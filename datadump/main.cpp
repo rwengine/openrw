@@ -146,6 +146,50 @@ void dumpModelFile(char* data, size_t& dataI)
 			}
 		}
 		
+		auto materialListHeader = readHeader(data, dataI);
+		readHeader(data, dataI); // Ignore the structure header..
+		
+		auto materialList = readStructure<BSMaterialList>(data, dataI);
+		std::cout << " Material List Data" << std::endl;
+		std::cout << "  Materials = " << materialList.nummaterials << std::endl;
+		
+		// Skip over the per-material byte values that I don't know what do.
+		dataI += sizeof(uint32_t) * materialList.nummaterials;
+		
+		for(size_t m = 0; m < materialList.nummaterials; ++m)
+		{
+			auto materialHeader = readHeader(data, dataI);
+			size_t secbase = dataI;
+			readHeader(data, dataI);
+			
+			auto material = readStructure<BSMaterial>(data, dataI);
+			std::cout << " Material Data" << std::endl;
+			std::cout << "  Textures = " << std::dec << material.numtextures << std::endl;
+			std::cout << "  Color = 0x" << std::hex << material.color << std::endl;
+			
+			for(size_t t = 0; t < material.numtextures; ++t) 
+			{
+				auto textureHeader = readHeader(data, dataI);
+				size_t texsecbase = dataI;
+				readHeader(data, dataI);
+				
+				auto texture = readStructure<BSTexture>(data, dataI);
+				
+				auto nameHeader = readHeader(data, dataI);
+				std::string textureName(data+dataI, nameHeader.size);
+				dataI += nameHeader.size;
+				auto alphaHeader = readHeader(data, dataI);
+				std::string alphaName(data+dataI, alphaHeader.size);
+				
+				std::cout << " Texture Data" << std::endl;
+				std::cout << "  Name = " << textureName << std::endl;
+				std::cout << "  Alpha = " << alphaName << std::endl;
+				
+				dataI = texsecbase + textureHeader.size;
+			}
+			
+			dataI = secbase + materialHeader.size;
+		}
 		
 		// Jump to the start of the next geometry
 		dataI = basedata + geomHeader.size;

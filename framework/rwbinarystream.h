@@ -137,6 +137,28 @@ namespace RW
 		uint32_t positions;
 		uint32_t normals;
 	};
+	
+	struct BSMaterialList
+	{
+		uint32_t nummaterials;
+	};
+	
+	struct BSMaterial
+	{
+		uint32_t unknown;
+		BSColor color;
+		uint32_t alsounknown;
+		uint32_t numtextures;
+		float ambient;
+		float specular;
+		float diffuse;
+	};
+	
+	struct BSTexture
+	{
+		uint16_t filterflags;
+		uint16_t unknown;
+	};
 };
 
 #endif
