@@ -23,6 +23,8 @@ namespace RW
 		SID_Geometry     = 0x000F,
 		SID_Clump        = 0x0010,
 		
+		SID_TextureDictionary = 0x0016,
+		
 		SID_GeometryList = 0x001A,
 		
 		SID_HAnimPLG     = 0x011E,
@@ -158,6 +160,68 @@ namespace RW
 	{
 		uint16_t filterflags;
 		uint16_t unknown;
+	};
+	
+	/**
+	 * Texture Dictionary Structures (TXD)
+	 */
+	struct BSTextureDictionary
+	{
+		uint16_t numtextures;
+		uint16_t unknown;
+	};
+	
+	struct BSTextureNative
+	{
+		uint32_t platform;
+		uint16_t filterflags;
+		uint8_t wrapV;
+		uint8_t wrapU;
+		char diffuseName[32]; 
+		char alphaName[32];
+		uint32_t rasterformat;
+		uint32_t alpha;
+		uint16_t width;
+		uint16_t height;
+		uint8_t bpp;
+		uint8_t nummipmaps;
+		uint8_t rastertype;
+		uint8_t dxttype;
+		uint32_t datasize;
+		
+		enum {
+			FILTER_NONE = 0x0,
+			FILTER_NEAREST = 0x01,
+			FILTER_LINEAR = 0x02,
+			FILTER_MIP_NEAREST = 0x03,
+			FILTER_MIP_LINEAR = 0x04,
+			FILTER_LINEAR_MIP_NEAREST = 0x05,
+			FILTER_LINEAR_MIP_LINEAR = 0x06,
+			FILTER_MYSTERY_OPTION = 0x1101
+		};
+		
+		enum {
+			WRAP_NONE = 0x00,
+			WRAP_WRAP  = 0x01,
+			WRAP_MIRROR = 0x02,
+			WRAP_CLAMP = 0x03
+		};
+		
+		enum {
+			FORMAT_DEFAULT = 0x0000, // helpful
+			FORMAT_1555    = 0x0100, // Alpha 1, RGB 5 b
+			FORMAT_565     = 0x0200, // 5r6g5b
+			FORMAT_4444    = 0x0300, // 4 bits each
+			FORMAT_LUM8    = 0x0400, // Greyscale
+			FORMAT_8888    = 0x0500, // 8 bits each
+			FORMAT_888     = 0x0600, // RGB 8 bits each
+			FORMAT_555     = 0x0A00, // do not use
+			
+			FORMAT_EXT_AUTO_MIPMAP = 0x1000, // Generate mipmaps
+			FORMAT_EXT_PAL8        = 0x2000, // 256 colour palette
+			FORMAT_EXT_PAL4        = 0x4000, // 16 color palette
+			FORMAT_EXT_MIPMAP      = 0x8000 // Mipmaps included
+		};
 	};
 };
 

@@ -196,6 +196,39 @@ void dumpModelFile(char* data, size_t& dataI)
 	}
 }
 
+void dumpTextureDictionary(char* data, size_t& dataI)
+{
+	auto header = readHeader(data, dataI);
+	
+	std::cout << "ID = " << std::hex << (unsigned long)header.id << " (IsTextureDirectory = " << (header.id == RW::SID_TextureDictionary) << ")" << std::endl;
+	std::cout << "Size = " << std::dec << (unsigned long)header.size << " bytes" << std::endl;
+	std::cout << "Version ID = " << std::hex << (unsigned long)header.versionid << std::endl;
+	
+	readHeader(data, dataI);
+	
+	auto dir = readStructure<BSTextureDictionary>(data, dataI);
+	std::cout << "Texture Count = " << dir.numtextures << std::endl;
+	
+	for(size_t t = 0; t < dir.numtextures; ++t) 
+	{
+		auto textureHeader = readHeader(data, dataI);
+		auto basloc = dataI;
+		
+		readHeader(data, dataI);
+		
+		auto native = readStructure<BSTextureNative>(data, dataI);
+		std::cout << "Texture Info" << std::endl;
+		std::cout << " Width = " << std::dec << native.width << std::endl;
+		std::cout << " Height = " << std::dec << native.height << std::endl;
+		std::cout << " UV Wrap = " << std::hex << (native.wrapU+0) << "/" << (native.wrapV+0) << std::endl;
+		std::cout << " Format = " << std::hex << (native.rasterformat) << std::endl;
+		std::cout << " Name = " << std::string(native.diffuseName, 32) << std::endl;
+		std::cout << " Alpha = " << std::string(native.alphaName, 32) << std::endl;
+		
+		dataI = basloc + textureHeader.size;
+	}
+}
+
 int main(int argc, char** argv)
 {
 	for(int i = 1; i < argc; ++i)
@@ -213,7 +246,23 @@ int main(int argc, char** argv)
 		dfile.read(data, length);
 		size_t dataI = 0;
 		
-		dumpModelFile(data, dataI);
+		std::string fname = argv[i];
+		auto ext = fname.substr(fname.size()-3);
+		
+		if(ext == "dff" || ext == "DFF")
+		{
+			std::cout << "Dumping model file" << std::endl;
+			dumpModelFile(data, dataI);
+		}
+		else if(ext == "txd" || ext == "TXD")
+		{
+			std::cout << "Dumping texture archive" << std::endl;
+			dumpTextureDictionary(data, dataI);
+		}
+		else 
+		{
+			std::cout << "I'm not sure what that is" << std::endl;
+		}
 		
 		delete[] data;
 	}
