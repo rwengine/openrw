@@ -223,6 +223,12 @@ namespace RW
 			FORMAT_EXT_MIPMAP      = 0x8000 // Mipmaps included
 		};
 	};
+	
+	struct BSPaletteData
+	{
+		uint32_t palette[256];
+		uint32_t rastersize;
+	};
 };
 
 #endif

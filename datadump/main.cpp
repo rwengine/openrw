@@ -218,12 +218,31 @@ void dumpTextureDictionary(char* data, size_t& dataI)
 		
 		auto native = readStructure<BSTextureNative>(data, dataI);
 		std::cout << "Texture Info" << std::endl;
+		std::cout << " Platform = " << std::hex << (native.platform) << std::endl;
 		std::cout << " Width = " << std::dec << native.width << std::endl;
 		std::cout << " Height = " << std::dec << native.height << std::endl;
 		std::cout << " UV Wrap = " << std::hex << (native.wrapU+0) << "/" << (native.wrapV+0) << std::endl;
 		std::cout << " Format = " << std::hex << (native.rasterformat) << std::endl;
 		std::cout << " Name = " << std::string(native.diffuseName, 32) << std::endl;
 		std::cout << " Alpha = " << std::string(native.alphaName, 32) << std::endl;
+		std::cout << " DXT = " << std::hex << (native.dxttype+0) << std::endl;
+		
+		if(native.rasterformat & BSTextureNative::FORMAT_EXT_PAL8) 
+		{
+			// Read the palette
+			auto palette = readStructure<BSPaletteData>(data, dataI);
+			
+			// We can just do this for the time being until we need to compress or something
+			uint32_t fullcolor[native.width * native.height];
+			
+			for(size_t y = 0; y < native.height; ++y)
+			{
+				for(size_t x = 0; x < native.width; ++x)
+				{
+					fullcolor[(y*native.width)+x] = palette.palette[static_cast<size_t>(data[dataI+(y*native.width)+x])];
+				}
+			}
+		};
 		
 		dataI = basloc + textureHeader.size;
 	}
