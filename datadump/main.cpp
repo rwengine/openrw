@@ -21,6 +21,7 @@ using RW::BSClump;
 using namespace RW;
 
 sf::Window *window;
+std::map<std::string, GLuint> loadedTextures;
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -55,6 +56,23 @@ template<class T> T readStructure(char* data, size_t& dataI)
 BSSectionHeader readHeader(char* data, size_t& dataI)
 {
 	return readStructure<BSSectionHeader>(data, dataI);
+}
+
+bool loadFile(const char *filename, char **data)
+{
+	std::ifstream dfile(filename);
+	if ( ! dfile.is_open()) {
+		std::cerr << "Error opening file " << filename << std::endl;
+		return false;
+	}
+
+	dfile.seekg(0, std::ios_base::end);
+	size_t length = dfile.tellg();
+	dfile.seekg(0);
+	*data = new char[length];
+	dfile.read(*data, length);
+
+	return true;
 }
 
 GLuint compileShader(GLenum type, const char *source)
@@ -282,8 +300,8 @@ void dumpTextureDictionary(char* data, size_t dataI)
 		std::cout << " Height = " << std::dec << native.height << std::endl;
 		std::cout << " UV Wrap = " << std::hex << (native.wrapU+0) << "/" << (native.wrapV+0) << std::endl;
 		std::cout << " Format = " << std::hex << (native.rasterformat) << std::endl;
-		std::cout << " Name = " << std::string(native.diffuseName, 32) << std::endl;
-		std::cout << " Alpha = " << std::string(native.alphaName, 32) << std::endl;
+		std::cout << " Name = " << std::string(native.diffuseName) << std::endl;
+		std::cout << " Alpha = " << std::string(native.alphaName) << std::endl;
 		std::cout << " DXT = " << std::hex << (native.dxttype+0) << std::endl;
 		
 		if(native.rasterformat & BSTextureNative::FORMAT_EXT_PAL8) 
@@ -292,15 +310,32 @@ void dumpTextureDictionary(char* data, size_t dataI)
 			auto palette = readStructure<BSPaletteData>(data, dataI);
 			
 			// We can just do this for the time being until we need to compress or something
-			uint32_t fullcolor[native.width * native.height];
+			uint8_t fullcolor[native.width * native.height * 4];
+			
+			// Pretend the pallet is uint8
 			
 			for(size_t y = 0; y < native.height; ++y)
 			{
 				for(size_t x = 0; x < native.width; ++x)
 				{
-					fullcolor[(y*native.width)+x] = palette.palette[static_cast<size_t>(data[dataI+(y*native.width)+x])];
+					size_t texI = ((y*native.width)+x) * 4;
+					size_t palI = static_cast<size_t>(data[dataI+(y*native.width)+x])*4;
+					fullcolor[texI+0] = palette.palette[palI+0];
+					fullcolor[texI+1] = palette.palette[palI+1];
+					fullcolor[texI+2] = palette.palette[palI+2];
+					fullcolor[texI+3] = 255;
 				}
 			}
+			
+			GLuint texid = 0;
+			glGenTextures(1, &texid);
+			glBindTexture(GL_TEXTURE_2D, texid);
+			// todo: not completely ignore everything the TXD says.
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, native.width, native.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, fullcolor);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			std::string name = std::string(native.diffuseName);
+			loadedTextures.insert(std::make_pair(name, texid));
 		};
 		
 		dataI = basloc + textureHeader.size;
@@ -310,9 +345,16 @@ void dumpTextureDictionary(char* data, size_t dataI)
 void renderModel(char *data, size_t dataI)
 {
 	window = new sf::Window({WIDTH, HEIGHT}, "GTA Model Viewer", sf::Style::Close);
+	window->setVerticalSyncEnabled(true);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+	
+	char* dataTex;
+	if(loadFile("MISC.TXD", &dataTex))
+	{
+		dumpTextureDictionary(dataTex, 0);
+	}
 
 	readHeader(data, dataI); // Header
 	readHeader(data, dataI); // ?
@@ -349,7 +391,7 @@ void renderModel(char *data, size_t dataI)
 	glUseProgram(shaderProgram);
 
 	sf::Image uvgridTexture;
-	uvgridTexture.loadFromFile("../datadump/uvgrid.jpg");
+	//uvgridTexture.loadFromFile("../datadump/uvgrid.jpg");
 	// sf::Texture::bind(&uvgridTexture);
 
 	GLuint VBO;
@@ -362,10 +404,10 @@ void renderModel(char *data, size_t dataI)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
+	/*glBindTexture(GL_TEXTURE_2D, textures[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, uvgridTexture.getSize().x, uvgridTexture.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, uvgridTexture.getPixelsPtr());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
 
 	auto geomlist = readStructure<BSGeometryList>(data, dataI);
 	for (size_t i = 0; i < geomlist.numgeometry; ++i) {
@@ -434,11 +476,53 @@ void renderModel(char *data, size_t dataI)
 			}
 		}
 		
+		auto materialListHeader = readHeader(data, dataI);
+		readHeader(data, dataI); // Ignore the structure header..
+		
+		auto materialList = readStructure<BSMaterialList>(data, dataI);
+		
+		// Skip over the per-material byte values that I don't know what do.
+		dataI += sizeof(uint32_t) * materialList.nummaterials;
+		
+		for(size_t m = 0; m < materialList.nummaterials; ++m)
+		{
+			auto materialHeader = readHeader(data, dataI);
+			size_t secbase = dataI;
+			readHeader(data, dataI);
+			
+			auto material = readStructure<BSMaterial>(data, dataI);
+			
+			for(size_t t = 0; t < material.numtextures; ++t) 
+			{
+				auto textureHeader = readHeader(data, dataI);
+				size_t texsecbase = dataI;
+				readHeader(data, dataI);
+				
+				auto texture = readStructure<BSTexture>(data, dataI);
+				
+				auto nameHeader = readHeader(data, dataI);
+				std::string textureName(data+dataI, nameHeader.size);
+				dataI += nameHeader.size;
+				auto alphaHeader = readHeader(data, dataI);
+				std::string alphaName(data+dataI, alphaHeader.size);
+				
+				textureName = textureName.c_str();
+				if(loadedTextures.find(textureName) != loadedTextures.end())
+				{
+					glBindTexture(GL_TEXTURE_2D, loadedTextures.find(textureName)->second);
+				}
+				
+				dataI = texsecbase + textureHeader.size;
+			}
+			
+			dataI = secbase + materialHeader.size;
+		}
+		
 		// Jump to the start of the next geometry
 		dataI = basedata + geomHeader.size;
 
 		/** CHANGE THIS NUMBER TO SELECT A SPECIFIC MODEL! **/
-		if (i <= 11)
+		if (i <= 9)
 			continue;
 
 		// Buffer stuff
@@ -483,23 +567,6 @@ void renderModel(char *data, size_t dataI)
 
 		break;
 	}
-}
-
-bool loadFile(const char *filename, char **data)
-{
-	std::ifstream dfile(filename);
-	if ( ! dfile.is_open()) {
-		std::cerr << "Error opening file " << filename << std::endl;
-		return false;
-	}
-
-	dfile.seekg(0, std::ios_base::end);
-	size_t length = dfile.tellg();
-	dfile.seekg(0);
-	*data = new char[length];
-	dfile.read(*data, length);
-
-	return true;
 }
 
 int main(int argc, char** argv)

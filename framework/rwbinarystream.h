@@ -226,7 +226,7 @@ namespace RW
 	
 	struct BSPaletteData
 	{
-		uint32_t palette[256];
+		uint8_t palette[1024];
 		uint32_t rastersize;
 	};
 };
