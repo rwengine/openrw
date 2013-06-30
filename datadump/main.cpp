@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include "../framework/rwbinarystream.h"
+#include "../framework/gtadata.h"
 
 using RW::BSSectionHeader;
 using RW::BSFrameList;
@@ -727,9 +728,9 @@ void dumpGenericTree(char* data)
 
 int main(int argc, char** argv)
 {
-	bool render = false, raw = false;
+	bool render = false, raw = false, loadgame = false;
 	int c;
-	while ((c = getopt (argc, argv, "rt")) != -1) {
+	while ((c = getopt (argc, argv, "rtg")) != -1) {
 		switch (c) {
 		case 'r':
 			render = true;
@@ -737,46 +738,55 @@ int main(int argc, char** argv)
 		case 't':
 			raw = true;
 			break;
+		case 'g':
+			loadgame = true;
+			break;
 		}
 	}
 
 	char *data;
 
-	if (render) {
-		if (loadFile(argv[2], &data)) {
-			renderModel(data, atoi(argv[3]));
+	if(!loadgame) {
+		if (render) {
+			if (loadFile(argv[2], &data)) {
+				renderModel(data, atoi(argv[3]));
 
-			delete[] data;
-		}
-	} if(raw) {
-		if(loadFile(argv[2], &data)) {
-			dumpGenericTree(data);
-		}
-	} else {
-		for (int i = 1; i < argc; ++i) {
-			if ( ! loadFile(argv[i], &data))
-				continue;
+				delete[] data;
+			}
+		} if(raw) {
+			if(loadFile(argv[2], &data)) {
+				dumpGenericTree(data);
+			}
+		} else {
+			for (int i = 1; i < argc; ++i) {
+				if ( ! loadFile(argv[i], &data))
+					continue;
 
-				std::string fname = argv[i];
-				auto ext = fname.substr(fname.size()-3);
+					std::string fname = argv[i];
+					auto ext = fname.substr(fname.size()-3);
+					
+					if(ext == "dff" || ext == "DFF")
+					{
+						std::cout << "Dumping model file" << std::endl;
+						dumpModelFile(data);
+					}
+					else if(ext == "txd" || ext == "TXD")
+					{
+						std::cout << "Dumping texture archive" << std::endl;
+						dumpTextureDictionary(data);
+					}
+					else 
+					{
+						std::cout << "I'm not sure what that is" << std::endl;
+					}
 				
-				if(ext == "dff" || ext == "DFF")
-				{
-					std::cout << "Dumping model file" << std::endl;
-					dumpModelFile(data);
-				}
-				else if(ext == "txd" || ext == "TXD")
-				{
-					std::cout << "Dumping texture archive" << std::endl;
-					dumpTextureDictionary(data);
-				}
-				else 
-				{
-					std::cout << "I'm not sure what that is" << std::endl;
-				}
-			
-			delete[] data;
+				delete[] data;
+			}
 		}
+	}
+	else {
+		GTAData gamedata(argv[2]);
+		gamedata.load();
 	}
 	
 	return 0;
