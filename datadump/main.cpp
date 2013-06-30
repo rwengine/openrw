@@ -55,11 +55,21 @@ void dumpModelFile(char* data, size_t& dataI)
 		std::cout << "   " << frame.rotation.c.x << " " << frame.rotation.c.y << " " << frame.rotation.c.z << std::endl;
 	}
 	
-	// Skip over the Frame extentions we can't parse.
 	auto nextHeader = readHeader(data, dataI);
 	while(nextHeader.id == RW::SID_Extension) 
 	{
-		dataI += nextHeader.size;
+		for(size_t i = 0; i < 2; ++i) {
+			auto firstHeader = readHeader(data, dataI);
+			if(firstHeader.id == RW::SID_NodeName) 
+			{
+				std::cout << "  Name = " << std::string(data+dataI, firstHeader.size) << std::endl;
+			}
+			else if(firstHeader.id == RW::SID_HAnimPLG)
+			{
+				std::cout << "  Bone Information Present" << std::endl;
+			}
+			dataI += firstHeader.size;
+		}
 		nextHeader = readHeader(data, dataI);
 	}
 	
@@ -67,7 +77,6 @@ void dumpModelFile(char* data, size_t& dataI)
 	
 	auto geomlist = readStructure<BSGeometryList>(data, dataI);
 	std::cout << " Geometry List Data" << std::endl;
-	std::cout << std::hex << dataI << std::endl;
 	std::cout << "  Geometries = " << std::dec << geomlist.numgeometry << std::endl;
 	for(size_t i = 0; i < geomlist.numgeometry; ++i) 
 	{
@@ -82,6 +91,61 @@ void dumpModelFile(char* data, size_t& dataI)
 		std::cout << "  Triangles = " << std::dec << static_cast<unsigned long>(geom.numtris) << std::endl;
 		std::cout << "  Verticies = " << static_cast<unsigned long>(geom.numverts) << std::endl;
 		std::cout << "  Frames = " << static_cast<unsigned long>(geom.numframes) << std::endl;
+		
+		if(geomHeader.versionid < 0x1003FFFF) 
+		{
+			std::cout << "  Some extra colour info" << std::endl;
+			auto colors = readStructure<BSGeometryColor>(data, dataI);
+		}
+		
+		if(geom.flags & BSGeometry::VertexColors)
+		{
+			std::cout << "  Vertex Colours Present" << std::endl;
+			for(size_t v = 0; v < geom.numverts; ++v) 
+			{
+				std::cout << "  " << v << ": " << static_cast<unsigned long>(readStructure<BSColor>(data, dataI)) << std::endl;
+			}
+		}
+		
+		if(geom.flags & BSGeometry::TexCoords1 || geom.flags & BSGeometry::TexCoords2)
+		{
+			std::cout << "  UV Coords Present" << std::endl;
+			for(size_t v = 0; v < geom.numverts; ++v) 
+			{
+				auto coords = readStructure<BSGeometryUV>(data, dataI);
+				std::cout << "  " << v << ": U" << coords.u << " V" << coords.v <<  std::endl;
+			}
+		}
+		
+		for(int j = 0; j < geom.numtris; ++j) 
+		{
+			auto tri = readStructure<BSGeometryTriangle>(data, dataI);
+			std::cout << "  Triangle " << std::dec 
+				<< static_cast<unsigned long>(tri.first) << " " 
+				<< static_cast<unsigned long>(tri.second) << " " 
+				<< static_cast<unsigned long>(tri.third) << " " 
+				<< "A: " << static_cast<unsigned long>(tri.attrib) << std::endl; 
+		}
+		
+		auto bounds = readStructure<BSGeometryBounds>(data,dataI);
+		std::cout << "  Bounding Radius = " << bounds.radius << std::endl;
+		
+		for(size_t v = 0; v < geom.numverts; ++v) 
+		{
+			auto p = readStructure<BSTVector3>(data, dataI);
+			std::cout << "  v " << p.x << " " << p.y << " " << p.z << std::endl;
+		}
+		
+		if(geom.flags & BSGeometry::StoreNormals) 
+		{
+			std::cout << "  Vertex Normals present" << std::endl;
+			for(size_t v = 0; v < geom.numverts; ++v) 
+			{
+				auto p = readStructure<BSTVector3>(data, dataI);
+				std::cout << "  n " << p.x << " " << p.y << " " << p.z << std::endl;
+			}
+		}
+		
 		
 		// Jump to the start of the next geometry
 		dataI = basedata + geomHeader.size;
