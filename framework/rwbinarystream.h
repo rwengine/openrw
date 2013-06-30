@@ -2,6 +2,9 @@
 #define _RWBINARYSTREAM_H_
 #include "gtfwpre.h"
 
+#include <cstddef>
+#include <cassert>
+
 /**
  * @file rwbinarystream.h 
  * Contains the structs for the shared Render Ware binary stream data.
