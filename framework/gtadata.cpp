@@ -1,4 +1,5 @@
 #include "gtadata.h"
+#include "LoaderIPL.h"
 #include <iostream>
 #include <fstream>
 
@@ -57,5 +58,14 @@ void GTAData::loadCOL(const size_t zone, const std::string& name)
 
 void GTAData::loadIPL(const std::string& name)
 {
-	std::cout << "IPL File " << name << std::endl;
+	LoaderIPL ipll;
+	
+	if(ipll.load(name))
+	{
+		// wait for it..
+	}
+	else
+	{
+		std::cerr << "Failed to load IPL: " << name << std::endl;
+	}
 }
