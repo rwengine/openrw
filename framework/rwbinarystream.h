@@ -23,6 +23,7 @@ namespace RW
 		SID_Geometry     = 0x000F,
 		SID_Clump        = 0x0010,
 		
+		SID_TextureNative     = 0x0015,
 		SID_TextureDictionary = 0x0016,
 		
 		SID_GeometryList = 0x001A,
@@ -228,6 +229,71 @@ namespace RW
 	{
 		uint8_t palette[1024];
 		uint32_t rastersize;
+	};
+	
+	/**
+	 * Structure object
+	 */
+	class BinaryStreamSection
+	{
+	public:
+		/**
+		 * Data pointer
+		 */
+		char* data;
+		
+		/**
+		 * Offset of this section in the data
+		 */
+		size_t offset;
+		
+		/**
+		 * The BSSectionHeader for the section
+		 */
+		BSSectionHeader header;
+		
+		/**
+		 * Structure header
+		 */
+		BSSectionHeader* structure;
+		
+		BinaryStreamSection(char* data, size_t offset = 0)
+		: data(data), offset(offset), structure(nullptr)
+		{
+			header = *reinterpret_cast<BSSectionHeader*>(data+offset);
+			if(header.size > sizeof(structure)) 
+			{
+				structure = reinterpret_cast<BSSectionHeader*>(data+offset+sizeof(BSSectionHeader));
+				if(structure->id != SID_Struct) 
+				{
+					structure = nullptr;
+				}
+			}
+		}
+		
+		template<class T> T readStructure()
+		{
+			return *reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)*2);
+		}
+		
+		char* raw()
+		{
+			return data + offset + sizeof(BSSectionHeader);
+		}
+		
+		bool hasMoreData(size_t length)
+		{
+			return (length) < (header.size);
+		}
+		
+		BinaryStreamSection getNextChildSection(size_t& internalOffset)
+		{
+			size_t realOffset = internalOffset;
+			assert(realOffset < header.size);
+			BinaryStreamSection sec(data, offset + sizeof(BSSectionHeader) + realOffset);
+			internalOffset += sec.header.size + sizeof(BSSectionHeader);
+			return sec;
+		}
 	};
 };
 

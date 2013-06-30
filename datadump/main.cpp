@@ -569,14 +569,112 @@ void renderModel(char *data, size_t dataI)
 	}
 }
 
+void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t maxdepth = 7)
+{
+	std::cout << std::string(depth, ' ') << "ID(" << std::hex << int(parent.header.id) << ") ";
+	std::cout << "size(" << std::dec << int(parent.header.size) << "b) ";
+	std::cout << "version(" << std::hex << int(parent.header.versionid) << ") ";
+	
+	size_t sectionOffset = 0, j = 0;
+	bool readchildren = false;
+	
+	// Handle the specialised bits
+	switch(parent.header.id)
+	{
+		case RW::SID_Struct:
+		{
+			std::cout << "structure";
+		}
+			break;
+		case RW::SID_String:
+		{
+			std::cout << "string(\"" << std::string(parent.raw()) << "\")";
+		}
+			break;
+		case RW::SID_GeometryList:
+		{
+			auto list = parent.readStructure<BSGeometryList>();
+			std::cout << std::dec << "gcount(" << list.numgeometry << ")";
+			readchildren = true;
+		}
+			break;
+		case RW::SID_Geometry:
+		{
+			auto geometry = parent.readStructure<BSGeometry>();
+			std::cout << std::dec << "tcount(" << geometry.numtris << ") vcount(" << geometry.numverts << ")";
+			readchildren = true;
+		}
+			break;
+		case RW::SID_MaterialList:
+		{
+			auto list = parent.readStructure<BSMaterialList>();
+			std::cout << std::dec << "mcount(" << list.nummaterials << ")";
+			readchildren = true;
+		}
+			break;
+		case RW::SID_Material:
+		{
+			auto material = parent.readStructure<BSMaterial>();
+			std::cout << std::dec << "tcount(" << material.numtextures << ")";
+			readchildren = true;
+		}
+			break;
+		case RW::SID_Texture:
+		{
+			auto texture = parent.readStructure<BSTexture>();
+			std::cout << "texture";
+			readchildren = true;
+		}
+			break;
+		case RW::SID_TextureNative:
+		{
+			auto texture = parent.readStructure<BSTextureNative>();
+			std::cout << std::dec << "size(" << texture.width << "x" << texture.height << ") ";
+			std::cout << " format(" << std::hex << texture.rasterformat << ")";
+		}
+			break;
+		case RW::SID_Clump:
+		case RW::SID_TextureDictionary:
+		case RW::SID_Extension:
+		{
+			readchildren = true;
+		}
+			break;
+		default:
+		{
+			std::cout << "Unknown Section";
+		}
+	};
+	
+	std::cout << std::endl;
+	
+	if(readchildren)
+	{
+		while(parent.hasMoreData(sectionOffset) && (j++) < 10 && depth < maxdepth) 
+		{
+			BinaryStreamSection sec = parent.getNextChildSection(sectionOffset);
+			dumpBinaryStreamSection(sec, depth+1);
+		}
+	}
+}
+
+void dumpGenericTree(char* data)
+{
+	BinaryStreamSection root(data);
+	dumpBinaryStreamSection(root, 0);
+}
+
 int main(int argc, char** argv)
 {
-	bool render = false;
+	bool render = false, raw = false;
 	int c;
-	while ((c = getopt (argc, argv, "r")) != -1) {
+	while ((c = getopt (argc, argv, "rt")) != -1) {
 		switch (c) {
 		case 'r':
 			render = true;
+			break;
+		case 't':
+			raw = true;
 			break;
 		}
 	}
@@ -588,6 +686,10 @@ int main(int argc, char** argv)
 			renderModel(data, 0);
 
 			delete[] data;
+		}
+	} if(raw) {
+		if(loadFile(argv[2], &data)) {
+			dumpGenericTree(data);
 		}
 	} else {
 		for (int i = 1; i < argc; ++i) {
