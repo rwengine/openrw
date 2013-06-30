@@ -97,20 +97,41 @@ GLuint compileShader(GLenum type, const char *source)
 	return shader;
 }
 
-void dumpModelFile(char* data, size_t dataI)
+void dumpModelFile(char* data)
 {
-	auto header = readHeader(data, dataI);
+	BinaryStreamSection root(data);
+	auto clump = root.readStructure<BSClump>();
+	std::cout << "numatomics(" << clump.numatomics << ")" << std::endl;
 	
-	std::cout << "ID = " << std::hex << (unsigned long)header.id << " (IsClump = " << (header.id == RW::SID_Clump) << ")" << std::endl;
-	std::cout << "Size = " << std::dec << (unsigned long)header.size << " bytes" << std::endl;
-	std::cout << "Version ID = " << std::hex << (unsigned long)header.versionid << std::endl;
-	
-	readHeader(data, dataI);
-	
-	auto clump = readStructure<BSClump>(data, dataI);
-	std::cout << " Clump Data" << std::endl;
-	std::cout << "  Atomics = " << std::dec << (unsigned long)clump.numatomics << std::endl;
-	
+	size_t dataI = 0;
+	while(root.hasMoreData(dataI))
+	{
+		auto sec = root.getNextChildSection(dataI);
+		
+		switch(sec.header.id) 
+		{
+			case RW::SID_FrameList:
+			{
+				auto list = sec.readStructure<BSFrameList>();
+			}
+			break;
+			case RW::SID_GeometryList:
+			{
+				auto list = sec.readStructure<BSGeometryList>();
+				size_t gdataI = 0;
+				while(sec.hasMoreData(gdataI))
+				{
+					auto item = sec.getNextChildSection(gdataI);
+					if(item.header.id == RW::SID_Geometry)
+					{
+						auto geom = item.readStructure<BSGeometry>();
+						std::cout << " verts(" << geom.numverts << ") tris(" << geom.numtris << ")" << std::endl;
+					}
+				}
+			}
+			break;
+		}
+	}
 	auto frameheader = readHeader(data, dataI);
 	std::cout << "ID = " << std::hex << (unsigned long)frameheader.id << " (IsFrameList = " << (frameheader.id == RW::SID_FrameList) << ")" << std::endl;
 	
@@ -273,37 +294,27 @@ void dumpModelFile(char* data, size_t dataI)
 	}
 }
 
-void dumpTextureDictionary(char* data, size_t dataI)
+void dumpTextureDictionary(char* data)
 {
-	auto header = readHeader(data, dataI);
+	BinaryStreamSection root(data);
+	auto texdict = root.readStructure<BSTextureDictionary>();
+	std::cout << std::dec << "tecount(" << texdict.numtextures << ")" << std::endl;
 	
-	std::cout << "ID = " << std::hex << (unsigned long)header.id << " (IsTextureDirectory = " << (header.id == RW::SID_TextureDictionary) << ")" << std::endl;
-	std::cout << "Size = " << std::dec << (unsigned long)header.size << " bytes" << std::endl;
-	std::cout << "Version ID = " << std::hex << (unsigned long)header.versionid << std::endl;
-	
-	readHeader(data, dataI);
-	
-	auto dir = readStructure<BSTextureDictionary>(data, dataI);
-	std::cout << "Texture Count = " << dir.numtextures << std::endl;
-	
-	for(size_t t = 0; t < dir.numtextures; ++t) 
+	size_t dataI = 0;
+	while(root.hasMoreData(dataI))
 	{
-		auto textureHeader = readHeader(data, dataI);
-		auto basloc = dataI;
+		BinaryStreamSection sec = root.getNextChildSection(dataI);
 		
-		readHeader(data, dataI);
-		
-		auto native = readStructure<BSTextureNative>(data, dataI);
-		std::cout << "Texture Info" << std::endl;
-		std::cout << " Platform = " << std::hex << (native.platform) << std::endl;
-		std::cout << " Width = " << std::dec << native.width << std::endl;
-		std::cout << " Height = " << std::dec << native.height << std::endl;
-		std::cout << " UV Wrap = " << std::hex << (native.wrapU+0) << "/" << (native.wrapV+0) << std::endl;
-		std::cout << " Format = " << std::hex << (native.rasterformat) << std::endl;
-		std::cout << " Name = " << std::string(native.diffuseName) << std::endl;
-		std::cout << " Alpha = " << std::string(native.alphaName) << std::endl;
-		std::cout << " DXT = " << std::hex << (native.dxttype+0) << std::endl;
-		
+		if(sec.header.id == RW::SID_TextureNative)
+		{
+			auto texnative = sec.readStructure<BSTextureNative>();
+			std::cout << "texture(\"" << texnative.diffuseName << "\")" << std::endl;
+			std::cout << " size(" << std::dec << texnative.width << "x" << texnative.height << ") format(" << std::hex << texnative.rasterformat << ")" << std::endl;
+			std::cout << " uvmode(" << std::hex << (texnative.wrapU+0) << "x" << (texnative.wrapV+0) << ") platform(" << std::hex << texnative.platform << ")" << std::endl;
+		}
+	}
+	
+	/*
 		if(native.rasterformat & BSTextureNative::FORMAT_EXT_PAL8) 
 		{
 			// Read the palette
@@ -337,15 +348,64 @@ void dumpTextureDictionary(char* data, size_t dataI)
 			std::string name = std::string(native.diffuseName);
 			loadedTextures.insert(std::make_pair(name, texid));
 		};
+	*/
+}
+
+void loadTextures(char* data)
+{
+	BinaryStreamSection root(data);
+	auto texdict = root.readStructure<BSTextureDictionary>();
+	
+	size_t dataI = 0;
+	while(root.hasMoreData(dataI))
+	{
+		BinaryStreamSection sec = root.getNextChildSection(dataI);
 		
-		dataI = basloc + textureHeader.size;
+		if(sec.header.id == RW::SID_TextureNative)
+		{
+			auto texnative = sec.readStructure<BSTextureNative>();
+			
+			if(texnative.rasterformat & BSTextureNative::FORMAT_EXT_PAL8) 
+			{
+				// Read the palette
+				auto palette = sec.readSubStructure<BSPaletteData>(sizeof(BSTextureNative));
+				auto coldata = sec.raw() + sizeof(BSTextureNative) + sizeof(BSPaletteData);
+				
+				// We can just do this for the time being until we need to compress or something
+				uint8_t fullcolor[texnative.width * texnative.height * 4];
+				
+				for(size_t y = 0; y < texnative.height; ++y)
+				{
+					for(size_t x = 0; x < texnative.width; ++x)
+					{
+						size_t texI = ((y*texnative.width)+x) * 4;
+						size_t palI = static_cast<size_t>(coldata[(y*texnative.width)+x])*4;
+						fullcolor[texI+0] = palette.palette[palI+2];
+						fullcolor[texI+1] = palette.palette[palI+1];
+						fullcolor[texI+2] = palette.palette[palI+0];
+						fullcolor[texI+3] = 255;// palette.palette[palI+3];
+					}
+				}
+				
+				GLuint texid = 0;
+				glGenTextures(1, &texid);
+				glBindTexture(GL_TEXTURE_2D, texid);
+				// todo: not completely ignore everything the TXD says.
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texnative.width, texnative.height, 0, GL_BGRA, GL_UNSIGNED_BYTE, fullcolor);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+				std::string name = std::string(texnative.diffuseName);
+				loadedTextures.insert(std::make_pair(name, texid));
+			}
+		}
 	}
 }
 
-void renderModel(char *data, size_t dataI)
+void renderModel(char *data, size_t modelI)
 {
 	window = new sf::Window({WIDTH, HEIGHT}, "GTA Model Viewer", sf::Style::Close);
 	window->setVerticalSyncEnabled(true);
+	window->setFramerateLimit(60);
 
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -353,29 +413,15 @@ void renderModel(char *data, size_t dataI)
 	char* dataTex;
 	if(loadFile("MISC.TXD", &dataTex))
 	{
-		dumpTextureDictionary(dataTex, 0);
+		loadTextures(dataTex);
 	}
 
-	readHeader(data, dataI); // Header
-	readHeader(data, dataI); // ?
-	readStructure<BSClump>(data, dataI); // Clump
-	readHeader(data, dataI); // Frame header
-	readHeader(data, dataI); // ?
-	BSFrameList frames = readStructure<BSFrameList>(data, dataI); // Frames
-	for (size_t i = 0; i < frames.numframes; ++i) 
-		readStructure<BSFrameListFrame>(data, dataI);
+	BinaryStreamSection root(data);
+	size_t rootI = 0, geometryI = 0;
+	root.getNextChildSection(rootI); // Skip structure
+	auto framelist = root.getNextChildSection(rootI);
+	auto geometry = root.getNextChildSection(rootI);
 	
-	auto nextHeader = readHeader(data, dataI);
-	while (nextHeader.id == RW::SID_Extension) {
-		for (size_t i = 0; i < 2; ++i) {
-			auto firstHeader = readHeader(data, dataI);
-			dataI += firstHeader.size;
-		}
-		nextHeader = readHeader(data, dataI);
-	}
-	
-	readHeader(data, dataI); // Structure Header..
-
 	// OpenGL
 	glClearColor(0.2, 0.2, 0.2, 1.0);
 	glEnable(GL_DEPTH_TEST);
@@ -408,15 +454,36 @@ void renderModel(char *data, size_t dataI)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, uvgridTexture.getSize().x, uvgridTexture.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, uvgridTexture.getPixelsPtr());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);*/
-
-	auto geomlist = readStructure<BSGeometryList>(data, dataI);
-	for (size_t i = 0; i < geomlist.numgeometry; ++i) {
-		auto geomHeader = readHeader(data, dataI);
-		size_t basedata = dataI;
-		readHeader(data, dataI);
-		auto geom = readStructure<BSGeometry>(data, dataI);
-		
-		if (geomHeader.versionid < 0x1003FFFF)
+	
+	size_t model = 0;
+	bool geomfound = false;
+	BinaryStreamSection geomsec(data);
+	
+	if(geometry.header.id == RW::SID_GeometryList)
+	{
+		auto geomlist = geometry.readStructure<BSGeometryList>();
+		while(geometry.hasMoreData(geometryI))
+		{
+			geomsec = geometry.getNextChildSection(geometryI);
+			if(geomsec.header.id == RW::SID_Geometry)
+			{
+				if(model++ == modelI) {
+					geomfound = true;
+					break;
+				}
+			}
+		}
+	}
+	
+	if(geomfound)
+	{
+		size_t dataI = 0, secI = 0;
+		auto geom = geomsec.readStructure<BSGeometry>();
+		geomsec.getNextChildSection(secI);
+		char* data = geomsec.raw() + sizeof(BSSectionHeader) + sizeof(BSGeometry);
+		std::cout << std::dec << geom.numtris << " " << geom.numverts << std::endl;
+	
+		if (geomsec.header.versionid < 0x1003FFFF)
 			auto colors = readStructure<BSGeometryColor>(data, dataI);
 		
 		if (geom.flags & BSGeometry::VertexColors) {
@@ -476,55 +543,51 @@ void renderModel(char *data, size_t dataI)
 			}
 		}
 		
-		auto materialListHeader = readHeader(data, dataI);
-		readHeader(data, dataI); // Ignore the structure header..
-		
-		auto materialList = readStructure<BSMaterialList>(data, dataI);
+		auto materiallistsec = geomsec.getNextChildSection(secI);
+		auto materialList = materiallistsec.readStructure<BSMaterialList>();
 		
 		// Skip over the per-material byte values that I don't know what do.
 		dataI += sizeof(uint32_t) * materialList.nummaterials;
 		
+		size_t matI = 0;
+		materiallistsec.getNextChildSection(matI);
+		
 		for(size_t m = 0; m < materialList.nummaterials; ++m)
 		{
-			auto materialHeader = readHeader(data, dataI);
-			size_t secbase = dataI;
-			readHeader(data, dataI);
+			auto materialsec = materiallistsec.getNextChildSection(matI);
+			if(materialsec.header.id != RW::SID_Material) continue;
 			
-			auto material = readStructure<BSMaterial>(data, dataI);
+			auto material = materialsec.readStructure<BSMaterial>();
+			
+			size_t texI = 0;
+			materialsec.getNextChildSection(texI);
 			
 			for(size_t t = 0; t < material.numtextures; ++t) 
 			{
-				auto textureHeader = readHeader(data, dataI);
-				size_t texsecbase = dataI;
-				readHeader(data, dataI);
+				auto texsec = materialsec.getNextChildSection(texI);
+				auto texture = texsec.readStructure<BSTexture>();
 				
-				auto texture = readStructure<BSTexture>(data, dataI);
+				std::string textureName, alphaName;
+				size_t yetAnotherI = 0;
+				texsec.getNextChildSection(yetAnotherI);
 				
-				auto nameHeader = readHeader(data, dataI);
-				std::string textureName(data+dataI, nameHeader.size);
-				dataI += nameHeader.size;
-				auto alphaHeader = readHeader(data, dataI);
-				std::string alphaName(data+dataI, alphaHeader.size);
+				auto namesec = texsec.getNextChildSection(yetAnotherI);
+				auto alphasec = texsec.getNextChildSection(yetAnotherI);
 				
-				textureName = textureName.c_str();
+				// The data is null terminated anyway.
+				textureName = namesec.raw();
+				alphaName = alphasec.raw();
+				
+				std::cout << textureName << std::endl;
+				
 				if(loadedTextures.find(textureName) != loadedTextures.end())
 				{
 					glBindTexture(GL_TEXTURE_2D, loadedTextures.find(textureName)->second);
 				}
-				
-				dataI = texsecbase + textureHeader.size;
 			}
 			
-			dataI = secbase + materialHeader.size;
 		}
 		
-		// Jump to the start of the next geometry
-		dataI = basedata + geomHeader.size;
-
-		/** CHANGE THIS NUMBER TO SELECT A SPECIFIC MODEL! **/
-		if (i <= 9)
-			continue;
-
 		// Buffer stuff
 		size_t bufferSize = numVertices + numTexcoords + numNormals;
 		std::cout << "BUFFER SIZE IS " << bufferSize << std::endl;
@@ -554,7 +617,7 @@ void renderModel(char *data, size_t dataI)
 		while (window->isOpen()) {
 			glm::mat4 model;
 			model = glm::translate(model, glm::vec3(0, 0, -0.5));
-			model = glm::rotate(model, (float) j, glm::vec3(2, 1, 1));
+			model = glm::rotate(model, j*1.f, glm::vec3(2, 1, 1));
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -564,8 +627,6 @@ void renderModel(char *data, size_t dataI)
 			window->display();
 			j++;
 		}
-
-		break;
 	}
 }
 
@@ -683,7 +744,7 @@ int main(int argc, char** argv)
 
 	if (render) {
 		if (loadFile(argv[2], &data)) {
-			renderModel(data, 0);
+			renderModel(data, atoi(argv[3]));
 
 			delete[] data;
 		}
@@ -702,12 +763,12 @@ int main(int argc, char** argv)
 				if(ext == "dff" || ext == "DFF")
 				{
 					std::cout << "Dumping model file" << std::endl;
-					dumpModelFile(data, 0);
+					dumpModelFile(data);
 				}
 				else if(ext == "txd" || ext == "TXD")
 				{
 					std::cout << "Dumping texture archive" << std::endl;
-					dumpTextureDictionary(data, 0);
+					dumpTextureDictionary(data);
 				}
 				else 
 				{
