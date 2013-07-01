@@ -1,26 +1,26 @@
 #pragma once
 
+#define GLEW_STATIC
+#include <GL/glew.h>
+
 #include "rwbinarystream.h"
 
 #include <vector>
 #include <string>
+#include <memory>
 
-class LoaderDFF
+class Model
 {
-private:
-	template<class T> T readStructure(char *data, size_t &dataI);
-	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
-
-	RW::BSClump clump;
-
 public:
-	void loadFromMemory(char *data);
+	RW::BSClump clump;
 
 	struct Texture {
 		std::string name;
 		std::string alphaName;
 	};
 	struct Geometry {
+		GLuint VBO, EBO;
+
 		RW::BSGeometryBounds geometryBounds;
 
 		std::vector<RW::BSGeometryUV> texcoords;
@@ -32,4 +32,14 @@ public:
 	};
 
 	std::vector<Geometry> geometries;
+};
+
+class LoaderDFF
+{
+private:
+	template<class T> T readStructure(char *data, size_t &dataI);
+	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
+
+public:
+	std::unique_ptr<Model> loadFromMemory(char *data);
 };

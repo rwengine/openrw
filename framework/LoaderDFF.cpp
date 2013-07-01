@@ -4,11 +4,12 @@
 
 #include <iostream>
 
-void LoaderDFF::loadFromMemory(char *data)
+std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 {
+	auto model = std::unique_ptr<Model>(new Model);
 	RW::BinaryStreamSection root(data);
 
-	this->clump = root.readStructure<RW::BSClump>();
+	model->clump = root.readStructure<RW::BSClump>();
 
 	size_t dataI = 0;
 	while (root.hasMoreData(dataI)) {
@@ -19,13 +20,14 @@ void LoaderDFF::loadFromMemory(char *data)
 			auto list = sec.readStructure<RW::BSGeometryList>();
 			size_t gdataI = 0;
 			while (sec.hasMoreData(gdataI)) {
-				Geometry geometryStruct;
+				Model::Geometry geometryStruct;
 				auto item = sec.getNextChildSection(gdataI);
 
 				if (item.header.id == RW::SID_Geometry) {
 					size_t dataI = 0, secI = 0;
 					auto geometry = item.readStructure<RW::BSGeometry>();
-					std::cout << " verts(" << geometry.numverts << ") tris(" << geometry.numtris << ")" << std::endl;
+					// std::cout << " verts(" << geometry.numverts << ") tris(" << geometry.numtris << ")" << std::endl;
+
 					item.getNextChildSection(secI);
 					char *data = item.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSGeometry);
 
@@ -104,13 +106,45 @@ void LoaderDFF::loadFromMemory(char *data)
 						}
 					}
 
+					// OpenGL buffer stuff
+					glGenBuffers(1, &geometryStruct.VBO);
+					glGenBuffers(1, &geometryStruct.EBO);
+
+					// Vertices
+					glBindBuffer(GL_ARRAY_BUFFER, geometryStruct.VBO);
+					glBufferData(
+						GL_ARRAY_BUFFER,
+						geometryStruct.vertices.size() * 3 * sizeof(float),
+						&geometryStruct.vertices[0],
+						GL_STATIC_DRAW
+					);
+
+					// Elements
+					uint16_t indicies[geometryStruct.triangles.size() * 3];
+					size_t i = 0;
+					for (auto &tri : geometryStruct.triangles) {
+						indicies[i]     = tri.first;
+						indicies[i + 1] = tri.second;
+						indicies[i + 2] = tri.third;
+						i += 3;
+					}
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
+					glBufferData(
+						GL_ELEMENT_ARRAY_BUFFER,
+						sizeof(indicies),
+						indicies,
+						GL_STATIC_DRAW
+					);
+
 					// Add it
-					geometries.push_back(geometryStruct);
+					model->geometries.push_back(geometryStruct);
 				}
 			}
 		}
 		}
 	}
+
+	return model;
 }
 
 template<class T> T LoaderDFF::readStructure(char *data, size_t &dataI)
