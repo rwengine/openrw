@@ -49,6 +49,7 @@ LoaderIPL iplLoader;
 
 std::map<std::string, std::unique_ptr<Model>> models;
 Model *selectedModel;
+glm::vec3 selectedModelCenter;
 
 GLuint compileShader(GLenum type, const char *source)
 {
@@ -133,8 +134,18 @@ void init(std::string gtapath)
 		}
 	}
 
-	if (iplLoader.load(gtapath +"/data/maps/comNbtm.ipl")) {
+	if (iplLoader.load(gtapath +"/data/maps/industSW.ipl")) {
 		printf("IPL Loaded, size: %d\n", iplLoader.m_instances.size());
+
+		// Get the center of the model by averaging all the vertices! Hax!
+		for (int i = 0; i < iplLoader.m_instances.size(); i++) {
+			selectedModelCenter += glm::vec3{
+				iplLoader.m_instances[i].posX,
+				iplLoader.m_instances[i].posY,
+				iplLoader.m_instances[i].posZ
+			};
+		}
+		selectedModelCenter /= iplLoader.m_instances.size();
 	} else {
 		printf("IPL failed to load.\n");
 		exit(1);
@@ -148,15 +159,16 @@ void init(std::string gtapath)
 void update()
 {
 	static int i = 0;
+	constexpr float rotspeed = 80;
 
 	glm::mat4 view;
 	glm::vec3 pos{
-		-200 + cos(i / 40.0) * 400,
-		700 + sin(i / 40.0) * 400,
-		-300,
+		-selectedModelCenter.x + cos(i / rotspeed) * 400,
+		-selectedModelCenter.y + sin(i / rotspeed) * 400,
+		-selectedModelCenter.z - 200,
 	};
 	view = glm::rotate(view, -50.f, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, (i/251.2f)*360 - 90, glm::vec3(0, 0, -1));
+	view = glm::rotate(view, (i/(6.28f*rotspeed))*360 - 90, glm::vec3(0, 0, -1));
 	view = glm::translate(view, pos);
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
