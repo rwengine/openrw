@@ -17,6 +17,8 @@
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
 
+constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
+
 sf::Window window;
 
 const char *vertexShaderSource = "#version 130\n"
@@ -50,6 +52,9 @@ LoaderIPL iplLoader;
 std::map<std::string, std::unique_ptr<Model>> models;
 Model *selectedModel;
 glm::vec3 selectedModelCenter;
+
+glm::vec3 plyPos;
+glm::vec2 plyLook;
 
 GLuint compileShader(GLenum type, const char *source)
 {
@@ -158,6 +163,7 @@ void init(std::string gtapath)
 			};
 		}
 		selectedModelCenter /= iplLoader.m_instances.size();
+		plyPos = selectedModelCenter;
 	} else {
 		printf("IPL failed to load.\n");
 		exit(1);
@@ -170,18 +176,54 @@ void init(std::string gtapath)
 
 void update()
 {
+	float dt = 1.0/60.0; // we'll be fine
 	static int i = 0;
-	constexpr float rotspeed = 80;
+	constexpr float moveSpeed = 20;
+
+	sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
+	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+	sf::Vector2i deltaMouse = mousePos - screenCenter;
+	sf::Mouse::setPosition(screenCenter, window);
+
+	plyLook.x += deltaMouse.x / 10.0;
+	plyLook.y += deltaMouse.y / 10.0;
+
+	if (plyLook.y > 90)
+		plyLook.y = 90;
+	else if (plyLook.y < -90)
+		plyLook.y = -90;
+
+	bool doMove = false;
+	int direction = 1;
+	int strafeDirection = 0;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+		doMove = true;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+		doMove = true;
+		direction = -1;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+		doMove = true;
+		strafeDirection = -1;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+		doMove = true;
+		strafeDirection = 1;
+	}
+	if (doMove) {
+		plyPos += dt * moveSpeed * direction * glm::vec3{
+			sin((plyLook.x + 90*strafeDirection) * PiOver180),
+			cos((plyLook.x + 90*strafeDirection) * PiOver180),
+			-sin(plyLook.y * PiOver180),
+		};
+	}
 
 	glm::mat4 view;
-	glm::vec3 pos{
-		-selectedModelCenter.x + cos(i / rotspeed) * 400,
-		-selectedModelCenter.y + sin(i / rotspeed) * 400,
-		-selectedModelCenter.z - 200,
-	};
-	view = glm::rotate(view, -50.f, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, (i/(6.28f*rotspeed))*360 - 90, glm::vec3(0, 0, -1));
-	view = glm::translate(view, pos);
+	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
+	view = glm::translate(view, -plyPos);
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
 	i++;
