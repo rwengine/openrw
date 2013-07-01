@@ -1,6 +1,6 @@
 project(gtfw)
 
-SET(CMAKE_CXX_FLAGS "-std=c++11")
+SET(CMAKE_CXX_FLAGS "-g -std=c++11")
 
 add_subdirectory(datadump)
 add_subdirectory(viewer)
