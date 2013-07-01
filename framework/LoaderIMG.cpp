@@ -35,17 +35,15 @@ bool LoaderIMG::load(const std::string& filename)
 }
 
 /// Get the information of a asset in the examining archive
-LoaderIMGFile LoaderIMG::getAssetInfo(const std::string& assetname)
+LoaderIMGFile &LoaderIMG::getAssetInfo(const std::string& assetname)
 {
-	LoaderIMGFile file;
 	for(size_t i = 0; i < m_assets.size(); ++i)
 	{
 		if(strcmp(m_assets[i].name, assetname.c_str()) == 0)
 		{
-			file = m_assets[i];
+			return m_assets[i];
 		}
 	}
-	return file;
 }
 
 char* LoaderIMG::loadToMemory(const std::string& assetname)
@@ -111,7 +109,7 @@ bool LoaderIMG::saveAsset(const std::string& assetname, const std::string& filen
 }
 
 /// Get the information of an asset by its index
-LoaderIMGFile LoaderIMG::getAssetInfoByIndex(size_t index)
+LoaderIMGFile &LoaderIMG::getAssetInfoByIndex(size_t index)
 {
 	return m_assets[index];
 }

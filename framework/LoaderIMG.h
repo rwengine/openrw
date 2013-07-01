@@ -45,10 +45,10 @@ public:
 	bool saveAsset(const std::string& assetname, const std::string& filename);
 
 	/// Get the information of an asset in the examining archive
-	LoaderIMGFile getAssetInfo(const std::string& assetname);
+	LoaderIMGFile &getAssetInfo(const std::string& assetname);
 
 	/// Get the information of an asset by its index
-	LoaderIMGFile getAssetInfoByIndex(size_t index);
+	LoaderIMGFile &getAssetInfoByIndex(size_t index);
 
 	/// Returns the number of asset files in the archive
 	uint32_t getAssetCount();
