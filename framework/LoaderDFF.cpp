@@ -41,7 +41,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					}
 
 					/** TEX COORDS **/
-					if (geometry.flags & RW::BSGeometry::TexCoords1 || geometry.flags & RW::BSGeometry::TexCoords2) {
+					if ((geometry.flags & RW::BSGeometry::TexCoords1) == RW::BSGeometry::TexCoords1 || 
+						(geometry.flags & RW::BSGeometry::TexCoords2) == RW::BSGeometry::TexCoords1) {
 						for (size_t v = 0; v < geometry.numverts; ++v) {
 							geometryStruct.texcoords.push_back(readStructure<RW::BSGeometryUV>(data, dataI));
 						}
@@ -110,14 +111,40 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					glGenBuffers(1, &geometryStruct.VBO);
 					glGenBuffers(1, &geometryStruct.EBO);
 
+					size_t buffsize = (geometryStruct.vertices.size() * sizeof(float) * 3)
+									+ (geometryStruct.texcoords.size() * sizeof(float) * 2)
+									+ (geometryStruct.normals.size() * sizeof(float) * 3);
+					
 					// Vertices
 					glBindBuffer(GL_ARRAY_BUFFER, geometryStruct.VBO);
-					glBufferData(
+					glBufferData(GL_ARRAY_BUFFER, buffsize, NULL, GL_STATIC_DRAW);
+					
+					glBufferSubData(
 						GL_ARRAY_BUFFER,
-						geometryStruct.vertices.size() * 3 * sizeof(float),
-						&geometryStruct.vertices[0],
-						GL_STATIC_DRAW
+						0,
+						(geometryStruct.vertices.size() * sizeof(float) * 3),
+						&geometryStruct.vertices[0]
 					);
+					
+					if(geometryStruct.texcoords.size() > 0)
+					{
+						glBufferSubData(
+							GL_ARRAY_BUFFER,
+							(geometryStruct.vertices.size() * sizeof(float) * 3),
+							(geometryStruct.texcoords.size() * sizeof(float) * 2),
+							&geometryStruct.texcoords[0]
+						);
+					}
+					
+					if(geometryStruct.normals.size() > 0 )
+					{
+						glBufferSubData(
+							GL_ARRAY_BUFFER,
+							(geometryStruct.vertices.size() * sizeof(float) * 3) + (geometryStruct.texcoords.size() * sizeof(float) * 2),
+							geometryStruct.normals.size() * 3 * sizeof(float),
+							&geometryStruct.normals[0]
+						);
+					}
 
 					// Elements
 					uint16_t indicies[geometryStruct.triangles.size() * 3];

@@ -217,7 +217,7 @@ void render()
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
 			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
 			glEnableVertexAttribArray(posAttrib);
 			glEnableVertexAttribArray(texAttrib);
 
