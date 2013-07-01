@@ -10,7 +10,7 @@ LoaderIMG::LoaderIMG()
 
 bool LoaderIMG::load(const std::string& filename)
 {
-  std::string dirName = filename;
+	std::string dirName = filename;
 	dirName.append(".dir");
 
 	FILE* fp = fopen(dirName.c_str(), "rb");
@@ -61,7 +61,7 @@ char* LoaderIMG::loadToMemory(const std::string& assetname)
 
 	if(!found)
 	{
-		printf("No such asset found.\n");
+		std::cerr << "Asset '" << assetname << "' not found!" << std::endl;
 		return 0;
 	}
 	

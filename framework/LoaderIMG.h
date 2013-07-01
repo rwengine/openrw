@@ -9,7 +9,7 @@
 class LoaderIMGFile
 {
 public:
-  uint32_t offset;
+	uint32_t offset;
 	uint32_t size;
 	char name[24];
 };
