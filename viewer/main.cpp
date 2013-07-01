@@ -206,11 +206,12 @@ void render()
 				textureLoader.bindTexture(model->geometries[g].textures[0].name);
 			}
 
+			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
+			glm::quat rot(-obj.rotW, obj.rotX, obj.rotY, obj.rotZ);
 			glm::mat4 matrixModel;
-			glm::quat rot{obj.rotW, obj.rotX, obj.rotY, obj.rotZ};
-			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ)); //glm::rotate(matrixModel, rot);//glm::angle(rot), glm::axis(rot));
+			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ));
 			matrixModel = glm::scale(matrixModel, glm::vec3(obj.scaleX, obj.scaleY, obj.scaleZ));
-			matrixModel = matrixModel * glm::mat4_cast(rot); 
+			matrixModel = matrixModel * glm::mat4_cast(rot);
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
