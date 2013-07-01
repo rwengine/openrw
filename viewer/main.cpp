@@ -4,12 +4,15 @@
 #include "../framework/LoaderIPL.h"
 #include "../framework/LoaderIMG.h"
 #include "../framework/LoaderDFF.h"
+#include "../framework/TextureLoader.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <SFML/Graphics.hpp>
+
+#include <memory>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -18,24 +21,34 @@ sf::Window window;
 
 const char *vertexShaderSource = "#version 130\n"
 "in vec3 position;"
-// "in vec2 texCoords;"
-// "out vec2 TexCoords;"
+"in vec2 texCoords;"
+"out vec2 TexCoords;"
 "uniform mat4 model;"
 "uniform mat4 view;"
 "uniform mat4 proj;"
 "void main()"
 "{"
-// "	TexCoords = texCoords;"
-"	gl_Position = proj * model * vec4(position, 1.0);"
+"	TexCoords = texCoords;"
+"	gl_Position = proj * view * model * vec4(position, 1.0);"
 "}";
 const char *fragmentShaderSource = "#version 130\n"
-// "in vec2 TexCoords;"
-// "uniform sampler2D texture;"
+"in vec2 TexCoords;"
+"uniform sampler2D texture;"
 "void main()"
 "{"
-"	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"
-// "	gl_FragColor = texture2D(texture, TexCoords);"
+// "	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"
+"	gl_FragColor = texture2D(texture, TexCoords);"
 "}";
+
+GLuint uniModel, uniProj, uniView;
+GLuint posAttrib, texAttrib;
+
+LoaderDFF dffLoader;
+TextureLoader textureLoader;
+LoaderIPL iplLoader;
+
+std::map<std::string, std::unique_ptr<Model>> models;
+Model *selectedModel;
 
 GLuint compileShader(GLenum type, const char *source)
 {
@@ -74,18 +87,10 @@ void handleEvent(sf::Event &event)
 	}
 }
 
-GLuint uniModel, uniProj, uniView;
-GLuint posAttrib;
-GLuint VBO, EBO;
-
-LoaderDFF dffLoader;
-
-LoaderDFF::Geometry *selectedGeometry;
-
-void init(std::string filepath)
+void init(std::string gtapath)
 {
 	glClearColor(0.2, 0.2, 0.2, 1.0);
-	// glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -95,99 +100,65 @@ void init(std::string filepath)
 	glLinkProgram(shaderProgram);
 	glUseProgram(shaderProgram);
 
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
 	posAttrib = glGetAttribLocation(shaderProgram, "position");
-	GLuint texAttrib = glGetAttribLocation(shaderProgram, "texCoords");
+	texAttrib = glGetAttribLocation(shaderProgram, "texCoords");
 
 	uniModel = glGetUniformLocation(shaderProgram, "model");
 	uniView = glGetUniformLocation(shaderProgram, "view");
 	uniProj = glGetUniformLocation(shaderProgram, "proj");
 
-	LoaderIPL iplLoader;
+	glm::mat4 proj = glm::perspective(80.f, (float) WIDTH/HEIGHT, 0.1f, 5000.f);
+	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+
 	LoaderIMG imgLoader;
 
-	if (iplLoader.load(filepath)) {
+	if (imgLoader.load(gtapath +"/models/gta3")) {
+		for (int i = 0; i < imgLoader.getAssetCount(); i++) {
+			auto &asset = imgLoader.getAssetInfoByIndex(i);
+
+			std::string filename = asset.name;
+
+			auto filetype = filename.substr(filename.size() - 3);
+			std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
+
+			if (filetype == "dff") {
+				std::string modelname = filename.substr(0, filename.size() - 4);
+
+				char *file = imgLoader.loadToMemory(filename);
+				models[modelname] = std::move(dffLoader.loadFromMemory(file));
+			} else if (filetype == "txd") {
+				char *file = imgLoader.loadToMemory(filename);
+				textureLoader.loadFromMemory(file);
+			}
+		}
+	}
+
+	if (iplLoader.load(gtapath +"/data/maps/comNbtm.ipl")) {
 		printf("IPL Loaded, size: %d\n", iplLoader.m_instances.size());
-
-		if (imgLoader.load("/home/iostream/.wine/drive_c/Program Files (x86)/Rockstar Games/GTAIII/models/gta3")) {
-			std::string filename = iplLoader.m_instances[0].model + ".dff";
-			std::cout << "Loading " << filename << std::endl;
-			char *file = imgLoader.loadToMemory(filename);
-
-			dffLoader.loadFromMemory(file);
-
-			selectedGeometry = &dffLoader.geometries[0];
-/*
-			for (int i = 0; i < 10; i++) {
-				auto v = selectedGeometry->vertices[i];
-				std::cout << v.x << ", " << v.y << ", " << v.z << std::endl;
-			}
-*/
-
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(
-				GL_ARRAY_BUFFER,
-				selectedGeometry->vertices.size() * 3 * sizeof(float),
-				&selectedGeometry->vertices[0],
-				GL_STATIC_DRAW
-			);
-
-			uint16_t indicies[selectedGeometry->triangles.size() * 3];
-			size_t i = 0;
-			for (auto &tri : selectedGeometry->triangles) {
-				indicies[i]     = tri.first;
-				indicies[i + 1] = tri.second;
-				indicies[i + 2] = tri.third;
-				i += 3;
-			}
-			/*
-			for (int i = 0; i < 8; i++) {
-				glm::vec3 t{indicies[i*3], indicies[i*3 + 1], indicies[i*3 + 2]};
-				auto v1 = selectedGeometry->vertices[t.x];
-				auto v2 = selectedGeometry->vertices[t.y];
-				auto v3 = selectedGeometry->vertices[t.z];
-				std::cout << t.x << ", " << t.y << ", " << t.z << std::endl;
-				std::cout << v1.x << ", " << v1.y << ", " << v1.z << std::endl;
-				std::cout << v2.x << ", " << v2.y << ", " << v2.z << std::endl;
-				std::cout << v3.x << ", " << v3.y << ", " << v3.z << std::endl;
-				std::cout << std::endl;
-			}
-			*/
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(
-				GL_ELEMENT_ARRAY_BUFFER,
-				sizeof(indicies),
-				indicies,
-				GL_STATIC_DRAW
-			);
-
-			glm::mat4 proj = glm::perspective(80.f, (float) WIDTH/HEIGHT, 0.1f, 100.f);
-			glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-		} else {
-			std::cerr << "IMG failed to load" << std::endl;
-			exit(1);
-		}
-/*
-		for (size_t i = 0; i < iplLoader.m_instances.size(); ++i) {
-			printf("IPL entry id: %d\n", iplLoader.m_instances[i].id);
-		}
-*/
 	} else {
 		printf("IPL failed to load.\n");
+		exit(1);
 	}
+
+	textureLoader.loadFromFile("MISC.TXD");
+
+	selectedModel = models["Jetty"].get();
 }
 
 void update()
 {
 	static int i = 0;
 
-	glm::mat4 model;
-	model = glm::translate(model, glm::vec3(0, 0, -10.0));
-	model = glm::rotate(model, 100.f, glm::vec3(1, 0, 0));
-	model = glm::rotate(model, i*1.f, glm::vec3(0, 0, 1));
-	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	glm::mat4 view;
+	glm::vec3 pos{
+		-200 + cos(i / 40.0) * 400,
+		700 + sin(i / 40.0) * 400,
+		-300,
+	};
+	view = glm::rotate(view, -50.f, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, (i/251.2f)*360 - 90, glm::vec3(0, 0, -1));
+	view = glm::translate(view, pos);
+	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
 	i++;
 }
@@ -196,16 +167,47 @@ void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(posAttrib);
+	for (size_t i = 0; i < iplLoader.m_instances.size(); ++i) {
+		auto &obj = iplLoader.m_instances[i];
+		std::string modelname = obj.model;
+		if (modelname.substr(0, 3) == "LOD")
+			continue;
+		auto &model = models[modelname];
+		// std::cout << "Rendering " << modelname << std::endl;
 
-	glDrawElements(GL_TRIANGLES, selectedGeometry->triangles.size() * 3, GL_UNSIGNED_SHORT, NULL);
+		for (size_t g = 0; g < model->geometries.size(); g++) {
+			if (model->geometries[g].textures.size() > 0) {
+				// std::cout << model->geometries[g].textures.size() << std::endl;
+				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+				textureLoader.bindTexture(model->geometries[g].textures[0].name);
+			}
+
+			glm::mat4 matrixModel;
+			glm::quat rot{obj.rotX, obj.rotY, obj.rotZ, obj.rotW};
+			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ));
+			matrixModel = glm::rotate(matrixModel, glm::angle(rot), glm::axis(rot));
+			matrixModel = glm::scale(matrixModel, glm::vec3(obj.scaleX, obj.scaleY, obj.scaleZ));
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+
+			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
+			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			glEnableVertexAttribArray(posAttrib);
+			glEnableVertexAttribArray(texAttrib);
+
+			glDrawElements(GL_TRIANGLES, model->geometries[g].triangles.size() * 3, GL_UNSIGNED_SHORT, NULL);
+		}
+	}
 }
 
 int main(int argc, char *argv[])
 {
+	if (argc < 2) {
+		std::cout << "Usage: " << argv[0] << " <path to GTA3 root folder>" << std::endl;
+		exit(1);
+	}
+
 	glewExperimental = GL_TRUE;
 	glewInit();
 
