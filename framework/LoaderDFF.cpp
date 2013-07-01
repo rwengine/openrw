@@ -33,8 +33,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 
 					if (item.header.versionid < 0x1003FFFF)
 						auto colors = readStructure<RW::BSGeometryColor>(data, dataI);
-
-					if (geometry.flags & RW::BSGeometry::VertexColors) {
+					
+					if ((geometry.flags & RW::BSGeometry::VertexColors) == RW::BSGeometry::VertexColors) {
 						for (size_t v = 0; v < geometry.numverts; ++v) {
 							readStructure<RW::BSColor>(data, dataI);
 						}
@@ -61,7 +61,7 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					}
 
 					/** NORMALS **/
-					if (geometry.flags & RW::BSGeometry::StoreNormals) {
+					if ((geometry.flags & RW::BSGeometry::StoreNormals) == RW::BSGeometry::StoreNormals) {
 						for (int n = 0; n < geometry.numverts; ++n) {
 							geometryStruct.normals.push_back(readStructure<RW::BSTVector3>(data, dataI));
 						}

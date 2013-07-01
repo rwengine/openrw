@@ -118,18 +118,30 @@ void init(std::string gtapath)
 			auto &asset = imgLoader.getAssetInfoByIndex(i);
 
 			std::string filename = asset.name;
+			
+			if(asset.size == 0)
+			{
+				std::cerr << "Asset: " << filename << " has no size" << std::endl;
+				continue;
+			}
 
 			auto filetype = filename.substr(filename.size() - 3);
 			std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
-
 			if (filetype == "dff") {
 				std::string modelname = filename.substr(0, filename.size() - 4);
-
 				char *file = imgLoader.loadToMemory(filename);
-				models[modelname] = std::move(dffLoader.loadFromMemory(file));
+				if(file)
+				{
+					models[modelname] = std::move(dffLoader.loadFromMemory(file));
+					delete[] file;
+				}
 			} else if (filetype == "txd") {
 				char *file = imgLoader.loadToMemory(filename);
-				textureLoader.loadFromMemory(file);
+				if(file)
+				{
+					textureLoader.loadFromMemory(file);
+					delete[] file;
+				}
 			}
 		}
 	}
@@ -151,7 +163,7 @@ void init(std::string gtapath)
 		exit(1);
 	}
 
-	textureLoader.loadFromFile("MISC.TXD");
+	//textureLoader.loadFromFile("MISC.TXD");
 
 	selectedModel = models["Jetty"].get();
 }
@@ -195,10 +207,10 @@ void render()
 			}
 
 			glm::mat4 matrixModel;
-			glm::quat rot{obj.rotX, obj.rotY, obj.rotZ, obj.rotW};
-			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ));
-			matrixModel = glm::rotate(matrixModel, glm::angle(rot), glm::axis(rot));
+			glm::quat rot{obj.rotW, obj.rotX, obj.rotY, obj.rotZ};
+			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ)); //glm::rotate(matrixModel, rot);//glm::angle(rot), glm::axis(rot));
 			matrixModel = glm::scale(matrixModel, glm::vec3(obj.scaleX, obj.scaleY, obj.scaleZ));
+			matrixModel = matrixModel * glm::mat4_cast(rot); 
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
