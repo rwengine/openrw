@@ -64,13 +64,16 @@ bool TextureLoader::loadFromMemory(char *data)
 			texNative.width, texNative.height, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, fullColor
 		);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+
 		std::string name = std::string(texNative.diffuseName);
 
 		textures[name] = texture;
 
-		std::cout << "Loaded texture '" << name << "'" << std::endl;
+		// std::cout << "Loaded texture '" << name << "'" << std::endl;
 	}
 
 	return true;
@@ -79,7 +82,7 @@ bool TextureLoader::loadFromMemory(char *data)
 void TextureLoader::bindTexture(std::string texture)
 {
 	if (textures.find(texture) == textures.end()) {
-		std::cerr << "Could not find nor bind texture '" << texture << "'" << std::endl;
+		// std::cerr << "Could not find nor bind texture '" << texture << "'" << std::endl;
 		return;
 	}
 
