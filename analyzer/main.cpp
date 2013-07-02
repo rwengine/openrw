@@ -6,11 +6,11 @@
 #include <iostream>
 #include <sstream>
 
-int main()
+int main(int argc, char** argv)
 {
 	std::cout << std::showbase;
 
-	std::string gtapath = "/home/iostream/.wine/drive_c/Program Files (x86)/Rockstar Games/GTAIII/";
+	std::string gtapath = argv[1];
 	auto ojg = RW::BinaryStream::parse(gtapath +"/models/MISC.TXD");
 	// auto ojg = RW::BinaryStream::parse("OJG.TXD");
 

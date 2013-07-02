@@ -20,6 +20,8 @@ bool TextureLoader::loadFromFile(std::string filename)
 	return loadFromMemory(data);
 }
 
+GLuint gErrorTextureData[] = { 0x00FF00FF, 0x00FFFFFF, 0x00FFFFFF, 0x00FF00FF };
+
 bool TextureLoader::loadFromMemory(char *data)
 {
 	RW::BinaryStreamSection root(data);
@@ -34,33 +36,35 @@ bool TextureLoader::loadFromMemory(char *data)
 
 		auto texNative = rootSection.readStructure<RW::BSTextureNative>();
 		
+		GLuint texture = 0;
+		
 		if(texNative.platform != 8) 
 		{
 			std::cerr << "Unsupported texture platform " << std::dec << texNative.platform << std::endl;
-			continue;
+			glGenTextures(1, &texture);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexImage2D(
+				GL_TEXTURE_2D, 0, GL_RGBA,
+				2, 2, 0,
+				GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, gErrorTextureData
+			);
 		}
-		
-		GLuint texture = 0;
-		
-		if((texNative.rasterformat & RW::BSTextureNative::FORMAT_EXT_PAL8) == RW::BSTextureNative::FORMAT_EXT_PAL8)
+		else if((texNative.rasterformat & RW::BSTextureNative::FORMAT_EXT_PAL8) == RW::BSTextureNative::FORMAT_EXT_PAL8)
 		{
-			auto palette = rootSection.readSubStructure<RW::BSPaletteData>(sizeof(RW::BSTextureNative));
-			auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative) + sizeof(RW::BSPaletteData);
-
+			auto palette = rootSection.readSubStructure<RW::BSPaletteData>(sizeof(RW::BSSectionHeader)+sizeof(RW::BSTextureNative) - 4);
+			uint8_t* coldata = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) + sizeof(RW::BSPaletteData) - 4);
 			uint8_t fullColor[texNative.width * texNative.height * 4];
-
-			for (size_t y = 0; y < texNative.height; y++) {
-				for (size_t x = 0; x < texNative.width; x++) {
-					size_t texI = ((y * texNative.width) + x) * 4;
-					size_t palI = 4 * static_cast<size_t>(
-						coldata[(y * texNative.width) + x]
-					);
-
-					fullColor[texI+0] = palette.palette[palI+2];
-					fullColor[texI+1] = palette.palette[palI+1];
-					fullColor[texI+2] = palette.palette[palI+0];
-					fullColor[texI+3] = palette.palette[palI+3];
-				}
+			
+			bool hasAlpha = (texNative.rasterformat & 0x0500) == 0x0500;
+			
+			for(size_t j = 0; j < texNative.width * texNative.height; ++j)
+			{
+				size_t iTex = j * 4;
+				size_t iPal = coldata[j] * 4;
+				fullColor[iTex+0] = palette.palette[iPal+0];
+				fullColor[iTex+1] = palette.palette[iPal+1];
+				fullColor[iTex+2] = palette.palette[iPal+2];
+				fullColor[iTex+3] = hasAlpha ? palette.palette[iPal+3] : 255;
 			}
 			
 			glGenTextures(1, &texture);
@@ -68,7 +72,7 @@ bool TextureLoader::loadFromMemory(char *data)
 			glTexImage2D(
 				GL_TEXTURE_2D, 0, GL_RGBA,
 				texNative.width, texNative.height, 0,
-				GL_BGRA, GL_UNSIGNED_BYTE, fullColor
+				GL_RGBA, GL_UNSIGNED_BYTE, fullColor
 			);
 		}
 		else if(
@@ -77,7 +81,9 @@ bool TextureLoader::loadFromMemory(char *data)
 			texNative.rasterformat == RW::BSTextureNative::FORMAT_888
 		)
 		{
-			auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative) + sizeof(uint32_t);
+			auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative);
+			uint32_t rastersize = *coldata;
+			coldata += sizeof(uint32_t);
 			
 			GLenum type, format;
 			switch(texNative.rasterformat)
@@ -88,7 +94,7 @@ bool TextureLoader::loadFromMemory(char *data)
 					break;
 				case RW::BSTextureNative::FORMAT_8888:
 					format = GL_BGRA;
-					type = GL_UNSIGNED_BYTE;
+					type = GL_UNSIGNED_INT_8_8_8_8_REV;
 					break;
 				case RW::BSTextureNative::FORMAT_888:
 					format = GL_BGR;
