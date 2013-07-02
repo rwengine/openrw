@@ -114,6 +114,9 @@ void update()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	// Update aspect ratio..
+	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 
 	gta->renderer.renderWorld(gta);
 }
@@ -128,7 +131,7 @@ int main(int argc, char *argv[])
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	window.create(sf::VideoMode(WIDTH, HEIGHT), "GTA3 Viewer", sf::Style::Close);
+	window.create(sf::VideoMode(WIDTH, HEIGHT), "GTA3 Viewer", sf::Style::Close | sf::Style::Resize);
 	window.setVerticalSyncEnabled(true);
 
 	init(argv[1]);
