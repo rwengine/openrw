@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	window.create(sf::VideoMode(WIDTH, HEIGHT), "GTA3 Viewer", sf::Style::Close | sf::Style::Resize);
+	window.create(sf::VideoMode(WIDTH, HEIGHT), "GTA3 Viewer", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
 	init(argv[1]);
