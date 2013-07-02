@@ -39,12 +39,24 @@ std::string findFileRealCase(const std::string& lowerPath) {
 		closedir(dp);
 	}
 	
+	return lowerPath;
+	
 #else 
 	// We'll just have to assume this means Windows for now.
-	return lowerName;
+	return lowerPath;
 #endif
 }
 
+// Yet another hack function to fix these paths
+std::string fixPath(std::string path) {
+	for( size_t t = 0; t < path.size(); ++t) {
+		path[t] = tolower(path[t]);
+		if(path[t] == '\\') {
+			path[t] = '/';
+		}
+	}
+	return path;
+}
 
 
 GTAData::GTAData(const std::string& path)
@@ -94,7 +106,9 @@ void GTAData::parseDAT(const std::string& path)
 				}
 				else if(cmd == "IPL")
 				{
-					loadIPL(line.substr(space+1));
+					std::string fixedpath = fixPath(line.substr(space+1));
+					fixedpath = findFileRealCase(datpath + "/" + fixedpath);
+					loadIPL(fixedpath.substr((datpath+"/").size()));
 				}
 				else if(cmd == "TEXDICTION") 
 				{
@@ -198,8 +212,6 @@ char* GTAData::loadFile(const std::string& name)
 		return nullptr;
 	}
 	
-	std::cout << "Loading file " << name << std::endl;
-	
 	auto i = fileLocations.find(name);
 	if(i != fileLocations.end())
 	{
@@ -246,10 +258,5 @@ char* GTAData::loadFile(const std::string& name)
 
 void GTAData::loadIPL(const std::string& name)
 {
-	std::string lowername = name;
-	for(size_t t = 0; t < lowername.size(); ++t)
-	{
-		lowername[t] = tolower(lowername[t]);
-	}
-	iplLocations.insert({lowername, datpath + "/" + lowername});
+	iplLocations.insert({name, datpath + "/" + name});
 }

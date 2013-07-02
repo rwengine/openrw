@@ -96,13 +96,14 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		glm::vec3 pos(obj.posX, obj.posY, obj.posZ);
 		glm::vec3 scale(obj.scaleX, obj.scaleY, obj.scaleZ);
 		
-		float mindist = glm::length(pos - camera.worldPos);
+		float mindist = 100000.f;
 		for (size_t g = 0; g < model->geometries.size(); g++) 
 		{
 			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
 			mindist = std::min(mindist, glm::length((pos+bounds.center) - camera.worldPos) - bounds.radius);
 		}
-		if( mindist > inst.object->drawDistance[0] || (inst.object->modelName.substr(0, 3) == "LOD" && mindist > inst.object->drawDistance[0])) {
+		if( mindist > (inst.object->drawDistance[0] * (inst.object->LOD ? 1.f : 2.f))
+			|| (inst.object->LOD && mindist < 250.f) ) {
 			culled++;
 			continue;
 		}

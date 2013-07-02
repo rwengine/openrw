@@ -27,6 +27,42 @@ public:
 class LoaderIPL
 {
 public:
+	
+	/**
+	 * \class Zone
+	 *  A Zone entry
+	 */
+	class Zone 
+	{
+	public:
+		/**
+		 * The name of the Zone (see .gxt)
+		 */
+		std::string name;
+		
+		int type;
+		
+		/**
+		 * Bottom left of the Zone
+		 */
+		glm::vec3 min;
+	
+		/** 
+		 * Top Right of the zone
+		 */
+		glm::vec3 max;
+		
+		/**
+		 * Island number
+		 */
+		int island;
+		
+		/**
+		 * Text of the zone?
+		 */
+		std::string Text;
+	};
+	
 	/// Load the IPL data into memory
 	bool load(const std::string& filename);
 
@@ -35,6 +71,9 @@ public:
 	
 	/// The centroid of the instances
 	glm::vec3 centroid;
+	
+	/// List of Zones
+	std::vector<Zone> zones;
 };
 
 #endif // LoaderIPL_h__

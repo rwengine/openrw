@@ -19,6 +19,14 @@ bool GTAEngine::load()
 		defineItems(it->second);
 	}
 	
+	// Load the .zon IPLs since we want to have the zones loaded
+	for(std::map<std::string, std::string>::iterator it = gameData.iplLocations.begin();
+		it != gameData.iplLocations.end();
+		++it) {
+		loadZone(it->second);
+		placeItems(it->second);
+	}
+	
 	return true;
 }
 
@@ -106,6 +114,24 @@ bool GTAEngine::placeItems(const std::string& name)
 	{
 		std::cerr << "Failed to load IPL: " << path << std::endl;
 		return false;
+	}
+	
+	return false;
+}
+
+bool GTAEngine::loadZone(const std::string& path)
+{
+	LoaderIPL ipll;
+
+	if( ipll.load(path)) {
+		if( ipll.zones.size() > 0) {
+			zones.insert(zones.begin(), ipll.zones.begin(), ipll.zones.end());
+			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
+			return true;
+		}
+	}
+	else {
+		std::cerr << "Failed to load IPL " << path << std::endl;
 	}
 	
 	return false;

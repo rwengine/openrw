@@ -7,7 +7,7 @@
 
 enum SectionTypes
 {
-  INST,
+	INST,
 	PICK,
 	CULL,
 	ZONE,
@@ -108,6 +108,39 @@ bool LoaderIPL::load(const std::string& filename)
 				std::cout << "rotW: " << instance.rotW << std::endl;*/
 
 				m_instances.push_back(instance);
+			}
+			else if(section == ZONE) 
+			{
+				Zone zone;
+				
+				std::stringstream strstream(line);
+				
+				std::string value;
+				
+				getline(strstream, value, ',');
+				zone.name = value;
+				
+				getline(strstream, value, ',');
+				zone.type = atoi(value.c_str());
+				
+				getline(strstream, value, ',');
+				zone.min.x = atof(value.c_str());
+				getline(strstream, value, ',');
+				zone.min.y = atof(value.c_str());
+				getline(strstream, value, ',');
+				zone.min.z = atof(value.c_str());
+				
+				getline(strstream, value, ',');
+				zone.max.x = atof(value.c_str());
+				getline(strstream, value, ',');
+				zone.max.y = atof(value.c_str());
+				getline(strstream, value, ',');
+				zone.max.z = atof(value.c_str());
+				
+				getline(strstream, value, ',');
+				zone.island = atoi(value.c_str());
+				
+				zones.push_back(zone);
 			}
 		}
 

@@ -25,6 +25,7 @@ GTAEngine* gta = nullptr;
 
 glm::vec3 plyPos;
 glm::vec2 plyLook;
+float moveSpeed = 20.0f;
 
 void handleEvent(sf::Event &event)
 {
@@ -34,7 +35,17 @@ void handleEvent(sf::Event &event)
 		case sf::Keyboard::Escape:
 			window.close();
 			break;
+		case sf::Keyboard::Space:
+			moveSpeed = 60.f;
+			break;
 		default: break;
+		}
+		break;
+	case sf::Event::KeyReleased:
+		switch(event.key.code) {
+			case sf::Keyboard::Space:
+				moveSpeed = 20.f;
+				break;
 		}
 		break;
 	default: break;
@@ -55,10 +66,10 @@ void init(std::string gtapath)
 	gta->load();
 	
 	// Test out a known IPL.
-	gta->placeItems(gtapath + "/data/maps/industsw/industSW.ipl");
+	/*gta->placeItems(gtapath + "/data/maps/industsw/industSW.ipl");
 	gta->placeItems(gtapath + "/data/maps/industnw/industNW.ipl");
 	gta->placeItems(gtapath + "/data/maps/industse/industSE.ipl");
-	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");
+	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");*/
 	
 	plyPos = gta->itemCentroid / (float) gta->itemCount;
 }
@@ -66,7 +77,6 @@ void init(std::string gtapath)
 void update(float dt)
 {
 	static int i = 0;
-	constexpr float moveSpeed = 20;
 
 	sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
 	sf::Vector2i mousePos = sf::Mouse::getPosition(window);

@@ -29,6 +29,7 @@ public:
 		size_t numClumps;
 		float drawDistance[3];
 		int32_t flags;
+		bool LOD;
 	};	
 
 	enum VehicleClass

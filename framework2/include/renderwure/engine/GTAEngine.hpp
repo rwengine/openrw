@@ -72,6 +72,11 @@ public:
 	bool placeItems(const std::string& name);
 	
 	/**
+	 * Loads the Zones from a zon/IPL file
+	 */
+	bool loadZone(const std::string& path);
+	
+	/**
 	 * Roughly the middle of everything
 	 */
 	glm::vec3 itemCentroid; 
@@ -91,6 +96,11 @@ public:
 	 * Renderer
 	 */
 	GTARenderer renderer;
+	
+	/**
+	 * Map Zones
+	 */
+	std::vector<LoaderIPL::Zone> zones;
 	
 	/**
 	 * Object Definitions
