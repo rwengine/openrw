@@ -10,6 +10,7 @@ add_library(renderware
 	LoaderCOL.cpp
 	LoaderIMG.cpp
 	LoaderIPL.cpp
+	LoaderIDE.cpp
 	GTAData.cpp
 	
 	GTAEngine.cpp

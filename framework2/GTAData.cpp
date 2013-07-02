@@ -1,6 +1,7 @@
 #include <renderwure/engine/GTAData.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
+#include <renderwure/loaders/LoaderIDE.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -57,6 +58,11 @@ void GTAData::load()
 void GTAData::loadIDE(const std::string& name)
 {
 	std::cout << "IDE File " << name << std::endl;
+
+	LoaderIDE ideLoader;
+	if ( ! ideLoader.load(datpath + name)) {
+		std::cerr << "COULD NOT LOAD IDE FILE '" << name << "' FOR SOME REASON" << std::endl;
+	}
 }
 
 void GTAData::loadCOL(const size_t zone, const std::string& name)
