@@ -85,16 +85,27 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 
 	auto& textureLoader = engine->gameData.textureLoader;
 
-	for (size_t i = 0; i < engine->instances.size(); ++i) {
-		LoaderIPLInstance &obj = engine->instances[i];
+	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
+		GTAEngine::GTAInstance& inst = engine->objectInstances[i];
+		LoaderIPLInstance &obj = inst.instance;
 		std::string modelname = obj.model;
-		if (modelname.substr(0, 3) == "LOD")
-			continue;
+		
 		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
 		
 		glm::quat rot(-obj.rotW, obj.rotX, obj.rotY, obj.rotZ);
 		glm::vec3 pos(obj.posX, obj.posY, obj.posZ);
 		glm::vec3 scale(obj.scaleX, obj.scaleY, obj.scaleZ);
+		
+		float mindist = glm::length(pos - camera.worldPos);
+		for (size_t g = 0; g < model->geometries.size(); g++) 
+		{
+			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+			mindist = std::min(mindist, glm::length((pos+bounds.center) - camera.worldPos) - bounds.radius);
+		}
+		if( mindist > inst.object->drawDistance[0] || (inst.object->modelName.substr(0, 3) == "LOD" && mindist > inst.object->drawDistance[0])) {
+			culled++;
+			continue;
+		}
 		
 		if(!model)
 		{

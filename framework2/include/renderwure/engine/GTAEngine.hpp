@@ -52,15 +52,30 @@ public:
 	void logError(const std::string& error);
 	
 	/**
+	 * @struct GTAObject
+	 *  Stores references to the Object data and the instance
+	 */
+	struct GTAInstance {
+		LoaderIPLInstance instance;
+		std::shared_ptr<LoaderIDE::OBJS_t> object;
+	};
+	
+	/**
+	 * Loads an IDE into the game
+	 */
+	bool defineItems(const std::string& name);
+	
+	/**
 	 * Loads an IPL into the game.
 	 * @param name The name of the IPL as it appears in the games' gta.dat
 	 */
-	bool loadItems(const std::string& name);
+	bool placeItems(const std::string& name);
 	
 	/**
 	 * Roughly the middle of everything
 	 */
-	glm::vec3 itemCentroid;
+	glm::vec3 itemCentroid; 
+	size_t itemCount;
 	
 	/** 
 	 * Game Clock
@@ -78,9 +93,15 @@ public:
 	GTARenderer renderer;
 	
 	/**
-	 * Until we have a real "object" class, just store a list of loaed instances.
+	 * Object Definitions
 	 */
-	std::vector<LoaderIPLInstance> instances;
+	std::map<uint16_t, std::shared_ptr<LoaderIDE::OBJS_t>> objectTypes;
+	
+	/**
+	 * Game Objects!
+	 */
+	std::vector<GTAInstance> objectInstances;
+
 };
 
 #endif

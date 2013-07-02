@@ -57,12 +57,16 @@ void GTAData::load()
 
 void GTAData::loadIDE(const std::string& name)
 {
-	std::cout << "IDE File " << name << std::endl;
-
-	LoaderIDE ideLoader;
-	if ( ! ideLoader.load(datpath + name)) {
-		std::cerr << "COULD NOT LOAD IDE FILE '" << name << "' FOR SOME REASON" << std::endl;
+	std::string lowername = name;
+	for(size_t t = 0; t < lowername.size(); ++t)
+	{
+		lowername[t] = tolower(lowername[t]);
+		if(lowername[t] == '\\') {
+			lowername[t] = '/';
+		}
 	}
+	
+	ideLocations.insert({lowername, datpath+"/"+lowername});
 }
 
 void GTAData::loadCOL(const size_t zone, const std::string& name)

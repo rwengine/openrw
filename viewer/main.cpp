@@ -55,12 +55,12 @@ void init(std::string gtapath)
 	gta->load();
 	
 	// Test out a known IPL.
-	gta->loadItems(gtapath + "/data/maps/industsw/industSW.ipl");
-	gta->loadItems(gtapath + "/data/maps/industnw/industNW.ipl");
-	gta->loadItems(gtapath + "/data/maps/industse/industSE.ipl");
-	gta->loadItems(gtapath + "/data/maps/industne/industNE.ipl");
+	gta->placeItems(gtapath + "/data/maps/industsw/industSW.ipl");
+	gta->placeItems(gtapath + "/data/maps/industnw/industNW.ipl");
+	gta->placeItems(gtapath + "/data/maps/industse/industSE.ipl");
+	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");
 	
-	plyPos = gta->itemCentroid / (float) gta->instances.size();
+	plyPos = gta->itemCentroid / (float) gta->itemCount;
 }
 
 void update(float dt)
@@ -106,6 +106,7 @@ void update(float dt)
 
 	view = glm::translate(view, -plyPos);
 	
+	gta->renderer.camera.worldPos = plyPos;
 	gta->renderer.camera.frustum.view = view;
 
 	i++;

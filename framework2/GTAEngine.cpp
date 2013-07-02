@@ -1,8 +1,9 @@
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
+#include <renderwure/loaders/LoaderIDE.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
-: gameData(path), gameTime(0.f)
+: itemCount(0), gameData(path), gameTime(0.f)
 {
 	
 }
@@ -10,6 +11,13 @@ GTAEngine::GTAEngine(const std::string& path)
 bool GTAEngine::load()
 {
 	gameData.load();
+	
+	// Loade all of the IDEs.
+	for(std::map<std::string, std::string>::iterator it = gameData.ideLocations.begin();
+		it != gameData.ideLocations.end();
+		++it) {
+		defineItems(it->second);
+	}
 	
 	return true;
 }
@@ -24,7 +32,36 @@ void GTAEngine::logError(const std::string& error)
 	log.push({LogEntry::Error, gameTime, error});
 }
 
-bool GTAEngine::loadItems(const std::string& name)
+bool GTAEngine::defineItems(const std::string& name)
+{
+	auto i = gameData.ideLocations.find(name);
+	std::string path = name;
+	
+	if( i != gameData.ideLocations.end()) {
+		path = i->second;
+	}
+	else {
+		std::cout << "IDE not pre-listed" << std::endl;
+	}
+	
+	LoaderIDE idel;
+	
+	if(idel.load(path)) {
+		for( size_t o = 0; o < idel.OBJSs.size(); ++o) {
+			objectTypes.insert({
+				idel.OBJSs[o].ID, 
+				std::shared_ptr<LoaderIDE::OBJS_t>(new LoaderIDE::OBJS_t(idel.OBJSs[o]))
+			});
+		}
+	}
+	else {
+		std::cerr << "Failed to load IDE " << path << std::endl;
+	}
+	
+	return false;
+}
+
+bool GTAEngine::placeItems(const std::string& name)
 {
 	auto i = gameData.iplLocations.find(name);
 	std::string path = name;
@@ -42,8 +79,19 @@ bool GTAEngine::loadItems(const std::string& name)
 
 	if(ipll.load(path))
 	{
-		instances.insert(instances.end(), ipll.m_instances.begin(), ipll.m_instances.end());
+		// Find the object.
+		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
+			LoaderIPLInstance& inst = ipll.m_instances[i];
+			auto oi = objectTypes.find(inst.id);
+			if( oi != objectTypes.end()) {
+				objectInstances.push_back({ inst, oi->second });
+			}
+			else {
+				std::cerr << "No object for instance " << inst.id << " (" << path << ")" << std::endl;
+			}
+		}
 		itemCentroid += ipll.centroid;
+		itemCount += ipll.m_instances.size();
 		return true;
 	}
 	else

@@ -5,6 +5,7 @@
 #include <renderwure/loaders/LoaderIMG.hpp>
 #include <renderwure/loaders/TextureLoader.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
+#include <renderwure/loaders/LoaderIDE.hpp>
 
 #include <string>
 #include <map>
@@ -76,6 +77,7 @@ public:
 	 * Maps the paths in GTA3.dat to the real paths
 	 */
 	std::map<std::string, std::string> iplLocations;
+	std::map<std::string, std::string> ideLocations;
 	
 	/**
 	 * Maps file names to their locations
@@ -96,7 +98,7 @@ public:
 	 * Loaded models
 	 */
 	std::map<std::string, std::unique_ptr<Model>> models;
-
+	
 };
 
 #endif
