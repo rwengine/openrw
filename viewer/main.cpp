@@ -242,11 +242,6 @@ void render()
 		// std::cout << "Rendering " << modelname << std::endl;
 
 		for (size_t g = 0; g < model->geometries.size(); g++) {
-			if (model->geometries[g].textures.size() > 0) {
-				// std::cout << model->geometries[g].textures.size() << std::endl;
-				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
-				textureLoader.bindTexture(model->geometries[g].textures[0].name);
-			}
 
 			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
 			glm::quat rot(-obj.rotW, obj.rotX, obj.rotY, obj.rotZ);
@@ -255,15 +250,27 @@ void render()
 			matrixModel = glm::scale(matrixModel, glm::vec3(obj.scaleX, obj.scaleY, obj.scaleZ));
 			matrixModel = matrixModel * glm::mat4_cast(rot);
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-
+			
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
 			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
 			glEnableVertexAttribArray(posAttrib);
 			glEnableVertexAttribArray(texAttrib);
+			
+			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
+			{
+				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
+					// std::cout << model->geometries[g].textures.size() << std::endl;
+					// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+					if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
+						textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+					}
+				}
+				
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
 
-			glDrawElements(GL_TRIANGLES, model->geometries[g].triangles.size() * 3, GL_UNSIGNED_SHORT, NULL);
+				glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+			}
 		}
 	}
 }

@@ -33,6 +33,8 @@ namespace RW
 		
 		SID_HAnimPLG     = 0x011E,
 		
+		SID_BinMeshPLG   = 0x50E,
+		
 		SID_NodeName     = 0x0253F2FE
 	};
 	
@@ -166,6 +168,19 @@ namespace RW
 		uint16_t unknown;
 	};
 	
+	struct BSBinMeshPLG
+	{
+		uint32_t facetype;
+		uint32_t numsplits;
+		uint32_t numfaces;
+	};
+	
+	struct BSMaterialSplit
+	{
+		uint32_t numverts;
+		uint32_t index;
+	};
+	
 	/**
 	 * Texture Dictionary Structures (TXD)
 	 */
@@ -282,6 +297,11 @@ namespace RW
 		template<class T> T readSubStructure(size_t internalOffset)
 		{
 			return *reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)+internalOffset);
+		}
+		
+		template<class T> T readRaw(size_t internalOffset)
+		{
+			return *reinterpret_cast<T*>(data+offset+internalOffset);
 		}
 		
 		char* raw()

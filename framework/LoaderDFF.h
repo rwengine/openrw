@@ -18,6 +18,17 @@ public:
 		std::string name;
 		std::string alphaName;
 	};
+	
+	struct Material {
+		std::vector<Texture> textures;
+	};
+	
+	struct SubGeometry {
+		GLuint EBO;
+		size_t material;
+		std::vector<uint32_t> indices;
+	};
+	
 	struct Geometry {
 		GLuint VBO, EBO;
 
@@ -28,7 +39,8 @@ public:
 		std::vector<RW::BSTVector3> vertices;
 		std::vector<RW::BSTVector3> normals;
 
-		std::vector<Texture> textures;
+		std::vector<Material> materials;
+		std::vector<SubGeometry> subgeom;
 	};
 
 	std::vector<Geometry> geometries;

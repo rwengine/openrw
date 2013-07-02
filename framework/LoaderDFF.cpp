@@ -77,6 +77,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 
 					size_t matI = 0;
 					materiallistsec.getNextChildSection(matI);
+					
+					geometryStruct.materials.resize(materialList.nummaterials);
 
 					for (size_t m = 0; m < materialList.nummaterials; ++m) {
 						auto materialsec = materiallistsec.getNextChildSection(matI);
@@ -84,10 +86,11 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 							continue;
 
 						auto material = materialsec.readStructure<RW::BSMaterial>();
+						geometryStruct.materials[m].textures.resize(material.numtextures);
 
 						size_t texI = 0;
 						materialsec.getNextChildSection(texI);
-
+						
 						for (size_t t = 0; t < material.numtextures; ++t) {
 							auto texsec = materialsec.getNextChildSection(texI);
 							auto texture = texsec.readStructure<RW::BSTexture>();
@@ -103,13 +106,44 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 							textureName = namesec.raw();
 							alphaName = alphasec.raw();
 
-							geometryStruct.textures.push_back({textureName, alphaName});
+							geometryStruct.materials[m].textures[t] = {textureName, alphaName};
+						}
+					}
+					
+					if(item.hasMoreData(secI))
+					{
+						auto extensions = item.getNextChildSection(secI);
+						size_t extI = 0;
+						while(extensions.hasMoreData(extI))
+						{
+							auto extsec = extensions.getNextChildSection(extI);
+							if(extsec.header.id == RW::SID_BinMeshPLG)
+							{
+								auto meshplg = extsec.readSubStructure<RW::BSBinMeshPLG>(0);
+								geometryStruct.subgeom.resize(meshplg.numsplits);
+								size_t meshplgI = sizeof(RW::BSBinMeshPLG);
+								for(size_t i = 0; i < meshplg.numsplits; ++i)
+								{
+									auto plgHeader = extsec.readSubStructure<RW::BSMaterialSplit>(meshplgI);
+									meshplgI += sizeof(RW::BSMaterialSplit);
+									geometryStruct.subgeom[i].material = plgHeader.index;
+									geometryStruct.subgeom[i].indices.resize(plgHeader.numverts);
+									for (int j = 0; j < plgHeader.numverts; ++j) {
+										geometryStruct.subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
+										meshplgI += sizeof(uint32_t);
+									}
+								}
+							}
 						}
 					}
 
 					// OpenGL buffer stuff
 					glGenBuffers(1, &geometryStruct.VBO);
 					glGenBuffers(1, &geometryStruct.EBO);
+					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
+					{
+						glGenBuffers(1, &(geometryStruct.subgeom[i].EBO));
+					}
 
 					size_t buffsize = (geometryStruct.vertices.size() * sizeof(float) * 3)
 									+ (geometryStruct.texcoords.size() * sizeof(float) * 2)
@@ -162,9 +196,22 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 						indicies,
 						GL_STATIC_DRAW
 					);
-
+					
+					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
+					{
+						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.subgeom[i].EBO);
+						glBufferData(
+							GL_ELEMENT_ARRAY_BUFFER,
+							sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size(),
+							&(geometryStruct.subgeom[i].indices[0]),
+							GL_STATIC_DRAW
+						);
+					}
+					
 					// Add it
 					model->geometries.push_back(geometryStruct);
+					
+					
 				}
 			}
 		}
