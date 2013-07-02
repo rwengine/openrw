@@ -148,36 +148,29 @@ void update()
 	else if (plyLook.y < -90)
 		plyLook.y = -90;
 
-	bool doMove = false;
-	int direction = 1;
-	int strafeDirection = 0;
+	glm::vec3 movement;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-		doMove = true;
+		movement.z = -1;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-		doMove = true;
-		direction = -1;
+		movement.z = 1;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-		doMove = true;
-		strafeDirection = -1;
+		movement.x = -1;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-		doMove = true;
-		strafeDirection = 1;
+		movement.x = 1;
 	}
-	if (doMove) {
-		plyPos += dt * moveSpeed * direction * glm::vec3{
-			sin((plyLook.x + 90*strafeDirection) * PiOver180),
-			cos((plyLook.x + 90*strafeDirection) * PiOver180),
-			-sin(plyLook.y * PiOver180),
-		};
-	}
-
+	
 	glm::mat4 view;
 	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
 	view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
 	view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
+	
+	if (glm::length(movement) > 0.f) {
+		plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * movement);
+	}
+
 	view = glm::translate(view, -plyPos);
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
