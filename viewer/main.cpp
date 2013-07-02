@@ -152,8 +152,7 @@ int main(int argc, char *argv[])
 			handleEvent(event);
 		}
 
-		update(clock.getElapsedTime().asSeconds());
-		clock.restart();
+		update(clock.restart().asSeconds());
 		
 		render();
 		window.display();
