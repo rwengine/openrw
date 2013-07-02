@@ -4,6 +4,7 @@
 
 #include <renderwure/engine/GTAData.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
+#include <renderwure/render/GTARenderer.hpp>
 
 #include <glm/glm.hpp>
 
@@ -39,6 +40,11 @@ public:
 	 * Game data
 	 */
 	GTAData gameData;
+	
+	/**
+	 * Renderer
+	 */
+	GTARenderer renderer;
 	
 	/**
 	 * Until we have a real "object" class, just store a list of loaed instances.

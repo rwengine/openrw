@@ -13,6 +13,9 @@ add_library(renderware
 	GTAData.cpp
 	
 	GTAEngine.cpp
+	
+	# Rendering
+	GTARenderer.cpp
 )
 
 target_link_libraries(renderware sfml-window)
