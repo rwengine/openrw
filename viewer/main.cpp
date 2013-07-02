@@ -55,16 +55,15 @@ void init(std::string gtapath)
 	
 	// Test out a known IPL.
 	gta->loadItems(gtapath + "/data/maps/industsw/industSW.ipl");
-	//gta->loadItems(gtapath + "/data/maps/industnw/industNW.ipl");
-	//gta->loadItems(gtapath + "/data/maps/industse/industSE.ipl");
-	//gta->loadItems(gtapath + "/data/maps/industne/industNE.ipl");
+	gta->loadItems(gtapath + "/data/maps/industnw/industNW.ipl");
+	gta->loadItems(gtapath + "/data/maps/industse/industSE.ipl");
+	gta->loadItems(gtapath + "/data/maps/industne/industNE.ipl");
 	
 	plyPos = gta->itemCentroid / (float) gta->instances.size();
 }
 
-void update()
+void update(float dt)
 {
-	float dt = 1.0/60.0; // we'll be fine
 	static int i = 0;
 	constexpr float moveSpeed = 20;
 
@@ -144,6 +143,8 @@ int main(int argc, char *argv[])
 	window.setVerticalSyncEnabled(true);
 
 	init(argv[1]);
+	
+	sf::Clock clock;
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -151,10 +152,12 @@ int main(int argc, char *argv[])
 			handleEvent(event);
 		}
 
-		update();
-
+		update(clock.getElapsedTime().asSeconds());
+		clock.restart();
+		
 		render();
 		window.display();
+		
 	}
 
 	return 0;
