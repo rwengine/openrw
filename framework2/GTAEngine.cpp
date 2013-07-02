@@ -61,6 +61,14 @@ bool GTAEngine::defineItems(const std::string& name)
 				std::shared_ptr<LoaderIDE::OBJS_t>(new LoaderIDE::OBJS_t(idel.OBJSs[o]))
 			});
 		}
+		
+		for( size_t v = 0; v < idel.CARSs.size(); ++v) {
+			std::cout << "Vehicle ID " << idel.CARSs[v].ID << ": " << idel.CARSs[v].gameName << std::endl;
+			vehicleTypes.insert({
+				idel.CARSs[v].ID,
+				std::shared_ptr<LoaderIDE::CARS_t>(new LoaderIDE::CARS_t(idel.CARSs[v]))
+			});
+		}
 	}
 	else {
 		std::cerr << "Failed to load IDE " << path << std::endl;
@@ -135,4 +143,21 @@ bool GTAEngine::loadZone(const std::string& path)
 	}
 	
 	return false;
+}
+
+void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
+{
+	auto vti = vehicleTypes.find(id);
+	if(vti != vehicleTypes.end()) {
+		std::cout << "Creating Vehicle ID " << id << " (" << vti->second->gameName << ")" << std::endl;
+		
+		if(! vti->second->modelName.empty()) {
+			gameData.loadDFF(vti->second->modelName + ".dff");
+		}
+		if(! vti->second->textureName.empty()) {
+			gameData.loadTXD(vti->second->textureName + ".txd");
+		}
+		
+		vehicleInstances.push_back({ pos, vti->second });
+	}
 }

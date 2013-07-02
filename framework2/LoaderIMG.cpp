@@ -53,7 +53,7 @@ char* LoaderIMG::loadToMemory(const std::string& assetname)
 	bool found = false;
 	for(size_t i = 0; i < m_assets.size(); ++i)
 	{
-		if(strcmp(m_assets[i].name, assetname.c_str()) == 0)
+		if(strcasecmp(m_assets[i].name, assetname.c_str()) == 0)
 		{
 			assetInfo = m_assets[i];
 			found = true;

@@ -153,4 +153,56 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			}
 		}
 	}
+	
+	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
+		GTAEngine::GTAVehicle& inst = engine->vehicleInstances[v];
+		std::string modelname = inst.vehicle->modelName;
+		
+		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
+		
+		if(!model)
+		{
+			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
+		}
+
+		for (size_t g = 0; g < model->geometries.size(); g++) 
+		{
+			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+			if(! camera.frustum.intersects(bounds.center + inst.position, bounds.radius)) {
+				culled++;
+				continue;
+			}
+			else {
+				rendered++;
+			}
+			
+			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
+			glm::mat4 matrixModel;
+			matrixModel = glm::translate(matrixModel, inst.position);
+			//matrixModel = glm::scale(matrixModel, scale);
+			////matrixModel = matrixModel * glm::mat4_cast(rot);
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+			
+			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
+			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+			glEnableVertexAttribArray(posAttrib);
+			glEnableVertexAttribArray(texAttrib);
+			
+			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
+			{
+				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
+					// std::cout << model->geometries[g].textures.size() << std::endl;
+					// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+					if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
+						textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+					}
+				}
+				
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
+
+				glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+			}
+		}
+	}
 }

@@ -61,6 +61,16 @@ public:
 	};
 	
 	/**
+	 * @class GTAVehicle
+	 *  Stores references to the vehicle data and the instance
+	 * @todo some kind of VehicleInstance data so we can save that.
+	 */
+	struct GTAVehicle {
+		glm::vec3 position;
+		std::shared_ptr<LoaderIDE::CARS_t> vehicle;
+	};
+	
+	/**
 	 * Loads an IDE into the game
 	 */
 	bool defineItems(const std::string& name);
@@ -75,6 +85,11 @@ public:
 	 * Loads the Zones from a zon/IPL file
 	 */
 	bool loadZone(const std::string& path);
+	
+	/**
+	 * Creates a vehicle
+	 */
+	void createVehicle(const uint16_t id, const glm::vec3& pos);
 	
 	/**
 	 * Roughly the middle of everything
@@ -108,9 +123,19 @@ public:
 	std::map<uint16_t, std::shared_ptr<LoaderIDE::OBJS_t>> objectTypes;
 	
 	/**
+	 * Vehicle definitions
+	 */
+	std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>> vehicleTypes;
+	
+	/**
 	 * Game Objects!
 	 */
 	std::vector<GTAInstance> objectInstances;
+	
+	/**
+	 * Game Vehicles!
+	 */
+	std::vector<GTAVehicle> vehicleInstances;
 
 };
 

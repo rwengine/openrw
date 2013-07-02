@@ -72,6 +72,16 @@ void init(std::string gtapath)
 	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");*/
 	
 	plyPos = gta->itemCentroid / (float) gta->itemCount;
+	
+	glm::vec3 spawnPos = plyPos + glm::vec3(0, 0, 100);
+	size_t k = 1;
+	// Spawn every vehicle, cause why not.
+	for(std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>>::iterator it = gta->vehicleTypes.begin();
+		it != gta->vehicleTypes.end(); ++it) {
+		gta->createVehicle(it->first, spawnPos);
+		spawnPos += glm::vec3(5, 0, 0);
+		if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, 10, 0); }
+	}
 }
 
 void update(float dt)

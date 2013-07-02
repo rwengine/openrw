@@ -164,11 +164,11 @@ void GTAData::loadIMG(const std::string& name)
 			}
 			else
 			{
-				// Load TXDs immediatley
-				auto filetype = filename.substr(filename.size() - 3);
-				for(size_t t = 0; t < filetype.size(); ++t)
+				// Enter the asset twice.. 
+				fileLocations.insert({ filename, { true, archivePath }});
+				for(size_t t = 0; t < filename.size(); ++t)
 				{
-					filetype[t] = tolower(filetype[t]);
+					filename[t] = tolower(filename[t]);
 				}
 				fileLocations.insert({ filename, { true, archivePath }});
 			}
