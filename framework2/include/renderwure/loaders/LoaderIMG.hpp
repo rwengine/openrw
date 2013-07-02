@@ -1,5 +1,6 @@
-#ifndef LoaderIMG_h__
-#define LoaderIMG_h__
+#pragma once
+#ifndef _LOADERIMG_HPP_
+#define _LOADERIMG_HPP_
 
 #include <iostream>
 #include <vector>

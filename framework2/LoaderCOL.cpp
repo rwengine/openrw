@@ -1,4 +1,5 @@
-#include "loaders/LoaderCOL.h"
+#include <renderwure/loaders/LoaderCOL.hpp>
+
 #include <string>
 #include <fstream>
 

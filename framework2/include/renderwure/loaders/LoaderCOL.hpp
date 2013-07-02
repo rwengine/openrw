@@ -1,5 +1,7 @@
-#ifndef _LOADERCOL_H_
-#define _LOADERCOL_H_
+#pragma once
+#ifndef _LOADERCOL_HPP_
+#define _LOADERCOL_HPP_
+
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>

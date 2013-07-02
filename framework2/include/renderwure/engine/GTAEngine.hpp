@@ -1,9 +1,13 @@
-#ifndef _GTAENGINE_H_
-#define _GTAENGINE_H_
-#include "GTAData.h"
-#include <loaders/LoaderIPL.h>
-#include <vector>
+#pragma once
+#ifndef _GTAENGINE_HPP_
+#define _GTAENGINE_HPP_
+
+#include <renderwure/engine/GTAData.hpp>
+#include <renderwure/loaders/LoaderIPL.hpp>
+
 #include <glm/glm.hpp>
+
+#include <vector>
 
 /**
  * @class GTAEngine

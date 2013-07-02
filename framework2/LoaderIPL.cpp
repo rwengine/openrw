@@ -1,4 +1,4 @@
-#include "loaders/LoaderIPL.h"
+#include <renderwure/loaders/LoaderIPL.hpp>
 
 #include <fstream>
 #include <string>

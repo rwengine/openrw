@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _BINARYSTREAM_HPP_
+#define _BINARYSTREAM_HPP_
 
 #include <string>
 #include <memory>
@@ -38,3 +40,5 @@ public:
 };
 
 }
+
+#endif

@@ -1,8 +1,8 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <engine/GTAEngine.h>
-#include <loaders/LoaderDFF.h>
+#include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/loaders/LoaderDFF.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

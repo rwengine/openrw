@@ -1,4 +1,4 @@
-#include "loaders/TextureLoader.h"
+#include <renderwure/loaders/TextureLoader.hpp>
 
 #include <fstream>
 #include <iostream>

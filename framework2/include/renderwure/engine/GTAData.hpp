@@ -1,11 +1,14 @@
-#ifndef _GTADATA_H_
-#define _GTADATA_H_
+#pragma once
+#ifndef _GTADATA_HPP_
+#define _GTADATA_HPP_
+
+#include <renderwure/loaders/LoaderIMG.hpp>
+#include <renderwure/loaders/TextureLoader.hpp>
+#include <renderwure/loaders/LoaderDFF.hpp>
+
 #include <string>
 #include <map>
 #include <memory>
-#include <loaders/LoaderIMG.h>
-#include <loaders/TextureLoader.h>
-#include <loaders/LoaderDFF.h>
 
 /**
  * Handles loading and management of the Game's DAT

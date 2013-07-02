@@ -1,4 +1,5 @@
-#include "loaders/LoaderIMG.h"
+#include <renderwure/loaders/LoaderIMG.hpp>
+
 #include <cstring>
 
 LoaderIMG::LoaderIMG()

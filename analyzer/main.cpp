@@ -1,5 +1,5 @@
-#include <renderware/BinaryStream.hpp>
-#include <renderware/TextureArchive.hpp>
+#include <renderwure/BinaryStream.hpp>
+#include <renderwure/TextureArchive.hpp>
 
 #include <SFML/Graphics.hpp>
 

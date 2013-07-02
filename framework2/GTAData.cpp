@@ -1,6 +1,7 @@
-#include "engine/GTAData.h"
-#include "loaders/LoaderIPL.h"
-#include <loaders/LoaderDFF.h>
+#include <renderwure/engine/GTAData.hpp>
+#include <renderwure/loaders/LoaderIPL.hpp>
+#include <renderwure/loaders/LoaderDFF.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <bits/algorithmfwd.h>

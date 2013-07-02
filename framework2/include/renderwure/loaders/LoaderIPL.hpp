@@ -1,5 +1,6 @@
-#ifndef LoaderIPL_h__
-#define LoaderIPL_h__
+#pragma once
+#ifndef _LOADERIPL_HPP_
+#define _LOADERIPL_HPP_
 
 #include <iostream>
 #include <vector>

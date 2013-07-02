@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _LOADERDFF_HPP_
+#define _LOADERDFF_HPP_
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -55,3 +57,5 @@ private:
 public:
 	std::unique_ptr<Model> loadFromMemory(char *data);
 };
+
+#endif

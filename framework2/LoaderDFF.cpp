@@ -1,4 +1,4 @@
-#include "loaders/LoaderDFF.h"
+#include <renderwure/loaders/LoaderDFF.hpp>
 
 #include <iostream>
 

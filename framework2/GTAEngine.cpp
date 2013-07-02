@@ -1,5 +1,5 @@
-#include "engine/GTAEngine.h"
-#include "loaders/LoaderIPL.h"
+#include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/loaders/LoaderIPL.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
 : gameData(path)

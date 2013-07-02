@@ -1,6 +1,8 @@
 #pragma once
+#ifndef _TEXTUREARCHIVE_HPP_
+#define _TEXTUREARCHIVE_HPP_
 
-#include <renderware/BinaryStream.hpp>
+#include <renderwure/BinaryStream.hpp>
 
 #include <vector>
 
@@ -44,3 +46,5 @@ public:
 };
 
 }
+
+#endif

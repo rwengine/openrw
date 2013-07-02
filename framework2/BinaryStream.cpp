@@ -1,4 +1,4 @@
-#include <renderware/BinaryStream.hpp>
+#include <renderwure/BinaryStream.hpp>
 
 #include <cstring>
 #include <iostream>
