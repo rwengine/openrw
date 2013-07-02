@@ -1,3 +1,20 @@
-add_library(renderware BinaryStream.cpp TextureArchive.cpp )
+add_library(renderware 
+	
+	# RenderWare related
+	BinaryStream.cpp 
+	TextureArchive.cpp
+	LoaderDFF.cpp
+	TextureLoader.cpp
+	
+	# Game data related
+	LoaderCOL.cpp
+	LoaderIMG.cpp
+	LoaderIPL.cpp
+	GTAData.cpp
+	
+	GTAEngine.cpp
+)
+
+target_link_libraries(renderware sfml-window)
 
 include_directories(include)

@@ -1,5 +1,7 @@
-add_executable(viewer main.cpp ../framework/LoaderIPL.cpp ../framework/LoaderIMG.cpp ../framework/LoaderDFF.cpp ../framework/TextureLoader.cpp)
+add_executable(viewer main.cpp ../framework/LoaderDFF.cpp)
 
-target_link_libraries( viewer sfml-graphics sfml-window sfml-system GL GLEW )
+include_directories(../framework2/include)
+
+target_link_libraries( viewer renderware sfml-graphics sfml-window sfml-system GL GLEW )
 
 install(TARGETS viewer RUNTIME DESTINATION bin)

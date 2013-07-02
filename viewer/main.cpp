@@ -1,10 +1,8 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include "../framework/LoaderIPL.h"
-#include "../framework/LoaderIMG.h"
-#include "../framework/LoaderDFF.h"
-#include "../framework/TextureLoader.h"
+#include <engine/GTAEngine.h>
+#include <loaders/LoaderDFF.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -47,11 +45,8 @@ GLuint uniModel, uniProj, uniView;
 GLuint posAttrib, texAttrib;
 
 LoaderDFF dffLoader;
-TextureLoader textureLoader;
-LoaderIPL iplLoader;
+GTAEngine* gta = nullptr;
 
-std::map<std::string, std::unique_ptr<Model>> models;
-Model *selectedModel;
 glm::vec3 selectedModelCenter;
 
 glm::vec3 plyPos;
@@ -116,63 +111,22 @@ void init(std::string gtapath)
 
 	glm::mat4 proj = glm::perspective(80.f, (float) WIDTH/HEIGHT, 0.1f, 5000.f);
 	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-
-	LoaderIMG imgLoader;
-
-	if (imgLoader.load(gtapath +"/models/gta3")) {
-		for (int i = 0; i < imgLoader.getAssetCount(); i++) {
-			auto &asset = imgLoader.getAssetInfoByIndex(i);
-
-			std::string filename = asset.name;
-			
-			if(asset.size == 0)
-			{
-				std::cerr << "Asset: " << filename << " has no size" << std::endl;
-				continue;
-			}
-
-			auto filetype = filename.substr(filename.size() - 3);
-			std::transform(filetype.begin(), filetype.end(), filetype.begin(), ::tolower);
-			if (filetype == "dff") {
-				std::string modelname = filename.substr(0, filename.size() - 4);
-				char *file = imgLoader.loadToMemory(filename);
-				if(file)
-				{
-					models[modelname] = std::move(dffLoader.loadFromMemory(file));
-					delete[] file;
-				}
-			} else if (filetype == "txd") {
-				char *file = imgLoader.loadToMemory(filename);
-				if(file)
-				{
-					textureLoader.loadFromMemory(file);
-					delete[] file;
-				}
-			}
-		}
-	}
-
-	if (iplLoader.load(gtapath +"/data/maps/industSW.ipl")) {
-		printf("IPL Loaded, size: %d\n", iplLoader.m_instances.size());
-
-		// Get the center of the model by averaging all the vertices! Hax!
-		for (int i = 0; i < iplLoader.m_instances.size(); i++) {
-			selectedModelCenter += glm::vec3{
-				iplLoader.m_instances[i].posX,
-				iplLoader.m_instances[i].posY,
-				iplLoader.m_instances[i].posZ
-			};
-		}
-		selectedModelCenter /= iplLoader.m_instances.size();
-		plyPos = selectedModelCenter;
-	} else {
-		printf("IPL failed to load.\n");
-		exit(1);
-	}
-
-	//textureLoader.loadFromFile("MISC.TXD");
-
-	selectedModel = models["Jetty"].get();
+	
+	// GTA GET
+	gta = new GTAEngine(gtapath);
+	
+	// This is harcoded in GTA III for some reason
+	gta->gameData.loadIMG("/models/gta3");
+	
+	gta->load();
+	
+	// Test out a known IPL.
+	gta->loadItems(gtapath + "/data/maps/industsw/industSW.ipl");
+	//gta->loadItems(gtapath + "/data/maps/industnw/industNW.ipl");
+	//gta->loadItems(gtapath + "/data/maps/industse/industSE.ipl");
+	//gta->loadItems(gtapath + "/data/maps/industne/industNE.ipl");
+	
+	plyPos = gta->itemCentroid / (float) gta->instances.size();
 }
 
 void update()
@@ -233,14 +187,21 @@ void update()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	auto& textureLoader = gta->gameData.textureLoader;
 
-	for (size_t i = 0; i < iplLoader.m_instances.size(); ++i) {
-		auto &obj = iplLoader.m_instances[i];
+	for (size_t i = 0; i < gta->instances.size(); ++i) {
+		auto &obj = gta->instances[i];
 		std::string modelname = obj.model;
 		if (modelname.substr(0, 3) == "LOD")
 			continue;
-		auto &model = models[modelname];
+		auto &model = gta->gameData.models[modelname];
 		// std::cout << "Rendering " << modelname << std::endl;
+		
+		if(!model)
+		{
+			std::cout << "model " << modelname << " not there (" << gta->gameData.models.size() << " models loaded)" << std::endl;
+		}
 
 		for (size_t g = 0; g < model->geometries.size(); g++) {
 
