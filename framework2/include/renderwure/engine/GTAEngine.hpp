@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <queue>
 
 /**
  * @class GTAEngine
@@ -25,6 +26,31 @@ public:
 	 */
 	bool load();
 	
+	struct LogEntry
+	{
+		enum Type {
+			Info,
+			Error,
+			Warning
+		};
+		
+		Type type;
+		float time;
+		std::string message;
+	};
+	
+	std::queue<LogEntry> log;
+	
+	/**
+	 * Displays an informative message
+	 */
+	void logInfo(const std::string& info);
+	
+	/**
+	 * Displays an alarming error
+	 */
+	void logError(const std::string& error);
+	
 	/**
 	 * Loads an IPL into the game.
 	 * @param name The name of the IPL as it appears in the games' gta.dat
@@ -35,6 +61,11 @@ public:
 	 * Roughly the middle of everything
 	 */
 	glm::vec3 itemCentroid;
+	
+	/** 
+	 * Game Clock
+	 */
+	float gameTime;
 	
 	/**
 	 * Game data

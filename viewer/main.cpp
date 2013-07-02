@@ -11,6 +11,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <memory>
+#include <sstream>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;

@@ -2,7 +2,7 @@
 #include <renderwure/loaders/LoaderIPL.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
-: gameData(path)
+: gameData(path), gameTime(0.f)
 {
 	
 }
@@ -12,6 +12,16 @@ bool GTAEngine::load()
 	gameData.load();
 	
 	return true;
+}
+
+void GTAEngine::logInfo(const std::string& info)
+{
+	log.push({LogEntry::Info, gameTime, info});
+}
+
+void GTAEngine::logError(const std::string& error)
+{
+	log.push({LogEntry::Error, gameTime, error});
 }
 
 bool GTAEngine::loadItems(const std::string& name)

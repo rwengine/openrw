@@ -55,7 +55,7 @@ GLuint compileShader(GLenum type, const char *source)
 
 GTARenderer::GTARenderer()
 : camera()
-{
+{	
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 	GLuint worldProgram = glCreateProgram();
