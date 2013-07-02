@@ -7,6 +7,46 @@
 #include <fstream>
 #include <bits/algorithmfwd.h>
 
+#include <dirent.h>
+#include <sys/types.h>
+
+// Hacky functtion to get around the fact that none of the files are the right case
+std::string findFileRealCase(const std::string& lowerPath) {
+#ifdef __unix__
+	size_t lastSlash = lowerPath.find_last_of("/");
+	std::string fileDir = ".";
+	if(lastSlash != lowerPath.npos) {
+		fileDir = lowerPath.substr(0, lastSlash);
+	}
+	else {
+		lastSlash = 0;
+	}
+	
+	DIR* dp = opendir(fileDir.c_str());
+	dirent* ep;
+	if( dp != NULL) {
+		while( ep = readdir(dp)) {
+			std::string realName(ep->d_name);
+			std::string lowerRealName = realName;
+			for( size_t t = 0; t < lowerRealName.size(); ++t) {
+				lowerRealName[t] = tolower(lowerRealName[t]);
+			}
+			if(lowerRealName == lowerPath.substr(lastSlash+1)) {
+				return fileDir + "/" + realName;
+			}
+		}
+		
+		closedir(dp);
+	}
+	
+#else 
+	// We'll just have to assume this means Windows for now.
+	return lowerName;
+#endif
+}
+
+
+
 GTAData::GTAData(const std::string& path)
 : datpath(path)
 {
@@ -15,7 +55,13 @@ GTAData::GTAData(const std::string& path)
 
 void GTAData::load()
 {
-	std::ifstream datfile((datpath+"/data/gta3.dat").c_str());
+	parseDAT(datpath+"/data/default.dat");
+	parseDAT(datpath+"/data/gta3.dat");
+}
+
+void GTAData::parseDAT(const std::string& path)
+{
+	std::ifstream datfile(path.c_str());
 	
 	if(!datfile.is_open()) 
 	{
@@ -49,6 +95,19 @@ void GTAData::load()
 				else if(cmd == "IPL")
 				{
 					loadIPL(line.substr(space+1));
+				}
+				else if(cmd == "TEXDICTION") 
+				{
+					std::string texpath = line.substr(space+1);
+					for( size_t t = 0; t < texpath.size(); ++t) {
+						texpath[t] = tolower(texpath[t]);
+						if(texpath[t] == '\\') {
+							texpath[t] = '/';
+						}
+					}
+					texpath = findFileRealCase(datpath + "/" + texpath);
+					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
+					fileLocations.insert({ texname, { false, texpath }});
 				}
 			}
 		}
@@ -97,38 +156,50 @@ void GTAData::loadIMG(const std::string& name)
 				{
 					filetype[t] = tolower(filetype[t]);
 				}
-				if (filetype == "txd") 
-				{
-					char *file = imgLoader.loadToMemory(filename);
-					if(file) {
-						textureLoader.loadFromMemory(file);
-					}
-				}
-				else if(filetype == "dff")
-				{
-					std::string modelname = filename.substr(0, filename.size() - 4);
-					char *file = imgLoader.loadToMemory(filename);
-					if(file)
-					{
-						LoaderDFF dffLoader;
-						models[modelname] = std::move(dffLoader.loadFromMemory(file));
-						delete[] file;
-					}
-				}
-				else
-				{
-					fileLocations.insert({ filename, { true, archivePath }});
-				}
+				fileLocations.insert({ filename, { true, archivePath }});
 			}
 		}
-		std::cout << "Archive loaded" << std::endl;
-		archives.insert({name, imgLoader});
-		std::cout << "Archive copied" << std::endl;
+		archives.insert({archivePath, imgLoader});
+	}
+}
+
+void GTAData::loadTXD(const std::string& name) 
+{
+	if( loadedFiles.find(name) != loadedFiles.end()) {
+		return;
+	}
+	
+	char* file = loadFile(name);
+	if(file) {
+		textureLoader.loadFromMemory(file);
+		delete[] file;
+	}
+}
+
+void GTAData::loadDFF(const std::string& name)
+{
+	if( loadedFiles.find(name) != loadedFiles.end()) {
+		return;
+	}
+	
+	char *file = loadFile(name);
+	if(file)
+	{
+		LoaderDFF dffLoader;
+		models[name.substr(0, name.size() - 4)] = std::move(dffLoader.loadFromMemory(file));
+		delete[] file;
 	}
 }
 
 char* GTAData::loadFile(const std::string& name)
 {
+	if( loadedFiles.find(name) != loadedFiles.end()) {
+		std::cerr << "File " << name << " already loaded!" << std::endl;
+		return nullptr;
+	}
+	
+	std::cout << "Loading file " << name << std::endl;
+	
 	auto i = fileLocations.find(name);
 	if(i != fileLocations.end())
 	{
@@ -138,13 +209,36 @@ char* GTAData::loadFile(const std::string& name)
 			auto ai = archives.find(i->second.path);
 			if(ai != archives.end())
 			{
+				loadedFiles[name] = true;
 				return ai->second.loadToMemory(name);
+			}
+			else 
+			{
+				std::cerr << "Archive not found " << i->second.path << std::endl;
 			}
 		}
 		else
 		{
-			std::cerr << "Cannot load unarchived files yet" << std::endl;
+			std::ifstream dfile(i->second.path);
+			if ( ! dfile.is_open()) {
+				std::cerr << "Error opening file " << i->second.path << std::endl;
+				return nullptr;
+			}
+
+			dfile.seekg(0, std::ios_base::end);
+			size_t length = dfile.tellg();
+			dfile.seekg(0);
+			char *data = new char[length];
+			dfile.read(data, length);
+			
+			loadedFiles[name] = true;
+			
+			return data;
 		}
+	}
+	else 
+	{
+		std::cerr << "Unable to locate file " << name << std::endl;
 	}
 	
 	return nullptr;

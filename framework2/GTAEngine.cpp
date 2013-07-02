@@ -84,6 +84,14 @@ bool GTAEngine::placeItems(const std::string& name)
 			LoaderIPLInstance& inst = ipll.m_instances[i];
 			auto oi = objectTypes.find(inst.id);
 			if( oi != objectTypes.end()) {
+				// Make sure the DFF and TXD are loaded
+				if(! oi->second->modelName.empty()) {
+					gameData.loadDFF(oi->second->modelName + ".dff");
+				}
+				if(! oi->second->textureName.empty()) {
+					gameData.loadTXD(oi->second->textureName + ".txd");
+				}
+				
 				objectInstances.push_back({ inst, oi->second });
 			}
 			else {

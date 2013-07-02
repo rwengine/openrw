@@ -67,11 +67,31 @@ public:
 	void load();
 	
 	/**
+	 * Loads a GTA3.dat file with the name path
+	 */
+	void parseDAT(const std::string& path);
+	
+	/**
+	 * Attempts to load a TXD, or does nothing if it has already been loaded
+	 */
+	void loadTXD(const std::string& name);
+	
+	/**
+	 * Attempts to load a DFF or does nothing if is already loaded
+	 */
+	void loadDFF(const std::string& name);
+	
+	/**
 	 * Returns a pointer to the named file if it is available, the memory must be freed.
 	 * @param name the filename in the archive
 	 * @return pointer to the data, NULL if it is not available 
 	 */
 	char* loadFile(const std::string& name);
+	
+	/**
+	 * Files that have been loaded previously
+	 */
+	std::map<std::string, bool> loadedFiles;
 	
 	/**
 	 * Maps the paths in GTA3.dat to the real paths
