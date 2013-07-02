@@ -38,8 +38,9 @@ const char *fragmentShaderSource = "#version 130\n"
 "uniform sampler2D texture;"
 "void main()"
 "{"
-// "	gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);"
-"	gl_FragColor = texture2D(texture, TexCoords);"
+"   vec4 c = texture2D(texture, TexCoords);"
+"   if(c.a < 0.9) discard;"
+"	gl_FragColor = c;"
 "}";
 
 GLuint uniModel, uniProj, uniView;

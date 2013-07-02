@@ -55,7 +55,7 @@ bool TextureLoader::loadFromMemory(char *data)
 			uint8_t* coldata = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) + sizeof(RW::BSPaletteData) - 4);
 			uint8_t fullColor[texNative.width * texNative.height * 4];
 			
-			bool hasAlpha = (texNative.rasterformat & 0x0500) == 0x0500;
+			bool hasAlpha = texNative.alpha == 1;
 			
 			for(size_t j = 0; j < texNative.width * texNative.height; ++j)
 			{
