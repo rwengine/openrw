@@ -75,34 +75,47 @@ GTARenderer::GTARenderer()
 void GTARenderer::renderWorld(GTAEngine* engine)
 {
 	glm::mat4 proj = camera.frustum.projection();
-	glm::mat4 view = camera.view;
+	glm::mat4 view = camera.frustum.view;
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 	
-	camera.frustum.update();	
+	camera.frustum.update(camera.frustum.projection() * view);
+	
+	rendered = culled = 0;
 
 	auto& textureLoader = engine->gameData.textureLoader;
 
 	for (size_t i = 0; i < engine->instances.size(); ++i) {
-		auto &obj = engine->instances[i];
+		LoaderIPLInstance &obj = engine->instances[i];
 		std::string modelname = obj.model;
 		if (modelname.substr(0, 3) == "LOD")
 			continue;
-		auto &model = engine->gameData.models[modelname];
-		// std::cout << "Rendering " << modelname << std::endl;
+		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
+		
+		glm::quat rot(-obj.rotW, obj.rotX, obj.rotY, obj.rotZ);
+		glm::vec3 pos(obj.posX, obj.posY, obj.posZ);
+		glm::vec3 scale(obj.scaleX, obj.scaleY, obj.scaleZ);
 		
 		if(!model)
 		{
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
 
-		for (size_t g = 0; g < model->geometries.size(); g++) {
-
+		for (size_t g = 0; g < model->geometries.size(); g++) 
+		{
+			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+			if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
+				culled++;
+				continue;
+			}
+			else {
+				rendered++;
+			}
+			
 			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
-			glm::quat rot(-obj.rotW, obj.rotX, obj.rotY, obj.rotZ);
 			glm::mat4 matrixModel;
-			matrixModel = glm::translate(matrixModel, glm::vec3(obj.posX, obj.posY, obj.posZ));
-			matrixModel = glm::scale(matrixModel, glm::vec3(obj.scaleX, obj.scaleY, obj.scaleZ));
+			matrixModel = glm::translate(matrixModel, pos);
+			matrixModel = glm::scale(matrixModel, scale);
 			matrixModel = matrixModel * glm::mat4_cast(rot);
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 			

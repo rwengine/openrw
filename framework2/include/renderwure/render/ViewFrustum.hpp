@@ -19,6 +19,8 @@ public:
 	float fov;
 	float aspectRatio;
 	
+	glm::mat4 view;
+	
 	ViewPlane planes[6];
 	
 	ViewFrustum(float near, float far, float fov, float aspect)
@@ -32,9 +34,8 @@ public:
 		return glm::perspective(fov, aspectRatio, near, far);
 	}
 	
-	void update()
+	void update(const glm::mat4& proj)
 	{
-		auto proj = projection();
 		for(size_t i = 0; i < 6; ++i)
 		{
 			float sign = (i%2==0) ? 1.f : -1.f;
@@ -56,7 +57,7 @@ public:
 		for(size_t i = 0; i < 6; ++i)
 		{
 			d = glm::dot(planes[i].normal, center) + planes[i].distance;
-			if( -d < radius ) return false;
+			if( d < -radius ) return false;
 		}
 		return true;
 	}

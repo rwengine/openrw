@@ -106,7 +106,7 @@ void update()
 
 	view = glm::translate(view, -plyPos);
 	
-	gta->renderer.camera.view = view;
+	gta->renderer.camera.frustum.view = view;
 
 	i++;
 }
@@ -117,8 +117,17 @@ void render()
 	
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
+	
+	glEnable(GL_CULL_FACE);
 
 	gta->renderer.renderWorld(gta);
+	
+	static size_t fc = 0;
+	if(fc++ == 60) 
+	{
+		std::cout << "Rendered: " << gta->renderer.rendered << " / Culled: " << gta->renderer.culled << std::endl;
+		fc = 0;
+	}
 }
 
 int main(int argc, char *argv[])

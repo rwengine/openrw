@@ -1,6 +1,7 @@
 #ifndef _RWBINARYSTREAM_H_
 #define _RWBINARYSTREAM_H_
 #include "gtfwpre.h"
+#include <glm/glm.hpp>
 
 #include <cstddef>
 #include <cassert>
@@ -41,10 +42,7 @@ namespace RW
 	/**
 	 * Vector data
 	 */
-	struct BSTVector3
-	{
-		float x, y, z;
-	};
+	typedef glm::vec3 BSTVector3;
 	
 	/**
 	 * Rotation Matrix
