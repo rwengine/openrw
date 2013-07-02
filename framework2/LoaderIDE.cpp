@@ -80,8 +80,7 @@ bool LoaderIDE::load(const std::string &filename)
 			case CARS: {
 				CARS_t cars;
 
-				std::string id, modelName, textureName, type, handlingID,
-				            gameName, classType, frequency, lvl,
+				std::string id, type, classType, frequency, lvl,
 				            comprules, wheelModelID, wheelScale;
 
 				getline(strstream, id, ',');
@@ -146,8 +145,7 @@ bool LoaderIDE::load(const std::string &filename)
 			case PEDS: {
 				PEDS_t peds;
 
-				std::string id, modelName, textureName, type,
-				            behaviour, animGroup, driveMask;
+				std::string id, driveMask;
 
 				getline(strstream, id, ',');
 				getline(strstream, peds.modelName, ',');
