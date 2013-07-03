@@ -1,7 +1,6 @@
-#include "renderwure/render/GTARenderer.hpp"
+#include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
-#define GLEW_STATIC
-#include <GL/glew.h>
+
 #include <glm/gtc/type_ptr.hpp>
 
 const char *vertexShaderSource = "#version 130\n"
@@ -25,10 +24,6 @@ const char *fragmentShaderSource = "#version 130\n"
 "   if(c.a < 0.9) discard;"
 "	gl_FragColor = c;"
 "}";
-
-GLuint uniModel, uniProj, uniView;
-GLuint posAttrib, texAttrib;
-GLuint worldProgram;
 
 GLuint compileShader(GLenum type, const char *source)
 {
@@ -58,7 +53,7 @@ GTARenderer::GTARenderer()
 {	
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-	GLuint worldProgram = glCreateProgram();
+	worldProgram = glCreateProgram();
 	glAttachShader(worldProgram, vertexShader);
 	glAttachShader(worldProgram, fragmentShader);
 	glLinkProgram(worldProgram);
