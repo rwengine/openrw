@@ -695,8 +695,15 @@ void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t m
 			std::cout << " format(" << std::hex << texture.rasterformat << ")";
 		}
 			break;
+		case RW::SID_NodeName:
+		{
+			std::string name(parent.raw(), parent.header.size);
+			std::cout << " nodename(\"" << name << "\")";
+		}
+			break;
 		case RW::SID_Clump:
 		case RW::SID_TextureDictionary:
+		case RW::SID_FrameList:
 		case RW::SID_Extension:
 		{
 			readchildren = true;
