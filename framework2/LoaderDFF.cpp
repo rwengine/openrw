@@ -51,6 +51,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					size_t dataI = 0, secI = 0;
 					auto geometry = item.readStructure<RW::BSGeometry>();
 					// std::cout << " verts(" << geometry.numverts << ") tris(" << geometry.numtris << ")" << std::endl;
+					
+					geometryStruct.flags = geometry.flags;
 
 					item.getNextChildSection(secI);
 					char *data = item.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSGeometry);
@@ -111,6 +113,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 
 						auto material = materialsec.readStructure<RW::BSMaterial>();
 						geometryStruct.materials[m].textures.resize(material.numtextures);
+						
+						geometryStruct.materials[m].colour = material.color;
 
 						size_t texI = 0;
 						materialsec.getNextChildSection(texI);

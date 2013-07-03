@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <queue>
+#include <random>
 
 /**
  * @class GTAEngine
@@ -68,6 +69,8 @@ public:
 	struct GTAVehicle {
 		glm::vec3 position;
 		std::shared_ptr<LoaderIDE::CARS_t> vehicle;
+		glm::vec3 colourPrimary;
+		glm::vec3 colourSecondary;
 	};
 	
 	/**
@@ -137,6 +140,10 @@ public:
 	 */
 	std::vector<GTAVehicle> vehicleInstances;
 
+	/**
+	 * Randomness Engine
+	 */
+	std::default_random_engine randomEngine;
 };
 
 #endif

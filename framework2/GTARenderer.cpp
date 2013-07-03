@@ -18,11 +18,12 @@ const char *vertexShaderSource = "#version 130\n"
 const char *fragmentShaderSource = "#version 130\n"
 "in vec2 TexCoords;"
 "uniform sampler2D texture;"
+"uniform vec4 BaseColour;"
 "void main()"
 "{"
 "   vec4 c = texture2D(texture, TexCoords);"
-"   if(c.a < 0.9) discard;"
-"	gl_FragColor = c;"
+"   if(c.a < 0.5) discard;"
+"	gl_FragColor = c * BaseColour;"
 "}";
 
 GLuint compileShader(GLenum type, const char *source)
@@ -65,6 +66,7 @@ GTARenderer::GTARenderer()
 	uniModel = glGetUniformLocation(worldProgram, "model");
 	uniView = glGetUniformLocation(worldProgram, "view");
 	uniProj = glGetUniformLocation(worldProgram, "proj");
+	uniCol = glGetUniformLocation(worldProgram, "BaseColour");
 }
 
 void GTARenderer::renderWorld(GTAEngine* engine)
@@ -130,6 +132,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
 			
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
 			
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
 			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -197,6 +200,9 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			}
 			
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+			if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
+				glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+			}
 			
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
 			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -207,11 +213,31 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 			{
 				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
+					Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
 					// std::cout << model->geometries[g].textures.size() << std::endl;
 					// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
-					if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
+					if(mat.textures.size() > 0) {
 						textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
 					}
+					
+					if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
+						auto colmasked = mat.colour;
+						size_t R = colmasked % 256; colmasked /= 256;
+						size_t G = colmasked % 256; colmasked /= 256;
+						size_t B = colmasked % 256; colmasked /= 256;
+						if( R == 60 && G == 255 && B == 0 ) {
+							glUniform4f(uniCol, inst.colourPrimary.r, inst.colourPrimary.g, inst.colourPrimary.b, 1.f);
+						}
+						else if( R == 255 && G == 0 && B == 175 ) {
+							glUniform4f(uniCol, inst.colourSecondary.r, inst.colourSecondary.g, inst.colourSecondary.b, 1.f);
+						}
+						else {
+							glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
+						}
+					}
+				}
+				else {
+					
 				}
 				
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);

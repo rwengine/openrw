@@ -23,6 +23,7 @@ public:
 	
 	struct Material {
 		std::vector<Texture> textures;
+		uint32_t colour;
 	};
 	
 	struct SubGeometry {
@@ -36,6 +37,8 @@ public:
 
 		RW::BSGeometryBounds geometryBounds;
 
+		uint32_t flags;
+		
 		std::vector<RW::BSGeometryUV> texcoords;
 		std::vector<RW::BSGeometryTriangle> triangles;
 		std::vector<RW::BSTVector3> vertices;

@@ -19,9 +19,10 @@ public:
 	size_t rendered;
 	size_t culled;
 
-	GLuint uniModel, uniProj, uniView;
+	GLuint uniModel, uniProj, uniView, uniCol;
 	GLuint posAttrib, texAttrib;
 	GLuint worldProgram;
+	GLuint vehicleProgram;
 	
 	void renderWorld(GTAEngine* engine);
 };

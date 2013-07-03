@@ -158,6 +158,18 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
 			gameData.loadTXD(vti->second->textureName + ".txd");
 		}
 		
-		vehicleInstances.push_back({ pos, vti->second });
+		glm::vec3 prim = glm::vec3(1.f), sec = glm::vec3(0.5f);
+		auto palit = gameData.vehiclePalettes.find(vti->second->modelName); // modelname is conveniently lowercase (usually)
+		if(palit != gameData.vehiclePalettes.end() && palit->second.size() > 0 ) {
+			 std::uniform_int_distribution<int> uniform(0, palit->second.size()-1);
+			 int set = uniform(randomEngine);
+			 prim = gameData.vehicleColours[palit->second[set].first];
+			 sec = gameData.vehicleColours[palit->second[set].second];
+		}
+		else {
+			std::cerr << "No colour palette for vehicle " << vti->second->modelName << std::endl;
+		}
+		
+		vehicleInstances.push_back({ pos, vti->second, prim, sec });
 	}
 }

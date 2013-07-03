@@ -64,6 +64,8 @@ public:
 	
 	void loadIPL(const std::string& name);
 	
+	void loadCarcols(const std::string& path);
+	
 	void load();
 	
 	/**
@@ -108,6 +110,16 @@ public:
 	 * Map of loaded archives
 	 */
 	std::map<std::string, LoaderIMG> archives;
+	
+	/**
+	 * The vehicle colour palettes
+	 */
+	std::vector<glm::vec3> vehicleColours;
+	
+	/**
+	 * The vehicle colours for each vehicle type
+	 */
+	std::map<std::string, std::vector<std::pair<size_t,size_t>>> vehiclePalettes;
 	
 	/**
 	 * Texture Loader

@@ -5,7 +5,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <bits/algorithmfwd.h>
+#include <sstream>
+#include <algorithm>
 
 #include <dirent.h>
 #include <sys/types.h>
@@ -69,6 +70,7 @@ void GTAData::load()
 {
 	parseDAT(datpath+"/data/default.dat");
 	parseDAT(datpath+"/data/gta3.dat");
+	loadCarcols(datpath+"/data/carcols.dat");
 }
 
 void GTAData::parseDAT(const std::string& path)
@@ -177,6 +179,71 @@ void GTAData::loadIMG(const std::string& name)
 	}
 }
 
+void GTAData::loadIPL(const std::string& name)
+{
+	iplLocations.insert({name, datpath + "/" + name});
+}
+
+enum ColSection {
+	Unknown,
+	COL,
+	CAR,
+	CAR3, ///> Used in GTASA, contains extra specular color
+	CAR4  ///> Used in GTASA, contains quadruple colors
+};
+
+void GTAData::loadCarcols(const std::string& path)
+{
+	std::ifstream fstream(path.c_str());
+	
+	std::string line;
+	ColSection currentSection = Unknown;
+	while( std::getline(fstream, line)) {
+		if( line.substr(0, 1) == "#") { // Comment 
+			continue; 
+		}
+		else if( currentSection == Unknown) {
+			if( line.substr(0, 3) == "col") {
+				currentSection = COL;
+			}
+			else if( line.substr(0, 3) == "car") {
+				currentSection = CAR;
+			}
+		}
+		else if( line.substr(0, 3) == "end") {
+			currentSection = Unknown;
+		}
+		else {
+			if( currentSection == COL) {
+				std::string r, g, b;
+				std::stringstream ss(line);
+				
+				if( std::getline(ss, r, ',') && std::getline(ss, g, ',') && std::getline(ss, b)) {
+					vehicleColours.push_back(glm::vec3(
+						atoi(r.c_str())/255.f,
+						atoi(g.c_str())/255.f,
+						atoi(b.c_str())/255.f
+					));
+				}
+			}
+			else if( currentSection == CAR) {
+				std::string vehicle, p, s;
+				std::stringstream ss(line);
+				size_t commapos = line.find(',');
+				
+				std::getline(ss, vehicle, ',');
+				std::vector<std::pair<size_t, size_t>> colours;
+				
+				while( std::getline(ss, p, ',') && std::getline(ss, s, ',') ) {
+					colours.push_back({ atoi(p.c_str()), atoi(s.c_str()) });
+				}
+				
+				vehiclePalettes.insert({vehicle, colours});
+			}
+		}
+	}
+}
+
 void GTAData::loadTXD(const std::string& name) 
 {
 	if( loadedFiles.find(name) != loadedFiles.end()) {
@@ -254,9 +321,4 @@ char* GTAData::loadFile(const std::string& name)
 	}
 	
 	return nullptr;
-}
-
-void GTAData::loadIPL(const std::string& name)
-{
-	iplLocations.insert({name, datpath + "/" + name});
 }
