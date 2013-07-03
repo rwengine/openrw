@@ -27,6 +27,7 @@ namespace RW
 		SID_Geometry     = 0x000F,
 		SID_Clump        = 0x0010,
 		
+		SID_Atomic       = 0x0014,
 		SID_TextureNative     = 0x0015,
 		SID_TextureDictionary = 0x0016,
 		
@@ -47,10 +48,7 @@ namespace RW
 	/**
 	 * Rotation Matrix
 	 */
-	struct BSTMatrix
-	{
-		BSTVector3 a, b, c;
-	};
+	typedef glm::mat3 BSTMatrix;
 	
 	struct BSSectionHeader
 	{
@@ -72,7 +70,7 @@ namespace RW
 	struct BSFrameListFrame //??????
 	{
 		BSTMatrix rotation;
-		BSTVector3 postiion;
+		BSTVector3 position;
 		uint32_t index;
 		uint32_t matrixflags; // UNUSED BY ANYTHING.
 	};

@@ -147,11 +147,11 @@ void dumpModelFile(char* data)
 		BSFrameListFrame frame = readStructure<BSFrameListFrame>(data, dataI);
 		std::cout << " Frame Data" << std::endl;
 		std::cout << "  Index = " << std::dec << (unsigned long)frame.index << std::endl;
-		std::cout << "  Position = " << frame.postiion.x << " " << frame.postiion.y << " "  << frame.postiion.z << std::endl;
-		std::cout << "  Rotation = " << std::endl;
-		std::cout << "   " << frame.rotation.a.x << " " << frame.rotation.a.y << " " << frame.rotation.a.z << std::endl;
-		std::cout << "   " << frame.rotation.b.x << " " << frame.rotation.b.y << " " << frame.rotation.b.z << std::endl;
-		std::cout << "   " << frame.rotation.c.x << " " << frame.rotation.c.y << " " << frame.rotation.c.z << std::endl;
+		std::cout << "  Position = " << frame.position.x << " " << frame.position.y << " "  << frame.position.z << std::endl;
+// 		std::cout << "  Rotation = " << std::endl;
+// 		std::cout << "   " << frame.rotation.a.x << " " << frame.rotation.a.y << " " << frame.rotation.a.z << std::endl;
+// 		std::cout << "   " << frame.rotation.b.x << " " << frame.rotation.b.y << " " << frame.rotation.b.z << std::endl;
+// 		std::cout << "   " << frame.rotation.c.x << " " << frame.rotation.c.y << " " << frame.rotation.c.z << std::endl;
 	}
 	
 	auto nextHeader = readHeader(data, dataI);
@@ -701,9 +701,27 @@ void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t m
 			std::cout << " nodename(\"" << name << "\")";
 		}
 			break;
+		case RW::SID_FrameList:
+		{
+			auto list = parent.readStructure<RW::BSFrameList>();
+			size_t fdataI = sizeof(RW::BSSectionHeader) + sizeof(RW::BSFrameList);
+			std::cout << " frames(" << std::dec << list.numframes << ") " << fdataI << " " << parent.offset;
+			for(size_t f = 0; f < list.numframes; ++f) {
+				auto frame = parent.readSubStructure<RW::BSFrameListFrame>(fdataI); fdataI += sizeof(RW::BSFrameListFrame);
+				std::cout << std::endl << std::string(depth, ' ') << " index(" << frame.index << ") position (" << std::dec << frame.position.x << " " << frame.position.y << " " << frame.position.z << ")";
+			}
+			
+			readchildren = true;
+		}
+			break;
+		case RW::SID_Atomic: 
+		{
+			std::cout << " atomic";
+			readchildren = true;
+		}
+			break;
 		case RW::SID_Clump:
 		case RW::SID_TextureDictionary:
-		case RW::SID_FrameList:
 		case RW::SID_Extension:
 		{
 			readchildren = true;
@@ -719,7 +737,7 @@ void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t m
 	
 	if(readchildren)
 	{
-		while(parent.hasMoreData(sectionOffset) && (j++) < 10 && depth < maxdepth) 
+		while(parent.hasMoreData(sectionOffset) && (j++) < 100 && depth < maxdepth) 
 		{
 			BinaryStreamSection sec = parent.getNextChildSection(sectionOffset);
 			dumpBinaryStreamSection(sec, depth+1);

@@ -44,8 +44,17 @@ public:
 		std::vector<Material> materials;
 		std::vector<SubGeometry> subgeom;
 	};
+	
+	struct Atomic {
+		uint32_t frame;
+		uint32_t geometry;
+	};
+	
+	std::vector<std::string> frameNames;
 
 	std::vector<Geometry> geometries;
+	std::vector<Atomic> atomics;
+	std::vector<RW::BSFrameListFrame> frames;
 };
 
 class LoaderDFF

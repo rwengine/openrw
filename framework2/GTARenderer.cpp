@@ -108,8 +108,9 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
 
-		for (size_t g = 0; g < model->geometries.size(); g++) 
+		for (size_t a = 0; a < model->atomics.size(); a++) 
 		{
+			size_t g = model->atomics[a].geometry;
 			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
 			if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
 				culled++;
@@ -124,6 +125,10 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			matrixModel = glm::translate(matrixModel, pos);
 			matrixModel = glm::scale(matrixModel, scale);
 			matrixModel = matrixModel * glm::mat4_cast(rot);
+			
+			matrixModel = glm::translate(matrixModel, model->frames[model->atomics[a].frame].position);
+			//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
+			
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 			
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
@@ -159,9 +164,10 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		{
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
-
-		for (size_t g = 0; g < model->geometries.size(); g++) 
+		
+		for (size_t a = 0; a < model->atomics.size(); a++) 
 		{
+			size_t g = model->atomics[a].geometry;
 			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
 			if(! camera.frustum.intersects(bounds.center + inst.position, bounds.radius)) {
 				culled++;
@@ -176,6 +182,20 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			matrixModel = glm::translate(matrixModel, inst.position);
 			//matrixModel = glm::scale(matrixModel, scale);
 			////matrixModel = matrixModel * glm::mat4_cast(rot);
+			
+			size_t fi = model->atomics[a].frame;
+			if(model->frameNames.size() > fi) {
+				std::string& name = model->frameNames[fi];
+				if( name.substr(name.size()-3) == "dam" || name.find("lo") != name.npos || name.find("dummy") != name.npos ) {
+					continue;
+				}
+			}
+			while(fi != 0) {
+				matrixModel = glm::translate(matrixModel, model->frames[fi].position);
+				matrixModel = matrixModel * glm::mat4(model->frames[fi].rotation);
+				fi = model->frames[fi].index;
+			}
+			
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 			
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);

@@ -1,4 +1,4 @@
-add_executable(viewer main.cpp ../framework/LoaderDFF.cpp)
+add_executable(viewer main.cpp)
 
 include_directories(../framework2/include)
 

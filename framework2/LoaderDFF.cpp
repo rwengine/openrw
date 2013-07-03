@@ -14,6 +14,32 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 		auto sec = root.getNextChildSection(dataI);
 
 		switch (sec.header.id) {
+		case RW::SID_FrameList: {
+			auto list = sec.readStructure<RW::BSFrameList>();
+			size_t fdataI = sizeof(RW::BSFrameList) + sizeof(RW::BSSectionHeader);
+			
+			for(size_t f = 0; f < list.numframes; ++f) {
+				auto frame = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
+				fdataI += sizeof(RW::BSFrameListFrame);
+				model->frames.push_back(frame);
+			}
+			
+			size_t fldataI = 0;
+			while( sec.hasMoreData(fldataI)) {
+				auto listsec = sec.getNextChildSection(fldataI);
+				if( listsec.header.id == RW::SID_Extension) {
+					size_t extI = 0;
+					while( listsec.hasMoreData(extI)) {
+						auto extSec = listsec.getNextChildSection(extI);
+						if( extSec.header.id == RW::SID_NodeName) {
+							model->frameNames.push_back(std::string(extSec.raw(), extSec.header.size));
+						}
+					}
+				}
+			}
+			
+			break;
+		}
 		case RW::SID_GeometryList: {
 			auto list = sec.readStructure<RW::BSGeometryList>();
 			size_t gdataI = 0;
@@ -212,6 +238,11 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					
 				}
 			}
+			break;
+		}
+		case RW::SID_Atomic: {
+			model->atomics.push_back(sec.readStructure<Model::Atomic>());
+			break;
 		}
 		}
 	}
