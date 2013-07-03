@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <sstream>
+#include <getopt.h>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -160,11 +161,24 @@ int main(int argc, char *argv[])
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+	
+	size_t w = WIDTH, h = HEIGHT;
+	int c;
+	while( (c = getopt(argc, argv, "w:h:")) != -1) {
+		switch(c) {
+			case 'w':
+				w = atoi(optarg);
+				break;
+			case 'h':
+				h = atoi(optarg);
+				break;
+		}
+	}
 
-	window.create(sf::VideoMode(WIDTH, HEIGHT), "GTA3 Viewer", sf::Style::Close);
+	window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close);
 	window.setVerticalSyncEnabled(true);
 
-	init(argv[1]);
+	init(argv[optind]);
 	
 	sf::Clock clock;
 
