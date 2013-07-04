@@ -5,6 +5,7 @@ add_library(renderware
 	TextureArchive.cpp
 	LoaderDFF.cpp
 	TextureLoader.cpp
+	WeatherLoader.cpp
 	
 	# Game data related
 	LoaderCOL.cpp
