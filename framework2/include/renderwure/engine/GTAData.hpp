@@ -69,6 +69,11 @@ public:
 
 	void loadWeather(const std::string& path);
 	
+	/**
+	 * Loads water level data
+	 */
+	void loadWaterpro(const std::string& path);
+	
 	void load();
 	
 	/**
@@ -139,6 +144,20 @@ public:
 	 */
 	std::map<std::string, std::unique_ptr<Model>> models;
 	
+	/**
+	 * Water heights
+	 */
+	float waterHeights[48];
+	
+	/**
+	 * Visible water heights
+	 */
+	uint8_t visibleWater[64*64];
+	
+	/**
+	 * The "real" water heights
+	 */
+	uint8_t realWater[128*128];
 };
 
 #endif
