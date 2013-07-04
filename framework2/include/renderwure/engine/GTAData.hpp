@@ -32,24 +32,6 @@ public:
 		bool archived; /// Is the file inside an IMG or on the filesystem?
 		std::string path; /// Path to the file containing the file
 	};
-
-	/**
-	 * @struct RGB
-	 *  Stores 8 bit RGB data
-	 */
-	struct RGB
-	{
-		uint8_t r, g, b;
-	};
-
-	/**
-	 * @struct RGBA
-	 *  Stores 8 bit RGBA data
-	 */
-	struct RGBA
-	{
-		uint8_t r, g, b, a;
-	};
 	
 	/**
 	 * ctor

@@ -59,9 +59,9 @@ bool WeatherLoader::load(const std::string &filename)
 	return true;
 }
 
-GTAData::RGB WeatherLoader::readRGB(std::stringstream &ss)
+GTATypes::RGB WeatherLoader::readRGB(std::stringstream &ss)
 {
-	GTAData::RGB color;
+	GTATypes::RGB color;
 	std::string r, g, b;
 
 	std::getline(ss, r, ' ');

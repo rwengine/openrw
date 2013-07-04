@@ -2,21 +2,22 @@
 #ifndef _WEATHERLOADER_HPP_
 #define _WEATHERLOADER_HPP_
 
-#include <renderwure/engine/GTAData.hpp>
+#include <renderwure/engine/GTATypes.hpp>
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 class WeatherLoader
 {
 public:
 	struct WeatherData {
-		GTAData::RGB ambientColor;
-		GTAData::RGB directLightColor;
-		GTAData::RGB skyTopColor;
-		GTAData::RGB skyBottomColor;
-		GTAData::RGB sunCoreColor;
-		GTAData::RGB sunCoronaColor;
+		GTATypes::RGB ambientColor;
+		GTATypes::RGB directLightColor;
+		GTATypes::RGB skyTopColor;
+		GTATypes::RGB skyBottomColor;
+		GTATypes::RGB sunCoreColor;
+		GTATypes::RGB sunCoronaColor;
 		float sunCoreSize;
 		float sunCoronaSize;
 		float sunBrightness;
@@ -26,9 +27,9 @@ public:
 		float farClipping;
 		float fogStart;
 		float amountGroundLight;
-		GTAData::RGB lowCloudColor;
-		GTAData::RGB topCloudColor;
-		GTAData::RGB bottomCloudColor;
+		GTATypes::RGB lowCloudColor;
+		GTATypes::RGB topCloudColor;
+		GTATypes::RGB bottomCloudColor;
 		uint8_t unknown[4];
 	};
 
@@ -37,7 +38,7 @@ public:
 	std::vector<WeatherData> weather;
 
 private:
-	GTAData::RGB readRGB(std::stringstream &ss);
+	GTATypes::RGB readRGB(std::stringstream &ss);
 };
 
 #endif
