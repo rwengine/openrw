@@ -26,6 +26,17 @@ const char *fragmentShaderSource = "#version 130\n"
 "	gl_FragColor = c * BaseColour;"
 "}";
 
+float planedata[] = {
+	 0.5f, 0.5f, 0.f,
+	-0.5f, 0.5f, 0.f,
+	 0.5f,-0.5f, 0.f,
+	-0.5f,-0.5f, 0.f,
+	1.f, 1.f,
+	0.f, 1.f,
+	1.f, 0.f,
+	0.f, 0.f
+};
+
 GLuint compileShader(GLenum type, const char *source)
 {
 	GLuint shader = glCreateShader(type);
@@ -66,6 +77,11 @@ GTARenderer::GTARenderer()
 	uniView = glGetUniformLocation(worldProgram, "view");
 	uniProj = glGetUniformLocation(worldProgram, "proj");
 	uniCol = glGetUniformLocation(worldProgram, "BaseColour");
+	
+	// prepare our special internal plane.
+	glGenBuffers(1, &planeVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(planedata), planedata, GL_STATIC_DRAW);
 }
 
 void GTARenderer::renderWorld(GTAEngine* engine)
@@ -80,7 +96,32 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	rendered = culled = 0;
 
 	auto& textureLoader = engine->gameData.textureLoader;
-
+	
+	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4));
+	glEnableVertexAttribArray(posAttrib);
+	glEnableVertexAttribArray(texAttrib);
+	textureLoader.bindTexture("water_old");
+	
+	float mapsize = 3000.f;
+	float waterscale = mapsize/64;
+	for( size_t y = 0, i = 0; y < 64; ++y) {
+		for( size_t x = 0; x < 64; ++x,++i) {
+			size_t dataInd = engine->gameData.visibleWater[i];
+			float wheight = engine->gameData.waterHeights[dataInd];
+			
+			glm::mat4 matrixModel;
+			matrixModel = glm::translate(matrixModel, glm::vec3((mapsize/2.f) - x * waterscale,(mapsize/2.f) - y * waterscale, wheight));
+			matrixModel = glm::scale(matrixModel, glm::vec3(waterscale, waterscale, 1.f));
+			
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+			
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		}
+	}
+	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
 		GTAEngine::GTAInstance& inst = engine->objectInstances[i];
 		LoaderIPLInstance &obj = inst.instance;

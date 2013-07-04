@@ -72,9 +72,12 @@ void GTAData::load()
 	parseDAT(datpath+"/data/gta3.dat");
 	
 	fileLocations.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
+	fileLocations.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
 	loadDFF("wheels.DFF");
+	loadTXD("particle.txd");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
+	loadWaterpro(datpath+"/data/waterpro.dat");
 }
 
 void GTAData::parseDAT(const std::string& path)
@@ -245,6 +248,20 @@ void GTAData::loadCarcols(const std::string& path)
 				vehiclePalettes.insert({vehicle, colours});
 			}
 		}
+	}
+}
+
+void GTAData::loadWaterpro(const std::string& path)
+{
+	std::ifstream ifstr(path.c_str());
+	
+	if(ifstr.is_open()) {
+		uint32_t numlevels; 
+		ifstr.read(reinterpret_cast<char*>(&numlevels), sizeof(uint32_t));
+		ifstr.read(reinterpret_cast<char*>(&waterHeights), sizeof(float)*48);
+		
+		ifstr.seekg(0x03C4);
+		ifstr.read(reinterpret_cast<char*>(&visibleWater), sizeof(float)*64*64);
 	}
 }
 

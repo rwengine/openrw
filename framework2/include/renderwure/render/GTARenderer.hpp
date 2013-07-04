@@ -26,6 +26,8 @@ public:
 	GLuint worldProgram;
 	GLuint vehicleProgram;
 	
+	GLuint planeVBO;
+	
 	void renderWorld(GTAEngine* engine);
 	
 	void renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
