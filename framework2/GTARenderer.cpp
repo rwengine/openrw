@@ -35,14 +35,21 @@ const char *fragmentShaderSource = "#version 130\n"
 "}";
 
 float planedata[] = {
+	// Vertices
 	 0.5f, 0.5f, 0.f,
 	-0.5f, 0.5f, 0.f,
 	 0.5f,-0.5f, 0.f,
 	-0.5f,-0.5f, 0.f,
+	// UV coords
 	1.f, 1.f,
 	0.f, 1.f,
 	1.f, 0.f,
-	0.f, 0.f
+	0.f, 0.f,
+	// Normals
+	0.f, 0.f, 1.f,
+	0.f, 0.f, 1.f,
+	0.f, 0.f, 1.f,
+	0.f, 0.f, 1.f,
 };
 
 GLuint compileShader(GLenum type, const char *source)
@@ -157,8 +164,10 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4));
+	glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4 + sizeof(float)*2*4));
 	glEnableVertexAttribArray(posAttrib);
 	glEnableVertexAttribArray(texAttrib);
+	glEnableVertexAttribArray(normalAttrib);
 	textureLoader.bindTexture("water_old");
 	
 	float mapsize = 3000.f;
