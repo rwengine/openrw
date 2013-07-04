@@ -264,8 +264,12 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
 			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+			glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
+				(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
+			);
 			glEnableVertexAttribArray(posAttrib);
 			glEnableVertexAttribArray(texAttrib);
+			glEnableVertexAttribArray(normalAttrib);
 			
 			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 			{
@@ -359,8 +363,12 @@ void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Mode
 		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
 		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
+			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
+		);
 		glEnableVertexAttribArray(posAttrib);
 		glEnableVertexAttribArray(texAttrib);
+		glEnableVertexAttribArray(normalAttrib);
 		
 		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 		{
