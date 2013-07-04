@@ -66,7 +66,6 @@ void handleEvent(sf::Event &event)
 
 void init(std::string gtapath)
 {
-	glClearColor(0.2, 0.2, 0.2, 1.0);
 	glEnable(GL_DEPTH_TEST);
 	
 	// GTA GET
@@ -146,8 +145,6 @@ void update(float dt)
 
 void render()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	

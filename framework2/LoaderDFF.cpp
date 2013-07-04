@@ -227,6 +227,7 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					
 					if(geometryStruct.normals.size() > 0 )
 					{
+						// std::cout << "Buffering " << geometryStruct.normals.size() << " normals" << std::endl;
 						glBufferSubData(
 							GL_ARRAY_BUFFER,
 							(geometryStruct.vertices.size() * sizeof(float) * 3) + (geometryStruct.texcoords.size() * sizeof(float) * 2),

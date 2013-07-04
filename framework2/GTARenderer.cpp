@@ -5,25 +5,33 @@
 
 const char *vertexShaderSource = "#version 130\n"
 "in vec3 position;"
+"in vec3 normal;"
 "in vec2 texCoords;"
+"out vec3 Normal;"
 "out vec2 TexCoords;"
 "uniform mat4 model;"
 "uniform mat4 view;"
 "uniform mat4 proj;"
 "void main()"
 "{"
+"	Normal = normal;"
 "	TexCoords = texCoords;"
 "	gl_Position = proj * view * model * vec4(position, 1.0);"
 "}";
 const char *fragmentShaderSource = "#version 130\n"
+"in vec3 Normal;"
 "in vec2 TexCoords;"
 "uniform sampler2D texture;"
 "uniform vec4 BaseColour;"
+"uniform vec4 AmbientColour;"
+"uniform vec3 SunDirection;"
 "void main()"
 "{"
 "   vec4 c = texture2D(texture, TexCoords);"
 "   if(c.a < 0.5) discard;"
-"	gl_FragColor = c * BaseColour;"
+"	gl_FragColor = AmbientColour + (c * BaseColour * clamp(dot(Normal, SunDirection), 0.2, 1));"
+// "	gl_FragColor = vec4((Normal*0.5)+0.5, 1.0);"
+// "	gl_FragColor = c * vec4((Normal*0.5)+0.5, 1.0);"
 "}";
 
 GLuint compileShader(GLenum type, const char *source)
@@ -61,15 +69,64 @@ GTARenderer::GTARenderer()
 
 	posAttrib = glGetAttribLocation(worldProgram, "position");
 	texAttrib = glGetAttribLocation(worldProgram, "texCoords");
+	normalAttrib = glGetAttribLocation(worldProgram, "normal");
 
 	uniModel = glGetUniformLocation(worldProgram, "model");
 	uniView = glGetUniformLocation(worldProgram, "view");
 	uniProj = glGetUniformLocation(worldProgram, "proj");
 	uniCol = glGetUniformLocation(worldProgram, "BaseColour");
+	uniAmbientCol = glGetUniformLocation(worldProgram, "AmbientColour");
+	uniSunDirection = glGetUniformLocation(worldProgram, "SunDirection");
+}
+
+float mix(uint8_t a, uint8_t b, float num)
+{
+	return a+(b-a)*num;
 }
 
 void GTARenderer::renderWorld(GTAEngine* engine)
 {
+	static float letime = 0;
+	float leclock = fmod(letime / 10, 24);
+	int hour = int(leclock);
+	int hournext = (hour + 1) % 24;
+
+	// std::cout << leclock << " " << hour << std::endl;
+	auto weather = engine->gameData.weatherLoader.weather[hour];
+	auto weathernext = engine->gameData.weatherLoader.weather[hournext];
+	auto color = weather.skyTopColor;
+	auto colornext = weathernext.skyTopColor;
+
+	float interpolate = leclock - int(leclock);
+	float r = mix(color.r, colornext.r, interpolate) / 255.0;
+	float g = mix(color.g, colornext.g, interpolate) / 255.0;
+	float b = mix(color.b, colornext.b, interpolate) / 255.0;
+
+	glm::vec3 ambient{
+		mix(weather.ambientColor.r, weathernext.ambientColor.r, interpolate) / 255.0,
+		mix(weather.ambientColor.g, weathernext.ambientColor.g, interpolate) / 255.0,
+		mix(weather.ambientColor.b, weathernext.ambientColor.b, interpolate) / 255.0,
+	};
+	float theta = (leclock - 12)/24.0 * 2 * 3.14159265;
+	glm::vec3 sunDirection{
+		sin(theta),
+		0.0,
+		cos(theta),
+	};
+	sunDirection = glm::normalize(sunDirection);
+	/*
+	std::cout << "CLOCK IS " << leclock << std::endl;
+	std::cout << "AMBIENT " << ambient.x << ", " << ambient.y << ", " << ambient.z << std::endl;
+	std::cout << "SUN DIR " << sunDirection.x << ", " << sunDirection.y << ", " << sunDirection.z << std::endl;
+	*/
+
+	glUniform4f(uniAmbientCol, ambient.x, ambient.y, ambient.z, 1.f);
+	glUniform3f(uniSunDirection, sunDirection.x, sunDirection.y, sunDirection.z);
+
+	letime++;
+	glClearColor(r, g, b, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glm::mat4 proj = camera.frustum.projection();
 	glm::mat4 view = camera.frustum.view;
 	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
@@ -313,6 +370,7 @@ void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& 
 		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
 			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
 		);
+		// std::cout << "Num normals: " << model->geometries[g].normals.size() << std::endl;
 		glEnableVertexAttribArray(posAttrib);
 		glEnableVertexAttribArray(texAttrib);
 		glEnableVertexAttribArray(normalAttrib);

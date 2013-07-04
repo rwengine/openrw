@@ -21,8 +21,8 @@ public:
 	size_t rendered;
 	size_t culled;
 
-	GLuint uniModel, uniProj, uniView, uniCol;
-	GLuint posAttrib, texAttrib;
+	GLuint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection;
+	GLuint posAttrib, normalAttrib, texAttrib;
 	GLuint worldProgram;
 	GLuint vehicleProgram;
 	
