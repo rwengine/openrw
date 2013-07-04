@@ -70,6 +70,10 @@ void GTAData::load()
 {
 	parseDAT(datpath+"/data/default.dat");
 	parseDAT(datpath+"/data/gta3.dat");
+	
+	fileLocations.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
+	loadDFF("wheels.DFF");
+	
 	loadCarcols(datpath+"/data/carcols.dat");
 }
 

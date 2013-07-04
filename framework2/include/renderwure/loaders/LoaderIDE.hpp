@@ -73,6 +73,7 @@ public:
 			int16_t modelLOD; // used only when type == PLANE
 		};
 		float wheelScale; // used only when type == CAR
+		std::vector<glm::vec3> wheelPositions;
 	};
 
 	struct PEDS_t

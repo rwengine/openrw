@@ -170,6 +170,27 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
 			std::cerr << "No colour palette for vehicle " << vti->second->modelName << std::endl;
 		}
 		
+		auto wi = objectTypes.find(vti->second->wheelModelID);
+		if( wi != objectTypes.end()) {
+			if(! wi->second->textureName.empty()) {
+				gameData.loadTXD(wi->second->textureName + ".txd");
+			}
+		}
+		
+		std::unique_ptr<Model> &model = gameData.models[vti->second->modelName];
+		if(model) {
+			if( vti->second->wheelPositions.size() == 0 ) {
+				for( size_t f = 0; f < model->frames.size(); ++f) {
+					if( model->frameNames.size() > f) {
+						std::string& name = model->frameNames[f];
+						if( name.substr(0, 5) == "wheel" ) {
+							vti->second->wheelPositions.push_back(model->frames[f].position);
+						}
+					}
+				}
+			}
+		}
+		
 		vehicleInstances.push_back({ pos, vti->second, prim, sec });
 	}
 }

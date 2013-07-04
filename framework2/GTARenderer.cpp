@@ -48,7 +48,6 @@ GLuint compileShader(GLenum type, const char *source)
 	return shader;
 }
 
-
 GTARenderer::GTARenderer()
 : camera()
 {	
@@ -110,51 +109,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
 
-		for (size_t a = 0; a < model->atomics.size(); a++) 
-		{
-			size_t g = model->atomics[a].geometry;
-			RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
-			if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
-				culled++;
-				continue;
-			}
-			else {
-				rendered++;
-			}
-			
-			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
-			glm::mat4 matrixModel;
-			matrixModel = glm::translate(matrixModel, pos);
-			matrixModel = glm::scale(matrixModel, scale);
-			matrixModel = matrixModel * glm::mat4_cast(rot);
-			
-			matrixModel = glm::translate(matrixModel, model->frames[model->atomics[a].frame].position);
-			//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
-			
-			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-			
-			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
-			glEnableVertexAttribArray(posAttrib);
-			glEnableVertexAttribArray(texAttrib);
-			
-			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
-			{
-				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-					// std::cout << model->geometries[g].textures.size() << std::endl;
-					// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
-					if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
-						textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
-					}
-				}
-				
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
-
-				glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
-			}
-		}
+		renderObject(engine, model, pos, rot, scale);
 	}
 	
 	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
@@ -168,6 +123,13 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
 		
+		glm::mat4 matrixModel;
+		matrixModel = glm::translate(matrixModel, inst.position);
+		//matrixModel = glm::scale(matrixModel, scale);
+		////matrixModel = matrixModel * glm::mat4_cast(rot);
+		
+		glm::mat4 matrixVehicle = matrixModel;
+		
 		for (size_t a = 0; a < model->atomics.size(); a++) 
 		{
 			size_t g = model->atomics[a].geometry;
@@ -180,12 +142,9 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 				rendered++;
 			}
 			
-			// This is a hack I have no idea why negating the quaternion fixes the issue but it does.
-			glm::mat4 matrixModel;
-			matrixModel = glm::translate(matrixModel, inst.position);
-			//matrixModel = glm::scale(matrixModel, scale);
-			////matrixModel = matrixModel * glm::mat4_cast(rot);
+			matrixModel = matrixVehicle;
 			
+			// Hackily sort out the model data (Todo: be less hacky)
 			size_t fi = model->atomics[a].frame;
 			if(model->frameNames.size() > fi) {
 				std::string& name = model->frameNames[fi];
@@ -244,6 +203,129 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 
 				glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
 			}
+		}
+		
+		// Draw wheels n' stuff
+		for( size_t w = 0; w < inst.vehicle->wheelPositions.size(); ++w) {
+			auto woi = engine->objectTypes.find(inst.vehicle->wheelModelID);
+			if(woi != engine->objectTypes.end()) {
+				std::unique_ptr<Model> &wheelModel = engine->gameData.models["wheels"];
+				if( wheelModel) {
+					auto wwpos = matrixVehicle * glm::vec4(inst.vehicle->wheelPositions[w], 1.f);
+					renderNamedFrame(engine, wheelModel, glm::vec3(wwpos), glm::quat(), glm::vec3(1.f, inst.vehicle->wheelScale, inst.vehicle->wheelScale), woi->second->modelName);
+				}
+				else {
+					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
+				}
+			}
+		}
+	}
+}
+
+void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>& model, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name)
+{
+	for (size_t f = 0; f < model->frames.size(); f++) 
+	{
+		if( model->frameNames.size() > f) {
+			std::string& fname = model->frameNames[f];
+			bool LOD = (fname.find("_l1") != fname.npos || fname.find("_l0") != fname.npos);
+			if( LOD || fname != name ) {
+				continue;
+			}
+		}
+		else {
+			continue;
+		}
+		
+		size_t g = f;
+		RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+		if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
+			culled++;
+			continue;
+		}
+		else {
+			rendered++;
+		}
+		
+		glm::mat4 matrixModel;
+		matrixModel = glm::translate(matrixModel, pos);
+		matrixModel = glm::scale(matrixModel, scale);
+		matrixModel = matrixModel * glm::mat4_cast(rot);
+		
+		//matrixModel = glm::translate(matrixModel, model->frames[f].position);
+		//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
+		
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+		glEnableVertexAttribArray(posAttrib);
+		glEnableVertexAttribArray(texAttrib);
+		
+		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
+		{
+			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
+				// std::cout << model->geometries[g].textures.size() << std::endl;
+				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+				if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
+					engine->gameData.textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+				}
+			}
+			
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
+
+			glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+		}
+		break;
+	}
+}
+
+void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& model, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale)
+{
+	for (size_t a = 0; a < model->atomics.size(); a++) 
+	{
+		size_t g = model->atomics[a].geometry;
+		RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+		if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
+			culled++;
+			continue;
+		}
+		else {
+			rendered++;
+		}
+		
+		glm::mat4 matrixModel;
+		matrixModel = glm::translate(matrixModel, pos);
+		matrixModel = glm::scale(matrixModel, scale);
+		matrixModel = matrixModel * glm::mat4_cast(rot);
+		
+		matrixModel = glm::translate(matrixModel, model->frames[model->atomics[a].frame].position);
+		//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
+		
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+		glEnableVertexAttribArray(posAttrib);
+		glEnableVertexAttribArray(texAttrib);
+		
+		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
+		{
+			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
+				// std::cout << model->geometries[g].textures.size() << std::endl;
+				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+				if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
+					engine->gameData.textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+				}
+			}
+			
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
+
+			glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
 		}
 	}
 }
