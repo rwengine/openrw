@@ -75,6 +75,7 @@ void GTAData::load()
 	loadDFF("wheels.DFF");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
+	loadWeather(datpath+"/data/timecyc.dat");
 }
 
 void GTAData::parseDAT(const std::string& path)
@@ -246,6 +247,11 @@ void GTAData::loadCarcols(const std::string& path)
 			}
 		}
 	}
+}
+
+void GTAData::loadWeather(const std::string &path)
+{
+	weatherLoader.load(path);
 }
 
 void GTAData::loadTXD(const std::string& name) 

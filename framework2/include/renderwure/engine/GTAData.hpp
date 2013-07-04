@@ -6,6 +6,7 @@
 #include <renderwure/loaders/TextureLoader.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/loaders/WeatherLoader.hpp>
 
 #include <string>
 #include <map>
@@ -65,6 +66,8 @@ public:
 	void loadIPL(const std::string& name);
 	
 	void loadCarcols(const std::string& path);
+
+	void loadWeather(const std::string& path);
 	
 	void load();
 	
@@ -125,6 +128,11 @@ public:
 	 * Texture Loader
 	 */
 	TextureLoader textureLoader;
+
+	/**
+	 * Weather Loader
+	 */
+	WeatherLoader weatherLoader;
 	
 	/**
 	 * Loaded models
