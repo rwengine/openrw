@@ -25,6 +25,17 @@ struct RGBA
 	uint8_t r, g, b, a;
 };
 
+/**
+ * @struct WaterRect
+ *  Rectangle with water information
+ */
+struct WaterRect
+{
+	float height;
+	float xLeft, yBottom;
+	float xRight, yTop;
+};
+
 }
 
 #endif

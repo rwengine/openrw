@@ -79,6 +79,7 @@ void GTAData::load()
 	loadCarcols(datpath+"/data/carcols.dat");
 	loadWeather(datpath+"/data/timecyc.dat");
 	loadWaterpro(datpath+"/data/waterpro.dat");
+	loadWater(datpath+"/data/water.dat");
 }
 
 void GTAData::parseDAT(const std::string& path)
@@ -268,6 +269,32 @@ void GTAData::loadWaterpro(const std::string& path)
 		
 		ifstr.seekg(0x03C4);
 		ifstr.read(reinterpret_cast<char*>(&visibleWater), sizeof(float)*64*64);
+	}
+}
+
+void GTAData::loadWater(const std::string& path)
+{
+	std::ifstream ifstr(path.c_str());
+	
+	std::string line;
+	while( std::getline(ifstr, line)) {
+		if( line[0] == ';') {
+			continue;
+		}
+		
+		std::stringstream ss(line);
+		
+		std::string a, b, c, d, e;
+		
+		if( std::getline(ss, a, ',') &&  std::getline(ss, b, ',') &&  std::getline(ss, c, ',') &&  std::getline(ss, d, ',') &&  std::getline(ss, e, ',')) {
+			waterRects.push_back({
+				atof(a.c_str()),
+				atof(b.c_str()),
+				atof(c.c_str()),
+				atof(d.c_str()),
+				atof(e.c_str())
+			});
+		}
 	}
 }
 

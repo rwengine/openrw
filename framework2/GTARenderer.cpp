@@ -36,10 +36,10 @@ const char *fragmentShaderSource = "#version 130\n"
 
 float planedata[] = {
 	// Vertices
-	 0.5f, 0.5f, 0.f,
-	-0.5f, 0.5f, 0.f,
-	 0.5f,-0.5f, 0.f,
-	-0.5f,-0.5f, 0.f,
+	 1.0f, 1.0f, 0.f,
+	-0.0f, 1.0f, 0.f,
+	 1.0f,-0.0f, 0.f,
+	-0.0f,-0.0f, 0.f,
 	// UV coords
 	1.f, 1.f,
 	0.f, 1.f,
@@ -170,22 +170,19 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	glEnableVertexAttribArray(normalAttrib);
 	textureLoader.bindTexture("water_old");
 	
-	float mapsize = 3000.f;
-	float waterscale = mapsize/64;
-	for( size_t y = 0, i = 0; y < 64; ++y) {
-		for( size_t x = 0; x < 64; ++x,++i) {
-			size_t dataInd = engine->gameData.visibleWater[i];
-			float wheight = engine->gameData.waterHeights[dataInd];
-			
-			glm::mat4 matrixModel;
-			matrixModel = glm::translate(matrixModel, glm::vec3((mapsize/2.f) - x * waterscale,(mapsize/2.f) - y * waterscale, wheight));
-			matrixModel = glm::scale(matrixModel, glm::vec3(waterscale, waterscale, 1.f));
-			
-			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-			
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		}
+	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
+		GTATypes::WaterRect& r = engine->gameData.waterRects[w];
+		glm::vec3 scale( r.xRight - r.xLeft, r.yTop - r.yBottom, 1.f );
+		glm::vec3 pos( r.xLeft, r.yBottom, r.height );
+		
+		glm::mat4 matrixModel;
+		matrixModel = glm::translate(matrixModel, pos);
+		matrixModel = glm::scale(matrixModel, scale);
+		
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
+		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+		
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
@@ -416,8 +413,13 @@ void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& 
 		matrixModel = glm::scale(matrixModel, scale);
 		matrixModel = matrixModel * glm::mat4_cast(rot);
 		
-		matrixModel = glm::translate(matrixModel, model->frames[model->atomics[a].frame].position);
-		//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
+		/*size_t fi = model->atomics[a].frame;
+		while(true) {
+			matrixModel = glm::translate(matrixModel, model->frames[fi].position);
+			matrixModel = matrixModel * glm::mat4(model->frames[fi].rotation);
+			if(fi == 0) break;
+			fi = model->frames[fi].index;
+		}*/
 		
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);

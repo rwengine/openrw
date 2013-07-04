@@ -73,6 +73,7 @@ public:
 	 * Loads water level data
 	 */
 	void loadWaterpro(const std::string& path);
+	void loadWater(const std::string& path);
 	
 	void load();
 	
@@ -143,6 +144,11 @@ public:
 	 * Loaded models
 	 */
 	std::map<std::string, std::unique_ptr<Model>> models;
+	
+	/**
+	 * Water Rectangles
+	 */
+	std::vector<GTATypes::WaterRect> waterRects;
 	
 	/**
 	 * Water heights
