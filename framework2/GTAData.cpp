@@ -77,6 +77,7 @@ void GTAData::load()
 	loadTXD("particle.txd");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
+	loadWeather(datpath+"/data/timecyc.dat");
 	loadWaterpro(datpath+"/data/waterpro.dat");
 }
 
@@ -249,6 +250,11 @@ void GTAData::loadCarcols(const std::string& path)
 			}
 		}
 	}
+}
+
+void GTAData::loadWeather(const std::string &path)
+{
+	weatherLoader.load(path);
 }
 
 void GTAData::loadWaterpro(const std::string& path)

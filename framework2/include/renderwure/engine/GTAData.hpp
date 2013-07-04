@@ -6,6 +6,7 @@
 #include <renderwure/loaders/TextureLoader.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/loaders/WeatherLoader.hpp>
 
 #include <string>
 #include <map>
@@ -31,24 +32,6 @@ public:
 	{
 		bool archived; /// Is the file inside an IMG or on the filesystem?
 		std::string path; /// Path to the file containing the file
-	};
-
-	/**
-	 * @struct RGB
-	 *  Stores 8 bit RGB data
-	 */
-	struct RGB
-	{
-		uint8_t r, g, b;
-	};
-
-	/**
-	 * @struct RGBA
-	 *  Stores 8 bit RGBA data
-	 */
-	struct RGBA
-	{
-		uint8_t r, g, b, a;
 	};
 	
 	/**
@@ -83,6 +66,8 @@ public:
 	void loadIPL(const std::string& name);
 	
 	void loadCarcols(const std::string& path);
+
+	void loadWeather(const std::string& path);
 	
 	/**
 	 * Loads water level data
@@ -148,6 +133,11 @@ public:
 	 * Texture Loader
 	 */
 	TextureLoader textureLoader;
+
+	/**
+	 * Weather Loader
+	 */
+	WeatherLoader weatherLoader;
 	
 	/**
 	 * Loaded models

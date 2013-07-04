@@ -27,6 +27,8 @@ GTAEngine* gta = nullptr;
 glm::vec3 plyPos;
 glm::vec2 plyLook;
 float moveSpeed = 20.0f;
+bool inFocus = false;
+bool mouseGrabbed = true;
 
 void handleEvent(sf::Event &event)
 {
@@ -39,6 +41,9 @@ void handleEvent(sf::Event &event)
 		case sf::Keyboard::Space:
 			moveSpeed = 60.f;
 			break;
+		case sf::Keyboard::M:
+			mouseGrabbed = ! mouseGrabbed;
+			break;
 		default: break;
 		}
 		break;
@@ -49,13 +54,18 @@ void handleEvent(sf::Event &event)
 				break;
 		}
 		break;
+	case sf::Event::GainedFocus:
+		inFocus = true;
+		break;
+	case sf::Event::LostFocus:
+		inFocus = false;
+		break;
 	default: break;
 	}
 }
 
 void init(std::string gtapath)
 {
-	glClearColor(0.2, 0.2, 0.2, 1.0);
 	glEnable(GL_DEPTH_TEST);
 	
 	// GTA GET
@@ -87,56 +97,54 @@ void init(std::string gtapath)
 
 void update(float dt)
 {
-	static int i = 0;
+	if (inFocus) {
+		if (mouseGrabbed) {
+			sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
+			sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+			sf::Vector2i deltaMouse = mousePos - screenCenter;
+			sf::Mouse::setPosition(screenCenter, window);
 
-	sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
-	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-	sf::Vector2i deltaMouse = mousePos - screenCenter;
-	sf::Mouse::setPosition(screenCenter, window);
+			plyLook.x += deltaMouse.x / 10.0;
+			plyLook.y += deltaMouse.y / 10.0;
 
-	plyLook.x += deltaMouse.x / 10.0;
-	plyLook.y += deltaMouse.y / 10.0;
+			if (plyLook.y > 90)
+				plyLook.y = 90;
+			else if (plyLook.y < -90)
+				plyLook.y = -90;
+		}
 
-	if (plyLook.y > 90)
-		plyLook.y = 90;
-	else if (plyLook.y < -90)
-		plyLook.y = -90;
+		glm::vec3 movement;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			movement.z = -1;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			movement.z = 1;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+			movement.x = -1;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+			movement.x = 1;
+		}
 
-	glm::vec3 movement;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-		movement.z = -1;
+		glm::mat4 view;
+		view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
+		view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
+		view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
+
+		if (glm::length(movement) > 0.f) {
+			plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * movement);
+		}
+
+		view = glm::translate(view, -plyPos);
+
+		gta->renderer.camera.worldPos = plyPos;
+		gta->renderer.camera.frustum.view = view;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-		movement.z = 1;
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-		movement.x = -1;
-	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-		movement.x = 1;
-	}
-	
-	glm::mat4 view;
-	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
-	
-	if (glm::length(movement) > 0.f) {
-		plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * movement);
-	}
-
-	view = glm::translate(view, -plyPos);
-	
-	gta->renderer.camera.worldPos = plyPos;
-	gta->renderer.camera.frustum.view = view;
-
-	i++;
 }
 
 void render()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	

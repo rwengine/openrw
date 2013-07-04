@@ -5,11 +5,6 @@
 #include <fstream>
 #include <algorithm>
 
-std::ostream &operator<< (std::ostream &out, GTAData::RGB const &color)
-{
-	out << color.r+0 << " " << color.g+0 << " " << color.b+0;
-}
-
 bool WeatherLoader::load(const std::string &filename)
 {
 	std::ifstream fstream(filename.c_str());
@@ -64,9 +59,9 @@ bool WeatherLoader::load(const std::string &filename)
 	return true;
 }
 
-GTAData::RGB WeatherLoader::readRGB(std::stringstream &ss)
+GTATypes::RGB WeatherLoader::readRGB(std::stringstream &ss)
 {
-	GTAData::RGB color;
+	GTATypes::RGB color;
 	std::string r, g, b;
 
 	std::getline(ss, r, ' ');

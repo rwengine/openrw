@@ -165,6 +165,33 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 						}
 					}
 
+					// Generate normals if they don't exist already
+					if (geometryStruct.normals.size() == 0) {
+						geometryStruct.normals.resize(geometry.numverts);
+						for (auto &subgeom : geometryStruct.subgeom) {
+							glm::vec3 normal{0, 0, 0};
+							for (size_t i = 0; i+2 < subgeom.indices.size(); i += 3) {
+								glm::vec3 p1 = geometryStruct.vertices[subgeom.indices[i]];
+								glm::vec3 p2 = geometryStruct.vertices[subgeom.indices[i+1]];
+								glm::vec3 p3 = geometryStruct.vertices[subgeom.indices[i+2]];
+
+								glm::vec3 U = p2 - p1;
+								glm::vec3 V = p3 - p1;
+
+								normal.x = (U.y * V.z) - (U.z * V.y);
+								normal.y = (U.z * V.x) - (U.x * V.z);
+								normal.z = (U.x * V.y) - (U.y * V.x);
+
+								if (glm::length(normal) > 0.0000001)
+									normal = glm::normalize(normal);
+
+								geometryStruct.normals[subgeom.indices[i]]   = normal;
+								geometryStruct.normals[subgeom.indices[i+1]] = normal;
+								geometryStruct.normals[subgeom.indices[i+2]] = normal;
+							}
+						}
+					}
+
 					// OpenGL buffer stuff
 					glGenBuffers(1, &geometryStruct.VBO);
 					glGenBuffers(1, &geometryStruct.EBO);
@@ -200,6 +227,7 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					
 					if(geometryStruct.normals.size() > 0 )
 					{
+						// std::cout << "Buffering " << geometryStruct.normals.size() << " normals" << std::endl;
 						glBufferSubData(
 							GL_ARRAY_BUFFER,
 							(geometryStruct.vertices.size() * sizeof(float) * 3) + (geometryStruct.texcoords.size() * sizeof(float) * 2),
