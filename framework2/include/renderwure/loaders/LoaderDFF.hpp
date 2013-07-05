@@ -24,6 +24,9 @@ public:
 	struct Material {
 		std::vector<Texture> textures;
 		uint32_t colour;
+		
+		float diffuseIntensity;
+		float ambientIntensity;
 	};
 	
 	struct SubGeometry {
@@ -41,6 +44,7 @@ public:
 		
 		std::vector<RW::BSGeometryUV> texcoords;
 		std::vector<RW::BSGeometryTriangle> triangles;
+		std::vector<glm::vec4> colours;
 		std::vector<RW::BSTVector3> vertices;
 		std::vector<RW::BSTVector3> normals;
 

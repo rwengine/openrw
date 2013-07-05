@@ -21,12 +21,14 @@ public:
 	size_t rendered;
 	size_t culled;
 
-	GLuint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection;
-	GLuint posAttrib, normalAttrib, texAttrib;
+	GLint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection, uniDynamicCol;
+	GLint uniMatDiffuse, uniMatAmbient, uniFogStart, uniFogEnd;
+	GLint posAttrib, normalAttrib, texAttrib, colourAttrib;
 	GLuint worldProgram;
-	GLuint vehicleProgram;
+	GLuint skyProgram;
+	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	
-	GLuint planeVBO;
+	GLuint planeVBO, skydomeVBO;
 	
 	void renderWorld(GTAEngine* engine);
 	

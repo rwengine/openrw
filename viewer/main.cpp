@@ -137,6 +137,8 @@ void update(float dt)
 		}
 
 		view = glm::translate(view, -plyPos);
+		
+		gta->gameTime += dt;
 
 		gta->renderer.camera.worldPos = plyPos;
 		gta->renderer.camera.frustum.view = view;

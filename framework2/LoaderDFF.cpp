@@ -60,9 +60,21 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					if (item.header.versionid < 0x1003FFFF)
 						auto colors = readStructure<RW::BSGeometryColor>(data, dataI);
 					
+					geometryStruct.colours.reserve(geometry.numverts);
 					if ((geometry.flags & RW::BSGeometry::VertexColors) == RW::BSGeometry::VertexColors) {
 						for (size_t v = 0; v < geometry.numverts; ++v) {
-							readStructure<RW::BSColor>(data, dataI);
+							auto s = readStructure<RW::BSColor>(data, dataI);
+							size_t R = s % 256; s /= 256;
+							size_t G = s % 256; s /= 256;
+							size_t B = s % 256; s /= 256;
+							size_t A = s % 256;
+							geometryStruct.colours.push_back(glm::vec4(R/255.f, G/255.f, B/255.f, A/255.f));
+						}
+					}
+					else {
+						// To save needing another shader, just insert a white colour for each vertex
+						for (size_t v = 0; v < geometry.numverts; ++v) {
+							geometryStruct.colours.push_back(glm::vec4(0.f));
 						}
 					}
 
@@ -115,6 +127,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 						geometryStruct.materials[m].textures.resize(material.numtextures);
 						
 						geometryStruct.materials[m].colour = material.color;
+						geometryStruct.materials[m].diffuseIntensity = material.diffuse;
+						geometryStruct.materials[m].ambientIntensity = material.ambient;
 
 						size_t texI = 0;
 						materialsec.getNextChildSection(texI);
@@ -202,7 +216,8 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 
 					size_t buffsize = (geometryStruct.vertices.size() * sizeof(float) * 3)
 									+ (geometryStruct.texcoords.size() * sizeof(float) * 2)
-									+ (geometryStruct.normals.size() * sizeof(float) * 3);
+									+ (geometryStruct.normals.size() * sizeof(float) * 3)
+									+ (geometryStruct.colours.size() * sizeof(glm::vec4));
 					
 					// Vertices
 					glBindBuffer(GL_ARRAY_BUFFER, geometryStruct.VBO);
@@ -233,6 +248,18 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 							(geometryStruct.vertices.size() * sizeof(float) * 3) + (geometryStruct.texcoords.size() * sizeof(float) * 2),
 							geometryStruct.normals.size() * 3 * sizeof(float),
 							&geometryStruct.normals[0]
+						);
+					}
+					
+					if(geometryStruct.colours.size() > 0 )
+					{
+						glBufferSubData(
+							GL_ARRAY_BUFFER,
+							(geometryStruct.vertices.size() * sizeof(float) * 3) 
+								+ (geometryStruct.texcoords.size() * sizeof(float) * 2) 
+								+ (geometryStruct.normals.size() * sizeof(float) * 3),
+							geometryStruct.colours.size() * sizeof(glm::vec4),
+							&geometryStruct.colours[0]
 						);
 					}
 
@@ -266,8 +293,6 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					
 					// Add it
 					model->geometries.push_back(geometryStruct);
-					
-					
 				}
 			}
 			break;

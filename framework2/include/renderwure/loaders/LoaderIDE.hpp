@@ -30,7 +30,25 @@ public:
 		float drawDistance[3];
 		int32_t flags;
 		bool LOD;
-	};	
+		
+		enum {
+			WET          = 1,       /// Render with a wet effect
+			NIGHTONLY    = 1 << 1,  /// Render only during the night
+			ALPHA1       = 1 << 2,  /// Alpha 
+			ALPHA2       = 1 << 3,  /// Alpha
+			DAYONLY      = 1 << 4,  /// Render only during the day
+			INTERIOR     = 1 << 5,  /// Is part of an interior
+			NOSHADOWMESH = 1 << 6,  /// Disable shadow mesh
+			DONTCULL     = 1 << 7,  /// Disable culling
+			NODRAWDIST   = 1 << 8,  /// Object won't be affected by draw distance
+			BREAKABLE    = 1 << 9,  /// Object can be broken
+			SMASHABLE    = 1 << 10, /// Object can be smashed and broken
+			GRGEDOOR     = 1 << 11, /// Is a garage door (SA and IV only)
+			MULTICLUMP   = 1 << 12, /// Multiclump
+			WBRIGHTNESS  = 1 << 13, /// Weather PoleShd value effects brightness.
+			EXPLODEONHIT = 1 << 14, /// Object explodes after being hit
+		};
+	};
 
 	enum VehicleClass
 	{

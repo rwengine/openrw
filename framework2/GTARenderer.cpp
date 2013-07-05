@@ -7,8 +7,11 @@ const char *vertexShaderSource = "#version 130\n"
 "in vec3 position;"
 "in vec3 normal;"
 "in vec2 texCoords;"
+"in vec4 colour;"
 "out vec3 Normal;"
 "out vec2 TexCoords;"
+"out vec4 Colour;"
+"out vec4 EyeSpace;"
 "uniform mat4 model;"
 "uniform mat4 view;"
 "uniform mat4 proj;"
@@ -16,23 +19,57 @@ const char *vertexShaderSource = "#version 130\n"
 "{"
 "	Normal = normal;"
 "	TexCoords = texCoords;"
-"	gl_Position = proj * view * model * vec4(position, 1.0);"
+"	Colour = colour;"
+"	vec4 eyeSpace = view * model * vec4(position, 1.0);"
+"	EyeSpace = proj * eyeSpace;"
+"	gl_Position = proj * eyeSpace;"
 "}";
 const char *fragmentShaderSource = "#version 130\n"
 "in vec3 Normal;"
 "in vec2 TexCoords;"
+"in vec4 Colour;"
+"in vec4 EyeSpace;"
 "uniform sampler2D texture;"
 "uniform vec4 BaseColour;"
 "uniform vec4 AmbientColour;"
+"uniform vec4 DynamicColour;"
 "uniform vec3 SunDirection;"
+"uniform float FogStart;"
+"uniform float FogEnd;"
+"uniform float MaterialDiffuse;"
+"uniform float MaterialAmbient;"
 "void main()"
 "{"
 "   vec4 c = texture2D(texture, TexCoords);"
 "   if(c.a < 0.5) discard;"
-"	gl_FragColor = AmbientColour + (c * BaseColour * clamp(dot(Normal, SunDirection), 0.2, 1));"
+"	float fogCoord = abs(EyeSpace.z / EyeSpace.w);"
+"	float fogfac = clamp( (FogEnd-fogCoord)/(FogEnd-FogStart), 0.0, 1.0 );"
+"	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);"
 // "	gl_FragColor = vec4((Normal*0.5)+0.5, 1.0);"
 // "	gl_FragColor = c * vec4((Normal*0.5)+0.5, 1.0);"
 "}";
+
+const char *skydomeVertexShaderSource = "#version 130\n"
+"in vec3 position;"
+"uniform mat4 view;"
+"uniform mat4 proj;"
+"out vec3 Position;"
+"uniform float Far;"
+"void main() {"
+"	Position = position;"
+"	vec4 viewsp = proj * mat4(mat3(view)) * vec4(position, 1.0);"
+"	viewsp.z = viewsp.w - 0.000001;"
+"	gl_Position = viewsp;"
+"}";
+const char *skydomeFragmentShaderSource = "#version 130\n"
+"in vec3 Position;"
+"uniform vec4 TopColor;"
+"uniform vec4 BottomColor;"
+"void main() {"
+"	gl_FragColor = mix(BottomColor, TopColor, clamp(Position.z, 0, 1));"
+"}";
+const size_t skydomeSegments = 8, skydomeRows = 10;
+
 
 float planedata[] = {
 	// Vertices
@@ -50,6 +87,11 @@ float planedata[] = {
 	0.f, 0.f, 1.f,
 	0.f, 0.f, 1.f,
 	0.f, 0.f, 1.f,
+	// Colours
+	1.f, 1.f, 1.f,
+	1.f, 1.f, 1.f,
+	1.f, 1.f, 1.f,
+	1.f, 1.f, 1.f
 };
 
 GLuint compileShader(GLenum type, const char *source)
@@ -88,6 +130,7 @@ GTARenderer::GTARenderer()
 	posAttrib = glGetAttribLocation(worldProgram, "position");
 	texAttrib = glGetAttribLocation(worldProgram, "texCoords");
 	normalAttrib = glGetAttribLocation(worldProgram, "normal");
+	colourAttrib = glGetAttribLocation(worldProgram, "colour");
 
 	uniModel = glGetUniformLocation(worldProgram, "model");
 	uniView = glGetUniformLocation(worldProgram, "view");
@@ -95,11 +138,52 @@ GTARenderer::GTARenderer()
 	uniCol = glGetUniformLocation(worldProgram, "BaseColour");
 	uniAmbientCol = glGetUniformLocation(worldProgram, "AmbientColour");
 	uniSunDirection = glGetUniformLocation(worldProgram, "SunDirection");
+	uniDynamicCol = glGetUniformLocation(worldProgram, "DynamicColour");
+	uniMatDiffuse = glGetUniformLocation(worldProgram, "MaterialDiffuse");
+	uniMatAmbient = glGetUniformLocation(worldProgram, "MaterialAmbient");
+	uniFogStart = glGetUniformLocation(worldProgram, "FogStart");
+	uniFogEnd = glGetUniformLocation(worldProgram, "FogEnd");
+	
+	vertexShader = compileShader(GL_VERTEX_SHADER, skydomeVertexShaderSource);
+	fragmentShader = compileShader(GL_FRAGMENT_SHADER, skydomeFragmentShaderSource);
+	skyProgram = glCreateProgram();
+	glAttachShader(skyProgram, vertexShader);
+	glAttachShader(skyProgram, fragmentShader);
+	glLinkProgram(skyProgram);
+	glUseProgram(skyProgram);
+	skyUniView = glGetUniformLocation(skyProgram, "view");
+	skyUniProj = glGetUniformLocation(skyProgram, "proj");
+	skyUniTop = glGetUniformLocation(skyProgram, "TopColor");
+	skyUniBottom = glGetUniformLocation(skyProgram, "BottomColor");
 	
 	// prepare our special internal plane.
 	glGenBuffers(1, &planeVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(planedata), planedata, GL_STATIC_DRAW);
+	
+	// And our skydome while we're at it.
+	glGenBuffers(1, &skydomeVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
+	size_t segments = skydomeSegments, rows = skydomeRows;
+	float radius = 1.f;
+	const float pi = 3.14159265;
+	const float pio2 = (pi / 2.f);
+	glm::vec3 skydomeBuff[rows * segments * 2];
+	for( size_t s = 0, i = 0; s < segments; ++s) {
+		for( size_t r = 0; r < rows; ++r) {
+			skydomeBuff[i++] = glm::vec3(
+				radius * cos( (s+1.f)/segments * pio2) * sin( 2.0f * (float)r/rows * pi),
+				radius * cos( (s+1.f)/segments * pio2) * cos( 2.0f * (float)r/rows * pi),
+				radius * sin( (s+1.f)/segments * pio2)
+			);
+			skydomeBuff[i++] = glm::vec3(
+				radius * cos( (s+0.f)/segments * pio2) * sin( 2.0f * (float)r/rows * pi),
+				radius * cos( (s+0.f)/segments * pio2) * cos( 2.0f * (float)r/rows * pi),
+				radius * sin( (s+0.f)/segments * pio2)
+			);
+		}
+	}
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff, GL_STATIC_DRAW);
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -109,45 +193,63 @@ float mix(uint8_t a, uint8_t b, float num)
 
 void GTARenderer::renderWorld(GTAEngine* engine)
 {
-	static float letime = 0;
-	float leclock = fmod(letime / 10, 24);
-	int hour = int(leclock);
+	float gameTime = fmod(engine->gameTime, 24.f);
+	int hour = floor(gameTime);
 	int hournext = (hour + 1) % 24;
 
 	// std::cout << leclock << " " << hour << std::endl;
-	auto weather = engine->gameData.weatherLoader.weather[hour];
-	auto weathernext = engine->gameData.weatherLoader.weather[hournext];
-	auto color = weather.skyTopColor;
-	auto colornext = weathernext.skyTopColor;
-
-	float interpolate = leclock - int(leclock);
-	float r = mix(color.r, colornext.r, interpolate) / 255.0;
-	float g = mix(color.g, colornext.g, interpolate) / 255.0;
-	float b = mix(color.b, colornext.b, interpolate) / 255.0;
-
+	auto weather = engine->gameData.weatherLoader.weather[hour/2];
+	auto weathernext = engine->gameData.weatherLoader.weather[hournext/2];
+	
+	float interpolate = gameTime - hour;
+	glm::vec3 skyTop{
+		mix(weather.skyTopColor.r, weathernext.skyTopColor.r, interpolate) / 255.0,
+		mix(weather.skyTopColor.g, weathernext.skyTopColor.g, interpolate) / 255.0,
+		mix(weather.skyTopColor.b, weathernext.skyTopColor.b, interpolate) / 255.0,
+	};
+	glm::vec3 skyBottom{
+		mix(weather.skyBottomColor.r, weathernext.skyBottomColor.r, interpolate) / 255.0,
+		mix(weather.skyBottomColor.g, weathernext.skyBottomColor.g, interpolate) / 255.0,
+		mix(weather.skyBottomColor.b, weathernext.skyBottomColor.b, interpolate) / 255.0,
+	};
+	
 	glm::vec3 ambient{
 		mix(weather.ambientColor.r, weathernext.ambientColor.r, interpolate) / 255.0,
 		mix(weather.ambientColor.g, weathernext.ambientColor.g, interpolate) / 255.0,
 		mix(weather.ambientColor.b, weathernext.ambientColor.b, interpolate) / 255.0,
 	};
-	float theta = (leclock - 12)/24.0 * 2 * 3.14159265;
+	glm::vec3 dynamic{
+		mix(weather.directLightColor.r, weathernext.directLightColor.r, interpolate) / 255.0,
+		mix(weather.directLightColor.g, weathernext.directLightColor.g, interpolate) / 255.0,
+		mix(weather.directLightColor.b, weathernext.directLightColor.b, interpolate) / 255.0,
+	};
+	float theta = (hour - 12.f)/24.0 * 2 * 3.14159265;
 	glm::vec3 sunDirection{
 		sin(theta),
 		0.0,
 		cos(theta),
 	};
 	sunDirection = glm::normalize(sunDirection);
+	float weatherFar = weather.farClipping; //mix(weather.farClipping, weathernext.farClipping, interpolate);
+	camera.frustum.far = weatherFar;
 	/*
 	std::cout << "CLOCK IS " << leclock << std::endl;
 	std::cout << "AMBIENT " << ambient.x << ", " << ambient.y << ", " << ambient.z << std::endl;
 	std::cout << "SUN DIR " << sunDirection.x << ", " << sunDirection.y << ", " << sunDirection.z << std::endl;
 	*/
+	
+	glUseProgram(worldProgram);
+
+	glUniform1f(uniFogStart, weather.fogStart);
+	glUniform1f(uniFogEnd, camera.frustum.far);
 
 	glUniform4f(uniAmbientCol, ambient.x, ambient.y, ambient.z, 1.f);
+	glUniform4f(uniDynamicCol, dynamic.x, dynamic.y, dynamic.z, 1.f);
 	glUniform3f(uniSunDirection, sunDirection.x, sunDirection.y, sunDirection.z);
-
-	letime++;
-	glClearColor(r, g, b, 1.0);
+	glUniform1f(uniMatDiffuse, 0.9f);
+	glUniform1f(uniMatAmbient, 0.1f);
+	
+	glClearColor(skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 proj = camera.frustum.projection();
@@ -165,9 +267,11 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4));
 	glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4 + sizeof(float)*2*4));
+	glVertexAttribPointer(colourAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4 + sizeof(float)*2*4 + sizeof(float)*3*4));
 	glEnableVertexAttribArray(posAttrib);
 	glEnableVertexAttribArray(texAttrib);
 	glEnableVertexAttribArray(normalAttrib);
+	glEnableVertexAttribArray(colourAttrib);
 	textureLoader.bindTexture("water_old");
 	
 	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
@@ -189,6 +293,11 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		GTAEngine::GTAInstance& inst = engine->objectInstances[i];
 		LoaderIPLInstance &obj = inst.instance;
 		std::string modelname = obj.model;
+		
+		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
+			continue;
+		}
+		
 		
 		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
 		
@@ -212,7 +321,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		{
 			std::cout << "model " << modelname << " not there (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
-
+		
 		renderObject(engine, model, pos, rot, scale);
 	}
 	
@@ -273,18 +382,23 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
 				(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
 			);
+			glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
+				(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
+					+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
+					+ (model->geometries[g].normals.size() * sizeof(float) * 3))
+			);
 			glEnableVertexAttribArray(posAttrib);
 			glEnableVertexAttribArray(texAttrib);
 			glEnableVertexAttribArray(normalAttrib);
+			glEnableVertexAttribArray(colourAttrib);
 			
 			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 			{
 				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
 					Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
-					// std::cout << model->geometries[g].textures.size() << std::endl;
-					// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
+					
 					if(mat.textures.size() > 0) {
-						textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+						textureLoader.bindTexture(mat.textures[0].name);
 					}
 					
 					if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
@@ -302,6 +416,9 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 							glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
 						}
 					}
+					
+					glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
+					glUniform1f(uniMatAmbient, mat.ambientIntensity);
 				}
 				else {
 					
@@ -328,6 +445,18 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 			}
 		}
 	}
+	
+	glUseProgram(skyProgram);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glUniformMatrix4fv(skyUniView, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(skyUniProj, 1, GL_FALSE, glm::value_ptr(proj));
+	glUniform4f(skyUniTop, skyTop.r, skyTop.g, skyTop.b, 1.f);
+	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
+		
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, skydomeSegments * skydomeRows * 2 + 1);
 }
 
 void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>& model, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name)
@@ -372,18 +501,27 @@ void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Mode
 		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
 			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
 		);
+		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
+			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
+				+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
+				+ (model->geometries[g].normals.size() * sizeof(float) * 3))
+		);
 		glEnableVertexAttribArray(posAttrib);
 		glEnableVertexAttribArray(texAttrib);
 		glEnableVertexAttribArray(normalAttrib);
+		glEnableVertexAttribArray(colourAttrib);
 		
 		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 		{
 			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-				// std::cout << model->geometries[g].textures.size() << std::endl;
-				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
-				if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
-					engine->gameData.textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+				Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
+				
+				if(mat.textures.size() > 0) {
+					engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
 				}
+				
+				glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
+				glUniform1f(uniMatAmbient, mat.ambientIntensity);
 			}
 			
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
@@ -430,19 +568,27 @@ void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& 
 		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
 			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
 		);
-		// std::cout << "Num normals: " << model->geometries[g].normals.size() << std::endl;
+		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
+			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
+				+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
+				+ (model->geometries[g].normals.size() * sizeof(float) * 3))
+		);
 		glEnableVertexAttribArray(posAttrib);
 		glEnableVertexAttribArray(texAttrib);
 		glEnableVertexAttribArray(normalAttrib);
+		glEnableVertexAttribArray(colourAttrib);
 		
 		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
 		{
 			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-				// std::cout << model->geometries[g].textures.size() << std::endl;
-				// std::cout << "Looking for " << model->geometries[g].textures[0].name << std::endl;
-				if(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures.size() > 0) {
-					engine->gameData.textureLoader.bindTexture(model->geometries[g].materials[model->geometries[g].subgeom[sg].material].textures[0].name);
+				Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
+			
+				if(mat.textures.size() > 0) {
+					engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
 				}
+				
+				glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
+				glUniform1f(uniMatAmbient, mat.ambientIntensity);
 			}
 			
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
