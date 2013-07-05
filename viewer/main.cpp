@@ -19,7 +19,7 @@ constexpr int WIDTH  = 800,
 
 constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
 
-sf::Window window;
+sf::RenderWindow window;
 
 LoaderDFF dffLoader;
 GTAEngine* gta = nullptr;
@@ -29,6 +29,8 @@ glm::vec2 plyLook;
 float moveSpeed = 20.0f;
 bool inFocus = false;
 bool mouseGrabbed = true;
+
+sf::Font font;
 
 void handleEvent(sf::Event &event)
 {
@@ -154,6 +156,16 @@ void render()
 
 	gta->renderer.renderWorld(gta);
 	
+	glUseProgram(0);
+	window.pushGLStates();
+	window.resetGLStates();
+	std::stringstream ss;
+	ss << floor(gta->gameTime) << " (Hour " << fmod(floor(gta->gameTime), 24.f) << ")";
+	sf::Text t(ss.str(), font, 20);
+	t.setPosition(10, 10);
+	window.draw(t);
+	window.popGLStates();
+	
 	static size_t fc = 0;
 	if(fc++ == 60) 
 	{
@@ -167,6 +179,10 @@ int main(int argc, char *argv[])
 	if (argc < 2) {
 		std::cout << "Usage: " << argv[0] << " <path to GTA3 root folder>" << std::endl;
 		exit(1);
+	}
+	
+	if(! font.loadFromFile("DejaVuSansCondensed.ttf")) {
+		std::cerr << "Failed to load font DejaVuSansCondensed" << std::endl;
 	}
 
 	glewExperimental = GL_TRUE;

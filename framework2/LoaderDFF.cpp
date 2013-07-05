@@ -9,7 +9,7 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 
 	model->clump = root.readStructure<RW::BSClump>();
 
-	size_t dataI = 0;
+	size_t dataI = 0, clumpID = 0;
 	while (root.hasMoreData(dataI)) {
 		auto sec = root.getNextChildSection(dataI);
 
@@ -74,7 +74,7 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 					else {
 						// To save needing another shader, just insert a white colour for each vertex
 						for (size_t v = 0; v < geometry.numverts; ++v) {
-							geometryStruct.colours.push_back(glm::vec4(0.f));
+							geometryStruct.colours.push_back(glm::vec4(1.f));
 						}
 					}
 
@@ -291,10 +291,13 @@ std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
 						);
 					}
 					
+					geometryStruct.clumpNum = clumpID;
+					
 					// Add it
 					model->geometries.push_back(geometryStruct);
 				}
 			}
+			clumpID++;
 			break;
 		}
 		case RW::SID_Atomic: {

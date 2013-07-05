@@ -44,6 +44,7 @@ const char *fragmentShaderSource = "#version 130\n"
 "   if(c.a < 0.5) discard;"
 "	float fogCoord = abs(EyeSpace.z / EyeSpace.w);"
 "	float fogfac = clamp( (FogEnd-fogCoord)/(FogEnd-FogStart), 0.0, 1.0 );"
+"	float l = clamp(dot(Normal, SunDirection), 0.0, 1);"
 "	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);"
 // "	gl_FragColor = vec4((Normal*0.5)+0.5, 1.0);"
 // "	gl_FragColor = c * vec4((Normal*0.5)+0.5, 1.0);"
@@ -223,7 +224,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		mix(weather.directLightColor.g, weathernext.directLightColor.g, interpolate) / 255.0,
 		mix(weather.directLightColor.b, weathernext.directLightColor.b, interpolate) / 255.0,
 	};
-	float theta = (hour - 12.f)/24.0 * 2 * 3.14159265;
+	float theta = (gameTime - 12.f)/24.0 * 2 * 3.14159265;
 	glm::vec3 sunDirection{
 		sin(theta),
 		0.0,
@@ -297,7 +298,6 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
 			continue;
 		}
-		
 		
 		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
 		
@@ -544,6 +544,10 @@ void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& 
 		}
 		else {
 			rendered++;
+		}
+	
+		if( model->geometries[g].clumpNum > 0) {
+			continue;
 		}
 		
 		glm::mat4 matrixModel;

@@ -39,6 +39,8 @@ public:
 		GLuint VBO, EBO;
 
 		RW::BSGeometryBounds geometryBounds;
+		
+		uint32_t clumpNum;
 
 		uint32_t flags;
 		
