@@ -21,7 +21,6 @@ constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
 
 sf::RenderWindow window;
 
-LoaderDFF dffLoader;
 GTAEngine* gta = nullptr;
 
 glm::vec3 plyPos;
@@ -68,8 +67,6 @@ void handleEvent(sf::Event &event)
 
 void init(std::string gtapath)
 {
-	glEnable(GL_DEPTH_TEST);
-	
 	// GTA GET
 	gta = new GTAEngine(gtapath);
 	
@@ -152,19 +149,48 @@ void render()
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	
-	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
 
 	gta->renderer.renderWorld(gta);
 	
-	glUseProgram(0);
-	window.pushGLStates();
 	window.resetGLStates();
+	
 	std::stringstream ss;
-	ss << floor(gta->gameTime) << " (Hour " << fmod(floor(gta->gameTime), 24.f) << ")";
-	sf::Text t(ss.str(), font, 20);
-	t.setPosition(10, 10);
-	window.draw(t);
-	window.popGLStates();
+	ss << fmod(floor(gta->gameTime), 24.f) << ":" << (floor(fmod(gta->gameTime, 1.f) * 60.f)) << " (" << gta->gameTime << ")";
+	sf::Text text(ss.str(), font, 15);
+	text.setPosition(10, 10);
+	window.draw(text);
+	
+	while( gta->log.size() > 0 && gta->log.front().time + 10.f < gta->gameTime ) {
+		gta->log.pop_front();
+	}
+	
+	sf::Vector2f tpos(10.f, 40.f);
+	text.setCharacterSize(15);
+	for(auto it = gta->log.begin(); it != gta->log.end(); ++it) {
+		text.setString(it->message);
+		switch(it->type) {
+		case GTAEngine::LogEntry::Error:
+			text.setColor(sf::Color::Red);
+			break;
+		case GTAEngine::LogEntry::Warning:
+			text.setColor(sf::Color::Yellow);
+			break;
+		default:
+			text.setColor(sf::Color::White);
+			break;
+		}
+		
+		// Interpolate the color
+		auto c = text.getColor();
+		c.a = (gta->gameTime - it->time > 5.f) ? 255 - (((gta->gameTime - it->time) - 5.f)/5.f) * 255 : 255;
+		text.setColor(c);
+		
+		text.setPosition(tpos);
+		window.draw(text);
+		tpos.y += text.getLocalBounds().height;
+	}
 	
 	static size_t fc = 0;
 	if(fc++ == 60) 
@@ -181,8 +207,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	
-	if(! font.loadFromFile("DejaVuSansCondensed.ttf")) {
-		std::cerr << "Failed to load font DejaVuSansCondensed" << std::endl;
+	if(! font.loadFromFile("DejaVuSansMono.ttf")) {
+		std::cerr << "Failed to load font" << std::endl;
 	}
 
 	glewExperimental = GL_TRUE;

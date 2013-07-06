@@ -5,7 +5,7 @@
 GTAEngine::GTAEngine(const std::string& path)
 : itemCount(0), gameData(path), gameTime(0.f), randomEngine(rand())
 {
-	
+	gameData.engine = this;
 }
 
 bool GTAEngine::load()
@@ -32,12 +32,17 @@ bool GTAEngine::load()
 
 void GTAEngine::logInfo(const std::string& info)
 {
-	log.push({LogEntry::Info, gameTime, info});
+	log.push_back({LogEntry::Info, gameTime, info});
 }
 
 void GTAEngine::logError(const std::string& error)
 {
-	log.push({LogEntry::Error, gameTime, error});
+	log.push_back({LogEntry::Error, gameTime, error});
+}
+
+void GTAEngine::logWarning(const std::string& warning)
+{
+	log.push_back({LogEntry::Warning, gameTime, warning});
 }
 
 bool GTAEngine::defineItems(const std::string& name)
@@ -167,7 +172,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
 			 sec = gameData.vehicleColours[palit->second[set].second];
 		}
 		else {
-			std::cerr << "No colour palette for vehicle " << vti->second->modelName << std::endl;
+			logWarning("No colour palette for vehicle " + vti->second->modelName);
 		}
 		
 		auto wi = objectTypes.find(vti->second->wheelModelID);

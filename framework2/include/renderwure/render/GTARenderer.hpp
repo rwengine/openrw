@@ -28,6 +28,9 @@ public:
 	GLuint skyProgram;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	
+	/// Internal VAO to avoid clobbering global state.
+	GLuint vao;
+	
 	GLuint planeVBO, skydomeVBO;
 	
 	void renderWorld(GTAEngine* engine);

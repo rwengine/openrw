@@ -40,7 +40,7 @@ public:
 		std::string message;
 	};
 	
-	std::queue<LogEntry> log;
+	std::deque<LogEntry> log;
 	
 	/**
 	 * Displays an informative message
@@ -51,6 +51,11 @@ public:
 	 * Displays an alarming error
 	 */
 	void logError(const std::string& error);
+	
+	/**
+	 * Displays a comforting warning
+	 */
+	void logWarning(const std::string& warning);
 	
 	/**
 	 * @struct GTAObject

@@ -12,6 +12,7 @@
 #include <map>
 #include <memory>
 
+class GTAEngine;
 /**
  * Handles loading and management of the Game's DAT
  */
@@ -39,6 +40,8 @@ public:
 	 * @param path Path to the root of the game data.
 	 */
 	GTAData(const std::string& path);
+	
+	GTAEngine* engine;
 	
 	/**
 	 * Returns the current platform

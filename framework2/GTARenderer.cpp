@@ -157,6 +157,8 @@ GTARenderer::GTARenderer()
 	skyUniTop = glGetUniformLocation(skyProgram, "TopColor");
 	skyUniBottom = glGetUniformLocation(skyProgram, "BottomColor");
 	
+	glGenVertexArrays( 1, &vao );
+	
 	// prepare our special internal plane.
 	glGenBuffers(1, &planeVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
@@ -194,13 +196,15 @@ float mix(uint8_t a, uint8_t b, float num)
 
 void GTARenderer::renderWorld(GTAEngine* engine)
 {
+	glBindVertexArray( vao );
+	
 	float gameTime = fmod(engine->gameTime, 24.f);
 	int hour = floor(gameTime);
 	int hournext = (hour + 1) % 24;
 
 	// std::cout << leclock << " " << hour << std::endl;
-	auto weather = engine->gameData.weatherLoader.weather[hour/2];
-	auto weathernext = engine->gameData.weatherLoader.weather[hournext/2];
+	auto weather = engine->gameData.weatherLoader.weather[hour];
+	auto weathernext = engine->gameData.weatherLoader.weather[hournext];
 	
 	float interpolate = gameTime - hour;
 	glm::vec3 skyTop{
@@ -457,6 +461,11 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 		
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, skydomeSegments * skydomeRows * 2 + 1);
+	
+	glUseProgram(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray( 0 );
 }
 
 void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>& model, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name)

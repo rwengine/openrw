@@ -1,4 +1,5 @@
 #include <renderwure/engine/GTAData.hpp>
+#include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
@@ -61,7 +62,7 @@ std::string fixPath(std::string path) {
 
 
 GTAData::GTAData(const std::string& path)
-: datpath(path)
+: datpath(path), engine(nullptr)
 {
 
 }
@@ -371,7 +372,10 @@ char* GTAData::loadFile(const std::string& name)
 	}
 	else 
 	{
-		std::cerr << "Unable to locate file " << name << std::endl;
+		std::stringstream err;
+		err << "Unable to locate file " << name;
+		engine->logError(err.str());
+		std::cerr << err.str() << std::endl;
 	}
 	
 	return nullptr;
