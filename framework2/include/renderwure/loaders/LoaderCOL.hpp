@@ -1,7 +1,5 @@
-#pragma once
-#ifndef _LOADERCOL_HPP_
-#define _LOADERCOL_HPP_
-
+#ifndef _LOADERCOL_H_
+#define _LOADERCOL_H_
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
@@ -73,6 +71,8 @@ struct CollTFaceV1
 
 struct CollTHeader
 {
+	char magic[4];
+	uint32_t size;
 	char name[22];
 	uint16_t modelid;
 	CollTBounds bounds;
@@ -104,7 +104,14 @@ struct CollTHeaderV3
  */
 class CollisionInstance
 {
+public:
+	int version;
+	CollTHeader header;
+	CollTHeaderV2 header2;
+	CollTHeaderV3 header3;
 	
+	std::vector<CollTSphere> spheres;
+	std::vector<CollTBox> boxes;
 };
 
 /**
@@ -116,6 +123,9 @@ class LoaderCOL
 public:
 	/// Load the COL data into memory
 	bool load(const std::string& file);
+	
+	/// Load the COL data from a file already in memory
+	bool load(char* data, const size_t size);
 	
 	std::vector<CollisionInstance> instances;
 };

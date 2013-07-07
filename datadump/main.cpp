@@ -1,8 +1,10 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <renderwure/BinaryStream.hpp>
+#include <renderwure/loaders/LoaderCOL.hpp>
 #include "../framework/rwbinarystream.h"
-#include "../framework/gtadata.h"
 
 using RW::BSSectionHeader;
 using RW::BSFrameList;
@@ -22,7 +24,7 @@ BSSectionHeader readHeader(char* data, size_t& dataI)
 	return readStructure<BSSectionHeader>(data, dataI);
 }
 
-bool loadFile(const char *filename, char **data)
+bool loadFile(const char *filename, char **data, size_t* size = nullptr)
 {
 	std::ifstream dfile(filename);
 	if ( ! dfile.is_open()) {
@@ -35,6 +37,8 @@ bool loadFile(const char *filename, char **data)
 	dfile.seekg(0);
 	*data = new char[length];
 	dfile.read(*data, length);
+	
+	if(size) *size = length;
 
 	return true;
 }
@@ -407,6 +411,31 @@ void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t m
 	}
 }
 
+void dumpCollisionModel(char* data, size_t size)
+{
+	LoaderCOL coll;
+	
+	if(coll.load(data, size)) {
+		std::cout << "Collision instances: " << coll.instances.size() << std::endl;
+		for(auto it = coll.instances.begin(); it != coll.instances.end(); ++it) {
+			std::cout << "Collision data (version " << it->version << ")" << std::endl;
+			std::cout << " model: " << it->header.name << std::endl;
+			std::cout << " model id: " << it->header.modelid << std::endl;
+			std::cout << " spheres: " << it->header2.numspheres << std::endl;
+			for( size_t b = 0; b < it->spheres.size(); ++b ) {
+				auto& box = it->spheres[b];
+				std::cout << "  radius: " << box.radius << " center: " << box.center.x << " " << box.center.y << " " << box.center.z << std::endl;
+			}
+			std::cout << " boxes: " << it->header2.numboxes << std::endl;
+			for( size_t b = 0; b < it->boxes.size(); ++b ) {
+				auto& box = it->boxes[b];
+				std::cout << "  min: " << box.min.x << " " << box.min.y << " " << box.min.z << " max: " << box.max.x << " " << box.max.y << " " << box.max.z << std::endl;
+			}
+			std::cout << " faces: " << it->header2.numfaces << std::endl;
+		}
+	}
+}
+
 void dumpGenericTree(char* data)
 {
 	BinaryStreamSection root(data);
@@ -426,6 +455,7 @@ int main(int argc, char** argv)
 	}
 
 	char *data;
+	size_t size;
 
 	if(raw) {
 		if(loadFile(argv[2], &data)) {
@@ -433,26 +463,32 @@ int main(int argc, char** argv)
 		}
 	} else {
 		for (int i = 1; i < argc; ++i) {
-			if ( ! loadFile(argv[i], &data))
+			if ( ! loadFile(argv[i], &data, &size))
 				continue;
 
-				std::string fname = argv[i];
-				auto ext = fname.substr(fname.size()-3);
-				
-				if(ext == "dff" || ext == "DFF")
-				{
-					std::cout << "Dumping model file" << std::endl;
-					dumpModelFile(data);
-				}
-				else if(ext == "txd" || ext == "TXD")
-				{
-					std::cout << "Dumping texture archive" << std::endl;
-					dumpTextureDictionary(data);
-				}
-				else 
-				{
-					std::cout << "I'm not sure what that is" << std::endl;
-				}
+			std::string fname = argv[i];
+			auto ext = fname.substr(fname.size()-3);
+			std::transform(ext.begin(), ext.begin(), ext.end(), ::tolower);
+			
+			if(ext == "dff")
+			{
+				std::cout << "Dumping model file" << std::endl;
+				dumpModelFile(data);
+			}
+			else if(ext == "txd")
+			{
+				std::cout << "Dumping texture archive" << std::endl;
+				dumpTextureDictionary(data);
+			}
+			else if(ext == "col")
+			{
+				std::cout << "Dumping Collsion file" << std::endl;
+				dumpCollisionModel(data, size);
+			}
+			else 
+			{
+				std::cout << "I'm not sure what that is" << std::endl;
+			}
 			
 			delete[] data;
 		}
