@@ -7,6 +7,7 @@
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
 #include <renderwure/loaders/WeatherLoader.hpp>
+#include <renderwure/loaders/LoaderCOL.hpp>
 
 #include <string>
 #include <map>
@@ -147,6 +148,11 @@ public:
 	 * Loaded models
 	 */
 	std::map<std::string, std::unique_ptr<Model>> models;
+	
+	/**
+	 * Loaded collision proxies
+	 */
+	std::map<std::string,  std::unique_ptr<CollisionInstance>> collisions;
 	
 	/**
 	 * Water Rectangles

@@ -18,8 +18,9 @@ add_library(renderware
 	
 	# Rendering
 	GTARenderer.cpp
+	DebugDraw.cpp
 )
 
 target_link_libraries(renderware sfml-window)
 
-include_directories(include)
+include_directories(include /usr/include/bullet)

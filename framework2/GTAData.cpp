@@ -165,16 +165,10 @@ void GTAData::loadCOL(const size_t zone, const std::string& name)
 {
 	LoaderCOL col;
 	
-	auto lowername = name;
-	for(size_t t = 0; t < lowername.size(); ++t)
-	{
-		lowername[t] = tolower(lowername[t]);
-		if(lowername[t] == '\\') {
-			lowername[t] = '/';
-		}
-	}
+	std::string realPath = fixPath(name);
+	realPath = findPathRealCase(datpath, realPath);
 	
-	if(col.load(datpath + "/" + name)) {
+	if(col.load(realPath)) {
 		for( size_t i = 0; i < col.instances.size(); ++i ) {
 			collisions[std::string(col.instances[i].header.name)] = std::move(std::unique_ptr<CollisionInstance>( new CollisionInstance(col.instances[i]) ));
 		}

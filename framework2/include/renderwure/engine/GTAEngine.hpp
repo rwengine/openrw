@@ -8,6 +8,9 @@
 
 #include <glm/glm.hpp>
 
+#include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+
 #include <vector>
 #include <queue>
 #include <random>
@@ -149,6 +152,16 @@ public:
 	 * Randomness Engine
 	 */
 	std::default_random_engine randomEngine;
+	
+	/**
+	 * Bullet 
+	 */
+	btDefaultCollisionConfiguration* collisionConfig;
+	btCollisionDispatcher* collisionDispatcher;
+	btBroadphaseInterface* broadphase;
+	btSequentialImpulseConstraintSolver* solver;
+	btDiscreteDynamicsWorld* dynamicsWorld;
+	
 };
 
 #endif

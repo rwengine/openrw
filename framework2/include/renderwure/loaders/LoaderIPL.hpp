@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _LOADERIPL_HPP_
 #define _LOADERIPL_HPP_
 

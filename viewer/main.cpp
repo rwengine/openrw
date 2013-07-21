@@ -3,6 +3,7 @@
 
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
+#include <renderwure/render/DebugDraw.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -28,6 +29,7 @@ glm::vec2 plyLook;
 float moveSpeed = 20.0f;
 bool inFocus = false;
 bool mouseGrabbed = true;
+bool showPhysics = false;
 
 sf::Font font;
 
@@ -44,6 +46,9 @@ void handleEvent(sf::Event &event)
 			break;
 		case sf::Keyboard::M:
 			mouseGrabbed = ! mouseGrabbed;
+			break;
+		case sf::Keyboard::P:
+			showPhysics = ! showPhysics;
 			break;
 		default: break;
 		}
@@ -92,6 +97,11 @@ void init(std::string gtapath)
 		spawnPos += glm::vec3(5, 0, 0);
 		if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
 	}
+	
+	DebugDraw* debg = new DebugDraw;
+	debg->setShaderProgram(gta->renderer.worldProgram);
+	debg->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	gta->dynamicsWorld->setDebugDrawer(debg);
 }
 
 void update(float dt)
@@ -152,7 +162,18 @@ void render()
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 
-	gta->renderer.renderWorld(gta);
+	if( showPhysics) {
+		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+		glUseProgram(gta->renderer.worldProgram);
+		glm::mat4 proj = gta->renderer.camera.frustum.projection();
+		glm::mat4 view = gta->renderer.camera.frustum.view;
+		glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+		gta->dynamicsWorld->debugDrawWorld();
+	}	
+	else {
+		gta->renderer.renderWorld(gta);
+	}
 	
 	window.resetGLStates();
 	

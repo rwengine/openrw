@@ -10,6 +10,12 @@ GTAEngine::GTAEngine(const std::string& path)
 
 bool GTAEngine::load()
 {
+	collisionConfig = new btDefaultCollisionConfiguration;
+	collisionDispatcher = new btCollisionDispatcher(collisionConfig);
+	broadphase = new btDbvtBroadphase();
+	solver = new btSequentialImpulseConstraintSolver;
+	dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, solver, collisionConfig);
+	
 	gameData.load();
 	
 	// Loade all of the IDEs.
@@ -111,6 +117,47 @@ bool GTAEngine::placeItems(const std::string& name)
 				}
 				if(! oi->second->textureName.empty()) {
 					gameData.loadTXD(oi->second->textureName + ".txd");
+				}
+				
+				btRigidBody* body = nullptr;
+				auto phyit = gameData.collisions.find(oi->second->modelName);
+				if( phyit != gameData.collisions.end() ) {
+					btCompoundShape* cmpShape = new btCompoundShape;
+					btDefaultMotionState* msta = new btDefaultMotionState;
+					msta->setWorldTransform(btTransform(
+						btQuaternion(
+							inst.rotX, inst.rotY, inst.rotZ, inst.rotW
+						), 
+						btVector3(
+							inst.posX, inst.posY, inst.posZ
+						)
+					));
+					btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
+					CollisionInstance& physInst = *phyit->second.get();
+					
+					// Boxes
+					for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
+						CollTBox& box = physInst.boxes[i];
+						auto size = (box.max - box.min) / 2.f;
+						auto mid = (box.min + box.max) / 2.f;
+						btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
+						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(mid.x, mid.y, mid.z));
+						cmpShape->addChildShape(t, bshape);
+					}
+					
+					// Spheres
+					for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
+						CollTSphere& sphere = physInst.spheres[i];
+						btCollisionShape* sshape = new btSphereShape(sphere.radius);
+						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
+						cmpShape->addChildShape(t, sshape);
+					}
+					
+					// Todo: other shapes.
+					
+					body = new btRigidBody(info);
+					//body->setWorldTransform();
+					dynamicsWorld->addRigidBody(body);
 				}
 				
 				objectInstances.push_back({ inst, oi->second });
