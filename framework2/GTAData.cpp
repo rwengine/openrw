@@ -12,40 +12,47 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-// Hacky functtion to get around the fact that none of the files are the right case
-std::string findFileRealCase(const std::string& lowerPath) {
+/**
+ * Finds the 'real' case for a path, to get around the fact that Rockstar's data is usually the wrong case.
+ * @param base The base of the path to start looking from.
+ * @param path the lowercase path.
+ */
+std::string findPathRealCase(const std::string& base, const std::string& path) 
+{
 #ifdef __unix__
-	size_t lastSlash = lowerPath.find_last_of("/");
-	std::string fileDir = ".";
-	if(lastSlash != lowerPath.npos) {
-		fileDir = lowerPath.substr(0, lastSlash);
+	size_t endslash = path.find("/");
+	bool isDirectory = true;
+	if(endslash == path.npos) {
+		isDirectory = false;
 	}
-	else {
-		lastSlash = 0;
-	}
+	std::string orgFileName = isDirectory ? path.substr(0, endslash) : path;
+	std::string realName;
 	
-	DIR* dp = opendir(fileDir.c_str());
+	// Open the current "base" path (i.e. the real path)
+	DIR* dp = opendir(base.c_str());
 	dirent* ep;
+		
 	if( dp != NULL) {
 		while( ep = readdir(dp)) {
-			std::string realName(ep->d_name);
+			realName = ep->d_name;
 			std::string lowerRealName = realName;
-			for( size_t t = 0; t < lowerRealName.size(); ++t) {
-				lowerRealName[t] = tolower(lowerRealName[t]);
-			}
-			if(lowerRealName == lowerPath.substr(lastSlash+1)) {
-				return fileDir + "/" + realName;
+			std::transform(lowerRealName.begin(), lowerRealName.end(), lowerRealName.begin(), ::tolower);
+			if( lowerRealName == orgFileName) {
+				closedir(dp);
+				if( isDirectory) {
+					return findPathRealCase(base + "/" + realName, path.substr(endslash+1));
+				}
+				else {
+					return base + "/" + realName;
+				}
 			}
 		}
-		
-		closedir(dp);
 	}
 	
-	return lowerPath;
-	
+	return "";
 #else 
-	// We'll just have to assume this means Windows for now.
-	return lowerPath;
+	// Is anything other than Windows likely to fall here?
+	return path;
 #endif
 }
 
@@ -119,8 +126,8 @@ void GTAData::parseDAT(const std::string& path)
 				else if(cmd == "IPL")
 				{
 					std::string fixedpath = fixPath(line.substr(space+1));
-					fixedpath = findFileRealCase(datpath + "/" + fixedpath);
-					loadIPL(fixedpath.substr((datpath+"/").size()));
+					fixedpath = findPathRealCase(datpath, fixedpath);
+					loadIPL(fixedpath);
 				}
 				else if(cmd == "TEXDICTION") 
 				{
@@ -131,7 +138,7 @@ void GTAData::parseDAT(const std::string& path)
 							texpath[t] = '/';
 						}
 					}
-					texpath = findFileRealCase(datpath + "/" + texpath);
+					texpath = findPathRealCase(datpath, texpath);
 					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
 					fileLocations.insert({ texname, { false, texpath }});
 				}
@@ -156,7 +163,22 @@ void GTAData::loadIDE(const std::string& name)
 
 void GTAData::loadCOL(const size_t zone, const std::string& name)
 {
-	std::cout << "COL File " << name << " for zone " << zone << std::endl;
+	LoaderCOL col;
+	
+	auto lowername = name;
+	for(size_t t = 0; t < lowername.size(); ++t)
+	{
+		lowername[t] = tolower(lowername[t]);
+		if(lowername[t] == '\\') {
+			lowername[t] = '/';
+		}
+	}
+	
+	if(col.load(datpath + "/" + name)) {
+		for( size_t i = 0; i < col.instances.size(); ++i ) {
+			collisions[std::string(col.instances[i].header.name)] = std::move(std::unique_ptr<CollisionInstance>( new CollisionInstance(col.instances[i]) ));
+		}
+	}
 }
 
 void GTAData::loadIMG(const std::string& name)
@@ -191,7 +213,7 @@ void GTAData::loadIMG(const std::string& name)
 
 void GTAData::loadIPL(const std::string& name)
 {
-	iplLocations.insert({name, datpath + "/" + name});
+	iplLocations.insert({name, name});
 }
 
 enum ColSection {
