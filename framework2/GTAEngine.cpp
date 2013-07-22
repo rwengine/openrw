@@ -119,9 +119,11 @@ bool GTAEngine::placeItems(const std::string& name)
 					gameData.loadTXD(oi->second->textureName + ".txd");
 				}
 				
+                static size_t bodycount = 0;
+
 				btRigidBody* body = nullptr;
 				auto phyit = gameData.collisions.find(oi->second->modelName);
-				if( phyit != gameData.collisions.end() ) {
+                if( phyit != gameData.collisions.end()) {
 					btCompoundShape* cmpShape = new btCompoundShape;
 					btDefaultMotionState* msta = new btDefaultMotionState;
 					msta->setWorldTransform(btTransform(
@@ -143,6 +145,7 @@ bool GTAEngine::placeItems(const std::string& name)
 						btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
 						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(mid.x, mid.y, mid.z));
 						cmpShape->addChildShape(t, bshape);
+                        bodycount++;
 					}
 					
 					// Spheres
@@ -151,7 +154,26 @@ bool GTAEngine::placeItems(const std::string& name)
 						btCollisionShape* sshape = new btSphereShape(sphere.radius);
 						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 						cmpShape->addChildShape(t, sshape);
+                        bodycount++;
 					}
+
+                    if( physInst.triangles.size() > 0 ) {
+                        btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
+                                    physInst.triangles.size(),
+                                    (int*) &(physInst.triangles.data()->a),
+                                    sizeof(CollTFace),
+                                    physInst.vertices.size(),
+                                    &(physInst.vertices[0].x),
+                                sizeof(glm::vec3)
+                                );
+                        btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
+                        cmpShape->addChildShape(
+                                    btTransform(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(0.f, 0.f, 0.f)),
+                                    trishape
+                                    );
+                        bodycount++;
+                    }
+
 					
 					// Todo: other shapes.
 					

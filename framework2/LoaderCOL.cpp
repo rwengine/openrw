@@ -32,6 +32,8 @@ bool LoaderCOL::load(char* data, const size_t size)
 		CollTHeaderV3 head3;
 		std::vector<CollTSphere> spheres;
 		std::vector<CollTBox> boxes;
+        std::vector<CollTVertex> meshvertices;
+        std::vector<CollTFaceV1> meshfaces;
 		
 		if(version >= 2) 
 		{
@@ -72,18 +74,39 @@ bool LoaderCOL::load(char* data, const size_t size)
 		for( size_t i = 0; i < head2.numboxes; ++i) {
 			boxes.push_back(readType<CollTBox>(data, &dataI));
 		}
-		
+
 		if(version == 1)
-		{
-			//head2.
-			uint32_t numverts = readType<uint32_t>(data, &dataI);
-			dataI += sizeof(CollTVertex) * numverts;
+        {
+            uint32_t numverts = readType<uint32_t>(data, &dataI);
+            head2.offsetverts = dataI;
+            // Skip the vertex data for now, since it's accessed retroactivly.
+            dataI += numverts * sizeof(CollTVertex);
 		}
-		
+        else {
+            // TODO support version 2 & 3.
+        }
+
 		if(version == 1) 
 		{
 			head2.numfaces = readType<uint32_t>(data, &dataI);
 		}
+        size_t maxvert = 0;
+        meshfaces.reserve(head2.numfaces);
+        for( size_t f = 0; f < head2.numfaces; ++f) {
+            // todo: Support 2-3
+            CollTFaceV1 face = readType<CollTFaceV1>(data, &dataI);
+            size_t maxv = std::max(face.a, std::max(face.b, face.c));
+            maxvert = std::max( maxvert, maxv );
+            meshfaces.push_back(face);
+        }
+
+        // Load up to maxvert vertices.
+        meshvertices.reserve(maxvert);
+        for( size_t v = 0, vertI = head2.offsetverts; v < maxvert; ++v ) {
+            CollTVertex vert = readType<CollTVertex>(data, &vertI);
+            meshvertices.push_back(vert);
+        }
+
 		dataI += sizeof(CollTFace) * head2.numfaces;
 		
 		instances.push_back({
@@ -92,7 +115,9 @@ bool LoaderCOL::load(char* data, const size_t size)
 			head2,
 			head3,
 			spheres,
-			boxes
+            boxes,
+            meshvertices,
+            meshfaces
 		});
 		
 		dataI = file_base + head.size + sizeof(char) * 8;

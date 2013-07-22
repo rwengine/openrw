@@ -112,6 +112,8 @@ public:
 	
 	std::vector<CollTSphere> spheres;
 	std::vector<CollTBox> boxes;
+    std::vector<CollTVertex> vertices;
+    std::vector<CollTFaceV1> triangles;
 };
 
 /**
