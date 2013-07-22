@@ -160,8 +160,8 @@ bool GTAEngine::placeItems(const std::string& name)
                     if( physInst.triangles.size() > 0 ) {
                         btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
                                     physInst.triangles.size(),
-                                    (int*) &(physInst.triangles.data()->a),
-                                    sizeof(CollTFace),
+                                    (int*) physInst.triangles.data(),
+                                    sizeof(CollTFaceTriangle),
                                     physInst.vertices.size(),
                                     &(physInst.vertices[0].x),
                                 sizeof(glm::vec3)

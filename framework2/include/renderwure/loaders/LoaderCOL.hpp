@@ -58,15 +58,26 @@ typedef glm::vec3 CollTVertex;
 
 struct CollTFace
 {
-	uint16_t a, b, c;
-	uint8_t material;
-	uint8_t light;
+    uint16_t a, b, c;
+    uint8_t material;
+    uint8_t light;
 };
 
 struct CollTFaceV1
 {
 	uint32_t a, b, c;
 	CollTSurface surface;
+};
+
+struct CollTFaceTriangle
+{
+    uint32_t a, b, c;
+};
+
+struct CollTFaceData
+{
+    uint8_t material;
+    uint8_t light;
 };
 
 struct CollTHeader
@@ -113,7 +124,7 @@ public:
 	std::vector<CollTSphere> spheres;
 	std::vector<CollTBox> boxes;
     std::vector<CollTVertex> vertices;
-    std::vector<CollTFaceV1> triangles;
+    std::vector<CollTFaceTriangle> triangles;
 };
 
 /**

@@ -4,6 +4,8 @@
 
 #define GLEW_STATIC
 #include <GL/glew.h>
+#include <vector>
+#include <glm/glm.hpp>
 
 class DebugDraw : public btIDebugDraw
 {
@@ -19,12 +21,20 @@ public:
 	void setDebugMode(int debugMode);
 	int getDebugMode() const;
 
+    void drawAllLines();
+
 	void setShaderProgram(GLuint shaderProgram) {
 		this->shaderProgram = shaderProgram;
 	}
 
 protected:
 	int debugMode;
+
+    std::vector<glm::vec3> lines;
+    size_t maxlines;
+
+    btVector3 color;
+
 	GLuint shaderProgram;
 
 	GLuint vbo, vao, texture;

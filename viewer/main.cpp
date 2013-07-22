@@ -24,6 +24,8 @@ sf::RenderWindow window;
 
 GTAEngine* gta = nullptr;
 
+DebugDraw* debugDrawer = nullptr;
+
 glm::vec3 plyPos;
 glm::vec2 plyLook;
 float moveSpeed = 20.0f;
@@ -98,10 +100,10 @@ void init(std::string gtapath)
 		if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
 	}
 	
-	DebugDraw* debg = new DebugDraw;
-	debg->setShaderProgram(gta->renderer.worldProgram);
-	debg->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-	gta->dynamicsWorld->setDebugDrawer(debg);
+    debugDrawer = new DebugDraw;
+    debugDrawer->setShaderProgram(gta->renderer.worldProgram);
+    debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+    gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 }
 
 void update(float dt)
@@ -170,6 +172,7 @@ void render()
 		glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 		gta->dynamicsWorld->debugDrawWorld();
+        debugDrawer->drawAllLines();
 	}	
 	else {
 		gta->renderer.renderWorld(gta);

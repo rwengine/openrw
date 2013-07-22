@@ -33,7 +33,7 @@ bool LoaderCOL::load(char* data, const size_t size)
 		std::vector<CollTSphere> spheres;
 		std::vector<CollTBox> boxes;
         std::vector<CollTVertex> meshvertices;
-        std::vector<CollTFaceV1> meshfaces;
+        std::vector<CollTFaceTriangle> meshfaces;
 		
 		if(version >= 2) 
 		{
@@ -97,12 +97,12 @@ bool LoaderCOL::load(char* data, const size_t size)
             CollTFaceV1 face = readType<CollTFaceV1>(data, &dataI);
             size_t maxv = std::max(face.a, std::max(face.b, face.c));
             maxvert = std::max( maxvert, maxv );
-            meshfaces.push_back(face);
+            meshfaces.push_back({face.a, face.b, face.c});
         }
 
         // Load up to maxvert vertices.
-        meshvertices.reserve(maxvert);
-        for( size_t v = 0, vertI = head2.offsetverts; v < maxvert; ++v ) {
+        meshvertices.reserve(maxvert+1);
+        for( size_t v = 0, vertI = head2.offsetverts; v < maxvert+1; ++v ) {
             CollTVertex vert = readType<CollTVertex>(data, &vertI);
             meshvertices.push_back(vert);
         }
