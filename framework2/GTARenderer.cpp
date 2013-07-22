@@ -295,7 +295,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	}
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
-		GTAEngine::GTAInstance& inst = engine->objectInstances[i];
+        GTAInstance& inst = engine->objectInstances[i];
 		LoaderIPLInstance &obj = inst.instance;
 		std::string modelname = obj.model;
 		
@@ -330,7 +330,7 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 	}
 	
 	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
-		GTAEngine::GTAVehicle& inst = engine->vehicleInstances[v];
+        GTAVehicle& inst = engine->vehicleInstances[v];
 		std::string modelname = inst.vehicle->modelName;
 		
 		std::unique_ptr<Model> &model = engine->gameData.models[modelname];
@@ -341,10 +341,8 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 		}
 		
 		glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, inst.position);
-		//matrixModel = glm::scale(matrixModel, scale);
-		////matrixModel = matrixModel * glm::mat4_cast(rot);
-		
+        matrixModel = glm::translate(matrixModel, inst.position);
+
 		glm::mat4 matrixVehicle = matrixModel;
 		
 		for (size_t a = 0; a < model->atomics.size(); a++) 
@@ -374,66 +372,14 @@ void GTARenderer::renderWorld(GTAEngine* engine)
 				matrixModel = matrixModel * glm::mat4(model->frames[fi].rotation);
 				fi = model->frames[fi].index;
 			}
-			
-			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-			if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
-				glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-			}
-			
-			glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-			glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-			glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
-			glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
-				(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
-			);
-			glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
-				(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
-					+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
-					+ (model->geometries[g].normals.size() * sizeof(float) * 3))
-			);
-			glEnableVertexAttribArray(posAttrib);
-			glEnableVertexAttribArray(texAttrib);
-			glEnableVertexAttribArray(normalAttrib);
-			glEnableVertexAttribArray(colourAttrib);
-			
-			for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
-			{
-				if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-					Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
-					
-					if(mat.textures.size() > 0) {
-						textureLoader.bindTexture(mat.textures[0].name);
-					}
-					
-					if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
-						auto colmasked = mat.colour;
-						size_t R = colmasked % 256; colmasked /= 256;
-						size_t G = colmasked % 256; colmasked /= 256;
-						size_t B = colmasked % 256; colmasked /= 256;
-						if( R == 60 && G == 255 && B == 0 ) {
-							glUniform4f(uniCol, inst.colourPrimary.r, inst.colourPrimary.g, inst.colourPrimary.b, 1.f);
-						}
-						else if( R == 255 && G == 0 && B == 175 ) {
-							glUniform4f(uniCol, inst.colourSecondary.r, inst.colourSecondary.g, inst.colourSecondary.b, 1.f);
-						}
-						else {
-							glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
-						}
-					}
-					
-					glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
-					glUniform1f(uniMatAmbient, mat.ambientIntensity);
-				}
-				else {
-					
-				}
-				
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
 
-				glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
-			}
-		}
-		
+            if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
+                glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+            }
+
+            renderGeometry(engine, model, g, matrixModel, &inst);
+        }
+
 		// Draw wheels n' stuff
 		for( size_t w = 0; w < inst.vehicle->wheelPositions.size(); ++w) {
 			auto woi = engine->objectTypes.find(inst.vehicle->wheelModelID);
@@ -498,45 +444,7 @@ void GTARenderer::renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Mode
 		matrixModel = glm::scale(matrixModel, scale);
 		matrixModel = matrixModel * glm::mat4_cast(rot);
 		
-		//matrixModel = glm::translate(matrixModel, model->frames[f].position);
-		//matrixModel = matrixModel * glm::mat4(model->frames[model->atomics[a].frame].rotation);
-		
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
-		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
-			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
-		);
-		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
-			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
-				+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
-				+ (model->geometries[g].normals.size() * sizeof(float) * 3))
-		);
-		glEnableVertexAttribArray(posAttrib);
-		glEnableVertexAttribArray(texAttrib);
-		glEnableVertexAttribArray(normalAttrib);
-		glEnableVertexAttribArray(colourAttrib);
-		
-		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
-		{
-			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-				Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
-				
-				if(mat.textures.size() > 0) {
-					engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
-				}
-				
-				glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
-				glUniform1f(uniMatAmbient, mat.ambientIntensity);
-			}
-			
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
-
-			glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
-		}
+        renderGeometry(engine, model, g, matrixModel);
 		break;
 	}
 }
@@ -572,41 +480,62 @@ void GTARenderer::renderObject(GTAEngine* engine, const std::unique_ptr<Model>& 
 			fi = model->frames[fi].index;
 		}*/
 		
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
-		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
-			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
-		);
-		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
-			(void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) 
-				+ (model->geometries[g].texcoords.size() * sizeof(float) * 2)
-				+ (model->geometries[g].normals.size() * sizeof(float) * 3))
-		);
-		glEnableVertexAttribArray(posAttrib);
-		glEnableVertexAttribArray(texAttrib);
-		glEnableVertexAttribArray(normalAttrib);
-		glEnableVertexAttribArray(colourAttrib);
-		
-		for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg) 
-		{
-			if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) { 
-				Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
-			
-				if(mat.textures.size() > 0) {
-					engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
-				}
-				
-				glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
-				glUniform1f(uniMatAmbient, mat.ambientIntensity);
-			}
-			
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
-
-			glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
-		}
+        renderGeometry(engine, model, g, matrixModel);
 	}
+}
+
+void GTARenderer::renderGeometry(GTAEngine *engine, const std::unique_ptr<Model> & model, size_t g, const glm::mat4& modelMatrix, GTAVehicle* vehicle)
+{
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+
+    glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
+    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
+        (void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
+    );
+    glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
+        (void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3)
+            + (model->geometries[g].texcoords.size() * sizeof(float) * 2)
+            + (model->geometries[g].normals.size() * sizeof(float) * 3))
+    );
+    glEnableVertexAttribArray(posAttrib);
+    glEnableVertexAttribArray(texAttrib);
+    glEnableVertexAttribArray(normalAttrib);
+    glEnableVertexAttribArray(colourAttrib);
+
+    for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg)
+    {
+        if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) {
+            Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
+
+            if(mat.textures.size() > 0) {
+                engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
+            }
+
+            if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
+                auto colmasked = mat.colour;
+                size_t R = colmasked % 256; colmasked /= 256;
+                size_t G = colmasked % 256; colmasked /= 256;
+                size_t B = colmasked % 256; colmasked /= 256;
+                if( vehicle && R == 60 && G == 255 && B == 0 ) {
+                    glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
+                }
+                else if( vehicle && R == 255 && G == 0 && B == 175 ) {
+                    glUniform4f(uniCol, vehicle->colourSecondary.r, vehicle->colourSecondary.g, vehicle->colourSecondary.b, 1.f);
+                }
+                else {
+                    glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
+                }
+            }
+
+            glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
+            glUniform1f(uniMatAmbient, mat.ambientIntensity);
+        }
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
+
+        glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+    }
 }

@@ -36,6 +36,8 @@ SET(RENDERWARE_HEADERS
     include/renderwure/engine/GTAEngine.hpp
     include/renderwure/engine/GTATypes.hpp
 
+    include/renderwure/engine/GTAObjects.hpp
+
     include/renderwure/render/GTARenderer.hpp
     include/renderwure/render/DebugDraw.hpp
     include/renderwure/render/ViewCamera.hpp

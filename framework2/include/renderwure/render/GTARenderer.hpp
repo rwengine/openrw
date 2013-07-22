@@ -9,6 +9,8 @@
 
 class Model;
 class GTAEngine;
+class GTAVehicle;
+
 class GTARenderer
 {
 public:
@@ -38,6 +40,8 @@ public:
 	void renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
 	
 	void renderObject(GTAEngine* engine, const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+
+    void renderGeometry(GTAEngine* engine, const std::unique_ptr<Model>&, size_t geom, const glm::mat4& modelMatrix, GTAVehicle* vehicle = nullptr);
 };
 
 #endif

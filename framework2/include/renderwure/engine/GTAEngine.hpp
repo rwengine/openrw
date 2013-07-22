@@ -3,8 +3,8 @@
 #define _GTAENGINE_HPP_
 
 #include <renderwure/engine/GTAData.hpp>
-#include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/render/GTARenderer.hpp>
+#include <renderwure/engine/GTAObjects.hpp>
 
 #include <glm/glm.hpp>
 
@@ -22,7 +22,7 @@
 class GTAEngine
 {
 public:
-	
+
 	GTAEngine(const std::string& gamepath);
 	
 	/**
@@ -58,28 +58,7 @@ public:
 	/**
 	 * Displays a comforting warning
 	 */
-	void logWarning(const std::string& warning);
-	
-	/**
-	 * @struct GTAObject
-	 *  Stores references to the Object data and the instance
-	 */
-	struct GTAInstance {
-		LoaderIPLInstance instance;
-		std::shared_ptr<LoaderIDE::OBJS_t> object;
-	};
-	
-	/**
-	 * @class GTAVehicle
-	 *  Stores references to the vehicle data and the instance
-	 * @todo some kind of VehicleInstance data so we can save that.
-	 */
-	struct GTAVehicle {
-		glm::vec3 position;
-		std::shared_ptr<LoaderIDE::CARS_t> vehicle;
-		glm::vec3 colourPrimary;
-		glm::vec3 colourSecondary;
-	};
+    void logWarning(const std::string& warning);
 	
 	/**
 	 * Loads an IDE into the game
@@ -100,7 +79,12 @@ public:
 	/**
 	 * Creates a vehicle
 	 */
-	void createVehicle(const uint16_t id, const glm::vec3& pos);
+    void createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+
+    /**
+     * Creates a pedestrian.
+     */
+    void createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Roughly the middle of everything
@@ -137,6 +121,11 @@ public:
 	 * Vehicle definitions
 	 */
 	std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>> vehicleTypes;
+
+    /**
+     * Ped definitions
+     */
+    std::map<uint16_t, std::shared_ptr<LoaderIDE::PEDS_t>> pedestrianTypes;
 	
 	/**
 	 * Game Objects!
@@ -147,6 +136,11 @@ public:
 	 * Game Vehicles!
 	 */
 	std::vector<GTAVehicle> vehicleInstances;
+
+    /**
+     * Pedestrians and PCs.
+     */
+    std::vector<GTACharacter> pedestrians;
 
 	/**
 	 * Randomness Engine

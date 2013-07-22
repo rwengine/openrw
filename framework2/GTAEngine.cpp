@@ -80,6 +80,13 @@ bool GTAEngine::defineItems(const std::string& name)
 				std::shared_ptr<LoaderIDE::CARS_t>(new LoaderIDE::CARS_t(idel.CARSs[v]))
 			});
 		}
+
+        for( size_t v = 0; v < idel.PEDSs.size(); ++v) {
+            pedestrianTypes.insert({
+                idel.PEDSs[v].ID,
+                std::shared_ptr<LoaderIDE::PEDS_t>(new LoaderIDE::PEDS_t(idel.PEDSs[v]))
+            });
+        }
 	}
 	else {
 		std::cerr << "Failed to load IDE " << path << std::endl;
@@ -219,7 +226,7 @@ bool GTAEngine::loadZone(const std::string& path)
 	return false;
 }
 
-void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
+void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto vti = vehicleTypes.find(id);
 	if(vti != vehicleTypes.end()) {
@@ -265,6 +272,24 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos)
 			}
 		}
 		
-		vehicleInstances.push_back({ pos, vti->second, prim, sec });
+        vehicleInstances.push_back({ vti->second, pos, rot, prim, sec });
 	}
+}
+
+void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
+{
+    auto pti = pedestrianTypes.find(id);
+    if( pti != pedestrianTypes.end() ) {
+        auto& pt = pti->second;
+
+        // Ensure the relevant data is loaded.
+        if(! pt->modelName.empty()) {
+            gameData.loadDFF(pt->modelName + ".dff");
+        }
+        if(! pt->textureName.empty()) {
+            gameData.loadTXD(pt->textureName + ".txd");
+        }
+
+        pedestrians.push_back({ pt, pos, rot });
+    }
 }
