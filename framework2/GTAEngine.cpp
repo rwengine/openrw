@@ -3,7 +3,7 @@
 #include <renderwure/loaders/LoaderIDE.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
-: itemCount(0), gameData(path), gameTime(0.f), randomEngine(rand())
+    : renderer(this), itemCount(0), gameData(path), gameTime(0.f), randomEngine(rand())
 {
 	gameData.engine = this;
 }

@@ -13,9 +13,11 @@ class GTAVehicle;
 
 class GTARenderer
 {
+    GTAEngine* engine;
+
 public:
 	
-	GTARenderer();
+    GTARenderer(GTAEngine*);
 	
 	ViewCamera camera;
 	
@@ -35,13 +37,13 @@ public:
 	
 	GLuint planeVBO, skydomeVBO;
 	
-	void renderWorld(GTAEngine* engine);
+    void renderWorld();
 	
-	void renderNamedFrame(GTAEngine* engine, const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
-	
-	void renderObject(GTAEngine* engine, const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale);
+    void renderNamedFrame(const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
 
-    void renderGeometry(GTAEngine* engine, const std::unique_ptr<Model>&, size_t geom, const glm::mat4& modelMatrix, GTAVehicle* vehicle = nullptr);
+    void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAVehicle* vehicle = nullptr);
+
+    void renderModel(Model*, const glm::mat4& modelMatrix, GTAVehicle* = nullptr);
 };
 
 #endif

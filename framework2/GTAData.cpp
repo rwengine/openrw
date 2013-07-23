@@ -191,7 +191,7 @@ void GTAData::loadIMG(const std::string& name)
 				std::cerr << "Asset " << filename << " has no size, ignoring." << std::endl;
 			}
 			else
-			{
+            {
 				// Enter the asset twice.. 
 				fileLocations.insert({ filename, { true, archivePath }});
 				for(size_t t = 0; t < filename.size(); ++t)

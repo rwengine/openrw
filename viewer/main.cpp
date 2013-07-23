@@ -97,8 +97,18 @@ void init(std::string gtapath)
 		it != gta->vehicleTypes.end(); ++it) {
 		gta->createVehicle(it->first, spawnPos);
 		spawnPos += glm::vec3(5, 0, 0);
-		if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
+        if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
 	}
+
+    spawnPos = plyPos + glm::vec3(-5, 20 + (2.5 * gta->pedestrianTypes.size()/4), 0);
+    k = 1;
+    // Spawn every pedestrian.
+    for(auto it = gta->pedestrianTypes.begin();
+        it != gta->pedestrianTypes.end(); ++it) {
+        gta->createPedestrian(it->first, spawnPos);
+        spawnPos += glm::vec3(2.5, 0, 0);
+        if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
+    }
 	
     debugDrawer = new DebugDraw;
     debugDrawer->setShaderProgram(gta->renderer.worldProgram);
@@ -175,7 +185,7 @@ void render()
         debugDrawer->drawAllLines();
 	}	
 	else {
-		gta->renderer.renderWorld(gta);
+        gta->renderer.renderWorld();
 	}
 	
 	window.resetGLStates();
