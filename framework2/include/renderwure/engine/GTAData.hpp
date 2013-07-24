@@ -147,7 +147,7 @@ public:
 	/**
 	 * Loaded models
 	 */
-	std::map<std::string, std::unique_ptr<Model>> models;
+    std::map<std::string, Model*> models;
 	
 	/**
 	 * Loaded collision proxies

@@ -189,7 +189,13 @@ bool GTAEngine::placeItems(const std::string& name)
 					dynamicsWorld->addRigidBody(body);
 				}
 				
-				objectInstances.push_back({ inst, oi->second });
+                objectInstances.push_back({
+                                              glm::vec3(inst.posX, inst.posY, inst.posZ),
+                                              glm::quat(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ),
+                                              gameData.models[inst.model],
+                                              glm::vec3(inst.scaleX, inst.scaleY, inst.scaleZ),
+                                              inst, oi->second
+                                          });
 			}
 			else {
 				std::cerr << "No object for instance " << inst.id << " (" << path << ")" << std::endl;
@@ -258,7 +264,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 			}
 		}
 		
-		std::unique_ptr<Model> &model = gameData.models[vti->second->modelName];
+        Model* model = gameData.models[vti->second->modelName];
 		if(model) {
 			if( vti->second->wheelPositions.size() == 0 ) {
 				for( size_t f = 0; f < model->frames.size(); ++f) {
@@ -272,7 +278,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 			}
 		}
 		
-        vehicleInstances.push_back({ vti->second, pos, rot, prim, sec });
+        vehicleInstances.push_back({ pos, rot, model, vti->second, prim, sec });
 	}
 }
 
@@ -290,6 +296,8 @@ void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const 
             gameData.loadTXD(pt->textureName + ".txd");
         }
 
-        pedestrians.push_back({ pt, pos, rot });
+        Model* model = gameData.models[pt->modelName];
+
+        pedestrians.push_back({ pos, rot, model, pt });
     }
 }

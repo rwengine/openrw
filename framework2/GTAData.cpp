@@ -338,7 +338,7 @@ void GTAData::loadDFF(const std::string& name)
 	if(file)
 	{
 		LoaderDFF dffLoader;
-		models[name.substr(0, name.size() - 4)] = std::move(dffLoader.loadFromMemory(file));
+        models[name.substr(0, name.size() - 4)] = dffLoader.loadFromMemory(file);
 		delete[] file;
 	}
 }

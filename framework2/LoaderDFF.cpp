@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-std::unique_ptr<Model> LoaderDFF::loadFromMemory(char *data)
+Model* LoaderDFF::loadFromMemory(char *data)
 {
-	auto model = std::unique_ptr<Model>(new Model);
+    auto model = new Model;
 	RW::BinaryStreamSection root(data);
 
 	model->clump = root.readStructure<RW::BSClump>();

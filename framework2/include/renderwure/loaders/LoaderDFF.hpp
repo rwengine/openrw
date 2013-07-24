@@ -73,7 +73,7 @@ private:
 	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
 
 public:
-	std::unique_ptr<Model> loadFromMemory(char *data);
+    Model* loadFromMemory(char *data);
 };
 
 #endif

@@ -9,7 +9,7 @@
 
 class Model;
 class GTAEngine;
-class GTAVehicle;
+class GTAObject;
 
 class GTARenderer
 {
@@ -39,11 +39,11 @@ public:
 	
     void renderWorld();
 	
-    void renderNamedFrame(const std::unique_ptr<Model>&, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
+    void renderNamedFrame(Model*, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
 
-    void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAVehicle* vehicle = nullptr);
+    void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 
-    void renderModel(Model*, const glm::mat4& modelMatrix, GTAVehicle* = nullptr);
+    void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 };
 
 #endif
