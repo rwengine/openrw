@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <renderwure/BinaryStream.hpp>
 #include <renderwure/loaders/LoaderCOL.hpp>
+#include <renderwure/loaders/LoaderIFP.hpp>
 #include "../framework/rwbinarystream.h"
 
 using RW::BSSectionHeader;
@@ -442,6 +443,27 @@ void dumpGenericTree(char* data)
 	dumpBinaryStreamSection(root, 0);
 }
 
+void dumpAnimationFile(char* data)
+{
+    LoaderIFP loader;
+
+   if(loader.loadFromMemory(data)) {
+        std::cout << loader.animations.size() << " animations" << std::endl;
+
+        for( auto it = loader.animations.begin();
+             it != loader.animations.end(); ++it ) {
+            Animation* a = *it;
+            std::cout << a->name << std::endl;
+            std::cout << "  " << a->bones.size() << " bones" << std::endl;
+            for( auto bit = a->bones.begin();
+                 bit != a->bones.end(); ++bit ) {
+                std::cout << "    " << bit->first << " (" << bit->second->frames.size() << " frames)" << std::endl;
+            }
+        }
+
+    }
+}
+
 int main(int argc, char** argv)
 {
 	bool raw = false;
@@ -485,6 +507,11 @@ int main(int argc, char** argv)
 				std::cout << "Dumping Collsion file" << std::endl;
 				dumpCollisionModel(data, size);
 			}
+            else if(ext == "ifp")
+            {
+                std::cout << "Dumping animation file" << std::endl;
+                dumpAnimationFile(data);
+            }
 			else 
 			{
 				std::cout << "I'm not sure what that is" << std::endl;

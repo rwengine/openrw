@@ -2,7 +2,6 @@ SET(RENDERWARE_SOURCES
     # RenderWare related
     BinaryStream.cpp
     TextureArchive.cpp
-    LoaderDFF.cpp
     TextureLoader.cpp
     WeatherLoader.cpp
 
@@ -11,6 +10,8 @@ SET(RENDERWARE_SOURCES
     LoaderIMG.cpp
     LoaderIPL.cpp
     LoaderIDE.cpp
+    LoaderDFF.cpp
+    LoaderIFP.cpp
     GTAData.cpp
 
     GTAEngine.cpp
@@ -31,6 +32,7 @@ SET(RENDERWARE_HEADERS
     include/renderwure/loaders/LoaderIMG.hpp
     include/renderwure/loaders/LoaderIPL.hpp
     include/renderwure/loaders/LoaderIDE.hpp
+    include/renderwure/loaders/LoaderIFP.hpp
 
     include/renderwure/engine/GTAData.hpp
     include/renderwure/engine/GTAEngine.hpp
