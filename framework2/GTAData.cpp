@@ -80,6 +80,7 @@ void GTAData::load()
 	parseDAT(datpath+"/data/gta3.dat");
 	
 	fileLocations.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
+    fileLocations.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
 	fileLocations.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
 	loadDFF("wheels.DFF");
 	loadTXD("particle.txd");
@@ -88,6 +89,8 @@ void GTAData::load()
 	loadWeather(datpath+"/data/timecyc.dat");
 	loadWaterpro(datpath+"/data/waterpro.dat");
 	loadWater(datpath+"/data/water.dat");
+
+    loadIFP(datpath+"/anim/ped.ifp");
 }
 
 void GTAData::parseDAT(const std::string& path)
@@ -341,6 +344,27 @@ void GTAData::loadDFF(const std::string& name)
         models[name.substr(0, name.size() - 4)] = dffLoader.loadFromMemory(file);
 		delete[] file;
 	}
+}
+
+void GTAData::loadIFP(const std::string &name)
+{
+    std::ifstream dfile(name.c_str());
+
+    if(dfile.is_open())
+    {
+        dfile.seekg(0, std::ios_base::end);
+        size_t length = dfile.tellg();
+        dfile.seekg(0);
+        char *file = new char[length];
+        dfile.read(file, length);
+
+        LoaderIFP loader;
+        if( loader.loadFromMemory(file) ) {
+            animations.insert(loader.animations.begin(), loader.animations.end());
+        }
+
+        delete[] file;
+    }
 }
 
 char* GTAData::loadFile(const std::string& name)

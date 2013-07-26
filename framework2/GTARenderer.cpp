@@ -305,7 +305,7 @@ void GTARenderer::renderWorld()
 
         if(!charac.model) continue;
 
-        renderModel(charac.model, matrixModel);
+        renderModel(charac.model, matrixModel, &charac);
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
@@ -489,6 +489,14 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object)
 {
+    if( object ) {
+        if( object->type() == GTAObject::Character && object->animation == nullptr ) {
+            object->animation = engine->gameData.animations["woman_walksexy"];
+        }
+        object->animtime = engine->gameTime;
+        object->updateFrames();
+    }
+
     for (size_t a = 0; a < model->atomics.size(); a++)
     {
         size_t g = model->atomics[a].geometry;
@@ -501,9 +509,6 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
             rendered++;
         }
 
-        glm::mat4 atomicMatrix = modelMatrix;
-
-        std::deque<size_t> frames;
         int32_t fi = model->atomics[a].frame;
         if( object && object->type() == GTAObject::Vehicle ) {
             if(model->frameNames.size() > fi) {
@@ -514,20 +519,16 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
             }
         }
 
-        while( fi != -1 ) {
-            frames.push_back(fi);
-            fi = model->frames[fi].index;
-        }
-        for( auto it = frames.rbegin(); it != frames.rend(); ++it ) {
-            glm::mat4 frameMatrix = glm::mat4(model->frames[*it].rotation);
-            frameMatrix[3] = glm::vec4(model->frames[*it].position, 1.f);
-            atomicMatrix = atomicMatrix * frameMatrix;
+        glm::mat4 animmatrix = glm::mat4(1.f);
+        if( object && object->animation ) {
+            animmatrix = glm::translate(animmatrix , object->animposition);
+            animmatrix = animmatrix * glm::mat4_cast(object->animrotation);
         }
 
         if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
             glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
         }
 
-        renderGeometry(model, g, atomicMatrix, object);
+        renderGeometry(model, g, modelMatrix * animmatrix * model->getFrameMatrix(model->atomics[a].frame), object);
     }
 }

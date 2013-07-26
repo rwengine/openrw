@@ -1,6 +1,7 @@
 #include <renderwure/loaders/LoaderDFF.hpp>
 
 #include <iostream>
+#include <algorithm>
 
 Model* LoaderDFF::loadFromMemory(char *data)
 {
@@ -19,9 +20,15 @@ Model* LoaderDFF::loadFromMemory(char *data)
 			size_t fdataI = sizeof(RW::BSFrameList) + sizeof(RW::BSSectionHeader);
 			
 			for(size_t f = 0; f < list.numframes; ++f) {
-				auto frame = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
+                auto rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
 				fdataI += sizeof(RW::BSFrameListFrame);
-				model->frames.push_back(frame);
+
+                Model::Frame frame;
+                frame.defaultRotation = rawframe.rotation;
+                frame.defaultTranslation = rawframe.position;
+                frame.parentFrameIndex = rawframe.index;
+
+                model->frames.push_back(frame);
 			}
 			
 			size_t fldataI = 0;
@@ -32,7 +39,9 @@ Model* LoaderDFF::loadFromMemory(char *data)
 					while( listsec.hasMoreData(extI)) {
 						auto extSec = listsec.getNextChildSection(extI);
 						if( extSec.header.id == RW::SID_NodeName) {
-							model->frameNames.push_back(std::string(extSec.raw(), extSec.header.size));
+                            std::string framename(extSec.raw(), extSec.header.size);
+                            std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
+                            model->frameNames.push_back(framename);
 						}
 					}
 				}

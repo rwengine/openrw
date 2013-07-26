@@ -6,6 +6,7 @@
 #include <renderwure/loaders/TextureLoader.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/loaders/LoaderIFP.hpp>
 #include <renderwure/loaders/WeatherLoader.hpp>
 #include <renderwure/loaders/LoaderCOL.hpp>
 
@@ -95,6 +96,11 @@ public:
 	 * Attempts to load a DFF or does nothing if is already loaded
 	 */
 	void loadDFF(const std::string& name);
+
+    /**
+     * Loads an IFP file containing animations
+     */
+    void loadIFP(const std::string& name);
 	
 	/**
 	 * Returns a pointer to the named file if it is available, the memory must be freed.
@@ -149,6 +155,11 @@ public:
 	 */
     std::map<std::string, Model*> models;
 	
+    /**
+     * Loaded Animations
+     */
+    std::map<std::string, Animation*> animations;
+
 	/**
 	 * Loaded collision proxies
 	 */

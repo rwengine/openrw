@@ -452,12 +452,17 @@ void dumpAnimationFile(char* data)
 
         for( auto it = loader.animations.begin();
              it != loader.animations.end(); ++it ) {
-            Animation* a = *it;
+            Animation* a = it->second;
             std::cout << a->name << std::endl;
             std::cout << "  " << a->bones.size() << " bones" << std::endl;
             for( auto bit = a->bones.begin();
                  bit != a->bones.end(); ++bit ) {
                 std::cout << "    " << bit->first << " (" << bit->second->frames.size() << " frames)" << std::endl;
+                for( auto fit = bit->second->frames.begin();
+                     fit != bit->second->frames.end();
+                     ++fit ) {
+                    std::cout << "      f " << fit->starttime << std::endl;
+                }
             }
         }
 

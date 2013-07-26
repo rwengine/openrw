@@ -58,12 +58,30 @@ public:
 		uint32_t frame;
 		uint32_t geometry;
 	};
+
+    struct Frame {
+        glm::mat4 matrix;
+        glm::mat3 defaultRotation;
+        glm::vec3 defaultTranslation;
+        int32_t parentFrameIndex;
+    };
 	
 	std::vector<std::string> frameNames;
 
 	std::vector<Geometry> geometries;
 	std::vector<Atomic> atomics;
-	std::vector<RW::BSFrameListFrame> frames;
+    std::vector<Frame> frames;
+
+    glm::mat4 getFrameMatrix(int32_t frameIndex)
+    {
+        Frame& frame = frames[frameIndex];
+        if( frame.parentFrameIndex != -1 ) {
+            return getFrameMatrix(frame.parentFrameIndex) * frame.matrix;
+        }
+        else {
+            return frame.matrix;
+        }
+    }
 };
 
 class LoaderDFF

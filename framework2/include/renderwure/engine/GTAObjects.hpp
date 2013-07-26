@@ -8,6 +8,7 @@
 #include <memory>
 
 class Model;
+class Animation;
 
 /**
  * @brief The GTAObject struct
@@ -20,8 +21,13 @@ struct GTAObject
 
     Model* model; /// Cached pointer to Object's Model.
 
+    Animation* animation; /// The currently playing animation.
+    float animtime; /// The current time in the animation.
+    glm::vec3 animposition; /// The offset of the root animation bone.
+    glm::quat animrotation; /// The rotation of the root animation bone.
+
     GTAObject(const glm::vec3& pos, const glm::quat& rot, Model* model)
-        : position(pos), rotation(rot), model(model) {}
+        : position(pos), rotation(rot), model(model), animation(nullptr), animtime(0.f) {}
 
     enum Type
     {
@@ -31,10 +37,16 @@ struct GTAObject
     };
 
     virtual Type type() = 0;
+
+    /**
+     * @brief updateBones Updates frame matrices
+     * Updates the internal frame matrices, taking into account the current animation.
+     */
+    void updateFrames();
 };
 
 /**
- * @struct GTAObject
+ * @struct GTAInstance
  *  Stores references to the Object data and the instance
  */
 struct GTAInstance : public GTAObject

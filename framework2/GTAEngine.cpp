@@ -271,7 +271,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 					if( model->frameNames.size() > f) {
 						std::string& name = model->frameNames[f];
 						if( name.substr(0, 5) == "wheel" ) {
-							vti->second->wheelPositions.push_back(model->frames[f].position);
+                            vti->second->wheelPositions.push_back(model->frames[f].defaultTranslation);
 						}
 					}
 				}
@@ -290,7 +290,12 @@ void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const 
 
         // Ensure the relevant data is loaded.
         if(! pt->modelName.empty()) {
-            gameData.loadDFF(pt->modelName + ".dff");
+            if( pt->modelName != "null" ) {
+                gameData.loadDFF(pt->modelName + ".dff");
+            }
+            else {
+                gameData.loadDFF("loplyguy.dff");
+            }
         }
         if(! pt->textureName.empty()) {
             gameData.loadTXD(pt->textureName + ".txd");

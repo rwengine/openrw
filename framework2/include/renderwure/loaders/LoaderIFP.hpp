@@ -13,6 +13,7 @@ struct AnimationKeyframe
     glm::quat rotation;
     glm::vec3 position;
     glm::vec3 scale;
+    float starttime;
 };
 
 struct AnimationBone
@@ -20,8 +21,18 @@ struct AnimationBone
     std::string name;
     int32_t previous;
     int32_t next;
-    float time;
+    float duration;
+
+    enum Data {
+        R00,
+        RT0,
+        RTS
+    };
+
+    Data type;
     std::vector<AnimationKeyframe> frames;
+
+    AnimationKeyframe getInterpolatedKeyframe(float time);
 };
 
 struct Animation
@@ -85,7 +96,6 @@ public:
 
     struct KFRM {
         BASE base;
-        float time;
     };
 
     struct Anim {
@@ -93,7 +103,7 @@ public:
 
     };
 
-    std::vector<Animation*> animations;
+    std::map<std::string, Animation*> animations;
 
     bool loadFromMemory(char *data);
 };

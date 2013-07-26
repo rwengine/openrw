@@ -13,6 +13,7 @@ SET(RENDERWARE_SOURCES
     LoaderDFF.cpp
     LoaderIFP.cpp
     GTAData.cpp
+    GTAObjects.cpp
 
     GTAEngine.cpp
 

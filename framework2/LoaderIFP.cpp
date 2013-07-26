@@ -1,4 +1,65 @@
 #include <renderwure/loaders/LoaderIFP.hpp>
+#include <algorithm>
+#include <iostream>
+
+bool findKeyframes(float t, AnimationBone* bone, AnimationKeyframe& f1, AnimationKeyframe& f2, float& alpha)
+{
+    for(size_t f = 0; f < bone->frames.size(); ++f ) {
+        if( t <= bone->frames[f].starttime ) {
+            f2 = bone->frames[f];
+
+            if( f == 0 ) {
+                if( bone->frames.size() != 1 ) {
+                    f1 = bone->frames.back();
+                }
+                else {
+                    f1 = f2;
+                }
+            }
+            else {
+                f1 = bone->frames[f-1];
+            }
+
+            float tdiff = (f2.starttime - f1.starttime);
+            if( tdiff == 0.f ) {
+                alpha = 1.f;
+            }
+            else {
+                alpha = (t - f1.starttime) / tdiff;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time)
+{
+    AnimationKeyframe f1, f2;
+
+    while(time > this->duration) {
+        time -= this->duration;
+    }
+
+    float alpha;
+
+    if( findKeyframes(time, this, f1, f2, alpha) ) {
+        return {
+                glm::normalize(glm::mix(f1.rotation, f2.rotation, alpha)),
+                glm::mix(f1.position, f2.position, alpha),
+                glm::mix(f1.scale, f2.scale, alpha),
+                time
+        };
+    }
+
+    return {
+    glm::quat(1.f, 0.f, 0.f, 0.f),
+    glm::vec3(0.f, 0.f, 0.f),
+    glm::vec3(1.f, 1.f, 1.f)
+    };
+
+}
 
 bool LoaderIFP::loadFromMemory(char *data)
 {
@@ -33,47 +94,69 @@ bool LoaderIFP::loadFromMemory(char *data)
 
             KFRM* frame = read<KFRM>(data, dataI);
             std::string type(frame->base.magic, 4);
-            bonedata->time = frame->time;
+
+            float time = 0.f;
 
             if(type == "KR00") {
+                bonedata->type = AnimationBone::R00;
                 for( size_t d = 0; d < frames->frames; ++d ) {
+                    glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
+                    time = *read<float>(data,dataI);
                     bonedata->frames.push_back({
-                                                   *read<glm::quat>(data, dataI),
+                                                   q,
                                                    glm::vec3(0.f, 0.f, 0.f),
-                                                   glm::vec3(1.f, 1.f, 1.f)
+                                                   glm::vec3(1.f, 1.f, 1.f),
+                                                   time
                                                });
                 }
             }
             else if(type == "KRT0") {
+                bonedata->type = AnimationBone::RT0;
                 for( size_t d = 0; d < frames->frames; ++d ) {
+                    glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
+                    glm::vec3 p = *read<glm::vec3>(data, dataI);
+                    time = *read<float>(data,dataI);
                     bonedata->frames.push_back({
-                                                   *read<glm::quat>(data, dataI),
-                                                   *read<glm::vec3>(data, dataI),
-                                                   glm::vec3(1.f, 1.f, 1.f)
+                                                   q,
+                                                   p,
+                                                   glm::vec3(1.f, 1.f, 1.f),
+                                                   time
                                                });
                 }
             }
             else if(type == "KRTS") {
+                bonedata->type = AnimationBone::RTS;
                 for( size_t d = 0; d < frames->frames; ++d ) {
+                    glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
+                    glm::vec3 p = *read<glm::vec3>(data, dataI);
+                    glm::vec3 s = *read<glm::vec3>(data, dataI);
+                    time = *read<float>(data,dataI);
                     bonedata->frames.push_back({
-                                                   *read<glm::quat>(data, dataI),
-                                                   *read<glm::vec3>(data, dataI),
-                                                   *read<glm::vec3>(data, dataI)
+                                                   q,
+                                                   p,
+                                                   s,
+                                                   time
                                                });
                 }
             }
 
+            bonedata->duration = time;
+
             data_offs = start + sizeof(CPAN) + cpan->base.size;
 
+            std::string framename(frames->name);
+            std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
+
             animation->bones.insert({
-                                        std::string(frames->name),
+                                        framename,
                                         bonedata
                                     });
         }
 
         data_offs = animstart + animroot->base.size;
 
-        animations.push_back(animation);
+        std::transform(animname.begin(), animname.end(), animname.begin(), ::tolower );
+        animations.insert({ animname, animation });
     }
 
     return true;
