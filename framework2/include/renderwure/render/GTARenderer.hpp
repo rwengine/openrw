@@ -33,17 +33,26 @@ public:
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	
 	/// Internal VAO to avoid clobbering global state.
-	GLuint vao;
+    GLuint vao, debugVAO;
 	
-	GLuint planeVBO, skydomeVBO;
+    GLuint planeVBO, skydomeVBO, debugVBO;
+    GLuint debugTex;
 	
+    /**
+     * @brief renderWorld renders the world.
+     */
     void renderWorld();
-	
+
     void renderNamedFrame(Model*, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
 
     void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 
     void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr);
+
+    /**
+     * @brief renderPaths renders the AI paths.
+     */
+    void renderPaths();
 };
 
 #endif

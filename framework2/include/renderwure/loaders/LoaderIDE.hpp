@@ -105,12 +105,41 @@ public:
 		uint8_t driveMask;
 	};
 
+    enum PathType
+    {
+        PATH_PED,
+        PATH_CAR
+    };
+
+    enum NodeType
+    {
+        EMPTY = 0, /// These are ignored
+        EXTERNAL = 1, /// May join with other paths
+        INTERNAL = 2 /// Internal to this path
+    };
+
+    struct PathNode
+    {
+        NodeType type;
+        int32_t next;
+        glm::vec3 position;
+    };
+
+    struct PATH_t
+    {
+        PathType type;
+        uint16_t ID;
+        std::string modelName;
+        std::vector<PathNode> nodes;
+    };
+
 	// Load the IDE data into memory
 	bool load(const std::string& filename);
 
 	std::vector<OBJS_t> OBJSs;
 	std::vector<CARS_t> CARSs;
 	std::vector<PEDS_t> PEDSs;
+    std::vector<PATH_t> PATHs;
 };
 
 #endif

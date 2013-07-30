@@ -5,6 +5,7 @@
 #include <renderwure/engine/GTAData.hpp>
 #include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/engine/GTAObjects.hpp>
+#include <renderwure/ai/GTAAINode.hpp>
 
 #include <glm/glm.hpp>
 
@@ -116,6 +117,11 @@ public:
 	 * Object Definitions
 	 */
 	std::map<uint16_t, std::shared_ptr<LoaderIDE::OBJS_t>> objectTypes;
+
+    /**
+     * Paths associated with each object definition.
+     */
+    std::map<uint16_t, std::vector<LoaderIDE::PATH_t>> objectNodes;
 	
 	/**
 	 * Vehicle definitions
@@ -141,6 +147,11 @@ public:
      * Pedestrians and PCs.
      */
     std::vector<GTACharacter> pedestrians;
+
+    /**
+     * AI nodes (todo: replace vector with spatial hash).
+     */
+    std::vector<GTAAINode> ainodes;
 
 	/**
 	 * Randomness Engine

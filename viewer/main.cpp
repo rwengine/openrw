@@ -31,7 +31,7 @@ glm::vec2 plyLook;
 float moveSpeed = 20.0f;
 bool inFocus = false;
 bool mouseGrabbed = true;
-bool showPhysics = false;
+int debugMode = 0;
 
 sf::Font font;
 
@@ -50,7 +50,8 @@ void handleEvent(sf::Event &event)
 			mouseGrabbed = ! mouseGrabbed;
 			break;
 		case sf::Keyboard::P:
-			showPhysics = ! showPhysics;
+            debugMode = debugMode++;
+            while(debugMode > 2) debugMode -= 3;
 			break;
 		default: break;
 		}
@@ -174,20 +175,37 @@ void render()
 	glEnable(GL_DEPTH_TEST);
 	//glEnable(GL_CULL_FACE);
 
-	if( showPhysics) {
-		glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-		glUseProgram(gta->renderer.worldProgram);
-		glm::mat4 proj = gta->renderer.camera.frustum.projection();
-		glm::mat4 view = gta->renderer.camera.frustum.view;
-		glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-		gta->dynamicsWorld->debugDrawWorld();
-        debugDrawer->drawAllLines();
-	}	
-	else {
+    switch( debugMode ) {
+    case 0:
         gta->renderer.renderWorld();
-	}
-	
+        break;
+
+    case 1: {
+
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+        glUseProgram(gta->renderer.worldProgram);
+        glm::mat4 proj = gta->renderer.camera.frustum.projection();
+        glm::mat4 view = gta->renderer.camera.frustum.view;
+        glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+        gta->renderer.renderPaths();
+        break;
+    }
+    case 2: {
+
+        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+        glUseProgram(gta->renderer.worldProgram);
+        glm::mat4 proj = gta->renderer.camera.frustum.projection();
+        glm::mat4 view = gta->renderer.camera.frustum.view;
+        glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+        gta->dynamicsWorld->debugDrawWorld();
+        debugDrawer->drawAllLines();
+
+        break;
+    }
+    }
+
 	window.resetGLStates();
 	
 	std::stringstream ss;

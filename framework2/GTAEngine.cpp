@@ -87,6 +87,20 @@ bool GTAEngine::defineItems(const std::string& name)
                 std::shared_ptr<LoaderIDE::PEDS_t>(new LoaderIDE::PEDS_t(idel.PEDSs[v]))
             });
         }
+
+        // Load AI information.
+        for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
+            auto pathit = objectNodes.find(idel.PATHs[a].ID);
+            if( pathit == objectNodes.end() ) {
+                objectNodes.insert({
+                                   idel.PATHs[a].ID,
+                                   {idel.PATHs[a]}
+                               });
+            }
+            else {
+                pathit->second.push_back(idel.PATHs[a]);
+            }
+        }
 	}
 	else {
 		std::cerr << "Failed to load IDE " << path << std::endl;
@@ -188,10 +202,52 @@ bool GTAEngine::placeItems(const std::string& name)
 					//body->setWorldTransform();
 					dynamicsWorld->addRigidBody(body);
 				}
+
+                glm::vec3 instancePos(inst.posX, inst.posY, inst.posZ);
+                glm::quat instanceRot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
+                instanceRot = glm::normalize(instanceRot);
+
+                auto pathit = objectNodes.find(inst.id);
+                if( pathit != objectNodes.end() ) {
+                    auto& pathlist = pathit->second;
+                    for( size_t p = 0; p < pathlist.size(); ++p ) {
+                        auto& path = pathlist[p];
+                        size_t startIndex = ainodes.size();
+                        for( size_t n = 0; n < path.nodes.size(); ++n ) {
+                            auto& node = path.nodes[n];
+
+                            GTAAINode::NodeType type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
+                            int32_t next = node.next >= 0 ? startIndex + node.next : -1;
+                            uint32_t flags = GTAAINode::None;
+                            glm::vec3 position = instancePos + (instanceRot * node.position);
+
+                            if( node.type == LoaderIDE::EXTERNAL ) {
+                                flags |= GTAAINode::External;
+                                for( size_t rn = 0; rn < ainodes.size(); ++rn ) {
+                                    if( (ainodes[rn].flags & GTAAINode::External) == GTAAINode::External ) {
+                                        auto d = glm::length(ainodes[rn].position - position);
+                                        if( d < 1.f ) {
+                                            next = rn;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            ainodes.push_back({
+                                                  type,
+                                                  position,
+                                                  flags,
+                                                  next
+                                              });
+                        }
+                    }
+                }
+
 				
                 objectInstances.push_back({
-                                              glm::vec3(inst.posX, inst.posY, inst.posZ),
-                                              glm::quat(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ),
+                                              instancePos,
+                                              instanceRot,
                                               gameData.models[inst.model],
                                               glm::vec3(inst.scaleX, inst.scaleY, inst.scaleZ),
                                               inst, oi->second

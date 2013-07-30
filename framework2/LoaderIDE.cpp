@@ -162,6 +162,70 @@ bool LoaderIDE::load(const std::string &filename)
 				PEDSs.push_back(peds);
 				break;
 			}
+            case PATH: {
+                PATH_t path;
+
+                std::string type;
+                getline(strstream, type, ',');
+                if( type == "ped" ) {
+                    path.type = PATH_PED;
+                }
+                else if( type == "car") {
+                    path.type = PATH_CAR;
+                }
+
+                std::string id;
+                getline(strstream, id, ',');
+                path.ID = atoi(id.c_str());
+
+                getline(strstream, path.modelName);
+
+
+                std::string linebuff, buff;
+                for( size_t p = 0; p < 12; ++p ) {
+                    PathNode node;
+
+                    getline(str, linebuff);
+                    std::stringstream buffstream(linebuff);
+
+                    getline(buffstream, buff, ',');
+                    switch(atoi(buff.c_str())) {
+                    case 0:
+                        node.type = EMPTY;
+                        break;
+                    case 1:
+                        node.type = INTERNAL;
+                        break;
+                    case 2:
+                        node.type = EXTERNAL;
+                        break;
+                    }
+
+                    if( node.type == EMPTY ) {
+                        continue;
+                    }
+
+                    getline(buffstream, buff, ',');
+                    node.next = atoi(buff.c_str());
+
+                    getline(buffstream, buff, ','); // "Always 0"
+
+                    getline(buffstream, buff, ',');
+                    node.position.x = atof(buff.c_str()) * 1/16.f;
+
+                    getline(buffstream, buff, ',');
+                    node.position.y = atof(buff.c_str()) * 1/16.f;
+
+                    getline(buffstream, buff, ',');
+                    node.position.z = atof(buff.c_str()) * 1/16.f;
+
+                    path.nodes.push_back(node);
+                }
+
+                PATHs.push_back(path);
+
+                break;
+            }
 			}
 		}
 

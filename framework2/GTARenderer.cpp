@@ -189,6 +189,10 @@ GTARenderer::GTARenderer(GTAEngine* engine)
 		}
 	}
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &debugVBO);
+    glGenTextures(1, &debugTex);
+    glGenVertexArrays(1, &debugVAO);
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -531,4 +535,74 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
 
         renderGeometry(model, g, modelMatrix * animmatrix * model->getFrameMatrix(model->atomics[a].frame), object);
     }
+}
+
+void GTARenderer::renderPaths()
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, debugTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    static std::vector<glm::vec3> carlines;
+    static std::vector<glm::vec3> pedlines;
+
+    GLint posAttrib = glGetAttribLocation(worldProgram, "position");
+    GLint uniModel = glGetUniformLocation(worldProgram, "model");
+
+    glBindVertexArray( vao );
+
+    for( size_t n = 0; n < engine->ainodes.size(); ++n ) {
+        auto& start = engine->ainodes[n];
+        if( start.nextIndex < 0 || start.nextIndex > engine->ainodes.size() ) {
+           continue;
+        }
+        auto& end = engine->ainodes[start.nextIndex];
+
+        if( start.type == GTAAINode::Pedestrian ) {
+            pedlines.push_back(start.position);
+            pedlines.push_back(start.position+glm::vec3(0.f, 0.f, 1.f));
+            pedlines.push_back(start.position);
+            pedlines.push_back(end.position);
+        }
+        else {
+            carlines.push_back(start.position);
+            carlines.push_back(start.position+glm::vec3(0.f, 0.f, 1.f));
+            carlines.push_back(start.position);
+            carlines.push_back(end.position);
+        }
+    }
+
+    glm::mat4 model;
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+    glEnableVertexAttribArray(posAttrib);
+
+    glBindBuffer(GL_ARRAY_BUFFER, debugVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * carlines.size(), &(carlines[0]), GL_STREAM_DRAW);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    float img[] = {1.f, 0.f, 0.f};
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
+        0, GL_RGB, GL_FLOAT, img
+    );
+
+    glDrawArrays(GL_LINES, 0, carlines.size());
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * pedlines.size(), &(pedlines[0]), GL_STREAM_DRAW);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    float img2[] = {0.f, 1.f, 0.f};
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
+        0, GL_RGB, GL_FLOAT, img2
+    );
+
+    glDrawArrays(GL_LINES, 0, pedlines.size());
+
+    pedlines.clear();
+    carlines.clear();
+    glBindVertexArray( 0 );
 }

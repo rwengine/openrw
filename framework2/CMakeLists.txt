@@ -14,6 +14,7 @@ SET(RENDERWARE_SOURCES
     LoaderIFP.cpp
     GTAData.cpp
     GTAObjects.cpp
+    GTAAINode.cpp
 
     GTAEngine.cpp
 
@@ -40,6 +41,7 @@ SET(RENDERWARE_HEADERS
     include/renderwure/engine/GTATypes.hpp
 
     include/renderwure/engine/GTAObjects.hpp
+    include/renderwure/ai/GTAAINode.hpp
 
     include/renderwure/render/GTARenderer.hpp
     include/renderwure/render/DebugDraw.hpp
