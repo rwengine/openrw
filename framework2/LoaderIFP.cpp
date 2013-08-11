@@ -53,12 +53,22 @@ AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time)
         };
     }
 
+    auto fend = frames.back();
     return {
-    glm::quat(1.f, 0.f, 0.f, 0.f),
-    glm::vec3(0.f, 0.f, 0.f),
+    fend.rotation,
+    fend.position,
     glm::vec3(1.f, 1.f, 1.f)
     };
+}
 
+glm::vec3 Animation::getAnimationTravel(float time)
+{
+    auto it = bones.find("swaist");
+    if( it != bones.end() ) {
+        auto frame = it->second->getInterpolatedKeyframe(time);
+        return frame.position;
+    }
+    return glm::vec3(0.f, 0.f, 0.f);
 }
 
 bool LoaderIFP::loadFromMemory(char *data)

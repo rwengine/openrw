@@ -3,6 +3,12 @@
 #define _GTATYPES_HPP_
 
 #include <cstdint>
+#include <map>
+#include <string>
+
+class Animation;
+
+typedef std::map<std::string, Animation*> AnimationSet;
 
 namespace GTATypes
 {

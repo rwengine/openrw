@@ -494,10 +494,6 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object)
 {
     if( object ) {
-        if( object->type() == GTAObject::Character && object->animation == nullptr ) {
-            object->animation = engine->gameData.animations["woman_walksexy"];
-        }
-        object->animtime = engine->gameTime;
         object->updateFrames();
     }
 
@@ -523,17 +519,11 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
             }
         }
 
-        glm::mat4 animmatrix = glm::mat4(1.f);
-        if( object && object->animation ) {
-            animmatrix = glm::translate(animmatrix , object->animposition);
-            animmatrix = animmatrix * glm::mat4_cast(object->animrotation);
-        }
-
         if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
             glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
         }
 
-        renderGeometry(model, g, modelMatrix * animmatrix * model->getFrameMatrix(model->atomics[a].frame), object);
+        renderGeometry(model, g, modelMatrix * model->getFrameMatrix(model->atomics[a].frame), object);
     }
 }
 

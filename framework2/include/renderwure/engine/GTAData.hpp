@@ -2,6 +2,7 @@
 #ifndef _GTADATA_HPP_
 #define _GTADATA_HPP_
 
+#include <renderwure/engine/GTATypes.hpp>
 #include <renderwure/loaders/LoaderIMG.hpp>
 #include <renderwure/loaders/TextureLoader.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
@@ -10,11 +11,10 @@
 #include <renderwure/loaders/WeatherLoader.hpp>
 #include <renderwure/loaders/LoaderCOL.hpp>
 
-#include <string>
-#include <map>
 #include <memory>
 
 class GTAEngine;
+
 /**
  * Handles loading and management of the Game's DAT
  */
@@ -158,7 +158,7 @@ public:
     /**
      * Loaded Animations
      */
-    std::map<std::string, Animation*> animations;
+    AnimationSet animations;
 
 	/**
 	 * Loaded collision proxies

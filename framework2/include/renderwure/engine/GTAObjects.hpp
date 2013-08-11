@@ -2,13 +2,19 @@
 #ifndef _GTAOBJECTS_HPP_
 #define _GTAOBJECTS_HPP_
 
+#include <renderwure/engine/GTATypes.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
+#include <bullet/btBulletCollisionCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <memory>
 
 class Model;
 class Animation;
+
+class GTAEngine;
 
 /**
  * @brief The GTAObject struct
@@ -23,8 +29,6 @@ struct GTAObject
 
     Animation* animation; /// The currently playing animation.
     float animtime; /// The current time in the animation.
-    glm::vec3 animposition; /// The offset of the root animation bone.
-    glm::quat animrotation; /// The rotation of the root animation bone.
 
     GTAObject(const glm::vec3& pos, const glm::quat& rot, Model* model)
         : position(pos), rotation(rot), model(model), animation(nullptr), animtime(0.f) {}
@@ -67,12 +71,46 @@ struct GTAInstance : public GTAObject
  */
 struct GTACharacter : public GTAObject
 {
+    enum Activity {
+        None,
+        Idle,
+        Walk,
+        Run,
+        Crouch
+    };
+
     std::shared_ptr<LoaderIDE::PEDS_t> ped;
 
-    GTACharacter(const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
-        : GTAObject(pos, rot, model), ped(ped) {}
+    btKinematicCharacterController* physCharacter;
+    btPairCachingGhostObject* physObject;
+    btBoxShape* physShape;
+
+    /**
+     * @brief GTACharacter Constructs a Character
+     * @param pos
+     * @param rot
+     * @param model
+     * @param ped PEDS_t struct to use.
+     */
+    GTACharacter(const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped);
 
     Type type() { return Character; }
+
+    Activity currentActivity;
+
+    void changeAction(Activity newAction, const AnimationSet &animations);
+
+    /**
+     * @brief updateCharacter updates internall bullet Character.
+     */
+    void updateCharacter();
+
+    /**
+     * @brief updateAnimation updates animation parameters
+     */
+    void updateAnimation(float dt);
+	
+	glm::vec3 skeletonOffset;
 };
 
 /**

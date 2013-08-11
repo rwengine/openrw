@@ -164,6 +164,13 @@ void update(float dt)
 
 		gta->renderer.camera.worldPos = plyPos;
 		gta->renderer.camera.frustum.view = view;
+
+        for( size_t p = 0; p < gta->pedestrians.size(); ++p ) {
+            gta->pedestrians[p].updateAnimation(dt);
+			gta->pedestrians[p].updateCharacter();
+        }
+        
+		gta->dynamicsWorld->stepSimulation(dt);
 	}
 }
 

@@ -39,6 +39,12 @@ struct Animation
 {
     std::string name;
     std::map<std::string, AnimationBone*> bones;
+
+    /**
+     * @brief getAnimationTravel Returns the motion of the root bone
+     * @return vec3 representing the travel
+     */
+    glm::vec3 getAnimationTravel(float time);
 };
 
 class LoaderIFP

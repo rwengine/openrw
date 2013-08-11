@@ -15,6 +15,7 @@ bool GTAEngine::load()
 	broadphase = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, solver, collisionConfig);
+	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	
 	gameData.load();
 	
@@ -360,5 +361,8 @@ void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const 
         Model* model = gameData.models[pt->modelName];
 
         pedestrians.push_back({ pos, rot, model, pt });
+        pedestrians.back().changeAction(GTACharacter::Walk, gameData.animations);
+		dynamicsWorld->addCollisionObject(pedestrians.back().physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+		dynamicsWorld->addAction(pedestrians.back().physCharacter);
     }
 }
