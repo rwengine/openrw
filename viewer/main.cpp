@@ -4,6 +4,7 @@
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/render/DebugDraw.hpp>
+#include <renderwure/ai/GTAAIController.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -166,8 +167,11 @@ void update(float dt)
 		gta->renderer.camera.frustum.view = view;
 
         for( size_t p = 0; p < gta->pedestrians.size(); ++p ) {
-            gta->pedestrians[p].updateAnimation(dt);
-			gta->pedestrians[p].updateCharacter();
+			if(gta->pedestrians[p]->controller) {
+				gta->pedestrians[p]->controller->update(dt);
+			}
+			gta->pedestrians[p]->updateCharacter();
+			gta->pedestrians[p]->updateAnimation(dt);
         }
         
 		gta->dynamicsWorld->stepSimulation(dt);

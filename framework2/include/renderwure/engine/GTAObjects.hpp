@@ -11,6 +11,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <memory>
 
+class GTAAIController;
 class Model;
 class Animation;
 
@@ -26,12 +27,14 @@ struct GTAObject
     glm::quat rotation;
 
     Model* model; /// Cached pointer to Object's Model.
+    
+    GTAEngine* engine;
 
     Animation* animation; /// The currently playing animation.
     float animtime; /// The current time in the animation.
 
-    GTAObject(const glm::vec3& pos, const glm::quat& rot, Model* model)
-        : position(pos), rotation(rot), model(model), animation(nullptr), animtime(0.f) {}
+    GTAObject(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
+        : position(pos), rotation(rot), model(model), engine(engine), animation(nullptr), animtime(0.f) {}
 
     enum Type
     {
@@ -59,8 +62,8 @@ struct GTAInstance : public GTAObject
     LoaderIPLInstance instance;
     std::shared_ptr<LoaderIDE::OBJS_t> object;
 
-    GTAInstance(const glm::vec3& pos, const glm::quat& rot, Model* model, const glm::vec3& scale, LoaderIPLInstance inst, std::shared_ptr<LoaderIDE::OBJS_t> obj)
-        : GTAObject(pos, rot, model), scale(scale), instance(inst), object(obj) {}
+    GTAInstance(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, const glm::vec3& scale, LoaderIPLInstance inst, std::shared_ptr<LoaderIDE::OBJS_t> obj)
+        : GTAObject(engine, pos, rot, model), scale(scale), instance(inst), object(obj) {}
 
     Type type() { return Instance; }
 };
@@ -84,6 +87,8 @@ struct GTACharacter : public GTAObject
     btKinematicCharacterController* physCharacter;
     btPairCachingGhostObject* physObject;
     btBoxShape* physShape;
+	
+	GTAAIController* controller;
 
     /**
      * @brief GTACharacter Constructs a Character
@@ -92,13 +97,13 @@ struct GTACharacter : public GTAObject
      * @param model
      * @param ped PEDS_t struct to use.
      */
-    GTACharacter(const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped);
+    GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped);
 
     Type type() { return Character; }
 
     Activity currentActivity;
 
-    void changeAction(Activity newAction, const AnimationSet &animations);
+    void changeAction(Activity newAction);
 
     /**
      * @brief updateCharacter updates internall bullet Character.
@@ -123,8 +128,8 @@ struct GTAVehicle : public GTAObject
     glm::vec3 colourPrimary;
     glm::vec3 colourSecondary;
 
-    GTAVehicle(const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const glm::vec3& prim, const glm::vec3& sec)
-        : GTAObject(pos, rot, model), vehicle(veh), colourPrimary(prim), colourSecondary(sec) {}
+    GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const glm::vec3& prim, const glm::vec3& sec)
+        : GTAObject(engine, pos, rot, model), vehicle(veh), colourPrimary(prim), colourSecondary(sec) {}
 
     Type type() { return Vehicle; }
 };

@@ -2,6 +2,7 @@
 #include <renderwure/loaders/LoaderIFP.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/ai/GTAAIController.hpp>
 
 void GTAObject::updateFrames()
 {
@@ -35,8 +36,8 @@ void GTAObject::updateFrames()
     }
 }
 
-GTACharacter::GTACharacter(const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
-: GTAObject(pos, rot, model), ped(ped), currentActivity(None)
+GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
+: GTAObject(engine, pos, rot, model), ped(ped), currentActivity(None), controller(nullptr)
 {
     btTransform tf;
 	tf.setIdentity();
@@ -45,26 +46,26 @@ GTACharacter::GTACharacter(const glm::vec3& pos, const glm::quat& rot, Model* mo
     physObject = new btPairCachingGhostObject;
     physObject->setWorldTransform(tf);
 	physShape = new btBoxShape(btVector3(0.25f, 0.25f, 0.5f));
-	skeletonOffset = glm::vec3(0.25f)/2.f;
+	skeletonOffset = glm::vec3(0.f, 0.f, 0.25f);
     physObject->setCollisionShape(physShape);
     physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	physCharacter = new btKinematicCharacterController(physObject, physShape, 0.35f, 2);
 }
 
-void GTACharacter::changeAction(Activity newAction, const AnimationSet &animations)
+void GTACharacter::changeAction(Activity newAction)
 {
     if(currentActivity != newAction) {
         currentActivity = newAction;
         switch( currentActivity ) {
         case Idle:
             if( animation == nullptr || animation->name != "idle_stance" ) {
-                animation = animations.at("idle_stance");
+                animation = engine->gameData.animations.at("idle_stance");
                 animtime = 0.f;
             }
             break;
         case Walk:
             if( animation == nullptr || animation->name != "walk_civi" ) {
-                animation = animations.at("walk_civi");
+                animation = engine->gameData.animations.at("walk_civi");
                 animtime = 0.f;
             }
             break;
@@ -74,6 +75,10 @@ void GTACharacter::changeAction(Activity newAction, const AnimationSet &animatio
 
 void GTACharacter::updateCharacter()
 {
+	if( controller ) {
+		rotation = controller->getTargetRotation();
+	}
+	
     glm::vec3 direction = rotation * glm::vec3(0.f, 1.f, 0.f);
     float speed = 0.f;
     switch(currentActivity) {

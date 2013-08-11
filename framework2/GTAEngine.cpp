@@ -1,6 +1,7 @@
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/ai/GTADefaultAIController.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
     : renderer(this), itemCount(0), gameData(path), gameTime(0.f), randomEngine(rand())
@@ -247,6 +248,7 @@ bool GTAEngine::placeItems(const std::string& name)
 
 				
                 objectInstances.push_back({
+                                              this,
                                               instancePos,
                                               instanceRot,
                                               gameData.models[inst.model],
@@ -335,7 +337,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 			}
 		}
 		
-        vehicleInstances.push_back({ pos, rot, model, vti->second, prim, sec });
+        vehicleInstances.push_back({ this, pos, rot, model, vti->second, prim, sec });
 	}
 }
 
@@ -360,9 +362,11 @@ void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const 
 
         Model* model = gameData.models[pt->modelName];
 
-        pedestrians.push_back({ pos, rot, model, pt });
-        pedestrians.back().changeAction(GTACharacter::Walk, gameData.animations);
-		dynamicsWorld->addCollisionObject(pedestrians.back().physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
-		dynamicsWorld->addAction(pedestrians.back().physCharacter);
+		auto ped = new GTACharacter( this, pos, rot, model, pt );
+		pedestrians.push_back(ped);
+		ped->changeAction(GTACharacter::Idle);
+		new GTADefaultAIController(ped);
+		dynamicsWorld->addCollisionObject(ped->physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+		dynamicsWorld->addAction(ped->physCharacter);
     }
 }

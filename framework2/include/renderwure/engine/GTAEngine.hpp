@@ -146,7 +146,7 @@ public:
     /**
      * Pedestrians and PCs.
      */
-    std::vector<GTACharacter> pedestrians;
+    std::vector<GTACharacter*> pedestrians;
 
     /**
      * AI nodes (todo: replace vector with spatial hash).

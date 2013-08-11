@@ -301,15 +301,15 @@ void GTARenderer::renderWorld()
 	}
 
     for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
-        GTACharacter& charac = engine->pedestrians[i];
+        GTACharacter* charac = engine->pedestrians[i];
 
         glm::mat4 matrixModel;
-        matrixModel = glm::translate(matrixModel, charac.position);
-        matrixModel = matrixModel * glm::mat4_cast(charac.rotation);
+        matrixModel = glm::translate(matrixModel, charac->position);
+        matrixModel = matrixModel * glm::mat4_cast(charac->rotation);
 
-        if(!charac.model) continue;
+        if(!charac->model) continue;
 
-        renderModel(charac.model, matrixModel, &charac);
+        renderModel(charac->model, matrixModel, charac);
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
