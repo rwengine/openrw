@@ -85,7 +85,7 @@ public:
     /**
      * Creates a pedestrian.
      */
-    void createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+    GTACharacter* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Roughly the middle of everything

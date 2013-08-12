@@ -5,6 +5,7 @@
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/render/DebugDraw.hpp>
 #include <renderwure/ai/GTAAIController.hpp>
+#include <renderwure/ai/GTAPlayerAIController.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +25,9 @@ constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
 sf::RenderWindow window;
 
 GTAEngine* gta = nullptr;
+
+GTAPlayerAIController* player = nullptr;
+GTACharacter* playerCharacter = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
 
@@ -149,17 +153,33 @@ void update(float dt)
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
 			movement.x = 1;
 		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
+			if( player == nullptr ) {
+				playerCharacter = gta->createPedestrian(1, plyPos);
+				player = new GTAPlayerAIController(playerCharacter);
+			}
+		}
 
 		glm::mat4 view;
 		view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
 		view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
 		view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
 
-		if (glm::length(movement) > 0.f) {
-			plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * movement);
+		if( player != nullptr ) {
+			glm::quat playerCamera(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180));
+			player->updateCameraDirection(playerCamera);
+			player->updateMovementDirection(movement);
+			player->setRunning(moveSpeed > 21.f);
+			
+			glm::vec3 localView = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, -0.5f, -2.5f);
+			view = glm::translate(view, -playerCharacter->position + localView);
 		}
-
-		view = glm::translate(view, -plyPos);
+		else {
+			if (glm::length(movement) > 0.f) {
+				plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * movement);
+			}
+			view = glm::translate(view, -plyPos);
+		}
 		
 		gta->gameTime += dt;
 

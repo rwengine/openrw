@@ -341,7 +341,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 	}
 }
 
-void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
+GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
     auto pti = pedestrianTypes.find(id);
     if( pti != pedestrianTypes.end() ) {
@@ -368,5 +368,7 @@ void GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const 
 		new GTADefaultAIController(ped);
 		dynamicsWorld->addCollisionObject(ped->physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
 		dynamicsWorld->addAction(ped->physCharacter);
+		return ped;
     }
+    return nullptr;
 }

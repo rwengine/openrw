@@ -17,6 +17,7 @@ SET(RENDERWARE_SOURCES
     GTAAINode.cpp
     GTAAIController.cpp
     GTADefaultAIController.cpp
+    GTAPlayerAIController.cpp
 
     GTAEngine.cpp
 
@@ -46,6 +47,7 @@ SET(RENDERWARE_HEADERS
     include/renderwure/ai/GTAAINode.hpp
     include/renderwure/ai/GTAAIController.hpp
     include/renderwure/ai/GTADefaultAIController.hpp
+    include/renderwure/ai/GTAPlayerAIController.hpp
 
     include/renderwure/render/GTARenderer.hpp
     include/renderwure/render/DebugDraw.hpp
