@@ -167,6 +167,8 @@ void update(float dt)
 
 		if( player != nullptr ) {
 			glm::quat playerCamera(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180));
+			movement.y = -movement.z;
+			movement.z = 0.f;
 			player->updateCameraDirection(playerCamera);
 			player->updateMovementDirection(movement);
 			player->setRunning(moveSpeed > 21.f);

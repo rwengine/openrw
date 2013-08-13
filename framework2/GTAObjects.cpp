@@ -69,6 +69,12 @@ void GTACharacter::changeAction(Activity newAction)
                 animtime = 0.f;
             }
             break;
+		case Run:
+            if( animation == nullptr || animation->name != "run_civi" ) {
+                animation = engine->gameData.animations.at("run_civi");
+                animtime = 0.f;
+            }
+			break;
         }
     }
 }
