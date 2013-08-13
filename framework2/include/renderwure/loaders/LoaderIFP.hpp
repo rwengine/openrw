@@ -39,6 +39,8 @@ struct Animation
 {
     std::string name;
     std::map<std::string, AnimationBone*> bones;
+	
+	float duration;
 
     /**
      * @brief getAnimationTravel Returns the motion of the root bone

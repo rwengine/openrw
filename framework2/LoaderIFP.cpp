@@ -151,6 +151,7 @@ bool LoaderIFP::loadFromMemory(char *data)
             }
 
             bonedata->duration = time;
+			animation->duration = std::max(bonedata->duration, animation->duration);
 
             data_offs = start + sizeof(CPAN) + cpan->base.size;
 

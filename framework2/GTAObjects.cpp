@@ -1,4 +1,4 @@
-  #include <renderwure/engine/GTAObjects.hpp>
+#include <renderwure/engine/GTAObjects.hpp>
 #include <renderwure/loaders/LoaderIFP.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
@@ -13,27 +13,48 @@ void GTAObject::updateFrames()
         fmat[3] = glm::vec4(model->frames[fi].defaultTranslation, 1.f);
 
         if( animation && fi < model->frameNames.size() ) {
+			animtime = fmod(animtime, animation->duration);
+			if( lastAnimtime > animtime ) {
+				lastRootPosition = rootPosition = glm::vec3(0.f);
+			}
+			
             AnimationBone* boneanim = animation->bones[model->frameNames[fi]];
             if( boneanim && boneanim->frames.size() > 0 ) {
                 auto keyframe = boneanim->getInterpolatedKeyframe(this->animtime);
+				fmat = glm::mat4(1.0f) * glm::mat4_cast(keyframe.rotation);
 
-                // TODO: check for the actual root bone and not just the name.
-                if( model->frameNames[fi] != "swaist" ) {
-                    fmat = glm::mat4(1.0f) * glm::mat4_cast(keyframe.rotation);
-
-                    // Only add the translation back if is is not present.
-                    if( boneanim->type == AnimationBone::R00 ) {
-                        fmat[3] = glm::vec4(model->frames[fi].defaultTranslation, 1.f);
-                    }
-                    else {
-                        fmat[3] = glm::vec4(keyframe.position, 1.f);
-                    }
-                }
+				// Only add the translation back if is is not present.
+				if( boneanim->type == AnimationBone::R00 ) {
+					fmat[3] = glm::vec4(model->frames[fi].defaultTranslation, 1.f);
+				}
+				else {
+					if( model->frameNames[fi] == "swaist" ) {
+						// Track the root bone.
+						lastRootPosition = rootPosition;
+						rootPosition = keyframe.position;
+						fmat[3] = glm::vec4(model->frames[fi].defaultTranslation, 1.f);
+					}
+					else {
+						fmat[3] = glm::vec4(keyframe.position, 1.f);
+					}
+				}
             }
         }
+        
+        lastAnimtime = animtime;
 
         model->frames[fi].matrix = fmat;
     }
+}
+
+void GTAObject::setPosition(const glm::vec3& pos)
+{
+	position = pos;
+}
+
+glm::vec3 GTAObject::getPosition() const
+{
+	return position;
 }
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
@@ -46,7 +67,6 @@ GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::q
     physObject = new btPairCachingGhostObject;
     physObject->setWorldTransform(tf);
 	physShape = new btBoxShape(btVector3(0.25f, 0.25f, 0.5f));
-	skeletonOffset = glm::vec3(0.f, 0.f, 0.25f);
     physObject->setCollisionShape(physShape);
     physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	physCharacter = new btKinematicCharacterController(physObject, physShape, 0.35f, 2);
@@ -82,29 +102,14 @@ void GTACharacter::changeAction(Activity newAction)
 void GTACharacter::updateCharacter()
 {
 	if( controller ) {
-		rotation = controller->getTargetRotation();
+		rotation = glm::normalize(controller->getTargetRotation());
 	}
 	
-    glm::vec3 direction = rotation * glm::vec3(0.f, 1.f, 0.f);
-    float speed = 0.f;
-    switch(currentActivity) {
-    case Walk:
-        speed = .125f;
-        break;
-    case Run:
-        speed = .25f;
-        break;
-    case Crouch:
-        speed = .125f;
-        break;
-	case Idle:
-		speed = 0.f;
-		break;
-    }
-    physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z)*speed);
+    glm::vec3 direction = rotation * (rootPosition - lastRootPosition);
+    physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
 	
 	btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
-	position = glm::vec3(Pos.x(), Pos.y(), Pos.z()) + skeletonOffset;
+	position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 }
 
 void GTACharacter::updateAnimation(float dt)
@@ -112,4 +117,17 @@ void GTACharacter::updateAnimation(float dt)
     if( animation != nullptr ) {
         animtime += dt;
 	}
+}
+
+void GTACharacter::setPosition(const glm::vec3& pos)
+{
+    btTransform& tf = physCharacter->getGhostObject()->getWorldTransform();
+	tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
+	position = pos;
+}
+
+glm::vec3 GTACharacter::getPosition() const
+{
+	btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
+	return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 }
