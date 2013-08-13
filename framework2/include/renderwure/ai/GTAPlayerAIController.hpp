@@ -10,6 +10,8 @@ class GTAPlayerAIController : public GTAAIController
 	
 	glm::vec3 direction;
 	
+	glm::quat lastRotation;
+	
 	bool running;
 	
 public:

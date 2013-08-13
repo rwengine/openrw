@@ -39,5 +39,8 @@ glm::vec3 GTAPlayerAIController::getTargetPosition()
 
 glm::quat GTAPlayerAIController::getTargetRotation()
 {
-	return cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
+	if( glm::length(direction) > 0.001f ) {
+		return lastRotation = cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
+	}
+	return lastRotation;
 }
