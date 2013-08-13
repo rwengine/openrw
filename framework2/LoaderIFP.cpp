@@ -37,38 +37,19 @@ bool findKeyframes(float t, AnimationBone* bone, AnimationKeyframe& f1, Animatio
 AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time)
 {
     AnimationKeyframe f1, f2;
-
-    while(time > this->duration) {
-        time -= this->duration;
-    }
-
     float alpha;
 
     if( findKeyframes(time, this, f1, f2, alpha) ) {
         return {
-                glm::normalize(glm::mix(f1.rotation, f2.rotation, alpha)),
+                (1.f - abs(glm::dot( f1.rotation, f2.rotation )) < 0.001f) ? f1.rotation 
+                    : glm::normalize(glm::mix(f1.rotation, f2.rotation, alpha)),
                 glm::mix(f1.position, f2.position, alpha),
                 glm::mix(f1.scale, f2.scale, alpha),
                 time
         };
     }
 
-    auto fend = frames.back();
-    return {
-    fend.rotation,
-    fend.position,
-    glm::vec3(1.f, 1.f, 1.f)
-    };
-}
-
-glm::vec3 Animation::getAnimationTravel(float time)
-{
-    auto it = bones.find("swaist");
-    if( it != bones.end() ) {
-        auto frame = it->second->getInterpolatedKeyframe(time);
-        return frame.position;
-    }
-    return glm::vec3(0.f, 0.f, 0.f);
+    return frames.back();
 }
 
 bool LoaderIFP::loadFromMemory(char *data)
@@ -137,7 +118,7 @@ bool LoaderIFP::loadFromMemory(char *data)
             else if(type == "KRTS") {
                 bonedata->type = AnimationBone::RTS;
                 for( size_t d = 0; d < frames->frames; ++d ) {
-                    glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
+					glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     glm::vec3 s = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data,dataI);
