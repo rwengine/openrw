@@ -493,10 +493,6 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object)
 {
-    if( object ) {
-        object->updateFrames();
-    }
-
     for (size_t a = 0; a < model->atomics.size(); a++)
     {
         size_t g = model->atomics[a].geometry;

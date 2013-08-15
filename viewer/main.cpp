@@ -192,8 +192,9 @@ void update(float dt)
 			if(gta->pedestrians[p]->controller) {
 				gta->pedestrians[p]->controller->update(dt);
 			}
-			gta->pedestrians[p]->updateCharacter();
 			gta->pedestrians[p]->updateAnimation(dt);
+			gta->pedestrians[p]->updateFrames();
+			gta->pedestrians[p]->updateCharacter();
         }
         
 		gta->dynamicsWorld->stepSimulation(dt);
@@ -319,17 +320,25 @@ int main(int argc, char *argv[])
 	
 	sf::Clock clock;
 
+	float accum = 0.f;
+	float ts = 1.f / 60.f;
+	
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			handleEvent(event);
 		}
-
-		update(clock.restart().asSeconds());
+		
+		accum += clock.restart().asSeconds();
+		
+		while ( accum >= ts ) {
+			update(ts);
+			accum -= ts;
+		}
 		
 		render();
 		window.display();
-		
+	
 	}
 
 	return 0;

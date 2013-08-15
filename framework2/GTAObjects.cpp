@@ -66,7 +66,7 @@ GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::q
 	
     physObject = new btPairCachingGhostObject;
     physObject->setWorldTransform(tf);
-	physShape = new btBoxShape(btVector3(0.25f, 0.25f, 0.5f));
+	physShape = new btBoxShape(btVector3(0.25f, 0.25f, 1.f));
     physObject->setCollisionShape(physShape);
     physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	physCharacter = new btKinematicCharacterController(physObject, physShape, 0.35f, 2);
