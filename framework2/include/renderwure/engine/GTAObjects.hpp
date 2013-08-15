@@ -68,9 +68,19 @@ struct GTAInstance : public GTAObject
     glm::vec3 scale;
     LoaderIPLInstance instance;
     std::shared_ptr<LoaderIDE::OBJS_t> object;
+	std::shared_ptr<GTAInstance> LODinstance;
 
-    GTAInstance(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, const glm::vec3& scale, LoaderIPLInstance inst, std::shared_ptr<LoaderIDE::OBJS_t> obj)
-        : GTAObject(engine, pos, rot, model), scale(scale), instance(inst), object(obj) {}
+    GTAInstance(
+		GTAEngine* engine, 
+		const glm::vec3& pos, 
+		const glm::quat& rot, 
+		Model* model, 
+		const glm::vec3& scale, 
+		LoaderIPLInstance inst, 
+		std::shared_ptr<LoaderIDE::OBJS_t> obj,
+		std::shared_ptr<GTAInstance> lod
+   			)
+        : GTAObject(engine, pos, rot, model), scale(scale), instance(inst), object(obj), LODinstance(lod) {}
 
     Type type() { return Instance; }
 };

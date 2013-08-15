@@ -246,15 +246,22 @@ bool GTAEngine::placeItems(const std::string& name)
                     }
                 }
 
-				
-                objectInstances.push_back({
+                objectInstances.push_back(std::shared_ptr<GTAInstance>(new GTAInstance(
                                               this,
                                               instancePos,
                                               instanceRot,
                                               gameData.models[inst.model],
                                               glm::vec3(inst.scaleX, inst.scaleY, inst.scaleZ),
-                                              inst, oi->second
-                                          });
+                                              inst, oi->second, nullptr
+														)));
+				
+				if( !oi->second->modelName.empty() ) {
+					modelInstances.insert({
+						oi->second->modelName,
+						objectInstances.back()
+					});
+				}
+
 			}
 			else {
 				std::cerr << "No object for instance " << inst.id << " (" << path << ")" << std::endl;
@@ -262,6 +269,17 @@ bool GTAEngine::placeItems(const std::string& name)
 		}
 		itemCentroid += ipll.centroid;
 		itemCount += ipll.m_instances.size();
+		
+		// Associate LODs.
+		for( size_t i = 0; i < objectInstances.size(); ++i ) {
+			if( !objectInstances[i]->object->LOD ) {
+				auto lodInstit = modelInstances.find("LOD" + objectInstances[i]->object->modelName.substr(3));
+				if( lodInstit != modelInstances.end() ) {
+					objectInstances[i]->LODinstance = lodInstit->second;
+				}
+			}
+		}
+		
 		return true;
 	}
 	else

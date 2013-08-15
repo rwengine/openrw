@@ -117,7 +117,7 @@ public:
 	 * Object Definitions
 	 */
 	std::map<uint16_t, std::shared_ptr<LoaderIDE::OBJS_t>> objectTypes;
-
+	
     /**
      * Paths associated with each object definition.
      */
@@ -136,7 +136,12 @@ public:
 	/**
 	 * Game Objects!
 	 */
-	std::vector<GTAInstance> objectInstances;
+	std::vector<std::shared_ptr<GTAInstance>> objectInstances;
+	
+	/**
+	 * Map of Model Names to Instances
+	 */
+	std::map<std::string, std::shared_ptr<GTAInstance>> modelInstances;
 	
 	/**
 	 * Game Vehicles!

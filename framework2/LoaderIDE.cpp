@@ -73,7 +73,7 @@ bool LoaderIDE::load(const std::string &filename)
 				objs.flags       = atoi(flags.c_str());
 				objs.modelName   = modelName;
 				objs.textureName = textureName;
-				objs.LOD         = modelName.find("LOD") != modelName.npos;
+				objs.LOD         = modelName.find("LOD",0,3) != modelName.npos;
 
 				OBJSs.push_back(objs);
 				break;

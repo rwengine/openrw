@@ -313,7 +313,7 @@ void GTARenderer::renderWorld()
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
-        GTAInstance& inst = engine->objectInstances[i];
+        GTAInstance& inst = *engine->objectInstances[i];
         LoaderIPLInstance &obj = inst.instance;
 		
 		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
@@ -336,13 +336,25 @@ void GTARenderer::renderWorld()
             RW::BSGeometryBounds& bounds = inst.model->geometries[g].geometryBounds;
             mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
         }
-        if( mindist > (inst.object->drawDistance[0] * (inst.object->LOD ? 1.f : 2.f))
-            || (inst.object->LOD && mindist < 250.f) ) {
-            culled++;
-            continue;
+        
+        if ( mindist > inst.object->drawDistance[0] ) {
+			if ( !inst.LODinstance ) {
+				culled++;
+				continue;
+			}
+			else {
+				if( mindist > inst.LODinstance->object->drawDistance[0] ) {
+					culled++;
+					continue;
+				}
+				else {
+					renderModel(inst.LODinstance->model, matrixModel);
+				}
+			}
         }
-
-        renderModel(inst.model, matrixModel);
+		else if (! inst.object->LOD ) {
+			renderModel(inst.model, matrixModel);
+		}
 	}
 	
 	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
