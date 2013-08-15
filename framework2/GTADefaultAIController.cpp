@@ -13,7 +13,7 @@ void GTADefaultAIController::update(float dt)
 				++n ) {
 				if( n->type != GTAAINode::Pedestrian ) continue;
 				float ld = glm::length( n->position - character->position );
-				if( ld > 5.f && ld < d ) {
+				if( ld > 2.5f && ld < d ) {
 					d = ld;
 					targetNode = &(*n);
 				}
@@ -24,9 +24,12 @@ void GTADefaultAIController::update(float dt)
 			}
 			else {
 				character->changeAction(GTACharacter::Walk);
+				// Choose a new random margin
+				std::uniform_real_distribution<float> dist(1.f, 2.5f);
+				nodeMargin = dist(character->engine->randomEngine);
 			}
 		}
-		else if( glm::length(targetNode->position - character->position) < 1.f ) {
+		else if( glm::length(targetNode->position - character->position) < nodeMargin ) {
 			if( targetNode->nextIndex >= 0 && targetNode->nextIndex < character->engine->ainodes.size() ) {
 				targetNode = &character->engine->ainodes[targetNode->nextIndex];
 			}

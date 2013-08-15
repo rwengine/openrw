@@ -2,6 +2,7 @@
 #ifndef _GTADEFAULTAICONTROLLER_HPP_
 #define _GTADEFAULTAICONTROLLER_HPP_
 #include "renderwure/ai/GTAAIController.hpp"
+#include <random>
 
 struct GTAAINode;
 class GTADefaultAIController : public GTAAIController
@@ -15,10 +16,12 @@ class GTADefaultAIController : public GTAAIController
 	
 	GTAAINode* targetNode;
 	
+	float nodeMargin; /// Minimum distance away to "reach" node.
+	
 public:
 	
     GTADefaultAIController(GTACharacter* character)
-	 : GTAAIController(character), action(Wander), targetNode(nullptr) {}
+	 : GTAAIController(character), action(Wander), targetNode(nullptr), nodeMargin(0.f) {}
 	
     virtual void update(float dt);
 	
