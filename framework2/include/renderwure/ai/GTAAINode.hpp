@@ -3,6 +3,7 @@
 #define _GTAAINODE_HPP_
 #include <glm/glm.hpp>
 #include <cstdint>
+#include <vector>
 
 struct GTAAINode
 {
@@ -22,6 +23,8 @@ struct GTAAINode
     uint32_t flags;
 
     int32_t nextIndex;
+	
+	std::vector<GTAAINode*> connections;
 };
 
 #endif

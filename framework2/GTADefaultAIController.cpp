@@ -11,11 +11,11 @@ void GTADefaultAIController::update(float dt)
 			for( auto n = character->engine->ainodes.begin();
 				n != character->engine->ainodes.end();
 				++n ) {
-				if( n->type != GTAAINode::Pedestrian ) continue;
-				float ld = glm::length( n->position - character->position );
+				if( (*n)->type != GTAAINode::Pedestrian ) continue;
+				float ld = glm::length( (*n)->position - character->position );
 				if( ld > 2.5f && ld < d ) {
 					d = ld;
-					targetNode = &(*n);
+					targetNode = (*n);
 				}
 			}
 			
@@ -30,8 +30,9 @@ void GTADefaultAIController::update(float dt)
 			}
 		}
 		else if( glm::length(targetNode->position - character->position) < nodeMargin ) {
-			if( targetNode->nextIndex >= 0 && targetNode->nextIndex < character->engine->ainodes.size() ) {
-				targetNode = &character->engine->ainodes[targetNode->nextIndex];
+			if( targetNode->connections.size() > 0 ) {
+				std::uniform_int_distribution<int> dist(0, targetNode->connections.size()-1);
+				targetNode = character->engine->ainodes[dist(character->engine->randomEngine)];
 			}
 			else {
 				targetNode = nullptr;

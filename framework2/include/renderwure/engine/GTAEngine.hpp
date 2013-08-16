@@ -156,7 +156,7 @@ public:
     /**
      * AI nodes (todo: replace vector with spatial hash).
      */
-    std::vector<GTAAINode> ainodes;
+    std::vector<GTAAINode*> ainodes;
 
 	/**
 	 * Randomness Engine

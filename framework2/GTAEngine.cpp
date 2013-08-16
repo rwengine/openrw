@@ -217,31 +217,40 @@ bool GTAEngine::placeItems(const std::string& name)
                         size_t startIndex = ainodes.size();
                         for( size_t n = 0; n < path.nodes.size(); ++n ) {
                             auto& node = path.nodes[n];
+							GTAAINode* ainode = new GTAAINode;
 
-                            GTAAINode::NodeType type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
-                            int32_t next = node.next >= 0 ? startIndex + node.next : -1;
-                            uint32_t flags = GTAAINode::None;
-                            glm::vec3 position = instancePos + (instanceRot * node.position);
+                            ainode->type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
+                            ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
+                            ainode->flags = GTAAINode::None;
+                            ainode->position = instancePos + (instanceRot * node.position);
 
                             if( node.type == LoaderIDE::EXTERNAL ) {
-                                flags |= GTAAINode::External;
+                                ainode->flags |= GTAAINode::External;
                                 for( size_t rn = 0; rn < ainodes.size(); ++rn ) {
-                                    if( (ainodes[rn].flags & GTAAINode::External) == GTAAINode::External ) {
-                                        auto d = glm::length(ainodes[rn].position - position);
+                                    if( (ainodes[rn]->flags & GTAAINode::External) == GTAAINode::External ) {
+                                        auto d = glm::length(ainodes[rn]->position - ainode->position);
                                         if( d < 1.f ) {
-                                            next = rn;
-                                            break;
+                                            ainode->connections.push_back(ainodes[rn]);
+											ainodes[rn]->connections.push_back(ainode);
                                         }
                                     }
                                 }
                             }
-
-                            ainodes.push_back({
-                                                  type,
-                                                  position,
-                                                  flags,
-                                                  next
-                                              });
+                            
+                            if( ainode->nextIndex < ainodes.size() ) {
+								ainode->connections.push_back(ainodes[ainode->nextIndex]);
+								ainodes[ainode->nextIndex]->connections.push_back(ainode);
+							}
+							
+							for( size_t on = startIndex; on < ainodes.size(); ++on ) {
+								if( ainodes[on]->nextIndex == startIndex+n ) {
+									ainodes[on]->connections.push_back(ainode);
+									ainode->connections.push_back(ainodes[on]);
+								}
+							}
+							
+                            ainodes.push_back(ainode);
+							
                         }
                     }
                 }

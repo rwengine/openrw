@@ -556,24 +556,29 @@ void GTARenderer::renderPaths()
     glBindVertexArray( vao );
 
     for( size_t n = 0; n < engine->ainodes.size(); ++n ) {
-        auto& start = engine->ainodes[n];
-        if( start.nextIndex < 0 || start.nextIndex > engine->ainodes.size() ) {
-           continue;
-        }
-        auto& end = engine->ainodes[start.nextIndex];
-
-        if( start.type == GTAAINode::Pedestrian ) {
-            pedlines.push_back(start.position);
-            pedlines.push_back(start.position+glm::vec3(0.f, 0.f, 1.f));
-            pedlines.push_back(start.position);
-            pedlines.push_back(end.position);
-        }
-        else {
-            carlines.push_back(start.position);
-            carlines.push_back(start.position+glm::vec3(0.f, 0.f, 1.f));
-            carlines.push_back(start.position);
-            carlines.push_back(end.position);
-        }
+        auto start = engine->ainodes[n];
+		
+		if( start->type == GTAAINode::Pedestrian ) {
+			pedlines.push_back(start->position);
+			pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+		}	
+		else {
+			carlines.push_back(start->position);
+			carlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+		}
+			
+		for( size_t c = 0; c < start->connections.size(); ++c ) {
+			auto end = start->connections[c];
+			
+			if( start->type == GTAAINode::Pedestrian ) {	
+				pedlines.push_back(start->position);
+				pedlines.push_back(end->position);
+			}
+			else {
+				carlines.push_back(start->position);
+				carlines.push_back(end->position);
+			}
+		}
     }
 
     glm::mat4 model;
