@@ -320,7 +320,7 @@ void GTARenderer::renderWorld()
         LoaderIPLInstance &obj = inst.instance;
 		
 		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
-			continue;
+			//continue;
 		}
 
         if(!inst.model)

@@ -152,7 +152,7 @@ bool GTAEngine::placeItems(const std::string& name)
 					msta->setWorldTransform(btTransform(
 						btQuaternion(
 							inst.rotX, inst.rotY, inst.rotZ, inst.rotW
-						), 
+						).inverse(), 
 						btVector3(
 							inst.posX, inst.posY, inst.posZ
 						)
