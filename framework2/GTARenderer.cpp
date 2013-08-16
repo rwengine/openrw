@@ -287,12 +287,15 @@ void GTARenderer::renderWorld()
 	
 	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
 		GTATypes::WaterRect& r = engine->gameData.waterRects[w];
-		glm::vec3 scale( r.xRight - r.xLeft, r.yTop - r.yBottom, 1.f );
-		glm::vec3 pos( r.xLeft, r.yBottom, r.height );
+		glm::vec3 vert[4] = {
+			glm::vec3(r.xRight, r.yTop,    r.height),
+			glm::vec3(r.xLeft,  r.yTop,    r.height),
+			glm::vec3(r.xRight, r.yBottom, r.height),
+			glm::vec3(r.xLeft,  r.yBottom, r.height)
+		};
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * 4, vert);
 		
-		glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, pos);
-		matrixModel = glm::scale(matrixModel, scale);
+		glm::mat4 matrixModel(1.f);
 		
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
 		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);

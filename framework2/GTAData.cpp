@@ -305,14 +305,20 @@ void GTAData::loadWater(const std::string& path)
 		std::stringstream ss(line);
 		
 		std::string a, b, c, d, e;
+		float fa, fb, fc, fd, fe;
 		
 		if( std::getline(ss, a, ',') &&  std::getline(ss, b, ',') &&  std::getline(ss, c, ',') &&  std::getline(ss, d, ',') &&  std::getline(ss, e, ',')) {
+			fa = atof(a.c_str());
+			fb = atof(b.c_str());
+			fc = atof(c.c_str());
+			fd = atof(d.c_str());
+			fe = atof(e.c_str());
 			waterRects.push_back({
-				atof(a.c_str()),
-				atof(b.c_str()),
-				atof(c.c_str()),
-				atof(d.c_str()),
-				atof(e.c_str())
+				fa,
+				fb,
+				fc,
+				fd,
+				fe
 			});
 		}
 	}
