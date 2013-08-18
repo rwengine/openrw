@@ -2,7 +2,7 @@
 #include <renderwure/engine/GTAEngine.hpp>
 
 #include <deque>
-
+#include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
 const char *vertexShaderSource = "#version 130\n"
@@ -171,25 +171,35 @@ GTARenderer::GTARenderer(GTAEngine* engine)
 	glGenBuffers(1, &skydomeVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
 	size_t segments = skydomeSegments, rows = skydomeRows;
-	float radius = 1.f;
-	const float pi = 3.14159265;
-	const float pio2 = (pi / 2.f);
-	glm::vec3 skydomeBuff[rows * segments * 2];
-	for( size_t s = 0, i = 0; s < segments; ++s) {
-		for( size_t r = 0; r < rows; ++r) {
-			skydomeBuff[i++] = glm::vec3(
-				radius * cos( (s+1.f)/segments * pio2) * sin( 2.0f * (float)r/rows * pi),
-				radius * cos( (s+1.f)/segments * pio2) * cos( 2.0f * (float)r/rows * pi),
-				radius * sin( (s+1.f)/segments * pio2)
-			);
-			skydomeBuff[i++] = glm::vec3(
-				radius * cos( (s+0.f)/segments * pio2) * sin( 2.0f * (float)r/rows * pi),
-				radius * cos( (s+0.f)/segments * pio2) * cos( 2.0f * (float)r/rows * pi),
-				radius * sin( (s+0.f)/segments * pio2)
-			);
+
+    float R = 1.f/(float)(rows-1);
+    float S = 1.f/(float)(segments-1);
+    glm::vec3 skydomeBuff[rows * segments];
+    for( size_t r = 0, i = 0; r < rows; ++r) {
+        for( size_t s = 0; s < segments; ++s) {
+            skydomeBuff[i++] = glm::vec3(
+                        cos(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
+                        sin(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
+                        sin(M_PI_2 * r * R)
+                        );
 		}
 	}
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &skydomeIBO);
+    GLushort skydomeIndBuff[rows*segments*6];
+    for( size_t r = 0, i = 0; r < (rows-1); ++r ) {
+        for( size_t s = 0; s < (segments-1); ++s ) {
+            skydomeIndBuff[i++] = r * segments + s;
+            skydomeIndBuff[i++] = r * segments + (s+1);
+            skydomeIndBuff[i++] = (r+1) * segments + (s+1);
+            skydomeIndBuff[i++] = r * segments + s;
+            skydomeIndBuff[i++] = (r+1) * segments + (s+1);
+            skydomeIndBuff[i++] = (r+1) * segments + s;
+        }
+    }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skydomeIndBuff), skydomeIndBuff, GL_STATIC_DRAW);
 
     glGenBuffers(1, &debugVBO);
     glGenTextures(1, &debugTex);
@@ -395,6 +405,7 @@ void GTARenderer::renderWorld()
 	glUseProgram(skyProgram);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 	glUniformMatrix4fv(skyUniView, 1, GL_FALSE, glm::value_ptr(view));
@@ -402,7 +413,7 @@ void GTARenderer::renderWorld()
 	glUniform4f(skyUniTop, skyTop.r, skyTop.g, skyTop.b, 1.f);
 	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 		
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, skydomeSegments * skydomeRows * 2 + 1);
+    glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
 	
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

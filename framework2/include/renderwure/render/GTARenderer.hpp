@@ -35,7 +35,7 @@ public:
 	/// Internal VAO to avoid clobbering global state.
     GLuint vao, debugVAO;
 	
-    GLuint planeVBO, skydomeVBO, debugVBO;
+    GLuint planeVBO, skydomeVBO, skydomeIBO, debugVBO;
     GLuint debugTex;
 	
     /**
