@@ -215,51 +215,24 @@ void GTARenderer::renderWorld()
 {
 	glBindVertexArray( vao );
 	
-	float gameTime = fmod(engine->gameTime, 24.f);
-	int hour = floor(gameTime);
-	int hournext = (hour + 1) % 24;
+    float gameTime = fmod(engine->gameTime, 24.f);
 
-	// std::cout << leclock << " " << hour << std::endl;
-	auto weather = engine->gameData.weatherLoader.weather[hour];
-	auto weathernext = engine->gameData.weatherLoader.weather[hournext];
-	
-	float interpolate = gameTime - hour;
-	glm::vec3 skyTop{
-		mix(weather.skyTopColor.r, weathernext.skyTopColor.r, interpolate) / 255.0,
-		mix(weather.skyTopColor.g, weathernext.skyTopColor.g, interpolate) / 255.0,
-		mix(weather.skyTopColor.b, weathernext.skyTopColor.b, interpolate) / 255.0,
-	};
-	glm::vec3 skyBottom{
-		mix(weather.skyBottomColor.r, weathernext.skyBottomColor.r, interpolate) / 255.0,
-		mix(weather.skyBottomColor.g, weathernext.skyBottomColor.g, interpolate) / 255.0,
-		mix(weather.skyBottomColor.b, weathernext.skyBottomColor.b, interpolate) / 255.0,
-	};
-	
-	glm::vec3 ambient{
-		mix(weather.ambientColor.r, weathernext.ambientColor.r, interpolate) / 255.0,
-		mix(weather.ambientColor.g, weathernext.ambientColor.g, interpolate) / 255.0,
-		mix(weather.ambientColor.b, weathernext.ambientColor.b, interpolate) / 255.0,
-	};
-	glm::vec3 dynamic{
-		mix(weather.directLightColor.r, weathernext.directLightColor.r, interpolate) / 255.0,
-		mix(weather.directLightColor.g, weathernext.directLightColor.g, interpolate) / 255.0,
-		mix(weather.directLightColor.b, weathernext.directLightColor.b, interpolate) / 255.0,
-	};
+    auto weather = engine->gameData.weatherLoader.getWeatherData(WeatherLoader::Sunny, gameTime);
+
+    glm::vec3 skyTop = weather.skyTopColor;
+    glm::vec3 skyBottom = weather.skyBottomColor;
+    glm::vec3 ambient = weather.ambientColor;
+    glm::vec3 dynamic = weather.directLightColor;
+
 	float theta = (gameTime - 12.f)/24.0 * 2 * 3.14159265;
 	glm::vec3 sunDirection{
 		sin(theta),
 		0.0,
 		cos(theta),
 	};
-	sunDirection = glm::normalize(sunDirection);
-	float weatherFar = weather.farClipping; //mix(weather.farClipping, weathernext.farClipping, interpolate);
-	camera.frustum.far = weatherFar;
-	/*
-	std::cout << "CLOCK IS " << leclock << std::endl;
-	std::cout << "AMBIENT " << ambient.x << ", " << ambient.y << ", " << ambient.z << std::endl;
-	std::cout << "SUN DIR " << sunDirection.x << ", " << sunDirection.y << ", " << sunDirection.z << std::endl;
-	*/
-	
+    sunDirection = glm::normalize(sunDirection);
+    camera.frustum.far = weather.farClipping;
+
 	glUseProgram(worldProgram);
 
     glUniform1f(uniFogStart, weather.fogStart);

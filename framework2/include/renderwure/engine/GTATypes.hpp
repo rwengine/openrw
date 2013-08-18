@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <glm/glm.hpp>
 
 class Animation;
 
@@ -20,6 +21,10 @@ namespace GTATypes
 struct RGB
 {
 	uint8_t r, g, b;
+
+    operator glm::vec3() {
+        return glm::vec3(r, g, b)/255.f;
+    }
 };
 
 /**

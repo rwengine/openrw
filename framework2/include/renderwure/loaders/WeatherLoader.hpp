@@ -33,9 +33,25 @@ public:
 		uint8_t unknown[4];
 	};
 
+    enum WeatherCondition
+    {
+        Sunny = 0,
+        Cloudy = 24,
+        Rainy = 48,
+        Foggy = 72
+    };
+
 	bool load(const std::string &filename);
 
 	std::vector<WeatherData> weather;
+
+    /**
+     * @brief getWeatherData returns interpolated Weather data for the time of day.
+     * @param cond weather condition
+     * @param tod float time of day
+     * @return Correctly interpolated values.
+     */
+    WeatherData getWeatherData(WeatherCondition cond, float tod);
 
 private:
 	GTATypes::RGB readRGB(std::stringstream &ss);

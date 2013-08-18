@@ -59,6 +59,47 @@ bool WeatherLoader::load(const std::string &filename)
 	return true;
 }
 
+GTATypes::RGB mix(GTATypes::RGB x, GTATypes::RGB y, float a)
+{
+	GTATypes::RGB n;
+	n.r = x.r * (1.f - a) + y.r * a;
+	n.g = x.g * (1.f - a) + y.g * a;
+	n.b = x.b * (1.f - a) + y.b * a;
+	return n;
+}
+
+#define MIXPROP(prop) data.prop = mix(x.prop, y.prop, a)
+#define MIXPROP2(prop) data.prop = glm::mix(x.prop, y.prop, a)
+
+WeatherLoader::WeatherData WeatherLoader::getWeatherData(WeatherCondition cond, float tod)
+{
+	size_t hour = floor(tod);
+	const WeatherData& x = weather[static_cast<size_t>(cond)+hour];
+	const WeatherData& y = weather[static_cast<size_t>(cond)+hour+1];
+	const float a = tod - floor(tod);
+
+	WeatherData data;
+	MIXPROP(ambientColor);
+	MIXPROP(directLightColor);
+	MIXPROP(skyTopColor);
+	MIXPROP(skyBottomColor);
+	MIXPROP(sunCoreColor);
+	MIXPROP2(sunCoreSize);
+	MIXPROP2(sunCoronaSize);
+	MIXPROP2(sunBrightness);
+	MIXPROP2(shadowIntensity);
+	MIXPROP2(lightShading);
+	MIXPROP2(poleShading);
+	MIXPROP2(farClipping);
+	MIXPROP2(fogStart);
+	MIXPROP2(amountGroundLight);
+	MIXPROP(lowCloudColor);
+	MIXPROP(topCloudColor);
+	MIXPROP(bottomCloudColor);
+
+	return data;
+}
+
 GTATypes::RGB WeatherLoader::readRGB(std::stringstream &ss)
 {
 	GTATypes::RGB color;
