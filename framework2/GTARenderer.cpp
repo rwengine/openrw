@@ -44,9 +44,10 @@ const char *fragmentShaderSource = "#version 130\n"
 "{"
 "   vec4 c = texture2D(texture, TexCoords);"
 "   if(c.a < 0.5) discard;"
-"	float fogCoord = abs(EyeSpace.z / EyeSpace.w);"
-"	float fogfac = clamp( (FogEnd-fogCoord)/(FogEnd-FogStart), 0.0, 1.0 );"
-"	float l = clamp(dot(Normal, SunDirection), 0.0, 1);"
+"	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);"
+"	float fogfac = clamp( (FogEnd-fogZ)/(FogEnd-FogStart), 0.0, 1.0 );"
+//"	float l = clamp(dot(Normal, SunDirection), 0.0, 1);"
+//"	gl_FragColor = vec4(vec3(fogfac), 1.0);"
 "	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);"
 // "	gl_FragColor = vec4((Normal*0.5)+0.5, 1.0);"
 // "	gl_FragColor = c * vec4((Normal*0.5)+0.5, 1.0);"
@@ -251,7 +252,7 @@ void GTARenderer::renderWorld()
 	
 	glUseProgram(worldProgram);
 
-	glUniform1f(uniFogStart, weather.fogStart);
+    glUniform1f(uniFogStart, weather.fogStart);
 	glUniform1f(uniFogEnd, camera.frustum.far);
 
 	glUniform4f(uniAmbientCol, ambient.x, ambient.y, ambient.z, 1.f);
@@ -502,7 +503,7 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
 
-        glDrawElements(GL_TRIANGLES, model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+        glDrawElements((model->geometries[g].facetype == Model::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP), model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
     }
 }
 

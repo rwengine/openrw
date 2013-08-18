@@ -14,6 +14,11 @@
 class Model
 {
 public:
+    enum FaceType {
+        Triangles = 0,
+        TriangleStrip = 1
+    };
+
 	RW::BSClump clump;
 
 	struct Texture {
@@ -29,9 +34,9 @@ public:
 		float ambientIntensity;
 	};
 	
-	struct SubGeometry {
+    struct SubGeometry {
 		GLuint EBO;
-		size_t material;
+        size_t material;
 		std::vector<uint32_t> indices;
 	};
 	
@@ -41,6 +46,8 @@ public:
 		RW::BSGeometryBounds geometryBounds;
 		
 		uint32_t clumpNum;
+
+        FaceType facetype;
 
 		uint32_t flags;
 		

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 Model* LoaderDFF::loadFromMemory(char *data)
 {
     auto model = new Model;
@@ -27,6 +29,9 @@ Model* LoaderDFF::loadFromMemory(char *data)
                 frame.defaultRotation = rawframe.rotation;
                 frame.defaultTranslation = rawframe.position;
                 frame.parentFrameIndex = rawframe.index;
+
+                // Initilize the matrix with the correct values.
+                frame.matrix = glm::translate(glm::mat4(frame.defaultRotation), frame.defaultTranslation);
 
                 model->frames.push_back(frame);
 			}
@@ -172,10 +177,11 @@ Model* LoaderDFF::loadFromMemory(char *data)
 							{
 								auto meshplg = extsec.readSubStructure<RW::BSBinMeshPLG>(0);
 								geometryStruct.subgeom.resize(meshplg.numsplits);
+                                geometryStruct.facetype = static_cast<Model::FaceType>(meshplg.facetype);
 								size_t meshplgI = sizeof(RW::BSBinMeshPLG);
 								for(size_t i = 0; i < meshplg.numsplits; ++i)
 								{
-									auto plgHeader = extsec.readSubStructure<RW::BSMaterialSplit>(meshplgI);
+                                    auto plgHeader = extsec.readSubStructure<RW::BSMaterialSplit>(meshplgI);
 									meshplgI += sizeof(RW::BSMaterialSplit);
 									geometryStruct.subgeom[i].material = plgHeader.index;
 									geometryStruct.subgeom[i].indices.resize(plgHeader.numverts);

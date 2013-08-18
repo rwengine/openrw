@@ -46,7 +46,7 @@ bool TextureLoader::loadFromMemory(char *data)
 			glTexImage2D(
 				GL_TEXTURE_2D, 0, GL_RGBA,
 				2, 2, 0,
-				GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, gErrorTextureData
+                GL_RGBA, GL_RGBA, gErrorTextureData
 			);
 		}
 		else if((texNative.rasterformat & RW::BSTextureNative::FORMAT_EXT_PAL8) == RW::BSTextureNative::FORMAT_EXT_PAL8)
@@ -56,11 +56,11 @@ bool TextureLoader::loadFromMemory(char *data)
 			uint8_t fullColor[texNative.width * texNative.height * 4];
 			
 			bool hasAlpha = texNative.alpha == 1;
-			
-			for(size_t j = 0; j < texNative.width * texNative.height; ++j)
+
+            for(size_t j = 0, iTex = 0, iPal = 0; j < texNative.width * texNative.height; ++j)
 			{
-				size_t iTex = j * 4;
-				size_t iPal = coldata[j] * 4;
+                iTex = j * 4;
+                iPal = coldata[j] * 4;
 				fullColor[iTex+0] = palette.palette[iPal+0];
 				fullColor[iTex+1] = palette.palette[iPal+1];
 				fullColor[iTex+2] = palette.palette[iPal+2];

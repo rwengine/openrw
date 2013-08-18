@@ -207,6 +207,7 @@ void render()
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	
 	glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	//glEnable(GL_CULL_FACE);
 
     switch( debugMode ) {
@@ -215,8 +216,6 @@ void render()
         break;
 
     case 1: {
-
-        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
@@ -226,8 +225,6 @@ void render()
         break;
     }
     case 2: {
-
-        glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
@@ -313,7 +310,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close);
+    sf::ContextSettings cs;
+    cs.depthBits = 32;
+    window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close, cs);
 	window.setVerticalSyncEnabled(true);
 
 	init(argv[optind]);
@@ -321,7 +320,7 @@ int main(int argc, char *argv[])
 	sf::Clock clock;
 
 	float accum = 0.f;
-	float ts = 1.f / 60.f;
+    float ts = 1.f / 20.f;
 	
 	while (window.isOpen()) {
 		sf::Event event;
