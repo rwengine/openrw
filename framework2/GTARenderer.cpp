@@ -1,6 +1,10 @@
 #include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 
+#include <renderwure/objects/GTACharacter.hpp>
+#include <renderwure/objects/GTAInstance.hpp>
+#include <renderwure/objects/GTAVehicle.hpp>
+
 #include <deque>
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>

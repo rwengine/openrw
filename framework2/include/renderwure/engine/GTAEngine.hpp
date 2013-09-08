@@ -4,8 +4,13 @@
 
 #include <renderwure/engine/GTAData.hpp>
 #include <renderwure/render/GTARenderer.hpp>
-#include <renderwure/engine/GTAObjects.hpp>
+#include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/ai/GTAAINode.hpp>
+
+class GTAObject;
+class GTACharacter;
+class GTAInstance;
+class GTAVehicle;
 
 #include <glm/glm.hpp>
 

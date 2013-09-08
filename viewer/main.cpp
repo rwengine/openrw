@@ -6,6 +6,7 @@
 #include <renderwure/render/DebugDraw.hpp>
 #include <renderwure/ai/GTAAIController.hpp>
 #include <renderwure/ai/GTAPlayerAIController.hpp>
+#include <renderwure/objects/GTACharacter.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

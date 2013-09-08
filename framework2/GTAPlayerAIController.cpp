@@ -1,5 +1,5 @@
 #include "renderwure/ai/GTAPlayerAIController.hpp"
-#include <renderwure/engine/GTAObjects.hpp>
+#include <renderwure/objects/GTACharacter.hpp>
 
 GTAPlayerAIController::GTAPlayerAIController(GTACharacter* character)
  : GTAAIController(character), running(false)

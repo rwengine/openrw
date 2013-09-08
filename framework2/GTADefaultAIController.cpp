@@ -1,5 +1,5 @@
 #include "renderwure/ai/GTADefaultAIController.hpp"
-#include <renderwure/engine/GTAObjects.hpp>
+#include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 
 void GTADefaultAIController::update(float dt)
