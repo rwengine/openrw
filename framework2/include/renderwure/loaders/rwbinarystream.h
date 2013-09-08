@@ -1,6 +1,6 @@
 #ifndef _RWBINARYSTREAM_H_
 #define _RWBINARYSTREAM_H_
-#include "gtfwpre.h"
+#include <cstdint>
 #include <glm/glm.hpp>
 
 #include <cstddef>

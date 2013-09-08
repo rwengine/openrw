@@ -5,7 +5,7 @@
 #include <renderwure/BinaryStream.hpp>
 #include <renderwure/loaders/LoaderCOL.hpp>
 #include <renderwure/loaders/LoaderIFP.hpp>
-#include "../framework/rwbinarystream.h"
+#include <renderwure/loaders/rwbinarystream.h>
 
 using RW::BSSectionHeader;
 using RW::BSFrameList;
