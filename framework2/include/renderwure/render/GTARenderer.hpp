@@ -43,7 +43,7 @@ public:
      */
     void renderWorld();
 
-    void renderNamedFrame(Model*, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name);
+	void renderNamedFrame(Model*, const glm::mat4& matrix, const std::string& name);
 
     void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 

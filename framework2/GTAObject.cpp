@@ -55,3 +55,8 @@ glm::vec3 GTAObject::getPosition() const
 {
 	return position;
 }
+
+glm::quat GTAObject::getRotation() const
+{
+	return rotation;
+}

@@ -349,28 +349,30 @@ void GTARenderer::renderWorld()
 	}
 	
 	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
-        GTAVehicle& inst = engine->vehicleInstances[v];
+		GTAVehicle* inst = engine->vehicleInstances[v];
 
-        if(!inst.model)
+		if(!inst->model)
 		{
-            std::cout << "model " <<  inst.vehicle->modelName << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
+			std::cout << "model " <<  inst->vehicle->modelName << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
 		}
 		
 		glm::mat4 matrixModel;
-        matrixModel = glm::translate(matrixModel, inst.position);
+		matrixModel = glm::translate(matrixModel, inst->getPosition());
+		matrixModel = matrixModel * glm::mat4_cast(inst->getRotation());
 
         glm::mat4 matrixVehicle = matrixModel;
 
-        renderModel(inst.model, matrixModel, &inst);
+		renderModel(inst->model, matrixModel, inst);
 
 		// Draw wheels n' stuff
-		for( size_t w = 0; w < inst.vehicle->wheelPositions.size(); ++w) {
-			auto woi = engine->objectTypes.find(inst.vehicle->wheelModelID);
+		for( size_t w = 0; w < inst->vehicle->wheelPositions.size(); ++w) {
+			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
                 Model* wheelModel = engine->gameData.models["wheels"];
 				if( wheelModel) {
-					auto wwpos = matrixVehicle * glm::vec4(inst.vehicle->wheelPositions[w], 1.f);
-                    renderNamedFrame(wheelModel, glm::vec3(wwpos), glm::quat(), glm::vec3(1.f, inst.vehicle->wheelScale, inst.vehicle->wheelScale), woi->second->modelName);
+					glm::mat4 wheelMatrix = glm::translate(glm::mat4(), inst->vehicle->wheelPositions[w]);
+					wheelMatrix = glm::scale(wheelMatrix, glm::vec3(1.f, inst->vehicle->wheelScale, inst->vehicle->wheelScale));
+					renderNamedFrame(wheelModel, matrixVehicle * wheelMatrix, woi->second->modelName);
 				}
 				else {
 					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
@@ -398,7 +400,7 @@ void GTARenderer::renderWorld()
 	glBindVertexArray( 0 );
 }
 
-void GTARenderer::renderNamedFrame(Model* model, const glm::vec3& pos, const glm::quat& rot, const glm::vec3& scale, const std::string& name)
+void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const std::string& name)
 {
 	for (size_t f = 0; f < model->frames.size(); f++) 
 	{
@@ -415,20 +417,15 @@ void GTARenderer::renderNamedFrame(Model* model, const glm::vec3& pos, const glm
 		
 		size_t g = f;
 		RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
-		if(! camera.frustum.intersects(bounds.center + pos, bounds.radius)) {
+		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			culled++;
 			continue;
 		}
 		else {
 			rendered++;
 		}
-		
-		glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, pos);
-		matrixModel = glm::scale(matrixModel, scale);
-		matrixModel = matrixModel * glm::mat4_cast(rot);
-		
-        renderGeometry(model, g, matrixModel);
+
+		renderGeometry(model, g, matrix);
 		break;
 	}
 }

@@ -151,7 +151,7 @@ public:
 	/**
 	 * Game Vehicles!
 	 */
-	std::vector<GTAVehicle> vehicleInstances;
+	std::vector<GTAVehicle*> vehicleInstances;
 
     /**
      * Pedestrians and PCs.

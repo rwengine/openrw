@@ -2,6 +2,7 @@
 #ifndef _GTAVEHICLE_HPP_
 #define _GTAVEHICLE_HPP_
 #include <renderwure/engine/GTAObject.hpp>
+#include <bullet/btBulletDynamicsCommon.h>
 
 /**
  * @class GTAVehicle
@@ -13,8 +14,13 @@ struct GTAVehicle : public GTAObject
 	glm::vec3 colourPrimary;
 	glm::vec3 colourSecondary;
 
-	GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const glm::vec3& prim, const glm::vec3& sec)
-		: GTAObject(engine, pos, rot, model), vehicle(veh), colourPrimary(prim), colourSecondary(sec) {}
+	btRigidBody* physBody;
+
+	GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const glm::vec3& prim, const glm::vec3& sec);
+
+	glm::vec3 getPosition() const;
+
+	glm::quat getRotation() const;
 
 	Type type() { return Vehicle; }
 };

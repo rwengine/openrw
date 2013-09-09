@@ -22,6 +22,7 @@ bool GTAEngine::load()
 	broadphase = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
 	dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, solver, collisionConfig);
+	dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
 	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	
 	gameData.load();
@@ -260,7 +261,7 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 			}
 		}
 		
-        vehicleInstances.push_back({ this, pos, rot, model, vti->second, prim, sec });
+		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, model, vti->second, prim, sec });
 	}
 }
 
