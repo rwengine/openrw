@@ -23,8 +23,7 @@ struct GTAInstance : public GTAObject
 		LoaderIPLInstance inst,
 		std::shared_ptr<LoaderIDE::OBJS_t> obj,
 		std::shared_ptr<GTAInstance> lod
-			)
-		: GTAObject(engine, pos, rot, model), scale(scale), instance(inst), object(obj), LODinstance(lod) {}
+			);
 
 	Type type() { return Instance; }
 };

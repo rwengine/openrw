@@ -15,6 +15,11 @@ GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::q
 	physObject->setCollisionShape(physShape);
 	physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	physCharacter = new btKinematicCharacterController(physObject, physShape, 0.65f, 2);
+
+	engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+	engine->dynamicsWorld->addAction(physCharacter);
+
+	changeAction(Idle);
 }
 
 void GTACharacter::changeAction(Activity newAction)

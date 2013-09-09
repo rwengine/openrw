@@ -148,122 +148,12 @@ bool GTAEngine::placeItems(const std::string& name)
 					gameData.loadTXD(oi->second->textureName + ".txd");
 				}
 				
-                static size_t bodycount = 0;
-
-				btRigidBody* body = nullptr;
-				auto phyit = gameData.collisions.find(oi->second->modelName);
-                if( phyit != gameData.collisions.end()) {
-					btCompoundShape* cmpShape = new btCompoundShape;
-					btDefaultMotionState* msta = new btDefaultMotionState;
-					msta->setWorldTransform(btTransform(
-						btQuaternion(
-							inst.rotX, inst.rotY, inst.rotZ, inst.rotW
-						).inverse(), 
-						btVector3(
-							inst.posX, inst.posY, inst.posZ
-						)
-					));
-					btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
-					CollisionInstance& physInst = *phyit->second.get();
-					
-					// Boxes
-					for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
-						CollTBox& box = physInst.boxes[i];
-						auto size = (box.max - box.min) / 2.f;
-						auto mid = (box.min + box.max) / 2.f;
-						btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
-						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(mid.x, mid.y, mid.z));
-						cmpShape->addChildShape(t, bshape);
-                        bodycount++;
-					}
-					
-					// Spheres
-					for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
-						CollTSphere& sphere = physInst.spheres[i];
-						btCollisionShape* sshape = new btSphereShape(sphere.radius);
-						btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
-						cmpShape->addChildShape(t, sshape);
-                        bodycount++;
-					}
-
-                    if( physInst.triangles.size() > 0 ) {
-                        btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
-                                    physInst.triangles.size(),
-                                    (int*) physInst.triangles.data(),
-                                    sizeof(CollTFaceTriangle),
-                                    physInst.vertices.size(),
-                                    &(physInst.vertices[0].x),
-                                sizeof(glm::vec3)
-                                );
-                        btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-                        cmpShape->addChildShape(
-                                    btTransform(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(0.f, 0.f, 0.f)),
-                                    trishape
-                                    );
-                        bodycount++;
-                    }
-
-					
-					// Todo: other shapes.
-					
-					body = new btRigidBody(info);
-					//body->setWorldTransform();
-					dynamicsWorld->addRigidBody(body);
-				}
-
-                glm::vec3 instancePos(inst.posX, inst.posY, inst.posZ);
-                glm::quat instanceRot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
-                instanceRot = glm::normalize(instanceRot);
-
-                auto pathit = objectNodes.find(inst.id);
-                if( pathit != objectNodes.end() ) {
-                    auto& pathlist = pathit->second;
-                    for( size_t p = 0; p < pathlist.size(); ++p ) {
-                        auto& path = pathlist[p];
-                        size_t startIndex = ainodes.size();
-                        for( size_t n = 0; n < path.nodes.size(); ++n ) {
-                            auto& node = path.nodes[n];
-							GTAAINode* ainode = new GTAAINode;
-
-                            ainode->type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
-                            ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
-                            ainode->flags = GTAAINode::None;
-                            ainode->position = instancePos + (instanceRot * node.position);
-
-                            if( node.type == LoaderIDE::EXTERNAL ) {
-                                ainode->flags |= GTAAINode::External;
-                                for( size_t rn = 0; rn < ainodes.size(); ++rn ) {
-                                    if( (ainodes[rn]->flags & GTAAINode::External) == GTAAINode::External ) {
-                                        auto d = glm::length(ainodes[rn]->position - ainode->position);
-                                        if( d < 1.f ) {
-                                            ainode->connections.push_back(ainodes[rn]);
-											ainodes[rn]->connections.push_back(ainode);
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            if( ainode->nextIndex < ainodes.size() ) {
-								ainode->connections.push_back(ainodes[ainode->nextIndex]);
-								ainodes[ainode->nextIndex]->connections.push_back(ainode);
-							}
-							
-							for( size_t on = startIndex; on < ainodes.size(); ++on ) {
-								if( ainodes[on]->nextIndex == startIndex+n ) {
-									ainodes[on]->connections.push_back(ainode);
-									ainode->connections.push_back(ainodes[on]);
-								}
-							}
-							
-                            ainodes.push_back(ainode);
-							
-                        }
-                    }
-                }
+				glm::quat instanceRot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
+				instanceRot = glm::normalize(instanceRot);
 
                 objectInstances.push_back(std::shared_ptr<GTAInstance>(new GTAInstance(
                                               this,
-                                              instancePos,
+											  glm::vec3(inst.posX, inst.posY, inst.posZ),
                                               instanceRot,
                                               gameData.models[inst.model],
                                               glm::vec3(inst.scaleX, inst.scaleY, inst.scaleZ),
@@ -382,12 +272,9 @@ GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &po
 
         // Ensure the relevant data is loaded.
         if(! pt->modelName.empty()) {
-            if( pt->modelName != "null" ) {
-                gameData.loadDFF(pt->modelName + ".dff");
-            }
-            else {
-                gameData.loadDFF("loplyguy.dff");
-            }
+			if( pt->modelName != "null" ) {
+				gameData.loadDFF(pt->modelName + ".dff");
+			}
         }
         if(! pt->textureName.empty()) {
             gameData.loadTXD(pt->textureName + ".txd");
@@ -397,10 +284,7 @@ GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &po
 
 		auto ped = new GTACharacter( this, pos, rot, model, pt );
 		pedestrians.push_back(ped);
-		ped->changeAction(GTACharacter::Idle);
 		new GTADefaultAIController(ped);
-		dynamicsWorld->addCollisionObject(ped->physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
-		dynamicsWorld->addAction(ped->physCharacter);
 		return ped;
     }
     return nullptr;
