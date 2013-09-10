@@ -142,10 +142,10 @@ bool LoaderIFP::loadFromMemory(char *data)
             animation->bones.insert({
                                         framename,
                                         bonedata
-                                    });
-        }
+									});
+		}
 
-        data_offs = animstart + animroot->base.size;
+		data_offs = animstart + animroot->base.size;
 
         std::transform(animname.begin(), animname.end(), animname.begin(), ::tolower );
         animations.insert({ animname, animation });

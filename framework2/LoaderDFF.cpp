@@ -46,6 +46,12 @@ Model* LoaderDFF::loadFromMemory(char *data)
 						if( extSec.header.id == RW::SID_NodeName) {
                             std::string framename(extSec.raw(), extSec.header.size);
                             std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
+
+							// !HACK!
+							if(framename == "swaist") {
+								model->rootFrameIdx = model->frameNames.size();
+							}
+
                             model->frameNames.push_back(framename);
 						}
 					}

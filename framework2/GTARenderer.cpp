@@ -1,5 +1,6 @@
 #include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/engine/Animator.hpp>
 
 #include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/objects/GTAInstance.hpp>
@@ -300,7 +301,7 @@ void GTARenderer::renderWorld()
 
         if(!charac->model) continue;
 
-        renderModel(charac->model, matrixModel, charac);
+		renderModel(charac->model, matrixModel, charac, charac->animator);
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
@@ -492,7 +493,7 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     }
 }
 
-void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object)
+void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object, Animator *animator)
 {
     for (size_t a = 0; a < model->atomics.size(); a++)
     {
@@ -520,7 +521,12 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
             glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
         }
 
-        renderGeometry(model, g, modelMatrix * model->getFrameMatrix(model->atomics[a].frame), object);
+		renderGeometry(model,
+					   g, modelMatrix *
+					   (animator ?
+							animator->getFrameMatrix(model->atomics[a].frame)
+							 : model->getFrameMatrix(model->atomics[a].frame)),
+					   object);
     }
 }
 

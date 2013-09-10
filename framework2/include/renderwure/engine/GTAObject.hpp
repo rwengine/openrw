@@ -10,7 +10,7 @@
 
 class GTAAIController;
 class Model;
-class Animation;
+class Animator;
 
 class GTAEngine;
 
@@ -27,14 +27,10 @@ struct GTAObject
     
     GTAEngine* engine;
 
-    Animation* animation; /// The currently playing animation.
-    float animtime; /// The current time in the animation.
-    float lastAnimtime;
-    glm::vec3 rootPosition; /// Where the object was at the start of animation
-    glm::vec3 lastRootPosition;
+	Animator* animator; /// Object's animator.
 
     GTAObject(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
-        : position(pos), rotation(rot), model(model), engine(engine), animation(nullptr), animtime(0.f), lastAnimtime(0.f) {}
+		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr) {}
 
     enum Type
     {
@@ -44,12 +40,6 @@ struct GTAObject
     };
 
     virtual Type type() = 0;
-
-    /**
-     * @brief updateBones Updates frame matrices
-     * Updates the internal frame matrices, taking into account the current animation.
-     */
-    void updateFrames();
 	
 	virtual void setPosition(const glm::vec3& pos);
 	

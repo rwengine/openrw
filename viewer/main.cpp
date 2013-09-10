@@ -190,12 +190,7 @@ void update(float dt)
 		gta->renderer.camera.frustum.view = view;
 
         for( size_t p = 0; p < gta->pedestrians.size(); ++p ) {
-			if(gta->pedestrians[p]->controller) {
-				gta->pedestrians[p]->controller->update(dt);
-			}
-			gta->pedestrians[p]->updateAnimation(dt);
-			gta->pedestrians[p]->updateFrames();
-			gta->pedestrians[p]->updateCharacter();
+			gta->pedestrians[p]->tick(dt);
         }
         
 		gta->dynamicsWorld->stepSimulation(dt);

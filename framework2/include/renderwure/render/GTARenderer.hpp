@@ -10,6 +10,7 @@
 class Model;
 class GTAEngine;
 class GTAObject;
+class Animator;
 
 class GTARenderer
 {
@@ -45,9 +46,9 @@ public:
 
 	void renderNamedFrame(Model*, const glm::mat4& matrix, const std::string& name);
 
-    void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
+	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 
-    void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr);
+	void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr, Animator* animator = nullptr);
 
     /**
      * @brief renderPaths renders the AI paths.

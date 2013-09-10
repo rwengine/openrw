@@ -43,15 +43,12 @@ struct GTACharacter : public GTAObject
 
 	void changeAction(Activity newAction);
 
+	void tick(float dt);
+
 	/**
 	 * @brief updateCharacter updates internall bullet Character.
 	 */
 	void updateCharacter();
-
-	/**
-	 * @brief updateAnimation updates animation parameters
-	 */
-	void updateAnimation(float dt);
 
 	virtual void setPosition(const glm::vec3& pos);
 

@@ -38,7 +38,7 @@ struct AnimationBone
 struct Animation
 {
     std::string name;
-    std::map<std::string, AnimationBone*> bones;
+	std::map<std::string, AnimationBone*> bones;
 	
 	float duration;
 };

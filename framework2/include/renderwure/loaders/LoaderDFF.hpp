@@ -66,8 +66,8 @@ public:
 		uint32_t geometry;
 	};
 
-    struct Frame {
-        glm::mat4 matrix;
+	struct Frame {
+		glm::mat4 matrix;
         glm::mat3 defaultRotation;
         glm::vec3 defaultTranslation;
         int32_t parentFrameIndex;
@@ -78,6 +78,8 @@ public:
 	std::vector<Geometry> geometries;
 	std::vector<Atomic> atomics;
     std::vector<Frame> frames;
+
+	int32_t rootFrameIdx;
 
     glm::mat4 getFrameMatrix(int32_t frameIndex)
     {
