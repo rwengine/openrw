@@ -9,3 +9,5 @@ add_subdirectory(viewer)
 
 add_subdirectory(framework2)
 add_subdirectory(analyzer)
+
+add_subdirectory(tests)

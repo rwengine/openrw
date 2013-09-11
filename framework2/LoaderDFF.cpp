@@ -183,7 +183,7 @@ Model* LoaderDFF::loadFromMemory(char *data)
 							{
 								auto meshplg = extsec.readSubStructure<RW::BSBinMeshPLG>(0);
 								geometryStruct.subgeom.resize(meshplg.numsplits);
-                                geometryStruct.facetype = static_cast<Model::FaceType>(meshplg.facetype);
+								geometryStruct.facetype = static_cast<Model::FaceType>(meshplg.facetype);
 								size_t meshplgI = sizeof(RW::BSBinMeshPLG);
 								for(size_t i = 0; i < meshplg.numsplits; ++i)
 								{
@@ -230,10 +230,13 @@ Model* LoaderDFF::loadFromMemory(char *data)
 					// OpenGL buffer stuff
 					glGenBuffers(1, &geometryStruct.VBO);
 					glGenBuffers(1, &geometryStruct.EBO);
+					size_t Ecount = 0;
 					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
 					{
-						glGenBuffers(1, &(geometryStruct.subgeom[i].EBO));
+						Ecount += geometryStruct.subgeom[i].indices.size();
+						//glGenBuffers(1, &(geometryStruct.subgeom[i].EBO));
 					}
+					geometryStruct.indicesCount = Ecount;
 
 					size_t buffsize = (geometryStruct.vertices.size() * sizeof(float) * 3)
 									+ (geometryStruct.texcoords.size() * sizeof(float) * 2)
@@ -293,23 +296,33 @@ Model* LoaderDFF::loadFromMemory(char *data)
 						indicies[i + 2] = tri.third;
 						i += 3;
 					}
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
+
+					/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
 					glBufferData(
 						GL_ELEMENT_ARRAY_BUFFER,
 						sizeof(indicies),
 						indicies,
 						GL_STATIC_DRAW
-					);
-					
-					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
+					);*/
+
+					// Allocate complete EBO buffer.
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
+					glBufferData(
+								GL_ELEMENT_ARRAY_BUFFER,
+								sizeof(uint32_t) * geometryStruct.indicesCount,
+								nullptr,
+								GL_STATIC_DRAW);
+
+					// Upload each subgeometry chunk.
+					size_t subOffset = 0;
+					for(size_t i = 0; i < geometryStruct.subgeom.size(); ++i)
 					{
-						glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.subgeom[i].EBO);
-						glBufferData(
-							GL_ELEMENT_ARRAY_BUFFER,
-							sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size(),
-							&(geometryStruct.subgeom[i].indices[0]),
-							GL_STATIC_DRAW
-						);
+						glBufferSubData(
+								GL_ELEMENT_ARRAY_BUFFER,
+								subOffset,
+								sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size(),
+								&(geometryStruct.subgeom[i].indices[0]));
+						subOffset += sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size();
 					}
 					
 					geometryStruct.clumpNum = clumpID;

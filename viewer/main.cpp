@@ -121,6 +121,10 @@ void init(std::string gtapath)
     debugDrawer->setShaderProgram(gta->renderer.worldProgram);
     debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
     gta->dynamicsWorld->setDebugDrawer(debugDrawer);
+
+	std::cout << "Loaded "
+			  << gta->gameData.models.size() << " models, "
+			  << gta->gameData.textureLoader.textures.size() << " textures" << std::endl;
 }
 
 void update(float dt)

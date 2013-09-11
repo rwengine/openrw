@@ -37,6 +37,8 @@ bool TextureLoader::loadFromMemory(char *data)
 		auto texNative = rootSection.readStructure<RW::BSTextureNative>();
 		
 		GLuint texture = 0;
+
+		std::cout << texNative.width << "x" <<  texNative.height << std::endl;
 		
 		if(texNative.platform != 8) 
 		{

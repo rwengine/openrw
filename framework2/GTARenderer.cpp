@@ -422,9 +422,6 @@ void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const 
 			culled++;
 			continue;
 		}
-		else {
-			rendered++;
-		}
 
 		renderGeometry(model, g, matrix);
 		break;
@@ -452,8 +449,8 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     glEnableVertexAttribArray(normalAttrib);
     glEnableVertexAttribArray(colourAttrib);
 
-    for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg)
-    {
+	for(size_t sg = 0; sg <1 && sg < model->geometries[g].subgeom.size(); ++sg)
+	{
         if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) {
             Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
 
@@ -487,25 +484,24 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
             glUniform1f(uniMatAmbient, mat.ambientIntensity);
         }
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].subgeom[sg].EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
 
-        glDrawElements((model->geometries[g].facetype == Model::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP), model->geometries[g].subgeom[sg].indices.size(), GL_UNSIGNED_INT, NULL);
+		rendered++;
+
+		glDrawElements((model->geometries[g].facetype == Model::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP), model->geometries[g].indicesCount, GL_UNSIGNED_INT, NULL);
     }
 }
 
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object, Animator *animator)
 {
-    for (size_t a = 0; a < model->atomics.size(); a++)
+	for (size_t a = 0; a < model->atomics.size(); a++)
     {
         size_t g = model->atomics[a].geometry;
         RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
         if(! camera.frustum.intersects(bounds.center + glm::vec3(modelMatrix[3]), bounds.radius)) {
             culled++;
             continue;
-        }
-        else {
-            rendered++;
-        }
+		}
 
         int32_t fi = model->atomics[a].frame;
         if( object && object->type() == GTAObject::Vehicle ) {

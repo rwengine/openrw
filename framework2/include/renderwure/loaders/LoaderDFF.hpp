@@ -35,7 +35,7 @@ public:
 	};
 	
     struct SubGeometry {
-		GLuint EBO;
+		//GLuint EBO;
         size_t material;
 		std::vector<uint32_t> indices;
 	};
@@ -56,6 +56,7 @@ public:
 		std::vector<glm::vec4> colours;
 		std::vector<RW::BSTVector3> vertices;
 		std::vector<RW::BSTVector3> normals;
+		uint32_t indicesCount;
 
 		std::vector<Material> materials;
 		std::vector<SubGeometry> subgeom;
