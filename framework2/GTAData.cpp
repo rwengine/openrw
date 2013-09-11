@@ -3,6 +3,7 @@
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/render/TextureAtlas.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -332,7 +333,7 @@ void GTAData::loadTXD(const std::string& name)
 	
 	char* file = loadFile(name);
 	if(file) {
-		textureLoader.loadFromMemory(file);
+		textureLoader.loadFromMemory(file, this);
 		delete[] file;
 	}
 }
@@ -347,7 +348,7 @@ void GTAData::loadDFF(const std::string& name)
 	if(file)
 	{
 		LoaderDFF dffLoader;
-        models[name.substr(0, name.size() - 4)] = dffLoader.loadFromMemory(file);
+		models[name.substr(0, name.size() - 4)] = dffLoader.loadFromMemory(file, this);
 		delete[] file;
 	}
 }
@@ -424,5 +425,19 @@ char* GTAData::loadFile(const std::string& name)
 		std::cerr << err.str() << std::endl;
 	}
 	
+	return nullptr;
+}
+
+TextureAtlas* GTAData::getAtlas(size_t i)
+{
+	if( i < atlases.size() ) {
+		return atlases[i];
+	}
+	if( i == atlases.size() && (i == 0 || atlases[i-1]->getTextureCount() > 0) ) {
+		GLint max_texture_size;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
+		atlases.push_back(new TextureAtlas(max_texture_size/2, max_texture_size/2));
+		return atlases[i];
+	}
 	return nullptr;
 }

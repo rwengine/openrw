@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _TEXTURE_ATLAS_HPP_
 #define _TEXTURE_ATLAS_HPP_
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 class TextureAtlas
 {
@@ -20,13 +20,19 @@ class TextureAtlas
 	size_t Y; // Y of current row.
 	size_t rowHeight; // Maximum texture height for the current row.
 
+	size_t textureCount;
+
+	bool finalized;
+
 public:
 
 	TextureAtlas(size_t w, size_t h);
 
 	~TextureAtlas();
 
-	void packTexture(uint8_t* data, size_t w, size_t h, float& s, float& t, float& sX, float& sY);
+	void packTexture(void* data, size_t w, size_t h, float& s, float& t, float& sX, float& sY);
+
+	void packTextureFormat(void* data, GLenum format, GLenum type, size_t w, size_t h, float& s, float& t, float& sX, float& sY);
 
 	/**
 	 * @brief canPack Returns true if enough space remains in the atlas
@@ -38,6 +44,13 @@ public:
 	 */
 	bool canPack(size_t* w, size_t* h, size_t n) const;
 
+	size_t getTextureCount() const;
+
+	GLint getName() const;
+
+	bool isFinalized() const;
+
+	void finalize();
 };
 
 #endif

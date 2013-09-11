@@ -10,6 +10,6 @@ add_library(renderware
     ${RENDERWARE_HEADERS}
 )
 
-target_link_libraries(renderware sfml-window)
+target_link_libraries(renderware sfml-window GLEW)
 
 include_directories(include /usr/include/bullet)

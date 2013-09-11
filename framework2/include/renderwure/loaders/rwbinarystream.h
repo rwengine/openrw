@@ -241,7 +241,7 @@ namespace RW
 	
 	struct BSPaletteData
 	{
-		uint8_t palette[1024];
+		uint32_t palette[256];
 		uint32_t rastersize;
 	};
 	
@@ -293,6 +293,11 @@ namespace RW
 		template<class T> T readSubStructure(size_t internalOffset)
 		{
 			return *reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)+internalOffset);
+		}
+
+		template<class T*> T* readSubStructure(size_t internalOffset)
+		{
+			return reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)+internalOffset);
 		}
 		
 		template<class T> T readRaw(size_t internalOffset)

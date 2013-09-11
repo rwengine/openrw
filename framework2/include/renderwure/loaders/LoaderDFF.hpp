@@ -11,6 +11,8 @@
 #include <string>
 #include <memory>
 
+class GTAData;
+
 class Model
 {
 public:
@@ -101,7 +103,7 @@ private:
 	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
 
 public:
-    Model* loadFromMemory(char *data);
+	Model* loadFromMemory(char *data, GTAData* gameData);
 };
 
 #endif

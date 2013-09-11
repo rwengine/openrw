@@ -1,6 +1,7 @@
 #include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/engine/Animator.hpp>
+#include <renderwure/render/TextureAtlas.hpp>
 
 #include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/objects/GTAInstance.hpp>
@@ -272,7 +273,7 @@ void GTARenderer::renderWorld()
 	glEnableVertexAttribArray(texAttrib);
 	glEnableVertexAttribArray(normalAttrib);
 	glEnableVertexAttribArray(colourAttrib);
-	textureLoader.bindTexture("water_old");
+	glBindTexture(GL_TEXTURE_2D, engine->gameData.textures["water_old"].atlas->getName());
 	
 	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
 		GTATypes::WaterRect& r = engine->gameData.waterRects[w];
@@ -454,8 +455,11 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
         if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) {
             Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
 
-            if(mat.textures.size() > 0) {
-                engine->gameData.textureLoader.bindTexture(mat.textures[0].name);
+			if(mat.textures.size() > 0 && engine->gameData.textures[mat.textures[0].name].atlas) {
+				if(! engine->gameData.textures[mat.textures[0].name].atlas->isFinalized()) {
+					engine->gameData.textures[mat.textures[0].name].atlas->finalize();
+				}
+				glBindTexture(GL_TEXTURE_2D, engine->gameData.textures[mat.textures[0].name].atlas->getName());
             }
 
             if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {

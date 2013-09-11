@@ -1,11 +1,13 @@
 #include <renderwure/loaders/LoaderDFF.hpp>
+#include <renderwure/engine/GTAData.hpp>
 
 #include <iostream>
 #include <algorithm>
+#include <set>
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Model* LoaderDFF::loadFromMemory(char *data)
+Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 {
     auto model = new Model;
 	RW::BinaryStreamSection root(data);
@@ -137,6 +139,7 @@ Model* LoaderDFF::loadFromMemory(char *data)
 					materiallistsec.getNextChildSection(matI);
 					
 					geometryStruct.materials.resize(materialList.nummaterials);
+					std::map<std::string, TextureInfo> availableTextures;
 
 					for (size_t m = 0; m < materialList.nummaterials; ++m) {
 						auto materialsec = materiallistsec.getNextChildSection(matI);
@@ -170,8 +173,16 @@ Model* LoaderDFF::loadFromMemory(char *data)
 
 							geometryStruct.materials[m].textures[t] = {textureName, alphaName};
 						}
+
+						if(geometryStruct.materials[m].textures.size() < 1) continue;
+
+						auto textureIt = gameData->textures
+								.find(geometryStruct.materials[m].textures[0].name);
+						if(textureIt != gameData->textures.end()) {
+							availableTextures.insert({textureIt->first, textureIt->second});
+						}
 					}
-					
+
 					if(item.hasMoreData(secI))
 					{
 						auto extensions = item.getNextChildSection(secI);
@@ -191,9 +202,32 @@ Model* LoaderDFF::loadFromMemory(char *data)
 									meshplgI += sizeof(RW::BSMaterialSplit);
 									geometryStruct.subgeom[i].material = plgHeader.index;
 									geometryStruct.subgeom[i].indices.resize(plgHeader.numverts);
+
+									// Find texture info if applicable
+									TextureInfo* tInf = nullptr;
+									if(geometryStruct.materials[plgHeader.index].textures.size() > 0) {
+										auto texInfoIt = availableTextures.find(geometryStruct.materials[plgHeader.index].textures[0].name);
+										tInf = &texInfoIt->second;
+									}
+									std::set<uint32_t> toUpdate;
+
 									for (int j = 0; j < plgHeader.numverts; ++j) {
-										geometryStruct.subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
+										uint32_t idx = extsec.readSubStructure<uint32_t>(meshplgI);
+										geometryStruct.subgeom[i].indices[j] = idx;
 										meshplgI += sizeof(uint32_t);
+										if(tInf && toUpdate.find(idx) == toUpdate.end()) {
+											toUpdate.insert(idx);
+										}
+									}
+
+									for(std::set<uint32_t>::iterator k = toUpdate.begin();
+										k != toUpdate.end();
+										++k) {
+										// Update verticies with atlas UV coordinates.
+										geometryStruct.texcoords[*k].u
+												= tInf->rect.x + geometryStruct.texcoords[*k].u * tInf->rect.z;
+										geometryStruct.texcoords[*k].v
+												= tInf->rect.y + geometryStruct.texcoords[*k].v * tInf->rect.w;
 									}
 								}
 							}

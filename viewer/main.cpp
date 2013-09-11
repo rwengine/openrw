@@ -124,7 +124,7 @@ void init(std::string gtapath)
 
 	std::cout << "Loaded "
 			  << gta->gameData.models.size() << " models, "
-			  << gta->gameData.textureLoader.textures.size() << " textures" << std::endl;
+			  << gta->gameData.textures.size() << " textures" << std::endl;
 }
 
 void update(float dt)

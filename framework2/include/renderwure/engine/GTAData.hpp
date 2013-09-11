@@ -14,6 +14,20 @@
 #include <memory>
 
 class GTAEngine;
+class TextureAtlas;
+
+/**
+ * @brief The TextureInfo struct
+ * Contains metadata about where a texture can be found in each atlas.
+ */
+struct TextureInfo
+{
+	TextureAtlas* atlas;
+	glm::vec4 rect; /// X/Y base coord, Z/W UV scale.
+
+	TextureInfo(TextureAtlas* a, const glm::vec4&r) : atlas(a), rect(r) {}
+	TextureInfo() : atlas(nullptr) {}
+};
 
 /**
  * Handles loading and management of the Game's DAT
@@ -108,6 +122,14 @@ public:
 	 * @return pointer to the data, NULL if it is not available 
 	 */
 	char* loadFile(const std::string& name);
+
+	/**
+	 * @brief getAtlas Returns atlas i, creating it if the situation calls for it.
+	 *  "the situation" being the last atlas has more than 0 textures packed.
+	 * @param i
+	 * @return
+	 */
+	TextureAtlas* getAtlas(size_t i);
 	
 	/**
 	 * Files that have been loaded previously
@@ -154,7 +176,17 @@ public:
 	 * Loaded models
 	 */
     std::map<std::string, Model*> models;
-	
+
+	/**
+	 * Loaded Textures and their atlas entries.
+	 */
+	std::map<std::string, TextureInfo> textures;
+
+	/**
+	 * Texture atlases.
+	 */
+	std::vector<TextureAtlas*> atlases;
+
     /**
      * Loaded Animations
      */
