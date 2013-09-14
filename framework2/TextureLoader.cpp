@@ -22,7 +22,7 @@ bool TextureLoader::loadFromFile(std::string filename, GTAData* gameData)
 	return loadFromMemory(data, gameData);
 }
 
-GLuint gErrorTextureData[] = { 0x00FF00FF, 0x00FFFFFF, 0x00FFFFFF, 0x00FF00FF };
+GLuint gErrorTextureData[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFF0000 };
 
 bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 {
@@ -43,6 +43,7 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 			std::cerr << "Unsupported texture platform " << std::dec << texNative.platform << std::endl;
 			continue;
 		}
+		bool isPal4 = (texNative.rasterformat & RW::BSTextureNative::FORMAT_EXT_PAL4) == RW::BSTextureNative::FORMAT_EXT_PAL4;
 		bool isPal8 = (texNative.rasterformat & RW::BSTextureNative::FORMAT_EXT_PAL8) == RW::BSTextureNative::FORMAT_EXT_PAL8;
 		bool isFulc = texNative.rasterformat == RW::BSTextureNative::FORMAT_1555 ||
 					texNative.rasterformat == RW::BSTextureNative::FORMAT_8888 ||
@@ -52,46 +53,47 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 			continue;
 		}
 
-		TextureAtlas* atlas;
-		glm::vec4 texRect;
-		size_t ai = 0;
-		size_t texW = texNative.width, texH = texNative.height;
-		do {
-			atlas = gameData->getAtlas(ai++);
-		} while(! atlas->canPack(&texW, &texH, 1));
+		bool useAtlas = false;
+
+		GLuint textureName = 0;
+		TextureAtlas* atlas = nullptr;
+		glm::vec4 texRect(0.f, 0.f, 1.f, 1.f);
+		if(useAtlas) {
+			size_t ai = 0;
+			size_t texW = texNative.width, texH = texNative.height;
+			do {
+				atlas = gameData->getAtlas(ai++);
+			} while(! atlas->canPack(&texW, &texH, 1));
+		}
 
 		if(isPal8)
 		{
 			uint32_t fullColor[texNative.width * texNative.height];
-			size_t paletteSize = sizeof(uint32_t) * 256;
-
+			size_t paletteSize = 1024;
 			uint8_t* coldata = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) + paletteSize);
+			uint32_t* palette = reinterpret_cast<uint32_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
 
-			if((texNative.rasterformat & RW::BSTextureNative::FORMAT_8888) == RW::BSTextureNative::FORMAT_8888) {
-				uint32_t* palette = reinterpret_cast<uint32_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
+			for(size_t j = 0, iTex = 0; j < texNative.width * texNative.height; ++j)
+			{
+				iTex = j;
+				fullColor[iTex] = palette[coldata[j]];
+			}
 
-				for(size_t j = 0, iTex = 0, iPal = 0; j < texNative.width * texNative.height; ++j)
-				{
-					iTex = j;
-					iPal = coldata[j];
-					fullColor[iTex] = palette[iPal];
-				}
+			if(atlas) {
+				atlas->packTextureFormat(
+							fullColor, GL_BGRA, GL_UNSIGNED_BYTE,
+							texNative.width, texNative.height,
+							texRect.x, texRect.y, texRect.z, texRect.w);
 			}
 			else {
-				uint32_t* palette = reinterpret_cast<uint32_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
-
-				for(size_t j = 0, iTex = 0, iPal = 0; j < texNative.width * texNative.height; ++j)
-				{
-					iTex = j;
-					iPal = coldata[j];
-					fullColor[iTex] = 0xFF000000 | palette[iPal];
-				}
+				glGenTextures(1, &textureName);
+				glBindTexture(GL_TEXTURE_2D, textureName);
+				glTexImage2D(
+					GL_TEXTURE_2D, 0, texNative.alpha ? GL_RGBA : GL_RGB,
+					texNative.width, texNative.height, 0,
+					GL_RGBA, GL_UNSIGNED_BYTE, fullColor
+				);
 			}
-
-			atlas->packTextureFormat(
-						fullColor, GL_RGBA, GL_UNSIGNED_BYTE,
-						texNative.width, texNative.height,
-						texRect.x, texRect.y, texRect.z, texRect.w);
 		}
 		else if(isFulc)
 		{
@@ -106,30 +108,43 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 					type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 					break;
 				case RW::BSTextureNative::FORMAT_8888:
-					format = GL_BGRA;
+					format = GL_RGBA;
 					type = GL_UNSIGNED_INT_8_8_8_8_REV;
 					break;
 				case RW::BSTextureNative::FORMAT_888:
-					format = GL_BGR;
+					format = GL_BGRA;
 					type = GL_UNSIGNED_BYTE;
 					break;
 			}
 
-			atlas->packTextureFormat(
-						coldata, format, type,
-						texNative.width, texNative.height,
-						texRect.x, texRect.y, texRect.z, texRect.w);
+			if(atlas) {
+				atlas->packTextureFormat(
+							coldata, format, type,
+							texNative.width, texNative.height,
+							texRect.x, texRect.y, texRect.z, texRect.w);
+			}
+			else {
+				glGenTextures(1, &textureName);
+				glBindTexture(GL_TEXTURE_2D, textureName);
+				glTexImage2D(
+					GL_TEXTURE_2D, 0, texNative.alpha ? GL_RGBA : GL_RGB,
+					texNative.width, texNative.height, 0,
+					format, type, coldata
+				);
+			}
 		}
-
-		// todo: not completely ignore everything the TXD says.
-		/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-		glGenerateMipmap(GL_TEXTURE_2D);*/
 
 		std::string name = std::string(texNative.diffuseName);
 
-		gameData->textures.insert({name, {atlas, texRect}});
+		// todo: not completely ignore everything the TXD says.
+		if(!atlas) {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
+		gameData->textures.insert({name, {textureName, atlas, texRect}});
 	}
 
 	return true;

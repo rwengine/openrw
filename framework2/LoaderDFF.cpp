@@ -204,23 +204,23 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 									geometryStruct.subgeom[i].indices.resize(plgHeader.numverts);
 
 									// Find texture info if applicable
-									TextureInfo* tInf = nullptr;
+									/*TextureInfo* tInf = nullptr;
 									if(geometryStruct.materials[plgHeader.index].textures.size() > 0) {
 										auto texInfoIt = availableTextures.find(geometryStruct.materials[plgHeader.index].textures[0].name);
 										tInf = &texInfoIt->second;
 									}
-									std::set<uint32_t> toUpdate;
+									std::set<uint32_t> toUpdate;*/
 
 									for (int j = 0; j < plgHeader.numverts; ++j) {
 										uint32_t idx = extsec.readSubStructure<uint32_t>(meshplgI);
 										geometryStruct.subgeom[i].indices[j] = idx;
 										meshplgI += sizeof(uint32_t);
-										if(tInf && toUpdate.find(idx) == toUpdate.end()) {
+										/*if(tInf && toUpdate.find(idx) == toUpdate.end()) {
 											toUpdate.insert(idx);
-										}
+										}*/
 									}
 
-									for(std::set<uint32_t>::iterator k = toUpdate.begin();
+									/*for(std::set<uint32_t>::iterator k = toUpdate.begin();
 										k != toUpdate.end();
 										++k) {
 										// Update verticies with atlas UV coordinates.
@@ -228,7 +228,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 												= tInf->rect.x + geometryStruct.texcoords[*k].u * tInf->rect.z;
 										geometryStruct.texcoords[*k].v
 												= tInf->rect.y + geometryStruct.texcoords[*k].v * tInf->rect.w;
-									}
+									}*/
 								}
 							}
 						}
@@ -264,13 +264,6 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 					// OpenGL buffer stuff
 					glGenBuffers(1, &geometryStruct.VBO);
 					glGenBuffers(1, &geometryStruct.EBO);
-					size_t Ecount = 0;
-					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
-					{
-						Ecount += geometryStruct.subgeom[i].indices.size();
-						//glGenBuffers(1, &(geometryStruct.subgeom[i].EBO));
-					}
-					geometryStruct.indicesCount = Ecount;
 
 					size_t buffsize = (geometryStruct.vertices.size() * sizeof(float) * 3)
 									+ (geometryStruct.texcoords.size() * sizeof(float) * 2)
@@ -331,13 +324,13 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 						i += 3;
 					}
 
-					/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
-					glBufferData(
-						GL_ELEMENT_ARRAY_BUFFER,
-						sizeof(indicies),
-						indicies,
-						GL_STATIC_DRAW
-					);*/
+					size_t Ecount = 0;
+					for(size_t i  = 0; i < geometryStruct.subgeom.size(); ++i)
+					{
+						geometryStruct.subgeom[i].start = Ecount;
+						Ecount += geometryStruct.subgeom[i].indices.size();
+					}
+					geometryStruct.indicesCount = Ecount;
 
 					// Allocate complete EBO buffer.
 					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryStruct.EBO);
@@ -347,16 +340,14 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 								nullptr,
 								GL_STATIC_DRAW);
 
-					// Upload each subgeometry chunk.
-					size_t subOffset = 0;
+					// Upload each subgeometry
 					for(size_t i = 0; i < geometryStruct.subgeom.size(); ++i)
 					{
 						glBufferSubData(
 								GL_ELEMENT_ARRAY_BUFFER,
-								subOffset,
+								geometryStruct.subgeom[i].start * sizeof(uint32_t),
 								sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size(),
 								&(geometryStruct.subgeom[i].indices[0]));
-						subOffset += sizeof(uint32_t) * geometryStruct.subgeom[i].indices.size();
 					}
 					
 					geometryStruct.clumpNum = clumpID;

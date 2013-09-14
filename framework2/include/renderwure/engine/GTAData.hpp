@@ -18,15 +18,20 @@ class TextureAtlas;
 
 /**
  * @brief The TextureInfo struct
- * Contains metadata about where a texture can be found in each atlas.
+ * Contains metadata about where a texture can be found.
  */
 struct TextureInfo
 {
+	/// Texture Name
+	GLuint texName;
+	/// Atlas (if applicable)
 	TextureAtlas* atlas;
 	glm::vec4 rect; /// X/Y base coord, Z/W UV scale.
 
-	TextureInfo(TextureAtlas* a, const glm::vec4&r) : atlas(a), rect(r) {}
-	TextureInfo() : atlas(nullptr) {}
+	TextureInfo(GLuint tex, TextureAtlas* a, const glm::vec4&r)
+		: texName(tex), atlas(a), rect(r) {}
+	TextureInfo()
+		: texName(0), atlas(nullptr) {}
 };
 
 /**

@@ -37,7 +37,7 @@ public:
 	};
 	
     struct SubGeometry {
-		//GLuint EBO;
+		GLuint start = 0;
         size_t material;
 		std::vector<uint32_t> indices;
 	};

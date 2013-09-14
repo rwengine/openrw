@@ -49,7 +49,7 @@ const char *fragmentShaderSource = "#version 130\n"
 "void main()"
 "{"
 "   vec4 c = texture2D(texture, TexCoords);"
-"   if(c.a < 0.5) discard;"
+//"	if(c.a < 0.9) discard;"
 "	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);"
 "	float fogfac = clamp( (FogEnd-fogZ)/(FogEnd-FogStart), 0.0, 1.0 );"
 //"	float l = clamp(dot(Normal, SunDirection), 0.0, 1);"
@@ -273,7 +273,7 @@ void GTARenderer::renderWorld()
 	glEnableVertexAttribArray(texAttrib);
 	glEnableVertexAttribArray(normalAttrib);
 	glEnableVertexAttribArray(colourAttrib);
-	glBindTexture(GL_TEXTURE_2D, engine->gameData.textures["water_old"].atlas->getName());
+	glBindTexture(GL_TEXTURE_2D, engine->gameData.textures["water_old"].texName);
 	
 	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
 		GTATypes::WaterRect& r = engine->gameData.waterRects[w];
@@ -450,16 +450,26 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     glEnableVertexAttribArray(normalAttrib);
     glEnableVertexAttribArray(colourAttrib);
 
-	for(size_t sg = 0; sg <1 && sg < model->geometries[g].subgeom.size(); ++sg)
-	{
-        if (model->geometries[g].materials.size() > model->geometries[g].subgeom[sg].material) {
-            Model::Material& mat = model->geometries[g].materials[model->geometries[g].subgeom[sg].material];
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
 
-			if(mat.textures.size() > 0 && engine->gameData.textures[mat.textures[0].name].atlas) {
-				if(! engine->gameData.textures[mat.textures[0].name].atlas->isFinalized()) {
-					engine->gameData.textures[mat.textures[0].name].atlas->finalize();
+	for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg)
+	{		
+		auto& subgeom = model->geometries[g].subgeom[sg];
+
+		if (model->geometries[g].materials.size() > subgeom.material) {
+			Model::Material& mat = model->geometries[g].materials[subgeom.material];
+
+			if(mat.textures.size() > 0 ) {
+				TextureInfo& tex = engine->gameData.textures[mat.textures[0].name];
+				if(tex.atlas) {
+					if(! tex.atlas->isFinalized()) {
+						tex.atlas->finalize();
+					}
+					glBindTexture(GL_TEXTURE_2D, tex.atlas->getName());
 				}
-				glBindTexture(GL_TEXTURE_2D, engine->gameData.textures[mat.textures[0].name].atlas->getName());
+				else {
+					glBindTexture(GL_TEXTURE_2D, tex.texName);
+				}
             }
 
             if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
@@ -488,11 +498,11 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
             glUniform1f(uniMatAmbient, mat.ambientIntensity);
         }
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
-
 		rendered++;
 
-		glDrawElements((model->geometries[g].facetype == Model::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP), model->geometries[g].indicesCount, GL_UNSIGNED_INT, NULL);
+		glDrawElements((model->geometries[g].facetype == Model::Triangles ?
+									GL_TRIANGLES : GL_TRIANGLE_STRIP),
+									subgeom.indices.size(), GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
     }
 }
 
