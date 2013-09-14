@@ -28,8 +28,10 @@ struct TextureInfo
 	TextureAtlas* atlas;
 	glm::vec4 rect; /// X/Y base coord, Z/W UV scale.
 
-	TextureInfo(GLuint tex, TextureAtlas* a, const glm::vec4&r)
-		: texName(tex), atlas(a), rect(r) {}
+	TextureInfo(GLuint tex)
+		: texName(tex), atlas(nullptr), rect(0.f, 0.f, 1.f, 1.f) {}
+	TextureInfo(TextureAtlas* a, const glm::vec4&r)
+		: texName(0), atlas(a), rect(r) {}
 	TextureInfo()
 		: texName(0), atlas(nullptr) {}
 };
