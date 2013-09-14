@@ -70,13 +70,18 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 		{
 			uint32_t fullColor[texNative.width * texNative.height];
 			size_t paletteSize = 1024;
-			uint8_t* coldata = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) + paletteSize);
-			uint32_t* palette = reinterpret_cast<uint32_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
+			bool hasAlpha = (texNative.rasterformat & RW::BSTextureNative::FORMAT_8888) == RW::BSTextureNative::FORMAT_8888;
+			char* dataBase = rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative);
 
-			for(size_t j = 0, iTex = 0; j < texNative.width * texNative.height; ++j)
+			// Where does this -4 offset come from.
+			uint8_t* coldata = reinterpret_cast<uint8_t*>(dataBase - 4 + paletteSize + sizeof(uint32_t));
+			uint32_t raster_size = *reinterpret_cast<uint32_t*>(dataBase - 4 + paletteSize);
+			uint32_t* palette = reinterpret_cast<uint32_t*>(dataBase - 4);
+
+			uint32_t amask = hasAlpha ? 0xFF000000 : 0x0;
+			for(size_t j = 0; j < raster_size; ++j)
 			{
-				iTex = j;
-				fullColor[iTex] = palette[coldata[j]];
+				fullColor[j] = palette[coldata[j]] | amask;
 			}
 
 			if(atlas) {
@@ -89,7 +94,7 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 				glGenTextures(1, &textureName);
 				glBindTexture(GL_TEXTURE_2D, textureName);
 				glTexImage2D(
-					GL_TEXTURE_2D, 0, texNative.alpha ? GL_RGBA : GL_RGB,
+					GL_TEXTURE_2D, 0, GL_RGBA,
 					texNative.width, texNative.height, 0,
 					GL_RGBA, GL_UNSIGNED_BYTE, fullColor
 				);
