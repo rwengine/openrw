@@ -433,6 +433,10 @@ void dumpCollisionModel(char* data, size_t size)
 				std::cout << "  min: " << box.min.x << " " << box.min.y << " " << box.min.z << " max: " << box.max.x << " " << box.max.y << " " << box.max.z << std::endl;
 			}
 			std::cout << " faces: " << it->header2.numfaces << std::endl;
+			std::cout << " verts: " << it->vertices.size() << std::endl;
+			for( size_t v = 0; v < it->vertices.size(); ++v ) {
+				std::cout << "  " << it->vertices[v].x << ", " << it->vertices[v].y << ", " << it->vertices[v].z << std::endl;
+			}
 		}
 	}
 }

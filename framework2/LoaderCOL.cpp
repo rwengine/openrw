@@ -101,8 +101,8 @@ bool LoaderCOL::load(char* data, const size_t size)
         }
 
         // Load up to maxvert vertices.
-		meshvertices.reserve(maxvert);
-		for( size_t v = 0, vertI = head2.offsetverts; v < maxvert; ++v ) {
+		meshvertices.reserve(maxvert+1);
+		for( size_t v = 0, vertI = head2.offsetverts; v < maxvert+1; ++v ) {
             CollTVertex vert = readType<CollTVertex>(data, &vertI);
             meshvertices.push_back(vert);
         }

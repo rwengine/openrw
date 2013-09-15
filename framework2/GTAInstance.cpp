@@ -35,7 +35,8 @@ GTAInstance::GTAInstance(
 			auto size = (box.max - box.min) / 2.f;
 			auto mid = (box.min + box.max) / 2.f;
 			btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
-			btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(mid.x, mid.y, mid.z));
+			btTransform t; t.setIdentity();
+			t.setOrigin(btVector3(mid.x, mid.y, mid.z));
 			cmpShape->addChildShape(t, bshape);
 		}
 
@@ -43,7 +44,8 @@ GTAInstance::GTAInstance(
 		for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
 			CollTSphere& sphere = physInst.spheres[i];
 			btCollisionShape* sshape = new btSphereShape(sphere.radius);
-			btTransform t(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
+			btTransform t; t.setIdentity();
+			t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 			cmpShape->addChildShape(t, sshape);
 		}
 
@@ -57,10 +59,8 @@ GTAInstance::GTAInstance(
 					sizeof(glm::vec3)
 					);
 			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-			cmpShape->addChildShape(
-						btTransform(btQuaternion(0.f, 0.f, 0.f, 1.f), btVector3(0.f, 0.f, 0.f)),
-						trishape
-						);
+			btTransform t; t.setIdentity();
+			cmpShape->addChildShape(t, trishape);
 		}
 
 		body = new btRigidBody(info);

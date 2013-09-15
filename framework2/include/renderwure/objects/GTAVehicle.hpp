@@ -11,6 +11,12 @@
  */
 struct GTAVehicle : public GTAObject
 {
+private:
+	float steerAngle;
+	float throttle;
+	float brake;
+	bool handbrake;
+public:
 	std::shared_ptr<LoaderIDE::CARS_t> vehicle; /// Vehicle type
 	VehicleInfo info;
 	glm::vec3 colourPrimary;
@@ -34,6 +40,22 @@ struct GTAVehicle : public GTAObject
 	glm::quat getRotation() const;
 
 	Type type() { return Vehicle; }
+
+	void setSteeringAngle(float);
+
+	float getSteeringAngle() const;
+
+	void setThrottle(float);
+
+	float getThrottle() const;
+
+	void setBraking(float);
+
+	float getBraking() const;
+
+	void setHandbraking(bool);
+
+	bool getHandbraking() const;
 
 	void tick(float dt);
 };
