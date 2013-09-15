@@ -40,6 +40,22 @@ GLuint getErrorTexture()
 	return errTexName;
 }
 
+const size_t paletteSize = 1024;
+void processPalette(uint32_t* fullColor, RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection)
+{
+	uint8_t* dataBase = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
+
+	uint8_t* coldata = (dataBase + paletteSize + sizeof(uint32_t));
+	uint32_t raster_size = *reinterpret_cast<uint32_t*>(dataBase + paletteSize);
+	uint32_t* palette = reinterpret_cast<uint32_t*>(dataBase);
+
+	for(size_t j = 0; j < raster_size; ++j)
+	{
+		fullColor[j] = palette[coldata[j]];
+	}
+
+}
+
 GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection)
 {
 	// TODO: Exception handling.
@@ -62,20 +78,8 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 	if(isPal8)
 	{
 		uint32_t fullColor[texNative.width * texNative.height];
-		size_t paletteSize = 1024;
-		bool hasAlpha = (texNative.rasterformat & RW::BSTextureNative::FORMAT_8888) == RW::BSTextureNative::FORMAT_8888;
-		char* dataBase = rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative);
 
-		// Where does this -4 offset come from.
-		uint8_t* coldata = reinterpret_cast<uint8_t*>(dataBase - 4 + paletteSize + sizeof(uint32_t));
-		uint32_t raster_size = *reinterpret_cast<uint32_t*>(dataBase - 4 + paletteSize);
-		uint32_t* palette = reinterpret_cast<uint32_t*>(dataBase - 4);
-
-		uint32_t amask = hasAlpha ? 0x0 : 0xFF000000;
-		for(size_t j = 0; j < raster_size; ++j)
-		{
-			fullColor[j] = palette[coldata[j]] | amask;
-		}
+		processPalette(fullColor, texNative, rootSection);
 
 		glGenTextures(1, &textureName);
 		glBindTexture(GL_TEXTURE_2D, textureName);
@@ -110,7 +114,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 		glGenTextures(1, &textureName);
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		glTexImage2D(
-			GL_TEXTURE_2D, 0, texNative.alpha ? GL_RGBA : GL_RGB,
+			GL_TEXTURE_2D, 0, GL_RGBA,
 			texNative.width, texNative.height, 0,
 			format, type, coldata
 		);

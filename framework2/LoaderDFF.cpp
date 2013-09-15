@@ -103,12 +103,14 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 					/** TEX COORDS **/
 					if ((geometry.flags & RW::BSGeometry::TexCoords1) == RW::BSGeometry::TexCoords1 || 
 						(geometry.flags & RW::BSGeometry::TexCoords2) == RW::BSGeometry::TexCoords1) {
+						geometryStruct.texcoords.reserve(geometry.numverts);
 						for (size_t v = 0; v < geometry.numverts; ++v) {
 							geometryStruct.texcoords.push_back(readStructure<RW::BSGeometryUV>(data, dataI));
 						}
 					}
 
 					/** INDICIES **/
+					geometryStruct.triangles.reserve(geometry.numtris);
 					for (int j = 0; j < geometry.numtris; ++j) {
 						geometryStruct.triangles.push_back(readStructure<RW::BSGeometryTriangle>(data, dataI));
 					}
@@ -117,12 +119,14 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 					geometryStruct.geometryBounds = readStructure<RW::BSGeometryBounds>(data, dataI);
 
 					/** VERTICES **/
+					geometryStruct.vertices.reserve(geometry.numverts);
 					for (int v = 0; v < geometry.numverts; ++v) {
 						geometryStruct.vertices.push_back(readStructure<RW::BSTVector3>(data, dataI));
 					}
 
 					/** NORMALS **/
 					if ((geometry.flags & RW::BSGeometry::StoreNormals) == RW::BSGeometry::StoreNormals) {
+						geometryStruct.normals.reserve(geometry.numverts);
 						for (int n = 0; n < geometry.numverts; ++n) {
 							geometryStruct.normals.push_back(readStructure<RW::BSTVector3>(data, dataI));
 						}
@@ -203,32 +207,10 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 									geometryStruct.subgeom[i].material = plgHeader.index;
 									geometryStruct.subgeom[i].indices.resize(plgHeader.numverts);
 
-									// Find texture info if applicable
-									/*TextureInfo* tInf = nullptr;
-									if(geometryStruct.materials[plgHeader.index].textures.size() > 0) {
-										auto texInfoIt = availableTextures.find(geometryStruct.materials[plgHeader.index].textures[0].name);
-										tInf = &texInfoIt->second;
-									}
-									std::set<uint32_t> toUpdate;*/
-
 									for (int j = 0; j < plgHeader.numverts; ++j) {
-										uint32_t idx = extsec.readSubStructure<uint32_t>(meshplgI);
-										geometryStruct.subgeom[i].indices[j] = idx;
+										geometryStruct.subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
 										meshplgI += sizeof(uint32_t);
-										/*if(tInf && toUpdate.find(idx) == toUpdate.end()) {
-											toUpdate.insert(idx);
-										}*/
 									}
-
-									/*for(std::set<uint32_t>::iterator k = toUpdate.begin();
-										k != toUpdate.end();
-										++k) {
-										// Update verticies with atlas UV coordinates.
-										geometryStruct.texcoords[*k].u
-												= tInf->rect.x + geometryStruct.texcoords[*k].u * tInf->rect.z;
-										geometryStruct.texcoords[*k].v
-												= tInf->rect.y + geometryStruct.texcoords[*k].v * tInf->rect.w;
-									}*/
 								}
 							}
 						}

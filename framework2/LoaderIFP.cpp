@@ -66,6 +66,7 @@ bool LoaderIFP::loadFromMemory(char *data)
         std::string animname = readString(data, dataI);
 
         Animation* animation = new Animation;
+		animation->duration = 0.f;
         animation->name = animname;
 
         size_t animstart = data_offs + 8;
