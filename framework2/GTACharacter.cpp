@@ -6,25 +6,27 @@
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
 : GTAObject(engine, pos, rot, model), ped(ped), currentActivity(None), controller(nullptr)
 {
-	animator = new Animator();
-	animator->setModel(model);
+	// Don't create anything without a valid model.
+	if(model) {
+		animator = new Animator();
+		animator->setModel(model);
 
-	btTransform tf;
-	tf.setIdentity();
-	tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
+		btTransform tf;
+		tf.setIdentity();
+		tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
 
-	physObject = new btPairCachingGhostObject;
-	physObject->setWorldTransform(tf);
-	physShape = new btBoxShape(btVector3(0.25f, 0.25f, 1.f));
-	physObject->setCollisionShape(physShape);
-	physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-	physCharacter = new btKinematicCharacterController(physObject, physShape, 0.65f, 2);
+		physObject = new btPairCachingGhostObject;
+		physObject->setWorldTransform(tf);
+		physShape = new btBoxShape(btVector3(0.25f, 0.25f, 1.f));
+		physObject->setCollisionShape(physShape);
+		physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
+		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.65f, 2);
 
-	engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
-	engine->dynamicsWorld->addAction(physCharacter);
+		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+		engine->dynamicsWorld->addAction(physCharacter);
 
-	changeAction(Idle);
-
+		changeAction(Idle);
+	}
 }
 
 void GTACharacter::changeAction(Activity newAction)

@@ -362,19 +362,21 @@ void GTARenderer::renderWorld()
 		matrixModel = glm::translate(matrixModel, inst->getPosition());
 		matrixModel = matrixModel * glm::mat4_cast(inst->getRotation());
 
-        glm::mat4 matrixVehicle = matrixModel;
-
 		renderModel(inst->model, matrixModel, inst);
 
 		// Draw wheels n' stuff
-		for( size_t w = 0; w < inst->vehicle->wheelPositions.size(); ++w) {
+		for( size_t w = 0; w < inst->info.wheels.size(); ++w) {
 			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
                 Model* wheelModel = engine->gameData.models["wheels"];
 				if( wheelModel) {
-					glm::mat4 wheelMatrix = glm::translate(glm::mat4(), inst->vehicle->wheelPositions[w]);
-					wheelMatrix = glm::scale(wheelMatrix, glm::vec3(1.f, inst->vehicle->wheelScale, inst->vehicle->wheelScale));
-					renderNamedFrame(wheelModel, matrixVehicle * wheelMatrix, woi->second->modelName);
+					// Tell bullet to update the matrix for this wheel.
+					inst->physVehicle->updateWheelTransform(w, false);
+					glm::mat4 wheel_tf;
+					inst->physVehicle->getWheelTransformWS(w).getOpenGLMatrix(glm::value_ptr(wheel_tf));
+					wheel_tf = glm::scale(wheel_tf, glm::vec3(inst->vehicle->wheelScale));
+					wheel_tf = glm::rotate(wheel_tf, inst->physVehicle->getWheelInfo(w).m_rotation, glm::vec3(1.f, 0.f, 0.f));
+					renderNamedFrame(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
 				}
 				else {
 					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;

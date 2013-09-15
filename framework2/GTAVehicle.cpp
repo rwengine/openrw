@@ -1,8 +1,9 @@
 #include <renderwure/objects/GTAVehicle.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
+#include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 
-GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const glm::vec3& prim, const glm::vec3& sec)
-	: GTAObject(engine, pos, rot, model), vehicle(veh), colourPrimary(prim), colourSecondary(sec), physBody(nullptr)
+GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
+	: GTAObject(engine, pos, rot, model), vehicle(veh), info(info), colourPrimary(prim), colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
 	if(! veh->modelName.empty()) {
 		auto phyit = engine->gameData.collisions.find(veh->modelName);
@@ -18,6 +19,8 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 				)
 			));
 			CollisionInstance& physInst = *phyit->second.get();
+
+			btVector3 com(info.handling.centerOfMass.x, info.handling.centerOfMass.y, info.handling.centerOfMass.z);
 
 			// Boxes
 			for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
@@ -54,12 +57,36 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			}
 
 			btVector3 inertia(0,0,0);
-			cmpShape->calculateLocalInertia(1000.f, inertia);
+			cmpShape->calculateLocalInertia(info.handling.mass, inertia);
 
-			btRigidBody::btRigidBodyConstructionInfo info(1000.f, msta, cmpShape, inertia);
+			btRigidBody::btRigidBodyConstructionInfo rginfo(info.handling.mass, msta, cmpShape, inertia);
 
-			physBody = new btRigidBody(info);
+			physBody = new btRigidBody(rginfo);
 			engine->dynamicsWorld->addRigidBody(physBody);
+
+			physRaycaster = new btDefaultVehicleRaycaster(engine->dynamicsWorld);
+			btRaycastVehicle::btVehicleTuning tuning;
+
+			float travel = info.handling.suspensionUpperLimit - info.handling.suspensionLowerLimit;
+			tuning.m_maxSuspensionTravelCm = (travel)*100.f;
+			tuning.m_frictionSlip = info.handling.tractionMulti * 10.f;
+
+			physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
+			physVehicle->setCoordinateSystem(0, 2, 1);
+			physBody->setActivationState(DISABLE_DEACTIVATION);
+			engine->dynamicsWorld->addVehicle(physVehicle);
+
+			for(size_t w = 0; w < info.wheels.size(); ++w) {
+				btVector3 connection(info.wheels[w].position.x, info.wheels[w].position.y, info.wheels[w].position.z);
+				bool front = connection.y() > 0;
+				btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel*0.45f, veh->wheelScale / 2.f, tuning, front);
+				wi.m_wheelsSuspensionForce = info.handling.mass * 1.5f;
+				wi.m_suspensionStiffness = 20.f;
+				wi.m_wheelsDampingRelaxation = 2.3;
+				wi.m_wheelsDampingCompression = 4.4f;
+				wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info.handling.tractionBias : 1.f - info.handling.tractionBias);
+			}
+
 		}
 	}
 }
@@ -80,4 +107,23 @@ glm::quat GTAVehicle::getRotation() const
 		return glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 	}
 	return rotation;
+}
+
+void GTAVehicle::tick(float dt)
+{
+	if(physVehicle) {
+		for(size_t w = 0; w < physVehicle->getNumWheels(); ++w) {
+			btWheelInfo& wi = physVehicle->getWheelInfo(w);
+			if( info.handling.driveType == VehicleHandlingInfo::All ||
+					(info.handling.driveType == VehicleHandlingInfo::Forward && wi.m_bIsFrontWheel) ||
+					(info.handling.driveType == VehicleHandlingInfo::Rear && !wi.m_bIsFrontWheel))
+			{
+				physVehicle->applyEngineForce(info.handling.acceleration * info.handling.mass * 0.1f, w);
+			}
+
+			/*if(wi.m_bIsFrontWheel) {
+				physVehicle->setSteeringValue(info.handling.steeringLock*(3.141/180.f), w);
+			}*/
+		}
+	}
 }

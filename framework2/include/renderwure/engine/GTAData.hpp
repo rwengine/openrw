@@ -10,6 +10,7 @@
 #include <renderwure/loaders/LoaderIFP.hpp>
 #include <renderwure/loaders/WeatherLoader.hpp>
 #include <renderwure/loaders/LoaderCOL.hpp>
+#include <renderwure/objects/VehicleInfo.hpp>
 
 #include <memory>
 
@@ -94,6 +95,8 @@ public:
 	void loadCarcols(const std::string& path);
 
 	void loadWeather(const std::string& path);
+
+	void loadHandling(const std::string& path);
 	
 	/**
 	 * Loads water level data
@@ -168,6 +171,11 @@ public:
 	 * The vehicle colours for each vehicle type
 	 */
 	std::map<std::string, std::vector<std::pair<size_t,size_t>>> vehiclePalettes;
+
+	/**
+	 * Vehicle information
+	 */
+	std::map<std::string, VehicleInfo> vehicleInfo;
 	
 	/**
 	 * Texture Loader

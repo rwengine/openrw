@@ -7,6 +7,7 @@
 #include <renderwure/ai/GTAAIController.hpp>
 #include <renderwure/ai/GTAPlayerAIController.hpp>
 #include <renderwure/objects/GTACharacter.hpp>
+#include <renderwure/objects/GTAVehicle.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -97,17 +98,18 @@ void init(std::string gtapath)
 	
 	plyPos = gta->itemCentroid / (float) gta->itemCount + glm::vec3(0, 0, 2);
 	
-	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0);
+	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);
 	size_t k = 1;
 	// Spawn every vehicle, cause why not.
 	for(std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>>::iterator it = gta->vehicleTypes.begin();
 		it != gta->vehicleTypes.end(); ++it) {
+		if(it->first == 140) continue; // get this plane out of here.
 		gta->createVehicle(it->first, spawnPos);
 		spawnPos += glm::vec3(5, 0, 0);
         if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
 	}
 
-    spawnPos = plyPos + glm::vec3(-5, 20 + (2.5 * gta->pedestrianTypes.size()/4), 0);
+	spawnPos = plyPos + glm::vec3(-5, 20 + (2.5 * gta->pedestrianTypes.size()/4), 0);
     k = 1;
     // Spawn every pedestrian.
     for(auto it = gta->pedestrianTypes.begin();
@@ -193,10 +195,14 @@ void update(float dt)
 		gta->renderer.camera.worldPos = plyPos;
 		gta->renderer.camera.frustum.view = view;
 
+		// TODO: move this inside the engine
         for( size_t p = 0; p < gta->pedestrians.size(); ++p ) {
 			gta->pedestrians[p]->tick(dt);
         }
-        
+		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
+			gta->vehicleInstances[v]->tick(dt);
+		}
+
 		gta->dynamicsWorld->stepSimulation(dt);
 	}
 }
@@ -327,7 +333,7 @@ int main(int argc, char *argv[])
 		while (window.pollEvent(event)) {
 			handleEvent(event);
 		}
-		
+
 		accum += clock.restart().asSeconds();
 		
 		while ( accum >= ts ) {

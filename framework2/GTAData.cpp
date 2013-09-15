@@ -88,6 +88,7 @@ void GTAData::load()
 	
 	loadCarcols(datpath+"/data/carcols.dat");
 	loadWeather(datpath+"/data/timecyc.dat");
+	loadHandling(datpath+"/data/handling.cfg");
 	loadWaterpro(datpath+"/data/waterpro.dat");
 	loadWater(datpath+"/data/water.dat");
 
@@ -277,6 +278,60 @@ void GTAData::loadCarcols(const std::string& path)
 void GTAData::loadWeather(const std::string &path)
 {
 	weatherLoader.load(path);
+}
+
+void GTAData::loadHandling(const std::string& path)
+{
+	std::ifstream hndFile(path.c_str());
+
+	if(! hndFile.is_open()) {
+		std::cerr << "Error loadind handling data " << path << std::endl;
+		return;
+	}
+
+	std::string lineBuff;
+
+	while(std::getline(hndFile, lineBuff)) {
+		if(lineBuff.at(0) == ';') continue;
+		std::stringstream ss(lineBuff);
+
+		VehicleHandlingInfo info;
+		ss >> info.ID;
+		ss >> info.mass;
+		ss >> info.dimensions.x;
+		ss >> info.dimensions.y;
+		ss >> info.dimensions.z;
+		ss >> info.centerOfMass.x;
+		ss >> info.centerOfMass.y;
+		ss >> info.centerOfMass.z;
+		ss >> info.percentSubmerged;
+		ss >> info.tractionMulti;
+		ss >> info.tractionLoss;
+		ss >> info.tractionBias;
+		ss >> info.numGears;
+		ss >> info.maxVelocity;
+		ss >> info.acceleration;
+		char dt, et;
+		ss >> dt; ss >> et;
+		info.driveType = (VehicleHandlingInfo::DriveType)dt;
+		info.engineType = (VehicleHandlingInfo::EngineType)et;
+		ss >> info.brakeDeceleration;
+		ss >> info.brakeBias;
+		ss >> info.ABS;
+		ss >> info.steeringLock;
+		ss >> info.suspensionForce;
+		ss >> info.suspensionDamping;
+		ss >> info.seatOffset;
+		ss >> info.damageMulti;
+		ss >> info.value;
+		ss >> info.suspensionUpperLimit;
+		ss >> info.suspensionLowerLimit;
+		ss >> info.suspensionBias;
+		ss >> std::hex >> info.flags;
+
+		vehicleInfo.insert({info.ID, {info}});
+	}
+
 }
 
 void GTAData::loadWaterpro(const std::string& path)

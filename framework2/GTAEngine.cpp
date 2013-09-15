@@ -247,21 +247,23 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 			}
 		}
 		
-        Model* model = gameData.models[vti->second->modelName];
-		if(model) {
-			if( vti->second->wheelPositions.size() == 0 ) {
+		Model* model = gameData.models[vti->second->modelName];
+		auto info = gameData.vehicleInfo.find(vti->second->handlingID);
+		if(model && info != gameData.vehicleInfo.end()) {
+			if( info->second.wheels.size() == 0 ) {
 				for( size_t f = 0; f < model->frames.size(); ++f) {
 					if( model->frameNames.size() > f) {
 						std::string& name = model->frameNames[f];
 						if( name.substr(0, 5) == "wheel" ) {
-                            vti->second->wheelPositions.push_back(model->frames[f].defaultTranslation);
+							auto frameTrans = model->getFrameMatrix(f);
+							info->second.wheels.push_back({glm::vec3(frameTrans[3])});
 						}
 					}
 				}
 			}
 		}
 		
-		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, model, vti->second, prim, sec });
+		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, model, vti->second, info->second, prim, sec });
 	}
 }
 
@@ -283,10 +285,12 @@ GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &po
 
         Model* model = gameData.models[pt->modelName];
 
-		auto ped = new GTACharacter( this, pos, rot, model, pt );
-		pedestrians.push_back(ped);
-		new GTADefaultAIController(ped);
-		return ped;
+		if(model != nullptr) {
+			auto ped = new GTACharacter( this, pos, rot, model, pt );
+			pedestrians.push_back(ped);
+			new GTADefaultAIController(ped);
+			return ped;
+		}
     }
     return nullptr;
 }
