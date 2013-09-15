@@ -69,6 +69,7 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			btRaycastVehicle::btVehicleTuning tuning;
 
 			float travel = info.handling.suspensionUpperLimit - info.handling.suspensionLowerLimit;
+			tuning.m_frictionSlip = 0.8f;
 			tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
 			physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
@@ -76,14 +77,17 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			physBody->setActivationState(DISABLE_DEACTIVATION);
 			engine->dynamicsWorld->addVehicle(physVehicle);
 
+			float kC = 0.4f;
+			float kR = 0.6f;
+
 			for(size_t w = 0; w < info.wheels.size(); ++w) {
-				btVector3 connection(info.wheels[w].position.x, info.wheels[w].position.y, info.wheels[w].position.z);
+				btVector3 connection(info.wheels[w].position.x, info.wheels[w].position.y, info.wheels[w].position.z - info.handling.suspensionLowerLimit);
 				bool front = connection.y() > 0;
-				btWheelInfo& wi = physVehicle->addWheel(connection + com, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel*0.4f, veh->wheelScale / 2.f, tuning, front);
-				wi.m_wheelsSuspensionForce = info.handling.mass * 2750.f * info.handling.suspensionForce;
-				wi.m_suspensionStiffness = 60.f;
-				wi.m_wheelsDampingRelaxation = 3.5f * info.handling.suspensionDamping;
-				wi.m_wheelsDampingCompression = 15.5f * info.handling.suspensionDamping;
+				btWheelInfo& wi = physVehicle->addWheel(connection + com, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel, veh->wheelScale / 2.f, tuning, front);
+				wi.m_suspensionStiffness = info.handling.suspensionForce * 10.f;
+				wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
+				wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
+				wi.m_rollInfluence = 0.2f;
 				wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info.handling.tractionBias : 1.f - info.handling.tractionBias);
 			}
 
