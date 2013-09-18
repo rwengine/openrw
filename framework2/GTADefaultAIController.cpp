@@ -1,19 +1,23 @@
 #include "renderwure/ai/GTADefaultAIController.hpp"
 #include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/objects/GTAVehicle.hpp>
 
 void GTADefaultAIController::update(float dt)
 {
 	if( action == Wander ) {
 		if( targetNode == nullptr ) {
+			GTAAINode::NodeType currentType = character->getCurrentVehicle()
+					? GTAAINode::Vehicle : GTAAINode::Pedestrian;
+
 			float d = std::numeric_limits< float >::max();
 			auto oldTarget = targetNode;
 			for( auto n = character->engine->ainodes.begin();
 				n != character->engine->ainodes.end();
 				++n ) {
-				if( (*n)->type != GTAAINode::Pedestrian ) continue;
-				float ld = glm::length( (*n)->position - character->position );
-				if( ld > 2.5f && ld < d ) {
+				if( (*n)->type != currentType ) continue;
+				float ld = glm::length( (*n)->position - character->getPosition() );
+				if( ld > nodeMargin && ld < d ) {
 					d = ld;
 					targetNode = (*n);
 				}
@@ -25,33 +29,63 @@ void GTADefaultAIController::update(float dt)
 			else {
 				character->changeAction(GTACharacter::Walk);
 				// Choose a new random margin
-				std::uniform_real_distribution<float> dist(1.f, 2.5f);
-				nodeMargin = dist(character->engine->randomEngine);
+				if(character->getCurrentVehicle()) {
+					std::uniform_real_distribution<float> dist(2.f, 2.5f);
+					nodeMargin = dist(character->engine->randomEngine);
+				}
+				else {
+					std::uniform_real_distribution<float> dist(1.f, 1.5f);
+					nodeMargin = dist(character->engine->randomEngine);
+				}
 			}
 		}
-		else if( glm::length(targetNode->position - character->position) < nodeMargin ) {
-			if( targetNode->connections.size() > 0 ) {
-				std::uniform_int_distribution<int> dist(0, targetNode->connections.size()-1);
-				targetNode = character->engine->ainodes[dist(character->engine->randomEngine)];
+		else if( glm::length(targetNode->position - character->getPosition()) < nodeMargin ) {
+			targetNode = nullptr;
+			character->changeAction(GTACharacter::Idle);
+		}
+	}
+
+	if( action == Wander && targetNode != nullptr ) {
+		auto d = targetNode->position - character->getPosition();
+		if(character->getCurrentVehicle()) {
+			auto vd = glm::inverse(character->getCurrentVehicle()->getRotation()) * d;
+			float va = -atan2( vd.x, vd.y );
+			if(glm::abs(va) > (3.141f/2.f)) {
+				va = -va;
 			}
-			else {
-				targetNode = nullptr;
+			character->getCurrentVehicle()->setSteeringAngle(va);
+		}
+		else {
+			float a = -atan2( d.x, d.y );
+			character->rotation = glm::quat(glm::vec3(0.f, 0.f, a));
+		}
+	}
+
+	if(character->getCurrentVehicle()) {
+		if(targetNode == nullptr) {
+			character->getCurrentVehicle()->setThrottle(0.f);
+		}
+		else {
+			float targetVelocity = 5.f;
+			float perc = (targetVelocity - character->getCurrentVehicle()->physBody->getLinearVelocity().length())/targetVelocity;
+			perc = std::min(1.f, std::max(0.f, perc));
+
+			// Determine if the vehicle should reverse instead.
+			auto td = targetNode->position - character->getPosition();
+			auto vd = character->getCurrentVehicle()->getRotation() * glm::vec3(0.f, 1.f, 0.f);
+			if(glm::dot(td, vd) < -0.25f) {
+				perc *= -1.f;
 			}
+
+			character->getCurrentVehicle()->setThrottle(perc);
 		}
 	}
 }
 
 glm::vec3 GTADefaultAIController::getTargetPosition()
 {
-	return glm::vec3();
-}
-
-glm::quat GTADefaultAIController::getTargetRotation()
-{
-	if( action == Wander && targetNode != nullptr ) {
-		auto d = targetNode->position - character->position;
-		float a = atan2( d.x, d.y );
-		return glm::quat( glm::vec3(0.f, 0.f, -a) );
+	if(targetNode) {
+		return targetNode->position;
 	}
-	return glm::quat();
+	return glm::vec3();
 }

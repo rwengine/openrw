@@ -6,18 +6,30 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
+class GTAVehicle;
+
 /**
  * @brief The GTACharacter struct
  * Stores data relating to an instance of a "pedestrian".
  */
 struct GTACharacter : public GTAObject
 {
+private:
+	GTAVehicle* currentVehicle;
+
+	void createActor();
+	void destroyActor();
+
+public:
+
 	enum Activity {
 		None,
 		Idle,
 		Walk,
 		Run,
-		Crouch
+		Crouch,
+		VehicleDrive,
+		VehicleSit
 	};
 
 	std::shared_ptr<LoaderIDE::PEDS_t> ped;
@@ -37,6 +49,8 @@ struct GTACharacter : public GTAObject
 	 */
 	GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped);
 
+	~GTACharacter();
+
 	Type type() { return Character; }
 
 	Activity currentActivity;
@@ -53,6 +67,9 @@ struct GTACharacter : public GTAObject
 	virtual void setPosition(const glm::vec3& pos);
 
 	virtual glm::vec3 getPosition() const;
+
+	GTAVehicle *getCurrentVehicle() const;
+	void setCurrentVehicle(GTAVehicle *value);
 };
 
 #endif

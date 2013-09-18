@@ -166,6 +166,21 @@ void update(float dt)
 				player = new GTAPlayerAIController(playerCharacter);
 			}
 		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+			if( player == nullptr ) {
+				playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
+				player = new GTAPlayerAIController(playerCharacter);
+				auto vid = (gta->vehicleTypes.begin())->first;
+				auto vehicle = gta->createVehicle(vid, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				playerCharacter->setCurrentVehicle(vehicle);
+			}
+		}
+		if(sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
+			auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
+			auto vid = (gta->vehicleTypes.begin())->first;
+			auto vehicle = gta->createVehicle(vid, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+			ped->setCurrentVehicle(vehicle);
+		}
 
 		glm::mat4 view;
 		view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
@@ -179,9 +194,16 @@ void update(float dt)
 			player->updateCameraDirection(playerCamera);
 			player->updateMovementDirection(movement);
 			player->setRunning(moveSpeed > 21.f);
-			
-			glm::vec3 localView = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, -0.5f, -2.5f);
-			view = glm::translate(view, -playerCharacter->position + localView);
+
+			float viewDistance = playerCharacter->getCurrentVehicle() ? -3.5f : -2.5f;
+			glm::vec3 localView = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, -0.5f, viewDistance);
+			if(playerCharacter->getCurrentVehicle()) {
+				plyPos = playerCharacter->getCurrentVehicle()->getPosition();
+			}
+			else {
+				plyPos = playerCharacter->getPosition();
+			}
+			view = glm::translate(view, -plyPos + localView);
 		}
 		else {
 			if (glm::length(movement) > 0.f) {
@@ -203,7 +225,7 @@ void update(float dt)
 			gta->vehicleInstances[v]->tick(dt);
 		}
 
-		gta->dynamicsWorld->stepSimulation(dt);
+		gta->dynamicsWorld->stepSimulation(dt, 1, dt);
 	}
 }
 
@@ -222,6 +244,7 @@ void render()
         break;
 
     case 1: {
+		gta->renderer.renderWorld();
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;

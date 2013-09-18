@@ -6,6 +6,7 @@
 #include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/objects/GTAInstance.hpp>
 #include <renderwure/objects/GTAVehicle.hpp>
+#include <renderwure/ai/GTAAIController.hpp>
 
 #include <deque>
 #include <cmath>
@@ -297,7 +298,7 @@ void GTARenderer::renderWorld()
         GTACharacter* charac = engine->pedestrians[i];
 
         glm::mat4 matrixModel;
-        matrixModel = glm::translate(matrixModel, charac->position);
+		matrixModel = glm::translate(matrixModel, charac->getPosition());
         matrixModel = matrixModel * glm::mat4_cast(charac->rotation);
 
         if(!charac->model) continue;
@@ -584,6 +585,16 @@ void GTARenderer::renderPaths()
 			}
 		}
     }
+
+
+	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
+		GTACharacter* charac = engine->pedestrians[i];
+
+		if(charac->controller) {
+			carlines.push_back(charac->getPosition());
+			carlines.push_back(charac->controller->getTargetPosition());
+		}
+	}
 
     glm::mat4 model;
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));

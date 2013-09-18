@@ -17,6 +17,7 @@ private:
 	float brake;
 	bool handbrake;
 public:
+
 	std::shared_ptr<LoaderIDE::CARS_t> vehicle; /// Vehicle type
 	VehicleInfo info;
 	glm::vec3 colourPrimary;

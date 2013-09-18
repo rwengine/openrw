@@ -27,8 +27,6 @@ public:
     virtual void update(float dt);
 	
     virtual glm::vec3 getTargetPosition();
-	
-    virtual glm::quat getTargetRotation();
 };
 
 #endif

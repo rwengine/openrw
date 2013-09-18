@@ -85,7 +85,7 @@ public:
 	/**
 	 * Creates a vehicle
 	 */
-    void createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+    GTAVehicle *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 
     /**
      * Creates a pedestrian.

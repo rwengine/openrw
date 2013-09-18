@@ -215,7 +215,7 @@ bool GTAEngine::loadZone(const std::string& path)
 	return false;
 }
 
-void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+GTAVehicle *GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto vti = vehicleTypes.find(id);
 	if(vti != vehicleTypes.end()) {
@@ -264,7 +264,9 @@ void GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm
 		}
 		
 		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, model, vti->second, info->second, prim, sec });
+		return vehicleInstances.back();
 	}
+	return nullptr;
 }
 
 GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)

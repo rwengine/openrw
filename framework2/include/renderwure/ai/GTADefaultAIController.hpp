@@ -23,11 +23,9 @@ public:
     GTADefaultAIController(GTACharacter* character)
 	 : GTAAIController(character), action(Wander), targetNode(nullptr), nodeMargin(0.f) {}
 	
-    virtual void update(float dt);
+	void update(float dt);
 	
-    virtual glm::vec3 getTargetPosition();
-	
-    virtual glm::quat getTargetRotation();
+	glm::vec3 getTargetPosition();
 };
 
 #endif

@@ -4,7 +4,7 @@
 
 GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
 	: GTAObject(engine, pos, rot, model),
-	  steerAngle(0.f), throttle(0.75f), brake(0.f), handbrake(false),
+	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
 	  vehicle(veh), info(info), colourPrimary(prim), colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
 	if(! veh->modelName.empty()) {
@@ -131,6 +131,7 @@ void GTAVehicle::tick(float dt)
 			if(wi.m_bIsFrontWheel) {
 				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
 				physVehicle->setSteeringValue(std::min(info.handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign, w);
+				//physVehicle->setSteeringValue(std::min(3.141f/2.f, std::abs(steerAngle)) * sign, w);
 			}
 		}
 	}
