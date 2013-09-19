@@ -34,13 +34,14 @@ void GTAPlayerAIController::update(float dt)
 
 	if( character->getCurrentVehicle() ) {
 		character->getCurrentVehicle()->setSteeringAngle(-direction.x * 3.131f);
+
+		// TODO what is handbraking.
+		character->getCurrentVehicle()->setThrottle(direction.y);
 	}
 	else if( glm::length(direction) > 0.001f ) {
 		character->rotation = cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
 	}
 
-	// TODO what is handbraking.
-	character->getCurrentVehicle()->setThrottle(direction.y);
 }
 
 glm::vec3 GTAPlayerAIController::getTargetPosition()
