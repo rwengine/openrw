@@ -15,13 +15,18 @@ class GTADefaultAIController : public GTAAIController
 	Action action;
 	
 	GTAAINode* targetNode;
+	GTAAINode* lastNode;
 	
 	float nodeMargin; /// Minimum distance away to "reach" node.
 	
 public:
 	
     GTADefaultAIController(GTACharacter* character)
-	 : GTAAIController(character), action(Wander), targetNode(nullptr), nodeMargin(0.f) {}
+	 : GTAAIController(character),
+	   action(Wander),
+	   targetNode(nullptr),
+	   lastNode(nullptr),
+	   nodeMargin(0.f) {}
 	
 	void update(float dt);
 	

@@ -193,10 +193,10 @@ bool LoaderIDE::load(const std::string &filename)
                     case 0:
                         node.type = EMPTY;
                         break;
-                    case 1:
+					case 2:
                         node.type = INTERNAL;
                         break;
-                    case 2:
+					case 1:
                         node.type = EXTERNAL;
                         break;
                     }

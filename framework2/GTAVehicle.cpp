@@ -69,7 +69,7 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			btRaycastVehicle::btVehicleTuning tuning;
 
 			float travel = info.handling.suspensionUpperLimit - info.handling.suspensionLowerLimit;
-			tuning.m_frictionSlip = 0.8f;
+			tuning.m_frictionSlip = 1.8f;
 			tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
 			physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);

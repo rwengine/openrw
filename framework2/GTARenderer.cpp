@@ -565,11 +565,21 @@ void GTARenderer::renderPaths()
 		
 		if( start->type == GTAAINode::Pedestrian ) {
 			pedlines.push_back(start->position);
-			pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+			if( start->external ) {
+				pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 2.f));
+			}
+			else {
+				pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+			}
 		}	
 		else {
 			carlines.push_back(start->position);
-			carlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+			if( start->external ) {
+				carlines.push_back(start->position+glm::vec3(0.f, 0.f, 2.f));
+			}
+			else {
+				carlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
+			}
 		}
 			
 		for( size_t c = 0; c < start->connections.size(); ++c ) {

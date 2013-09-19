@@ -14,13 +14,13 @@ struct GTAAINode
 
     enum {
         None = 0,
-        External = 1, /// Node can connect to external nodes.
-        CrossesRoad = 4 /// No documentation for other flags yet, but this is mentioned.
+		CrossesRoad = 1 /// No documentation for other flags yet, but this is mentioned.
     };
 
     NodeType type;
     glm::vec3 position;
-    uint32_t flags;
+	bool external;
+	uint8_t flags;
 
     int32_t nextIndex;
 	

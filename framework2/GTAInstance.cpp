@@ -81,19 +81,7 @@ GTAInstance::GTAInstance(
 				ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
 				ainode->flags = GTAAINode::None;
 				ainode->position = position + (rotation * node.position);
-
-				if( node.type == LoaderIDE::EXTERNAL ) {
-					ainode->flags |= GTAAINode::External;
-					for( size_t rn = 0; rn < engine->ainodes.size(); ++rn ) {
-						if( (engine->ainodes[rn]->flags & GTAAINode::External) == GTAAINode::External ) {
-							auto d = glm::length(engine->ainodes[rn]->position - ainode->position);
-							if( d < 1.f ) {
-								ainode->connections.push_back(engine->ainodes[rn]);
-								engine->ainodes[rn]->connections.push_back(ainode);
-							}
-						}
-					}
-				}
+				ainode->external = node.type == LoaderIDE::EXTERNAL;
 
 				if( ainode->nextIndex < engine->ainodes.size() ) {
 					ainode->connections.push_back(engine->ainodes[ainode->nextIndex]);
@@ -104,6 +92,16 @@ GTAInstance::GTAInstance(
 					if( engine->ainodes[on]->nextIndex == startIndex+n ) {
 						engine->ainodes[on]->connections.push_back(ainode);
 						ainode->connections.push_back(engine->ainodes[on]);
+					}
+				}
+
+				if( ainode->external ) {
+					for( size_t rn = 0; rn < engine->ainodes.size(); ++rn ) {
+						auto d = glm::length(engine->ainodes[rn]->position - ainode->position);
+						if( d < 1.f ) {
+							ainode->connections.push_back(engine->ainodes[rn]);
+							engine->ainodes[rn]->connections.push_back(ainode);
+						}
 					}
 				}
 
