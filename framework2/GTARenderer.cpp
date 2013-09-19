@@ -573,15 +573,10 @@ void GTARenderer::renderPaths()
 			}
 		}	
 		else {
-			carlines.push_back(start->position);
-			if( start->external ) {
-				carlines.push_back(start->position+glm::vec3(0.f, 0.f, 2.f));
-			}
-			else {
-				carlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
-			}
+			carlines.push_back(start->position-glm::vec3(start->size / 2.f, 0.f, 0.f));
+			carlines.push_back(start->position+glm::vec3(start->size / 2.f, 0.f, 0.f));
 		}
-			
+
 		for( size_t c = 0; c < start->connections.size(); ++c ) {
 			auto end = start->connections[c];
 			

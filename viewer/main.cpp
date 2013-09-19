@@ -170,15 +170,27 @@ void update(float dt)
 			if( player == nullptr ) {
 				playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
 				player = new GTAPlayerAIController(playerCharacter);
-				auto vid = (gta->vehicleTypes.begin())->first;
-				auto vehicle = gta->createVehicle(vid, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+
+				// Pick random vehicle.
+				auto it = gta->vehicleTypes.begin();
+				std::uniform_int_distribution<int> uniform(0, 9);
+				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+					it++;
+				}
+
+				auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
 				playerCharacter->setCurrentVehicle(vehicle);
 			}
 		}
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
 			auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
-			auto vid = (gta->vehicleTypes.begin())->first;
-			auto vehicle = gta->createVehicle(vid, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+			// Pick random vehicle.
+			auto it = gta->vehicleTypes.begin();
+			std::uniform_int_distribution<int> uniform(0, 9);
+			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+				it++;
+			}
+			auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
 			ped->setCurrentVehicle(vehicle);
 		}
 

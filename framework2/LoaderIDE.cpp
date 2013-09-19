@@ -219,6 +219,15 @@ bool LoaderIDE::load(const std::string &filename)
                     getline(buffstream, buff, ',');
                     node.position.z = atof(buff.c_str()) * 1/16.f;
 
+					getline(buffstream, buff, ',');
+					node.size = atof(buff.c_str()) * 1/16.f;
+
+					getline(buffstream, buff, ',');
+					node.other_thing = atoi(buff.c_str());
+
+					getline(buffstream, buff, ',');
+					node.other_thing2 = atoi(buff.c_str());
+
                     path.nodes.push_back(node);
                 }
 

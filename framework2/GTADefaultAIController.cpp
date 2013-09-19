@@ -39,7 +39,7 @@ void GTADefaultAIController::update(float dt)
 				}
 			}
 		}
-		else if( glm::length(targetNode->position - character->getPosition()) < nodeMargin ) {
+		else if( glm::length(getTargetPosition() - character->getPosition()) < nodeMargin ) {
 			if(targetNode->connections.size() > 0) {
 				std::uniform_int_distribution<int> uniform(0, targetNode->connections.size()-1);
 				GTAAINode* nextNode = nullptr; size_t i = 0;
@@ -59,6 +59,13 @@ void GTADefaultAIController::update(float dt)
 
 	if( action == Wander && targetNode != nullptr ) {
 		auto d = targetNode->position - character->getPosition();
+
+		if(lastNode && character->getCurrentVehicle()) {
+			auto nDir = glm::normalize(targetNode->position - lastNode->position);
+			auto right = glm::cross(nDir, glm::vec3(0.f, 0.f, 1.f));
+			d += right * 2.2f;
+		}
+
 		if(character->getCurrentVehicle()) {
 			auto vd = glm::inverse(character->getCurrentVehicle()->getRotation()) * d;
 			float va = -atan2( vd.x, vd.y );
@@ -83,7 +90,7 @@ void GTADefaultAIController::update(float dt)
 			perc = std::min(1.f, std::max(0.f, perc));
 
 			// Determine if the vehicle should reverse instead.
-			auto td = targetNode->position - character->getPosition();
+			auto td = getTargetPosition() - character->getPosition();
 			auto vd = character->getCurrentVehicle()->getRotation() * glm::vec3(0.f, 1.f, 0.f);
 			if(glm::dot(td, vd) < -0.25f) {
 				perc *= -1.f;
@@ -97,6 +104,11 @@ void GTADefaultAIController::update(float dt)
 glm::vec3 GTADefaultAIController::getTargetPosition()
 {
 	if(targetNode) {
+		if(lastNode && character->getCurrentVehicle()) {
+			auto nDir = glm::normalize(targetNode->position - lastNode->position);
+			auto right = glm::cross(nDir, glm::vec3(0.f, 0.f, 1.f));
+			return targetNode->position + right * 2.2f;
+		}
 		return targetNode->position;
 	}
 	return glm::vec3();

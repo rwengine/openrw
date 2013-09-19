@@ -19,6 +19,9 @@ struct GTAAINode
 
     NodeType type;
     glm::vec3 position;
+	float size;
+	int other_thing;
+	int other_thing2;
 	bool external;
 	uint8_t flags;
 

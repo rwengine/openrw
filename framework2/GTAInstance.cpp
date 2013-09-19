@@ -80,6 +80,9 @@ GTAInstance::GTAInstance(
 				ainode->type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
 				ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
 				ainode->flags = GTAAINode::None;
+				ainode->size = node.size;
+				ainode->other_thing = node.other_thing;
+				ainode->other_thing2 = node.other_thing2;
 				ainode->position = position + (rotation * node.position);
 				ainode->external = node.type == LoaderIDE::EXTERNAL;
 
