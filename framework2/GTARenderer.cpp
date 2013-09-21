@@ -560,8 +560,8 @@ void GTARenderer::renderPaths()
 
     glBindVertexArray( vao );
 
-    for( size_t n = 0; n < engine->ainodes.size(); ++n ) {
-        auto start = engine->ainodes[n];
+    for( size_t n = 0; n < engine->aigraph.nodes.size(); ++n ) {
+        auto start = engine->aigraph.nodes[n];
 		
 		if( start->type == GTAAINode::Pedestrian ) {
 			pedlines.push_back(start->position);
@@ -581,12 +581,12 @@ void GTARenderer::renderPaths()
 			auto end = start->connections[c];
 			
 			if( start->type == GTAAINode::Pedestrian ) {	
-				pedlines.push_back(start->position);
-				pedlines.push_back(end->position);
+				pedlines.push_back(start->position + glm::vec3(0.f, 0.f, 1.f));
+				pedlines.push_back(end->position + glm::vec3(0.f, 0.f, 1.f));
 			}
 			else {
-				carlines.push_back(start->position);
-				carlines.push_back(end->position);
+				carlines.push_back(start->position + glm::vec3(0.f, 0.f, 1.f));
+				carlines.push_back(end->position + glm::vec3(0.f, 0.f, 1.f));
 			}
 		}
     }

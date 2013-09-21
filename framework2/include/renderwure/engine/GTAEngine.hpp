@@ -6,6 +6,7 @@
 #include <renderwure/render/GTARenderer.hpp>
 #include <renderwure/loaders/LoaderIPL.hpp>
 #include <renderwure/ai/GTAAINode.hpp>
+#include <renderwure/ai/AIGraph.hpp>
 
 class GTAObject;
 class GTACharacter;
@@ -158,10 +159,10 @@ public:
      */
     std::vector<GTACharacter*> pedestrians;
 
-    /**
-     * AI nodes (todo: replace vector with spatial hash).
-     */
-    std::vector<GTAAINode*> ainodes;
+	/**
+	 * AI Graph
+	 */
+	AIGraph aigraph;
 
 	/**
 	 * Randomness Engine

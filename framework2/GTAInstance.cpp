@@ -72,45 +72,7 @@ GTAInstance::GTAInstance(
 		auto& pathlist = pathit->second;
 		for( size_t p = 0; p < pathlist.size(); ++p ) {
 			auto& path = pathlist[p];
-			size_t startIndex = engine->ainodes.size();
-			for( size_t n = 0; n < path.nodes.size(); ++n ) {
-				auto& node = path.nodes[n];
-				GTAAINode* ainode = new GTAAINode;
-
-				ainode->type = (path.type == LoaderIDE::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
-				ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
-				ainode->flags = GTAAINode::None;
-				ainode->size = node.size;
-				ainode->other_thing = node.other_thing;
-				ainode->other_thing2 = node.other_thing2;
-				ainode->position = position + (rotation * node.position);
-				ainode->external = node.type == LoaderIDE::EXTERNAL;
-
-				if( ainode->nextIndex < engine->ainodes.size() ) {
-					ainode->connections.push_back(engine->ainodes[ainode->nextIndex]);
-					engine->ainodes[ainode->nextIndex]->connections.push_back(ainode);
-				}
-
-				for( size_t on = startIndex; on < engine->ainodes.size(); ++on ) {
-					if( engine->ainodes[on]->nextIndex == startIndex+n ) {
-						engine->ainodes[on]->connections.push_back(ainode);
-						ainode->connections.push_back(engine->ainodes[on]);
-					}
-				}
-
-				if( ainode->external ) {
-					for( size_t rn = 0; rn < engine->ainodes.size(); ++rn ) {
-						auto d = glm::length(engine->ainodes[rn]->position - ainode->position);
-						if( d < 1.f ) {
-							ainode->connections.push_back(engine->ainodes[rn]);
-							engine->ainodes[rn]->connections.push_back(ainode);
-						}
-					}
-				}
-
-				engine->ainodes.push_back(ainode);
-
-			}
+			engine->aigraph.createPathNodes(position, rot, path);
 		}
 	}
 

@@ -11,8 +11,8 @@ void GTADefaultAIController::update(float dt)
 					? GTAAINode::Vehicle : GTAAINode::Pedestrian;
 
 			float d = std::numeric_limits< float >::max();
-			for( auto n = character->engine->ainodes.begin();
-				n != character->engine->ainodes.end();
+			for( auto n = character->engine->aigraph.nodes.begin();
+				n != character->engine->aigraph.nodes.end();
 				++n ) {
 				if( (*n)->type != currentType ) continue;
 				if( (*n) == lastNode ) continue;
