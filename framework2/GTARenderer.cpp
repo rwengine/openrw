@@ -2,6 +2,7 @@
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/engine/Animator.hpp>
 #include <renderwure/render/TextureAtlas.hpp>
+#include <renderwure/render/Model.hpp>
 
 #include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/objects/GTAInstance.hpp>
@@ -265,36 +266,7 @@ void GTARenderer::renderWorld()
 
 	auto& textureLoader = engine->gameData.textureLoader;
 	
-	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4));
-	glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4 + sizeof(float)*2*4));
-	glVertexAttribPointer(colourAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)(sizeof(float)*3*4 + sizeof(float)*2*4 + sizeof(float)*3*4));
-	glEnableVertexAttribArray(posAttrib);
-	glEnableVertexAttribArray(texAttrib);
-	glEnableVertexAttribArray(normalAttrib);
-	glEnableVertexAttribArray(colourAttrib);
-	glBindTexture(GL_TEXTURE_2D, engine->gameData.textures["water_old"].texName);
-	
-	for( size_t w = 0; w < engine->gameData.waterRects.size(); ++w) {
-		GTATypes::WaterRect& r = engine->gameData.waterRects[w];
-		glm::vec3 vert[4] = {
-			glm::vec3(r.xRight, r.yTop,    r.height),
-			glm::vec3(r.xLeft,  r.yTop,    r.height),
-			glm::vec3(r.xRight, r.yBottom, r.height),
-			glm::vec3(r.xLeft,  r.yBottom, r.height)
-		};
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * 4, vert);
-		
-		glm::mat4 matrixModel(1.f);
-		
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(matrixModel));
-		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-		
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}
-
-    for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
+	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
         GTACharacter* charac = engine->pedestrians[i];
 
         glm::mat4 matrixModel;
@@ -327,7 +299,7 @@ void GTARenderer::renderWorld()
         float mindist = 100000.f;
         for (size_t g = 0; g < inst.model->geometries.size(); g++)
         {
-            RW::BSGeometryBounds& bounds = inst.model->geometries[g].geometryBounds;
+            RW::BSGeometryBounds& bounds = inst.model->geometries[g]->geometryBounds;
             mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
         }
         
@@ -421,7 +393,7 @@ void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const 
 		}
 		
 		size_t g = f;
-		RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+		RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
 		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			culled++;
 			continue;
@@ -437,30 +409,25 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g].VBO);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)(model->geometries[g].vertices.size() * sizeof(float) * 3));
-    glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0,
-        (void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3) + (model->geometries[g].texcoords.size() * sizeof(float) * 2))
-    );
-    glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0,
-        (void *) ((model->geometries[g].vertices.size() * sizeof(float) * 3)
-            + (model->geometries[g].texcoords.size() * sizeof(float) * 2)
-            + (model->geometries[g].normals.size() * sizeof(float) * 3))
-    );
+    glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g]->VBO);
+	
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsVert);
+	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsTexCoords);
+	glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsNormals);
+	glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsColours);
     glEnableVertexAttribArray(posAttrib);
     glEnableVertexAttribArray(texAttrib);
-    glEnableVertexAttribArray(normalAttrib);
-    glEnableVertexAttribArray(colourAttrib);
+	glEnableVertexAttribArray(normalAttrib);
+	glEnableVertexAttribArray(colourAttrib);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g].EBO);
+	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
+	{
+		auto& subgeom = model->geometries[g]->subgeom[sg];
 
-	for(size_t sg = 0; sg < model->geometries[g].subgeom.size(); ++sg)
-	{		
-		auto& subgeom = model->geometries[g].subgeom[sg];
-
-		if (model->geometries[g].materials.size() > subgeom.material) {
-			Model::Material& mat = model->geometries[g].materials[subgeom.material];
+		if (model->geometries[g]->materials.size() > subgeom.material) {
+			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
 
 			if(mat.textures.size() > 0 ) {
 				TextureInfo& tex = engine->gameData.textures[mat.textures[0].name];
@@ -475,7 +442,7 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 				}
             }
 
-            if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
+            if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
                 auto colmasked = mat.colour;
                 size_t R = colmasked % 256; colmasked /= 256;
                 size_t G = colmasked % 256; colmasked /= 256;
@@ -503,9 +470,9 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 
 		rendered++;
 
-		glDrawElements((model->geometries[g].facetype == Model::Triangles ?
+		glDrawElements((model->geometries[g]->facetype == Model::Triangles ?
 									GL_TRIANGLES : GL_TRIANGLE_STRIP),
-									subgeom.indices.size(), GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
+									subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
     }
 }
 
@@ -514,7 +481,7 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
 	for (size_t a = 0; a < model->atomics.size(); a++)
     {
         size_t g = model->atomics[a].geometry;
-        RW::BSGeometryBounds& bounds = model->geometries[g].geometryBounds;
+        RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
         if(! camera.frustum.intersects(bounds.center + glm::vec3(modelMatrix[3]), bounds.radius)) {
             culled++;
             continue;
@@ -530,7 +497,7 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
             }
         }
 
-        if( (model->geometries[g].flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
+        if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
             glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
         }
 

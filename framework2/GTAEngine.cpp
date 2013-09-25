@@ -3,6 +3,7 @@
 #include <renderwure/loaders/LoaderIDE.hpp>
 #include <renderwure/ai/GTADefaultAIController.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <renderwure/render/Model.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <renderwure/objects/GTACharacter.hpp>

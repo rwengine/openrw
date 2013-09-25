@@ -1,6 +1,7 @@
 #include <renderwure/engine/Animator.hpp>
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIFP.hpp>
+#include <renderwure/render/Model.hpp>
 
 Animator::Animator()
 	: animation(nullptr),  model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f)
