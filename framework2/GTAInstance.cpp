@@ -7,11 +7,10 @@ GTAInstance::GTAInstance(
 		const glm::quat& rot,
 		Model* model,
 		const glm::vec3& scale,
-		LoaderIPLInstance inst,
 		std::shared_ptr<LoaderIDE::OBJS_t> obj,
 		std::shared_ptr<GTAInstance> lod
 			)
-: GTAObject(engine, pos, rot, model), scale(scale), instance(inst), object(obj), LODinstance(lod)
+: GTAObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
 {
 	btRigidBody* body = nullptr;
 	auto phyit = engine->gameData.collisions.find(obj->modelName);
@@ -20,10 +19,10 @@ GTAInstance::GTAInstance(
 		btDefaultMotionState* msta = new btDefaultMotionState;
 		msta->setWorldTransform(btTransform(
 			btQuaternion(
-				inst.rotX, inst.rotY, inst.rotZ, inst.rotW
+				rot.w, rot.x, rot.y, rot.z
 			).inverse(),
 			btVector3(
-				inst.posX, inst.posY, inst.posZ
+				pos.x, pos.y, pos.z
 			)
 		));
 		btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
@@ -67,7 +66,7 @@ GTAInstance::GTAInstance(
 		engine->dynamicsWorld->addRigidBody(body);
 	}
 
-	auto pathit = engine->objectNodes.find(inst.id);
+	auto pathit = engine->objectNodes.find(obj->ID);
 	if( pathit != engine->objectNodes.end() ) {
 		auto& pathlist = pathit->second;
 		for( size_t p = 0; p < pathlist.size(); ++p ) {

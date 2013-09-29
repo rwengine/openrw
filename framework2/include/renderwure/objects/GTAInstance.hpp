@@ -10,7 +10,6 @@
 struct GTAInstance : public GTAObject
 {
 	glm::vec3 scale;
-	LoaderIPLInstance instance;
 	std::shared_ptr<LoaderIDE::OBJS_t> object;
 	std::shared_ptr<GTAInstance> LODinstance;
 
@@ -20,7 +19,6 @@ struct GTAInstance : public GTAObject
 		const glm::quat& rot,
 		Model* model,
 		const glm::vec3& scale,
-		LoaderIPLInstance inst,
 		std::shared_ptr<LoaderIDE::OBJS_t> obj,
 		std::shared_ptr<GTAInstance> lod
 			);

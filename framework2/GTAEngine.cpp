@@ -27,22 +27,7 @@ bool GTAEngine::load()
 	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	
 	gameData.load();
-	
-	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = gameData.ideLocations.begin();
-		it != gameData.ideLocations.end();
-		++it) {
-		defineItems(it->second);
-	}
-	
-	// Load the .zon IPLs since we want to have the zones loaded
-	for(std::map<std::string, std::string>::iterator it = gameData.iplLocations.begin();
-		it != gameData.iplLocations.end();
-		++it) {
-		loadZone(it->second);
-		placeItems(it->second);
-	}
-	
+
 	return true;
 }
 
@@ -140,37 +125,9 @@ bool GTAEngine::placeItems(const std::string& name)
 		// Find the object.
 		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
 			LoaderIPLInstance& inst = ipll.m_instances[i];
-			auto oi = objectTypes.find(inst.id);
-			if( oi != objectTypes.end()) {
-				// Make sure the DFF and TXD are loaded
-				if(! oi->second->modelName.empty()) {
-					gameData.loadDFF(oi->second->modelName + ".dff");
-				}
-				if(! oi->second->textureName.empty()) {
-					gameData.loadTXD(oi->second->textureName + ".txd");
-				}
-				
-				glm::quat instanceRot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
-				instanceRot = glm::normalize(instanceRot);
-
-                objectInstances.push_back(std::shared_ptr<GTAInstance>(new GTAInstance(
-                                              this,
-											  glm::vec3(inst.posX, inst.posY, inst.posZ),
-                                              instanceRot,
-                                              gameData.models[inst.model],
-                                              glm::vec3(inst.scaleX, inst.scaleY, inst.scaleZ),
-                                              inst, oi->second, nullptr
-														)));
-				
-				if( !oi->second->modelName.empty() ) {
-					modelInstances.insert({
-						oi->second->modelName,
-						objectInstances.back()
-					});
-				}
-
-			}
-			else {
+			glm::quat rot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
+			rot = glm::normalize(rot);
+			if(! createInstance(inst.id, glm::vec3(inst.posX, inst.posY, inst.posZ), rot)) {
 				std::cerr << "No object for instance " << inst.id << " (" << path << ")" << std::endl;
 			}
 		}
@@ -214,6 +171,42 @@ bool GTAEngine::loadZone(const std::string& path)
 	}
 	
 	return false;
+}
+
+GTAInstance *GTAEngine::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+{
+	auto oi = objectTypes.find(id);
+	if( oi != objectTypes.end()) {
+		// Make sure the DFF and TXD are loaded
+		if(! oi->second->modelName.empty()) {
+			gameData.loadDFF(oi->second->modelName + ".dff");
+		}
+		if(! oi->second->textureName.empty()) {
+			gameData.loadTXD(oi->second->textureName + ".txd");
+		}
+		
+		auto instance = std::shared_ptr<GTAInstance>(new GTAInstance(
+			this,
+			pos,
+			rot,
+			gameData.models[oi->second->modelName],
+			glm::vec3(1.f, 1.f, 1.f),
+			oi->second, nullptr
+		));
+		
+		objectInstances.push_back(instance);
+		
+		if( !oi->second->modelName.empty() ) {
+			modelInstances.insert({
+				oi->second->modelName,
+				objectInstances.back()
+			});
+		}
+
+		return instance.get();
+	}
+	
+	return nullptr;
 }
 
 GTAVehicle *GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)

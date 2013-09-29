@@ -86,6 +86,40 @@ void command(const std::string& line)
 		playerCharacter = gta->createPedestrian(1, plyPos);
 		player = new GTAPlayerAIController(playerCharacter);
 	}
+	else if("list-ipl" == cmd) {
+		for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
+			it != gta->gameData.iplLocations.end();
+			++it) {
+			gta->logInfo(it->second);
+		}
+	}
+	else if("load-ipl" == cmd) {
+		if(line.find(' ') != line.npos) {
+			std::string ipl = line.substr(line.find(' ')+1);
+			auto iplit = gta->gameData.iplLocations.find(ipl);
+			if(iplit != gta->gameData.iplLocations.end()) {
+				gta->logInfo("Loading: " + iplit->second);
+				gta->loadZone(iplit->second);
+				gta->placeItems(iplit->second);
+			}
+			else {
+				gta->logInfo("Not found: " + ipl);
+			}
+		}
+	}
+	else if("create-instance" == cmd) {
+		if(line.find(' ') != line.npos) {
+			std::string ID = line.substr(line.find(' ')+1);
+			int intID = atoi(ID.c_str());
+			auto archit = gta->objectTypes.find(intID);
+			if(archit != gta->objectTypes.end()) {
+				gta->createInstance(archit->first, plyPos);
+			}
+			else {
+				gta->logInfo("Unkown Object: " + ID);
+			}
+		}
+	}
 	else {
 		gta->logInfo("Unkown command: " + cmd);
 	}
@@ -188,7 +222,7 @@ void handleCommandEvent(sf::Event &event)
 	}
 }
 
-void init(std::string gtapath)
+void init(std::string gtapath, bool loadWorld)
 {
 	// GTA GET
 	gta = new GTAEngine(gtapath);
@@ -198,13 +232,24 @@ void init(std::string gtapath)
 	
 	gta->load();
 	
-	// Test out a known IPL.
-	/*gta->placeItems(gtapath + "/data/maps/industsw/industSW.ipl");
-	gta->placeItems(gtapath + "/data/maps/industnw/industNW.ipl");
-	gta->placeItems(gtapath + "/data/maps/industse/industSE.ipl");
-	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");*/
+	// Loade all of the IDEs.
+	for(std::map<std::string, std::string>::iterator it = gta->gameData.ideLocations.begin();
+		it != gta->gameData.ideLocations.end();
+		++it) {
+		gta->defineItems(it->second);
+	}
 	
-	plyPos = gta->itemCentroid / (float) gta->itemCount + glm::vec3(0, 0, 2);
+	if(loadWorld) {
+		// Load IPLs 
+		for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
+			it != gta->gameData.iplLocations.end();
+			++it) {
+			gta->loadZone(it->second);
+			gta->placeItems(it->second);
+		}
+		
+		plyPos = gta->itemCentroid / (float) gta->itemCount + glm::vec3(0, 0, 2);
+	}
 	
 	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);
 	size_t k = 1;
@@ -402,16 +447,20 @@ int main(int argc, char *argv[])
 
 	glewExperimental = GL_TRUE;
 	glewInit();
-	
+
+	bool loadWorld = false;
 	size_t w = WIDTH, h = HEIGHT;
 	int c;
-	while( (c = getopt(argc, argv, "w:h:")) != -1) {
+	while( (c = getopt(argc, argv, "w:h:l")) != -1) {
 		switch(c) {
 			case 'w':
 				w = atoi(optarg);
 				break;
 			case 'h':
 				h = atoi(optarg);
+				break;
+			case 'l':
+				loadWorld = true;
 				break;
 		}
 	}
@@ -421,7 +470,7 @@ int main(int argc, char *argv[])
     window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close, cs);
 	window.setVerticalSyncEnabled(true);
 
-	init(argv[optind]);
+	init(argv[optind], loadWorld);
 	
 	sf::Clock clock;
 

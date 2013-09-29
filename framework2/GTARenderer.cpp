@@ -280,7 +280,6 @@ void GTARenderer::renderWorld()
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
         GTAInstance& inst = *engine->objectInstances[i];
-        LoaderIPLInstance &obj = inst.instance;
 		
 		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
 			//continue;
@@ -288,7 +287,7 @@ void GTARenderer::renderWorld()
 
         if(!inst.model)
         {
-            std::cout << "model " << obj.model << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
+            std::cout << "model " << inst.model << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
         }
 		
         glm::mat4 matrixModel;

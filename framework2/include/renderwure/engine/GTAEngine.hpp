@@ -84,6 +84,11 @@ public:
 	bool loadZone(const std::string& path);
 	
 	/**
+	 * Creates an instance
+	 */
+	GTAInstance *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	
+	/**
 	 * Creates a vehicle
 	 */
     GTAVehicle *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
