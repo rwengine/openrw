@@ -19,7 +19,7 @@ GTAInstance::GTAInstance(
 		btDefaultMotionState* msta = new btDefaultMotionState;
 		msta->setWorldTransform(btTransform(
 			btQuaternion(
-				rot.w, rot.x, rot.y, rot.z
+				rot.x, rot.y, rot.z, -rot.w
 			).inverse(),
 			btVector3(
 				pos.x, pos.y, pos.z

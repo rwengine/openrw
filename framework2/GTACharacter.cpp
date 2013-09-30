@@ -6,7 +6,7 @@
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
 : GTAObject(engine, pos, rot, model),
-  currentVehicle(nullptr),
+  currentVehicle(nullptr), physCharacter(nullptr),
   ped(ped), currentActivity(None), controller(nullptr)
 {
 	if(model) {
@@ -23,8 +23,12 @@ GTACharacter::~GTACharacter()
 	destroyActor();
 }
 
-void GTACharacter::createActor()
+void GTACharacter::createActor(const glm::vec3& size)
 {
+	if(physCharacter) {
+		destroyActor();
+	}
+	
 	// Don't create anything without a valid model.
 	if(model) {
 		btTransform tf;
@@ -33,7 +37,7 @@ void GTACharacter::createActor()
 
 		physObject = new btPairCachingGhostObject;
 		physObject->setWorldTransform(tf);
-		physShape = new btBoxShape(btVector3(0.25f, 0.25f, 1.f));
+		physShape = new btBoxShape(btVector3(size.x, size.y, size.z));
 		physObject->setCollisionShape(physShape);
 		physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.65f, 2);
@@ -64,13 +68,21 @@ void GTACharacter::changeAction(Activity newAction)
 			switch( currentActivity ) {
 			default:
 			case Idle:
+				createActor();
 				animator->setAnimation(engine->gameData.animations.at("idle_stance"));
 				break;
 			case Walk:
+				createActor();
 				animator->setAnimation(engine->gameData.animations.at("walk_civi"));
 				break;
 			case Run:
+				createActor();
 				animator->setAnimation(engine->gameData.animations.at("run_civi"));
+				break;
+			case KnockedDown:
+				// Change body shape.
+				createActor(glm::vec3(0.5f, 0.5f, 0.1f));
+				animator->setAnimation(engine->gameData.animations.at("kd_front"), false);
 				break;
 			case VehicleDrive:
 				animator->setAnimation(engine->gameData.animations.at("car_sit"));
@@ -95,6 +107,56 @@ void GTACharacter::tick(float dt)
 void GTACharacter::updateCharacter()
 {
 	if(physCharacter) {
+		
+		// Check to see if the character should be knocked down.
+		btManifoldArray   manifoldArray;
+		btBroadphasePairArray& pairArray = physObject->getOverlappingPairCache()->getOverlappingPairArray();
+		int numPairs = pairArray.size();
+	
+		for (int i=0;i<numPairs;i++)
+		{
+			manifoldArray.clear();
+	
+			const btBroadphasePair& pair = pairArray[i];
+	
+			//unless we manually perform collision detection on this pair, the contacts are in the dynamics world paircache:
+			btBroadphasePair* collisionPair = engine->dynamicsWorld->getPairCache()->findPair(pair.m_pProxy0,pair.m_pProxy1);
+			if (!collisionPair)
+				continue;
+	
+			if (collisionPair->m_algorithm)
+				collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
+	
+			for (int j=0;j<manifoldArray.size();j++)
+			{
+				btPersistentManifold* manifold = manifoldArray[j];
+				btScalar directionSign = manifold->getBody0() == physObject ? btScalar(-1.0) : btScalar(1.0);
+				for (int p=0;p<manifold->getNumContacts();p++)
+				{
+					const btManifoldPoint&pt = manifold->getContactPoint(p);
+					if (pt.getDistance() < 0.f)
+					{
+						const btVector3& ptA = pt.getPositionWorldOnA();
+						const btVector3& ptB = pt.getPositionWorldOnB();
+						const btVector3& normalOnB = pt.m_normalWorldOnB;
+						
+						auto otherObject = static_cast<btCollisionObject*>(
+							manifold->getBody0() == physObject ? manifold->getBody1() : manifold->getBody0());
+						if(otherObject->getUserPointer()) {
+							GTAObject* object = static_cast<GTAObject*>(otherObject->getUserPointer());
+							if(object->type() == Vehicle) {
+								GTAVehicle* vehicle = static_cast<GTAVehicle*>(object);
+								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
+									changeAction(KnockedDown);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
 		glm::vec3 direction = rotation * animator->getRootTranslation();
 		physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
 

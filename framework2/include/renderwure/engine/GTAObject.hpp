@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTAOBJECTS_HPP_
-#define _GTAOBJECTS_HPP_
+#ifndef _GTAOBJECT_HPP_
+#define _GTAOBJECT_HPP_
 
 #include <renderwure/engine/GTATypes.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>

@@ -5,6 +5,7 @@
 #include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <glm/glm.hpp>
 
 class GTAVehicle;
 
@@ -17,7 +18,7 @@ struct GTACharacter : public GTAObject
 private:
 	GTAVehicle* currentVehicle;
 
-	void createActor();
+	void createActor(const glm::vec3& size = glm::vec3(0.25f, 0.25f, 1.f));
 	void destroyActor();
 
 public:
@@ -29,7 +30,8 @@ public:
 		Run,
 		Crouch,
 		VehicleDrive,
-		VehicleSit
+		VehicleSit,
+		KnockedDown
 	};
 
 	std::shared_ptr<LoaderIDE::PEDS_t> ped;

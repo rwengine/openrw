@@ -63,6 +63,7 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			btRigidBody::btRigidBodyConstructionInfo rginfo(info.handling.mass, msta, cmpShape, inertia);
 
 			physBody = new btRigidBody(rginfo);
+			physBody->setUserPointer(this);
 			engine->dynamicsWorld->addRigidBody(physBody);
 
 			physRaycaster = new btDefaultVehicleRaycaster(engine->dynamicsWorld);

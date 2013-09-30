@@ -30,6 +30,8 @@ class Animator
 	float time;
 	float serverTime;
 	float lastServerTime;
+	
+	bool repeat;
 
 	void updateFrameMapping();
 	void reset();
@@ -41,9 +43,10 @@ public:
 	/**
 	 * @brief setAnimation Sets the currently active animation.
 	 * @param animation
+	 * @param repeat If true animation will restart after ending.
 	 * @todo Interpolate between the new and old frames.
 	 */
-	void setAnimation(Animation* animation);
+	void setAnimation(Animation* animation, bool repeat = true);
 
 	void setModel(Model* model);
 

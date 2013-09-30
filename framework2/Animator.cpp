@@ -4,7 +4,7 @@
 #include <renderwure/render/Model.hpp>
 
 Animator::Animator()
-	: animation(nullptr),  model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f)
+	: animation(nullptr),  model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), repeat(true)
 {
 
 }
@@ -46,13 +46,14 @@ void Animator::reset()
 	}
 }
 
-void Animator::setAnimation(Animation *animation)
+void Animator::setAnimation(Animation *animation, bool repeat)
 {
 	if(animation == this->animation) {
 		return;
 	}
 
 	this->animation = animation;
+	this->repeat = repeat;
 
 	updateFrameMapping();
 	reset();
@@ -101,7 +102,13 @@ void Animator::tick(float dt)
 		fmat[3] = glm::vec4(model->frames[fi].defaultTranslation, 1.f);
 
 		if( animation && fi < model->frameNames.size() ) {
-			serverTime = fmod(serverTime, animation->duration);
+			if(repeat) {
+				serverTime = fmod(serverTime, animation->duration);
+			}
+			else {
+				serverTime = std::min(serverTime, animation->duration);
+			}
+			
 			if( lastServerTime > serverTime ) {
 				lastRootPosition = glm::vec3(0.f);
 			}
