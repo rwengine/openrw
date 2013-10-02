@@ -36,13 +36,14 @@ void GTACharacter::createActor(const glm::vec3& size)
 		tf.setOrigin(btVector3(position.x, position.y, position.z));
 
 		physObject = new btPairCachingGhostObject;
+		physObject->setUserPointer(this);
 		physObject->setWorldTransform(tf);
-		physShape = new btBoxShape(btVector3(size.x, size.y, size.z));
+		physShape = new btCapsuleShapeZ(size.x, size.z);
 		physObject->setCollisionShape(physShape);
-		physObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
-		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.65f, 2);
-
-		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter|btBroadphaseProxy::DefaultFilter);
+		physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+		physCharacter = new btKinematicCharacterController(physObject, physShape, 3.5f, 2);
+		
+		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
 		engine->dynamicsWorld->addAction(physCharacter);
 	}
 }
@@ -119,7 +120,7 @@ void GTACharacter::updateCharacter()
 		for (int i=0;i<numPairs;i++)
 		{
 			manifoldArray.clear();
-	
+			
 			const btBroadphasePair& pair = pairArray[i];
 	
 			//unless we manually perform collision detection on this pair, the contacts are in the dynamics world paircache:
@@ -159,10 +160,9 @@ void GTACharacter::updateCharacter()
 			}
 		}
 		
-		
 		glm::vec3 direction = rotation * animator->getRootTranslation();
 		physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
-
+		
 		btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
 		position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}

@@ -58,6 +58,7 @@ GTAInstance::GTAInstance(
 					sizeof(glm::vec3)
 					);
 			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
+			trishape->setMargin(0.09f);
 			btTransform t; t.setIdentity();
 			cmpShape->addChildShape(t, trishape);
 		}

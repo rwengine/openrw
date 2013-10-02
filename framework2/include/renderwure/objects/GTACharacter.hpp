@@ -18,7 +18,7 @@ struct GTACharacter : public GTAObject
 private:
 	GTAVehicle* currentVehicle;
 
-	void createActor(const glm::vec3& size = glm::vec3(0.25f, 0.25f, 1.f));
+	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
 	void destroyActor();
 
 public:
@@ -39,7 +39,7 @@ public:
 
 	btKinematicCharacterController* physCharacter;
 	btPairCachingGhostObject* physObject;
-	btBoxShape* physShape;
+	btCapsuleShapeZ* physShape;
 
 	GTAAIController* controller;
 
