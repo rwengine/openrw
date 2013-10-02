@@ -181,3 +181,8 @@ glm::mat4 Animator::getFrameMatrix(size_t frame) const
 		}
 	}
 }
+
+bool Animator::isCompleted() const
+{
+	return serverTime >= animation->duration;
+}

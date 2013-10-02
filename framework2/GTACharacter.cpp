@@ -68,21 +68,24 @@ void GTACharacter::changeAction(Activity newAction)
 			switch( currentActivity ) {
 			default:
 			case Idle:
-				createActor();
 				animator->setAnimation(engine->gameData.animations.at("idle_stance"));
 				break;
 			case Walk:
-				createActor();
 				animator->setAnimation(engine->gameData.animations.at("walk_civi"));
 				break;
 			case Run:
-				createActor();
 				animator->setAnimation(engine->gameData.animations.at("run_civi"));
 				break;
 			case KnockedDown:
 				// Change body shape.
+				position += glm::vec3(0.f, 0.f, 0.5f);
 				createActor(glm::vec3(0.5f, 0.5f, 0.1f));
 				animator->setAnimation(engine->gameData.animations.at("kd_front"), false);
+				break;
+			case GettingUp:
+				// Change body shape back to normal.
+				createActor();
+				animator->setAnimation(engine->gameData.animations.at("getup"), false);
 				break;
 			case VehicleDrive:
 				animator->setAnimation(engine->gameData.animations.at("car_sit"));

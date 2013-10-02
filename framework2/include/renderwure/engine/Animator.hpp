@@ -80,6 +80,11 @@ public:
 	 * @return
 	 */
 	glm::mat4 getFrameMatrix(size_t frame) const;
+	
+	/**
+	 * Returns true if the animation has finished playing.
+	 */
+	bool isCompleted() const; 
 };
 
 #endif

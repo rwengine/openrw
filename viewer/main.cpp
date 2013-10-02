@@ -86,6 +86,11 @@ void command(const std::string& line)
 		playerCharacter = gta->createPedestrian(1, plyPos);
 		player = new GTAPlayerAIController(playerCharacter);
 	}
+	else if("knock-down" == cmd) {
+		for(auto it = gta->pedestrians.begin(); it != gta->pedestrians.end(); ++it) {
+			(*it)->changeAction(GTACharacter::KnockedDown);
+		}
+	}
 	else if("list-ipl" == cmd) {
 		for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
 			it != gta->gameData.iplLocations.end();
@@ -341,7 +346,7 @@ void update(float dt)
 			gta->vehicleInstances[v]->tick(dt);
 		}
 
-		gta->dynamicsWorld->stepSimulation(dt, 1, dt);
+		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
 	}
 }
 
@@ -475,7 +480,7 @@ int main(int argc, char *argv[])
 	sf::Clock clock;
 
 	float accum = 0.f;
-    float ts = 1.f / 20.f;
+    float ts = 1.f / 60.f;
 	
 	while (window.isOpen()) {
 		sf::Event event;

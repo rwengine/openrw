@@ -18,6 +18,7 @@ class GTADefaultAIController : public GTAAIController
 	GTAAINode* lastNode;
 	
 	float nodeMargin; /// Minimum distance away to "reach" node.
+	float getUpTime; /// Time to wait before getting up.
 	
 public:
 	
@@ -26,7 +27,7 @@ public:
 	   action(Wander),
 	   targetNode(nullptr),
 	   lastNode(nullptr),
-	   nodeMargin(0.f) {}
+	   nodeMargin(0.f), getUpTime(-1.f) {}
 	
 	void update(float dt);
 	

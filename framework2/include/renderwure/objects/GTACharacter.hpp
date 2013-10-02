@@ -31,7 +31,8 @@ public:
 		Crouch,
 		VehicleDrive,
 		VehicleSit,
-		KnockedDown
+		KnockedDown,
+		GettingUp
 	};
 
 	std::shared_ptr<LoaderIDE::PEDS_t> ped;
