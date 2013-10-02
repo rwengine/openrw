@@ -3,7 +3,7 @@
 #include <renderwure/objects/GTAVehicle.hpp>
 
 GTAPlayerAIController::GTAPlayerAIController(GTACharacter* character)
-	: GTAAIController(character), running(false), lastRotation(glm::vec3(0.f, 0.f, 0.f))
+	: GTAAIController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false)
 {
 	
 }

@@ -11,7 +11,7 @@
 #include <renderwure/objects/GTAVehicle.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
-    : renderer(this), itemCount(0), gameData(path), gameTime(0.f), randomEngine(rand())
+    : itemCount(0), renderer(this), gameTime(0.f), gameData(path), randomEngine(rand())
 {
 	gameData.engine = this;
 }

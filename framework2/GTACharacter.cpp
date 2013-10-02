@@ -6,8 +6,8 @@
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
 : GTAObject(engine, pos, rot, model),
-  currentVehicle(nullptr), physCharacter(nullptr),
-  ped(ped), currentActivity(None), controller(nullptr)
+  currentVehicle(nullptr), ped(ped), physCharacter(nullptr),
+  controller(nullptr), currentActivity(None)
 {
 	if(model) {
 		animator = new Animator();
@@ -143,7 +143,7 @@ void GTACharacter::updateCharacter()
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						
-						auto otherObject = static_cast<btCollisionObject*>(
+						auto otherObject = static_cast<const btCollisionObject*>(
 							manifold->getBody0() == physObject ? manifold->getBody1() : manifold->getBody0());
 						if(otherObject->getUserPointer()) {
 							GTAObject* object = static_cast<GTAObject*>(otherObject->getUserPointer());

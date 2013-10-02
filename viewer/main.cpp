@@ -166,7 +166,7 @@ void handleInputEvent(sf::Event &event)
 			mouseGrabbed = ! mouseGrabbed;
 			break;
 		case sf::Keyboard::P:
-            debugMode = debugMode++;
+            debugMode+=1;
             while(debugMode > 2) debugMode -= 3;
 			break;
 		case sf::Keyboard::W:
@@ -181,6 +181,7 @@ void handleInputEvent(sf::Event &event)
 		case sf::Keyboard::D:
 			movement.x = 1;
 			break;
+		default: break;
 		}
 		break;
 	case sf::Event::KeyReleased:
@@ -200,8 +201,10 @@ void handleInputEvent(sf::Event &event)
 		case sf::Keyboard::D:
 			movement.x = 0;
 			break;
+		default: break;
 		}
 		break;
+	default: break;
 	}
 }
 
@@ -217,6 +220,7 @@ void handleCommandEvent(sf::Event &event)
 				case sf::Keyboard::BackSpace:
 					commandBuff = commandBuff.substr(0, commandBuff.length()-1);
 					break;
+				default: break;
 			}
 			break;
 		case sf::Event::TextEntered:
@@ -224,6 +228,7 @@ void handleCommandEvent(sf::Event &event)
 				commandBuff += static_cast<char>(event.text.unicode);
 			}
 			break;
+		default: break;
 	}
 }
 

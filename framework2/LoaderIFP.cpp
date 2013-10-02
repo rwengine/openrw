@@ -158,7 +158,7 @@ bool LoaderIFP::loadFromMemory(char *data)
 std::string LoaderIFP::readString(char *data, size_t *ofs)
 {
     size_t b = *ofs;
-    for(size_t o = *ofs; o = *ofs;) {
+    for(size_t o = *ofs; (o = *ofs);) {
         *ofs += 4;
         if(data[o+0] == 0) break;
         if(data[o+1] == 0) break;

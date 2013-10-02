@@ -166,7 +166,7 @@ glm::vec3 Animator::getRootTranslation() const
 
 glm::quat Animator::getRootRotation() const
 {
-	glm::quat();
+	return glm::quat();
 }
 
 glm::mat4 Animator::getFrameMatrix(size_t frame) const
@@ -180,6 +180,7 @@ glm::mat4 Animator::getFrameMatrix(size_t frame) const
 			return getFrameMatrix(f.parentFrameIndex) * matrices.at(frame);
 		}
 	}
+	return glm::mat4();
 }
 
 bool Animator::isCompleted() const

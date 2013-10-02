@@ -264,8 +264,6 @@ void GTARenderer::renderWorld()
 	
 	rendered = culled = 0;
 
-	auto& textureLoader = engine->gameData.textureLoader;
-	
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
         GTACharacter* charac = engine->pedestrians[i];
 

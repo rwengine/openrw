@@ -34,7 +34,7 @@ std::string findPathRealCase(const std::string& base, const std::string& path)
 	dirent* ep;
 		
 	if( dp != NULL) {
-		while( ep = readdir(dp)) {
+		while( (ep = readdir(dp)) ) {
 			realName = ep->d_name;
 			std::string lowerRealName = realName;
 			std::transform(lowerRealName.begin(), lowerRealName.end(), lowerRealName.begin(), ::tolower);
