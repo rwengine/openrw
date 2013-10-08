@@ -57,7 +57,7 @@ void handleEvent(sf::Event &event)
 			mouseGrabbed = ! mouseGrabbed;
 			break;
 		case sf::Keyboard::P:
-            debugMode = debugMode++;
+            debugMode++;
             while(debugMode > 2) debugMode -= 3;
 			break;
 		default: break;
@@ -68,6 +68,7 @@ void handleEvent(sf::Event &event)
 			case sf::Keyboard::Space:
 				moveSpeed = 20.f;
 				break;
+			default: break;
 		}
 		break;
 	case sf::Event::GainedFocus:
