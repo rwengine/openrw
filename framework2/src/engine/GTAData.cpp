@@ -260,7 +260,6 @@ void GTAData::loadCarcols(const std::string& path)
 			else if( currentSection == CAR) {
 				std::string vehicle, p, s;
 				std::stringstream ss(line);
-				size_t commapos = line.find(',');
 				
 				std::getline(ss, vehicle, ',');
 				std::vector<std::pair<size_t, size_t>> colours;

@@ -59,12 +59,12 @@ void dumpModelFile(char* data)
 		{
 			case RW::SID_FrameList:
 			{
-				auto list = sec.readStructure<BSFrameList>();
+				/*auto list =*/ sec.readStructure<BSFrameList>();
 			}
 			break;
 			case RW::SID_GeometryList:
 			{
-				auto list = sec.readStructure<BSGeometryList>();
+				/*auto list =*/ sec.readStructure<BSGeometryList>();
 				size_t gdataI = 0;
 				while(sec.hasMoreData(gdataI))
 				{
@@ -140,7 +140,7 @@ void dumpModelFile(char* data)
 		if(geomHeader.versionid < 0x1003FFFF) 
 		{
 			std::cout << "  Some extra colour info" << std::endl;
-			auto colors = readStructure<BSGeometryColor>(data, dataI);
+			/*auto colors =*/ readStructure<BSGeometryColor>(data, dataI);
 		}
 		
 		if(geom.flags & BSGeometry::VertexColors)
@@ -191,7 +191,7 @@ void dumpModelFile(char* data)
 			}
 		}
 		
-		auto materialListHeader = readHeader(data, dataI);
+		/*auto materialListHeader =*/ readHeader(data, dataI);
 		readHeader(data, dataI); // Ignore the structure header..
 		
 		auto materialList = readStructure<BSMaterialList>(data, dataI);
@@ -218,7 +218,7 @@ void dumpModelFile(char* data)
 				size_t texsecbase = dataI;
 				readHeader(data, dataI);
 				
-				auto texture = readStructure<BSTexture>(data, dataI);
+				/*auto texture =*/ readStructure<BSTexture>(data, dataI);
 				
 				auto nameHeader = readHeader(data, dataI);
 				std::string textureName(data+dataI, nameHeader.size);
@@ -350,7 +350,7 @@ void dumpBinaryStreamSection(BinaryStreamSection& parent, size_t depth, size_t m
 			break;
 		case RW::SID_Texture:
 		{
-			auto texture = parent.readStructure<BSTexture>();
+			/*auto texture =*/ parent.readStructure<BSTexture>();
 			std::cout << "texture";
 			readchildren = true;
 		}

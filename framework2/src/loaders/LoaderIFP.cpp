@@ -62,7 +62,7 @@ bool LoaderIFP::loadFromMemory(char *data)
 
     for( size_t a = 0; a < fileRoot->info.entries; ++a ) {
         // something about a name?
-        NAME* n = read<NAME>(data, dataI);
+        /*NAME* n =*/ read<NAME>(data, dataI);
         std::string animname = readString(data, dataI);
 
         Animation* animation = new Animation;

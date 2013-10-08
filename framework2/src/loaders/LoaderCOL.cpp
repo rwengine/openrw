@@ -10,7 +10,6 @@ template<class T> T readType(char* data, size_t* offset)
 
 bool LoaderCOL::load(char* data, const size_t size)
 {
-	char* dataptr = data;
 	int version = 1;
 	size_t dataI = 0;
 	

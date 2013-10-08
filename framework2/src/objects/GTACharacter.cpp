@@ -134,16 +134,11 @@ void GTACharacter::updateCharacter()
 			for (int j=0;j<manifoldArray.size();j++)
 			{
 				btPersistentManifold* manifold = manifoldArray[j];
-				btScalar directionSign = manifold->getBody0() == physObject ? btScalar(-1.0) : btScalar(1.0);
 				for (int p=0;p<manifold->getNumContacts();p++)
 				{
 					const btManifoldPoint&pt = manifold->getContactPoint(p);
 					if (pt.getDistance() < 0.f)
 					{
-						const btVector3& ptA = pt.getPositionWorldOnA();
-						const btVector3& ptB = pt.getPositionWorldOnB();
-						const btVector3& normalOnB = pt.m_normalWorldOnB;
-						
 						auto otherObject = static_cast<const btCollisionObject*>(
 							manifold->getBody0() == physObject ? manifold->getBody1() : manifold->getBody0());
 						if(otherObject->getUserPointer()) {

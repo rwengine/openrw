@@ -65,7 +65,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 			break;
 		}
 		case RW::SID_GeometryList: {
-			auto list = sec.readStructure<RW::BSGeometryList>();
+			/*auto list =*/ sec.readStructure<RW::BSGeometryList>();
 			size_t gdataI = 0;
 			while (sec.hasMoreData(gdataI)) {
 				std::shared_ptr<Model::Geometry> geom(new Model::Geometry);
@@ -83,7 +83,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 					char *data = item.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSGeometry);
 
 					if (item.header.versionid < 0x1003FFFF)
-						auto colors = readStructure<RW::BSGeometryColor>(data, dataI);
+						/*auto colors =*/ readStructure<RW::BSGeometryColor>(data, dataI);
 					
 					std::vector<glm::vec4> colours;
 					colours.resize(geometry.numverts);
@@ -198,7 +198,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 						
 						for (size_t t = 0; t < material.numtextures; ++t) {
 							auto texsec = materialsec.getNextChildSection(texI);
-							auto texture = texsec.readStructure<RW::BSTexture>();
+							/*auto texture =*/ texsec.readStructure<RW::BSTexture>();
 
 							std::string textureName, alphaName;
 							size_t yetAnotherI = 0;

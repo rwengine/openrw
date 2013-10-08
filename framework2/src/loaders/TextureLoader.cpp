@@ -171,7 +171,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 {
 	RW::BinaryStreamSection root(data);
-	auto texDict = root.readStructure<RW::BSTextureDictionary>();
+	/*auto texDict =*/ root.readStructure<RW::BSTextureDictionary>();
 
 	size_t rootI = 0;
 	while (root.hasMoreData(rootI)) {
