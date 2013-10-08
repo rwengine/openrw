@@ -324,6 +324,6 @@ namespace RW
 			return sec;
 		}
 	};
-};
+}
 
 #endif
