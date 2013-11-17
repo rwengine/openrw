@@ -419,23 +419,24 @@ void dumpCollisionModel(char* data, size_t size)
 	if(coll.load(data, size)) {
 		std::cout << "Collision instances: " << coll.instances.size() << std::endl;
 		for(auto it = coll.instances.begin(); it != coll.instances.end(); ++it) {
-			std::cout << "Collision data (version " << it->version << ")" << std::endl;
-			std::cout << " model: " << it->name << std::endl;
-			std::cout << " model id: " << it->modelid << std::endl;
-			std::cout << " spheres: " << it->spheres.size() << std::endl;
-			for( size_t b = 0; b < it->spheres.size(); ++b ) {
-				auto& box = it->spheres[b];
+			CollisionModel* model = (*it).get();
+			std::cout << "Collision data (version " << model->version << ")" << std::endl;
+			std::cout << " model: " << model->name << std::endl;
+			std::cout << " model id: " << model->modelid << std::endl;
+			std::cout << " spheres: " << model->spheres.size() << std::endl;
+			for( size_t b = 0; b < model->spheres.size(); ++b ) {
+				auto& box = model->spheres[b];
 				std::cout << "  radius: " << box.radius << " center: " << box.center.x << " " << box.center.y << " " << box.center.z << std::endl;
 			}
-			std::cout << " boxes: " << it->boxes.size() << std::endl;
-			for( size_t b = 0; b < it->boxes.size(); ++b ) {
-				auto& box = it->boxes[b];
+			std::cout << " boxes: " << model->boxes.size() << std::endl;
+			for( size_t b = 0; b < model->boxes.size(); ++b ) {
+				auto& box = model->boxes[b];
 				std::cout << "  min: " << box.min.x << " " << box.min.y << " " << box.min.z << " max: " << box.max.x << " " << box.max.y << " " << box.max.z << std::endl;
 			}
-			std::cout << " faces: " << it->indices.size()/3 << std::endl;
-			std::cout << " verts: " << it->vertices.size() << std::endl;
-			for( size_t v = 0; v < it->vertices.size(); ++v ) {
-				std::cout << "  " << it->vertices[v].x << ", " << it->vertices[v].y << ", " << it->vertices[v].z << std::endl;
+			std::cout << " faces: " << model->indices.size()/3 << std::endl;
+			std::cout << " verts: " << model->vertices.size() << std::endl;
+			for( size_t v = 0; v < model->vertices.size(); ++v ) {
+				std::cout << "  " << model->vertices[v].x << ", " << model->vertices[v].y << ", " << model->vertices[v].z << std::endl;
 			}
 		}
 	}

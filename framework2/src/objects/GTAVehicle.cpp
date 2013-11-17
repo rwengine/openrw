@@ -1,6 +1,7 @@
 #include <renderwure/objects/GTAVehicle.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#include <renderwure/data/CollisionModel.hpp>
 
 GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
 	: GTAObject(engine, pos, rot, model),

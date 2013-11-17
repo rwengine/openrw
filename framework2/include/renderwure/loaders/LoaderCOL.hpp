@@ -2,6 +2,7 @@
 #define _LOADERCOL_H_
 #include <string>
 #include <vector>
+#include <memory>
 #include <glm/glm.hpp>
 #include <renderwure/data/CollisionModel.hpp>
 
@@ -18,7 +19,7 @@ public:
 	/// Load the COL data from a file already in memory
 	bool load(char* data, const size_t size);
 	
-	std::vector<CollisionModel> instances;
+	std::vector<std::unique_ptr<CollisionModel>> instances;
 };
 
 #endif

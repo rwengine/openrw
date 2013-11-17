@@ -144,13 +144,13 @@ bool LoaderCOL::load(char* data, const size_t size)
 			}
 		}
 		
-		CollisionModel model;
-		model.version = version;
-		model.center = head.bounds.center;
-		model.min = head.bounds.min;
-		model.max = head.bounds.max;
-		model.name = head.name;
-		model.modelid = head.modelid;
+		CollisionModel *model = new CollisionModel;
+		model->version = version;
+		model->center = head.bounds.center;
+		model->min = head.bounds.min;
+		model->max = head.bounds.max;
+		model->name = head.name;
+		model->modelid = head.modelid;
 		
 		if(version == 1)
 		{
@@ -162,12 +162,12 @@ bool LoaderCOL::load(char* data, const size_t size)
 			if(version == 1) {
 				auto s1 = readType<CollTSphereV1>(data, &dataI);
 				
-				model.spheres.push_back({ s1.center, s1.radius });
+				model->spheres.push_back({ s1.center, s1.radius });
 			}
 			else {
 				auto s2 = readType<CollTSphere>(data, &dataI);
 				
-				model.spheres.push_back({ s2.center, s2.radius });
+				model->spheres.push_back({ s2.center, s2.radius });
 			}
 		}
 		
@@ -184,7 +184,7 @@ bool LoaderCOL::load(char* data, const size_t size)
 		}
 		for( size_t i = 0; i < head2.numboxes; ++i) {
 			auto b1 = readType<CollTBox>(data, &dataI);
-			model.boxes.push_back({b1.min, b1.max});
+			model->boxes.push_back({b1.min, b1.max});
 		}
 
 		if(version == 1)
@@ -204,28 +204,28 @@ bool LoaderCOL::load(char* data, const size_t size)
 		}
 		
 		size_t maxvert = 0;
-		model.indices.reserve(head2.numfaces * 3);
+		model->indices.reserve(head2.numfaces * 3);
 		for( size_t f = 0; f < head2.numfaces; ++f) {
 			// todo: Support 2-3
 			CollTFaceV1 face = readType<CollTFaceV1>(data, &dataI);
 			size_t maxv = std::max(face.a, std::max(face.b, face.c));
 			maxvert = std::max( maxvert, maxv );
-			model.indices.push_back(face.a);
-			model.indices.push_back(face.b);
-			model.indices.push_back(face.c);
+			model->indices.push_back(face.a);
+			model->indices.push_back(face.b);
+			model->indices.push_back(face.c);
 		}
 
 		// Load up to maxvert vertices.
-		model.vertices.reserve(maxvert+1);
+		model->vertices.reserve(maxvert+1);
 		for( size_t v = 0, vertI = head2.offsetverts; v < maxvert+1; ++v ) {
 			CollTVertex vert = readType<CollTVertex>(data, &vertI);
 			// CollTVertex is vec3
-			model.vertices.push_back(vert);
+			model->vertices.push_back(vert);
 		}
 
 		dataI += sizeof(CollTFace) * head2.numfaces;
 		
-		instances.push_back(model);
+		instances.push_back(std::move(std::unique_ptr<CollisionModel>(model)));
 		
 		dataI = file_base + head.size + sizeof(char) * 8;
 	}

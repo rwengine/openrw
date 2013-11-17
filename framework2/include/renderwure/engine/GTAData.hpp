@@ -9,8 +9,8 @@
 #include <renderwure/loaders/LoaderIDE.hpp>
 #include <renderwure/loaders/LoaderIFP.hpp>
 #include <renderwure/loaders/WeatherLoader.hpp>
-#include <renderwure/loaders/LoaderCOL.hpp>
 #include <renderwure/objects/VehicleInfo.hpp>
+#include <renderwure/data/CollisionModel.hpp>
 
 #include <memory>
 
@@ -208,7 +208,7 @@ public:
     AnimationSet animations;
 
 	/**
-	 * Loaded collision proxies
+	 * CollisionModel data.
 	 */
 	std::map<std::string,  std::unique_ptr<CollisionModel>> collisions;
 	

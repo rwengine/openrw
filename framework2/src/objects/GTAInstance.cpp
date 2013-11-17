@@ -1,5 +1,6 @@
 #include <renderwure/objects/GTAInstance.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
+#include <renderwure/data/CollisionModel.hpp>
 
 GTAInstance::GTAInstance(
 		GTAEngine* engine,

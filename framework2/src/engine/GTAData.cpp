@@ -4,6 +4,7 @@
 #include <renderwure/loaders/LoaderDFF.hpp>
 #include <renderwure/loaders/LoaderIDE.hpp>
 #include <renderwure/render/TextureAtlas.hpp>
+#include <renderwure/loaders/LoaderCOL.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -175,7 +176,7 @@ void GTAData::loadCOL(const size_t zone, const std::string& name)
 	
 	if(col.load(realPath)) {
 		for( size_t i = 0; i < col.instances.size(); ++i ) {
-			collisions[std::string(col.instances[i].name)] = std::move(std::unique_ptr<CollisionModel>( new CollisionModel(col.instances[i]) ));
+			collisions[col.instances[i]->name] = std::move(col.instances[i]);
 		}
 	}
 }
