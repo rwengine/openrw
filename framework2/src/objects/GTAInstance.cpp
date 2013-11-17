@@ -26,11 +26,11 @@ GTAInstance::GTAInstance(
 			)
 		));
 		btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
-		CollisionInstance& physInst = *phyit->second.get();
+		CollisionModel& physInst = *phyit->second.get();
 
 		// Boxes
 		for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
-			CollTBox& box = physInst.boxes[i];
+			auto& box = physInst.boxes[i];
 			auto size = (box.max - box.min) / 2.f;
 			auto mid = (box.min + box.max) / 2.f;
 			btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
@@ -41,22 +41,21 @@ GTAInstance::GTAInstance(
 
 		// Spheres
 		for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
-			CollTSphere& sphere = physInst.spheres[i];
+			auto& sphere = physInst.spheres[i];
 			btCollisionShape* sshape = new btSphereShape(sphere.radius);
 			btTransform t; t.setIdentity();
 			t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 			cmpShape->addChildShape(t, sshape);
 		}
 
-		if( physInst.triangles.size() > 0 ) {
+		if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
 			btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
-						physInst.triangles.size(),
-						(int*) physInst.triangles.data(),
-						sizeof(CollTFaceTriangle),
+						physInst.indices.size()/3,
+						(int*) physInst.indices.data(),
+						sizeof(uint32_t)*3,
 						physInst.vertices.size(),
 						&(physInst.vertices[0].x),
-					sizeof(glm::vec3)
-					);
+						sizeof(glm::vec3));
 			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
 			trishape->setMargin(0.09f);
 			btTransform t; t.setIdentity();

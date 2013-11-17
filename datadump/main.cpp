@@ -420,19 +420,19 @@ void dumpCollisionModel(char* data, size_t size)
 		std::cout << "Collision instances: " << coll.instances.size() << std::endl;
 		for(auto it = coll.instances.begin(); it != coll.instances.end(); ++it) {
 			std::cout << "Collision data (version " << it->version << ")" << std::endl;
-			std::cout << " model: " << it->header.name << std::endl;
-			std::cout << " model id: " << it->header.modelid << std::endl;
-			std::cout << " spheres: " << it->header2.numspheres << std::endl;
+			std::cout << " model: " << it->name << std::endl;
+			std::cout << " model id: " << it->modelid << std::endl;
+			std::cout << " spheres: " << it->spheres.size() << std::endl;
 			for( size_t b = 0; b < it->spheres.size(); ++b ) {
 				auto& box = it->spheres[b];
 				std::cout << "  radius: " << box.radius << " center: " << box.center.x << " " << box.center.y << " " << box.center.z << std::endl;
 			}
-			std::cout << " boxes: " << it->header2.numboxes << std::endl;
+			std::cout << " boxes: " << it->boxes.size() << std::endl;
 			for( size_t b = 0; b < it->boxes.size(); ++b ) {
 				auto& box = it->boxes[b];
 				std::cout << "  min: " << box.min.x << " " << box.min.y << " " << box.min.z << " max: " << box.max.x << " " << box.max.y << " " << box.max.z << std::endl;
 			}
-			std::cout << " faces: " << it->header2.numfaces << std::endl;
+			std::cout << " faces: " << it->indices.size()/3 << std::endl;
 			std::cout << " verts: " << it->vertices.size() << std::endl;
 			for( size_t v = 0; v < it->vertices.size(); ++v ) {
 				std::cout << "  " << it->vertices[v].x << ", " << it->vertices[v].y << ", " << it->vertices[v].z << std::endl;

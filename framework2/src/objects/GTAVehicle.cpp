@@ -20,13 +20,13 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 					pos.x, pos.y, pos.z
 				)
 			));
-			CollisionInstance& physInst = *phyit->second.get();
+			CollisionModel& physInst = *phyit->second.get();
 
 			btVector3 com(info.handling.centerOfMass.x, info.handling.centerOfMass.y, info.handling.centerOfMass.z);
 
 			// Boxes
 			for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
-				CollTBox& box = physInst.boxes[i];
+				auto& box = physInst.boxes[i];
 				auto size = (box.max - box.min) / 2.f;
 				auto mid = (box.min + box.max) / 2.f;
 				btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
@@ -37,18 +37,18 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 
 			// Spheres
 			for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
-				CollTSphere& sphere = physInst.spheres[i];
+				auto& sphere = physInst.spheres[i];
 				btCollisionShape* sshape = new btSphereShape(sphere.radius);
 				btTransform t; t.setIdentity();
 				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z) + com);
 				cmpShape->addChildShape(t, sshape);
 			}
 
-			if( physInst.triangles.size() > 0 ) {
+			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
 				btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
-							physInst.triangles.size(),
-							(int*) physInst.triangles.data(),
-							sizeof(CollTFaceTriangle),
+							physInst.indices.size()/3,
+							(int*) physInst.indices.data(),
+							sizeof(uint32_t)*3,
 							physInst.vertices.size(),
 							&(physInst.vertices[0].x),
 							sizeof(glm::vec3));

@@ -210,7 +210,7 @@ public:
 	/**
 	 * Loaded collision proxies
 	 */
-	std::map<std::string,  std::unique_ptr<CollisionInstance>> collisions;
+	std::map<std::string,  std::unique_ptr<CollisionModel>> collisions;
 	
 	/**
 	 * Water Rectangles
