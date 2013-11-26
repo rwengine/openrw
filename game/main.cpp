@@ -102,7 +102,7 @@ void init(std::string gtapath)
 	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);
 	size_t k = 1;
 	// Spawn every vehicle, cause why not.
-	for(std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>>::iterator it = gta->vehicleTypes.begin();
+	for(std::map<uint16_t, std::shared_ptr<CarData>>::iterator it = gta->vehicleTypes.begin();
 		it != gta->vehicleTypes.end(); ++it) {
 		if(it->first == 140) continue; // get this plane out of here.
 		gta->createVehicle(it->first, spawnPos);
@@ -111,23 +111,23 @@ void init(std::string gtapath)
 	}
 
 	spawnPos = plyPos + glm::vec3(-5, 20 + (2.5 * gta->pedestrianTypes.size()/4), 0);
-    k = 1;
-    // Spawn every pedestrian.
-    for(auto it = gta->pedestrianTypes.begin();
-        it != gta->pedestrianTypes.end(); ++it) {
-        gta->createPedestrian(it->first, spawnPos);
-        spawnPos += glm::vec3(2.5, 0, 0);
-        if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
-    }
-	
-    debugDrawer = new DebugDraw;
-    debugDrawer->setShaderProgram(gta->renderer.worldProgram);
-    debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    gta->dynamicsWorld->setDebugDrawer(debugDrawer);
+	k = 1;
+	// Spawn every pedestrian.
+	/*for(auto it = gta->pedestrianTypes.begin();
+		it != gta->pedestrianTypes.end(); ++it) {
+		gta->createPedestrian(it->first, spawnPos);
+		spawnPos += glm::vec3(2.5, 0, 0);
+		if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
+	}*/
+
+	debugDrawer = new DebugDraw;
+	debugDrawer->setShaderProgram(gta->renderer.worldProgram);
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
 	std::cout << "Loaded "
-			  << gta->gameData.models.size() << " models, "
-			  << gta->gameData.textures.size() << " textures" << std::endl;
+		<< gta->gameData.models.size() << " models, "
+		<< gta->gameData.textures.size() << " textures" << std::endl;
 }
 
 void update(float dt)

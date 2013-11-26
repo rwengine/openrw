@@ -3,13 +3,13 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <renderwure/data/CollisionModel.hpp>
 
-GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::CARS_t> veh, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
+GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CarData> data, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
 	: GTAObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  vehicle(veh), info(info), colourPrimary(prim), colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
+	  vehicle(data), info(info), colourPrimary(prim), colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
-	if(! veh->modelName.empty()) {
-		auto phyit = engine->gameData.collisions.find(veh->modelName);
+	if(! data->modelName.empty()) {
+		auto phyit = engine->gameData.collisions.find(data->modelName);
 		if( phyit != engine->gameData.collisions.end()) {
 			btCompoundShape* cmpShape = new btCompoundShape;
 			btDefaultMotionState* msta = new btDefaultMotionState;
@@ -85,7 +85,7 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 			for(size_t w = 0; w < info.wheels.size(); ++w) {
 				btVector3 connection(info.wheels[w].position.x, info.wheels[w].position.y, info.wheels[w].position.z - info.handling.suspensionLowerLimit);
 				bool front = connection.y() > 0;
-				btWheelInfo& wi = physVehicle->addWheel(connection + com, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel, veh->wheelScale / 2.f, tuning, front);
+				btWheelInfo& wi = physVehicle->addWheel(connection + com, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel, data->wheelScale / 2.f, tuning, front);
 				wi.m_suspensionStiffness = info.handling.suspensionForce * 10.f;
 				wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 				wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);

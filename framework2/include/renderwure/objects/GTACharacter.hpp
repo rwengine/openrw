@@ -35,7 +35,7 @@ public:
 		GettingUp
 	};
 
-	std::shared_ptr<LoaderIDE::PEDS_t> ped;
+	std::shared_ptr<CharacterData> ped;
 
 	btKinematicCharacterController* physCharacter;
 	btPairCachingGhostObject* physObject;
@@ -50,7 +50,7 @@ public:
 	 * @param model
 	 * @param ped PEDS_t struct to use.
 	 */
-	GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped);
+	GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data);
 
 	~GTACharacter();
 

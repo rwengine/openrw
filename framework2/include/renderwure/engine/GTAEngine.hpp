@@ -127,22 +127,22 @@ public:
 	/**
 	 * Object Definitions
 	 */
-	std::map<uint16_t, std::shared_ptr<LoaderIDE::OBJS_t>> objectTypes;
-	
-    /**
-     * Paths associated with each object definition.
-     */
-    std::map<uint16_t, std::vector<LoaderIDE::PATH_t>> objectNodes;
-	
+	std::map<uint16_t, std::shared_ptr<ObjectData>> objectTypes;
+
+	/**
+		* Paths associated with each object definition.
+		*/
+	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
+
 	/**
 	 * Vehicle definitions
 	 */
-	std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>> vehicleTypes;
+	std::map<uint16_t, std::shared_ptr<CarData>> vehicleTypes;
 
-    /**
-     * Ped definitions
-     */
-    std::map<uint16_t, std::shared_ptr<LoaderIDE::PEDS_t>> pedestrianTypes;
+	/**
+		* Ped definitions
+		*/
+	std::map<uint16_t, std::shared_ptr<CharacterData>> pedestrianTypes;
 	
 	/**
 	 * Game Objects!

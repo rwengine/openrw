@@ -138,8 +138,9 @@ void handleGlobalEvent(sf::Event &event)
 		case sf::Keyboard::Escape:
 			window.close();
 			break;
-		case sf::Keyboard::Insert:
-			commandMode = !commandMode;
+		case sf::Keyboard::M:
+			//commandMode = !commandMode;
+			command("player-vehicle");
 			break;
 		default: break;
 		}
@@ -264,7 +265,7 @@ void init(std::string gtapath, bool loadWorld)
 	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);
 	size_t k = 1;
 	// Spawn every vehicle, cause why not.
-	for(std::map<uint16_t, std::shared_ptr<LoaderIDE::CARS_t>>::iterator it = gta->vehicleTypes.begin();
+	for(std::map<uint16_t, std::shared_ptr<CarData>>::iterator it = gta->vehicleTypes.begin();
 		it != gta->vehicleTypes.end(); ++it) {
 		if(it->first == 140) continue; // get this plane out of here.
 		gta->createVehicle(it->first, spawnPos);
@@ -275,12 +276,12 @@ void init(std::string gtapath, bool loadWorld)
 	spawnPos = plyPos + glm::vec3(-5, 20 + (2.5 * gta->pedestrianTypes.size()/4), 0);
     k = 1;
     // Spawn every pedestrian.
-    for(auto it = gta->pedestrianTypes.begin();
+    /*for(auto it = gta->pedestrianTypes.begin();
         it != gta->pedestrianTypes.end(); ++it) {
         gta->createPedestrian(it->first, spawnPos);
         spawnPos += glm::vec3(2.5, 0, 0);
         if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
-    }
+    }*/
 	
     debugDrawer = new DebugDraw;
     debugDrawer->setShaderProgram(gta->renderer.worldProgram);

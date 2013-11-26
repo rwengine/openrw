@@ -8,7 +8,7 @@ GTAInstance::GTAInstance(
 		const glm::quat& rot,
 		Model* model,
 		const glm::vec3& scale,
-		std::shared_ptr<LoaderIDE::OBJS_t> obj,
+		std::shared_ptr<ObjectData> obj,
 		std::shared_ptr<GTAInstance> lod
 			)
 : GTAObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
@@ -72,7 +72,7 @@ GTAInstance::GTAInstance(
 		auto& pathlist = pathit->second;
 		for( size_t p = 0; p < pathlist.size(); ++p ) {
 			auto& path = pathlist[p];
-			engine->aigraph.createPathNodes(position, rot, path);
+			engine->aigraph.createPathNodes(position, rot, *path);
 		}
 	}
 

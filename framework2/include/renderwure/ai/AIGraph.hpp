@@ -3,7 +3,7 @@
 #define _AIGRAPH_HPP_
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
-#include <renderwure/loaders/LoaderIDE.hpp>
+#include <renderwure/data/PathData.hpp>
 
 struct GTAInstance;
 struct GTAAINode;
@@ -14,7 +14,7 @@ public:
 	
 	std::vector<GTAAINode*> nodes;
 	
-	void createPathNodes(const glm::vec3& position, const glm::quat& rotation, LoaderIDE::PATH_t& path);
+	void createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path);
 
 };
 

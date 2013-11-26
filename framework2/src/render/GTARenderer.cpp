@@ -279,7 +279,7 @@ void GTARenderer::renderWorld()
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
         GTAInstance& inst = *engine->objectInstances[i];
 		
-		if(((inst.object->flags & LoaderIDE::OBJS_t::NIGHTONLY) | (inst.object->flags & LoaderIDE::OBJS_t::DAYONLY)) != 0) {
+		if(((inst.object->flags & ObjectData::NIGHTONLY) | (inst.object->flags & ObjectData::DAYONLY)) != 0) {
 			//continue;
 		}
 

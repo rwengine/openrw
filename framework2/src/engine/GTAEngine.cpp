@@ -63,39 +63,38 @@ bool GTAEngine::defineItems(const std::string& name)
 	if(idel.load(path)) {
 		for( size_t o = 0; o < idel.OBJSs.size(); ++o) {
 			objectTypes.insert({
-				idel.OBJSs[o].ID, 
-				std::shared_ptr<LoaderIDE::OBJS_t>(new LoaderIDE::OBJS_t(idel.OBJSs[o]))
+				idel.OBJSs[o]->ID, 
+				idel.OBJSs[o]
 			});
 		}
 		
 		for( size_t v = 0; v < idel.CARSs.size(); ++v) {
-			std::cout << "Vehicle ID " << idel.CARSs[v].ID << ": " << idel.CARSs[v].gameName << std::endl;
 			vehicleTypes.insert({
-				idel.CARSs[v].ID,
-				std::shared_ptr<LoaderIDE::CARS_t>(new LoaderIDE::CARS_t(idel.CARSs[v]))
+				idel.CARSs[v]->ID,
+				idel.CARSs[v]
 			});
 		}
 
-        for( size_t v = 0; v < idel.PEDSs.size(); ++v) {
-            pedestrianTypes.insert({
-                idel.PEDSs[v].ID,
-                std::shared_ptr<LoaderIDE::PEDS_t>(new LoaderIDE::PEDS_t(idel.PEDSs[v]))
-            });
-        }
+		for( size_t v = 0; v < idel.PEDSs.size(); ++v) {
+			pedestrianTypes.insert({
+				idel.PEDSs[v]->ID,
+				idel.PEDSs[v]
+			});
+		}
 
-        // Load AI information.
-        for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
-            auto pathit = objectNodes.find(idel.PATHs[a].ID);
-            if( pathit == objectNodes.end() ) {
-                objectNodes.insert({
-                                   idel.PATHs[a].ID,
-                                   {idel.PATHs[a]}
-                               });
-            }
-            else {
-                pathit->second.push_back(idel.PATHs[a]);
-            }
-        }
+		// Load AI information.
+		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
+			auto pathit = objectNodes.find(idel.PATHs[a]->ID);
+			if( pathit == objectNodes.end() ) {
+					objectNodes.insert({
+															idel.PATHs[a]->ID,
+															{idel.PATHs[a]}
+													});
+			}
+			else {
+					pathit->second.push_back(idel.PATHs[a]);
+			}
+		}
 	}
 	else {
 		std::cerr << "Failed to load IDE " << path << std::endl;

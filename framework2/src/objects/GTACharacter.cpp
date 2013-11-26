@@ -4,9 +4,9 @@
 #include <renderwure/engine/Animator.hpp>
 #include <renderwure/objects/GTAVehicle.hpp>
 
-GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<LoaderIDE::PEDS_t> ped)
+GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GTAObject(engine, pos, rot, model),
-  currentVehicle(nullptr), ped(ped), physCharacter(nullptr),
+  currentVehicle(nullptr), ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
 	if(model) {

@@ -18,7 +18,7 @@ private:
 	bool handbrake;
 public:
 
-	std::shared_ptr<LoaderIDE::CARS_t> vehicle; /// Vehicle type
+	std::shared_ptr<CarData> vehicle;
 	VehicleInfo info;
 	glm::vec3 colourPrimary;
 	glm::vec3 colourSecondary;
@@ -31,7 +31,7 @@ public:
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
 			   Model* model,
-			   std::shared_ptr<LoaderIDE::CARS_t> veh,
+			   std::shared_ptr<CarData> data,
 			   const VehicleInfo& info,
 			   const glm::vec3& prim,
 			   const glm::vec3& sec);
