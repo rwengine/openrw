@@ -258,8 +258,6 @@ void init(std::string gtapath, bool loadWorld)
 			gta->loadZone(it->second);
 			gta->placeItems(it->second);
 		}
-		
-		plyPos = gta->itemCentroid / (float) gta->itemCount + glm::vec3(0, 0, 2);
 	}
 	
 	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);

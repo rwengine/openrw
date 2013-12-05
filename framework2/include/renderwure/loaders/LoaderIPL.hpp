@@ -1,23 +1,10 @@
 #ifndef _LOADERIPL_HPP_
 #define _LOADERIPL_HPP_
+#include <renderwure/data/InstanceData.hpp>
 
 #include <iostream>
 #include <vector>
-#include <glm/glm.hpp>
-
-/**
-  \class LoaderIPLInstance
-	\brief One INST entry's data from a IPL file
-*/
-class LoaderIPLInstance
-{
-public:
-	int id; ///< ID of the asset in the main IMG archive
-	std::string model; ///< Name of the model for this instance, as seen in the IMG archive
-	float posX, posY, posZ; ///< 3D Position of the instance
-	float scaleX, scaleY, scaleZ; ///< Scale of the instance
-	float rotX, rotY, rotZ, rotW; ///< Rotation of the instance, in a Quaternion
-};
+#include <memory>
 
 /**
 	\class LoaderIPL
@@ -66,10 +53,7 @@ public:
 	bool load(const std::string& filename);
 
 	/// The list of instances from the IPL file
-	std::vector<LoaderIPLInstance> m_instances;
-	
-	/// The centroid of the instances
-	glm::vec3 centroid;
+	std::vector<std::shared_ptr<InstanceData>> m_instances;
 	
 	/// List of Zones
 	std::vector<Zone> zones;

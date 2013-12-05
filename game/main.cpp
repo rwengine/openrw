@@ -97,8 +97,6 @@ void init(std::string gtapath)
 	gta->placeItems(gtapath + "/data/maps/industse/industSE.ipl");
 	gta->placeItems(gtapath + "/data/maps/industne/industNE.ipl");*/
 	
-	plyPos = gta->itemCentroid / (float) gta->itemCount + glm::vec3(0, 0, 2);
-	
 	glm::vec3 spawnPos = plyPos + glm::vec3(-5, -20, 0.0);
 	size_t k = 1;
 	// Spawn every vehicle, cause why not.

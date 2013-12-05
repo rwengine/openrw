@@ -98,12 +98,6 @@ public:
      */
     GTACharacter* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
-	/**
-	 * Roughly the middle of everything
-	 */
-	glm::vec3 itemCentroid; 
-	size_t itemCount;
-	
 	/** 
 	 * Game Clock
 	 */

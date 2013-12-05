@@ -11,7 +11,7 @@
 #include <renderwure/objects/GTAVehicle.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
-    : itemCount(0), gameTime(0.f), gameData(path), renderer(this), randomEngine(rand())
+    : gameTime(0.f), gameData(path), renderer(this), randomEngine(rand())
 {
 	gameData.engine = this;
 }
@@ -123,17 +123,13 @@ bool GTAEngine::placeItems(const std::string& name)
 	{
 		// Find the object.
 		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
-			LoaderIPLInstance& inst = ipll.m_instances[i];
-			glm::quat rot(-inst.rotW, inst.rotX, inst.rotY, inst.rotZ);
-			rot = glm::normalize(rot);
-			if(! createInstance(inst.id, glm::vec3(inst.posX, inst.posY, inst.posZ), rot)) {
-				std::cerr << "No object for instance " << inst.id << " (" << path << ")" << std::endl;
+			std::shared_ptr<InstanceData> inst = ipll.m_instances[i];
+			if(! createInstance(inst->id, inst->pos, inst->rot)) {
+				std::cerr << "No object for instance " << inst->id << " (" << path << ")" << std::endl;
 			}
 		}
-		itemCentroid += ipll.centroid;
-		itemCount += ipll.m_instances.size();
 		
-		// Associate LODs.
+		// Attempt to Associate LODs.
 		for( size_t i = 0; i < objectInstances.size(); ++i ) {
 			if( !objectInstances[i]->object->LOD ) {
 				auto lodInstit = modelInstances.find("LOD" + objectInstances[i]->object->modelName.substr(3));

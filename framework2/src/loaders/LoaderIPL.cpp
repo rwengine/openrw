@@ -60,8 +60,6 @@ bool LoaderIPL::load(const std::string& filename)
 		{
 			if(section == INST)
 			{
-				LoaderIPLInstance instance;
-
 				std::string id;
 				std::string model;
 				std::string posX, posY, posZ;
@@ -83,30 +81,15 @@ bool LoaderIPL::load(const std::string& filename)
 				getline(strstream, rotY, ',');
 				getline(strstream, rotZ, ',');
 				getline(strstream, rotW, ',');
-
-				// convert to our structure
-				instance.id = atoi(id.c_str());
-				instance.model = model.substr(1, model.size()-1);
-				instance.posX = atof(posX.c_str());
-				instance.posY = atof(posY.c_str());
-				instance.posZ = atof(posZ.c_str());
-				instance.scaleX = atof(scaleX.c_str());
-				instance.scaleY = atof(scaleY.c_str());
-				instance.scaleZ = atof(scaleZ.c_str());
-				instance.rotX = atof(rotX.c_str());
-				instance.rotY = atof(rotY.c_str());
-				instance.rotZ = atof(rotZ.c_str());
-				instance.rotW = atof(rotW.c_str());
 				
-				centroid += glm::vec3(instance.posX, instance.posY, instance.posZ);
-
-				/*std::cout << "id: " << instance.id << std::endl;
-				std::cout << "model: " << instance.model << std::endl;
-				std::cout << "posX: " << instance.posX << std::endl;
-				std::cout << "posY: " << instance.posY << std::endl;
-				std::cout << "posZ: " << instance.posZ << std::endl;
-				std::cout << "rotW: " << instance.rotW << std::endl;*/
-
+				std::shared_ptr<InstanceData> instance(new InstanceData{
+					atoi(id.c_str()), // ID
+					model.substr(1, model.size()-1), 
+					glm::vec3(atof(posX.c_str()), atof(posY.c_str()), atof(posZ.c_str())),
+					glm::vec3(atof(scaleX.c_str()), atof(scaleY.c_str()), atof(scaleZ.c_str())),
+					glm::normalize(glm::quat(-atof(rotW.c_str()), atof(rotX.c_str()), atof(rotY.c_str()), atof(rotZ.c_str())))
+				});
+				
 				m_instances.push_back(instance);
 			}
 			else if(section == ZONE) 
