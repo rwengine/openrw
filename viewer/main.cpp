@@ -43,9 +43,29 @@ int debugMode = 0;
 
 sf::Font font;
 
-std::string commandBuff;
+bool showControls = true;
 
-bool commandMode = false;
+bool hitWorldRay(glm::vec3& hit, glm::vec3& normal)
+{
+	glm::mat4 view;
+	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
+	glm::vec3 dir = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, 0.f, 1.f) * -50.f;
+	auto from = btVector3(plyPos.x, plyPos.y, plyPos.z);
+	auto to = btVector3(plyPos.x+dir.x, plyPos.y+dir.y, plyPos.z+dir.z);
+	btCollisionWorld::ClosestRayResultCallback ray(from, to);
+	gta->dynamicsWorld->rayTest(from, to, ray);
+	if( ray.hasHit() ) 
+	{
+		hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
+						ray.m_hitPointWorld.z());
+		normal = glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
+						   ray.m_hitNormalWorld.z());
+		return true;
+	}
+	return false;
+}
 
 void command(const std::string& line)
 {
@@ -58,29 +78,37 @@ void command(const std::string& line)
 	}
 	
 	if ("pedestrian-vehicle" == cmd) {
-		auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
-		// Pick random vehicle.
-		auto it = gta->vehicleTypes.begin();
-		std::uniform_int_distribution<int> uniform(0, 9);
-		for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-			it++;
+		glm::vec3 hit, normal;
+		if(hitWorldRay(hit, normal)) {
+			auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
+			// Pick random vehicle.
+			auto it = gta->vehicleTypes.begin();
+			std::uniform_int_distribution<int> uniform(0, 9);
+			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+				it++;
+			}
+			auto spawnpos = hit + normal;
+			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+			ped->setCurrentVehicle(vehicle);
 		}
-		auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-		ped->setCurrentVehicle(vehicle);
 	}
 	else if("player-vehicle" == cmd) {
-		playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
-		player = new GTAPlayerAIController(playerCharacter);
+		glm::vec3 hit, normal;
+		if(hitWorldRay(hit, normal)) {
+			playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
+			player = new GTAPlayerAIController(playerCharacter);
 
-		// Pick random vehicle.
-		auto it = gta->vehicleTypes.begin();
-		std::uniform_int_distribution<int> uniform(0, 9);
-		for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-			it++;
+			// Pick random vehicle.
+			auto it = gta->vehicleTypes.begin();
+			std::uniform_int_distribution<int> uniform(0, 9);
+			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+				it++;
+			}
+			
+			auto spawnpos = hit + normal;
+			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+			playerCharacter->setCurrentVehicle(vehicle);
 		}
-
-		auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-		playerCharacter->setCurrentVehicle(vehicle);
 	}
 	else if("player" == cmd) {
 		playerCharacter = gta->createPedestrian(1, plyPos);
@@ -213,23 +241,18 @@ void handleCommandEvent(sf::Event &event)
 {
 	switch(event.type) {
 		case sf::Event::KeyPressed:
-			switch(event.key.code) {
-				case sf::Keyboard::Return:
-					command(commandBuff);
-					commandBuff = "";
-					break;
-				case sf::Keyboard::BackSpace:
-					commandBuff = commandBuff.substr(0, commandBuff.length()-1);
-					break;
-				default: break;
-			}
+		switch (event.key.code) {
+		case sf::Keyboard::F1:
+			showControls = !showControls;
 			break;
-		case sf::Event::TextEntered:
-			if(isprint(event.text.unicode)) {
-				commandBuff += static_cast<char>(event.text.unicode);
-			}
+		case sf::Keyboard::F2:
+			command("pedestrian-vehicle");
 			break;
-		default: break;
+		case sf::Keyboard::F3:
+			command("player-vehicle");
+			break;
+		}
+		break;
 	}
 }
 
@@ -394,14 +417,20 @@ void render()
 	window.resetGLStates();
 	
 	std::stringstream ss;
-	ss << fmod(floor(gta->gameTime), 24.f) << ":" << (floor(fmod(gta->gameTime, 1.f) * 60.f)) << " (" << gta->gameTime << ")";
+	ss << "Time: " << fmod(floor(gta->gameTime), 24.f) << ":" << (floor(fmod(gta->gameTime, 1.f) * 60.f)) << std::endl;
+	ss << "Game Time: " << gta->gameTime << std::endl;
+	ss << "Camera: " << plyPos.x << " " << plyPos.y << " " << plyPos.z << std::endl; 
 	sf::Text text(ss.str(), font, 15);
 	text.setPosition(10, 10);
 	window.draw(text);
 	
-	if (commandMode) {
-		text.setPosition(10.f, window.getSize().y - 25);
-		text.setString("> " + commandBuff);
+	if(showControls) {
+		std::stringstream ss;
+		ss << "F1 - Toggle Help" << std::endl;
+		ss << "F2 - Create Vehicle (with driver)" << std::endl;
+		ss << "F3 - Create Vehicle (with player)" << std::endl;
+		text.setString(ss.str());
+		text.setPosition(10, 100);
 		window.draw(text);
 	}
 	
@@ -409,7 +438,7 @@ void render()
 		gta->log.pop_front();
 	}
 	
-	sf::Vector2f tpos(10.f, 40.f);
+	sf::Vector2f tpos(10.f, 150.f);
 	text.setCharacterSize(15);
 	for(auto it = gta->log.begin(); it != gta->log.end(); ++it) {
 		text.setString(it->message);
@@ -490,12 +519,8 @@ int main(int argc, char *argv[])
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			handleGlobalEvent(event);
-			if(commandMode) { 
-				handleCommandEvent(event);
-			}
-			else {
-				handleInputEvent(event);
-			}
+			handleCommandEvent(event);
+			handleInputEvent(event);
 		}
 
 		accum += clock.restart().asSeconds();
