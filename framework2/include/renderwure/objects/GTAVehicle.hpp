@@ -59,6 +59,8 @@ public:
 	bool getHandbraking() const;
 
 	void tick(float dt);
+	
+    virtual bool takeDamage(const DamageInfo& damage);
 };
 
 #endif

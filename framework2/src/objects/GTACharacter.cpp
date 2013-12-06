@@ -9,6 +9,7 @@ GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::q
   currentVehicle(nullptr), ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
+	mHealth = 100.f;
 	if(model) {
 		animator = new Animator();
 		animator->setModel(model);
@@ -197,3 +198,10 @@ void GTACharacter::setCurrentVehicle(GTAVehicle *value)
 		destroyActor();
 	}
 }
+
+bool GTACharacter::takeDamage(const GTAObject::DamageInfo& dmg)
+{
+	mHealth -= dmg.hitpoints;
+	return true;
+}
+

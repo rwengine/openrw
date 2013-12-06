@@ -73,6 +73,8 @@ public:
 
 	GTAVehicle *getCurrentVehicle() const;
 	void setCurrentVehicle(GTAVehicle *value);
+	
+    virtual bool takeDamage(const DamageInfo& damage);
 };
 
 #endif

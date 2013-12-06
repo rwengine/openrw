@@ -6,8 +6,10 @@
 GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CarData> data, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
 	: GTAObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  vehicle(data), info(info), colourPrimary(prim), colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
+	  vehicle(data), info(info), colourPrimary(prim), colourSecondary(sec), 
+	  physBody(nullptr), physVehicle(nullptr)
 {
+	mHealth = 100.f;
 	if(! data->modelName.empty()) {
 		auto phyit = engine->gameData.collisions.find(data->modelName);
 		if( phyit != engine->gameData.collisions.end()) {
@@ -177,4 +179,10 @@ void GTAVehicle::setHandbraking(bool hb)
 bool GTAVehicle::getHandbraking() const
 {
 	return handbrake;
+}
+
+bool GTAVehicle::takeDamage(const GTAObject::DamageInfo& dmg)
+{
+	mHealth -= dmg.hitpoints;
+	return true;
 }

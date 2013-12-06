@@ -24,6 +24,8 @@ struct GTAInstance : public GTAObject
 			);
 
 	Type type() { return Instance; }
+	
+    virtual bool takeDamage(const DamageInfo& damage);
 };
 
 

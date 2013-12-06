@@ -75,6 +75,17 @@ GTAInstance::GTAInstance(
 			engine->aigraph.createPathNodes(position, rot, *path);
 		}
 	}
+}
 
+bool GTAInstance::takeDamage(const GTAObject::DamageInfo& dmg)
+{
+	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
+	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
+	if(explodeOnHit || smash)
+	{
+		mHealth -= dmg.hitpoints;
+		return true;
+	}
+	return false;
 }
 
