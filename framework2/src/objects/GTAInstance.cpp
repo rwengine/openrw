@@ -64,6 +64,7 @@ GTAInstance::GTAInstance(
 		}
 
 		body = new btRigidBody(info);
+		body->setUserPointer(this);
 		engine->dynamicsWorld->addRigidBody(body);
 	}
 

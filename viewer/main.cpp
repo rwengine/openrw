@@ -32,6 +32,7 @@ GTAPlayerAIController* player = nullptr;
 GTACharacter* playerCharacter = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
+GTAObject* debugObject = nullptr;
 
 glm::vec3 plyPos(87.f, -932.f, 58.f);
 glm::vec2 plyLook;
@@ -45,7 +46,7 @@ sf::Font font;
 
 bool showControls = true;
 
-bool hitWorldRay(glm::vec3& hit, glm::vec3& normal)
+bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr)
 {
 	glm::mat4 view;
 	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
@@ -62,6 +63,9 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal)
 						ray.m_hitPointWorld.z());
 		normal = glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
 						   ray.m_hitNormalWorld.z());
+		if(object) {
+			*object = static_cast<GTAObject*>(ray.m_collisionObject->getUserPointer());
+		}
 		return true;
 	}
 	return false;
@@ -181,6 +185,13 @@ void command(const std::string& line)
 			}
 		}
 	}
+	else if("object-info" == cmd) {
+		glm::vec3 hit, normal;
+		GTAObject* object;
+		if(hitWorldRay(hit, normal, &object)) {
+			debugObject = object;
+		}
+	}
 	else {
 		gta->logInfo("Unkown command: " + cmd);
 	}
@@ -280,6 +291,9 @@ void handleCommandEvent(sf::Event &event)
 			break;
 		case sf::Keyboard::F7:
 			command("pedestrian-test");
+			break;
+		case sf::Keyboard::F9:
+			command("object-info");
 			break;
 		break;
 		}
@@ -429,21 +443,28 @@ void render()
 	ss << "Time: " << fmod(floor(gta->gameTime), 24.f) << ":" << (floor(fmod(gta->gameTime, 1.f) * 60.f)) << std::endl;
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << plyPos.x << " " << plyPos.y << " " << plyPos.z << std::endl; 
-	sf::Text text(ss.str(), font, 15);
-	text.setPosition(10, 10);
-	window.draw(text);
+	
+	if(debugObject) {
+		auto p = debugObject->getPosition();
+		ss << "Position: " << p.x << " " << p.y << " " << p.z << std::endl;
+		if(debugObject->type() == GTAObject::Vehicle) {
+			GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
+			ss << "ID: " << vehicle->info.handling.ID << std::endl;
+		}
+	}
 	
 	if(showControls) {
-		std::stringstream ss;
 		ss << "F1 - Toggle Help" << std::endl;
 		ss << "F2 - Create Vehicle (with driver)" << std::endl;
 		ss << "F3 - Create Vehicle (with player)" << std::endl;
 		ss << "F6 - Create all Vehicles" << std::endl;
 		ss << "F7 - Create all Pedestrians" << std::endl;
-		text.setString(ss.str());
-		text.setPosition(10, 100);
-		window.draw(text);
+		ss << "F9 - Display Object Information" << std::endl;
 	}
+	
+	sf::Text text(ss.str(), font, 15);
+	text.setPosition(10, 10);
+	window.draw(text);
 	
 	while( gta->log.size() > 0 && gta->log.front().time + 10.f < gta->gameTime ) {
 		gta->log.pop_front();
