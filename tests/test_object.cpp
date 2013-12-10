@@ -1,0 +1,58 @@
+#include <boost/test/unit_test.hpp>
+#include <renderwure/objects/GTAInstance.hpp>
+#include <renderwure/engine/GTAEngine.hpp>
+
+BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
+
+GTAEngine e("");
+
+BOOST_AUTO_TEST_CASE(instance_test_damage)
+{
+	std::shared_ptr<ObjectData> object(new ObjectData);
+	GTAInstance inst(&e, 
+					 glm::vec3(0.f, 0.f, 0.f), 
+					 glm::quat(), nullptr, 
+					 glm::vec3(1.f),
+					 object,
+				     nullptr
+					);
+	GTAObject::DamageInfo dmg;
+	dmg.type = GTAObject::DamageInfo::Bullet;
+	dmg.hitpoints = 50.f;
+	
+	// Set object to undamagable.
+	object->flags = 0;
+	
+	BOOST_CHECK( ! inst.takeDamage(dmg) );
+	
+	// Now make it damageable
+	
+	object->flags = ObjectData::BREAKABLE;
+	
+	BOOST_CHECK( inst.takeDamage(dmg) );
+}
+
+BOOST_AUTO_TEST_CASE(instance_test_destroy)
+{
+	std::shared_ptr<ObjectData> object(new ObjectData);
+	GTAInstance inst(&e, 
+					 glm::vec3(0.f, 0.f, 0.f), 
+					 glm::quat(), nullptr, 
+					 glm::vec3(1.f),
+					 object,
+				     nullptr
+					);
+	GTAObject::DamageInfo dmg;
+	dmg.type = GTAObject::DamageInfo::Bullet;
+	dmg.hitpoints = inst.mHealth + 1.f;
+	
+	// Now make it damageable
+	
+	object->flags = ObjectData::BREAKABLE;
+	
+	BOOST_CHECK( inst.takeDamage(dmg) );
+	
+	BOOST_CHECK( inst.mHealth < 0.f );
+}
+
+BOOST_AUTO_TEST_SUITE_END()
