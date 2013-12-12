@@ -449,6 +449,7 @@ void render()
 	if(debugObject) {
 		auto p = debugObject->getPosition();
 		ss << "Position: " << p.x << " " << p.y << " " << p.z << std::endl;
+		ss << "Health: " << debugObject->mHealth << std::endl;
 		if(debugObject->type() == GTAObject::Vehicle) {
 			GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
 			ss << "ID: " << vehicle->info.handling.ID << std::endl;
