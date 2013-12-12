@@ -70,6 +70,8 @@ public:
 	virtual void setPosition(const glm::vec3& pos);
 
 	virtual glm::vec3 getPosition() const;
+	
+	bool enterVehicle(GTAVehicle* vehicle, size_t seat);
 
 	GTAVehicle *getCurrentVehicle() const;
 	void setCurrentVehicle(GTAVehicle *value);

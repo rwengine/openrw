@@ -183,6 +183,29 @@ glm::vec3 GTACharacter::getPosition() const
 	return position;
 }
 
+bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
+{
+	if(vehicle) {
+		// Check that the seat is free
+		if(vehicle->getOccupant(seat)) {
+			return false;
+		}
+		else {
+			// Make sure we leave any vehicle we're inside
+			enterVehicle(nullptr, 0);
+			vehicle->setOccupant(seat, this);
+			setCurrentVehicle(vehicle);
+		}
+	}
+	else {
+		if(currentVehicle) {
+			vehicle->setOccupant(seat, nullptr);
+			setPosition(currentVehicle->getPosition());
+			setCurrentVehicle(nullptr);
+		}
+	}
+}
+
 GTAVehicle *GTACharacter::getCurrentVehicle() const
 {
 	return currentVehicle;

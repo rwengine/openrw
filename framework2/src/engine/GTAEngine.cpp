@@ -292,7 +292,7 @@ void GTAEngine::destroyObject(GTAObject* object)
 	{
 		for(auto it = pedestrians.begin(); it != pedestrians.end(); ) {
 			if( *it == object ) {
-				pedestrians.erase(it++);
+				it = pedestrians.erase(it);
 			}
 			else {
 				++it;
@@ -303,7 +303,7 @@ void GTAEngine::destroyObject(GTAObject* object)
 	{
 		for(auto it = vehicleInstances.begin(); it != vehicleInstances.end(); ) {
 			if( *it == object ) {
-				vehicleInstances.erase(it++);
+				it = vehicleInstances.erase(it);
 			}
 			else {
 				++it;
@@ -314,7 +314,7 @@ void GTAEngine::destroyObject(GTAObject* object)
 	{
 		for(auto it = modelInstances.begin(); it != modelInstances.end(); ) {
 			if( it->second.get() == object ) {
-				modelInstances.erase(it++);
+				it = modelInstances.erase(it);
 			}
 			else {
 				++it;

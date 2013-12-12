@@ -3,6 +3,8 @@
 #define __GLT_OBJECTDATA_HPP__
 #include <stdint.h>
 #include <string>
+#include <vector>
+#include <glm/glm.hpp>
 
 struct ObjectData
 {
@@ -76,6 +78,12 @@ struct CarData
 		int16_t modelLOD; // used only when type == PLANE
 	};
 	float wheelScale; // used only when type == CAR
+	
+	struct SeatData {
+		glm::vec3 offset;
+	};
+	
+	std::vector<SeatData> seats;
 };
 
 struct CharacterData

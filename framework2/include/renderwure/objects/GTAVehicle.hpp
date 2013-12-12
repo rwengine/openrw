@@ -3,6 +3,7 @@
 #define _GTAVEHICLE_HPP_
 #include <renderwure/engine/GTAObject.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
+#include <map>
 #include <renderwure/objects/VehicleInfo.hpp>
 
 /**
@@ -22,6 +23,8 @@ public:
 	VehicleInfo info;
 	glm::vec3 colourPrimary;
 	glm::vec3 colourSecondary;
+	
+	std::map<size_t, GTAObject*> seatOccupants;
 
 	btRigidBody* physBody;
 	btVehicleRaycaster* physRaycaster;
@@ -35,6 +38,8 @@ public:
 			   const VehicleInfo& info,
 			   const glm::vec3& prim,
 			   const glm::vec3& sec);
+	
+    virtual ~GTAVehicle();
 
 	glm::vec3 getPosition() const;
 
@@ -59,6 +64,12 @@ public:
 	bool getHandbraking() const;
 
 	void tick(float dt);
+	
+	void ejectAll();
+	
+	GTAObject* getOccupant(size_t seat);
+	
+	void setOccupant(size_t seat, GTAObject* occupant);
 	
     virtual bool takeDamage(const DamageInfo& damage);
 };

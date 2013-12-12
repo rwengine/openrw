@@ -1,6 +1,8 @@
 #include <renderwure/objects/GTAVehicle.hpp>
+#include <renderwure/objects/GTACharacter.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#include <sys/stat.h>
 #include <renderwure/data/CollisionModel.hpp>
 
 GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CarData> data, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
@@ -99,6 +101,17 @@ GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat&
 	}
 }
 
+GTAVehicle::~GTAVehicle()
+{
+	engine->dynamicsWorld->removeRigidBody(physBody);
+	engine->dynamicsWorld->removeVehicle(physVehicle);
+	delete physBody;
+	delete physVehicle;
+	delete physRaycaster;
+	
+	ejectAll();
+}
+
 glm::vec3 GTAVehicle::getPosition() const
 {
 	if(physBody) {
@@ -179,6 +192,44 @@ void GTAVehicle::setHandbraking(bool hb)
 bool GTAVehicle::getHandbraking() const
 {
 	return handbrake;
+}
+
+void GTAVehicle::ejectAll()
+{
+	for(std::map<size_t, GTAObject*>::iterator it = seatOccupants.begin();
+		it != seatOccupants.end();
+	) {
+		if(it->second->type() == GTAObject::Character) {
+			GTACharacter* c = static_cast<GTACharacter*>(it->second);
+			c->setCurrentVehicle(nullptr);
+			c->setPosition(getPosition());
+		}
+		it = seatOccupants.erase(it);
+	}
+}
+
+GTAObject* GTAVehicle::getOccupant(size_t seat)
+{
+	auto it = seatOccupants.find(seat);
+	if( it != seatOccupants.end() ) {
+		return it->second;
+	}
+	return nullptr;
+}
+
+void GTAVehicle::setOccupant(size_t seat, GTAObject* occupant)
+{
+	auto it = seatOccupants.find(seat);
+	if(occupant == nullptr) {
+		if(it != seatOccupants.end()) {
+			seatOccupants.erase(it);
+		}
+	}
+	else {
+		if(it == seatOccupants.end()) {
+			seatOccupants.insert({seat, occupant});
+		}
+	}
 }
 
 bool GTAVehicle::takeDamage(const GTAObject::DamageInfo& dmg)

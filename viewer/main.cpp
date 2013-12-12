@@ -18,6 +18,7 @@
 #include <memory>
 #include <sstream>
 #include <getopt.h>
+#include <boost/concept_check.hpp>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -93,7 +94,7 @@ void command(const std::string& line)
 			}
 			auto spawnpos = hit + normal;
 			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-			ped->setCurrentVehicle(vehicle);
+			ped->enterVehicle(vehicle, 0);
 		}
 	}
 	else if("player-vehicle" == cmd) {
@@ -190,6 +191,14 @@ void command(const std::string& line)
 		GTAObject* object;
 		if(hitWorldRay(hit, normal, &object)) {
 			debugObject = object;
+		}
+	}
+	else if("damage-object" == cmd) {
+		if(debugObject) {
+			GTAObject::DamageInfo dmg;
+			dmg.type = GTAObject::DamageInfo::Bullet;
+			dmg.hitpoints = 15.f;
+			debugObject->takeDamage(dmg);
 		}
 	}
 	else {
@@ -292,6 +301,9 @@ void handleCommandEvent(sf::Event &event)
 		case sf::Keyboard::F7:
 			command("pedestrian-test");
 			break;
+		case sf::Keyboard::F8:
+			command("damage-object");
+			break;
 		case sf::Keyboard::F9:
 			command("object-info");
 			break;
@@ -391,9 +403,27 @@ void update(float dt)
 		// Update all objects.
         for( size_t p = 0; p < gta->pedestrians.size(); ++p) {
 			gta->pedestrians[p]->tick(dt);
+			
+			// For the time being, remove anything that isn't the player with no health.
+			if(gta->pedestrians[p]->mHealth <= 0.f) {
+				if(gta->pedestrians[p] != playerCharacter) {
+					if(gta->pedestrians[p] == debugObject) {
+						debugObject = nullptr;
+					}
+					gta->destroyObject(gta->pedestrians[p]);
+					p--;
+				}
+			}
         }
 		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
 			gta->vehicleInstances[v]->tick(dt);
+			if(gta->vehicleInstances[v]->mHealth <= 0.f) {
+				if(gta->vehicleInstances[v] == debugObject) {
+					debugObject = nullptr;
+				}
+				gta->destroyObject(gta->vehicleInstances[v]);
+				v--;
+			}
 		}
 		
 		
