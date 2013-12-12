@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <renderwure/render/TextureAtlas.hpp>
 
-BOOST_AUTO_TEST_SUITE(TextureAtlasTests)
+/*BOOST_AUTO_TEST_SUITE(TextureAtlasTests)
 
 BOOST_AUTO_TEST_CASE(atlas_fill_test)
 {
@@ -54,3 +54,4 @@ BOOST_AUTO_TEST_CASE(atlas_pack_test)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+*/

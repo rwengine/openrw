@@ -84,7 +84,13 @@ bool GTAInstance::takeDamage(const GTAObject::DamageInfo& dmg)
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
 	if(explodeOnHit || smash)
 	{
-		mHealth -= dmg.hitpoints;
+		if(explodeOnHit) {
+			// explode
+			mHealth = -1.f;
+		}
+		else {
+			mHealth -= dmg.hitpoints;
+		}
 		return true;
 	}
 	return false;

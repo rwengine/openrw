@@ -1,15 +1,14 @@
 #include <boost/test/unit_test.hpp>
+#include "test_globals.hpp"
 #include <renderwure/objects/GTAInstance.hpp>
 #include <renderwure/engine/GTAEngine.hpp>
 
 BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
 
-GTAEngine e("");
-
 BOOST_AUTO_TEST_CASE(instance_test_damage)
 {
 	std::shared_ptr<ObjectData> object(new ObjectData);
-	GTAInstance inst(&e, 
+	GTAInstance inst(Global::get().e, 
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
@@ -25,17 +24,19 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 	
 	BOOST_CHECK( ! inst.takeDamage(dmg) );
 	
-	// Now make it damageable
+	// Now make it explode on hit
 	
-	object->flags = ObjectData::BREAKABLE;
+	object->flags = ObjectData::EXPLODEONHIT;
 	
 	BOOST_CHECK( inst.takeDamage(dmg) );
+	
+	BOOST_CHECK( inst.mHealth < 0.f );
 }
 
 BOOST_AUTO_TEST_CASE(instance_test_destroy)
 {
 	std::shared_ptr<ObjectData> object(new ObjectData);
-	GTAInstance inst(&e, 
+	GTAInstance inst(Global::get().e, 
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
@@ -48,7 +49,7 @@ BOOST_AUTO_TEST_CASE(instance_test_destroy)
 	
 	// Now make it damageable
 	
-	object->flags = ObjectData::BREAKABLE;
+	object->flags = ObjectData::EXPLODEONHIT;
 	
 	BOOST_CHECK( inst.takeDamage(dmg) );
 	
