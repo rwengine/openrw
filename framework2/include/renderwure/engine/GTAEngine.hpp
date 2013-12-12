@@ -98,6 +98,11 @@ public:
      */
     GTACharacter* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
+	/**
+	 * Destroys an existing Object
+	 */
+	void destroyObject(GTAObject* object);
+	
 	/** 
 	 * Game Clock
 	 */
@@ -157,7 +162,7 @@ public:
      * Pedestrians and PCs.
      */
     std::vector<GTACharacter*> pedestrians;
-
+	
 	/**
 	 * AI Graph
 	 */

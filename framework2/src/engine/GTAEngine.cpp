@@ -285,3 +285,41 @@ GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &po
     }
     return nullptr;
 }
+
+void GTAEngine::destroyObject(GTAObject* object)
+{
+	if(object->type() == GTAObject::Character)
+	{
+		for(auto it = pedestrians.begin(); it != pedestrians.end(); ) {
+			if( *it == object ) {
+				pedestrians.erase(it++);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+	else if(object->type() == GTAObject::Vehicle)
+	{
+		for(auto it = vehicleInstances.begin(); it != vehicleInstances.end(); ) {
+			if( *it == object ) {
+				vehicleInstances.erase(it++);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+	else if(object->type() == GTAObject::Instance)
+	{
+		for(auto it = modelInstances.begin(); it != modelInstances.end(); ) {
+			if( it->second.get() == object ) {
+				modelInstances.erase(it++);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+	delete object;
+}

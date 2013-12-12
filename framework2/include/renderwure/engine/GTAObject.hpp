@@ -36,6 +36,8 @@ struct GTAObject
 
     GTAObject(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f) {}
+		
+	virtual ~GTAObject() {};
 
     enum Type
     {

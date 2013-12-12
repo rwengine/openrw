@@ -387,14 +387,16 @@ void update(float dt)
 
 		gta->renderer.camera.worldPos = plyPos;
 		gta->renderer.camera.frustum.view = view;
-
-		// TODO: move this inside the engine
-        for( size_t p = 0; p < gta->pedestrians.size(); ++p ) {
+		
+		// Update all objects.
+        for( size_t p = 0; p < gta->pedestrians.size(); ++p) {
 			gta->pedestrians[p]->tick(dt);
         }
 		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
 			gta->vehicleInstances[v]->tick(dt);
 		}
+		
+		
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
 	}
