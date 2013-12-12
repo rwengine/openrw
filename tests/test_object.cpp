@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 BOOST_AUTO_TEST_CASE(instance_test_destroy)
 {
 	std::shared_ptr<ObjectData> object(new ObjectData);
-	GTAInstance inst(Global::get().e, 
+	GTAInstance inst(Global::get().e,
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
