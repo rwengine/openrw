@@ -72,6 +72,158 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr
 	return false;
 }
 
+// Commands.
+std::map<std::string, std::function<void (std::string)>> Commands = {
+	{"pedestrian-vehicle", 
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			if(hitWorldRay(hit, normal)) {
+				auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
+				// Pick random vehicle.
+				auto it = gta->vehicleTypes.begin();
+				std::uniform_int_distribution<int> uniform(0, 9);
+				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+					it++;
+				}
+				auto spawnpos = hit + normal;
+				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				ped->enterVehicle(vehicle, 0);
+			}
+		}
+	},
+	{"player-vehicle",
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			if(hitWorldRay(hit, normal)) {
+				playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
+				player = new GTAPlayerAIController(playerCharacter);
+
+				// Pick random vehicle.
+				auto it = gta->vehicleTypes.begin();
+				std::uniform_int_distribution<int> uniform(0, 9);
+				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+					it++;
+				}
+				
+				auto spawnpos = hit + normal;
+				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				playerCharacter->enterVehicle(vehicle, 0);
+			}
+		}
+	},
+	{"player",
+		[&](std::string) {
+			playerCharacter = gta->createPedestrian(1, plyPos);
+			player = new GTAPlayerAIController(playerCharacter);
+		}
+	},
+	{"knock-down",
+		[&](std::string) {
+			for(auto it = gta->pedestrians.begin(); it != gta->pedestrians.end(); ++it) {
+				(*it)->changeAction(GTACharacter::KnockedDown);
+			}
+		}
+	},
+	{"vehicle-test", 
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			if(hitWorldRay(hit, normal)) {
+				glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
+				size_t k = 1;
+				for(std::map<uint16_t, std::shared_ptr<CarData>>::iterator it = gta->vehicleTypes.begin();
+					it != gta->vehicleTypes.end(); ++it) {
+					if(it->first == 140) continue; // get this plane out of here.
+					gta->createVehicle(it->first, spawnPos);
+					spawnPos += glm::vec3(5, 0, 0);
+					if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
+				}
+			}
+		}
+	},
+	{"pedestrian-test",
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			if(hitWorldRay(hit, normal)) {
+				glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
+				size_t k = 1;
+				// Spawn every pedestrian.
+				for(auto it = gta->pedestrianTypes.begin();
+					it != gta->pedestrianTypes.end(); ++it) {
+					gta->createPedestrian(it->first, spawnPos);
+					spawnPos += glm::vec3(2.5, 0, 0);
+					if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
+				}
+			}
+		}
+	},
+	{"list-ipl",
+		[&](std::string) {
+			for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
+				it != gta->gameData.iplLocations.end();
+				++it) {
+				gta->logInfo(it->second);
+			}
+		}
+	},
+	{"load-ipl",
+		[&](std::string line) {
+			if(line.find(' ') != line.npos) {
+				std::string ipl = line.substr(line.find(' ')+1);
+				auto iplit = gta->gameData.iplLocations.find(ipl);
+				if(iplit != gta->gameData.iplLocations.end()) {
+					gta->logInfo("Loading: " + iplit->second);
+					gta->loadZone(iplit->second);
+					gta->placeItems(iplit->second);
+				}
+				else {
+					gta->logInfo("Not found: " + ipl);
+				}
+			}
+		}
+	},
+	{"create-instance",
+		[&](std::string line) {
+			if(line.find(' ') != line.npos) {
+				std::string ID = line.substr(line.find(' ')+1);
+				int intID = atoi(ID.c_str());
+				auto archit = gta->objectTypes.find(intID);
+				if(archit != gta->objectTypes.end()) {
+					gta->createInstance(archit->first, plyPos);
+				}
+				else {
+					gta->logInfo("Unkown Object: " + ID);
+				}
+			}
+		}
+	},
+	{"object-info",
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			GTAObject* object;
+			if(hitWorldRay(hit, normal, &object)) {
+				debugObject = object;
+			}
+		}
+	},
+	{"damage-object",
+		[&](std::string) {
+			if(debugObject) {
+				GTAObject::DamageInfo dmg;
+				dmg.type = GTAObject::DamageInfo::Bullet;
+				dmg.hitpoints = 15.f;
+				debugObject->takeDamage(dmg);
+			}
+		}
+	}
+	/*{"",
+		[&](std::string) {
+			
+		}
+	}*/
+};
+
+
+
 void command(const std::string& line)
 {
 	std::string cmd;
@@ -82,124 +234,9 @@ void command(const std::string& line)
 		cmd = line;
 	}
 	
-	if ("pedestrian-vehicle" == cmd) {
-		glm::vec3 hit, normal;
-		if(hitWorldRay(hit, normal)) {
-			auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
-			// Pick random vehicle.
-			auto it = gta->vehicleTypes.begin();
-			std::uniform_int_distribution<int> uniform(0, 9);
-			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-				it++;
-			}
-			auto spawnpos = hit + normal;
-			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-			ped->enterVehicle(vehicle, 0);
-		}
-	}
-	else if("player-vehicle" == cmd) {
-		glm::vec3 hit, normal;
-		if(hitWorldRay(hit, normal)) {
-			playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
-			player = new GTAPlayerAIController(playerCharacter);
-
-			// Pick random vehicle.
-			auto it = gta->vehicleTypes.begin();
-			std::uniform_int_distribution<int> uniform(0, 9);
-			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-				it++;
-			}
-			
-			auto spawnpos = hit + normal;
-			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-			playerCharacter->enterVehicle(vehicle, 0);
-		}
-	}
-	else if("player" == cmd) {
-		playerCharacter = gta->createPedestrian(1, plyPos);
-		player = new GTAPlayerAIController(playerCharacter);
-	}
-	else if("knock-down" == cmd) {
-		for(auto it = gta->pedestrians.begin(); it != gta->pedestrians.end(); ++it) {
-			(*it)->changeAction(GTACharacter::KnockedDown);
-		}
-	}
-	else if("vehicle-test" == cmd) {
-		glm::vec3 hit, normal;
-		if(hitWorldRay(hit, normal)) {
-			glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
-			size_t k = 1;
-			for(std::map<uint16_t, std::shared_ptr<CarData>>::iterator it = gta->vehicleTypes.begin();
-				it != gta->vehicleTypes.end(); ++it) {
-				if(it->first == 140) continue; // get this plane out of here.
-				gta->createVehicle(it->first, spawnPos);
-				spawnPos += glm::vec3(5, 0, 0);
-				if((k++ % 4) == 0) { spawnPos += glm::vec3(-20, -15, 0); }
-			}
-		}
-	}
-	else if("pedestrian-test" == cmd) {
-		glm::vec3 hit, normal;
-		if(hitWorldRay(hit, normal)) {
-			glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
-			size_t k = 1;
-			// Spawn every pedestrian.
-			for(auto it = gta->pedestrianTypes.begin();
-				it != gta->pedestrianTypes.end(); ++it) {
-				gta->createPedestrian(it->first, spawnPos);
-				spawnPos += glm::vec3(2.5, 0, 0);
-				if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
-			}
-		}
-	}
-	else if("list-ipl" == cmd) {
-		for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
-			it != gta->gameData.iplLocations.end();
-			++it) {
-			gta->logInfo(it->second);
-		}
-	}
-	else if("load-ipl" == cmd) {
-		if(line.find(' ') != line.npos) {
-			std::string ipl = line.substr(line.find(' ')+1);
-			auto iplit = gta->gameData.iplLocations.find(ipl);
-			if(iplit != gta->gameData.iplLocations.end()) {
-				gta->logInfo("Loading: " + iplit->second);
-				gta->loadZone(iplit->second);
-				gta->placeItems(iplit->second);
-			}
-			else {
-				gta->logInfo("Not found: " + ipl);
-			}
-		}
-	}
-	else if("create-instance" == cmd) {
-		if(line.find(' ') != line.npos) {
-			std::string ID = line.substr(line.find(' ')+1);
-			int intID = atoi(ID.c_str());
-			auto archit = gta->objectTypes.find(intID);
-			if(archit != gta->objectTypes.end()) {
-				gta->createInstance(archit->first, plyPos);
-			}
-			else {
-				gta->logInfo("Unkown Object: " + ID);
-			}
-		}
-	}
-	else if("object-info" == cmd) {
-		glm::vec3 hit, normal;
-		GTAObject* object;
-		if(hitWorldRay(hit, normal, &object)) {
-			debugObject = object;
-		}
-	}
-	else if("damage-object" == cmd) {
-		if(debugObject) {
-			GTAObject::DamageInfo dmg;
-			dmg.type = GTAObject::DamageInfo::Bullet;
-			dmg.hitpoints = 15.f;
-			debugObject->takeDamage(dmg);
-		}
+	auto it = Commands.find(cmd);
+	if(it != Commands.end()) {
+		it->second(line);
 	}
 	else {
 		gta->logInfo("Unkown command: " + cmd);
