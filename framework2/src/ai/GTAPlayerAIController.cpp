@@ -31,7 +31,7 @@ void GTAPlayerAIController::exitVehicle()
 		// Determine the seat location and teleport to outside the vehicle.
 		auto vehicle = character->getCurrentVehicle();
 		auto seatPos = vehicle->info.seats[character->getCurrentSeat()].offset;
-		seatPos.y += vehicle->info.handling.seatOffset;
+		seatPos.x += 1.f * glm::sign(seatPos.x);
 		glm::mat4 vehicleMatrix;
 		vehicleMatrix = glm::translate(vehicleMatrix, vehicle->getPosition());
 		vehicleMatrix = vehicleMatrix * glm::mat4_cast(vehicle->getRotation());
