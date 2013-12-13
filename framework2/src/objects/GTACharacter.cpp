@@ -200,8 +200,9 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 	}
 	else {
 		if(currentVehicle) {
-			vehicle->setOccupant(seat, nullptr);
-			setPosition(currentVehicle->getPosition());
+			currentVehicle->setOccupant(seat, nullptr);
+			// Disabled due to crashing.
+			//setPosition(currentVehicle->getPosition()); 
 			setCurrentVehicle(nullptr, 0);
 			return true;
 		}

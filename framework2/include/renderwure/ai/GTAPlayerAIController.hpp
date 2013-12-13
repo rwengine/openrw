@@ -24,6 +24,10 @@ public:
 	
 	void updateMovementDirection(const glm::vec3& pos);
 	
+	void exitVehicle();
+	
+	void enterNearestVehicle();
+	
     virtual void update(float dt);
 	
     virtual glm::vec3 getTargetPosition();

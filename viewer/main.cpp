@@ -95,8 +95,10 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 		[&](std::string) {
 			glm::vec3 hit, normal;
 			if(hitWorldRay(hit, normal)) {
-				playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
-				player = new GTAPlayerAIController(playerCharacter);
+				if(! playerCharacter) {
+					playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
+					player = new GTAPlayerAIController(playerCharacter);
+				}
 
 				// Pick random vehicle.
 				auto it = gta->vehicleTypes.begin();
@@ -108,6 +110,22 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 				auto spawnpos = hit + normal;
 				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
 				playerCharacter->enterVehicle(vehicle, 0);
+			}
+		}
+	},
+	{"empty-vehicle",
+		[&](std::string) {
+			glm::vec3 hit, normal;
+			if(hitWorldRay(hit, normal)) {
+				// Pick random vehicle.
+				auto it = gta->vehicleTypes.begin();
+				std::uniform_int_distribution<int> uniform(0, 9);
+				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
+					it++;
+				}
+				
+				auto spawnpos = hit + normal;
+				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
 			}
 		}
 	},
@@ -311,6 +329,16 @@ void handleInputEvent(sf::Event &event)
 		case sf::Keyboard::D:
 			movement.x = 0;
 			break;
+		case sf::Keyboard::F:
+			if(playerCharacter) {
+				if(playerCharacter->getCurrentVehicle()) {
+					player->exitVehicle();
+				}
+				else {
+					player->enterNearestVehicle();
+				}
+			}
+			break;
 		default: break;
 		}
 		break;
@@ -331,6 +359,9 @@ void handleCommandEvent(sf::Event &event)
 			break;
 		case sf::Keyboard::F3:
 			command("player-vehicle");
+			break;
+		case sf::Keyboard::F4:
+			command("empty-vehicle");
 			break;
 		case sf::Keyboard::F6:
 			command("vehicle-test");
@@ -527,6 +558,7 @@ void render()
 		ss << "F1 - Toggle Help" << std::endl;
 		ss << "F2 - Create Vehicle (with driver)" << std::endl;
 		ss << "F3 - Create Vehicle (with player)" << std::endl;
+		ss << "F4 - Create Vehicle (empty)" << std::endl;
 		ss << "F6 - Create all Vehicles" << std::endl;
 		ss << "F7 - Create all Pedestrians" << std::endl;
 		ss << "F9 - Display Object Information" << std::endl;
