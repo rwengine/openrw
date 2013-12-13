@@ -201,7 +201,7 @@ void GTAVehicle::ejectAll()
 	) {
 		if(it->second->type() == GTAObject::Character) {
 			GTACharacter* c = static_cast<GTACharacter*>(it->second);
-			c->setCurrentVehicle(nullptr);
+			c->setCurrentVehicle(nullptr, 0);
 			c->setPosition(getPosition());
 		}
 		it = seatOccupants.erase(it);

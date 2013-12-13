@@ -165,33 +165,6 @@ void update(float dt)
 				player = new GTAPlayerAIController(playerCharacter);
 			}
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
-			if( player == nullptr ) {
-				playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
-				player = new GTAPlayerAIController(playerCharacter);
-
-				// Pick random vehicle.
-				auto it = gta->vehicleTypes.begin();
-				std::uniform_int_distribution<int> uniform(0, 9);
-				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-					it++;
-				}
-
-				auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-				playerCharacter->setCurrentVehicle(vehicle);
-			}
-		}
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
-			auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
-			// Pick random vehicle.
-			auto it = gta->vehicleTypes.begin();
-			std::uniform_int_distribution<int> uniform(0, 9);
-			for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-				it++;
-			}
-			auto vehicle = gta->createVehicle(it->first, plyPos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-			ped->setCurrentVehicle(vehicle);
-		}
 
 		glm::mat4 view;
 		view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));

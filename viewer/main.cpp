@@ -112,7 +112,7 @@ void command(const std::string& line)
 			
 			auto spawnpos = hit + normal;
 			auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-			playerCharacter->setCurrentVehicle(vehicle);
+			playerCharacter->enterVehicle(vehicle, 0);
 		}
 	}
 	else if("player" == cmd) {

@@ -47,7 +47,7 @@ struct VehicleHandlingInfo
 	float suspensionLowerLimit;
 	float suspensionBias;
 	uint32_t flags;
-
+	
 	enum /*VehicleFlags*/ {
 		VF_1G_BOOST		= 1 << 0,
 		VF_2G_BOOST		= 2 << 0,
@@ -73,11 +73,17 @@ struct WheelInfo
 	glm::vec3 position;
 };
 
+struct SeatInfo {
+	glm::vec3 offset;
+};
+
 struct VehicleInfo
 {
 	VehicleHandlingInfo handling;
 
 	std::vector<WheelInfo> wheels;
+	
+	std::vector<SeatInfo> seats;
 };
 
 #endif

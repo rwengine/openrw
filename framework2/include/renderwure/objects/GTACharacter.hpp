@@ -17,6 +17,7 @@ struct GTACharacter : public GTAObject
 {
 private:
 	GTAVehicle* currentVehicle;
+	size_t currentSeat;
 
 	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
 	void destroyActor();
@@ -74,7 +75,8 @@ public:
 	bool enterVehicle(GTAVehicle* vehicle, size_t seat);
 
 	GTAVehicle *getCurrentVehicle() const;
-	void setCurrentVehicle(GTAVehicle *value);
+	size_t getCurrentSeat() const;
+	void setCurrentVehicle(GTAVehicle *value, size_t seat);
 	
     virtual bool takeDamage(const DamageInfo& damage);
 };

@@ -6,7 +6,7 @@
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GTAObject(engine, pos, rot, model),
-  currentVehicle(nullptr), ped(data), physCharacter(nullptr),
+  currentVehicle(nullptr), currentSeat(0), ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
 	mHealth = 100.f;
@@ -194,16 +194,19 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 			// Make sure we leave any vehicle we're inside
 			enterVehicle(nullptr, 0);
 			vehicle->setOccupant(seat, this);
-			setCurrentVehicle(vehicle);
+			setCurrentVehicle(vehicle, seat);
+			return true;
 		}
 	}
 	else {
 		if(currentVehicle) {
 			vehicle->setOccupant(seat, nullptr);
 			setPosition(currentVehicle->getPosition());
-			setCurrentVehicle(nullptr);
+			setCurrentVehicle(nullptr, 0);
+			return true;
 		}
 	}
+	return false;
 }
 
 GTAVehicle *GTACharacter::getCurrentVehicle() const
@@ -211,9 +214,15 @@ GTAVehicle *GTACharacter::getCurrentVehicle() const
 	return currentVehicle;
 }
 
-void GTACharacter::setCurrentVehicle(GTAVehicle *value)
+size_t GTACharacter::getCurrentSeat() const
+{
+	return currentSeat;
+}
+
+void GTACharacter::setCurrentVehicle(GTAVehicle *value, size_t seat)
 {
 	currentVehicle = value;
+	currentSeat = seat;
 	if(currentVehicle == nullptr && physCharacter == nullptr) {
 		createActor();
 	}

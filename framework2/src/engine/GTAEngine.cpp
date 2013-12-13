@@ -239,13 +239,21 @@ GTAVehicle *GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, co
 		Model* model = gameData.models[vti->second->modelName];
 		auto info = gameData.vehicleInfo.find(vti->second->handlingID);
 		if(model && info != gameData.vehicleInfo.end()) {
-			if( info->second.wheels.size() == 0 ) {
+			if( info->second.wheels.size() == 0 && info->second.seats.size() == 0 ) {
 				for( size_t f = 0; f < model->frames.size(); ++f) {
 					if( model->frameNames.size() > f) {
 						std::string& name = model->frameNames[f];
+						
 						if( name.substr(0, 5) == "wheel" ) {
 							auto frameTrans = model->getFrameMatrix(f);
 							info->second.wheels.push_back({glm::vec3(frameTrans[3])});
+						}
+						if(name.substr(0, 3) == "ped" && name.substr(name.size()-4) == "seat") {
+							auto p = model->frames[f].defaultTranslation;
+							p.x = p.x * -1.f;
+							info->second.seats.push_back({p});
+							p.x = p.x * -1.f;
+							info->second.seats.push_back({p});
 						}
 					}
 				}

@@ -78,12 +78,6 @@ struct CarData
 		int16_t modelLOD; // used only when type == PLANE
 	};
 	float wheelScale; // used only when type == CAR
-	
-	struct SeatData {
-		glm::vec3 offset;
-	};
-	
-	std::vector<SeatData> seats;
 };
 
 struct CharacterData

@@ -268,8 +268,19 @@ void GTARenderer::renderWorld()
         GTACharacter* charac = engine->pedestrians[i];
 
         glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, charac->getPosition());
-        matrixModel = matrixModel * glm::mat4_cast(charac->rotation);
+		
+		if(charac->getCurrentVehicle()) {
+			auto v = charac->getCurrentVehicle();
+			matrixModel = glm::translate(matrixModel, 
+										 v->getPosition());
+			matrixModel = matrixModel * glm::mat4_cast(v->getRotation());
+			glm::vec3 seatpos = v->info.seats[charac->getCurrentSeat()].offset;
+			matrixModel = glm::translate(matrixModel, seatpos);
+		}
+		else {
+			matrixModel = glm::translate(matrixModel, charac->getPosition());
+			matrixModel = matrixModel * glm::mat4_cast(charac->rotation);
+		}
 
         if(!charac->model) continue;
 
