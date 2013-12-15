@@ -112,6 +112,16 @@ GTAVehicle::~GTAVehicle()
 	ejectAll();
 }
 
+void GTAVehicle::setPosition(const glm::vec3& pos)
+{
+    GTAObject::setPosition(pos);
+	if(physBody) {
+		auto t = physBody->getWorldTransform();
+		t.setOrigin(btVector3(pos.x, pos.y, pos.z));
+		physBody->setWorldTransform(t);
+	}
+}
+
 glm::vec3 GTAVehicle::getPosition() const
 {
 	if(physBody) {

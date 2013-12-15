@@ -3,6 +3,7 @@
 #include <renderwure/engine/GTAEngine.hpp>
 #include <renderwure/engine/Animator.hpp>
 #include <renderwure/objects/GTAVehicle.hpp>
+#include <boost/concept_check.hpp>
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GTAObject(engine, pos, rot, model),
@@ -42,7 +43,8 @@ void GTACharacter::createActor(const glm::vec3& size)
 		physShape = new btCapsuleShapeZ(size.x, size.z);
 		physObject->setCollisionShape(physShape);
 		physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
-		physCharacter = new btKinematicCharacterController(physObject, physShape, 3.5f, 2);
+		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.2f, 2);
+		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 0.f), 1.f);
 		
 		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
 		engine->dynamicsWorld->addAction(physCharacter);
@@ -107,6 +109,11 @@ void GTACharacter::tick(float dt)
 	}
 	animator->tick(dt);
 	updateCharacter();
+	
+	// Ensure the character doesn't need to be reset
+	if(getPosition().z < -100.f) {
+		resetToAINode();
+	}
 }
 
 void GTACharacter::updateCharacter()
@@ -236,5 +243,35 @@ bool GTACharacter::takeDamage(const GTAObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 	return true;
+}
+
+void GTACharacter::resetToAINode()
+{
+	auto nodes = engine->aigraph.nodes;
+	bool vehicleNode = !! getCurrentVehicle();
+	GTAAINode* nearest = nullptr; float d = std::numeric_limits<float>::max();
+	for(auto it = nodes.begin(); it != nodes.end(); ++it) {
+		if(vehicleNode) {
+			if((*it)->type == GTAAINode::Pedestrian) continue;
+		}
+		else {
+			if((*it)->type == GTAAINode::Vehicle) continue;
+		}
+		
+		float dist = glm::length((*it)->position - getPosition());
+		if(dist < d) {
+			nearest = *it;
+			d = dist;
+		}
+	}
+	
+	if(nearest) {
+		if(vehicleNode) {
+			getCurrentVehicle()->setPosition(nearest->position + glm::vec3(0.f, 0.f, 2.5f));
+		}
+		else {
+			setPosition(nearest->position + glm::vec3(0.f, 0.f, 2.5f));
+		}
+	}
 }
 

@@ -79,6 +79,12 @@ public:
 	void setCurrentVehicle(GTAVehicle *value, size_t seat);
 	
     virtual bool takeDamage(const DamageInfo& damage);
+	
+	/**
+	 * Resets the Actor to the nearest AI Graph node
+	 * (taking into account the current vehicle)
+	 */
+	void resetToAINode();
 };
 
 #endif
