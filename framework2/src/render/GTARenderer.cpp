@@ -356,7 +356,11 @@ void GTARenderer::renderWorld()
 					glm::mat4 wheel_tf;
 					inst->physVehicle->getWheelTransformWS(w).getOpenGLMatrix(glm::value_ptr(wheel_tf));
 					wheel_tf = glm::scale(wheel_tf, glm::vec3(inst->vehicle->wheelScale));
-					wheel_tf = glm::rotate(wheel_tf, inst->physVehicle->getWheelInfo(w).m_rotation, glm::vec3(1.f, 0.f, 0.f));
+					float angle = inst->physVehicle->getWheelInfo(w).m_rotation;
+					if(inst->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
+						wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
+					}
+					wheel_tf = glm::rotate(wheel_tf, angle, glm::vec3(1.f, 0.f, 0.f));
 					renderNamedFrame(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
 				}
 				else {
