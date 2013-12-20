@@ -1,10 +1,10 @@
 #pragma once
 #ifndef _GTAVEHICLE_HPP_
 #define _GTAVEHICLE_HPP_
-#include <renderwure/engine/GTAObject.hpp>
+#include <engine/GTAObject.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <map>
-#include <renderwure/objects/VehicleInfo.hpp>
+#include <objects/VehicleInfo.hpp>
 
 /**
  * @class GTAVehicle

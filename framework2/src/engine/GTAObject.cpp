@@ -1,7 +1,7 @@
-#include <renderwure/engine/GTAObject.hpp>
-#include <renderwure/loaders/LoaderIFP.hpp>
-#include <renderwure/loaders/LoaderDFF.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
+#include <engine/GTAObject.hpp>
+#include <loaders/LoaderIFP.hpp>
+#include <loaders/LoaderDFF.hpp>
+#include <engine/GTAEngine.hpp>
 
 void GTAObject::setPosition(const glm::vec3& pos)
 {

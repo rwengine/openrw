@@ -1,5 +1,5 @@
-#include "renderwure/ai/GTAAIController.hpp"
-#include <renderwure/objects/GTACharacter.hpp>
+#include <ai/GTAAIController.hpp>
+#include <objects/GTACharacter.hpp>
 
 GTAAIController::GTAAIController(GTACharacter* character)
 : character(character) 

@@ -1,6 +1,6 @@
 #ifndef _LOADERIPL_HPP_
 #define _LOADERIPL_HPP_
-#include <renderwure/data/InstanceData.hpp>
+#include <data/InstanceData.hpp>
 
 #include <iostream>
 #include <vector>

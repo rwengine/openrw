@@ -2,7 +2,7 @@
 #ifndef _WEATHERLOADER_HPP_
 #define _WEATHERLOADER_HPP_
 
-#include <renderwure/engine/GTATypes.hpp>
+#include <engine/GTATypes.hpp>
 
 #include <string>
 #include <sstream>

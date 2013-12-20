@@ -2,9 +2,9 @@
 #ifndef _GTAOBJECT_HPP_
 #define _GTAOBJECT_HPP_
 
-#include <renderwure/engine/GTATypes.hpp>
-#include <renderwure/loaders/LoaderIDE.hpp>
-#include <renderwure/loaders/LoaderIPL.hpp>
+#include <engine/GTATypes.hpp>
+#include <loaders/LoaderIDE.hpp>
+#include <loaders/LoaderIPL.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
 

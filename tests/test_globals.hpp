@@ -2,7 +2,7 @@
 #define _TESTGLOBABLS_HPP_
 
 #include <SFML/Window.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
+#include <engine/GTAEngine.hpp>
 
 // Many tests require OpenGL be functional, seems like a reasonable solution.
 

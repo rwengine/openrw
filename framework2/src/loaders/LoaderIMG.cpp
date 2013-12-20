@@ -1,4 +1,4 @@
-#include <renderwure/loaders/LoaderIMG.hpp>
+#include <loaders/LoaderIMG.hpp>
 
 #include <cstring>
 

@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
-#include <renderwure/objects/GTAInstance.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
+#include <objects/GTAInstance.hpp>
+#include <engine/GTAEngine.hpp>
 
 BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
 

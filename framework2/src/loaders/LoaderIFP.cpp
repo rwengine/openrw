@@ -1,4 +1,4 @@
-#include <renderwure/loaders/LoaderIFP.hpp>
+#include <loaders/LoaderIFP.hpp>
 #include <algorithm>
 #include <iostream>
 

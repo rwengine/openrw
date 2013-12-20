@@ -2,15 +2,15 @@
 #ifndef _GTADATA_HPP_
 #define _GTADATA_HPP_
 
-#include <renderwure/engine/GTATypes.hpp>
-#include <renderwure/loaders/LoaderIMG.hpp>
-#include <renderwure/loaders/TextureLoader.hpp>
-#include <renderwure/loaders/LoaderDFF.hpp>
-#include <renderwure/loaders/LoaderIDE.hpp>
-#include <renderwure/loaders/LoaderIFP.hpp>
-#include <renderwure/loaders/WeatherLoader.hpp>
-#include <renderwure/objects/VehicleInfo.hpp>
-#include <renderwure/data/CollisionModel.hpp>
+#include <engine/GTATypes.hpp>
+#include <loaders/LoaderIMG.hpp>
+#include <loaders/TextureLoader.hpp>
+#include <loaders/LoaderDFF.hpp>
+#include <loaders/LoaderIDE.hpp>
+#include <loaders/LoaderIFP.hpp>
+#include <loaders/WeatherLoader.hpp>
+#include <objects/VehicleInfo.hpp>
+#include <data/CollisionModel.hpp>
 
 #include <memory>
 

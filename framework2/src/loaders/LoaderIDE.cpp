@@ -1,4 +1,4 @@
-#include <renderwure/loaders/LoaderIDE.hpp>
+#include <loaders/LoaderIDE.hpp>
 
 #include <fstream>
 #include <string>

@@ -5,7 +5,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <renderwure/loaders/rwbinarystream.h>
+#include <loaders/rwbinarystream.h>
 
 #include <string>
 #include <map>

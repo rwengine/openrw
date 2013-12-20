@@ -3,7 +3,7 @@
 #define _AIGRAPH_HPP_
 #include <vector>
 #include <glm/gtc/quaternion.hpp>
-#include <renderwure/data/PathData.hpp>
+#include <data/PathData.hpp>
 
 struct GTAInstance;
 struct GTAAINode;

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include <renderwure/render/ViewCamera.hpp>
+#include <render/ViewCamera.hpp>
 
 class Model;
 class GTAEngine;

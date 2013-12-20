@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GTAPLAYERAICONTROLLER_HPP_
 #define _GTAPLAYERAICONTROLLER_HPP_
-#include "renderwure/ai/GTAAIController.hpp"
+#include "ai/GTAAIController.hpp"
 
 class GTAPlayerAIController : public GTAAIController
 {

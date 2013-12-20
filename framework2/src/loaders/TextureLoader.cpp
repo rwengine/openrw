@@ -1,6 +1,6 @@
-#include <renderwure/loaders/TextureLoader.hpp>
-#include <renderwure/engine/GTAData.hpp>
-#include <renderwure/render/TextureAtlas.hpp>
+#include <loaders/TextureLoader.hpp>
+#include <engine/GTAData.hpp>
+#include <render/TextureAtlas.hpp>
 
 #include <fstream>
 #include <iostream>

@@ -1,8 +1,8 @@
-#include "renderwure/ai/GTADefaultAIController.hpp"
-#include <renderwure/objects/GTACharacter.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/engine/Animator.hpp>
-#include <renderwure/objects/GTAVehicle.hpp>
+#include "ai/GTADefaultAIController.hpp"
+#include <objects/GTACharacter.hpp>
+#include <engine/GTAEngine.hpp>
+#include <engine/Animator.hpp>
+#include <objects/GTAVehicle.hpp>
 
 void GTADefaultAIController::update(float dt)
 {

@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GTAINSTANCE_HPP_
 #define _GTAINSTANCE_HPP_
-#include <renderwure/engine/GTAObject.hpp>
+#include <engine/GTAObject.hpp>
 
 /**
  * @struct GTAInstance

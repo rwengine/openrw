@@ -1,4 +1,4 @@
-#include "renderwure/render/DebugDraw.hpp"
+#include "render/DebugDraw.hpp"
 
 #define GLEW_STATIC
 #include <GL/glew.h>

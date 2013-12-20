@@ -1,13 +1,13 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/loaders/LoaderDFF.hpp>
-#include <renderwure/render/DebugDraw.hpp>
-#include <renderwure/ai/GTAAIController.hpp>
-#include <renderwure/ai/GTAPlayerAIController.hpp>
-#include <renderwure/objects/GTACharacter.hpp>
-#include <renderwure/objects/GTAVehicle.hpp>
+#include <engine/GTAEngine.hpp>
+#include <loaders/LoaderDFF.hpp>
+#include <render/DebugDraw.hpp>
+#include <ai/GTAAIController.hpp>
+#include <ai/GTAPlayerAIController.hpp>
+#include <objects/GTACharacter.hpp>
+#include <objects/GTAVehicle.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

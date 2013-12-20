@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <renderwure/render/TextureAtlas.hpp>
+#include <render/TextureAtlas.hpp>
 
 /*BOOST_AUTO_TEST_SUITE(TextureAtlasTests)
 

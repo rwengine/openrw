@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include <renderwure/data/CollisionModel.hpp>
+#include <data/CollisionModel.hpp>
 
 /**
  * @class LoaderCOL

@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
+#include <engine/GTAEngine.hpp>
 
 BOOST_AUTO_TEST_SUITE(WorldTests)
 

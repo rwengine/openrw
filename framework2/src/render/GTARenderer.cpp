@@ -1,13 +1,13 @@
-#include <renderwure/render/GTARenderer.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/engine/Animator.hpp>
-#include <renderwure/render/TextureAtlas.hpp>
-#include <renderwure/render/Model.hpp>
+#include <render/GTARenderer.hpp>
+#include <engine/GTAEngine.hpp>
+#include <engine/Animator.hpp>
+#include <render/TextureAtlas.hpp>
+#include <render/Model.hpp>
 
-#include <renderwure/objects/GTACharacter.hpp>
-#include <renderwure/objects/GTAInstance.hpp>
-#include <renderwure/objects/GTAVehicle.hpp>
-#include <renderwure/ai/GTAAIController.hpp>
+#include <objects/GTACharacter.hpp>
+#include <objects/GTAInstance.hpp>
+#include <objects/GTAVehicle.hpp>
+#include <ai/GTAAIController.hpp>
 
 #include <deque>
 #include <cmath>

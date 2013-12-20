@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GTADEFAULTAICONTROLLER_HPP_
 #define _GTADEFAULTAICONTROLLER_HPP_
-#include "renderwure/ai/GTAAIController.hpp"
+#include "ai/GTAAIController.hpp"
 #include <random>
 
 struct GTAAINode;

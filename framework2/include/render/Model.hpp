@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
-#include <renderwure/loaders/rwbinarystream.h>
+#include <loaders/rwbinarystream.h>
 
 class Model
 {

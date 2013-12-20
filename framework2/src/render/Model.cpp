@@ -1,4 +1,4 @@
-#include "renderwure/render/Model.hpp"
+#include "render/Model.hpp"
 #include <GL/glew.h>
 
 Model::Geometry::Geometry()

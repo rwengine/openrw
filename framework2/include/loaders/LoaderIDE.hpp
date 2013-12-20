@@ -6,8 +6,8 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
-#include <renderwure/data/ObjectData.hpp>
-#include <renderwure/data/PathData.hpp>
+#include <data/ObjectData.hpp>
+#include <data/PathData.hpp>
 
 class LoaderIDE
 {

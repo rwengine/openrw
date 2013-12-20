@@ -1,6 +1,6 @@
-#include <renderwure/loaders/LoaderDFF.hpp>
-#include <renderwure/engine/GTAData.hpp>
-#include <renderwure/render/Model.hpp>
+#include <loaders/LoaderDFF.hpp>
+#include <engine/GTAData.hpp>
+#include <render/Model.hpp>
 
 #include <iostream>
 #include <algorithm>

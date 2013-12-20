@@ -1,14 +1,14 @@
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/loaders/LoaderIPL.hpp>
-#include <renderwure/loaders/LoaderIDE.hpp>
-#include <renderwure/ai/GTADefaultAIController.hpp>
+#include <engine/GTAEngine.hpp>
+#include <loaders/LoaderIPL.hpp>
+#include <loaders/LoaderIDE.hpp>
+#include <ai/GTADefaultAIController.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <renderwure/render/Model.hpp>
+#include <render/Model.hpp>
 
 // 3 isn't enough to cause a factory.
-#include <renderwure/objects/GTACharacter.hpp>
-#include <renderwure/objects/GTAInstance.hpp>
-#include <renderwure/objects/GTAVehicle.hpp>
+#include <objects/GTACharacter.hpp>
+#include <objects/GTAInstance.hpp>
+#include <objects/GTAVehicle.hpp>
 
 GTAEngine::GTAEngine(const std::string& path)
     : gameTime(0.f), gameData(path), renderer(this), randomEngine(rand())

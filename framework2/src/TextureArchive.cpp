@@ -1,4 +1,4 @@
-#include <renderwure/TextureArchive.hpp>
+#include <TextureArchive.hpp>
 
 #include <cstring>
 #include <iostream>

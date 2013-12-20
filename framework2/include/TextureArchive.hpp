@@ -2,7 +2,7 @@
 #ifndef _TEXTUREARCHIVE_HPP_
 #define _TEXTUREARCHIVE_HPP_
 
-#include <renderwure/BinaryStream.hpp>
+#include <BinaryStream.hpp>
 
 #include <vector>
 

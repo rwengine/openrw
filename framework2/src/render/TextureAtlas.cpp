@@ -1,4 +1,4 @@
-#include <renderwure/render/TextureAtlas.hpp>
+#include <render/TextureAtlas.hpp>
 #include <algorithm>
 
 TextureAtlas::TextureAtlas(size_t w, size_t h)

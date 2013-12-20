@@ -2,10 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <renderwure/BinaryStream.hpp>
-#include <renderwure/loaders/LoaderCOL.hpp>
-#include <renderwure/loaders/LoaderIFP.hpp>
-#include <renderwure/loaders/rwbinarystream.h>
+#include <BinaryStream.hpp>
+#include <loaders/LoaderCOL.hpp>
+#include <loaders/LoaderIFP.hpp>
+#include <loaders/rwbinarystream.h>
 
 using RW::BSSectionHeader;
 using RW::BSFrameList;

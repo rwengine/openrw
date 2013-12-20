@@ -1,10 +1,10 @@
-#include <renderwure/engine/GTAData.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/loaders/LoaderIPL.hpp>
-#include <renderwure/loaders/LoaderDFF.hpp>
-#include <renderwure/loaders/LoaderIDE.hpp>
-#include <renderwure/render/TextureAtlas.hpp>
-#include <renderwure/loaders/LoaderCOL.hpp>
+#include <engine/GTAData.hpp>
+#include <engine/GTAEngine.hpp>
+#include <loaders/LoaderIPL.hpp>
+#include <loaders/LoaderDFF.hpp>
+#include <loaders/LoaderIDE.hpp>
+#include <render/TextureAtlas.hpp>
+#include <loaders/LoaderCOL.hpp>
 
 #include <iostream>
 #include <fstream>

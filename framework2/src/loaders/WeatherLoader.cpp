@@ -1,4 +1,4 @@
-#include <renderwure/loaders/WeatherLoader.hpp>
+#include <loaders/WeatherLoader.hpp>
 
 #include <iostream>
 #include <sstream>

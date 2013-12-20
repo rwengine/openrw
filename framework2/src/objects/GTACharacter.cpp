@@ -1,8 +1,8 @@
-#include <renderwure/objects/GTACharacter.hpp>
-#include <renderwure/ai/GTAAIController.hpp>
-#include <renderwure/engine/GTAEngine.hpp>
-#include <renderwure/engine/Animator.hpp>
-#include <renderwure/objects/GTAVehicle.hpp>
+#include <objects/GTACharacter.hpp>
+#include <ai/GTAAIController.hpp>
+#include <engine/GTAEngine.hpp>
+#include <engine/Animator.hpp>
+#include <objects/GTAVehicle.hpp>
 #include <boost/concept_check.hpp>
 
 GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)

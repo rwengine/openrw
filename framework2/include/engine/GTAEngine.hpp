@@ -2,11 +2,11 @@
 #ifndef _GTAENGINE_HPP_
 #define _GTAENGINE_HPP_
 
-#include <renderwure/engine/GTAData.hpp>
-#include <renderwure/render/GTARenderer.hpp>
-#include <renderwure/loaders/LoaderIPL.hpp>
-#include <renderwure/ai/GTAAINode.hpp>
-#include <renderwure/ai/AIGraph.hpp>
+#include <engine/GTAData.hpp>
+#include <render/GTARenderer.hpp>
+#include <loaders/LoaderIPL.hpp>
+#include <ai/GTAAINode.hpp>
+#include <ai/AIGraph.hpp>
 
 class GTAObject;
 class GTACharacter;
