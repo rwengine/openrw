@@ -370,6 +370,18 @@ void GTARenderer::renderWorld()
 		}
 	}
 	
+	// Draw anything that got queued.
+	for(auto it = transparentDrawQueue.begin();
+		it != transparentDrawQueue.end();
+		++it)
+	{
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(it->matrix));
+		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+		
+		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->object, false);
+	}
+	transparentDrawQueue.clear();
+	
 	glUseProgram(skyProgram);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
@@ -421,71 +433,84 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
 
-    glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g]->VBO);
-	
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsVert);
-	glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsTexCoords);
-	glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsNormals);
-	glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsColours);
-    glEnableVertexAttribArray(posAttrib);
-    glEnableVertexAttribArray(texAttrib);
-	glEnableVertexAttribArray(normalAttrib);
-	glEnableVertexAttribArray(colourAttrib);
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
-
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
-		auto& subgeom = model->geometries[g]->subgeom[sg];
+		if(! renderSubgeometry(model, g, sg, modelMatrix, object)) {
+			// If rendering was rejected, queue for later.
+			transparentDrawQueue.push_back(
+				{model, g, sg, modelMatrix, object}
+			);
+		}
+    }
+}
 
-		if (model->geometries[g]->materials.size() > subgeom.material) {
-			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
+static GLuint currentVBO = 0;
 
-			if(mat.textures.size() > 0 ) {
-				TextureInfo& tex = engine->gameData.textures[mat.textures[0].name];
-				if(tex.atlas) {
-					if(! tex.atlas->isFinalized()) {
-						tex.atlas->finalize();
-					}
-					glBindTexture(GL_TEXTURE_2D, tex.atlas->getName());
+bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
+{
+	if(currentVBO != model->geometries[g]->VBO) {
+		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g]->VBO);
+	
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsVert);
+		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsTexCoords);
+		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsNormals);
+		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsColours);
+		glEnableVertexAttribArray(posAttrib);
+		glEnableVertexAttribArray(texAttrib);
+		glEnableVertexAttribArray(normalAttrib);
+		glEnableVertexAttribArray(colourAttrib);
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
+		
+		currentVBO = model->geometries[g]->VBO;
+	}
+	
+	auto& subgeom = model->geometries[g]->subgeom[sg];
+
+	if (model->geometries[g]->materials.size() > subgeom.material) {
+		Model::Material& mat = model->geometries[g]->materials[subgeom.material];
+
+		if(mat.textures.size() > 0 ) {
+			TextureInfo& tex = engine->gameData.textures[mat.textures[0].name];
+			if(tex.transparent && queueTransparent) {
+				return false;
+			}
+			glBindTexture(GL_TEXTURE_2D, tex.texName);
+		}
+
+		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
+			auto colmasked = mat.colour;
+			size_t R = colmasked % 256; colmasked /= 256;
+			size_t G = colmasked % 256; colmasked /= 256;
+			size_t B = colmasked % 256; colmasked /= 256;
+			if( object && object->type() == GTAObject::Vehicle ) {
+				auto vehicle = static_cast<GTAVehicle*>(object);
+				if( R == 60 && G == 255 && B == 0 ) {
+					glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
+				}
+				else if( R == 255 && G == 0 && B == 175 ) {
+					glUniform4f(uniCol, vehicle->colourSecondary.r, vehicle->colourSecondary.g, vehicle->colourSecondary.b, 1.f);
 				}
 				else {
-					glBindTexture(GL_TEXTURE_2D, tex.texName);
+					glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
 				}
-            }
+			}
+			else {
+				glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
+			}
+		}
 
-            if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
-                auto colmasked = mat.colour;
-                size_t R = colmasked % 256; colmasked /= 256;
-                size_t G = colmasked % 256; colmasked /= 256;
-                size_t B = colmasked % 256; colmasked /= 256;
-                if( object && object->type() == GTAObject::Vehicle ) {
-                    auto vehicle = static_cast<GTAVehicle*>(object);
-                    if( R == 60 && G == 255 && B == 0 ) {
-                        glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
-                    }
-                    else if( R == 255 && G == 0 && B == 175 ) {
-                        glUniform4f(uniCol, vehicle->colourSecondary.r, vehicle->colourSecondary.g, vehicle->colourSecondary.b, 1.f);
-                    }
-                    else {
-                        glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
-                    }
-                }
-                else {
-                    glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
-                }
-            }
+		glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
+		glUniform1f(uniMatAmbient, mat.ambientIntensity);
+	}
 
-            glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
-            glUniform1f(uniMatAmbient, mat.ambientIntensity);
-        }
+	rendered++;
 
-		rendered++;
-
-		glDrawElements((model->geometries[g]->facetype == Model::Triangles ?
-									GL_TRIANGLES : GL_TRIANGLE_STRIP),
-									subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
-    }
+	glDrawElements((model->geometries[g]->facetype == Model::Triangles ?
+								GL_TRIANGLES : GL_TRIANGLE_STRIP),
+								subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
+	
+	return true;
 }
 
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object, Animator *animator)

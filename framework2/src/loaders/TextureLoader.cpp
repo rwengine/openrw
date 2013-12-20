@@ -23,6 +23,7 @@ bool TextureLoader::loadFromFile(std::string filename, GTAData* gameData)
 }
 
 GLuint gErrorTextureData[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFF0000 };
+GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
 
 GLuint getErrorTexture()
 {
@@ -56,7 +57,7 @@ void processPalette(uint32_t* fullColor, RW::BSTextureNative& texNative, RW::Bin
 
 }
 
-GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection)
+GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection, bool* transparent)
 {
 	// TODO: Exception handling.
 	if(texNative.platform != 8) {
@@ -68,13 +69,29 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 	bool isFulc = texNative.rasterformat == RW::BSTextureNative::FORMAT_1555 ||
 				texNative.rasterformat == RW::BSTextureNative::FORMAT_8888 ||
 				texNative.rasterformat == RW::BSTextureNative::FORMAT_888;
+	// Export this value
+	*transparent = !((texNative.rasterformat&RW::BSTextureNative::FORMAT_888) == RW::BSTextureNative::FORMAT_888);
+	
 	if(! (isPal8 || isFulc)) {
 		std::cerr << "Unsuported raster format " << std::dec << texNative.rasterformat << std::endl;
 		return getErrorTexture();
 	}
 
 	GLuint textureName = 0;
-
+	
+#if ENABLE_ABHORENT_DEBUGGING
+	if(true)
+	{
+		glGenTextures(1, &textureName);
+		glBindTexture(GL_TEXTURE_2D, textureName);
+		glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_RGBA,
+			1, 1, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)(gDebugTextureData) + (*transparent ? 0 : 4)
+		);
+	}
+	else 
+#endif
 	if(isPal8)
 	{
 		uint32_t fullColor[texNative.width * texNative.height];
@@ -182,9 +199,10 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 
 		RW::BSTextureNative texNative = rootSection.readStructure<RW::BSTextureNative>();
 		std::string name = std::string(texNative.diffuseName);
-		GLuint id = createTexture(texNative, rootSection);
+		bool transparent = false;
+		GLuint id = createTexture(texNative, rootSection, &transparent);
 
-		gameData->textures.insert({name, {id}});
+		gameData->textures.insert({name, {id, transparent}});
 	}
 
 	return true;

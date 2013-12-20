@@ -4,6 +4,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <memory>
+#include <vector>
 
 #include <renderwure/render/ViewCamera.hpp>
 
@@ -15,6 +16,22 @@ class Animator;
 class GTARenderer
 {
     GTAEngine* engine;
+	
+	struct RQueueEntry {
+		Model* model;
+		size_t g;
+		size_t sg;
+		glm::mat4 matrix;
+		GTAObject* object;
+	};
+	
+	// Internal method for processing sub-geometry
+	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent = true);
+	
+	/// Queue of sub-geometry to post-render 
+	/// With a faster occulusion culling stage
+	/// This could be replaced with a 2nd draw pass.
+	std::vector<RQueueEntry> transparentDrawQueue;
 
 public:
 	

@@ -25,16 +25,14 @@ struct TextureInfo
 {
 	/// Texture Name
 	GLuint texName;
-	/// Atlas (if applicable)
-	TextureAtlas* atlas;
-	glm::vec4 rect; /// X/Y base coord, Z/W UV scale.
+	
+	/// Transparent flag.
+	bool transparent;
 
-	TextureInfo(GLuint tex)
-		: texName(tex), atlas(nullptr), rect(0.f, 0.f, 1.f, 1.f) {}
-	TextureInfo(TextureAtlas* a, const glm::vec4&r)
-		: texName(0), atlas(a), rect(r) {}
+	TextureInfo(GLuint tex, bool t)
+		: texName(tex), transparent(t) {}
 	TextureInfo()
-		: texName(0), atlas(nullptr) {}
+		: texName(0), transparent(false) {} 
 };
 
 /**
