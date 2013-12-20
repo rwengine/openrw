@@ -9,13 +9,13 @@
 #include <render/ViewCamera.hpp>
 
 class Model;
-class GTAEngine;
+class GameWorld;
 class GTAObject;
 class Animator;
 
 class GTARenderer
 {
-    GTAEngine* engine;
+    GameWorld* engine;
 	
 	struct RQueueEntry {
 		Model* model;
@@ -35,7 +35,7 @@ class GTARenderer
 
 public:
 	
-    GTARenderer(GTAEngine*);
+    GTARenderer(GameWorld*);
 	
 	ViewCamera camera;
 	

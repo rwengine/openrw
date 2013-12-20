@@ -1,9 +1,9 @@
 #include <objects/GTAInstance.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <data/CollisionModel.hpp>
 
 GTAInstance::GTAInstance(
-		GTAEngine* engine,
+		GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
 		Model* model,

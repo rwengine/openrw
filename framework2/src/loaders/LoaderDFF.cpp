@@ -1,5 +1,5 @@
 #include <loaders/LoaderDFF.hpp>
-#include <engine/GTAData.hpp>
+#include <engine/GameData.hpp>
 #include <render/Model.hpp>
 
 #include <iostream>
@@ -9,7 +9,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
+Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 {
     auto model = new Model;
 	RW::BinaryStreamSection root(data);

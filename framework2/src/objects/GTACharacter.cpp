@@ -1,11 +1,11 @@
 #include <objects/GTACharacter.hpp>
 #include <ai/GTAAIController.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <objects/GTAVehicle.hpp>
 #include <boost/concept_check.hpp>
 
-GTACharacter::GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
+GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GTAObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0), ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)

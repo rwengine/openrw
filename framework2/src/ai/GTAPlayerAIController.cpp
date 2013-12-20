@@ -1,7 +1,7 @@
 #include "ai/GTAPlayerAIController.hpp"
 #include <objects/GTACharacter.hpp>
 #include <objects/GTAVehicle.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 GTAPlayerAIController::GTAPlayerAIController(GTACharacter* character)

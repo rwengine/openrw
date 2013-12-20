@@ -10,13 +10,13 @@
 #include <string>
 #include <map>
 
-class GTAData;
+class GameData;
 
 class TextureLoader
 {
 public:
-	bool loadFromFile(std::string filename, GTAData* gameData);
-	bool loadFromMemory(char *data, GTAData* gameData);
+	bool loadFromFile(std::string filename, GameData* gameData);
+	bool loadFromMemory(char *data, GameData* gameData);
 };
 
 #endif

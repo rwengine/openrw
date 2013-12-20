@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTADATA_HPP_
-#define _GTADATA_HPP_
+#ifndef _GAMEDATA_HPP_
+#define _GAMEDATA_HPP_
 
 #include <engine/GTATypes.hpp>
 #include <loaders/LoaderIMG.hpp>
@@ -14,7 +14,7 @@
 
 #include <memory>
 
-class GTAEngine;
+class GameWorld;
 class TextureAtlas;
 
 /**
@@ -38,7 +38,7 @@ struct TextureInfo
 /**
  * Handles loading and management of the Game's DAT
  */
-class GTAData
+class GameData
 {
 private:
 	
@@ -61,9 +61,9 @@ public:
 	 * ctor
 	 * @param path Path to the root of the game data.
 	 */
-	GTAData(const std::string& path);
+	GameData(const std::string& path);
 	
-	GTAEngine* engine;
+	GameWorld* engine;
 	
 	/**
 	 * Returns the current platform

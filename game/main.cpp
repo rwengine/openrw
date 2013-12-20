@@ -1,7 +1,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <render/DebugDraw.hpp>
 #include <ai/GTAAIController.hpp>
@@ -26,7 +26,7 @@ constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
 
 sf::RenderWindow window;
 
-GTAEngine* gta = nullptr;
+GameWorld* gta = nullptr;
 
 GTAPlayerAIController* player = nullptr;
 GTACharacter* playerCharacter = nullptr;
@@ -84,7 +84,7 @@ void handleEvent(sf::Event &event)
 void init(std::string gtapath)
 {
 	// GTA GET
-	gta = new GTAEngine(gtapath);
+	gta = new GameWorld(gtapath);
 	
 	// This is harcoded in GTA III for some reason
 	gta->gameData.loadIMG("/models/gta3");
@@ -267,10 +267,10 @@ void render()
 	for(auto it = gta->log.begin(); it != gta->log.end(); ++it) {
 		text.setString(it->message);
 		switch(it->type) {
-		case GTAEngine::LogEntry::Error:
+		case GameWorld::LogEntry::Error:
 			text.setColor(sf::Color::Red);
 			break;
-		case GTAEngine::LogEntry::Warning:
+		case GameWorld::LogEntry::Warning:
 			text.setColor(sf::Color::Yellow);
 			break;
 		default:

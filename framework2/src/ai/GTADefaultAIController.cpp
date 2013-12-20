@@ -1,6 +1,6 @@
 #include "ai/GTADefaultAIController.hpp"
 #include <objects/GTACharacter.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <objects/GTAVehicle.hpp>
 

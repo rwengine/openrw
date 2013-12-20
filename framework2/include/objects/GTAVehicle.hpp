@@ -30,7 +30,7 @@ public:
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
 
-	GTAVehicle(GTAEngine* engine,
+	GTAVehicle(GameWorld* engine,
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
 			   Model* model,

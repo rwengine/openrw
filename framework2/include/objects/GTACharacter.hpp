@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 class GTAVehicle;
+class GameWorld;
 
 /**
  * @brief The GTACharacter struct
@@ -51,7 +52,7 @@ public:
 	 * @param model
 	 * @param ped PEDS_t struct to use.
 	 */
-	GTACharacter(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data);
+	GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data);
 
 	~GTACharacter();
 

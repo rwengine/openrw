@@ -13,7 +13,7 @@
 
 class Model;
 
-class GTAData;
+class GameData;
 
 class LoaderDFF
 {
@@ -22,7 +22,7 @@ private:
 	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
 
 public:
-	Model* loadFromMemory(char *data, GTAData* gameData);
+	Model* loadFromMemory(char *data, GameData* gameData);
 };
 
 #endif

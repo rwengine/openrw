@@ -1,12 +1,12 @@
 #include <loaders/TextureLoader.hpp>
-#include <engine/GTAData.hpp>
+#include <engine/GameData.hpp>
 #include <render/TextureAtlas.hpp>
 
 #include <fstream>
 #include <iostream>
 #include <algorithm>
 
-bool TextureLoader::loadFromFile(std::string filename, GTAData* gameData)
+bool TextureLoader::loadFromFile(std::string filename, GameData* gameData)
 {
 	std::ifstream dfile(filename);
 	if ( ! dfile.is_open()) {
@@ -194,7 +194,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 	return textureName;
 }
 
-bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
+bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 {
 	RW::BinaryStreamSection root(data);
 	/*auto texDict =*/ root.readStructure<RW::BSTextureDictionary>();

@@ -1,8 +1,8 @@
 #pragma once
-#ifndef _GTAENGINE_HPP_
-#define _GTAENGINE_HPP_
+#ifndef _GAMEWORLD_HPP_
+#define _GAMEWORLD_HPP_
 
-#include <engine/GTAData.hpp>
+#include <engine/GameData.hpp>
 #include <render/GTARenderer.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <ai/GTAAINode.hpp>
@@ -26,11 +26,11 @@ class GTAVehicle;
  * @class GTAEngine
  *  Provides a simple interface to the framework's internals
  */
-class GTAEngine
+class GameWorld
 {
 public:
 
-	GTAEngine(const std::string& gamepath);
+	GameWorld(const std::string& gamepath);
 	
 	/**
 	 * Loads the game data
@@ -111,7 +111,7 @@ public:
 	/**
 	 * Game data
 	 */
-	GTAData gameData;
+	GameData gameData;
 	
 	/**
 	 * Renderer

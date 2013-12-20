@@ -1,11 +1,11 @@
 #include <objects/GTAVehicle.hpp>
 #include <objects/GTACharacter.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <sys/stat.h>
 #include <data/CollisionModel.hpp>
 
-GTAVehicle::GTAVehicle(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CarData> data, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
+GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CarData> data, const VehicleInfo& info, const glm::vec3& prim, const glm::vec3& sec)
 	: GTAObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
 	  vehicle(data), info(info), colourPrimary(prim), colourSecondary(sec), 

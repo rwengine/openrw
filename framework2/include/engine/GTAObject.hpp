@@ -12,7 +12,7 @@ class GTAAIController;
 class Model;
 class Animator;
 
-class GTAEngine;
+class GameWorld;
 
 /**
  * @brief The GTAObject struct
@@ -25,7 +25,7 @@ struct GTAObject
 
     Model* model; /// Cached pointer to Object's Model.
     
-    GTAEngine* engine;
+    GameWorld* engine;
 
 	Animator* animator; /// Object's animator.
 	
@@ -34,7 +34,7 @@ struct GTAObject
 	 */
 	float mHealth; 
 
-    GTAObject(GTAEngine* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
+    GTAObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f) {}
 		
 	virtual ~GTAObject() {};

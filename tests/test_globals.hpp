@@ -2,7 +2,7 @@
 #define _TESTGLOBABLS_HPP_
 
 #include <SFML/Window.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 
 // Many tests require OpenGL be functional, seems like a reasonable solution.
 
@@ -10,13 +10,13 @@ class Global
 {
 public:
 	sf::Window wnd;
-	GTAEngine* e;
+	GameWorld* e;
 	
 	Global() {
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		e = new GTAEngine("data");
+		e = new GameWorld("data");
 	}
 
 	~Global() {

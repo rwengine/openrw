@@ -14,7 +14,7 @@ struct GTAInstance : public GTAObject
 	std::shared_ptr<GTAInstance> LODinstance;
 
 	GTAInstance(
-		GTAEngine* engine,
+		GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
 		Model* model,

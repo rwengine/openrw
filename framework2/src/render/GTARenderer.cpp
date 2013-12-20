@@ -1,5 +1,5 @@
 #include <render/GTARenderer.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <render/TextureAtlas.hpp>
 #include <render/Model.hpp>
@@ -125,7 +125,7 @@ GLuint compileShader(GLenum type, const char *source)
 	return shader;
 }
 
-GTARenderer::GTARenderer(GTAEngine* engine)
+GTARenderer::GTARenderer(GameWorld* engine)
     : engine(engine)
 {	
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);

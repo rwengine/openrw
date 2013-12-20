@@ -1,5 +1,5 @@
-#include <engine/GTAData.hpp>
-#include <engine/GTAEngine.hpp>
+#include <engine/GameData.hpp>
+#include <engine/GameWorld.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
@@ -70,13 +70,13 @@ std::string fixPath(std::string path) {
 }
 
 
-GTAData::GTAData(const std::string& path)
+GameData::GameData(const std::string& path)
 : datpath(path), engine(nullptr)
 {
 
 }
 
-void GTAData::load()
+void GameData::load()
 {
 	parseDAT(datpath+"/data/default.dat");
 	parseDAT(datpath+"/data/gta3.dat");
@@ -96,7 +96,7 @@ void GTAData::load()
     loadIFP(datpath+"/anim/ped.ifp");
 }
 
-void GTAData::parseDAT(const std::string& path)
+void GameData::parseDAT(const std::string& path)
 {
 	std::ifstream datfile(path.c_str());
 	
@@ -153,7 +153,7 @@ void GTAData::parseDAT(const std::string& path)
 	}
 }
 
-void GTAData::loadIDE(const std::string& name)
+void GameData::loadIDE(const std::string& name)
 {
 	std::string lowername = name;
 	for(size_t t = 0; t < lowername.size(); ++t)
@@ -167,7 +167,7 @@ void GTAData::loadIDE(const std::string& name)
 	ideLocations.insert({lowername, datpath+"/"+lowername});
 }
 
-void GTAData::loadCOL(const size_t zone, const std::string& name)
+void GameData::loadCOL(const size_t zone, const std::string& name)
 {
 	LoaderCOL col;
 	
@@ -181,7 +181,7 @@ void GTAData::loadCOL(const size_t zone, const std::string& name)
 	}
 }
 
-void GTAData::loadIMG(const std::string& name)
+void GameData::loadIMG(const std::string& name)
 {
 	LoaderIMG imgLoader; 
 	std::string archivePath = datpath + name;
@@ -211,7 +211,7 @@ void GTAData::loadIMG(const std::string& name)
 	}
 }
 
-void GTAData::loadIPL(const std::string& name)
+void GameData::loadIPL(const std::string& name)
 {
 	iplLocations.insert({name, name});
 }
@@ -224,7 +224,7 @@ enum ColSection {
 	CAR4  ///> Used in GTASA, contains quadruple colors
 };
 
-void GTAData::loadCarcols(const std::string& path)
+void GameData::loadCarcols(const std::string& path)
 {
 	std::ifstream fstream(path.c_str());
 	
@@ -275,12 +275,12 @@ void GTAData::loadCarcols(const std::string& path)
 	}
 }
 
-void GTAData::loadWeather(const std::string &path)
+void GameData::loadWeather(const std::string &path)
 {
 	weatherLoader.load(path);
 }
 
-void GTAData::loadHandling(const std::string& path)
+void GameData::loadHandling(const std::string& path)
 {
 	std::ifstream hndFile(path.c_str());
 
@@ -334,7 +334,7 @@ void GTAData::loadHandling(const std::string& path)
 
 }
 
-void GTAData::loadWaterpro(const std::string& path)
+void GameData::loadWaterpro(const std::string& path)
 {
 	std::ifstream ifstr(path.c_str());
 	
@@ -348,7 +348,7 @@ void GTAData::loadWaterpro(const std::string& path)
 	}
 }
 
-void GTAData::loadWater(const std::string& path)
+void GameData::loadWater(const std::string& path)
 {
 	std::ifstream ifstr(path.c_str());
 	
@@ -380,7 +380,7 @@ void GTAData::loadWater(const std::string& path)
 	}
 }
 
-void GTAData::loadTXD(const std::string& name) 
+void GameData::loadTXD(const std::string& name) 
 {
 	if( loadedFiles.find(name) != loadedFiles.end()) {
 		return;
@@ -393,7 +393,7 @@ void GTAData::loadTXD(const std::string& name)
 	}
 }
 
-void GTAData::loadDFF(const std::string& name)
+void GameData::loadDFF(const std::string& name)
 {
 	if( loadedFiles.find(name) != loadedFiles.end()) {
 		return;
@@ -408,7 +408,7 @@ void GTAData::loadDFF(const std::string& name)
 	}
 }
 
-void GTAData::loadIFP(const std::string &name)
+void GameData::loadIFP(const std::string &name)
 {
     std::ifstream dfile(name.c_str());
 
@@ -429,7 +429,7 @@ void GTAData::loadIFP(const std::string &name)
     }
 }
 
-char* GTAData::loadFile(const std::string& name)
+char* GameData::loadFile(const std::string& name)
 {
 	if( loadedFiles.find(name) != loadedFiles.end()) {
 		std::cerr << "File " << name << " already loaded!" << std::endl;
@@ -483,7 +483,7 @@ char* GTAData::loadFile(const std::string& name)
 	return nullptr;
 }
 
-TextureAtlas* GTAData::getAtlas(size_t i)
+TextureAtlas* GameData::getAtlas(size_t i)
 {
 	if( i < atlases.size() ) {
 		return atlases[i];

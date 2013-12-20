@@ -1,4 +1,4 @@
-#include <engine/GTAEngine.hpp>
+#include <engine/GameWorld.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <ai/GTADefaultAIController.hpp>
@@ -10,13 +10,13 @@
 #include <objects/GTAInstance.hpp>
 #include <objects/GTAVehicle.hpp>
 
-GTAEngine::GTAEngine(const std::string& path)
+GameWorld::GameWorld(const std::string& path)
     : gameTime(0.f), gameData(path), renderer(this), randomEngine(rand())
 {
 	gameData.engine = this;
 }
 
-bool GTAEngine::load()
+bool GameWorld::load()
 {
 	collisionConfig = new btDefaultCollisionConfiguration;
 	collisionDispatcher = new btCollisionDispatcher(collisionConfig);
@@ -31,22 +31,22 @@ bool GTAEngine::load()
 	return true;
 }
 
-void GTAEngine::logInfo(const std::string& info)
+void GameWorld::logInfo(const std::string& info)
 {
 	log.push_back({LogEntry::Info, gameTime, info});
 }
 
-void GTAEngine::logError(const std::string& error)
+void GameWorld::logError(const std::string& error)
 {
 	log.push_back({LogEntry::Error, gameTime, error});
 }
 
-void GTAEngine::logWarning(const std::string& warning)
+void GameWorld::logWarning(const std::string& warning)
 {
 	log.push_back({LogEntry::Warning, gameTime, warning});
 }
 
-bool GTAEngine::defineItems(const std::string& name)
+bool GameWorld::defineItems(const std::string& name)
 {
 	auto i = gameData.ideLocations.find(name);
 	std::string path = name;
@@ -103,7 +103,7 @@ bool GTAEngine::defineItems(const std::string& name)
 	return false;
 }
 
-bool GTAEngine::placeItems(const std::string& name)
+bool GameWorld::placeItems(const std::string& name)
 {
 	auto i = gameData.iplLocations.find(name);
 	std::string path = name;
@@ -150,7 +150,7 @@ bool GTAEngine::placeItems(const std::string& name)
 	return false;
 }
 
-bool GTAEngine::loadZone(const std::string& path)
+bool GameWorld::loadZone(const std::string& path)
 {
 	LoaderIPL ipll;
 
@@ -168,7 +168,7 @@ bool GTAEngine::loadZone(const std::string& path)
 	return false;
 }
 
-GTAInstance *GTAEngine::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+GTAInstance *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto oi = objectTypes.find(id);
 	if( oi != objectTypes.end()) {
@@ -204,7 +204,7 @@ GTAInstance *GTAEngine::createInstance(const uint16_t id, const glm::vec3& pos, 
 	return nullptr;
 }
 
-GTAVehicle *GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto vti = vehicleTypes.find(id);
 	if(vti != vehicleTypes.end()) {
@@ -266,7 +266,7 @@ GTAVehicle *GTAEngine::createVehicle(const uint16_t id, const glm::vec3& pos, co
 	return nullptr;
 }
 
-GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
+GTACharacter* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
     auto pti = pedestrianTypes.find(id);
     if( pti != pedestrianTypes.end() ) {
@@ -294,7 +294,7 @@ GTACharacter* GTAEngine::createPedestrian(const uint16_t id, const glm::vec3 &po
     return nullptr;
 }
 
-void GTAEngine::destroyObject(GTAObject* object)
+void GameWorld::destroyObject(GTAObject* object)
 {
 	if(object->type() == GTAObject::Character)
 	{
