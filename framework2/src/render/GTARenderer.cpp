@@ -54,11 +54,8 @@ const char *fragmentShaderSource = "#version 130\n"
 "	if(c.a < 0.1) discard;"
 "	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);"
 "	float fogfac = clamp( (FogEnd-fogZ)/(FogEnd-FogStart), 0.0, 1.0 );"
-//"	float l = clamp(dot(Normal, SunDirection), 0.0, 1);"
-//"	gl_FragColor = vec4(vec3(fogfac), 1.0);"
+//"	gl_FragColor = mix(AmbientColour, c, fogfac);"
 "	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);"
-// "	gl_FragColor = vec4((Normal*0.5)+0.5, 1.0);"
-// "	gl_FragColor = c * vec4((Normal*0.5)+0.5, 1.0);"
 "}";
 
 const char *skydomeVertexShaderSource = "#version 130\n"
@@ -471,11 +468,14 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 		Model::Material& mat = model->geometries[g]->materials[subgeom.material];
 
 		if(mat.textures.size() > 0 ) {
-			TextureInfo& tex = engine->gameData.textures[mat.textures[0].name];
-			if(tex.transparent && queueTransparent) {
-				return false;
+			auto t = engine->gameData.textures.find(mat.textures[0].name);
+			if(t != engine->gameData.textures.end()) {
+				TextureInfo& tex = t->second;
+				if(tex.transparent && queueTransparent) {
+					return false;
+				}
+				glBindTexture(GL_TEXTURE_2D, tex.texName);
 			}
-			glBindTexture(GL_TEXTURE_2D, tex.texName);
 		}
 
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {

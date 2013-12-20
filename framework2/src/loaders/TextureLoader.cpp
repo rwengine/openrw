@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 bool TextureLoader::loadFromFile(std::string filename, GTAData* gameData)
 {
@@ -22,8 +23,11 @@ bool TextureLoader::loadFromFile(std::string filename, GTAData* gameData)
 	return loadFromMemory(data, gameData);
 }
 
-GLuint gErrorTextureData[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000, 0xFFFF0000 };
+GLuint gErrorTextureData[] = { 0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF };
 GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
+GLuint gTextureRed[] = {0xFF0000FF};
+GLuint gTextureGreen[] = {0xFF00FF00};
+GLuint gTextureBlue[] = {0xFFFF0000};
 
 GLuint getErrorTexture()
 {
@@ -37,6 +41,7 @@ GLuint getErrorTexture()
 			2, 2, 0,
 			GL_RGBA, GL_UNSIGNED_BYTE, gErrorTextureData
 		);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	return errTexName;
 }
@@ -119,8 +124,9 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 				type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
 				break;
 			case RW::BSTextureNative::FORMAT_8888:
-				format = GL_RGBA;
-				type = GL_UNSIGNED_INT_8_8_8_8_REV;
+				format = GL_BGRA;
+				//type = GL_UNSIGNED_INT_8_8_8_8_REV;
+				type = GL_UNSIGNED_BYTE;
 				break;
 			case RW::BSTextureNative::FORMAT_888:
 				format = GL_BGRA;
@@ -135,6 +141,9 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 			texNative.width, texNative.height, 0,
 			format, type, coldata
 		);
+	}
+	else {
+		return getErrorTexture();
 	}
 
 	GLenum texFilter = GL_LINEAR;
@@ -199,6 +208,7 @@ bool TextureLoader::loadFromMemory(char *data, GTAData *gameData)
 
 		RW::BSTextureNative texNative = rootSection.readStructure<RW::BSTextureNative>();
 		std::string name = std::string(texNative.diffuseName);
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 		bool transparent = false;
 		GLuint id = createTexture(texNative, rootSection, &transparent);
 

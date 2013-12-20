@@ -210,6 +210,9 @@ Model* LoaderDFF::loadFromMemory(char *data, GTAData *gameData)
 							// The data is null terminated anyway.
 							textureName = namesec.raw();
 							alphaName = alphasec.raw();
+							
+							std::transform(textureName.begin(), textureName.end(), textureName.begin(), ::tolower );
+							std::transform(alphaName.begin(), alphaName.end(), alphaName.begin(), ::tolower );
 
 							geom->materials[m].textures[t] = {textureName, alphaName};
 						}

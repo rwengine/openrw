@@ -4,6 +4,7 @@
 #include <engine/GTAEngine.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <render/DebugDraw.hpp>
+#include <render/Model.hpp>
 #include <ai/GTAAIController.hpp>
 #include <ai/GTAPlayerAIController.hpp>
 #include <objects/GTACharacter.hpp>
@@ -548,6 +549,24 @@ void render()
 		auto p = debugObject->getPosition();
 		ss << "Position: " << p.x << " " << p.y << " " << p.z << std::endl;
 		ss << "Health: " << debugObject->mHealth << std::endl;
+		if(debugObject->model) {
+			auto m = debugObject->model;
+			ss << "Textures: " << std::endl;
+			for(auto it = m->geometries.begin(); it != m->geometries.end();
+				++it ) 
+			{
+				auto g = *it;
+				for(auto itt = g->materials.begin(); itt != g->materials.end();
+					++itt)
+				{
+					for(auto tit = itt->textures.begin(); tit != itt->textures.end();
+						++tit)
+					{
+						ss << " " << tit->name << std::endl;
+					}
+				}
+			}
+		}
 		if(debugObject->type() == GTAObject::Vehicle) {
 			GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
 			ss << "ID: " << vehicle->info.handling.ID << std::endl;
