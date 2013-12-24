@@ -31,6 +31,8 @@ public:
     virtual void update(float dt);
 	
     virtual glm::vec3 getTargetPosition();
+	
+	void jump();
 };
 
 #endif

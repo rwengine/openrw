@@ -288,8 +288,13 @@ void handleInputEvent(sf::Event &event)
 	switch(event.type) {
 	case sf::Event::KeyPressed:
 		switch (event.key.code) {
-		case sf::Keyboard::Space:
+		case sf::Keyboard::LShift:
 			moveSpeed = 60.f;
+			break;
+		case sf::Keyboard::Space:
+			if(playerCharacter) {
+				playerCharacter->jump();
+			}
 			break;
 		case sf::Keyboard::M:
 			mouseGrabbed = ! mouseGrabbed;
@@ -660,6 +665,7 @@ int main(int argc, char *argv[])
     cs.depthBits = 32;
     window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close, cs);
 	window.setVerticalSyncEnabled(true);
+	window.setMouseCursorVisible(false);
 
 	init(argv[optind], loadWorld);
 	

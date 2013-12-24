@@ -62,26 +62,35 @@ void GTAPlayerAIController::enterNearestVehicle()
 
 void GTAPlayerAIController::update(float dt)
 {
-	if( glm::length(direction) > 0.001f ) {
-		character->changeAction(running ? GTACharacter::Run : GTACharacter::Walk);
-	}
-	else {
-		character->changeAction(GTACharacter::Idle);
-	}
+	if( character->currentActivity != GTACharacter::Jump )
+	{
+		if( glm::length(direction) > 0.001f ) {
+			character->changeAction(running ? GTACharacter::Run : GTACharacter::Walk);
+		}
+		else {
+			character->changeAction(GTACharacter::Idle);
+		}
 
-	if( character->getCurrentVehicle() ) {
-		character->getCurrentVehicle()->setSteeringAngle(-direction.x * 3.131f);
+		if( character->getCurrentVehicle() ) {
+			character->getCurrentVehicle()->setSteeringAngle(-direction.x * 3.131f);
 
-		// TODO what is handbraking.
-		character->getCurrentVehicle()->setThrottle(direction.y);
+			// TODO what is handbraking.
+			character->getCurrentVehicle()->setThrottle(direction.y);
+		}
+		else if( glm::length(direction) > 0.001f ) {
+			character->rotation = cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
+		}
 	}
-	else if( glm::length(direction) > 0.001f ) {
-		character->rotation = cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
-	}
-
 }
 
 glm::vec3 GTAPlayerAIController::getTargetPosition()
 {
 	return direction;
 }
+
+void GTAPlayerAIController::jump()
+{
+	character->changeAction(GTACharacter::Jump);
+	character->jump();
+}
+

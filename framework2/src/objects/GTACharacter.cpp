@@ -119,7 +119,6 @@ void GTACharacter::tick(float dt)
 void GTACharacter::updateCharacter()
 {
 	if(physCharacter) {
-		
 		// Check to see if the character should be knocked down.
 		btManifoldArray   manifoldArray;
 		btBroadphasePairArray& pairArray = physObject->getOverlappingPairCache()->getOverlappingPairArray();
@@ -163,11 +162,21 @@ void GTACharacter::updateCharacter()
 			}
 		}
 		
-		glm::vec3 direction = rotation * animator->getRootTranslation();
-		physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
-		
-		btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
-		position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+		if(currentActivity == GTACharacter::Jump)
+		{
+			if(physCharacter->onGround())
+			{
+				changeAction(GTACharacter::Idle);
+			}
+		}
+		else 
+		{
+			glm::vec3 direction = rotation * animator->getRootTranslation();
+			physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
+			
+			btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
+			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+		}
 	}
 }
 
@@ -243,6 +252,12 @@ bool GTACharacter::takeDamage(const GTAObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 	return true;
+}
+
+void GTACharacter::jump()
+{
+	physCharacter->jump();
+	changeAction(GTACharacter::Jump);
 }
 
 void GTACharacter::resetToAINode()

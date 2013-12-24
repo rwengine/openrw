@@ -31,6 +31,9 @@ public:
 		Walk,
 		Run,
 		Crouch,
+		Jump,
+		Falling,
+		Landing,
 		VehicleDrive,
 		VehicleSit,
 		KnockedDown,
@@ -80,6 +83,8 @@ public:
 	void setCurrentVehicle(GTAVehicle *value, size_t seat);
 	
     virtual bool takeDamage(const DamageInfo& damage);
+	
+	void jump();
 	
 	/**
 	 * Resets the Actor to the nearest AI Graph node
