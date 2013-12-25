@@ -14,12 +14,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "MenuSystem.hpp"
 #include <SFML/Graphics.hpp>
 
 #include <memory>
 #include <sstream>
 #include <getopt.h>
-#include <boost/concept_check.hpp>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -298,6 +298,7 @@ void handleInputEvent(sf::Event &event)
 			break;
 		case sf::Keyboard::M:
 			mouseGrabbed = ! mouseGrabbed;
+			window.setMouseCursorVisible(! mouseGrabbed);
 			break;
 		case sf::Keyboard::P:
             debugMode+=1;
@@ -320,7 +321,7 @@ void handleInputEvent(sf::Event &event)
 		break;
 	case sf::Event::KeyReleased:
 		switch(event.key.code) {
-		case sf::Keyboard::Space:
+		case sf::Keyboard::LShift:
 				moveSpeed = 20.f;
 				break;
 		case sf::Keyboard::W:
@@ -670,7 +671,13 @@ int main(int argc, char *argv[])
 	init(argv[optind], loadWorld);
 	
 	sf::Clock clock;
-
+	
+	/*Menu mainMenu(font);
+	mainMenu.offset = sf::Vector2f(50.f, 100.f);
+	mainMenu.addEntry(Menu::lambda("Test", [] { std::cout << "Test" << std::endl; }));
+	mainMenu.addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
+	mainMenu.addEntry(Menu::lambda("Exit", [] { window.close(); }));*/
+	
 	float accum = 0.f;
     float ts = 1.f / 60.f;
 	
@@ -680,6 +687,14 @@ int main(int argc, char *argv[])
 			handleGlobalEvent(event);
 			handleCommandEvent(event);
 			handleInputEvent(event);
+			
+			if(! mouseGrabbed) {
+				switch(event.type) {
+					case sf::Event::MouseButtonPressed:
+						mainMenu.click(event.mouseButton.x, event.mouseButton.y);
+						break;
+				}
+			}
 		}
 
 		accum += clock.restart().asSeconds();
@@ -690,6 +705,8 @@ int main(int argc, char *argv[])
 		}
 		
 		render();
+	
+		mainMenu.draw(window);
 		window.display();
 	
 	}
