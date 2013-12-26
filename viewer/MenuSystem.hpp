@@ -20,7 +20,7 @@ public:
 		
 		MenuEntry(const std::string& n) : name(n) {}
 		
-		float getHeight() { return 50.f; }
+		float getHeight() { return 30.f; }
 		
 		virtual void draw(const sf::Font& font, sf::RenderWindow& window, sf::Vector2f& basis)
 		{
@@ -29,7 +29,7 @@ public:
 			t.setPosition(basis);
 			t.setString(name);
 			window.draw(t);
-			basis.y += 50.f;
+			basis.y += getHeight();
 		}
 		
 		virtual void activate(sf::Vector2f click) = 0;

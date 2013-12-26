@@ -15,11 +15,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "MenuSystem.hpp"
+#include "State.hpp"
 #include <SFML/Graphics.hpp>
 
 #include <memory>
 #include <sstream>
 #include <getopt.h>
+#include <boost/concept_check.hpp>
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -46,7 +48,7 @@ int debugMode = 0;
 
 sf::Font font;
 
-bool showControls = true;
+bool showControls = false;
 
 bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr)
 {
@@ -71,6 +73,12 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr
 		return true;
 	}
 	return false;
+}
+
+void lockCursor(bool lock)
+{
+	mouseGrabbed = lock;
+	window.setMouseCursorVisible(! lock);
 }
 
 // Commands.
@@ -266,12 +274,6 @@ void handleGlobalEvent(sf::Event &event)
 {
 	switch (event.type) {
 	case sf::Event::KeyPressed:
-		switch (event.key.code) {
-		case sf::Keyboard::Escape:
-			window.close();
-			break;
-		default: break;
-		}
 		break;
 	case sf::Event::GainedFocus:
 		inFocus = true;
@@ -297,8 +299,7 @@ void handleInputEvent(sf::Event &event)
 			}
 			break;
 		case sf::Keyboard::M:
-			mouseGrabbed = ! mouseGrabbed;
-			window.setMouseCursorVisible(! mouseGrabbed);
+			lockCursor(! mouseGrabbed);
 			break;
 		case sf::Keyboard::P:
             debugMode+=1;
@@ -383,7 +384,9 @@ void handleCommandEvent(sf::Event &event)
 			command("object-info");
 			break;
 		break;
+		default: break;
 		}
+		default: break;
 	}
 }
 
@@ -631,6 +634,110 @@ void render()
 	}
 }
 
+GenericState pauseState(
+		[](State* self)
+		{
+			Menu *m = new Menu(font);
+			m->offset = sf::Vector2f(50.f, 100.f);
+			m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
+			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
+			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
+			self->currentMenu = m;
+			lockCursor(false);
+		},
+		[](State* self, float dt)
+		{
+			
+		},
+		[](State* self)
+		{
+			delete self->currentMenu;
+		},
+		[](State* self, const sf::Event& e)
+		{
+			switch(e.type) {
+				case sf::Event::KeyPressed:
+					switch(e.key.code) {
+						case sf::Keyboard::Escape:
+							StateManager::get().exit();
+							break;
+						default: break;
+					}
+					break;
+				default: break;
+			}
+		}
+);
+
+GenericState gameState(
+	[](State* self)
+	{
+		lockCursor(true);
+		// TODO: create game state object
+		// so we can track if we already
+		// Started or not.
+		if(! player) {
+			command("player");
+		}
+	},
+	[](State* self, float dt)
+	{
+		
+	},
+	[](State* self)
+	{
+		
+	},
+	[](State* self, const sf::Event& e)
+	{
+		switch(e.type) {
+			case sf::Event::KeyPressed:
+				switch(e.key.code) {
+					case sf::Keyboard::Escape:
+						StateManager::get().enter(&pauseState);
+						break;
+					default: break;
+				}
+				break;
+			default: break;
+		}
+	}
+);
+	
+GenericState menuState(
+		[](State* self)
+		{
+			Menu *m = new Menu(font);
+			m->offset = sf::Vector2f(50.f, 100.f);
+			m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(&gameState); }));
+			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
+			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
+			self->currentMenu = m;
+			lockCursor(false);
+		},
+		[](State* self, float dt)
+		{
+			
+		},
+		[](State* self)
+		{
+			delete self->currentMenu;
+		},
+		[](State* self, const sf::Event& e)
+		{
+			switch(e.type) {
+				case sf::Event::KeyPressed:
+					switch(e.key.code) {
+						case sf::Keyboard::Escape:
+							StateManager::get().exit();
+						default: break;
+					}
+					break;
+				default: break;
+			}
+		}
+);
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -664,7 +771,7 @@ int main(int argc, char *argv[])
 
     sf::ContextSettings cs;
     cs.depthBits = 32;
-    window.create(sf::VideoMode(w, h), "GTA3 Viewer", sf::Style::Close, cs);
+    window.create(sf::VideoMode(w, h), "", sf::Style::Default, cs);
 	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
@@ -672,29 +779,20 @@ int main(int argc, char *argv[])
 	
 	sf::Clock clock;
 	
-	/*Menu mainMenu(font);
-	mainMenu.offset = sf::Vector2f(50.f, 100.f);
-	mainMenu.addEntry(Menu::lambda("Test", [] { std::cout << "Test" << std::endl; }));
-	mainMenu.addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-	mainMenu.addEntry(Menu::lambda("Exit", [] { window.close(); }));*/
+	StateManager::get().enter(&menuState);
 	
 	float accum = 0.f;
     float ts = 1.f / 60.f;
 	
-	while (window.isOpen()) {
+	// Loop until the window is closed or we run out of state.
+	while (window.isOpen() && StateManager::get().states.size()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			handleGlobalEvent(event);
 			handleCommandEvent(event);
 			handleInputEvent(event);
 			
-			if(! mouseGrabbed) {
-				switch(event.type) {
-					case sf::Event::MouseButtonPressed:
-						mainMenu.click(event.mouseButton.x, event.mouseButton.y);
-						break;
-				}
-			}
+			StateManager::get().states.back()->handleEvent(event);
 		}
 
 		accum += clock.restart().asSeconds();
@@ -705,8 +803,9 @@ int main(int argc, char *argv[])
 		}
 		
 		render();
-	
-		mainMenu.draw(window);
+		
+		StateManager::get().draw(window);
+		
 		window.display();
 	
 	}
