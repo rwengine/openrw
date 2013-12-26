@@ -600,7 +600,7 @@ void render()
 		gta->log.pop_front();
 	}
 	
-	sf::Vector2f tpos(10.f, 200.f);
+	sf::Vector2f tpos(10.f, window.getSize().y - 30.f);
 	text.setCharacterSize(15);
 	for(auto it = gta->log.begin(); it != gta->log.end(); ++it) {
 		text.setString(it->message);
@@ -623,7 +623,7 @@ void render()
 		
 		text.setPosition(tpos);
 		window.draw(text);
-		tpos.y += text.getLocalBounds().height;
+		tpos.y -= text.getLocalBounds().height;
 	}
 	
 	static size_t fc = 0;
