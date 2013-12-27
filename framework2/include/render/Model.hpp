@@ -108,7 +108,7 @@ public:
     {
         Frame& frame = frames[frameIndex];
         if( frame.parentFrameIndex != -1 ) {
-            return getFrameMatrix(frame.parentFrameIndex) * frame.matrix;
+            return frame.matrix * getFrameMatrix(frame.parentFrameIndex);
         }
         else {
             return frame.matrix;

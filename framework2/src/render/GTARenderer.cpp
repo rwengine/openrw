@@ -542,7 +542,7 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
 					   g, modelMatrix *
 					   (animator ?
 							animator->getFrameMatrix(model->atomics[a].frame)
-							 : model->getFrameMatrix(model->atomics[a].frame)),
+							 : glm::mat4()), //model->getFrameMatrix(model->atomics[a].frame)),
 					   object);
     }
 }
