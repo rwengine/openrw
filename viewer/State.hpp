@@ -100,7 +100,7 @@ struct StateManager
 		// TODO: Resole states being leaked.
 		states.back()->exit();
 		states.pop_back();
-		if(states.back()) {
+		if(states.size() > 0) {
 			states.back()->enter();
 		}
 	}
