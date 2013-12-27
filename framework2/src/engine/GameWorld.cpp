@@ -331,3 +331,15 @@ void GameWorld::destroyObject(GTAObject* object)
 	}
 	delete object;
 }
+
+int GameWorld::getHour()
+{
+	const float dayseconds = (24.f * 60.f);
+	float daytime = fmod(gameTime, dayseconds);
+	return daytime / 60.f;
+}
+
+int GameWorld::getMinute()
+{
+	return fmod(gameTime, 60.f);
+}

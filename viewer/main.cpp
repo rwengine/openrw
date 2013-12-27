@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <sstream>
+#include <iomanip>
 #include <getopt.h>
 #include <boost/concept_check.hpp>
 
@@ -400,6 +401,9 @@ void init(std::string gtapath, bool loadWorld)
 	
 	gta->load();
 	
+	// Set time to noon.
+	gta->gameTime = 12.f * 60.f;
+	
 	// Loade all of the IDEs.
 	for(std::map<std::string, std::string>::iterator it = gta->gameData.ideLocations.begin();
 		it != gta->gameData.ideLocations.end();
@@ -550,7 +554,8 @@ void render()
 	window.resetGLStates();
 	
 	std::stringstream ss;
-	ss << "Time: " << fmod(floor(gta->gameTime), 24.f) << ":" << (floor(fmod(gta->gameTime, 1.f) * 60.f)) << std::endl;
+	ss << std::setfill('0') << "Time: " << std::setw(2) << gta->getHour() 
+		<< ":" << std::setw(2) << gta->getMinute() << std::endl;
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << plyPos.x << " " << plyPos.y << " " << plyPos.z << std::endl; 
 	

@@ -103,6 +103,16 @@ public:
 	 */
 	void destroyObject(GTAObject* object);
 	
+	/**
+	 * Returns the current hour
+	 */
+    int getHour();
+	
+	/**
+	 * Returns the current minute
+	 */
+	int getMinute();
+	
 	/** 
 	 * Game Clock
 	 */

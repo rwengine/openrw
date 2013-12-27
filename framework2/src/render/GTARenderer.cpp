@@ -220,16 +220,17 @@ void GTARenderer::renderWorld()
 {
 	glBindVertexArray( vao );
 	
-    float gameTime = fmod(engine->gameTime, 24.f);
+    float tod = fmod(engine->gameTime, 24.f * 60.f);
 
-    auto weather = engine->gameData.weatherLoader.getWeatherData(WeatherLoader::Sunny, gameTime);
+	// Requires a float 0-24
+    auto weather = engine->gameData.weatherLoader.getWeatherData(WeatherLoader::Sunny, tod / 60.f);
 
     glm::vec3 skyTop = weather.skyTopColor;
     glm::vec3 skyBottom = weather.skyBottomColor;
     glm::vec3 ambient = weather.ambientColor;
     glm::vec3 dynamic = weather.directLightColor;
 
-	float theta = (gameTime - 12.f)/24.0 * 2 * 3.14159265;
+	float theta = (tod/(60.f * 24.f) - 0.5f) * 2 * 3.14159265;
 	glm::vec3 sunDirection{
 		sin(theta),
 		0.0,
