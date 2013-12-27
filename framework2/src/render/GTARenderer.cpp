@@ -537,12 +537,19 @@ void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObj
         if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
             glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
         }
+        
+        // Determine which transformation to use (why is this neccasary)
+        glm::mat4 localMatrix;
+		if(animator) {
+			localMatrix = animator->getFrameMatrix(model->atomics[a].frame);
+		}
+		else if(object&& object->type() == GTAObject::Vehicle)
+		{
+			localMatrix = model->getFrameMatrix(model->atomics[a].frame);
+		}
 
 		renderGeometry(model,
-					   g, modelMatrix *
-					   (animator ?
-							animator->getFrameMatrix(model->atomics[a].frame)
-							 : glm::mat4()), //model->getFrameMatrix(model->atomics[a].frame)),
+					   g, modelMatrix * localMatrix,
 					   object);
     }
 }
