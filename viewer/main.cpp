@@ -384,6 +384,12 @@ void handleCommandEvent(sf::Event &event)
 		case sf::Keyboard::F9:
 			command("object-info");
 			break;
+		case sf::Keyboard::LBracket:
+			gta->gameTime -= 60.f;
+			break;
+		case sf::Keyboard::RBracket:
+			gta->gameTime += 60.f;
+			break;
 		break;
 		default: break;
 		}

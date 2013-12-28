@@ -8,6 +8,7 @@
 #include <objects/GTAInstance.hpp>
 #include <objects/GTAVehicle.hpp>
 #include <ai/GTAAIController.hpp>
+#include <data/ObjectData.hpp>
 
 #include <deque>
 #include <cmath>
@@ -288,8 +289,12 @@ void GTARenderer::renderWorld()
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
         GTAInstance& inst = *engine->objectInstances[i];
 		
-		if(((inst.object->flags & ObjectData::NIGHTONLY) | (inst.object->flags & ObjectData::DAYONLY)) != 0) {
-			//continue;
+		if(inst.object->timeOn != inst.object->timeOff) {
+			// Update rendering flags.
+			if(engine->getHour() < inst.object->timeOn 
+				&& engine->getHour() > inst.object->timeOff) {
+				continue;
+			}
 		}
 
         if(!inst.model)

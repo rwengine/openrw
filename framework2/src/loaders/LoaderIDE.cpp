@@ -47,7 +47,8 @@ bool LoaderIDE::load(const std::string &filename)
 			std::stringstream strstream(line);
 
 			switch (section) {
-			case OBJS: { // Supports Type 1, 2 and 3
+			case OBJS:
+			case TOBJ: { // Supports Type 1, 2 and 3
 				std::shared_ptr<ObjectData> objs(new ObjectData);
 
 				std::string id, numClumps, flags,
@@ -67,6 +68,18 @@ bool LoaderIDE::load(const std::string &filename)
 				}
 
 				getline(strstream, flags, ',');
+				
+				// Keep reading TOBJ data
+				if(section == LoaderIDE::TOBJ) {
+					std::string buff;
+					getline(strstream, buff, ',');
+					objs->timeOn = atoi(buff.c_str());
+					getline(strstream, buff, ',');
+					objs->timeOff = atoi(buff.c_str());
+				}
+				else {
+					objs->timeOff = objs->timeOn = 0;
+				}
 
 				// Put stuff in our struct
 				objs->ID          = atoi(id.c_str());

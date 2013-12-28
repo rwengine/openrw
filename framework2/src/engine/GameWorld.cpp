@@ -125,7 +125,7 @@ bool GameWorld::placeItems(const std::string& name)
 		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
 			std::shared_ptr<InstanceData> inst = ipll.m_instances[i];
 			if(! createInstance(inst->id, inst->pos, inst->rot)) {
-				std::cerr << "No object for instance " << inst->id << " (" << path << ")" << std::endl;
+				std::cerr << "No object for instance " << inst->id << " Model: " << inst->model << " (" << path << ")" << std::endl;
 			}
 		}
 		

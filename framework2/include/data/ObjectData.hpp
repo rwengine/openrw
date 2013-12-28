@@ -16,6 +16,9 @@ struct ObjectData
 	int32_t flags;
 	bool LOD;
 	
+	short timeOn;
+	short timeOff;
+	
 	enum {
 		WET          = 1,       /// Render with a wet effect
 		NIGHTONLY    = 1 << 1,  /// Render only during the night
