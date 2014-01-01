@@ -649,7 +649,7 @@ GenericState pauseState(
 		[](State* self)
 		{
 			Menu *m = new Menu(font);
-			m->offset = sf::Vector2f(50.f, 100.f);
+			m->offset = glm::vec2(50.f, 100.f);
 			m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
 			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
@@ -719,7 +719,7 @@ GenericState menuState(
 		[](State* self)
 		{
 			Menu *m = new Menu(font);
-			m->offset = sf::Vector2f(50.f, 100.f);
+			m->offset = glm::vec2(50.f, 100.f);
 			m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(&gameState); }));
 			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));

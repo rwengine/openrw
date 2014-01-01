@@ -38,6 +38,25 @@ struct State
 					currentMenu->click(e.mouseButton.x, e.mouseButton.y);
 				}
 				break;
+			case sf::Event::MouseMoved:
+				if(currentMenu) {
+					currentMenu->hover(e.mouseMove.x, e.mouseMove.y);
+				}
+				break;
+			case sf::Event::KeyPressed:
+				if(currentMenu) {
+					switch(e.key.code) {
+						case sf::Keyboard::Up:
+							currentMenu->move(-1);
+							break;
+						case sf::Keyboard::Down:
+							currentMenu->move(1);
+							break;
+						case sf::Keyboard::Return:
+							currentMenu->activate();
+							break;
+					}
+				}
 			default: break;
 		};
 	}

@@ -4,6 +4,7 @@
 #include <memory>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <glm/glm.hpp>
 #include <functional>
 
 class Menu
@@ -12,7 +13,7 @@ class Menu
 public:
 	
 	Menu(const sf::Font& font)
-	 : font(font) {}
+	 : font(font), activeEntry(-1) {}
 	
 	struct MenuEntry
 	{
@@ -20,19 +21,19 @@ public:
 		
 		MenuEntry(const std::string& n) : name(n) {}
 		
-		float getHeight() { return 30.f; }
+		float getHeight() { return 38.f; }
 		
-		virtual void draw(const sf::Font& font, sf::RenderWindow& window, sf::Vector2f& basis)
+		virtual void draw(const sf::Font& font, sf::RenderWindow& window, glm::vec2& basis)
 		{
 			sf::Text t;
 			t.setFont(font);
-			t.setPosition(basis);
+			t.setPosition(basis.x, basis.y);
 			t.setString(name);
 			window.draw(t);
 			basis.y += getHeight();
 		}
 		
-		virtual void activate(sf::Vector2f click) = 0;
+		virtual void activate(float clickX, float clickY) = 0;
 	};
 	
 	struct Entry : public MenuEntry
@@ -42,7 +43,7 @@ public:
 		Entry(const std::string& title, std::function<void (void)> cb)
 		 : MenuEntry(title), callback(cb) {}
 		 
-		 void activate(sf::Vector2f click) { callback(); }
+		 void activate(float clickX, float clickY) { callback(); }
 	};
 	
 	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback)
@@ -52,7 +53,12 @@ public:
 	
 	std::vector<std::shared_ptr<MenuEntry>> entries;
 	
-	sf::Vector2f offset;
+	/**
+	 * Active Entry index
+	 */
+	int activeEntry;
+	
+	glm::vec2 offset;
 	
 	void addEntry(std::shared_ptr<MenuEntry> entry)
 	{
@@ -61,30 +67,66 @@ public:
 	
 	void draw(sf::RenderWindow& window)
 	{
-		sf::Vector2f basis(offset);
-		for(auto it = entries.begin();
-			it != entries.end();
-			++it)
+		glm::vec2 basis(offset);
+		for(size_t i = 0;
+			i < entries.size();
+			++i)
 		{
-			(*it)->draw(font, window, basis);
+			if(activeEntry >= 0 && i == activeEntry) {
+				sf::RectangleShape rs(sf::Vector2f(500.f, entries[i]->getHeight()));
+				rs.setPosition(basis.x, basis.y);
+				rs.setFillColor(sf::Color::Cyan);
+				window.draw(rs);
+			}
+			entries[i]->draw(font, window, basis);
+		}
+	}
+	
+	void hover(const float x, const float y)
+	{
+		glm::vec2 c(x - offset.x, y - offset.y);
+		for(size_t i = 0;
+			i < entries.size();
+			++i)
+		{
+			if( c.y > 0.f && c.y < entries[i]->getHeight() ) {
+				activeEntry = i;
+				return;
+			}
+			else {
+				c.y -= entries[i]->getHeight();
+			}
 		}
 	}
 	
 	void click(const float x, const float y)
 	{
-		sf::Vector2f c(x - offset.x, y - offset.y);
+		glm::vec2 c(x - offset.x, y - offset.y);
 		for(auto it = entries.begin();
 			it != entries.end();
 			++it)
 		{
 			if( c.y > 0.f && c.y < (*it)->getHeight() ) {
-				(*it)->activate(c);
+				(*it)->activate(c.x, c.y);
 				return;
 			}
 			else {
 				c.y -= (*it)->getHeight();
 			}
 		}
+	}
+	
+	// Activates the menu entry at the current active index.
+	void activate()
+	{
+		if(activeEntry < entries.size()) {
+			entries[activeEntry]->activate(0.f, 0.f);
+		}
+	}
+	
+	void move(int movement)
+	{
+		activeEntry = std::min<const int>(entries.size()-1, std::max<const int>(0, activeEntry + movement));
 	}
 };
 
