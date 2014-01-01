@@ -9,9 +9,10 @@ struct State
 {
 	// Helper for global menu behaviour
 	Menu* currentMenu;
+	Menu* nextMenu;
 	
 	State()
-	 : currentMenu(nullptr) {}
+	 : currentMenu(nullptr), nextMenu(nullptr) {}
 	
 	virtual void enter() = 0;
 	virtual void exit() = 0;
@@ -20,42 +21,56 @@ struct State
 	
 	virtual void draw(sf::RenderWindow& w)
 	{
-		if(currentMenu) {
-			currentMenu->draw(w);
+		if(getCurrentMenu()) {
+			getCurrentMenu()->draw(w);
+		}
+	}
+	
+	virtual ~State() {
+		if(getCurrentMenu()) {
+			delete getCurrentMenu();
 		}
 	}
 	
 	void enterMenu(Menu* menu)
 	{
-		currentMenu = menu;
+		nextMenu = menu;
+	}
+	
+	Menu* getCurrentMenu()
+	{
+		if(nextMenu) {
+			if(currentMenu) {
+				delete currentMenu;
+			}
+			currentMenu = nextMenu;
+			nextMenu = nullptr;
+		}
+		return currentMenu;
 	}
 	
 	virtual void handleEvent(const sf::Event& e)
 	{
+		auto m = getCurrentMenu();
+		if(! m) return;
 		switch(e.type) {
 			case sf::Event::MouseButtonReleased:
-				if(currentMenu) {
-					currentMenu->click(e.mouseButton.x, e.mouseButton.y);
-				}
+				m->click(e.mouseButton.x, e.mouseButton.y);
 				break;
 			case sf::Event::MouseMoved:
-				if(currentMenu) {
-					currentMenu->hover(e.mouseMove.x, e.mouseMove.y);
-				}
+				m->hover(e.mouseMove.x, e.mouseMove.y);
 				break;
 			case sf::Event::KeyPressed:
-				if(currentMenu) {
-					switch(e.key.code) {
-						case sf::Keyboard::Up:
-							currentMenu->move(-1);
-							break;
-						case sf::Keyboard::Down:
-							currentMenu->move(1);
-							break;
-						case sf::Keyboard::Return:
-							currentMenu->activate();
-							break;
-					}
+				switch(e.key.code) {
+					case sf::Keyboard::Up:
+						m->move(-1);
+						break;
+					case sf::Keyboard::Down:
+						m->move(1);
+						break;
+					case sf::Keyboard::Return:
+						m->activate();
+						break;
 				}
 			default: break;
 		};

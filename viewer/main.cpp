@@ -653,7 +653,7 @@ GenericState pauseState(
 			m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
 			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
-			self->currentMenu = m;
+			self->enterMenu(m);
 			lockCursor(false);
 		},
 		[](State* self, float dt)
@@ -723,7 +723,7 @@ GenericState menuState(
 			m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(&gameState); }));
 			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
-			self->currentMenu = m;
+			self->enterMenu(m);
 			lockCursor(false);
 		},
 		[](State* self, float dt)
@@ -732,7 +732,6 @@ GenericState menuState(
 		},
 		[](State* self)
 		{
-			delete self->currentMenu;
 		},
 		[](State* self, const sf::Event& e)
 		{
