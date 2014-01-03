@@ -5,6 +5,7 @@
 #include <loaders/LoaderIDE.hpp>
 #include <render/TextureAtlas.hpp>
 #include <loaders/LoaderCOL.hpp>
+#include <data/ObjectData.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -427,6 +428,40 @@ void GameData::loadIFP(const std::string &name)
 
         delete[] file;
     }
+}
+
+void GameData::loadDynamicObjects(const std::string& name)
+{
+	std::ifstream dfile(name.c_str());
+	
+	if(dfile.is_open()) {
+		std::string lineBuff;
+
+		while(std::getline(dfile, lineBuff)) {
+			if(lineBuff.at(0) == ';') continue;
+			std::stringstream ss(lineBuff);
+			
+			std::shared_ptr<DynamicObjectData> dyndata(new DynamicObjectData);
+			
+			ss >> dyndata->modelName;
+			ss >> dyndata->mass;
+			ss >> dyndata->turnMass;
+			ss >> dyndata->airRes;
+			ss >> dyndata->elacticity;
+			ss >> dyndata->bouancy;
+			ss >> dyndata->uprootForce;
+			ss >> dyndata->collDamageMulti;
+			ss >> dyndata->collDamageFlags;
+			ss >> dyndata->collResponseFlags;
+			ss >> dyndata->cameraAvoid;
+			
+			dynamicObjectData.insert({dyndata->modelName, dyndata});
+		}
+
+	}
+	else {
+		engine->logError("Failed to load dynamic object file: " + name);
+	}
 }
 
 char* GameData::loadFile(const std::string& name)

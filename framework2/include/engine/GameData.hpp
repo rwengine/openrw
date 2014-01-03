@@ -14,6 +14,7 @@
 
 #include <memory>
 
+struct DynamicObjectData;
 class GameWorld;
 class TextureAtlas;
 
@@ -125,6 +126,11 @@ public:
     void loadIFP(const std::string& name);
 	
 	/**
+	 * Loads data from an object definition dat.
+	 */
+	void loadDynamicObjects(const std::string& name);
+	
+	/**
 	 * Returns a pointer to the named file if it is available, the memory must be freed.
 	 * @param name the filename in the archive
 	 * @return pointer to the data, NULL if it is not available 
@@ -209,6 +215,11 @@ public:
 	 * CollisionModel data.
 	 */
 	std::map<std::string,  std::unique_ptr<CollisionModel>> collisions;
+	
+	/**
+	 * DynamicObjectData 
+	 */
+	std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 	
 	/**
 	 * Water Rectangles

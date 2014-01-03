@@ -94,4 +94,35 @@ struct CharacterData
 	uint8_t driveMask;
 };
 
+/** 
+ * This is orthogonal to object class, it gives
+ * Instances different physical properties.
+ */
+struct DynamicObjectData
+{
+	std::string modelName;
+	float mass; // Kg
+	float turnMass; // Kg m^3
+	float airRes; // fraction
+	float elacticity; // "
+	float bouancy;
+	float uprootForce; // Force
+	float collDamageMulti;
+	/*
+	 * 1: change model
+	 * 2: split model
+	 * 3: smash
+	 * 4: change and smash
+	 */
+	uint8_t collDamageFlags;
+	/*
+	 * 1: lampost
+	 * 2: smallbox
+	 * 3: bigbox
+	 * 4: fencepart
+	 */
+	uint8_t collResponseFlags;
+	bool cameraAvoid;
+};
+
 #endif
