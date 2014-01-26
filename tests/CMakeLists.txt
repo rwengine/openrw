@@ -1,4 +1,3 @@
-
 FILE(GLOB TEST_SOURCES "*.cpp")
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK) 
 
@@ -8,8 +7,8 @@ include_directories(include)
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-include_directories(../framework2/include ../viewer /usr/include/bullet)
+include_directories(../rwengine/include ../rwgame /usr/include/bullet)
 
-target_link_libraries(run_tests renderware sfml-window sfml-system sfml-graphics GL GLEW BulletDynamics BulletCollision LinearMath ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries(run_tests rwengine sfml-window sfml-system sfml-graphics GL GLEW BulletDynamics BulletCollision LinearMath ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 add_test(UnitTests run_tests)
