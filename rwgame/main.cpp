@@ -407,6 +407,9 @@ void init(std::string gtapath, bool loadWorld)
 	
 	gta->load();
 	
+	// Load dynamic object data
+	gta->gameData.loadDynamicObjects(gtapath + "/data/object.dat");
+	
 	// Set time to noon.
 	gta->gameTime = 12.f * 60.f;
 	
