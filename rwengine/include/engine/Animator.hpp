@@ -24,16 +24,12 @@ class Animator
 	glm::vec3 lastRootPosition;
 	glm::quat lastRootRotation;
 
-	std::vector<glm::mat4> matrices;
-	std::map<int32_t, AnimationBone*> frameToBone;
-
 	float time;
 	float serverTime;
 	float lastServerTime;
 	
 	bool repeat;
 
-	void updateFrameMapping();
 	void reset();
 
 public:

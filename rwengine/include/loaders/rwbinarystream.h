@@ -290,7 +290,7 @@ namespace RW
 			return *reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)*2);
 		}
 		
-		template<class T> T readSubStructure(size_t internalOffset)
+		template<class T> T& readSubStructure(size_t internalOffset)
 		{
 			return *reinterpret_cast<T*>(data+offset+sizeof(BSSectionHeader)+internalOffset);
 		}

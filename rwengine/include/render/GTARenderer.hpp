@@ -9,6 +9,7 @@
 #include <render/ViewCamera.hpp>
 
 class Model;
+class ModelFrame;
 class GameWorld;
 class GTAObject;
 class Animator;
@@ -24,6 +25,8 @@ class GTARenderer
 		glm::mat4 matrix;
 		GTAObject* object;
 	};
+	
+	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GTAObject* object, bool queueTransparent = true);
 	
 	// Internal method for processing sub-geometry
 	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent = true);

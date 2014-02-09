@@ -1,5 +1,9 @@
 #include "render/Model.hpp"
 #include <GL/glew.h>
+#include <iostream>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 
 Model::Geometry::Geometry()
 	: VBO(0), EBO(0),
@@ -22,7 +26,6 @@ void Model::Geometry::generateNormals()
 {
 	
 }
-#include <iostream>
 
 void Model::Geometry::buildBuffers()
 {
@@ -119,4 +122,23 @@ void Model::Geometry::buildBuffers()
 				sizeof(uint32_t) * subgeom[i].numIndices,
 				subgeom[i].indices);
 	}
+}
+
+ModelFrame::ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT)
+ : defaultRotation(dR), defaultTranslation(dT), parentFrame(parent)
+{
+	if(parent != nullptr) {
+		parent->childs.push_back(this);
+	}
+	reset();
+}
+
+void ModelFrame::reset()
+{
+	matrix = glm::translate(glm::mat4(), defaultTranslation) * glm::mat4(defaultRotation);
+}
+
+void ModelFrame::addGeometry(size_t idx)
+{
+	geometries.push_back(idx);
 }

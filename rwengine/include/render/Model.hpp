@@ -1,13 +1,64 @@
 #pragma once
 #ifndef _MODEL_HPP_
 #define _MODEL_HPP_
+#include <glm/glm.hpp>
 #include <vector>
 #include <string>
 #include <memory>
-#include <glm/glm.hpp>
 #include <GL/glew.h>
 
 #include <loaders/rwbinarystream.h>
+
+/** 
+	* Frame
+	*   => Atomic 
+	*     => Geometry
+	*   - defaultRotation
+	*   - defaultTranslation 
+	*   
+	*   + setTransform(mat)
+	*   + resetTransform()
+	*/
+
+class ModelFrame {
+	glm::mat3 defaultRotation;
+	glm::vec3 defaultTranslation;
+	glm::mat4 matrix;
+	ModelFrame* parentFrame;
+	std::string name;
+	std::vector<size_t> geometries;
+	std::vector<ModelFrame*> childs;
+public:
+	
+	ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT);
+	~ModelFrame();
+
+	void reset();
+	void setTransform(const glm::mat4& m);
+
+	void setName(const std::string& fname) 
+		{ name = fname; }
+
+	void addGeometry(size_t idx);
+
+	glm::vec3 getDefaultTranslation() const
+		{ return defaultTranslation; }
+
+	glm::mat3 getDefaultRotation() const 
+		{ return defaultRotation; }
+
+	glm::mat4 getMatrix() const 
+		{ return (parentFrame? parentFrame->getMatrix() : glm::mat4()) * matrix; }
+
+	const std::vector<ModelFrame*>& getChildren() const
+		{ return childs; }
+
+	const std::string& getName() const 
+		{ return name; }
+
+	const std::vector<size_t>& getGeometries() const
+		{ return geometries; }
+};
 
 class Model
 {
@@ -88,32 +139,15 @@ public:
 		uint32_t frame;
 		uint32_t geometry;
 	};
-
-	struct Frame {
-		glm::mat4 matrix;
-        glm::mat3 defaultRotation;
-        glm::vec3 defaultTranslation;
-        int32_t parentFrameIndex;
-    };
+	
+	std::vector<ModelFrame*> frames;
 	
 	std::vector<std::string> frameNames;
 
 	std::vector<std::shared_ptr<Geometry>> geometries;
 	std::vector<Atomic> atomics;
-    std::vector<Frame> frames;
 
 	int32_t rootFrameIdx;
-	
-    glm::mat4 getFrameMatrix(int32_t frameIndex)
-    {
-        Frame& frame = frames[frameIndex];
-        if( frame.parentFrameIndex != -1 ) {
-            return frame.matrix * getFrameMatrix(frame.parentFrameIndex);
-        }
-        else {
-            return frame.matrix;
-        }
-    }
 };
 
 #endif

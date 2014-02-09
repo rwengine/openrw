@@ -7,8 +7,6 @@
 #include <set>
 #include <cstring>
 
-#include <glm/gtc/matrix_transform.hpp>
-
 Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 {
     auto model = new Model;
@@ -25,19 +23,21 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 			auto list = sec.readStructure<RW::BSFrameList>();
 			size_t fdataI = sizeof(RW::BSFrameList) + sizeof(RW::BSSectionHeader);
 			
+			model->frames.reserve(list.numframes);
+			
 			for(size_t f = 0; f < list.numframes; ++f) {
-                auto rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
+                RW::BSFrameListFrame& rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
 				fdataI += sizeof(RW::BSFrameListFrame);
-
-                Model::Frame frame;
-                frame.defaultRotation = rawframe.rotation;
-                frame.defaultTranslation = rawframe.position;
-                frame.parentFrameIndex = rawframe.index;
-
-                // Initilize the matrix with the correct values.
-                frame.matrix = glm::translate(glm::mat4(frame.defaultRotation), frame.defaultTranslation);
-
-                model->frames.push_back(frame);
+				ModelFrame* parent = nullptr;
+				if(rawframe.index != -1) {
+					parent = model->frames[rawframe.index];
+				}
+				else {
+					model->rootFrameIdx = 0;
+				}
+				model->frames.push_back(
+					new ModelFrame(parent, rawframe.rotation, rawframe.position)
+				);
 			}
 			
 			size_t fldataI = 0;
@@ -47,6 +47,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					size_t extI = 0;
 					while( listsec.hasMoreData(extI)) {
 						auto extSec = listsec.getNextChildSection(extI);
+						size_t fn = 0;
 						if( extSec.header.id == RW::SID_NodeName) {
                             std::string framename(extSec.raw(), extSec.header.size);
                             std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
@@ -55,8 +56,10 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 							if(framename == "swaist") {
 								model->rootFrameIdx = model->frameNames.size();
 							}
-
-                            model->frameNames.push_back(framename);
+							
+							if( fn < model->frames.size() ) {
+								model->frames[(fn++)]->setName(framename);
+							}
 						}
 					}
 				}
@@ -267,7 +270,9 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 			break;
 		}
 		case RW::SID_Atomic: {
-			model->atomics.push_back(sec.readStructure<Model::Atomic>());
+			const Model::Atomic& at = sec.readStructure<Model::Atomic>();
+			model->frames[at.frame]->addGeometry(at.geometry);
+			model->atomics.push_back(at);
 			break;
 		}
 		}

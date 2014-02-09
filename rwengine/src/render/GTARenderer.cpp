@@ -447,6 +447,37 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     }
 }
 
+bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
+{
+	auto localmatrix = matrix * f->getMatrix();
+	for(size_t g : f->getGeometries()) {
+		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
+		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+			continue;
+		}
+
+		if( object && object->type() == GTAObject::Vehicle ) {
+			auto& name = f->getName();
+			if( name.substr(name.size()-3) == "dam" || name.find("lo") != name.npos || name.find("dummy") != name.npos ) {
+				continue;
+			}
+		}
+
+		if( (m->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
+			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+		}
+
+		renderGeometry(m,
+						g, localmatrix,
+						object);
+	}
+	
+	for(ModelFrame* c : f->getChildren()) {
+		renderFrame(m, c, matrix, object, queueTransparent);
+	}
+	return true;
+}
+
 static GLuint currentVBO = 0;
 
 bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
@@ -521,43 +552,7 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 
 void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object, Animator *animator)
 {
-	for (size_t a = 0; a < model->atomics.size(); a++)
-    {
-        size_t g = model->atomics[a].geometry;
-        RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-        if(! camera.frustum.intersects(bounds.center + glm::vec3(modelMatrix[3]), bounds.radius)) {
-            culled++;
-            continue;
-		}
-
-        int32_t fi = model->atomics[a].frame;
-        if( object && object->type() == GTAObject::Vehicle ) {
-            if(model->frameNames.size() > fi) {
-                std::string& name = model->frameNames[fi];
-                if( name.substr(name.size()-3) == "dam" || name.find("lo") != name.npos || name.find("dummy") != name.npos ) {
-                    continue;
-                }
-            }
-        }
-
-        if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
-            glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-        }
-        
-        // Determine which transformation to use (why is this neccasary)
-        glm::mat4 localMatrix;
-		if(animator) {
-			localMatrix = animator->getFrameMatrix(model->atomics[a].frame);
-		}
-		else if(object&& object->type() == GTAObject::Vehicle)
-		{
-			localMatrix = model->getFrameMatrix(model->atomics[a].frame);
-		}
-
-		renderGeometry(model,
-					   g, modelMatrix * localMatrix,
-					   object);
-    }
+	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object);
 }
 
 void GTARenderer::renderPaths()

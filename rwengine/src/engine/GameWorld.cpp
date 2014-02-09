@@ -245,11 +245,11 @@ GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, co
 						std::string& name = model->frameNames[f];
 						
 						if( name.substr(0, 5) == "wheel" ) {
-							auto frameTrans = model->getFrameMatrix(f);
+							auto frameTrans = model->frames[f]->getMatrix();
 							info->second.wheels.push_back({glm::vec3(frameTrans[3])});
 						}
 						if(name.substr(0, 3) == "ped" && name.substr(name.size()-4) == "seat") {
-							auto p = model->frames[f].defaultTranslation;
+							auto p = model->frames[f]->getDefaultTranslation();
 							p.x = p.x * -1.f;
 							info->second.seats.push_back({p});
 							p.x = p.x * -1.f;
