@@ -1,4 +1,4 @@
 build/
-gtfw.kdev4
+*.kdev4
 *~
 
