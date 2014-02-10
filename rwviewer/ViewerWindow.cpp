@@ -3,6 +3,8 @@
 #include "ArchiveContentsWidget.hpp"
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QApplication>
+#include <QSettings>
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(parent, flags)
 {
@@ -12,11 +14,18 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	this->setCentralWidget(viewer);
 	
 	archivewidget = new ArchiveContentsWidget;
+	archivewidget->setObjectName("archivewidget");
 	this->addDockWidget(Qt::LeftDockWidgetArea, archivewidget);
 	
 	QMenuBar* mb = this->menuBar();
 	QMenu* file = mb->addMenu("&File");
 	file->addAction("Open &Archive", this, SLOT(openArchive()));
+	file->addSeparator();
+	file->addAction("E&xit", QApplication::instance(), SLOT(quit()), QKeySequence::Quit);
+	
+	QSettings settings("OpenRW", "rwviewer");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
 }
 
 void ViewerWindow::openArchive(const QString& name)
@@ -32,6 +41,15 @@ void ViewerWindow::openArchive(const QString& name)
 	
 	archivewidget->setArchive(ld);
 }
+
+void ViewerWindow::closeEvent(QCloseEvent* event)
+{
+	QSettings settings("OpenRW", "rwviewer");
+	settings.setValue("geometry", saveGeometry());
+	settings.setValue("windowState", saveState());
+	QMainWindow::closeEvent(event);
+}
+
 
 void ViewerWindow::openArchive()
 {

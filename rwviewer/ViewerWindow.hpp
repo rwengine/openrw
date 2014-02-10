@@ -15,7 +15,8 @@ public:
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 	void openArchive(const QString& name);
-
+	
+    virtual void closeEvent(QCloseEvent*);
 public slots:
 
 	void openArchive();

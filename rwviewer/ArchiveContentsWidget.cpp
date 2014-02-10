@@ -5,6 +5,7 @@ ArchiveContentsWidget::ArchiveContentsWidget(QWidget* parent, Qt::WindowFlags fl
 {
 	setWindowTitle("Archive");
 	table = new QTableView();
+	table->setShowGrid(false);
 	setWidget(table);
 }
 
