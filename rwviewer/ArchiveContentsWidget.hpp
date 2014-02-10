@@ -16,6 +16,12 @@ public:
     ArchiveContentsWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 	void setArchive(const LoaderIMG& archive);
+	
+signals:
+	void selectedFileChanged(const std::string& file);
+
+public slots:
+	void selectedIndexChanged(const QModelIndex& current);
 };
 
 #endif

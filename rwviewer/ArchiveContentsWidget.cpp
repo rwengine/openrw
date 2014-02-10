@@ -14,4 +14,13 @@ void ArchiveContentsWidget::setArchive(const LoaderIMG& archive)
 	model = new IMGArchiveModel(archive);
 	table->setModel(model);
 	delete m;
+	connect(table->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), SLOT(selectedIndexChanged(QModelIndex)));
+}
+
+void ArchiveContentsWidget::selectedIndexChanged(const QModelIndex& current)
+{
+	if(current.row() < model->getArchive().getAssetCount()) {
+		auto& f = model->getArchive().getAssetInfoByIndex(current.row());
+		emit selectedFileChanged(f.name);
+	}
 }

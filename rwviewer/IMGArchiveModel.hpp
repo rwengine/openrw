@@ -23,6 +23,8 @@ public:
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 	
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+	
+	const LoaderIMG& getArchive() const { return archive; }
 };
 
 #endif 

@@ -23,6 +23,8 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	file->addSeparator();
 	file->addAction("E&xit", QApplication::instance(), SLOT(quit()), QKeySequence::Quit);
 	
+	connect(archivewidget, SIGNAL(selectedFileChanged(std::string)), viewer, SLOT(showFile(std::string)));
+	
 	QSettings settings("OpenRW", "rwviewer");
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
