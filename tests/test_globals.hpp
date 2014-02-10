@@ -16,7 +16,7 @@ public:
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		e = new GameWorld("data");
+		e = new GameWorld("test_data");
 	}
 
 	~Global() {

@@ -65,6 +65,11 @@ BOOST_AUTO_TEST_CASE(menu_test_active_index)
 	
 	test.activate();
 	
+	BOOST_CHECK( clickindex == -1 );
+	
+	test.move( 1);
+	test.activate();
+	
 	BOOST_CHECK( clickindex == 0 );
 	
 	test.move( 1);
