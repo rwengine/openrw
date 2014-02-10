@@ -8,6 +8,8 @@
 #include <GL/glew.h>
 
 #include <loaders/rwbinarystream.h>
+#include "DrawBuffer.hpp"
+#include "GeometryBuffer.hpp"
 
 /** 
 	* Frame
@@ -90,8 +92,27 @@ public:
 		size_t numIndices;
 	};
 	
+	struct GeometryVertex {
+		glm::vec3 position; /* 0 */
+		glm::vec3 normal;   /* 24 */
+		glm::vec2 texcoord; /* 48 */
+		glm::vec4 colour;   /* 64 */
+		
+		static const AttributeList vertex_attributes() {
+			return {
+				{ATRS_Position, 3, sizeof(GeometryVertex),  0ul},
+				{ATRS_Normal,   3, sizeof(GeometryVertex), sizeof(float)*3},
+				{ATRS_TexCoord, 2, sizeof(GeometryVertex), sizeof(float)*6},
+				{ATRS_Colour,   4, sizeof(GeometryVertex), sizeof(float)*8}
+			};
+		}
+	};
+	
 	struct Geometry {
-		GLuint VBO, EBO;
+		DrawBuffer dbuff;
+		GeometryBuffer gbuff;
+		
+		GLuint EBO;
 		
 		RW::BSGeometryBounds geometryBounds;
 		
@@ -100,39 +121,12 @@ public:
         FaceType facetype;
 
 		uint32_t flags;
-		
-		size_t offsVert;
-		std::vector<glm::vec3> vertices;
-		size_t offsNormals;
-		std::vector<glm::vec3> normals;
-		size_t offsTexCoords;
-		std::vector<glm::vec2> texcoords;
-		size_t offsColours;
-		std::vector<glm::vec4> colours;
-		
-		size_t indicesCount;
 
 		std::vector<Material> materials;
 		std::vector<SubGeometry> subgeom;
 		
 		Geometry();
 		~Geometry();
-		
-		void setVertexData(const std::vector<glm::vec3>& vertices) {
-			this->vertices = vertices;
-		}
-		void setColours(const std::vector<glm::vec4>& colours) {
-			this->colours = colours;
-		}
-		void setTexCoords(const std::vector<glm::vec2>& coords) {
-			this->texcoords = coords;
-		}
-		void setNormals(const std::vector<glm::vec3>& normals) {
-			this->normals = normals;
-		}
-		void generateNormals();
-		
-		void buildBuffers();
 	};
 	
 	struct Atomic {

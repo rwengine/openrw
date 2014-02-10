@@ -6,6 +6,13 @@ GeometryBuffer::GeometryBuffer()
 
 }
 
+GeometryBuffer::~GeometryBuffer()
+{
+	if(vbo != 0) {
+		glDeleteBuffers(1, &vbo);
+	}
+}
+
 void GeometryBuffer::uploadVertices(GLsizei num, GLsizeiptr size, const GLvoid* mem)
 {
 	if(vbo == 0) {

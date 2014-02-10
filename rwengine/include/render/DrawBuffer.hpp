@@ -7,6 +7,7 @@ class GeometryBuffer;
 class DrawBuffer {
 	GLuint vao;
 	
+	GLenum facetype;
 public:
 	
 	DrawBuffer();
@@ -14,6 +15,12 @@ public:
 	
 	GLuint getVAOName() const
 		{ return vao; }
+	
+	void setFaceType(GLenum ft)
+		{ facetype = ft; }
+	
+	GLenum getFaceType() const
+		{ return facetype; }
 	
 	/**
 	 * Adds a Geometry Buffer to the Draw Buffer.

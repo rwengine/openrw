@@ -48,7 +48,6 @@ public:
 
 	GLint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection, uniDynamicCol;
 	GLint uniMatDiffuse, uniMatAmbient, uniFogStart, uniFogEnd;
-	GLint posAttrib, normalAttrib, texAttrib, colourAttrib;
 	GLuint worldProgram;
 	GLuint skyProgram;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;

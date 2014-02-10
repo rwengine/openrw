@@ -5,9 +5,9 @@
 /* TODO: Come up with a more elegant solution to "WHICH ARRAY IS IT?" */
 std::map<AttributeSemantic, GLuint> semantic_to_attrib_array = {
 	{ATRS_Position, 0},
-	{ATRS_Normal, 4},
-	{ATRS_Colour, 8},
-	{ATRS_TexCoord, 12}
+	{ATRS_Normal,   1},
+	{ATRS_Colour,   2},
+	{ATRS_TexCoord, 3}
 };
 
 DrawBuffer::DrawBuffer()

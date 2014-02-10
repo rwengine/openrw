@@ -88,8 +88,9 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					if (item.header.versionid < 0x1003FFFF)
 						/*auto colors =*/ readStructure<RW::BSGeometryColor>(data, dataI);
 					
-					std::vector<glm::vec4> colours;
-					colours.resize(geometry.numverts);
+					std::vector<Model::GeometryVertex> vertices;
+					vertices.resize(geometry.numverts);
+					
 					if ((geometry.flags & RW::BSGeometry::VertexColors) == RW::BSGeometry::VertexColors) {
 						for (size_t v = 0; v < geometry.numverts; ++v) {
 							auto s = readStructure<RW::BSColor>(data, dataI);
@@ -97,29 +98,24 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 							size_t G = s % 256; s /= 256;
 							size_t B = s % 256; s /= 256;
 							size_t A = s % 256;
-							colours[v] = glm::vec4(R/255.f, G/255.f, B/255.f, A/255.f);
+							vertices[v].colour = glm::vec4(R/255.f, G/255.f, B/255.f, A/255.f);
 						}
 					}
 					else {
 						// To save needing another shader, just insert a white colour for each vertex
 						for (size_t v = 0; v < geometry.numverts; ++v) {
-							colours[v] = glm::vec4(1.f);
+							vertices[v].colour = glm::vec4(1.f, 1.f, 1.f, 1.f);
 						}
 					}
-					geom->setColours(colours);
 					
 					/** TEX COORDS **/
 					if ((geometry.flags & RW::BSGeometry::TexCoords1) == RW::BSGeometry::TexCoords1 || 
 						(geometry.flags & RW::BSGeometry::TexCoords2) == RW::BSGeometry::TexCoords1) {
-						std::vector<glm::vec2> texcoords;
-						texcoords.resize(geometry.numverts);
 						for (size_t v = 0; v < geometry.numverts; ++v) {
-							texcoords[v] = readStructure<glm::vec2>(data, dataI);
+							vertices[v].texcoord = readStructure<glm::vec2>(data, dataI);
 						}
-						geom->setTexCoords(texcoords);
 					}
 
-					//geometryStruct.triangles.reserve(geometry.numtris);
 					for (int j = 0; j < geometry.numtris; ++j) {
 						readStructure<RW::BSGeometryTriangle>(data, dataI);
 					}
@@ -128,23 +124,20 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					geom->geometryBounds = readStructure<RW::BSGeometryBounds>(data, dataI);
 
 					/** VERTICES **/
-					std::vector<glm::vec3> positions;
-					positions.resize(geometry.numverts);
 					for (size_t v = 0; v < geometry.numverts; ++v) {
-						positions[v] = readStructure<glm::vec3>(data, dataI);
+						vertices[v].position = readStructure<glm::vec3>(data, dataI);
 					}
-					geom->setVertexData(positions);
-
+					
 					/** NORMALS **/
 					if ((geometry.flags & RW::BSGeometry::StoreNormals) == RW::BSGeometry::StoreNormals) {
-						std::vector<glm::vec3> normals;
-						normals.reserve(geometry.numverts);
 						for (size_t v = 0; v < geometry.numverts; ++v) {
-							normals[v] = readStructure<glm::vec3>(data, dataI);
+							vertices[v].normal = readStructure<glm::vec3>(data, dataI);
 						}
-						geom->setNormals(normals);
 					}
 					else {
+						for (size_t v = 0; v < geometry.numverts; ++v) {
+							vertices[v].normal = glm::vec3(0.f, 0.f, 1.f);
+						}
 						// Generate normals.
 						/*geometryStruct.normals.resize(geometry.numverts);
 						for (auto &subgeom : geometryStruct.subgeom) {
@@ -242,6 +235,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 								geom->subgeom.resize(meshplg.numsplits);
 								geom->facetype = static_cast<Model::FaceType>(meshplg.facetype);
 								size_t meshplgI = sizeof(RW::BSBinMeshPLG);
+								size_t sgstart = 0;
 								for(size_t i = 0; i < meshplg.numsplits; ++i)
 								{
                                     auto plgHeader = extsec.readSubStructure<RW::BSMaterialSplit>(meshplgI);
@@ -249,6 +243,8 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 									geom->subgeom[i].material = plgHeader.index;
 									geom->subgeom[i].indices = new uint32_t[plgHeader.numverts];
 									geom->subgeom[i].numIndices = plgHeader.numverts;
+									geom->subgeom[i].start = sgstart;
+									sgstart += plgHeader.numverts;
 									for (int j = 0; j < plgHeader.numverts; ++j) {
 										geom->subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
 										meshplgI += sizeof(uint32_t);
@@ -257,8 +253,29 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 							}
 						}
 					}
-
-					geom->buildBuffers();
+					
+					/* Upload Vertex Data */
+					
+					/* uploadVertices uses magic to determine what is inside vertices */
+					geom->gbuff.uploadVertices(vertices);
+					/* dbuff asks gbuff for it's contents */
+					geom->dbuff.addGeometry(&geom->gbuff);
+					
+					/* TODO: Migrate indicies to new framework */
+					glGenBuffers(1, &geom->EBO);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->EBO);
+					
+					size_t icount = std::accumulate(
+						geom->subgeom.begin(), 
+						geom->subgeom.end(), 0u, 
+						[](size_t a, const Model::SubGeometry& b) {return a + b.numIndices;});
+					glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0, GL_STATIC_DRAW);
+					for(auto& sg : geom->subgeom) {
+						glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 
+										sg.start * sizeof(uint32_t),
+										sizeof(uint32_t) * sg.numIndices, 
+										sg.indices);
+					}
 					
 					geom->clumpNum = clumpID;
 					

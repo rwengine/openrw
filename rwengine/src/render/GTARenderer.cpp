@@ -14,11 +14,11 @@
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
-const char *vertexShaderSource = "#version 130\n"
-"in vec3 position;"
-"in vec3 normal;"
-"in vec2 texCoords;"
-"in vec4 colour;"
+const char *vertexShaderSource = "#version 130\n#extension GL_ARB_explicit_attrib_location : enable\n"
+"layout(location = 0) in vec3 position;"
+"layout(location = 1) in vec3 normal;"
+"layout(location = 2) in vec4 colour;"
+"layout(location = 3) in vec2 texCoords;"
 "out vec3 Normal;"
 "out vec2 TexCoords;"
 "out vec4 Colour;"
@@ -136,12 +136,7 @@ GTARenderer::GTARenderer(GameWorld* engine)
 	glAttachShader(worldProgram, fragmentShader);
 	glLinkProgram(worldProgram);
 	glUseProgram(worldProgram);
-
-	posAttrib = glGetAttribLocation(worldProgram, "position");
-	texAttrib = glGetAttribLocation(worldProgram, "texCoords");
-	normalAttrib = glGetAttribLocation(worldProgram, "normal");
-	colourAttrib = glGetAttribLocation(worldProgram, "colour");
-
+	
 	uniModel = glGetUniformLocation(worldProgram, "model");
 	uniView = glGetUniformLocation(worldProgram, "view");
 	uniProj = glGetUniformLocation(worldProgram, "proj");
@@ -385,6 +380,8 @@ void GTARenderer::renderWorld()
 	}
 	transparentDrawQueue.clear();
 	
+	glBindVertexArray( vao );
+	
 	glUseProgram(skyProgram);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
@@ -478,27 +475,12 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	return true;
 }
 
-static GLuint currentVBO = 0;
-
 bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
 {
-	if(currentVBO != model->geometries[g]->VBO) {
-		glBindBuffer(GL_ARRAY_BUFFER, model->geometries[g]->VBO);
-	
-		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsVert);
-		glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsTexCoords);
-		glVertexAttribPointer(normalAttrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsNormals);
-		glVertexAttribPointer(colourAttrib, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)model->geometries[g]->offsColours);
-		glEnableVertexAttribArray(posAttrib);
-		glEnableVertexAttribArray(texAttrib);
-		glEnableVertexAttribArray(normalAttrib);
-		glEnableVertexAttribArray(colourAttrib);
-		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
-		
-		currentVBO = model->geometries[g]->VBO;
-	}
-	
+	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
+
 	auto& subgeom = model->geometries[g]->subgeom[sg];
 
 	if (model->geometries[g]->materials.size() > subgeom.material) {
