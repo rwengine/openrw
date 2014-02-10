@@ -7,7 +7,7 @@ add_executable(rwviewer
 	main.cpp
 	ViewerWindow.cpp
 	ViewerWidget.cpp
-	IMGTableModel.cpp
+	IMGArchiveModel.cpp
 	ArchiveContentsWidget.cpp)
 
 include_directories(../rwengine/include /usr/include/bullet)

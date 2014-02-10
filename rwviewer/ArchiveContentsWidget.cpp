@@ -4,15 +4,14 @@ ArchiveContentsWidget::ArchiveContentsWidget(QWidget* parent, Qt::WindowFlags fl
 	: QDockWidget(parent, flags), model(nullptr)
 {
 	setWindowTitle("Archive");
-	table = new QTableView();
-	table->setShowGrid(false);
+	table = new QListView();
 	setWidget(table);
 }
 
 void ArchiveContentsWidget::setArchive(const LoaderIMG& archive)
 {
 	auto m = table->model();
-	model = new IMGTableModel(archive);
+	model = new IMGArchiveModel(archive);
 	table->setModel(model);
 	delete m;
 }

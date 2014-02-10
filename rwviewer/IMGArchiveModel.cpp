@@ -1,6 +1,6 @@
-#include "IMGTableModel.hpp"
+#include "IMGArchiveModel.hpp"
 
-QVariant IMGTableModel::data(const QModelIndex& index, int role) const
+QVariant IMGArchiveModel::data(const QModelIndex& index, int role) const
 {
 	if(role == Qt::DisplayRole) {
 		if(index.row() < archive.getAssetCount()) {
@@ -16,7 +16,7 @@ QVariant IMGTableModel::data(const QModelIndex& index, int role) const
 	return QVariant::Invalid;
 }
 
-QVariant IMGTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant IMGArchiveModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if(role == Qt::DisplayRole && orientation == Qt::Horizontal) {
 		if(section == 0) {
@@ -29,12 +29,12 @@ QVariant IMGTableModel::headerData(int section, Qt::Orientation orientation, int
 	return QVariant::Invalid;
 }
 
-int IMGTableModel::rowCount(const QModelIndex& parent) const
+int IMGArchiveModel::rowCount(const QModelIndex& parent) const
 {
 	return archive.getAssetCount();
 }
 
-int IMGTableModel::columnCount(const QModelIndex& parent) const
+int IMGArchiveModel::columnCount(const QModelIndex& parent) const
 {
 	return 2;
 }

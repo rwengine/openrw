@@ -1,10 +1,10 @@
 #pragma once 
-#ifndef _IMGTABLEMODEL_HPP_
-#define _IMGTABLEMODEL_HPP_
+#ifndef _IMGARCHIVEMODEL_HPP_
+#define _IMGARCHIVEMODEL_HPP_
 #include <QAbstractItemModel>
 #include <loaders/LoaderIMG.hpp>
 
-class IMGTableModel : public QAbstractTableModel
+class IMGArchiveModel : public QAbstractListModel
 {
 	Q_OBJECT
 	
@@ -12,8 +12,8 @@ class IMGTableModel : public QAbstractTableModel
 	
 public:
 	
-    IMGTableModel(const LoaderIMG& archive, QObject* parent = 0)
-		: QAbstractTableModel(parent), archive(archive)
+    IMGArchiveModel(const LoaderIMG& archive, QObject* parent = 0)
+		: QAbstractListModel(parent), archive(archive)
 		{}
 
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
