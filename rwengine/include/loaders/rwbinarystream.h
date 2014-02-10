@@ -111,7 +111,7 @@ namespace RW
 		};
 	};
 	
-	typedef uint32_t BSColor;
+	typedef glm::detail::tvec4<uint8_t> BSColor;
 	
 	struct BSGeometryColor
 	{

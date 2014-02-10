@@ -94,11 +94,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					if ((geometry.flags & RW::BSGeometry::VertexColors) == RW::BSGeometry::VertexColors) {
 						for (size_t v = 0; v < geometry.numverts; ++v) {
 							auto s = readStructure<RW::BSColor>(data, dataI);
-							size_t R = s % 256; s /= 256;
-							size_t G = s % 256; s /= 256;
-							size_t B = s % 256; s /= 256;
-							size_t A = s % 256;
-							vertices[v].colour = glm::vec4(R/255.f, G/255.f, B/255.f, A/255.f);
+							vertices[v].colour = glm::vec4(s.r/255.f, s.g/255.f, s.b/255.f, s.a/255.f);
 						}
 					}
 					else {
@@ -188,6 +184,14 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 						geom->materials[m].colour = material.color;
 						geom->materials[m].diffuseIntensity = material.diffuse;
 						geom->materials[m].ambientIntensity = material.ambient;
+						geom->materials[m].flags = 0;
+						
+						if( material.color.r == 60 && material.color.g == 255 && material.color.b == 0 ) {
+							geom->materials[m].flags |= Model::MTF_PrimaryColour;
+						}
+						else if( material.color.r == 255 && material.color.g == 0 && material.color.b == 175 ) {
+							geom->materials[m].flags |= Model::MTF_SecondaryColour;
+						}
 
 						size_t texI = 0;
 						materialsec.getNextChildSection(texI);
@@ -255,6 +259,8 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					}
 					
 					/* Upload Vertex Data */
+					geom->dbuff.setFaceType(geom->facetype == Model::Triangles ?
+								GL_TRIANGLES : GL_TRIANGLE_STRIP);
 					
 					/* uploadVertices uses magic to determine what is inside vertices */
 					geom->gbuff.uploadVertices(vertices);

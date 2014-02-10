@@ -77,9 +77,16 @@ public:
 		std::string alphaName;
 	};
 	
+	enum {
+		MTF_PrimaryColour = 1 << 0,
+		MTF_SecondaryColour = 1 << 1
+	};
+	
 	struct Material {
 		std::vector<Texture> textures;
-		uint32_t colour;
+		glm::detail::tvec4<uint8_t> colour;
+		
+		uint8_t flags;
 		
 		float diffuseIntensity;
 		float ambientIntensity;

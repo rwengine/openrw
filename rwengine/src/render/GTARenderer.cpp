@@ -498,24 +498,21 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 		}
 
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
-			auto colmasked = mat.colour;
-			size_t R = colmasked % 256; colmasked /= 256;
-			size_t G = colmasked % 256; colmasked /= 256;
-			size_t B = colmasked % 256; colmasked /= 256;
+			auto col = mat.colour;
 			if( object && object->type() == GTAObject::Vehicle ) {
 				auto vehicle = static_cast<GTAVehicle*>(object);
-				if( R == 60 && G == 255 && B == 0 ) {
+				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
 					glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
 				}
-				else if( R == 255 && G == 0 && B == 175 ) {
+				else if( (mat.flags&Model::MTF_SecondaryColour) != 0 ) {
 					glUniform4f(uniCol, vehicle->colourSecondary.r, vehicle->colourSecondary.g, vehicle->colourSecondary.b, 1.f);
 				}
 				else {
-					glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
+					glUniform4f(uniCol, col.r/255.f, col.g/255.f, col.b/255.f, 1.f);
 				}
 			}
 			else {
-				glUniform4f(uniCol, R/255.f, G/255.f, B/255.f, 1.f);
+				glUniform4f(uniCol, col.r/255.f, col.g/255.f, col.b/255.f, 1.f);
 			}
 		}
 
@@ -525,8 +522,7 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 
 	rendered++;
 
-	glDrawElements((model->geometries[g]->facetype == Model::Triangles ?
-								GL_TRIANGLES : GL_TRIANGLE_STRIP),
+	glDrawElements(model->geometries[g]->dbuff.getFaceType(),
 								subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
 	
 	return true;

@@ -148,7 +148,8 @@ void dumpModelFile(char* data)
 			std::cout << "  Vertex Colours Present" << std::endl;
 			for(size_t v = 0; v < geom.numverts; ++v) 
 			{
-				std::cout << "  " << v << ": " << static_cast<unsigned long>(readStructure<BSColor>(data, dataI)) << std::endl;
+				auto c = readStructure<BSColor>(data, dataI);
+				std::cout << "  " << v << ": " << c.r << " " << c.g << " " << c.b << std::endl;
 			}
 		}
 		
@@ -210,7 +211,7 @@ void dumpModelFile(char* data)
 			auto material = readStructure<BSMaterial>(data, dataI);
 			std::cout << " Material Data" << std::endl;
 			std::cout << "  Textures = " << std::dec << material.numtextures << std::endl;
-			std::cout << "  Color = 0x" << std::hex << material.color << std::endl;
+			std::cout << "  Color = " << material.color.r << " " << material.color.g << " " << material.color.b << std::endl;
 			
 			for(size_t t = 0; t < material.numtextures; ++t) 
 			{
