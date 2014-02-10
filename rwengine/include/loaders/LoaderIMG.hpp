@@ -49,10 +49,10 @@ public:
 	LoaderIMGFile &getAssetInfo(const std::string& assetname);
 
 	/// Get the information of an asset by its index
-	LoaderIMGFile &getAssetInfoByIndex(size_t index);
+	const LoaderIMGFile &getAssetInfoByIndex(size_t index) const;
 
 	/// Returns the number of asset files in the archive
-	uint32_t getAssetCount();
+	uint32_t getAssetCount() const;
 
 private:
 	Versions m_version; ///< Version of this IMG archive

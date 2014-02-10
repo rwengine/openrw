@@ -3,12 +3,22 @@
 #define _VIEWERWINDOW_HPP_
 #include <QMainWindow>
 
+class ArchiveContentsWidget;
 class ViewerWidget;
 class ViewerWindow : public QMainWindow
 {
+	Q_OBJECT
+	
 	ViewerWidget* viewer;
+	ArchiveContentsWidget* archivewidget;
 public:
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+
+	void openArchive(const QString& name);
+
+public slots:
+
+	void openArchive();
 };
 
 #endif 

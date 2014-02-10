@@ -110,13 +110,13 @@ bool LoaderIMG::saveAsset(const std::string& assetname, const std::string& filen
 }
 
 /// Get the information of an asset by its index
-LoaderIMGFile &LoaderIMG::getAssetInfoByIndex(size_t index)
+const LoaderIMGFile &LoaderIMG::getAssetInfoByIndex(size_t index) const
 {
 	return m_assets[index];
 }
 
 
-uint32_t LoaderIMG::getAssetCount()
+uint32_t LoaderIMG::getAssetCount() const
 {
 	return m_assetCount;
 }

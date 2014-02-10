@@ -6,7 +6,9 @@ find_package(Qt5Core REQUIRED)
 add_executable(rwviewer
 	main.cpp
 	ViewerWindow.cpp
-	ViewerWidget.cpp)
+	ViewerWidget.cpp
+	IMGTableModel.cpp
+	ArchiveContentsWidget.cpp)
 
 include_directories(../rwengine/include /usr/include/bullet)
 

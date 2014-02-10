@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 	
 	BOOST_CHECK( loader.getAssetCount() > 0 );
 	
-	LoaderIMGFile& f = loader.getAssetInfoByIndex(0);
+	auto& f = loader.getAssetInfoByIndex(0);
 	
 	// A few assumptions..
 	
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 	BOOST_CHECK_EQUAL( f.offset, 0);
 	BOOST_CHECK_EQUAL( f.size, 33);
 	
-	LoaderIMGFile& f2 = loader.getAssetInfo("radar00.txd");
+	auto& f2 = loader.getAssetInfo("radar00.txd");
 	
 	BOOST_CHECK_EQUAL( f2.name, f.name );
 	BOOST_CHECK_EQUAL( f2.offset, f.offset );
