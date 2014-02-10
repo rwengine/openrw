@@ -41,17 +41,17 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 			}
 			
 			size_t fldataI = 0;
+			size_t fn = 0;
 			while( sec.hasMoreData(fldataI)) {
 				auto listsec = sec.getNextChildSection(fldataI);
 				if( listsec.header.id == RW::SID_Extension) {
 					size_t extI = 0;
 					while( listsec.hasMoreData(extI)) {
 						auto extSec = listsec.getNextChildSection(extI);
-						size_t fn = 0;
 						if( extSec.header.id == RW::SID_NodeName) {
-                            std::string framename(extSec.raw(), extSec.header.size);
-                            std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
-
+							std::string framename(extSec.raw(), extSec.header.size);
+							std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
+							
 							// !HACK!
 							if(framename == "swaist") {
 								model->rootFrameIdx = model->frameNames.size();

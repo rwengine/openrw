@@ -268,8 +268,10 @@ void GTARenderer::renderWorld()
 			matrixModel = glm::translate(matrixModel, 
 										 v->getPosition());
 			matrixModel = matrixModel * glm::mat4_cast(v->getRotation());
-			glm::vec3 seatpos = v->info.seats[charac->getCurrentSeat()].offset;
-			matrixModel = glm::translate(matrixModel, seatpos);
+			if(charac->getCurrentSeat() < v->info.seats.size()) {
+				glm::vec3 seatpos = v->info.seats[charac->getCurrentSeat()].offset;
+				matrixModel = glm::translate(matrixModel, seatpos);
+			}
 		}
 		else {
 			matrixModel = glm::translate(matrixModel, charac->getPosition());
@@ -403,20 +405,16 @@ void GTARenderer::renderWorld()
 
 void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const std::string& name)
 {
-	for (size_t f = 0; f < model->frames.size(); f++) 
+	size_t n = 0;
+	for (const ModelFrame* f : model->frames) 
 	{
-		if( model->frameNames.size() > f) {
-			std::string& fname = model->frameNames[f];
-			bool LOD = (fname.find("_l1") != fname.npos || fname.find("_l0") != fname.npos);
-			if( LOD || fname != name ) {
-				continue;
-			}
-		}
-		else {
+		const std::string& fname = f->getName();
+		bool LOD = (fname.find("_l1") != fname.npos || fname.find("_l0") != fname.npos);
+		if( LOD || fname != name ) {
 			continue;
 		}
 		
-		size_t g = f;
+		size_t g = 3;
 		RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
 		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			culled++;
@@ -455,8 +453,12 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 
 		if( object && object->type() == GTAObject::Vehicle ) {
 			auto& name = f->getName();
-			if( name.substr(name.size()-3) == "dam" || name.find("lo") != name.npos || name.find("dummy") != name.npos ) {
-				continue;
+			if(name.size() > 3) {
+				if(name.substr(name.size()-3) == "dam" 
+					|| name.find("lo") != name.npos 
+					|| name.find("dummy") != name.npos) {
+					continue;
+				}
 			}
 		}
 
