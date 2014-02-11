@@ -19,6 +19,11 @@ class ViewerWidget : public QGLWidget
 	Model* currentModel;
 	
 	float viewDistance;
+	glm::vec2 viewAngles;
+	
+	bool dragging;
+	QPointF dstart;
+	glm::vec2 dastart;
 public:
 	
 	enum FileMode {
@@ -44,6 +49,13 @@ public slots:
 signals:
 
 	void fileOpened(const QString& file);
+
+protected:
+	
+	virtual void mousePressEvent(QMouseEvent*);
+	virtual void mouseReleaseEvent(QMouseEvent*);
+    virtual void mouseMoveEvent(QMouseEvent*);
+    virtual void wheelEvent(QWheelEvent*);
 
 private:
 	FileMode fm;
