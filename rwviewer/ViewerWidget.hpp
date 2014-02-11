@@ -6,6 +6,7 @@
 #include <QGLWidget>
 #include <QTimer>
 
+class Model;
 class ViewerWidget : public QGLWidget
 {
 	Q_OBJECT
@@ -14,6 +15,10 @@ class ViewerWidget : public QGLWidget
 
 	QTimer timer;
 	GameWorld* gworld;
+	
+	Model* currentModel;
+	
+	float viewDistance;
 public:
 	
 	enum FileMode {
