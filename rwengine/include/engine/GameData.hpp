@@ -62,7 +62,7 @@ public:
 	 * ctor
 	 * @param path Path to the root of the game data.
 	 */
-	GameData(const std::string& path);
+	GameData(const std::string& path = "");
 	
 	GameWorld* engine;
 	

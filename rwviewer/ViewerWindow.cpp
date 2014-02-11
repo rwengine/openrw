@@ -1,4 +1,5 @@
 #include "ViewerWindow.hpp"
+#include <engine/GameWorld.hpp>
 #include "ViewerWidget.hpp"
 #include "ArchiveContentsWidget.hpp"
 #include <QMenuBar>
@@ -23,7 +24,8 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	file->addSeparator();
 	file->addAction("E&xit", QApplication::instance(), SLOT(quit()), QKeySequence::Quit);
 	
-	connect(archivewidget, SIGNAL(selectedFileChanged(std::string)), viewer, SLOT(showFile(std::string)));
+	connect(archivewidget, SIGNAL(selectedFileChanged(QString)), viewer, SLOT(showFile(QString)));
+	connect(viewer, SIGNAL(fileOpened(QString)), SLOT(updateTitle(QString)));
 	
 	QSettings settings("OpenRW", "rwviewer");
     restoreGeometry(settings.value("geometry").toByteArray());
@@ -40,6 +42,8 @@ void ViewerWindow::openArchive(const QString& name)
 	
 	LoaderIMG ld;
 	ld.load(rname.toStdString());
+	
+	viewer->world()->gameData.loadIMG(rname.toStdString());
 	
 	archivewidget->setArchive(ld);
 }
@@ -60,3 +64,9 @@ void ViewerWindow::openArchive()
 		openArchive(dialog.selectedFiles().at(0));
 	}
 }
+
+void ViewerWindow::updateTitle(const QString& name)
+{
+	setWindowTitle(name);
+}
+

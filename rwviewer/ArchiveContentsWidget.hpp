@@ -18,7 +18,7 @@ public:
 	void setArchive(const LoaderIMG& archive);
 	
 signals:
-	void selectedFileChanged(const std::string& file);
+	void selectedFileChanged(const QString& file);
 
 public slots:
 	void selectedIndexChanged(const QModelIndex& current);
