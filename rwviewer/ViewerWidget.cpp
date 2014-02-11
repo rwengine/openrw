@@ -46,10 +46,10 @@ void ViewerWidget::paintGL()
 		
 		glUseProgram(r.worldProgram);
 
-		/*glUniform1f(uniFogStart, weather.fogStart);
-		glUniform1f(uniFogEnd, camera.frustum.far);*/
+		glUniform1f(r.uniFogStart, 90.f);
+		glUniform1f(r.uniFogEnd, 100.f);
 
-		glUniform4f(r.uniAmbientCol, 1.f, 1.f, 1.f, 1.f);
+		glUniform4f(r.uniAmbientCol, .1f, .1f, .1f, 1.f);
 		glUniform4f(r.uniDynamicCol, 1.f, 1.f, 1.f, 1.f);
 		//glUniform3f(uniSunDirection, sunDirection.x, sunDirection.y, sunDirection.z);
 		glUniform1f(r.uniMatDiffuse, 0.9f);
@@ -86,7 +86,10 @@ void ViewerWidget::showFile(const QString& file)
 void ViewerWidget::showDFF(const QString& file)
 {
 	gworld->gameData.loadDFF(file.toStdString());
-	auto mit = gworld->gameData.models.find(file.left(file.size()-4).toStdString());
+	QString basename(file.left(file.size()-4));
+	// HACK this
+	gworld->gameData.loadTXD((basename+".txd").toStdString());
+	auto mit = gworld->gameData.models.find(basename.toStdString());
 	if(mit != gworld->gameData.models.end()) {
 		// TODO better error handling
 		currentModel = mit->second;
