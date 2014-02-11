@@ -12,7 +12,7 @@ class ViewerWindow : public QMainWindow
 	ViewerWidget* viewer;
 	ArchiveContentsWidget* archivewidget;
 public:
-	
+
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 	void openArchive(const QString& name);
@@ -23,6 +23,16 @@ public slots:
 
 	void openArchive();
 	void updateTitle(const QString& name);
+
+private slots:
+
+	void openRecent();
+
+private:
+	
+	QList<QAction*> recentArchives;
+	QAction* recentSep;
+	void updateRecentArchives();
 };
 
 #endif 
