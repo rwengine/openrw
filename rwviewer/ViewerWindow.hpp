@@ -19,6 +19,8 @@ public:
 
 	void openArchive(const QString& name);
 	
+    virtual void showEvent(QShowEvent*);
+	
     virtual void closeEvent(QCloseEvent*);
 
 public slots:
