@@ -2,6 +2,7 @@
 #include <engine/GameWorld.hpp>
 #include "ViewerWidget.hpp"
 #include "ArchiveContentsWidget.hpp"
+#include "ModelFramesWidget.hpp"
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QApplication>
@@ -20,6 +21,10 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	archivewidget->setObjectName("archivewidget");
 	this->addDockWidget(Qt::LeftDockWidgetArea, archivewidget);
 	
+	frameswidget = new ModelFramesWidget;
+	frameswidget->setObjectName("frameswidget");
+	this->addDockWidget(Qt::RightDockWidgetArea, frameswidget);
+	
 	QMenuBar* mb = this->menuBar();
 	QMenu* file = mb->addMenu("&File");
 	file->addAction("Open &Archive", this, SLOT(openArchive()));
@@ -33,7 +38,7 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	file->addAction("E&xit", QApplication::instance(), SLOT(quit()), QKeySequence::Quit);
 	
 	connect(archivewidget, SIGNAL(selectedFileChanged(QString)), viewer, SLOT(showFile(QString)));
-	connect(viewer, SIGNAL(fileOpened(QString)), SLOT(updateTitle(QString)));
+	connect(viewer, SIGNAL(fileOpened(QString)), SLOT(openFileChanged(QString)));
 	
 	QSettings settings("OpenRW", "rwviewer");
     restoreGeometry(settings.value("geometry").toByteArray());
@@ -83,9 +88,15 @@ void ViewerWindow::openArchive()
 	}
 }
 
-void ViewerWindow::updateTitle(const QString& name)
+void ViewerWindow::openFileChanged(const QString& name)
 {
 	setWindowTitle(name);
+	if(viewer->fileMode() == ViewerWidget::DFF) {
+		frameswidget->setModel(viewer->currentModel());
+	}
+	else {
+		frameswidget->setModel(nullptr);
+	}
 }
 
 void ViewerWindow::openRecent()

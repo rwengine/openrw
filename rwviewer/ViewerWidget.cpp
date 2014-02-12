@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), currentModel(nullptr), 
+: QGLWidget(parent, shareWidget, f), gworld(nullptr), cmodel(nullptr), 
  viewDistance(1.f), dragging(false), fm(ViewerWidget::UNK)
 {
 }
@@ -42,7 +42,7 @@ void ViewerWidget::paintGL()
 	r.camera.frustum.fov = 60.f;
 	r.camera.frustum.aspectRatio = width()/(height()*1.f);
 	
-	if(currentModel) {
+	if(cmodel) {
 		glEnable(GL_DEPTH_TEST);
 		
 		glm::mat4 m;
@@ -64,7 +64,7 @@ void ViewerWidget::paintGL()
 		glUniformMatrix4fv(r.uniView, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(r.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 		
-		gworld->renderer.renderModel(currentModel, m);
+		gworld->renderer.renderModel(cmodel, m);
 	}
 }
 
@@ -75,7 +75,7 @@ GameWorld* ViewerWidget::world()
 
 void ViewerWidget::showFile(const QString& file)
 {
-	currentModel = nullptr;
+	cmodel = nullptr;
 	currentFile = file;
 	QString low = file.toLower();
 	if(low.endsWith("dff")) {
@@ -96,10 +96,10 @@ void ViewerWidget::showDFF(const QString& file)
 	auto mit = gworld->gameData.models.find(basename.toStdString());
 	if(mit != gworld->gameData.models.end()) {
 		// TODO better error handling
-		currentModel = mit->second;
+		cmodel = mit->second;
 		float radius = 0.f;
 		for(auto& g 
-			: currentModel->geometries) {
+			: cmodel->geometries) {
 			radius = std::max(
 				radius,
 				glm::length(g->geometryBounds.center)+g->geometryBounds.radius);
@@ -113,6 +113,16 @@ void ViewerWidget::showDFF(const QString& file)
 void ViewerWidget::showTXD(const QString& file)
 {
 	fm = ViewerWidget::TXD;
+}
+
+Model* ViewerWidget::currentModel() const
+{
+	return cmodel;
+}
+
+ViewerWidget::FileMode ViewerWidget::fileMode() const
+{
+	return fm;
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e)

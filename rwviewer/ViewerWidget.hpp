@@ -16,7 +16,7 @@ class ViewerWidget : public QGLWidget
 	QTimer timer;
 	GameWorld* gworld;
 	
-	Model* currentModel;
+	Model* cmodel;
 	
 	float viewDistance;
 	glm::vec2 viewAngles;
@@ -37,6 +37,10 @@ public:
     virtual void resizeGL(int w, int h);
 	
     virtual void paintGL();
+	
+	FileMode fileMode() const;
+	
+	Model* currentModel() const;
 	
 	GameWorld* world();
 

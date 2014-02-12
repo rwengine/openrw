@@ -3,6 +3,7 @@
 #define _VIEWERWINDOW_HPP_
 #include <QMainWindow>
 
+class ModelFramesWidget;
 class ArchiveContentsWidget;
 class ViewerWidget;
 class ViewerWindow : public QMainWindow
@@ -11,6 +12,7 @@ class ViewerWindow : public QMainWindow
 	
 	ViewerWidget* viewer;
 	ArchiveContentsWidget* archivewidget;
+	ModelFramesWidget* frameswidget;
 public:
 
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
@@ -22,10 +24,10 @@ public:
 public slots:
 
 	void openArchive();
-	void updateTitle(const QString& name);
 
 private slots:
 
+	void openFileChanged(const QString& name);
 	void openRecent();
 
 private:

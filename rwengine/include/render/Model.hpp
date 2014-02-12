@@ -51,6 +51,9 @@ public:
 
 	glm::mat4 getMatrix() const 
 		{ return (parentFrame? parentFrame->getMatrix() : glm::mat4()) * matrix; }
+	
+	ModelFrame* getParent() const
+		{ return parentFrame; }
 
 	const std::vector<ModelFrame*>& getChildren() const
 		{ return childs; }
