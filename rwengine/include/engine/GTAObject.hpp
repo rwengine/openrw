@@ -15,8 +15,7 @@ class Animator;
 class GameWorld;
 
 /**
- * @brief The GTAObject struct
- * Stores data that is relevant to all types of objects.
+ * Stores data used by call types of object instances.
  */
 struct GTAObject
 {

@@ -6,6 +6,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+/**
+ * Data used by Object Instances
+ */
 struct ObjectData
 {
 	uint16_t ID;
@@ -38,6 +41,9 @@ struct ObjectData
 	};
 };
 
+/**
+ * Data used by vehicles
+ */
 struct CarData
 {
 	enum VehicleClass
@@ -83,6 +89,9 @@ struct CarData
 	float wheelScale; // used only when type == CAR
 };
 
+/**
+ * Data used by peds
+ */
 struct CharacterData
 {
 	uint16_t ID;

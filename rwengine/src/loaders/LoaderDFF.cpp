@@ -52,13 +52,9 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 							std::string framename(extSec.raw(), extSec.header.size);
 							std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
 							
-							// !HACK!
-							if(framename == "swaist") {
-								model->rootFrameIdx = model->frameNames.size();
-							}
-							
 							if( fn < model->frames.size() ) {
-								model->frames[(fn++)]->setName(framename);
+								model->frames[fn]->setName(framename);
+								fn++;
 							}
 						}
 					}

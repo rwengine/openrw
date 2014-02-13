@@ -27,6 +27,9 @@ struct AttributeIndex {
 
 typedef std::vector<AttributeIndex> AttributeList;
 
+/** 
+ * GeometryBuffer stores a set of vertex attribute data
+ */
 class GeometryBuffer {
 	GLuint vbo;
 	GLsizei num;
@@ -42,6 +45,9 @@ public:
 	
 	/**
 	 * Uploads Vertex Buffer data from an STL vector
+	 * 
+	 * vertex_attributes() is assumed to exist so that vertex types
+	 * can implicitly declare the strides and offsets for their data.
 	 */
 	template<class T> void uploadVertices(const std::vector<T>& data) {
 		uploadVertices(data.size(), data.size()*sizeof(T), data.data());

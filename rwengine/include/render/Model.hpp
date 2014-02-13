@@ -11,17 +11,10 @@
 #include "DrawBuffer.hpp"
 #include "GeometryBuffer.hpp"
 
-/** 
-	* Frame
-	*   => Atomic 
-	*     => Geometry
-	*   - defaultRotation
-	*   - defaultTranslation 
-	*   
-	*   + setTransform(mat)
-	*   + resetTransform()
-	*/
-
+/**
+ * ModelFrame stores the hierarchy of a model's geometry as well as default
+ * transformations. 
+ */
 class ModelFrame {
 	glm::mat3 defaultRotation;
 	glm::vec3 defaultTranslation;
@@ -65,6 +58,10 @@ public:
 		{ return geometries; }
 };
 
+/**
+ * Model stores all the data contained within a DFF, as well as data required
+ * to render them.
+ */
 class Model
 {
 public:
@@ -108,6 +105,7 @@ public:
 		glm::vec2 texcoord; /* 48 */
 		glm::vec4 colour;   /* 64 */
 		
+		/** @see GeometryBuffer */
 		static const AttributeList vertex_attributes() {
 			return {
 				{ATRS_Position, 3, sizeof(GeometryVertex),  0ul},
@@ -145,9 +143,7 @@ public:
 	};
 	
 	std::vector<ModelFrame*> frames;
-	
-	std::vector<std::string> frameNames;
-
+	/** @TODO clean up this mess a little */
 	std::vector<std::shared_ptr<Geometry>> geometries;
 	std::vector<Atomic> atomics;
 

@@ -5,6 +5,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+/**
+ * Vehicle handling data
+ */
 struct VehicleHandlingInfo
 {
 	enum EngineType

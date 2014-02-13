@@ -14,6 +14,12 @@ class GameWorld;
 class GTAObject;
 class Animator;
 
+/**
+ * Renderer 
+ * 
+ * Handles low level rendering of Models, as well as high level rendering of
+ * objects in the world.
+ */
 class GTARenderer
 {
     GameWorld* engine;
@@ -46,6 +52,7 @@ public:
 	size_t rendered;
 	size_t culled;
 
+	/* TODO clean up all these variables */
 	GLint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection, uniDynamicCol;
 	GLint uniMatDiffuse, uniMatAmbient, uniFogStart, uniFogEnd;
 	GLuint worldProgram;
@@ -59,7 +66,7 @@ public:
     GLuint debugTex;
 	
     /**
-     * @brief renderWorld renders the world.
+     * Renders the current World. 
      */
     void renderWorld();
 
@@ -67,10 +74,13 @@ public:
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
 
+	/** 
+	 * Renders a model (who'd have thought)
+	 */
 	void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr, Animator* animator = nullptr);
 
     /**
-     * @brief renderPaths renders the AI paths.
+     * Debug method renders all AI paths
      */
     void renderPaths();
 };

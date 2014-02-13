@@ -4,6 +4,10 @@
 #include <GL/glew.h>
 
 class GeometryBuffer;
+
+/** 
+ * DrawBuffer stores VAO state 
+ */
 class DrawBuffer {
 	GLuint vao;
 	
