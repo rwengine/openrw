@@ -7,7 +7,7 @@ include_directories(include)
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-include_directories(../rwengine/include ../rwgame /usr/include/bullet)
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" "${CMAKE_SOURCE_DIR}/rwgame" /usr/include/bullet)
 
 target_link_libraries(run_tests rwengine sfml-window sfml-system sfml-graphics GL GLEW BulletDynamics BulletCollision LinearMath ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 

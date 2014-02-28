@@ -1,6 +1,6 @@
 add_executable(analyzer main.cpp)
 
-include_directories(../rwengine/include)
+include_directories(${CMAKE_SOURCE_DIR}/rwengine/include)
 
 target_link_libraries( analyzer rwengine sfml-graphics )
 

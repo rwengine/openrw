@@ -12,7 +12,7 @@ add_executable(rwviewer
 	DFFFramesTreeModel.cpp
 	ModelFramesWidget.cpp)
 
-include_directories(../rwengine/include /usr/include/bullet)
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
 
 target_link_libraries(rwviewer rwengine sfml-graphics sfml-system GL GLEW BulletDynamics BulletCollision LinearMath)
 qt5_use_modules(rwviewer Widgets OpenGL)
