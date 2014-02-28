@@ -1,13 +1,13 @@
 #pragma once
 #ifndef _GTAINSTANCE_HPP_
 #define _GTAINSTANCE_HPP_
-#include <engine/GTAObject.hpp>
+#include <engine/GameObject.hpp>
 
 /**
  * @struct GTAInstance
  *  Stores references to the Object data and the instance
  */
-struct GTAInstance : public GTAObject
+struct GTAInstance : public GameObject
 {
 	glm::vec3 scale;
 	std::shared_ptr<ObjectData> object;

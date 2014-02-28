@@ -179,7 +179,7 @@ public:
 	/**
 	 * Vehicle information
 	 */
-	std::map<std::string, VehicleInfo> vehicleInfo;
+	std::map<std::string, VehicleInfoHandle> vehicleInfo;
 	
 	/**
 	 * Texture Loader

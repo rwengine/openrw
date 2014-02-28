@@ -268,8 +268,8 @@ void GTARenderer::renderWorld()
 			matrixModel = glm::translate(matrixModel, 
 										 v->getPosition());
 			matrixModel = matrixModel * glm::mat4_cast(v->getRotation());
-			if(charac->getCurrentSeat() < v->info.seats.size()) {
-				glm::vec3 seatpos = v->info.seats[charac->getCurrentSeat()].offset;
+			if(charac->getCurrentSeat() < v->info->seats.size()) {
+				glm::vec3 seatpos = v->info->seats[charac->getCurrentSeat()].offset;
 				matrixModel = glm::translate(matrixModel, seatpos);
 			}
 		}
@@ -346,7 +346,7 @@ void GTARenderer::renderWorld()
 		renderModel(inst->model, matrixModel, inst);
 
 		// Draw wheels n' stuff
-		for( size_t w = 0; w < inst->info.wheels.size(); ++w) {
+		for( size_t w = 0; w < inst->info->wheels.size(); ++w) {
 			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
                 Model* wheelModel = engine->gameData.models["wheels"];
@@ -426,7 +426,7 @@ void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const 
 	}
 }
 
-void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GTAObject* object)
+void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GameObject* object)
 {
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
@@ -442,7 +442,7 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     }
 }
 
-bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
+bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	auto localmatrix = matrix * f->getMatrix();
 	for(size_t g : f->getGeometries()) {
@@ -451,7 +451,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 			continue;
 		}
 
-		if( object && object->type() == GTAObject::Vehicle ) {
+		if( object && object->type() == GameObject::Vehicle ) {
 			auto& name = f->getName();
 			if(name.size() > 3) {
 				if(name.substr(name.size()-3) == "dam" 
@@ -477,7 +477,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	return true;
 }
 
-bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent)
+bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
 
@@ -501,7 +501,7 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
 			auto col = mat.colour;
-			if( object && object->type() == GTAObject::Vehicle ) {
+			if( object && object->type() == GameObject::Vehicle ) {
 				auto vehicle = static_cast<GTAVehicle*>(object);
 				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
 					glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
@@ -530,7 +530,7 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 	return true;
 }
 
-void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GTAObject* object, Animator *animator)
+void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object, Animator *animator)
 {
 	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object);
 }

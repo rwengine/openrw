@@ -37,7 +37,7 @@ GTAPlayerAIController* player = nullptr;
 GTACharacter* playerCharacter = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
-GTAObject* debugObject = nullptr;
+GameObject* debugObject = nullptr;
 
 glm::vec3 plyPos(87.f, -932.f, 58.f);
 glm::vec2 plyLook;
@@ -51,7 +51,7 @@ sf::Font font;
 
 bool showControls = false;
 
-bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr)
+bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object = nullptr)
 {
 	glm::mat4 view;
 	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
@@ -69,7 +69,7 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GTAObject** object = nullptr
 		normal = glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
 						   ray.m_hitNormalWorld.z());
 		if(object) {
-			*object = static_cast<GTAObject*>(ray.m_collisionObject->getUserPointer());
+			*object = static_cast<GameObject*>(ray.m_collisionObject->getUserPointer());
 		}
 		return true;
 	}
@@ -158,7 +158,7 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 			if(hitWorldRay(hit, normal)) {
 				glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
 				size_t k = 1;
-				for(std::map<uint16_t, std::shared_ptr<CarData>>::iterator it = gta->vehicleTypes.begin();
+				for(std::map<uint16_t, std::shared_ptr<VehicleData>>::iterator it = gta->vehicleTypes.begin();
 					it != gta->vehicleTypes.end(); ++it) {
 					if(it->first == 140) continue; // get this plane out of here.
 					gta->createVehicle(it->first, spawnPos);
@@ -227,7 +227,7 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 	{"object-info",
 		[&](std::string) {
 			glm::vec3 hit, normal;
-			GTAObject* object;
+			GameObject* object;
 			if(hitWorldRay(hit, normal, &object)) {
 				debugObject = object;
 			}
@@ -236,8 +236,8 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 	{"damage-object",
 		[&](std::string) {
 			if(debugObject) {
-				GTAObject::DamageInfo dmg;
-				dmg.type = GTAObject::DamageInfo::Bullet;
+				GameObject::DamageInfo dmg;
+				dmg.type = GameObject::DamageInfo::Bullet;
 				dmg.hitpoints = 15.f;
 				debugObject->takeDamage(dmg);
 			}
@@ -590,9 +590,9 @@ void render()
 				}
 			}
 		}
-		if(debugObject->type() == GTAObject::Vehicle) {
+		if(debugObject->type() == GameObject::Vehicle) {
 			GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
-			ss << "ID: " << vehicle->info.handling.ID << std::endl;
+			ss << "ID: " << vehicle->info->handling.ID << std::endl;
 		}
 	}
 	

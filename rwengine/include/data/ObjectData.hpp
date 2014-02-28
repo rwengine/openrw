@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include <glm/glm.hpp>
 
 /**
@@ -42,9 +43,23 @@ struct ObjectData
 };
 
 /**
- * Data used by vehicles
+ * Data used by peds
  */
-struct CarData
+struct CharacterData
+{
+	uint16_t ID;
+	std::string modelName;
+	std::string textureName;
+	std::string type;
+	std::string behaviour;
+	std::string animGroup;
+	uint8_t driveMask;
+};
+
+/**
+ * Data shared by vehicles types.
+ */
+struct VehicleData
 {
 	enum VehicleClass
 	{
@@ -63,7 +78,7 @@ struct CarData
 		BICYCLE     = 1 << 11,
 		ONFOOT      = 1 << 12,
 	};
-	
+
 	enum VehicleType {
 		CAR,
 		BOAT,
@@ -71,7 +86,7 @@ struct CarData
 		PLANE,
 		HELI,
 	};
-	
+
 	uint16_t ID;
 	std::string modelName;
 	std::string textureName;
@@ -89,19 +104,7 @@ struct CarData
 	float wheelScale; // used only when type == CAR
 };
 
-/**
- * Data used by peds
- */
-struct CharacterData
-{
-	uint16_t ID;
-	std::string modelName;
-	std::string textureName;
-	std::string type;
-	std::string behaviour;
-	std::string animGroup;
-	uint8_t driveMask;
-};
+typedef std::shared_ptr<VehicleData> VehicleDataHandle;
 
 /** 
  * This is orthogonal to object class, it gives

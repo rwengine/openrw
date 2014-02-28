@@ -239,20 +239,20 @@ GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, co
 		Model* model = gameData.models[vti->second->modelName];
 		auto info = gameData.vehicleInfo.find(vti->second->handlingID);
 		if(model && info != gameData.vehicleInfo.end()) {
-			if( info->second.wheels.size() == 0 && info->second.seats.size() == 0 ) {
+			if( info->second->wheels.size() == 0 && info->second->seats.size() == 0 ) {
 				for( const ModelFrame* f : model->frames ) {
 					const std::string& name = f->getName();
 					
 					if( name.size() > 5 && name.substr(0, 5) == "wheel" ) {
 						auto frameTrans = f->getMatrix();
-						info->second.wheels.push_back({glm::vec3(frameTrans[3])});
+						info->second->wheels.push_back({glm::vec3(frameTrans[3])});
 					}
 					if(name.size() > 3 && name.substr(0, 3) == "ped" && name.substr(name.size()-4) == "seat") {
 						auto p = f->getDefaultTranslation();
 						p.x = p.x * -1.f;
-						info->second.seats.push_back({p});
+						info->second->seats.push_back({p});
 						p.x = p.x * -1.f;
-						info->second.seats.push_back({p});
+						info->second->seats.push_back({p});
 					}
 				}
 			}
@@ -292,9 +292,9 @@ GTACharacter* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &po
     return nullptr;
 }
 
-void GameWorld::destroyObject(GTAObject* object)
+void GameWorld::destroyObject(GameObject* object)
 {
-	if(object->type() == GTAObject::Character)
+	if(object->type() == GameObject::Character)
 	{
 		for(auto it = pedestrians.begin(); it != pedestrians.end(); ) {
 			if( *it == object ) {
@@ -305,7 +305,7 @@ void GameWorld::destroyObject(GTAObject* object)
 			}
 		}
 	}
-	else if(object->type() == GTAObject::Vehicle)
+	else if(object->type() == GameObject::Vehicle)
 	{
 		for(auto it = vehicleInstances.begin(); it != vehicleInstances.end(); ) {
 			if( *it == object ) {
@@ -316,7 +316,7 @@ void GameWorld::destroyObject(GTAObject* object)
 			}
 		}
 	}
-	else if(object->type() == GTAObject::Instance)
+	else if(object->type() == GameObject::Instance)
 	{
 		for(auto it = modelInstances.begin(); it != modelInstances.end(); ) {
 			if( it->second.get() == object ) {

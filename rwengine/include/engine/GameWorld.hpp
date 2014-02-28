@@ -8,7 +8,7 @@
 #include <ai/GTAAINode.hpp>
 #include <ai/AIGraph.hpp>
 
-class GTAObject;
+class GameObject;
 class GTACharacter;
 class GTAInstance;
 class GTAVehicle;
@@ -101,7 +101,7 @@ public:
 	/**
 	 * Destroys an existing Object
 	 */
-	void destroyObject(GTAObject* object);
+	void destroyObject(GameObject* object);
 	
 	/**
 	 * Returns the current hour
@@ -146,7 +146,7 @@ public:
 	/**
 	 * Vehicle definitions
 	 */
-	std::map<uint16_t, std::shared_ptr<CarData>> vehicleTypes;
+	std::map<uint16_t, std::shared_ptr<VehicleData>> vehicleTypes;
 
 	/**
 		* Ped definitions

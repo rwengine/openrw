@@ -17,10 +17,19 @@ public:
 		glewExperimental = GL_TRUE;
 		glewInit();
 		e = new GameWorld("test_data");
+
+		e->gameData.loadIMG("/models/gta3");
+		e->load();
+		for(std::map<std::string, std::string>::iterator it = e->gameData.ideLocations.begin();
+			it != e->gameData.ideLocations.end();
+			++it) {
+			e->defineItems(it->second);
+		}
 	}
 
 	~Global() {
 		wnd.close();
+		delete e;
 	}
 	
 	static Global& get()

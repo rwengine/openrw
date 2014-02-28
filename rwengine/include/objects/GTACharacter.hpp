@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GTACHARACTER_HPP_
 #define _GTACHARACTER_HPP_
-#include <engine/GTAObject.hpp>
+#include <engine/GameObject.hpp>
 #include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
@@ -14,7 +14,7 @@ class GameWorld;
  * @brief The GTACharacter struct
  * Stores data relating to an instance of a "pedestrian".
  */
-struct GTACharacter : public GTAObject
+struct GTACharacter : public GameObject
 {
 private:
 	GTAVehicle* currentVehicle;

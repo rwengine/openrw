@@ -11,7 +11,7 @@
 class Model;
 class ModelFrame;
 class GameWorld;
-class GTAObject;
+class GameObject;
 class Animator;
 
 /**
@@ -29,13 +29,13 @@ class GTARenderer
 		size_t g;
 		size_t sg;
 		glm::mat4 matrix;
-		GTAObject* object;
+		GameObject* object;
 	};
 	
-	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GTAObject* object, bool queueTransparent = true);
+	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent = true);
 	
 	// Internal method for processing sub-geometry
-	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GTAObject* object, bool queueTransparent = true);
+	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent = true);
 	
 	/// Queue of sub-geometry to post-render 
 	/// With a faster occulusion culling stage
@@ -72,12 +72,12 @@ public:
 
 	void renderNamedFrame(Model*, const glm::mat4& matrix, const std::string& name);
 
-	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GTAObject* = nullptr);
+	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GameObject* = nullptr);
 
 	/** 
 	 * Renders a model (who'd have thought)
 	 */
-	void renderModel(Model*, const glm::mat4& modelMatrix, GTAObject* = nullptr, Animator* animator = nullptr);
+	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
 
     /**
      * Debug method renders all AI paths

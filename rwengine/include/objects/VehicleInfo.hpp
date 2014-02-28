@@ -3,7 +3,10 @@
 #define _VEHICLE_INFO_HPP_
 #include <string>
 #include <vector>
+#include <memory>
 #include <glm/glm.hpp>
+
+class VehicleData;
 
 /**
  * Vehicle handling data
@@ -80,13 +83,19 @@ struct SeatInfo {
 	glm::vec3 offset;
 };
 
-struct VehicleInfo
-{
+/**
+ * Vehicle Handling and runtime data.
+ */
+struct VehicleInfo {
+	/** Handling data */
 	VehicleHandlingInfo handling;
 
+	/** Value for caching wheel information */
 	std::vector<WheelInfo> wheels;
-	
+	/** Value for caching seat information */
 	std::vector<SeatInfo> seats;
 };
+
+typedef std::shared_ptr<VehicleInfo> VehicleInfoHandle;
 
 #endif

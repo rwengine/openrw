@@ -11,7 +11,7 @@ GTAInstance::GTAInstance(
 		std::shared_ptr<ObjectData> obj,
 		std::shared_ptr<GTAInstance> lod
 			)
-: GTAObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
+: GameObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
 {
 	btRigidBody* body = nullptr;
 	auto phyit = engine->gameData.collisions.find(obj->modelName);
@@ -78,7 +78,7 @@ GTAInstance::GTAInstance(
 	}
 }
 
-bool GTAInstance::takeDamage(const GTAObject::DamageInfo& dmg)
+bool GTAInstance::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;

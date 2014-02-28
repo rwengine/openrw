@@ -15,8 +15,8 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 					 object,
 				     nullptr
 					);
-	GTAObject::DamageInfo dmg;
-	dmg.type = GTAObject::DamageInfo::Bullet;
+	GameObject::DamageInfo dmg;
+	dmg.type = GameObject::DamageInfo::Bullet;
 	dmg.hitpoints = 50.f;
 	
 	// Set object to undamagable.
@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE(instance_test_destroy)
 					 object,
 				     nullptr
 					);
-	GTAObject::DamageInfo dmg;
-	dmg.type = GTAObject::DamageInfo::Bullet;
+	GameObject::DamageInfo dmg;
+	dmg.type = GameObject::DamageInfo::Bullet;
 	dmg.hitpoints = inst.mHealth + 1.f;
 	
 	// Now make it damageable

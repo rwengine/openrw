@@ -330,9 +330,15 @@ void GameData::loadHandling(const std::string& path)
 		ss >> info.suspensionBias;
 		ss >> std::hex >> info.flags;
 
-		vehicleInfo.insert({info.ID, {info}});
+		auto mit = vehicleInfo.find(info.ID);
+		if(mit == vehicleInfo.end()) {
+			vehicleInfo.insert({info.ID,
+								VehicleInfoHandle(new VehicleInfo{info})});
+		}
+		else {
+			mit->second->handling = info;
+		}
 	}
-
 }
 
 void GameData::loadWaterpro(const std::string& path)

@@ -92,7 +92,7 @@ bool LoaderIDE::load(const std::string &filename)
 				break;
 			}
 			case CARS: {
-				std::shared_ptr<CarData> cars(new CarData);
+				std::shared_ptr<VehicleData> cars(new VehicleData);
 
 				std::string id, type, classType, frequency, lvl,
 				            comprules, wheelModelID, wheelScale;
@@ -116,35 +116,35 @@ bool LoaderIDE::load(const std::string &filename)
 				cars->comprules = atoi(comprules.c_str());
 
 				if (type == "car") {
-					cars->type = CarData::CAR;
+					cars->type = VehicleData::CAR;
 					cars->wheelModelID = atoi(wheelModelID.c_str());
 					cars->wheelScale = atof(wheelScale.c_str());
 				} else if (type == "boat") {
-					cars->type = CarData::BOAT;
+					cars->type = VehicleData::BOAT;
 				} else if (type == "train") {
-					cars->type = CarData::TRAIN;
+					cars->type = VehicleData::TRAIN;
 					cars->modelLOD = atoi(wheelModelID.c_str());
 				} else if (type == "plane") {
-					cars->type = CarData::PLANE;
+					cars->type = VehicleData::PLANE;
 				} else if (type == "heli") {
-					cars->type = CarData::HELI;
+					cars->type = VehicleData::HELI;
 				}
 
-				const std::map<CarData::VehicleClass, std::string> classTypes{
-					{CarData::IGNORE,      "ignore"},
-					{CarData::NORMAL,      "normal"},
-					{CarData::POORFAMILY,  "poorfamily"},
-					{CarData::RICHFAMILY,  "richfamily"},
-					{CarData::EXECUTIVE,   "executive"},
-					{CarData::WORKER,      "worker"},
-					{CarData::BIG,         "big"},
-					{CarData::TAXI,        "taxi"},
-					{CarData::MOPED,       "moped"},
-					{CarData::MOTORBIKE,   "motorbike"},
-					{CarData::LEISUREBOAT, "leisureboat"},
-					{CarData::WORKERBOAT,  "workerboat"},
-					{CarData::BICYCLE,     "bicycle"},
-					{CarData::ONFOOT,      "onfoot"},
+				const std::map<VehicleData::VehicleClass, std::string> classTypes{
+					{VehicleData::IGNORE,      "ignore"},
+					{VehicleData::NORMAL,      "normal"},
+					{VehicleData::POORFAMILY,  "poorfamily"},
+					{VehicleData::RICHFAMILY,  "richfamily"},
+					{VehicleData::EXECUTIVE,   "executive"},
+					{VehicleData::WORKER,      "worker"},
+					{VehicleData::BIG,         "big"},
+					{VehicleData::TAXI,        "taxi"},
+					{VehicleData::MOPED,       "moped"},
+					{VehicleData::MOTORBIKE,   "motorbike"},
+					{VehicleData::LEISUREBOAT, "leisureboat"},
+					{VehicleData::WORKERBOAT,  "workerboat"},
+					{VehicleData::BICYCLE,     "bicycle"},
+					{VehicleData::ONFOOT,      "onfoot"},
 				};
 				for (auto &a : classTypes) {
 					if (classType == a.second) {

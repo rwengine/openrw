@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTAOBJECT_HPP_
-#define _GTAOBJECT_HPP_
+#ifndef _GAMEOBJECT_HPP_
+#define _GAMEOBJECT_HPP_
 
 #include <engine/GTATypes.hpp>
 #include <loaders/LoaderIDE.hpp>
@@ -17,7 +17,7 @@ class GameWorld;
 /**
  * Stores data used by call types of object instances.
  */
-struct GTAObject
+struct GameObject
 {
     glm::vec3 position;
     glm::quat rotation;
@@ -33,10 +33,10 @@ struct GTAObject
 	 */
 	float mHealth; 
 
-    GTAObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
+	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f) {}
 		
-	virtual ~GTAObject() {};
+	virtual ~GameObject() {};
 
     enum Type
     {
@@ -87,4 +87,4 @@ struct GTAObject
 	virtual bool takeDamage(const DamageInfo& damage) { return false; };
 };
 
-#endif // GTAOBJECTS_HPP
+#endif // __GAMEOBJECTS_HPP__

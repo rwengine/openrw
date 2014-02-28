@@ -6,7 +6,7 @@
 #include <boost/concept_check.hpp>
 
 GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
-: GTAObject(engine, pos, rot, model),
+: GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0), ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
@@ -149,7 +149,7 @@ void GTACharacter::updateCharacter()
 						auto otherObject = static_cast<const btCollisionObject*>(
 							manifold->getBody0() == physObject ? manifold->getBody1() : manifold->getBody0());
 						if(otherObject->getUserPointer()) {
-							GTAObject* object = static_cast<GTAObject*>(otherObject->getUserPointer());
+							GameObject* object = static_cast<GameObject*>(otherObject->getUserPointer());
 							if(object->type() == Vehicle) {
 								GTAVehicle* vehicle = static_cast<GTAVehicle*>(object);
 								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
@@ -248,7 +248,7 @@ void GTACharacter::setCurrentVehicle(GTAVehicle *value, size_t seat)
 	}
 }
 
-bool GTACharacter::takeDamage(const GTAObject::DamageInfo& dmg)
+bool GTACharacter::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 	return true;

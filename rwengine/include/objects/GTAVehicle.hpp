@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GTAVEHICLE_HPP_
 #define _GTAVEHICLE_HPP_
-#include <engine/GTAObject.hpp>
+#include <engine/GameObject.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <map>
 #include <objects/VehicleInfo.hpp>
@@ -10,7 +10,7 @@
  * @class GTAVehicle
  *  Stores references to the vehicle data and the instance
  */
-struct GTAVehicle : public GTAObject
+struct GTAVehicle : public GameObject
 {
 private:
 	float steerAngle;
@@ -19,12 +19,12 @@ private:
 	bool handbrake;
 public:
 
-	std::shared_ptr<CarData> vehicle;
-	VehicleInfo info;
+	VehicleDataHandle vehicle;
+	VehicleInfoHandle info;
 	glm::vec3 colourPrimary;
 	glm::vec3 colourSecondary;
 	
-	std::map<size_t, GTAObject*> seatOccupants;
+	std::map<size_t, GameObject*> seatOccupants;
 
 	btRigidBody* physBody;
 	btVehicleRaycaster* physRaycaster;
@@ -34,8 +34,8 @@ public:
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
 			   Model* model,
-			   std::shared_ptr<CarData> data,
-			   const VehicleInfo& info,
+			   VehicleDataHandle data,
+			   VehicleInfoHandle info,
 			   const glm::vec3& prim,
 			   const glm::vec3& sec);
 	
@@ -69,9 +69,9 @@ public:
 	
 	void ejectAll();
 	
-	GTAObject* getOccupant(size_t seat);
+	GameObject* getOccupant(size_t seat);
 	
-	void setOccupant(size_t seat, GTAObject* occupant);
+	void setOccupant(size_t seat, GameObject* occupant);
 	
     virtual bool takeDamage(const DamageInfo& damage);
 };

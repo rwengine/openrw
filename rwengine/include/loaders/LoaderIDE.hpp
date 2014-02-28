@@ -7,6 +7,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <data/ObjectData.hpp>
+#include <objects/VehicleInfo.hpp>
 #include <data/PathData.hpp>
 
 class LoaderIDE
@@ -28,7 +29,7 @@ public:
 	bool load(const std::string& filename);
 
 	std::vector<std::shared_ptr<ObjectData>> OBJSs;
-	std::vector<std::shared_ptr<CarData>> CARSs;
+	std::vector<std::shared_ptr<VehicleData>> CARSs;
 	std::vector<std::shared_ptr<CharacterData>> PEDSs;
 	std::vector<std::shared_ptr<PathData>> PATHs;
 };
