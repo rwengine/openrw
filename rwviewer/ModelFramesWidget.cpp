@@ -19,6 +19,7 @@ void ModelFramesWidget::setModel(Model* model)
 	if(model != nullptr) {
 		framemodel = new DFFFramesTreeModel(model, this);
 		tree->setModel(framemodel);
+		tree->setDisabled(false);
 	}
 	else {
 		tree->setDisabled(true);
