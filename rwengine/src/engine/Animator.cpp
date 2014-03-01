@@ -78,12 +78,12 @@ glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
 			m = m * glm::mat4_cast(kf.rotation);
 		}
 		else if(it->second->type == AnimationBone::RT0) {
-			m = glm::mat4_cast(kf.rotation);
 			m = glm::translate(m, kf.position);
+			m = m * glm::mat4_cast(kf.rotation);
 		}
 		else {
-			m = glm::mat4_cast(kf.rotation);
 			m = glm::translate(m, kf.position);
+			m = m * glm::mat4_cast(kf.rotation);
 		}
 		return m;
 	}
