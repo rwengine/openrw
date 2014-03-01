@@ -31,6 +31,7 @@ public:
 
 	void reset();
 	void setTransform(const glm::mat4& m);
+	const glm::mat4& getTransform() const { return matrix; }
 
 	void setName(const std::string& fname) 
 		{ name = fname; }

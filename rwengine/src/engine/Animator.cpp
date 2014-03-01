@@ -2,6 +2,7 @@
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIFP.hpp>
 #include <render/Model.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 Animator::Animator()
 	: animation(nullptr),  model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), repeat(true)
@@ -53,11 +54,6 @@ void Animator::tick(float dt)
 
 }
 
-void Animator::render(float dt)
-{
-
-}
-
 glm::vec3 Animator::getRootTranslation() const
 {
 	if( model && model->rootFrameIdx	!= -1 ) {
@@ -71,12 +67,40 @@ glm::quat Animator::getRootRotation() const
 	return glm::quat();
 }
 
-glm::mat4 Animator::getFrameMatrix(size_t frame) const
+glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
 {
-	return glm::mat4();
+	auto it = animation->bones.find(frame->getName());
+	if(it != animation->bones.end()) {
+		auto kf = it->second->getInterpolatedKeyframe(getAnimationTime(alpha));
+		glm::mat4 m;
+		if(it->second->type == AnimationBone::R00) {
+			m = glm::translate(m, frame->getDefaultTranslation());
+			m = m * glm::mat4_cast(kf.rotation);
+		}
+		else if(it->second->type == AnimationBone::RT0) {
+			m = glm::mat4_cast(kf.rotation);
+			m = glm::translate(m, kf.position);
+		}
+		else {
+			m = glm::mat4_cast(kf.rotation);
+			m = glm::translate(m, kf.position);
+		}
+		return m;
+	}
+	else {
+		return frame->getTransform();
+	}
 }
 
 bool Animator::isCompleted() const
 {
 	return serverTime >= animation->duration;
+}
+
+float Animator::getAnimationTime(float alpha) const
+{
+	if(repeat) {
+		return fmod(serverTime + alpha, this->animation->duration);
+	}
+	return serverTime + alpha;
 }

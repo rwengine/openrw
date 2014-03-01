@@ -11,6 +11,7 @@
 class Animation;
 class AnimationBone;
 class Model;
+class ModelFrame;
 
 /**
  * @brief The Animator class handles updating frame matricies for animations.
@@ -47,6 +48,14 @@ public:
 	void setModel(Model* model);
 
 	/**
+	 * @brief getFrameMatrix returns the matrix for frame at the current time
+	 * @param t
+	 * @param frame
+	 * @return
+	 */
+	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha) const;
+
+	/**
 	 * @brief tick Update animation paramters for server-side data.
 	 * @param dt
 	 */
@@ -71,16 +80,11 @@ public:
 	glm::quat getRootRotation() const;
 
 	/**
-	 * @brief getFrameMatrix returns the matrix for a given frame index.
-	 * @param frame
-	 * @return
-	 */
-	glm::mat4 getFrameMatrix(size_t frame) const;
-	
-	/**
 	 * Returns true if the animation has finished playing.
 	 */
 	bool isCompleted() const; 
+
+	float getAnimationTime(float alpha = 0.f) const;
 };
 
 #endif

@@ -10,7 +10,9 @@ add_executable(rwviewer
 	IMGArchiveModel.cpp
 	ArchiveContentsWidget.cpp
 	DFFFramesTreeModel.cpp
-	ModelFramesWidget.cpp)
+	ModelFramesWidget.cpp
+	AnimationListModel.cpp
+	AnimationListWidget.cpp)
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
 

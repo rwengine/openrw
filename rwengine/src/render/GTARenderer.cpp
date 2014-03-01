@@ -444,7 +444,15 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 
 bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
-	auto localmatrix = matrix * f->getMatrix();
+	auto localmatrix = matrix;
+
+	if(object && object->animator) {
+		localmatrix *= object->animator->getFrameMatrix(f, 0.f);
+	}
+	else {
+		localmatrix *= f->getTransform();
+	}
+
 	bool vis = object == nullptr || object->isFrameVisible(f);
 	for(size_t g : f->getGeometries()) {
 		if(!vis ) continue;
@@ -464,7 +472,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	}
 	
 	for(ModelFrame* c : f->getChildren()) {
-		renderFrame(m, c, matrix, object, queueTransparent);
+		renderFrame(m, c, localmatrix, object, queueTransparent);
 	}
 	return true;
 }

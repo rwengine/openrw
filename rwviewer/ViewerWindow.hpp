@@ -5,7 +5,9 @@
 
 class ModelFramesWidget;
 class ArchiveContentsWidget;
+class AnimationListWidget;
 class ViewerWidget;
+
 class ViewerWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -13,6 +15,7 @@ class ViewerWindow : public QMainWindow
 	ViewerWidget* viewer;
 	ArchiveContentsWidget* archivewidget;
 	ModelFramesWidget* frameswidget;
+	AnimationListWidget* animationswidget;
 public:
 
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
@@ -26,6 +29,8 @@ public:
 public slots:
 
 	void openArchive();
+
+	void openAnimations();
 
 private slots:
 

@@ -5,6 +5,7 @@
 #include <engine/GameWorld.hpp>
 #include <QGLWidget>
 #include <QTimer>
+#include <loaders/LoaderIFP.hpp>
 
 class Model;
 class ViewerWidget : public QGLWidget
@@ -15,8 +16,11 @@ class ViewerWidget : public QGLWidget
 
 	QTimer timer;
 	GameWorld* gworld;
+
+	GameObject* dummyObject;
 	
 	Model* cmodel;
+	Animation* canimation;
 	
 	float viewDistance;
 	glm::vec2 viewAngles;
@@ -49,6 +53,8 @@ public slots:
 	void showFile(const QString& file);
 	void showDFF(const QString& file);
 	void showTXD(const QString& file);
+
+	void showAnimation(Animation* anim);
 
 signals:
 

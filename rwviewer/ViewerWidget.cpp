@@ -2,10 +2,13 @@
 #include <render/Model.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QMouseEvent>
+#include <engine/GameObject.hpp>
+#include <engine/Animator.hpp>
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), cmodel(nullptr), 
- viewDistance(1.f), dragging(false), fm(ViewerWidget::UNK)
+: QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr),
+  cmodel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
+  fm(ViewerWidget::UNK)
 {
 }
 
@@ -41,6 +44,10 @@ void ViewerWidget::paintGL()
 	r.camera.frustum.near = 0.1f;
 	r.camera.frustum.fov = 60.f;
 	r.camera.frustum.aspectRatio = width()/(height()*1.f);
+
+	if(dummyObject && dummyObject->animator) {
+		dummyObject->animator->tick(1.f/60.f);
+	}
 	
 	if(cmodel) {
 		glEnable(GL_DEPTH_TEST);
@@ -64,7 +71,7 @@ void ViewerWidget::paintGL()
 		glUniformMatrix4fv(r.uniView, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(r.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 		
-		gworld->renderer.renderModel(cmodel, m);
+		gworld->renderer.renderModel(cmodel, m, dummyObject);
 	}
 }
 
@@ -96,7 +103,9 @@ void ViewerWidget::showDFF(const QString& file)
 	auto mit = gworld->gameData.models.find(basename.toStdString());
 	if(mit != gworld->gameData.models.end()) {
 		// TODO better error handling
+		if(dummyObject) delete dummyObject;
 		cmodel = mit->second;
+		dummyObject = new GameObject(gworld, glm::vec3(), glm::quat(), cmodel);
 		float radius = 0.f;
 		for(auto& g 
 			: cmodel->geometries) {
@@ -113,6 +122,18 @@ void ViewerWidget::showDFF(const QString& file)
 void ViewerWidget::showTXD(const QString& file)
 {
 	fm = ViewerWidget::TXD;
+}
+
+void ViewerWidget::showAnimation(Animation *anim)
+{
+	canimation = anim;
+	if(dummyObject) {
+		if(dummyObject->animator == nullptr) {
+			dummyObject->animator = new Animator;
+			dummyObject->animator->setModel(dummyObject->model);
+		}
+		dummyObject->animator->setAnimation(canimation);
+	}
 }
 
 Model* ViewerWidget::currentModel() const

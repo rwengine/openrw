@@ -25,7 +25,7 @@ bool findKeyframes(float t, AnimationBone* bone, AnimationKeyframe& f1, Animatio
                 alpha = 1.f;
             }
             else {
-                alpha = (t - f1.starttime) / tdiff;
+				alpha = glm::clamp((t - f1.starttime) / tdiff, 0.f, 1.f);
             }
 
             return true;
@@ -39,10 +39,9 @@ AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time)
     AnimationKeyframe f1, f2;
     float alpha;
 
-    if( findKeyframes(time, this, f1, f2, alpha) ) {
+	if( findKeyframes(time, this, f1, f2, alpha) ) {
         return {
-                (1.f - abs(glm::dot( f1.rotation, f2.rotation )) < 0.001f) ? f1.rotation 
-                    : glm::normalize(glm::mix(f1.rotation, f2.rotation, alpha)),
+				glm::normalize(glm::lerp(f1.rotation, f2.rotation, alpha)),
                 glm::mix(f1.position, f2.position, alpha),
                 glm::mix(f1.scale, f2.scale, alpha),
                 time

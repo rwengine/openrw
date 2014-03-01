@@ -43,10 +43,11 @@ struct GameObject
     {
         Instance,
         Character,
-        Vehicle
+		Vehicle,
+		Unknown
     };
 
-    virtual Type type() = 0;
+	virtual Type type() { return Unknown; }
 	
 	virtual void setPosition(const glm::vec3& pos);
 	

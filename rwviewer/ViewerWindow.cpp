@@ -3,10 +3,12 @@
 #include "ViewerWidget.hpp"
 #include "ArchiveContentsWidget.hpp"
 #include "ModelFramesWidget.hpp"
+#include "AnimationListWidget.hpp"
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QApplication>
 #include <QSettings>
+#include <fstream>
 
 static int MaxRecentArchives = 5;
 
@@ -24,6 +26,10 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	frameswidget = new ModelFramesWidget;
 	frameswidget->setObjectName("frameswidget");
 	this->addDockWidget(Qt::RightDockWidgetArea, frameswidget);
+
+	animationswidget = new AnimationListWidget;
+	animationswidget->setObjectName("animationswidget");
+	this->addDockWidget(Qt::RightDockWidgetArea, animationswidget);
 	
 	QMenuBar* mb = this->menuBar();
 	QMenu* file = mb->addMenu("&File");
@@ -38,8 +44,12 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	auto ex = file->addAction("E&xit");
 	ex->setShortcut(QKeySequence::Quit);
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
+
+	QMenu* anim = mb->addMenu("&Animation");
+	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
 	
 	connect(archivewidget, SIGNAL(selectedFileChanged(QString)), viewer, SLOT(showFile(QString)));
+	connect(animationswidget, SIGNAL(selectedAnimationChanged(Animation*)), viewer, SLOT(showAnimation(Animation*)));
 	connect(viewer, SIGNAL(fileOpened(QString)), SLOT(openFileChanged(QString)));
 	
 	updateRecentArchives();
@@ -94,6 +104,35 @@ void ViewerWindow::openArchive()
 	QFileDialog dialog(this, "Open Archive", QDir::homePath(), "IMG Archives (*.img)");
 	if(dialog.exec()) {
 		openArchive(dialog.selectedFiles().at(0));
+	}
+}
+
+void ViewerWindow::openAnimations()
+{
+	QFileDialog dialog(this, "Open Animations", QDir::homePath(), "IFP Animations (*.ifp)");
+	if(dialog.exec()) {
+		std::ifstream dfile(dialog.selectedFiles().at(0).toStdString().c_str());
+		AnimationList anims;
+
+		if(dfile.is_open())
+		{
+			dfile.seekg(0, std::ios_base::end);
+			size_t length = dfile.tellg();
+			dfile.seekg(0);
+			char *file = new char[length];
+			dfile.read(file, length);
+
+			LoaderIFP loader;
+			if( loader.loadFromMemory(file) ) {
+				for(auto& f : loader.animations) {
+					anims.push_back(f);
+				}
+			}
+
+			delete[] file;
+		}
+
+		animationswidget->setAnimations(anims);
 	}
 }
 
