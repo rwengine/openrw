@@ -4,12 +4,13 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <sys/stat.h>
 #include <data/CollisionModel.hpp>
+#include <render/Model.hpp>
 
 GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  vehicle(data), info(info), colourPrimary(prim), colourSecondary(sec), 
-	  physBody(nullptr), physVehicle(nullptr)
+	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
+	  colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
 	mHealth = 100.f;
 	if(! data->modelName.empty()) {
@@ -245,5 +246,54 @@ void GTAVehicle::setOccupant(size_t seat, GameObject* occupant)
 bool GTAVehicle::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
+	return true;
+}
+
+void GTAVehicle::setPartDamaged(unsigned int flag, bool damaged)
+{
+	if(damaged) {
+		damageFlags |= flag;
+	}
+	else {
+		damageFlags = damageFlags & ~flag;
+	}
+}
+
+unsigned int nameToDamageFlag(const std::string& name)
+{
+	if(name.find("bonnet") != name.npos) return GTAVehicle::DF_Bonnet;
+	if(name.find("door_lf") != name.npos) return GTAVehicle::DF_Door_lf;
+	if(name.find("door_rf") != name.npos) return GTAVehicle::DF_Door_rf;
+	if(name.find("door_lr") != name.npos) return GTAVehicle::DF_Door_lr;
+	if(name.find("door_rr") != name.npos) return GTAVehicle::DF_Door_rr;
+	if(name.find("boot") != name.npos) return GTAVehicle::DF_Boot;
+	if(name.find("windscreen") != name.npos) return GTAVehicle::DF_Windscreen;
+	if(name.find("bump_front") != name.npos) return GTAVehicle::DF_Bump_front;
+	if(name.find("bump_rear") != name.npos) return GTAVehicle::DF_Bump_rear;
+	if(name.find("wing_lf") != name.npos) return GTAVehicle::DF_Wing_lf;
+	if(name.find("wing_rf") != name.npos) return GTAVehicle::DF_Wing_rf;
+	if(name.find("wing_lr") != name.npos) return GTAVehicle::DF_Wing_lr;
+	if(name.find("wing_rr") != name.npos) return GTAVehicle::DF_Wing_rr;
+	return 0;
+}
+
+bool GTAVehicle::isFrameVisible(ModelFrame *frame) const
+{
+	auto& name = frame->getName();
+	bool isDam = name.find("_dam") != name.npos;
+	bool isOk = name.find("_ok") != name.npos;
+	if(name.find("lo") != name.npos
+			|| name.find("_dummy") != name.npos) return false;
+
+	if(isDam || isOk) {
+		unsigned int dft = nameToDamageFlag(name);
+		if(isDam) {
+			return (damageFlags & dft) == dft;
+		}
+		else {
+			return (damageFlags & dft) == 0;
+		}
+	}
+
 	return true;
 }

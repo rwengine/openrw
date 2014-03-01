@@ -10,6 +10,7 @@
 
 class GTAAIController;
 class Model;
+class ModelFrame;
 class Animator;
 
 class GameWorld;
@@ -84,7 +85,9 @@ struct GameObject
 		DamageType type;
 	};
 	
-	virtual bool takeDamage(const DamageInfo& damage) { return false; };
+	virtual bool takeDamage(const DamageInfo& damage) { return false; }
+
+	virtual bool isFrameVisible(ModelFrame* frame) const { return true; }
 };
 
 #endif // __GAMEOBJECTS_HPP__

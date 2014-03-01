@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
 #include <objects/GTAVehicle.hpp>
+#include <render/Model.hpp>
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)
 
@@ -19,6 +20,34 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle)
 	BOOST_CHECK_EQUAL(vehicle->info->wheels.size(), 4);
 
 	BOOST_CHECK_EQUAL(vehicle->info->seats.size(), 4);
+}
+
+BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
+{
+	GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
+
+	BOOST_REQUIRE(vehicle != nullptr);
+	BOOST_REQUIRE(vehicle->model != nullptr);
+
+	auto bonnet_ok = vehicle->model->findFrame("bonnet_hi_ok");
+	auto bonnet_dam = vehicle->model->findFrame("bonnet_hi_dam");
+
+	BOOST_REQUIRE(bonnet_ok != nullptr);
+	BOOST_REQUIRE(bonnet_dam != nullptr);
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
+
+	vehicle->setPartDamaged(GTAVehicle::DF_Bonnet, true);
+
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_ok));
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_dam));
+
+	vehicle->setPartDamaged(GTAVehicle::DF_Bonnet, false);
+
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
+
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 #include <GL/glew.h>
 
 #include <loaders/rwbinarystream.h>
@@ -148,6 +149,13 @@ public:
 	std::vector<Atomic> atomics;
 
 	int32_t rootFrameIdx;
+
+	ModelFrame* findFrame(const std::string& name) const {
+		auto fit = std::find_if(
+					frames.begin(), frames.end(),
+					[&](ModelFrame* f) { return f->getName() == name; });
+		return fit != frames.end() ? *fit : nullptr;
+	}
 };
 
 #endif

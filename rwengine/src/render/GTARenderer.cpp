@@ -445,21 +445,13 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
 bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	auto localmatrix = matrix * f->getMatrix();
+	bool vis = object == nullptr || object->isFrameVisible(f);
 	for(size_t g : f->getGeometries()) {
+		if(!vis ) continue;
+
 		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
 		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			continue;
-		}
-
-		if( object && object->type() == GameObject::Vehicle ) {
-			auto& name = f->getName();
-			if(name.size() > 3) {
-				if(name.substr(name.size()-3) == "dam" 
-					|| name.find("lo") != name.npos 
-					|| name.find("dummy") != name.npos) {
-					continue;
-				}
-			}
 		}
 
 		if( (m->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
