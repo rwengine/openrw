@@ -148,7 +148,7 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 	{"knock-down",
 		[&](std::string) {
 			for(auto it = gta->pedestrians.begin(); it != gta->pedestrians.end(); ++it) {
-				(*it)->changeAction(GTACharacter::KnockedDown);
+				(*it)->enterActivity(GTACharacter::KnockedDown);
 			}
 		}
 	},

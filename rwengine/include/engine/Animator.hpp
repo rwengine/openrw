@@ -45,6 +45,9 @@ public:
 	 */
 	void setAnimation(Animation* animation, bool repeat = true);
 
+	Animation* getAnimation() const
+	{ return animation; }
+
 	void setModel(Model* model);
 
 	/**

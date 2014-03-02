@@ -11,18 +11,39 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
   controller(nullptr), currentActivity(None)
 {
 	mHealth = 100.f;
+
+	// TODO move AnimationGroup creation somewhere else.
+	animations.idle = engine->gameData.animations["idle_stance"];
+	animations.walk = engine->gameData.animations["walk_player"];
+	animations.walk_start = engine->gameData.animations["walk_start"];
+	animations.run  = engine->gameData.animations["run_player"];
+
+	animations.jump_start = engine->gameData.animations["jump_launch"];
+	animations.jump_glide = engine->gameData.animations["jump_glide"];
+	animations.jump_land  = engine->gameData.animations["jump_land"];
+
+	animations.car_sit     = engine->gameData.animations["car_sit"];
+	animations.car_sit_low = engine->gameData.animations["car_lsit"];
+
 	if(model) {
 		animator = new Animator();
 		animator->setModel(model);
 
 		createActor();
-		changeAction(Idle);
+		enterActivity(Idle);
 	}
 }
 
 GTACharacter::~GTACharacter()
 {
 	destroyActor();
+}
+
+void GTACharacter::enterActivity(GTACharacter::Activity act)
+{
+	if(currentActivity != act) {
+		currentActivity = act;
+	}
 }
 
 void GTACharacter::createActor(const glm::vec3& size)
@@ -64,49 +85,56 @@ void GTACharacter::destroyActor()
 	}
 }
 
-void GTACharacter::changeAction(Activity newAction)
-{
-	if(currentActivity != newAction) {
-		currentActivity = newAction;
-		if(currentVehicle == nullptr) {
-			switch( currentActivity ) {
-			default:
-			case Idle:
-				animator->setAnimation(engine->gameData.animations.at("idle_stance"));
-				break;
-			case Walk:
-				animator->setAnimation(engine->gameData.animations.at("walk_civi"));
-				break;
-			case Run:
-				animator->setAnimation(engine->gameData.animations.at("run_civi"));
-				break;
-			case KnockedDown:
-				// Change body shape.
-				position += glm::vec3(0.f, 0.f, 0.5f);
-				createActor(glm::vec3(0.5f, 0.5f, 0.1f));
-				animator->setAnimation(engine->gameData.animations.at("kd_front"), false);
-				break;
-			case GettingUp:
-				// Change body shape back to normal.
-				createActor();
-				animator->setAnimation(engine->gameData.animations.at("getup"), false);
-				break;
-			case VehicleDrive:
-				animator->setAnimation(engine->gameData.animations.at("car_sit"));
-				break;
-			}
-		}
-		else {
-			animator->setAnimation(engine->gameData.animations.at("car_sit"));
-		}
-	}
-}
-
 void GTACharacter::tick(float dt)
 {
 	if(controller) {
 		controller->update(dt);
 	}
+
+	if(currentVehicle) {
+		enterActivity(VehicleSit);
+	}
+
+	switch(currentActivity) {
+	case Idle: {
+		if(animator->getAnimation() != animations.idle) {
+			animator->setAnimation(animations.idle);
+		}
+	} break;
+	case Walk: {
+		if(animator->getAnimation() != animations.walk) {
+			if(animator->getAnimation() != animations.walk_start) {
+				animator->setAnimation(animations.walk_start, false);
+			}
+			else if(animator->isCompleted()) {
+				animator->setAnimation(animations.walk);
+			}
+		}
+	} break;
+	case Run: {
+		if(animator->getAnimation() != animations.run) {
+			animator->setAnimation(animations.run);
+		}
+	} break;
+	case Jump: {
+		if(animator->getAnimation() != animations.jump_start) {
+			if(animator->getAnimation() != animations.jump_glide) {
+				animator->setAnimation(animations.jump_start, false);
+			}
+			else if(animator->isCompleted()) {
+				animator->setAnimation(animations.jump_glide);
+			}
+		}
+	} break;
+	case VehicleSit: {
+		if(animator->getAnimation() != animations.car_sit) {
+			animator->setAnimation(animations.car_sit);
+		}
+	} break;
+	default: break;
+	};
+
+
 	animator->tick(dt);
 	updateCharacter();
 	
@@ -153,7 +181,7 @@ void GTACharacter::updateCharacter()
 							if(object->type() == Vehicle) {
 								GTAVehicle* vehicle = static_cast<GTAVehicle*>(object);
 								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
-									changeAction(KnockedDown);
+									enterActivity(KnockedDown);
 								}
 							}
 						}
@@ -166,7 +194,7 @@ void GTACharacter::updateCharacter()
 		{
 			if(physCharacter->onGround())
 			{
-				changeAction(GTACharacter::Idle);
+				enterActivity(GTACharacter::Idle);
 			}
 		}
 		else 
@@ -211,6 +239,7 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 			enterVehicle(nullptr, 0);
 			vehicle->setOccupant(seat, this);
 			setCurrentVehicle(vehicle, seat);
+			enterActivity(VehicleSit);
 			return true;
 		}
 	}
@@ -257,7 +286,7 @@ bool GTACharacter::takeDamage(const GameObject::DamageInfo& dmg)
 void GTACharacter::jump()
 {
 	physCharacter->jump();
-	changeAction(GTACharacter::Jump);
+	enterActivity(GTACharacter::Jump);
 }
 
 void GTACharacter::resetToAINode()

@@ -10,6 +10,27 @@
 class GTAVehicle;
 class GameWorld;
 
+struct AnimationGroup
+{
+	Animation* idle;
+	Animation* walk;
+	Animation* walk_start;
+	Animation* run;
+
+	Animation* jump_start;
+	Animation* jump_glide;
+	Animation* jump_land;
+
+	Animation* car_sit;
+	Animation* car_sit_low;
+
+	AnimationGroup()
+	 : idle(nullptr), walk(nullptr), walk_start(nullptr), run(nullptr),
+	   jump_start(nullptr), jump_glide(nullptr), jump_land(nullptr),
+	   car_sit(nullptr), car_sit_low(nullptr)
+	{}
+};
+
 /**
  * @brief The GTACharacter struct
  * Stores data relating to an instance of a "pedestrian".
@@ -48,6 +69,8 @@ public:
 
 	GTAAIController* controller;
 
+	AnimationGroup animations;
+
 	/**
 	 * @brief GTACharacter Constructs a Character
 	 * @param pos
@@ -63,7 +86,7 @@ public:
 
 	Activity currentActivity;
 
-	void changeAction(Activity newAction);
+	void enterActivity(Activity act);
 
 	void tick(float dt);
 

@@ -13,14 +13,14 @@ void GTADefaultAIController::update(float dt)
 		else {
 			getUpTime -= dt;
 			if(getUpTime < 0.f) {
-				character->changeAction(GTACharacter::GettingUp);
+				character->enterActivity(GTACharacter::GettingUp);
 				getUpTime = -1.f;
 			}
 		}
 	}
 	else if (character->currentActivity == GTACharacter::GettingUp ) {
 		if( character->animator->isCompleted() ) {
-			character->changeAction(GTACharacter::Idle);
+			character->enterActivity(GTACharacter::Idle);
 		}
 	}
 	else {
@@ -43,10 +43,10 @@ void GTADefaultAIController::update(float dt)
 				}
 				
 				if( targetNode == nullptr ) {
-					character->changeAction(GTACharacter::Idle);
+					character->enterActivity(GTACharacter::Idle);
 				}
 				else {
-					character->changeAction(GTACharacter::Walk);
+					character->enterActivity(GTACharacter::Walk);
 					// Choose a new random margin
 					if(character->getCurrentVehicle()) {
 						std::uniform_real_distribution<float> dist(2.f, 2.5f);
@@ -71,14 +71,14 @@ void GTADefaultAIController::update(float dt)
 				}
 				else {
 					targetNode = nullptr;
-					character->changeAction(GTACharacter::Idle);
+					character->enterActivity(GTACharacter::Idle);
 				}
 			}
 			else 
 			{
 				// Ensure the AI doesn't get stuck in idle with a target node.
 				if(character->currentActivity == GTACharacter::Idle) {
-					character->changeAction(GTACharacter::Walk);
+					character->enterActivity(GTACharacter::Walk);
 				}
 			}
 		}
