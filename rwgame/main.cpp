@@ -24,6 +24,8 @@
 #include <getopt.h>
 #include <boost/concept_check.hpp>
 
+#define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
+
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
 
@@ -443,23 +445,26 @@ void init(std::string gtapath, bool loadWorld)
 void update(float dt)
 {
 	if (inFocus) {
+
+		float qpi = glm::half_pi<float>();
+
 		if (mouseGrabbed) {
 			sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
 			sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 			sf::Vector2i deltaMouse = mousePos - screenCenter;
 			sf::Mouse::setPosition(screenCenter, window);
 
-			plyLook.x += deltaMouse.x / 10.0;
-			plyLook.y += deltaMouse.y / 10.0;
+			plyLook.x += deltaMouse.x / 100.0;
+			plyLook.y += deltaMouse.y / 100.0;
 
-			if (plyLook.y > 90)
-				plyLook.y = 90;
-			else if (plyLook.y < -90)
-				plyLook.y = -90;
+			if (plyLook.y > qpi)
+				plyLook.y = qpi;
+			else if (plyLook.y < -qpi)
+				plyLook.y = -qpi;
 		}
 
 		glm::mat4 view;
-		view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
+		view = glm::rotate(view, qpi, glm::vec3(1, 0, 0));
 		view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
 		view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
 		
@@ -751,13 +756,14 @@ GenericState menuState(
 		}
 );
 
+std::string getGamePath()
+{
+	auto v = getenv(ENV_GAME_PATH_NAME);
+	return v ? v : "";
+}
+
 int main(int argc, char *argv[])
 {
-	if (argc < 2) {
-		std::cout << "Usage: " << argv[0] << " <path to GTA3 root folder>" << std::endl;
-		exit(1);
-	}
-	
 	if(! font.loadFromFile("DejaVuSansMono.ttf")) {
 		std::cerr << "Failed to load font" << std::endl;
 	}
@@ -765,7 +771,7 @@ int main(int argc, char *argv[])
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	bool loadWorld = false;
+	bool loadWorld = true;
 	size_t w = WIDTH, h = HEIGHT;
 	int c;
 	while( (c = getopt(argc, argv, "w:h:l")) != -1) {
@@ -777,7 +783,7 @@ int main(int argc, char *argv[])
 				h = atoi(optarg);
 				break;
 			case 'l':
-				loadWorld = true;
+				loadWorld = false;
 				break;
 		}
 	}
@@ -788,7 +794,7 @@ int main(int argc, char *argv[])
 	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
-	init(argv[optind], loadWorld);
+	init(getGamePath(), loadWorld);
 	
 	sf::Clock clock;
 	
