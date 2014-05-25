@@ -8,7 +8,7 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 {
 	LoaderIMG loader;
 	
-	BOOST_REQUIRE( loader.load("test_data/models/gta3") );
+	BOOST_REQUIRE( loader.load(Global::getGamePath() + "/models/gta3") );
 	
 	BOOST_CHECK( loader.getAssetCount() > 0 );
 	

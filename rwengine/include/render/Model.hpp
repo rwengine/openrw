@@ -86,7 +86,7 @@ public:
 	
 	struct Material {
 		std::vector<Texture> textures;
-		glm::detail::tvec4<uint8_t> colour;
+		glm::u8vec4 colour;
 		
 		uint8_t flags;
 		

@@ -71,7 +71,7 @@ namespace RW
 	{
 		BSTMatrix rotation;
 		BSTVector3 position;
-		uint32_t index;
+		int32_t index;
 		uint32_t matrixflags; // UNUSED BY ANYTHING.
 	};
 	
@@ -111,7 +111,7 @@ namespace RW
 		};
 	};
 	
-	typedef glm::detail::tvec4<uint8_t> BSColor;
+	typedef glm::u8vec4 BSColor;
 	
 	struct BSGeometryColor
 	{

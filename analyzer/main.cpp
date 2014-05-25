@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 			for (int i = 0; i < 16; i++) {
 				uint8_t pixelIndex = 4 * (j*16 + i);
 
-				for (int y = 0; y < scaleUp; y++) {
-					for (int x = 0; x < scaleUp; x++) {
+				for (u_int32_t y = 0; y < scaleUp; y++) {
+					for (u_int32_t x = 0; x < scaleUp; x++) {
 						img.setPixel((i*scaleUp)+x, (j*scaleUp)+y, {
 							tex.body.palette[pixelIndex + 0],
 							tex.body.palette[pixelIndex + 1],

@@ -163,7 +163,7 @@ void dumpModelFile(char* data)
 			}
 		}
 		
-		for(int j = 0; j < geom.numtris; ++j) 
+		for(size_t j = 0; j < geom.numtris; ++j)
 		{
 			auto tri = readStructure<BSGeometryTriangle>(data, dataI);
 			std::cout << "  Triangle " << std::dec 

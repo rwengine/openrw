@@ -59,7 +59,7 @@ bool LoaderIFP::loadFromMemory(char *data)
     ANPK* fileRoot = read<ANPK>(data, dataI);
     std::string listname = readString(data, dataI);
 
-    for( size_t a = 0; a < fileRoot->info.entries; ++a ) {
+	for( int a = 0; a < fileRoot->info.entries; ++a ) {
         // something about a name?
         /*NAME* n =*/ read<NAME>(data, dataI);
         std::string animname = readString(data, dataI);
@@ -72,7 +72,7 @@ bool LoaderIFP::loadFromMemory(char *data)
         DGAN* animroot = read<DGAN>(data, dataI);
         std::string infoname = readString(data, dataI);
 
-        for( size_t c = 0; c < animroot->info.entries; ++c ) {
+		for( int c = 0; c < animroot->info.entries; ++c ) {
             size_t start = data_offs;
             CPAN* cpan = read<CPAN>(data, dataI);
             ANIM* frames = read<ANIM>(data, dataI);
@@ -90,7 +90,7 @@ bool LoaderIFP::loadFromMemory(char *data)
 
             if(type == "KR00") {
                 bonedata->type = AnimationBone::R00;
-                for( size_t d = 0; d < frames->frames; ++d ) {
+				for( int d = 0; d < frames->frames; ++d ) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     time = *read<float>(data,dataI);
                     bonedata->frames.push_back({
@@ -103,7 +103,7 @@ bool LoaderIFP::loadFromMemory(char *data)
             }
             else if(type == "KRT0") {
                 bonedata->type = AnimationBone::RT0;
-                for( size_t d = 0; d < frames->frames; ++d ) {
+				for( int d = 0; d < frames->frames; ++d ) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data,dataI);
@@ -117,7 +117,7 @@ bool LoaderIFP::loadFromMemory(char *data)
             }
             else if(type == "KRTS") {
                 bonedata->type = AnimationBone::RTS;
-                for( size_t d = 0; d < frames->frames; ++d ) {
+				for( int d = 0; d < frames->frames; ++d ) {
 					glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     glm::vec3 s = *read<glm::vec3>(data, dataI);

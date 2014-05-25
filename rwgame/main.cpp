@@ -135,7 +135,7 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 				}
 				
 				auto spawnpos = hit + normal;
-				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
 			}
 		}
 	},

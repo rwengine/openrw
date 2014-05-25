@@ -4,7 +4,7 @@
 #include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
 
-// Many tests require OpenGL be functional, seems like a reasonable solution.
+#define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
 
 class Global
 {
@@ -16,7 +16,7 @@ public:
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		e = new GameWorld("test_data");
+		e = new GameWorld(getGamePath());
 
 		e->gameData.loadIMG("/models/gta3");
 		e->load();
@@ -30,6 +30,13 @@ public:
 	~Global() {
 		wnd.close();
 		delete e;
+	}
+
+	static std::string getGamePath()
+	{
+		// TODO: Is this "the way to do it" on windows.
+		auto v = getenv(ENV_GAME_PATH_NAME);
+		return v ? v : "";
 	}
 	
 	static Global& get()

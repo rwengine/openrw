@@ -47,6 +47,7 @@ bool LoaderIDE::load(const std::string &filename)
 			std::stringstream strstream(line);
 
 			switch (section) {
+			default: break;
 			case OBJS:
 			case TOBJ: { // Supports Type 1, 2 and 3
 				std::shared_ptr<ObjectData> objs(new ObjectData);

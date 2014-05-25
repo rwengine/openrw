@@ -188,7 +188,7 @@ void GameData::loadIMG(const std::string& name)
 	std::string archivePath = datpath + name;
 
 	if (imgLoader.load(archivePath)) {
-		for (int i = 0; i < imgLoader.getAssetCount(); i++) {
+		for (size_t i = 0; i < imgLoader.getAssetCount(); i++) {
 			auto &asset = imgLoader.getAssetInfoByIndex(i);
 
 			std::string filename = asset.name;

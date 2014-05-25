@@ -62,6 +62,7 @@ struct State
 				break;
 			case sf::Event::KeyPressed:
 				switch(e.key.code) {
+				default: break;
 					case sf::Keyboard::Up:
 						m->move(-1);
 						break;

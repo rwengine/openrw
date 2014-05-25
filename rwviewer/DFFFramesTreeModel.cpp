@@ -42,7 +42,7 @@ QModelIndex DFFFramesTreeModel::parent(const QModelIndex& child) const
 	if(c->getParent()) {
 		auto cp = c->getParent();
 		if(cp->getParent()) {
-			for(int i = 0; i < cp->getParent()->getChildren().size(); ++i) {
+			for(size_t i = 0; i < cp->getParent()->getChildren().size(); ++i) {
 				if(cp->getParent()->getChildren()[i] == c->getParent()) {
 					return createIndex(i, 0, c->getParent());
 				}

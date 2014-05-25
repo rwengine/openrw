@@ -405,7 +405,6 @@ void GTARenderer::renderWorld()
 
 void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const std::string& name)
 {
-	size_t n = 0;
 	for (const ModelFrame* f : model->frames) 
 	{
 		const std::string& fname = f->getName();

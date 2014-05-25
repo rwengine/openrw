@@ -144,7 +144,7 @@ glm::quat GTAVehicle::getRotation() const
 void GTAVehicle::tick(float dt)
 {
 	if(physVehicle) {
-		for(size_t w = 0; w < physVehicle->getNumWheels(); ++w) {
+		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
 			btWheelInfo& wi = physVehicle->getWheelInfo(w);
 			if( info->handling.driveType == VehicleHandlingInfo::All ||
 					(info->handling.driveType == VehicleHandlingInfo::Forward && wi.m_bIsFrontWheel) ||

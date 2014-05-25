@@ -108,7 +108,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 						}
 					}
 
-					for (int j = 0; j < geometry.numtris; ++j) {
+					for (size_t j = 0; j < geometry.numtris; ++j) {
 						readStructure<RW::BSGeometryTriangle>(data, dataI);
 					}
 
@@ -245,7 +245,7 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 									geom->subgeom[i].numIndices = plgHeader.numverts;
 									geom->subgeom[i].start = sgstart;
 									sgstart += plgHeader.numverts;
-									for (int j = 0; j < plgHeader.numverts; ++j) {
+									for (size_t j = 0; j < plgHeader.numverts; ++j) {
 										geom->subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
 										meshplgI += sizeof(uint32_t);
 									}
