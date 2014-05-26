@@ -1,4 +1,9 @@
-add_executable(rwgame main.cpp)
+add_executable(rwgame
+	main.cpp
+	ingamestate.cpp
+	pausestate.cpp
+	menustate.cpp
+)
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
 

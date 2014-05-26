@@ -5,8 +5,6 @@
 #include <loaders/LoaderDFF.hpp>
 #include <render/DebugDraw.hpp>
 #include <render/Model.hpp>
-#include <ai/GTAAIController.hpp>
-#include <ai/GTAPlayerAIController.hpp>
 #include <objects/GTACharacter.hpp>
 #include <objects/GTAVehicle.hpp>
 
@@ -14,54 +12,67 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "MenuSystem.hpp"
-#include "State.hpp"
+#include "menustate.hpp"
 #include <SFML/Graphics.hpp>
 
 #include <memory>
 #include <sstream>
 #include <iomanip>
 #include <getopt.h>
-#include <boost/concept_check.hpp>
+#include "game.hpp"
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
 
-constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;
-
 sf::RenderWindow window;
 
 GameWorld* gta = nullptr;
 
-GTAPlayerAIController* player = nullptr;
-GTACharacter* playerCharacter = nullptr;
-
 DebugDraw* debugDrawer = nullptr;
 GameObject* debugObject = nullptr;
 
-glm::vec3 plyPos(87.f, -932.f, 58.f);
-glm::vec2 plyLook;
-glm::vec3 movement;
-float moveSpeed = 20.0f;
 bool inFocus = false;
-bool mouseGrabbed = true;
 int debugMode = 0;
 
 sf::Font font;
 
 bool showControls = false;
 
-bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object = nullptr)
+glm::vec3 viewPosition;
+glm::vec2 viewAngles;
+
+void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
+{
+	viewPosition = center;
+	viewAngles = angles;
+}
+
+sf::Window& getWindow()
+{
+	return window;
+}
+
+GameWorld* getWorld()
+{
+	return gta;
+}
+
+sf::Font& getFont()
+{
+	return font;
+}
+
+bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object)
 {
 	glm::mat4 view;
 	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
+	view = glm::rotate(view, viewAngles.y, glm::vec3(1, 0, 0));
+	view = glm::rotate(view, viewAngles.x, glm::vec3(0, 0, 1));
 	glm::vec3 dir = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, 0.f, 1.f) * -50.f;
-	auto from = btVector3(plyPos.x, plyPos.y, plyPos.z);
-	auto to = btVector3(plyPos.x+dir.x, plyPos.y+dir.y, plyPos.z+dir.z);
+	auto from = btVector3(viewPosition.x, viewPosition.y, viewPosition.z);
+	auto to = btVector3(viewPosition.x+dir.x, viewPosition.y+dir.y, viewPosition.z+dir.z);
 	btCollisionWorld::ClosestRayResultCallback ray(from, to);
 	gta->dynamicsWorld->rayTest(from, to, ray);
 	if( ray.hasHit() ) 
@@ -78,19 +89,13 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object = nullpt
 	return false;
 }
 
-void lockCursor(bool lock)
-{
-	mouseGrabbed = lock;
-	window.setMouseCursorVisible(! lock);
-}
-
 // Commands.
 std::map<std::string, std::function<void (std::string)>> Commands = {
 	{"pedestrian-vehicle", 
 		[&](std::string) {
 			glm::vec3 hit, normal;
 			if(hitWorldRay(hit, normal)) {
-				auto ped = gta->createPedestrian(2, plyPos+glm::vec3(0.f,10.f,0.f));
+				auto ped = gta->createPedestrian(2, hit+glm::vec3(0.f,10.f,0.f));
 				// Pick random vehicle.
 				auto it = gta->vehicleTypes.begin();
 				std::uniform_int_distribution<int> uniform(0, 9);
@@ -98,30 +103,8 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 					it++;
 				}
 				auto spawnpos = hit + normal;
-				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -viewAngles.x * PiOver180)));
 				ped->enterVehicle(vehicle, 0);
-			}
-		}
-	},
-	{"player-vehicle",
-		[&](std::string) {
-			glm::vec3 hit, normal;
-			if(hitWorldRay(hit, normal)) {
-				if(! playerCharacter) {
-					playerCharacter = gta->createPedestrian(1, plyPos+glm::vec3(0.f,10.f,0.f));
-					player = new GTAPlayerAIController(playerCharacter);
-				}
-
-				// Pick random vehicle.
-				auto it = gta->vehicleTypes.begin();
-				std::uniform_int_distribution<int> uniform(0, 9);
-				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-					it++;
-				}
-				
-				auto spawnpos = hit + normal;
-				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
-				playerCharacter->enterVehicle(vehicle, 0);
 			}
 		}
 	},
@@ -137,14 +120,8 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 				}
 				
 				auto spawnpos = hit + normal;
-				gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180)));
+				gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -viewAngles.x * PiOver180)));
 			}
-		}
-	},
-	{"player",
-		[&](std::string) {
-			playerCharacter = gta->createPedestrian(1, plyPos);
-			player = new GTAPlayerAIController(playerCharacter);
 		}
 	},
 	{"knock-down",
@@ -207,21 +184,6 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 				}
 				else {
 					gta->logInfo("Not found: " + ipl);
-				}
-			}
-		}
-	},
-	{"create-instance",
-		[&](std::string line) {
-			if(line.find(' ') != line.npos) {
-				std::string ID = line.substr(line.find(' ')+1);
-				int intID = atoi(ID.c_str());
-				auto archit = gta->objectTypes.find(intID);
-				if(archit != gta->objectTypes.end()) {
-					gta->createInstance(archit->first, plyPos);
-				}
-				else {
-					gta->logInfo("Unkown Object: " + ID);
 				}
 			}
 		}
@@ -293,63 +255,15 @@ void handleInputEvent(sf::Event &event)
 	switch(event.type) {
 	case sf::Event::KeyPressed:
 		switch (event.key.code) {
-		case sf::Keyboard::LShift:
-			moveSpeed = 60.f;
-			break;
-		case sf::Keyboard::Space:
-			if(playerCharacter) {
-				playerCharacter->jump();
-			}
-			break;
-		case sf::Keyboard::M:
-			lockCursor(! mouseGrabbed);
-			break;
 		case sf::Keyboard::P:
             debugMode+=1;
             while(debugMode > 2) debugMode -= 3;
-			break;
-		case sf::Keyboard::W:
-			movement.y = -1;
-			break;
-		case sf::Keyboard::S:
-			movement.y = 1;
-			break;
-		case sf::Keyboard::A:
-			movement.x = -1;
-			break;
-		case sf::Keyboard::D:
-			movement.x = 1;
 			break;
 		default: break;
 		}
 		break;
 	case sf::Event::KeyReleased:
 		switch(event.key.code) {
-		case sf::Keyboard::LShift:
-				moveSpeed = 20.f;
-				break;
-		case sf::Keyboard::W:
-			movement.y = 0;
-			break;
-		case sf::Keyboard::S:
-			movement.y = 0;
-			break;
-		case sf::Keyboard::A:
-			movement.x = 0;
-			break;
-		case sf::Keyboard::D:
-			movement.x = 0;
-			break;
-		case sf::Keyboard::F:
-			if(playerCharacter) {
-				if(playerCharacter->getCurrentVehicle()) {
-					player->exitVehicle();
-				}
-				else {
-					player->enterNearestVehicle();
-				}
-			}
-			break;
 		default: break;
 		}
 		break;
@@ -445,72 +359,31 @@ void init(std::string gtapath, bool loadWorld)
 void update(float dt)
 {
 	if (inFocus) {
-
 		float qpi = glm::half_pi<float>();
 
-		if (mouseGrabbed) {
-			sf::Vector2i screenCenter{sf::Vector2i{window.getSize()} / 2};
-			sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-			sf::Vector2i deltaMouse = mousePos - screenCenter;
-			sf::Mouse::setPosition(screenCenter, window);
-
-			plyLook.x += deltaMouse.x / 100.0;
-			plyLook.y += deltaMouse.y / 100.0;
-
-			if (plyLook.y > qpi)
-				plyLook.y = qpi;
-			else if (plyLook.y < -qpi)
-				plyLook.y = -qpi;
-		}
-
 		glm::mat4 view;
-		view = glm::rotate(view, qpi, glm::vec3(1, 0, 0));
-		view = glm::rotate(view, plyLook.y, glm::vec3(1, 0, 0));
-		view = glm::rotate(view, plyLook.x, glm::vec3(0, 0, 1));
-		
-		if( player != nullptr ) {
-			glm::quat playerCamera(glm::vec3(0.f, 0.f, -plyLook.x * PiOver180));
-			player->updateCameraDirection(playerCamera);
-			player->updateMovementDirection(glm::vec3(movement.x, -movement.y, movement.z));
-			player->setRunning(moveSpeed > 21.f);
-
-			float viewDistance = playerCharacter->getCurrentVehicle() ? -3.5f : -2.5f;
-			glm::vec3 localView = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, -0.5f, viewDistance);
-			if(playerCharacter->getCurrentVehicle()) {
-				plyPos = playerCharacter->getCurrentVehicle()->getPosition();
-			}
-			else {
-				plyPos = playerCharacter->getPosition();
-			}
-			view = glm::translate(view, -plyPos + localView);
-		}
-		else {
-			if (glm::length(movement) > 0.f) {
-				plyPos += dt * moveSpeed * (glm::inverse(glm::mat3(view)) * glm::vec3(movement.x, movement.z, movement.y));
-			}
-			view = glm::translate(view, -plyPos);
-		}
+		view = glm::translate(view, viewPosition);
+		view = glm::rotate(view, viewAngles.x, glm::vec3(0, 0, 1));
+		view = glm::rotate(view, viewAngles.y - qpi, glm::vec3(1, 0, 0));
+		view = glm::inverse(view);
 		
 		gta->gameTime += dt;
 
-		gta->renderer.camera.worldPos = plyPos;
+		gta->renderer.camera.worldPos = viewPosition;
 		gta->renderer.camera.frustum.view = view;
 		
 		// Update all objects.
-        for( size_t p = 0; p < gta->pedestrians.size(); ++p) {
+		for( size_t p = 0; p < gta->pedestrians.size(); ++p) {
 			gta->pedestrians[p]->tick(dt);
-			
-			// For the time being, remove anything that isn't the player with no health.
+
 			if(gta->pedestrians[p]->mHealth <= 0.f) {
-				if(gta->pedestrians[p] != playerCharacter) {
-					if(gta->pedestrians[p] == debugObject) {
-						debugObject = nullptr;
-					}
-					gta->destroyObject(gta->pedestrians[p]);
-					p--;
+				if(gta->pedestrians[p] == debugObject) {
+					debugObject = nullptr;
 				}
+				gta->destroyObject(gta->pedestrians[p]);
+				p--;
 			}
-        }
+		}
 		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
 			gta->vehicleInstances[v]->tick(dt);
 			if(gta->vehicleInstances[v]->mHealth <= 0.f) {
@@ -571,7 +444,7 @@ void render()
 	ss << std::setfill('0') << "Time: " << std::setw(2) << gta->getHour() 
 		<< ":" << std::setw(2) << gta->getMinute() << std::endl;
 	ss << "Game Time: " << gta->gameTime << std::endl;
-	ss << "Camera: " << plyPos.x << " " << plyPos.y << " " << plyPos.z << std::endl; 
+	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
 	
 	if(debugObject) {
 		auto p = debugObject->getPosition();
@@ -653,109 +526,6 @@ void render()
 	}
 }
 
-GenericState pauseState(
-		[](State* self)
-		{
-			Menu *m = new Menu(font);
-			m->offset = glm::vec2(50.f, 100.f);
-			m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
-			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
-			self->enterMenu(m);
-			lockCursor(false);
-		},
-		[](State* self, float dt)
-		{
-			
-		},
-		[](State* self)
-		{
-			delete self->currentMenu;
-		},
-		[](State* self, const sf::Event& e)
-		{
-			switch(e.type) {
-				case sf::Event::KeyPressed:
-					switch(e.key.code) {
-						case sf::Keyboard::Escape:
-							StateManager::get().exit();
-							break;
-						default: break;
-					}
-					break;
-				default: break;
-			}
-		}
-);
-
-GenericState gameState(
-	[](State* self)
-	{
-		lockCursor(true);
-		// TODO: create game state object
-		// so we can track if we already
-		// Started or not.
-		if(! player) {
-			command("player");
-		}
-	},
-	[](State* self, float dt)
-	{
-		
-	},
-	[](State* self)
-	{
-		
-	},
-	[](State* self, const sf::Event& e)
-	{
-		switch(e.type) {
-			case sf::Event::KeyPressed:
-				switch(e.key.code) {
-					case sf::Keyboard::Escape:
-						StateManager::get().enter(&pauseState);
-						break;
-					default: break;
-				}
-				break;
-			default: break;
-		}
-	}
-);
-	
-GenericState menuState(
-		[](State* self)
-		{
-			Menu *m = new Menu(font);
-			m->offset = glm::vec2(50.f, 100.f);
-			m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(&gameState); }));
-			m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-			m->addEntry(Menu::lambda("Exit", [] { window.close(); }));
-			self->enterMenu(m);
-			lockCursor(false);
-		},
-		[](State* self, float dt)
-		{
-			
-		},
-		[](State* self)
-		{
-		},
-		[](State* self, const sf::Event& e)
-		{
-			switch(e.type) {
-				case sf::Event::KeyPressed:
-					switch(e.key.code) {
-						case sf::Keyboard::Escape:
-							StateManager::get().exit();
-						default: break;
-					}
-					break;
-				default: break;
-			}
-		}
-);
-
 std::string getGamePath()
 {
 	auto v = getenv(ENV_GAME_PATH_NAME);
@@ -797,8 +567,10 @@ int main(int argc, char *argv[])
 	init(getGamePath(), loadWorld);
 	
 	sf::Clock clock;
+
+	MenuState* menuState = new MenuState();
 	
-	StateManager::get().enter(&menuState);
+	StateManager::get().enter(menuState);
 	
 	float accum = 0.f;
     float ts = 1.f / 60.f;
@@ -817,6 +589,9 @@ int main(int argc, char *argv[])
 		accum += clock.restart().asSeconds();
 		
 		while ( accum >= ts ) {
+
+			StateManager::get().tick(ts);
+
 			update(ts);
 			accum -= ts;
 		}
