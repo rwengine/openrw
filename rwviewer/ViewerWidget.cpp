@@ -42,7 +42,7 @@ void ViewerWidget::paintGL()
 	
 	r.camera.frustum.far = 100.f;
 	r.camera.frustum.near = 0.1f;
-	r.camera.frustum.fov = 60.f;
+	r.camera.frustum.fov = 90.f;
 	r.camera.frustum.aspectRatio = width()/(height()*1.f);
 
 	if(dummyObject && dummyObject->animator) {
@@ -168,6 +168,6 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent* e)
 
 void ViewerWidget::wheelEvent(QWheelEvent* e)
 {
-	viewDistance = qMax(viewDistance - e->angleDelta().y() / 240.f, 1.f);
+	viewDistance = qMax(viewDistance - e->angleDelta().y() / 240.f, 0.5f);
 }
 
