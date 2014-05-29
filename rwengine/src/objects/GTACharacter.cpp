@@ -7,7 +7,9 @@
 
 GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
-  currentVehicle(nullptr), currentSeat(0), ped(data), physCharacter(nullptr),
+  currentVehicle(nullptr), currentSeat(0),
+  _hasTargetPosition(false),
+  ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
 	mHealth = 100.f;
@@ -30,7 +32,7 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 		animator->setModel(model);
 
 		createActor();
-		enterActivity(Idle);
+		enterAction(Idle);
 	}
 }
 
@@ -39,7 +41,7 @@ GTACharacter::~GTACharacter()
 	destroyActor();
 }
 
-void GTACharacter::enterActivity(GTACharacter::Activity act)
+void GTACharacter::enterAction(GTACharacter::Action act)
 {
 	if(currentActivity != act) {
 		currentActivity = act;
@@ -66,7 +68,8 @@ void GTACharacter::createActor(const glm::vec3& size)
 		physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.2f, 2);
 		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 0.f), 1.f);
-		
+		physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
+
 		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
 		engine->dynamicsWorld->addAction(physCharacter);
 	}
@@ -92,7 +95,7 @@ void GTACharacter::tick(float dt)
 	}
 
 	if(currentVehicle) {
-		enterActivity(VehicleSit);
+		enterAction(VehicleSit);
 	}
 
 	switch(currentActivity) {
@@ -136,7 +139,7 @@ void GTACharacter::tick(float dt)
 
 
 	animator->tick(dt);
-	updateCharacter();
+	updateCharacter(dt);
 	
 	// Ensure the character doesn't need to be reset
 	if(getPosition().z < -100.f) {
@@ -144,7 +147,7 @@ void GTACharacter::tick(float dt)
 	}
 }
 
-void GTACharacter::updateCharacter()
+void GTACharacter::updateCharacter(float dt)
 {
 	if(physCharacter) {
 		// Check to see if the character should be knocked down.
@@ -181,7 +184,7 @@ void GTACharacter::updateCharacter()
 							if(object->type() == Vehicle) {
 								GTAVehicle* vehicle = static_cast<GTAVehicle*>(object);
 								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
-									enterActivity(KnockedDown);
+									enterAction(KnockedDown);
 								}
 							}
 						}
@@ -194,15 +197,43 @@ void GTACharacter::updateCharacter()
 		{
 			if(physCharacter->onGround())
 			{
-				enterActivity(GTACharacter::Idle);
+				enterAction(GTACharacter::Idle);
 			}
 		}
 		else 
 		{
-			glm::vec3 direction = rotation * animator->getRootTranslation();
-			physCharacter->setWalkDirection(btVector3(direction.x, direction.y, direction.z));
-			
+			glm::vec3 walkDir;
+			glm::vec3 animTranslate = animator->getRootTranslation();
+
 			btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
+			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+
+			if( _hasTargetPosition ) {
+				auto beforedelta = _targetPosition - position;
+
+				glm::quat faceDir( glm::vec3( 0.f, 0.f, atan2(beforedelta.y, beforedelta.x) - glm::half_pi<float>() ) );
+				glm::vec3 direction = faceDir * animTranslate;
+
+				auto positiondelta = _targetPosition - (position + direction);
+				if( glm::length(beforedelta) < glm::length(positiondelta) ) {
+					// Warp the character to the target position if we are about to overstep.
+					physObject->getWorldTransform().setOrigin(btVector3(
+																  _targetPosition.x,
+																  _targetPosition.y,
+																  _targetPosition.z));
+					_hasTargetPosition = false;
+				}
+				else {
+					walkDir = direction;
+				}
+			}
+			else {
+				walkDir = rotation * animTranslate;
+			}
+
+			physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
+			
+			Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
 			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 		}
 	}
@@ -239,7 +270,7 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 			enterVehicle(nullptr, 0);
 			vehicle->setOccupant(seat, this);
 			setCurrentVehicle(vehicle, seat);
-			enterActivity(VehicleSit);
+			enterAction(VehicleSit);
 			return true;
 		}
 	}
@@ -286,7 +317,7 @@ bool GTACharacter::takeDamage(const GameObject::DamageInfo& dmg)
 void GTACharacter::jump()
 {
 	physCharacter->jump();
-	enterActivity(GTACharacter::Jump);
+	enterAction(GTACharacter::Jump);
 }
 
 void GTACharacter::resetToAINode()
@@ -317,5 +348,11 @@ void GTACharacter::resetToAINode()
 			setPosition(nearest->position + glm::vec3(0.f, 0.f, 2.5f));
 		}
 	}
+}
+
+void GTACharacter::setTargetPosition(const glm::vec3 &target)
+{
+	_targetPosition = target;
+	_hasTargetPosition = true;
 }
 

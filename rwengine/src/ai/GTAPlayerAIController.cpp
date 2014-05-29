@@ -65,10 +65,10 @@ void GTAPlayerAIController::update(float dt)
 	if( character->currentActivity != GTACharacter::Jump )
 	{
 		if( glm::length(direction) > 0.001f ) {
-			character->enterActivity(running ? GTACharacter::Run : GTACharacter::Walk);
+			character->enterAction(running ? GTACharacter::Run : GTACharacter::Walk);
 		}
 		else {
-			character->enterActivity(GTACharacter::Idle);
+			character->enterAction(GTACharacter::Idle);
 		}
 
 		if( character->getCurrentVehicle() ) {

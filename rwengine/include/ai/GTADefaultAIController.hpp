@@ -7,30 +7,11 @@
 struct GTAAINode;
 class GTADefaultAIController : public GTAAIController
 {
-	enum Action
-	{
-		Wander
-	};
-	
-	Action action;
-	
-	GTAAINode* targetNode;
-	GTAAINode* lastNode;
-	
-	float nodeMargin; /// Minimum distance away to "reach" node.
-	float getUpTime; /// Time to wait before getting up.
-	
 public:
 	
     GTADefaultAIController(GTACharacter* character)
-	 : GTAAIController(character),
-	   action(Wander),
-	   targetNode(nullptr),
-	   lastNode(nullptr),
-	   nodeMargin(0.f), getUpTime(-1.f) {}
-	
-	void update(float dt);
-	
+	 : GTAAIController(character) {}
+
 	glm::vec3 getTargetPosition();
 };
 

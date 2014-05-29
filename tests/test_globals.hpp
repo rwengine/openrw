@@ -3,8 +3,21 @@
 
 #include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
+
+std::ostream& operator<<( std::ostream& stream, glm::vec3 const& v );
+
+namespace boost { namespace test_tools {
+template<>
+struct print_log_value<glm::vec3> {
+	void operator()( std::ostream& s , glm::vec3 const& v )
+	{
+		s << glm::to_string(v);
+	}
+};
+}}
 
 class Global
 {
@@ -25,6 +38,8 @@ public:
 			++it) {
 			e->defineItems(it->second);
 		}
+
+		e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
 	}
 
 	~Global() {

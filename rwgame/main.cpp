@@ -124,13 +124,6 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 			}
 		}
 	},
-	{"knock-down",
-		[&](std::string) {
-			for(auto it = gta->pedestrians.begin(); it != gta->pedestrians.end(); ++it) {
-				(*it)->enterActivity(GTACharacter::KnockedDown);
-			}
-		}
-	},
 	{"vehicle-test", 
 		[&](std::string) {
 			glm::vec3 hit, normal;

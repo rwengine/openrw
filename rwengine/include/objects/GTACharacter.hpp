@@ -44,9 +44,13 @@ private:
 	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
 	void destroyActor();
 
+	// Incredibly hacky "move in this direction".
+	bool _hasTargetPosition;
+	glm::vec3 _targetPosition;
+
 public:
 
-	enum Activity {
+	enum Action {
 		None,
 		Idle,
 		Walk,
@@ -84,16 +88,16 @@ public:
 
 	Type type() { return Character; }
 
-	Activity currentActivity;
+	Action currentActivity;
 
-	void enterActivity(Activity act);
+	void enterAction(Action act);
 
 	void tick(float dt);
 
 	/**
 	 * @brief updateCharacter updates internall bullet Character.
 	 */
-	void updateCharacter();
+	void updateCharacter(float dt);
 
 	virtual void setPosition(const glm::vec3& pos);
 
@@ -114,6 +118,8 @@ public:
 	 * (taking into account the current vehicle)
 	 */
 	void resetToAINode();
+
+	void setTargetPosition( const glm::vec3& target );
 };
 
 #endif
