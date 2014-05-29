@@ -3,57 +3,93 @@
 
 bool GTAAIController::updateActivity()
 {
-	switch( _currentActivity ) {
-	default: break;
-
-	case GoTo: {
-		/* TODO: Use the ai nodes to navigate to the position */
-		glm::vec3 targetDirection = _currentParameter.position - character->getPosition();
-
-		if( glm::length(targetDirection) < 0.01f ) {
-			character->enterAction(GTACharacter::Idle);
-			return true;
-		}
-
-		character->setTargetPosition( _currentParameter.position );
-
-		glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-		character->rotation = r;
-		character->enterAction(GTACharacter::Walk);
-	} break;
-
+	if( _currentActivity ) {
+		return _currentActivity->update(character, this);
 	}
+
 	return false;
 }
 
-void GTAAIController::setActivity(GTAAIController::Activity activity, const ActivityParameter &parameter)
+void GTAAIController::setActivity(GTAAIController::Activity* activity)
 {
 	_currentActivity = activity;
-	_currentParameter = parameter;
+	if( _currentActivity == nullptr ) {
+		character->enterAction( GTACharacter::Idle );
+	}
 }
 
 GTAAIController::GTAAIController(GTACharacter* character)
-: character(character), _currentActivity(Idle), _nextActivity(Idle)
+: character(character), _currentActivity(nullptr), _nextActivity(nullptr)
 {
 	character->controller = this;
 }
 
-void GTAAIController::setNextActivity(GTAAIController::Activity activity, const ActivityParameter &parameter)
+void GTAAIController::setNextActivity(GTAAIController::Activity* activity)
 {
-	if( _currentActivity == Idle ) {
-		setActivity(activity, parameter);
-		_nextActivity = Idle;
+	if( _currentActivity == nullptr ) {
+		setActivity(activity);
+		_nextActivity = nullptr;
 	}
 	else {
-		_nextParameter = parameter;
+		if(_nextActivity) delete _nextActivity;
 		_nextActivity = activity;
 	}
 }
 
 void GTAAIController::update(float dt)
 {
-	if(updateActivity()) {
-		setActivity(Idle, {});
+	if( updateActivity() ) {
+		if( _currentActivity ) {
+			delete _currentActivity;
+			_currentActivity = nullptr;
+		}
+		if( _nextActivity ) {
+			setActivity( _nextActivity );
+			_nextActivity = nullptr;
+		}
 	}
 }
 
+
+
+bool Activities::GoTo::update(GTACharacter *character, GTAAIController *controller)
+{
+	/* TODO: Use the ai nodes to navigate to the position */
+	glm::vec3 targetDirection = target - character->getPosition();
+
+	if( glm::length(targetDirection) < 0.01f ) {
+		character->enterAction(GTACharacter::Idle);
+		return true;
+	}
+
+	character->setTargetPosition( target );
+
+	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
+	character->rotation = r;
+	character->enterAction(GTACharacter::Walk);
+
+	return false;
+}
+
+#include <objects/GTAVehicle.hpp>
+
+bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *controller)
+{
+	glm::vec3 target = vehicle->getSeatEntryPosition(seat);
+	glm::vec3 targetDirection = target - character->getPosition();
+
+	if( glm::length(targetDirection) < 0.01f ) {
+		// TODO: play enter vehicle animation instead of teleporting.
+		// The correct Action is handled by the character
+		character->enterVehicle(vehicle, seat);
+		return true;
+	}
+
+	character->setTargetPosition( target );
+
+	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
+	character->rotation = r;
+	character->enterAction(GTACharacter::Walk);
+
+	return false;
+}

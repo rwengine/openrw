@@ -91,6 +91,10 @@ public:
 	GameObject* getOccupant(size_t seat);
 	
 	void setOccupant(size_t seat, GameObject* occupant);
+
+	glm::vec3 getSeatEntryPosition(size_t seat) const {
+		return getPosition() + getRotation() * info->seats[seat].offset * glm::vec3(2.f, 1.f, 1.f);
+	}
 	
     virtual bool takeDamage(const DamageInfo& damage);
 

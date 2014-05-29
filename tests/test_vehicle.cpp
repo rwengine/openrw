@@ -20,6 +20,8 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle)
 	BOOST_CHECK_EQUAL(vehicle->info->wheels.size(), 4);
 
 	BOOST_CHECK_EQUAL(vehicle->info->seats.size(), 4);
+
+	Global::get().e->destroyObject(vehicle);
 }
 
 BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
@@ -47,8 +49,22 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
 	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
 
-
+	Global::get().e->destroyObject(vehicle);
 }
 
+BOOST_AUTO_TEST_CASE(test_door_position)
+{
+	GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+
+	BOOST_REQUIRE(vehicle != nullptr);
+
+	BOOST_REQUIRE(vehicle->info != nullptr);
+	BOOST_REQUIRE(vehicle->vehicle != nullptr);
+
+	BOOST_CHECK( vehicle->getSeatEntryPosition(0).x > 5.f );
+
+
+	Global::get().e->destroyObject(vehicle);
+}
 BOOST_AUTO_TEST_SUITE_END()
 

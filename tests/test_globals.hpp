@@ -19,6 +19,16 @@ struct print_log_value<glm::vec3> {
 };
 }}
 
+namespace boost { namespace test_tools {
+template<>
+struct print_log_value<nullptr_t> {
+	void operator()( std::ostream& s , nullptr_t )
+	{
+		s << "nullptr";
+	}
+};
+}}
+
 class Global
 {
 public:
