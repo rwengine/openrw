@@ -16,7 +16,7 @@ DebugState::DebugState()
 		if(hitWorldRay({ch->position + fwd * 5.f}, {0.f, 0.f, -2.f}, hit, normal)) {
 			// Pick random vehicle.
 			auto it = getWorld()->vehicleTypes.begin();
-			std::uniform_int_distribution<int> uniform(0, 9);
+			std::uniform_int_distribution<int> uniform(0, 3);
 			for(size_t i = 0, n = uniform(getWorld()->randomEngine); i != n; i++) {
 				it++;
 			}

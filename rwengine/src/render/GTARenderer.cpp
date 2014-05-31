@@ -360,7 +360,7 @@ void GTARenderer::renderWorld()
 					if(inst->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
 						wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
 					}
-					wheel_tf = glm::rotate(wheel_tf, angle, glm::vec3(1.f, 0.f, 0.f));
+					//wheel_tf = wheel_tf * glm::mat4_cast(glm::quat(glm::vec3(angle, 0.f, 0.f)));
 					renderNamedFrame(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
 				}
 				else {
