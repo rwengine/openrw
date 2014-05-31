@@ -4,6 +4,7 @@
 #include "debugstate.hpp"
 #include <objects/GTACharacter.hpp>
 #include <objects/GTAVehicle.hpp>
+#include <render/Model.hpp>
 
 IngameState::IngameState()
 	: _player(nullptr), _playerCharacter(nullptr)
@@ -61,25 +62,37 @@ void IngameState::tick(float dt)
 	else if (_lookAngles.y < -qpi)
 		_lookAngles.y = -qpi;
 
+	float localX = _lookAngles.x;
 
-	glm::quat vR = glm::normalize(glm::angleAxis(_lookAngles.x, glm::vec3{0.f, 0.f, 1.f}));
+	float viewDistance = 2.f;
+	if( _playerCharacter->getCurrentVehicle() ) {
+		auto model = _playerCharacter->getCurrentVehicle()->model;
+		for(auto& g : model->geometries) {
+			viewDistance = std::max(
+						(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 1.5f,
+						viewDistance);
+		}
+
+		auto vfwd = _playerCharacter->getCurrentVehicle()->getRotation() * glm::vec3(1.f, 0.f, 0.f);
+		localX += atan2( vfwd.y, vfwd.x );
+	}
+
+	glm::quat vR = glm::normalize(glm::angleAxis(localX, glm::vec3{0.f, 0.f, 1.f}));
 	_player->updateMovementDirection(vR * _movement, _movement);
-
-	float viewDistance = _playerCharacter->getCurrentVehicle() ? -3.5f : -2.5f;
 
 	glm::vec3 localview;
 	float vy = cos(_lookAngles.y);
-	localview.x = -sin(-_lookAngles.x) * vy;
-	localview.y = -cos(-_lookAngles.x) * vy;
+	localview.x = -sin(-localX) * vy;
+	localview.y = -cos(-localX) * vy;
 	localview.z = -sin(_lookAngles.y);
-	localview *= viewDistance;
+	localview *= -viewDistance;
 
 	glm::vec3 viewPos = _playerCharacter->getPosition();
 	if(_playerCharacter->getCurrentVehicle()) {
 		viewPos = _playerCharacter->getCurrentVehicle()->getPosition();
 	}
 
-	setViewParameters( viewPos + localview, _lookAngles );
+	setViewParameters( viewPos + localview, {localX, _lookAngles.y} );
 }
 
 void IngameState::handleEvent(const sf::Event &event)
