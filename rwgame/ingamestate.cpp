@@ -67,15 +67,19 @@ void IngameState::tick(float dt)
 
 	float viewDistance = _playerCharacter->getCurrentVehicle() ? -3.5f : -2.5f;
 
-	glm::vec3 localView{0.f, -viewDistance, 1.f};
-	localView = vR * localView;
+	glm::vec3 localview;
+	float vy = cos(_lookAngles.y);
+	localview.x = -sin(-_lookAngles.x) * vy;
+	localview.y = -cos(-_lookAngles.x) * vy;
+	localview.z = -sin(_lookAngles.y);
+	localview *= viewDistance;
 
 	glm::vec3 viewPos = _playerCharacter->getPosition();
 	if(_playerCharacter->getCurrentVehicle()) {
 		viewPos = _playerCharacter->getCurrentVehicle()->getPosition();
 	}
 
-	setViewParameters( viewPos + localView, _lookAngles );
+	setViewParameters( viewPos + localview, _lookAngles );
 }
 
 void IngameState::handleEvent(const sf::Event &event)
