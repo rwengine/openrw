@@ -4,8 +4,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <vector>
-#include <map>
+#include <queue>
 #include <cstdint>
 
 class Animation;
@@ -18,17 +17,25 @@ class ModelFrame;
  */
 class Animator
 {
-	Animation* animation;
+	/**
+	 * @brief _animations Queue of animations to play.
+	 */
+	std::queue<Animation*> _animations;
 
+	/**
+	 * @brief model The model being animated.
+	 */
 	Model* model;
 
+	// Used in determining how far the skeleton being animated has moved
+	// From it's local origin.
 	glm::vec3 lastRootPosition;
 	glm::quat lastRootRotation;
 
 	float time;
 	float serverTime;
 	float lastServerTime;
-	
+
 	bool repeat;
 
 	void reset();
@@ -45,8 +52,15 @@ public:
 	 */
 	void setAnimation(Animation* animation, bool repeat = true);
 
-	Animation* getAnimation() const
-	{ return animation; }
+	void queueAnimation(Animation* animation);
+
+	void next();
+
+	const std::queue<Animation*> getAnimationQueue() const
+	{ return _animations; }
+
+	const Animation* getAnimation() const
+	{ return _animations.empty() ? nullptr : _animations.front(); }
 
 	void setModel(Model* model);
 

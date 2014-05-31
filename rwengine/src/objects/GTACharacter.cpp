@@ -139,7 +139,7 @@ void GTACharacter::tick(float dt)
 		if(animator->getAnimation() != animations.car_getin_lhs) {
 			animator->setAnimation(animations.car_getin_lhs, false);
 		}
-		else if( animator->isCompleted() ) {
+		else if( animator->getAnimation() == nullptr ) {
 			enterAction(Idle);
 		}
 	} break;

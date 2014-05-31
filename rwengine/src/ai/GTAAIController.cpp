@@ -77,9 +77,8 @@ bool Activities::GoTo::update(GTACharacter *character, GTAAIController *controll
 bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *controller)
 {
 	if( entering ) {
-		std::cout << "Checking" << std::endl;
-		if( character->currentActivity == GTACharacter::Idle ) {
-			std::cout << "was idle" << std::endl;
+		// TODO: decouple from the character's animator.
+		if( character->animator->isCompleted() ) {
 			character->enterVehicle(vehicle, seat);
 			return true;
 		}
@@ -87,9 +86,9 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 	else {
 		glm::vec3 target = vehicle->getSeatEntryPosition(seat);
 		glm::vec3 targetDirection = target - character->getPosition();
+		targetDirection.z = 0.f;
 
 		if( glm::length(targetDirection) <= 0.4f ) {
-			std::cout << "enter started" << std::endl;
 			entering = true;
 			character->enterAction(GTACharacter::VehicleGetIn);
 		}

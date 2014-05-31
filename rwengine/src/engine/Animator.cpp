@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 Animator::Animator()
-	: animation(nullptr),  model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), repeat(true)
+	: model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), repeat(true)
 {
 
 }
@@ -15,21 +15,29 @@ void Animator::reset()
 	time = 0.f;
 	serverTime = 0.f;
 	lastServerTime= 0.f;
-
-	if(model && animation) {
-		
-	}
 }
 
 void Animator::setAnimation(Animation *animation, bool repeat)
 {
-	if(animation == this->animation) {
+	if(!_animations.empty() && animation == _animations.front()) {
 		return;
 	}
 
-	this->animation = animation;
+	while(!_animations.empty()) _animations.pop();
+	queueAnimation(animation);
 	this->repeat = repeat;
 	
+	reset();
+}
+
+void Animator::queueAnimation(Animation *animation)
+{
+	_animations.push(animation);
+}
+
+void Animator::next()
+{
+	_animations.pop();
 	reset();
 }
 
@@ -46,23 +54,27 @@ void Animator::setModel(Model *model)
 
 void Animator::tick(float dt)
 {
-	if(! (animation && model)) {
+	if( model == nullptr || _animations.empty() ) {
 		return;
 	}
 
 	lastServerTime = serverTime;
 	serverTime += dt;
 
+	if( isCompleted() && ! repeat && _animations.size() > 1 ) {
+		next();
+	}
 }
 
 glm::vec3 Animator::getRootTranslation() const
 {
 	// This is a pretty poor assumption.
-	if(model->frames[model->rootFrameIdx]->getChildren().size() > 0) {
+	if(!model->frames[model->rootFrameIdx]->getChildren().empty()
+			&& !_animations.empty()) {
 		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
-		auto it = animation->bones.find(realRoot->getName());
-		if(it != animation->bones.end()) {
-			float df = fmod(lastServerTime, this->animation->duration);
+		auto it = getAnimation()->bones.find(realRoot->getName());
+		if(it != getAnimation()->bones.end()) {
+			float df = fmod(lastServerTime, getAnimation()->duration);
 			float rt = getAnimationTime();
 			if(df < rt) {
 				auto lastKF = it->second->getInterpolatedKeyframe(df);
@@ -82,38 +94,39 @@ glm::quat Animator::getRootRotation() const
 
 glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
 {
-	auto it = animation->bones.find(frame->getName());
-	if(it != animation->bones.end()) {
-		auto kf = it->second->getInterpolatedKeyframe(getAnimationTime(alpha));
-		glm::mat4 m;
-		if(it->second->type == AnimationBone::R00 || frame->getName() == "swaist") {
-			m = glm::translate(m, frame->getDefaultTranslation());
-			m = m * glm::mat4_cast(kf.rotation);
+	if(getAnimation()) {
+		auto it = getAnimation()->bones.find(frame->getName());
+		if(it != getAnimation()->bones.end()) {
+			auto kf = it->second->getInterpolatedKeyframe(getAnimationTime(alpha));
+			glm::mat4 m;
+			if(it->second->type == AnimationBone::R00 || frame->getName() == "swaist") {
+				m = glm::translate(m, frame->getDefaultTranslation());
+				m = m * glm::mat4_cast(kf.rotation);
+			}
+			else if(it->second->type == AnimationBone::RT0) {
+				m = glm::translate(m, kf.position);
+				m = m * glm::mat4_cast(kf.rotation);
+			}
+			else {
+				m = glm::translate(m, kf.position);
+				m = m * glm::mat4_cast(kf.rotation);
+			}
+			return m;
 		}
-		else if(it->second->type == AnimationBone::RT0) {
-			m = glm::translate(m, kf.position);
-			m = m * glm::mat4_cast(kf.rotation);
-		}
-		else {
-			m = glm::translate(m, kf.position);
-			m = m * glm::mat4_cast(kf.rotation);
-		}
-		return m;
 	}
-	else {
-		return frame->getTransform();
-	}
+
+	return frame->getTransform();
 }
 
 bool Animator::isCompleted() const
 {
-	return serverTime >= animation->duration;
+	return getAnimation() ? serverTime >= getAnimation()->duration : true;
 }
 
 float Animator::getAnimationTime(float alpha) const
 {
 	if(repeat) {
-		return fmod(serverTime + alpha, this->animation->duration);
+		return fmod(serverTime + alpha, getAnimation()->duration);
 	}
 	return serverTime + alpha;
 }
