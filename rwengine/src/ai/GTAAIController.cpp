@@ -90,6 +90,8 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 
 		if( glm::length(targetDirection) <= 0.4f ) {
 			entering = true;
+			// Warp character to vehicle orientation
+			character->rotation = vehicle->getRotation();
 			character->enterAction(GTACharacter::VehicleGetIn);
 		}
 		else {

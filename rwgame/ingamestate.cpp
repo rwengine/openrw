@@ -63,7 +63,7 @@ void IngameState::tick(float dt)
 
 
 	glm::quat vR = glm::normalize(glm::angleAxis(_lookAngles.x, glm::vec3{0.f, 0.f, 1.f}));
-	_player->updateMovementDirection(vR * _movement);
+	_player->updateMovementDirection(vR * _movement, _movement);
 
 	float viewDistance = _playerCharacter->getCurrentVehicle() ? -3.5f : -2.5f;
 

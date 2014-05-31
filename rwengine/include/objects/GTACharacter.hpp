@@ -24,12 +24,14 @@ struct AnimationGroup
 	Animation* car_sit;
 	Animation* car_sit_low;
 
+	Animation* car_open_lhs;
 	Animation* car_getin_lhs;
 
 	AnimationGroup()
 	 : idle(nullptr), walk(nullptr), walk_start(nullptr), run(nullptr),
 	   jump_start(nullptr), jump_glide(nullptr), jump_land(nullptr),
-	   car_sit(nullptr), car_sit_low(nullptr), car_getin_lhs(nullptr)
+	   car_sit(nullptr), car_sit_low(nullptr), car_open_lhs(nullptr),
+	   car_getin_lhs(nullptr)
 	{}
 };
 

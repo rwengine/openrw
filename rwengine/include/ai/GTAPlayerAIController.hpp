@@ -9,6 +9,7 @@ class GTAPlayerAIController : public GTAAIController
 	glm::quat cameraRotation;
 	
 	glm::vec3 direction;
+	glm::vec3 _rawDirection;
 	
 	glm::quat lastRotation;
 	
@@ -22,7 +23,7 @@ public:
 	
 	void updateCameraDirection(const glm::quat& rot);
 	
-	void updateMovementDirection(const glm::vec3& pos);
+	void updateMovementDirection(const glm::vec3& pos, const glm::vec3& rawdirection);
 	
 	void exitVehicle();
 	

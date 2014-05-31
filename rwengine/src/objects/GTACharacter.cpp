@@ -26,6 +26,7 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 	animations.car_sit     = engine->gameData.animations["car_sit"];
 	animations.car_sit_low = engine->gameData.animations["car_lsit"];
 
+	animations.car_open_lhs   = engine->gameData.animations["car_open_lhs"];
 	animations.car_getin_lhs   = engine->gameData.animations["car_getin_lhs"];
 
 	if(model) {
@@ -136,8 +137,10 @@ void GTACharacter::tick(float dt)
 		}
 	} break;
 	case VehicleGetIn: {
-		if(animator->getAnimation() != animations.car_getin_lhs) {
-			animator->setAnimation(animations.car_getin_lhs, false);
+		if(animator->getAnimation() != animations.car_getin_lhs
+				&& animator->getAnimation() != animations.car_open_lhs) {
+			animator->setAnimation(animations.car_open_lhs, false);
+			animator->queueAnimation(animations.car_getin_lhs);
 		}
 		else if( animator->getAnimation() == nullptr ) {
 			enterAction(Idle);

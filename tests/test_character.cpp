@@ -68,7 +68,6 @@ BOOST_AUTO_TEST_CASE(test_activities)
 		controller->setNextActivity( new Activities::EnterVehicle( vehicle, 0 ) );
 
 		for(float t = 0.f; t < 0.5f; t+=(1.f/60.f)) {
-			controller->update(1.f/60.f);
 			character->tick(1.f/60.f);
 			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
 		}
