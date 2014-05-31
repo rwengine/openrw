@@ -3,7 +3,6 @@
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <objects/GTAVehicle.hpp>
-#include <boost/concept_check.hpp>
 
 GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
@@ -26,6 +25,8 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 
 	animations.car_sit     = engine->gameData.animations["car_sit"];
 	animations.car_sit_low = engine->gameData.animations["car_lsit"];
+
+	animations.car_getin_lhs   = engine->gameData.animations["car_getin_lhs"];
 
 	if(model) {
 		animator = new Animator();
@@ -132,6 +133,14 @@ void GTACharacter::tick(float dt)
 	case VehicleSit: {
 		if(animator->getAnimation() != animations.car_sit) {
 			animator->setAnimation(animations.car_sit);
+		}
+	} break;
+	case VehicleGetIn: {
+		if(animator->getAnimation() != animations.car_getin_lhs) {
+			animator->setAnimation(animations.car_getin_lhs, false);
+		}
+		else if( animator->isCompleted() ) {
+			enterAction(Idle);
 		}
 	} break;
 	default: break;

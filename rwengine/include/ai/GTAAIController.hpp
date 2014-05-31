@@ -88,8 +88,10 @@ namespace Activities {
 		GTAVehicle* vehicle;
 		unsigned int seat;
 
+		bool entering;
+
 		EnterVehicle( GTAVehicle* vehicle, unsigned int seat = 0 )
-			: vehicle( vehicle ), seat( seat ) {}
+			: vehicle( vehicle ), seat( seat ), entering(false) {}
 
 		bool update(GTACharacter *character, GTAAIController *controller);
 	};

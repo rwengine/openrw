@@ -1,6 +1,7 @@
 #include "ingamestate.hpp"
 #include "game.hpp"
 #include "pausestate.hpp"
+#include "debugstate.hpp"
 #include <objects/GTACharacter.hpp>
 #include <objects/GTAVehicle.hpp>
 
@@ -9,6 +10,8 @@ IngameState::IngameState()
 {
 	_playerCharacter = getWorld()->createPedestrian(1, {100.f, 100.f, 50.f});
 	_player = new GTAPlayerAIController(_playerCharacter);
+
+	setPlayerCharacter( _playerCharacter );
 }
 
 void IngameState::spawnPlayerVehicle()
@@ -82,6 +85,9 @@ void IngameState::handleEvent(const sf::Event &event)
 		switch(event.key.code) {
 		case sf::Keyboard::Escape:
 			StateManager::get().enter(new PauseState);
+			break;
+		case sf::Keyboard::M:
+			StateManager::get().enter(new DebugState);
 			break;
 		case sf::Keyboard::Space:
 			if(_playerCharacter) {

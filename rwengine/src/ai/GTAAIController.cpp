@@ -1,5 +1,6 @@
 #include <ai/GTAAIController.hpp>
 #include <objects/GTACharacter.hpp>
+#include <engine/Animator.hpp>
 
 bool GTAAIController::updateActivity()
 {
@@ -75,21 +76,30 @@ bool Activities::GoTo::update(GTACharacter *character, GTAAIController *controll
 
 bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *controller)
 {
-	glm::vec3 target = vehicle->getSeatEntryPosition(seat);
-	glm::vec3 targetDirection = target - character->getPosition();
-
-	if( glm::length(targetDirection) < 0.01f ) {
-		// TODO: play enter vehicle animation instead of teleporting.
-		// The correct Action is handled by the character
-		character->enterVehicle(vehicle, seat);
-		return true;
+	if( entering ) {
+		std::cout << "Checking" << std::endl;
+		if( character->currentActivity == GTACharacter::Idle ) {
+			std::cout << "was idle" << std::endl;
+			character->enterVehicle(vehicle, seat);
+			return true;
+		}
 	}
+	else {
+		glm::vec3 target = vehicle->getSeatEntryPosition(seat);
+		glm::vec3 targetDirection = target - character->getPosition();
 
-	character->setTargetPosition( target );
+		if( glm::length(targetDirection) <= 0.4f ) {
+			std::cout << "enter started" << std::endl;
+			entering = true;
+			character->enterAction(GTACharacter::VehicleGetIn);
+		}
+		else {
+			character->setTargetPosition( target );
 
-	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-	character->rotation = r;
-	character->enterAction(GTACharacter::Walk);
-
+			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
+			character->rotation = r;
+			character->enterAction(GTACharacter::Walk);
+		}
+	}
 	return false;
 }

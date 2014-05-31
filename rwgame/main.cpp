@@ -29,9 +29,9 @@ constexpr int WIDTH  = 800,
 sf::RenderWindow window;
 
 GameWorld* gta = nullptr;
+GTACharacter* player = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
-GameObject* debugObject = nullptr;
 
 bool inFocus = false;
 int debugMode = 0;
@@ -64,7 +64,17 @@ sf::Font& getFont()
 	return font;
 }
 
-bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object)
+void setPlayerCharacter(GTACharacter *playerCharacter)
+{
+	player = playerCharacter;
+}
+
+GTACharacter* getPlayerCharacter()
+{
+	return player;
+}
+
+bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object)
 {
 	glm::mat4 view;
 	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
@@ -76,6 +86,26 @@ bool hitWorldRay(glm::vec3& hit, glm::vec3& normal, GameObject** object)
 	btCollisionWorld::ClosestRayResultCallback ray(from, to);
 	gta->dynamicsWorld->rayTest(from, to, ray);
 	if( ray.hasHit() ) 
+	{
+		hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
+						ray.m_hitPointWorld.z());
+		normal = glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
+						   ray.m_hitNormalWorld.z());
+		if(object) {
+			*object = static_cast<GameObject*>(ray.m_collisionObject->getUserPointer());
+		}
+		return true;
+	}
+	return false;
+}
+
+bool hitWorldRay(const glm::vec3 &start, const glm::vec3 &direction, glm::vec3 &hit, glm::vec3 &normal, GameObject **object)
+{
+	auto from = btVector3(start.x, start.y, start.z);
+	auto to = btVector3(start.x+direction.x, start.y+direction.y, start.z+direction.z);
+	btCollisionWorld::ClosestRayResultCallback ray(from, to);
+	gta->dynamicsWorld->rayTest(from, to, ray);
+	if( ray.hasHit() )
 	{
 		hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
 						ray.m_hitPointWorld.z());
@@ -105,22 +135,6 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 				auto spawnpos = hit + normal;
 				auto vehicle = gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -viewAngles.x * PiOver180)));
 				ped->enterVehicle(vehicle, 0);
-			}
-		}
-	},
-	{"empty-vehicle",
-		[&](std::string) {
-			glm::vec3 hit, normal;
-			if(hitWorldRay(hit, normal)) {
-				// Pick random vehicle.
-				auto it = gta->vehicleTypes.begin();
-				std::uniform_int_distribution<int> uniform(0, 9);
-				for(size_t i = 0, n = uniform(gta->randomEngine); i != n; i++) {
-					it++;
-				}
-				
-				auto spawnpos = hit + normal;
-				gta->createVehicle(it->first, spawnpos, glm::quat(glm::vec3(0.f, 0.f, -viewAngles.x * PiOver180)));
 			}
 		}
 	},
@@ -181,25 +195,6 @@ std::map<std::string, std::function<void (std::string)>> Commands = {
 			}
 		}
 	},
-	{"object-info",
-		[&](std::string) {
-			glm::vec3 hit, normal;
-			GameObject* object;
-			if(hitWorldRay(hit, normal, &object)) {
-				debugObject = object;
-			}
-		}
-	},
-	{"damage-object",
-		[&](std::string) {
-			if(debugObject) {
-				GameObject::DamageInfo dmg;
-				dmg.type = GameObject::DamageInfo::Bullet;
-				dmg.hitpoints = 15.f;
-				debugObject->takeDamage(dmg);
-			}
-		}
-	}
 	/*{"",
 		[&](std::string) {
 			
@@ -370,9 +365,6 @@ void update(float dt)
 			gta->pedestrians[p]->tick(dt);
 
 			if(gta->pedestrians[p]->mHealth <= 0.f) {
-				if(gta->pedestrians[p] == debugObject) {
-					debugObject = nullptr;
-				}
 				gta->destroyObject(gta->pedestrians[p]);
 				p--;
 			}
@@ -380,9 +372,6 @@ void update(float dt)
 		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
 			gta->vehicleInstances[v]->tick(dt);
 			if(gta->vehicleInstances[v]->mHealth <= 0.f) {
-				if(gta->vehicleInstances[v] == debugObject) {
-					debugObject = nullptr;
-				}
 				gta->destroyObject(gta->vehicleInstances[v]);
 				v--;
 			}
@@ -439,34 +428,7 @@ void render()
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
 	
-	if(debugObject) {
-		auto p = debugObject->getPosition();
-		ss << "Position: " << p.x << " " << p.y << " " << p.z << std::endl;
-		ss << "Health: " << debugObject->mHealth << std::endl;
-		if(debugObject->model) {
-			auto m = debugObject->model;
-			ss << "Textures: " << std::endl;
-			for(auto it = m->geometries.begin(); it != m->geometries.end();
-				++it ) 
-			{
-				auto g = *it;
-				for(auto itt = g->materials.begin(); itt != g->materials.end();
-					++itt)
-				{
-					for(auto tit = itt->textures.begin(); tit != itt->textures.end();
-						++tit)
-					{
-						ss << " " << tit->name << std::endl;
-					}
-				}
-			}
-		}
-		if(debugObject->type() == GameObject::Vehicle) {
-			GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
-			ss << "ID: " << vehicle->info->handling.ID << std::endl;
-		}
-	}
-	
+
 	if(showControls) {
 		ss << "F1 - Toggle Help" << std::endl;
 		ss << "F2 - Create Vehicle (with driver)" << std::endl;
@@ -527,7 +489,7 @@ std::string getGamePath()
 
 int main(int argc, char *argv[])
 {
-	if(! font.loadFromFile("DejaVuSansMono.ttf")) {
+	if(! font.loadFromFile(getGamePath() + "/DejaVuSansMono.ttf")) {
 		std::cerr << "Failed to load font" << std::endl;
 	}
 

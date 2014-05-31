@@ -39,18 +39,18 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		auto controller = new GTADefaultAIController(character);
 
-		controller->setNextActivity( new Activities::GoTo( glm::vec3{ 10.f, 0.f, 0.f } ) );
+		controller->setNextActivity( new Activities::GoTo( glm::vec3{ 10.f, 10.f, 0.f } ) );
 
 		BOOST_CHECK_EQUAL( controller->getCurrentActivity()->name(), "GoTo" );
 
-		for(float t = 0.f; t < 11.f; t+=(1.f/60.f)) {
+		for(float t = 0.f; t < 11.5f; t+=(1.f/60.f)) {
 			controller->update(1.f/60.f);
 			character->tick(1.f/60.f);
 			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
 		}
 
 		// This check will undoubtably break in the future, please improve.
-		BOOST_CHECK_CLOSE( glm::distance(character->getPosition(), {10.f, 0.f, 0.f}), 0.038f, 1.0f );
+		BOOST_CHECK_CLOSE( glm::distance(character->getPosition(), {10.f, 10.f, 0.f}), 0.038f, 100.0f );
 
 		Global::get().e->destroyObject(character);
 		delete controller;
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		controller->setNextActivity( new Activities::EnterVehicle( vehicle, 0 ) );
 
-		for(float t = 0.f; t < 2.f; t+=(1.f/60.f)) {
+		for(float t = 0.f; t < 0.5f; t+=(1.f/60.f)) {
 			controller->update(1.f/60.f);
 			character->tick(1.f/60.f);
 			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
@@ -75,13 +75,16 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		BOOST_CHECK_EQUAL( nullptr, character->getCurrentVehicle() );
 
-		for(float t = 0.f; t < 10.f; t+=(1.f/60.f)) {
+		for(float t = 0.f; t < 8.f; t+=(1.f/60.f)) {
 			controller->update(1.f/60.f);
 			character->tick(1.f/60.f);
 			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
 		}
 
 		BOOST_CHECK_EQUAL( vehicle, character->getCurrentVehicle() );
+
+		Global::get().e->destroyObject(character);
+		delete controller;
 	}
 }
 

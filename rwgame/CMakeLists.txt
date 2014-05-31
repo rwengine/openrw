@@ -3,6 +3,7 @@ add_executable(rwgame
 	ingamestate.cpp
 	pausestate.cpp
 	menustate.cpp
+	debugstate.cpp
 )
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
