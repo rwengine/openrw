@@ -328,8 +328,10 @@ bool GTACharacter::takeDamage(const GameObject::DamageInfo& dmg)
 
 void GTACharacter::jump()
 {
-	physCharacter->jump();
-	enterAction(GTACharacter::Jump);
+	if( physCharacter ) {
+		physCharacter->jump();
+		enterAction(GTACharacter::Jump);
+	}
 }
 
 void GTACharacter::resetToAINode()
