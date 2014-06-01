@@ -38,8 +38,6 @@ int debugMode = 0;
 
 sf::Font font;
 
-bool showControls = false;
-
 glm::vec3 viewPosition;
 glm::vec2 viewAngles;
 
@@ -264,30 +262,6 @@ void handleCommandEvent(sf::Event &event)
 	switch(event.type) {
 		case sf::Event::KeyPressed:
 		switch (event.key.code) {
-		case sf::Keyboard::F1:
-			showControls = !showControls;
-			break;
-		case sf::Keyboard::F2:
-			command("pedestrian-vehicle");
-			break;
-		case sf::Keyboard::F3:
-			command("player-vehicle");
-			break;
-		case sf::Keyboard::F4:
-			command("empty-vehicle");
-			break;
-		case sf::Keyboard::F6:
-			command("vehicle-test");
-			break;
-		case sf::Keyboard::F7:
-			command("pedestrian-test");
-			break;
-		case sf::Keyboard::F8:
-			command("damage-object");
-			break;
-		case sf::Keyboard::F9:
-			command("object-info");
-			break;
 		case sf::Keyboard::LBracket:
 			gta->gameTime -= 60.f;
 			break;
@@ -428,17 +402,7 @@ void render()
 		<< ":" << std::setw(2) << gta->getMinute() << std::endl;
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
-	
-
-	if(showControls) {
-		ss << "F1 - Toggle Help" << std::endl;
-		ss << "F2 - Create Vehicle (with driver)" << std::endl;
-		ss << "F3 - Create Vehicle (with player)" << std::endl;
-		ss << "F4 - Create Vehicle (empty)" << std::endl;
-		ss << "F6 - Create all Vehicles" << std::endl;
-		ss << "F7 - Create all Pedestrians" << std::endl;
-		ss << "F9 - Display Object Information" << std::endl;
-	}
+	ss << "Renderered " << gta->renderer.rendered << " / " << gta->renderer.culled << std::endl;
 	
 	sf::Text text(ss.str(), font, 15);
 	text.setPosition(10, 10);
@@ -472,13 +436,6 @@ void render()
 		text.setPosition(tpos);
 		window.draw(text);
 		tpos.y -= text.getLocalBounds().height;
-	}
-	
-	static size_t fc = 0;
-	if(fc++ == 60) 
-	{
-		std::cout << "Rendered: " << gta->renderer.rendered << " / Culled: " << gta->renderer.culled << std::endl;
-		fc = 0;
 	}
 }
 

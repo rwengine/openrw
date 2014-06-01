@@ -18,17 +18,20 @@ public:
 	struct MenuEntry
 	{
 		std::string name;
+		float _size;
 		
-		MenuEntry(const std::string& n) : name(n) {}
+		MenuEntry(const std::string& n, float size = 38.f) : name(n), _size(size) {}
 		
-		float getHeight() { return 38.f; }
+		float getHeight() { return _size; }
 		
 		virtual void draw(const sf::Font& font, sf::RenderWindow& window, glm::vec2& basis)
 		{
 			sf::Text t;
 			t.setFont(font);
-			t.setPosition(basis.x, basis.y);
+			t.setPosition(basis.x + 6, basis.y + 2);
 			t.setString(name);
+			auto cSize = getHeight() - 10.f;
+			t.setCharacterSize(cSize);
 			window.draw(t);
 			basis.y += getHeight();
 		}
@@ -40,15 +43,15 @@ public:
 	{
 		std::function<void (void)> callback;
 		
-		Entry(const std::string& title, std::function<void (void)> cb)
-		 : MenuEntry(title), callback(cb) {}
+		Entry(const std::string& title, std::function<void (void)> cb, float size)
+		 : MenuEntry(title, size), callback(cb) {}
 		 
 		 void activate(float clickX, float clickY) { callback(); }
 	};
 	
-	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback)
+	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 38.f)
 	{
-		return std::shared_ptr<MenuEntry>(new Entry(n, callback));
+		return std::shared_ptr<MenuEntry>(new Entry(n, callback, size));
 	}
 	
 	std::vector<std::shared_ptr<MenuEntry>> entries;
@@ -73,7 +76,7 @@ public:
 			++i)
 		{
 			if(activeEntry >= 0 && i == activeEntry) {
-				sf::RectangleShape rs(sf::Vector2f(500.f, entries[i]->getHeight()));
+				sf::RectangleShape rs(sf::Vector2f(250.f, entries[i]->getHeight()));
 				rs.setPosition(basis.x, basis.y);
 				rs.setFillColor(sf::Color::Cyan);
 				window.draw(rs);

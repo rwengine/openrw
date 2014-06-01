@@ -6,20 +6,21 @@ DebugState::DebugState()
 {
 	Menu *m = new Menu(getFont());
 	m->offset = glm::vec2(50.f, 100.f);
-	m->addEntry(Menu::lambda("Create Vehicle", [this] {
+	float entryHeight = 24.f;
+	m->addEntry(Menu::lambda("Random Vehicle", [this] {
 		auto it = getWorld()->vehicleTypes.begin();
 		std::uniform_int_distribution<int> uniform(0, 3);
 		for(size_t i = 0, n = uniform(getWorld()->randomEngine); i != n; i++) {
 			it++;
 		}
 		spawnVehicle(it->first);
-	}));
-	int vehiclesMax = 5, i = 0;
+	}, entryHeight));
+	int vehiclesMax = 16, i = 0;
 	for( auto& v : getWorld()->vehicleTypes ) {
 		if( (i++) > vehiclesMax ) break;
 		m->addEntry(Menu::lambda(v.second->handlingID, [=] {
 			spawnVehicle(v.first);
-		}));
+		}, entryHeight));
 	}
 	this->enterMenu(m);
 }
