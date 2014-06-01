@@ -99,7 +99,8 @@ glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
 		if(it != getAnimation()->bones.end()) {
 			auto kf = it->second->getInterpolatedKeyframe(getAnimationTime(alpha));
 			glm::mat4 m;
-			if(it->second->type == AnimationBone::R00 || frame->getName() == "swaist") {
+			bool isRoot = frame->getParent() ? !! frame->getParent() : true;
+			if(it->second->type == AnimationBone::R00 || isRoot ) {
 				m = glm::translate(m, frame->getDefaultTranslation());
 				m = m * glm::mat4_cast(kf.rotation);
 			}
