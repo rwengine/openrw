@@ -50,6 +50,11 @@ public:
 	Activity* getNextActivity() { return _nextActivity; }
 
 	/**
+	 * @brief skipActivity Cancel the current activity, immediatley.
+	 */
+	void skipActivity();
+
+	/**
 	 * @brief setNextActivity Sets the next Activity with a parameter.
 	 * @param activity
 	 * @param position

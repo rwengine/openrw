@@ -63,6 +63,11 @@ void GTAPlayerAIController::enterNearestVehicle()
 
 void GTAPlayerAIController::update(float dt)
 {
+	// TODO: Determine if the player is allowed to interupt the current activity.
+	if( glm::length(direction) > 0.001f && _currentActivity != nullptr ) {
+		skipActivity();
+	}
+
 	if( _currentActivity == nullptr ) {
 		if( character->currentActivity != GTACharacter::Jump )
 		{

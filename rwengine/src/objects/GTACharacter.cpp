@@ -370,3 +370,8 @@ void GTACharacter::setTargetPosition(const glm::vec3 &target)
 	_hasTargetPosition = true;
 }
 
+void GTACharacter::clearTargetPosition()
+{
+	_hasTargetPosition = false;
+}
+

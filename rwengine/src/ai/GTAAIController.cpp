@@ -13,8 +13,11 @@ bool GTAAIController::updateActivity()
 
 void GTAAIController::setActivity(GTAAIController::Activity* activity)
 {
+	if( _currentActivity ) delete _currentActivity;
 	_currentActivity = activity;
 	if( _currentActivity == nullptr ) {
+		// TODO make idle an actual activity or something,
+		character->clearTargetPosition();
 		character->enterAction( GTACharacter::Idle );
 	}
 }
@@ -23,6 +26,11 @@ GTAAIController::GTAAIController(GTACharacter* character)
 : character(character), _currentActivity(nullptr), _nextActivity(nullptr)
 {
 	character->controller = this;
+}
+
+void GTAAIController::skipActivity()
+{
+	setActivity(nullptr);
 }
 
 void GTAAIController::setNextActivity(GTAAIController::Activity* activity)
@@ -88,11 +96,16 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 		glm::vec3 targetDirection = target - character->getPosition();
 		targetDirection.z = 0.f;
 
-		if( glm::length(targetDirection) <= 0.4f ) {
+		float targetDistance = glm::length(targetDirection);
+
+		if( targetDistance <= 0.4f ) {
 			entering = true;
 			// Warp character to vehicle orientation
 			character->rotation = vehicle->getRotation();
 			character->enterAction(GTACharacter::VehicleGetIn);
+		}
+		else if( targetDistance > 15.f ) {
+			return true; // Give up if the vehicle is too far away.
 		}
 		else {
 			character->setTargetPosition( target );

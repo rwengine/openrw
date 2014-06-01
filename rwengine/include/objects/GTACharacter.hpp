@@ -125,6 +125,7 @@ public:
 	void resetToAINode();
 
 	void setTargetPosition( const glm::vec3& target );
+	void clearTargetPosition();
 };
 
 #endif
