@@ -349,7 +349,7 @@ void GTARenderer::renderWorld()
 		for( size_t w = 0; w < inst->info->wheels.size(); ++w) {
 			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
-                Model* wheelModel = engine->gameData.models["wheels"];
+				Model* wheelModel = engine->gameData.models["wheels"];
 				if( wheelModel) {
 					// Tell bullet to update the matrix for this wheel.
 					inst->physVehicle->updateWheelTransform(w, false);

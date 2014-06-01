@@ -6,25 +6,21 @@ DebugState::DebugState()
 {
 	Menu *m = new Menu(getFont());
 	m->offset = glm::vec2(50.f, 100.f);
-	m->addEntry(Menu::lambda("Create Vehicle", [] {
-		auto ch = getPlayerCharacter();
-		if(! ch) return;
-
-		auto fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
-
-		glm::vec3 hit, normal;
-		if(hitWorldRay({ch->position + fwd * 5.f}, {0.f, 0.f, -2.f}, hit, normal)) {
-			// Pick random vehicle.
-			auto it = getWorld()->vehicleTypes.begin();
-			std::uniform_int_distribution<int> uniform(0, 3);
-			for(size_t i = 0, n = uniform(getWorld()->randomEngine); i != n; i++) {
-				it++;
-			}
-
-			auto spawnpos = hit + normal;
-			getWorld()->createVehicle(it->first, spawnpos, glm::quat());
+	m->addEntry(Menu::lambda("Create Vehicle", [this] {
+		auto it = getWorld()->vehicleTypes.begin();
+		std::uniform_int_distribution<int> uniform(0, 3);
+		for(size_t i = 0, n = uniform(getWorld()->randomEngine); i != n; i++) {
+			it++;
 		}
+		spawnVehicle(it->first);
 	}));
+	int vehiclesMax = 5, i = 0;
+	for( auto& v : getWorld()->vehicleTypes ) {
+		if( (i++) > vehiclesMax ) break;
+		m->addEntry(Menu::lambda(v.second->handlingID, [=] {
+			spawnVehicle(v.first);
+		}));
+	}
 	this->enterMenu(m);
 }
 
@@ -83,4 +79,18 @@ void DebugState::handleEvent(const sf::Event &e)
 		default: break;
 	}
 	State::handleEvent(e);
+}
+
+void DebugState::spawnVehicle(unsigned int id)
+{
+	auto ch = getPlayerCharacter();
+	if(! ch) return;
+
+	auto fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
+
+	glm::vec3 hit, normal;
+	if(hitWorldRay({ch->position + fwd * 5.f}, {0.f, 0.f, -2.f}, hit, normal)) {
+		auto spawnpos = hit + normal;
+		getWorld()->createVehicle(id, spawnpos, glm::quat());
+	}
 }

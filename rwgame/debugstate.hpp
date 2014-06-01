@@ -14,6 +14,8 @@ public:
 	virtual void tick(float dt);
 
 	virtual void handleEvent(const sf::Event& event);
+
+	void spawnVehicle(unsigned int id);
 };
 
 #endif // DEBUGSTATE_HPP
