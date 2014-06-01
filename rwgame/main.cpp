@@ -383,6 +383,7 @@ void render()
         break;
     }
     case 2: {
+		gta->renderer.renderWorld();
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
