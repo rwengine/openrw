@@ -86,8 +86,10 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 {
 	if( entering ) {
 		// TODO: decouple from the character's animator.
-		if( character->animator->isCompleted() ) {
+		if( character->animator->getAnimationQueue().size() == 1 ) {
 			character->enterVehicle(vehicle, seat);
+		}
+		else if( character->currentActivity == GTACharacter::Idle ) {
 			return true;
 		}
 	}

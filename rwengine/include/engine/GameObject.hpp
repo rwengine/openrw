@@ -32,12 +32,16 @@ struct GameObject
 	/**
 	 * Health value
 	 */
-	float mHealth; 
+	float mHealth;
+
+	bool _useAnimTranslation;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
-		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f) {}
+		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
+		_useAnimTranslation(false)
+	{}
 		
-	virtual ~GameObject() {};
+	virtual ~GameObject() {}
 
     enum Type
     {

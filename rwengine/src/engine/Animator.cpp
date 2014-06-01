@@ -92,7 +92,7 @@ glm::quat Animator::getRootRotation() const
 	return glm::quat();
 }
 
-glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
+glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha, bool disableRoot) const
 {
 	if(getAnimation()) {
 		auto it = getAnimation()->bones.find(frame->getName());
@@ -100,7 +100,7 @@ glm::mat4 Animator::getFrameMatrix(ModelFrame* frame, float alpha) const
 			auto kf = it->second->getInterpolatedKeyframe(getAnimationTime(alpha));
 			glm::mat4 m;
 			bool isRoot = frame->getParent() ? !! frame->getParent() : true;
-			if(it->second->type == AnimationBone::R00 || isRoot ) {
+			if(it->second->type == AnimationBone::R00 || ( isRoot && disableRoot ) ) {
 				m = glm::translate(m, frame->getDefaultTranslation());
 				m = m * glm::mat4_cast(kf.rotation);
 			}

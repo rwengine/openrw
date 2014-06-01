@@ -287,6 +287,7 @@ bool GTAVehicle::isFrameVisible(ModelFrame *frame) const
 
 	if(isDam || isOk) {
 		unsigned int dft = nameToDamageFlag(name);
+		if(dft == GTAVehicle::DF_Door_lf) return false;
 		if(isDam) {
 			return (damageFlags & dft) == dft;
 		}

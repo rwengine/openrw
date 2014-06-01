@@ -4,6 +4,9 @@
 #include <engine/Animator.hpp>
 #include <objects/GTAVehicle.hpp>
 
+// TODO: make this not hardcoded
+static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
+
 GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
@@ -96,7 +99,7 @@ void GTACharacter::tick(float dt)
 		controller->update(dt);
 	}
 
-	if(currentVehicle) {
+	if(currentVehicle && currentActivity != VehicleGetIn) {
 		enterAction(VehicleSit);
 	}
 
@@ -142,7 +145,11 @@ void GTACharacter::tick(float dt)
 			animator->setAnimation(animations.car_open_lhs, false);
 			animator->queueAnimation(animations.car_getin_lhs);
 		}
-		else if( animator->getAnimation() == nullptr ) {
+		else if( animator->getAnimationQueue().size() == 1 ) {
+			_useAnimTranslation = true;
+		}
+		else if( animator->isCompleted() ) {
+			_useAnimTranslation = false;
 			enterAction(Idle);
 		}
 	} break;
@@ -265,9 +272,25 @@ glm::vec3 GTACharacter::getPosition() const
 		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}
 	if(currentVehicle) {
-		return currentVehicle->getPosition();
+		auto v = getCurrentVehicle();
+		auto R = glm::mat3_cast(v->getRotation());
+		glm::vec3 offset;
+		auto o = (animator->getAnimation() == animations.car_getin_lhs) ? enter_offset : glm::vec3();
+		if(getCurrentSeat() < v->info->seats.size()) {
+			offset = R * (v->info->seats[getCurrentSeat()].offset -
+					o);
+		}
+		return currentVehicle->getPosition() + offset;
 	}
 	return position;
+}
+
+glm::quat GTACharacter::getRotation() const
+{
+	if(currentVehicle) {
+		return currentVehicle->getRotation();
+	}
+	return GameObject::getRotation();
 }
 
 bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
@@ -282,7 +305,7 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 			enterVehicle(nullptr, 0);
 			vehicle->setOccupant(seat, this);
 			setCurrentVehicle(vehicle, seat);
-			enterAction(VehicleSit);
+			//enterAction(VehicleSit);
 			return true;
 		}
 	}

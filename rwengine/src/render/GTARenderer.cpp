@@ -263,20 +263,8 @@ void GTARenderer::renderWorld()
 
         glm::mat4 matrixModel;
 		
-		if(charac->getCurrentVehicle()) {
-			auto v = charac->getCurrentVehicle();
-			matrixModel = glm::translate(matrixModel, 
-										 v->getPosition());
-			matrixModel = matrixModel * glm::mat4_cast(v->getRotation());
-			if(charac->getCurrentSeat() < v->info->seats.size()) {
-				glm::vec3 seatpos = v->info->seats[charac->getCurrentSeat()].offset;
-				matrixModel = glm::translate(matrixModel, seatpos);
-			}
-		}
-		else {
-			matrixModel = glm::translate(matrixModel, charac->getPosition());
-			matrixModel = matrixModel * glm::mat4_cast(charac->rotation);
-		}
+		matrixModel = glm::translate(matrixModel, charac->getPosition());
+		matrixModel = matrixModel * glm::mat4_cast(charac->getRotation());
 
         if(!charac->model) continue;
 
@@ -446,7 +434,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {
-		localmatrix *= object->animator->getFrameMatrix(f, 0.f);
+		localmatrix *= object->animator->getFrameMatrix(f, 0.f, ! object->_useAnimTranslation);
 	}
 	else {
 		localmatrix *= f->getTransform();

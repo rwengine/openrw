@@ -107,6 +107,8 @@ public:
 	virtual void setPosition(const glm::vec3& pos);
 
 	virtual glm::vec3 getPosition() const;
+
+	virtual glm::quat getRotation() const;
 	
 	bool enterVehicle(GTAVehicle* vehicle, size_t seat);
 

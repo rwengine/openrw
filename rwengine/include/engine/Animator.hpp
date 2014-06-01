@@ -70,7 +70,7 @@ public:
 	 * @param frame
 	 * @return
 	 */
-	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha) const;
+	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha, bool disableRoot = true) const;
 
 	/**
 	 * @brief tick Update animation paramters for server-side data.
