@@ -308,6 +308,7 @@ void init(std::string gtapath, bool loadWorld)
 	
 	// This is harcoded in GTA III for some reason
 	gta->gameData.loadIMG("/models/gta3");
+	gta->gameData.loadIMG("/models/txd");
 	
 	gta->load();
 	

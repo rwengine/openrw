@@ -359,7 +359,7 @@ void GTARenderer::renderWorld()
 					if(inst->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
 						wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
 					}
-					renderNamedFrame(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
+					renderWheel(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
 				}
 				else {
 					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
@@ -401,24 +401,26 @@ void GTARenderer::renderWorld()
 	glBindVertexArray( 0 );
 }
 
-void GTARenderer::renderNamedFrame(Model* model, const glm::mat4 &matrix, const std::string& name)
+void GTARenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
 {
 	for (const ModelFrame* f : model->frames) 
 	{
 		const std::string& fname = f->getName();
-		bool LOD = (fname.find("_l1") != fname.npos || fname.find("_l0") != fname.npos);
-		if( LOD || fname != name ) {
-			continue;
-		}
-		
-		size_t g = 3;
-		RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
-			culled++;
+		if( fname != name ) {
 			continue;
 		}
 
-		renderGeometry(model, g, matrix);
+		auto firstLod = f->getChildren()[0];
+
+		for( auto& g : firstLod->getGeometries() ) {
+			RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
+			if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+				culled++;
+				continue;
+			}
+
+			renderGeometry(model, g, matrix);
+		}
 		break;
 	}
 }

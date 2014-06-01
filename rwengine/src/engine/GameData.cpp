@@ -148,6 +148,7 @@ void GameData::parseDAT(const std::string& path)
 					texpath = findPathRealCase(datpath, texpath);
 					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
 					fileLocations.insert({ texname, { false, texpath }});
+					loadTXD(texname);
 				}
 			}
 		}
