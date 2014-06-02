@@ -26,12 +26,13 @@ struct AnimationGroup
 
 	Animation* car_open_lhs;
 	Animation* car_getin_lhs;
+	Animation* car_getout_lhs;
 
 	AnimationGroup()
 	 : idle(nullptr), walk(nullptr), walk_start(nullptr), run(nullptr),
 	   jump_start(nullptr), jump_glide(nullptr), jump_land(nullptr),
 	   car_sit(nullptr), car_sit_low(nullptr), car_open_lhs(nullptr),
-	   car_getin_lhs(nullptr)
+	   car_getin_lhs(nullptr), car_getout_lhs(nullptr)
 	{}
 };
 
@@ -63,7 +64,9 @@ public:
 		Jump,
 		Falling,
 		Landing,
+		VehicleOpen,
 		VehicleGetIn,
+		VehicleGetOut,
 		VehicleDrive,
 		VehicleSit,
 		KnockedDown,

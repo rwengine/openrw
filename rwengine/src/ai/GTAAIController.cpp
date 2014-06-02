@@ -86,10 +86,10 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 {
 	if( entering ) {
 		// TODO: decouple from the character's animator.
-		if( character->animator->getAnimation() == character->animations.car_getin_lhs ) {
+		if( character->currentActivity == GTACharacter::VehicleGetIn ) {
 			character->enterVehicle(vehicle, seat);
 		}
-		else if(character->currentActivity == GTACharacter::VehicleGetIn) {
+		else if( character->currentActivity == GTACharacter::VehicleOpen ) {
 			// Ensure the player remains aligned with the vehicle
 			character->setPosition(vehicle->getSeatEntryPosition(seat));
 			character->rotation = vehicle->getRotation();
@@ -110,7 +110,7 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 			entering = true;
 			// Warp character to vehicle orientation
 			character->rotation = vehicle->getRotation();
-			character->enterAction(GTACharacter::VehicleGetIn);
+			character->enterAction(GTACharacter::VehicleOpen);
 		}
 		else if( targetDistance > 15.f ) {
 			return true; // Give up if the vehicle is too far away.
@@ -123,5 +123,24 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 			character->enterAction(GTACharacter::Walk);
 		}
 	}
+	return false;
+}
+
+
+bool Activities::ExitVehicle::update(GTACharacter *character, GTAAIController *controller)
+{
+	if( character->getCurrentVehicle() == nullptr ) return true;
+
+	if( character->currentActivity == GTACharacter::Idle ) {
+		auto vehicle = character->getCurrentVehicle();
+		auto exitpos = vehicle->getSeatEntryPosition(character->getCurrentSeat());
+
+		character->enterVehicle(nullptr, 0);
+		character->setPosition(exitpos);
+
+		return true;
+	}
+
+	character->enterAction(GTACharacter::VehicleGetOut);
 	return false;
 }

@@ -100,6 +100,15 @@ namespace Activities {
 
 		bool update(GTACharacter *character, GTAAIController *controller);
 	};
+
+	struct ExitVehicle : public GTAAIController::Activity {
+		DECL_ACTIVITY( ExitVehicle )
+
+		ExitVehicle( )
+			{}
+
+		bool update(GTACharacter *character, GTAAIController *controller);
+	};
 }
 
 #endif

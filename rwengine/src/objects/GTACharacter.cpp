@@ -31,6 +31,7 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 
 	animations.car_open_lhs   = engine->gameData.animations["car_open_lhs"];
 	animations.car_getin_lhs   = engine->gameData.animations["car_getin_lhs"];
+	animations.car_getout_lhs   = engine->gameData.animations["car_getout_lhs"];
 
 	if(model) {
 		animator = new Animator();
@@ -99,7 +100,9 @@ void GTACharacter::tick(float dt)
 		controller->update(dt);
 	}
 
-	if(currentVehicle && currentActivity != VehicleGetIn) {
+	if(currentVehicle
+			&& currentActivity != VehicleGetIn
+			&& currentActivity != VehicleGetOut) {
 		enterAction(VehicleSit);
 	}
 
@@ -139,14 +142,28 @@ void GTACharacter::tick(float dt)
 			animator->setAnimation(animations.car_sit);
 		}
 	} break;
-	case VehicleGetIn: {
-		if(animator->getAnimation() != animations.car_getin_lhs
-				&& animator->getAnimation() != animations.car_open_lhs) {
+	case VehicleOpen: {
+		if(animator->getAnimation() != animations.car_open_lhs) {
 			animator->setAnimation(animations.car_open_lhs, false);
-			animator->queueAnimation(animations.car_getin_lhs);
+		}
+		else if(animator->isCompleted()) {
+			enterAction(VehicleGetIn);
+		}
+	} break;
+	case VehicleGetIn: {
+		if(animator->getAnimation() != animations.car_getin_lhs) {
+			animator->setAnimation(animations.car_getin_lhs, false);
 		}
 		else if( animator->isCompleted() ) {
 			enterAction(VehicleSit);
+		}
+	} break;
+	case VehicleGetOut: {
+		if(animator->getAnimation() != animations.car_getout_lhs) {
+			animator->setAnimation(animations.car_getout_lhs, false);
+		}
+		else if( animator->isCompleted() ) {
+			enterAction(Idle);
 		}
 	} break;
 	default: break;
@@ -268,6 +285,9 @@ glm::vec3 GTACharacter::getPosition() const
 		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}
 	if(currentVehicle) {
+		if( currentActivity == VehicleGetOut ) {
+			return currentVehicle->getSeatEntryPosition(currentSeat);
+		}
 		auto v = getCurrentVehicle();
 		auto R = glm::mat3_cast(v->getRotation());
 		glm::vec3 offset;
@@ -396,6 +416,9 @@ void GTACharacter::clearTargetPosition()
 
 bool GTACharacter::isAnimationFixed() const
 {
-	return animator->getAnimation() != animations.car_getin_lhs;
+	// TODO probably get rid of how this works.
+	auto ca = animator->getAnimation();
+	return ca != animations.car_getin_lhs &&
+			ca != animations.car_getout_lhs;
 }
 
