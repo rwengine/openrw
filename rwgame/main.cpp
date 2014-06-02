@@ -7,6 +7,7 @@
 #include <render/Model.hpp>
 #include <objects/GTACharacter.hpp>
 #include <objects/GTAVehicle.hpp>
+#include <ai/GTAAIController.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -402,6 +403,16 @@ void render(float alpha)
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
 	ss << "Renderered " << gta->renderer.rendered << " / " << gta->renderer.culled << std::endl;
+	if( player ) {
+		ss << "Activity: ";
+		if( player->controller->getCurrentActivity() ) {
+			ss << player->controller->getCurrentActivity()->name();
+		}
+		else {
+			ss << "Idle";
+		}
+		ss << std::endl;
+	}
 	
 	sf::Text text(ss.str(), font, 15);
 	text.setPosition(10, 10);
