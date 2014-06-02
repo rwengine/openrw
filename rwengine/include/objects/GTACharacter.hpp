@@ -128,6 +128,8 @@ public:
 
 	void setTargetPosition( const glm::vec3& target );
 	void clearTargetPosition();
+
+	virtual bool isAnimationFixed() const;
 };
 
 #endif

@@ -86,10 +86,16 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 {
 	if( entering ) {
 		// TODO: decouple from the character's animator.
-		if( character->animator->getAnimationQueue().size() == 1 ) {
+		if( character->animator->getAnimation() == character->animations.car_getin_lhs ) {
 			character->enterVehicle(vehicle, seat);
 		}
-		else if( character->currentActivity == GTACharacter::Idle ) {
+		else if(character->currentActivity == GTACharacter::VehicleGetIn) {
+			// Ensure the player remains aligned with the vehicle
+			character->setPosition(vehicle->getSeatEntryPosition(seat));
+			character->rotation = vehicle->getRotation();
+		}
+		else {
+			// VehicleGetIn is over, finish activity
 			return true;
 		}
 	}

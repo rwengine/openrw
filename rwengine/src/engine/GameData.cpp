@@ -94,7 +94,7 @@ void GameData::load()
 	loadWaterpro(datpath+"/data/waterpro.dat");
 	loadWater(datpath+"/data/water.dat");
 
-    loadIFP(datpath+"/anim/ped.ifp");
+	loadIFP(datpath+"/anim/ped.ifp");
 }
 
 void GameData::parseDAT(const std::string& path)

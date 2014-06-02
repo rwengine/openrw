@@ -358,7 +358,7 @@ void update(float dt)
 	}
 }
 
-void render()
+void render(float alpha)
 {
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
@@ -367,13 +367,12 @@ void render()
     glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	//glEnable(GL_CULL_FACE);
 
-    switch( debugMode ) {
-    case 0:
-        gta->renderer.renderWorld();
-        break;
+	gta->renderer.renderWorld(alpha);
 
-    case 1: {
-		gta->renderer.renderWorld();
+    switch( debugMode ) {
+	case 0: break;
+
+	case 1: {
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
@@ -382,8 +381,7 @@ void render()
         gta->renderer.renderPaths();
         break;
     }
-    case 2: {
-		gta->renderer.renderWorld();
+	case 2: {
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
@@ -487,7 +485,7 @@ int main(int argc, char *argv[])
 	StateManager::get().enter(menuState);
 	
 	float accum = 0.f;
-    float ts = 1.f / 60.f;
+	float ts = 1.f / 60.f;
 	
 	// Loop until the window is closed or we run out of state.
 	while (window.isOpen() && StateManager::get().states.size()) {
@@ -509,8 +507,10 @@ int main(int argc, char *argv[])
 			update(ts);
 			accum -= ts;
 		}
+
+		float alpha = accum / ts;
 		
-		render();
+		render(alpha);
 		
 		StateManager::get().draw(window);
 		

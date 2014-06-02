@@ -127,7 +127,7 @@ GLuint compileShader(GLenum type, const char *source)
 }
 
 GTARenderer::GTARenderer(GameWorld* engine)
-    : engine(engine)
+	: engine(engine), _renderAlpha(0.f)
 {	
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -212,8 +212,10 @@ float mix(uint8_t a, uint8_t b, float num)
 	return a+(b-a)*num;
 }
 
-void GTARenderer::renderWorld()
+void GTARenderer::renderWorld(float alpha)
 {
+	_renderAlpha = alpha;
+
 	glBindVertexArray( vao );
 	
     float tod = fmod(engine->gameTime, 24.f * 60.f);
@@ -434,7 +436,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {
-		localmatrix *= object->animator->getFrameMatrix(f, 0.f, ! object->_useAnimTranslation);
+		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, object->isAnimationFixed());
 	}
 	else {
 		localmatrix *= f->getTransform();

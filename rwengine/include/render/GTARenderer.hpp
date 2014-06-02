@@ -42,6 +42,8 @@ class GTARenderer
 	/// This could be replaced with a 2nd draw pass.
 	std::vector<RQueueEntry> transparentDrawQueue;
 
+	float _renderAlpha;
+
 public:
 	
     GTARenderer(GameWorld*);
@@ -68,7 +70,7 @@ public:
     /**
      * Renders the current World. 
      */
-    void renderWorld();
+    void renderWorld(float alpha);
 
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 

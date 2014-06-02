@@ -145,12 +145,8 @@ void GTACharacter::tick(float dt)
 			animator->setAnimation(animations.car_open_lhs, false);
 			animator->queueAnimation(animations.car_getin_lhs);
 		}
-		else if( animator->getAnimationQueue().size() == 1 ) {
-			_useAnimTranslation = true;
-		}
 		else if( animator->isCompleted() ) {
-			_useAnimTranslation = false;
-			enterAction(Idle);
+			enterAction(VehicleSit);
 		}
 	} break;
 	default: break;
@@ -396,5 +392,10 @@ void GTACharacter::setTargetPosition(const glm::vec3 &target)
 void GTACharacter::clearTargetPosition()
 {
 	_hasTargetPosition = false;
+}
+
+bool GTACharacter::isAnimationFixed() const
+{
+	return animator->getAnimation() != animations.car_getin_lhs;
 }
 

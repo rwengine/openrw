@@ -5,10 +5,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <queue>
+#include <map>
+#include <loaders/LoaderIFP.hpp>
 #include <cstdint>
 
-class Animation;
-class AnimationBone;
 class Model;
 class ModelFrame;
 
@@ -26,6 +26,14 @@ class Animator
 	 * @brief model The model being animated.
 	 */
 	Model* model;
+
+	struct BonePair {
+		AnimationBone* bone;
+		AnimationKeyframe first;
+		AnimationKeyframe second;
+	};
+
+	std::map<ModelFrame*, BonePair> _boneMatrices;
 
 	// Used in determining how far the skeleton being animated has moved
 	// From it's local origin.
@@ -65,12 +73,15 @@ public:
 	void setModel(Model* model);
 
 	/**
-	 * @brief getFrameMatrix returns the matrix for frame at the current time
+	 * @brief getFrameMatrix returns the matrix for frame at the given time
 	 * @param t
 	 * @param frame
 	 * @return
 	 */
-	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha, bool disableRoot = true) const;
+	glm::mat4 getFrameMatrixAt(ModelFrame* frame, float time, bool disableRoot = true) const;
+	AnimationKeyframe getKeyframeAt(ModelFrame* frame, float time) const;
+
+	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha = 0.f, bool ignoreRoot = true) const;
 
 	/**
 	 * @brief tick Update animation paramters for server-side data.

@@ -34,11 +34,8 @@ struct GameObject
 	 */
 	float mHealth;
 
-	bool _useAnimTranslation;
-
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
-		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
-		_useAnimTranslation(false)
+		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f)
 	{}
 		
 	virtual ~GameObject() {}
@@ -93,6 +90,8 @@ struct GameObject
 	virtual bool takeDamage(const DamageInfo& damage) { return false; }
 
 	virtual bool isFrameVisible(ModelFrame* frame) const { return true; }
+
+	virtual bool isAnimationFixed() const { return true; }
 };
 
 #endif // __GAMEOBJECTS_HPP__
