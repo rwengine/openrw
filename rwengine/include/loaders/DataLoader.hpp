@@ -4,15 +4,15 @@
 
 #include <iostream>
 
-class LoadContext;
+class WorkContext;
 
 class DataLoader
 {
-	LoadContext* _context;
+	WorkContext* _context;
 
 public:
 
-	DataLoader(LoadContext* context)
+	DataLoader(WorkContext* context)
 		: _context(context) {}
 
 	virtual ~DataLoader() {}
@@ -21,7 +21,7 @@ public:
 	 * @brief getContext
 	 * @return The loading context for this Loader
 	 */
-	LoadContext* getContext() const { return _context; }
+	WorkContext* getContext() const { return _context; }
 
 	/**
 	 * @brief load the data contained in a set of bytes

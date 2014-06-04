@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <string>
-#include <memory>
+#include <WorkContext.hpp>
 
 class Model;
 
@@ -23,6 +23,30 @@ private:
 
 public:
 	Model* loadFromMemory(char *data, GameData* gameData);
+};
+
+#include <functional>
+
+class LoaderIMG;
+
+class LoadModelJob : public WorkJob
+{
+public:
+	typedef std::function<void ( Model* )> ModelCallback;
+
+private:
+	GameData* _gameData;
+	LoaderIMG* _archive;
+	std::string _file;
+	ModelCallback _callback;
+	char* _data;
+public:
+
+	LoadModelJob(WorkContext* context, GameData* gd, LoaderIMG& archive, const std::string& file, ModelCallback cb);
+
+	void work();
+
+	void complete();
 };
 
 #endif
