@@ -3,12 +3,11 @@
 
 #include "State.hpp"
 
-#include <ai/GTAAIController.hpp>
-#include <ai/GTAPlayerAIController.hpp>
+#include <ai/PlayerController.hpp>
 
 class IngameState : public State
 {
-	GTAPlayerAIController* _player;
+	PlayerController* _player;
 	CharacterObject* _playerCharacter;
 
 	glm::vec2 _lookAngles;

@@ -1,5 +1,5 @@
-#ifndef _GTARENDERER_HPP_
-#define _GTARENDERER_HPP_
+#ifndef _GAMERENDERER_HPP_
+#define _GAMERENDERER_HPP_
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -20,7 +20,7 @@ class Animator;
  * Handles low level rendering of Models, as well as high level rendering of
  * objects in the world.
  */
-class GTARenderer
+class GameRenderer
 {
     GameWorld* engine;
 	
@@ -46,7 +46,7 @@ class GTARenderer
 
 public:
 	
-    GTARenderer(GameWorld*);
+	GameRenderer(GameWorld*);
 	
 	ViewCamera camera;
 	

@@ -1,9 +1,9 @@
-#include <ai/GTAAIController.hpp>
+#include <ai/CharacterController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <engine/Animator.hpp>
 
-bool GTAAIController::updateActivity()
+bool CharacterController::updateActivity()
 {
 	if( _currentActivity ) {
 		return _currentActivity->update(character, this);
@@ -12,7 +12,7 @@ bool GTAAIController::updateActivity()
 	return false;
 }
 
-void GTAAIController::setActivity(GTAAIController::Activity* activity)
+void CharacterController::setActivity(CharacterController::Activity* activity)
 {
 	if( _currentActivity ) delete _currentActivity;
 	_currentActivity = activity;
@@ -23,18 +23,18 @@ void GTAAIController::setActivity(GTAAIController::Activity* activity)
 	}
 }
 
-GTAAIController::GTAAIController(CharacterObject* character)
+CharacterController::CharacterController(CharacterObject* character)
 : character(character), _currentActivity(nullptr), _nextActivity(nullptr)
 {
 	character->controller = this;
 }
 
-void GTAAIController::skipActivity()
+void CharacterController::skipActivity()
 {
 	setActivity(nullptr);
 }
 
-void GTAAIController::setNextActivity(GTAAIController::Activity* activity)
+void CharacterController::setNextActivity(CharacterController::Activity* activity)
 {
 	if( _currentActivity == nullptr ) {
 		setActivity(activity);
@@ -46,7 +46,7 @@ void GTAAIController::setNextActivity(GTAAIController::Activity* activity)
 	}
 }
 
-void GTAAIController::update(float dt)
+void CharacterController::update(float dt)
 {
 	if( updateActivity() ) {
 		if( _currentActivity ) {
@@ -60,7 +60,7 @@ void GTAAIController::update(float dt)
 	}
 }
 
-bool Activities::GoTo::update(CharacterObject *character, GTAAIController *controller)
+bool Activities::GoTo::update(CharacterObject *character, CharacterController *controller)
 {
 	/* TODO: Use the ai nodes to navigate to the position */
 	glm::vec3 targetDirection = target - character->getPosition();
@@ -80,7 +80,7 @@ bool Activities::GoTo::update(CharacterObject *character, GTAAIController *contr
 }
 
 
-bool Activities::EnterVehicle::update(CharacterObject *character, GTAAIController *controller)
+bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {
 	if( entering ) {
 		// TODO: decouple from the character's animator.
@@ -125,7 +125,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, GTAAIControlle
 }
 
 
-bool Activities::ExitVehicle::update(CharacterObject *character, GTAAIController *controller)
+bool Activities::ExitVehicle::update(CharacterObject *character, CharacterController *controller)
 {
 	if( character->getCurrentVehicle() == nullptr ) return true;
 

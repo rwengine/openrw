@@ -6,13 +6,13 @@
 #include <data/PathData.hpp>
 
 struct InstanceObject;
-struct GTAAINode;
+struct AIGraphNode;
 
 class AIGraph
 {
 public:
 	
-	std::vector<GTAAINode*> nodes;
+	std::vector<AIGraphNode*> nodes;
 	
 	void createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path);
 

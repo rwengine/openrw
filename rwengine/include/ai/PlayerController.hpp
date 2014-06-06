@@ -1,9 +1,9 @@
 #pragma once
-#ifndef _GTAPLAYERAICONTROLLER_HPP_
-#define _GTAPLAYERAICONTROLLER_HPP_
-#include "ai/GTAAIController.hpp"
+#ifndef _PLAYERCONTROLLER_HPP_
+#define _PLAYERCONTROLLER_HPP_
+#include <ai/CharacterController.hpp>
 
-class GTAPlayerAIController : public GTAAIController
+class PlayerController : public CharacterController
 {
 	
 	glm::quat cameraRotation;
@@ -17,7 +17,7 @@ class GTAPlayerAIController : public GTAAIController
 	
 public:
 	
-    GTAPlayerAIController(CharacterObject* character);
+	PlayerController(CharacterObject* character);
 	
 	void setRunning(bool run);
 	

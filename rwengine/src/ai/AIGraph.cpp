@@ -1,6 +1,6 @@
 #include "ai/AIGraph.hpp"
 #include "objects/InstanceObject.hpp"
-#include "ai/GTAAINode.hpp"
+#include <ai/AIGraphNode.hpp>
 
 void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path)
 {
@@ -10,7 +10,7 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 
 	for( size_t n = 0; n < path.nodes.size(); ++n ) {
 		auto& node = path.nodes[n];
-		GTAAINode* ainode = nullptr;
+		AIGraphNode* ainode = nullptr;
 		glm::vec3 nodePosition = position + (rotation * node.position);
 		
 		if( node.type == PathNode::EXTERNAL ) {
@@ -25,10 +25,10 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 		}
 		
 		if( ainode == nullptr ) {
-			ainode = new GTAAINode;
-			ainode->type = (path.type == PathData::PATH_PED ? GTAAINode::Pedestrian : GTAAINode::Vehicle);
+			ainode = new AIGraphNode;
+			ainode->type = (path.type == PathData::PATH_PED ? AIGraphNode::Pedestrian : AIGraphNode::Vehicle);
 			ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
-			ainode->flags = GTAAINode::None;
+			ainode->flags = AIGraphNode::None;
 			ainode->size = node.size;
 			ainode->other_thing = node.other_thing;
 			ainode->other_thing2 = node.other_thing2;

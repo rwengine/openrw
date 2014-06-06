@@ -1,11 +1,11 @@
 #pragma once
-#ifndef _GTAAINODE_HPP_
-#define _GTAAINODE_HPP_
+#ifndef _AIGRAPHNODE_HPP_
+#define _AIGRAPHNODE_HPP_
 #include <glm/glm.hpp>
 #include <cstdint>
 #include <vector>
 
-struct GTAAINode
+struct AIGraphNode
 {
     enum NodeType {
         Vehicle,
@@ -27,7 +27,7 @@ struct GTAAINode
 
     int32_t nextIndex;
 	
-	std::vector<GTAAINode*> connections;
+	std::vector<AIGraphNode*> connections;
 };
 
 #endif

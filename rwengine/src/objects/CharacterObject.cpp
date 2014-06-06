@@ -1,5 +1,5 @@
 #include <objects/CharacterObject.hpp>
-#include <ai/GTAAIController.hpp>
+#include <ai/CharacterController.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <objects/VehicleObject.hpp>
@@ -377,13 +377,13 @@ void CharacterObject::resetToAINode()
 {
 	auto nodes = engine->aigraph.nodes;
 	bool vehicleNode = !! getCurrentVehicle();
-	GTAAINode* nearest = nullptr; float d = std::numeric_limits<float>::max();
+	AIGraphNode* nearest = nullptr; float d = std::numeric_limits<float>::max();
 	for(auto it = nodes.begin(); it != nodes.end(); ++it) {
 		if(vehicleNode) {
-			if((*it)->type == GTAAINode::Pedestrian) continue;
+			if((*it)->type == AIGraphNode::Pedestrian) continue;
 		}
 		else {
-			if((*it)->type == GTAAINode::Vehicle) continue;
+			if((*it)->type == AIGraphNode::Vehicle) continue;
 		}
 		
 		float dist = glm::length((*it)->position - getPosition());

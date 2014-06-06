@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <ai/GTADefaultAIController.hpp>
+#include <ai/DefaultAIController.hpp>
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(CharacterTests)
@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(test_create)
 
 		BOOST_REQUIRE( character != nullptr );
 
-		auto controller = new GTADefaultAIController(character);
+		auto controller = new DefaultAIController(character);
 
 
 		// Check the initial activity is Idle.
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		BOOST_REQUIRE( character != nullptr );
 
-		auto controller = new GTADefaultAIController(character);
+		auto controller = new DefaultAIController(character);
 
 		controller->setNextActivity( new Activities::GoTo( glm::vec3{ 10.f, 10.f, 0.f } ) );
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		BOOST_REQUIRE( character != nullptr );
 
-		auto controller = new GTADefaultAIController(character);
+		auto controller = new DefaultAIController(character);
 
 		controller->setNextActivity( new Activities::EnterVehicle( vehicle, 0 ) );
 

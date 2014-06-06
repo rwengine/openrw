@@ -10,7 +10,7 @@ IngameState::IngameState()
 	: _player(nullptr), _playerCharacter(nullptr)
 {
 	_playerCharacter = getWorld()->createPedestrian(1, {100.f, 100.f, 25.f});
-	_player = new GTAPlayerAIController(_playerCharacter);
+	_player = new PlayerController(_playerCharacter);
 
 	setPlayerCharacter( _playerCharacter );
 }

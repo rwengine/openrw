@@ -2,13 +2,13 @@
 #ifndef _GAMEOBJECT_HPP_
 #define _GAMEOBJECT_HPP_
 
-#include <engine/GTATypes.hpp>
+#include <engine/RWTypes.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <memory>
 
-class GTAAIController;
+class CharacterController;
 class ModelFrame;
 class Animator;
 

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTACHARACTER_HPP_
-#define _GTACHARACTER_HPP_
+#ifndef _CHARACTEROBJECT_HPP_
+#define _CHARACTEROBJECT_HPP_
 #include <engine/GameObject.hpp>
 #include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
 #include <bullet/btBulletCollisionCommon.h>
@@ -37,7 +37,7 @@ struct AnimationGroup
 };
 
 /**
- * @brief The GTACharacter struct
+ * @brief The CharacterObject struct
  * Implements Character object behaviours.
  */
 struct CharacterObject : public GameObject
@@ -79,12 +79,11 @@ public:
 	btPairCachingGhostObject* physObject;
 	btCapsuleShapeZ* physShape;
 
-	GTAAIController* controller;
+	CharacterController* controller;
 
 	AnimationGroup animations;
 
 	/**
-	 * @brief GTACharacter Constructs a Character
 	 * @param pos
 	 * @param rot
 	 * @param model

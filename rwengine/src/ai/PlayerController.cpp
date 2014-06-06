@@ -1,39 +1,39 @@
-#include "ai/GTAPlayerAIController.hpp"
+#include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-GTAPlayerAIController::GTAPlayerAIController(CharacterObject* character)
-	: GTAAIController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false)
+PlayerController::PlayerController(CharacterObject* character)
+	: CharacterController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false)
 {
 	
 }
 
-void GTAPlayerAIController::setRunning(bool run)
+void PlayerController::setRunning(bool run)
 {
 	running = run;
 }
 
-void GTAPlayerAIController::updateCameraDirection(const glm::quat& rot)
+void PlayerController::updateCameraDirection(const glm::quat& rot)
 {
 	cameraRotation = rot;
 }
 
-void GTAPlayerAIController::updateMovementDirection(const glm::vec3& dir, const glm::vec3 &rawdirection)
+void PlayerController::updateMovementDirection(const glm::vec3& dir, const glm::vec3 &rawdirection)
 {
 	direction = dir;
 	_rawDirection = rawdirection;
 }
 
-void GTAPlayerAIController::exitVehicle()
+void PlayerController::exitVehicle()
 {
 	if(character->getCurrentVehicle()) {
 		setNextActivity(new Activities::ExitVehicle());
 	}
 }
 
-void GTAPlayerAIController::enterNearestVehicle()
+void PlayerController::enterNearestVehicle()
 {
 	if(! character->getCurrentVehicle()) {
 		auto world = character->engine;
@@ -52,7 +52,7 @@ void GTAPlayerAIController::enterNearestVehicle()
 	}
 }
 
-void GTAPlayerAIController::update(float dt)
+void PlayerController::update(float dt)
 {
 	// TODO: Determine if the player is allowed to interupt the current activity.
 	if( glm::length(direction) > 0.001f && _currentActivity != nullptr ) {
@@ -81,15 +81,15 @@ void GTAPlayerAIController::update(float dt)
 		}
 	}
 
-	GTAAIController::update(dt);
+	CharacterController::update(dt);
 }
 
-glm::vec3 GTAPlayerAIController::getTargetPosition()
+glm::vec3 PlayerController::getTargetPosition()
 {
 	return direction;
 }
 
-void GTAPlayerAIController::jump()
+void PlayerController::jump()
 {
 	character->jump();
 }

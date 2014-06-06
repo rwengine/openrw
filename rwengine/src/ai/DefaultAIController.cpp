@@ -1,8 +1,8 @@
-#include "ai/GTADefaultAIController.hpp"
+#include <ai/DefaultAIController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
 
-glm::vec3 GTADefaultAIController::getTargetPosition()
+glm::vec3 DefaultAIController::getTargetPosition()
 {
 	/*if(targetNode) {
 		if(lastNode && character->getCurrentVehicle()) {

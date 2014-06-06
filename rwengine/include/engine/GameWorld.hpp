@@ -3,9 +3,9 @@
 #define _GAMEWORLD_HPP_
 
 #include <engine/GameData.hpp>
-#include <render/GTARenderer.hpp>
+#include <render/GameRenderer.hpp>
 #include <loaders/LoaderIPL.hpp>
-#include <ai/GTAAINode.hpp>
+#include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
 
 class WorkContext;
@@ -25,8 +25,8 @@ class VehicleObject;
 #include <random>
 
 /**
- * @class GTAEngine
- *  Provides a simple interface to the framework's internals
+ * @class GameWorld
+ *  Represents a single instance of the game world, and all of the data required.
  */
 class GameWorld
 {
@@ -130,7 +130,7 @@ public:
 	/**
 	 * Renderer
 	 */
-	GTARenderer renderer;
+	GameRenderer renderer;
 	
 	/**
 	 * Map Zones

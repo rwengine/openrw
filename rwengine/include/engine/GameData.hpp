@@ -2,7 +2,7 @@
 #ifndef _GAMEDATA_HPP_
 #define _GAMEDATA_HPP_
 
-#include <engine/GTATypes.hpp>
+#include <engine/RWTypes.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/TextureLoader.hpp>
 #include <loaders/LoaderDFF.hpp>
@@ -49,10 +49,10 @@ private:
 public:
 	
 	/**
-	 * @struct GTAFile
+	 * @struct FileInfo
 	 *  Stores information about a file the engine might want to load
 	 */
-	struct GTAFile
+	struct FileInfo
 	{
 		bool archived; /// Is the file inside an IMG or on the filesystem?
 		std::string path; /// Path to the file containing the file.
@@ -167,7 +167,7 @@ public:
 	/**
 	 * Maps file names to data about the file.
 	 */
-	std::map<std::string, GTAFile> _knownFiles;
+	std::map<std::string, FileInfo> _knownFiles;
 	
 	/**
 	 * Map of loaded archives
@@ -232,7 +232,7 @@ public:
 	/**
 	 * Water Rectangles
 	 */
-	std::vector<GTATypes::WaterRect> waterRects;
+	std::vector<RWTypes::WaterRect> waterRects;
 	
 	/**
 	 * Water heights

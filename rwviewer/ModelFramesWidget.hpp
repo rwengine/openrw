@@ -4,7 +4,7 @@
 #include <QDockWidget>
 #include <QTreeView>
 #include "DFFFramesTreeModel.hpp"
-#include <engine/GTATypes.hpp>
+#include <engine/RWTypes.hpp>
 
 class ModelFramesWidget : public QDockWidget
 {

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTAAICONTROLLER_HPP_
-#define _GTAAICONTROLLER_HPP_
+#ifndef _CHARACTERCONTROLLER_HPP_
+#define _CHARACTERCONTROLLER_HPP_
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <string>
@@ -9,10 +9,10 @@ struct CharacterObject;
 struct VehicleObject;
 
 /**
- * @class GTAAIController
+ * @class CharacterController
  * Character Controller Interface, translates high-level behaviours into low level actions.
  */
-class GTAAIController
+class CharacterController
 {
 public:
 
@@ -25,7 +25,7 @@ public:
 
 		virtual std::string name() const = 0;
 
-		virtual bool update(CharacterObject* character, GTAAIController* controller) = 0;
+		virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
 	};
 
 protected:
@@ -43,7 +43,7 @@ protected:
 
 public:
 	
-	GTAAIController(CharacterObject* character);
+	CharacterController(CharacterObject* character);
 
 	Activity* getCurrentActivity() { return _currentActivity; }
 
@@ -76,7 +76,7 @@ public:
 // TODO: Refactor this with an ugly macro to reduce code dup.
 
 namespace Activities {
-	struct GoTo : public GTAAIController::Activity {
+	struct GoTo : public CharacterController::Activity {
 		DECL_ACTIVITY( GoTo )
 
 		glm::vec3 target;
@@ -84,10 +84,10 @@ namespace Activities {
 		GoTo( const glm::vec3& target )
 			: target( target ) {}
 
-		bool update(CharacterObject* character, GTAAIController* controller);
+		bool update(CharacterObject* character, CharacterController* controller);
 	};
 
-	struct EnterVehicle : public GTAAIController::Activity {
+	struct EnterVehicle : public CharacterController::Activity {
 		DECL_ACTIVITY( EnterVehicle )
 
 		VehicleObject* vehicle;
@@ -98,16 +98,16 @@ namespace Activities {
 		EnterVehicle( VehicleObject* vehicle, unsigned int seat = 0 )
 			: vehicle( vehicle ), seat( seat ), entering(false) {}
 
-		bool update(CharacterObject *character, GTAAIController *controller);
+		bool update(CharacterObject *character, CharacterController *controller);
 	};
 
-	struct ExitVehicle : public GTAAIController::Activity {
+	struct ExitVehicle : public CharacterController::Activity {
 		DECL_ACTIVITY( ExitVehicle )
 
 		ExitVehicle( )
 			{}
 
-		bool update(CharacterObject *character, GTAAIController *controller);
+		bool update(CharacterObject *character, CharacterController *controller);
 	};
 }
 

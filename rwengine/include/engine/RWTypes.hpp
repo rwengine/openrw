@@ -1,6 +1,6 @@
 #pragma once
-#ifndef _GTATYPES_HPP_
-#define _GTATYPES_HPP_
+#ifndef _RWTYPES_HPP_
+#define _RWTYPES_HPP_
 
 #include <cstdint>
 #include <map>
@@ -21,7 +21,7 @@ struct ModelHandle {
 	ModelHandle(const std::string& name) : model( nullptr ), name(name) {}
 };
 
-namespace GTATypes
+namespace RWTypes
 {
 
 /**

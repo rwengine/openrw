@@ -1,7 +1,7 @@
 #include <engine/GameWorld.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderIDE.hpp>
-#include <ai/GTADefaultAIController.hpp>
+#include <ai/DefaultAIController.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <render/Model.hpp>
 #include <WorkContext.hpp>
@@ -294,7 +294,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 		if(m != nullptr) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			pedestrians.push_back(ped);
-			new GTADefaultAIController(ped);
+			new DefaultAIController(ped);
 			return ped;
 		}
     }

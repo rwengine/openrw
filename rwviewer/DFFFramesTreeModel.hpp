@@ -2,7 +2,7 @@
 #ifndef _DFFFRAMESTREEMODEL_HPP_
 #define _DFFFRAMESTREEMODEL_HPP_
 #include <QAbstractItemModel>
-#include <engine/GTATypes.hpp>
+#include <engine/RWTypes.hpp>
 
 class DFFFramesTreeModel : public QAbstractItemModel
 {

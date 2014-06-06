@@ -1,4 +1,4 @@
-#include <render/GTARenderer.hpp>
+#include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <render/TextureAtlas.hpp>
@@ -7,7 +7,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <ai/GTAAIController.hpp>
+#include <ai/CharacterController.hpp>
 #include <data/ObjectData.hpp>
 
 #include <deque>
@@ -126,7 +126,7 @@ GLuint compileShader(GLenum type, const char *source)
 	return shader;
 }
 
-GTARenderer::GTARenderer(GameWorld* engine)
+GameRenderer::GameRenderer(GameWorld* engine)
 	: engine(engine), _renderAlpha(0.f)
 {	
 	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
@@ -212,7 +212,7 @@ float mix(uint8_t a, uint8_t b, float num)
 	return a+(b-a)*num;
 }
 
-void GTARenderer::renderWorld(float alpha)
+void GameRenderer::renderWorld(float alpha)
 {
 	_renderAlpha = alpha;
 
@@ -391,7 +391,7 @@ void GTARenderer::renderWorld(float alpha)
 	glBindVertexArray( 0 );
 }
 
-void GTARenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
+void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
 {
 	for (const ModelFrame* f : model->frames) 
 	{
@@ -415,7 +415,7 @@ void GTARenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::
 	}
 }
 
-void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GameObject* object)
+void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GameObject* object)
 {
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
     glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
@@ -431,7 +431,7 @@ void GTARenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelM
     }
 }
 
-bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
+bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	auto localmatrix = matrix;
 
@@ -466,7 +466,7 @@ bool GTARenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, 
 	return true;
 }
 
-bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
+bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
 
@@ -519,12 +519,12 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 	return true;
 }
 
-void GTARenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object, Animator *animator)
+void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object, Animator *animator)
 {
 	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object);
 }
 
-void GTARenderer::renderPaths()
+void GameRenderer::renderPaths()
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, debugTex);
@@ -544,7 +544,7 @@ void GTARenderer::renderPaths()
     for( size_t n = 0; n < engine->aigraph.nodes.size(); ++n ) {
         auto start = engine->aigraph.nodes[n];
 		
-		if( start->type == GTAAINode::Pedestrian ) {
+		if( start->type == AIGraphNode::Pedestrian ) {
 			pedlines.push_back(start->position);
 			if( start->external ) {
 				pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 2.f));
@@ -561,7 +561,7 @@ void GTARenderer::renderPaths()
 		for( size_t c = 0; c < start->connections.size(); ++c ) {
 			auto end = start->connections[c];
 			
-			if( start->type == GTAAINode::Pedestrian ) {	
+			if( start->type == AIGraphNode::Pedestrian ) {	
 				pedlines.push_back(start->position + glm::vec3(0.f, 0.f, 1.f));
 				pedlines.push_back(end->position + glm::vec3(0.f, 0.f, 1.f));
 			}

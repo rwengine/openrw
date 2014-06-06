@@ -59,9 +59,9 @@ bool WeatherLoader::load(const std::string &filename)
 	return true;
 }
 
-GTATypes::RGB mix(GTATypes::RGB x, GTATypes::RGB y, float a)
+RWTypes::RGB mix(RWTypes::RGB x, RWTypes::RGB y, float a)
 {
-	GTATypes::RGB n;
+	RWTypes::RGB n;
 	n.r = x.r * (1.f - a) + y.r * a;
 	n.g = x.g * (1.f - a) + y.g * a;
 	n.b = x.b * (1.f - a) + y.b * a;
@@ -106,9 +106,9 @@ WeatherLoader::WeatherData WeatherLoader::getWeatherData(WeatherCondition cond, 
 	return data;
 }
 
-GTATypes::RGB WeatherLoader::readRGB(std::stringstream &ss)
+RWTypes::RGB WeatherLoader::readRGB(std::stringstream &ss)
 {
-	GTATypes::RGB color;
+	RWTypes::RGB color;
 	std::string r, g, b;
 
 	std::getline(ss, r, ' ');
