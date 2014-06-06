@@ -52,6 +52,9 @@ public:
 	virtual void complete() {}
 };
 
+// TODO: refactor everything to remove this.
+class GameWorld;
+
 class WorkContext
 {
 	std::queue<WorkJob*> _workQueue;
@@ -62,10 +65,12 @@ class WorkContext
 	std::mutex _inMutex;
 	std::mutex _outMutex;
 
+	GameWorld* _world;
+
 public:
 
-	WorkContext()
-		: _worker(this) { }
+	WorkContext(GameWorld* world = nullptr)
+		: _worker(this), _world(world) { }
 
 	void queueJob( WorkJob* job )
 	{
@@ -78,6 +83,15 @@ public:
 
 	const std::queue<WorkJob*> getWorkQueue() const { return _workQueue; }
 	const std::queue<WorkJob*> getCompleteQueue() const { return _completeQueue; }
+
+	bool isEmpty() {
+		std::lock_guard<std::mutex> guardIn( _inMutex );
+		std::lock_guard<std::mutex> guardOu( _outMutex );
+
+		return (getWorkQueue().size() + getCompleteQueue().size()) == 0;
+	}
+
+	GameWorld* getWorld() const { return _world; }
 
 	void update();
 };

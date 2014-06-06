@@ -217,3 +217,26 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 
 	return true;
 }
+
+
+LoadTextureArchiveJob::LoadTextureArchiveJob(WorkContext *context, GameData *gd, const std::string &file)
+	: WorkJob(context), _gameData(gd), _file(file), _data(nullptr)
+{
+
+}
+
+void LoadTextureArchiveJob::work()
+{
+	_data = _gameData->openFile(_file);
+}
+
+void LoadTextureArchiveJob::complete()
+{
+	// TODO error status
+	if(_data) {
+		TextureLoader loader;
+		loader.loadFromMemory(_data, _gameData);
+	}
+
+	delete[] _data;
+}

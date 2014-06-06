@@ -52,7 +52,7 @@ public:
 	GTAVehicle(GameWorld* engine,
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
-			   Model* model,
+			   ModelHandle* model,
 			   VehicleDataHandle data,
 			   VehicleInfoHandle info,
 			   const glm::vec3& prim,

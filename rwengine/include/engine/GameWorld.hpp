@@ -8,6 +8,8 @@
 #include <ai/GTAAINode.hpp>
 #include <ai/AIGraph.hpp>
 
+class WorkContext;
+
 class GameObject;
 class GTACharacter;
 class GTAInstance;
@@ -31,6 +33,8 @@ class GameWorld
 public:
 
 	GameWorld(const std::string& gamepath);
+
+	~GameWorld();
 	
 	/**
 	 * Loads the game data
@@ -191,7 +195,11 @@ public:
 	btBroadphaseInterface* broadphase;
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld* dynamicsWorld;
-	
+
+	/**
+	 * Work related
+	 */
+	WorkContext* _work;
 };
 
 #endif

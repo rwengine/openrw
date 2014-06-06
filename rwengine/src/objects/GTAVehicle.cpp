@@ -6,7 +6,7 @@
 #include <data/CollisionModel.hpp>
 #include <render/Model.hpp>
 
-GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
+GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
 	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),

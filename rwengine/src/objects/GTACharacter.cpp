@@ -7,7 +7,7 @@
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
-GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model, std::shared_ptr<CharacterData> data)
+GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
   _hasTargetPosition(false),
@@ -35,7 +35,7 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 
 	if(model) {
 		animator = new Animator();
-		animator->setModel(model);
+		animator->setModel(model->model);
 
 		createActor();
 		enterAction(Idle);

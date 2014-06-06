@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 	BOOST_REQUIRE(vehicle != nullptr);
 	BOOST_REQUIRE(vehicle->model != nullptr);
 
-	auto bonnet_ok = vehicle->model->findFrame("bonnet_hi_ok");
-	auto bonnet_dam = vehicle->model->findFrame("bonnet_hi_dam");
+	auto bonnet_ok = vehicle->model->model->findFrame("bonnet_hi_ok");
+	auto bonnet_dam = vehicle->model->model->findFrame("bonnet_hi_dam");
 
 	BOOST_REQUIRE(bonnet_ok != nullptr);
 	BOOST_REQUIRE(bonnet_dam != nullptr);

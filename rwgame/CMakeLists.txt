@@ -1,5 +1,6 @@
 add_executable(rwgame
 	main.cpp
+	loadingstate.cpp
 	ingamestate.cpp
 	pausestate.cpp
 	menustate.cpp

@@ -27,8 +27,6 @@ public:
 
 #include <functional>
 
-class LoaderIMG;
-
 class LoadModelJob : public WorkJob
 {
 public:
@@ -36,13 +34,12 @@ public:
 
 private:
 	GameData* _gameData;
-	LoaderIMG* _archive;
 	std::string _file;
 	ModelCallback _callback;
 	char* _data;
 public:
 
-	LoadModelJob(WorkContext* context, GameData* gd, LoaderIMG& archive, const std::string& file, ModelCallback cb);
+	LoadModelJob(WorkContext* context, GameData* gd, const std::string& file, ModelCallback cb);
 
 	void work();
 

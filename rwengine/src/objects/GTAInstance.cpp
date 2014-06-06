@@ -2,11 +2,10 @@
 #include <engine/GameWorld.hpp>
 #include <data/CollisionModel.hpp>
 
-GTAInstance::GTAInstance(
-		GameWorld* engine,
+GTAInstance::GTAInstance(GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
-		Model* model,
+		ModelHandle *model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
 		std::shared_ptr<GTAInstance> lod

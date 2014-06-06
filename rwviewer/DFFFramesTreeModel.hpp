@@ -2,14 +2,14 @@
 #ifndef _DFFFRAMESTREEMODEL_HPP_
 #define _DFFFRAMESTREEMODEL_HPP_
 #include <QAbstractItemModel>
+#include <engine/GTATypes.hpp>
 
-class Model;
 class DFFFramesTreeModel : public QAbstractItemModel
 {
-	Model* model;
+	ModelHandle* model;
 public:
 	
-    explicit DFFFramesTreeModel(Model* m, QObject* parent = 0);
+	explicit DFFFramesTreeModel(ModelHandle* m, QObject* parent = 0);
 	
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 	

@@ -55,7 +55,7 @@ public:
 	struct GTAFile
 	{
 		bool archived; /// Is the file inside an IMG or on the filesystem?
-		std::string path; /// Path to the file containing the file
+		std::string path; /// Path to the file containing the file.
 	};
 	
 	/**
@@ -113,12 +113,12 @@ public:
 	/**
 	 * Attempts to load a TXD, or does nothing if it has already been loaded
 	 */
-	void loadTXD(const std::string& name);
-	
+	void loadTXD(const std::string& name, bool async = false);
+
 	/**
 	 * Attempts to load a DFF or does nothing if is already loaded
 	 */
-	void loadDFF(const std::string& name);
+	void loadDFF(const std::string& name, bool async = false);
 
     /**
      * Loads an IFP file containing animations
@@ -129,11 +129,19 @@ public:
 	 * Loads data from an object definition dat.
 	 */
 	void loadDynamicObjects(const std::string& name);
-	
+
 	/**
-	 * Returns a pointer to the named file if it is available, the memory must be freed.
+	 * Returns a pointer to the named file if it is available,
+	 * the memory must be freed by the caller.
 	 * @param name the filename in the archive
-	 * @return pointer to the data, NULL if it is not available 
+	 * @return pointer to the data, NULL if it is not available
+	 */
+	char* openFile(const std::string& name);
+
+	/**
+	 * @brief loadFile Marks a file as open, and opens it.
+	 * @param name
+	 * @return
 	 */
 	char* loadFile(const std::string& name);
 
@@ -157,9 +165,9 @@ public:
 	std::map<std::string, std::string> ideLocations;
 	
 	/**
-	 * Maps file names to their locations
+	 * Maps file names to data about the file.
 	 */
-	std::map<std::string, GTAFile> fileLocations;
+	std::map<std::string, GTAFile> _knownFiles;
 	
 	/**
 	 * Map of loaded archives
@@ -190,11 +198,11 @@ public:
 	 * Weather Loader
 	 */
 	WeatherLoader weatherLoader;
-	
+
 	/**
 	 * Loaded models
 	 */
-    std::map<std::string, Model*> models;
+	std::map<std::string, ModelHandle*> models;
 
 	/**
 	 * Loaded Textures and their atlas entries.

@@ -19,7 +19,7 @@ class ViewerWidget : public QGLWidget
 
 	GameObject* dummyObject;
 	
-	Model* cmodel;
+	ModelHandle* cmodel;
 	Animation* canimation;
 	
 	float viewDistance;
@@ -44,7 +44,7 @@ public:
 	
 	FileMode fileMode() const;
 	
-	Model* currentModel() const;
+	ModelHandle *currentModel() const;
 	
 	GameWorld* world();
 

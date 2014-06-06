@@ -4,6 +4,7 @@
 #include <ai/GTADefaultAIController.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <render/Model.hpp>
+#include <WorkContext.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <objects/GTACharacter.hpp>
@@ -11,9 +12,16 @@
 #include <objects/GTAVehicle.hpp>
 
 GameWorld::GameWorld(const std::string& path)
-    : gameTime(0.f), gameData(path), renderer(this), randomEngine(rand())
+	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
+	  _work( new WorkContext( this ) )
 {
 	gameData.engine = this;
+}
+
+GameWorld::~GameWorld()
+{
+	delete _work;
+	// TODO: delete other things.
 }
 
 bool GameWorld::load()
@@ -174,10 +182,10 @@ GTAInstance *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, 
 	if( oi != objectTypes.end()) {
 		// Make sure the DFF and TXD are loaded
 		if(! oi->second->modelName.empty()) {
-			gameData.loadDFF(oi->second->modelName + ".dff");
+			gameData.loadDFF(oi->second->modelName + ".dff", true);
 		}
 		if(! oi->second->textureName.empty()) {
-			gameData.loadTXD(oi->second->textureName + ".txd");
+			gameData.loadTXD(oi->second->textureName + ".txd", true);
 		}
 		
 		auto instance = std::shared_ptr<GTAInstance>(new GTAInstance(
@@ -236,7 +244,8 @@ GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, co
 			}
 		}
 		
-		Model* model = gameData.models[vti->second->modelName];
+		ModelHandle* m = gameData.models[vti->second->modelName];
+		auto model = m->model;
 		auto info = gameData.vehicleInfo.find(vti->second->handlingID);
 		if(model && info != gameData.vehicleInfo.end()) {
 			if( info->second->wheels.size() == 0 && info->second->seats.size() == 0 ) {
@@ -258,7 +267,7 @@ GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, co
 			}
 		}
 		
-		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, model, vti->second, info->second, prim, sec });
+		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, m, vti->second, info->second, prim, sec });
 		return vehicleInstances.back();
 	}
 	return nullptr;
@@ -280,10 +289,10 @@ GTACharacter* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &po
             gameData.loadTXD(pt->textureName + ".txd");
         }
 
-        Model* model = gameData.models[pt->modelName];
+		ModelHandle* m = gameData.models[pt->modelName];
 
-		if(model != nullptr) {
-			auto ped = new GTACharacter( this, pos, rot, model, pt );
+		if(m != nullptr) {
+			auto ped = new GTACharacter( this, pos, rot, m, pt );
 			pedestrians.push_back(ped);
 			new GTADefaultAIController(ped);
 			return ped;

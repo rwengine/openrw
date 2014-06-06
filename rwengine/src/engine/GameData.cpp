@@ -82,9 +82,9 @@ void GameData::load()
 	parseDAT(datpath+"/data/default.dat");
 	parseDAT(datpath+"/data/gta3.dat");
 	
-	fileLocations.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
-    fileLocations.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
-	fileLocations.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
+	_knownFiles.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
+	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
+	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
 	loadDFF("wheels.DFF");
 	loadTXD("particle.txd");
 	
@@ -147,7 +147,7 @@ void GameData::parseDAT(const std::string& path)
 					}
 					texpath = findPathRealCase(datpath, texpath);
 					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
-					fileLocations.insert({ texname, { false, texpath }});
+					_knownFiles.insert({ texname, { false, texpath }});
 					loadTXD(texname);
 				}
 			}
@@ -201,12 +201,12 @@ void GameData::loadIMG(const std::string& name)
 			else
             {
 				// Enter the asset twice.. 
-				fileLocations.insert({ filename, { true, archivePath }});
+				_knownFiles.insert({ filename, { true, archivePath }});
 				for(size_t t = 0; t < filename.size(); ++t)
 				{
 					filename[t] = tolower(filename[t]);
 				}
-				fileLocations.insert({ filename, { true, archivePath }});
+				_knownFiles.insert({ filename, { true, archivePath }});
 			}
 		}
 		archives.insert({archivePath, imgLoader});
@@ -388,32 +388,54 @@ void GameData::loadWater(const std::string& path)
 	}
 }
 
-void GameData::loadTXD(const std::string& name) 
+void GameData::loadTXD(const std::string& name, bool async)
 {
-	if( loadedFiles.find(name) != loadedFiles.end()) {
+	if( loadedFiles.find(name) != loadedFiles.end() ) {
 		return;
 	}
-	
-	char* file = loadFile(name);
-	if(file) {
-		textureLoader.loadFromMemory(file, this);
-		delete[] file;
+
+	loadedFiles[name] = true;
+
+	auto j = new LoadTextureArchiveJob(this->engine->_work, this, name);
+
+	if( async ) {
+		this->engine->_work->queueJob( j );
+	}
+	else {
+		j->work();
+		j->complete();
+		delete j;
 	}
 }
 
-void GameData::loadDFF(const std::string& name)
+void GameData::loadDFF(const std::string& name, bool async)
 {
-	if( loadedFiles.find(name) != loadedFiles.end()) {
+	auto realname = name.substr(0, name.size() - 4);
+	if( models.find(realname) != models.end() ) {
 		return;
 	}
-	
-	char *file = loadFile(name);
-	if(file)
-	{
-		LoaderDFF dffLoader;
-		models[name.substr(0, name.size() - 4)] = dffLoader.loadFromMemory(file, this);
-		delete[] file;
+
+	// Before starting the job make sure the file isn't loaded again.
+	loadedFiles.insert({name, true});
+
+	models[realname] = new ModelHandle(realname);
+
+	auto j = new LoadModelJob(this->engine->_work, this, name,
+							  [&, realname]( Model* model ) {
+								  models[realname]->model = model;
+							  }
+						  );
+
+
+	if( async ) {
+		this->engine->_work->queueJob( j );
 	}
+	else {
+		j->work();
+		j->complete();
+		delete j;
+	}
+
 }
 
 void GameData::loadIFP(const std::string &name)
@@ -471,15 +493,10 @@ void GameData::loadDynamicObjects(const std::string& name)
 	}
 }
 
-char* GameData::loadFile(const std::string& name)
+char* GameData::openFile(const std::string& name)
 {
-	if( loadedFiles.find(name) != loadedFiles.end()) {
-		std::cerr << "File " << name << " already loaded!" << std::endl;
-		return nullptr;
-	}
-	
-	auto i = fileLocations.find(name);
-	if(i != fileLocations.end())
+	auto i = _knownFiles.find(name);
+	if(i != _knownFiles.end())
 	{
 		if(i->second.archived)
 		{
@@ -487,7 +504,6 @@ char* GameData::loadFile(const std::string& name)
 			auto ai = archives.find(i->second.path);
 			if(ai != archives.end())
 			{
-				loadedFiles[name] = true;
 				return ai->second.loadToMemory(name);
 			}
 			else 
@@ -509,8 +525,6 @@ char* GameData::loadFile(const std::string& name)
 			char *data = new char[length];
 			dfile.read(data, length);
 			
-			loadedFiles[name] = true;
-			
 			return data;
 		}
 	}
@@ -523,6 +537,18 @@ char* GameData::loadFile(const std::string& name)
 	}
 	
 	return nullptr;
+}
+
+char* GameData::loadFile(const std::string &name)
+{
+	auto it = loadedFiles.find(name);
+	 if( it != loadedFiles.end() ) {
+		std::cerr << "File " << name << " already loaded?" << std::endl;
+	}
+
+	loadedFiles[name] = true;
+
+	return openFile(name);
 }
 
 TextureAtlas* GameData::getAtlas(size_t i)

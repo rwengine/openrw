@@ -9,7 +9,6 @@
 #include <memory>
 
 class GTAAIController;
-class Model;
 class ModelFrame;
 class Animator;
 
@@ -23,7 +22,7 @@ struct GameObject
     glm::vec3 position;
     glm::quat rotation;
 
-    Model* model; /// Cached pointer to Object's Model.
+	ModelHandle* model; /// Cached pointer to Object's Model.
     
     GameWorld* engine;
 
@@ -34,7 +33,7 @@ struct GameObject
 	 */
 	float mHealth;
 
-	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, Model* model)
+	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f)
 	{}
 		

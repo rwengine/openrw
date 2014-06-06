@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "menustate.hpp"
+#include "loadingstate.hpp"
 #include <SFML/Graphics.hpp>
 
 #include <memory>
@@ -39,8 +39,8 @@ int debugMode = 0;
 
 sf::Font font;
 
-glm::vec3 viewPosition;
-glm::vec2 viewAngles;
+glm::vec3 viewPosition { -200.f, -100.f, 45.f };
+glm::vec2 viewAngles { -0.90f, 0.2f };
 
 void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
 {
@@ -293,23 +293,6 @@ void init(std::string gtapath, bool loadWorld)
 	// Set time to noon.
 	gta->gameTime = 12.f * 60.f;
 	
-	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = gta->gameData.ideLocations.begin();
-		it != gta->gameData.ideLocations.end();
-		++it) {
-		gta->defineItems(it->second);
-	}
-	
-	if(loadWorld) {
-		// Load IPLs 
-		for(std::map<std::string, std::string>::iterator it = gta->gameData.iplLocations.begin();
-			it != gta->gameData.iplLocations.end();
-			++it) {
-			gta->loadZone(it->second);
-			gta->placeItems(it->second);
-		}
-	}
-	
     debugDrawer = new DebugDraw;
     debugDrawer->setShaderProgram(gta->renderer.worldProgram);
     debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
@@ -361,6 +344,8 @@ void update(float dt)
 
 void render(float alpha)
 {
+	gta->_work->update();
+
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	
@@ -491,9 +476,7 @@ int main(int argc, char *argv[])
 	
 	sf::Clock clock;
 
-	MenuState* menuState = new MenuState();
-	
-	StateManager::get().enter(menuState);
+	StateManager::get().enter(new LoadingState);
 	
 	float accum = 0.f;
 	float ts = 1.f / 60.f;

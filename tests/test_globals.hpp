@@ -50,6 +50,10 @@ public:
 		}
 
 		e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
+
+		while( ! e->_work->isEmpty() ) {
+			std::this_thread::yield();
+		}
 	}
 
 	~Global() {

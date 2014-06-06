@@ -268,9 +268,9 @@ void GTARenderer::renderWorld(float alpha)
 		matrixModel = glm::translate(matrixModel, charac->getPosition());
 		matrixModel = matrixModel * glm::mat4_cast(charac->getRotation());
 
-        if(!charac->model) continue;
+		if(!charac->model->model) continue;
 
-		renderModel(charac->model, matrixModel, charac, charac->animator);
+		renderModel(charac->model->model, matrixModel, charac, charac->animator);
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
@@ -284,24 +284,24 @@ void GTARenderer::renderWorld(float alpha)
 			}
 		}
 
-        if(!inst.model)
-        {
-            std::cout << "model " << inst.model << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
-        }
-		
-        glm::mat4 matrixModel;
-        matrixModel = glm::translate(matrixModel, inst.position);
-        matrixModel = glm::scale(matrixModel, inst.scale);
-        matrixModel = matrixModel * glm::mat4_cast(inst.rotation);
+		if(!inst.model->model)
+		{
+			continue;
+		}
 
-        float mindist = 100000.f;
-        for (size_t g = 0; g < inst.model->geometries.size(); g++)
-        {
-            RW::BSGeometryBounds& bounds = inst.model->geometries[g]->geometryBounds;
-            mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
-        }
-        
-        if ( mindist > inst.object->drawDistance[0] ) {
+		glm::mat4 matrixModel;
+		matrixModel = glm::translate(matrixModel, inst.position);
+		matrixModel = glm::scale(matrixModel, inst.scale);
+		matrixModel = matrixModel * glm::mat4_cast(inst.rotation);
+
+		float mindist = 100000.f;
+		for (size_t g = 0; g < inst.model->model->geometries.size(); g++)
+		{
+			RW::BSGeometryBounds& bounds = inst.model->model->geometries[g]->geometryBounds;
+			mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+		}
+
+		if ( mindist > inst.object->drawDistance[0] ) {
 			if ( !inst.LODinstance ) {
 				culled++;
 				continue;
@@ -311,13 +311,13 @@ void GTARenderer::renderWorld(float alpha)
 					culled++;
 					continue;
 				}
-				else {
-					renderModel(inst.LODinstance->model, matrixModel);
+				else if (inst.LODinstance->model->model) {
+					renderModel(inst.LODinstance->model->model, matrixModel);
 				}
 			}
-        }
+		}
 		else if (! inst.object->LOD ) {
-			renderModel(inst.model, matrixModel);
+			renderModel(inst.model->model, matrixModel);
 		}
 	}
 	
@@ -333,13 +333,13 @@ void GTARenderer::renderWorld(float alpha)
 		matrixModel = glm::translate(matrixModel, inst->getPosition());
 		matrixModel = matrixModel * glm::mat4_cast(inst->getRotation());
 
-		renderModel(inst->model, matrixModel, inst);
+		renderModel(inst->model->model, matrixModel, inst);
 
 		// Draw wheels n' stuff
 		for( size_t w = 0; w < inst->info->wheels.size(); ++w) {
 			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
-				Model* wheelModel = engine->gameData.models["wheels"];
+				Model* wheelModel = engine->gameData.models["wheels"]->model;
 				if( wheelModel) {
 					// Tell bullet to update the matrix for this wheel.
 					inst->physVehicle->updateWheelTransform(w, false);

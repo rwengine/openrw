@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		Animator animator;
 
 		Global::get().e->gameData.loadDFF("player.dff");
-		Model* test_model = Global::get().e->gameData.models["player"];
+		ModelHandle* test_model = Global::get().e->gameData.models["player"];
 
 		BOOST_REQUIRE( test_model );
 
@@ -34,16 +34,16 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		};
 
 		animator.setAnimation(&animation);
-		animator.setModel( test_model );
+		animator.setModel( test_model->model );
 
 		{
-			auto intp_matrix = animator.getFrameMatrixAt( test_model->frames[0], 0.0f );
+			auto intp_matrix = animator.getFrameMatrixAt( test_model->model->frames[0], 0.0f );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.f, 0.f)), 0.0f );
 		}
 
 		{
-			auto intp_matrix = animator.getFrameMatrixAt( test_model->frames[0], 0.5f );
+			auto intp_matrix = animator.getFrameMatrixAt( test_model->model->frames[0], 0.5f );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
 		}
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		Animator animator;
 
 		Global::get().e->gameData.loadDFF("player.dff");
-		Model* test_model = Global::get().e->gameData.models["player"];
+		ModelHandle* test_model = Global::get().e->gameData.models["player"];
 
 		BOOST_REQUIRE( test_model );
 
@@ -82,10 +82,10 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		};
 
 		animator.setAnimation(&animation);
-		animator.setModel( test_model );
+		animator.setModel( test_model->model );
 
 		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->frames[0] );
+			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0] );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.f, 0.f)), 0.0f );
 		}
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		animator.tick( 1.f );
 
 		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->frames[0], 0.5f );
+			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
 		}
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		animator.tick( 1.f );
 
 		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->frames[0], 0.5f );
+			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 1.5f, 0.0f)) );
 		}
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		animator.tick( 1.f );
 
 		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->frames[0], 0.5f );
+			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
 			auto intp_col = intp_matrix[3];
 			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
 		}

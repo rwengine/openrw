@@ -119,6 +119,12 @@ struct StateManager
 		states.push_back(state);
 		state->enter();
 	}
+
+	void exec(State* state)
+	{
+		exit();
+		enter(state);
+	}
 	
 	void tick(float dt)
 	{

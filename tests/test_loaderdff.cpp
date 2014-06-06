@@ -7,12 +7,8 @@ BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 
 BOOST_AUTO_TEST_CASE(test_open_dff)
 {
-	LoaderIMG archive;
-
-	BOOST_REQUIRE( archive.load(Global::getGamePath() + "/models/gta3") );
-
 	{
-		auto d = archive.loadToMemory("landstal.dff");
+		auto d = Global::get().e->gameData.openFile("landstal.dff");
 
 		LoaderDFF loader;
 
@@ -29,16 +25,12 @@ BOOST_AUTO_TEST_CASE(test_open_dff)
 
 BOOST_AUTO_TEST_CASE(test_modeljob)
 {
-	LoaderIMG archive;
-
-	BOOST_REQUIRE( archive.load(Global::getGamePath() + "/models/gta3") );
-
 	{
 		WorkContext ctx;
 
 		Model* m = nullptr;
 		bool done = false;
-		LoadModelJob* lmj = new LoadModelJob(&ctx, &Global::get().e->gameData, archive, "landstal.dff",
+		LoadModelJob* lmj = new LoadModelJob(&ctx, &Global::get().e->gameData, "landstal.dff",
 											 [&](Model* model) { m = model; done = true; });
 
 		ctx.queueJob(lmj);

@@ -71,7 +71,7 @@ void ViewerWidget::paintGL()
 		glUniformMatrix4fv(r.uniView, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(r.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 		
-		gworld->renderer.renderModel(cmodel, m, dummyObject);
+		gworld->renderer.renderModel(cmodel->model, m, dummyObject);
 	}
 }
 
@@ -108,7 +108,7 @@ void ViewerWidget::showDFF(const QString& file)
 		dummyObject = new GameObject(gworld, glm::vec3(), glm::quat(), cmodel);
 		float radius = 0.f;
 		for(auto& g 
-			: cmodel->geometries) {
+			: cmodel->model->geometries) {
 			radius = std::max(
 				radius,
 				glm::length(g->geometryBounds.center)+g->geometryBounds.radius);
@@ -130,13 +130,13 @@ void ViewerWidget::showAnimation(Animation *anim)
 	if(dummyObject) {
 		if(dummyObject->animator == nullptr) {
 			dummyObject->animator = new Animator;
-			dummyObject->animator->setModel(dummyObject->model);
+			dummyObject->animator->setModel(dummyObject->model->model);
 		}
 		dummyObject->animator->setAnimation(canimation);
 	}
 }
 
-Model* ViewerWidget::currentModel() const
+ModelHandle* ViewerWidget::currentModel() const
 {
 	return cmodel;
 }

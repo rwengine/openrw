@@ -67,7 +67,7 @@ void IngameState::tick(float dt)
 	float viewDistance = 2.f;
 	if( _playerCharacter->getCurrentVehicle() ) {
 		auto model = _playerCharacter->getCurrentVehicle()->model;
-		for(auto& g : model->geometries) {
+		for(auto& g : model->model->geometries) {
 			viewDistance = std::max(
 						(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 1.5f,
 						viewDistance);

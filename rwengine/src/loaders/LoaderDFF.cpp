@@ -312,25 +312,28 @@ RW::BSSectionHeader LoaderDFF::readHeader(char *data, size_t &dataI)
 	return readStructure<RW::BSSectionHeader>(data, dataI);
 }
 
-#include <loaders/LoaderIMG.hpp>
-
-LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, LoaderIMG &archive, const std::string &file, ModelCallback cb)
-	: WorkJob(context), _gameData(gd), _archive(&archive), _file(file), _callback(cb), _data(nullptr)
+LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, const std::string &file, ModelCallback cb)
+	: WorkJob(context), _gameData(gd), _file(file), _callback(cb), _data(nullptr)
 {
 
 }
 
 void LoadModelJob::work()
 {
-	_data = _archive->loadToMemory(_file);
+	_data = _gameData->openFile(_file);
 }
 
 void LoadModelJob::complete()
 {
-	// TODO allow some of the loading to process in a seperate thread.
-	LoaderDFF loader;
+	Model* m = nullptr;
+	// TODO error status
+	if( _data ) {
 
-	Model* m = loader.loadFromMemory(_data, _gameData);
+		// TODO allow some of the loading to process in a seperate thread.
+		LoaderDFF loader;
+
+		m = loader.loadFromMemory(_data, _gameData);
+	}
 
 	_callback(m);
 
