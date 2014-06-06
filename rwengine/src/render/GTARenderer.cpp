@@ -4,9 +4,9 @@
 #include <render/TextureAtlas.hpp>
 #include <render/Model.hpp>
 
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAInstance.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <ai/GTAAIController.hpp>
 #include <data/ObjectData.hpp>
 
@@ -261,7 +261,7 @@ void GTARenderer::renderWorld(float alpha)
 	rendered = culled = 0;
 
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
-        GTACharacter* charac = engine->pedestrians[i];
+		CharacterObject* charac = engine->pedestrians[i];
 
         glm::mat4 matrixModel;
 		
@@ -274,7 +274,7 @@ void GTARenderer::renderWorld(float alpha)
     }
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
-        GTAInstance& inst = *engine->objectInstances[i];
+		InstanceObject& inst = *engine->objectInstances[i];
 		
 		if(inst.object->timeOn != inst.object->timeOff) {
 			// Update rendering flags.
@@ -322,7 +322,7 @@ void GTARenderer::renderWorld(float alpha)
 	}
 	
 	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
-		GTAVehicle* inst = engine->vehicleInstances[v];
+		VehicleObject* inst = engine->vehicleInstances[v];
 
 		if(!inst->model)
 		{
@@ -491,7 +491,7 @@ bool GTARenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
 			auto col = mat.colour;
 			if( object && object->type() == GameObject::Vehicle ) {
-				auto vehicle = static_cast<GTAVehicle*>(object);
+				auto vehicle = static_cast<VehicleObject*>(object);
 				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
 					glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
 				}
@@ -574,7 +574,7 @@ void GTARenderer::renderPaths()
 
 
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
-		GTACharacter* charac = engine->pedestrians[i];
+		CharacterObject* charac = engine->pedestrians[i];
 
 		if(charac->controller) {
 			carlines.push_back(charac->getPosition());

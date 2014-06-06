@@ -1,6 +1,6 @@
 #include "debugstate.hpp"
 #include "game.hpp"
-#include <objects/GTACharacter.hpp>
+#include <objects/CharacterObject.hpp>
 
 DebugState::DebugState()
 {

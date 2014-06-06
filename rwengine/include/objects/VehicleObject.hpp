@@ -1,16 +1,16 @@
 #pragma once
-#ifndef _GTAVEHICLE_HPP_
-#define _GTAVEHICLE_HPP_
+#ifndef _VEHICLEOBJECT_HPP_
+#define _VEHICLEOBJECT_HPP_
 #include <engine/GameObject.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <map>
 #include <objects/VehicleInfo.hpp>
 
 /**
- * @class GTAVehicle
- *  Stores references to the vehicle data and the instance
+ * @class VehicleObject
+ * Implements Vehicle behaviours.
  */
-struct GTAVehicle : public GameObject
+struct VehicleObject : public GameObject
 {
 public:
 
@@ -49,7 +49,7 @@ public:
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
 
-	GTAVehicle(GameWorld* engine,
+	VehicleObject(GameWorld* engine,
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
 			   ModelHandle* model,
@@ -58,7 +58,7 @@ public:
 			   const glm::vec3& prim,
 			   const glm::vec3& sec);
 	
-    virtual ~GTAVehicle();
+	virtual ~VehicleObject();
 	
 	void setPosition(const glm::vec3& pos);
 

@@ -1,14 +1,14 @@
-#include <objects/GTAInstance.hpp>
+#include <objects/InstanceObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <data/CollisionModel.hpp>
 
-GTAInstance::GTAInstance(GameWorld* engine,
+InstanceObject::InstanceObject(GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
 		ModelHandle *model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
-		std::shared_ptr<GTAInstance> lod
+		std::shared_ptr<InstanceObject> lod
 			)
 : GameObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
 {
@@ -77,7 +77,7 @@ GTAInstance::GTAInstance(GameWorld* engine,
 	}
 }
 
-bool GTAInstance::takeDamage(const GameObject::DamageInfo& dmg)
+bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;

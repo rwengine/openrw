@@ -5,8 +5,8 @@
 #include <loaders/LoaderDFF.hpp>
 #include <render/DebugDraw.hpp>
 #include <render/Model.hpp>
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/VehicleObject.hpp>
+#include <objects/CharacterObject.hpp>
 #include <ai/GTAAIController.hpp>
 
 #include <glm/glm.hpp>
@@ -30,7 +30,7 @@ constexpr int WIDTH  = 800,
 sf::RenderWindow window;
 
 GameWorld* gta = nullptr;
-GTACharacter* player = nullptr;
+CharacterObject* player = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
 
@@ -63,12 +63,12 @@ sf::Font& getFont()
 	return font;
 }
 
-void setPlayerCharacter(GTACharacter *playerCharacter)
+void setPlayerCharacter(CharacterObject *playerCharacter)
 {
 	player = playerCharacter;
 }
 
-GTACharacter* getPlayerCharacter()
+CharacterObject* getPlayerCharacter()
 {
 	return player;
 }

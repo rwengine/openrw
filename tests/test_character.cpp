@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <ai/GTADefaultAIController.hpp>
 #include "test_globals.hpp"
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_activities)
 		delete controller;
 	}
 	{
-		GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+		VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
 		BOOST_REQUIRE(vehicle != nullptr);
 		BOOST_REQUIRE(vehicle->model != nullptr);
 

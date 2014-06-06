@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
-#include <objects/GTAInstance.hpp>
+#include <objects/InstanceObject.hpp>
 #include <engine/GameWorld.hpp>
 
 BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
@@ -8,7 +8,7 @@ BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
 BOOST_AUTO_TEST_CASE(instance_test_damage)
 {
 	std::shared_ptr<ObjectData> object(new ObjectData);
-	GTAInstance inst(Global::get().e, 
+	InstanceObject inst(Global::get().e, 
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 BOOST_AUTO_TEST_CASE(instance_test_destroy)
 {
 	std::shared_ptr<ObjectData> object(new ObjectData);
-	GTAInstance inst(Global::get().e,
+	InstanceObject inst(Global::get().e,
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),

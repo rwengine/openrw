@@ -7,7 +7,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 
-class GTAVehicle;
+class VehicleObject;
 class GameWorld;
 
 struct AnimationGroup
@@ -38,12 +38,12 @@ struct AnimationGroup
 
 /**
  * @brief The GTACharacter struct
- * Stores data relating to an instance of a "pedestrian".
+ * Implements Character object behaviours.
  */
-struct GTACharacter : public GameObject
+struct CharacterObject : public GameObject
 {
 private:
-	GTAVehicle* currentVehicle;
+	VehicleObject* currentVehicle;
 	size_t currentSeat;
 
 	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
@@ -90,9 +90,9 @@ public:
 	 * @param model
 	 * @param ped PEDS_t struct to use.
 	 */
-	GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle *model, std::shared_ptr<CharacterData> data);
+	CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle *model, std::shared_ptr<CharacterData> data);
 
-	~GTACharacter();
+	~CharacterObject();
 
 	Type type() { return Character; }
 
@@ -113,11 +113,11 @@ public:
 
 	virtual glm::quat getRotation() const;
 	
-	bool enterVehicle(GTAVehicle* vehicle, size_t seat);
+	bool enterVehicle(VehicleObject* vehicle, size_t seat);
 
-	GTAVehicle *getCurrentVehicle() const;
+	VehicleObject *getCurrentVehicle() const;
 	size_t getCurrentSeat() const;
-	void setCurrentVehicle(GTAVehicle *value, size_t seat);
+	void setCurrentVehicle(VehicleObject *value, size_t seat);
 	
     virtual bool takeDamage(const DamageInfo& damage);
 	

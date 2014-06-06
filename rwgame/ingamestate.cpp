@@ -2,8 +2,8 @@
 #include "game.hpp"
 #include "pausestate.hpp"
 #include "debugstate.hpp"
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <render/Model.hpp>
 
 IngameState::IngameState()

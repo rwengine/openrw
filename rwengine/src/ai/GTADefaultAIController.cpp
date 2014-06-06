@@ -1,5 +1,5 @@
 #include "ai/GTADefaultAIController.hpp"
-#include <objects/GTACharacter.hpp>
+#include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
 
 glm::vec3 GTADefaultAIController::getTargetPosition()

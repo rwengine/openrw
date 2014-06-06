@@ -5,8 +5,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 
-struct GTACharacter;
-struct GTAVehicle;
+struct CharacterObject;
+struct VehicleObject;
 
 /**
  * @class GTAAIController
@@ -25,7 +25,7 @@ public:
 
 		virtual std::string name() const = 0;
 
-		virtual bool update(GTACharacter* character, GTAAIController* controller) = 0;
+		virtual bool update(CharacterObject* character, GTAAIController* controller) = 0;
 	};
 
 protected:
@@ -33,7 +33,7 @@ protected:
 	/**
 	 * The character being controlled.
 	 */
-	GTACharacter* character;
+	CharacterObject* character;
 
 	Activity* _currentActivity;
 	Activity* _nextActivity;
@@ -43,7 +43,7 @@ protected:
 
 public:
 	
-	GTAAIController(GTACharacter* character);
+	GTAAIController(CharacterObject* character);
 
 	Activity* getCurrentActivity() { return _currentActivity; }
 
@@ -84,21 +84,21 @@ namespace Activities {
 		GoTo( const glm::vec3& target )
 			: target( target ) {}
 
-		bool update(GTACharacter* character, GTAAIController* controller);
+		bool update(CharacterObject* character, GTAAIController* controller);
 	};
 
 	struct EnterVehicle : public GTAAIController::Activity {
 		DECL_ACTIVITY( EnterVehicle )
 
-		GTAVehicle* vehicle;
+		VehicleObject* vehicle;
 		unsigned int seat;
 
 		bool entering;
 
-		EnterVehicle( GTAVehicle* vehicle, unsigned int seat = 0 )
+		EnterVehicle( VehicleObject* vehicle, unsigned int seat = 0 )
 			: vehicle( vehicle ), seat( seat ), entering(false) {}
 
-		bool update(GTACharacter *character, GTAAIController *controller);
+		bool update(CharacterObject *character, GTAAIController *controller);
 	};
 
 	struct ExitVehicle : public GTAAIController::Activity {
@@ -107,7 +107,7 @@ namespace Activities {
 		ExitVehicle( )
 			{}
 
-		bool update(GTACharacter *character, GTAAIController *controller);
+		bool update(CharacterObject *character, GTAAIController *controller);
 	};
 }
 

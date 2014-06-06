@@ -9,7 +9,7 @@ class GTADefaultAIController : public GTAAIController
 {
 public:
 	
-    GTADefaultAIController(GTACharacter* character)
+    GTADefaultAIController(CharacterObject* character)
 	 : GTAAIController(character) {}
 
 	glm::vec3 getTargetPosition();

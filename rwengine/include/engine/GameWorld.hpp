@@ -11,9 +11,9 @@
 class WorkContext;
 
 class GameObject;
-class GTACharacter;
-class GTAInstance;
-class GTAVehicle;
+class CharacterObject;
+class InstanceObject;
+class VehicleObject;
 
 #include <glm/glm.hpp>
 
@@ -90,17 +90,17 @@ public:
 	/**
 	 * Creates an instance
 	 */
-	GTAInstance *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Creates a vehicle
 	 */
-    GTAVehicle *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 
     /**
      * Creates a pedestrian.
      */
-    GTACharacter* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Destroys an existing Object
@@ -160,22 +160,22 @@ public:
 	/**
 	 * Game Objects!
 	 */
-	std::vector<std::shared_ptr<GTAInstance>> objectInstances;
+	std::vector<std::shared_ptr<InstanceObject>> objectInstances;
 	
 	/**
 	 * Map of Model Names to Instances
 	 */
-	std::map<std::string, std::shared_ptr<GTAInstance>> modelInstances;
+	std::map<std::string, std::shared_ptr<InstanceObject>> modelInstances;
 	
 	/**
 	 * Game Vehicles!
 	 */
-	std::vector<GTAVehicle*> vehicleInstances;
+	std::vector<VehicleObject*> vehicleInstances;
 
     /**
      * Pedestrians and PCs.
      */
-    std::vector<GTACharacter*> pedestrians;
+	std::vector<CharacterObject*> pedestrians;
 	
 	/**
 	 * AI Graph

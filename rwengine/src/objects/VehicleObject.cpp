@@ -1,12 +1,12 @@
-#include <objects/GTAVehicle.hpp>
-#include <objects/GTACharacter.hpp>
+#include <objects/VehicleObject.hpp>
+#include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <sys/stat.h>
 #include <data/CollisionModel.hpp>
 #include <render/Model.hpp>
 
-GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
+VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
 	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
@@ -102,7 +102,7 @@ GTAVehicle::GTAVehicle(GameWorld* engine, const glm::vec3& pos, const glm::quat&
 	}
 }
 
-GTAVehicle::~GTAVehicle()
+VehicleObject::~VehicleObject()
 {
 	engine->dynamicsWorld->removeRigidBody(physBody);
 	engine->dynamicsWorld->removeVehicle(physVehicle);
@@ -113,7 +113,7 @@ GTAVehicle::~GTAVehicle()
 	ejectAll();
 }
 
-void GTAVehicle::setPosition(const glm::vec3& pos)
+void VehicleObject::setPosition(const glm::vec3& pos)
 {
 	GameObject::setPosition(pos);
 	if(physBody) {
@@ -123,7 +123,7 @@ void GTAVehicle::setPosition(const glm::vec3& pos)
 	}
 }
 
-glm::vec3 GTAVehicle::getPosition() const
+glm::vec3 VehicleObject::getPosition() const
 {
 	if(physBody) {
 		btVector3 Pos = physBody->getWorldTransform().getOrigin();
@@ -132,7 +132,7 @@ glm::vec3 GTAVehicle::getPosition() const
 	return position;
 }
 
-glm::quat GTAVehicle::getRotation() const
+glm::quat VehicleObject::getRotation() const
 {
 	if(physBody) {
 		btQuaternion rot = physBody->getWorldTransform().getRotation();
@@ -141,7 +141,7 @@ glm::quat GTAVehicle::getRotation() const
 	return rotation;
 }
 
-void GTAVehicle::tick(float dt)
+void VehicleObject::tick(float dt)
 {
 	if(physVehicle) {
 		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
@@ -165,53 +165,53 @@ void GTAVehicle::tick(float dt)
 	}
 }
 
-void GTAVehicle::setSteeringAngle(float a)
+void VehicleObject::setSteeringAngle(float a)
 {
 	steerAngle = a;
 }
 
-float GTAVehicle::getSteeringAngle() const
+float VehicleObject::getSteeringAngle() const
 {
 	return steerAngle;
 }
 
-void GTAVehicle::setThrottle(float t)
+void VehicleObject::setThrottle(float t)
 {
 	throttle = t;
 }
 
-float GTAVehicle::getThrottle() const
+float VehicleObject::getThrottle() const
 {
 	return throttle;
 }
 
-void GTAVehicle::setBraking(float b)
+void VehicleObject::setBraking(float b)
 {
 	brake = b;
 }
 
-float GTAVehicle::getBraking() const
+float VehicleObject::getBraking() const
 {
 	return brake;
 }
 
-void GTAVehicle::setHandbraking(bool hb)
+void VehicleObject::setHandbraking(bool hb)
 {
 	handbrake = hb;
 }
 
-bool GTAVehicle::getHandbraking() const
+bool VehicleObject::getHandbraking() const
 {
 	return handbrake;
 }
 
-void GTAVehicle::ejectAll()
+void VehicleObject::ejectAll()
 {
 	for(std::map<size_t, GameObject*>::iterator it = seatOccupants.begin();
 		it != seatOccupants.end();
 	) {
 		if(it->second->type() == GameObject::Character) {
-			GTACharacter* c = static_cast<GTACharacter*>(it->second);
+			CharacterObject* c = static_cast<CharacterObject*>(it->second);
 			c->setCurrentVehicle(nullptr, 0);
 			c->setPosition(getPosition());
 		}
@@ -219,7 +219,7 @@ void GTAVehicle::ejectAll()
 	}
 }
 
-GameObject* GTAVehicle::getOccupant(size_t seat)
+GameObject* VehicleObject::getOccupant(size_t seat)
 {
 	auto it = seatOccupants.find(seat);
 	if( it != seatOccupants.end() ) {
@@ -228,7 +228,7 @@ GameObject* GTAVehicle::getOccupant(size_t seat)
 	return nullptr;
 }
 
-void GTAVehicle::setOccupant(size_t seat, GameObject* occupant)
+void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 {
 	auto it = seatOccupants.find(seat);
 	if(occupant == nullptr) {
@@ -243,13 +243,13 @@ void GTAVehicle::setOccupant(size_t seat, GameObject* occupant)
 	}
 }
 
-bool GTAVehicle::takeDamage(const GameObject::DamageInfo& dmg)
+bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 	return true;
 }
 
-void GTAVehicle::setPartDamaged(unsigned int flag, bool damaged)
+void VehicleObject::setPartDamaged(unsigned int flag, bool damaged)
 {
 	if(damaged) {
 		damageFlags |= flag;
@@ -261,23 +261,23 @@ void GTAVehicle::setPartDamaged(unsigned int flag, bool damaged)
 
 unsigned int nameToDamageFlag(const std::string& name)
 {
-	if(name.find("bonnet") != name.npos) return GTAVehicle::DF_Bonnet;
-	if(name.find("door_lf") != name.npos) return GTAVehicle::DF_Door_lf;
-	if(name.find("door_rf") != name.npos) return GTAVehicle::DF_Door_rf;
-	if(name.find("door_lr") != name.npos) return GTAVehicle::DF_Door_lr;
-	if(name.find("door_rr") != name.npos) return GTAVehicle::DF_Door_rr;
-	if(name.find("boot") != name.npos) return GTAVehicle::DF_Boot;
-	if(name.find("windscreen") != name.npos) return GTAVehicle::DF_Windscreen;
-	if(name.find("bump_front") != name.npos) return GTAVehicle::DF_Bump_front;
-	if(name.find("bump_rear") != name.npos) return GTAVehicle::DF_Bump_rear;
-	if(name.find("wing_lf") != name.npos) return GTAVehicle::DF_Wing_lf;
-	if(name.find("wing_rf") != name.npos) return GTAVehicle::DF_Wing_rf;
-	if(name.find("wing_lr") != name.npos) return GTAVehicle::DF_Wing_lr;
-	if(name.find("wing_rr") != name.npos) return GTAVehicle::DF_Wing_rr;
+	if(name.find("bonnet") != name.npos) return VehicleObject::DF_Bonnet;
+	if(name.find("door_lf") != name.npos) return VehicleObject::DF_Door_lf;
+	if(name.find("door_rf") != name.npos) return VehicleObject::DF_Door_rf;
+	if(name.find("door_lr") != name.npos) return VehicleObject::DF_Door_lr;
+	if(name.find("door_rr") != name.npos) return VehicleObject::DF_Door_rr;
+	if(name.find("boot") != name.npos) return VehicleObject::DF_Boot;
+	if(name.find("windscreen") != name.npos) return VehicleObject::DF_Windscreen;
+	if(name.find("bump_front") != name.npos) return VehicleObject::DF_Bump_front;
+	if(name.find("bump_rear") != name.npos) return VehicleObject::DF_Bump_rear;
+	if(name.find("wing_lf") != name.npos) return VehicleObject::DF_Wing_lf;
+	if(name.find("wing_rf") != name.npos) return VehicleObject::DF_Wing_rf;
+	if(name.find("wing_lr") != name.npos) return VehicleObject::DF_Wing_lr;
+	if(name.find("wing_rr") != name.npos) return VehicleObject::DF_Wing_rr;
 	return 0;
 }
 
-bool GTAVehicle::isFrameVisible(ModelFrame *frame) const
+bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 {
 	auto& name = frame->getName();
 	bool isDam = name.find("_dam") != name.npos;
@@ -287,7 +287,7 @@ bool GTAVehicle::isFrameVisible(ModelFrame *frame) const
 
 	if(isDam || isOk) {
 		unsigned int dft = nameToDamageFlag(name);
-		if(dft == GTAVehicle::DF_Door_lf) return false;
+		if(dft == VehicleObject::DF_Door_lf) return false;
 		if(isDam) {
 			return (damageFlags & dft) == dft;
 		}

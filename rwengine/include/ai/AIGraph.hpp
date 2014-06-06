@@ -5,7 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <data/PathData.hpp>
 
-struct GTAInstance;
+struct InstanceObject;
 struct GTAAINode;
 
 class AIGraph

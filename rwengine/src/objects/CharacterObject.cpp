@@ -1,13 +1,13 @@
-#include <objects/GTACharacter.hpp>
+#include <objects/CharacterObject.hpp>
 #include <ai/GTAAIController.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/VehicleObject.hpp>
 
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
-GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, std::shared_ptr<CharacterData> data)
+CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
   _hasTargetPosition(false),
@@ -42,19 +42,19 @@ GTACharacter::GTACharacter(GameWorld* engine, const glm::vec3& pos, const glm::q
 	}
 }
 
-GTACharacter::~GTACharacter()
+CharacterObject::~CharacterObject()
 {
 	destroyActor();
 }
 
-void GTACharacter::enterAction(GTACharacter::Action act)
+void CharacterObject::enterAction(CharacterObject::Action act)
 {
 	if(currentActivity != act) {
 		currentActivity = act;
 	}
 }
 
-void GTACharacter::createActor(const glm::vec3& size)
+void CharacterObject::createActor(const glm::vec3& size)
 {
 	if(physCharacter) {
 		destroyActor();
@@ -81,7 +81,7 @@ void GTACharacter::createActor(const glm::vec3& size)
 	}
 }
 
-void GTACharacter::destroyActor()
+void CharacterObject::destroyActor()
 {
 	if(physCharacter) {
 		engine->dynamicsWorld->removeCollisionObject(physObject);
@@ -94,7 +94,7 @@ void GTACharacter::destroyActor()
 	}
 }
 
-void GTACharacter::tick(float dt)
+void CharacterObject::tick(float dt)
 {
 	if(controller) {
 		controller->update(dt);
@@ -179,7 +179,7 @@ void GTACharacter::tick(float dt)
 	}
 }
 
-void GTACharacter::updateCharacter(float dt)
+void CharacterObject::updateCharacter(float dt)
 {
 	if(physCharacter) {
 		// Check to see if the character should be knocked down.
@@ -214,7 +214,7 @@ void GTACharacter::updateCharacter(float dt)
 						if(otherObject->getUserPointer()) {
 							GameObject* object = static_cast<GameObject*>(otherObject->getUserPointer());
 							if(object->type() == Vehicle) {
-								GTAVehicle* vehicle = static_cast<GTAVehicle*>(object);
+								VehicleObject* vehicle = static_cast<VehicleObject*>(object);
 								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
 									enterAction(KnockedDown);
 								}
@@ -225,11 +225,11 @@ void GTACharacter::updateCharacter(float dt)
 			}
 		}
 		
-		if(currentActivity == GTACharacter::Jump)
+		if(currentActivity == CharacterObject::Jump)
 		{
 			if(physCharacter->onGround())
 			{
-				enterAction(GTACharacter::Idle);
+				enterAction(CharacterObject::Idle);
 			}
 		}
 		else 
@@ -271,14 +271,14 @@ void GTACharacter::updateCharacter(float dt)
 	}
 }
 
-void GTACharacter::setPosition(const glm::vec3& pos)
+void CharacterObject::setPosition(const glm::vec3& pos)
 {
 	btTransform& tf = physCharacter->getGhostObject()->getWorldTransform();
 	tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
 	position = pos;
 }
 
-glm::vec3 GTACharacter::getPosition() const
+glm::vec3 CharacterObject::getPosition() const
 {
 	if(physCharacter) {
 		btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
@@ -301,7 +301,7 @@ glm::vec3 GTACharacter::getPosition() const
 	return position;
 }
 
-glm::quat GTACharacter::getRotation() const
+glm::quat CharacterObject::getRotation() const
 {
 	if(currentVehicle) {
 		return currentVehicle->getRotation();
@@ -309,7 +309,7 @@ glm::quat GTACharacter::getRotation() const
 	return GameObject::getRotation();
 }
 
-bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
+bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 {
 	if(vehicle) {
 		// Check that the seat is free
@@ -337,17 +337,17 @@ bool GTACharacter::enterVehicle(GTAVehicle* vehicle, size_t seat)
 	return false;
 }
 
-GTAVehicle *GTACharacter::getCurrentVehicle() const
+VehicleObject *CharacterObject::getCurrentVehicle() const
 {
 	return currentVehicle;
 }
 
-size_t GTACharacter::getCurrentSeat() const
+size_t CharacterObject::getCurrentSeat() const
 {
 	return currentSeat;
 }
 
-void GTACharacter::setCurrentVehicle(GTAVehicle *value, size_t seat)
+void CharacterObject::setCurrentVehicle(VehicleObject *value, size_t seat)
 {
 	currentVehicle = value;
 	currentSeat = seat;
@@ -359,21 +359,21 @@ void GTACharacter::setCurrentVehicle(GTAVehicle *value, size_t seat)
 	}
 }
 
-bool GTACharacter::takeDamage(const GameObject::DamageInfo& dmg)
+bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 	return true;
 }
 
-void GTACharacter::jump()
+void CharacterObject::jump()
 {
 	if( physCharacter ) {
 		physCharacter->jump();
-		enterAction(GTACharacter::Jump);
+		enterAction(CharacterObject::Jump);
 	}
 }
 
-void GTACharacter::resetToAINode()
+void CharacterObject::resetToAINode()
 {
 	auto nodes = engine->aigraph.nodes;
 	bool vehicleNode = !! getCurrentVehicle();
@@ -403,18 +403,18 @@ void GTACharacter::resetToAINode()
 	}
 }
 
-void GTACharacter::setTargetPosition(const glm::vec3 &target)
+void CharacterObject::setTargetPosition(const glm::vec3 &target)
 {
 	_targetPosition = target;
 	_hasTargetPosition = true;
 }
 
-void GTACharacter::clearTargetPosition()
+void CharacterObject::clearTargetPosition()
 {
 	_hasTargetPosition = false;
 }
 
-bool GTACharacter::isAnimationFixed() const
+bool CharacterObject::isAnimationFixed() const
 {
 	// TODO probably get rid of how this works.
 	auto ca = animator->getAnimation();

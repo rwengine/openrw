@@ -1,26 +1,26 @@
 #pragma once
-#ifndef _GTAINSTANCE_HPP_
-#define _GTAINSTANCE_HPP_
+#ifndef _OBJECTINSTANCE_HPP_
+#define _OBJECTINSTANCE_HPP_
 #include <engine/GameObject.hpp>
 
 /**
- * @struct GTAInstance
- *  Stores references to the Object data and the instance
+ * @struct InstanceObject
+ *  A simple object instance
  */
-struct GTAInstance : public GameObject
+struct InstanceObject : public GameObject
 {
 	glm::vec3 scale;
 	std::shared_ptr<ObjectData> object;
-	std::shared_ptr<GTAInstance> LODinstance;
+	std::shared_ptr<InstanceObject> LODinstance;
 
-	GTAInstance(
+	InstanceObject(
 		GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
 		ModelHandle* model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
-		std::shared_ptr<GTAInstance> lod
+		std::shared_ptr<InstanceObject> lod
 			);
 
 	Type type() { return Instance; }

@@ -17,7 +17,7 @@ class GTAPlayerAIController : public GTAAIController
 	
 public:
 	
-    GTAPlayerAIController(GTACharacter* character);
+    GTAPlayerAIController(CharacterObject* character);
 	
 	void setRunning(bool run);
 	

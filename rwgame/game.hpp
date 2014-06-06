@@ -18,8 +18,8 @@ bool hitWorldRay(const glm::vec3& start, const glm::vec3& direction,
 sf::Window& getWindow();
 
 GameWorld* getWorld();
-GTACharacter* getPlayerCharacter();
-void setPlayerCharacter(GTACharacter* playerCharacter);
+CharacterObject* getPlayerCharacter();
+void setPlayerCharacter(CharacterObject* playerCharacter);
 
 sf::Font& getFont();
 

@@ -1,13 +1,13 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
-#include <objects/GTAVehicle.hpp>
+#include <objects/VehicleObject.hpp>
 #include <render/Model.hpp>
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)
 
 BOOST_AUTO_TEST_CASE(test_create_vehicle)
 {
-	GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
 	BOOST_REQUIRE(vehicle != nullptr);
 
@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle)
 
 BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 {
-	GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
 	BOOST_REQUIRE(vehicle != nullptr);
 	BOOST_REQUIRE(vehicle->model != nullptr);
@@ -39,12 +39,12 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
 	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
 
-	vehicle->setPartDamaged(GTAVehicle::DF_Bonnet, true);
+	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, true);
 
 	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_ok));
 	BOOST_CHECK(vehicle->isFrameVisible(bonnet_dam));
 
-	vehicle->setPartDamaged(GTAVehicle::DF_Bonnet, false);
+	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, false);
 
 	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
 	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 
 BOOST_AUTO_TEST_CASE(test_door_position)
 {
-	GTAVehicle* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
 
 	BOOST_REQUIRE(vehicle != nullptr);
 

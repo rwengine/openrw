@@ -1,5 +1,6 @@
 #include <ai/GTAAIController.hpp>
-#include <objects/GTACharacter.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <engine/Animator.hpp>
 
 bool GTAAIController::updateActivity()
@@ -18,11 +19,11 @@ void GTAAIController::setActivity(GTAAIController::Activity* activity)
 	if( _currentActivity == nullptr ) {
 		// TODO make idle an actual activity or something,
 		character->clearTargetPosition();
-		character->enterAction( GTACharacter::Idle );
+		character->enterAction( CharacterObject::Idle );
 	}
 }
 
-GTAAIController::GTAAIController(GTACharacter* character)
+GTAAIController::GTAAIController(CharacterObject* character)
 : character(character), _currentActivity(nullptr), _nextActivity(nullptr)
 {
 	character->controller = this;
@@ -59,15 +60,13 @@ void GTAAIController::update(float dt)
 	}
 }
 
-
-
-bool Activities::GoTo::update(GTACharacter *character, GTAAIController *controller)
+bool Activities::GoTo::update(CharacterObject *character, GTAAIController *controller)
 {
 	/* TODO: Use the ai nodes to navigate to the position */
 	glm::vec3 targetDirection = target - character->getPosition();
 
 	if( glm::length(targetDirection) < 0.01f ) {
-		character->enterAction(GTACharacter::Idle);
+		character->enterAction(CharacterObject::Idle);
 		return true;
 	}
 
@@ -75,21 +74,20 @@ bool Activities::GoTo::update(GTACharacter *character, GTAAIController *controll
 
 	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
 	character->rotation = r;
-	character->enterAction(GTACharacter::Walk);
+	character->enterAction(CharacterObject::Walk);
 
 	return false;
 }
 
-#include <objects/GTAVehicle.hpp>
 
-bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *controller)
+bool Activities::EnterVehicle::update(CharacterObject *character, GTAAIController *controller)
 {
 	if( entering ) {
 		// TODO: decouple from the character's animator.
-		if( character->currentActivity == GTACharacter::VehicleGetIn ) {
+		if( character->currentActivity == CharacterObject::VehicleGetIn ) {
 			character->enterVehicle(vehicle, seat);
 		}
-		else if( character->currentActivity == GTACharacter::VehicleOpen ) {
+		else if( character->currentActivity == CharacterObject::VehicleOpen ) {
 			// Ensure the player remains aligned with the vehicle
 			character->setPosition(vehicle->getSeatEntryPosition(seat));
 			character->rotation = vehicle->getRotation();
@@ -110,7 +108,7 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 			entering = true;
 			// Warp character to vehicle orientation
 			character->rotation = vehicle->getRotation();
-			character->enterAction(GTACharacter::VehicleOpen);
+			character->enterAction(CharacterObject::VehicleOpen);
 		}
 		else if( targetDistance > 15.f ) {
 			return true; // Give up if the vehicle is too far away.
@@ -120,18 +118,18 @@ bool Activities::EnterVehicle::update(GTACharacter *character, GTAAIController *
 
 			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
 			character->rotation = r;
-			character->enterAction(GTACharacter::Walk);
+			character->enterAction(CharacterObject::Walk);
 		}
 	}
 	return false;
 }
 
 
-bool Activities::ExitVehicle::update(GTACharacter *character, GTAAIController *controller)
+bool Activities::ExitVehicle::update(CharacterObject *character, GTAAIController *controller)
 {
 	if( character->getCurrentVehicle() == nullptr ) return true;
 
-	if( character->currentActivity == GTACharacter::Idle ) {
+	if( character->currentActivity == CharacterObject::Idle ) {
 		auto vehicle = character->getCurrentVehicle();
 		auto exitpos = vehicle->getSeatEntryPosition(character->getCurrentSeat());
 
@@ -141,6 +139,6 @@ bool Activities::ExitVehicle::update(GTACharacter *character, GTAAIController *c
 		return true;
 	}
 
-	character->enterAction(GTACharacter::VehicleGetOut);
+	character->enterAction(CharacterObject::VehicleGetOut);
 	return false;
 }

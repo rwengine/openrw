@@ -1,5 +1,5 @@
 #include "ai/AIGraph.hpp"
-#include "objects/GTAInstance.hpp"
+#include "objects/InstanceObject.hpp"
 #include "ai/GTAAINode.hpp"
 
 void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path)

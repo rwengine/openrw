@@ -7,9 +7,9 @@
 #include <WorkContext.hpp>
 
 // 3 isn't enough to cause a factory.
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAInstance.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
+#include <objects/VehicleObject.hpp>
 
 GameWorld::GameWorld(const std::string& path)
 	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
@@ -176,7 +176,7 @@ bool GameWorld::loadZone(const std::string& path)
 	return false;
 }
 
-GTAInstance *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto oi = objectTypes.find(id);
 	if( oi != objectTypes.end()) {
@@ -188,7 +188,7 @@ GTAInstance *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, 
 			gameData.loadTXD(oi->second->textureName + ".txd", true);
 		}
 		
-		auto instance = std::shared_ptr<GTAInstance>(new GTAInstance(
+		auto instance = std::shared_ptr<InstanceObject>(new InstanceObject(
 			this,
 			pos,
 			rot,
@@ -212,7 +212,7 @@ GTAInstance *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, 
 	return nullptr;
 }
 
-GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto vti = vehicleTypes.find(id);
 	if(vti != vehicleTypes.end()) {
@@ -267,13 +267,13 @@ GTAVehicle *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, co
 			}
 		}
 		
-		vehicleInstances.push_back(new GTAVehicle{ this, pos, rot, m, vti->second, info->second, prim, sec });
+		vehicleInstances.push_back(new VehicleObject{ this, pos, rot, m, vti->second, info->second, prim, sec });
 		return vehicleInstances.back();
 	}
 	return nullptr;
 }
 
-GTACharacter* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
+CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
     auto pti = pedestrianTypes.find(id);
     if( pti != pedestrianTypes.end() ) {
@@ -292,7 +292,7 @@ GTACharacter* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &po
 		ModelHandle* m = gameData.models[pt->modelName];
 
 		if(m != nullptr) {
-			auto ped = new GTACharacter( this, pos, rot, m, pt );
+			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			pedestrians.push_back(ped);
 			new GTADefaultAIController(ped);
 			return ped;

@@ -1,10 +1,10 @@
 #include "ai/GTAPlayerAIController.hpp"
-#include <objects/GTACharacter.hpp>
-#include <objects/GTAVehicle.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-GTAPlayerAIController::GTAPlayerAIController(GTACharacter* character)
+GTAPlayerAIController::GTAPlayerAIController(CharacterObject* character)
 	: GTAAIController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false)
 {
 	
@@ -37,7 +37,7 @@ void GTAPlayerAIController::enterNearestVehicle()
 {
 	if(! character->getCurrentVehicle()) {
 		auto world = character->engine;
-		GTAVehicle* nearest = nullptr; float d = 10.f;
+		VehicleObject* nearest = nullptr; float d = 10.f;
 		for(auto it = world->vehicleInstances.begin(); it != world->vehicleInstances.end(); ++it) {
 			float vd = glm::length( character->getPosition() - (*it)->getPosition());
 			if( vd < d ) { 
@@ -60,13 +60,13 @@ void GTAPlayerAIController::update(float dt)
 	}
 
 	if( _currentActivity == nullptr ) {
-		if( character->currentActivity != GTACharacter::Jump )
+		if( character->currentActivity != CharacterObject::Jump )
 		{
 			if( glm::length(direction) > 0.001f ) {
-				character->enterAction(running ? GTACharacter::Run : GTACharacter::Walk);
+				character->enterAction(running ? CharacterObject::Run : CharacterObject::Walk);
 			}
 			else {
-				character->enterAction(GTACharacter::Idle);
+				character->enterAction(CharacterObject::Idle);
 			}
 
 			if( character->getCurrentVehicle() ) {
