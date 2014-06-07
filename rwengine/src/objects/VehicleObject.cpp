@@ -159,13 +159,17 @@ glm::quat VehicleObject::getRotation() const
 void VehicleObject::tick(float dt)
 {
 	if(physVehicle) {
+		// todo: a real engine function
+		float velFac = (info->handling.maxVelocity - physVehicle->getCurrentSpeedKmHour()) / info->handling.maxVelocity;
+		float engineForce = info->handling.acceleration * 150.f * throttle * velFac;
+
 		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
 			btWheelInfo& wi = physVehicle->getWheelInfo(w);
 			if( info->handling.driveType == VehicleHandlingInfo::All ||
 					(info->handling.driveType == VehicleHandlingInfo::Forward && wi.m_bIsFrontWheel) ||
 					(info->handling.driveType == VehicleHandlingInfo::Rear && !wi.m_bIsFrontWheel))
 			{
-				physVehicle->applyEngineForce(info->handling.acceleration * 150.f * throttle, w);
+					physVehicle->applyEngineForce(engineForce, w);
 			}
 
 			float brakeReal = info->handling.brakeDeceleration * info->handling.mass * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
