@@ -105,4 +105,19 @@ public:
 	virtual bool isFrameVisible(ModelFrame *frame) const;
 };
 
+/**
+ * Implements vehicle ray casting behaviour.
+ * i.e. ignore the god damn vehicle body when casting rays.
+ */
+class VehicleRaycaster : public btVehicleRaycaster
+{
+	btDynamicsWorld* _world;
+	VehicleObject* _vehicle;
+public:
+	VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
+		: _world(world), _vehicle(vehicle) {}
+
+	void* castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result);
+};
+
 #endif

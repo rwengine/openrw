@@ -37,7 +37,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 				auto mid = (box.min + box.max) / 2.f;
 				btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
 				btTransform t; t.setIdentity();
-				t.setOrigin(btVector3(mid.x, mid.y, mid.z) + com);
+				t.setOrigin(btVector3(mid.x, mid.y, mid.z));
 				cmpShape->addChildShape(t, bshape);
 			}
 
@@ -46,11 +46,11 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 				auto& sphere = physInst.spheres[i];
 				btCollisionShape* sshape = new btSphereShape(sphere.radius);
 				btTransform t; t.setIdentity();
-				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z) + com);
+				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 				cmpShape->addChildShape(t, sshape);
 			}
 
-			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
+			if( false && physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
 				btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
 							physInst.indices.size()/3,
 							(int*) physInst.indices.data(),
@@ -59,7 +59,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 							&(physInst.vertices[0].x),
 							sizeof(glm::vec3));
 				btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-				btTransform t; t.setIdentity();
+				btTransform t;
+				t.setOrigin(com);
 				cmpShape->addChildShape(t,trishape);
 			}
 
@@ -72,10 +73,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			physBody->setUserPointer(this);
 			engine->dynamicsWorld->addRigidBody(physBody);
 
-			physRaycaster = new btDefaultVehicleRaycaster(engine->dynamicsWorld);
+			physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
 			btRaycastVehicle::btVehicleTuning tuning;
 
-			float travel = info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit;
+			float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
 			tuning.m_frictionSlip = 1.8f;
 			tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
@@ -88,13 +89,25 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			float kR = 0.6f;
 
 			for(size_t w = 0; w < info->wheels.size(); ++w) {
-				btVector3 connection(info->wheels[w].position.x, info->wheels[w].position.y, info->wheels[w].position.z - info->handling.suspensionLowerLimit);
+				auto restLength = travel;
+				auto heightOffset = info->handling.suspensionUpperLimit;
+				btVector3 connection(
+							info->wheels[w].position.x,
+							info->wheels[w].position.y,
+							info->wheels[w].position.z + heightOffset );
 				bool front = connection.y() > 0;
-				btWheelInfo& wi = physVehicle->addWheel(connection + com, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), travel, data->wheelScale / 2.f, tuning, front);
-				wi.m_suspensionStiffness = info->handling.suspensionForce * 10.f;
+				btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
+				wi.m_suspensionRestLength1 = restLength;
+
+				wi.m_maxSuspensionForce = 100000.f;
+				wi.m_suspensionStiffness = (info->handling.suspensionForce * 10.f);
+
+				//float dampEffect = (info->handling.suspensionDamping) / travel;
+				//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
+
 				wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 				wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-				wi.m_rollInfluence = 0.2f;
+				wi.m_rollInfluence = 0.0f;
 				wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 			}
 
@@ -125,21 +138,23 @@ void VehicleObject::setPosition(const glm::vec3& pos)
 
 glm::vec3 VehicleObject::getPosition() const
 {
-	if(physBody) {
-		btVector3 Pos = physBody->getWorldTransform().getOrigin();
-		return glm::vec3(Pos.x(), Pos.y(), Pos.z()) + info->handling.centerOfMass;
+	if(physVehicle) {
+		btVector3 Pos = physVehicle->getChassisWorldTransform().getOrigin();
+		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}
 	return position;
 }
 
 glm::quat VehicleObject::getRotation() const
 {
-	if(physBody) {
-		btQuaternion rot = physBody->getWorldTransform().getRotation();
+	if(physVehicle) {
+		btQuaternion rot = physVehicle->getChassisWorldTransform().getRotation();
 		return glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 	}
 	return rotation;
 }
+
+#include <glm/gtc/type_ptr.hpp>
 
 void VehicleObject::tick(float dt)
 {
@@ -297,4 +312,43 @@ bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 	}
 
 	return true;
+}
+
+// Dammnit Bullet
+
+class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
+{
+	btCollisionObject* _self;
+public:
+
+	ClosestNotMeRayResultCallback( btCollisionObject* self, const btVector3& from, const btVector3& to )
+		: ClosestRayResultCallback( from, to ), _self( self ) {}
+
+	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace)
+	{
+		if( rayResult.m_collisionObject == _self ) {
+			return 1.0;
+		}
+		return ClosestRayResultCallback::addSingleResult( rayResult, normalInWorldSpace );
+	}
+};
+
+void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycaster::btVehicleRaycasterResult &result)
+{
+	ClosestNotMeRayResultCallback rayCallback( _vehicle->physBody, from, to );
+
+	_world->rayTest(from, to, rayCallback);
+
+	if( rayCallback.hasHit() ) {
+		const btRigidBody* body = btRigidBody::upcast( rayCallback.m_collisionObject );
+
+		if( body && body->hasContactResponse() ) {
+			result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+			result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+			result.m_hitNormalInWorld.normalize();
+			result.m_distFraction = rayCallback.m_closestHitFraction;
+			return (void*) body;
+		}
+	}
+	return 0;
 }

@@ -340,7 +340,7 @@ void GameRenderer::renderWorld(float alpha)
 			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
 			if(woi != engine->objectTypes.end()) {
 				Model* wheelModel = engine->gameData.models["wheels"]->model;
-				if( wheelModel) {
+				if( wheelModel ) {
 					// Tell bullet to update the matrix for this wheel.
 					inst->physVehicle->updateWheelTransform(w, false);
 					glm::mat4 wheel_tf;
@@ -349,7 +349,7 @@ void GameRenderer::renderWorld(float alpha)
 					if(inst->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
 						wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
 					}
-					renderWheel(wheelModel, /*matrixVehicle **/ wheel_tf, woi->second->modelName);
+					renderWheel(wheelModel, wheel_tf, woi->second->modelName);
 				}
 				else {
 					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
