@@ -347,12 +347,13 @@ void GameData::loadWaterpro(const std::string& path)
 	std::ifstream ifstr(path.c_str());
 	
 	if(ifstr.is_open()) {
-		uint32_t numlevels; 
+		uint32_t numlevels;
 		ifstr.read(reinterpret_cast<char*>(&numlevels), sizeof(uint32_t));
 		ifstr.read(reinterpret_cast<char*>(&waterHeights), sizeof(float)*48);
 		
 		ifstr.seekg(0x03C4);
 		ifstr.read(reinterpret_cast<char*>(&visibleWater), sizeof(float)*64*64);
+		ifstr.read(reinterpret_cast<char*>(&realWater), sizeof(float)*128*128);
 	}
 }
 
@@ -377,7 +378,7 @@ void GameData::loadWater(const std::string& path)
 			fc = atof(c.c_str());
 			fd = atof(d.c_str());
 			fe = atof(e.c_str());
-			waterRects.push_back({
+			waterBlocks.push_back({
 				fa,
 				fb,
 				fc,

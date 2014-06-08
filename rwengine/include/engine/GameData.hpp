@@ -229,10 +229,22 @@ public:
 	 */
 	std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 	
+
 	/**
-	 * Water Rectangles
+	 * @struct WaterArea
+	 *  Stores Water Rectangle Information
 	 */
-	std::vector<RWTypes::WaterRect> waterRects;
+	struct WaterArea
+	{
+		float height;
+		float xLeft, yBottom;
+		float xRight, yTop;
+	};
+
+	/**
+	 * Water Areas
+	 */
+	std::vector<WaterArea> waterBlocks;
 	
 	/**
 	 * Water heights

@@ -59,12 +59,13 @@ public:
 	GLint uniMatDiffuse, uniMatAmbient, uniFogStart, uniFogEnd;
 	GLuint worldProgram;
 	GLuint skyProgram;
+	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	
 	/// Internal VAO to avoid clobbering global state.
     GLuint vao, debugVAO;
 	
-    GLuint planeVBO, skydomeVBO, skydomeIBO, debugVBO;
+	GLuint skydomeVBO, skydomeIBO, debugVBO;
     GLuint debugTex;
 	
     /**

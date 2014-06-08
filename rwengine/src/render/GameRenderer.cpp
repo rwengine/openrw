@@ -80,29 +80,50 @@ const char *skydomeFragmentShaderSource = "#version 130\n"
 "}";
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
+struct WaterVertex {
+	static const AttributeList vertex_attributes() {
+		return {
+			{ATRS_Position, 2, sizeof(WaterVertex),  0ul}
+		};
+	}
 
-float planedata[] = {
-	// Vertices
-	 1.0f, 1.0f, 0.f,
-	-0.0f, 1.0f, 0.f,
-	 1.0f,-0.0f, 0.f,
-	-0.0f,-0.0f, 0.f,
-	// UV coords
-	1.f, 1.f,
-	0.f, 1.f,
-	1.f, 0.f,
-	0.f, 0.f,
-	// Normals
-	0.f, 0.f, 1.f,
-	0.f, 0.f, 1.f,
-	0.f, 0.f, 1.f,
-	0.f, 0.f, 1.f,
-	// Colours
-	1.f, 1.f, 1.f,
-	1.f, 1.f, 1.f,
-	1.f, 1.f, 1.f,
-	1.f, 1.f, 1.f
+	float x, y;
 };
+
+std::vector<WaterVertex> planeVerts = {
+	{1.0f, 1.0f},
+	{0.0f, 1.0f},
+	{1.0f,-0.0f},
+	{0.0f,-0.0f}
+};
+
+GeometryBuffer waterBuffer;
+DrawBuffer waterDraw;
+
+const char *waterVSSource = R"(
+#version 130
+#extension GL_ARB_explicit_attrib_location : enable
+layout(location = 0) in vec2 position;
+out vec2 TexCoords;
+uniform float height;
+uniform float size;
+uniform mat4 MVP;
+void main()
+{
+	TexCoords = position;
+	gl_Position = MVP * vec4(position * size, height, 1.0);
+})";
+
+const char *waterFSSource = R"(
+#version 130
+in vec3 Normal;
+in vec2 TexCoords;
+uniform sampler2D texture;
+void main() {
+	vec4 c = texture2D(texture, TexCoords);
+	gl_FragColor = c;
+})";
+
 
 GLuint compileShader(GLenum type, const char *source)
 {
@@ -118,7 +139,7 @@ GLuint compileShader(GLenum type, const char *source)
 		GLchar *buffer = new GLchar[len];
 		glGetShaderInfoLog(shader, len, NULL, buffer);
 
-		std::cerr << "ERROR compiling shader: " << buffer << std::endl;
+		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << source << std::endl;
 		delete[] buffer;
 		exit(1);
 	}
@@ -162,11 +183,22 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	skyUniBottom = glGetUniformLocation(skyProgram, "BottomColor");
 	
 	glGenVertexArrays( 1, &vao );
-	
-	// prepare our special internal plane.
-	glGenBuffers(1, &planeVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(planedata), planedata, GL_STATIC_DRAW);
+
+	// Upload water plane
+	waterBuffer.uploadVertices(planeVerts);
+	waterDraw.addGeometry(&waterBuffer);
+	waterDraw.setFaceType(GL_TRIANGLE_STRIP);
+
+	GLuint waterVS = compileShader(GL_VERTEX_SHADER, waterVSSource);
+	GLuint waterFS = compileShader(GL_FRAGMENT_SHADER, waterFSSource);
+	waterProgram = glCreateProgram();
+	glAttachShader(waterProgram, waterVS);
+	glAttachShader(waterProgram, waterFS);
+	glLinkProgram(waterProgram);
+	waterHeight = glGetUniformLocation(waterProgram, "height");
+	waterTexture = glGetUniformLocation(waterProgram, "texture");
+	waterSize = glGetUniformLocation(waterProgram, "size");
+	waterMVP = glGetUniformLocation(waterProgram, "MVP");
 	
 	// And our skydome while we're at it.
 	glGenBuffers(1, &skydomeVBO);
@@ -210,6 +242,11 @@ GameRenderer::GameRenderer(GameWorld* engine)
 float mix(uint8_t a, uint8_t b, float num)
 {
 	return a+(b-a)*num;
+}
+
+#define GL_PLS() \
+{ auto errc = glGetError(); \
+	if(errc != GL_NO_ERROR) std::cout << __LINE__ << ": " << errc << std::endl;\
 }
 
 void GameRenderer::renderWorld(float alpha)
@@ -369,7 +406,38 @@ void GameRenderer::renderWorld(float alpha)
 		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->object, false);
 	}
 	transparentDrawQueue.clear();
-	
+
+	// Draw the water.
+	glBindVertexArray( waterDraw.getVAOName() );
+	glUseProgram( waterProgram );
+
+	// TODO: label all the variables!
+#define NO_WATER_INDEX 48
+	glm::mat4 waterModel;
+	glUniform1i(waterTexture, 0);
+	float blockSize = 4096.f/64.f;
+	auto waterTex = engine->gameData.textures["water_old"];
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
+
+	// TODO: high / low quality water. Projected grid?
+
+	for( int x = 0; x < 64; x++ ) {
+		for( int y = 0; y < 64; y++ ) {
+			int i = (x*64) + y;
+			int hI = engine->gameData.visibleWater[i];
+			if( hI >= NO_WATER_INDEX ) continue;
+			float h = engine->gameData.waterHeights[hI];
+			waterModel = glm::mat4();
+			waterModel = glm::translate(waterModel, {-2048.f + x * blockSize, -2048.f + y * blockSize, 0.f});
+			glUniform1f(waterSize, blockSize);
+			glUniform1f(waterHeight, h);
+			auto MVP = proj * view * waterModel;
+			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
+			glDrawArrays(waterDraw.getFaceType(), 0, 4);
+		}
+	}
+
 	glBindVertexArray( vao );
 	
 	glUseProgram(skyProgram);
@@ -382,8 +450,8 @@ void GameRenderer::renderWorld(float alpha)
 	glUniformMatrix4fv(skyUniProj, 1, GL_FALSE, glm::value_ptr(proj));
 	glUniform4f(skyUniTop, skyTop.r, skyTop.g, skyTop.b, 1.f);
 	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
-		
-    glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
+
+	glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
 	
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
