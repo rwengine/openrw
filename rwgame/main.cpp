@@ -48,6 +48,16 @@ void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
 	viewAngles = angles;
 }
 
+glm::vec3& getViewPosition()
+{
+	return viewPosition;
+}
+
+glm::vec2& getViewAngles()
+{
+	return viewAngles;
+}
+
 sf::Window& getWindow()
 {
 	return window;

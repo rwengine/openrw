@@ -5,6 +5,11 @@
 
 class DebugState : public State
 {
+	glm::vec3 _debugPos;
+	glm::vec3 _movement;
+	glm::vec2 _debugAngles;
+	bool _freeLook;
+	bool _sonicMode;
 public:
 	DebugState();
 

@@ -3,6 +3,7 @@
 #include <objects/CharacterObject.hpp>
 
 DebugState::DebugState()
+	: _freeLook( false ), _sonicMode( false )
 {
 	Menu *m = new Menu(getFont());
 	m->offset = glm::vec2(50.f, 100.f);
@@ -27,7 +28,8 @@ DebugState::DebugState()
 
 void DebugState::enter()
 {
-
+	_debugPos = getViewPosition();
+	_debugAngles = getViewAngles();
 }
 
 void DebugState::exit()
@@ -64,20 +66,77 @@ void DebugState::tick(float dt)
 			ss << "ID: " << vehicle->info->handling.ID << std::endl;
 		}
 	}*/
+
+	if( _freeLook ) {
+		float qpi = glm::half_pi<float>();
+
+		sf::Vector2i screenCenter{sf::Vector2i{getWindow().getSize()} / 2};
+		sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
+		sf::Vector2i deltaMouse = mousePos - screenCenter;
+		sf::Mouse::setPosition(screenCenter, getWindow());
+
+		_debugAngles.x += deltaMouse.x / 100.0;
+		_debugAngles.y += deltaMouse.y / 100.0;
+
+		if (_debugAngles.y > qpi)
+			_debugAngles.y = qpi;
+		else if (_debugAngles.y < -qpi)
+			_debugAngles.y = -qpi;
+
+		glm::quat vR = glm::normalize(glm::angleAxis(_debugAngles.x, glm::vec3{0.f, 0.f, 1.f}));
+		vR = vR * glm::angleAxis(_debugAngles.y, glm::vec3(1.f, 0.f, 0.f));
+
+		_debugPos += vR * _movement * dt * (_sonicMode ? 100.f : 10.f);
+	}
+
+	setViewParameters( _debugPos, _debugAngles );
 }
 
 void DebugState::handleEvent(const sf::Event &e)
 {
 	switch(e.type) {
-		case sf::Event::KeyPressed:
-			switch(e.key.code) {
-				case sf::Keyboard::Escape:
-					StateManager::get().exit();
-					break;
-				default: break;
-			}
+	case sf::Event::KeyPressed:
+		switch(e.key.code) {
+		default: break;
+		case sf::Keyboard::Escape:
+			StateManager::get().exit();
+			break;
+		case sf::Keyboard::W:
+			_movement.y =-1.f;
+			break;
+		case sf::Keyboard::S:
+			_movement.y = 1.f;
+			break;
+		case sf::Keyboard::A:
+			_movement.x = 1.f;
+			break;
+		case sf::Keyboard::D:
+			_movement.x =-1.f;
+			break;
+		case sf::Keyboard::F:
+			_freeLook = !_freeLook;
+			break;
+		case sf::Keyboard::LShift:
+			_sonicMode = true;
+			break;
+		}
+		break;
+	case sf::Event::KeyReleased:
+		switch(e.key.code) {
+		case sf::Keyboard::W:
+		case sf::Keyboard::S:
+			_movement.y = 0.f;
+			break;
+		case sf::Keyboard::A:
+		case sf::Keyboard::D:
+			_movement.x = 0.f;
+			break;
+		case sf::Keyboard::LShift:
+			_sonicMode = false;
 			break;
 		default: break;
+		}
+	default: break;
 	}
 	State::handleEvent(e);
 }
