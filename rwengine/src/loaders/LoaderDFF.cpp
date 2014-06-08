@@ -26,14 +26,14 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 			model->frames.reserve(list.numframes);
 			
 			for(size_t f = 0; f < list.numframes; ++f) {
-                RW::BSFrameListFrame& rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
+				RW::BSFrameListFrame& rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
 				fdataI += sizeof(RW::BSFrameListFrame);
 				ModelFrame* parent = nullptr;
 				if(rawframe.index != -1) {
 					parent = model->frames[rawframe.index];
 				}
 				else {
-					model->rootFrameIdx = 0;
+					model->rootFrameIdx = f;
 				}
 				model->frames.push_back(
 					new ModelFrame(parent, rawframe.rotation, rawframe.position)
