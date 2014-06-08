@@ -7,8 +7,9 @@ add_executable(rwviewer
 	main.cpp
 	ViewerWindow.cpp
 	ViewerWidget.cpp
+	ItemListModel.cpp
+	ItemListWidget.cpp
 	IMGArchiveModel.cpp
-	ArchiveContentsWidget.cpp
 	DFFFramesTreeModel.cpp
 	ModelFramesWidget.cpp
 	AnimationListModel.cpp

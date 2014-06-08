@@ -29,11 +29,7 @@ class ViewerWidget : public QGLWidget
 	QPointF dstart;
 	glm::vec2 dastart;
 public:
-	
-	enum FileMode {
-		TXD, DFF, UNK
-	};
-	
+
     ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
 
     virtual void initializeGL();
@@ -41,22 +37,22 @@ public:
     virtual void resizeGL(int w, int h);
 	
     virtual void paintGL();
-	
-	FileMode fileMode() const;
-	
+
 	ModelHandle *currentModel() const;
 	
+	// TODO: Move this into the main window or elsewhere, doesn't really belong here.
+	void setGamePath(const std::string& path);
 	GameWorld* world();
 
 public slots:
 
-	void showFile(const QString& file);
-	void showDFF(const QString& file);
-	void showTXD(const QString& file);
+	void showItem(qint16 item);
 
 	void showAnimation(Animation* anim);
 
 signals:
+
+	void dataLoaded(GameWorld* world);
 
 	void fileOpened(const QString& file);
 
@@ -66,9 +62,6 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent*);
     virtual void mouseMoveEvent(QMouseEvent*);
     virtual void wheelEvent(QWheelEvent*);
-
-private:
-	FileMode fm;
 };
 
 #endif

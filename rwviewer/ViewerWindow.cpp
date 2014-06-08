@@ -1,7 +1,7 @@
 #include "ViewerWindow.hpp"
 #include <engine/GameWorld.hpp>
 #include "ViewerWidget.hpp"
-#include "ArchiveContentsWidget.hpp"
+#include "ItemListWidget.hpp"
 #include "ModelFramesWidget.hpp"
 #include "AnimationListWidget.hpp"
 #include <QMenuBar>
@@ -10,7 +10,7 @@
 #include <QSettings>
 #include <fstream>
 
-static int MaxRecentArchives = 5;
+static int MaxRecentGames = 5;
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(parent, flags)
 {
@@ -19,9 +19,9 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	viewer = new ViewerWidget();
 	this->setCentralWidget(viewer);
 	
-	archivewidget = new ArchiveContentsWidget;
-	archivewidget->setObjectName("archivewidget");
-	this->addDockWidget(Qt::LeftDockWidgetArea, archivewidget);
+	itemsWidget = new ItemListWidget;
+	itemsWidget->setObjectName("archivewidget");
+	this->addDockWidget(Qt::LeftDockWidgetArea, itemsWidget);
 	
 	frameswidget = new ModelFramesWidget;
 	frameswidget->setObjectName("frameswidget");
@@ -33,13 +33,16 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	
 	QMenuBar* mb = this->menuBar();
 	QMenu* file = mb->addMenu("&File");
-	file->addAction("Open &Archive", this, SLOT(openArchive()));
+
+	file->addAction("Open &Game", this, SLOT(loadGame()));
+
 	file->addSeparator();
-	for(int i = 0; i < MaxRecentArchives; ++i) {
+	for(int i = 0; i < MaxRecentGames; ++i) {
 		QAction* r = file->addAction("");
-		recentArchives.append(r);
+		recentGames.append(r);
 		connect(r, SIGNAL(triggered()), SLOT(openRecent()));
 	}
+
 	recentSep = file->addSeparator();
 	auto ex = file->addAction("E&xit");
 	ex->setShortcut(QKeySequence::Quit);
@@ -48,36 +51,11 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
 	
-	connect(archivewidget, SIGNAL(selectedFileChanged(QString)), viewer, SLOT(showFile(QString)));
+	connect(itemsWidget, SIGNAL(selectedItemChanged(qint16)), viewer, SLOT(showItem(qint16)));
+	connect(viewer, SIGNAL(dataLoaded(GameWorld*)), itemsWidget, SLOT(worldLoaded(GameWorld*)));
 	connect(animationswidget, SIGNAL(selectedAnimationChanged(Animation*)), viewer, SLOT(showAnimation(Animation*)));
-	connect(viewer, SIGNAL(fileOpened(QString)), SLOT(openFileChanged(QString)));
 	
-	updateRecentArchives();
-}
-
-void ViewerWindow::openArchive(const QString& name)
-{
-	QString rname = name;
-	QString lower = name.toLower();
-	if(lower.endsWith(".img")) {
-		rname = rname.left(rname.size()-4);
-	}
-	
-	LoaderIMG ld;
-	ld.load(rname.toStdString());
-	
-	viewer->world()->gameData.loadIMG(rname.toStdString());
-	
-	archivewidget->setArchive(ld);
-	
-	QSettings settings("OpenRW", "rwviewer");
-	QStringList recent = settings.value("recentArchives").toStringList();
-	recent.removeAll(name);
-	recent.prepend(name);
-	while(recent.size() > MaxRecentArchives) recent.removeLast();
-	settings.setValue("recentArchives", recent);
-	
-	updateRecentArchives();
+	updateRecentGames();
 }
 
 void ViewerWindow::showEvent(QShowEvent*)
@@ -97,14 +75,6 @@ void ViewerWindow::closeEvent(QCloseEvent* event)
 	settings.setValue("window/geometry", saveGeometry());
 	settings.setValue("window/windowState", saveState());
 	QMainWindow::closeEvent(event);
-}
-
-void ViewerWindow::openArchive()
-{
-	QFileDialog dialog(this, "Open Archive", QDir::homePath(), "IMG Archives (*.img)");
-	if(dialog.exec()) {
-		openArchive(dialog.selectedFiles().at(0));
-	}
 }
 
 void ViewerWindow::openAnimations()
@@ -136,39 +106,57 @@ void ViewerWindow::openAnimations()
 	}
 }
 
-void ViewerWindow::openFileChanged(const QString& name)
+void ViewerWindow::loadGame()
 {
-	setWindowTitle(name);
-	if(viewer->fileMode() == ViewerWidget::DFF) {
-		frameswidget->setModel(viewer->currentModel());
+	QString dir = QFileDialog::getExistingDirectory(
+		this, tr("Open Directory"),
+		 QDir::homePath(),
+		 QFileDialog::ShowDirsOnly
+		 | QFileDialog::DontResolveSymlinks);
+
+	if( dir.size() > 0 ) loadGame( dir );
+}
+
+void ViewerWindow::loadGame(const QString &path)
+{
+	QDir gameDir( path );
+
+	if( gameDir.exists() && path.size() > 0 ) {
+		viewer->setGamePath( gameDir.absolutePath().toStdString() );
 	}
-	else {
-		frameswidget->setModel(nullptr);
-	}
+
+	QSettings settings("OpenRW", "rwviewer");
+	QStringList recent = settings.value("recentGames").toStringList();
+	recent.removeAll( path );
+	recent.prepend( path );
+	while(recent.size() > MaxRecentGames) recent.removeLast();
+	settings.setValue("recentGames", recent);
+
+	updateRecentGames();
 }
 
 void ViewerWindow::openRecent()
 {
 	QAction* r = qobject_cast< QAction* >(sender());
 	if(r) {
-		openArchive(r->data().toString());
+		loadGame( r->data().toString() );
 	}
 }
 
-void ViewerWindow::updateRecentArchives()
+void ViewerWindow::updateRecentGames()
 {
 	QSettings settings("OpenRW", "rwviewer");
-	QStringList recent = settings.value("recentArchives").toStringList();
+	QStringList recent = settings.value("recentGames").toStringList();
 	
-	for(int i = 0; i < MaxRecentArchives; ++i) {
+	for(int i = 0; i < MaxRecentGames; ++i) {
 		if(i < recent.size()) {
 			QString fnm(QFileInfo(recent[i]).fileName());
-			recentArchives[i]->setText(tr("&%1 - %2").arg(i).arg(fnm));
-			recentArchives[i]->setData(recent[i]);
-			recentArchives[i]->setVisible(true);
+			recentGames[i]->setText(tr("&%1 - %2").arg(i).arg(fnm));
+			recentGames[i]->setData(recent[i]);
+			recentGames[i]->setVisible(true);
 		}
 		else {
-			recentArchives[i]->setVisible(false);
+			recentGames[i]->setVisible(false);
 		}
 	}
 	

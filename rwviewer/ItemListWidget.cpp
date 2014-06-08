@@ -1,17 +1,18 @@
-#include "ArchiveContentsWidget.hpp"
+#include "ItemListWidget.hpp"
 #include <QVBoxLayout>
+#include <QHeaderView>
 
-ArchiveContentsWidget::ArchiveContentsWidget(QWidget* parent, Qt::WindowFlags flags)
+ItemListWidget::ItemListWidget(QWidget* parent, Qt::WindowFlags flags)
 	: QDockWidget(parent, flags), filter(nullptr), model(nullptr)
 {
-	setWindowTitle("Archive");
+	setWindowTitle("Items");
 	QVBoxLayout* layout = new QVBoxLayout();
 	QWidget* intermediate = new QWidget();
 
 	searchbox = new QLineEdit();
 	searchbox->setPlaceholderText("Search");
 
-	table = new QListView();
+	table = new QTableView();
 	layout->addWidget(searchbox);
 	layout->addWidget(table);
 	intermediate->setLayout(layout);
@@ -19,30 +20,27 @@ ArchiveContentsWidget::ArchiveContentsWidget(QWidget* parent, Qt::WindowFlags fl
 
 	filter = new QSortFilterProxyModel;
 	table->setModel(filter);
+	filter->setFilterKeyColumn(-1); // Search all columns
 	connect(table->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), SLOT(selectedIndexChanged(QModelIndex)));
 	connect(searchbox, SIGNAL(textChanged(QString)), SLOT(setFilter(QString)));
 }
 
-void ArchiveContentsWidget::setArchive(const LoaderIMG& archive)
+void ItemListWidget::worldLoaded(GameWorld *world)
 {
-	auto m = new IMGArchiveModel(archive);
-	filter->setSourceModel(m);
-	if(model) {
-		delete model;
-	}
-	model = m;
+	if ( model ) delete model;
+	model = new ItemListModel( world, this );
+	filter->setSourceModel( model );
 }
 
-void ArchiveContentsWidget::selectedIndexChanged(const QModelIndex& current)
+void ItemListWidget::selectedIndexChanged(const QModelIndex& current)
 {
 	auto mts = filter->mapToSource(current);
-	if(mts.row() < model->getArchive().getAssetCount()) {
-		auto& f = model->getArchive().getAssetInfoByIndex(mts.row());
-		emit selectedFileChanged(f.name);
+	if( mts.isValid() ) {
+		emit selectedItemChanged( current.internalId() );
 	}
 }
 
-void ArchiveContentsWidget::setFilter(const QString &f)
+void ItemListWidget::setFilter(const QString &f)
 {
 	filter->setFilterRegExp(QRegExp(f, Qt::CaseInsensitive));
 }

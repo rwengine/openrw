@@ -7,8 +7,7 @@
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
 : QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr),
-  cmodel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
-  fm(ViewerWidget::UNK)
+  cmodel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false)
 {
 }
 
@@ -21,8 +20,6 @@ void ViewerWidget::initializeGL()
 	
 	glewExperimental = 1;
 	glewInit();
-	
-	gworld = new GameWorld("");
 }
 
 void ViewerWidget::resizeGL(int w, int h)
@@ -38,6 +35,8 @@ void ViewerWidget::paintGL()
 	
 	glViewport(0, 0, width(), height());
 	
+	if( gworld == nullptr ) return;
+
 	auto& r = gworld->renderer;
 	
 	r.camera.frustum.far = 100.f;
@@ -80,48 +79,9 @@ GameWorld* ViewerWidget::world()
 	return gworld;
 }
 
-void ViewerWidget::showFile(const QString& file)
+void ViewerWidget::showItem(qint16 item)
 {
-	cmodel = nullptr;
-	currentFile = file;
-	QString low = file.toLower();
-	if(low.endsWith("dff")) {
-		showDFF(file);
-	}
-	else if(low.endsWith("txd")) {
-		showTXD(file);
-	}
-	emit fileOpened(file);
-}
-
-void ViewerWidget::showDFF(const QString& file)
-{
-	gworld->gameData.loadDFF(file.toStdString());
-	QString basename(file.left(file.size()-4));
-	// HACK this
-	gworld->gameData.loadTXD((basename+".txd").toStdString());
-	auto mit = gworld->gameData.models.find(basename.toStdString());
-	if(mit != gworld->gameData.models.end()) {
-		// TODO better error handling
-		if(dummyObject) delete dummyObject;
-		cmodel = mit->second;
-		dummyObject = new GameObject(gworld, glm::vec3(), glm::quat(), cmodel);
-		float radius = 0.f;
-		for(auto& g 
-			: cmodel->model->geometries) {
-			radius = std::max(
-				radius,
-				glm::length(g->geometryBounds.center)+g->geometryBounds.radius);
-		}
-		radius *= 4.f;
-		viewDistance = (radius/2.f) / tan(gworld->renderer.camera.frustum.aspectRatio/2.f);
-	}
-	fm = ViewerWidget::DFF;
-}
-
-void ViewerWidget::showTXD(const QString& file)
-{
-	fm = ViewerWidget::TXD;
+	// TODO: actually show items.
 }
 
 void ViewerWidget::showAnimation(Animation *anim)
@@ -141,9 +101,19 @@ ModelHandle* ViewerWidget::currentModel() const
 	return cmodel;
 }
 
-ViewerWidget::FileMode ViewerWidget::fileMode() const
+void ViewerWidget::setGamePath(const std::string &path)
 {
-	return fm;
+	if( gworld ) delete gworld;
+	gworld = new GameWorld(path);
+	gworld->gameData.load();
+
+	for(auto it = gworld->gameData.ideLocations.begin();
+		it != gworld->gameData.ideLocations.end();
+		++it) {
+		gworld->defineItems(it->second);
+	}
+
+	emit dataLoaded(gworld);
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e)

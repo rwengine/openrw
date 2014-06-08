@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 class ModelFramesWidget;
-class ArchiveContentsWidget;
+class ItemListWidget;
 class AnimationListWidget;
 class ViewerWidget;
 
@@ -13,35 +13,40 @@ class ViewerWindow : public QMainWindow
 	Q_OBJECT
 	
 	ViewerWidget* viewer;
-	ArchiveContentsWidget* archivewidget;
+	ItemListWidget* itemsWidget;
 	ModelFramesWidget* frameswidget;
 	AnimationListWidget* animationswidget;
 public:
 
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
-	void openArchive(const QString& name);
-	
+	/**
+	 * @brief openGame Loads a game's dat file.
+	 * @param datFile
+	 */
+	void openGame(const QString& datFile);
+
     virtual void showEvent(QShowEvent*);
 	
     virtual void closeEvent(QCloseEvent*);
 
 public slots:
 
-	void openArchive();
-
 	void openAnimations();
+
+	void loadGame();
+
+	void loadGame( const QString& path );
 
 private slots:
 
-	void openFileChanged(const QString& name);
 	void openRecent();
 
 private:
 	
-	QList<QAction*> recentArchives;
+	QList<QAction*> recentGames;
 	QAction* recentSep;
-	void updateRecentArchives();
+	void updateRecentGames();
 };
 
 #endif 
