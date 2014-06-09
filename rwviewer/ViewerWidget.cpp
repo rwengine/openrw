@@ -4,9 +4,11 @@
 #include <QMouseEvent>
 #include <engine/GameObject.hpp>
 #include <engine/Animator.hpp>
+#include <QFileDialog>
+#include <algorithm>
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr),
+: QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
   cmodel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false)
 {
 }
@@ -81,6 +83,7 @@ GameWorld* ViewerWidget::world()
 
 void ViewerWidget::showItem(qint16 item)
 {
+	currentObjectID = item;
 	// TODO: actually show items.
 }
 
@@ -96,6 +99,30 @@ void ViewerWidget::showAnimation(Animation *anim)
 	}
 }
 
+void ViewerWidget::exportModel()
+{
+	QString toSv = QFileDialog::getSaveFileName(this,
+												"Export Model",
+												QDir::homePath(),
+												"Model (*.DFF)");
+
+	if( toSv.size() == 0 ) return;
+
+	auto it = world()->objectTypes.find(currentObjectID);
+	if( it != world()->objectTypes.end() ) {
+		for( auto& archive : world()->gameData.archives ) {
+			for(size_t i = 0; i < archive.second.getAssetCount(); ++i) {
+				auto& assetI = archive.second.getAssetInfoByIndex(i);
+				std::string q(assetI.name);
+				std::transform(q.begin(), q.end(), q.begin(), ::tolower);
+				if( q.find(it->second->modelName) != q.npos ) {
+					archive.second.saveAsset(q, toSv.toStdString());
+				}
+			}
+		}
+	}
+}
+
 ModelHandle* ViewerWidget::currentModel() const
 {
 	return cmodel;
@@ -105,8 +132,11 @@ void ViewerWidget::setGamePath(const std::string &path)
 {
 	if( gworld ) delete gworld;
 	gworld = new GameWorld(path);
-	gworld->gameData.load();
 
+	gworld->gameData.loadIMG("/models/gta3");
+	gworld->gameData.loadIMG("/models/txd");
+
+	gworld->gameData.load();
 	for(auto it = gworld->gameData.ideLocations.begin();
 		it != gworld->gameData.ideLocations.end();
 		++it) {

@@ -48,6 +48,9 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	ex->setShortcut(QKeySequence::Quit);
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
+	QMenu* data = mb->addMenu("&Data");
+	data->addAction("Export &Model", viewer, SLOT(exportModel()));
+
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
 	

@@ -68,3 +68,8 @@ QVariant ItemListModel::headerData(int section, Qt::Orientation orientation, int
 	}
 	return QVariant::Invalid;
 }
+
+QModelIndex ItemListModel::index(int row, int column, const QModelIndex &parent) const
+{
+	return hasIndex(row, column, parent) ? createIndex(row, column, getIDOf(row)) : QModelIndex();
+}

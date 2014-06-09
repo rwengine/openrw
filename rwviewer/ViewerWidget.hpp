@@ -18,6 +18,7 @@ class ViewerWidget : public QGLWidget
 	GameWorld* gworld;
 
 	GameObject* dummyObject;
+	quint16 currentObjectID;
 	
 	ModelHandle* cmodel;
 	Animation* canimation;
@@ -49,6 +50,8 @@ public slots:
 	void showItem(qint16 item);
 
 	void showAnimation(Animation* anim);
+
+	void exportModel();
 
 signals:
 

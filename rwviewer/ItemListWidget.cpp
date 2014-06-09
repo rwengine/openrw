@@ -15,6 +15,7 @@ ItemListWidget::ItemListWidget(QWidget* parent, Qt::WindowFlags flags)
 	table = new QTableView();
 	layout->addWidget(searchbox);
 	layout->addWidget(table);
+	table->setSelectionBehavior(QAbstractItemView::SelectRows);
 	intermediate->setLayout(layout);
 	setWidget(intermediate);
 
@@ -36,7 +37,7 @@ void ItemListWidget::selectedIndexChanged(const QModelIndex& current)
 {
 	auto mts = filter->mapToSource(current);
 	if( mts.isValid() ) {
-		emit selectedItemChanged( current.internalId() );
+		emit selectedItemChanged( model->getIDOf(mts.row()) );
 	}
 }
 
