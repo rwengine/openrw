@@ -146,10 +146,10 @@ void DebugState::spawnVehicle(unsigned int id)
 	auto ch = getPlayerCharacter();
 	if(! ch) return;
 
-	auto fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
 	glm::vec3 hit, normal;
-	if(hitWorldRay({ch->position + fwd * 5.f}, {0.f, 0.f, -2.f}, hit, normal)) {
+	if(hitWorldRay(ch->position + (fwd * 5.f), {0.f, 0.f, -2.f}, hit, normal)) {
 		auto spawnpos = hit + normal;
 		getWorld()->createVehicle(id, spawnpos, glm::quat());
 	}
