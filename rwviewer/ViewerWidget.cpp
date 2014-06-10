@@ -6,6 +6,7 @@
 #include <engine/Animator.hpp>
 #include <QFileDialog>
 #include <algorithm>
+#include <objects/InstanceObject.hpp>
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
 : QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
@@ -50,7 +51,7 @@ void ViewerWidget::paintGL()
 		dummyObject->animator->tick(1.f/60.f);
 	}
 	
-	if(cmodel) {
+	if(dummyObject) {
 		glEnable(GL_DEPTH_TEST);
 		
 		glm::mat4 m;
@@ -72,7 +73,9 @@ void ViewerWidget::paintGL()
 		glUniformMatrix4fv(r.uniView, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(r.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 		
-		gworld->renderer.renderModel(cmodel->model, m, dummyObject);
+		if( dummyObject->model->model ) {
+			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);
+		}
 	}
 }
 
@@ -84,7 +87,10 @@ GameWorld* ViewerWidget::world()
 void ViewerWidget::showItem(qint16 item)
 {
 	currentObjectID = item;
-	// TODO: actually show items.
+
+	if( dummyObject ) gworld->destroyObject( dummyObject );
+
+	dummyObject = gworld->createInstance(item, {});
 }
 
 void ViewerWidget::showAnimation(Animation *anim)
@@ -136,7 +142,7 @@ void ViewerWidget::setGamePath(const std::string &path)
 	gworld->gameData.loadIMG("/models/gta3");
 	gworld->gameData.loadIMG("/models/txd");
 
-	gworld->gameData.load();
+	gworld->load();
 	for(auto it = gworld->gameData.ideLocations.begin();
 		it != gworld->gameData.ideLocations.end();
 		++it) {
