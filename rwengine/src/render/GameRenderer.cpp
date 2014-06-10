@@ -338,23 +338,42 @@ void GameRenderer::renderWorld(float alpha)
 			mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
 		}
 
-		if ( mindist > inst.object->drawDistance[0] ) {
-			if ( !inst.LODinstance ) {
+		if( inst.object->numClumps == 1 ) {
+			if( mindist > inst.object->drawDistance[0] ) {
+				// Check for LOD instances
+				if ( inst.LODinstance ) {
+					if( mindist > inst.LODinstance->object->drawDistance[0] ) {
+						culled++;
+						continue;
+					}
+					else if (inst.LODinstance->model->model) {
+						renderModel(inst.LODinstance->model->model, matrixModel);
+					}
+				}
+			}
+			else if (! inst.object->LOD ) {
+				renderModel(inst.model->model, matrixModel);
+			}
+		}
+		else {
+			if( mindist > inst.object->drawDistance[1] ) {
 				culled++;
 				continue;
 			}
-			else {
-				if( mindist > inst.LODinstance->object->drawDistance[0] ) {
-					culled++;
-					continue;
-				}
-				else if (inst.LODinstance->model->model) {
-					renderModel(inst.LODinstance->model->model, matrixModel);
-				}
+			else if( mindist > inst.object->drawDistance[0] ) {
+				// Figure out which one is the LOD.
+				auto RF = inst.model->model->frames[0];
+				auto LODindex = RF->getChildren().size() - 2;
+				auto f = RF->getChildren()[LODindex];
+				renderFrame(inst.model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
 			}
-		}
-		else if (! inst.object->LOD ) {
-			renderModel(inst.model->model, matrixModel);
+			else {
+				// Draw the real object
+				auto RF = inst.model->model->frames[0];
+				auto LODindex = RF->getChildren().size() - 1;
+				auto f = RF->getChildren()[LODindex];
+				renderFrame(inst.model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
+			}
 		}
 	}
 	
