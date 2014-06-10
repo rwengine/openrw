@@ -3,7 +3,7 @@
 QVariant IMGArchiveModel::data(const QModelIndex& index, int role) const
 {
 	if(role == Qt::DisplayRole) {
-		if(index.row() < archive.getAssetCount()) {
+		if(index.row() >= 0 && (unsigned) index.row() < archive.getAssetCount()) {
 			auto& f = archive.getAssetInfoByIndex(index.row());
 			if(index.column() == 0) {
 				return QString(f.name);

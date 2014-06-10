@@ -41,7 +41,7 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 	}
 
 	for(size_t pn = 0; pn < path.nodes.size(); ++pn) {
-		if(path.nodes[pn].next > -1 && path.nodes[pn].next < realNodes.size()) {
+		if(path.nodes[pn].next >= 0 && (unsigned) path.nodes[pn].next < realNodes.size()) {
 			auto node = nodes[realNodes[pn]];
 			node->connections.push_back(nodes[realNodes[path.nodes[pn].next]]);
 			nodes[realNodes[path.nodes[pn].next]]->connections.push_back(node);

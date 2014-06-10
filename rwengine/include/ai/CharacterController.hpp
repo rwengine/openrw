@@ -45,6 +45,8 @@ public:
 	
 	CharacterController(CharacterObject* character);
 
+	virtual ~CharacterController() { }
+
 	Activity* getCurrentActivity() { return _currentActivity; }
 
 	Activity* getNextActivity() { return _nextActivity; }

@@ -36,7 +36,7 @@ void AnimationListWidget::setAnimations(const AnimationList& archive)
 void AnimationListWidget::selectedIndexChanged(const QModelIndex& current)
 {
 	auto mts = filter->mapToSource(current);
-	if(mts.row() < model->getAnimations().size()) {
+	if(mts.row() >= 0 && (unsigned) mts.row() < model->getAnimations().size()) {
 		auto& f = model->getAnimations().at(mts.row());
 		emit selectedAnimationChanged(f.second);
 	}

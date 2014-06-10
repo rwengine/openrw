@@ -75,7 +75,7 @@ public:
 			i < entries.size();
 			++i)
 		{
-			if(activeEntry >= 0 && i == activeEntry) {
+			if(activeEntry >= 0 && i == (unsigned) activeEntry) {
 				sf::RectangleShape rs(sf::Vector2f(250.f, entries[i]->getHeight()));
 				rs.setPosition(basis.x, basis.y);
 				rs.setFillColor(sf::Color::Cyan);
@@ -122,7 +122,7 @@ public:
 	// Activates the menu entry at the current active index.
 	void activate()
 	{
-		if(activeEntry < entries.size()) {
+		if(activeEntry >= 0 && (unsigned) activeEntry < entries.size()) {
 			entries[activeEntry]->activate(0.f, 0.f);
 		}
 	}
