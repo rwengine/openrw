@@ -10,9 +10,28 @@
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
 : QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
-  _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false)
+  _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
+  _frameWidgetDraw(nullptr), _frameWidgetGeom(nullptr)
 {
 }
+
+struct WidgetVertex {
+	float x, y, z;
+	static const AttributeList vertex_attributes() {
+		return {
+			{ATRS_Position, 2, sizeof(WidgetVertex),  0ul}
+		};
+	}
+};
+
+std::vector<WidgetVertex> widgetVerts = {
+	{-1.f, 0.f, 0.f},
+	{ 1.f, 0.f, 0.f},
+	{ 0.f,-1.f, 0.f},
+	{ 0.f, 1.f, 0.f},
+	{ 0.f, 0.f,-1.f},
+	{ 0.f, 0.f, 1.f}
+};
 
 void ViewerWidget::initializeGL()
 {
@@ -23,6 +42,12 @@ void ViewerWidget::initializeGL()
 	
 	glewExperimental = 1;
 	glewInit();
+
+	_frameWidgetDraw = new DrawBuffer;
+	_frameWidgetDraw->setFaceType(GL_LINES);
+	_frameWidgetGeom = new GeometryBuffer;
+	_frameWidgetGeom->uploadVertices(widgetVerts);
+	_frameWidgetDraw->addGeometry(_frameWidgetGeom);
 }
 
 void ViewerWidget::resizeGL(int w, int h)
@@ -83,7 +108,24 @@ void ViewerWidget::paintGL()
 		
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);
+
+			drawFrameWidget(dummyObject->model->model->frames[dummyObject->model->model->rootFrameIdx]);
 		}
+	}
+}
+
+void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m)
+{
+	auto thisM = m * f->getTransform();
+	if(f->getGeometries().size() == 0) {
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform4f(gworld->renderer.uniCol, 1.f, 1.f, 1.f, 1.f);
+		glUniformMatrix4fv(gworld->renderer.uniModel, 1, GL_FALSE, glm::value_ptr(thisM));
+		glBindVertexArray(_frameWidgetDraw->getVAOName());
+		glDrawArrays(_frameWidgetDraw->getFaceType(), 0, 6);
+	}
+	for(auto c : f->getChildren()) {
+		drawFrameWidget(c, thisM);
 	}
 }
 

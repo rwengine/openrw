@@ -6,6 +6,9 @@
 #include <QGLWidget>
 #include <QTimer>
 #include <loaders/LoaderIFP.hpp>
+#include <render/DrawBuffer.hpp>
+#include <render/GeometryBuffer.hpp>
+#include <glm/glm.hpp>
 
 class Model;
 class ViewerWidget : public QGLWidget
@@ -29,6 +32,10 @@ class ViewerWidget : public QGLWidget
 	bool dragging;
 	QPointF dstart;
 	glm::vec2 dastart;
+	
+	DrawBuffer* _frameWidgetDraw;
+	GeometryBuffer* _frameWidgetGeom;
+	void drawFrameWidget(ModelFrame* f, const glm::mat4& = {});
 public:
 
     ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
