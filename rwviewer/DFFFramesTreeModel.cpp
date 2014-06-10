@@ -1,7 +1,7 @@
 #include "DFFFramesTreeModel.hpp"
 #include <render/Model.hpp>
 
-DFFFramesTreeModel::DFFFramesTreeModel(ModelHandle *m, QObject* parent)
+DFFFramesTreeModel::DFFFramesTreeModel(Model *m, QObject* parent)
 	: QAbstractItemModel(parent), model(m)
 {
 
@@ -29,7 +29,7 @@ int DFFFramesTreeModel::rowCount(const QModelIndex& parent) const
 QModelIndex DFFFramesTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
 	if(parent.row() == -1 && parent.column() == -1) {
-		return createIndex(row, column, model->model->frames[model->model->rootFrameIdx]);
+		return createIndex(row, column, model->frames[model->rootFrameIdx]);
 	}
 	ModelFrame* f = static_cast<ModelFrame*>(parent.internalPointer());
 	ModelFrame* p = f->getChildren()[row];

@@ -10,14 +10,16 @@ class ModelFramesWidget : public QDockWidget
 {
 	Q_OBJECT
 
-	ModelHandle* gmodel;
+	Model* gmodel;
 	DFFFramesTreeModel* framemodel;
 	QTreeView* tree;
 	
 public:
     ModelFramesWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
-	void setModel(ModelHandle* model);
+public slots:
+
+	void setModel(Model *model);
 };
 
 #endif

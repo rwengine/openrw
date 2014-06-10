@@ -10,7 +10,7 @@
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
 : QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
-  cmodel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false)
+  _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false)
 {
 }
 
@@ -52,6 +52,14 @@ void ViewerWidget::paintGL()
 	}
 	
 	if(dummyObject) {
+		gworld->_work->update();
+
+		if( dummyObject->model->model != _lastModel ) {
+			_lastModel = dummyObject->model->model;
+			emit modelChanged(_lastModel);
+		}
+
+
 		glEnable(GL_DEPTH_TEST);
 		
 		glm::mat4 m;
@@ -129,9 +137,9 @@ void ViewerWidget::exportModel()
 	}
 }
 
-ModelHandle* ViewerWidget::currentModel() const
+Model* ViewerWidget::currentModel() const
 {
-	return cmodel;
+	return _lastModel;
 }
 
 void ViewerWidget::setGamePath(const std::string &path)

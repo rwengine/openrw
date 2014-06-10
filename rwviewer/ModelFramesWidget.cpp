@@ -8,7 +8,7 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
 	setWidget(tree);
 }
 
-void ModelFramesWidget::setModel(ModelHandle *model)
+void ModelFramesWidget::setModel(Model *model)
 {
 	if(framemodel) {
 		delete framemodel;

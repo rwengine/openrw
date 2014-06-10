@@ -56,6 +56,7 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	
 	connect(itemsWidget, SIGNAL(selectedItemChanged(qint16)), viewer, SLOT(showItem(qint16)));
 	connect(viewer, SIGNAL(dataLoaded(GameWorld*)), itemsWidget, SLOT(worldLoaded(GameWorld*)));
+	connect(viewer, SIGNAL(modelChanged(Model*)), frameswidget, SLOT(setModel(Model*)));
 	connect(animationswidget, SIGNAL(selectedAnimationChanged(Animation*)), viewer, SLOT(showAnimation(Animation*)));
 	
 	updateRecentGames();
