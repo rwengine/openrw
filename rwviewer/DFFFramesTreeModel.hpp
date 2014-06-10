@@ -6,10 +6,10 @@
 
 class DFFFramesTreeModel : public QAbstractItemModel
 {
-	ModelHandle* model;
+	Model* model;
 public:
 	
-	explicit DFFFramesTreeModel(ModelHandle* m, QObject* parent = 0);
+	explicit DFFFramesTreeModel(Model* m, QObject* parent = 0);
 	
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 	

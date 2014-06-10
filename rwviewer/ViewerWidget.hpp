@@ -20,7 +20,7 @@ class ViewerWidget : public QGLWidget
 	GameObject* dummyObject;
 	quint16 currentObjectID;
 	
-	ModelHandle* cmodel;
+	Model* _lastModel;
 	Animation* canimation;
 	
 	float viewDistance;
@@ -39,7 +39,7 @@ public:
 	
     virtual void paintGL();
 
-	ModelHandle *currentModel() const;
+	Model *currentModel() const;
 	
 	// TODO: Move this into the main window or elsewhere, doesn't really belong here.
 	void setGamePath(const std::string& path);
@@ -58,6 +58,8 @@ signals:
 	void dataLoaded(GameWorld* world);
 
 	void fileOpened(const QString& file);
+
+	void modelChanged(Model* model);
 
 protected:
 	
