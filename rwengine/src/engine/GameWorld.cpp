@@ -187,6 +187,13 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		if(! oi->second->textureName.empty()) {
 			gameData.loadTXD(oi->second->textureName + ".txd", true);
 		}
+
+		// Check for dynamic data.
+		auto dyit = gameData.dynamicObjectData.find(oi->second->modelName);
+		std::shared_ptr<DynamicObjectData> dydata;
+		if( dyit != gameData.dynamicObjectData.end() ) {
+			dydata = dyit->second;
+		}
 		
 		auto instance = std::shared_ptr<InstanceObject>(new InstanceObject(
 			this,
@@ -194,7 +201,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			rot,
 			gameData.models[oi->second->modelName],
 			glm::vec3(1.f, 1.f, 1.f),
-			oi->second, nullptr
+			oi->second, nullptr, dydata
 		));
 		
 		objectInstances.push_back(instance);
@@ -349,4 +356,60 @@ int GameWorld::getHour()
 int GameWorld::getMinute()
 {
 	return fmod(gameTime, 60.f);
+}
+
+void GameWorld::handleCollisionResponses()
+{
+	int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; i++)
+	{
+		btPersistentManifold* contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+		auto obA = static_cast<const btCollisionObject*>(contactManifold->getBody0());
+		auto obB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+
+		int numContacts = contactManifold->getNumContacts();
+		for (int j = 0; j < numContacts; j++)
+		{
+			// Check that at least one of the objects involved is an instance.
+			GameObject* a = static_cast<GameObject*>(obA->getUserPointer());
+			GameObject* b = static_cast<GameObject*>(obB->getUserPointer());
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+
+			if(a && a->type() == GameObject::Instance) {
+				auto inst = static_cast<InstanceObject*>(a);
+				if( inst->dynamics ) {
+					if( pt.getAppliedImpulse() > inst->dynamics->uprootForce ) {
+						auto dmg = pt.getPositionWorldOnA();
+						auto src = pt.getPositionWorldOnB();
+
+						inst->takeDamage({
+											 {dmg.x(), dmg.y(), dmg.z()},
+											 {src.x(), src.y(), src.z()},
+											 0.f,
+											 GameObject::DamageInfo::Physics,
+											 pt.getAppliedImpulse()
+										 });
+					}
+				}
+			}
+			if(b && b->type() == GameObject::Instance) {
+				auto inst = static_cast<InstanceObject*>(b);
+				if( inst->dynamics ) {
+					if( pt.getAppliedImpulse() > inst->dynamics->uprootForce ) {
+						auto dmg = pt.getPositionWorldOnB();
+						auto src = pt.getPositionWorldOnA();
+
+						inst->takeDamage({
+											 {dmg.x(), dmg.y(), dmg.z()},
+											 {src.x(), src.y(), src.z()},
+											 0.f,
+											 GameObject::DamageInfo::Physics,
+											 pt.getAppliedImpulse()
+										 });
+					}
+				}
+			}
+		}
+	}
+
 }

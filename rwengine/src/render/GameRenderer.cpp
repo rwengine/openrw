@@ -327,9 +327,14 @@ void GameRenderer::renderWorld(float alpha)
 		}
 
 		glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, inst.position);
-		matrixModel = glm::scale(matrixModel, inst.scale);
-		matrixModel = matrixModel * glm::mat4_cast(inst.rotation);
+		if( inst.body ) {
+			inst.body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
+		}
+		else {
+			matrixModel = glm::translate(matrixModel, inst.position);
+			matrixModel = glm::scale(matrixModel, inst.scale);
+			matrixModel = matrixModel * glm::mat4_cast(inst.rotation);
+		}
 
 		float mindist = 100000.f;
 		for (size_t g = 0; g < inst.model->model->geometries.size(); g++)

@@ -12,8 +12,7 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
-					 object,
-				     nullptr
+					 object, nullptr, nullptr
 					);
 	GameObject::DamageInfo dmg;
 	dmg.type = GameObject::DamageInfo::Bullet;
@@ -40,8 +39,7 @@ BOOST_AUTO_TEST_CASE(instance_test_destroy)
 					 glm::vec3(0.f, 0.f, 0.f), 
 					 glm::quat(), nullptr, 
 					 glm::vec3(1.f),
-					 object,
-				     nullptr
+					 object, nullptr, nullptr
 					);
 	GameObject::DamageInfo dmg;
 	dmg.type = GameObject::DamageInfo::Bullet;

@@ -8,11 +8,11 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		ModelHandle *model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
-		std::shared_ptr<InstanceObject> lod
-			)
-: GameObject(engine, pos, rot, model), scale(scale), object(obj), LODinstance(lod)
+		std::shared_ptr<InstanceObject> lod,
+		std::shared_ptr<DynamicObjectData> dyn)
+: GameObject(engine, pos, rot, model), scale(scale), object(obj),
+  LODinstance(lod), dynamics(dyn)
 {
-	btRigidBody* body = nullptr;
 	auto phyit = engine->gameData.collisions.find(obj->modelName);
 	if( phyit != engine->gameData.collisions.end()) {
 		btCompoundShape* cmpShape = new btCompoundShape;
@@ -62,9 +62,23 @@ InstanceObject::InstanceObject(GameWorld* engine,
 			cmpShape->addChildShape(t, trishape);
 		}
 
+		if( dynamics ) {
+			if( dynamics->uprootForce > 0.f ) {
+				info.m_mass = 0.f;
+			}
+			else {
+				btVector3 inert;
+				cmpShape->calculateLocalInertia(dynamics->mass, inert);
+				info.m_mass = dynamics->mass;
+				info.m_localInertia = inert;
+			}
+		}
+
 		body = new btRigidBody(info);
 		body->setUserPointer(this);
 		engine->dynamicsWorld->addRigidBody(body);
+
+		body->setActivationState(ISLAND_SLEEPING);
 	}
 
 	auto pathit = engine->objectNodes.find(obj->ID);
@@ -81,6 +95,18 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
+	if( dynamics ) {
+		smash = dynamics->collDamageFlags == 80;
+
+		if( dmg.impulse >= dynamics->uprootForce && (body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
+			// Apparently bodies must be removed and re-added if their mass changes.
+			engine->dynamicsWorld->removeRigidBody(body);
+			btVector3 inert;
+			body->getCollisionShape()->calculateLocalInertia(dynamics->mass, inert);
+			body->setMassProps(dynamics->mass, inert);
+			engine->dynamicsWorld->addRigidBody(body);
+		}
+	}
 	if(explodeOnHit || smash)
 	{
 		if(explodeOnHit) {
@@ -94,4 +120,5 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 	}
 	return false;
 }
+
 

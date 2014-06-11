@@ -84,6 +84,11 @@ struct GameObject
 		 * Type of the damage
 		 */
 		DamageType type;
+
+		/**
+		 * Physics impulse.
+		 */
+		float impulse;
 	};
 	
 	virtual bool takeDamage(const DamageInfo& damage) { return false; }

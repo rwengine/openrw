@@ -197,6 +197,12 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
 	/**
+	 * @brief handleCollisionResponses performs physics response checking
+	 * for collisions between vehicles, objects etc.
+	 */
+	void handleCollisionResponses();
+
+	/**
 	 * Work related
 	 */
 	WorkContext* _work;

@@ -474,15 +474,31 @@ void GameData::loadDynamicObjects(const std::string& name)
 			std::shared_ptr<DynamicObjectData> dyndata(new DynamicObjectData);
 			
 			ss >> dyndata->modelName;
+			auto cpos = dyndata->modelName.find(',');
+			if( cpos != dyndata->modelName.npos ) {
+				dyndata->modelName.erase(cpos);
+			}
 			ss >> dyndata->mass;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->turnMass;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->airRes;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->elacticity;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->bouancy;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->uprootForce;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->collDamageMulti;
-			ss >> dyndata->collDamageFlags;
-			ss >> dyndata->collResponseFlags;
+			if(ss.peek() == ',') ss.ignore(1);
+			int tmp;
+			ss >> tmp;
+			dyndata->collDamageFlags = tmp;
+			if(ss.peek() == ',') ss.ignore(1);
+			ss >> tmp;
+			dyndata->collResponseFlags = tmp;
+			if(ss.peek() == ',') ss.ignore(1);
 			ss >> dyndata->cameraAvoid;
 			
 			dynamicObjectData.insert({dyndata->modelName, dyndata});
