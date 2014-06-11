@@ -110,7 +110,7 @@ uniform float size;
 uniform mat4 MVP;
 void main()
 {
-	TexCoords = position;
+	TexCoords = position * 2.0;
 	gl_Position = MVP * vec4(position * size, height, 1.0);
 })";
 
@@ -435,26 +435,66 @@ void GameRenderer::renderWorld(float alpha)
 	glBindVertexArray( waterDraw.getVAOName() );
 	glUseProgram( waterProgram );
 
-	// TODO: label all the variables!
+	// TODO: Add some kind of draw distance
 #define NO_WATER_INDEX 48
+#define WATER_LQ_DATA_SIZE 64
+#define WATER_HQ_DATA_SIZE 128
+#define WATER_WORLD_SIZE 4096.f
+#define WATER_HQ_DISTANCE 128.f
+
+	float blockLQSize = WATER_WORLD_SIZE/WATER_LQ_DATA_SIZE;
+	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
+
+	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
 	glm::mat4 waterModel;
 	glUniform1i(waterTexture, 0);
-	float blockSize = 4096.f/64.f;
 	auto waterTex = engine->gameData.textures["water_old"];
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
-	// TODO: high / low quality water. Projected grid?
+	auto camposFlat = glm::vec2(camera.worldPos);
 
-	for( int x = 0; x < 64; x++ ) {
-		for( int y = 0; y < 64; y++ ) {
-			int i = (x*64) + y;
+	// Draw High detail water
+	glUniform1f(waterSize, blockHQSize);
+	for( int x = 0; x < WATER_HQ_DATA_SIZE; x++ ) {
+		for( int y = 0; y < WATER_HQ_DATA_SIZE; y++ ) {
+			auto waterWS = waterOffset + glm::vec2(blockHQSize) * glm::vec2(x, y);
+			auto cullWS = waterWS + (blockHQSize / 2.f);
+
+			// Check that this is the right time to draw the HQ water
+			if( glm::distance(camposFlat, cullWS) - blockHQSize >= WATER_HQ_DISTANCE ) continue;
+
+			waterModel = glm::mat4();
+			waterModel = glm::translate(waterModel, glm::vec3(waterWS, 0.f));
+			int i = (x*WATER_HQ_DATA_SIZE) + y;
+			int hI = engine->gameData.realWater[i];
+			if( hI >= NO_WATER_INDEX ) continue;
+			float h = engine->gameData.waterHeights[hI];
+
+			glUniform1f(waterHeight, h);
+			auto MVP = proj * view * waterModel;
+			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
+			glDrawArrays(waterDraw.getFaceType(), 0, 4);
+		}
+	}
+
+	glUniform1f(waterSize, blockLQSize);
+	for( int x = 0; x < WATER_LQ_DATA_SIZE; x++ ) {
+		for( int y = 0; y < WATER_LQ_DATA_SIZE; y++ ) {
+			auto waterWS = waterOffset + glm::vec2(blockLQSize) * glm::vec2(x, y);
+			auto cullWS = waterWS + (blockLQSize / 2.f);
+
+			// Check that this is the right time to draw the LQ
+			if( glm::distance(camposFlat, cullWS) - blockHQSize/4.f < WATER_HQ_DISTANCE ) continue;
+			if( glm::distance(camposFlat, cullWS) - blockLQSize/2.f > camera.frustum.far ) continue;
+
+			waterModel = glm::mat4();
+			waterModel = glm::translate(waterModel, glm::vec3(waterWS, 0.f));
+			int i = (x*WATER_LQ_DATA_SIZE) + y;
 			int hI = engine->gameData.visibleWater[i];
 			if( hI >= NO_WATER_INDEX ) continue;
 			float h = engine->gameData.waterHeights[hI];
-			waterModel = glm::mat4();
-			waterModel = glm::translate(waterModel, {-2048.f + x * blockSize, -2048.f + y * blockSize, 0.f});
-			glUniform1f(waterSize, blockSize);
+
 			glUniform1f(waterHeight, h);
 			auto MVP = proj * view * waterModel;
 			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));

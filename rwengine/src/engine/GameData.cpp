@@ -352,8 +352,8 @@ void GameData::loadWaterpro(const std::string& path)
 		ifstr.read(reinterpret_cast<char*>(&waterHeights), sizeof(float)*48);
 		
 		ifstr.seekg(0x03C4);
-		ifstr.read(reinterpret_cast<char*>(&visibleWater), sizeof(float)*64*64);
-		ifstr.read(reinterpret_cast<char*>(&realWater), sizeof(float)*128*128);
+		ifstr.read(reinterpret_cast<char*>(&visibleWater), sizeof(char)*64*64);
+		ifstr.read(reinterpret_cast<char*>(&realWater), sizeof(char)*128*128);
 	}
 }
 

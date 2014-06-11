@@ -67,7 +67,7 @@ void ViewerWidget::paintGL()
 
 	auto& r = gworld->renderer;
 	
-	r.camera.frustum.far = 100.f;
+	r.camera.frustum.far = 500.f;
 	r.camera.frustum.near = 0.1f;
 	r.camera.frustum.fov = 90.f;
 	r.camera.frustum.aspectRatio = width()/(height()*1.f);
