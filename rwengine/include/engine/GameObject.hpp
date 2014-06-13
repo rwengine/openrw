@@ -27,14 +27,17 @@ struct GameObject
     GameWorld* engine;
 
 	Animator* animator; /// Object's animator.
-	
+
 	/**
 	 * Health value
 	 */
 	float mHealth;
 
+	bool _inWater;
+
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
-		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f)
+		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
+		  _inWater(false)
 	{}
 		
 	virtual ~GameObject() {}
@@ -96,6 +99,8 @@ struct GameObject
 	virtual bool isFrameVisible(ModelFrame* frame) const { return true; }
 
 	virtual bool isAnimationFixed() const { return true; }
+
+	virtual bool isInWater() const { return _inWater; }
 };
 
 #endif // __GAMEOBJECTS_HPP__

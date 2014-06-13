@@ -91,6 +91,8 @@ glm::vec3 PlayerController::getTargetPosition()
 
 void PlayerController::jump()
 {
-	character->jump();
+	if(! character->isInWater() ) {
+		character->jump();
+	}
 }
 

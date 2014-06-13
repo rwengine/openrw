@@ -9,15 +9,17 @@
 IngameState::IngameState()
 	: _player(nullptr), _playerCharacter(nullptr)
 {
-	_playerCharacter = getWorld()->createPedestrian(1, {-1240.f, -875.f, 13.f});
+	_playerCharacter = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
 	_player = new PlayerController(_playerCharacter);
 
 	setPlayerCharacter( _playerCharacter );
 
 	float j = 0;
-	auto spawnPos = glm::vec3( -1200.f, -885.f, 14.f );
+	auto spawnPos = glm::vec3( -1000.f, -1000.f, 14.f );
 	for( auto& vi : getWorld()->vehicleTypes ) {
-		auto v = getWorld()->createVehicle(vi.first, spawnPos, glm::quat());
+		auto sp = spawnPos;
+		if(vi.first == 120) sp = { -1000.f, -1050.f, 5.f };
+		auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
 		spawnPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
 		if( ++j > 33 ) break;
 	}

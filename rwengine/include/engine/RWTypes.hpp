@@ -7,6 +7,12 @@
 #include <string>
 #include <glm/glm.hpp>
 
+#define NO_WATER_INDEX 48
+#define WATER_LQ_DATA_SIZE 64
+#define WATER_HQ_DATA_SIZE 128
+#define WATER_WORLD_SIZE 4096.f
+#define WATER_HQ_DISTANCE 128.f
+
 class Animation;
 
 typedef std::map<std::string, Animation*> AnimationSet;

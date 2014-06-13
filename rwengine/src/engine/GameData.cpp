@@ -581,3 +581,15 @@ TextureAtlas* GameData::getAtlas(size_t i)
 	}
 	return nullptr;
 }
+
+int GameData::getWaterIndexAt(const glm::vec3 &ws) const
+{
+	auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+	auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+
+	if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
+		int i = (wX*WATER_HQ_DATA_SIZE) + wY;
+		return engine->gameData.realWater[i];
+	}
+	return 0;
+}

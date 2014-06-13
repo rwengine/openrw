@@ -9,7 +9,8 @@
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
+	  damageFlags(0), _lastHeight(0.f), vehicle(data),
+	  info(info), colourPrimary(prim),
 	  colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
 	mHealth = 100.f;
@@ -181,6 +182,63 @@ void VehicleObject::tick(float dt)
 				//physVehicle->setSteeringValue(std::min(3.141f/2.f, std::abs(steerAngle)) * sign, w);
 			}
 		}
+
+		auto ws = getPosition();
+		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+		float vH = ws.z - info->handling.dimensions.z;
+		float wH = 0.f;
+
+		if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
+			int i = (wX*WATER_HQ_DATA_SIZE) + wY;
+			int hI = engine->gameData.realWater[i];
+			if( hI < NO_WATER_INDEX ) {
+				wH = engine->gameData.waterHeights[hI];
+				// If the vehicle is currently underwater
+				if( vH <= wH ) {
+					// and was not underwater here in the last tick
+					if( _lastHeight >= wH ) {
+						// we are for real, underwater
+						_inWater = true;
+					}
+					else if( _inWater == false ) {
+						// It's just a tunnel or something, we good.
+						_inWater = false;
+					}
+				}
+				else {
+					// The water is beneath us
+					_inWater = false;
+				}
+			}
+			else {
+				_inWater = false;
+			}
+		}
+
+		if( _inWater ) {
+			float oZ = 0.f;
+			if( vehicle->type != VehicleData::BOAT ) {
+				oZ = -((-info->handling.dimensions.z/2.f) + info->handling.dimensions.z * (info->handling.percentSubmerged/100.f));
+			}
+			auto vFwd = getRotation() * glm::vec3(info->handling.dimensions.y, 0.f, 0.f);
+			auto vRt = getRotation() * glm::vec3(0.f, info->handling.dimensions.x, 0.f);
+
+			float buoyancyForce = info->handling.mass * 9.81f * 0.75f;
+
+			// Damper motion
+			physBody->setDamping(0.9f, 0.9f);
+
+			applyWaterFloat( vFwd, buoyancyForce, oZ);
+			applyWaterFloat(-vFwd, buoyancyForce, oZ);
+			applyWaterFloat( vRt, buoyancyForce, oZ);
+			applyWaterFloat(-vRt, buoyancyForce, oZ);
+		}
+		else {
+			physBody->setDamping(0.0f, 0.0f);
+		}
+
+		_lastHeight = vH;
 	}
 }
 
@@ -316,6 +374,19 @@ bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 	}
 
 	return true;
+}
+
+void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float force, float waterOffset)
+{
+	auto ws = getPosition() + relPt;
+	auto wi = engine->gameData.getWaterIndexAt(ws);
+	if(wi != NO_WATER_INDEX) {
+		float h = engine->gameData.waterHeights[wi] + waterOffset;
+		if ( ws.z <= h ) {
+			physBody->applyForce(btVector3(0.f, 0.f, (1.f + h - ws.z) * force),
+								 btVector3(relPt.x, relPt.y, relPt.z));
+		}
+	}
 }
 
 // Dammnit Bullet

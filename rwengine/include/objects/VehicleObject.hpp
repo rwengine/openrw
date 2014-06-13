@@ -36,6 +36,9 @@ private:
 	float brake;
 	bool handbrake;
 	unsigned int damageFlags;
+
+	// Used to determine in water status
+	float _lastHeight;
 public:
 
 	VehicleDataHandle vehicle;
@@ -103,6 +106,8 @@ public:
 	void setPartDamaged(unsigned int flag, bool damaged);
 
 	virtual bool isFrameVisible(ModelFrame *frame) const;
+
+	void applyWaterFloat(const glm::vec3& relPt, float force, float waterOffset);
 };
 
 /**

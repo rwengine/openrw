@@ -224,10 +224,27 @@ void CharacterObject::updateCharacter(float dt)
 				}
 			}
 		}
+
+		// Handle above waist height water.
+		auto wi = engine->gameData.getWaterIndexAt(getPosition());
+		if( wi != NO_WATER_INDEX ) {
+			float wh = engine->gameData.waterHeights[wi];
+			auto ws = getPosition();
+			if( ws.z < wh ) {
+				ws.z = wh;
+				setPosition(ws);
+				physCharacter->setGravity(0.f);
+				_inWater = true;
+			}
+			else {
+				physCharacter->setGravity(9.81f);
+				_inWater = false;
+			}
+		}
 		
 		if(currentActivity == CharacterObject::Jump)
 		{
-			if(physCharacter->onGround())
+			if(physCharacter->onGround() || isInWater())
 			{
 				enterAction(CharacterObject::Idle);
 			}

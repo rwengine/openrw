@@ -436,11 +436,6 @@ void GameRenderer::renderWorld(float alpha)
 	glUseProgram( waterProgram );
 
 	// TODO: Add some kind of draw distance
-#define NO_WATER_INDEX 48
-#define WATER_LQ_DATA_SIZE 64
-#define WATER_HQ_DATA_SIZE 128
-#define WATER_WORLD_SIZE 4096.f
-#define WATER_HQ_DISTANCE 128.f
 
 	float blockLQSize = WATER_WORLD_SIZE/WATER_LQ_DATA_SIZE;
 	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
