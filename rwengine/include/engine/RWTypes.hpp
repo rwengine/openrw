@@ -12,6 +12,8 @@
 #define WATER_HQ_DATA_SIZE 128
 #define WATER_WORLD_SIZE 4096.f
 #define WATER_HQ_DISTANCE 128.f
+#define WATER_SCALE 0.05f
+#define WATER_HEIGHT 0.5f
 
 class Animation;
 

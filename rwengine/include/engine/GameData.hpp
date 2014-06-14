@@ -262,6 +262,7 @@ public:
 	uint8_t realWater[128*128];
 
 	int getWaterIndexAt(const glm::vec3& ws) const;
+	float getWaveHeightAt(const glm::vec3& ws) const;
 };
 
 #endif

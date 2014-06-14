@@ -107,7 +107,7 @@ public:
 
 	virtual bool isFrameVisible(ModelFrame *frame) const;
 
-	void applyWaterFloat(const glm::vec3& relPt, float force, float waterOffset);
+	void applyWaterFloat(const glm::vec3& relPt, float waterOffset);
 };
 
 /**

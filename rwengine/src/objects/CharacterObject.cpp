@@ -230,6 +230,7 @@ void CharacterObject::updateCharacter(float dt)
 		if( wi != NO_WATER_INDEX ) {
 			float wh = engine->gameData.waterHeights[wi];
 			auto ws = getPosition();
+			wh += engine->gameData.getWaveHeightAt(ws);
 			if( ws.z < wh ) {
 				ws.z = wh;
 				setPosition(ws);

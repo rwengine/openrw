@@ -90,15 +90,19 @@ struct WaterVertex {
 	float x, y;
 };
 
-std::vector<WaterVertex> planeVerts = {
+std::vector<WaterVertex> waterLQVerts = {
 	{1.0f, 1.0f},
 	{0.0f, 1.0f},
 	{1.0f,-0.0f},
 	{0.0f,-0.0f}
 };
 
-GeometryBuffer waterBuffer;
-DrawBuffer waterDraw;
+std::vector<WaterVertex> waterHQVerts;
+
+GeometryBuffer waterLQBuffer;
+DrawBuffer waterLQDraw;
+GeometryBuffer waterHQBuffer;
+DrawBuffer waterHQDraw;
 
 const char *waterVSSource = R"(
 #version 130
@@ -108,10 +112,15 @@ out vec2 TexCoords;
 uniform float height;
 uniform float size;
 uniform mat4 MVP;
+uniform float time;
+uniform vec2 worldP;
+uniform vec2 waveParams;
 void main()
 {
+	vec2 p = worldP + position * size;
+	float waveHeight = (1.0+sin(time + (p.x + p.y) * waveParams.x)) * waveParams.y;
 	TexCoords = position * 2.0;
-	gl_Position = MVP * vec4(position * size, height, 1.0);
+	gl_Position = MVP * vec4(p, height + waveHeight, 1.0);
 })";
 
 const char *waterFSSource = R"(
@@ -185,9 +194,30 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	glGenVertexArrays( 1, &vao );
 
 	// Upload water plane
-	waterBuffer.uploadVertices(planeVerts);
-	waterDraw.addGeometry(&waterBuffer);
-	waterDraw.setFaceType(GL_TRIANGLE_STRIP);
+	waterLQBuffer.uploadVertices(waterLQVerts);
+	waterLQDraw.addGeometry(&waterLQBuffer);
+	waterLQDraw.setFaceType(GL_TRIANGLE_STRIP);
+
+	// Generate HQ water geometry
+	int waterverts = 5;
+	float vertStep = 1.f/waterverts;
+	for(int x = 0; x < waterverts; ++x) {
+		float xB = vertStep * x;
+		for(int y = 0; y < waterverts; ++y) {
+			float yB = vertStep * y;
+			waterHQVerts.push_back({xB + vertStep, yB + vertStep});
+			waterHQVerts.push_back({xB,            yB + vertStep});
+			waterHQVerts.push_back({xB + vertStep, yB           });
+
+			waterHQVerts.push_back({xB + vertStep, yB           });
+			waterHQVerts.push_back({xB,            yB + vertStep});
+			waterHQVerts.push_back({xB,            yB           });
+		}
+	}
+
+	waterHQBuffer.uploadVertices(waterHQVerts);
+	waterHQDraw.addGeometry(&waterHQBuffer);
+	waterHQDraw.setFaceType(GL_TRIANGLES);
 
 	GLuint waterVS = compileShader(GL_VERTEX_SHADER, waterVSSource);
 	GLuint waterFS = compileShader(GL_FRAGMENT_SHADER, waterFSSource);
@@ -199,6 +229,9 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	waterTexture = glGetUniformLocation(waterProgram, "texture");
 	waterSize = glGetUniformLocation(waterProgram, "size");
 	waterMVP = glGetUniformLocation(waterProgram, "MVP");
+	waterTime = glGetUniformLocation(waterProgram, "time");
+	waterPosition = glGetUniformLocation(waterProgram, "worldP");
+	waterWave = glGetUniformLocation(waterProgram, "waveParams");
 	
 	// And our skydome while we're at it.
 	glGenBuffers(1, &skydomeVBO);
@@ -432,7 +465,6 @@ void GameRenderer::renderWorld(float alpha)
 	transparentDrawQueue.clear();
 
 	// Draw the water.
-	glBindVertexArray( waterDraw.getVAOName() );
 	glUseProgram( waterProgram );
 
 	// TODO: Add some kind of draw distance
@@ -441,16 +473,19 @@ void GameRenderer::renderWorld(float alpha)
 	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
 
 	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
-	glm::mat4 waterModel;
 	glUniform1i(waterTexture, 0);
+	glUniform2f(waterWave, WATER_SCALE, WATER_HEIGHT);
 	auto waterTex = engine->gameData.textures["water_old"];
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
 	auto camposFlat = glm::vec2(camera.worldPos);
 
+	glBindVertexArray( waterHQDraw.getVAOName() );
+
 	// Draw High detail water
 	glUniform1f(waterSize, blockHQSize);
+	glUniform1f(waterTime, engine->gameTime);
 	for( int x = 0; x < WATER_HQ_DATA_SIZE; x++ ) {
 		for( int y = 0; y < WATER_HQ_DATA_SIZE; y++ ) {
 			auto waterWS = waterOffset + glm::vec2(blockHQSize) * glm::vec2(x, y);
@@ -459,19 +494,20 @@ void GameRenderer::renderWorld(float alpha)
 			// Check that this is the right time to draw the HQ water
 			if( glm::distance(camposFlat, cullWS) - blockHQSize >= WATER_HQ_DISTANCE ) continue;
 
-			waterModel = glm::mat4();
-			waterModel = glm::translate(waterModel, glm::vec3(waterWS, 0.f));
 			int i = (x*WATER_HQ_DATA_SIZE) + y;
 			int hI = engine->gameData.realWater[i];
 			if( hI >= NO_WATER_INDEX ) continue;
 			float h = engine->gameData.waterHeights[hI];
 
 			glUniform1f(waterHeight, h);
-			auto MVP = proj * view * waterModel;
+			auto MVP = proj * view;
+			glUniform2fv(waterPosition, 1, glm::value_ptr(waterWS));
 			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
-			glDrawArrays(waterDraw.getFaceType(), 0, 4);
+			glDrawArrays(waterHQDraw.getFaceType(), 0, waterHQVerts.size());
 		}
 	}
+
+	glBindVertexArray( waterLQDraw.getVAOName() );
 
 	glUniform1f(waterSize, blockLQSize);
 	for( int x = 0; x < WATER_LQ_DATA_SIZE; x++ ) {
@@ -483,17 +519,16 @@ void GameRenderer::renderWorld(float alpha)
 			if( glm::distance(camposFlat, cullWS) - blockHQSize/4.f < WATER_HQ_DISTANCE ) continue;
 			if( glm::distance(camposFlat, cullWS) - blockLQSize/2.f > camera.frustum.far ) continue;
 
-			waterModel = glm::mat4();
-			waterModel = glm::translate(waterModel, glm::vec3(waterWS, 0.f));
 			int i = (x*WATER_LQ_DATA_SIZE) + y;
 			int hI = engine->gameData.visibleWater[i];
 			if( hI >= NO_WATER_INDEX ) continue;
 			float h = engine->gameData.waterHeights[hI];
 
 			glUniform1f(waterHeight, h);
-			auto MVP = proj * view * waterModel;
+			auto MVP = proj * view;
+			glUniform2fv(waterPosition, 1, glm::value_ptr(waterWS));
 			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
-			glDrawArrays(waterDraw.getFaceType(), 0, 4);
+			glDrawArrays(waterLQDraw.getFaceType(), 0, 4);
 		}
 	}
 

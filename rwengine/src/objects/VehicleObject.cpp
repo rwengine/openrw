@@ -219,20 +219,19 @@ void VehicleObject::tick(float dt)
 		if( _inWater ) {
 			float oZ = 0.f;
 			if( vehicle->type != VehicleData::BOAT ) {
-				oZ = -((-info->handling.dimensions.z/2.f) + info->handling.dimensions.z * (info->handling.percentSubmerged/100.f));
+				// dimensions.z doesn't quite fite, so divide by 120 instead of 100.
+				oZ = (info->handling.dimensions.z / 2.f) - (info->handling.dimensions.z * (info->handling.percentSubmerged/120.f));
 			}
-			auto vFwd = getRotation() * glm::vec3(info->handling.dimensions.y, 0.f, 0.f);
-			auto vRt = getRotation() * glm::vec3(0.f, info->handling.dimensions.x, 0.f);
-
-			float buoyancyForce = info->handling.mass * 9.81f * 0.75f;
+			auto vFwd = getRotation() * glm::vec3(0.f, info->handling.dimensions.y/2.f, 0.f);
+			auto vRt = getRotation() * glm::vec3(info->handling.dimensions.x/2.f, 0.f, 0.f);
 
 			// Damper motion
-			physBody->setDamping(0.9f, 0.9f);
+			physBody->setDamping(0.95f, 0.9f);
 
-			applyWaterFloat( vFwd, buoyancyForce, oZ);
-			applyWaterFloat(-vFwd, buoyancyForce, oZ);
-			applyWaterFloat( vRt, buoyancyForce, oZ);
-			applyWaterFloat(-vRt, buoyancyForce, oZ);
+			applyWaterFloat( vFwd, oZ);
+			applyWaterFloat(-vFwd, oZ);
+			applyWaterFloat( vRt, oZ);
+			applyWaterFloat(-vRt, oZ);
 		}
 		else {
 			physBody->setDamping(0.0f, 0.0f);
@@ -376,14 +375,23 @@ bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 	return true;
 }
 
-void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float force, float waterOffset)
+float buoyancyK = 25000.f;
+float buoyancyC = 100.f;
+
+void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float waterOffset)
 {
 	auto ws = getPosition() + relPt;
 	auto wi = engine->gameData.getWaterIndexAt(ws);
 	if(wi != NO_WATER_INDEX) {
 		float h = engine->gameData.waterHeights[wi] + waterOffset;
+
+		// Calculate wave height
+		h += engine->gameData.getWaveHeightAt(ws);
+
 		if ( ws.z <= h ) {
-			physBody->applyForce(btVector3(0.f, 0.f, (1.f + h - ws.z) * force),
+			float x = (h - ws.z);
+			float F = buoyancyK * x + -buoyancyC * physBody->getLinearVelocity().z();
+			physBody->applyForce(btVector3(0.f, 0.f, F),
 								 btVector3(relPt.x, relPt.y, relPt.z));
 		}
 	}

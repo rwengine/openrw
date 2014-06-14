@@ -593,3 +593,8 @@ int GameData::getWaterIndexAt(const glm::vec3 &ws) const
 	}
 	return 0;
 }
+
+float GameData::getWaveHeightAt(const glm::vec3 &ws) const
+{
+	return (1+sin(engine->gameTime + (ws.x + ws.y) * WATER_SCALE)) * WATER_HEIGHT;
+}
