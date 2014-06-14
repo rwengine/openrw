@@ -18,7 +18,7 @@ IngameState::IngameState()
 	auto spawnPos = glm::vec3( -1000.f, -1000.f, 14.f );
 	for( auto& vi : getWorld()->vehicleTypes ) {
 		auto sp = spawnPos;
-		if(vi.first == 120) sp = { -1000.f, -1050.f, 5.f };
+		if(vi.first == 120) sp = { -1000.f, -1040.f, 5.f };
 		auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
 		spawnPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
 		if( ++j > 33 ) break;

@@ -183,6 +183,17 @@ void VehicleObject::tick(float dt)
 			}
 		}
 
+		if( vehicle->type == VehicleData::BOAT ) {
+			if( isInWater() ) {
+				btVector3 localSteer = btVector3(info->handling.dimensions.x * steerAngle, 0.f, 0.f)
+						.rotate(physBody->getOrientation().getAxis(), physBody->getOrientation().getAngle());
+				physBody->applyForce(
+							physVehicle->getForwardVector() * engineForce * 100.f,
+							localSteer);
+			}
+			physBody->setDamping(0.2f, 0.6f);
+		}
+
 		auto ws = getPosition();
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
@@ -221,12 +232,12 @@ void VehicleObject::tick(float dt)
 			if( vehicle->type != VehicleData::BOAT ) {
 				// dimensions.z doesn't quite fite, so divide by 120 instead of 100.
 				oZ = (info->handling.dimensions.z / 2.f) - (info->handling.dimensions.z * (info->handling.percentSubmerged/120.f));
+
+				// Damper motion
+				physBody->setDamping(0.95f, 0.9f);
 			}
 			auto vFwd = getRotation() * glm::vec3(0.f, info->handling.dimensions.y/2.f, 0.f);
 			auto vRt = getRotation() * glm::vec3(info->handling.dimensions.x/2.f, 0.f, 0.f);
-
-			// Damper motion
-			physBody->setDamping(0.95f, 0.9f);
 
 			applyWaterFloat( vFwd, oZ);
 			applyWaterFloat(-vFwd, oZ);
