@@ -11,7 +11,7 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		std::shared_ptr<InstanceObject> lod,
 		std::shared_ptr<DynamicObjectData> dyn)
 : GameObject(engine, pos, rot, model), scale(scale), object(obj),
-  LODinstance(lod), dynamics(dyn)
+  LODinstance(lod), dynamics(dyn), _collisionHeight(0.f)
 {
 	auto phyit = engine->gameData.collisions.find(obj->modelName);
 	if( phyit != engine->gameData.collisions.end()) {
@@ -28,6 +28,9 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
 		CollisionModel& physInst = *phyit->second.get();
 
+		float colMin = std::numeric_limits<float>::max(),
+				colMax = std::numeric_limits<float>::lowest();
+
 		// Boxes
 		for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
 			auto& box = physInst.boxes[i];
@@ -37,6 +40,9 @@ InstanceObject::InstanceObject(GameWorld* engine,
 			btTransform t; t.setIdentity();
 			t.setOrigin(btVector3(mid.x, mid.y, mid.z));
 			cmpShape->addChildShape(t, bshape);
+
+			colMin = std::min(colMin, mid.z - size.z);
+			colMax = std::max(colMax, mid.z + size.z);
 		}
 
 		// Spheres
@@ -46,6 +52,9 @@ InstanceObject::InstanceObject(GameWorld* engine,
 			btTransform t; t.setIdentity();
 			t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 			cmpShape->addChildShape(t, sshape);
+
+			colMin = std::min(colMin, sphere.center.z - sphere.radius);
+			colMax = std::max(colMax, sphere.center.z + sphere.radius);
 		}
 
 		if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
@@ -61,6 +70,8 @@ InstanceObject::InstanceObject(GameWorld* engine,
 			btTransform t; t.setIdentity();
 			cmpShape->addChildShape(t, trishape);
 		}
+
+		_collisionHeight = colMax - colMin;
 
 		if( dynamics ) {
 			if( dynamics->uprootForce > 0.f ) {
@@ -87,6 +98,70 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		for( size_t p = 0; p < pathlist.size(); ++p ) {
 			auto& path = pathlist[p];
 			engine->aigraph.createPathNodes(position, rot, *path);
+		}
+	}
+}
+
+void InstanceObject::tick(float dt)
+{
+	if( dynamics ) {
+		auto _bws = body->getWorldTransform().getOrigin();
+		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
+		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
+		float vH = ws.z;// - _collisionHeight/2.f;
+		float wH = 0.f;
+
+		if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
+			int i = (wX*WATER_HQ_DATA_SIZE) + wY;
+			int hI = engine->gameData.realWater[i];
+			if( hI < NO_WATER_INDEX ) {
+				wH = engine->gameData.waterHeights[hI];
+				wH += engine->gameData.getWaveHeightAt(ws);
+				if( vH <= wH ) {
+					_inWater = true;
+				}
+				else {
+					_inWater = false;
+				}
+			}
+			else {
+				_inWater = false;
+			}
+		}
+		_lastHeight = ws.z;
+
+		if( _inWater ) {
+			float oZ = -(_collisionHeight * (dynamics->bouancy/100.f));
+			body->activate(true);
+			// Damper motion
+			body->setDamping(0.95f, 0.9f);
+
+			auto wi = engine->gameData.getWaterIndexAt(ws);
+			if(wi != NO_WATER_INDEX) {
+				float h = engine->gameData.waterHeights[wi] + oZ;
+
+				// Calculate wave height
+				h += engine->gameData.getWaveHeightAt(ws);
+
+				if ( ws.z <= h ) {
+					if( dynamics->uprootForce > 0.f && (body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
+						// Apparently bodies must be removed and re-added if their mass changes.
+						engine->dynamicsWorld->removeRigidBody(body);
+						btVector3 inert;
+						body->getCollisionShape()->calculateLocalInertia(dynamics->mass, inert);
+						body->setMassProps(dynamics->mass, inert);
+						engine->dynamicsWorld->addRigidBody(body);
+					}
+
+					float x = (h - ws.z);
+					float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * body->getLinearVelocity().z();
+					btVector3 forcePos = btVector3(0.f, 0.f, 2.f).rotate(
+								body->getOrientation().getAxis(), body->getOrientation().getAngle());
+					body->applyForce(btVector3(0.f, 0.f, F),
+										 forcePos);
+				}
+			}
 		}
 	}
 }

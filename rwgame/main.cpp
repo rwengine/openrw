@@ -7,6 +7,7 @@
 #include <render/Model.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
 #include <ai/CharacterController.hpp>
 
 #include <glm/glm.hpp>
@@ -344,6 +345,9 @@ void update(float dt)
 				gta->destroyObject(gta->vehicleInstances[v]);
 				v--;
 			}
+		}
+		for( size_t p = 0; p < gta->objectInstances.size(); ++p) {
+			gta->objectInstances[p]->tick(dt);
 		}
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);

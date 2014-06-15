@@ -15,6 +15,7 @@ struct InstanceObject : public GameObject
 	std::shared_ptr<ObjectData> object;
 	std::shared_ptr<InstanceObject> LODinstance;
 	std::shared_ptr<DynamicObjectData> dynamics;
+	float _collisionHeight;
 
 	InstanceObject(
 		GameWorld* engine,
@@ -28,6 +29,8 @@ struct InstanceObject : public GameObject
 			);
 
 	Type type() { return Instance; }
+
+	void tick(float dt);
 	
 	virtual bool takeDamage(const DamageInfo& damage);
 };

@@ -35,9 +35,12 @@ struct GameObject
 
 	bool _inWater;
 
+	// Used to determine in water status
+	float _lastHeight;
+
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
-		  _inWater(false)
+		  _inWater(false), _lastHeight(0.f)
 	{}
 		
 	virtual ~GameObject() {}

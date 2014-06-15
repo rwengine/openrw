@@ -9,8 +9,7 @@
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  damageFlags(0), _lastHeight(0.f), vehicle(data),
-	  info(info), colourPrimary(prim),
+	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
 	  colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
 	mHealth = 100.f;
@@ -386,9 +385,6 @@ bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 	return true;
 }
 
-float buoyancyK = 25000.f;
-float buoyancyC = 100.f;
-
 void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float waterOffset)
 {
 	auto ws = getPosition() + relPt;
@@ -401,7 +397,7 @@ void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float waterOffset)
 
 		if ( ws.z <= h ) {
 			float x = (h - ws.z);
-			float F = buoyancyK * x + -buoyancyC * physBody->getLinearVelocity().z();
+			float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * physBody->getLinearVelocity().z();
 			physBody->applyForce(btVector3(0.f, 0.f, F),
 								 btVector3(relPt.x, relPt.y, relPt.z));
 		}

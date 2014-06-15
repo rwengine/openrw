@@ -36,9 +36,6 @@ private:
 	float brake;
 	bool handbrake;
 	unsigned int damageFlags;
-
-	// Used to determine in water status
-	float _lastHeight;
 public:
 
 	VehicleDataHandle vehicle;
