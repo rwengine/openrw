@@ -40,8 +40,8 @@ int debugMode = 0;
 
 sf::Font font;
 
-glm::vec3 viewPosition { -200.f, -100.f, 45.f };
-glm::vec2 viewAngles { -0.90f, 0.2f };
+glm::vec3 viewPosition { -260.f, -151.5f, 9.f };
+glm::vec2 viewAngles { -0.3f, 0.05f };
 
 void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
 {

@@ -10,74 +10,12 @@
 #include <ai/CharacterController.hpp>
 #include <data/ObjectData.hpp>
 
+#include <render/GameShaders.hpp>
+
 #include <deque>
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
-const char *vertexShaderSource = "#version 130\n#extension GL_ARB_explicit_attrib_location : enable\n"
-"layout(location = 0) in vec3 position;"
-"layout(location = 1) in vec3 normal;"
-"layout(location = 2) in vec4 colour;"
-"layout(location = 3) in vec2 texCoords;"
-"out vec3 Normal;"
-"out vec2 TexCoords;"
-"out vec4 Colour;"
-"out vec4 EyeSpace;"
-"uniform mat4 model;"
-"uniform mat4 view;"
-"uniform mat4 proj;"
-"void main()"
-"{"
-"	Normal = normal;"
-"	TexCoords = texCoords;"
-"	Colour = colour;"
-"	vec4 eyeSpace = view * model * vec4(position, 1.0);"
-"	EyeSpace = proj * eyeSpace;"
-"	gl_Position = proj * eyeSpace;"
-"}";
-const char *fragmentShaderSource = "#version 130\n"
-"in vec3 Normal;"
-"in vec2 TexCoords;"
-"in vec4 Colour;"
-"in vec4 EyeSpace;"
-"uniform sampler2D texture;"
-"uniform vec4 BaseColour;"
-"uniform vec4 AmbientColour;"
-"uniform vec4 DynamicColour;"
-"uniform vec3 SunDirection;"
-"uniform float FogStart;"
-"uniform float FogEnd;"
-"uniform float MaterialDiffuse;"
-"uniform float MaterialAmbient;"
-"void main()"
-"{"
-"   vec4 c = texture2D(texture, TexCoords);"
-"	if(c.a < 0.1) discard;"
-"	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);"
-"	float fogfac = clamp( (FogEnd-fogZ)/(FogEnd-FogStart), 0.0, 1.0 );"
-//"	gl_FragColor = mix(AmbientColour, c, fogfac);"
-"	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);"
-"}";
-
-const char *skydomeVertexShaderSource = "#version 130\n"
-"in vec3 position;"
-"uniform mat4 view;"
-"uniform mat4 proj;"
-"out vec3 Position;"
-"uniform float Far;"
-"void main() {"
-"	Position = position;"
-"	vec4 viewsp = proj * mat4(mat3(view)) * vec4(position, 1.0);"
-"	viewsp.z = viewsp.w - 0.000001;"
-"	gl_Position = viewsp;"
-"}";
-const char *skydomeFragmentShaderSource = "#version 130\n"
-"in vec3 Position;"
-"uniform vec4 TopColor;"
-"uniform vec4 BottomColor;"
-"void main() {"
-"	gl_FragColor = mix(BottomColor, TopColor, clamp(Position.z, 0, 1));"
-"}";
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
 struct WaterVertex {
@@ -104,36 +42,6 @@ DrawBuffer waterLQDraw;
 GeometryBuffer waterHQBuffer;
 DrawBuffer waterHQDraw;
 
-const char *waterVSSource = R"(
-#version 130
-#extension GL_ARB_explicit_attrib_location : enable
-layout(location = 0) in vec2 position;
-out vec2 TexCoords;
-uniform float height;
-uniform float size;
-uniform mat4 MVP;
-uniform float time;
-uniform vec2 worldP;
-uniform vec2 waveParams;
-void main()
-{
-	vec2 p = worldP + position * size;
-	float waveHeight = (1.0+sin(time + (p.x + p.y) * waveParams.x)) * waveParams.y;
-	TexCoords = position * 2.0;
-	gl_Position = MVP * vec4(p, height + waveHeight, 1.0);
-})";
-
-const char *waterFSSource = R"(
-#version 130
-in vec3 Normal;
-in vec2 TexCoords;
-uniform sampler2D texture;
-void main() {
-	vec4 c = texture2D(texture, TexCoords);
-	gl_FragColor = c;
-})";
-
-
 GLuint compileShader(GLenum type, const char *source)
 {
 	GLuint shader = glCreateShader(type);
@@ -156,16 +64,26 @@ GLuint compileShader(GLenum type, const char *source)
 	return shader;
 }
 
+GLuint compileProgram(const char* vertex, const char* fragment)
+{
+	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertex);
+	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragment);
+	GLuint prog	= glCreateProgram();
+	glAttachShader(prog, vertexShader);
+	glAttachShader(prog, fragmentShader);
+	glLinkProgram(prog);
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	return prog;
+}
+
 GameRenderer::GameRenderer(GameWorld* engine)
 	: engine(engine), _renderAlpha(0.f)
-{	
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-	worldProgram = glCreateProgram();
-	glAttachShader(worldProgram, vertexShader);
-	glAttachShader(worldProgram, fragmentShader);
-	glLinkProgram(worldProgram);
-	glUseProgram(worldProgram);
+{
+	worldProgram = compileProgram(GameShaders::WorldObject::VertexShader,
+								  GameShaders::WorldObject::FragmentShader);
 	
 	uniModel = glGetUniformLocation(worldProgram, "model");
 	uniView = glGetUniformLocation(worldProgram, "view");
@@ -178,18 +96,26 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	uniMatAmbient = glGetUniformLocation(worldProgram, "MaterialAmbient");
 	uniFogStart = glGetUniformLocation(worldProgram, "FogStart");
 	uniFogEnd = glGetUniformLocation(worldProgram, "FogEnd");
-	
-	vertexShader = compileShader(GL_VERTEX_SHADER, skydomeVertexShaderSource);
-	fragmentShader = compileShader(GL_FRAGMENT_SHADER, skydomeFragmentShaderSource);
-	skyProgram = glCreateProgram();
-	glAttachShader(skyProgram, vertexShader);
-	glAttachShader(skyProgram, fragmentShader);
-	glLinkProgram(skyProgram);
-	glUseProgram(skyProgram);
+
+	skyProgram = compileProgram(GameShaders::Sky::VertexShader,
+								GameShaders::Sky::FragmentShader);
+
 	skyUniView = glGetUniformLocation(skyProgram, "view");
 	skyUniProj = glGetUniformLocation(skyProgram, "proj");
 	skyUniTop = glGetUniformLocation(skyProgram, "TopColor");
 	skyUniBottom = glGetUniformLocation(skyProgram, "BottomColor");
+
+	waterProgram = compileProgram(GameShaders::WaterHQ::VertexShader,
+								  GameShaders::WaterHQ::FragmentShader);
+
+	waterHeight = glGetUniformLocation(waterProgram, "height");
+	waterTexture = glGetUniformLocation(waterProgram, "texture");
+	waterSize = glGetUniformLocation(waterProgram, "size");
+	waterMVP = glGetUniformLocation(waterProgram, "MVP");
+	waterTime = glGetUniformLocation(waterProgram, "time");
+	waterPosition = glGetUniformLocation(waterProgram, "worldP");
+	waterWave = glGetUniformLocation(waterProgram, "waveParams");
+
 	
 	glGenVertexArrays( 1, &vao );
 
@@ -219,20 +145,7 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	waterHQDraw.addGeometry(&waterHQBuffer);
 	waterHQDraw.setFaceType(GL_TRIANGLES);
 
-	GLuint waterVS = compileShader(GL_VERTEX_SHADER, waterVSSource);
-	GLuint waterFS = compileShader(GL_FRAGMENT_SHADER, waterFSSource);
-	waterProgram = glCreateProgram();
-	glAttachShader(waterProgram, waterVS);
-	glAttachShader(waterProgram, waterFS);
-	glLinkProgram(waterProgram);
-	waterHeight = glGetUniformLocation(waterProgram, "height");
-	waterTexture = glGetUniformLocation(waterProgram, "texture");
-	waterSize = glGetUniformLocation(waterProgram, "size");
-	waterMVP = glGetUniformLocation(waterProgram, "MVP");
-	waterTime = glGetUniformLocation(waterProgram, "time");
-	waterPosition = glGetUniformLocation(waterProgram, "worldP");
-	waterWave = glGetUniformLocation(waterProgram, "waveParams");
-	
+
 	// And our skydome while we're at it.
 	glGenBuffers(1, &skydomeVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);

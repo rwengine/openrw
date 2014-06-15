@@ -10,9 +10,9 @@ public:
 	ViewFrustum frustum;
 	
 	glm::vec3 worldPos;
-	
+
 	ViewCamera()
-	: frustum({0.1f, 5000.f, 80.f, 1.f})
+		: frustum({0.1f, 5000.f, (-75.f / 180.f) * 3.1415f, 1.f})
 	{
 		
 	}
