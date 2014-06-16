@@ -82,6 +82,13 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {
+	// Boats don't have any kind of entry animation unless you're onboard.
+	if( vehicle->vehicle->type == VehicleData::BOAT ) {
+		character->enterVehicle(vehicle, seat);
+		return true;
+	}
+
+
 	if( entering ) {
 		// TODO: decouple from the character's animator.
 		if( character->currentActivity == CharacterObject::VehicleGetIn ) {
@@ -129,8 +136,16 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 {
 	if( character->getCurrentVehicle() == nullptr ) return true;
 
+	auto vehicle = character->getCurrentVehicle();
+
+	if( vehicle->vehicle->type == VehicleData::BOAT ) {
+		auto ppos = character->getPosition();
+		character->enterVehicle(nullptr, 0);
+		character->setPosition(ppos);
+		return true;
+	}
+
 	if( character->currentActivity == CharacterObject::Idle ) {
-		auto vehicle = character->getCurrentVehicle();
 		auto exitpos = vehicle->getSeatEntryPosition(character->getCurrentSeat());
 
 		character->enterVehicle(nullptr, 0);

@@ -15,13 +15,27 @@ IngameState::IngameState()
 	setPlayerCharacter( _playerCharacter );
 
 	float j = 0;
-	auto spawnPos = glm::vec3( -1000.f, -1000.f, 14.f );
+	auto carPos = glm::vec3( -1000.f, -1000.f, 14.f );
+	auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
 	for( auto& vi : getWorld()->vehicleTypes ) {
-		auto sp = spawnPos;
-		if(vi.first == 120) sp = { -1000.f, -1040.f, 5.f };
+		switch( vi.first ) {
+		case 140: continue;
+		case 141: continue;
+		}
+
+		auto sp = carPos;
+		if( vi.second->type == VehicleData::BOAT ) {
+			sp = boatPos;
+		}
+
 		auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
-		spawnPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
-		if( ++j > 33 ) break;
+
+		if( vi.second->type == VehicleData::BOAT ) {
+			boatPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
+		}
+		else {
+			carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
+		}
 	}
 }
 

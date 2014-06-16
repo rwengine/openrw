@@ -184,26 +184,53 @@ void VehicleObject::tick(float dt)
 
 		if( vehicle->type == VehicleData::BOAT ) {
 			if( isInWater() ) {
-				btVector3 localSteer = btVector3(info->handling.dimensions.x * steerAngle, 0.f, 0.f)
-						.rotate(physBody->getOrientation().getAxis(), physBody->getOrientation().getAngle());
+				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
+				float steer = std::min(info->handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign;
+				auto orient = physBody->getOrientation();
+
+				// Find the local-space velocity
+				auto velocity = physBody->getLinearVelocity();
+				velocity = velocity.rotate(-orient.getAxis(), orient.getAngle());
+
+				// Rudder force is proportional to velocity.
+				float rAngle = steer * (velFac * 0.5f + 0.5f);
+				btVector3 rForce = btVector3(1000.f * velocity.y() * rAngle, 0.f, 0.f)
+						.rotate(orient.getAxis(), orient.getAngle());
+				btVector3 rudderPoint = btVector3(0.f, -info->handling.dimensions.y/2.f, 0.f)
+						.rotate(orient.getAxis(), orient.getAngle());
 				physBody->applyForce(
-							physVehicle->getForwardVector() * engineForce * 100.f,
-							localSteer);
+							rForce,
+							rudderPoint);
+
+				btVector3 rudderVector = btVector3(0.f, 1.f, 0.f)
+						.rotate(orient.getAxis(), orient.getAngle());
+				physBody->applyForce(
+							rudderVector * engineForce * 100.f,
+							rudderPoint);
+
+
+				btVector3 dampforce( 10000.f * velocity.x(), velocity.y() * 100.f, 0.f );
+				physBody->applyCentralForce(-dampforce.rotate(orient.getAxis(), orient.getAngle()));
 			}
-			physBody->setDamping(0.2f, 0.6f);
+			physBody->setDamping(0.1f, 0.8f);
 		}
 
 		auto ws = getPosition();
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
-		float vH = ws.z - info->handling.dimensions.z;
+		btVector3 bbmin, bbmax;
+		// This is in world space.
+		physBody->getAabb(bbmin, bbmax);
+		float vH = bbmin.z();
 		float wH = 0.f;
+
 
 		if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
 			int i = (wX*WATER_HQ_DATA_SIZE) + wY;
 			int hI = engine->gameData.realWater[i];
 			if( hI < NO_WATER_INDEX ) {
 				wH = engine->gameData.waterHeights[hI];
+				wH += engine->gameData.getWaveHeightAt(ws);
 				// If the vehicle is currently underwater
 				if( vH <= wH ) {
 					// and was not underwater here in the last tick
@@ -227,21 +254,37 @@ void VehicleObject::tick(float dt)
 		}
 
 		if( _inWater ) {
-			float oZ = 0.f;
-			if( vehicle->type != VehicleData::BOAT ) {
-				// dimensions.z doesn't quite fite, so divide by 120 instead of 100.
-				oZ = (info->handling.dimensions.z / 2.f) - (info->handling.dimensions.z * (info->handling.percentSubmerged/120.f));
+			float bbZ = info->handling.dimensions.z/2.f;
 
+			float oZ = 0.f;
+			oZ = -bbZ/2.f + (bbZ * (info->handling.percentSubmerged/120.f));
+
+			if( vehicle->type != VehicleData::BOAT ) {
 				// Damper motion
 				physBody->setDamping(0.95f, 0.9f);
 			}
-			auto vFwd = getRotation() * glm::vec3(0.f, info->handling.dimensions.y/2.f, 0.f);
-			auto vRt = getRotation() * glm::vec3(info->handling.dimensions.x/2.f, 0.f, 0.f);
 
-			applyWaterFloat( vFwd, oZ);
-			applyWaterFloat(-vFwd, oZ);
-			applyWaterFloat( vRt, oZ);
-			applyWaterFloat(-vRt, oZ);
+			if( vehicle->type == VehicleData::BOAT ) {
+				oZ = 0.f;
+			}
+
+			// Boats, Buoyancy offset is affected by the orientation of the chassis.
+			// Vehicles, it isn't.
+			glm::vec3 vFwd = glm::vec3(0.f, info->handling.dimensions.y/2.f, oZ),
+					vBack = glm::vec3(0.f, -info->handling.dimensions.y/2.f, oZ);
+			glm::vec3 vRt = glm::vec3( info->handling.dimensions.x/2.f, 0.f, oZ),
+					vLeft = glm::vec3(-info->handling.dimensions.x/2.f, 0.f, oZ);
+
+			vFwd = getRotation() * vFwd;
+			vBack = getRotation() * vBack;
+			vRt = getRotation() * vRt;
+			vLeft = getRotation() * vLeft;
+
+			// This function will try to keep v* at the water level.
+			applyWaterFloat( vFwd);
+			applyWaterFloat( vBack);
+			applyWaterFloat( vRt);
+			applyWaterFloat( vLeft);
 		}
 		else {
 			physBody->setDamping(0.0f, 0.0f);
@@ -385,12 +428,12 @@ bool VehicleObject::isFrameVisible(ModelFrame *frame) const
 	return true;
 }
 
-void VehicleObject::applyWaterFloat(const glm::vec3 &relPt, float waterOffset)
+void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)
 {
 	auto ws = getPosition() + relPt;
 	auto wi = engine->gameData.getWaterIndexAt(ws);
 	if(wi != NO_WATER_INDEX) {
-		float h = engine->gameData.waterHeights[wi] + waterOffset;
+		float h = engine->gameData.waterHeights[wi];
 
 		// Calculate wave height
 		h += engine->gameData.getWaveHeightAt(ws);

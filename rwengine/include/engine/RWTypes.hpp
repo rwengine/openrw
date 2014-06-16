@@ -15,7 +15,7 @@
 #define WATER_SCALE 0.05f
 #define WATER_HEIGHT 0.5f
 #define WATER_BUOYANCY_K 25000.f
-#define WATER_BUOYANCY_C 100.f
+#define WATER_BUOYANCY_C 2550.f
 
 class Animation;
 

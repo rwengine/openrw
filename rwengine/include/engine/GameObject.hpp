@@ -40,7 +40,7 @@ struct GameObject
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
 		: position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
-		  _inWater(false), _lastHeight(0.f)
+		  _inWater(false), _lastHeight(std::numeric_limits<float>::max())
 	{}
 		
 	virtual ~GameObject() {}
