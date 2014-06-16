@@ -44,13 +44,13 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			// Spheres
 			for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
 				auto& sphere = physInst.spheres[i];
-				btCollisionShape* sshape = new btSphereShape(sphere.radius);
+				btCollisionShape* sshape = new btSphereShape(sphere.radius/2.f);
 				btTransform t; t.setIdentity();
 				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
 				cmpShape->addChildShape(t, sshape);
 			}
 
-			if( false && physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
+			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
 				btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
 							physInst.indices.size()/3,
 							(int*) physInst.indices.data(),
@@ -59,9 +59,9 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 							&(physInst.vertices[0].x),
 							sizeof(glm::vec3));
 				btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-				btTransform t;
-				t.setOrigin(com);
-				cmpShape->addChildShape(t,trishape);
+				trishape->setMargin(0.09f);
+				btTransform t; t.setIdentity();
+				cmpShape->addChildShape(t, trishape);
 			}
 
 			btVector3 inertia(0,0,0);
