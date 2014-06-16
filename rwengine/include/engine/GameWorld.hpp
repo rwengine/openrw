@@ -197,10 +197,10 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
 	/**
-	 * @brief handleCollisionResponses performs physics response checking
-	 * for collisions between vehicles, objects etc.
+	 * @brief physicsNearCallback
+	 * Used to implement uprooting and other physics oddities.
 	 */
-	void handleCollisionResponses();
+	static bool ContactProcessedCallback(btManifoldPoint& mp, void* body0, void* body1);
 
 	/**
 	 * Work related

@@ -16,6 +16,7 @@ struct InstanceObject : public GameObject
 	std::shared_ptr<InstanceObject> LODinstance;
 	std::shared_ptr<DynamicObjectData> dynamics;
 	float _collisionHeight;
+	bool _enablePhysics;
 
 	InstanceObject(
 		GameWorld* engine,

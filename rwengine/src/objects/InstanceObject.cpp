@@ -11,7 +11,7 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		std::shared_ptr<InstanceObject> lod,
 		std::shared_ptr<DynamicObjectData> dyn)
 : GameObject(engine, pos, rot, model), scale(scale), object(obj),
-  LODinstance(lod), dynamics(dyn), _collisionHeight(0.f)
+  LODinstance(lod), dynamics(dyn), _collisionHeight(0.f), _enablePhysics(false)
 {
 	auto phyit = engine->gameData.collisions.find(obj->modelName);
 	if( phyit != engine->gameData.collisions.end()) {
@@ -89,6 +89,11 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		body->setUserPointer(this);
 		engine->dynamicsWorld->addRigidBody(body);
 
+		if( dynamics && dynamics->uprootForce > 0.f ) {
+			body->setCollisionFlags(body->getCollisionFlags()
+									| btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+		}
+
 		body->setActivationState(ISLAND_SLEEPING);
 	}
 
@@ -105,6 +110,17 @@ InstanceObject::InstanceObject(GameWorld* engine,
 void InstanceObject::tick(float dt)
 {
 	if( dynamics ) {
+		if( body->isStaticObject() ) {
+			if( _enablePhysics ) {
+				// Apparently bodies must be removed and re-added if their mass changes.
+				engine->dynamicsWorld->removeRigidBody(body);
+				btVector3 inert;
+				body->getCollisionShape()->calculateLocalInertia(dynamics->mass, inert);
+				body->setMassProps(dynamics->mass, inert);
+				engine->dynamicsWorld->addRigidBody(body);
+			}
+		}
+
 		auto _bws = body->getWorldTransform().getOrigin();
 		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
@@ -174,12 +190,7 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 		smash = dynamics->collDamageFlags == 80;
 
 		if( dmg.impulse >= dynamics->uprootForce && (body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
-			// Apparently bodies must be removed and re-added if their mass changes.
-			engine->dynamicsWorld->removeRigidBody(body);
-			btVector3 inert;
-			body->getCollisionShape()->calculateLocalInertia(dynamics->mass, inert);
-			body->setMassProps(dynamics->mass, inert);
-			engine->dynamicsWorld->addRigidBody(body);
+			_enablePhysics = true;
 		}
 	}
 	if(explodeOnHit || smash)

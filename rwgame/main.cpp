@@ -351,8 +351,6 @@ void update(float dt)
 		}
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
-
-		gta->handleCollisionResponses();
 	}
 }
 
