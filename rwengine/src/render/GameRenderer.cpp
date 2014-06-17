@@ -16,6 +16,8 @@
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
+GLuint GameRenderer::currentUBO = 0;
+
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
 struct WaterVertex {
@@ -85,17 +87,18 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	worldProgram = compileProgram(GameShaders::WorldObject::VertexShader,
 								  GameShaders::WorldObject::FragmentShader);
 	
-	uniModel = glGetUniformLocation(worldProgram, "model");
-	uniView = glGetUniformLocation(worldProgram, "view");
-	uniProj = glGetUniformLocation(worldProgram, "proj");
-	uniCol = glGetUniformLocation(worldProgram, "BaseColour");
-	uniAmbientCol = glGetUniformLocation(worldProgram, "AmbientColour");
-	uniSunDirection = glGetUniformLocation(worldProgram, "SunDirection");
-	uniDynamicCol = glGetUniformLocation(worldProgram, "DynamicColour");
-	uniMatDiffuse = glGetUniformLocation(worldProgram, "MaterialDiffuse");
-	uniMatAmbient = glGetUniformLocation(worldProgram, "MaterialAmbient");
-	uniFogStart = glGetUniformLocation(worldProgram, "FogStart");
-	uniFogEnd = glGetUniformLocation(worldProgram, "FogEnd");
+	uniTexture = glGetUniformLocation(worldProgram, "texture");
+	ubiScene = glGetUniformBlockIndex(worldProgram, "SceneData");
+	ubiObject = glGetUniformBlockIndex(worldProgram, "ObjectData");
+
+	glGenBuffers(1, &uboScene);
+	glGenBuffers(1, &uboObject);
+
+	glUniformBlockBinding(worldProgram, ubiScene, 1);
+	glUniformBlockBinding(worldProgram, ubiObject, 2);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboScene);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboObject);
 
 	skyProgram = compileProgram(GameShaders::Sky::VertexShader,
 								GameShaders::Sky::FragmentShader);
@@ -222,26 +225,29 @@ void GameRenderer::renderWorld(float alpha)
 
 	glUseProgram(worldProgram);
 
-    glUniform1f(uniFogStart, weather.fogStart);
-	glUniform1f(uniFogEnd, camera.frustum.far);
+	auto view = camera.frustum.view;
+	auto proj = camera.frustum.projection();
 
-	glUniform4f(uniAmbientCol, ambient.x, ambient.y, ambient.z, 1.f);
-	glUniform4f(uniDynamicCol, dynamic.x, dynamic.y, dynamic.z, 1.f);
-	glUniform3f(uniSunDirection, sunDirection.x, sunDirection.y, sunDirection.z);
-	glUniform1f(uniMatDiffuse, 0.9f);
-	glUniform1f(uniMatAmbient, 0.1f);
+	uploadUBO<SceneUniformData>(
+				uboScene,
+				{
+					proj,
+					view,
+					glm::vec4{ambient, 1.0f},
+					glm::vec4{dynamic, 1.0f},
+					weather.fogStart,
+					camera.frustum.far
+				});
 	
 	glClearColor(skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 proj = camera.frustum.projection();
-	glm::mat4 view = camera.frustum.view;
-	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-	
-	camera.frustum.update(camera.frustum.projection() * view);
+	camera.frustum.update(proj * view);
 	
 	rendered = culled = 0;
+
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(uniTexture, 0);
 
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
 		CharacterObject* charac = engine->pedestrians[i];
@@ -370,9 +376,10 @@ void GameRenderer::renderWorld(float alpha)
 		it != transparentDrawQueue.end();
 		++it)
 	{
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(it->matrix));
-		glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
-		
+		glBindVertexArray(it->model->geometries[it->g]->dbuff.getVAOName());
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->model->geometries[it->g]->EBO);
+
 		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->object, false);
 	}
 	transparentDrawQueue.clear();
@@ -492,8 +499,9 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 
 void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GameObject* object)
 {
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-    glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
+	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
 
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
@@ -517,17 +525,15 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 		localmatrix *= f->getTransform();
 	}
 
-	bool vis = object == nullptr || object->isFrameVisible(f);
+	float distance = glm::distance(camera.worldPos, glm::vec3(localmatrix[3]));
+
+	bool vis = object == nullptr || object->isFrameVisible(f, distance);
 	for(size_t g : f->getGeometries()) {
 		if(!vis ) continue;
 
 		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
 		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			continue;
-		}
-
-		if( (m->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) != RW::BSGeometry::ModuleMaterialColor) {
-			glUniform4f(uniCol, 1.f, 1.f, 1.f, 1.f);
 		}
 
 		renderGeometry(m,
@@ -543,11 +549,19 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 
 bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
-	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
-
 	auto& subgeom = model->geometries[g]->subgeom[sg];
+
+	/*
+	 * model matrix,
+	 * material diffuse
+	 * material ambient
+	 * materialcolour
+	 */
+	ObjectUniformData oudata {
+		matrix,
+		glm::vec4(1.f),
+		1.f, 1.f
+	};
 
 	if (model->geometries[g]->materials.size() > subgeom.material) {
 		Model::Material& mat = model->geometries[g]->materials[subgeom.material];
@@ -568,23 +582,25 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 			if( object && object->type() == GameObject::Vehicle ) {
 				auto vehicle = static_cast<VehicleObject*>(object);
 				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
-					glUniform4f(uniCol, vehicle->colourPrimary.r, vehicle->colourPrimary.g, vehicle->colourPrimary.b, 1.f);
+					oudata.colour = glm::vec4(vehicle->colourPrimary, 1.f);
 				}
 				else if( (mat.flags&Model::MTF_SecondaryColour) != 0 ) {
-					glUniform4f(uniCol, vehicle->colourSecondary.r, vehicle->colourSecondary.g, vehicle->colourSecondary.b, 1.f);
+					oudata.colour = glm::vec4(vehicle->colourSecondary, 1.f);
 				}
 				else {
-					glUniform4f(uniCol, col.r/255.f, col.g/255.f, col.b/255.f, 1.f);
+					oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, 1.f};
 				}
 			}
 			else {
-				glUniform4f(uniCol, col.r/255.f, col.g/255.f, col.b/255.f, 1.f);
+				oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, 1.f};
 			}
 		}
 
-		glUniform1f(uniMatDiffuse, mat.diffuseIntensity);
-		glUniform1f(uniMatAmbient, mat.ambientIntensity);
+		oudata.diffuse = mat.diffuseIntensity;
+		oudata.ambient = mat.ambientIntensity;
 	}
+
+	uploadUBO(uboObject, oudata);
 
 	rendered++;
 

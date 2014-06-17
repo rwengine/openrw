@@ -406,17 +406,19 @@ unsigned int nameToDamageFlag(const std::string& name)
 	return 0;
 }
 
-bool VehicleObject::isFrameVisible(ModelFrame *frame) const
+bool VehicleObject::isFrameVisible(ModelFrame *frame, float distance) const
 {
 	auto& name = frame->getName();
 	bool isDam = name.find("_dam") != name.npos;
 	bool isOk = name.find("_ok") != name.npos;
+	if(distance >= 150.f) {
+		return name.find("lo") != name.npos;
+	}
 	if(name.find("lo") != name.npos
 			|| name.find("_dummy") != name.npos) return false;
 
 	if(isDam || isOk) {
 		unsigned int dft = nameToDamageFlag(name);
-		if(dft == VehicleObject::DF_Door_lf) return false;
 		if(isDam) {
 			return (damageFlags & dft) == dft;
 		}

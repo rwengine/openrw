@@ -36,18 +36,18 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 
 	BOOST_REQUIRE(bonnet_ok != nullptr);
 	BOOST_REQUIRE(bonnet_dam != nullptr);
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok, 0.f));
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam, 0.f));
 
 	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, true);
 
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_ok));
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_dam));
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_ok, 0.f));
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_dam, 0.f));
 
 	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, false);
 
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok));
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam));
+	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok, 0.f));
+	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam, 0.f));
 
 	Global::get().e->destroyObject(vehicle);
 }

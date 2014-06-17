@@ -54,53 +54,82 @@ void main() {
 	gl_FragColor = mix(BottomColor, TopColor, clamp(Position.z, 0, 1));
 })";
 
+/*
+ * GLSL 130 is required until the game can run in core context,
+ * SFML needs to up it's game.
+ */
+
 const char* WorldObject::VertexShader = R"(
 #version 130
 #extension GL_ARB_explicit_attrib_location : enable
+#extension GL_ARB_uniform_buffer_object : enable
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec4 colour;
+layout(location = 2) in vec4 _colour;
 layout(location = 3) in vec2 texCoords;
 out vec3 Normal;
 out vec2 TexCoords;
 out vec4 Colour;
-out vec4 EyeSpace;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	float fogStart;
+	float fogEnd;
+};
+
+layout(std140) uniform ObjectData {
+	mat4 model;
+	vec4 colour;
+	float diffusefac;
+	float ambientfac;
+};
+
 void main()
 {
 	Normal = normal;
 	TexCoords = texCoords;
-	Colour = colour;
+	Colour = _colour;
 	vec4 eyeSpace = view * model * vec4(position, 1.0);
-	EyeSpace = proj * eyeSpace;
-	gl_Position = proj * eyeSpace;
+	gl_Position = projection * eyeSpace;
 })";
 
 const char* WorldObject::FragmentShader = R"(
 #version 130
+#extension GL_ARB_uniform_buffer_object : enable
 in vec3 Normal;
 in vec2 TexCoords;
 in vec4 Colour;
-in vec4 EyeSpace;
 uniform sampler2D texture;
-uniform vec4 BaseColour;
-uniform vec4 AmbientColour;
-uniform vec4 DynamicColour;
-uniform vec3 SunDirection;
-uniform float FogStart;
-uniform float FogEnd;
-uniform float MaterialDiffuse;
-uniform float MaterialAmbient;
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	float fogStart;
+	float fogEnd;
+};
+
+layout(std140) uniform ObjectData {
+	mat4 model;
+	vec4 colour;
+	float diffusefac;
+	float ambientfac;
+};
+
+#define ALPHA_DISCARD_THRESHOLD 0.01
+
 void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
-	if(c.a < 0.1) discard;
+	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
 	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
-	float fogfac = clamp( (FogEnd-fogZ)/(FogEnd-FogStart), 0.0, 1.0 );
-	//	gl_FragColor = mix(AmbientColour, c, fogfac);
-	gl_FragColor = mix(AmbientColour, BaseColour * (vec4(0.5) + Colour * 0.5) * (vec4(0.5) + DynamicColour * 0.5) * c, fogfac);
+	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
+	gl_FragColor = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
+					   * (vec4(0.5) + dynamic * 0.5) * c, 1.f);
 })";
 
 }

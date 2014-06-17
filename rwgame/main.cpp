@@ -374,18 +374,14 @@ void render(float alpha)
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
-        glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-        gta->renderer.renderPaths();
+		gta->renderer.renderPaths();
         break;
     }
 	case 2: {
         glUseProgram(gta->renderer.worldProgram);
         glm::mat4 proj = gta->renderer.camera.frustum.projection();
         glm::mat4 view = gta->renderer.camera.frustum.view;
-        glUniformMatrix4fv(gta->renderer.uniView, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(gta->renderer.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-        gta->dynamicsWorld->debugDrawWorld();
+		gta->dynamicsWorld->debugDrawWorld();
         debugDrawer->drawAllLines();
 
         break;

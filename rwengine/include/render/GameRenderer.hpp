@@ -55,9 +55,11 @@ public:
 	size_t culled;
 
 	/* TODO clean up all these variables */
-	GLint uniModel, uniProj, uniView, uniCol, uniAmbientCol, uniSunDirection, uniDynamicCol;
-	GLint uniMatDiffuse, uniMatAmbient, uniFogStart, uniFogEnd;
 	GLuint worldProgram;
+	GLint uniTexture;
+	GLuint ubiScene, ubiObject;
+	GLuint uboScene, uboObject;
+
 	GLuint skyProgram;
 	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize, waterTime, waterPosition, waterWave;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
@@ -86,6 +88,32 @@ public:
      * Debug method renders all AI paths
      */
     void renderPaths();
+
+	static GLuint currentUBO;
+	template<class T> void uploadUBO(GLuint buffer, const T& data)
+	{
+		if( currentUBO != buffer ) {
+			glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+			currentUBO = buffer;
+		}
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(T), &data, GL_DYNAMIC_DRAW);
+	}
+};
+
+struct SceneUniformData {
+	glm::mat4 projection;
+	glm::mat4 view;
+	glm::vec4 ambient;
+	glm::vec4 dynamic;
+	float fogStart;
+	float fogEnd;
+};
+
+struct ObjectUniformData {
+	glm::mat4 model;
+	glm::vec4 colour;
+	float diffuse;
+	float ambient;
 };
 
 #endif

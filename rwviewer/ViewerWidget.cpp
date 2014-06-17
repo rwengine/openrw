@@ -91,21 +91,13 @@ void ViewerWidget::paintGL()
 		
 		glUseProgram(r.worldProgram);
 
-		glUniform1f(r.uniFogStart, 90.f);
-		glUniform1f(r.uniFogEnd, 100.f);
-
-		glUniform4f(r.uniAmbientCol, .1f, .1f, .1f, 1.f);
-		glUniform4f(r.uniDynamicCol, 1.f, 1.f, 1.f, 1.f);
-		//glUniform3f(uniSunDirection, sunDirection.x, sunDirection.y, sunDirection.z);
-		glUniform1f(r.uniMatDiffuse, 0.9f);
-		glUniform1f(r.uniMatAmbient, 0.1f);
-		
 		glm::mat4 proj = r.camera.frustum.projection();
 		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
-		glUniformMatrix4fv(r.uniView, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(r.uniProj, 1, GL_FALSE, glm::value_ptr(proj));
-		
+
+		r.uploadUBO<SceneUniformData>(r.uboScene,
+		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), 90.f, r.camera.frustum.far });
+
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);
 
@@ -119,8 +111,8 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m)
 	auto thisM = m * f->getTransform();
 	if(f->getGeometries().size() == 0) {
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glUniform4f(gworld->renderer.uniCol, 1.f, 1.f, 1.f, 1.f);
-		glUniformMatrix4fv(gworld->renderer.uniModel, 1, GL_FALSE, glm::value_ptr(thisM));
+		/*glUniform4f(gworld->renderer.uniCol, 1.f, 1.f, 1.f, 1.f);
+		glUniformMatrix4fv(gworld->renderer.uniModel, 1, GL_FALSE, glm::value_ptr(thisM));*/
 		glBindVertexArray(_frameWidgetDraw->getVAOName());
 		glDrawArrays(_frameWidgetDraw->getFaceType(), 0, 6);
 	}

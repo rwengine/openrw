@@ -99,7 +99,7 @@ struct GameObject
 	
 	virtual bool takeDamage(const DamageInfo& damage) { return false; }
 
-	virtual bool isFrameVisible(ModelFrame* frame) const { return true; }
+	virtual bool isFrameVisible(ModelFrame* frame, float distance) const { return true; }
 
 	virtual bool isAnimationFixed() const { return true; }
 
