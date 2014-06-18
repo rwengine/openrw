@@ -1,5 +1,9 @@
 # OpenRW
 
+A project to re-implement gta3.exe, adding support for more platforms and fixing all of the bugs that have piled up.
+
+**REQURIES A LEGITAMATE COPY OF GTA III PC TO RUN**, this project only functions with the original game's data.
+
 ## Building
 
 Dependencies:
