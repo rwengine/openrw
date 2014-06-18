@@ -15,7 +15,7 @@ void Animator::reset()
 	serverTime = 0.f;
 	lastServerTime = 0.f;
 
-	if( _boneMatrices.empty() ) {
+	if( _frameInstances.empty() ) {
 		if( ! getAnimation() || ! model ) return;
 
 		for( ModelFrame* f : model->frames ) {
@@ -23,7 +23,7 @@ void Animator::reset()
 			if( it == getAnimation()->bones.end() ) continue;
 
 			auto A = getKeyframeAt(f, 0.f);
-			_boneMatrices[f] = { it->second, A, A };
+			_frameInstances[f] = { true, it->second, A, A };
 		}
 	}
 }
@@ -38,7 +38,7 @@ void Animator::setAnimation(Animation *animation, bool repeat)
 	queueAnimation(animation);
 	this->repeat = repeat;
 
-	_boneMatrices.clear();
+	_frameInstances.clear();
 	
 	reset();
 }
@@ -62,9 +62,36 @@ void Animator::setModel(Model *model)
 
 	this->model = model;
 
-	_boneMatrices.clear();
+	_frameInstances.clear();
 
 	reset();
+}
+
+void Animator::setFrameVisibility(ModelFrame *frame, bool visible)
+{
+	auto fit = _frameInstances.find(frame);
+	if( fit != _frameInstances.end() ) {
+		fit->second.visible = visible;
+	}
+	else {
+		_frameInstances.insert({
+								   frame,
+								   {
+									   visible,
+									   nullptr,
+									   {}, {}
+								   }
+							   });
+	}
+}
+
+bool Animator::getFrameVisibility(ModelFrame *frame) const
+{
+	auto fit = _frameInstances.find(frame);
+	if( fit != _frameInstances.end() ) {
+		return fit->second.visible;
+	}
+	return true;
 }
 
 void Animator::tick(float dt)
@@ -76,7 +103,7 @@ void Animator::tick(float dt)
 	lastServerTime = serverTime;
 	serverTime += dt;
 
-	for( auto& p : _boneMatrices ) {
+	for( auto& p : _frameInstances ) {
 		p.second.second = p.second.first;
 		float t = getAnimationTime();
 		p.second.first = getKeyframeAt(p.first, t);
@@ -153,8 +180,8 @@ AnimationKeyframe Animator::getKeyframeAt(ModelFrame *frame, float time) const
 
 glm::mat4 Animator::getFrameMatrix(ModelFrame *frame, float alpha, bool ignoreRoot) const
 {
-	auto it = _boneMatrices.find( frame );
-	if( it != _boneMatrices.end() ) {
+	auto it = _frameInstances.find( frame );
+	if( it != _frameInstances.end() && it->second.bone ) {
 		const AnimationKeyframe& S = it->second.first;
 		const AnimationKeyframe& F = it->second.second;
 

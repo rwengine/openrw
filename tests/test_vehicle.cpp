@@ -2,6 +2,7 @@
 #include "test_globals.hpp"
 #include <objects/VehicleObject.hpp>
 #include <render/Model.hpp>
+#include <engine/Animator.hpp>
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)
 
@@ -36,18 +37,18 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 
 	BOOST_REQUIRE(bonnet_ok != nullptr);
 	BOOST_REQUIRE(bonnet_dam != nullptr);
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok, 0.f));
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam, 0.f));
+	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_ok));
+	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
 
 	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, true);
 
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_ok, 0.f));
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_dam, 0.f));
+	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_ok));
+	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_dam));
 
 	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, false);
 
-	BOOST_CHECK(vehicle->isFrameVisible(bonnet_ok, 0.f));
-	BOOST_CHECK(!vehicle->isFrameVisible(bonnet_dam, 0.f));
+	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_ok));
+	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
 
 	Global::get().e->destroyObject(vehicle);
 }

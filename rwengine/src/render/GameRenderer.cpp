@@ -525,9 +525,9 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 		localmatrix *= f->getTransform();
 	}
 
-	float distance = glm::distance(camera.worldPos, glm::vec3(localmatrix[3]));
+	bool vis = (object == nullptr || object->animator == nullptr) ||
+			object->animator->getFrameVisibility(f);
 
-	bool vis = object == nullptr || object->isFrameVisible(f, distance);
 	for(size_t g : f->getGeometries()) {
 		if(!vis ) continue;
 

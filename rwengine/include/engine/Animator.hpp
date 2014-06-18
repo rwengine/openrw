@@ -27,13 +27,17 @@ class Animator
 	 */
 	Model* model;
 
-	struct BonePair {
+	struct FrameInstanceData {
+		bool visible;
 		AnimationBone* bone;
+		// Used if bone is non-null.
 		AnimationKeyframe first;
 		AnimationKeyframe second;
+		// Used if bone is null and entry exists.
+		glm::quat orientation;
 	};
 
-	std::map<ModelFrame*, BonePair> _boneMatrices;
+	std::map<ModelFrame*, FrameInstanceData> _frameInstances;
 
 	// Used in determining how far the skeleton being animated has moved
 	// From it's local origin.
@@ -71,6 +75,9 @@ public:
 	{ return _animations.empty() ? nullptr : _animations.front(); }
 
 	void setModel(Model* model);
+
+	void setFrameVisibility(ModelFrame* frame, bool visible);
+	bool getFrameVisibility(ModelFrame* frame) const;
 
 	/**
 	 * @brief getFrameMatrix returns the matrix for frame at the given time

@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <data/CollisionModel.hpp>
 #include <render/Model.hpp>
+#include <engine/Animator.hpp>
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
@@ -113,6 +114,22 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 		}
 	}
+
+	// Hide all LOD and damage frames.
+	animator = new Animator;
+	animator->setModel(model->model);
+
+	for(ModelFrame* f : model->model->frames) {
+		auto& name = f->getName();
+		bool isDam = name.find("_dam") != name.npos;
+		bool isLod = name.find("lo") != name.npos;
+		bool isDum = name.find("_dummy") != name.npos;
+		bool isOk = name.find("_ok") != name.npos;
+		if(isDam || isLod || isDum ) {
+			animator->setFrameVisibility(f, false);
+		}
+	}
+
 }
 
 VehicleObject::~VehicleObject()
@@ -122,6 +139,7 @@ VehicleObject::~VehicleObject()
 	delete physBody;
 	delete physVehicle;
 	delete physRaycaster;
+	delete animator;
 	
 	ejectAll();
 }
@@ -375,6 +393,40 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
+
+	const float frameDamageThreshold = 1500.f;
+
+	if( dmg.impulse >= frameDamageThreshold ) {
+		auto dpoint = dmg.damageLocation;
+		dpoint -= getPosition();
+		dpoint = glm::inverse(getRotation()) * dpoint;
+
+		float d = std::numeric_limits<float>::max();
+		ModelFrame* nearest = nullptr;
+		// find nearest "_ok" frame.
+		for(ModelFrame* f : model->model->frames) {
+			auto& name = f->getName();
+			if( name.find("_ok") != name.npos ) {
+				auto pp = f->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
+				float td = glm::distance(glm::vec3(pp), dpoint);
+				if( td < d ) {
+					d = td;
+					nearest = f;
+				}
+			}
+		}
+
+		if( nearest && animator->getFrameVisibility(nearest) ) {
+			animator->setFrameVisibility(nearest, false);
+			// find damaged
+			auto name = nearest->getName();
+			name.replace(name.find("_ok"), 3, "_dam");
+			auto damage = model->model->findFrame(name);
+			animator->setFrameVisibility(damage, true);
+		}
+
+	}
+
 	return true;
 }
 
@@ -404,30 +456,6 @@ unsigned int nameToDamageFlag(const std::string& name)
 	if(name.find("wing_lr") != name.npos) return VehicleObject::DF_Wing_lr;
 	if(name.find("wing_rr") != name.npos) return VehicleObject::DF_Wing_rr;
 	return 0;
-}
-
-bool VehicleObject::isFrameVisible(ModelFrame *frame, float distance) const
-{
-	auto& name = frame->getName();
-	bool isDam = name.find("_dam") != name.npos;
-	bool isOk = name.find("_ok") != name.npos;
-	if(distance >= 150.f) {
-		return name.find("lo") != name.npos;
-	}
-	if(name.find("lo") != name.npos
-			|| name.find("_dummy") != name.npos) return false;
-
-	if(isDam || isOk) {
-		unsigned int dft = nameToDamageFlag(name);
-		if(isDam) {
-			return (damageFlags & dft) == dft;
-		}
-		else {
-			return (damageFlags & dft) == 0;
-		}
-	}
-
-	return true;
 }
 
 void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)

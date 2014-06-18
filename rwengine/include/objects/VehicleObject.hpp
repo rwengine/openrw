@@ -102,8 +102,6 @@ public:
 
 	void setPartDamaged(unsigned int flag, bool damaged);
 
-	virtual bool isFrameVisible(ModelFrame *frame, float distance) const;
-
 	void applyWaterFloat(const glm::vec3& relPt);
 };
 

@@ -412,6 +412,31 @@ int GameWorld::getMinute()
 	return fmod(gameTime, 60.f);
 }
 
+void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA)
+{
+	bool isVehicle = object->type() == GameObject::Vehicle;
+	if(! isVehicle) return;
+	if( mp.getAppliedImpulse() <= 100.f ) return;
+
+	btVector3 src, dmg;
+	if(isA) {
+		src = mp.getPositionWorldOnB();
+		dmg = mp.getPositionWorldOnA();
+	}
+	else {
+		src = mp.getPositionWorldOnA();
+		dmg = mp.getPositionWorldOnB();
+	}
+
+	object->takeDamage({
+							{dmg.x(), dmg.y(), dmg.z()},
+							{src.x(), src.y(), src.z()},
+							0.f,
+							GameObject::DamageInfo::Physics,
+							mp.getAppliedImpulse()
+						});
+}
+
 bool GameWorld::ContactProcessedCallback(btManifoldPoint &mp, void *body0, void *body1)
 {
 	auto obA = static_cast<btCollisionObject*>(body0);
@@ -433,37 +458,44 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint &mp, void *body0, void 
 		InstanceObject* dynInst = nullptr;
 		const btRigidBody* instBody = nullptr, * otherBody = nullptr;
 
+		btVector3 src, dmg;
+
 		if( valA ) {
 			dynInst = static_cast<InstanceObject*>(a);
 			instBody = static_cast<const btRigidBody*>(obA);
 			otherBody = static_cast<const btRigidBody*>(obB);
+			src = mp.getPositionWorldOnB();
+			dmg = mp.getPositionWorldOnA();
 		}
 		else {
 			dynInst = static_cast<InstanceObject*>(b);
 			instBody = static_cast<const btRigidBody*>(obB);
 			otherBody = static_cast<const btRigidBody*>(obA);
+			src = mp.getPositionWorldOnA();
+			dmg = mp.getPositionWorldOnB();
 		}
 
-		if( dynInst->dynamics == nullptr || ! instBody->isStaticObject() ) {
-			return false;
-		}
+		if( dynInst->dynamics != nullptr && instBody->isStaticObject() ) {
+			// Attempt to determine relative velocity.
+			auto dV  = (otherBody->getLinearVelocity());
+			auto impulse = dV.length()/ (otherBody->getInvMass());
 
-		// Attempt to determine relative velocity.
-		auto dV  = (otherBody->getLinearVelocity());
-		auto impulse = dV.length()/ (otherBody->getInvMass());
-		auto src = otherBody->getWorldTransform().getOrigin();
-
-		// Ignore collision if the object is about to be uprooted.
-		if(	dynInst->dynamics->uprootForce <= impulse ) {
-			dynInst->takeDamage({
-								dynInst->getPosition(),
-									{src.x(), src.y(), src.z()},
-								0.f,
-								GameObject::DamageInfo::Physics,
-								impulse
-							  });
+			if( dynInst->dynamics->uprootForce <= impulse ) {
+				dynInst->takeDamage({
+										{dmg.x(), dmg.y(), dmg.z()},
+										{src.x(), src.y(), src.z()},
+										0.f,
+										GameObject::DamageInfo::Physics,
+										impulse
+									});
+			}
 		}
 	}
+
+	// Handle vehicles
+	if(a) handleVehicleResponse(a, mp, true);
+	if(b) handleVehicleResponse(b, mp, false);
+
 	return true;
 }
 
