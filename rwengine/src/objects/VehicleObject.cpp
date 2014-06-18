@@ -52,14 +52,11 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			}
 
 			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
-				btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
-							physInst.indices.size()/3,
-							(int*) physInst.indices.data(),
-							sizeof(uint32_t)*3,
-							physInst.vertices.size(),
-							&(physInst.vertices[0].x),
-							sizeof(glm::vec3));
-				btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
+				btConvexHullShape* trishape = new btConvexHullShape();
+				for(size_t i = 0; i < physInst.indices.size(); ++i) {
+					auto vert = physInst.vertices[physInst.indices[i]];
+					trishape->addPoint({ vert.x, vert.y, vert.z });
+				}
 				trishape->setMargin(0.09f);
 				btTransform t; t.setIdentity();
 				cmpShape->addChildShape(t, trishape);
@@ -394,7 +391,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 
-	const float frameDamageThreshold = 1500.f;
+	const float frameDamageThreshold = 2500.f;
 
 	if( dmg.impulse >= frameDamageThreshold ) {
 		auto dpoint = dmg.damageLocation;
