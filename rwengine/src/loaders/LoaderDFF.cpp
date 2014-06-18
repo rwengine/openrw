@@ -167,7 +167,6 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 					materiallistsec.getNextChildSection(matI);
 					
 					geom->materials.resize(materialList.nummaterials);
-					std::map<std::string, TextureInfo> availableTextures;
 
 					for (size_t m = 0; m < materialList.nummaterials; ++m) {
 						auto materialsec = materiallistsec.getNextChildSection(matI);
@@ -214,12 +213,6 @@ Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
 						}
 
 						if(geom->materials[m].textures.size() < 1) continue;
-
-						auto textureIt = gameData->textures
-								.find(geom->materials[m].textures[0].name);
-						if(textureIt != gameData->textures.end()) {
-							availableTextures.insert({textureIt->first, textureIt->second});
-						}
 					}
 
 					if(item.hasMoreData(secI))

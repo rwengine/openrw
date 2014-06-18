@@ -208,11 +208,14 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 
 		RW::BSTextureNative texNative = rootSection.readStructure<RW::BSTextureNative>();
 		std::string name = std::string(texNative.diffuseName);
+		std::string alpha = std::string(texNative.alphaName);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
+		std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
 		bool transparent = false;
 		GLuint id = createTexture(texNative, rootSection, &transparent);
 
-		gameData->textures.insert({name, {id, transparent}});
+		gameData->textures.insert({{name, alpha}, {id, transparent}});
+		gameData->textures.insert({{name, ""}, {id, transparent}});
 	}
 
 	return true;

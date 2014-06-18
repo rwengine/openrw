@@ -246,7 +246,6 @@ void GameRenderer::renderWorld(float alpha)
 	
 	rendered = culled = 0;
 
-	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(uniTexture, 0);
 
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
@@ -395,7 +394,7 @@ void GameRenderer::renderWorld(float alpha)
 	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
 	glUniform1i(waterTexture, 0);
 	glUniform2f(waterWave, WATER_SCALE, WATER_HEIGHT);
-	auto waterTex = engine->gameData.textures["water_old"];
+	auto waterTex = engine->gameData.textures[{"water_old",""}];
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
@@ -567,13 +566,19 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 		Model::Material& mat = model->geometries[g]->materials[subgeom.material];
 
 		if(mat.textures.size() > 0 ) {
-			auto t = engine->gameData.textures.find(mat.textures[0].name);
+			auto& tC = mat.textures[0].name;
+			auto& tA = mat.textures[0].alphaName;
+			auto t = engine->gameData.textures.find({tC, tA});
 			if(t != engine->gameData.textures.end()) {
 				TextureInfo& tex = t->second;
 				if(tex.transparent && queueTransparent) {
 					return false;
 				}
+				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, tex.texName);
+			}
+			else {
+				// Texture pair is missing?
 			}
 		}
 

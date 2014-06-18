@@ -207,7 +207,7 @@ public:
 	/**
 	 * Loaded Textures and their atlas entries.
 	 */
-	std::map<std::string, TextureInfo> textures;
+	std::map<std::pair<std::string, std::string>, TextureInfo> textures;
 
 	/**
 	 * Texture atlases.
