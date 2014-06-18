@@ -66,7 +66,7 @@ InstanceObject::InstanceObject(GameWorld* engine,
 						&(physInst.vertices[0].x),
 						sizeof(glm::vec3));
 			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-			trishape->setMargin(0.09f);
+			trishape->setMargin(0.05f);
 			btTransform t; t.setIdentity();
 			cmpShape->addChildShape(t, trishape);
 		}

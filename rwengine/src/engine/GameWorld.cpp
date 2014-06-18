@@ -87,6 +87,7 @@ bool GameWorld::load()
 	dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
 	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	gContactProcessedCallback = ContactProcessedCallback;
+	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
 
 	gameData.load();
 
@@ -497,5 +498,14 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint &mp, void *body0, void 
 	if(b) handleVehicleResponse(b, mp, false);
 
 	return true;
+}
+
+void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeStep)
+{
+	GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
+
+	for(VehicleObject* v : world->vehicleInstances) {
+		v->tickPhysics(timeStep);
+	}
 }
 

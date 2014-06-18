@@ -15,7 +15,7 @@ IngameState::IngameState()
 	setPlayerCharacter( _playerCharacter );
 
 	float j = 0;
-	auto carPos = glm::vec3( -1000.f, -1000.f, 14.f );
+	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
 	auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
 	for( auto& vi : getWorld()->vehicleTypes ) {
 		switch( vi.first ) {

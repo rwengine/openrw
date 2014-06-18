@@ -201,6 +201,7 @@ public:
 	 * Used to implement uprooting and other physics oddities.
 	 */
 	static bool ContactProcessedCallback(btManifoldPoint& mp, void* body0, void* body1);
+	static void PhysicsTickCallback(btDynamicsWorld* physWorld, btScalar timeStep);
 
 	/**
 	 * Work related

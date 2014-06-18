@@ -85,6 +85,8 @@ public:
 	bool getHandbraking() const;
 
 	void tick(float dt);
+
+	void tickPhysics(float dt);
 	
 	void ejectAll();
 	

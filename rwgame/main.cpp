@@ -372,15 +372,23 @@ void render(float alpha)
 
 	case 1: {
         glUseProgram(gta->renderer.worldProgram);
-        glm::mat4 proj = gta->renderer.camera.frustum.projection();
-        glm::mat4 view = gta->renderer.camera.frustum.view;
+		gta->renderer.uploadUBO<ObjectUniformData>(
+					gta->renderer.uboObject, {
+						glm::mat4(),
+						glm::vec4(1.f),
+						1.f, 1.f
+					});
 		gta->renderer.renderPaths();
         break;
     }
 	case 2: {
-        glUseProgram(gta->renderer.worldProgram);
-        glm::mat4 proj = gta->renderer.camera.frustum.projection();
-        glm::mat4 view = gta->renderer.camera.frustum.view;
+		glUseProgram(gta->renderer.worldProgram);
+		gta->renderer.uploadUBO<ObjectUniformData>(
+					gta->renderer.uboObject, {
+						glm::mat4(),
+						glm::vec4(1.f),
+						1.f, 1.f
+					});
 		gta->dynamicsWorld->debugDrawWorld();
         debugDrawer->drawAllLines();
 

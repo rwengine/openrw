@@ -57,7 +57,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 					auto vert = physInst.vertices[physInst.indices[i]];
 					trishape->addPoint({ vert.x, vert.y, vert.z });
 				}
-				trishape->setMargin(0.09f);
+				trishape->setMargin(0.02f);
 				btTransform t; t.setIdentity();
 				cmpShape->addChildShape(t, trishape);
 			}
@@ -75,15 +75,15 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			btRaycastVehicle::btVehicleTuning tuning;
 
 			float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
-			tuning.m_frictionSlip = 1.8f;
+			tuning.m_frictionSlip = 2.5f;
 			tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
 			physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
 			physVehicle->setCoordinateSystem(0, 2, 1);
-			physBody->setActivationState(DISABLE_DEACTIVATION);
+			//physBody->setActivationState(DISABLE_DEACTIVATION);
 			engine->dynamicsWorld->addVehicle(physVehicle);
 
-			float kC = 0.4f;
+			float kC = 0.5f;
 			float kR = 0.6f;
 
 			for(size_t w = 0; w < info->wheels.size(); ++w) {
@@ -97,7 +97,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 				btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
 				wi.m_suspensionRestLength1 = restLength;
 
-				wi.m_maxSuspensionForce = 100000.f;
+				// Max force slightly more than gravity.
+				wi.m_maxSuspensionForce = info->handling.mass * 12.f;
 				wi.m_suspensionStiffness = (info->handling.suspensionForce * 10.f);
 
 				//float dampEffect = (info->handling.suspensionDamping) / travel;
@@ -105,7 +106,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 				wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 				wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-				wi.m_rollInfluence = 0.0f;
+				wi.m_rollInfluence = 0.45f;
 				wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 			}
 
@@ -173,10 +174,16 @@ glm::quat VehicleObject::getRotation() const
 
 void VehicleObject::tick(float dt)
 {
+	// Moved to tickPhysics
+}
+
+void VehicleObject::tickPhysics(float dt)
+{
 	if(physVehicle) {
 		// todo: a real engine function
 		float velFac = (info->handling.maxVelocity - physVehicle->getCurrentSpeedKmHour()) / info->handling.maxVelocity;
 		float engineForce = info->handling.acceleration * 150.f * throttle * velFac;
+		if( fabs(engineForce) >= 0.001f ) physBody->activate(true);
 
 		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
 			btWheelInfo& wi = physVehicle->getWheelInfo(w);
@@ -227,7 +234,6 @@ void VehicleObject::tick(float dt)
 				btVector3 dampforce( 10000.f * velocity.x(), velocity.y() * 100.f, 0.f );
 				physBody->applyCentralForce(-dampforce.rotate(orient.getAxis(), orient.getAngle()));
 			}
-			physBody->setDamping(0.1f, 0.8f);
 		}
 
 		auto ws = getPosition();
@@ -302,7 +308,12 @@ void VehicleObject::tick(float dt)
 			applyWaterFloat( vLeft);
 		}
 		else {
-			physBody->setDamping(0.0f, 0.0f);
+			if( vehicle->type == VehicleData::BOAT ) {
+				physBody->setDamping(0.1f, 0.8f);
+			}
+			else {
+				physBody->setDamping(0.05f, 0.0f);
+			}
 		}
 
 		_lastHeight = vH;
@@ -391,35 +402,32 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
 
-	const float frameDamageThreshold = 2500.f;
+	const float frameDamageThreshold = 1500.f;
 
 	if( dmg.impulse >= frameDamageThreshold ) {
 		auto dpoint = dmg.damageLocation;
 		dpoint -= getPosition();
 		dpoint = glm::inverse(getRotation()) * dpoint;
 
-		float d = std::numeric_limits<float>::max();
-		ModelFrame* nearest = nullptr;
 		// find nearest "_ok" frame.
 		for(ModelFrame* f : model->model->frames) {
 			auto& name = f->getName();
 			if( name.find("_ok") != name.npos ) {
+				auto& geom = model->model->geometries[f->getGeometries()[0]];
 				auto pp = f->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
-				float td = glm::distance(glm::vec3(pp), dpoint);
-				if( td < d ) {
-					d = td;
-					nearest = f;
+				float td = glm::distance(glm::vec3(pp)+geom->geometryBounds.center
+										 , dpoint);
+				if( td < geom->geometryBounds.radius * 1.2f ) {
+					if( animator->getFrameVisibility(f) ) {
+						animator->setFrameVisibility(f, false);
+						// find damaged
+						auto name = f->getName();
+						name.replace(name.find("_ok"), 3, "_dam");
+						auto damage = model->model->findFrame(name);
+						animator->setFrameVisibility(damage, true);
+					}
 				}
 			}
-		}
-
-		if( nearest && animator->getFrameVisibility(nearest) ) {
-			animator->setFrameVisibility(nearest, false);
-			// find damaged
-			auto name = nearest->getName();
-			name.replace(name.find("_ok"), 3, "_dam");
-			auto damage = model->model->findFrame(name);
-			animator->setFrameVisibility(damage, true);
 		}
 
 	}
@@ -497,6 +505,8 @@ void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVe
 {
 	ClosestNotMeRayResultCallback rayCallback( _vehicle->physBody, from, to );
 
+	const void *res = 0;
+
 	_world->rayTest(from, to, rayCallback);
 
 	if( rayCallback.hasHit() ) {
@@ -507,8 +517,9 @@ void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVe
 			result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
 			result.m_hitNormalInWorld.normalize();
 			result.m_distFraction = rayCallback.m_closestHitFraction;
-			return (void*) body;
+			res = body;
 		}
 	}
-	return 0;
+
+	return (void* )res;
 }
