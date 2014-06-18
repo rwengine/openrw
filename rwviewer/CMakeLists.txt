@@ -15,9 +15,9 @@ add_executable(rwviewer
 	AnimationListModel.cpp
 	AnimationListWidget.cpp)
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIRS})
 
-target_link_libraries(rwviewer rwengine sfml-graphics sfml-system GL GLEW BulletDynamics BulletCollision LinearMath)
+target_link_libraries(rwviewer rwengine sfml-graphics sfml-system GL GLEW ${BULLET_LIBRARIES})
 qt5_use_modules(rwviewer Widgets OpenGL)
 
 install(TARGETS rwviewer RUNTIME DESTINATION bin)

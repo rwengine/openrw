@@ -7,8 +7,8 @@ add_executable(rwgame
 	debugstate.cpp
 )
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" /usr/include/bullet)
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIRS})
 
-target_link_libraries( rwgame rwengine sfml-graphics sfml-window sfml-system GL GLEW BulletDynamics BulletCollision LinearMath )
+target_link_libraries( rwgame rwengine sfml-graphics sfml-window sfml-system GL GLEW ${BULLET_LIBRARIES} )
 
 install(TARGETS rwgame RUNTIME DESTINATION bin)
