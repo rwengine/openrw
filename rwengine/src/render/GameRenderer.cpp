@@ -246,6 +246,7 @@ void GameRenderer::renderWorld(float alpha)
 	
 	rendered = culled = 0;
 
+	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(uniTexture, 0);
 
 	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
@@ -574,16 +575,19 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 				if(tex.transparent && queueTransparent) {
 					return false;
 				}
-				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, tex.texName);
 			}
 			else {
 				// Texture pair is missing?
 			}
 		}
+		else {
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
 			auto col = mat.colour;
+			if(col.a < 255 && queueTransparent) return false;
 			if( object && object->type() == GameObject::Vehicle ) {
 				auto vehicle = static_cast<VehicleObject*>(object);
 				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
@@ -593,11 +597,11 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 					oudata.colour = glm::vec4(vehicle->colourSecondary, 1.f);
 				}
 				else {
-					oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, 1.f};
+					oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, col.a/255.f};
 				}
 			}
 			else {
-				oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, 1.f};
+				oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, col.a/255.f};
 			}
 		}
 

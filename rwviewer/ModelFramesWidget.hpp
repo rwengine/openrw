@@ -22,7 +22,7 @@ class ModelFramesWidget : public QDockWidget
 
 private slots:
 
-	void updateInfoBox(ModelFrame* f);
+	void updateInfoBox(Model* model, ModelFrame* f);
 
 	void selectedModelChanged(const QModelIndex&,const QModelIndex&);
 	

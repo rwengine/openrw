@@ -116,7 +116,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 		auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative);
 		coldata += sizeof(uint32_t);
 
-		GLenum type, format;
+		GLenum type = GL_UNSIGNED_BYTE, format = GL_RGBA;
 		switch(texNative.rasterformat)
 		{
 			case RW::BSTextureNative::FORMAT_1555:
@@ -131,6 +131,8 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 			case RW::BSTextureNative::FORMAT_888:
 				format = GL_BGRA;
 				type = GL_UNSIGNED_BYTE;
+				break;
+		default:
 				break;
 		}
 
@@ -211,11 +213,15 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 		std::string alpha = std::string(texNative.alphaName);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 		std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
+
 		bool transparent = false;
 		GLuint id = createTexture(texNative, rootSection, &transparent);
 
-		gameData->textures.insert({{name, alpha}, {id, transparent}});
-		gameData->textures.insert({{name, ""}, {id, transparent}});
+		gameData->textures[{name, alpha}] = {id, transparent};
+
+		if( !alpha.empty() ) {
+			gameData->textures[{name, ""}] = {id, transparent};
+		}
 	}
 
 	return true;
