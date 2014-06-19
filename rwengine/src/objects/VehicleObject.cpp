@@ -15,18 +15,19 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 {
 	mHealth = 100.f;
 	if(! data->modelName.empty()) {
+		btTransform wt(
+					btQuaternion(
+						rot.x, rot.y, rot.z, rot.w
+					),
+					btVector3(
+						pos.x, pos.y, pos.z
+					));
+
 		auto phyit = engine->gameData.collisions.find(data->modelName);
 		if( phyit != engine->gameData.collisions.end()) {
 			btCompoundShape* cmpShape = new btCompoundShape;
 			btDefaultMotionState* msta = new btDefaultMotionState;
-			msta->setWorldTransform(btTransform(
-				btQuaternion(
-					rot.x, rot.y, rot.z, rot.w
-				),
-				btVector3(
-					pos.x, pos.y, pos.z
-				)
-			));
+			msta->setWorldTransform(wt);
 			CollisionModel& physInst = *phyit->second.get();
 
 			btVector3 com(info->handling.centerOfMass.x, info->handling.centerOfMass.y, info->handling.centerOfMass.z);
@@ -111,31 +112,29 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			}
 
 		}
-	}
 
-	// Hide all LOD and damage frames.
-	animator = new Animator;
-	animator->setModel(model->model);
+		// Hide all LOD and damage frames.
+		animator = new Animator;
+		animator->setModel(model->model);
 
-	for(ModelFrame* f : model->model->frames) {
-		auto& name = f->getName();
-		bool isDam = name.find("_dam") != name.npos;
-		bool isLod = name.find("lo") != name.npos;
-		bool isDum = name.find("_dummy") != name.npos;
-		bool isOk = name.find("_ok") != name.npos;
-		if(isDam || isLod || isDum ) {
-			animator->setFrameVisibility(f, false);
-		}
-		if( isDum ) {
-			if( name.find("door") != name.npos ) {
-				float a = glm::half_pi<float>() - glm::quarter_pi<float>() * 0.5f;
-				animator->setFrameOrientation(f, glm::normalize(
-												  glm::quat( a, glm::vec3(0.f, 0.f,	glm::sign(f->getDefaultTranslation().x)) )));
-				std::cout << name << std::endl;
+		for(ModelFrame* f : model->model->frames) {
+			auto& name = f->getName();
+			bool isDam = name.find("_dam") != name.npos;
+			bool isLod = name.find("lo") != name.npos;
+			bool isDum = name.find("_dummy") != name.npos;
+			bool isOk = name.find("_ok") != name.npos;
+			if(isDam || isLod || isDum ) {
+				animator->setFrameVisibility(f, false);
+			}
+
+			if( isDum ) {
+				_hingedObjects[f] = {
+					nullptr,
+					nullptr
+				};
 			}
 		}
 	}
-
 }
 
 VehicleObject::~VehicleObject()
@@ -325,6 +324,15 @@ void VehicleObject::tickPhysics(float dt)
 		}
 
 		_lastHeight = vH;
+
+		// Update hinge object rotations
+		for(auto it : _hingedObjects) {
+			if(it.second.body == nullptr) continue;
+			auto inv = glm::inverse(getRotation());
+			auto rot = it.second.body->getWorldTransform().getRotation();
+			animator->setFrameOrientation(it.first,
+					inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z()));
+		}
 	}
 }
 
@@ -427,6 +435,9 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 										 , dpoint);
 				if( td < geom->geometryBounds.radius * 1.2f ) {
 					setFrameState(f, DAM);
+
+					// Disable the lock on damaged frames.
+					setHingeLocked(f->getParent(), false);
 				}
 			}
 		}
@@ -491,6 +502,118 @@ void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)
 			physBody->applyForce(btVector3(0.f, 0.f, F),
 								 btVector3(relPt.x, relPt.y, relPt.z));
 		}
+	}
+}
+
+void VehicleObject::setHingeLocked(ModelFrame *frame, bool locked)
+{
+	auto hit = _hingedObjects.find(frame);
+	if( hit != _hingedObjects.end() ) {
+		if( !locked && hit->second.body == nullptr ) {
+			createObjectHinge(physBody->getWorldTransform(), frame);
+		}
+		else if( locked && hit->second.body ) {
+			destroyObjectHinge(hit->second);
+		}
+	}
+}
+
+void VehicleObject::createObjectHinge(btTransform& local, ModelFrame *frame)
+{
+	float sign = glm::sign(frame->getDefaultTranslation().x);
+	btVector3 hingeAxis,
+			hingePosition;
+	btVector3 boxSize,
+			boxOffset;
+	float hingeMax = 1.f;
+	float hingeMin = 0.f;
+
+	auto& fn = frame->getName();
+
+	if( frame->getChildren().size() == 0 ) return;
+
+	ModelFrame* okframe = frame->getChildren()[0];
+
+	if( okframe->getGeometries().size() == 0 ) return;
+	auto& geom = model->model->geometries[okframe->getGeometries()[0]];
+	auto gbounds = geom->geometryBounds;
+
+	if( fn.find("door") != fn.npos ) {
+		std::cout << fn << std::endl;
+		hingeAxis = {0.f, 0.f, 1.f};
+		hingePosition = {0.f, 0.2f, 0.f};
+		boxSize = {0.1f, 0.4f, gbounds.radius/2.f};
+		boxOffset = {0.f,-0.2f, gbounds.center.z/2.f};
+		if( sign > 0.f ) {
+			hingeMin = -glm::quarter_pi<float>() * 1.5f;
+			hingeMax = 0.f;
+		}
+		else {
+			hingeMax = glm::quarter_pi<float>() * 1.5f;
+			hingeMin = 0.f;
+		}
+	}
+	else if( fn.find("bonnet") != fn.npos ) {
+		hingeAxis = {1.f, 0.f, 0.f};
+		hingePosition = {0.f, -0.2f, 0.f};
+		hingeMax = 0.f;
+		hingeMin = -glm::quarter_pi<float>() * 1.5f;
+		boxSize = {0.4f, 0.4f, 0.1f};
+		boxOffset = {0.f, 0.2f, 0.f};
+	}
+	else {
+		// TODO: boot, bumper
+		return;
+	}
+
+	btDefaultMotionState* dms = new btDefaultMotionState();
+	btTransform tr = btTransform::getIdentity();
+
+	auto p = frame->getDefaultTranslation();
+	auto o = glm::toQuat(frame->getDefaultRotation());
+	auto bp = btVector3(p.x, p.y, p.z);
+	tr.setOrigin(bp);
+	tr.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
+
+	dms->setWorldTransform(local * tr);
+
+	btCompoundShape* cs = new btCompoundShape;
+	btCollisionShape* bshape = new btBoxShape( boxSize );
+	btTransform t; t.setIdentity();
+	t.setOrigin(boxOffset);
+	cs->addChildShape(t, bshape);
+
+	btVector3 inertia;
+	cs->calculateLocalInertia(10.f, inertia);
+
+	btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, dms, cs, inertia);
+	btRigidBody* subObject = new btRigidBody(rginfo);
+	subObject->setUserPointer(this);
+
+	auto hinge = new btHingeConstraint(
+				*physBody,
+				*subObject,
+				bp, hingePosition,
+				hingeAxis, hingeAxis);
+	hinge->setLimit(hingeMin, hingeMax);
+
+	engine->dynamicsWorld->addRigidBody(subObject);
+	engine->dynamicsWorld->addConstraint(hinge, true);
+
+	_hingedObjects[frame].body = subObject;
+	_hingedObjects[frame].constraint = hinge;
+}
+
+void VehicleObject::destroyObjectHinge(VehicleObject::HingeInfo &hinge)
+{
+	if( hinge.body ) {
+		engine->dynamicsWorld->removeRigidBody(hinge.body);
+		engine->dynamicsWorld->removeConstraint(hinge.constraint);
+
+		delete hinge.body;
+		delete hinge.constraint;
+		hinge.body = nullptr;
+		hinge.constraint = nullptr;
 	}
 }
 

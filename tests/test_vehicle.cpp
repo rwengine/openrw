@@ -68,5 +68,28 @@ BOOST_AUTO_TEST_CASE(test_door_position)
 
 	Global::get().e->destroyObject(vehicle);
 }
+
+BOOST_AUTO_TEST_CASE(test_hinges)
+{
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+
+	BOOST_CHECK( vehicle->_hingedObjects.size() > 0 );
+
+	for(auto& ho : vehicle->_hingedObjects) {
+		// All Hinge objects should initalize, but not be locked.
+		BOOST_CHECK( ho.second.body == nullptr );
+	}
+
+	auto fld = vehicle->model->model->findFrame("door_lf_dummy");
+
+	vehicle->setHingeLocked(fld, false);
+
+	BOOST_REQUIRE( vehicle->_hingedObjects[fld].body != nullptr );
+
+	vehicle->setHingeLocked(fld, true);
+
+	BOOST_CHECK( vehicle->_hingedObjects[fld].body == nullptr );
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 

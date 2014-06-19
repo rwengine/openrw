@@ -1,6 +1,7 @@
 #include "debugstate.hpp"
 #include "game.hpp"
 #include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 
 DebugState::DebugState()
 	: _freeLook( false ), _sonicMode( false )
@@ -15,6 +16,15 @@ DebugState::DebugState()
 			it++;
 		}
 		spawnVehicle(it->first);
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Open All Doors/Flaps", [this] {
+		auto pc = getPlayerCharacter();
+		auto pv = pc->getCurrentVehicle();
+		if( pv ) {
+			for(auto& it : pv->_hingedObjects) {
+				pv->setHingeLocked(it.first, false);
+			}
+		}
 	}, entryHeight));
 	int vehiclesMax = 16, i = 0;
 	for( auto& v : getWorld()->vehicleTypes ) {

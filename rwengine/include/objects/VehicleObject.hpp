@@ -49,6 +49,13 @@ public:
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
 
+	struct HingeInfo {
+		btRigidBody* body;
+		btHingeConstraint* constraint;
+	};
+
+	std::map<ModelFrame*, HingeInfo> _hingedObjects;
+
 	VehicleObject(GameWorld* engine,
 			   const glm::vec3& pos,
 			   const glm::quat& rot,
@@ -111,6 +118,13 @@ public:
 	void setFrameState(ModelFrame *f, FrameState state);
 
 	void applyWaterFloat(const glm::vec3& relPt);
+
+	void setHingeLocked(ModelFrame* frame, bool locked);
+
+private:
+
+	void createObjectHinge(btTransform &local, ModelFrame* frame);
+	void destroyObjectHinge(HingeInfo& hinge);
 };
 
 /**
