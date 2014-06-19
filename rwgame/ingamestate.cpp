@@ -116,7 +116,28 @@ void IngameState::tick(float dt)
 		viewPos = _playerCharacter->getCurrentVehicle()->getPosition();
 	}
 
-	setViewParameters( viewPos + localview, {localX, _lookAngles.y} );
+	btVector3 rayFrom(viewPos.x, viewPos.y, viewPos.z);
+	btVector3 rayTo = rayFrom + btVector3(localview.x, localview.y, localview.z);
+
+	btDynamicsWorld::AllHitsRayResultCallback allrr(rayFrom, rayTo);
+
+	getWorld()->dynamicsWorld->rayTest( rayFrom, rayTo, allrr );
+
+	float viewFraction = 1.f;
+	btCollisionObject* playobj = _playerCharacter->physObject;
+	if( _playerCharacter->getCurrentVehicle() ) {
+		playobj = _playerCharacter->getCurrentVehicle()->physBody;
+	}
+	if(allrr.hasHit()) {
+		auto& co = allrr.m_collisionObjects;
+		for(int i = 0; i < co.size(); ++i) {
+			if( co[i] != playobj && allrr.m_hitFractions[i] <= viewFraction ) {
+				viewFraction = allrr.m_hitFractions[i] * 0.9f;
+			}
+		}
+	}
+
+	setViewParameters( viewPos + localview * viewFraction, {localX, _lookAngles.y} );
 }
 
 void IngameState::handleEvent(const sf::Event &event)
