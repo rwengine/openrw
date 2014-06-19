@@ -94,6 +94,34 @@ bool Animator::getFrameVisibility(ModelFrame *frame) const
 	return true;
 }
 
+void Animator::setFrameOrientation(ModelFrame *frame, const glm::quat &orientation)
+{
+	auto fit = _frameInstances.find(frame);
+	if( fit != _frameInstances.end() ) {
+		fit->second.orientation = orientation;
+	}
+	else {
+		_frameInstances.insert({
+								   frame,
+								   {
+									   true,
+									   nullptr,
+									   {}, {},
+									   orientation
+								   }
+							   });
+	}
+}
+
+glm::quat Animator::getFrameOrientation(ModelFrame *frame) const
+{
+	auto fit = _frameInstances.find(frame);
+	if( fit != _frameInstances.end() ) {
+		return fit->second.orientation;
+	}
+	return glm::toQuat(frame->getDefaultRotation());
+}
+
 void Animator::tick(float dt)
 {
 	if( model == nullptr || _animations.empty() ) {
@@ -207,6 +235,9 @@ glm::mat4 Animator::getFrameMatrix(ModelFrame *frame, float alpha, bool ignoreRo
 			m = m * glm::mat4_cast(kf.rotation);
 		}
 		return m;
+	}
+	else if( it != _frameInstances.end() ) {
+		return frame->getTransform() * glm::mat4_cast(it->second.orientation);
 	}
 	return frame->getTransform();
 }

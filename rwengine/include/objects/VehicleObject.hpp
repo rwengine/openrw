@@ -102,7 +102,13 @@ public:
 	
     virtual bool takeDamage(const DamageInfo& damage);
 
-	void setPartDamaged(unsigned int flag, bool damaged);
+	enum FrameState {
+		OK,
+		DAM,
+		BROKEN
+	};
+
+	void setFrameState(ModelFrame *f, FrameState state);
 
 	void applyWaterFloat(const glm::vec3& relPt);
 };

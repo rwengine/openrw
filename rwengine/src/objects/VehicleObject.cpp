@@ -126,6 +126,14 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		if(isDam || isLod || isDum ) {
 			animator->setFrameVisibility(f, false);
 		}
+		if( isDum ) {
+			if( name.find("door") != name.npos ) {
+				float a = glm::half_pi<float>() - glm::quarter_pi<float>() * 0.5f;
+				animator->setFrameOrientation(f, glm::normalize(
+												  glm::quat( a, glm::vec3(0.f, 0.f,	glm::sign(f->getDefaultTranslation().x)) )));
+				std::cout << name << std::endl;
+			}
+		}
 	}
 
 }
@@ -409,7 +417,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 		dpoint -= getPosition();
 		dpoint = glm::inverse(getRotation()) * dpoint;
 
-		// find nearest "_ok" frame.
+		// find visible "_ok" frames and damage them.
 		for(ModelFrame* f : model->model->frames) {
 			auto& name = f->getName();
 			if( name.find("_ok") != name.npos ) {
@@ -418,30 +426,34 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 				float td = glm::distance(glm::vec3(pp)+geom->geometryBounds.center
 										 , dpoint);
 				if( td < geom->geometryBounds.radius * 1.2f ) {
-					if( animator->getFrameVisibility(f) ) {
-						animator->setFrameVisibility(f, false);
-						// find damaged
-						auto name = f->getName();
-						name.replace(name.find("_ok"), 3, "_dam");
-						auto damage = model->model->findFrame(name);
-						animator->setFrameVisibility(damage, true);
-					}
+					setFrameState(f, DAM);
 				}
 			}
 		}
-
 	}
 
 	return true;
 }
 
-void VehicleObject::setPartDamaged(unsigned int flag, bool damaged)
+void VehicleObject::setFrameState(ModelFrame* f, FrameState state)
 {
-	if(damaged) {
-		damageFlags |= flag;
+	bool isOkVis = animator->getFrameVisibility(f);
+
+	auto damName = f->getName();
+	damName.replace(damName.find("_ok"), 3, "_dam");
+	auto damage = model->model->findFrame(damName);
+
+	if(DAM == state) {
+		if( isOkVis ) {
+			animator->setFrameVisibility(f, false);
+			animator->setFrameVisibility(damage, true);
+		}
 	}
-	else {
-		damageFlags = damageFlags & ~flag;
+	else if(OK == state) {
+		if(! isOkVis) {
+			animator->setFrameVisibility(f, true);
+			animator->setFrameVisibility(damage, false);
+		}
 	}
 }
 

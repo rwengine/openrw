@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle)
 	Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
+BOOST_AUTO_TEST_CASE(vehicle_frame_vis)
 {
 	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
@@ -37,17 +37,18 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_flags)
 
 	BOOST_REQUIRE(bonnet_ok != nullptr);
 	BOOST_REQUIRE(bonnet_dam != nullptr);
-	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_ok));
+
+	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_ok));
 	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
 
-	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, true);
+	vehicle->setFrameState(bonnet_ok, VehicleObject::DAM);
 
 	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_ok));
-	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_dam));
+	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_dam));
 
-	vehicle->setPartDamaged(VehicleObject::DF_Bonnet, false);
+	vehicle->setFrameState(bonnet_ok, VehicleObject::OK);
 
-	BOOST_CHECK(vehicle->animator->getFrameVisibility(bonnet_ok));
+	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_ok));
 	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
 
 	Global::get().e->destroyObject(vehicle);

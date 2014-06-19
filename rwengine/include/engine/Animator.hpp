@@ -79,6 +79,9 @@ public:
 	void setFrameVisibility(ModelFrame* frame, bool visible);
 	bool getFrameVisibility(ModelFrame* frame) const;
 
+	void setFrameOrientation(ModelFrame* frame, const glm::quat& orientation);
+	glm::quat getFrameOrientation(ModelFrame* frame) const;
+
 	/**
 	 * @brief getFrameMatrix returns the matrix for frame at the given time
 	 * @param t

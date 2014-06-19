@@ -23,34 +23,34 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy)
 		vehicle->setPosition(glm::vec3(tpos, -5.f));
 
 		// Allow the object to update
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 
 		BOOST_CHECK( vehicle->isInWater() );
 
 		// Ensure that the in water state sticks
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 
 		BOOST_CHECK( vehicle->isInWater() );
 
 		vehicle->setPosition(glm::vec3(tpos, 5.f));
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
 
 		// TODO: fix magic numbers
 		auto orgval	= Global::get().e->gameData.realWater[0];
 		Global::get().e->gameData.realWater[0] = NO_WATER_INDEX;
 
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
 
 		vehicle->setPosition(glm::vec3(tpos, -5.f));
 
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
 
 		Global::get().e->gameData.realWater[0] = orgval;
 
-		vehicle->tick(0.0016f);
+		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
 
 		Global::get().e->destroyObject(vehicle);
