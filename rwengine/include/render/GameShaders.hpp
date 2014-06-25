@@ -8,10 +8,6 @@ struct WaterHQ {
 	static const char* VertexShader;
 	static const char* FragmentShader;
 };
-struct WaterLQ {
-	static const char* VertexShader;
-	static const char* FragmentShader;
-};
 
 struct Sky {
 	static const char* VertexShader;

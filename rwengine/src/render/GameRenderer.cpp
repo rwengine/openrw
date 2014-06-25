@@ -428,6 +428,7 @@ void GameRenderer::renderWorld(float alpha)
 	}
 
 	glBindVertexArray( waterLQDraw.getVAOName() );
+	glUniform2f(waterWave, 0.0f, 0.0f);
 
 	glUniform1f(waterSize, blockLQSize);
 	for( int x = 0; x < WATER_LQ_DATA_SIZE; x++ ) {
