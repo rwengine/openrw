@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_interpolate)
 		{
 			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
 			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 1.5f, 0.0f)) );
+			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
 		}
 
 		animator.tick( 1.f );
