@@ -15,6 +15,7 @@
 #include <memory>
 
 struct DynamicObjectData;
+struct WeaponData;
 class GameWorld;
 class TextureAtlas;
 
@@ -131,6 +132,11 @@ public:
 	void loadDynamicObjects(const std::string& name);
 
 	/**
+	 * Loads weapon.dat
+	 */
+	void loadWeaponDAT(const std::string& name);
+
+	/**
 	 * Returns a pointer to the named file if it is available,
 	 * the memory must be freed by the caller.
 	 * @param name the filename in the archive
@@ -229,6 +235,7 @@ public:
 	 */
 	std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 	
+	std::map<std::string, std::shared_ptr<WeaponData>> weaponData;
 
 	/**
 	 * @struct WaterArea

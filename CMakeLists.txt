@@ -8,7 +8,7 @@ project(OpenRW)
 
 SET(BUILD_OLD_TOOLS FALSE CACHE BOOL "Build old datadump and analyzer tools")
 
-IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -Wall -Wextra" )
 ELSE()
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -Wall" )

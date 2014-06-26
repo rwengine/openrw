@@ -41,6 +41,9 @@ Currently only supports viewing instance data, pending some rewriting.
     * Handling data
     * Collision data
     * Animation scrubbing
+* Improve file loading
+    * One-off loaders should be moved out of GameData into some DATLoader or something.
+    * Some error mechanism that allows for useful error messages.
 
 ## License
 
