@@ -15,6 +15,8 @@ class CharacterObject;
 class InstanceObject;
 class VehicleObject;
 
+class WeaponScan;
+
 #include <glm/glm.hpp>
 
 #include <btBulletDynamicsCommon.h>
@@ -106,6 +108,11 @@ public:
 	 * Destroys an existing Object
 	 */
 	void destroyObject(GameObject* object);
+
+	/**
+	 * Performs a weapon scan against things in the world
+	 */
+	void doWeaponScan( WeaponScan& scan );
 	
 	/**
 	 * Returns the current hour

@@ -38,4 +38,36 @@ struct WeaponData
 	std::uint32_t flags;
 };
 
+/**
+ * @brief The WeaponScan struct
+ * Represents a scene query against a ray
+ * or shape used to determine what to damage.
+ */
+struct WeaponScan
+{
+	enum ScanType {
+		HITSCAN,
+		RADIUS,
+	};
+
+	const ScanType type;
+
+	float damage;
+
+	glm::vec3 center;
+	float radius;
+
+	glm::vec3 end;
+
+	// Constructor for a RADIUS hitscan
+	WeaponScan( float damage, const glm::vec3& center, float radius )
+		: type(RADIUS), damage(damage), center(center), radius(radius)
+	{}
+
+	// Constructor for a ray hitscan
+	WeaponScan( float damage, const glm::vec3& start, const glm::vec3& end)
+		: type(HITSCAN), damage(damage), center(start), end(end)
+	{}
+};
+
 #endif

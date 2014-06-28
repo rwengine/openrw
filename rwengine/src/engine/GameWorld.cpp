@@ -4,6 +4,7 @@
 #include <ai/DefaultAIController.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <render/Model.hpp>
+#include <data/WeaponData.hpp>
 #include <WorkContext.hpp>
 
 // 3 isn't enough to cause a factory.
@@ -399,6 +400,34 @@ void GameWorld::destroyObject(GameObject* object)
 		}
 	}
 	delete object;
+}
+
+void GameWorld::doWeaponScan(WeaponScan &scan)
+{
+	if( scan.type == WeaponScan::RADIUS ) {
+		// TODO
+		// Requires custom ConvexResultCallback
+	}
+	else if( scan.type == WeaponScan::HITSCAN ) {
+		btVector3 from(scan.center.x, scan.center.y, scan.center.z),
+				to(scan.end.x, scan.end.y, scan.end.z);
+		btCollisionWorld::ClosestRayResultCallback cb(from, to);
+		cb.m_collisionFilterGroup = btBroadphaseProxy::AllFilter;
+		dynamicsWorld->rayTest(from, to, cb);
+		// TODO: did any weapons penetrate?
+
+		if( cb.hasHit() ) {
+			GameObject* go = static_cast<GameObject*>(cb.m_collisionObject->getUserPointer());
+			GameObject::DamageInfo di;
+			di.damageLocation = glm::vec3(cb.m_hitPointWorld.x(),
+								  cb.m_hitPointWorld.y(),
+								  cb.m_hitPointWorld.z() );
+			di.damageSource = scan.center;
+			di.type = GameObject::DamageInfo::Bullet;
+			di.hitpoints = scan.damage;
+			go->takeDamage(di);
+		}
+	}
 }
 
 int GameWorld::getHour()
