@@ -19,6 +19,8 @@ BOOST_AUTO_TEST_CASE(TestWeaponScan)
 		Global::get().e->doWeaponScan( scan );
 
 		BOOST_CHECK( character->mHealth < 100.f );
+
+		Global::get().e->destroyObject(character);
 	}
 }
 
