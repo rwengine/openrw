@@ -5,6 +5,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <render/Model.hpp>
+#include <items/WeaponItem.hpp>
 
 IngameState::IngameState()
 	: _player(nullptr), _playerCharacter(nullptr)
@@ -13,6 +14,10 @@ IngameState::IngameState()
 	_player = new PlayerController(_playerCharacter);
 
 	setPlayerCharacter( _playerCharacter );
+
+	auto bat = new WeaponItem(getWorld()->gameData.weaponData["ak47"]);
+	_playerCharacter->addToInventory(bat);
+	_playerCharacter->setActiveItem(bat->getInventorySlot());
 
 	float j = 0;
 	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
@@ -196,6 +201,22 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::LShift:
 			_player->setRunning(false);
+			break;
+		default: break;
+		}
+		break;
+	case sf::Event::MouseButtonPressed:
+		switch(event.mouseButton.button) {
+		case sf::Mouse::Left:
+			_player->useItem(true, true);
+			break;
+		default: break;
+		}
+		break;
+	case sf::Event::MouseButtonReleased:
+		switch(event.mouseButton.button) {
+		case sf::Mouse::Left:
+			_player->useItem(false, true);
 			break;
 		default: break;
 		}

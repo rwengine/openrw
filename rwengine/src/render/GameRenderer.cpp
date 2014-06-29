@@ -9,6 +9,7 @@
 #include <objects/VehicleObject.hpp>
 #include <ai/CharacterController.hpp>
 #include <data/ObjectData.hpp>
+#include <items/InventoryItem.hpp>
 
 #include <render/GameShaders.hpp>
 
@@ -260,7 +261,19 @@ void GameRenderer::renderWorld(float alpha)
 		if(!charac->model->model) continue;
 
 		renderModel(charac->model->model, matrixModel, charac, charac->animator);
-    }
+
+		if(charac->getActiveItem()) {
+			auto handFrame = charac->model->model->findFrame("srhand");
+			glm::mat4 localMatrix;
+			if( handFrame ) {
+				while( handFrame->getParent() ) {
+					localMatrix = charac->animator->getFrameMatrix(handFrame) * localMatrix;
+					handFrame = handFrame->getParent();
+				}
+			}
+			renderItem(charac->getActiveItem(), matrixModel * localMatrix);
+		}
+	}
 	
 	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
 		InstanceObject& inst = *engine->objectInstances[i];
@@ -495,6 +508,26 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 			renderGeometry(model, g, matrix);
 		}
 		break;
+	}
+}
+
+void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
+{
+	// srhand
+	std::shared_ptr<ObjectData> odata = engine->objectTypes[item->getModelID()];
+	auto weapons = engine->gameData.models["weapons"];
+	if( weapons && weapons->model ) {
+		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+		auto matrix = glm::inverse(itemModel->getTransform());
+		if(itemModel) {
+			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr);
+		}
+		else {
+			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+		}
+	}
+	else {
+		std::cerr << "weapons.dff not loaded" << std::endl;
 	}
 }
 

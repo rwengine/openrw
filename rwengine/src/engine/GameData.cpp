@@ -85,8 +85,11 @@ void GameData::load()
 	
 	_knownFiles.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
 	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
+	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
+
 	loadDFF("wheels.DFF");
+	loadDFF("weapons.dff");
 	loadTXD("particle.txd");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
@@ -518,6 +521,7 @@ void GameData::loadWeaponDAT(const std::string &name)
 
 	if(dfile.is_open()) {
 		std::string linebuffer;
+		int slotNum = 0;
 
 		while(std::getline(dfile, linebuffer)) {
 			if(linebuffer[0] == '#') continue;
@@ -576,7 +580,8 @@ void GameData::loadWeaponDAT(const std::string &name)
 			ss >> data->modelID;
 			ss >> data->flags;
 
-			std::cout << "uwot; " << data->name << std::endl;
+			data->inventorySlot = slotNum++;
+
 			weaponData[data->name] = data;
 		}
 	}

@@ -2,6 +2,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <engine/Animator.hpp>
+#include <items/WeaponItem.hpp>
 
 bool CharacterController::updateActivity()
 {
@@ -56,6 +57,18 @@ void CharacterController::update(float dt)
 		if( _nextActivity ) {
 			setActivity( _nextActivity );
 			_nextActivity = nullptr;
+		}
+	}
+}
+
+void CharacterController::useItem(bool active, bool primary)
+{
+	if( character->getActiveItem() ) {
+		if( primary ) {
+			character->getActiveItem()->primary(character, active);
+		}
+		else {
+			character->getActiveItem()->secondary(character, active);
 		}
 	}
 }
@@ -155,5 +168,31 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 	}
 
 	character->enterAction(CharacterObject::VehicleGetOut);
+	return false;
+}
+
+#include <engine/GameWorld.hpp>
+bool Activities::ShootWeapon::update(CharacterObject *character, CharacterController *controller)
+{
+	auto& wepdata = _item->getWeaponData();
+
+	if( _item->isFiring() ) {
+		character->enterAction(CharacterObject::FiringWeapon);
+
+		auto shootanim = character->engine->gameData.animations[wepdata->animation1];
+		if( shootanim ) {
+			character->animator->setAnimation(shootanim, false);
+			if( character->animator->getAnimationTime() >= wepdata->animLoopEnd / 100.f ) {
+				character->animator->setAnimationTime( wepdata->animLoopStart / 100.f );
+			}
+		}
+	}
+	else {
+		if( character->animator->isCompleted() ) {
+			character->enterAction(CharacterObject::Idle);
+			return true;
+		}
+	}
+
 	return false;
 }

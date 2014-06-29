@@ -9,6 +9,7 @@
 
 class VehicleObject;
 class GameWorld;
+class InventoryItem;
 
 struct AnimationGroup
 {
@@ -53,6 +54,8 @@ private:
 	bool _hasTargetPosition;
 	glm::vec3 _targetPosition;
 
+	std::map<int, InventoryItem*> _inventory;
+	int _activeInventoryItem;
 public:
 
 	enum Action {
@@ -70,7 +73,8 @@ public:
 		VehicleDrive,
 		VehicleSit,
 		KnockedDown,
-		GettingUp
+		GettingUp,
+		FiringWeapon
 	};
 
 	std::shared_ptr<CharacterData> ped;
@@ -132,6 +136,11 @@ public:
 	void clearTargetPosition();
 
 	virtual bool isAnimationFixed() const;
+
+	void addToInventory( InventoryItem* item );
+	void setActiveItem( int slot );
+	InventoryItem* getActiveItem();
+	void destroyItem( int slot );
 };
 
 #endif

@@ -36,6 +36,8 @@ struct WeaponData
 	float breakoutAnim;
 	int modelID;
 	std::uint32_t flags;
+
+	int inventorySlot;
 };
 
 /**

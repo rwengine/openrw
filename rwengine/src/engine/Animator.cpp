@@ -254,3 +254,8 @@ float Animator::getAnimationTime(float alpha) const
 	}
 	return serverTime + alpha;
 }
+
+void Animator::setAnimationTime(float time)
+{
+	serverTime = time;
+}

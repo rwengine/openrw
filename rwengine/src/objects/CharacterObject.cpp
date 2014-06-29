@@ -3,6 +3,7 @@
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <objects/VehicleObject.hpp>
+#include <items/InventoryItem.hpp>
 
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
@@ -10,7 +11,7 @@ static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
-  _hasTargetPosition(false),
+  _hasTargetPosition(false), _activeInventoryItem(0),
   ped(data), physCharacter(nullptr),
   controller(nullptr), currentActivity(None)
 {
@@ -44,6 +45,9 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 
 CharacterObject::~CharacterObject()
 {
+	for(auto p : _inventory) {
+		destroyItem(p.first);
+	}
 	destroyActor();
 }
 
@@ -438,5 +442,26 @@ bool CharacterObject::isAnimationFixed() const
 	auto ca = animator->getAnimation();
 	return ca != animations.car_getin_lhs &&
 			ca != animations.car_getout_lhs;
+}
+
+void CharacterObject::addToInventory(InventoryItem *item)
+{
+	_inventory[item->getInventorySlot()] = item;
+}
+
+void CharacterObject::setActiveItem(int slot)
+{
+	_activeInventoryItem = slot;
+}
+
+InventoryItem *CharacterObject::getActiveItem()
+{
+	return _inventory[_activeInventoryItem];
+}
+
+void CharacterObject::destroyItem(int slot)
+{
+	delete _inventory[slot];
+	_inventory[slot] = nullptr;
 }
 

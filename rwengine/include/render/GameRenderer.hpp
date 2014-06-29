@@ -13,6 +13,7 @@ class ModelFrame;
 class GameWorld;
 class GameObject;
 class Animator;
+class InventoryItem;
 
 /**
  * Renderer 
@@ -76,6 +77,8 @@ public:
     void renderWorld(float alpha);
 
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
+
+	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GameObject* = nullptr);
 

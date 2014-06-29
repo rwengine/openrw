@@ -70,12 +70,19 @@ public:
 	virtual void update(float dt);
 
 	virtual glm::vec3 getTargetPosition() = 0;
+
+	/**
+	 * Uses the character's active item.
+	 * @param primary use the primary action.
+	 */
+	void useItem(bool active, bool primary = true);
 };
 
 #define DECL_ACTIVITY( activity_name ) \
 	std::string name() const { return #activity_name; }
 
 // TODO: Refactor this with an ugly macro to reduce code dup.
+class WeaponItem;
 
 namespace Activities {
 	struct GoTo : public CharacterController::Activity {
@@ -108,6 +115,17 @@ namespace Activities {
 
 		ExitVehicle( )
 			{}
+
+		bool update(CharacterObject *character, CharacterController *controller);
+	};
+
+	struct ShootWeapon : public CharacterController::Activity {
+		DECL_ACTIVITY( ShootWeapon )
+
+		WeaponItem* _item;
+
+		ShootWeapon( WeaponItem* item )
+			: _item(item) {}
 
 		bool update(CharacterObject *character, CharacterController *controller);
 	};

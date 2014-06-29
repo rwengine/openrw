@@ -123,6 +123,7 @@ public:
 	bool isCompleted() const; 
 
 	float getAnimationTime(float alpha = 0.f) const;
+	void setAnimationTime(float time);
 };
 
 #endif
