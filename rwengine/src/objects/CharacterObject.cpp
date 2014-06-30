@@ -456,6 +456,7 @@ void CharacterObject::setActiveItem(int slot)
 
 InventoryItem *CharacterObject::getActiveItem()
 {
+	if ( currentVehicle ) return nullptr;
 	return _inventory[_activeInventoryItem];
 }
 

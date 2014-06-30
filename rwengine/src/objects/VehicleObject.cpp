@@ -13,7 +13,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
 	  colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
 {
-	mHealth = 100.f;
+	mHealth = 1000.f;
 	if(! data->modelName.empty()) {
 		btTransform wt(
 					btQuaternion(
