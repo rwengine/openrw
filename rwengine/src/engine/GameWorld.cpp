@@ -402,7 +402,7 @@ void GameWorld::destroyObject(GameObject* object)
 	delete object;
 }
 
-void GameWorld::doWeaponScan(WeaponScan &scan)
+void GameWorld::doWeaponScan(const WeaponScan &scan)
 {
 	if( scan.type == WeaponScan::RADIUS ) {
 		// TODO
@@ -411,6 +411,7 @@ void GameWorld::doWeaponScan(WeaponScan &scan)
 	else if( scan.type == WeaponScan::HITSCAN ) {
 		btVector3 from(scan.center.x, scan.center.y, scan.center.z),
 				to(scan.end.x, scan.end.y, scan.end.z);
+		glm::vec3 hitEnd = scan.end;
 		btCollisionWorld::ClosestRayResultCallback cb(from, to);
 		cb.m_collisionFilterGroup = btBroadphaseProxy::AllFilter;
 		dynamicsWorld->rayTest(from, to, cb);
@@ -419,7 +420,7 @@ void GameWorld::doWeaponScan(WeaponScan &scan)
 		if( cb.hasHit() ) {
 			GameObject* go = static_cast<GameObject*>(cb.m_collisionObject->getUserPointer());
 			GameObject::DamageInfo di;
-			di.damageLocation = glm::vec3(cb.m_hitPointWorld.x(),
+			hitEnd = di.damageLocation = glm::vec3(cb.m_hitPointWorld.x(),
 								  cb.m_hitPointWorld.y(),
 								  cb.m_hitPointWorld.z() );
 			di.damageSource = scan.center;
@@ -427,6 +428,9 @@ void GameWorld::doWeaponScan(WeaponScan &scan)
 			di.hitpoints = scan.damage;
 			go->takeDamage(di);
 		}
+
+		// Make the renderer draw a tracer.
+		renderer.addTracer(scan.center, hitEnd);
 	}
 }
 

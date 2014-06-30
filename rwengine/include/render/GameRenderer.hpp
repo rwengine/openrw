@@ -45,6 +45,8 @@ class GameRenderer
 
 	float _renderAlpha;
 
+	std::vector<std::pair<glm::vec3, glm::vec3>> _tracers;
+
 public:
 	
 	GameRenderer(GameWorld*);
@@ -91,6 +93,10 @@ public:
      * Debug method renders all AI paths
      */
     void renderPaths();
+
+	void addTracer(const glm::vec3& from, const glm::vec3& to) {
+		_tracers.push_back({from, to});
+	}
 
 	static GLuint currentUBO;
 	template<class T> void uploadUBO(GLuint buffer, const T& data)

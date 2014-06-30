@@ -480,7 +480,34 @@ void GameRenderer::renderWorld(float alpha)
 	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 
 	glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
-	
+
+	// Draw bullets like this for now
+	if( _tracers.size() > 0 ) {
+		glUseProgram(worldProgram);
+		glBindVertexArray( vao );
+		glBindBuffer(GL_ARRAY_BUFFER, debugVBO);
+		glBindTexture(GL_TEXTURE_2D, debugTex);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * _tracers.size() * 2, _tracers.data(), GL_STREAM_DRAW);
+		GLint posAttrib = glGetAttribLocation(worldProgram, "position");
+		glEnableVertexAttribArray(posAttrib);
+		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		uploadUBO<ObjectUniformData>(
+							uboObject, {
+								glm::mat4(),
+								glm::vec4(1.f),
+								1.f, 1.f
+							});
+
+		float img3[] = {1.f, 1.f, 0.f};
+		glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
+			0, GL_RGB, GL_FLOAT, img3
+		);
+		glDrawArrays(GL_LINES, 0, _tracers.size());
+
+		_tracers.clear();
+	}
+
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -744,6 +771,6 @@ void GameRenderer::renderPaths()
     glDrawArrays(GL_LINES, 0, pedlines.size());
 
     pedlines.clear();
-    carlines.clear();
+	carlines.clear();
     glBindVertexArray( 0 );
 }

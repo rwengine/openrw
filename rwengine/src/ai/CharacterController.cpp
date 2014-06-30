@@ -184,6 +184,17 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			character->animator->setAnimation(shootanim, false);
 			if( character->animator->getAnimationTime() >= wepdata->animLoopEnd / 100.f ) {
 				character->animator->setAnimationTime( wepdata->animLoopStart / 100.f );
+				_fired = false;
+			}
+			if( !_fired && character->animator->getAnimationTime() >= wepdata->animFirePoint / 100.f ) {
+				auto farTarget = character->getPosition() +
+						character->getRotation() * glm::vec3(0.f, wepdata->hitRange, 0.f);
+				auto fireOrigin = character->getPosition() +
+						character->getRotation() * wepdata->fireOffset;
+
+				character->engine->doWeaponScan(WeaponScan(wepdata->damage, fireOrigin, farTarget));
+
+				_fired = true;
 			}
 		}
 	}

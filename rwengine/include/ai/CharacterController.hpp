@@ -123,9 +123,10 @@ namespace Activities {
 		DECL_ACTIVITY( ShootWeapon )
 
 		WeaponItem* _item;
+		bool _fired;
 
 		ShootWeapon( WeaponItem* item )
-			: _item(item) {}
+			: _item(item), _fired(false) {}
 
 		bool update(CharacterObject *character, CharacterController *controller);
 	};

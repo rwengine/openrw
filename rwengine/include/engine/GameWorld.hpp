@@ -112,7 +112,7 @@ public:
 	/**
 	 * Performs a weapon scan against things in the world
 	 */
-	void doWeaponScan( WeaponScan& scan );
+	void doWeaponScan(const WeaponScan &scan );
 	
 	/**
 	 * Returns the current hour
