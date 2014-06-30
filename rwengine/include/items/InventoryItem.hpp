@@ -15,6 +15,8 @@ protected:
 	{}
 public:
 
+	virtual ~InventoryItem() {}
+
 	/**
 	 * @brief getObject
 	 * @return The ID of the model associated with the item.
