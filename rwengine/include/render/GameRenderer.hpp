@@ -12,6 +12,9 @@ class Model;
 class ModelFrame;
 class GameWorld;
 class GameObject;
+class CharacterObject;
+class VehicleObject;
+class InstanceObject;
 class Animator;
 class InventoryItem;
 
@@ -78,11 +81,17 @@ public:
      */
     void renderWorld(float alpha);
 
+	// Object rendering methods.
+	void renderPedestrian(CharacterObject* pedestrian);
+	void renderVehicle(VehicleObject* vehicle);
+	void renderInstance(InstanceObject* instance);
+
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 
 	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GameObject* = nullptr);
+
 
 	/** 
 	 * Renders a model (who'd have thought)

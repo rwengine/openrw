@@ -250,138 +250,16 @@ void GameRenderer::renderWorld(float alpha)
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(uniTexture, 0);
 
-	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
-		CharacterObject* charac = engine->pedestrians[i];
-
-        glm::mat4 matrixModel;
-		
-		matrixModel = glm::translate(matrixModel, charac->getPosition());
-		matrixModel = matrixModel * glm::mat4_cast(charac->getRotation());
-
-		if(!charac->model->model) continue;
-
-		renderModel(charac->model->model, matrixModel, charac, charac->animator);
-
-		if(charac->getActiveItem()) {
-			auto handFrame = charac->model->model->findFrame("srhand");
-			glm::mat4 localMatrix;
-			if( handFrame ) {
-				while( handFrame->getParent() ) {
-					localMatrix = charac->animator->getFrameMatrix(handFrame) * localMatrix;
-					handFrame = handFrame->getParent();
-				}
-			}
-			renderItem(charac->getActiveItem(), matrixModel * localMatrix);
-		}
+	for(GameObject* object : engine->pedestrians) {
+		renderPedestrian(static_cast<CharacterObject*>(object));
 	}
 	
-	for(size_t i = 0; i < engine->objectInstances.size(); ++i) {
-		InstanceObject& inst = *engine->objectInstances[i];
-		
-		if(inst.object->timeOn != inst.object->timeOff) {
-			// Update rendering flags.
-			if(engine->getHour() < inst.object->timeOn 
-				&& engine->getHour() > inst.object->timeOff) {
-				continue;
-			}
-		}
-
-		if(!inst.model->model)
-		{
-			continue;
-		}
-
-		glm::mat4 matrixModel;
-		if( inst.body ) {
-			inst.body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
-		}
-		else {
-			matrixModel = glm::translate(matrixModel, inst.position);
-			matrixModel = glm::scale(matrixModel, inst.scale);
-			matrixModel = matrixModel * glm::mat4_cast(inst.rotation);
-		}
-
-		float mindist = 100000.f;
-		for (size_t g = 0; g < inst.model->model->geometries.size(); g++)
-		{
-			RW::BSGeometryBounds& bounds = inst.model->model->geometries[g]->geometryBounds;
-			mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
-		}
-
-		if( inst.object->numClumps == 1 ) {
-			if( mindist > inst.object->drawDistance[0] ) {
-				// Check for LOD instances
-				if ( inst.LODinstance ) {
-					if( mindist > inst.LODinstance->object->drawDistance[0] ) {
-						culled++;
-						continue;
-					}
-					else if (inst.LODinstance->model->model) {
-						renderModel(inst.LODinstance->model->model, matrixModel);
-					}
-				}
-			}
-			else if (! inst.object->LOD ) {
-				renderModel(inst.model->model, matrixModel);
-			}
-		}
-		else {
-			if( mindist > inst.object->drawDistance[1] ) {
-				culled++;
-				continue;
-			}
-			else if( mindist > inst.object->drawDistance[0] ) {
-				// Figure out which one is the LOD.
-				auto RF = inst.model->model->frames[0];
-				auto LODindex = RF->getChildren().size() - 2;
-				auto f = RF->getChildren()[LODindex];
-				renderFrame(inst.model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
-			}
-			else {
-				// Draw the real object
-				auto RF = inst.model->model->frames[0];
-				auto LODindex = RF->getChildren().size() - 1;
-				auto f = RF->getChildren()[LODindex];
-				renderFrame(inst.model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
-			}
-		}
+	for(auto object : engine->objectInstances) {
+		renderInstance(static_cast<InstanceObject*>(object.get()));
 	}
-	
-	for(size_t v = 0; v < engine->vehicleInstances.size(); ++v) {
-		VehicleObject* inst = engine->vehicleInstances[v];
 
-		if(!inst->model)
-		{
-			std::cout << "model " <<  inst->vehicle->modelName << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
-		}
-		
-		glm::mat4 matrixModel;
-		matrixModel = glm::translate(matrixModel, inst->getPosition());
-		matrixModel = matrixModel * glm::mat4_cast(inst->getRotation());
-
-		renderModel(inst->model->model, matrixModel, inst);
-
-		// Draw wheels n' stuff
-		for( size_t w = 0; w < inst->info->wheels.size(); ++w) {
-			auto woi = engine->objectTypes.find(inst->vehicle->wheelModelID);
-			if(woi != engine->objectTypes.end()) {
-				Model* wheelModel = engine->gameData.models["wheels"]->model;
-				if( wheelModel ) {
-					// Tell bullet to update the matrix for this wheel.
-					inst->physVehicle->updateWheelTransform(w, false);
-					glm::mat4 wheel_tf;
-					inst->physVehicle->getWheelTransformWS(w).getOpenGLMatrix(glm::value_ptr(wheel_tf));
-					wheel_tf = glm::scale(wheel_tf, glm::vec3(inst->vehicle->wheelScale));
-					if(inst->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
-						wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
-					}
-					renderWheel(wheelModel, wheel_tf, woi->second->modelName);
-				}
-				else {
-					std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
-				}
-			}
-		}
+	for(GameObject* object : engine->vehicleInstances) {
+		renderVehicle(static_cast<VehicleObject*>(object));
 	}
 	
 	// Draw anything that got queued.
@@ -512,6 +390,137 @@ void GameRenderer::renderWorld(float alpha)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindVertexArray( 0 );
+}
+
+void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
+{
+	glm::mat4 matrixModel;
+
+	matrixModel = glm::translate(matrixModel, pedestrian->getPosition());
+	matrixModel = matrixModel * glm::mat4_cast(pedestrian->getRotation());
+
+	if(!pedestrian->model->model) return;
+
+	renderModel(pedestrian->model->model, matrixModel, pedestrian, pedestrian->animator);
+
+	if(pedestrian->getActiveItem()) {
+		auto handFrame = pedestrian->model->model->findFrame("srhand");
+		glm::mat4 localMatrix;
+		if( handFrame ) {
+			while( handFrame->getParent() ) {
+				localMatrix = pedestrian->animator->getFrameMatrix(handFrame) * localMatrix;
+				handFrame = handFrame->getParent();
+			}
+		}
+		renderItem(pedestrian->getActiveItem(), matrixModel * localMatrix);
+	}
+}
+
+void GameRenderer::renderVehicle(VehicleObject *vehicle)
+{
+	if(!vehicle->model)
+	{
+		std::cout << "model " <<  vehicle->vehicle->modelName << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
+	}
+
+	glm::mat4 matrixModel;
+	matrixModel = glm::translate(matrixModel, vehicle->getPosition());
+	matrixModel = matrixModel * glm::mat4_cast(vehicle->getRotation());
+
+	renderModel(vehicle->model->model, matrixModel, vehicle);
+
+	// Draw wheels n' stuff
+	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
+		auto woi = engine->objectTypes.find(vehicle->vehicle->wheelModelID);
+		if(woi != engine->objectTypes.end()) {
+			Model* wheelModel = engine->gameData.models["wheels"]->model;
+			if( wheelModel ) {
+				// Tell bullet to update the matrix for this wheel.
+				vehicle->physVehicle->updateWheelTransform(w, false);
+				glm::mat4 wheel_tf;
+				vehicle->physVehicle->getWheelTransformWS(w).getOpenGLMatrix(glm::value_ptr(wheel_tf));
+				wheel_tf = glm::scale(wheel_tf, glm::vec3(vehicle->vehicle->wheelScale));
+				if(vehicle->physVehicle->getWheelInfo(w).m_chassisConnectionPointCS.x() < 0.f) {
+					wheel_tf = glm::scale(wheel_tf, glm::vec3(-1.f, 1.f, 1.f));
+				}
+				renderWheel(wheelModel, wheel_tf, woi->second->modelName);
+			}
+			else {
+				std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
+			}
+		}
+	}
+}
+
+void GameRenderer::renderInstance(InstanceObject *instance)
+{
+	if(instance->object->timeOn != instance->object->timeOff) {
+		// Update rendering flags.
+		if(engine->getHour() < instance->object->timeOn
+			&& engine->getHour() > instance->object->timeOff) {
+			return;
+		}
+	}
+
+	if(!instance->model->model)
+	{
+		return;
+	}
+
+	glm::mat4 matrixModel;
+	if( instance->body ) {
+		instance->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
+	}
+	else {
+		matrixModel = glm::translate(matrixModel, instance->position);
+		matrixModel = glm::scale(matrixModel, instance->scale);
+		matrixModel = matrixModel * glm::mat4_cast(instance->rotation);
+	}
+
+	float mindist = 100000.f;
+	for (size_t g = 0; g < instance->model->model->geometries.size(); g++)
+	{
+		RW::BSGeometryBounds& bounds = instance->model->model->geometries[g]->geometryBounds;
+		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+	}
+
+	if( instance->object->numClumps == 1 ) {
+		if( mindist > instance->object->drawDistance[0] ) {
+			// Check for LOD instances
+			if ( instance->LODinstance ) {
+				if( mindist > instance->LODinstance->object->drawDistance[0] ) {
+					culled++;
+					return;
+				}
+				else if (instance->LODinstance->model->model) {
+					renderModel(instance->LODinstance->model->model, matrixModel);
+				}
+			}
+		}
+		else if (! instance->object->LOD ) {
+			renderModel(instance->model->model, matrixModel);
+		}
+	}
+	else {
+		if( mindist > instance->object->drawDistance[1] ) {
+			culled++;
+			return;
+		}
+		else if( mindist > instance->object->drawDistance[0] ) {
+			// Figure out which one is the LOD.
+			auto RF = instance->model->model->frames[0];
+			auto LODindex = RF->getChildren().size() - 2;
+			auto f = RF->getChildren()[LODindex];
+			renderFrame(instance->model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
+		}
+		else {
+			// Draw the real object
+			auto RF = instance->model->model->frames[0];
+			auto LODindex = RF->getChildren().size() - 1;
+			auto f = RF->getChildren()[LODindex];
+			renderFrame(instance->model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
+		}
+	}
 }
 
 void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
