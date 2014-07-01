@@ -329,25 +329,9 @@ void update(float dt)
 
 		gta->renderer.camera.worldPos = viewPosition;
 		gta->renderer.camera.frustum.view = view;
-		
-		// Update all objects.
-		for( size_t p = 0; p < gta->pedestrians.size(); ++p) {
-			gta->pedestrians[p]->tick(dt);
 
-			if(gta->pedestrians[p]->mHealth <= 0.f) {
-				gta->destroyObject(gta->pedestrians[p]);
-				p--;
-			}
-		}
-		for( size_t v = 0; v < gta->vehicleInstances.size(); ++v ) {
-			gta->vehicleInstances[v]->tick(dt);
-			if(gta->vehicleInstances[v]->mHealth <= 0.f) {
-				gta->destroyObject(gta->vehicleInstances[v]);
-				v--;
-			}
-		}
-		for( size_t p = 0; p < gta->objectInstances.size(); ++p) {
-			gta->objectInstances[p]->tick(dt);
+		for( GameObject* object : gta->objects ) {
+			object->tick(dt);
 		}
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);

@@ -23,6 +23,7 @@ class WeaponScan;
 #include <btBulletCollisionCommon.h>
 
 #include <vector>
+#include <set>
 #include <queue>
 #include <random>
 
@@ -163,27 +164,19 @@ public:
 		* Ped definitions
 		*/
 	std::map<uint16_t, std::shared_ptr<CharacterData>> pedestrianTypes;
-	
+
 	/**
-	 * Game Objects!
+	 * @brief objects All active GameObjects in the world.
+	 * @TODO add some mechanism to allow objects to be "locked" preventing deletion.
+	 * @TODO add deletion queue to allow objects to self delete.
 	 */
-	std::vector<std::shared_ptr<InstanceObject>> objectInstances;
-	
+	std::set<GameObject*> objects;
+
 	/**
 	 * Map of Model Names to Instances
 	 */
-	std::map<std::string, std::shared_ptr<InstanceObject>> modelInstances;
-	
-	/**
-	 * Game Vehicles!
-	 */
-	std::vector<VehicleObject*> vehicleInstances;
+	std::map<std::string, InstanceObject*> modelInstances;
 
-    /**
-     * Pedestrians and PCs.
-     */
-	std::vector<CharacterObject*> pedestrians;
-	
 	/**
 	 * AI Graph
 	 */

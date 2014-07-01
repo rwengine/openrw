@@ -38,14 +38,17 @@ void PlayerController::enterNearestVehicle()
 	if(! character->getCurrentVehicle()) {
 		auto world = character->engine;
 		VehicleObject* nearest = nullptr; float d = 10.f;
-		for(auto it = world->vehicleInstances.begin(); it != world->vehicleInstances.end(); ++it) {
-			float vd = glm::length( character->getPosition() - (*it)->getPosition());
-			if( vd < d ) { 
-				d = vd;
-				nearest = *it;
+
+		for( GameObject* object : world->objects ) {
+			if( object->type() == GameObject::Vehicle ) {
+				float vd = glm::length( character->getPosition() - object->getPosition());
+				if( vd < d ) {
+					d = vd;
+					nearest = static_cast<VehicleObject*>(object);
+				}
 			}
 		}
-		
+
 		if( nearest ) {
 			setNextActivity(new Activities::EnterVehicle(nearest, 0));
 		}

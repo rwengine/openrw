@@ -250,16 +250,19 @@ void GameRenderer::renderWorld(float alpha)
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(uniTexture, 0);
 
-	for(GameObject* object : engine->pedestrians) {
-		renderPedestrian(static_cast<CharacterObject*>(object));
-	}
-	
-	for(auto object : engine->objectInstances) {
-		renderInstance(static_cast<InstanceObject*>(object.get()));
-	}
-
-	for(GameObject* object : engine->vehicleInstances) {
-		renderVehicle(static_cast<VehicleObject*>(object));
+	for( GameObject* object : engine->objects ) {
+		switch(object->type()) {
+		case GameObject::Character:
+			renderPedestrian(static_cast<CharacterObject*>(object));
+			break;
+		case GameObject::Vehicle:
+			renderVehicle(static_cast<VehicleObject*>(object));
+			break;
+		case GameObject::Instance:
+			renderInstance(static_cast<InstanceObject*>(object));
+			break;
+		default: break;
+		}
 	}
 	
 	// Draw anything that got queued.
@@ -741,16 +744,6 @@ void GameRenderer::renderPaths()
 			}
 		}
     }
-
-
-	for(size_t i = 0; i < engine->pedestrians.size(); ++i) {
-		CharacterObject* charac = engine->pedestrians[i];
-
-		if(charac->controller) {
-			carlines.push_back(charac->getPosition());
-			carlines.push_back(charac->controller->getTargetPosition());
-		}
-	}
 
     glm::mat4 model;
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));

@@ -8,7 +8,7 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		ModelHandle *model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
-		std::shared_ptr<InstanceObject> lod,
+		InstanceObject* lod,
 		std::shared_ptr<DynamicObjectData> dyn)
 : GameObject(engine, pos, rot, model), scale(scale), object(obj),
   LODinstance(lod), dynamics(dyn), _collisionHeight(0.f), _enablePhysics(false)

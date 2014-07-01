@@ -102,6 +102,8 @@ struct GameObject
 	virtual bool isAnimationFixed() const { return true; }
 
 	virtual bool isInWater() const { return _inWater; }
+
+	virtual void tick(float dt) = 0;
 };
 
 #endif // __GAMEOBJECTS_HPP__

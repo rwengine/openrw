@@ -194,11 +194,14 @@ bool GameWorld::placeItems(const std::string& name)
 		}
 		
 		// Attempt to Associate LODs.
-		for( size_t i = 0; i < objectInstances.size(); ++i ) {
-			if( !objectInstances[i]->object->LOD ) {
-				auto lodInstit = modelInstances.find("LOD" + objectInstances[i]->object->modelName.substr(3));
-				if( lodInstit != modelInstances.end() ) {
-					objectInstances[i]->LODinstance = lodInstit->second;
+		for(GameObject* object : objects) {
+			if( object->type() == GameObject::Instance ) {
+				InstanceObject* instance = static_cast<InstanceObject*>(object);
+				if( !instance->object->LOD ) {
+					auto lodInstit = modelInstances.find("LOD" + instance->object->modelName.substr(3));
+					if( lodInstit != modelInstances.end() ) {
+						instance->LODinstance = lodInstit->second;
+					}
 				}
 			}
 		}
@@ -250,26 +253,28 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		if( dyit != gameData.dynamicObjectData.end() ) {
 			dydata = dyit->second;
 		}
+
+		if( oi->second->modelName.empty() ) {
+			logWarning("Instance with missing model: " + std::to_string(id));
+		}
 		
-		auto instance = std::shared_ptr<InstanceObject>(new InstanceObject(
+		auto instance = new InstanceObject(
 			this,
 			pos,
 			rot,
 			gameData.models[oi->second->modelName],
 			glm::vec3(1.f, 1.f, 1.f),
 			oi->second, nullptr, dydata
-		));
-		
-		objectInstances.push_back(instance);
-		
-		if( !oi->second->modelName.empty() ) {
-			modelInstances.insert({
-				oi->second->modelName,
-				objectInstances.back()
-			});
-		}
+		);
 
-		return instance.get();
+		objects.insert(instance);
+
+		modelInstances.insert({
+			oi->second->modelName,
+			instance
+		});
+
+		return instance;
 	}
 	
 	return nullptr;
@@ -329,9 +334,12 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 				}
 			}
 		}
-		
-		vehicleInstances.push_back(new VehicleObject{ this, pos, rot, m, vti->second, info->second, prim, sec });
-		return vehicleInstances.back();
+
+		auto vehicle = new VehicleObject{ this, pos, rot, m, vti->second, info->second, prim, sec };
+
+		objects.insert(vehicle);
+
+		return vehicle;
 	}
 	return nullptr;
 }
@@ -356,7 +364,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 		if(m != nullptr) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
-			pedestrians.push_back(ped);
+			objects.insert(ped);
 			new DefaultAIController(ped);
 			return ped;
 		}
@@ -366,40 +374,12 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 void GameWorld::destroyObject(GameObject* object)
 {
-	if(object->type() == GameObject::Character)
-	{
-		for(auto it = pedestrians.begin(); it != pedestrians.end(); ) {
-			if( *it == object ) {
-				it = pedestrians.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
+	/// @TODO deletion queue
+	auto iterator = objects.find(object);
+	if( iterator != objects.end() ) {
+		delete object;
+		objects.erase(iterator);
 	}
-	else if(object->type() == GameObject::Vehicle)
-	{
-		for(auto it = vehicleInstances.begin(); it != vehicleInstances.end(); ) {
-			if( *it == object ) {
-				it = vehicleInstances.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
-	else if(object->type() == GameObject::Instance)
-	{
-		for(auto it = modelInstances.begin(); it != modelInstances.end(); ) {
-			if( it->second.get() == object ) {
-				it = modelInstances.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
-	delete object;
 }
 
 void GameWorld::doWeaponScan(const WeaponScan &scan)
@@ -537,8 +517,10 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeSte
 {
 	GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
-	for(VehicleObject* v : world->vehicleInstances) {
-		v->tickPhysics(timeStep);
+	for( GameObject* object : world->objects ) {
+		if( object->type() == GameObject::Vehicle ) {
+			static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
+		}
 	}
 }
 
