@@ -5,6 +5,8 @@ namespace GameShaders {
 const char* WaterHQ::VertexShader = R"(
 #version 130
 #extension GL_ARB_explicit_attrib_location : enable
+#extension GL_ARB_uniform_buffer_object : enable
+
 layout(location = 0) in vec2 position;
 out vec2 TexCoords;
 uniform float height;
