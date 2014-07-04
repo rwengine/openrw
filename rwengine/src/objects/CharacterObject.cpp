@@ -80,7 +80,8 @@ void CharacterObject::createActor(const glm::vec3& size)
 		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 0.f), 1.f);
 		physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
 
-		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
+		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter,
+												  btBroadphaseProxy::StaticFilter|btBroadphaseProxy::SensorTrigger);
 		engine->dynamicsWorld->addAction(physCharacter);
 	}
 }
@@ -464,5 +465,39 @@ void CharacterObject::destroyItem(int slot)
 {
 	delete _inventory[slot];
 	_inventory[slot] = nullptr;
+}
+
+void CharacterObject::cycleInventory(bool up)
+{
+	if( up ) {
+		for(auto it	= _inventory.begin(); it != _inventory.end(); ++it) {
+			if( it->first < 0 ) continue;
+			if( it->first > _activeInventoryItem ) {
+				setActiveItem(it->first);
+				return;
+			}
+		}
+
+		// if there's no higher slot, set the first item.
+		auto next = _inventory.lower_bound(0);
+		if( next != _inventory.end() ) {
+			setActiveItem(next->first);
+		}
+	}
+	else {
+		for(auto it	= _inventory.rbegin(); it != _inventory.rend(); ++it) {
+			if( it->first < 0 ) break;
+			if( it->first < _activeInventoryItem ) {
+				setActiveItem(it->first);
+				return;
+			}
+		}
+
+		// if there's no lower slot, set the last item.
+		auto next = _inventory.rbegin();
+		if( next != _inventory.rend() ) {
+			setActiveItem(next->first);
+		}
+	}
 }
 

@@ -12,9 +12,12 @@ class Model;
 class ModelFrame;
 class GameWorld;
 class GameObject;
+
 class CharacterObject;
 class VehicleObject;
 class InstanceObject;
+class PickupObject;
+
 class Animator;
 class InventoryItem;
 
@@ -85,6 +88,7 @@ public:
 	void renderPedestrian(CharacterObject* pedestrian);
 	void renderVehicle(VehicleObject* vehicle);
 	void renderInstance(InstanceObject* instance);
+	void renderPickup(PickupObject* pickup);
 
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 

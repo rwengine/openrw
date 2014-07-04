@@ -7,6 +7,8 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <objects/PickupObject.hpp>
+
 #include <ai/CharacterController.hpp>
 #include <data/ObjectData.hpp>
 #include <items/InventoryItem.hpp>
@@ -260,6 +262,9 @@ void GameRenderer::renderWorld(float alpha)
 			break;
 		case GameObject::Instance:
 			renderInstance(static_cast<InstanceObject*>(object));
+			break;
+		case GameObject::Pickup:
+			renderPickup(static_cast<PickupObject*>(object));
 			break;
 		default: break;
 		}
@@ -524,6 +529,31 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 			renderFrame(instance->model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
 		}
 	}
+}
+
+void GameRenderer::renderPickup(PickupObject *pickup)
+{
+	if( ! pickup->isEnabled() ) return;
+
+	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
+	modelMatrix = glm::rotate(modelMatrix, engine->gameTime, glm::vec3(0.f, 0.f, 1.f));
+
+	std::shared_ptr<ObjectData> odata = engine->objectTypes[pickup->getModelID()];
+	auto weapons = engine->gameData.models["weapons"];
+	if( weapons && weapons->model ) {
+		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+		auto matrix = glm::inverse(itemModel->getTransform());
+		if(itemModel) {
+			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr);
+		}
+		else {
+			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+		}
+	}
+	else {
+		std::cerr << "weapons.dff not loaded" << std::endl;
+	}
+
 }
 
 void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)

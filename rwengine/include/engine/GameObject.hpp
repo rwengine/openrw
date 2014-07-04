@@ -47,9 +47,10 @@ struct GameObject
 
     enum Type
     {
-        Instance,
-        Character,
+		Instance,
+		Character,
 		Vehicle,
+		Pickup,
 		Unknown
     };
 

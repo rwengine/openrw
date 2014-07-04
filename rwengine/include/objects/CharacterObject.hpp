@@ -141,6 +141,10 @@ public:
 	void setActiveItem( int slot );
 	InventoryItem* getActiveItem();
 	void destroyItem( int slot );
+
+	void cycleInventory( bool up );
+
+	const std::map<int, InventoryItem*>& getInventory() const { return _inventory; }
 };
 
 #endif

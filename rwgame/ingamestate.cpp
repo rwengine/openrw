@@ -4,6 +4,7 @@
 #include "debugstate.hpp"
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <objects/ItemPickup.hpp>
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
 
@@ -15,9 +16,16 @@ IngameState::IngameState()
 
 	setPlayerCharacter( _playerCharacter );
 
-	auto bat = new WeaponItem(getWorld()->gameData.weaponData["ak47"]);
+	/*auto bat = new WeaponItem(getWorld()->gameData.weaponData["ak47"]);
 	_playerCharacter->addToInventory(bat);
-	_playerCharacter->setActiveItem(bat->getInventorySlot());
+	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
+
+	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1000.f, -980.f, 11.5f},
+											  getWorld()->gameData.weaponData["ak47"]));
+	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1002.f, -980.f, 11.5f},
+											  getWorld()->gameData.weaponData["colt45"]));
+	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1004.f, -980.f, 11.5f},
+											  getWorld()->gameData.weaponData["shotgun"]));
 
 	float j = 0;
 	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
@@ -220,6 +228,9 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		default: break;
 		}
+		break;
+	case sf::Event::MouseWheelMoved:
+		_playerCharacter->cycleInventory(event.mouseWheel.delta > 0);
 		break;
 	default: break;
 	}
