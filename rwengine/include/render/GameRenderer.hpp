@@ -106,16 +106,20 @@ public:
 		/** Up direction (only used in Free mode) */
 		glm::vec3 up;
 
+		/** Render tint colour */
+		glm::vec4 colour;
+
 		/** Internal cache value */
 		glm::vec3 _currentPosition;
 
 		/** Constructs a particle */
 		FXParticle(const glm::vec3& p, const glm::vec3& d, float v,
 				   Orientation o, float st, float lt, GLuint texture,
-				   const glm::vec2& size, const glm::vec3& up = {0.f, 0.f, 1.f})
+				   const glm::vec2& size, const glm::vec3& up = {0.f, 0.f, 1.f},
+				   const glm::vec4& colour = {1.f, 1.f, 1.f, 1.f})
 			: position(p), direction(d), velocity(v), orientation(o),
 			  starttime(st), lifetime(lt), texture(texture), size(size),
-			  up(up), _currentPosition(p) {}
+			  up(up), colour(colour), _currentPosition(p) {}
 	};
 
 private:

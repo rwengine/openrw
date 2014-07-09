@@ -163,7 +163,7 @@ layout(std140) uniform ObjectData {
 void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
-	c.a	= clamp(0, length(c.rgb) * 2, 1);
+	c.a	= clamp(0, length(c.rgb/3.0), 1);
 	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
 	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
 	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );

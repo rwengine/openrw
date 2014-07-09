@@ -62,6 +62,19 @@ void PickupObject::tick(float dt)
 				}
 			}
 		}
+
+		auto tex = engine->gameData.textures[{"coronacircle",""}].texName;
+
+		engine->renderer.addParticle({
+										 position,
+										 {0.f, 0.f, 1.f},
+										 0.f,
+										 GameRenderer::FXParticle::Camera,
+										 engine->gameTime, dt,
+										 tex,
+										 {1.f, 1.f},
+										 {}, {0.75f, 0.f, 0.f, 1.f} /** @todo configurable tint colour */
+					});
 	}
 }
 

@@ -20,14 +20,14 @@ IngameState::IngameState()
 	_playerCharacter->addToInventory(bat);
 	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
 
-	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1000.f, -980.f, 11.5f},
-											  getWorld()->gameData.weaponData["ak47"]));
-	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1002.f, -980.f, 11.5f},
-											  getWorld()->gameData.weaponData["colt45"]));
-	getWorld()->objects.insert(new ItemPickup(getWorld(), {-1004.f, -980.f, 11.5f},
-											  getWorld()->gameData.weaponData["shotgun"]));
+	glm::vec3 itemspawn(-1000.f, -980.f, 11.0f);
+	for( auto& w : getWorld()->gameData.weaponData ) {
+		if( w.first == "unarmed" ) continue;
+		getWorld()->objects.insert(new ItemPickup(getWorld(), itemspawn,
+												  w.second));
+		itemspawn.x += 2.5f;
+	}
 
-	float j = 0;
 	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
 	auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
 	for( auto& vi : getWorld()->vehicleTypes ) {

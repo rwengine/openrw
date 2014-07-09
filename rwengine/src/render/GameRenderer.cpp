@@ -552,7 +552,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 
 	std::shared_ptr<ObjectData> odata = engine->objectTypes[pickup->getModelID()];
 	auto weapons = engine->gameData.models["weapons"];
-	if( weapons && weapons->model ) {
+	if( weapons && weapons->model && odata ) {
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
@@ -563,9 +563,8 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 		}
 	}
 	else {
-		std::cerr << "weapons.dff not loaded" << std::endl;
+		std::cerr << "weapons.dff not loaded (" << pickup->getModelID() << ")" << std::endl;
 	}
-
 }
 
 void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
@@ -665,6 +664,9 @@ void GameRenderer::renderParticles()
 		if( part.orientation == FXParticle::UpCamera ) {
 			ptc = glm::normalize(amp - (glm::dot(amp, cfwd))*cfwd);
 		}
+		else if( part.orientation == FXParticle::Camera ) {
+			ptc = amp;
+		}
 
 		glm::vec3 f = glm::normalize(part.direction);
 		glm::vec3 s = glm::cross(f, glm::normalize(ptc));
@@ -686,7 +688,7 @@ void GameRenderer::renderParticles()
 		uploadUBO<ObjectUniformData>(
 							uboObject, {
 								m,
-								glm::vec4(1.f),
+								part.colour,
 								1.f, 1.f
 							});
 
