@@ -172,6 +172,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 }
 
 #include <engine/GameWorld.hpp>
+#include <render/Model.hpp>
 bool Activities::ShootWeapon::update(CharacterObject *character, CharacterController *controller)
 {
 	auto& wepdata = _item->getWeaponData();
@@ -182,17 +183,98 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 		auto shootanim = character->engine->gameData.animations[wepdata->animation1];
 		if( shootanim ) {
 			character->animator->setAnimation(shootanim, false);
-			if( character->animator->getAnimationTime() >= wepdata->animLoopEnd / 100.f ) {
-				character->animator->setAnimationTime( wepdata->animLoopStart / 100.f );
+
+			auto loopstart = wepdata->animLoopStart / 100.f;
+			auto loopend = wepdata->animLoopEnd / 100.f;
+			auto firetime = wepdata->animFirePoint / 100.f;
+
+			auto currID = character->animator->getAnimationTime();
+
+			if( currID >= loopend ) {
+				character->animator->setAnimationTime( loopstart );
 				_fired = false;
 			}
-			if( !_fired && character->animator->getAnimationTime() >= wepdata->animFirePoint / 100.f ) {
+			else if( currID >= firetime && ! _fired ) {
+
+				auto handFrame = character->model->model->findFrame("srhand");
+				glm::mat4 handMatrix;
+				if( handFrame ) {
+					while( handFrame->getParent() ) {
+						handMatrix = character->animator->getFrameMatrix(handFrame) * handMatrix;
+						handFrame = handFrame->getParent();
+					}
+				}
+
 				auto farTarget = character->getPosition() +
 						character->getRotation() * glm::vec3(0.f, wepdata->hitRange, 0.f);
+				auto handPos = glm::vec3(handMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f));
 				auto fireOrigin = character->getPosition() +
-						character->getRotation() * wepdata->fireOffset;
+						character->getRotation() * handPos;
+				auto flashDir = character->getRotation() * glm::vec3{0.f, 0.f, 1.f};
+				auto flashUp = character->getRotation() * glm::vec3{0.f, -1.f, 0.f};
 
-				character->engine->doWeaponScan(WeaponScan(wepdata->damage, fireOrigin, farTarget));
+				character->engine->doWeaponScan(WeaponScan(wepdata->damage, fireOrigin, farTarget, wepdata.get()));
+
+				// Particle FX involved:
+				// - smokeII emited around barrel
+				// - Some circle particle used for the tracer
+				// - smoke emited at hit point
+				// - gunflash
+
+				auto tracerTex = character->engine->gameData.textures[{"shad_exp",""}].texName;
+				auto flashTex = character->engine->gameData.textures[{"gunflash2",""}].texName;
+				auto flashTex1 = character->engine->gameData.textures[{"gunflash1",""}].texName;
+
+				float tracertime = 0.1f;
+				auto distance = glm::distance(fireOrigin, farTarget);
+				const float tracerspeed = distance / tracertime * 0.5f;
+				float tracersize = wepdata->hitRange / 4.f;
+				float flashtime = 0.015f;
+				auto shotdir = glm::normalize(farTarget - fireOrigin);
+
+				character->engine->renderer.addParticle({
+															fireOrigin + shotdir * tracersize / 2.f,
+															shotdir,
+															tracerspeed,
+															GameRenderer::FXParticle::UpCamera,
+															character->engine->gameTime, tracertime,
+															tracerTex,
+															{0.04f, tracersize},
+															{0.f, 0.f, 0.f}
+														});
+
+				character->engine->renderer.addParticle({
+															fireOrigin,
+															flashDir,
+															0.f,
+															GameRenderer::FXParticle::Free,
+															character->engine->gameTime, flashtime,
+															flashTex,
+															{0.2f, 0.2f},
+															flashUp
+														});
+
+				character->engine->renderer.addParticle({
+															fireOrigin + shotdir * 0.1f,
+															flashDir,
+															0.f,
+															GameRenderer::FXParticle::Free,
+															character->engine->gameTime, flashtime,
+															flashTex,
+															{0.2f, 0.2f},
+															flashUp
+														});
+
+				character->engine->renderer.addParticle({
+															fireOrigin + shotdir * 0.2f,
+															flashDir,
+															0.f,
+															GameRenderer::FXParticle::Free,
+															character->engine->gameTime, flashtime,
+															flashTex1,
+															{0.2f, 0.2f},
+															flashUp
+														});
 
 				_fired = true;
 			}

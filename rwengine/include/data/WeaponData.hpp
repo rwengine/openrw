@@ -61,14 +61,16 @@ struct WeaponScan
 
 	glm::vec3 end;
 
+	WeaponData* weapon;
+
 	// Constructor for a RADIUS hitscan
-	WeaponScan( float damage, const glm::vec3& center, float radius )
-		: type(RADIUS), damage(damage), center(center), radius(radius)
+	WeaponScan( float damage, const glm::vec3& center, float radius, WeaponData* weapon = nullptr )
+		: type(RADIUS), damage(damage), center(center), radius(radius), weapon(weapon)
 	{}
 
 	// Constructor for a ray hitscan
-	WeaponScan( float damage, const glm::vec3& start, const glm::vec3& end)
-		: type(HITSCAN), damage(damage), center(start), end(end)
+	WeaponScan( float damage, const glm::vec3& start, const glm::vec3& end, WeaponData* weapon = nullptr )
+		: type(HITSCAN), damage(damage), center(start), end(end), weapon(weapon)
 	{}
 };
 

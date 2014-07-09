@@ -134,4 +134,40 @@ void main()
 					   * (vec4(0.5) + dynamic * 0.5) * c, 1.f);
 })";
 
+const char* Particle::FragmentShader = R"(
+#version 130
+#extension GL_ARB_uniform_buffer_object : enable
+in vec3 Normal;
+in vec2 TexCoords;
+in vec4 Colour;
+uniform sampler2D texture;
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	float fogStart;
+	float fogEnd;
+};
+
+layout(std140) uniform ObjectData {
+	mat4 model;
+	vec4 colour;
+	float diffusefac;
+	float ambientfac;
+};
+
+#define ALPHA_DISCARD_THRESHOLD 0.01
+
+void main()
+{
+	vec4 c = texture2D(texture, TexCoords);
+	c.a	= clamp(0, length(c.rgb) * 2, 1);
+	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
+	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
+	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
+	gl_FragColor = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
+					   * (vec4(0.5) + dynamic * 0.5) * c, 1.f);
+})";
 }

@@ -51,7 +51,42 @@ class GameRenderer
 
 	float _renderAlpha;
 
-	std::vector<std::pair<glm::vec3, glm::vec3>> _tracers;
+public:
+
+	struct FXParticle {
+		glm::vec3 position;
+		glm::vec3 direction;
+		float velocity;
+
+		enum Orientation {
+			Free,
+			Camera,
+			UpCamera
+		};
+		Orientation orientation;
+
+		float starttime;
+		float lifetime;
+
+		/// @TODO convert use of TextureInfo to a pointer so it can be used here
+		GLuint texture;
+
+		glm::vec2 size;
+
+		glm::vec3 up;
+
+		glm::vec3 _currentPosition;
+
+		FXParticle(const glm::vec3& p, const glm::vec3& d, float v,
+				   Orientation o, float st, float lt, GLuint texture,
+				   const glm::vec2& size, const glm::vec3& up = {0.f, 0.f, 1.f})
+			: position(p), direction(d), velocity(v), orientation(o),
+			  starttime(st), lifetime(lt), texture(texture), size(size),
+			  up(up), _currentPosition(p) {}
+	};
+
+private:
+	std::vector<FXParticle> _particles;
 
 public:
 	
@@ -72,10 +107,11 @@ public:
 	GLuint skyProgram;
 	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize, waterTime, waterPosition, waterWave;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
+	GLuint particleProgram;
 	
 	/// Internal VAO to avoid clobbering global state.
     GLuint vao, debugVAO;
-	
+
 	GLuint skydomeVBO, skydomeIBO, debugVBO;
     GLuint debugTex;
 	
@@ -96,20 +132,20 @@ public:
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GameObject* = nullptr);
 
+	void renderParticles();
+
 
 	/** 
 	 * Renders a model (who'd have thought)
 	 */
 	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
 
-    /**
-     * Debug method renders all AI paths
-     */
+	/**
+	 * Debug method renders all AI paths
+	 */
     void renderPaths();
 
-	void addTracer(const glm::vec3& from, const glm::vec3& to) {
-		_tracers.push_back({from, to});
-	}
+	void addParticle(const FXParticle& particle);
 
 	static GLuint currentUBO;
 	template<class T> void uploadUBO(GLuint buffer, const T& data)

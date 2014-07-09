@@ -35,6 +35,14 @@ class Animator
 		AnimationKeyframe second;
 		// Used if bone is null and entry exists.
 		glm::quat orientation;
+
+		/// Construct from animation data
+		FrameInstanceData(AnimationBone* bone, const AnimationKeyframe& a, const AnimationKeyframe& b)
+			: visible(true), bone(bone), first(a), second(b) {}
+
+		/// Construct from procedural data
+		FrameInstanceData(bool visible, const glm::quat& orientation = {})
+			: visible(visible), bone(nullptr), orientation(orientation) {}
 	};
 
 	std::map<ModelFrame*, FrameInstanceData> _frameInstances;
@@ -48,6 +56,7 @@ class Animator
 	float serverTime;
 	float lastServerTime;
 
+	bool playing;
 	bool repeat;
 
 	void reset();
@@ -81,6 +90,8 @@ public:
 
 	void setFrameOrientation(ModelFrame* frame, const glm::quat& orientation);
 	glm::quat getFrameOrientation(ModelFrame* frame) const;
+
+	FrameInstanceData* getFrameInstance(ModelFrame* frame);
 
 	/**
 	 * @brief getFrameMatrix returns the matrix for frame at the given time
@@ -124,6 +135,8 @@ public:
 
 	float getAnimationTime(float alpha = 0.f) const;
 	void setAnimationTime(float time);
+
+	void setPlaying( bool play ) { playing = play; }
 };
 
 #endif

@@ -408,9 +408,6 @@ void GameWorld::doWeaponScan(const WeaponScan &scan)
 			di.hitpoints = scan.damage;
 			go->takeDamage(di);
 		}
-
-		// Make the renderer draw a tracer.
-		renderer.addTracer(scan.center, hitEnd);
 	}
 }
 

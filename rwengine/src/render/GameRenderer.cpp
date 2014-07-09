@@ -47,6 +47,24 @@ DrawBuffer waterLQDraw;
 GeometryBuffer waterHQBuffer;
 DrawBuffer waterHQDraw;
 
+/// @TODO collapse all of these into "VertPNC" etc.
+struct ParticleVert {
+	static const AttributeList vertex_attributes() {
+		return {
+			{ATRS_Position, 2, sizeof(ParticleVert),  0ul},
+			{ATRS_TexCoord, 2, sizeof(ParticleVert),  2ul * sizeof(float)},
+			{ATRS_Colour, 3, sizeof(ParticleVert),  4ul * sizeof(float)}
+		};
+	}
+
+	float x, y;
+	float u, v;
+	float r, g, b;
+};
+
+GeometryBuffer particleGeom;
+DrawBuffer particleDraw;
+
 GLuint compileShader(GLenum type, const char *source)
 {
 	GLuint shader = glCreateShader(type);
@@ -102,6 +120,16 @@ GameRenderer::GameRenderer(GameWorld* engine)
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboScene);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboObject);
+
+	particleProgram = compileProgram(GameShaders::WorldObject::VertexShader,
+								  GameShaders::Particle::FragmentShader);
+
+	/*uniTexture = glGetUniformLocation(particleProgram, "texture");
+	ubiScene = glGetUniformBlockIndex(particleProgram, "SceneData");
+	ubiObject = glGetUniformBlockIndex(particleProgram, "ObjectData");*/
+
+	glUniformBlockBinding(particleProgram, ubiScene, 1);
+	glUniformBlockBinding(particleProgram, ubiObject, 2);
 
 	skyProgram = compileProgram(GameShaders::Sky::VertexShader,
 								GameShaders::Sky::FragmentShader);
@@ -189,6 +217,15 @@ GameRenderer::GameRenderer(GameWorld* engine)
     glGenBuffers(1, &debugVBO);
     glGenTextures(1, &debugTex);
     glGenVertexArrays(1, &debugVAO);
+
+	particleGeom.uploadVertices<ParticleVert>(
+	{
+					{ 0.5f, 0.5f, 1.f, 1.f, 1.f, 1.f, 1.f},
+					{-0.5f, 0.5f, 0.f, 1.f, 1.f, 1.f, 1.f},
+					{ 0.5f,-0.5f, 1.f, 0.f, 1.f, 1.f, 1.f},
+					{-0.5f,-0.5f, 0.f, 0.f, 1.f, 1.f, 1.f}
+	});
+	particleDraw.addGeometry(&particleGeom);
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -367,32 +404,7 @@ void GameRenderer::renderWorld(float alpha)
 
 	glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
 
-	// Draw bullets like this for now
-	if( _tracers.size() > 0 ) {
-		glUseProgram(worldProgram);
-		glBindVertexArray( vao );
-		glBindBuffer(GL_ARRAY_BUFFER, debugVBO);
-		glBindTexture(GL_TEXTURE_2D, debugTex);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * _tracers.size() * 2, _tracers.data(), GL_STREAM_DRAW);
-		GLint posAttrib = glGetAttribLocation(worldProgram, "position");
-		glEnableVertexAttribArray(posAttrib);
-		glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		uploadUBO<ObjectUniformData>(
-							uboObject, {
-								glm::mat4(),
-								glm::vec4(1.f),
-								1.f, 1.f
-							});
-
-		float img3[] = {1.f, 1.f, 0.f};
-		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
-			0, GL_RGB, GL_FLOAT, img3
-		);
-		glDrawArrays(GL_LINES, 0, _tracers.size());
-
-		_tracers.clear();
-	}
+	renderParticles();
 
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -614,7 +626,72 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 				{model, g, sg, modelMatrix, object}
 			);
 		}
-    }
+	}
+}
+
+void GameRenderer::renderParticles()
+{
+	_particles.erase( std::remove_if(_particles.begin(), _particles.end(),
+				   [&](FXParticle& p) {
+		if ( ( engine->gameTime - p.starttime ) > p.lifetime ) {
+			return true;
+		}
+		float t = engine->gameTime - p.starttime;
+		p._currentPosition = p.position + (p.direction * p.velocity) * t;
+		return false;
+	}), _particles.end() );
+
+	glUseProgram( particleProgram );
+	glBindVertexArray( particleDraw.getVAOName() );
+
+	auto cpos = camera.worldPos;
+	auto cfwd = glm::normalize(glm::inverse(glm::mat3(camera.frustum.view)) * glm::vec3(0.f, 1.f, 0.f));
+
+	std::sort( _particles.begin(), _particles.end(),
+			   [&](const FXParticle& a, const FXParticle& b) {
+		return glm::distance( a._currentPosition, cpos ) > glm::distance( b._currentPosition, cpos );
+	});
+
+	for(FXParticle& part : _particles) {
+		glBindTexture(GL_TEXTURE_2D, part.texture);
+		auto& p = part._currentPosition;
+
+		glm::mat4 m(1.f);
+
+		// Figure the direction to the camera center.
+		auto amp = cpos - p;
+		glm::vec3 ptc = part.up;
+
+		if( part.orientation == FXParticle::UpCamera ) {
+			ptc = glm::normalize(amp - (glm::dot(amp, cfwd))*cfwd);
+		}
+
+		glm::vec3 f = glm::normalize(part.direction);
+		glm::vec3 s = glm::cross(f, glm::normalize(ptc));
+		glm::vec3 u	= glm::cross(s, f);
+		m[0][0] = s.x;
+		m[1][0] = s.y;
+		m[2][0] = s.z;
+		m[0][1] =-f.x;
+		m[1][1] =-f.y;
+		m[2][1] =-f.z;
+		m[0][2] = u.x;
+		m[1][2] = u.y;
+		m[2][2] = u.z;
+		m[3][0] =-glm::dot(s, p);
+		m[3][1] = glm::dot(f, p);
+		m[3][2] =-glm::dot(u, p);
+
+		m = glm::scale(glm::inverse(m), glm::vec3(part.size, 1.f));
+		uploadUBO<ObjectUniformData>(
+							uboObject, {
+								m,
+								glm::vec4(1.f),
+								1.f, 1.f
+							});
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
 }
 
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
@@ -804,5 +881,10 @@ void GameRenderer::renderPaths()
 
     pedlines.clear();
 	carlines.clear();
-    glBindVertexArray( 0 );
+	glBindVertexArray( 0 );
+}
+
+void GameRenderer::addParticle(const FXParticle &particle)
+{
+	_particles.push_back(particle);
 }

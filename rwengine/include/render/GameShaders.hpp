@@ -19,6 +19,11 @@ struct WorldObject {
 	static const char* FragmentShader;
 };
 
+struct Particle {
+	/* Shares vertex with WorldObject */
+	static const char* FragmentShader;
+};
+
 }
 
 #endif

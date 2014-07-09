@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 Animator::Animator()
-	: model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), repeat(true)
+	: model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), playing(true), repeat(true)
 {
 
 }
@@ -23,7 +23,8 @@ void Animator::reset()
 			if( it == getAnimation()->bones.end() ) continue;
 
 			auto A = getKeyframeAt(f, 0.f);
-			_frameInstances[f] = { true, it->second, A, A };
+
+			_frameInstances.insert( { f, { it->second, A, A } } );
 		}
 	}
 }
@@ -77,9 +78,7 @@ void Animator::setFrameVisibility(ModelFrame *frame, bool visible)
 		_frameInstances.insert({
 								   frame,
 								   {
-									   visible,
-									   nullptr,
-									   {}, {}
+									   visible
 								   }
 							   });
 	}
@@ -105,8 +104,6 @@ void Animator::setFrameOrientation(ModelFrame *frame, const glm::quat &orientati
 								   frame,
 								   {
 									   true,
-									   nullptr,
-									   {}, {},
 									   orientation
 								   }
 							   });
@@ -122,14 +119,25 @@ glm::quat Animator::getFrameOrientation(ModelFrame *frame) const
 	return glm::toQuat(frame->getDefaultRotation());
 }
 
+Animator::FrameInstanceData *Animator::getFrameInstance(ModelFrame *frame)
+{
+	auto fit = _frameInstances.find(frame);
+	if( fit != _frameInstances.end() ) {
+		return &fit->second;
+	}
+	return nullptr;
+}
+
 void Animator::tick(float dt)
 {
 	if( model == nullptr || _animations.empty() ) {
 		return;
 	}
 
-	lastServerTime = serverTime;
-	serverTime += dt;
+	if( playing ) {
+		lastServerTime = serverTime;
+		serverTime += dt;
+	}
 
 	for( auto& p : _frameInstances ) {
 		p.second.second = p.second.first;
@@ -203,21 +211,22 @@ AnimationKeyframe Animator::getKeyframeAt(ModelFrame *frame, float time) const
 			return it->second->getInterpolatedKeyframe(time);
 		}
 	}
-	return { glm::toQuat(frame->getDefaultRotation()), frame->getDefaultTranslation(), glm::vec3(1.f), 0.f };
+	return { glm::toQuat(frame->getDefaultRotation()), frame->getDefaultTranslation(), glm::vec3(1.f), 0.f, 0 };
 }
 
 glm::mat4 Animator::getFrameMatrix(ModelFrame *frame, float alpha, bool ignoreRoot) const
 {
 	auto it = _frameInstances.find( frame );
 	if( it != _frameInstances.end() && it->second.bone ) {
-		const AnimationKeyframe& S = it->second.first;
-		const AnimationKeyframe& F = it->second.second;
+		const AnimationKeyframe& F = it->second.first;
+		const AnimationKeyframe& S = it->second.second;
 
 		AnimationKeyframe kf {
 			glm::slerp(F.rotation, S.rotation, alpha),
 			glm::mix(F.position, S.position, alpha),
 			glm::mix(F.scale, S.scale, alpha),
-			glm::mix(F.starttime, S.starttime, alpha)
+			glm::mix(F.starttime, S.starttime, alpha),
+			S.id
 		};
 
 		glm::mat4 m;
@@ -257,5 +266,7 @@ float Animator::getAnimationTime(float alpha) const
 
 void Animator::setAnimationTime(float time)
 {
+	lastServerTime = serverTime;
 	serverTime = time;
+
 }

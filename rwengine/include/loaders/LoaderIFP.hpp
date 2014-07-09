@@ -14,6 +14,7 @@ struct AnimationKeyframe
     glm::vec3 position;
     glm::vec3 scale;
     float starttime;
+	size_t id;
 };
 
 struct AnimationBone
@@ -33,6 +34,7 @@ struct AnimationBone
     std::vector<AnimationKeyframe> frames;
 
     AnimationKeyframe getInterpolatedKeyframe(float time);
+	AnimationKeyframe getKeyframe(float time);
 };
 
 struct Animation
