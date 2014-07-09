@@ -26,6 +26,22 @@ DebugState::DebugState()
 			}
 		}
 	}, entryHeight));
+
+	m->addEntry(Menu::lambda("Spawn Pedestrians", [this] {
+		glm::vec3 hit, normal;
+		if(hitWorldRay(hit, normal)) {
+			glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
+			size_t k = 1;
+			// Spawn every pedestrian.
+			for(auto it = getWorld()->pedestrianTypes.begin();
+				it != getWorld()->pedestrianTypes.end(); ++it) {
+				getWorld()->createPedestrian(it->first, spawnPos);
+				spawnPos += glm::vec3(2.5, 0, 0);
+				if((k++ % 6) == 0) { spawnPos += glm::vec3(-15, -2.5, 0); }
+			}
+		}
+	}, entryHeight));
+
 	int vehiclesMax = 16, i = 0;
 	for( auto& v : getWorld()->vehicleTypes ) {
 		if( (i++) > vehiclesMax ) break;
@@ -34,6 +50,7 @@ DebugState::DebugState()
 		}, entryHeight));
 	}
 	this->enterMenu(m);
+
 }
 
 void DebugState::enter()

@@ -362,7 +362,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 		ModelHandle* m = gameData.models[pt->modelName];
 
-		if(m != nullptr) {
+		if(m && m->model) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			objects.insert(ped);
 			new DefaultAIController(ped);
