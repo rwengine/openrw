@@ -57,7 +57,7 @@ struct CharacterData
 };
 
 /**
- * Data shared by vehicles types.
+ * @brief Stores vehicle data loaded from item definition files.
  */
 struct VehicleData
 {

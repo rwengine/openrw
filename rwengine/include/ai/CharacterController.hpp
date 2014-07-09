@@ -84,6 +84,11 @@ public:
 // TODO: Refactor this with an ugly macro to reduce code dup.
 class WeaponItem;
 
+/**
+ * @brief Activities for CharacterController behaviour
+ *
+ * @todo Move into ControllerActivities.hpp or equivelant
+ */
 namespace Activities {
 	struct GoTo : public CharacterController::Activity {
 		DECL_ACTIVITY( GoTo )

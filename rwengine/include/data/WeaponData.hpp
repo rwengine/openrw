@@ -41,14 +41,16 @@ struct WeaponData
 };
 
 /**
- * @brief The WeaponScan struct
- * Represents a scene query against a ray
- * or shape used to determine what to damage.
+ * @brief simple object for performing weapon checks against the world
+ *
+ * @todo RADIUS hitscans
  */
 struct WeaponScan
 {
 	enum ScanType {
+		/** Instant-hit ray weapons */
 		HITSCAN,
+		/** Area of effect attack */
 		RADIUS,
 	};
 

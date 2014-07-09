@@ -15,7 +15,10 @@ class Animator;
 class GameWorld;
 
 /**
- * Stores data used by call types of object instances.
+ * @brief Base data and interface for all world "objects" like vehicles, peds.
+ *
+ * Contains handle to the world, and other useful properties like water level
+ * tracking used to make tunnels work.
  */
 struct GameObject
 {
@@ -35,7 +38,9 @@ struct GameObject
 
 	bool _inWater;
 
-	// Used to determine in water status
+	/**
+	 * @brief stores the height of water at the last tick
+	 */
 	float _lastHeight;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
@@ -45,6 +50,9 @@ struct GameObject
 		
 	virtual ~GameObject() {}
 
+	/**
+	 * @brief Enumeration of possible object types.
+	 */
     enum Type
     {
 		Instance,
@@ -54,6 +62,10 @@ struct GameObject
 		Unknown
     };
 
+	/**
+	 * @brief determines what type of object this is.
+	 * @return one of Type
+	 */
 	virtual Type type() { return Unknown; }
 	
 	virtual void setPosition(const glm::vec3& pos);
@@ -98,7 +110,7 @@ struct GameObject
 		float impulse;
 	};
 	
-	virtual bool takeDamage(const DamageInfo& damage) { return false; }
+	virtual bool takeDamage(const DamageInfo& /*damage*/) { return false; }
 
 	virtual bool isAnimationFixed() const { return true; }
 

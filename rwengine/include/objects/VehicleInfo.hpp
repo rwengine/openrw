@@ -9,7 +9,7 @@
 class VehicleData;
 
 /**
- * Vehicle handling data
+ * @brief Stores data loaded from handling.cfg
  */
 struct VehicleHandlingInfo
 {
@@ -84,7 +84,7 @@ struct SeatInfo {
 };
 
 /**
- * Vehicle Handling and runtime data.
+ * @brief Vehicle Handling and runtime-derrived information about wheel and seat positions.
  */
 struct VehicleInfo {
 	/** Handling data */

@@ -32,6 +32,10 @@ File viewer for game data, open the folder containing "gta3.exe" and it will loa
 
 Currently only supports viewing instance data, pending some rewriting.
 
+## Documentation
+
+Run Doxygen on the included Doxyfile to generate documentation.
+
 ## Things to do
 
 * Make it work on Windows (shouldn't be too difficult for anyone with CMake and C++ experience)

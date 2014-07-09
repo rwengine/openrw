@@ -13,7 +13,8 @@ class Model;
 class ModelFrame;
 
 /**
- * @brief The Animator class handles updating frame matricies for animations.
+ * @brief calculates animation frame matrices, as well as procedural frame
+ * animation.
  */
 class Animator
 {
@@ -27,6 +28,9 @@ class Animator
 	 */
 	Model* model;
 
+	/**
+	 * @brief Stores data required to animate a model frame
+	 */
 	struct FrameInstanceData {
 		bool visible;
 		AnimationBone* bone;

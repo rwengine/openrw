@@ -20,8 +20,9 @@ class GameWorld;
 class TextureAtlas;
 
 /**
- * @brief The TextureInfo struct
- * Contains metadata about where a texture can be found.
+ * @brief Stores simple data about Textures such as transparency flags.
+ *
+ * @todo Covert usage to TextureHandles or something for streaming.
  */
 struct TextureInfo
 {
@@ -38,7 +39,12 @@ struct TextureInfo
 };
 
 /**
- * Handles loading and management of the Game's DAT
+ * @brief Loads and stores all "static" data such as loaded models, handling
+ * information, weather etc.
+ *
+ * @todo Move parsing of one-off data files from this class.
+ * @todo Improve how Loaders and written and used
+ * @todo Considering implementation of streaming data and object handles.
  */
 class GameData
 {

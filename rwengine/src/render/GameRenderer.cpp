@@ -47,7 +47,7 @@ DrawBuffer waterLQDraw;
 GeometryBuffer waterHQBuffer;
 DrawBuffer waterHQDraw;
 
-/// @TODO collapse all of these into "VertPNC" etc.
+/// @todo collapse all of these into "VertPNC" etc.
 struct ParticleVert {
 	static const AttributeList vertex_attributes() {
 		return {

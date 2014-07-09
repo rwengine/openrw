@@ -31,6 +31,9 @@ public:
 	}
 };
 
+/**
+ * @brief Interface for background work
+ */
 class WorkJob
 {
 	WorkContext* _context;
@@ -55,6 +58,12 @@ public:
 // TODO: refactor everything to remove this.
 class GameWorld;
 
+/**
+ * @brief A worker queue that runs work in the background.
+ *
+ * Work is added with queueJob, once it completes the job is added
+ * to the _completeQueue to be finalised on the "main" thread.
+ */
 class WorkContext
 {
 	std::queue<WorkJob*> _workQueue;

@@ -28,8 +28,7 @@ class WeaponScan;
 #include <random>
 
 /**
- * @class GameWorld
- *  Represents a single instance of the game world, and all of the data required.
+ * @brief Handles all data relating to object instances and other "worldly" state.
  */
 class GameWorld
 {
@@ -151,24 +150,26 @@ public:
 	std::map<uint16_t, std::shared_ptr<ObjectData>> objectTypes;
 
 	/**
-		* Paths associated with each object definition.
-		*/
+	* Paths associated with each object definition.
+	*/
 	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
 
 	/**
-	 * Vehicle definitions
+	 * Vehicle type definitions
+	 * @todo move this non-instance data to GameData
 	 */
 	std::map<uint16_t, std::shared_ptr<VehicleData>> vehicleTypes;
 
 	/**
-		* Ped definitions
-		*/
+	* Ped definitions
+	* @todo move this non-instance data to GameData
+	*/
 	std::map<uint16_t, std::shared_ptr<CharacterData>> pedestrianTypes;
 
 	/**
 	 * @brief objects All active GameObjects in the world.
-	 * @TODO add some mechanism to allow objects to be "locked" preventing deletion.
-	 * @TODO add deletion queue to allow objects to self delete.
+	 * @todo add some mechanism to allow objects to be "locked" preventing deletion.
+	 * @todo add deletion queue to allow objects to self delete.
 	 */
 	std::set<GameObject*> objects;
 
@@ -201,6 +202,12 @@ public:
 	 * Used to implement uprooting and other physics oddities.
 	 */
 	static bool ContactProcessedCallback(btManifoldPoint& mp, void* body0, void* body1);
+
+	/**
+	 * @brief PhysicsTickCallback updates object each physics tick.
+	 * @param physWorld
+	 * @param timeStep
+	 */
 	static void PhysicsTickCallback(btDynamicsWorld* physWorld, btScalar timeStep);
 
 	/**

@@ -37,6 +37,11 @@ struct AnimationBone
 	AnimationKeyframe getKeyframe(float time);
 };
 
+/**
+ * @brief Animation data object, stores bones.
+ *
+ * @todo break out into Animation.hpp
+ */
 struct Animation
 {
     std::string name;

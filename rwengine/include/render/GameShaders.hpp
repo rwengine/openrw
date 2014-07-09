@@ -2,6 +2,9 @@
 #ifndef _GAMESHADERS_HPP_
 #define _GAMESHADERS_HPP_
 
+/**
+ * @brief collection of shaders to make managing them a little easier.
+ */
 namespace GameShaders {
 
 struct WaterHQ {
@@ -19,8 +22,8 @@ struct WorldObject {
 	static const char* FragmentShader;
 };
 
+/** @brief Particle effect shaders, uses WorldObject::VertexShader */
 struct Particle {
-	/* Shares vertex with WorldObject */
 	static const char* FragmentShader;
 };
 
