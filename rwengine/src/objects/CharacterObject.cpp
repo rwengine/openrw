@@ -298,7 +298,7 @@ void CharacterObject::setPosition(const glm::vec3& pos)
 {
 	btTransform& tf = physCharacter->getGhostObject()->getWorldTransform();
 	tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
-	position = pos;
+	GameObject::setPosition(pos);
 }
 
 glm::vec3 CharacterObject::getPosition() const

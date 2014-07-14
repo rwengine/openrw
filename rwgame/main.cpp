@@ -40,11 +40,13 @@ int debugMode = 0;
 
 sf::Font font;
 
-glm::vec3 viewPosition { -260.f, -151.5f, 9.f };
-glm::vec2 viewAngles { -0.3f, 0.05f };
+glm::vec3 viewPosition { -260.f, -151.5f, 9.f }, lastViewPosition;
+glm::vec2 viewAngles { -0.3f, 0.05f }, lastViewAngles;
 
 void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
 {
+	lastViewPosition = viewPosition;
+	lastViewAngles = viewAngles;
 	viewPosition = center;
 	viewAngles = angles;
 }
@@ -205,6 +207,8 @@ void init(std::string gtapath, bool loadWorld)
     debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
     gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
+	setViewParameters( { -260.f, -151.5f, 9.f }, { -0.3f, 0.05f } );
+
 	std::cout << "Loaded "
 			  << gta->gameData.models.size() << " models, "
 			  << gta->gameData.textures.size() << " textures" << std::endl;
@@ -213,20 +217,10 @@ void init(std::string gtapath, bool loadWorld)
 void update(float dt)
 {
 	if (inFocus) {
-		float qpi = glm::half_pi<float>();
-
-		glm::mat4 view;
-		view = glm::translate(view, viewPosition);
-		view = glm::rotate(view, viewAngles.x, glm::vec3(0, 0, 1));
-		view = glm::rotate(view, viewAngles.y - qpi, glm::vec3(1, 0, 0));
-		view = glm::inverse(view);
-		
 		gta->gameTime += dt;
 
-		gta->renderer.camera.worldPos = viewPosition;
-		gta->renderer.camera.frustum.view = view;
-
 		for( GameObject* object : gta->objects ) {
+			object->_updateLastTransform();
 			object->tick(dt);
 		}
 
@@ -237,6 +231,18 @@ void update(float dt)
 void render(float alpha)
 {
 	gta->_work->update();
+
+	float qpi = glm::half_pi<float>();
+
+	glm::mat4 view;
+	view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
+	auto va = glm::mix(lastViewAngles, viewAngles, alpha);
+	view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
+	view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
+	view = glm::inverse(view);
+
+	gta->renderer.camera.worldPos = viewPosition;
+	gta->renderer.camera.frustum.view = view;
 
 	// Update aspect ratio..
 	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
@@ -376,6 +382,7 @@ int main(int argc, char *argv[])
 	
 	float accum = 0.f;
 	float ts = 1.f / 60.f;
+	float timescale = 1.f;
 	
 	// Loop until the window is closed or we run out of state.
 	while (window.isOpen() && StateManager::get().states.size()) {
@@ -388,7 +395,7 @@ int main(int argc, char *argv[])
 			StateManager::get().states.back()->handleEvent(event);
 		}
 
-		accum += clock.restart().asSeconds();
+		accum += clock.restart().asSeconds() * timescale;
 		
 		while ( accum >= ts ) {
 

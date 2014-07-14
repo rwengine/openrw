@@ -23,8 +23,14 @@ void Animator::reset()
 			if( it == getAnimation()->bones.end() ) continue;
 
 			auto A = getKeyframeAt(f, 0.f);
-
-			_frameInstances.insert( { f, { it->second, A, A } } );
+			auto kfit = _frameInstances.find( f );
+			if( kfit == _frameInstances.end() ) {
+				_frameInstances.insert( { f, { it->second, A, A } } );
+			}
+			else {
+				kfit->second.first = kfit->second.second;
+				kfit->second.second = A;
+			}
 		}
 	}
 }
@@ -39,7 +45,7 @@ void Animator::setAnimation(Animation *animation, bool repeat)
 	queueAnimation(animation);
 	this->repeat = repeat;
 
-	_frameInstances.clear();
+	//_frameInstances.clear();
 	
 	reset();
 }
@@ -218,8 +224,8 @@ glm::mat4 Animator::getFrameMatrix(ModelFrame *frame, float alpha, bool ignoreRo
 {
 	auto it = _frameInstances.find( frame );
 	if( it != _frameInstances.end() && it->second.bone ) {
-		const AnimationKeyframe& F = it->second.first;
-		const AnimationKeyframe& S = it->second.second;
+		const AnimationKeyframe& S = it->second.first;
+		const AnimationKeyframe& F = it->second.second;
 
 		AnimationKeyframe kf {
 			glm::slerp(F.rotation, S.rotation, alpha),

@@ -4,12 +4,7 @@
 
 void GameObject::setPosition(const glm::vec3& pos)
 {
-	position = pos;
-}
-
-glm::vec3 GameObject::getPosition() const
-{
-	return position;
+	_lastPosition = position = pos;
 }
 
 glm::quat GameObject::getRotation() const
