@@ -3,6 +3,7 @@
 #define _PROJECTILEOBJECT_HPP_
 #include <engine/GameObject.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 /**
  * @brief Implements weapon projectile (e.g. molotovs, RPGs etc.)
@@ -31,11 +32,17 @@ private:
 	ProjectileInfo _info;
 
 	btSphereShape* _shape;
-	union {
-		btRigidBody* _body;
-	};
 
+	btRigidBody* _body;
+
+	/** Used for RPGs and Molotov collision detection */
+	btPairCachingGhostObject* _ghostBody;
+
+	bool _exploded;
+
+	void checkPhysicsContact();
 	void explode();
+	void cleanup();
 
 public:
 
