@@ -103,8 +103,50 @@ SCMTypeInfoTable typeData = {
 	{EndOfArgList, {0}},
 };
 
-void dumpSection(SCMByte* scm, unsigned int offset, unsigned int size)
+void dumpModels(SCMByte* scm, unsigned int offset, unsigned int size)
 {
+	int i = offset;
+	unsigned int model_count = readFromSCM<uint32_t>(scm, i);
+	std::cout << "model_count = " << std::dec << model_count << std::endl;
+	i += sizeof(uint32_t);
+
+	for(unsigned int m = 0; m < model_count; ++m) {
+		char model_name[24];
+		for(size_t c = 0; c < 24; ++c) {
+			model_name[c] = readFromSCM<char>(scm, i++);
+		}
+		std::cout << std::dec << m << ": " << model_name << std::endl;
+	}
+}
+
+void dumpCodeSizes(SCMByte* scm, unsigned int offset, unsigned int size)
+{
+	int i = offset;
+
+	unsigned int size_main = readFromSCM<uint32_t>(scm, i);
+	std::cout << "size_main = " << std::dec << size_main << std::endl;
+	i += sizeof(uint32_t);
+
+	unsigned int largest_mission = readFromSCM<uint32_t>(scm, i);
+	std::cout << "largest _mission = " << std::dec << largest_mission << std::endl;
+	i += sizeof(uint32_t);
+
+	unsigned int mission_count = readFromSCM<uint32_t>(scm, i);
+	std::cout << "mission_count = " << std::dec << mission_count << std::endl;
+	i += sizeof(uint32_t);
+
+	for(unsigned int m = 0; m < mission_count; ++m) {
+		unsigned int mission_address = readFromSCM<uint32_t>(scm, i);
+		std::cout << std::dec << m << ": " << std::hex << mission_address << std::endl;
+		i += sizeof(uint32_t);
+	}
+}
+
+void dumpOpcodes(SCMByte* scm, unsigned int offset, unsigned int size)
+{
+	std::cout << "Offs Opcd " << std::setw(FIELD_DESC_WIDTH) << std::left
+			  << "Description" << " Parameters" << std::endl;
+
 	for( unsigned int i = offset; i < offset+size; ) {
 		SCMOpcode op = readOpcode(scm, i) & ~CONDITIONAL_MASK;
 
@@ -118,7 +160,7 @@ void dumpSection(SCMByte* scm, unsigned int offset, unsigned int size)
 		std::cout << std::hex << std::setfill('0') << std::right <<
 					 std::setw(4) << i << ":" <<
 					 std::setw(4) << op <<
-					 " " << std::setw(FIELD_DESC_WIDTH) << std::setfill(' ') <<
+					 std::setw(FIELD_DESC_WIDTH) << std::setfill(' ') <<
 					 std::left << opit->second.name << std::right;
 
 		i += sizeof(SCMOpcode);
@@ -282,15 +324,18 @@ void readSCM(const std::string& scmname)
 
 		i = section_main;
 
-		std::cout << "section_globals = " << section_globals << std::endl;
-		std::cout << "section_models = " << section_models << std::endl;
-		std::cout << "section_sizes = " << section_sizes << std::endl;
-		std::cout << "section_main = " << section_main << std::endl;
+		std::cout << "section_globals = " << std::hex << section_globals << std::endl;
+		std::cout << "section_models = " << std::hex << section_models << std::endl;
+		std::cout << "section_sizes = " << std::hex << section_sizes << std::endl;
+		std::cout << "section_main = " << std::hex << section_main << std::endl;
 
-		std::cout << "Offs Opcd " << std::setw(FIELD_DESC_WIDTH) << std::left
-				  << "Description" << " Parameters" << std::endl;
+		dumpModels(scm, section_models + 2 + 1 + 4 + 1,
+				   section_sizes - section_models);
 
-		dumpSection(scm, i, size);
+		dumpCodeSizes(scm, section_sizes + 2 + 1 + 4 + 1,
+				   section_main - section_sizes);
+
+		dumpOpcodes(scm, i, size);
 	}
 	catch (SCMException& ex) {
 		std::cerr << ex.what() << std::endl;
