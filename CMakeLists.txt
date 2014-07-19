@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenRW)
 
+# Setup options
+SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
+
 # TODO:
 # - Visual Studio support
 # - Find libraries correctly, e.g. FindBullet
@@ -22,6 +25,10 @@ find_package(Bullet REQUIRED)
 IF(BUILD_OLD_TOOLS)
 	add_subdirectory(analyzer)
 	add_subdirectory(datadump)
+ENDIF()
+
+IF(BUILD_SCRIPT_TOOL)
+	add_subdirectory(scripttool)
 ENDIF()
 
 add_subdirectory(rwgame)

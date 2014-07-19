@@ -1,0 +1,212 @@
+# L = local, G = Global, V = Value Type
+# Opc   desc,  param num (- indicates optional), flags (1 = has string)
+0x0000, nop, 0, 0
+0x0001, wait, 1, 0
+0x0002, Jump, 1, 0
+
+0x0004, Set G to Vint, 2, 0
+0x0005, Set G to Vfloat, 2, 0
+0x0006, Set L to Vint, 2, 0
+0x0007, Set L to Vfloat, 2, 0
+
+0x0015, Div G by Vfloat, 2, 0
+
+0x0018, Is G greater Vint, 2, 0
+
+0x0020, Is G greater Vfloat, 2, 0
+
+0x0022, Is Vfloat greater G, 2, 0
+
+0x001A, Is Vint gequal G, 2, 0
+
+0x0028, Is G gequal Vint, 2, 0
+
+0x0038, Is G equal Vint, 2, 0
+
+0x0042, Is G equal Vfloat, 2, 0
+
+0x004D, Jump if false, 1, 0
+0x004E, Terminate this script 0, 0
+0x004F, Start script with args, -1, 0
+
+0x0053, Create player, 5, 0
+
+0x0055, Set player coordinates, 4, 0
+0x0056, Is player in area 2D, 6, 0
+0x0057, Is player in area 3D, 8, 0
+
+0x0086, Set G to Gfloat, 2, 0
+
+0x00BA, Print big, 3, 0
+0x00BB, Print, 3, 0
+0x00BC, Print now, 3, 0
+0x00BD, Print soon, 3, 0
+
+0x00BF, Get time of day, 2, 0
+0x00C0, Set time of day, 2, 0
+
+0x00D7, Start script, 1, 0
+0x00D6, If, 1, 0
+
+0x00DE, Is player in model, 2, 0
+
+0x00E0, Is player in any car, 1, 0
+0x00E1, Is button pressed, 2, 0
+
+0x00E4, Locate player on foot 2D, 6, 0
+
+0x00F5, Locate player by any means 2D, 8, 0
+0x00F6, Locate player on foot 3D, 8, 0
+
+0x00F9, Locate play. stoped onfoot 3d, 6, 0
+
+0x0106, Locate car ped near ped 3D, 6, 0
+
+0x010A, Is player money greater, 2, 0
+
+0x0111, Set deatharrest state, 1, 0
+
+0x0121, Is player in zone, 2, 0
+
+0x014B, Create car generator, 13, 0
+0x014C, Switch car generator, 2, 0
+0x014D, Add Pager mesasge, 4, 0
+
+0x0152, Set zone car info, 17, 0
+
+0x015C, Set zone ped info, 11, 0
+
+0x015F, Set fixed camera position, 6, 0
+0x0160, Point camera at point, 4, 0
+
+0x0164, Remove blip, 1, 0
+
+0x0169, Set fade colour, 3, 0
+0x016A, Fade screen, 2, 0
+0x016B, Get fade status, 0, 0
+0x016C, Add Hospital restart, 4, 0
+0x016D, Add Police restart, 4, 0
+
+0x0171, Set player heading, 2, 0
+
+0x0176, Get object heading, 2, 0
+0x0177, Set object heading, 2, 0
+
+0x0180, Set on mission flag, 1, 0
+0x0181, nop, 2, 0
+0x0182, Unkown function, 2, 0
+
+0x018B, Change Blip display, 2, 0
+
+0x018E, Remove sound, 1, 0
+
+0x019C, Is player in area onfoot 3D, 8, 0
+
+0x01B4, Set player control, 2, 0
+
+0x01C7, Don't remove object, 1, 0
+
+0x01E8, Switch roads off, 6, 0
+
+0x018D, Add continious sound, 5, 0
+
+0x01F0, Set max wanted level, 1, 0
+
+0x01F5, Get player char, 2, 0
+
+0x0213, Create pickup, 6, 0
+0x0214, has picked been collected, 1, 0
+
+0x0215, Remove pickup, 1, 0
+
+0x0219, Create garage, 8, 0
+
+0x022B, Switch ped paths off, 6, 0
+
+0x0236, Set gang car, 2, 0
+0x0237, Set gang weapons, 3, 0
+
+0x024a, Get phone, 3, 0
+
+0x024E, Turn phone off, 1, 0
+
+0x0256, Is player playing, 1, 0
+
+0x0293, Get controller mode, 1, 0
+
+0x029B, Create object, 5, 0
+
+0x02A7, Add blip for contact point, 5, 0
+0x02A8, Add blip for coord, 5, 0
+
+0x02B4, Is player in angle area onfoot 3D, 9, 0
+
+0x02CD, Unkown function, 2, 0
+
+0x02DE, Is player in taxi, 1, 0
+
+0x02EB, Restore camera jumpcut, 0, 0
+0x02EC, Put hidden package, 3, 0
+0x02ED, Set total hidden packages, 1, 0
+
+0x02FB, Create crusher crane, 10, 0
+
+0x030D, Set max progress, 1, 0
+
+0x031A, Remove all script fires, 0, 0
+
+0x0324, Set pedgroup info, 3, 0
+
+0x0339, Is area occupied, 11, 0
+
+0x034D, Rotate object, 4, 0
+0x034E, Slide object, 8, 0
+
+0x035D, Make object targetable, 1, 0
+
+0x0363, Set vis. of. closest of type, 6, 0
+
+0x0368, Create ev? crane, 10, 0
+
+0x0395, Clear area, 5, 0
+
+0x0399, Switch ped roads off angle, 7, 0
+
+0x03A4, Thread name, 1, 0
+
+0x03AF, Switch map streaming, 1, 0
+
+0x03B6, Swap nearest building model, 6, 0
+
+0x03BB, Set garage door rotate, 1, 0
+
+0x03C6, Is collision in memory, 1, 0
+
+0x03C8, Set camera infront of player, 0, 0
+
+0x03CA, Does object exist, 1, 0
+
+0x03CF, Load mission audio, 1, 0
+0x03D0, Has mission audio loaded, 0, 0
+0x03D1, Play mission audio, 0, 0
+0x03D2, Has mission audio finished, 0, 0
+
+0x03D8, Activate save menu, 0, 0
+0x03D9, Did game save successfully, 0, 0
+0x03DA, Grage camera follow player, 1, 0
+
+0x03E5, Print help, 1, 0
+0x03E6, Clear help, 0, 0
+
+0x03EE, Can player start mission, 1, 0
+0x03EF, Make player safe for cutscene, 1, 0
+
+0x03F1, Set threat for ped type, 2, 0
+
+0x0405, Enable phone, 1, 0
+
+0x0417, Start mission, 1, 0
+
+0x042C, Set total missions, 1, 0
+
+0x0426, Unkown function, 6, 0
