@@ -110,6 +110,16 @@ public:
 	void destroyObject(GameObject* object);
 
 	/**
+	 * @brief Put an object on the deletion queue.
+	 */
+	void destroyObjectQueued(GameObject* object);
+
+	/**
+	 * @brief Destroys all objects on the destruction queue.
+	 */
+	void destroyQueuedObjects();
+
+	/**
 	 * Performs a weapon scan against things in the world
 	 */
 	void doWeaponScan(const WeaponScan &scan );
@@ -214,6 +224,13 @@ public:
 	 * Work related
 	 */
 	WorkContext* _work;
+
+private:
+
+	/**
+	 * @brief Used by objects to delete themselves during updates.
+	 */
+	std::queue<GameObject*> deletionQueue;
 };
 
 #endif

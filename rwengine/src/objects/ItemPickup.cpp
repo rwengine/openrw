@@ -11,6 +11,6 @@ ItemPickup::ItemPickup(GameWorld *world, const glm::vec3 &position, std::shared_
 
 bool ItemPickup::onCharacterTouch(CharacterObject *character)
 {
-	character->addToInventory(new WeaponItem(_data));
+	character->addToInventory(new WeaponItem(character, _data));
 	return true;
 }

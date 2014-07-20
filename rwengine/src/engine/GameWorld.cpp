@@ -374,11 +374,23 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 void GameWorld::destroyObject(GameObject* object)
 {
-	/// @TODO deletion queue
 	auto iterator = objects.find(object);
 	if( iterator != objects.end() ) {
 		delete object;
 		objects.erase(iterator);
+	}
+}
+
+void GameWorld::destroyObjectQueued(GameObject *object)
+{
+	deletionQueue.push(object);
+}
+
+void GameWorld::destroyQueuedObjects()
+{
+	while( !deletionQueue.empty() ) {
+		destroyObject( deletionQueue.front() );
+		deletionQueue.pop();
 	}
 }
 

@@ -224,6 +224,8 @@ void update(float dt)
 			object->tick(dt);
 		}
 
+		gta->destroyQueuedObjects();
+
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
 	}
 }

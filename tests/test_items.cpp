@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(test_character_inventory)
 		auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
 		BOOST_REQUIRE( character != nullptr );
 
-		auto item = new WeaponItem(Global::get().e->gameData.weaponData["unarmed"]);
+		auto item = new WeaponItem(character, Global::get().e->gameData.weaponData["unarmed"]);
 
 		character->addToInventory(item);
 

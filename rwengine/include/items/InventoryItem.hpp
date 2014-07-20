@@ -10,8 +10,10 @@ class InventoryItem
 	int _inventorySlot;
 	int _modelID;
 protected:
-	InventoryItem(int invSlot, int model)
-		: _inventorySlot(invSlot), _modelID(model)
+	CharacterObject* _character;
+
+	InventoryItem(int invSlot, int model, CharacterObject* character)
+		: _inventorySlot(invSlot), _modelID(model), _character(character)
 	{}
 public:
 
@@ -33,12 +35,12 @@ public:
 	 * @brief primary Implements mouse 1 action
 	 * @param active action starting or ending
 	 */
-	virtual void primary(CharacterObject* character, bool active) = 0;
+	virtual void primary(bool active) = 0;
 
 	/**
 	 * @see primary
 	 */
-	virtual void secondary(CharacterObject* character, bool active) = 0;
+	virtual void secondary(bool active) = 0;
 
 	constexpr static int NO_INVSLOT = -1;
 };

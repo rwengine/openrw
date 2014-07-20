@@ -2,6 +2,7 @@
 #ifndef _PROJECTILEOBJECT_HPP_
 #define _PROJECTILEOBJECT_HPP_
 #include <engine/GameObject.hpp>
+#include <data/WeaponData.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
@@ -25,6 +26,8 @@ public:
 
 		/** Time to dentonation or removal */
 		float time;
+
+		std::shared_ptr<WeaponData> weapon;
 	};
 
 private:
@@ -54,6 +57,10 @@ public:
 	~ProjectileObject();
 
 	void tick(float dt);
+
+	Type type() { return Projectile; }
+
+	const ProjectileInfo& getProjectileInfo() const { return _info; }
 };
 
 #endif

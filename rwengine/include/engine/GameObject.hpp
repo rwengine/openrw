@@ -64,6 +64,7 @@ public:
 		Character,
 		Vehicle,
 		Pickup,
+		Projectile,
 		Unknown
     };
 

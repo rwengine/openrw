@@ -24,11 +24,15 @@ void ProjectileObject::checkPhysicsContact()
 		}
 
 		for (int j=0;j<manifoldArray.size();j++) {
-			btPersistentManifold* manifold = manifoldArray[j];
+			//btPersistentManifold* manifold = manifoldArray[j];
+			//const btCollisionObject* B = manifold->getBody0() == _ghostBody ? manifold->getBody1() : manifold->getBody0();
+			//GameObject* go = static_cast<GameObject*>(B->getUserPointer());
 
 			/// @todo check if this is a suitable level to check c.f btManifoldPoint
 			// It's happening
 			explode();
+
+			return;
 		}
 	}
 }
@@ -38,6 +42,10 @@ void ProjectileObject::explode()
 	if( ! _exploded ) {
 		// Remove our physics objects
 		cleanup();
+
+		const float exp_size = 10.f;
+		const float damageSize = 5.f;
+		const float damage = _info.weapon->damage;
 
 		/// @todo accelerate this with bullet instead of doing this stupid loop.
 		for(auto& o : engine->objects) {
@@ -52,17 +60,32 @@ void ProjectileObject::explode()
 			}
 
 			float d = glm::distance(getPosition(), o->getPosition());
-			if( d > 10.f ) continue;
+			if( d > damageSize ) continue;
 
 			o->takeDamage({
 							  getPosition(),
 							  getPosition(),
-							  10.f / glm::max(d, 1.f),
+							  damage / glm::max(d, 1.f),
 							  DamageInfo::Explosion,
 							  0.f
 						  });
-			_exploded = true;
 		}
+
+		std::pair<std::string, std::string> explodeTexName { "explo02", "" };
+
+		/// @todo add support for image sets and opacity to the particle system.
+		engine->renderer.addParticle({
+										 position,
+										 {0.f, 0.f, 1.f},
+										 0.f,
+										 GameRenderer::FXParticle::Camera,
+										 engine->gameTime, 0.5f,
+										 engine->gameData.textures[explodeTexName].texName,
+										 {exp_size, exp_size}
+					});
+
+		_exploded = true;
+		engine->destroyObjectQueued(this);
 	}
 }
 
@@ -89,12 +112,15 @@ ProjectileObject::ProjectileObject(GameWorld *world, const glm::vec3 &position, 
 	  _info(info), _body(nullptr), _ghostBody(nullptr),
 	  _exploded(false)
 {
-	_shape = new btSphereShape(0.25f);
+	_shape = new btSphereShape(0.45f);
 	btVector3 inertia(0.f, 0.f, 0.f);
 	_shape->calculateLocalInertia(1.f, inertia);
 	btRigidBody::btRigidBodyConstructionInfo riginfo(1.f, nullptr, _shape, inertia);
 
-	riginfo.m_startWorldTransform = btTransform(btQuaternion(), btVector3(position.x, position.y, position.z));
+	btTransform ws;
+	ws.setIdentity();
+	ws.setOrigin(btVector3(position.x, position.y, position.z));
+	riginfo.m_startWorldTransform = ws;
 	riginfo.m_mass = 1.f;
 
 	_body = new btRigidBody(riginfo);
@@ -115,7 +141,7 @@ ProjectileObject::ProjectileObject(GameWorld *world, const glm::vec3 &position, 
 		_ghostBody->setCollisionShape(_shape);
 		_ghostBody->setUserPointer(this);
 		_ghostBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT|btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		engine->dynamicsWorld->addCollisionObject(_ghostBody, btBroadphaseProxy::SensorTrigger);
+		engine->dynamicsWorld->addCollisionObject(_ghostBody, btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::AllFilter);
 	}
 }
 
@@ -130,6 +156,8 @@ void ProjectileObject::tick(float dt)
 
 	auto& bttr = _body->getWorldTransform();
 	position = { bttr.getOrigin().x(), bttr.getOrigin().y(), bttr.getOrigin().z() };
+	auto r = bttr.getRotation();
+	rotation = { r.x(), r.y(), r.z(), r.w() };
 
 	_info.time -= dt;
 

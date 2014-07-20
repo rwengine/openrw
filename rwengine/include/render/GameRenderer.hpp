@@ -13,10 +13,12 @@ class ModelFrame;
 class GameWorld;
 class GameObject;
 
+/// @todo migrate to some other way of rendering each object type.
 class CharacterObject;
 class VehicleObject;
 class InstanceObject;
 class PickupObject;
+class ProjectileObject;
 
 class Animator;
 class InventoryItem;
@@ -188,6 +190,8 @@ public:
 	 * @todo corona rendering, with tint.
 	 */
 	void renderPickup(PickupObject* pickup);
+
+	void renderProjectile(ProjectileObject* projectile);
 
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 
