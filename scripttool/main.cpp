@@ -1,154 +1,49 @@
 #include <iostream>
 #include <sstream>
-#include <cstdint>
 #include <fstream>
 #include <iomanip>
-#include <map>
+
+#include <script/SCMFile.hpp>
+#include <script/ScriptMachine.hpp>
 
 #define FIELD_DESC_WIDTH 30
 #define FIELD_PARAM_WIDTH 8
-#define CONDITIONAL_MASK 0xF000
 
 void printUsage();
 
-typedef uint16_t SCMOpcode;
-typedef char SCMByte;
-
-template<class T> T readFromSCM(SCMByte* scm, unsigned int offset)
+void dumpModels(SCMFile* file)
 {
-	return *((T*)(scm+offset));
-}
-
-SCMOpcode readOpcode(SCMByte* scm, unsigned int offset)
-{
-	return readFromSCM<SCMOpcode>(scm, offset);
-}
-
-struct SCMException
-{
-	virtual ~SCMException() { }
-	virtual std::string what() const = 0;
-};
-
-struct IllegalInstruction : SCMException
-{
-	SCMOpcode opcode;
-	unsigned int offset;
-
-	IllegalInstruction(SCMOpcode opcode, unsigned int offset)
-		: opcode(opcode), offset(offset) { }
-
-	std::string what() const {
-		std::stringstream ss;
-		ss << "Illegal Instruction " <<
-			  std::setfill('0') << std::setw(4) << std::hex << opcode <<
-			  " encountered at offset " <<
-			  std::setfill('0') << std::setw(4) << std::hex << offset;
-		return ss.str();
-	}
-};
-
-struct UnknownType : SCMException
-{
-	SCMByte type;
-	unsigned int offset;
-
-	UnknownType(SCMByte type, unsigned int offset)
-		: type(type), offset(offset) {}
-
-	std::string what() const {
-		std::stringstream ss;
-		ss << "Unkown data type " <<
-			  std::setfill('0') << std::hex << static_cast<unsigned int>(type) <<
-			  " encountered at offset " <<
-			  std::setfill('0') << std::hex << offset;
-		return ss.str();
-	}
-};
-
-struct SCMMicrocode {
-	std::string name;
-	int parameters;
-};
-
-typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
-
-SCMMicrocodeTable knownOps;
-
-enum SCMType {
-	EndOfArgList = 0x00,
-	TInt32       = 0x01,
-	TGlobal      = 0x02,
-	TLocal       = 0x03,
-	TInt8        = 0x04,
-	TInt16       = 0x05,
-	TFloat16     = 0x06,
-	TString      = 0x09,
-};
-
-struct SCMTypeInfo {
-	uint8_t size;
-};
-
-typedef std::map<SCMType, SCMTypeInfo> SCMTypeInfoTable;
-
-SCMTypeInfoTable typeData = {
-	{TInt8,   {1}},
-	{TInt16,  {2}},
-	{TInt32,  {4}},
-	{TInt8,   {1}},
-	{TGlobal, {2}},
-	{TLocal,  {2}},
-	{TFloat16,{2}},
-	{EndOfArgList, {0}},
-};
-
-void dumpModels(SCMByte* scm, unsigned int offset, unsigned int size)
-{
-	int i = offset;
-	unsigned int model_count = readFromSCM<uint32_t>(scm, i);
-	std::cout << "model_count = " << std::dec << model_count << std::endl;
-	i += sizeof(uint32_t);
-
-	for(unsigned int m = 0; m < model_count; ++m) {
-		char model_name[24];
-		for(size_t c = 0; c < 24; ++c) {
-			model_name[c] = readFromSCM<char>(scm, i++);
-		}
-		std::cout << std::dec << m << ": " << model_name << std::endl;
+	std::cout << "model count: " << std::dec << file->getModels().size() << std::endl;
+	int i = 0;
+	for( auto& m : file->getModels() ) {
+		std::cout << std::dec << (i++) << ": " << m << std::endl;
 	}
 }
 
-void dumpCodeSizes(SCMByte* scm, unsigned int offset, unsigned int size)
+void dumpCodeSizes(SCMFile* file)
 {
-	int i = offset;
+	std::cout << "main size: " << std::hex <<
+				 file->getMainSize() << std::endl;
 
-	unsigned int size_main = readFromSCM<uint32_t>(scm, i);
-	std::cout << "size_main = " << std::dec << size_main << std::endl;
-	i += sizeof(uint32_t);
+	std::cout << "largest mission size: " << std::hex <<
+				 file->getLargestMissionSize() << std::endl;
 
-	unsigned int largest_mission = readFromSCM<uint32_t>(scm, i);
-	std::cout << "largest _mission = " << std::dec << largest_mission << std::endl;
-	i += sizeof(uint32_t);
+	std::cout << "mission count: " << std::dec <<
+				 file->getMissionOffsets().size() << std::endl;
 
-	unsigned int mission_count = readFromSCM<uint32_t>(scm, i);
-	std::cout << "mission_count = " << std::dec << mission_count << std::endl;
-	i += sizeof(uint32_t);
-
-	for(unsigned int m = 0; m < mission_count; ++m) {
-		unsigned int mission_address = readFromSCM<uint32_t>(scm, i);
-		std::cout << std::dec << m << ": " << std::hex << mission_address << std::endl;
-		i += sizeof(uint32_t);
+	int i = 0;
+	for(auto& m : file->getMissionOffsets()) {
+		std::cout << std::dec << (i++) << ": " << std::hex << m << std::endl;
 	}
 }
 
-void dumpOpcodes(SCMByte* scm, unsigned int offset, unsigned int size)
+void dumpOpcodes(SCMFile* scm, unsigned int offset, unsigned int size)
 {
 	std::cout << "Offs Opcd " << std::setw(FIELD_DESC_WIDTH) << std::left
-			  << "Description" << " Parameters" << std::endl;
+			  << "Description" << "Parameters" << std::endl;
 
 	for( unsigned int i = offset; i < offset+size; ) {
-		SCMOpcode op = readOpcode(scm, i) & ~CONDITIONAL_MASK;
+		SCMOpcode op = scm->read<SCMOpcode>(i) & ~SCM_CONDITIONAL_MASK;
 
 		auto opit = knownOps.find( op );
 
@@ -167,7 +62,7 @@ void dumpOpcodes(SCMByte* scm, unsigned int offset, unsigned int size)
 
 		bool hasMoreArgs = opit->second.parameters < 0;
 		for( int p = 0; p < std::abs(opit->second.parameters) || hasMoreArgs; ++p ) {
-			SCMByte datatype = readFromSCM<SCMByte>(scm, i);
+			SCMByte datatype = scm->read<SCMByte>(i);
 
 			auto typeit = typeData.find(static_cast<SCMType>(datatype));
 			if( typeit == typeData.end()) {
@@ -188,20 +83,20 @@ void dumpOpcodes(SCMByte* scm, unsigned int offset, unsigned int size)
 
 			switch( datatype ) {
 			case TInt32:
-				std::cout << std::dec << readFromSCM<int32_t>(scm, i);
+				std::cout << std::dec << scm->read<int32_t>(i);
 				break;
 			case TInt16:
-				std::cout << std::dec << readFromSCM<int16_t>(scm, i);
+				std::cout << std::dec << scm->read<int16_t>(i);
 				break;
 			case TGlobal:
 			case TLocal:
-				std::cout << std::hex << readFromSCM<int16_t>(scm, i);
+				std::cout << std::hex << scm->read<int16_t>(i);
 				break;
 			case TInt8:
-				std::cout << std::dec << static_cast<int>(readFromSCM<int8_t>(scm, i));
+				std::cout << std::dec << static_cast<int>(scm->read<int8_t>(i));
 				break;
 			case TFloat16:
-				std::cout << (float)readFromSCM<uint16_t>(scm, i) / 16.f;
+				std::cout << (float)scm->read<uint16_t>(i) / 16.f;
 				break;
 			case EndOfArgList:
 				hasMoreArgs = false;
@@ -209,7 +104,7 @@ void dumpOpcodes(SCMByte* scm, unsigned int offset, unsigned int size)
 			case TString: {
 				char strbuff[8];
 				for(size_t c = 0; c < 8; ++c) {
-					strbuff[c] = readFromSCM<char>(scm, i++);
+					strbuff[c] = scm->read<char>(i++);
 				}
 				std::cout << strbuff << " ";
 			}
@@ -280,68 +175,31 @@ void readSCM(const std::string& scmname)
 	int size = scmfile.tellg();
 	scmfile.seekg(0);
 
-	SCMByte* scm = new SCMByte[size];
-	scmfile.read(scm, size);
-
-	int section_globals = 10;
-	int section_models = 0;
-	int section_sizes = 0;
-	int section_main = 0;
+	SCMByte* byff = new SCMByte[size];
+	scmfile.read(byff, size);
+	SCMFile scm;
+	scm.loadFile(byff, size);
+	delete byff;
 
 	try {
-		int i = 0;
+		std::cout << "section globals: " << std::hex <<
+					 scm.getGlobalSection() << std::endl;
+		std::cout << "section models: " << std::hex <<
+					 scm.getModelSection() << std::endl;
+		std::cout << "section sizes: " << std::hex <<
+					 scm.getMissionSection() << std::endl;
+		std::cout << "section main: " << std::hex <<
+					 scm.getCodeSection() << std::endl;
 
-		SCMOpcode op;
-		SCMByte param;
+		dumpModels(&scm);
 
-		op = readOpcode(scm, i);
-		i += sizeof(SCMOpcode);
+		dumpCodeSizes(&scm);
 
-		param = readFromSCM<SCMByte>(scm, i);
-		i += sizeof(SCMByte);
-
-		section_models = readFromSCM<int32_t>(scm, i);
-
-		i = section_models;
-
-		op = readOpcode(scm, i);
-		i += sizeof(SCMOpcode);
-
-		param = readFromSCM<SCMByte>(scm, i);
-		i += sizeof(SCMByte);
-
-		section_sizes = readFromSCM<int32_t>(scm, i);
-
-		i = section_sizes;
-
-		op = readOpcode(scm, i);
-		i += sizeof(SCMOpcode);
-
-		param = readFromSCM<SCMByte>(scm, i);
-		i += sizeof(SCMByte);
-
-		section_main = readFromSCM<int32_t>(scm, i);
-
-		i = section_main;
-
-		std::cout << "section_globals = " << std::hex << section_globals << std::endl;
-		std::cout << "section_models = " << std::hex << section_models << std::endl;
-		std::cout << "section_sizes = " << std::hex << section_sizes << std::endl;
-		std::cout << "section_main = " << std::hex << section_main << std::endl;
-
-		dumpModels(scm, section_models + 2 + 1 + 4 + 1,
-				   section_sizes - section_models);
-
-		dumpCodeSizes(scm, section_sizes + 2 + 1 + 4 + 1,
-				   section_main - section_sizes);
-
-		dumpOpcodes(scm, i, size);
+		dumpOpcodes(&scm, scm.getCodeSection(), size);
 	}
 	catch (SCMException& ex) {
 		std::cerr << ex.what() << std::endl;
 	}
-
-	delete scm;
 }
 
 int main(int argc, char** argv)
