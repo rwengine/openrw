@@ -7,6 +7,7 @@
 #include <loaders/LoaderCOL.hpp>
 #include <data/ObjectData.hpp>
 #include <data/WeaponData.hpp>
+#include <script/SCMFile.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -345,6 +346,25 @@ void GameData::loadHandling(const std::string& path)
 			mit->second->handling = info;
 		}
 	}
+}
+
+SCMFile *GameData::loadSCM(const std::string &path)
+{
+	std::ifstream f(datpath + "/" + path);
+
+	if(! f.is_open() ) return nullptr;
+
+	f.seekg(0, std::ios_base::end);
+	unsigned int size = f.tellg();
+	f.seekg(0);
+
+	char* buff = new char[size];
+	f.read(buff, size);
+	SCMFile* scm = new SCMFile;
+	scm->loadFile(buff, size);
+	delete buff;
+
+	return scm;
 }
 
 void GameData::loadWaterpro(const std::string& path)

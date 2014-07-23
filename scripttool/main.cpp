@@ -49,7 +49,7 @@ void dumpOpcodes(SCMFile* scm, unsigned int offset, unsigned int size)
 
 		// If we don't know the size of the operator's parameters we can't jump over it.
 		if( opit == knownOps.end() ) {
-			throw IllegalInstruction(op, i);
+			throw IllegalInstruction(op, i, "");
 		}
 
 		std::cout << std::hex << std::setfill('0') << std::right <<
@@ -67,7 +67,7 @@ void dumpOpcodes(SCMFile* scm, unsigned int offset, unsigned int size)
 			auto typeit = typeData.find(static_cast<SCMType>(datatype));
 			if( typeit == typeData.end()) {
 				if( datatype < 0x06 ) {
-					throw UnknownType(datatype, i);
+					throw UnknownType(datatype, i, "");
 				}
 				else {
 					datatype = TString;

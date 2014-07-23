@@ -7,9 +7,20 @@
 #include <objects/ItemPickup.hpp>
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
+#include <script/ScriptMachine.hpp>
 
-IngameState::IngameState()
+IngameState::IngameState(bool test)
 	: _player(nullptr), _playerCharacter(nullptr)
+{
+	if( test ) {
+		startTest();
+	}
+	else {
+		getWorld()->runScript("data/main.scm");
+	}
+}
+
+void IngameState::startTest()
 {
 	_playerCharacter = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
 	_player = new PlayerController(_playerCharacter);
@@ -72,17 +83,7 @@ void IngameState::spawnPlayerVehicle()
 	}
 }
 
-void IngameState::enter()
-{
-
-}
-
-void IngameState::exit()
-{
-
-}
-
-void IngameState::tick(float dt)
+void IngameState::updateView()
 {
 	float qpi = glm::half_pi<float>();
 
@@ -151,6 +152,34 @@ void IngameState::tick(float dt)
 	}
 
 	setViewParameters( viewPos + localview * viewFraction, {localX, _lookAngles.y} );
+}
+
+void IngameState::enter()
+{
+
+}
+
+void IngameState::exit()
+{
+
+}
+
+void IngameState::tick(float dt)
+{
+	if( _player ) {
+		updateView();
+	}
+
+	if( getWorld()->script ) {
+		try {
+			getWorld()->script->execute(dt);
+		}
+		catch( SCMException& ex ) {
+			std::cerr << ex.what() << std::endl;
+			getWorld()->logError( ex.what() );
+			throw;
+		}
+	}
 }
 
 void IngameState::handleEvent(const sf::Event &event)

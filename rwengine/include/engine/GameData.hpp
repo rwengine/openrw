@@ -18,6 +18,7 @@ struct DynamicObjectData;
 struct WeaponData;
 class GameWorld;
 class TextureAtlas;
+class SCMFile;
 
 /**
  * @brief Stores simple data about Textures such as transparency flags.
@@ -103,6 +104,8 @@ public:
 	void loadWeather(const std::string& path);
 
 	void loadHandling(const std::string& path);
+
+	SCMFile* loadSCM(const std::string& path);
 	
 	/**
 	 * Loads water level data

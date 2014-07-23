@@ -1,10 +1,16 @@
 #pragma once
 #ifndef _SCRIPTMACHINE_HPP_
 #define _SCRIPTMACHINE_HPP_
+#include <script/ScriptTypes.hpp>
+#include <sstream>
+#include <iomanip>
 #include <string>
-#include <map>
+#include <vector>
 
 #define SCM_CONDITIONAL_MASK 0xF000
+#define SCM_THREAD_LOCAL_SIZE 256
+
+class SCMFile;
 
 struct SCMException
 {
@@ -16,16 +22,18 @@ struct IllegalInstruction : SCMException
 {
 	SCMOpcode opcode;
 	unsigned int offset;
+	std::string thread;
 
-	IllegalInstruction(SCMOpcode opcode, unsigned int offset)
-		: opcode(opcode), offset(offset) { }
+	IllegalInstruction(SCMOpcode opcode, unsigned int offset, const std::string& thread)
+		: opcode(opcode), offset(offset), thread(thread) { }
 
 	std::string what() const {
 		std::stringstream ss;
 		ss << "Illegal Instruction " <<
 			  std::setfill('0') << std::setw(4) << std::hex << opcode <<
 			  " encountered at offset " <<
-			  std::setfill('0') << std::setw(4) << std::hex << offset;
+			  std::setfill('0') << std::setw(4) << std::hex << offset <<
+			  " on thread " << thread;
 		return ss.str();
 	}
 };
@@ -34,54 +42,56 @@ struct UnknownType : SCMException
 {
 	SCMByte type;
 	unsigned int offset;
+	std::string thread;
 
-	UnknownType(SCMByte type, unsigned int offset)
-		: type(type), offset(offset) {}
+	UnknownType(SCMByte type, unsigned int offset, const std::string& thread)
+		: type(type), offset(offset), thread(thread) {}
 
 	std::string what() const {
 		std::stringstream ss;
 		ss << "Unkown data type " <<
 			  std::setfill('0') << std::hex << static_cast<unsigned int>(type) <<
 			  " encountered at offset " <<
-			  std::setfill('0') << std::hex << offset;
+			  std::setfill('0') << std::hex << offset <<
+			  " on thread " << thread;
 		return ss.str();
 	}
 };
 
-struct SCMMicrocode {
+static SCMMicrocodeTable knownOps;
+
+struct SCMThread
+{
+	typedef unsigned int pc_t;
+
 	std::string name;
-	int parameters;
+	pc_t programCounter;
+	/** Number of MS until the thread should be waked (-1 = yeilded) */
+	int wakeCounter;
+	SCMByte locals[SCM_THREAD_LOCAL_SIZE];
 };
 
-typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
+class ScriptMachine
+{
+	SCMFile* _file;
+	SCMOpcodes* _ops;
 
-SCMMicrocodeTable knownOps;
+	std::vector<SCMThread> _activeThreads;
 
-enum SCMType {
-	EndOfArgList = 0x00,
-	TInt32       = 0x01,
-	TGlobal      = 0x02,
-	TLocal       = 0x03,
-	TInt8        = 0x04,
-	TInt16       = 0x05,
-	TFloat16     = 0x06,
-	TString      = 0x09,
-};
+	void executeThread(SCMThread& t, int msPassed);
 
-struct SCMTypeInfo {
-	uint8_t size;
-};
+public:
+	ScriptMachine(SCMFile* file, SCMOpcodes* ops);
+	~ScriptMachine();
 
-typedef std::map<SCMType, SCMTypeInfo> SCMTypeInfoTable;
+	void startThread(SCMThread::pc_t start);
 
-SCMTypeInfoTable typeData = {
-	{TInt8,   {1}},
-	{TInt16,  {2}},
-	{TInt32,  {4}},
-	{TGlobal, {2}},
-	{TLocal,  {2}},
-	{TFloat16,{2}},
-	{EndOfArgList, {0}},
+	SCMByte* getGlobals();
+
+	/**
+	 * @brief executes threads until they are all in waiting state.
+	 */
+	void execute(float dt);
 };
 
 #endif

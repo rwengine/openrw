@@ -13,9 +13,12 @@ class IngameState : public State
 	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
 public:
-	IngameState();
+	IngameState(bool test = false);
 
+	void startTest();
 	void spawnPlayerVehicle();
+
+	void updateView();
 
 	virtual void enter();
 	virtual void exit();

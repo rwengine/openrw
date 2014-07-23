@@ -17,6 +17,8 @@ class VehicleObject;
 
 class WeaponScan;
 
+class ScriptMachine;
+
 #include <glm/glm.hpp>
 
 #include <btBulletDynamicsCommon.h>
@@ -77,6 +79,8 @@ public:
 	 * Loads an IDE into the game
 	 */
 	bool defineItems(const std::string& name);
+
+	void runScript(const std::string& name);
 	
 	/**
 	 * Loads an IPL into the game.
@@ -214,6 +218,8 @@ public:
 	 * Work related
 	 */
 	WorkContext* _work;
+
+	ScriptMachine* script;
 };
 
 #endif

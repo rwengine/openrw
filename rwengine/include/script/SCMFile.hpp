@@ -1,12 +1,9 @@
 #pragma once
 #ifndef _SCMFILE_HPP_
 #define _SCMFILE_HPP_
-#include <cstdint>
 #include <vector>
 #include <string>
-
-typedef uint16_t SCMOpcode;
-typedef char SCMByte;
+#include <script/ScriptTypes.hpp>
 
 /**
  * @brief Handles in-memory SCM file data including section offsets.
