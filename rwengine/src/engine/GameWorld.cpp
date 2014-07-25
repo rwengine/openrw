@@ -176,7 +176,7 @@ void GameWorld::runScript(const std::string &name)
 	if( f ) {
 		if( script ) delete script;
 
-		script = new ScriptMachine(f, new Opcodes3);
+		script = new ScriptMachine(this, f, new Opcodes3);
 	}
 	else {
 		logError("Failed to load SCM: " + name);

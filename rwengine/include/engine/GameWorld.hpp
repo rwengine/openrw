@@ -3,7 +3,9 @@
 #define _GAMEWORLD_HPP_
 
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
+
 #include <loaders/LoaderIPL.hpp>
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
@@ -142,6 +144,11 @@ public:
 	 * Renderer
 	 */
 	GameRenderer renderer;
+
+	/**
+	 * Gameplay state
+	 */
+	GameState state;
 	
 	/**
 	 * Map Zones

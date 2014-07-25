@@ -182,6 +182,12 @@ void InstanceObject::tick(float dt)
 	}
 }
 
+void InstanceObject::setRotation(const glm::quat &r)
+{
+	auto wtr = body->getWorldTransform();
+	wtr.setRotation(btQuaternion(r.x, r.y, r.z, r.w));
+}
+
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;

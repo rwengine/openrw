@@ -53,6 +53,8 @@ public:
 	std::uint32_t getMissionSection() const { return missionSectionOffset; }
 	std::uint32_t getCodeSection() const { return codeSectionOffset; }
 
+	unsigned int getGlobalsSize() const { return modelSectionOffset - globalSectionOffset; }
+
 private:
 
 	SCMByte* _data;

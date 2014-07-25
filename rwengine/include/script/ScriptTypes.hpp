@@ -47,6 +47,7 @@ struct SCMOpcodeParameter {
 		float real;
 		char string[8];
 		void* globalPtr;
+		void** handle;
 		int* globalInteger;
 		float* globalReal;
 	};

@@ -11,3 +11,8 @@ glm::quat GameObject::getRotation() const
 {
 	return rotation;
 }
+
+void GameObject::setRotation(const glm::quat& orientation)
+{
+	rotation = orientation;
+}

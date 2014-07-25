@@ -43,7 +43,7 @@ void dumpOpcodes(SCMFile* scm, unsigned int offset, unsigned int size)
 			  << "Description" << "Parameters" << std::endl;
 
 	for( unsigned int i = offset; i < offset+size; ) {
-		SCMOpcode op = scm->read<SCMOpcode>(i) & ~SCM_CONDITIONAL_MASK;
+		SCMOpcode op = scm->read<SCMOpcode>(i) & ~SCM_NEGATE_CONDITIONAL_MASK;
 
 		auto opit = knownOps.find( op );
 

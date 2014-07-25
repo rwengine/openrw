@@ -243,6 +243,8 @@ void GameRenderer::renderWorld(float alpha)
 	_renderAlpha = alpha;
 
 	glBindVertexArray( vao );
+
+	/// @todo take into account engine->state.fading
 	
     float tod = fmod(engine->gameTime, 24.f * 60.f);
 

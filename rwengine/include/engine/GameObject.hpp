@@ -79,7 +79,8 @@ public:
 	const glm::vec3& getLastPosition() const { return _lastPosition; }
 
 	virtual glm::quat getRotation() const;
-	
+	virtual void setRotation(const glm::quat &orientation);
+
 	struct DamageInfo
 	{
 		enum DamageType
