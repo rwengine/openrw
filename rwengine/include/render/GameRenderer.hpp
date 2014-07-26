@@ -200,6 +200,11 @@ public:
 	 */
 	void renderParticles();
 
+	/**
+	 * @brief Draws the current on screen text.
+	 */
+	void drawOnScreenText();
+
 	/** 
 	 * Renders a model (who'd have thought)
 	 */

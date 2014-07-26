@@ -16,3 +16,10 @@ void GameObject::setRotation(const glm::quat& orientation)
 {
 	rotation = orientation;
 }
+
+void GameObject::setHeading(float heading)
+{
+	auto hdg = (heading / 180.f) * glm::pi<float>();
+	auto quat = glm::normalize(glm::quat(glm::vec3(0.f, 0.f, hdg)));
+	setRotation(quat);
+}

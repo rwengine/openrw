@@ -1,7 +1,8 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 
-#define SCRIPTMACHINE_VERBOSE 1
+#define SCRIPTMACHINE_VERBOSE 0
+#define SCRIPTMACHINE_VERBOSE_PARAMETERS 1
 
 #if SCRIPTMACHINE_VERBOSE
 #include <iostream>
@@ -78,7 +79,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				t.programCounter += sizeof(SCMByte) * 8;
 				break;
 			case TFloat16:
-				parameters.back().real = (float)(_file->read<std::uint16_t>(t.programCounter)) / 16.f;
+				parameters.back().real = _file->read<std::int16_t>(t.programCounter) / 16.f;
 				t.programCounter += sizeof(SCMByte) * 2;
 				break;
 			default:
@@ -90,7 +91,29 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 #if SCRIPTMACHINE_VERBOSE
 		std::cout << "[SCM] " << std::hex << std::setw(8) << t.programCounter <<
 					 " EXEC " << std::hex << std::setw(4) << std::setfill('0') << opcode <<
-					 std::dec << std::setfill(' ') << " " << code.name << std::endl;
+					 " " << std::setw(8) << std::setfill(' ') << t.name <<
+					 std::dec << std::setfill(' ') << " " << code.name << " ( ";
+#if SCRIPTMACHINE_VERBOSE_PARAMETERS
+		for(auto& p : parameters) {
+			std::cout << p.type << ":";
+			switch(p.type) {
+			case TGlobal:
+			case TLocal:
+				std::cout << *p.globalInteger;
+				break;
+			case TInt8:
+			case TInt16:
+			case TInt32:
+				std::cout << p.integer;
+				break;
+			case TFloat16:
+				std::cout << p.real;
+				break;
+			}
+			std::cout << " ";
+		}
+#endif
+		std::cout << " ) " << std::endl;
 #endif
 
 		code.func(this, &t, &parameters);
@@ -146,6 +169,7 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission)
 	t.conditionCount = 0;
 	t.conditionAND = false;
 	t.programCounter = start;
+	t.baseAddress = start; /* Indicates where negative jumps should jump from */
 	t.wakeCounter = 0;
 	t.isMission = mission;
 	t.finished = false;

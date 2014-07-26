@@ -239,13 +239,15 @@ bool GameWorld::loadZone(const std::string& path)
 
 	if( ipll.load(path)) {
 		if( ipll.zones.size() > 0) {
-			zones.insert(zones.begin(), ipll.zones.begin(), ipll.zones.end());
+			for(auto& z : ipll.zones) {
+				zones.insert({z.name, z});
+			}
 			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
 			return true;
 		}
 	}
 	else {
-		std::cerr << "Failed to load IPL " << path << std::endl;
+		std::cerr << "Failed to load Zones " << path << std::endl;
 	}
 	
 	return false;
@@ -429,14 +431,29 @@ void GameWorld::doWeaponScan(const WeaponScan &scan)
 
 int GameWorld::getHour()
 {
-	const float dayseconds = (24.f * 60.f);
-	float daytime = fmod(gameTime, dayseconds);
-	return daytime / 60.f;
+	return state.hour;
 }
 
 int GameWorld::getMinute()
 {
-	return fmod(gameTime, 60.f);
+	return state.minute;
+}
+
+glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
+{
+	btVector3 rayFrom(pos.x, pos.y, 100.f);
+	btVector3 rayTo(pos.x, pos.y, -100.f);
+
+	btDynamicsWorld::ClosestRayResultCallback rr(rayFrom, rayTo);
+
+	dynamicsWorld->rayTest( rayFrom, rayTo, rr );
+
+	if(rr.hasHit()) {
+		auto& ws = rr.m_hitPointWorld;
+		return { ws.x(), ws.y(), ws.z() };
+	}
+
+	return pos;
 }
 
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA)

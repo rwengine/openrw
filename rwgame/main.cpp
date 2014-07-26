@@ -10,6 +10,8 @@
 #include <objects/InstanceObject.hpp>
 #include <ai/CharacterController.hpp>
 
+#include <script/ScriptMachine.hpp>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -35,8 +37,10 @@ CharacterObject* player = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
 
-bool inFocus = false;
+bool inFocus = true;
 int debugMode = 0;
+
+float accum = 0.f;
 
 sf::Font font;
 
@@ -84,6 +88,11 @@ void setPlayerCharacter(CharacterObject *playerCharacter)
 CharacterObject* getPlayerCharacter()
 {
 	return player;
+}
+
+void skipTime(float time)
+{
+	accum += time;
 }
 
 bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object)
@@ -198,14 +207,13 @@ void init(std::string gtapath, bool loadWorld)
 	
 	// Load dynamic object data
 	gta->gameData.loadDynamicObjects(gtapath + "/data/object.dat");
+
+	gta->gameTime = 0.f;
 	
-	// Set time to noon.
-	gta->gameTime = 12.f * 60.f;
-	
-    debugDrawer = new DebugDraw;
-    debugDrawer->setShaderProgram(gta->renderer.worldProgram);
-    debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    gta->dynamicsWorld->setDebugDrawer(debugDrawer);
+	debugDrawer = new DebugDraw;
+	debugDrawer->setShaderProgram(gta->renderer.worldProgram);
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
 	setViewParameters( { -260.f, -151.5f, 9.f }, { -0.3f, 0.05f } );
 
@@ -216,8 +224,22 @@ void init(std::string gtapath, bool loadWorld)
 
 void update(float dt)
 {
+	static float clockAccumulator = 0.f;
 	if (inFocus) {
 		gta->gameTime += dt;
+
+		clockAccumulator += dt;
+		while( clockAccumulator >= 1.f ) {
+			gta->state.minute ++;
+			if( gta->state.minute >= 60 ) {
+				gta->state.minute = 0;
+				gta->state.hour ++;
+				if( gta->state.hour >= 24 ) {
+					gta->state.hour = 0;
+				}
+			}
+			clockAccumulator -= 1.f;
+		}
 
 		for( GameObject* object : gta->objects ) {
 			object->_updateLastTransform();
@@ -225,6 +247,17 @@ void update(float dt)
 		}
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
+
+		if( getWorld()->script ) {
+			try {
+				getWorld()->script->execute(dt);
+			}
+			catch( SCMException& ex ) {
+				std::cerr << ex.what() << std::endl;
+				getWorld()->logError( ex.what() );
+				throw;
+			}
+		}
 	}
 }
 
@@ -334,6 +367,16 @@ void render(float alpha)
 		window.draw(text);
 		tpos.y -= text.getLocalBounds().height;
 	}
+
+	/// @todo this should be done by GameRenderer? but it doesn't have any font support yet
+	if( gta->gameTime < gta->state.osTextStart + gta->state.osTextTime ) {
+		sf::Text messageText(gta->state.osTextString, font, 15);
+		auto sz = window.getSize();
+
+		auto b = messageText.getLocalBounds();
+		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), sz.y / 2.f - std::round(b.height / 2.f));
+		window.draw(messageText);
+	}
 }
 
 std::string getGamePath()
@@ -356,15 +399,15 @@ int main(int argc, char *argv[])
 	int c;
 	while( (c = getopt(argc, argv, "w:h:l")) != -1) {
 		switch(c) {
-			case 'w':
-				w = atoi(optarg);
-				break;
-			case 'h':
-				h = atoi(optarg);
-				break;
-			case 'l':
-				loadWorld = false;
-				break;
+		case 'w':
+			w = atoi(optarg);
+			break;
+		case 'h':
+			h = atoi(optarg);
+			break;
+		case 'l':
+			loadWorld = false;
+			break;
 		}
 	}
 
@@ -379,9 +422,8 @@ int main(int argc, char *argv[])
 	sf::Clock clock;
 
 	StateManager::get().enter(new LoadingState);
-	
-	float accum = 0.f;
-	float ts = 1.f / 60.f;
+
+	float ts = 1.f / 20.f;
 	float timescale = 1.f;
 	
 	// Loop until the window is closed or we run out of state.

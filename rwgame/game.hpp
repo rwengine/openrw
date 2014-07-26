@@ -31,5 +31,7 @@ void setViewParameters(const glm::vec3& center, const glm::vec2 &angles);
 glm::vec3& getViewPosition();
 glm::vec2& getViewAngles();
 
+void skipTime(float time);
+
 #endif // GAME_HPP
 

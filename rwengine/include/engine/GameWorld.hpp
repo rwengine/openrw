@@ -123,12 +123,14 @@ public:
 	/**
 	 * Returns the current hour
 	 */
-    int getHour();
+	int getHour();
 	
 	/**
 	 * Returns the current minute
 	 */
 	int getMinute();
+
+	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 	
 	/** 
 	 * Game Clock
@@ -153,7 +155,7 @@ public:
 	/**
 	 * Map Zones
 	 */
-	std::vector<LoaderIPL::Zone> zones;
+	std::map<std::string, LoaderIPL::Zone> zones;
 	
 	/**
 	 * Object Definitions

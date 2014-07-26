@@ -111,6 +111,7 @@ struct SCMThread
 	typedef unsigned int pc_t;
 
 	std::string name;
+	pc_t baseAddress;
 	pc_t programCounter;
 
 	unsigned int conditionCount;

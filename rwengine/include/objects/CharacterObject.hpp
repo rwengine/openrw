@@ -115,6 +115,8 @@ public:
 	virtual glm::vec3 getPosition() const;
 
 	virtual glm::quat getRotation() const;
+
+	bool isAlive() const;
 	
 	bool enterVehicle(VehicleObject* vehicle, size_t seat);
 

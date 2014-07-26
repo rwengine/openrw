@@ -246,10 +246,11 @@ void GameRenderer::renderWorld(float alpha)
 
 	/// @todo take into account engine->state.fading
 	
-    float tod = fmod(engine->gameTime, 24.f * 60.f);
+	float tod = engine->state.hour + engine->state.minute/60.f;
 
 	// Requires a float 0-24
-    auto weather = engine->gameData.weatherLoader.getWeatherData(WeatherLoader::Sunny, tod / 60.f);
+	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(engine->state.currentWeather * 24);
+	auto weather = engine->gameData.weatherLoader.getWeatherData(weatherID, tod / 60.f);
 
     glm::vec3 skyTop = weather.skyTopColor;
     glm::vec3 skyBottom = weather.skyBottomColor;
@@ -715,6 +716,11 @@ void GameRenderer::renderParticles()
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
+}
+
+void GameRenderer::drawOnScreenText()
+{
+	/// @ TODO
 }
 
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)

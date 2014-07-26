@@ -7,7 +7,6 @@
 #include <objects/ItemPickup.hpp>
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
-#include <script/ScriptMachine.hpp>
 
 IngameState::IngameState(bool test)
 	: _player(nullptr), _playerCharacter(nullptr)
@@ -166,19 +165,13 @@ void IngameState::exit()
 
 void IngameState::tick(float dt)
 {
-	if( _player ) {
-		updateView();
+	if( getWorld()->state.player ) {
+		_player = getWorld()->state.player;
+		_playerCharacter = _player->getCharacter();
 	}
 
-	if( getWorld()->script ) {
-		try {
-			getWorld()->script->execute(dt);
-		}
-		catch( SCMException& ex ) {
-			std::cerr << ex.what() << std::endl;
-			getWorld()->logError( ex.what() );
-			throw;
-		}
+	if( _player ) {
+		updateView();
 	}
 }
 
@@ -238,6 +231,9 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::LShift:
 			_player->setRunning(false);
+			break;
+		case sf::Keyboard::F12:
+			skipTime(120.f);
 			break;
 		default: break;
 		}

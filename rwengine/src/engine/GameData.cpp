@@ -101,6 +101,7 @@ void GameData::load()
 	loadWeaponDAT(datpath+"/data/weapon.dat");
 
 	loadIFP(datpath+"/anim/ped.ifp");
+
 }
 
 void GameData::parseDAT(const std::string& path)
