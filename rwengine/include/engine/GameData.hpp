@@ -11,6 +11,7 @@
 #include <loaders/WeatherLoader.hpp>
 #include <objects/VehicleInfo.hpp>
 #include <data/CollisionModel.hpp>
+#include <data/GameTexts.hpp>
 
 #include <memory>
 
@@ -106,6 +107,8 @@ public:
 	void loadHandling(const std::string& path);
 
 	SCMFile* loadSCM(const std::string& path);
+
+	void loadGXT(const std::string& name);
 	
 	/**
 	 * Loads water level data
@@ -280,6 +283,8 @@ public:
 
 	int getWaterIndexAt(const glm::vec3& ws) const;
 	float getWaveHeightAt(const glm::vec3& ws) const;
+
+	GameTexts texts;
 };
 
 #endif

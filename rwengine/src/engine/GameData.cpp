@@ -9,6 +9,8 @@
 #include <data/WeaponData.hpp>
 #include <script/SCMFile.hpp>
 
+#include <loaders/LoaderGXT.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -88,6 +90,7 @@ void GameData::load()
 	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
 	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
+	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
 
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
@@ -366,6 +369,15 @@ SCMFile *GameData::loadSCM(const std::string &path)
 	delete buff;
 
 	return scm;
+}
+
+void GameData::loadGXT(const std::string &name)
+{
+	auto d = openFile2(name);
+
+	LoaderGXT loader;
+
+	loader.load( texts, d );
 }
 
 void GameData::loadWaterpro(const std::string& path)

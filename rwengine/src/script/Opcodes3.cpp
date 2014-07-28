@@ -230,7 +230,9 @@ SCMMicrocodeTable ops_game = {
 	})
 
 	OPC( 0x00BC, "Print Message Now", 3, {
-		m->getWorld()->state.osTextString = p->at(0).string;
+		std::string str(p->at(0).string);
+		str = m->getWorld()->gameData.texts.text(str);
+		m->getWorld()->state.osTextString = str;
 		m->getWorld()->state.osTextTime = p->at(1).integer / 1000.f;
 		m->getWorld()->state.osTextStart= m->getWorld()->gameTime;
 		m->getWorld()->state.osTextStyle = p->at(2).integer;

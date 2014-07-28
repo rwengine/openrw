@@ -212,6 +212,8 @@ void init(std::string gtapath, bool loadWorld)
 	// Load dynamic object data
 	gta->gameData.loadDynamicObjects(gtapath + "/data/object.dat");
 
+	gta->gameData.loadGXT("english.gxt");
+
 	gta->gameTime = 0.f;
 	
 	debugDrawer = new DebugDraw;
@@ -404,7 +406,8 @@ void render(float alpha)
 		auto sz = window.getSize();
 
 		auto b = messageText.getLocalBounds();
-		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), sz.y / 2.f - std::round(b.height / 2.f));
+		float lowerBar = sz.y - sz.y * 0.1f;
+		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
 		window.draw(messageText);
 	}
 }
