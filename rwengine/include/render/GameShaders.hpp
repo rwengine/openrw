@@ -27,6 +27,16 @@ struct Particle {
 	static const char* FragmentShader;
 };
 
+/**
+ * @brief The ScreenSpaceRect shader
+ *
+ * Used to draw black bars, splash screens, fading etc.
+ */
+struct ScreenSpaceRect {
+	static const char* VertexShader;
+	static const char* FragmentShader;
+};
+
 }
 
 #endif

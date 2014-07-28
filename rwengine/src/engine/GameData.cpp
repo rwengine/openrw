@@ -657,6 +657,56 @@ char* GameData::openFile(const std::string& name)
 	return nullptr;
 }
 
+FileHandle GameData::openFile2(const std::string &name)
+{
+	auto i = _knownFiles.find(name);
+	if(i != _knownFiles.end())
+	{
+		char* data;
+		size_t length;
+
+		if(i->second.archived)
+		{
+			// Find the archive
+			auto ai = archives.find(i->second.path);
+			if(ai != archives.end())
+			{
+				data = ai->second.loadToMemory(name);
+				auto& asset = ai->second.getAssetInfo(name);
+				length = asset.size * 2048;
+			}
+			else
+			{
+				std::cerr << "Archive not found " << i->second.path << std::endl;
+			}
+		}
+		else
+		{
+			std::ifstream dfile(i->second.path);
+			if ( ! dfile.is_open()) {
+				std::cerr << "Error opening file " << i->second.path << std::endl;
+				return nullptr;
+			}
+
+			dfile.seekg(0, std::ios_base::end);
+			length = dfile.tellg();
+			dfile.seekg(0);
+			data = new char[length];
+			dfile.read(data, length);
+		}
+
+		return FileHandle( new FileContentsInfo{ data, length } );
+	}
+	else
+	{
+		std::stringstream err;
+		err << "Unable to locate file " << name;
+		engine->logError(err.str());
+		std::cerr << err.str() << std::endl;
+	}
+	return nullptr;
+}
+
 char* GameData::loadFile(const std::string &name)
 {
 	auto it = loadedFiles.find(name);

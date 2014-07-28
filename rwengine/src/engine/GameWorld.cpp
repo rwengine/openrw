@@ -15,6 +15,9 @@
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+#include <data/CutsceneData.hpp>
+#include <loaders/LoaderCutsceneDAT.hpp>
+
 class WorldCollisionDispatcher : public btCollisionDispatcher
 {
 public:
@@ -552,5 +555,25 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeSte
 			static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
 		}
 	}
+}
+
+void GameWorld::loadCutscene(const std::string &name)
+{
+	std::string lowerName(name);
+	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+	auto datfile = gameData.openFile2(lowerName + ".dat");
+
+	CutsceneData* cutscene = new CutsceneData;
+
+	if( datfile ) {
+		LoaderCutsceneDAT loaderdat;
+		loaderdat.load(cutscene->tracks, datfile);
+	}
+
+	if( state.currentCutscene ) {
+		delete state.currentCutscene;
+	}
+	state.currentCutscene = cutscene;
+	std::cout << "Loaded cutscene: " << name << std::endl;
 }
 

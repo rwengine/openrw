@@ -42,6 +42,7 @@ public:
 		e = new GameWorld(getGamePath());
 
 		e->gameData.loadIMG("/models/gta3");
+		e->gameData.loadIMG("/anim/cuts");
 		e->load();
 		for(std::map<std::string, std::string>::iterator it = e->gameData.ideLocations.begin();
 			it != e->gameData.ideLocations.end();

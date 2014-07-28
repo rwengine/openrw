@@ -65,6 +65,26 @@ struct ParticleVert {
 GeometryBuffer particleGeom;
 DrawBuffer particleDraw;
 
+struct VertexP2 {
+	static const AttributeList vertex_attributes() {
+		return {
+			{ATRS_Position, 2, sizeof(VertexP2),  0ul}
+		};
+	}
+
+	float x, y;
+};
+
+std::vector<VertexP2> sspaceRect = {
+	{-1.f, -1.f},
+	{ 1.f, -1.f},
+	{-1.f,  1.f},
+	{ 1.f,  1.f},
+};
+
+GeometryBuffer ssRectGeom;
+DrawBuffer ssRectDraw;
+
 GLuint compileShader(GLenum type, const char *source)
 {
 	GLuint shader = glCreateShader(type);
@@ -79,8 +99,14 @@ GLuint compileShader(GLenum type, const char *source)
 		GLchar *buffer = new GLchar[len];
 		glGetShaderInfoLog(shader, len, NULL, buffer);
 
-		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << source << std::endl;
+		GLint sourceLen;
+		glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
+		GLchar *sourceBuff = new GLchar[sourceLen];
+		glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
+
+		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << sourceBuff << std::endl;
 		delete[] buffer;
+		delete[] sourceBuff;
 		exit(1);
 	}
 
@@ -226,6 +252,17 @@ GameRenderer::GameRenderer(GameWorld* engine)
 					{-0.5f,-0.5f, 0.f, 0.f, 1.f, 1.f, 1.f}
 	});
 	particleDraw.addGeometry(&particleGeom);
+
+	ssRectGeom.uploadVertices(sspaceRect);
+	ssRectDraw.addGeometry(&ssRectGeom);
+
+	ssRectProgram = compileProgram(GameShaders::ScreenSpaceRect::VertexShader,
+								  GameShaders::ScreenSpaceRect::FragmentShader);
+
+	ssRectTexture = glGetUniformLocation(ssRectProgram, "texture");
+	ssRectColour = glGetUniformLocation(ssRectProgram, "colour");
+	ssRectSize = glGetUniformLocation(ssRectProgram, "size");
+	ssRectOffset = glGetUniformLocation(ssRectProgram, "offset");
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -250,12 +287,12 @@ void GameRenderer::renderWorld(float alpha)
 
 	// Requires a float 0-24
 	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(engine->state.currentWeather * 24);
-	auto weather = engine->gameData.weatherLoader.getWeatherData(weatherID, tod / 60.f);
+	auto weather = engine->gameData.weatherLoader.getWeatherData(weatherID, tod);
 
-    glm::vec3 skyTop = weather.skyTopColor;
-    glm::vec3 skyBottom = weather.skyBottomColor;
-    glm::vec3 ambient = weather.ambientColor;
-    glm::vec3 dynamic = weather.directLightColor;
+	glm::vec3 skyTop = weather.skyTopColor;
+	glm::vec3 skyBottom = weather.skyBottomColor;
+	glm::vec3 ambient = weather.ambientColor;
+	glm::vec3 dynamic = weather.directLightColor;
 
 	float theta = (tod/(60.f * 24.f) - 0.5f) * 2 * 3.14159265;
 	glm::vec3 sunDirection{
@@ -263,8 +300,8 @@ void GameRenderer::renderWorld(float alpha)
 		0.0,
 		cos(theta),
 	};
-    sunDirection = glm::normalize(sunDirection);
-    camera.frustum.far = weather.farClipping;
+	sunDirection = glm::normalize(sunDirection);
+	camera.frustum.far = weather.farClipping;
 
 	glUseProgram(worldProgram);
 
@@ -276,8 +313,10 @@ void GameRenderer::renderWorld(float alpha)
 				{
 					proj,
 					view,
-					glm::vec4{ambient, 1.0f},
-					glm::vec4{dynamic, 1.0f},
+					glm::vec4{ambient, 0.0f},
+					glm::vec4{dynamic, 0.0f},
+					glm::vec4(skyBottom, 1.f),
+					glm::vec4(camera.worldPos, 0.f),
 					weather.fogStart,
 					camera.frustum.far
 				});
@@ -408,6 +447,54 @@ void GameRenderer::renderWorld(float alpha)
 	glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
 
 	renderParticles();
+
+	glActiveTexture(0);
+
+	glDisable(GL_DEPTH_TEST);
+
+	float fadeTimer = engine->gameTime - engine->state.fadeStart;
+	if( fadeTimer <= engine->state.fadeTime || !engine->state.fadeOut ) {
+		glUseProgram(ssRectProgram);
+		glUniform2f(ssRectOffset, 0.f, 0.f);
+		glUniform2f(ssRectSize, 1.f, 1.f);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform1i(ssRectTexture, 0);
+		float fadeFrac = 0.f;
+		if( engine->state.fadeTime > 0.f ) {
+			fadeFrac = std::min(fadeTimer / engine->state.fadeTime, 1.f);
+		}
+
+		auto fc = engine->state.fadeColour;
+
+		float a = engine->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
+
+		glm::vec4 fadeNormed(fc.r / 255.f, fc.g/ 255.f, fc.b/ 255.f, a);
+
+		glUniform4fv(ssRectColour, 1, glm::value_ptr(fadeNormed));
+
+		glBindVertexArray( ssRectDraw.getVAOName() );
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	if( engine->state.currentCutscene ) {
+		glUseProgram(ssRectProgram);
+		const float cinematicExperienceSize = 0.15f;
+		glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
+		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform1i(ssRectTexture, 0);
+		glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+
+		glBindVertexArray( ssRectDraw.getVAOName() );
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glUniform2f(ssRectOffset, 0.f, 1.f * (1.f - cinematicExperienceSize));
+		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
 
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

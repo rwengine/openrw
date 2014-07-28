@@ -148,6 +148,9 @@ public:
 	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize, waterTime, waterPosition, waterWave;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	GLuint particleProgram;
+
+	GLuint ssRectProgram;
+	GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
 	
 	/** Internal non-descript VAOs */
     GLuint vao, debugVAO;
@@ -235,6 +238,8 @@ struct SceneUniformData {
 	glm::mat4 view;
 	glm::vec4 ambient;
 	glm::vec4 dynamic;
+	glm::vec4 fogColour;
+	glm::vec4 campos;
 	float fogStart;
 	float fogEnd;
 };

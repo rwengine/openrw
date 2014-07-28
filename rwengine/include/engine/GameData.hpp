@@ -152,6 +152,7 @@ public:
 	 * @return pointer to the data, NULL if it is not available
 	 */
 	char* openFile(const std::string& name);
+	FileHandle openFile2(const std::string& name);
 
 	/**
 	 * @brief loadFile Marks a file as open, and opens it.

@@ -96,7 +96,7 @@ void ViewerWidget::paintGL()
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
 		r.uploadUBO<SceneUniformData>(r.uboScene,
-		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), 90.f, r.camera.frustum.far });
+		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, r.camera.frustum.far });
 
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);

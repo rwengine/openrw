@@ -10,6 +10,7 @@
 #include <ai/PlayerController.hpp>
 #include <ai/DefaultAIController.hpp>
 
+#include <data/CutsceneData.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
@@ -327,11 +328,11 @@ SCMMicrocodeTable ops_game = {
 		m->getWorld()->state.fadeColour.g = p->at(1).integer;
 		m->getWorld()->state.fadeColour.b = p->at(2).integer;
 	})
-
 	OPC( 0x016A, "Fade Screen", 2, {
-		m->getWorld()->state.fadeIn = !!p->at(0).integer;
-		m->getWorld()->state.fadeTime = p->at(1).integer / 1000.f;
+		m->getWorld()->state.fadeTime = p->at(0).integer / 1000.f;
+		m->getWorld()->state.fadeOut = !!p->at(1).integer;
 		m->getWorld()->state.fadeStart = m->getWorld()->gameTime;
+		std::cout << "Fade " << p->at(0).integer << " " << p->at(1).integer << std::endl;
 	})
 	OPC_COND( 0x016B, "Is Screen Fading", 0, {
 		return m->getWorld()->gameTime <
@@ -462,7 +463,12 @@ SCMMicrocodeTable ops_game = {
 		return false;
 	})
 
-	OPC_UNIMPLEMENTED_MSG( 0x0244, "Set Cutscene Offset", 3)
+	OPC( 0x0244, "Set Cutscene Offset", 3, {
+		glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real);
+		if( m->getWorld()->state.currentCutscene ) {
+			m->getWorld()->state.currentCutscene->meta.sceneOffset = position;
+		}
+	})
 	OPC_UNIMPLEMENTED_MSG( 0x0245, "Set Character Animation Group", 2)
 
 	OPC_UNIMPLEMENTED_MSG( 0x0247, "Request Model Loaded", 1)
@@ -516,25 +522,34 @@ SCMMicrocodeTable ops_game = {
 		return vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI;
 	})
 
-	OPC_UNIMPLEMENTED_MSG( 0x02E4, "Load Cutscene Data", 1)
+	OPC( 0x02E4, "Load Cutscene Data", 1, {
+		m->getWorld()->loadCutscene(p->at(0).string);
+		m->getWorld()->state.cutsceneStartTime = -1.f;
+	})
 	OPC_UNIMPLEMENTED_MSG( 0x02E5, "Create Cutscene Object", 2)
 	OPC_UNIMPLEMENTED_MSG( 0x02E6, "Set Cutscene Animation", 2)
 	OPC( 0x02E7, "Start Cutscene", 0, {
 		m->getWorld()->state.cutsceneStartTime = m->getWorld()->gameTime;
 	})
 	OPC( 0x02E8, "Get Cutscene Time", 1, {
-		/** @todo Implement cutscenes */
 		float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
 		*p->at(0).globalInteger = time * 1000;
 	})
 	OPC_COND( 0x02E9, "Is Cutscene Over", 0, {
-		/** @todo Implement cutscenes */
-		float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
-		return time > 20.f;
+		if( m->getWorld()->state.currentCutscene ) {
+			float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
+			return time > m->getWorld()->state.currentCutscene->tracks.duration;
+		}
+
+		return true;
 	})
 	OPC( 0x02EA, "Clear Cutscene", 0, {
 		/** @todo Implement cutscenes */
-		m->getWorld()->state.cutsceneStartTime = 0.f;
+		if( m->getWorld()->state.currentCutscene ) {
+			delete m->getWorld()->state.currentCutscene;
+			m->getWorld()->state.currentCutscene = nullptr;
+		}
+		m->getWorld()->state.cutsceneStartTime = -1.f;
 	})
 
 	OPC_UNIMPLEMENTED_MSG( 0x02EC, "Create Hidden Package", 3 )

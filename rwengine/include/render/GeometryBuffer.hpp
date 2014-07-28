@@ -38,6 +38,12 @@ class GeometryBuffer {
 public:
 
 	GeometryBuffer();
+	template<class T> GeometryBuffer(const std::vector<T>& data)
+		: vbo(0), num(0)
+	{
+		uploadVertices(data);
+	}
+
 	~GeometryBuffer();
 
 	GLuint getVBOName() const

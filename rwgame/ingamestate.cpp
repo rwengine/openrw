@@ -233,7 +233,7 @@ void IngameState::handleEvent(const sf::Event &event)
 			_player->setRunning(false);
 			break;
 		case sf::Keyboard::F12:
-			skipTime(120.f);
+			skipTime(100.f);
 			break;
 		default: break;
 		}

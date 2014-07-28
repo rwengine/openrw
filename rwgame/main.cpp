@@ -16,6 +16,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <data/CutsceneData.hpp>
+
 #include "loadingstate.hpp"
 #include <SFML/Graphics.hpp>
 
@@ -26,6 +28,7 @@
 #include "game.hpp"
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
+#define GAME_TIMESTEP (1.f/20.f)
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -182,10 +185,10 @@ void handleCommandEvent(sf::Event &event)
 		case sf::Event::KeyPressed:
 		switch (event.key.code) {
 		case sf::Keyboard::LBracket:
-			gta->gameTime -= 60.f;
+			gta->state.minute -= 30.f;
 			break;
 		case sf::Keyboard::RBracket:
-			gta->gameTime += 60.f;
+			gta->state.minute += 30.f;
 			break;
 		break;
 		default: break;
@@ -202,7 +205,8 @@ void init(std::string gtapath, bool loadWorld)
 	// This is harcoded in GTA III for some reason
 	gta->gameData.loadIMG("/models/gta3");
 	gta->gameData.loadIMG("/models/txd");
-	
+	gta->gameData.loadIMG("/anim/cuts");
+
 	gta->load();
 	
 	// Load dynamic object data
@@ -268,13 +272,38 @@ void render(float alpha)
 	float qpi = glm::half_pi<float>();
 
 	glm::mat4 view;
-	view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
-	auto va = glm::mix(lastViewAngles, viewAngles, alpha);
-	view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
-	view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
-	view = glm::inverse(view);
+	/// @todo this probably doesn't belong in main.cpp
+	if( gta->state.currentCutscene == nullptr || gta->state.cutsceneStartTime <= 0.f ) {
+		view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
+		auto va = glm::mix(lastViewAngles, viewAngles, alpha);
+		view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
+		view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
+		view = glm::inverse(view);
 
-	gta->renderer.camera.worldPos = viewPosition;
+		gta->renderer.camera.worldPos = viewPosition;
+	}
+	else {
+		auto cutscene = gta->state.currentCutscene;
+		float cutsceneTime = std::min(gta->gameTime - gta->state.cutsceneStartTime,
+									  cutscene->tracks.duration);
+		cutsceneTime += GAME_TIMESTEP * alpha;
+		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
+				targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
+		float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
+		gta->renderer.camera.frustum.fov = glm::radians(-zoom);
+		float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
+
+		auto d = glm::normalize(targetPos-cameraPos);
+		auto qtilt = glm::rotate(glm::quat(), glm::radians(tilt), d);
+
+		cameraPos += cutscene->meta.sceneOffset;
+		targetPos += cutscene->meta.sceneOffset;
+
+		view = glm::lookAt(cameraPos, targetPos, qtilt * glm::vec3(0.f, 0.f, -1.f));
+
+		gta->renderer.camera.worldPos = cameraPos;
+	}
+
 	gta->renderer.camera.frustum.view = view;
 
 	// Update aspect ratio..
@@ -323,6 +352,7 @@ void render(float alpha)
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
 	ss << "Renderered " << gta->renderer.rendered << " / " << gta->renderer.culled << std::endl;
+	ss << "Weather: " << gta->state.currentWeather << "\n";
 	if( player ) {
 		ss << "Activity: ";
 		if( player->controller->getCurrentActivity() ) {
@@ -423,7 +453,7 @@ int main(int argc, char *argv[])
 
 	StateManager::get().enter(new LoadingState);
 
-	float ts = 1.f / 20.f;
+	float ts = GAME_TIMESTEP;
 	float timescale = 1.f;
 	
 	// Loop until the window is closed or we run out of state.

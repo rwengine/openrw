@@ -229,6 +229,12 @@ public:
 	WorkContext* _work;
 
 	ScriptMachine* script;
+
+	/**
+	 * @brief Loads and starts the named cutscene.
+	 * @param name
+	 */
+	void loadCutscene(const std::string& name);
 };
 
 #endif

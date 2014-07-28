@@ -5,6 +5,7 @@
 #include <string>
 
 class PlayerController;
+class CutsceneData;
 
 struct GameState
 {
@@ -17,8 +18,6 @@ struct GameState
 	unsigned int maxWantedLevel;
 	PlayerController* player;
 
-	glm::i8vec3 fadeColour;
-
 	unsigned int currentWeather;
 
 	/**
@@ -26,12 +25,15 @@ struct GameState
 	 */
 	unsigned int *scriptOnMissionFlag;
 
-	bool fadeIn;
+	bool fadeOut;
 	float fadeStart;
 	float fadeTime;
 	bool fadeSound;
+	glm::u16vec3 fadeColour;
+
 
 	bool isIntroPlaying;
+	CutsceneData* currentCutscene;
 	float cutsceneStartTime;
 
 	short hour;
@@ -54,12 +56,13 @@ struct GameState
 		player(nullptr),
 		currentWeather(0),
 		scriptOnMissionFlag(nullptr),
-		fadeIn(false),
+		fadeOut(false),
 		fadeStart(0.f),
 		fadeTime(0.f),
 		fadeSound(false),
 		isIntroPlaying(false),
-		cutsceneStartTime(0.f),
+		currentCutscene(nullptr),
+		cutsceneStartTime(-1.f),
 		hour(0),
 		minute(0),
 		osTextStyle(0),
