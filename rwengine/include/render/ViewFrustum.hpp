@@ -54,12 +54,15 @@ public:
 	bool intersects(glm::vec3 center, float radius)
 	{
 		float d;
+		bool result = true;
+
 		for(size_t i = 0; i < 6; ++i)
 		{
 			d = glm::dot(planes[i].normal, center) + planes[i].distance;
-			if( d < -radius ) return false;
+			if( d < -radius ) result = false;
 		}
-		return true;
+
+		return result;
 	}
 };
 

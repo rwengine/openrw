@@ -19,6 +19,7 @@ class VehicleObject;
 class InstanceObject;
 class PickupObject;
 class ProjectileObject;
+class CutsceneObject;
 
 class Animator;
 class InventoryItem;
@@ -150,6 +151,9 @@ public:
 	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize, waterTime, waterPosition, waterWave;
 	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	GLuint particleProgram;
+
+	GLuint ssRectProgram;
+	GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
 	
 	/** Internal non-descript VAOs */
     GLuint vao, debugVAO;
@@ -193,6 +197,8 @@ public:
 
 	void renderProjectile(ProjectileObject* projectile);
 
+	void renderCutsceneObject(CutsceneObject *cutscene);
+
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 
 	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
@@ -203,6 +209,11 @@ public:
 	 * @brief renders all visible particles and removes expired
 	 */
 	void renderParticles();
+
+	/**
+	 * @brief Draws the current on screen text.
+	 */
+	void drawOnScreenText();
 
 	/** 
 	 * Renders a model (who'd have thought)
@@ -234,6 +245,8 @@ struct SceneUniformData {
 	glm::mat4 view;
 	glm::vec4 ambient;
 	glm::vec4 dynamic;
+	glm::vec4 fogColour;
+	glm::vec4 campos;
 	float fogStart;
 	float fogEnd;
 };

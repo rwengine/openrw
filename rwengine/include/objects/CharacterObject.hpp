@@ -106,6 +106,11 @@ public:
 	void tick(float dt);
 
 	/**
+	 * @brief Loads the model and texture for a character skin.
+	 */
+	void changeCharacterModel(const std::string& name);
+
+	/**
 	 * @brief updateCharacter updates internall bullet Character.
 	 */
 	void updateCharacter(float dt);
@@ -115,6 +120,8 @@ public:
 	virtual glm::vec3 getPosition() const;
 
 	virtual glm::quat getRotation() const;
+
+	bool isAlive() const;
 	
 	bool enterVehicle(VehicleObject* vehicle, size_t seat);
 

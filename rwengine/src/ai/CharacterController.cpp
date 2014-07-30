@@ -73,6 +73,11 @@ void CharacterController::useItem(bool active, bool primary)
 	}
 }
 
+CharacterObject *CharacterController::getCharacter() const
+{
+	return character;
+}
+
 bool Activities::GoTo::update(CharacterObject *character, CharacterController *controller)
 {
 	/* TODO: Use the ai nodes to navigate to the position */

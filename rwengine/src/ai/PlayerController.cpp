@@ -5,7 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 PlayerController::PlayerController(CharacterObject* character)
-	: CharacterController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false)
+	: CharacterController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false),
+	  _enabled(true)
 {
 	
 }
@@ -13,6 +14,11 @@ PlayerController::PlayerController(CharacterObject* character)
 void PlayerController::setRunning(bool run)
 {
 	running = run;
+}
+
+void PlayerController::setInputEnabled(bool enabled)
+{
+	_enabled = enabled;
 }
 
 void PlayerController::updateCameraDirection(const glm::quat& rot)

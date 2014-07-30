@@ -184,6 +184,22 @@ void CharacterObject::tick(float dt)
 	}
 }
 
+#include <algorithm>
+void CharacterObject::changeCharacterModel(const std::string &name)
+{
+	auto modelName = std::string(name);
+	std::transform(modelName.begin(), modelName.end(), modelName.begin(), ::tolower);
+
+	engine->gameData.loadDFF(modelName + ".dff");
+	engine->gameData.loadTXD(modelName + ".txd");
+
+	auto& models = engine->gameData.models;
+	auto mfind = models.find(modelName);
+	if( mfind != models.end() ) {
+		model = mfind->second;
+	}
+}
+
 void CharacterObject::updateCharacter(float dt)
 {
 	if(physCharacter) {
@@ -229,24 +245,6 @@ void CharacterObject::updateCharacter(float dt)
 				}
 			}
 		}
-
-		// Handle above waist height water.
-		auto wi = engine->gameData.getWaterIndexAt(getPosition());
-		if( wi != NO_WATER_INDEX ) {
-			float wh = engine->gameData.waterHeights[wi];
-			auto ws = getPosition();
-			wh += engine->gameData.getWaveHeightAt(ws);
-			if( ws.z < wh ) {
-				ws.z = wh;
-				setPosition(ws);
-				physCharacter->setGravity(0.f);
-				_inWater = true;
-			}
-			else {
-				physCharacter->setGravity(9.81f);
-				_inWater = false;
-			}
-		}
 		
 		if(currentActivity == CharacterObject::Jump)
 		{
@@ -260,8 +258,7 @@ void CharacterObject::updateCharacter(float dt)
 			glm::vec3 walkDir;
 			glm::vec3 animTranslate = animator->getRootTranslation();
 
-			btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
-			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+			position = getPosition();
 
 			if( _hasTargetPosition ) {
 				auto beforedelta = _targetPosition - position;
@@ -288,16 +285,43 @@ void CharacterObject::updateCharacter(float dt)
 
 			physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
 			
-			Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
+			auto Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
 			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+		}
+
+		// Handle above waist height water.
+		auto wi = engine->gameData.getWaterIndexAt(getPosition());
+		if( wi != NO_WATER_INDEX ) {
+			float wh = engine->gameData.waterHeights[wi];
+			auto ws = getPosition();
+			wh += engine->gameData.getWaveHeightAt(ws);
+			if( ws.z < wh ) {
+				ws.z = wh;
+
+				btVector3 bpos(ws.x, ws.y, ws.z);
+				physCharacter->warp(bpos);
+				auto& wt = physObject->getWorldTransform();
+				wt.setOrigin(bpos);
+				physObject->setWorldTransform(wt);
+
+				physCharacter->setGravity(0.f);
+				_inWater = true;
+			}
+			else {
+				physCharacter->setGravity(9.81f);
+				_inWater = false;
+			}
 		}
 	}
 }
 
 void CharacterObject::setPosition(const glm::vec3& pos)
 {
-	btTransform& tf = physCharacter->getGhostObject()->getWorldTransform();
-	tf.setOrigin(btVector3(pos.x, pos.y, pos.z));
+	btVector3 bpos(pos.x, pos.y, pos.z);
+	physCharacter->warp(bpos);
+	auto& wt = physObject->getWorldTransform();
+	wt.setOrigin(bpos);
+	physObject->setWorldTransform(wt);
 	GameObject::setPosition(pos);
 }
 
@@ -330,6 +354,12 @@ glm::quat CharacterObject::getRotation() const
 		return currentVehicle->getRotation();
 	}
 	return GameObject::getRotation();
+}
+
+bool CharacterObject::isAlive() const
+{
+	///  @todo remove immortality
+	return true;
 }
 
 bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)

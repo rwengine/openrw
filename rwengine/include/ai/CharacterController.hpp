@@ -76,6 +76,12 @@ public:
 	 * @param primary use the primary action.
 	 */
 	void useItem(bool active, bool primary = true);
+
+	/**
+	 * @brief
+	 * @return Returns the Character Object
+	 */
+	CharacterObject* getCharacter() const;
 };
 
 #define DECL_ACTIVITY( activity_name ) \

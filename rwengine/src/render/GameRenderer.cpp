@@ -14,6 +14,9 @@
 #include <data/ObjectData.hpp>
 #include <items/InventoryItem.hpp>
 
+#include <data/CutsceneData.hpp>
+#include <objects/CutsceneObject.hpp>
+
 #include <render/GameShaders.hpp>
 
 #include <deque>
@@ -66,6 +69,26 @@ struct ParticleVert {
 GeometryBuffer particleGeom;
 DrawBuffer particleDraw;
 
+struct VertexP2 {
+	static const AttributeList vertex_attributes() {
+		return {
+			{ATRS_Position, 2, sizeof(VertexP2),  0ul}
+		};
+	}
+
+	float x, y;
+};
+
+std::vector<VertexP2> sspaceRect = {
+	{-1.f, -1.f},
+	{ 1.f, -1.f},
+	{-1.f,  1.f},
+	{ 1.f,  1.f},
+};
+
+GeometryBuffer ssRectGeom;
+DrawBuffer ssRectDraw;
+
 GLuint compileShader(GLenum type, const char *source)
 {
 	GLuint shader = glCreateShader(type);
@@ -80,8 +103,14 @@ GLuint compileShader(GLenum type, const char *source)
 		GLchar *buffer = new GLchar[len];
 		glGetShaderInfoLog(shader, len, NULL, buffer);
 
-		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << source << std::endl;
+		GLint sourceLen;
+		glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
+		GLchar *sourceBuff = new GLchar[sourceLen];
+		glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
+
+		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << sourceBuff << std::endl;
 		delete[] buffer;
+		delete[] sourceBuff;
 		exit(1);
 	}
 
@@ -227,6 +256,17 @@ GameRenderer::GameRenderer(GameWorld* engine)
 					{-0.5f,-0.5f, 0.f, 0.f, 1.f, 1.f, 1.f}
 	});
 	particleDraw.addGeometry(&particleGeom);
+
+	ssRectGeom.uploadVertices(sspaceRect);
+	ssRectDraw.addGeometry(&ssRectGeom);
+
+	ssRectProgram = compileProgram(GameShaders::ScreenSpaceRect::VertexShader,
+								  GameShaders::ScreenSpaceRect::FragmentShader);
+
+	ssRectTexture = glGetUniformLocation(ssRectProgram, "texture");
+	ssRectColour = glGetUniformLocation(ssRectProgram, "colour");
+	ssRectSize = glGetUniformLocation(ssRectProgram, "size");
+	ssRectOffset = glGetUniformLocation(ssRectProgram, "offset");
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -244,16 +284,19 @@ void GameRenderer::renderWorld(float alpha)
 	_renderAlpha = alpha;
 
 	glBindVertexArray( vao );
+
+	/// @todo take into account engine->state.fading
 	
-    float tod = fmod(engine->gameTime, 24.f * 60.f);
+	float tod = engine->state.hour + engine->state.minute/60.f;
 
 	// Requires a float 0-24
-    auto weather = engine->gameData.weatherLoader.getWeatherData(WeatherLoader::Sunny, tod / 60.f);
+	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(engine->state.currentWeather * 24);
+	auto weather = engine->gameData.weatherLoader.getWeatherData(weatherID, tod);
 
-    glm::vec3 skyTop = weather.skyTopColor;
-    glm::vec3 skyBottom = weather.skyBottomColor;
-    glm::vec3 ambient = weather.ambientColor;
-    glm::vec3 dynamic = weather.directLightColor;
+	glm::vec3 skyTop = weather.skyTopColor;
+	glm::vec3 skyBottom = weather.skyBottomColor;
+	glm::vec3 ambient = weather.ambientColor;
+	glm::vec3 dynamic = weather.directLightColor;
 
 	float theta = (tod/(60.f * 24.f) - 0.5f) * 2 * 3.14159265;
 	glm::vec3 sunDirection{
@@ -261,8 +304,8 @@ void GameRenderer::renderWorld(float alpha)
 		0.0,
 		cos(theta),
 	};
-    sunDirection = glm::normalize(sunDirection);
-    camera.frustum.far = weather.farClipping;
+	sunDirection = glm::normalize(sunDirection);
+	camera.frustum.far = weather.farClipping;
 
 	glUseProgram(worldProgram);
 
@@ -274,8 +317,10 @@ void GameRenderer::renderWorld(float alpha)
 				{
 					proj,
 					view,
-					glm::vec4{ambient, 1.0f},
-					glm::vec4{dynamic, 1.0f},
+					glm::vec4{ambient, 0.0f},
+					glm::vec4{dynamic, 0.0f},
+					glm::vec4(skyBottom, 1.f),
+					glm::vec4(camera.worldPos, 0.f),
 					weather.fogStart,
 					camera.frustum.far
 				});
@@ -306,6 +351,9 @@ void GameRenderer::renderWorld(float alpha)
 			break;
 		case GameObject::Projectile:
 			renderProjectile(static_cast<ProjectileObject*>(object));
+			break;
+		case GameObject::Cutscene:
+			renderCutsceneObject(static_cast<CutsceneObject*>(object));
 			break;
 		default: break;
 		}
@@ -410,6 +458,54 @@ void GameRenderer::renderWorld(float alpha)
 
 	renderParticles();
 
+	glActiveTexture(0);
+
+	glDisable(GL_DEPTH_TEST);
+
+	float fadeTimer = engine->gameTime - engine->state.fadeStart;
+	if( fadeTimer <= engine->state.fadeTime || !engine->state.fadeOut ) {
+		glUseProgram(ssRectProgram);
+		glUniform2f(ssRectOffset, 0.f, 0.f);
+		glUniform2f(ssRectSize, 1.f, 1.f);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform1i(ssRectTexture, 0);
+		float fadeFrac = 0.f;
+		if( engine->state.fadeTime > 0.f ) {
+			fadeFrac = std::min(fadeTimer / engine->state.fadeTime, 1.f);
+		}
+
+		auto fc = engine->state.fadeColour;
+
+		float a = engine->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
+
+		glm::vec4 fadeNormed(fc.r / 255.f, fc.g/ 255.f, fc.b/ 255.f, a);
+
+		glUniform4fv(ssRectColour, 1, glm::value_ptr(fadeNormed));
+
+		glBindVertexArray( ssRectDraw.getVAOName() );
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
+	if( engine->state.currentCutscene ) {
+		glUseProgram(ssRectProgram);
+		const float cinematicExperienceSize = 0.15f;
+		glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
+		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform1i(ssRectTexture, 0);
+		glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+
+		glBindVertexArray( ssRectDraw.getVAOName() );
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+		glUniform2f(ssRectOffset, 0.f, 1.f * (1.f - cinematicExperienceSize));
+		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	}
+
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -497,7 +593,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 void GameRenderer::renderInstance(InstanceObject *instance)
 {
-	if(instance->object->timeOn != instance->object->timeOff) {
+	if(instance->object && instance->object->timeOn != instance->object->timeOff) {
 		// Update rendering flags.
 		if(engine->getHour() < instance->object->timeOn
 			&& engine->getHour() > instance->object->timeOff) {
@@ -514,10 +610,14 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	if( instance->body ) {
 		instance->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
 	}
-	else {
+	else if(instance->object) {
 		matrixModel = glm::translate(matrixModel, instance->position);
 		matrixModel = glm::scale(matrixModel, instance->scale);
 		matrixModel = matrixModel * glm::mat4_cast(instance->rotation);
+	}
+	else {
+		/// @todo clean up this
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 	}
 
 	float mindist = 100000.f;
@@ -527,7 +627,11 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
 	}
 
-	if( instance->object->numClumps == 1 ) {
+	/// @todo not sure if this is the best way to handle cutscene objects
+	if(! instance->object ) {
+		renderModel(instance->model->model, matrixModel, instance);
+	}
+	else if( instance->object->numClumps == 1 ) {
 		if( mindist > instance->object->drawDistance[0] ) {
 			// Check for LOD instances
 			if ( instance->LODinstance ) {
@@ -587,6 +691,49 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	}
 	else {
 		std::cerr << "weapons.dff not loaded (" << pickup->getModelID() << ")" << std::endl;
+	}
+}
+
+void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
+{
+	if(!cutscene->model->model)
+	{
+		return;
+	}
+
+	glm::mat4 matrixModel;
+
+	if( cutscene->getParentActor() ) {
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
+		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
+		glm::mat4 localMatrix;
+		auto boneframe = cutscene->getParentFrame();
+		while( boneframe ) {
+			localMatrix = cutscene->getParentActor()->animator->getFrameMatrix(boneframe, _renderAlpha, false) * localMatrix;
+			boneframe = boneframe->getParent();
+		}
+		matrixModel = matrixModel * localMatrix;
+	}
+	else {
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+	}
+
+	float mindist = 100000.f;
+	for (size_t g = 0; g < cutscene->model->model->geometries.size(); g++)
+	{
+		RW::BSGeometryBounds& bounds = cutscene->model->model->geometries[g]->geometryBounds;
+		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+	}
+
+	if( cutscene->getParentActor() ) {
+		glm::mat4 align;
+		/// @todo figure out where this 90 degree offset is coming from.
+		align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
+		renderModel(cutscene->model->model, matrixModel * align, cutscene);
+	}
+	else {
+		renderModel(cutscene->model->model, matrixModel, cutscene);
 	}
 }
 
@@ -740,12 +887,17 @@ void GameRenderer::renderParticles()
 	}
 }
 
+void GameRenderer::drawOnScreenText()
+{
+	/// @ TODO
+}
+
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
 {
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {
-		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, object->isAnimationFixed());
+		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, false); //object->isAnimationFixed());
 	}
 	else {
 		localmatrix *= f->getTransform();
@@ -758,7 +910,8 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 		if(!vis ) continue;
 
 		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
-		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+		/// @todo fix culling animating objects?
+		if( (!object || !object->animator) && ! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			continue;
 		}
 

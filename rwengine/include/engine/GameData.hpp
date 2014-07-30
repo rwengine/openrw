@@ -11,6 +11,7 @@
 #include <loaders/WeatherLoader.hpp>
 #include <objects/VehicleInfo.hpp>
 #include <data/CollisionModel.hpp>
+#include <data/GameTexts.hpp>
 
 #include <memory>
 
@@ -18,6 +19,7 @@ struct DynamicObjectData;
 struct WeaponData;
 class GameWorld;
 class TextureAtlas;
+class SCMFile;
 
 /**
  * @brief Stores simple data about Textures such as transparency flags.
@@ -103,6 +105,10 @@ public:
 	void loadWeather(const std::string& path);
 
 	void loadHandling(const std::string& path);
+
+	SCMFile* loadSCM(const std::string& path);
+
+	void loadGXT(const std::string& name);
 	
 	/**
 	 * Loads water level data
@@ -149,6 +155,7 @@ public:
 	 * @return pointer to the data, NULL if it is not available
 	 */
 	char* openFile(const std::string& name);
+	FileHandle openFile2(const std::string& name);
 
 	/**
 	 * @brief loadFile Marks a file as open, and opens it.
@@ -276,6 +283,8 @@ public:
 
 	int getWaterIndexAt(const glm::vec3& ws) const;
 	float getWaveHeightAt(const glm::vec3& ws) const;
+
+	GameTexts texts;
 };
 
 #endif

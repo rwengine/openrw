@@ -40,7 +40,7 @@ LoaderIMGFile &LoaderIMG::getAssetInfo(const std::string& assetname)
 {
 	for(size_t i = 0; i < m_assets.size(); ++i)
 	{
-		if(strcmp(m_assets[i].name, assetname.c_str()) == 0)
+		if(strcasecmp(m_assets[i].name, assetname.c_str()) == 0)
 		{
 			return m_assets[i];
 		}

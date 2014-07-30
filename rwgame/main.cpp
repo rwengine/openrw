@@ -10,9 +10,13 @@
 #include <objects/InstanceObject.hpp>
 #include <ai/CharacterController.hpp>
 
+#include <script/ScriptMachine.hpp>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <data/CutsceneData.hpp>
 
 #include "loadingstate.hpp"
 #include <SFML/Graphics.hpp>
@@ -24,6 +28,7 @@
 #include "game.hpp"
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
+#define GAME_TIMESTEP (1.f/20.f)
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -35,8 +40,10 @@ CharacterObject* player = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
 
-bool inFocus = false;
+bool inFocus = true;
 int debugMode = 0;
+
+float accum = 0.f;
 
 sf::Font font;
 
@@ -84,6 +91,11 @@ void setPlayerCharacter(CharacterObject *playerCharacter)
 CharacterObject* getPlayerCharacter()
 {
 	return player;
+}
+
+void skipTime(float time)
+{
+	accum += time;
 }
 
 bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object)
@@ -173,10 +185,10 @@ void handleCommandEvent(sf::Event &event)
 		case sf::Event::KeyPressed:
 		switch (event.key.code) {
 		case sf::Keyboard::LBracket:
-			gta->gameTime -= 60.f;
+			gta->state.minute -= 30.f;
 			break;
 		case sf::Keyboard::RBracket:
-			gta->gameTime += 60.f;
+			gta->state.minute += 30.f;
 			break;
 		break;
 		default: break;
@@ -193,19 +205,21 @@ void init(std::string gtapath, bool loadWorld)
 	// This is harcoded in GTA III for some reason
 	gta->gameData.loadIMG("/models/gta3");
 	gta->gameData.loadIMG("/models/txd");
-	
+	gta->gameData.loadIMG("/anim/cuts");
+
 	gta->load();
 	
 	// Load dynamic object data
 	gta->gameData.loadDynamicObjects(gtapath + "/data/object.dat");
+
+	gta->gameData.loadGXT("english.gxt");
+
+	gta->gameTime = 0.f;
 	
-	// Set time to noon.
-	gta->gameTime = 12.f * 60.f;
-	
-    debugDrawer = new DebugDraw;
-    debugDrawer->setShaderProgram(gta->renderer.worldProgram);
-    debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    gta->dynamicsWorld->setDebugDrawer(debugDrawer);
+	debugDrawer = new DebugDraw;
+	debugDrawer->setShaderProgram(gta->renderer.worldProgram);
+	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
 	setViewParameters( { -260.f, -151.5f, 9.f }, { -0.3f, 0.05f } );
 
@@ -216,8 +230,22 @@ void init(std::string gtapath, bool loadWorld)
 
 void update(float dt)
 {
+	static float clockAccumulator = 0.f;
 	if (inFocus) {
 		gta->gameTime += dt;
+
+		clockAccumulator += dt;
+		while( clockAccumulator >= 1.f ) {
+			gta->state.minute ++;
+			if( gta->state.minute >= 60 ) {
+				gta->state.minute = 0;
+				gta->state.hour ++;
+				if( gta->state.hour >= 24 ) {
+					gta->state.hour = 0;
+				}
+			}
+			clockAccumulator -= 1.f;
+		}
 
 		for( GameObject* object : gta->objects ) {
 			object->_updateLastTransform();
@@ -227,6 +255,17 @@ void update(float dt)
 		gta->destroyQueuedObjects();
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
+
+		if( getWorld()->script ) {
+			try {
+				getWorld()->script->execute(dt);
+			}
+			catch( SCMException& ex ) {
+				std::cerr << ex.what() << std::endl;
+				getWorld()->logError( ex.what() );
+				throw;
+			}
+		}
 	}
 }
 
@@ -237,13 +276,38 @@ void render(float alpha)
 	float qpi = glm::half_pi<float>();
 
 	glm::mat4 view;
-	view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
-	auto va = glm::mix(lastViewAngles, viewAngles, alpha);
-	view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
-	view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
-	view = glm::inverse(view);
+	/// @todo this probably doesn't belong in main.cpp
+	if( gta->state.currentCutscene == nullptr || gta->state.cutsceneStartTime <= 0.f ) {
+		view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
+		auto va = glm::mix(lastViewAngles, viewAngles, alpha);
+		view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
+		view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
+		view = glm::inverse(view);
 
-	gta->renderer.camera.worldPos = viewPosition;
+		gta->renderer.camera.worldPos = viewPosition;
+	}
+	else {
+		auto cutscene = gta->state.currentCutscene;
+		float cutsceneTime = std::min(gta->gameTime - gta->state.cutsceneStartTime,
+									  cutscene->tracks.duration);
+		cutsceneTime += GAME_TIMESTEP * alpha;
+		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
+				targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
+		float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
+		gta->renderer.camera.frustum.fov = glm::radians(-zoom);
+		float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
+
+		auto d = glm::normalize(targetPos-cameraPos);
+		auto qtilt = glm::rotate(glm::quat(), glm::radians(tilt), d);
+
+		cameraPos += cutscene->meta.sceneOffset;
+		targetPos += cutscene->meta.sceneOffset;
+
+		view = glm::lookAt(cameraPos, targetPos, qtilt * glm::vec3(0.f, 0.f, -1.f));
+
+		gta->renderer.camera.worldPos = cameraPos;
+	}
+
 	gta->renderer.camera.frustum.view = view;
 
 	// Update aspect ratio..
@@ -292,6 +356,7 @@ void render(float alpha)
 	ss << "Game Time: " << gta->gameTime << std::endl;
 	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
 	ss << "Renderered " << gta->renderer.rendered << " / " << gta->renderer.culled << std::endl;
+	ss << "Weather: " << gta->state.currentWeather << "\n";
 	if( player ) {
 		ss << "Activity: ";
 		if( player->controller->getCurrentActivity() ) {
@@ -336,6 +401,17 @@ void render(float alpha)
 		window.draw(text);
 		tpos.y -= text.getLocalBounds().height;
 	}
+
+	/// @todo this should be done by GameRenderer? but it doesn't have any font support yet
+	if( gta->gameTime < gta->state.osTextStart + gta->state.osTextTime ) {
+		sf::Text messageText(gta->state.osTextString, font, 15);
+		auto sz = window.getSize();
+
+		auto b = messageText.getLocalBounds();
+		float lowerBar = sz.y - sz.y * 0.1f;
+		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
+		window.draw(messageText);
+	}
 }
 
 std::string getGamePath()
@@ -358,15 +434,15 @@ int main(int argc, char *argv[])
 	int c;
 	while( (c = getopt(argc, argv, "w:h:l")) != -1) {
 		switch(c) {
-			case 'w':
-				w = atoi(optarg);
-				break;
-			case 'h':
-				h = atoi(optarg);
-				break;
-			case 'l':
-				loadWorld = false;
-				break;
+		case 'w':
+			w = atoi(optarg);
+			break;
+		case 'h':
+			h = atoi(optarg);
+			break;
+		case 'l':
+			loadWorld = false;
+			break;
 		}
 	}
 
@@ -381,9 +457,8 @@ int main(int argc, char *argv[])
 	sf::Clock clock;
 
 	StateManager::get().enter(new LoadingState);
-	
-	float accum = 0.f;
-	float ts = 1.f / 60.f;
+
+	float ts = GAME_TIMESTEP;
 	float timescale = 1.f;
 	
 	// Loop until the window is closed or we run out of state.

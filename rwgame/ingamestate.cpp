@@ -8,8 +8,18 @@
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
 
-IngameState::IngameState()
+IngameState::IngameState(bool test)
 	: _player(nullptr), _playerCharacter(nullptr)
+{
+	if( test ) {
+		startTest();
+	}
+	else {
+		getWorld()->runScript("data/main.scm");
+	}
+}
+
+void IngameState::startTest()
 {
 	_playerCharacter = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
 	_player = new PlayerController(_playerCharacter);
@@ -72,17 +82,7 @@ void IngameState::spawnPlayerVehicle()
 	}
 }
 
-void IngameState::enter()
-{
-
-}
-
-void IngameState::exit()
-{
-
-}
-
-void IngameState::tick(float dt)
+void IngameState::updateView()
 {
 	float qpi = glm::half_pi<float>();
 
@@ -153,6 +153,28 @@ void IngameState::tick(float dt)
 	setViewParameters( viewPos + localview * viewFraction, {localX, _lookAngles.y} );
 }
 
+void IngameState::enter()
+{
+
+}
+
+void IngameState::exit()
+{
+
+}
+
+void IngameState::tick(float dt)
+{
+	if( getWorld()->state.player ) {
+		_player = getWorld()->state.player;
+		_playerCharacter = _player->getCharacter();
+	}
+
+	if( _player ) {
+		updateView();
+	}
+}
+
 void IngameState::handleEvent(const sf::Event &event)
 {
 	switch(event.type) {
@@ -209,6 +231,9 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::LShift:
 			_player->setRunning(false);
+			break;
+		case sf::Keyboard::F12:
+			skipTime(100.f);
 			break;
 		default: break;
 		}

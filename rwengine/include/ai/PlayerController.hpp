@@ -5,7 +5,6 @@
 
 class PlayerController : public CharacterController
 {
-	
 	glm::quat cameraRotation;
 	
 	glm::vec3 direction;
@@ -14,12 +13,20 @@ class PlayerController : public CharacterController
 	glm::quat lastRotation;
 	
 	bool running;
+
+	bool _enabled;
 	
 public:
 	
 	PlayerController(CharacterObject* character);
 	
 	void setRunning(bool run);
+
+	/**
+	 * @brief Enables and disables player input.
+	 * @todo actually implement input being disabled.
+	 */
+	void setInputEnabled(bool enabled);
 	
 	void updateCameraDirection(const glm::quat& rot);
 	

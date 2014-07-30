@@ -6,7 +6,8 @@ MenuState::MenuState()
 {
 	Menu *m = new Menu(getFont());
 	m->offset = glm::vec2(50.f, 100.f);
-	m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(new IngameState); }));
+	m->addEntry(Menu::lambda("Start", [] { StateManager::get().enter(new IngameState); }));
+	m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(new IngameState(true)); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 	m->addEntry(Menu::lambda("Exit", [] { getWindow().close(); }));
 	this->enterMenu(m);

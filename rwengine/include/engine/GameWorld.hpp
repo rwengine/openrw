@@ -3,7 +3,9 @@
 #define _GAMEWORLD_HPP_
 
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
+
 #include <loaders/LoaderIPL.hpp>
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
@@ -16,6 +18,8 @@ class InstanceObject;
 class VehicleObject;
 
 class WeaponScan;
+
+class ScriptMachine;
 
 #include <glm/glm.hpp>
 
@@ -77,6 +81,8 @@ public:
 	 * Loads an IDE into the game
 	 */
 	bool defineItems(const std::string& name);
+
+	void runScript(const std::string& name);
 	
 	/**
 	 * Loads an IPL into the game.
@@ -93,15 +99,20 @@ public:
 	 * Creates an instance
 	 */
 	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+
+	/**
+	 * @brief Creates an InstanceObject for use in the current Cutscene.
+	 */
+	CutsceneObject *createCutsceneObject(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Creates a vehicle
 	 */
 	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 
-    /**
-     * Creates a pedestrian.
-     */
+	/**
+	 * Creates a pedestrian.
+	 */
 	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
@@ -127,12 +138,14 @@ public:
 	/**
 	 * Returns the current hour
 	 */
-    int getHour();
+	int getHour();
 	
 	/**
 	 * Returns the current minute
 	 */
 	int getMinute();
+
+	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 	
 	/** 
 	 * Game Clock
@@ -148,11 +161,16 @@ public:
 	 * Renderer
 	 */
 	GameRenderer renderer;
+
+	/**
+	 * Gameplay state
+	 */
+	GameState state;
 	
 	/**
 	 * Map Zones
 	 */
-	std::vector<LoaderIPL::Zone> zones;
+	std::map<std::string, LoaderIPL::Zone> zones;
 	
 	/**
 	 * Object Definitions
@@ -163,6 +181,11 @@ public:
 	* Paths associated with each object definition.
 	*/
 	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
+
+	/**
+	 * Stores cutscene object model "names"
+	 */
+	std::map<uint16_t, std::shared_ptr<CutsceneObjectData>> cutsceneObjectTypes;
 
 	/**
 	 * Vehicle type definitions
@@ -224,6 +247,22 @@ public:
 	 * Work related
 	 */
 	WorkContext* _work;
+
+	ScriptMachine* script;
+
+	/**
+	 * @brief Loads and starts the named cutscene.
+	 * @param name
+	 */
+	void loadCutscene(const std::string& name);
+
+	void clearCutscene();
+
+	/**
+	 * @brief loads a model into a special character slot.
+	 */
+	void loadSpecialCharacter(const unsigned short index, const std::string& name);
+	void loadSpecialModel(const unsigned short index, const std::string& name);
 
 private:
 

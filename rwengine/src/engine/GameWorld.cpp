@@ -7,10 +7,17 @@
 #include <data/WeaponData.hpp>
 #include <WorkContext.hpp>
 
+#include <script/Opcodes3.hpp>
+#include <script/ScriptMachine.hpp>
+
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <objects/CutsceneObject.hpp>
+
+#include <data/CutsceneData.hpp>
+#include <loaders/LoaderCutsceneDAT.hpp>
 
 class WorldCollisionDispatcher : public btCollisionDispatcher
 {
@@ -67,7 +74,7 @@ public:
 
 GameWorld::GameWorld(const std::string& path)
 	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
-	  _work( new WorkContext( this ) )
+	  _work( new WorkContext( this ) ), script(nullptr)
 {
 	gameData.engine = this;
 }
@@ -146,6 +153,13 @@ bool GameWorld::defineItems(const std::string& name)
 			});
 		}
 
+		for( size_t v = 0; v < idel.HIERs.size(); ++v) {
+			cutsceneObjectTypes.insert({
+				idel.HIERs[v]->ID,
+				idel.HIERs[v]
+			});
+		}
+
 		// Load AI information.
 		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
 			auto pathit = objectNodes.find(idel.PATHs[a]->ID);
@@ -165,6 +179,19 @@ bool GameWorld::defineItems(const std::string& name)
 	}
 	
 	return false;
+}
+
+void GameWorld::runScript(const std::string &name)
+{
+	SCMFile* f = gameData.loadSCM(name);
+	if( f ) {
+		if( script ) delete script;
+
+		script = new ScriptMachine(this, f, new Opcodes3);
+	}
+	else {
+		logError("Failed to load SCM: " + name);
+	}
 }
 
 bool GameWorld::placeItems(const std::string& name)
@@ -223,13 +250,15 @@ bool GameWorld::loadZone(const std::string& path)
 
 	if( ipll.load(path)) {
 		if( ipll.zones.size() > 0) {
-			zones.insert(zones.begin(), ipll.zones.begin(), ipll.zones.end());
+			for(auto& z : ipll.zones) {
+				zones.insert({z.name, z});
+			}
 			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
 			return true;
 		}
 	}
 	else {
-		std::cerr << "Failed to load IPL " << path << std::endl;
+		std::cerr << "Failed to load Zones " << path << std::endl;
 	}
 	
 	return false;
@@ -239,13 +268,21 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 {
 	auto oi = objectTypes.find(id);
 	if( oi != objectTypes.end()) {
-		// Make sure the DFF and TXD are loaded
+
+		std::string modelname = oi->second->modelName;
+		std::string texturename = oi->second->textureName;
+
+		// Ensure the relevant data is loaded.
 		if(! oi->second->modelName.empty()) {
-			gameData.loadDFF(oi->second->modelName + ".dff", true);
+			if( modelname != "null" ) {
+				gameData.loadDFF(modelname + ".dff", true);
+			}
 		}
-		if(! oi->second->textureName.empty()) {
-			gameData.loadTXD(oi->second->textureName + ".txd", true);
+		if(! texturename.empty()) {
+			gameData.loadTXD(texturename + ".txd", true);
 		}
+
+		ModelHandle* m = gameData.models[modelname];
 
 		// Check for dynamic data.
 		auto dyit = gameData.dynamicObjectData.find(oi->second->modelName);
@@ -254,7 +291,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			dydata = dyit->second;
 		}
 
-		if( oi->second->modelName.empty() ) {
+		if( modelname.empty() ) {
 			logWarning("Instance with missing model: " + std::to_string(id));
 		}
 		
@@ -262,7 +299,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			this,
 			pos,
 			rot,
-			gameData.models[oi->second->modelName],
+			m,
 			glm::vec3(1.f, 1.f, 1.f),
 			oi->second, nullptr, dydata
 		);
@@ -278,6 +315,73 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 	}
 	
 	return nullptr;
+}
+
+#include <ai/PlayerController.hpp>
+CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::vec3 &pos, const glm::quat &rot)
+{
+	std::string modelname;
+	std::string texturename;
+
+	/// @todo merge all object defintion types so we don't have to deal with this.
+	auto ci = cutsceneObjectTypes.find(id);
+	if( ci != cutsceneObjectTypes.end()) {
+		modelname = state.specialModels[id];
+		texturename = state.specialModels[id];
+	}
+	else {
+		auto ii = objectTypes.find(id);
+		if( ii != objectTypes.end() ) {
+			modelname = ii->second->modelName;
+			texturename = ii->second->textureName;
+		}
+		else {
+			auto pi = pedestrianTypes.find(id);
+			if( pi != pedestrianTypes.end() ) {
+				modelname = pi->second->modelName;
+				texturename = pi->second->textureName;
+
+				static std::string specialPrefix("special");
+				if(! modelname.compare(0, specialPrefix.size(), specialPrefix) ) {
+					auto sid = modelname.substr(specialPrefix.size());
+					unsigned short specialID = std::atoi(sid.c_str());
+					modelname = state.specialCharacters[specialID];
+					texturename = state.specialCharacters[specialID];
+				}
+			}
+		}
+	}
+
+	if( id == 0 ) {
+		modelname = state.player->getCharacter()->model->name;
+	}
+
+	// Ensure the relevant data is loaded.
+	if( modelname.empty() ) {
+		std::cerr << "Couldn't find model for id " << id << std::endl;
+		return nullptr;
+	}
+
+	if( modelname != "null" ) {
+		gameData.loadDFF(modelname + ".dff", false);
+	}
+
+	if(! texturename.empty()) {
+		gameData.loadTXD(texturename + ".txd", true);
+	}
+
+
+	ModelHandle* m = gameData.models[modelname];
+
+	auto instance = new CutsceneObject(
+		this,
+		pos,
+		m);
+
+	objects.insert(instance);
+
+
+	return instance;
 }
 
 VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
@@ -346,21 +450,34 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
 CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
-    auto pti = pedestrianTypes.find(id);
-    if( pti != pedestrianTypes.end() ) {
-        auto& pt = pti->second;
+	auto pti = pedestrianTypes.find(id);
+	if( pti != pedestrianTypes.end() ) {
+		auto& pt = pti->second;
 
-        // Ensure the relevant data is loaded.
-        if(! pt->modelName.empty()) {
-			if( pt->modelName != "null" ) {
-				gameData.loadDFF(pt->modelName + ".dff");
+		std::string modelname = pt->modelName;
+		std::string texturename = pt->textureName;
+
+		// Ensure the relevant data is loaded.
+		if(! pt->modelName.empty()) {
+			// Some model names have special meanings.
+			/// @todo Should CharacterObjects handle this?
+			static std::string specialPrefix("special");
+			if(! modelname.compare(0, specialPrefix.size(), specialPrefix) ) {
+				auto sid = modelname.substr(specialPrefix.size());
+				unsigned short specialID = std::atoi(sid.c_str());
+				modelname = state.specialCharacters[specialID];
+				texturename = state.specialCharacters[specialID];
 			}
-        }
-        if(! pt->textureName.empty()) {
-            gameData.loadTXD(pt->textureName + ".txd");
-        }
 
-		ModelHandle* m = gameData.models[pt->modelName];
+			if( modelname != "null" ) {
+				gameData.loadDFF(modelname + ".dff");
+			}
+		}
+		if(! texturename.empty()) {
+			gameData.loadTXD(texturename + ".txd");
+		}
+
+		ModelHandle* m = gameData.models[modelname];
 
 		if(m && m->model) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
@@ -368,8 +485,8 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 			new DefaultAIController(ped);
 			return ped;
 		}
-    }
-    return nullptr;
+	}
+	return nullptr;
 }
 
 void GameWorld::destroyObject(GameObject* object)
@@ -425,14 +542,29 @@ void GameWorld::doWeaponScan(const WeaponScan &scan)
 
 int GameWorld::getHour()
 {
-	const float dayseconds = (24.f * 60.f);
-	float daytime = fmod(gameTime, dayseconds);
-	return daytime / 60.f;
+	return state.hour;
 }
 
 int GameWorld::getMinute()
 {
-	return fmod(gameTime, 60.f);
+	return state.minute;
+}
+
+glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
+{
+	btVector3 rayFrom(pos.x, pos.y, 100.f);
+	btVector3 rayTo(pos.x, pos.y, -100.f);
+
+	btDynamicsWorld::ClosestRayResultCallback rr(rayFrom, rayTo);
+
+	dynamicsWorld->rayTest( rayFrom, rayTo, rr );
+
+	if(rr.hasHit()) {
+		auto& ws = rr.m_hitPointWorld;
+		return { ws.x(), ws.y(), ws.z() };
+	}
+
+	return pos;
 }
 
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA)
@@ -531,5 +663,62 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeSte
 			static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
 		}
 	}
+}
+
+void GameWorld::loadCutscene(const std::string &name)
+{
+	std::string lowerName(name);
+	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+	auto datfile = gameData.openFile2(lowerName + ".dat");
+
+	CutsceneData* cutscene = new CutsceneData;
+
+	if( datfile ) {
+		LoaderCutsceneDAT loaderdat;
+		loaderdat.load(cutscene->tracks, datfile);
+	}
+
+	gameData.loadIFP(lowerName + ".ifp");
+
+	if( state.currentCutscene ) {
+		delete state.currentCutscene;
+	}
+	state.currentCutscene = cutscene;
+	std::cout << "Loaded cutscene: " << name << std::endl;
+}
+
+void GameWorld::clearCutscene()
+{
+	/// @todo replace with the queued deletion from the projectile branch
+	for(auto i = objects.begin(); i != objects.end();) {
+		if( (*i)->type() == GameObject::Cutscene ) {
+			delete (*i);
+			i = objects.erase(i);
+		}
+		else {
+			i++;
+		}
+	}
+
+	delete state.currentCutscene;
+	state.currentCutscene = nullptr;
+	state.cutsceneStartTime = -1.f;
+}
+
+void GameWorld::loadSpecialCharacter(const unsigned short index, const std::string &name)
+{
+	std::string lowerName(name);
+	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+	/// @todo a bit more smarter than this
+	state.specialCharacters[index] = lowerName;
+}
+
+void GameWorld::loadSpecialModel(const unsigned short index, const std::string &name)
+{
+	std::string lowerName(name);
+	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+	/// @todo a bit more smarter than this
+	state.specialModels[index] = lowerName;
 }
 

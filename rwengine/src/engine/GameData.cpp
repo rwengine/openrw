@@ -7,6 +7,9 @@
 #include <loaders/LoaderCOL.hpp>
 #include <data/ObjectData.hpp>
 #include <data/WeaponData.hpp>
+#include <script/SCMFile.hpp>
+
+#include <loaders/LoaderGXT.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -87,6 +90,8 @@ void GameData::load()
 	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
 	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
+	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
+	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
 
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
@@ -99,7 +104,8 @@ void GameData::load()
 	loadWater(datpath+"/data/water.dat");
 	loadWeaponDAT(datpath+"/data/weapon.dat");
 
-	loadIFP(datpath+"/anim/ped.ifp");
+	loadIFP("ped.ifp");
+
 }
 
 void GameData::parseDAT(const std::string& path)
@@ -347,6 +353,34 @@ void GameData::loadHandling(const std::string& path)
 	}
 }
 
+SCMFile *GameData::loadSCM(const std::string &path)
+{
+	std::ifstream f(datpath + "/" + path);
+
+	if(! f.is_open() ) return nullptr;
+
+	f.seekg(0, std::ios_base::end);
+	unsigned int size = f.tellg();
+	f.seekg(0);
+
+	char* buff = new char[size];
+	f.read(buff, size);
+	SCMFile* scm = new SCMFile;
+	scm->loadFile(buff, size);
+	delete buff;
+
+	return scm;
+}
+
+void GameData::loadGXT(const std::string &name)
+{
+	auto d = openFile2(name);
+
+	LoaderGXT loader;
+
+	loader.load( texts, d );
+}
+
 void GameData::loadWaterpro(const std::string& path)
 {
 	std::ifstream ifstr(path.c_str());
@@ -446,23 +480,16 @@ void GameData::loadDFF(const std::string& name, bool async)
 
 void GameData::loadIFP(const std::string &name)
 {
-    std::ifstream dfile(name.c_str());
+	auto f = openFile2(name);
 
-    if(dfile.is_open())
-    {
-        dfile.seekg(0, std::ios_base::end);
-        size_t length = dfile.tellg();
-        dfile.seekg(0);
-        char *file = new char[length];
-        dfile.read(file, length);
+	if(f)
+	{
+		LoaderIFP loader;
+		if( loader.loadFromMemory(f->data) ) {
+			animations.insert(loader.animations.begin(), loader.animations.end());
+		}
 
-        LoaderIFP loader;
-        if( loader.loadFromMemory(file) ) {
-            animations.insert(loader.animations.begin(), loader.animations.end());
-        }
-
-        delete[] file;
-    }
+	}
 }
 
 void GameData::loadDynamicObjects(const std::string& name)
@@ -633,6 +660,56 @@ char* GameData::openFile(const std::string& name)
 		std::cerr << err.str() << std::endl;
 	}
 	
+	return nullptr;
+}
+
+FileHandle GameData::openFile2(const std::string &name)
+{
+	auto i = _knownFiles.find(name);
+	if(i != _knownFiles.end())
+	{
+		char* data;
+		size_t length;
+
+		if(i->second.archived)
+		{
+			// Find the archive
+			auto ai = archives.find(i->second.path);
+			if(ai != archives.end())
+			{
+				data = ai->second.loadToMemory(name);
+				auto& asset = ai->second.getAssetInfo(name);
+				length = asset.size * 2048;
+			}
+			else
+			{
+				std::cerr << "Archive not found " << i->second.path << std::endl;
+			}
+		}
+		else
+		{
+			std::ifstream dfile(i->second.path);
+			if ( ! dfile.is_open()) {
+				std::cerr << "Error opening file " << i->second.path << std::endl;
+				return nullptr;
+			}
+
+			dfile.seekg(0, std::ios_base::end);
+			length = dfile.tellg();
+			dfile.seekg(0);
+			data = new char[length];
+			dfile.read(data, length);
+		}
+
+		return FileHandle( new FileContentsInfo{ data, length } );
+	}
+	else
+	{
+		std::stringstream err;
+		err << "Unable to locate file " << name;
+		engine->logError(err.str());
+		std::cerr << err.str() << std::endl;
+	}
 	return nullptr;
 }
 

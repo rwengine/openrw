@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <glm/glm.hpp>
+#include <memory>
 
 #define NO_WATER_INDEX 48
 #define WATER_LQ_DATA_SIZE 64
@@ -55,7 +56,19 @@ struct RGBA
 {
 	uint8_t r, g, b, a;
 };
-
 }
+
+/**
+ * @brief Returned by GameData::loadFile()
+ */
+struct FileContentsInfo {
+	char* data;
+	size_t length;
+
+	~FileContentsInfo() {
+		delete[] data;
+	}
+};
+typedef std::shared_ptr<FileContentsInfo> FileHandle;
 
 #endif

@@ -31,6 +31,8 @@ struct InstanceObject : public GameObject
 	Type type() { return Instance; }
 
 	void tick(float dt);
+
+	virtual void setRotation(const glm::quat& r);
 	
 	virtual bool takeDamage(const DamageInfo& damage);
 };

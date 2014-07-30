@@ -253,6 +253,20 @@ bool LoaderIDE::load(const std::string &filename)
 
 					break;
 				}
+			case HIER: {
+				std::shared_ptr<CutsceneObjectData> cut(new CutsceneObjectData);
+
+				std::string id;
+
+				getline(strstream, id, ',');
+				getline(strstream, cut->modelName, ',');
+				getline(strstream, cut->textureName, ',');
+
+				cut->ID = atoi(id.c_str());
+
+				HIERs.push_back(cut);
+				break;
+			}
 			}
 		}
 

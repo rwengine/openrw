@@ -71,6 +71,8 @@ public:
 
 	glm::vec3 getPosition() const;
 
+	void setRotation(const glm::quat &orientation);
+
 	glm::quat getRotation() const;
 
 	Type type() { return Vehicle; }

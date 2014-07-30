@@ -168,6 +168,16 @@ glm::vec3 VehicleObject::getPosition() const
 	return position;
 }
 
+void VehicleObject::setRotation(const glm::quat &orientation)
+{
+	if( physBody ) {
+		auto t = physBody->getWorldTransform();
+		t.setRotation(btQuaternion(orientation.x, orientation.y, orientation.z, orientation.w));
+		physBody->setWorldTransform(t);
+	}
+	GameObject::setRotation(orientation);
+}
+
 glm::quat VehicleObject::getRotation() const
 {
 	if(physVehicle) {

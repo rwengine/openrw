@@ -1,6 +1,7 @@
 #include <objects/InstanceObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <data/CollisionModel.hpp>
+#include <engine/Animator.hpp>
 
 InstanceObject::InstanceObject(GameWorld* engine,
 		const glm::vec3& pos,
@@ -13,98 +14,101 @@ InstanceObject::InstanceObject(GameWorld* engine,
 : GameObject(engine, pos, rot, model), scale(scale), object(obj),
   LODinstance(lod), dynamics(dyn), _collisionHeight(0.f), _enablePhysics(false)
 {
-	auto phyit = engine->gameData.collisions.find(obj->modelName);
-	if( phyit != engine->gameData.collisions.end()) {
-		btCompoundShape* cmpShape = new btCompoundShape;
-		btDefaultMotionState* msta = new btDefaultMotionState;
-		msta->setWorldTransform(btTransform(
-			btQuaternion(
-				rot.x, rot.y, rot.z, -rot.w
-			).inverse(),
-			btVector3(
-				pos.x, pos.y, pos.z
-			)
-		));
-		btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
-		CollisionModel& physInst = *phyit->second.get();
+	if( obj ) {
+		auto phyit = engine->gameData.collisions.find(obj->modelName);
+		if( phyit != engine->gameData.collisions.end()) {
+			btCompoundShape* cmpShape = new btCompoundShape;
+			btDefaultMotionState* msta = new btDefaultMotionState;
+			msta->setWorldTransform(btTransform(
+				btQuaternion(
+					rot.x, rot.y, rot.z, -rot.w
+				).inverse(),
+				btVector3(
+					pos.x, pos.y, pos.z
+				)
+			));
+			btRigidBody::btRigidBodyConstructionInfo info(0.f, msta, cmpShape);
+			CollisionModel& physInst = *phyit->second.get();
 
-		float colMin = std::numeric_limits<float>::max(),
-				colMax = std::numeric_limits<float>::lowest();
+			float colMin = std::numeric_limits<float>::max(),
+					colMax = std::numeric_limits<float>::lowest();
 
-		// Boxes
-		for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
-			auto& box = physInst.boxes[i];
-			auto size = (box.max - box.min) / 2.f;
-			auto mid = (box.min + box.max) / 2.f;
-			btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
-			btTransform t; t.setIdentity();
-			t.setOrigin(btVector3(mid.x, mid.y, mid.z));
-			cmpShape->addChildShape(t, bshape);
+			// Boxes
+			for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
+				auto& box = physInst.boxes[i];
+				auto size = (box.max - box.min) / 2.f;
+				auto mid = (box.min + box.max) / 2.f;
+				btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
+				btTransform t; t.setIdentity();
+				t.setOrigin(btVector3(mid.x, mid.y, mid.z));
+				cmpShape->addChildShape(t, bshape);
 
-			colMin = std::min(colMin, mid.z - size.z);
-			colMax = std::max(colMax, mid.z + size.z);
-		}
-
-		// Spheres
-		for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
-			auto& sphere = physInst.spheres[i];
-			btCollisionShape* sshape = new btSphereShape(sphere.radius);
-			btTransform t; t.setIdentity();
-			t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
-			cmpShape->addChildShape(t, sshape);
-
-			colMin = std::min(colMin, sphere.center.z - sphere.radius);
-			colMax = std::max(colMax, sphere.center.z + sphere.radius);
-		}
-
-		if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
-			btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
-						physInst.indices.size()/3,
-						(int*) physInst.indices.data(),
-						sizeof(uint32_t)*3,
-						physInst.vertices.size(),
-						&(physInst.vertices[0].x),
-						sizeof(glm::vec3));
-			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
-			trishape->setMargin(0.05f);
-			btTransform t; t.setIdentity();
-			cmpShape->addChildShape(t, trishape);
-		}
-
-		_collisionHeight = colMax - colMin;
-
-		if( dynamics ) {
-			if( dynamics->uprootForce > 0.f ) {
-				info.m_mass = 0.f;
+				colMin = std::min(colMin, mid.z - size.z);
+				colMax = std::max(colMax, mid.z + size.z);
 			}
-			else {
-				btVector3 inert;
-				cmpShape->calculateLocalInertia(dynamics->mass, inert);
-				info.m_mass = dynamics->mass;
-				info.m_localInertia = inert;
+
+			// Spheres
+			for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
+				auto& sphere = physInst.spheres[i];
+				btCollisionShape* sshape = new btSphereShape(sphere.radius);
+				btTransform t; t.setIdentity();
+				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
+				cmpShape->addChildShape(t, sshape);
+
+				colMin = std::min(colMin, sphere.center.z - sphere.radius);
+				colMax = std::max(colMax, sphere.center.z + sphere.radius);
+			}
+
+			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
+				btTriangleIndexVertexArray* vertarray = new btTriangleIndexVertexArray(
+							physInst.indices.size()/3,
+							(int*) physInst.indices.data(),
+							sizeof(uint32_t)*3,
+							physInst.vertices.size(),
+							&(physInst.vertices[0].x),
+							sizeof(glm::vec3));
+				btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertarray, false);
+				trishape->setMargin(0.05f);
+				btTransform t; t.setIdentity();
+				cmpShape->addChildShape(t, trishape);
+			}
+
+			_collisionHeight = colMax - colMin;
+
+			if( dynamics ) {
+				if( dynamics->uprootForce > 0.f ) {
+					info.m_mass = 0.f;
+				}
+				else {
+					btVector3 inert;
+					cmpShape->calculateLocalInertia(dynamics->mass, inert);
+					info.m_mass = dynamics->mass;
+					info.m_localInertia = inert;
+				}
+			}
+
+			body = new btRigidBody(info);
+			body->setUserPointer(this);
+			engine->dynamicsWorld->addRigidBody(body);
+
+			if( dynamics && dynamics->uprootForce > 0.f ) {
+				body->setCollisionFlags(body->getCollisionFlags()
+										| btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+			}
+
+			body->setActivationState(ISLAND_SLEEPING);
+		}
+
+		auto pathit = engine->objectNodes.find(obj->ID);
+		if( pathit != engine->objectNodes.end() ) {
+			auto& pathlist = pathit->second;
+			for( size_t p = 0; p < pathlist.size(); ++p ) {
+				auto& path = pathlist[p];
+				engine->aigraph.createPathNodes(position, rot, *path);
 			}
 		}
-
-		body = new btRigidBody(info);
-		body->setUserPointer(this);
-		engine->dynamicsWorld->addRigidBody(body);
-
-		if( dynamics && dynamics->uprootForce > 0.f ) {
-			body->setCollisionFlags(body->getCollisionFlags()
-									| btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-		}
-
-		body->setActivationState(ISLAND_SLEEPING);
 	}
 
-	auto pathit = engine->objectNodes.find(obj->ID);
-	if( pathit != engine->objectNodes.end() ) {
-		auto& pathlist = pathit->second;
-		for( size_t p = 0; p < pathlist.size(); ++p ) {
-			auto& path = pathlist[p];
-			engine->aigraph.createPathNodes(position, rot, *path);
-		}
-	}
 }
 
 void InstanceObject::tick(float dt)
@@ -180,6 +184,14 @@ void InstanceObject::tick(float dt)
 			}
 		}
 	}
+
+	if( animator ) animator->tick(dt);
+}
+
+void InstanceObject::setRotation(const glm::quat &r)
+{
+	auto wtr = body->getWorldTransform();
+	wtr.setRotation(btQuaternion(r.x, r.y, r.z, r.w));
 }
 
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)

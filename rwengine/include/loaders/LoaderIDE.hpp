@@ -32,6 +32,7 @@ public:
 	std::vector<std::shared_ptr<VehicleData>> CARSs;
 	std::vector<std::shared_ptr<CharacterData>> PEDSs;
 	std::vector<std::shared_ptr<PathData>> PATHs;
+	std::vector<std::shared_ptr<CutsceneObjectData>> HIERs;
 };
 
 #endif
