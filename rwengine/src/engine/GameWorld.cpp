@@ -691,13 +691,9 @@ void GameWorld::loadCutscene(const std::string &name)
 void GameWorld::clearCutscene()
 {
 	/// @todo replace with the queued deletion from the projectile branch
-	for(auto i = objects.begin(); i != objects.end();) {
-		if( (*i)->type() == GameObject::Cutscene ) {
-			delete (*i);
-			i = objects.erase(i);
-		}
-		else {
-			i++;
+	for(auto o : objects) {
+		if( o->type() == GameObject::Cutscene ) {
+			destroyObjectQueued(o);
 		}
 	}
 
