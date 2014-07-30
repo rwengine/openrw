@@ -253,6 +253,7 @@ void update(float dt)
 		}
 
 		gta->destroyQueuedObjects();
+		gta->state.texts.clear();
 
 		gta->dynamicsWorld->stepSimulation(dt, 2, dt);
 
@@ -410,6 +411,19 @@ void render(float alpha)
 		auto b = messageText.getLocalBounds();
 		float lowerBar = sz.y - sz.y * 0.1f;
 		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
+		window.draw(messageText);
+	}
+
+	for(auto& t : gta->state.texts) {
+		sf::Text messageText(t.text, font, 15);
+
+		glm::vec2 scpos(t.position.x, t.position.y);
+		auto s = window.getSize();
+		scpos /= glm::vec2(640.f, 480.f);
+		scpos *= glm::vec2(s.x, s.y);
+
+		messageText.setPosition(scpos.x, scpos.y);
+
 		window.draw(messageText);
 	}
 }

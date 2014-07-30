@@ -624,14 +624,32 @@ SCMMicrocodeTable ops_game = {
 
 	OPC_UNIMPLEMENTED_MSG( 0x0336, "Set Player Visible", 2)
 
-	OPC_UNIMPLEMENTED_MSG( 0x033E, "Display Text", 3)
+	OPC( 0x033E, "Display Text", 3, {
+		glm::vec2 pos(p->at(0).real, p->at(1).real);
+		std::string str(p->at(2).string);
+		str = m->getWorld()->gameData.texts.text(str);
+		m->getWorld()->state.nextText.text = str;
+		m->getWorld()->state.nextText.position = pos;
+		m->getWorld()->state.texts.push_back(m->getWorld()->state.nextText);
+	})
 	OPC_UNIMPLEMENTED_MSG( 0x033F, "Set Text Scale", 2)
-	OPC_UNIMPLEMENTED_MSG( 0x0340, "Set Text Colour", 4)
+	OPC( 0x0340, "Set Text Colour", 4, {
+		m->getWorld()->state.nextText.colourFG.r = p->at(0).integer / 255.f;
+		m->getWorld()->state.nextText.colourFG.g = p->at(1).integer / 255.f;
+		m->getWorld()->state.nextText.colourFG.b = p->at(2).integer / 255.f;
+		m->getWorld()->state.nextText.colourFG.a = p->at(3).integer / 255.f;
+	})
 	OPC_UNIMPLEMENTED_MSG( 0x0341, "Set Text Justify", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0342, "Set Text Centered", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0344, "Set Center Text Size", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0345, "Set Text Background", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0346, "Set Text Background Colour", 4)
+	OPC( 0x0346, "Set Text Background Colour", 4,
+	{
+		m->getWorld()->state.nextText.colourBG.r = p->at(0).integer / 255.f;
+		m->getWorld()->state.nextText.colourBG.g = p->at(1).integer / 255.f;
+		m->getWorld()->state.nextText.colourBG.b = p->at(2).integer / 255.f;
+		m->getWorld()->state.nextText.colourBG.a = p->at(3).integer / 255.f;
+	})
 
 	OPC_UNIMPLEMENTED_MSG( 0x0348, "Set Text Size Proportional", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0349, "Set Text Font", 1)

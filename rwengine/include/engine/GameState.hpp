@@ -4,9 +4,20 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <map>
+#include <vector>
 
 class PlayerController;
 class CutsceneData;
+
+struct TextDisplayData
+{
+	// This is set by the final display text command.
+	std::string text;
+	glm::vec2 position;
+
+	glm::vec4 colourFG;
+	glm::vec4 colourBG;
+};
 
 struct GameState
 {
@@ -49,6 +60,9 @@ struct GameState
 	/// Stores the "special" character and cutscene model indices.
 	std::map<unsigned short, std::string> specialCharacters;
 	std::map<unsigned short, std::string> specialModels;
+
+	TextDisplayData nextText;
+	std::vector<TextDisplayData> texts;
 
 	GameState() :
 		maxProgress(1),
