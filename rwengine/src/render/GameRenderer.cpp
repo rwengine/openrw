@@ -13,6 +13,9 @@
 #include <data/ObjectData.hpp>
 #include <items/InventoryItem.hpp>
 
+#include <data/CutsceneData.hpp>
+#include <objects/CutsceneObject.hpp>
+
 #include <render/GameShaders.hpp>
 
 #include <deque>
@@ -345,6 +348,9 @@ void GameRenderer::renderWorld(float alpha)
 		case GameObject::Pickup:
 			renderPickup(static_cast<PickupObject*>(object));
 			break;
+		case GameObject::Cutscene:
+			renderCutsceneObject(static_cast<CutsceneObject*>(object));
+			break;
 		default: break;
 		}
 	}
@@ -583,7 +589,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 void GameRenderer::renderInstance(InstanceObject *instance)
 {
-	if(instance->object->timeOn != instance->object->timeOff) {
+	if(instance->object && instance->object->timeOn != instance->object->timeOff) {
 		// Update rendering flags.
 		if(engine->getHour() < instance->object->timeOn
 			&& engine->getHour() > instance->object->timeOff) {
@@ -600,10 +606,14 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	if( instance->body ) {
 		instance->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
 	}
-	else {
+	else if(instance->object) {
 		matrixModel = glm::translate(matrixModel, instance->position);
 		matrixModel = glm::scale(matrixModel, instance->scale);
 		matrixModel = matrixModel * glm::mat4_cast(instance->rotation);
+	}
+	else {
+		/// @todo clean up this
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 	}
 
 	float mindist = 100000.f;
@@ -613,7 +623,11 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
 	}
 
-	if( instance->object->numClumps == 1 ) {
+	/// @todo not sure if this is the best way to handle cutscene objects
+	if(! instance->object ) {
+		renderModel(instance->model->model, matrixModel, instance);
+	}
+	else if( instance->object->numClumps == 1 ) {
 		if( mindist > instance->object->drawDistance[0] ) {
 			// Check for LOD instances
 			if ( instance->LODinstance ) {
@@ -673,6 +687,49 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	}
 	else {
 		std::cerr << "weapons.dff not loaded (" << pickup->getModelID() << ")" << std::endl;
+	}
+}
+#include <glm/gtx/string_cast.hpp>
+void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
+{
+	if(!cutscene->model->model)
+	{
+		return;
+	}
+
+	glm::mat4 matrixModel;
+
+	if( cutscene->getParentActor() ) {
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
+		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
+		glm::mat4 localMatrix;
+		auto boneframe = cutscene->getParentFrame();
+		while( boneframe ) {
+			localMatrix = cutscene->getParentActor()->animator->getFrameMatrix(boneframe, _renderAlpha, false) * localMatrix;
+			boneframe = boneframe->getParent();
+		}
+		matrixModel = matrixModel * localMatrix;
+	}
+	else {
+		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+	}
+
+	float mindist = 100000.f;
+	for (size_t g = 0; g < cutscene->model->model->geometries.size(); g++)
+	{
+		RW::BSGeometryBounds& bounds = cutscene->model->model->geometries[g]->geometryBounds;
+		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+	}
+
+	if( cutscene->getParentActor() ) {
+		glm::mat4 align;
+		/// @todo figure out where this 90 degree offset is coming from.
+		align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
+		renderModel(cutscene->model->model, matrixModel * align, cutscene);
+	}
+	else {
+		renderModel(cutscene->model->model, matrixModel, cutscene);
 	}
 }
 
@@ -815,7 +872,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {
-		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, object->isAnimationFixed());
+		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, false); //object->isAnimationFixed());
 	}
 	else {
 		localmatrix *= f->getTransform();
@@ -828,7 +885,8 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 		if(!vis ) continue;
 
 		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
-		if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+		/// @todo fix culling animating objects?
+		if( (!object || !object->animator) && ! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 			continue;
 		}
 

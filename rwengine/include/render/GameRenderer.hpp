@@ -17,6 +17,7 @@ class CharacterObject;
 class VehicleObject;
 class InstanceObject;
 class PickupObject;
+class CutsceneObject;
 
 class Animator;
 class InventoryItem;
@@ -191,6 +192,8 @@ public:
 	 * @todo corona rendering, with tint.
 	 */
 	void renderPickup(PickupObject* pickup);
+
+	void renderCutsceneObject(CutsceneObject *cutscene);
 
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 

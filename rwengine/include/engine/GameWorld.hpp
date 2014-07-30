@@ -99,15 +99,20 @@ public:
 	 * Creates an instance
 	 */
 	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+
+	/**
+	 * @brief Creates an InstanceObject for use in the current Cutscene.
+	 */
+	CutsceneObject *createCutsceneObject(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
 	 * Creates a vehicle
 	 */
 	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 
-    /**
-     * Creates a pedestrian.
-     */
+	/**
+	 * Creates a pedestrian.
+	 */
 	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
 	
 	/**
@@ -166,6 +171,11 @@ public:
 	* Paths associated with each object definition.
 	*/
 	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
+
+	/**
+	 * Stores cutscene object model "names"
+	 */
+	std::map<uint16_t, std::shared_ptr<CutsceneObjectData>> cutsceneObjectTypes;
 
 	/**
 	 * Vehicle type definitions
@@ -235,6 +245,14 @@ public:
 	 * @param name
 	 */
 	void loadCutscene(const std::string& name);
+
+	void clearCutscene();
+
+	/**
+	 * @brief loads a model into a special character slot.
+	 */
+	void loadSpecialCharacter(const unsigned short index, const std::string& name);
+	void loadSpecialModel(const unsigned short index, const std::string& name);
 };
 
 #endif

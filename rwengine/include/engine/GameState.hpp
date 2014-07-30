@@ -3,6 +3,7 @@
 #define _GAMESTATE_HPP_
 #include <glm/glm.hpp>
 #include <string>
+#include <map>
 
 class PlayerController;
 class CutsceneData;
@@ -44,6 +45,10 @@ struct GameState
 	std::string osTextString;
 	float osTextStart;
 	float osTextTime;
+
+	/// Stores the "special" character and cutscene model indices.
+	std::map<unsigned short, std::string> specialCharacters;
+	std::map<unsigned short, std::string> specialModels;
 
 	GameState() :
 		maxProgress(1),

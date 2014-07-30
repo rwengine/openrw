@@ -91,6 +91,7 @@ void GameData::load()
 	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
 	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
+	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
 
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
@@ -103,7 +104,7 @@ void GameData::load()
 	loadWater(datpath+"/data/water.dat");
 	loadWeaponDAT(datpath+"/data/weapon.dat");
 
-	loadIFP(datpath+"/anim/ped.ifp");
+	loadIFP("ped.ifp");
 
 }
 
@@ -479,23 +480,16 @@ void GameData::loadDFF(const std::string& name, bool async)
 
 void GameData::loadIFP(const std::string &name)
 {
-    std::ifstream dfile(name.c_str());
+	auto f = openFile2(name);
 
-    if(dfile.is_open())
-    {
-        dfile.seekg(0, std::ios_base::end);
-        size_t length = dfile.tellg();
-        dfile.seekg(0);
-        char *file = new char[length];
-        dfile.read(file, length);
+	if(f)
+	{
+		LoaderIFP loader;
+		if( loader.loadFromMemory(f->data) ) {
+			animations.insert(loader.animations.begin(), loader.animations.end());
+		}
 
-        LoaderIFP loader;
-        if( loader.loadFromMemory(file) ) {
-            animations.insert(loader.animations.begin(), loader.animations.end());
-        }
-
-        delete[] file;
-    }
+	}
 }
 
 void GameData::loadDynamicObjects(const std::string& name)

@@ -137,4 +137,11 @@ struct DynamicObjectData
 	bool cameraAvoid;
 };
 
+struct CutsceneObjectData
+{
+	uint16_t ID;
+	std::string modelName;
+	std::string textureName;
+};
+
 #endif

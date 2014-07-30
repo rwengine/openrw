@@ -184,6 +184,22 @@ void CharacterObject::tick(float dt)
 	}
 }
 
+#include <algorithm>
+void CharacterObject::changeCharacterModel(const std::string &name)
+{
+	auto modelName = std::string(name);
+	std::transform(modelName.begin(), modelName.end(), modelName.begin(), ::tolower);
+
+	engine->gameData.loadDFF(modelName + ".dff");
+	engine->gameData.loadTXD(modelName + ".txd");
+
+	auto& models = engine->gameData.models;
+	auto mfind = models.find(modelName);
+	if( mfind != models.end() ) {
+		model = mfind->second;
+	}
+}
+
 void CharacterObject::updateCharacter(float dt)
 {
 	if(physCharacter) {

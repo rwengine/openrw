@@ -106,6 +106,11 @@ public:
 	void tick(float dt);
 
 	/**
+	 * @brief Loads the model and texture for a character skin.
+	 */
+	void changeCharacterModel(const std::string& name);
+
+	/**
 	 * @brief updateCharacter updates internall bullet Character.
 	 */
 	void updateCharacter(float dt);

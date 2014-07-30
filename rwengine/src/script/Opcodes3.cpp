@@ -7,13 +7,18 @@
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
 
+#include <render/Model.hpp>
+#include <engine/Animator.hpp>
 #include <ai/PlayerController.hpp>
 #include <ai/DefaultAIController.hpp>
 
 #include <data/CutsceneData.hpp>
+#include <objects/CutsceneObject.hpp>
 
 #include <glm/gtx/string_cast.hpp>
+
 #include <iostream>
+#include <algorithm>
 
 #define OPC(code, name, params, func) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) func } },
 #define OPC_COND(code, name, params, func) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) { t->conditionResult = ([=]() {func})(); } } },
@@ -205,14 +210,11 @@ SCMMicrocodeTable ops_game = {
 		glm::vec3 position(p->at(2).real, p->at(3).real, p->at(4).real);
 
 		if( type == 21 ) {
-			std::cout << "Special Characters Unimplemented, forcing Model 2" << std::endl;
-			id = 2;
+
 		}
 		if( position.z < -99.f ) {
 			position = m->getWorld()->getGroundAtPosition(position);
 		}
-
-		std::cout << position.x << " " << position.y << " " << position.z << std::endl;
 
 		auto character = m->getWorld()->createPedestrian(id, position + spawnMagic);
 		auto controller = new DefaultAIController(character);
@@ -452,7 +454,9 @@ SCMMicrocodeTable ops_game = {
 	OPC_UNIMPLEMENTED_MSG( 0x0236, "Set Gang Car", 2 )
 	OPC_UNIMPLEMENTED_MSG( 0x0237, "Set Gang Weapons", 3 )
 
-	OPC_UNIMPLEMENTED_MSG( 0x023C, "Load Special Character", 2)
+	OPC( 0x023C, "Load Special Character", 2, {
+		m->getWorld()->loadSpecialCharacter(p->at(0).integer, p->at(1).string);
+	})
 	OPC_COND( 0x023D, "Is Special Character Loaded", 1, {
 		auto chfind = m->getWorld()->pedestrianTypes.find(p->at(0).integer);
 		if( chfind != m->getWorld()->pedestrianTypes.end() ) {
@@ -510,7 +514,6 @@ SCMMicrocodeTable ops_game = {
 
 		auto inst = m->getWorld()->createInstance(object->ID, position);
 
-		/// @todo this will fall over due to 64-bit pointers.
 		*p->at(4).handle = inst;
 	})
 
@@ -528,8 +531,29 @@ SCMMicrocodeTable ops_game = {
 		m->getWorld()->loadCutscene(p->at(0).string);
 		m->getWorld()->state.cutsceneStartTime = -1.f;
 	})
-	OPC_UNIMPLEMENTED_MSG( 0x02E5, "Create Cutscene Object", 2)
-	OPC_UNIMPLEMENTED_MSG( 0x02E6, "Set Cutscene Animation", 2)
+	OPC( 0x02E5, "Create Cutscene Object", 2, {
+		auto id	= p->at(0).integer;
+
+		GameObject* object = object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
+		*p->at(1).handle = object;
+
+		if( object == nullptr ) {
+			std::cerr << "Could not create cutscene object " << id << std::endl;
+		}
+	})
+	OPC( 0x02E6, "Set Cutscene Animation", 2, {
+		GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
+		std::string animName = p->at(1).string;
+		std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
+		Animation* anim = m->getWorld()->gameData.animations[animName];
+		if( anim ) {
+			object->animator->setModel(object->model->model);
+			object->animator->setAnimation(anim, false);
+		}
+		else {
+			std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
+		}
+	})
 	OPC( 0x02E7, "Start Cutscene", 0, {
 		m->getWorld()->state.cutsceneStartTime = m->getWorld()->gameTime;
 	})
@@ -542,16 +566,10 @@ SCMMicrocodeTable ops_game = {
 			float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
 			return time > m->getWorld()->state.currentCutscene->tracks.duration;
 		}
-
 		return true;
 	})
 	OPC( 0x02EA, "Clear Cutscene", 0, {
-		/** @todo Implement cutscenes */
-		if( m->getWorld()->state.currentCutscene ) {
-			delete m->getWorld()->state.currentCutscene;
-			m->getWorld()->state.currentCutscene = nullptr;
-		}
-		m->getWorld()->state.cutsceneStartTime = -1.f;
+		m->getWorld()->clearCutscene();
 	})
 
 	OPC_UNIMPLEMENTED_MSG( 0x02EC, "Create Hidden Package", 3 )
@@ -560,10 +578,34 @@ SCMMicrocodeTable ops_game = {
 		m->getWorld()->state.numHiddenPackages = p->at(0).integer;
 	})
 
-	/// @todo parse HIER section for this opcode
-	OPC_UNIMPLEMENTED_MSG( 0x02F3, "Load Special Model", 2)
-	OPC_UNIMPLEMENTED_MSG( 0x02F4, "Create Cutscene Actor Head", 3)
-	OPC_UNIMPLEMENTED_MSG( 0x02F5, "Set Cutscene Head Animation", 2)
+	OPC( 0x02F3, "Load Special Model", 2, {
+		m->getWorld()->loadSpecialModel(p->at(0).integer, p->at(1).string);
+	})
+	OPC( 0x02F4, "Create Cutscene Actor Head", 3, {
+		auto id = p->at(1).integer;
+		auto actor = static_cast<GameObject*>(*p->at(0).handle);
+		CutsceneObject* object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
+
+		auto headframe = actor->model->model->findFrame("shead");
+		actor->animator->setFrameVisibility(headframe, false);
+		object->setParentActor(actor, headframe);
+
+		*p->at(2).handle = object;
+	})
+	OPC( 0x02F5, "Set Cutscene Head Animation", 2,
+	{
+		GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
+		std::string animName = p->at(1).string;
+		std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
+		Animation* anim = m->getWorld()->gameData.animations[animName];
+		if( anim ) {
+			object->animator->setModel(object->model->model);
+			object->animator->setAnimation(anim, false);
+		}
+		else {
+			std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
+		}
+	})
 
 	OPC_UNIMPLEMENTED_MSG( 0x02FB, "Create Crusher Crane", 10)
 
@@ -594,7 +636,11 @@ SCMMicrocodeTable ops_game = {
 	OPC_UNIMPLEMENTED_MSG( 0x0348, "Set Text Size Proportional", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0349, "Set Text Font", 1)
 
-	OPC_UNIMPLEMENTED_MSG( 0x0352, "Set Character Model", 2)
+	OPC( 0x0352, "Set Character Model", 2,
+	{
+		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+		controller->getCharacter()->changeCharacterModel(p->at(1).string);
+	})
 	OPC_UNIMPLEMENTED_MSG( 0x0353, "Refresh Actor Model", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0354, "Start Chase Scene", 1)
 	OPC_UNIMPLEMENTED_MSG( 0x0355, "Stop Chase Scene", 0)
