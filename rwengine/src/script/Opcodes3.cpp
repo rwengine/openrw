@@ -3,6 +3,8 @@
 #include <script/SCMFile.hpp>
 #include <engine/GameWorld.hpp>
 
+#include <script/OpcodesVM.hpp>
+
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
@@ -23,740 +25,766 @@
 #define OPC(code, name, params, func) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) func } },
 #define OPC_COND(code, name, params, func) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) { t->conditionResult = ([=]() {func})(); } } },
 #define OPC_UNIMPLEMENTED_CRITICAL(code, name, params) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) { throw UnimplementedOpcode(code, *p); } } },
-#define OPC_UNIMPLEMENTED_MSG(code, name, params) { code, { name, params, [](ScriptMachine* m, SCMThread* t, SCMParams* p) { std::cout << #code << " " << #name << " unimplemented" << std::endl; } } },
-
-SCMThread::pc_t	localizeLabel(SCMThread* t, int label)
-{
-	// Negative jump addresses indicate a jump relative to the start of the thread.
-	return (label < 0) ? (t->baseAddress + (-label)) : label;
-}
-
-SCMMicrocodeTable ops_global = {
-	OPC( 0x0001, "Wait", 1, {
-		t->wakeCounter = p->at(0).integer;
-		if( t->wakeCounter == 0 ) {
-			t->wakeCounter = -1;
-		}
-	})
-
-	OPC( 0x0002, "Jump", 1, {
-		t->programCounter = localizeLabel(t, p->at(0).integer);
-	})
-
-	OPC( 0x0004, "Set Global Integer", 2, {
-		*p->at(0).globalInteger = p->at(1).integer;
-	})
-
-	OPC( 0x0005, "Set Global Float", 2, {
-		*p->at(0).globalReal = p->at(1).real;
-	})
-	OPC( 0x0006, "Set Local Int", 2, {
-		*p->at(0).globalInteger = p->at(1).integer;
-	})
-
-	OPC( 0x0008, "Increment Global Int", 2, {
-		*p->at(0).globalInteger += p->at(1).integer;
-	})
-	OPC( 0x0009, "Increment Global Float", 2, {
-		*p->at(0).globalReal += p->at(1).real;
-	})
-
-	OPC( 0x000C, "Decrement Global Int", 2, {
-		*p->at(0).globalInteger -= p->at(1).integer;
-	})
-	OPC( 0x000D, "Decrement Global Float", 2, {
-		*p->at(0).globalReal -= p->at(1).real;
-	})
-
-	OPC( 0x0015, "Divide Global by Float", 2, {
-		*p->at(0).globalReal /= p->at(1).real;
-	})
-
-	OPC_COND( 0x0018, "Global Int Greater than Int", 2, {
-		return *p->at(0).globalInteger > p->at(1).integer;
-	})
-	OPC_COND( 0x0019, "Local Int Greater than Int", 2, {
-		return *p->at(0).globalInteger > p->at(1).integer;
-	})
-
-	OPC_COND( 0x001A, "Int Greater Than Global Int", 2, {
-		return p->at(0).integer > *p->at(1).globalInteger;
-	})
-
-	OPC_COND( 0x0038, "Global Int Equal to Int", 2, {
-		return *p->at(0).globalInteger == p->at(1).integer;
-	})
-
-	OPC_COND( 0x0039, "Local Int Equal to Int", 2, {
-		std::cout << *p->at(0).globalInteger << " == " << p->at(1).integer << std::endl;
-		return *p->at(0).globalInteger == p->at(1).integer;
-	})
-
-	OPC( 0x004F, "Start New Thread", -1, {
-		std::cout << "Starting thread at " << p->at(0).integer << std::endl;
-		m->startThread(p->at(0).integer);
-	})
-
-	OPC( 0x004D, "Jump if false", 1, {
-		if( ! t->conditionResult ) {
-			t->programCounter = localizeLabel(t, p->at(0).integer);
-		}
-	})
-
-	OPC( 0x004E, "End Thread", 0, {
-		// ensure the thread is immediately yeilded
-		t->wakeCounter = -1;
-		t->finished = true;
-	})
-
-	OPC( 0x0050, "Gosub", 1, {
-		t->calls.push(t->programCounter);
-		t->programCounter = localizeLabel(t, p->at(0).integer);
-	})
-
-	OPC( 0x0051, "Return", 0, {
-		t->programCounter = t->calls.top();
-		t->calls.pop();
-	})
-
-	OPC( 0x0061, "Decrement Global Float by Global Float", 2, {
-		*p->at(0).globalReal -= *p->at(1).globalReal;
-	})
-
-
-	OPC( 0x0084, "Set Global Int To Global", 2, {
-		*p->at(0).globalInteger = *p->at(1).globalInteger;
-	})
-
-	OPC( 0x0086, "Set Global Float To Global", 2, {
-		*p->at(0).globalReal = *p->at(1).globalReal;
-	})
-
-	OPC( 0x00D6, "If", 1, {
-		auto n = p->at(0).integer;
-		if( n <= 7 ) {
-			t->conditionCount = n+1;
-			t->conditionMask = 0xFF;
-		}
-		else {
-			t->conditionCount = n-7;
-			t->conditionMask = 0x00;
-		}
-	})
-
-	OPC( 0x00D7, "Start Mission Thread", 1, {
-		std::cout << "Starting Mission Thread at " << p->at(0).integer << std::endl;
-		m->startThread(p->at(0).integer, true);
-	})
-
-	OPC( 0x00D8, "Set Mission Finished", 0, {
-		std::cout << "Ended: " << t->name << std::endl;
-		*m->getWorld()->state.scriptOnMissionFlag = 0;
-	})
-
-	OPC( 0x02CD, "Call", 2, {
-		t->calls.push(t->programCounter);
-		t->programCounter = p->at(0).integer;
-	})
-
-	OPC( 0x03A4, "Name Thread", 1, {
-		t->name = p->at(0).string;
-	})
-
-	OPC( 0x0417, "Start Mission", 1, {
-		std::cout << "Starting mission no. " << p->at(0).integer << std::endl;
-		auto offset = m->getFile()->getMissionOffsets()[p->at(0).integer];
-		m->startThread(offset, true);
-	})
-};
 
 glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
 
-SCMMicrocodeTable ops_game = {
-	OPC( 0x0053, "Create Player", 5, {
-		auto id	= p->at(0).integer;
-		glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
+VM_OPCODE_DEF( 0x0053 )
+{
+	auto id	= p->at(0).integer;
+	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
 
-		if( position.z < -99.f ) {
-			position = m->getWorld()->getGroundAtPosition(position);
-		}
+	if( position.z < -99.f ) {
+		position = m->getWorld()->getGroundAtPosition(position);
+	}
 
-		auto pc = m->getWorld()->createPedestrian(1, position + spawnMagic);
-		m->getWorld()->state.player = new PlayerController(pc);
+	auto pc = m->getWorld()->createPedestrian(1, position + spawnMagic);
+	m->getWorld()->state.player = new PlayerController(pc);
 
-		*p->at(4).handle = m->getWorld()->state.player;
-	})
+	*p->at(4).handle = m->getWorld()->state.player;
+}
 
-	OPC( 0x0055, "Set Player Position", 4, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real + 1.f);
-		controller->getCharacter()->setPosition(position + spawnMagic);
-	})
-	OPC_COND( 0x0056, "Is In Area", 6, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		glm::vec2 min(p->at(1).real, p->at(2).real);
-		glm::vec2 max(p->at(3).real, p->at(4).real);
-		bool drawMarker = !!p->at(5).integer;
+VM_OPCODE_DEF( 0x0055 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real + 1.f);
+	controller->getCharacter()->setPosition(position + spawnMagic);
+}
+VM_CONDOPCODE_DEF( 0x0056 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	glm::vec2 min(p->at(1).real, p->at(2).real);
+	glm::vec2 max(p->at(3).real, p->at(4).real);
+	bool drawMarker = !!p->at(5).integer;
+	auto player = controller->getCharacter()->getPosition();
+	if( player.x > min.x && player.y > min.y && player.x < max.x && player.y < max.y ) {
+		return true;
+	}
+	return false;
+}
+
+VM_OPCODE_DEF( 0x009A )
+{
+	auto type = p->at(0).integer;
+	auto id	= p->at(1).integer;
+	glm::vec3 position(p->at(2).real, p->at(3).real, p->at(4).real);
+
+	if( type == 21 ) {
+
+	}
+	if( position.z < -99.f ) {
+		position = m->getWorld()->getGroundAtPosition(position);
+	}
+
+	auto character = m->getWorld()->createPedestrian(id, position + spawnMagic);
+	auto controller = new DefaultAIController(character);
+
+	*p->at(5).handle = controller;
+}
+
+VM_OPCODE_DEF( 0x00A5 )
+{
+	auto id	= p->at(0).integer;
+	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
+
+	auto vehicle = m->getWorld()->createVehicle(id, position + spawnMagic);
+
+	*p->at(4).handle = vehicle;
+}
+
+VM_OPCODE_DEF( 0x00BC )
+{
+	std::string str(p->at(0).string);
+	str = m->getWorld()->gameData.texts.text(str);
+	m->getWorld()->state.osTextString = str;
+	m->getWorld()->state.osTextTime = p->at(1).integer / 1000.f;
+	m->getWorld()->state.osTextStart= m->getWorld()->gameTime;
+	m->getWorld()->state.osTextStyle = p->at(2).integer;
+}
+
+VM_OPCODE_DEF( 0x00BE )
+{
+	m->getWorld()->state.osTextTime = 0.f;
+	m->getWorld()->state.osTextStart= 0.f;
+}
+
+VM_OPCODE_DEF( 0x00C0 )
+{
+	m->getWorld()->state.hour = p->at(0).integer;
+	m->getWorld()->state.minute = p->at(1).integer;
+}
+
+VM_CONDOPCODE_DEF( 0x00DE )
+{
+	auto& vdata = m->getWorld()->vehicleTypes[p->at(1).integer];
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	auto character = controller->getCharacter();
+	auto vehicle = character->getCurrentVehicle();
+	if ( vehicle ) {
+		return vehicle->model && vdata->modelName == vehicle->model->name;
+	}
+	return false;
+}
+
+VM_CONDOPCODE_DEF( 0x00E0 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	return vehicle != nullptr;
+}
+
+VM_CONDOPCODE_DEF( 0x00E1 )
+{
+	/// @todo implement
+	return false;
+}
+
+VM_CONDOPCODE_DEF( 0x0100 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	glm::vec3 center(p->at(1).real, p->at(2).real, p->at(3).real);
+	glm::vec3 size(p->at(4).real, p->at(5).real, p->at(6).real);
+	bool unkown	= !!p->at(7).integer;
+
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	if( vehicle ) {
+		auto distance = center - controller->getCharacter()->getPosition();
+		distance /= size;
+		if( glm::length( distance ) < 1.f ) return true;
+	}
+
+	return false;
+}
+
+VM_OPCODE_DEF( 0x0111 )
+{
+	*m->getWorld()->state.scriptOnMissionFlag = p->at(0).integer;
+}
+
+VM_CONDOPCODE_DEF( 0x0118 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	return !controller->getCharacter()->isAlive();
+}
+
+VM_CONDOPCODE_DEF( 0x0121 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	std::string zname(p->at(1).string);
+
+	auto zfind = m->getWorld()->zones.find(zname);
+	if( zfind != m->getWorld()->zones.end() ) {
 		auto player = controller->getCharacter()->getPosition();
-		if( player.x > min.x && player.y > min.y && player.x < max.x && player.y < max.y ) {
+		auto& min = zfind->second.min;
+		auto& max = zfind->second.max;
+		if( player.x > min.x && player.y > min.y && player.z > min.z &&
+			player.x < max.x && player.y < max.y && player.z < max.z ) {
+			std::cout << "Player is in zone! " << zfind->second.name << std::endl;
+		}
+	}
+
+	return false;
+}
+
+VM_OPCODE_DEF( 0x0169 )
+{
+	m->getWorld()->state.fadeColour.r = p->at(0).integer;
+	m->getWorld()->state.fadeColour.g = p->at(1).integer;
+	m->getWorld()->state.fadeColour.b = p->at(2).integer;
+}
+VM_OPCODE_DEF( 0x016A )
+{
+	m->getWorld()->state.fadeTime = p->at(0).integer / 1000.f;
+	m->getWorld()->state.fadeOut = !!p->at(1).integer;
+	m->getWorld()->state.fadeStart = m->getWorld()->gameTime;
+	std::cout << "Fade " << p->at(0).integer << " " << p->at(1).integer << std::endl;
+}
+VM_CONDOPCODE_DEF( 0x016B )
+{
+	return m->getWorld()->gameTime <
+		m->getWorld()->state.fadeStart + m->getWorld()->state.fadeTime;
+}
+
+VM_OPCODE_DEF( 0x0171 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	controller->getCharacter()->setHeading(p->at(1).real);
+}
+
+VM_OPCODE_DEF( 0x0173 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	controller->getCharacter()->setHeading(p->at(1).real);
+}
+
+VM_OPCODE_DEF( 0x0175 )
+{
+	auto vehicle = (VehicleObject*)(*p->at(0).handle);
+	vehicle->setHeading(p->at(1).real);
+}
+
+VM_OPCODE_DEF( 0x0177 )
+{
+	auto inst = (InstanceObject*)(*p->at(0).handle);
+	inst->setHeading(p->at(1).real);
+}
+
+VM_OPCODE_DEF( 0x0180 )
+{
+	m->getWorld()->state.scriptOnMissionFlag = (unsigned int*)p->at(0).globalInteger;
+}
+
+VM_OPCODE_DEF( 0x01B4 )
+{
+	auto controller = static_cast<PlayerController*>(*p->at(0).handle);
+	controller->setInputEnabled(!!p->at(1).integer);
+}
+
+VM_OPCODE_DEF( 0x01B6 )
+{
+	m->getWorld()->state.currentWeather = p->at(0).integer;
+}
+
+VM_OPCODE_DEF( 0x01C7 )
+{
+	auto inst = (InstanceObject*)(*p->at(0).handle);
+	std::cout << "Unable to pin object " << inst << ". Object pinning unimplimented" << std::endl;
+}
+
+VM_OPCODE_DEF( 0x01F0 )
+{
+	m->getWorld()->state.maxWantedLevel = p->at(0).integer;
+}
+
+// This does nothing for us.
+VM_OPCODE_DEF( 0x01F5 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	*p->at(1).handle = controller;
+}
+
+VM_CONDOPCODE_DEF( 0x0204 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	auto vehicle = (VehicleObject*)(*p->at(1).handle);
+	glm::vec2 radius(p->at(2).real, p->at(3).real);
+	bool drawMarker = !!p->at(4).integer;
+
+	auto charVehicle = controller->getCharacter()->getCurrentVehicle();
+	if( charVehicle ) {
+		auto dist = charVehicle->getPosition() - vehicle->getPosition();
+		if( dist.x <= radius.x && dist.y <= radius.y ) {
 			return true;
 		}
-		return false;
-	})
+	}
 
-	OPC( 0x009A, "Create Character", 6, {
-		auto type = p->at(0).integer;
-		auto id	= p->at(1).integer;
-		glm::vec3 position(p->at(2).real, p->at(3).real, p->at(4).real);
+	return false;
+}
 
-		if( type == 21 ) {
+VM_CONDOPCODE_DEF( 0x0214 )
+{
+	/// @todo implement pls
+	return false;
+}
 
-		}
-		if( position.z < -99.f ) {
-			position = m->getWorld()->getGroundAtPosition(position);
-		}
+VM_OPCODE_DEF( 0x0219 )
+{
+	glm::vec3 min(p->at(0).real, p->at(1).real, p->at(2).real);
+	glm::vec3 max(p->at(3).real, p->at(4).real, p->at(5).real);
 
-		auto character = m->getWorld()->createPedestrian(id, position + spawnMagic);
-		auto controller = new DefaultAIController(character);
+	/// @todo http://www.gtamodding.com/index.php?title=Garage#GTA_III
+	int garageType = p->at(6).integer;
+	auto garageHandle = p->at(7).handle;
 
-		*p->at(5).handle = controller;
-	})
+	std::cout << "Garages Unimplemented. type " << garageType << std::endl;
+}
 
-	OPC( 0x00A5, "Create Vehicle", 5, {
-		auto id	= p->at(0).integer;
-		glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
+VM_OPCODE_DEF( 0x0229 )
+{
+	auto vehicle = (VehicleObject*)(*p->at(0).handle);
 
-		auto vehicle = m->getWorld()->createVehicle(id, position + spawnMagic);
+	auto& colours = m->getWorld()->gameData.vehicleColours;
+	vehicle->colourPrimary = colours[p->at(1).integer];
+	vehicle->colourSecondary = colours[p->at(2).integer];
+}
 
-		*p->at(4).handle = vehicle;
-	})
-
-	OPC( 0x00BC, "Print Message Now", 3, {
-		std::string str(p->at(0).string);
-		str = m->getWorld()->gameData.texts.text(str);
-		m->getWorld()->state.osTextString = str;
-		m->getWorld()->state.osTextTime = p->at(1).integer / 1000.f;
-		m->getWorld()->state.osTextStart= m->getWorld()->gameTime;
-		m->getWorld()->state.osTextStyle = p->at(2).integer;
-	})
-
-	OPC( 0x00BE, "Clear Message Prints", 0, {
-		m->getWorld()->state.osTextTime = 0.f;
-		m->getWorld()->state.osTextStart= 0.f;
-	})
-
-	OPC( 0x00C0, "Set Time Of Day", 2, {
-		m->getWorld()->state.hour = p->at(0).integer;
-		m->getWorld()->state.minute = p->at(1).integer;
-	})
-
-	OPC_COND( 0x00DE, "Is Player In Model", 2, {
-		auto& vdata = m->getWorld()->vehicleTypes[p->at(1).integer];
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		auto character = controller->getCharacter();
-		auto vehicle = character->getCurrentVehicle();
-		if ( vehicle ) {
-			return vehicle->model && vdata->modelName == vehicle->model->name;
-		}
-		return false;
-	})
-
-	OPC_COND( 0x00E0, "Is Player In Any Vehicle", 1, {
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
-
-		auto vehicle = controller->getCharacter()->getCurrentVehicle();
-		return vehicle != nullptr;
-	})
-
-	OPC_COND( 0x00E1, "Is Button Pressed", 2, {
-		/// @todo implement
-		return false;
-	})
-
-	OPC_COND( 0x0100, "Is Character near point in car", 8, {
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
-		glm::vec3 center(p->at(1).real, p->at(2).real, p->at(3).real);
-		glm::vec3 size(p->at(4).real, p->at(5).real, p->at(6).real);
-		bool unkown	= !!p->at(7).integer;
-
-		auto vehicle = controller->getCharacter()->getCurrentVehicle();
-		if( vehicle ) {
-			auto distance = center - controller->getCharacter()->getPosition();
-			distance /= size;
-			if( glm::length( distance ) < 1.f ) return true;
-		}
-
-		return false;
-	})
-
-	OPC( 0x0111, "Set Dead or Arrested", 1, {
-		*m->getWorld()->state.scriptOnMissionFlag = p->at(0).integer;
-	})
-
-	OPC_COND( 0x0118, "Is Character Dead", 1, {
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
-		return !controller->getCharacter()->isAlive();
-	})
-
-	OPC_COND( 0x0121, "Is Player In Zone", 2, {
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
-		std::string zname(p->at(1).string);
-
-		auto zfind = m->getWorld()->zones.find(zname);
-		if( zfind != m->getWorld()->zones.end() ) {
-			auto player = controller->getCharacter()->getPosition();
-			auto& min = zfind->second.min;
-			auto& max = zfind->second.max;
-			if( player.x > min.x && player.y > min.y && player.z > min.z &&
-				player.x < max.x && player.y < max.y && player.z < max.z ) {
-				std::cout << "Player is in zone! " << zfind->second.name << std::endl;
-			}
-		}
-
-		return false;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x014B, "Create Car Generator", 13 )
-
-	// 0 -> disable, 1-100 -> number, 101+ -> always
-	OPC_UNIMPLEMENTED_MSG( 0x014C, "Set Car Generator count", 2)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0152, "Set zone car info", 17)
-
-	OPC_UNIMPLEMENTED_MSG( 0x015C, "Set zone ped info", 11)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0164, "Disable Radar Blip", 1)
-
-	OPC( 0x0169, "Set Fade Colour", 3, {
-		m->getWorld()->state.fadeColour.r = p->at(0).integer;
-		m->getWorld()->state.fadeColour.g = p->at(1).integer;
-		m->getWorld()->state.fadeColour.b = p->at(2).integer;
-	})
-	OPC( 0x016A, "Fade Screen", 2, {
-		m->getWorld()->state.fadeTime = p->at(0).integer / 1000.f;
-		m->getWorld()->state.fadeOut = !!p->at(1).integer;
-		m->getWorld()->state.fadeStart = m->getWorld()->gameTime;
-		std::cout << "Fade " << p->at(0).integer << " " << p->at(1).integer << std::endl;
-	})
-	OPC_COND( 0x016B, "Is Screen Fading", 0, {
-		return m->getWorld()->gameTime <
-			m->getWorld()->state.fadeStart + m->getWorld()->state.fadeTime;
-	})
-
-	OPC( 0x0171, "Set Player Heading", 2, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		controller->getCharacter()->setHeading(p->at(1).real);
-	})
-
-	OPC( 0x0173, "Set Character Heading", 2, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		controller->getCharacter()->setHeading(p->at(1).real);
-	})
-
-	OPC( 0x0175, "Set Vehicle heading", 2, {
-		auto vehicle = (VehicleObject*)(*p->at(0).handle);
-		vehicle->setHeading(p->at(1).real);
-	})
-
-	OPC( 0x0177, "Set Object heading", 2, {
-		auto inst = (InstanceObject*)(*p->at(0).handle);
-		inst->setHeading(p->at(1).real);
-	})
-
-	OPC( 0x0180, "Link ONMISSION Flag", 1, {
-		m->getWorld()->state.scriptOnMissionFlag = (unsigned int*)p->at(0).globalInteger;
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x0181, "Link Character Mission Flag", 2 )
-	OPC_UNIMPLEMENTED_MSG( 0x0182, "Unknown Character Opcode", 2 )
-
-	OPC_UNIMPLEMENTED_MSG( 0x018D, "Create soundscape", 5)
-
-	OPC( 0x01B4, "Set Player Input Enabled", 2, {
-		auto controller = static_cast<PlayerController*>(*p->at(0).handle);
-		controller->setInputEnabled(!!p->at(1).integer);
-	})
-
-	OPC( 0x01B6, "Set Weather Now", 1, {
-		m->getWorld()->state.currentWeather = p->at(0).integer;
-	})
-
-
-	OPC_UNIMPLEMENTED_MSG( 0x01BE, "Turn Character To Face Point", 4)
-
-	OPC( 0x01C7, "Don't remove object", 1, {
-		auto inst = (InstanceObject*)(*p->at(0).handle);
-		std::cout << "Unable to pin object " << inst << ". Object pinning unimplimented" << std::endl;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x01E7, "Enable Roads", 6)
-	OPC_UNIMPLEMENTED_MSG( 0x01E8, "Disable Roads", 6)
-
-	OPC_UNIMPLEMENTED_MSG( 0x01ED, "Clear Character Threat Search", 1)
-
-	OPC( 0x01F0, "Set Max Wanted Level", 1, {
-		m->getWorld()->state.maxWantedLevel = p->at(0).integer;
-	})
-
-	// This does nothing for us.
-	OPC( 0x01F5, "Get Player Character", 2, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		*p->at(1).handle = controller;
-	})
-
-	OPC_COND( 0x0204, "Is Char near Car in Car 2D", 5, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		auto vehicle = (VehicleObject*)(*p->at(1).handle);
-		glm::vec2 radius(p->at(2).real, p->at(3).real);
-		bool drawMarker = !!p->at(4).integer;
-
-		auto charVehicle = controller->getCharacter()->getCurrentVehicle();
-		if( charVehicle ) {
-			auto dist = charVehicle->getPosition() - vehicle->getPosition();
-			if( dist.x <= radius.x && dist.y <= radius.y ) {
-				return true;
-			}
-		}
-
-		return false;
-	})
-
-	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0213/
-	OPC_UNIMPLEMENTED_MSG( 0x0213, "Create pickup", 6)
-	OPC_COND( 0x0214, "Has Pickup been collected", 1, {
-		/// @todo implement pls
-		return false;
-	})
-
-	OPC( 0x0219, "Create Garage", 8, {
-		glm::vec3 min(p->at(0).real, p->at(1).real, p->at(2).real);
-		glm::vec3 max(p->at(3).real, p->at(4).real, p->at(5).real);
-
-		/// @todo http://www.gtamodding.com/index.php?title=Garage#GTA_III
-		int garageType = p->at(6).integer;
-		auto garageHandle = p->at(7).handle;
-
-		std::cout << "Garages Unimplemented. type " << garageType << std::endl;
-	})
-
-	OPC( 0x0229, "Set Vehicle Colours", 3, {
-		auto vehicle = (VehicleObject*)(*p->at(0).handle);
-
-		auto& colours = m->getWorld()->gameData.vehicleColours;
-		vehicle->colourPrimary = colours[p->at(1).integer];
-		vehicle->colourSecondary = colours[p->at(2).integer];
-	})
-
-
-	OPC_UNIMPLEMENTED_MSG( 0x022B, "Disable ped paths", 6)
-
-	OPC_UNIMPLEMENTED_MSG( 0x022D, "Set Character Always Face Player", 2)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0236, "Set Gang Car", 2 )
-	OPC_UNIMPLEMENTED_MSG( 0x0237, "Set Gang Weapons", 3 )
-
-	OPC( 0x023C, "Load Special Character", 2, {
-		m->getWorld()->loadSpecialCharacter(p->at(0).integer, p->at(1).string);
-	})
-	OPC_COND( 0x023D, "Is Special Character Loaded", 1, {
-		auto chfind = m->getWorld()->pedestrianTypes.find(p->at(0).integer);
-		if( chfind != m->getWorld()->pedestrianTypes.end() ) {
-			auto modelfind = m->getWorld()->gameData.models.find(chfind->second->modelName);
-			if( modelfind != m->getWorld()->gameData.models.end() && modelfind->second->model != nullptr ) {
-				return true;
-			}
-		}
-
-		return false;
-	})
-
-	OPC( 0x0244, "Set Cutscene Offset", 3, {
-		glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real);
-		if( m->getWorld()->state.currentCutscene ) {
-			m->getWorld()->state.currentCutscene->meta.sceneOffset = position;
-		}
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x0245, "Set Character Animation Group", 2)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0247, "Request Model Loaded", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x024A, "Get Phone Near", 3)
-
-	OPC_COND( 0x0248, "Is Model Loaded", 1, {
-		/// @todo this will need changing when model loading is overhauled.
-		if( p->at(0).integer == 0 ) {
-			/// @todo Figure out if this really does mean the player.
+VM_OPCODE_DEF( 0x023C )
+{
+	m->getWorld()->loadSpecialCharacter(p->at(0).integer, p->at(1).string);
+}
+VM_CONDOPCODE_DEF( 0x023D )
+{
+	auto chfind = m->getWorld()->pedestrianTypes.find(p->at(0).integer);
+	if( chfind != m->getWorld()->pedestrianTypes.end() ) {
+		auto modelfind = m->getWorld()->gameData.models.find(chfind->second->modelName);
+		if( modelfind != m->getWorld()->gameData.models.end() && modelfind->second->model != nullptr ) {
 			return true;
 		}
-		//auto model = m->getFile()->getModels()[p->at(0).integer];
-		//if( model == "" ) return true; // ??
+	}
+
+	return false;
+}
+
+VM_OPCODE_DEF( 0x0244 )
+{
+	glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real);
+	if( m->getWorld()->state.currentCutscene ) {
+		m->getWorld()->state.currentCutscene->meta.sceneOffset = position;
+	}
+}
+
+VM_CONDOPCODE_DEF( 0x0248 )
+{
+	/// @todo this will need changing when model loading is overhauled.
+	if( p->at(0).integer == 0 ) {
+		/// @todo Figure out if this really does mean the player.
 		return true;
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x0249, "Mark Model As Unneeded", 1)
+	}
+	//auto model = m->getFile()->getModels()[p->at(0).integer];
+	//if( model == "" ) return true; // ??
+	return true;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0250, "Create Light", 6)
+/// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
+VM_CONDOPCODE_DEF( 0x0256 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	return controller != nullptr;
+}
 
-	/// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
-	OPC_COND( 0x0256, "Is Player Playing", 1, {
-		auto controller = (CharacterController*)(*p->at(0).handle);
-		return controller != nullptr;
-	})
+VM_OPCODE_DEF( 0x0293 )
+{
+	*p->at(0).globalInteger	= 0;
+}
 
-	OPC( 0x0293, "Get Controller Mode", 1, {
-		*p->at(0).globalInteger	= 0;
-	})
+VM_OPCODE_DEF( 0x029B )
+{
+	auto id = p->at(0).integer;
+	auto& object = m->getWorld()->objectTypes[id];
+	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
 
-	OPC_UNIMPLEMENTED_MSG( 0x0296, "Unload Special Character", 1)
+	auto inst = m->getWorld()->createInstance(object->ID, position);
 
-	OPC( 0x029B, "Create Object no offset", 5, {
-		auto id = p->at(0).integer;
-		auto& object = m->getWorld()->objectTypes[id];
-		glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
+	*p->at(4).handle = inst;
+}
 
-		auto inst = m->getWorld()->createInstance(object->ID, position);
+VM_CONDOPCODE_DEF( 0x02DE )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
 
-		*p->at(4).handle = inst;
-	})
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	return vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x02A7, "Add Radar Contact Blip", 5)
-	OPC_UNIMPLEMENTED_MSG( 0x02A8, "Add Radar Blip", 5)
+VM_OPCODE_DEF( 0x02E4 )
+{
+	m->getWorld()->loadCutscene(p->at(0).string);
+	m->getWorld()->state.cutsceneStartTime = -1.f;
+}
+VM_OPCODE_DEF( 0x02E5 )
+{
+	auto id	= p->at(0).integer;
 
-	OPC_COND( 0x02DE, "Is Player In Taxi", 1, {
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	GameObject* object = object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
+	*p->at(1).handle = object;
 
-		auto vehicle = controller->getCharacter()->getCurrentVehicle();
-		return vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI;
-	})
-
-	OPC( 0x02E4, "Load Cutscene Data", 1, {
-		m->getWorld()->loadCutscene(p->at(0).string);
-		m->getWorld()->state.cutsceneStartTime = -1.f;
-	})
-	OPC( 0x02E5, "Create Cutscene Object", 2, {
-		auto id	= p->at(0).integer;
-
-		GameObject* object = object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
-		*p->at(1).handle = object;
-
-		if( object == nullptr ) {
-			std::cerr << "Could not create cutscene object " << id << std::endl;
-		}
-	})
-	OPC( 0x02E6, "Set Cutscene Animation", 2, {
-		GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
-		std::string animName = p->at(1).string;
-		std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-		Animation* anim = m->getWorld()->gameData.animations[animName];
-		if( anim ) {
-			object->animator->setModel(object->model->model);
-			object->animator->setAnimation(anim, false);
-		}
-		else {
-			std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
-		}
-	})
-	OPC( 0x02E7, "Start Cutscene", 0, {
-		m->getWorld()->state.cutsceneStartTime = m->getWorld()->gameTime;
-	})
-	OPC( 0x02E8, "Get Cutscene Time", 1, {
+	if( object == nullptr ) {
+		std::cerr << "Could not create cutscene object " << id << std::endl;
+	}
+}
+VM_OPCODE_DEF( 0x02E6 )
+{
+	GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
+	std::string animName = p->at(1).string;
+	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
+	Animation* anim = m->getWorld()->gameData.animations[animName];
+	if( anim ) {
+		object->animator->setModel(object->model->model);
+		object->animator->setAnimation(anim, false);
+	}
+	else {
+		std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
+	}
+}
+VM_OPCODE_DEF( 0x02E7 )
+{
+	m->getWorld()->state.cutsceneStartTime = m->getWorld()->gameTime;
+}
+VM_OPCODE_DEF( 0x02E8 )
+{
+	float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
+	*p->at(0).globalInteger = time * 1000;
+}
+VM_CONDOPCODE_DEF( 0x02E9 )
+{
+	if( m->getWorld()->state.currentCutscene ) {
 		float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
-		*p->at(0).globalInteger = time * 1000;
-	})
-	OPC_COND( 0x02E9, "Is Cutscene Over", 0, {
-		if( m->getWorld()->state.currentCutscene ) {
-			float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
-			return time > m->getWorld()->state.currentCutscene->tracks.duration;
-		}
-		return true;
-	})
-	OPC( 0x02EA, "Clear Cutscene", 0, {
-		m->getWorld()->clearCutscene();
-	})
+		return time > m->getWorld()->state.currentCutscene->tracks.duration;
+	}
+	return true;
+}
+VM_OPCODE_DEF( 0x02EA )
+{
+	m->getWorld()->clearCutscene();
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x02EC, "Create Hidden Package", 3 )
+VM_OPCODE_DEF( 0x02ED )
+{
+	m->getWorld()->state.numHiddenPackages = p->at(0).integer;
+}
 
-	OPC( 0x02ED, "Set Total Hidden Packages", 1, {
-		m->getWorld()->state.numHiddenPackages = p->at(0).integer;
-	})
+VM_OPCODE_DEF( 0x02F3 )
+{
+	m->getWorld()->loadSpecialModel(p->at(0).integer, p->at(1).string);
+}
+VM_OPCODE_DEF( 0x02F4 )
+{
+	auto id = p->at(1).integer;
+	auto actor = static_cast<GameObject*>(*p->at(0).handle);
+	CutsceneObject* object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
 
-	OPC( 0x02F3, "Load Special Model", 2, {
-		m->getWorld()->loadSpecialModel(p->at(0).integer, p->at(1).string);
-	})
-	OPC( 0x02F4, "Create Cutscene Actor Head", 3, {
-		auto id = p->at(1).integer;
-		auto actor = static_cast<GameObject*>(*p->at(0).handle);
-		CutsceneObject* object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
+	auto headframe = actor->model->model->findFrame("shead");
+	actor->animator->setFrameVisibility(headframe, false);
+	object->setParentActor(actor, headframe);
 
-		auto headframe = actor->model->model->findFrame("shead");
-		actor->animator->setFrameVisibility(headframe, false);
-		object->setParentActor(actor, headframe);
+	*p->at(2).handle = object;
+}
+VM_OPCODE_DEF( 0x02F5 )
+{
+	GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
+	std::string animName = p->at(1).string;
+	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
+	Animation* anim = m->getWorld()->gameData.animations[animName];
+	if( anim ) {
+		object->animator->setModel(object->model->model);
+		object->animator->setAnimation(anim, false);
+	}
+	else {
+		std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
+	}
+}
 
-		*p->at(2).handle = object;
-	})
-	OPC( 0x02F5, "Set Cutscene Head Animation", 2,
-	{
-		GameObject* object = static_cast<GameObject*>(*p->at(0).handle);
-		std::string animName = p->at(1).string;
-		std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-		Animation* anim = m->getWorld()->gameData.animations[animName];
-		if( anim ) {
-			object->animator->setModel(object->model->model);
-			object->animator->setAnimation(anim, false);
-		}
-		else {
-			std::cerr << "Failed to find cutscene animation: " << animName << std::endl;
-		}
-	})
+VM_OPCODE_DEF( 0x030D )
+{
+	m->getWorld()->state.maxProgress = p->at(0).integer;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x02FB, "Create Crusher Crane", 10)
+VM_OPCODE_DEF( 0x0314 )
+{
+	m->getWorld()->state.numUniqueJumps = p->at(0).integer;
+}
 
-	OPC( 0x030D, "Set Max Progress", 1, {
-		m->getWorld()->state.maxProgress = p->at(0).integer;
-	})
+VM_OPCODE_DEF( 0x033E )
+{
+	glm::vec2 pos(p->at(0).real, p->at(1).real);
+	std::string str(p->at(2).string);
+	str = m->getWorld()->gameData.texts.text(str);
+	m->getWorld()->state.nextText.text = str;
+	m->getWorld()->state.nextText.position = pos;
+	m->getWorld()->state.texts.push_back(m->getWorld()->state.nextText);
+}
 
-	OPC( 0x0314, "Set Total Unique Jumps", 1, {
-		m->getWorld()->state.numUniqueJumps = p->at(0).integer;
-	})
+VM_OPCODE_DEF( 0x0340 )
+{
+	m->getWorld()->state.nextText.colourFG.r = p->at(0).integer / 255.f;
+	m->getWorld()->state.nextText.colourFG.g = p->at(1).integer / 255.f;
+	m->getWorld()->state.nextText.colourFG.b = p->at(2).integer / 255.f;
+	m->getWorld()->state.nextText.colourFG.a = p->at(3).integer / 255.f;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0324, "Set zone ped group", 3)
-	OPC_UNIMPLEMENTED_MSG( 0x0325, "Create Car Fire", 2)
+VM_OPCODE_DEF( 0x0346 )
+{
+	m->getWorld()->state.nextText.colourBG.r = p->at(0).integer / 255.f;
+	m->getWorld()->state.nextText.colourBG.g = p->at(1).integer / 255.f;
+	m->getWorld()->state.nextText.colourBG.b = p->at(2).integer / 255.f;
+	m->getWorld()->state.nextText.colourBG.a = p->at(3).integer / 255.f;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x032B, "Create Weapon Pickup", 7)
+VM_OPCODE_DEF( 0x0352 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	controller->getCharacter()->changeCharacterModel(p->at(1).string);
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0336, "Set Player Visible", 2)
+VM_CONDOPCODE_DEF( 0x03C6 )
+{
+	/// @todo verify if this is against the global models or the SCM models
+	auto model = m->getFile()->getModels()[p->at(0).integer];
+	auto phyit = m->getWorld()->gameData.collisions.find(model);
 
-	OPC( 0x033E, "Display Text", 3, {
-		glm::vec2 pos(p->at(0).real, p->at(1).real);
-		std::string str(p->at(2).string);
-		str = m->getWorld()->gameData.texts.text(str);
-		m->getWorld()->state.nextText.text = str;
-		m->getWorld()->state.nextText.position = pos;
-		m->getWorld()->state.texts.push_back(m->getWorld()->state.nextText);
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x033F, "Set Text Scale", 2)
-	OPC( 0x0340, "Set Text Colour", 4, {
-		m->getWorld()->state.nextText.colourFG.r = p->at(0).integer / 255.f;
-		m->getWorld()->state.nextText.colourFG.g = p->at(1).integer / 255.f;
-		m->getWorld()->state.nextText.colourFG.b = p->at(2).integer / 255.f;
-		m->getWorld()->state.nextText.colourFG.a = p->at(3).integer / 255.f;
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x0341, "Set Text Justify", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0342, "Set Text Centered", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0344, "Set Center Text Size", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0345, "Set Text Background", 1)
-	OPC( 0x0346, "Set Text Background Colour", 4,
-	{
-		m->getWorld()->state.nextText.colourBG.r = p->at(0).integer / 255.f;
-		m->getWorld()->state.nextText.colourBG.g = p->at(1).integer / 255.f;
-		m->getWorld()->state.nextText.colourBG.b = p->at(2).integer / 255.f;
-		m->getWorld()->state.nextText.colourBG.a = p->at(3).integer / 255.f;
-	})
+	return phyit != m->getWorld()->gameData.collisions.end();
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0348, "Set Text Size Proportional", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0349, "Set Text Font", 1)
+VM_OPCODE_DEF( 0x03E1 )
+{
+	*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
+}
 
-	OPC( 0x0352, "Set Character Model", 2,
-	{
-		auto controller = static_cast<CharacterController*>(*p->at(0).handle);
-		controller->getCharacter()->changeCharacterModel(p->at(1).string);
-	})
-	OPC_UNIMPLEMENTED_MSG( 0x0353, "Refresh Actor Model", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0354, "Start Chase Scene", 1)
-	OPC_UNIMPLEMENTED_MSG( 0x0355, "Stop Chase Scene", 0)
+VM_OPCODE_DEF( 0x0408 )
+{
+	m->getWorld()->state.numRampages = p->at(0).integer;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x035D, "Set Object Targetable", 1)
+VM_OPCODE_DEF( 0x041D )
+{
+	m->getWorld()->renderer.camera.frustum.near = p->at(0).real;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0363, "Set Closest Object Visibility", 6)
+VM_OPCODE_DEF( 0x042C )
+{
+	m->getWorld()->state.numMissions = p->at(0).integer;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0368, "Create ev Crane", 10)
+VM_OPCODE_DEF( 0x043C )
+{
+	m->getWorld()->state.fadeSound = !!p->at(0).integer;
+}
+VM_OPCODE_DEF( 0x043D )
+{
+	m->getWorld()->state.isIntroPlaying = !!p->at(0).integer;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x0373, "Set Camera Behind Player", 0)
-	OPC_UNIMPLEMENTED_MSG( 0x0374, "Set Motion Blur", 1)
+VM_CONDOPCODE_DEF( 0x0445 )
+{
+	return false;
+}
 
-	OPC_UNIMPLEMENTED_MSG( 0x038B, "Load Requested Models Now", 0)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0399, "Disable ped paths in angled cube", 7)
-
-	OPC_UNIMPLEMENTED_MSG( 0x039D, "Scatter Particles", 12)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03AD, "Set Garbage Enabled", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03AF, "Set Map Streaming Enabled", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03B6, "Change Nearest Instance Model", 6)
-	OPC_UNIMPLEMENTED_MSG( 0x03B7, "Process Cutscene Only", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03BB, "Set Garage Door to Rotate", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03BF, "Set Pedestrians Ignoring Player", 2)
-
-	OPC_COND( 0x03C6, "Is Collision In Memory", 1, {
-		/// @todo verify if this is against the global models or the SCM models
-		auto model = m->getFile()->getModels()[p->at(0).integer];
-		auto phyit = m->getWorld()->gameData.collisions.find(model);
-
-		return phyit != m->getWorld()->gameData.collisions.end();
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x03CB, "Load Area Near", 3)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03DA, "Set Garage Camera Follows Player", 1)
-
-	OPC( 0x03E1, "Get Hidden Packages Found", 1, {
-		*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x03E5, "Display Help Text", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03EB, "Clear Small Prints", 0)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03EE, "Draw Text", 3)
-	OPC_UNIMPLEMENTED_MSG( 0x03EF, "Make Player Safe For Cutscene", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x03F0, "Enable Text Draw", 1 )
-	OPC_UNIMPLEMENTED_MSG( 0x03F1, "Set Ped Hostility", 2 )
-	OPC_UNIMPLEMENTED_MSG( 0x03F2, "Clear Ped Hostility", 2 )
-
-	OPC_UNIMPLEMENTED_MSG( 0x03F7, "Load Collision", 1 )
-
-	OPC( 0x0408, "Set Total Rampage Missions", 1, {
-		m->getWorld()->state.numRampages = p->at(0).integer;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x040A, "Remove Chase Car", 1)
-
-	OPC_UNIMPLEMENTED_MSG( 0x0418, "Set Object Draw Ontop", 2)
-
-	OPC( 0x041D, "Set Camera Near Clip", 1, {
-		m->getWorld()->renderer.camera.frustum.near = p->at(0).real;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x0421, "Force Rain", 1)
-
-	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0426/
-	OPC_UNIMPLEMENTED_MSG( 0x0426, "Create Save Cars Between Levels cube", 6)
-
-	OPC( 0x042C, "Set Total Missions", 1, {
-		m->getWorld()->state.numMissions = p->at(0).integer;
-	})
-
-	OPC( 0x043C, "Set Sound Fade", 1, {
-		m->getWorld()->state.fadeSound = !!p->at(0).integer;
-	})
-	OPC( 0x043D, "Set Is Intro Playing", 1, {
-		m->getWorld()->state.isIntroPlaying = !!p->at(0).integer;
-	})
-
-	OPC_COND( 0x0445, "Are Any Vehicle Cheats enabled", 0, {
-		return false;
-	})
-
-	OPC_UNIMPLEMENTED_MSG( 0x044D, "Load Splash Screen", 1)
-};
-
-
+#define MERGE(other) insert(other.begin(), other.end())
 
 Opcodes3::Opcodes3()
 {
-	codes.insert(ops_global.begin(), ops_global.end());
-	codes.insert(ops_game.begin(), ops_game.end());
+	codes.MERGE(Opcodes::VM::get().codes);
+
+	VM_OPCODE_DEC( 0x0053, 5, "Create Player" );
+
+	VM_OPCODE_DEC( 0x0055, 4, "Set Player Position" );
+	VM_CONDOPCODE_DEC( 0x0056, 6, "Is In Area" );
+
+	VM_OPCODE_DEC( 0x009A, 6, "Create Character" );
+
+	VM_OPCODE_DEC( 0x00A5, 5, "Create Vehicle" );
+
+	VM_OPCODE_DEC( 0x00BC, 3, "Print Message Now" );
+
+	VM_OPCODE_DEC( 0x00BE, 0, "Clear Message Prints" );
+
+	VM_OPCODE_DEC( 0x00C0, 2, "Set Time Of Day" );
+
+	VM_CONDOPCODE_DEC( 0x00DE, 2, "Is Player In Model" );
+
+	VM_CONDOPCODE_DEC( 0x00E0, 1, "Is Player In Any Vehicle" );
+	VM_CONDOPCODE_DEC( 0x00E1, 2, "Is Button Pressed" );
+
+	VM_CONDOPCODE_DEC( 0x0100, 8, "Is Character near point in car" );
+
+	VM_OPCODE_DEC( 0x0111, 1, "Set Dead or Arrested" );
+
+	VM_CONDOPCODE_DEC( 0x0118, 1, "Is Character Dead" );
+
+	VM_CONDOPCODE_DEC( 0x0121, 2, "Is Player In Zone" );
+
+	VM_OPCODE_DEC_U( 0x014B, 13, "Create Car Generator" );
+
+	// 0 -> disable, 1-100 -> number, 101+ -> always
+	VM_OPCODE_DEC_U( 0x014C, 2, "Set Car Generator count" );
+
+	VM_OPCODE_DEC_U( 0x0152, 17, "Set zone car info" );
+
+	VM_OPCODE_DEC_U( 0x015C, 11, "Set zone ped info" );
+
+	VM_OPCODE_DEC_U( 0x0164, 1, "Disable Radar Blip" );
+
+	VM_OPCODE_DEC( 0x0169, 3, "Set Fade Colour" );
+	VM_OPCODE_DEC( 0x016A, 2, "Fade Screen" );
+	VM_CONDOPCODE_DEC( 0x016B, 0, "Is Screen Fading" );
+
+	VM_OPCODE_DEC( 0x0171, 2, "Set Player Heading" );
+
+	VM_OPCODE_DEC( 0x0173, 2, "Set Character Heading" );
+
+	VM_OPCODE_DEC( 0x0175, 2, "Set Vehicle heading" );
+
+	VM_OPCODE_DEC( 0x0177, 2, "Set Object heading" );
+
+	VM_OPCODE_DEC( 0x0180, 1, "Link ONMISSION Flag" );
+	VM_OPCODE_DEC_U( 0x0181, 2, "Link Character Mission Flag" );
+	VM_OPCODE_DEC_U( 0x0182, 2, "Unknown Character Opcode" );
+
+	VM_OPCODE_DEC_U( 0x018D, 5, "Create soundscape" );
+
+	VM_OPCODE_DEC( 0x01B4, 2, "Set Player Input Enabled" );
+
+	VM_OPCODE_DEC( 0x01B6, 1, "Set Weather Now" );
+
+	VM_OPCODE_DEC_U( 0x01BE, 4, "Turn Character To Face Point" );
+
+	VM_OPCODE_DEC( 0x01C7, 1, "Don't remove object" );
+
+	VM_OPCODE_DEC_U( 0x01E7, 6, "Enable Roads" );
+	VM_OPCODE_DEC_U( 0x01E8, 6, "Disable Roads" );
+
+	VM_OPCODE_DEC_U( 0x01ED, 1, "Clear Character Threat Search" );
+
+	VM_OPCODE_DEC( 0x01F0, 1, "Set Max Wanted Level" );
+
+	VM_OPCODE_DEC( 0x01F5, 2, "Get Player Character" );
+
+	VM_CONDOPCODE_DEC( 0x0204, 5, "Is Char near Car in Car 2D" );
+
+	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0213/
+	VM_OPCODE_DEC_U( 0x0213, 6, "Create pickup" );
+	VM_CONDOPCODE_DEC( 0x0214, 1, "Has Pickup been collected" );
+
+	VM_OPCODE_DEC( 0x0219, 8, "Create Garage" );
+
+	VM_OPCODE_DEC( 0x0229, 3, "Set Vehicle Colours" );
+
+	VM_OPCODE_DEC_U( 0x022B, 6, "Disable ped paths" );
+
+	VM_OPCODE_DEC_U( 0x022D, 2, "Set Character Always Face Player" );
+
+	VM_OPCODE_DEC_U( 0x0236, 2, "Set Gang Car" );
+	VM_OPCODE_DEC_U( 0x0237, 3, "Set Gang Weapons" );
+
+	VM_OPCODE_DEC( 0x023C, 2, "Load Special Character" );
+	VM_CONDOPCODE_DEC( 0x023D, 1, "Is Special Character Loaded" );
+
+	VM_OPCODE_DEC( 0x0244, 3, "Set Cutscene Offset" );
+	VM_OPCODE_DEC_U( 0x0245, 2, "Set Character Animation Group" );
+
+	VM_OPCODE_DEC_U( 0x0247, 1, "Request Model Loaded" );
+
+	VM_OPCODE_DEC_U( 0x024A, 3, "Get Phone Near" );
+
+	VM_CONDOPCODE_DEC( 0x0248, 1, "Is Model Loaded" );
+	VM_OPCODE_DEC_U( 0x0249, 1, "Mark Model As Unneeded" );
+
+	VM_OPCODE_DEC_U( 0x0250, 6, "Create Light" );
+
+	VM_CONDOPCODE_DEC( 0x0256, 1, "Is Player Playing" );
+
+	VM_OPCODE_DEC( 0x0293, 1, "Get Controller Mode" );
+
+	VM_OPCODE_DEC_U( 0x0296, 1, "Unload Special Character" );
+
+	VM_OPCODE_DEC( 0x029B, 5, "Create Object no offset" );
+
+	VM_OPCODE_DEC_U( 0x02A7, 5, "Add Radar Contact Blip" );
+	VM_OPCODE_DEC_U( 0x02A8, 5, "Add Radar Blip" );
+
+	VM_CONDOPCODE_DEC( 0x02DE, 1, "Is Player In Taxi" );
+
+	VM_OPCODE_DEC( 0x02E4, 1, "Load Cutscene Data" );
+	VM_OPCODE_DEC( 0x02E5, 2, "Create Cutscene Object" );
+	VM_OPCODE_DEC( 0x02E6, 2, "Set Cutscene Animation" );
+	VM_OPCODE_DEC( 0x02E7, 0, "Start Cutscene" );
+	VM_OPCODE_DEC( 0x02E8, 1, "Get Cutscene Time" );
+	VM_CONDOPCODE_DEC( 0x02E9, 0, "Is Cutscene Over" );
+	VM_OPCODE_DEC( 0x02EA, 0, "Clear Cutscene" );
+
+	VM_OPCODE_DEC_U( 0x02EC, 3, "Create Hidden Package" );
+
+	VM_OPCODE_DEC( 0x02ED, 1, "Set Total Hidden Packages" );
+
+	VM_OPCODE_DEC( 0x02F3, 2, "Load Special Model" );
+	VM_OPCODE_DEC( 0x02F4, 3, "Create Cutscene Actor Head" );
+	VM_OPCODE_DEC( 0x02F5, 2, "Set Cutscene Head Animation" );
+
+	VM_OPCODE_DEC_U( 0x02FB, 10, "Create Crusher Crane" );
+
+	VM_OPCODE_DEC( 0x030D, 1, "Set Max Progress" );
+
+	VM_OPCODE_DEC( 0x0314, 1, "Set Total Unique Jumps" );
+
+	VM_OPCODE_DEC_U( 0x0324, 3, "Set zone ped group" );
+	VM_OPCODE_DEC_U( 0x0325, 2, "Create Car Fire" );
+
+	VM_OPCODE_DEC_U( 0x032B, 7, "Create Weapon Pickup" );
+
+	VM_OPCODE_DEC_U( 0x0336, 2, "Set Player Visible" );
+
+	VM_OPCODE_DEC( 0x033E, 3, "Display Text" );
+	VM_OPCODE_DEC_U( 0x033F, 2, "Set Text Scale" );
+	VM_OPCODE_DEC( 0x0340, 4, "Set Text Colour" );
+	VM_OPCODE_DEC_U( 0x0341, 1, "Set Text Justify" );
+	VM_OPCODE_DEC_U( 0x0342, 1, "Set Text Centered" );
+	VM_OPCODE_DEC_U( 0x0344, 1, "Set Center Text Size" );
+	VM_OPCODE_DEC_U( 0x0345, 1, "Set Text Background" );
+	VM_OPCODE_DEC( 0x0346, 4, "Set Text Background Colour" );
+
+	VM_OPCODE_DEC_U( 0x0348, 1, "Set Text Size Proportional" );
+	VM_OPCODE_DEC_U( 0x0349, 1, "Set Text Font" );
+
+	VM_OPCODE_DEC( 0x0352, 2, "Set Character Model" );
+	VM_OPCODE_DEC_U( 0x0353, 1, "Refresh Actor Model" );
+	VM_OPCODE_DEC_U( 0x0354, 1, "Start Chase Scene" );
+	VM_OPCODE_DEC_U( 0x0355, 0, "Stop Chase Scene" );
+
+	VM_OPCODE_DEC_U( 0x035D, 1, "Set Object Targetable" );
+
+	VM_OPCODE_DEC_U( 0x0363, 6, "Set Closest Object Visibility" );
+
+	VM_OPCODE_DEC_U( 0x0368, 10, "Create ev Crane" );
+
+	VM_OPCODE_DEC_U( 0x0373, 0, "Set Camera Behind Player" );
+	VM_OPCODE_DEC_U( 0x0374, 1, "Set Motion Blur" );
+
+	VM_OPCODE_DEC_U( 0x038B, 0, "Load Requested Models Now" );
+
+	VM_OPCODE_DEC_U( 0x0399, 7, "Disable ped paths in angled cube" );
+
+	VM_OPCODE_DEC_U( 0x039D, 12, "Scatter Particles" );
+
+	VM_OPCODE_DEC_U( 0x03AD, 1, "Set Garbage Enabled" );
+
+	VM_OPCODE_DEC_U( 0x03AF, 1, "Set Map Streaming Enabled" );
+
+	VM_OPCODE_DEC_U( 0x03B6, 6, "Change Nearest Instance Model" );
+	VM_OPCODE_DEC_U( 0x03B7, 1, "Process Cutscene Only" );
+
+	VM_OPCODE_DEC_U( 0x03BB, 1, "Set Garage Door to Rotate" );
+
+	VM_OPCODE_DEC_U( 0x03BF, 2, "Set Pedestrians Ignoring Player" );
+
+	VM_CONDOPCODE_DEC( 0x03C6, 1, "Is Collision In Memory" );
+
+	VM_OPCODE_DEC_U( 0x03CB, 3, "Load Area Near" );
+
+	VM_OPCODE_DEC_U( 0x03DA, 1, "Set Garage Camera Follows Player" );
+
+	VM_OPCODE_DEC( 0x03E1, 1, "Get Hidden Packages Found" );
+
+	VM_OPCODE_DEC_U( 0x03E5, 1, "Display Help Text" );
+
+	VM_OPCODE_DEC_U( 0x03EB, 0, "Clear Small Prints" );
+
+	VM_OPCODE_DEC_U( 0x03EE, 3, "Draw Text" );
+	VM_OPCODE_DEC_U( 0x03EF, 1, "Make Player Safe For Cutscene" );
+
+	VM_OPCODE_DEC_U( 0x03F0, 1, "Enable Text Draw" );
+	VM_OPCODE_DEC_U( 0x03F1, 2, "Set Ped Hostility" );
+	VM_OPCODE_DEC_U( 0x03F2, 2, "Clear Ped Hostility" );
+
+	VM_OPCODE_DEC_U( 0x03F7, 1, "Load Collision" );
+
+	VM_OPCODE_DEC( 0x0408, 1, "Set Total Rampage Missions" );
+
+	VM_OPCODE_DEC_U( 0x040A, 1, "Remove Chase Car" );
+
+	VM_OPCODE_DEC_U( 0x0418, 2, "Set Object Draw Ontop" );
+
+	VM_OPCODE_DEC( 0x041D, 1, "Set Camera Near Clip" );
+
+	VM_OPCODE_DEC_U( 0x0421, 1, "Force Rain" );
+
+	VM_OPCODE_DEC_U( 0x0426, 6, "Create Save Cars Between Levels cube" );
+
+	VM_OPCODE_DEC( 0x042C, 1, "Set Total Missions" );
+
+	VM_OPCODE_DEC( 0x043C, 1, "Set Sound Fade" );
+	VM_OPCODE_DEC( 0x043D, 1, "Set Is Intro Playing" );
+
+	VM_CONDOPCODE_DEC( 0x0445, 0, "Are Any Vehicle Cheats enabled" );
+
+	VM_OPCODE_DEC_U( 0x044D, 1, "Load Splash Screen" );
 }

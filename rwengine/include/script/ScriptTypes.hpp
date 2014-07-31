@@ -65,7 +65,20 @@ typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
 
 struct SCMOpcodes
 {
+	typedef std::function<void (ScriptMachine*, SCMThread*, SCMParams*)> SCMFunc;
 	std::map<SCMOpcode, SCMMicrocode> codes;
 };
+
+
+#define OPC_UNIMPLEMENTED_MSG(code, name) [=](ScriptMachine* m, SCMThread* t, SCMParams* p) { std::cout << #code << " " << name << " unimplemented" << std::endl; }
+
+#define VM_OPCODE_DEF(code) void _opcode_##code##_func(ScriptMachine* m, SCMThread* t, SCMParams* p)
+#define VM_CONDOPCODE_DEF(code) bool _opcode_##code##_func(ScriptMachine* m, SCMThread* t, SCMParams* p)
+
+#define VM_OPCODE_DEC(code, parameters, name) codes[code] = SCMMicrocode{name, parameters, SCMOpcodes::SCMFunc(_opcode_##code##_func)}
+#define VM_CONDOPCODE_DEC(code, parameters, name) codes[code] = SCMMicrocode{name, parameters, \
+	[=](ScriptMachine* m, SCMThread* t, SCMParams* p) { t->conditionResult = _opcode_##code##_func(m, t, p); }}
+
+#define VM_OPCODE_DEC_U(code, parameters, name) codes.insert({code, {name, parameters, OPC_UNIMPLEMENTED_MSG(code, name)}})
 
 #endif
