@@ -99,6 +99,7 @@ public:
 	 * Creates an instance
 	 */
 	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	uint16_t findModelDefinition(const std::string model);
 
 	/**
 	 * @brief Creates an InstanceObject for use in the current Cutscene.

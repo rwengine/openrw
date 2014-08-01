@@ -54,7 +54,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				t.programCounter += sizeof(SCMByte);
 				break;
 			case TInt16:
-				parameters.back().integer = _file->read<std::uint16_t>(t.programCounter);
+				parameters.back().integer = _file->read<std::int16_t>(t.programCounter);
 				t.programCounter += sizeof(SCMByte) * 2;
 				break;
 			case TGlobal: {
@@ -89,10 +89,10 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		}
 
 #if SCRIPTMACHINE_VERBOSE
-		std::cout << "[SCM] " << std::hex << std::setw(8) << t.programCounter <<
-					 " EXEC " << std::hex << std::setw(4) << std::setfill('0') << opcode <<
-					 " " << std::setw(8) << std::setfill(' ') << t.name <<
-					 std::dec << std::setfill(' ') << " " << code.name << " ( ";
+			std::cout << "[SCM] " << std::hex << std::setw(8) << t.programCounter <<
+						 " EXEC " << std::hex << std::setw(4) << std::setfill('0') << opcode <<
+						 " " << std::setw(8) << std::setfill(' ') << t.name <<
+						 std::dec << std::setfill(' ') << " " << code.name << " ( ";
 #if SCRIPTMACHINE_VERBOSE_PARAMETERS
 		for(auto& p : parameters) {
 			std::cout << p.type << ":";

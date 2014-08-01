@@ -317,6 +317,16 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 	return nullptr;
 }
 
+#include <strings.h>
+uint16_t GameWorld::findModelDefinition(const std::string model)
+{
+	// Dear C++ Why do I have to resort to strcasecmp this isn't C.
+	auto defit = std::find_if(objectTypes.begin(), objectTypes.end(),
+							  [&](const decltype(objectTypes)::value_type& d) { return strcasecmp(d.second->modelName.c_str(), model.c_str()) == 0; });
+	if( defit != objectTypes.end() ) return defit->first;
+	return -1;
+}
+
 #include <ai/PlayerController.hpp>
 CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::vec3 &pos, const glm::quat &rot)
 {

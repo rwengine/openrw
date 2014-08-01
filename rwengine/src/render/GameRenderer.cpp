@@ -696,6 +696,8 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 
 void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 {
+	if(!engine->state.currentCutscene) return;
+
 	if(!cutscene->model->model)
 	{
 		return;

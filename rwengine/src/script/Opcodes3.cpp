@@ -359,7 +359,24 @@ VM_OPCODE_DEF( 0x0293 )
 
 VM_OPCODE_DEF( 0x029B )
 {
-	auto id = p->at(0).integer;
+	int id = 0;
+	switch(p->at(0).type) {
+	case TInt8:
+		id = (std::int8_t)p->at(0).integer;
+		break;
+	case TInt16:
+		id = (std::int16_t)p->at(0).integer;
+		break;
+	}
+
+	if( id < 0 ) {
+		auto& modelname = m->getFile()->getModels()[-id];
+		id = m->getWorld()->findModelDefinition(modelname);
+		if( id == (uint16_t)-1 ) {
+			std::cerr << "Failed to find model: " << modelname << std::endl;
+		}
+	}
+
 	auto& object = m->getWorld()->objectTypes[id];
 	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
 
@@ -506,18 +523,78 @@ VM_OPCODE_DEF( 0x0352 )
 	controller->getCharacter()->changeCharacterModel(p->at(1).string);
 }
 
+VM_OPCODE_DEF( 0x03B6 )
+{
+	glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real);
+	float radius = p->at(3).real;
+	int newid = 0, oldid = 0;
+
+	/// @todo fix this being a problem.
+	switch(p->at(4).type) {
+	case TInt8:
+		oldid = (std::int8_t)p->at(4).integer;
+		break;
+	case TInt16:
+		oldid = (std::int16_t)p->at(4).integer;
+		break;
+	}
+
+	switch(p->at(5).type) {
+	case TInt8:
+		newid = (std::int8_t)p->at(5).integer;
+		break;
+	case TInt16:
+		newid = (std::int16_t)p->at(5).integer;
+		break;
+	}
+
+	if( std::abs(newid) > 178 || std::abs(oldid) > 178 ) {
+		/// @todo implement this path,
+		return;
+	}
+
+	std::string newmodel;
+	std::string oldmodel;
+
+	if(newid < 0) newid = -newid;
+	if(oldid < 0) oldid = -oldid;
+
+	newmodel = m->getFile()->getModels()[newid];
+	oldmodel = m->getFile()->getModels()[oldid];
+	std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
+	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
+
+	/// @todo Objects need to adopt the new object ID, not just the model.
+	for(auto o : m->getWorld()->objects) {
+		if( o->type() == GameObject::Instance ) {
+			if( !o->model ) continue;
+			if( o->model->name != oldmodel ) continue;
+			float d = glm::distance(position, o->getPosition());
+			if( d < radius ) {
+				m->getWorld()->gameData.loadDFF(newmodel + ".dff", false);
+
+				o->model = m->getWorld()->gameData.models[newmodel];
+			}
+		}
+	}
+}
+
 VM_CONDOPCODE_DEF( 0x03C6 )
 {
-	/// @todo verify if this is against the global models or the SCM models
-	auto model = m->getFile()->getModels()[p->at(0).integer];
-	auto phyit = m->getWorld()->gameData.collisions.find(model);
-
-	return phyit != m->getWorld()->gameData.collisions.end();
+	// The paramter to this is actually the island number.
+	// Not sure how that will fit into the scheme of full paging
+	/// @todo use the current player zone island number to return the correct value.
+	return true;
 }
 
 VM_OPCODE_DEF( 0x03E1 )
 {
 	*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
+}
+
+VM_OPCODE_DEF( 0x03F7 )
+{
+	// Collision is loaded when required, not sure what this is supposed to mean.
 }
 
 VM_OPCODE_DEF( 0x0408 )
@@ -597,6 +674,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0169, 3, "Set Fade Colour" );
 	VM_OPCODE_DEC( 0x016A, 2, "Fade Screen" );
 	VM_CONDOPCODE_DEC( 0x016B, 0, "Is Screen Fading" );
+	VM_OPCODE_DEC_U( 0x016C, 4, "Add Hospital Restart" );
+	VM_OPCODE_DEC_U( 0x016D, 4, "Add Police Restart" );
 
 	VM_OPCODE_DEC( 0x0171, 2, "Set Player Heading" );
 
@@ -609,6 +688,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0180, 1, "Link ONMISSION Flag" );
 	VM_OPCODE_DEC_U( 0x0181, 2, "Link Character Mission Flag" );
 	VM_OPCODE_DEC_U( 0x0182, 2, "Unknown Character Opcode" );
+
+	VM_OPCODE_DEC_U( 0x018B, 2, "Change Blip Display Mode" );
 
 	VM_OPCODE_DEC_U( 0x018D, 5, "Create soundscape" );
 
@@ -634,6 +715,7 @@ Opcodes3::Opcodes3()
 	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0213/
 	VM_OPCODE_DEC_U( 0x0213, 6, "Create pickup" );
 	VM_CONDOPCODE_DEC( 0x0214, 1, "Has Pickup been collected" );
+	VM_OPCODE_DEC_U( 0x0215, 1, "Destroy Pickup" );
 
 	VM_OPCODE_DEC( 0x0219, 8, "Create Garage" );
 
@@ -739,7 +821,7 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC_U( 0x03AF, 1, "Set Map Streaming Enabled" );
 
-	VM_OPCODE_DEC_U( 0x03B6, 6, "Change Nearest Instance Model" );
+	VM_OPCODE_DEC( 0x03B6, 6, "Change Nearest Instance Model" );
 	VM_OPCODE_DEC_U( 0x03B7, 1, "Process Cutscene Only" );
 
 	VM_OPCODE_DEC_U( 0x03BB, 1, "Set Garage Door to Rotate" );
@@ -765,7 +847,7 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x03F1, 2, "Set Ped Hostility" );
 	VM_OPCODE_DEC_U( 0x03F2, 2, "Clear Ped Hostility" );
 
-	VM_OPCODE_DEC_U( 0x03F7, 1, "Load Collision" );
+	VM_OPCODE_DEC( 0x03F7, 1, "Load Collision" );
 
 	VM_OPCODE_DEC( 0x0408, 1, "Set Total Rampage Missions" );
 
