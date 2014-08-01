@@ -27,10 +27,13 @@ struct InstanceObject : public GameObject
 		InstanceObject *lod,
 		std::shared_ptr<DynamicObjectData> dyn
 			);
+	~InstanceObject();
 
 	Type type() { return Instance; }
 
 	void tick(float dt);
+
+	void changeModel(std::shared_ptr<ObjectData> incoming);
 
 	virtual void setRotation(const glm::quat& r);
 	

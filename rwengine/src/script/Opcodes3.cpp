@@ -564,6 +564,9 @@ VM_OPCODE_DEF( 0x03B6 )
 	std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 
+	auto newobjectid = m->getWorld()->findModelDefinition(newmodel);
+	auto& nobj = m->getWorld()->objectTypes[newobjectid];
+
 	/// @todo Objects need to adopt the new object ID, not just the model.
 	for(auto o : m->getWorld()->objects) {
 		if( o->type() == GameObject::Instance ) {
@@ -572,8 +575,9 @@ VM_OPCODE_DEF( 0x03B6 )
 			float d = glm::distance(position, o->getPosition());
 			if( d < radius ) {
 				m->getWorld()->gameData.loadDFF(newmodel + ".dff", false);
-
-				o->model = m->getWorld()->gameData.models[newmodel];
+				InstanceObject* inst = static_cast<InstanceObject*>(o);
+				inst->changeModel(nobj);
+				inst->model = m->getWorld()->gameData.models[newmodel];
 			}
 		}
 	}
