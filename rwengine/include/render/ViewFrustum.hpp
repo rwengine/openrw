@@ -31,7 +31,7 @@ public:
 	
 	glm::mat4 projection()
 	{
-		return glm::perspective(fov, aspectRatio, near, far);
+		return glm::perspective(fov / aspectRatio, aspectRatio, near, far);
 	}
 	
 	void update(const glm::mat4& proj)

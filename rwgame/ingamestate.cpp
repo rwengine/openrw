@@ -150,7 +150,7 @@ void IngameState::updateView()
 		}
 	}
 
-	setViewParameters( viewPos + localview * viewFraction, {localX, _lookAngles.y} );
+	setViewParameters( (viewPos + glm::vec3(0.f, 0.f, 0.75f)) + localview * viewFraction, {localX, _lookAngles.y} );
 }
 
 void IngameState::enter()
