@@ -256,8 +256,11 @@ public:
 	 * @param name
 	 */
 	void loadCutscene(const std::string& name);
-
+	void startCutscene();
 	void clearCutscene();
+
+	MADStream fgAudio;
+	void playForegroundAudio(const std::string& name);
 
 	/**
 	 * @brief loads a model into a special character slot.

@@ -695,7 +695,14 @@ void GameWorld::loadCutscene(const std::string &name)
 		delete state.currentCutscene;
 	}
 	state.currentCutscene = cutscene;
+	state.currentCutscene->meta.name = name;
 	std::cout << "Loaded cutscene: " << name << std::endl;
+}
+
+void GameWorld::startCutscene()
+{
+	state.cutsceneStartTime = gameTime;
+	playForegroundAudio(state.currentCutscene->meta.name);
 }
 
 void GameWorld::clearCutscene()
@@ -707,9 +714,18 @@ void GameWorld::clearCutscene()
 		}
 	}
 
+	fgAudio.stop();
+
 	delete state.currentCutscene;
 	state.currentCutscene = nullptr;
 	state.cutsceneStartTime = -1.f;
+}
+
+void GameWorld::playForegroundAudio(const std::string &name)
+{
+	if( gameData.loadAudio(fgAudio, name+".mp3") ) {
+		fgAudio.play();
+	}
 }
 
 void GameWorld::loadSpecialCharacter(const unsigned short index, const std::string &name)

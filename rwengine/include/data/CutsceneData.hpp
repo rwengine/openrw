@@ -19,6 +19,8 @@ struct CutsceneMetadata
 		std::string gxt;
 	};
 
+	std::string name;
+
 	/// The origin for coordinates in the cutscene
 	glm::vec3 sceneOffset;
 

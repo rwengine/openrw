@@ -425,7 +425,7 @@ VM_OPCODE_DEF( 0x02E6 )
 }
 VM_OPCODE_DEF( 0x02E7 )
 {
-	m->getWorld()->state.cutsceneStartTime = m->getWorld()->gameTime;
+	m->getWorld()->startCutscene();
 }
 VM_OPCODE_DEF( 0x02E8 )
 {

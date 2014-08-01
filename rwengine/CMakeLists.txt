@@ -9,6 +9,6 @@ add_library(rwengine
     ${RENDERWARE_HEADERS}
 )
 
-target_link_libraries(rwengine sfml-window GLEW)
+target_link_libraries(rwengine sfml-window sfml-audio GLEW mad)
 
 include_directories(include /usr/include/bullet)

@@ -617,6 +617,11 @@ void GameData::loadWeaponDAT(const std::string &name)
 	}
 }
 
+bool GameData::loadAudio(MADStream& music, const std::string &name)
+{
+	return music.open(datpath + "/audio/" + name);
+}
+
 char* GameData::openFile(const std::string& name)
 {
 	auto i = _knownFiles.find(name);

@@ -13,6 +13,8 @@
 #include <data/CollisionModel.hpp>
 #include <data/GameTexts.hpp>
 
+#include <audio/MADStream.hpp>
+
 #include <memory>
 
 struct DynamicObjectData;
@@ -147,6 +149,8 @@ public:
 	 * Loads weapon.dat
 	 */
 	void loadWeaponDAT(const std::string& name);
+
+	bool loadAudio(MADStream &music, const std::string& name);
 
 	/**
 	 * Returns a pointer to the named file if it is available,
