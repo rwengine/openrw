@@ -304,6 +304,9 @@ void render(float alpha)
 		cameraPos += cutscene->meta.sceneOffset;
 		targetPos += cutscene->meta.sceneOffset;
 
+		// Update the internal values
+		lastViewPosition = viewPosition = cameraPos;
+
 		view = glm::lookAt(cameraPos, targetPos, qtilt * glm::vec3(0.f, 0.f, -1.f));
 
 		gta->renderer.camera.worldPos = cameraPos;
@@ -353,11 +356,9 @@ void render(float alpha)
 	
 	std::stringstream ss;
 	ss << std::setfill('0') << "Time: " << std::setw(2) << gta->getHour() 
-		<< ":" << std::setw(2) << gta->getMinute() << std::endl;
-	ss << "Game Time: " << gta->gameTime << std::endl;
-	ss << "Camera: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << std::endl;
-	ss << "Renderered " << gta->renderer.rendered << " / " << gta->renderer.culled << std::endl;
-	ss << "Weather: " << gta->state.currentWeather << "\n";
+		<< ":" << std::setw(2) << gta->getMinute() << " (" << gta->gameTime << "s)\n";
+	ss << "View: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << "\n";
+	ss << "Drawn " << gta->renderer.rendered << " / " << gta->renderer.culled << " Culled\n";
 	if( player ) {
 		ss << "Activity: ";
 		if( player->controller->getCurrentActivity() ) {
@@ -369,7 +370,7 @@ void render(float alpha)
 		ss << std::endl;
 	}
 	
-	sf::Text text(ss.str(), font, 15);
+	sf::Text text(ss.str(), font, 14);
 	text.setPosition(10, 10);
 	window.draw(text);
 	
@@ -378,7 +379,7 @@ void render(float alpha)
 	}
 	
 	sf::Vector2f tpos(10.f, window.getSize().y - 30.f);
-	text.setCharacterSize(15);
+	text.setCharacterSize(14);
 	for(auto it = gta->log.begin(); it != gta->log.end(); ++it) {
 		text.setString(it->message);
 		switch(it->type) {
