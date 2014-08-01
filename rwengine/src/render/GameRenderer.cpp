@@ -462,20 +462,41 @@ void GameRenderer::renderWorld(float alpha)
 
 	glDisable(GL_DEPTH_TEST);
 
+	GLuint splashTexName = 0;
+	auto fc = engine->state.fadeColour;
+	if((fc.r + fc.g + fc.b) == 0 && engine->state.currentSplash.size() > 0) {
+		std::pair<std::string, std::string> splashName(engine->state.currentSplash, "");
+		auto splshfnd = engine->gameData.textures.find(splashName);
+		if( splshfnd != engine->gameData.textures.end() ) {
+			splashTexName = splshfnd->second.texName;
+		}
+	}
+
+	if( engine->state.currentCutscene && splashTexName != 0 ) {
+		renderLetterbox();
+	}
+
 	float fadeTimer = engine->gameTime - engine->state.fadeStart;
 	if( fadeTimer <= engine->state.fadeTime || !engine->state.fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(0);
 		glUniform1i(ssRectTexture, 0);
+
+		if(splashTexName != 0) {
+			glBindTexture(GL_TEXTURE_2D, splashTexName);
+			fc = glm::u16vec3(0, 0, 0);
+		}
+		else {
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
 		float fadeFrac = 0.f;
 		if( engine->state.fadeTime > 0.f ) {
 			fadeFrac = std::min(fadeTimer / engine->state.fadeTime, 1.f);
 		}
-
-		auto fc = engine->state.fadeColour;
 
 		float a = engine->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
 
@@ -487,23 +508,8 @@ void GameRenderer::renderWorld(float alpha)
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
-	if( engine->state.currentCutscene ) {
-		glUseProgram(ssRectProgram);
-		const float cinematicExperienceSize = 0.15f;
-		glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
-		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glUniform1i(ssRectTexture, 0);
-		glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
-
-		glBindVertexArray( ssRectDraw.getVAOName() );
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-		glUniform2f(ssRectOffset, 0.f, 1.f * (1.f - cinematicExperienceSize));
-		glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
-
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	if( engine->state.currentCutscene && splashTexName == 0 ) {
+		renderLetterbox();
 	}
 
 	glUseProgram(0);
@@ -1083,6 +1089,26 @@ void GameRenderer::renderPaths()
     pedlines.clear();
 	carlines.clear();
 	glBindVertexArray( 0 );
+}
+
+void GameRenderer::renderLetterbox()
+{
+	glUseProgram(ssRectProgram);
+	const float cinematicExperienceSize = 0.15f;
+	glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
+	glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glUniform1i(ssRectTexture, 0);
+	glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+
+	glBindVertexArray( ssRectDraw.getVAOName() );
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glUniform2f(ssRectOffset, 0.f, 1.f * (1.f - cinematicExperienceSize));
+	glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void GameRenderer::addParticle(const FXParticle &particle)

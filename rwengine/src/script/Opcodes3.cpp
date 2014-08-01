@@ -630,6 +630,11 @@ VM_CONDOPCODE_DEF( 0x0445 )
 	return false;
 }
 
+VM_OPCODE_DEF( 0x044D )
+{
+	m->getWorld()->gameData.loadSplash(p->at(0).string);
+}
+
 #define MERGE(other) insert(other.begin(), other.end())
 
 Opcodes3::Opcodes3()
@@ -872,5 +877,5 @@ Opcodes3::Opcodes3()
 
 	VM_CONDOPCODE_DEC( 0x0445, 0, "Are Any Vehicle Cheats enabled" );
 
-	VM_OPCODE_DEC_U( 0x044D, 1, "Load Splash Screen" );
+	VM_OPCODE_DEC( 0x044D, 1, "Load Splash Screen" );
 }

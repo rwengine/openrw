@@ -152,6 +152,8 @@ public:
 
 	bool loadAudio(MADStream &music, const std::string& name);
 
+	void loadSplash(const std::string& name);
+
 	/**
 	 * Returns a pointer to the named file if it is available,
 	 * the memory must be freed by the caller.

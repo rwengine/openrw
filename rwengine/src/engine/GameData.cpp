@@ -93,6 +93,11 @@ void GameData::load()
 	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
 	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
 
+	_knownFiles.insert({"news.txd", {false, datpath+"/txd/NEWS.TXD"}});
+	_knownFiles.insert({"splash1.txd", {false, datpath+"/txd/SPLASH1.TXD"}});
+	_knownFiles.insert({"splash2.txd", {false, datpath+"/txd/SPLASH2.TXD"}});
+	_knownFiles.insert({"splash3.txd", {false, datpath+"/txd/SPLASH3.TXD"}});
+
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
 	loadTXD("particle.txd");
@@ -620,6 +625,16 @@ void GameData::loadWeaponDAT(const std::string &name)
 bool GameData::loadAudio(MADStream& music, const std::string &name)
 {
 	return music.open(datpath + "/audio/" + name);
+}
+
+void GameData::loadSplash(const std::string &name)
+{
+	std::string lower(name);
+	std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+	loadTXD(lower + ".txd", false);
+
+	engine->state.currentSplash = lower;
 }
 
 char* GameData::openFile(const std::string& name)

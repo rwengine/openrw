@@ -43,6 +43,8 @@ struct GameState
 	bool fadeSound;
 	glm::u16vec3 fadeColour;
 
+	std::string currentSplash;
+
 
 	bool isIntroPlaying;
 	CutsceneData* currentCutscene;
@@ -75,7 +77,7 @@ struct GameState
 		player(nullptr),
 		currentWeather(0),
 		scriptOnMissionFlag(nullptr),
-		fadeOut(false),
+		fadeOut(true),
 		fadeStart(0.f),
 		fadeTime(0.f),
 		fadeSound(false),

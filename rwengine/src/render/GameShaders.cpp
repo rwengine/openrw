@@ -204,7 +204,7 @@ uniform vec2 offset;
 
 void main()
 {
-	TexCoords = position * 0.5 + vec2(0.5);
+	TexCoords = position * vec2(0.5,-0.5) + vec2(0.5);
 	gl_Position = vec4(offset + position * size, 0.0, 1.0);
 })";
 
@@ -219,6 +219,6 @@ void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
 	// Set colour to 0, 0, 0, 1 for textured mode.
-	gl_FragColor = colour;
+	gl_FragColor = colour + vec4(c.rgb, 0.0);
 })";
 }

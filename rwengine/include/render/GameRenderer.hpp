@@ -221,7 +221,10 @@ public:
 	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
 
 	/** method for rendering AI debug information */
-    void renderPaths();
+	void renderPaths();
+
+	/** Increases cinematic value */
+	void renderLetterbox();
 
 	/** Adds a particle to the rendering */
 	void addParticle(const FXParticle& particle);
