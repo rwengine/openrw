@@ -41,6 +41,7 @@ class GameRenderer
 		size_t g;
 		size_t sg;
 		glm::mat4 matrix;
+		float opacity;
 		GameObject* object;
 	};
 	
@@ -53,7 +54,7 @@ class GameRenderer
 	 * @param queueTransparent abort the draw if the frame contains transparent materials
 	 * @return True if the frame was drawn, false if it should be queued
 	 */
-	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent = true);
+	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent = true);
 	
 	/**
 	 * @brief renders a model's subgeometry
@@ -65,7 +66,7 @@ class GameRenderer
 	 * @param queueTransparent
 	 * @return @see renderFrame(
 	 */
-	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent = true);
+	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, float opacity, GameObject* object, bool queueTransparent = true);
 	
 	/** Transparent objects are queued into this list */
 	std::vector<RQueueEntry> transparentDrawQueue;
@@ -203,8 +204,6 @@ public:
 
 	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
 
-	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, GameObject* = nullptr);
-
 	/**
 	 * @brief renders all visible particles and removes expired
 	 */
@@ -219,6 +218,8 @@ public:
 	 * Renders a model (who'd have thought)
 	 */
 	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
+
+	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, float opacity, GameObject* = nullptr);
 
 	/** method for rendering AI debug information */
 	void renderPaths();
@@ -259,6 +260,7 @@ struct ObjectUniformData {
 	glm::vec4 colour;
 	float diffuse;
 	float ambient;
+	float visibility;
 };
 
 #endif

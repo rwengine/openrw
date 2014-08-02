@@ -60,6 +60,8 @@ void IngameState::startTest()
 			carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
 		}
 	}
+
+	getWorld()->renderer.camera.frustum.fov = -2.f * glm::quarter_pi<float>();
 }
 
 void IngameState::spawnPlayerVehicle()

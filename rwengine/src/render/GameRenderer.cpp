@@ -285,8 +285,6 @@ void GameRenderer::renderWorld(float alpha)
 
 	glBindVertexArray( vao );
 
-	/// @todo take into account engine->state.fading
-	
 	float tod = engine->state.hour + engine->state.minute/60.f;
 
 	// Requires a float 0-24
@@ -297,6 +295,7 @@ void GameRenderer::renderWorld(float alpha)
 	glm::vec3 skyBottom = weather.skyBottomColor;
 	glm::vec3 ambient = weather.ambientColor;
 	glm::vec3 dynamic = weather.directLightColor;
+	weather.poleShading;
 
 	float theta = (tod/(60.f * 24.f) - 0.5f) * 2 * 3.14159265;
 	glm::vec3 sunDirection{
@@ -368,7 +367,7 @@ void GameRenderer::renderWorld(float alpha)
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->model->geometries[it->g]->EBO);
 
-		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->object, false);
+		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->opacity, it->object, false);
 	}
 	transparentDrawQueue.clear();
 
@@ -616,14 +615,10 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	if( instance->body ) {
 		instance->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
 	}
-	else if(instance->object) {
+	else {
 		matrixModel = glm::translate(matrixModel, instance->position);
 		matrixModel = glm::scale(matrixModel, instance->scale);
 		matrixModel = matrixModel * glm::mat4_cast(instance->rotation);
-	}
-	else {
-		/// @todo clean up this
-		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 	}
 
 	float mindist = 100000.f;
@@ -633,11 +628,16 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
 	}
 
-	/// @todo not sure if this is the best way to handle cutscene objects
-	if(! instance->object ) {
-		renderModel(instance->model->model, matrixModel, instance);
-	}
-	else if( instance->object->numClumps == 1 ) {
+	Model* model = nullptr;
+	ModelFrame* frame = nullptr;
+
+	// These are used to gracefully fade out things that are just out of view distance.
+	Model* fadingModel = nullptr;
+	ModelFrame* fadingFrame = nullptr;
+	float opacity = 0.f;
+
+	if( instance->object->numClumps == 1 ) {
+		// Object consists of a single clump.
 		if( mindist > instance->object->drawDistance[0] ) {
 			// Check for LOD instances
 			if ( instance->LODinstance ) {
@@ -646,12 +646,20 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 					return;
 				}
 				else if (instance->LODinstance->model->model) {
-					renderModel(instance->LODinstance->model->model, matrixModel);
+					model = instance->LODinstance->model->model;
+
+					fadingModel = instance->model->model;
+					opacity = (mindist) / instance->object->drawDistance[0];
 				}
+			}
+			else {
+				fadingModel = instance->model->model;
+				opacity = (mindist) / instance->object->drawDistance[0];
 			}
 		}
 		else if (! instance->object->LOD ) {
-			renderModel(instance->model->model, matrixModel);
+			model = instance->model->model;
+			opacity = (mindist) / instance->object->drawDistance[0];
 		}
 	}
 	else {
@@ -659,19 +667,34 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 			culled++;
 			return;
 		}
-		else if( mindist > instance->object->drawDistance[0] ) {
-			// Figure out which one is the LOD.
-			auto RF = instance->model->model->frames[0];
-			auto LODindex = RF->getChildren().size() - 2;
-			auto f = RF->getChildren()[LODindex];
-			renderFrame(instance->model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
+
+		auto root = instance->model->model->frames[0];
+		int lodInd = 1;
+		if( mindist > instance->object->drawDistance[0] ) {
+			lodInd = 2;
 		}
-		else {
-			// Draw the real object
-			auto RF = instance->model->model->frames[0];
-			auto LODindex = RF->getChildren().size() - 1;
-			auto f = RF->getChildren()[LODindex];
-			renderFrame(instance->model->model, f, matrixModel * glm::inverse(f->getTransform()), nullptr);
+		auto LODindex = root->getChildren().size() - lodInd;
+		auto f = root->getChildren()[LODindex];
+		model = instance->model->model;
+		frame = f;
+
+		if( lodInd == 2 ) {
+			fadingModel = model;
+			fadingFrame = root->getChildren()[LODindex+1];
+			opacity = (mindist) / instance->object->drawDistance[0];
+		}
+	}
+
+	if( model ) {
+		frame = frame ? frame : model->frames[0];
+		renderFrame(model, frame, matrixModel * glm::inverse(frame->getTransform()), nullptr, 1.f);
+	}
+	if( fadingModel ) {
+		// opacity is the distance over the culling limit,
+		opacity = 2.0f - opacity;
+		if(opacity > 0.f) {
+			fadingFrame = fadingFrame ? fadingFrame : fadingModel->frames[0];
+			renderFrame(fadingModel, fadingFrame, matrixModel * glm::inverse(fadingFrame->getTransform()), nullptr, opacity);
 		}
 	}
 }
@@ -689,7 +712,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr);
+			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
 			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
@@ -755,7 +778,7 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr);
+			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
 			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
@@ -784,7 +807,7 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 				continue;
 			}
 
-			renderGeometry(model, g, matrix);
+			renderGeometry(model, g, matrix, 1.f);
 		}
 		break;
 	}
@@ -799,7 +822,7 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr);
+			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
 			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
@@ -810,7 +833,7 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 	}
 }
 
-void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, GameObject* object)
+void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, float opacity, GameObject* object)
 {
 	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
 
@@ -818,10 +841,10 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
-		if(! renderSubgeometry(model, g, sg, modelMatrix, object)) {
+		if(opacity < 1.f || ! renderSubgeometry(model, g, sg, modelMatrix, opacity, object)) {
 			// If rendering was rejected, queue for later.
 			transparentDrawQueue.push_back(
-				{model, g, sg, modelMatrix, object}
+				{model, g, sg, modelMatrix, opacity, object}
 			);
 		}
 	}
@@ -888,7 +911,7 @@ void GameRenderer::renderParticles()
 							uboObject, {
 								m,
 								part.colour,
-								1.f, 1.f
+								1.f, 1.f, 1.f
 							});
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -900,7 +923,7 @@ void GameRenderer::drawOnScreenText()
 	/// @ TODO
 }
 
-bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
+bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent)
 {
 	auto localmatrix = matrix;
 
@@ -919,13 +942,13 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 
 		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
 		/// @todo fix culling animating objects?
-		if( (!object || !object->animator) && ! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+
+		glm::vec3 boundpos = bounds.center + glm::vec3(matrix[3]);
+		if( (!object || !object->animator) && ! camera.frustum.intersects(boundpos, bounds.radius)) {
 			continue;
 		}
 
-		renderGeometry(m,
-						g, localmatrix,
-						object);
+		renderGeometry(m, g, localmatrix, opacity, object);
 	}
 	
 	for(ModelFrame* c : f->getChildren()) {
@@ -934,7 +957,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 	return true;
 }
 
-bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, GameObject* object, bool queueTransparent)
+bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, float opacity, GameObject* object, bool queueTransparent)
 {
 	auto& subgeom = model->geometries[g]->subgeom[sg];
 
@@ -947,7 +970,7 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 	ObjectUniformData oudata {
 		matrix,
 		glm::vec4(1.f),
-		1.f, 1.f
+		1.f, 1.f, opacity
 	};
 
 	if (model->geometries[g]->materials.size() > subgeom.material) {
@@ -1008,7 +1031,7 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 
 void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object, Animator *animator)
 {
-	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object);
+	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object, 1.f);
 }
 
 void GameRenderer::renderPaths()

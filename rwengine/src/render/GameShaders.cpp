@@ -113,6 +113,7 @@ in vec2 TexCoords;
 in vec4 Colour;
 in vec3 WorldSpace;
 uniform sampler2D texture;
+out vec4 fragOut;
 
 layout(std140) uniform SceneData {
 	mat4 projection;
@@ -130,6 +131,7 @@ layout(std140) uniform ObjectData {
 	vec4 colour;
 	float diffusefac;
 	float ambientfac;
+	float visibility;
 };
 
 #define ALPHA_DISCARD_THRESHOLD 0.01
@@ -146,9 +148,9 @@ void main()
 	float fogZ = length(campos.xyz - WorldSpace.xyz);
 	float fogfac = 1.0 - clamp( (fogEnd-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
 	vec3 tmp = (ambient.rgb + c.rgb) * crunch(Colour).rgb;
-	gl_FragColor = fogfac * fogColor + (1.0-fogfac) * vec4(colour.rgb * tmp, c.a * colour.a);
-	//gl_FragColor = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
-		//			   * (vec4(0.5) + dynamic * 0.5) * c, fogfac);
+	vec4 diffuseC = vec4(colour.rgb * tmp, c.a * colour.a);
+	vec2 cscale = vec2(1.0, visibility);
+	fragOut = cscale.xxxy *	(fogfac * fogColor + (1.0-fogfac) * diffuseC);
 })";
 
 const char* Particle::FragmentShader = R"(
