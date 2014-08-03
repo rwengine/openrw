@@ -93,6 +93,7 @@ layout(std140) uniform ObjectData {
 	vec4 colour;
 	float diffusefac;
 	float ambientfac;
+	float visibility;
 };
 
 void main()
