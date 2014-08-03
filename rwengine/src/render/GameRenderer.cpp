@@ -97,9 +97,14 @@ GLuint compileShader(GLenum type, const char *source)
 
 	GLint status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status != GL_TRUE) {
-		GLint len;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+	
+	if( status != GL_TRUE ) {
+		std::cerr << "[OGL] Shader Compilation Failed" << std::endl;
+	}
+	
+	GLint len;
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+	if( len > 1 ) {
 		GLchar *buffer = new GLchar[len];
 		glGetShaderInfoLog(shader, len, NULL, buffer);
 
@@ -107,13 +112,17 @@ GLuint compileShader(GLenum type, const char *source)
 		glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
 		GLchar *sourceBuff = new GLchar[sourceLen];
 		glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
+		
+		std::cerr << "[OGL] Shader InfoLog(" << shader << "):\n" << buffer << "\nSource:\n" << sourceBuff << std::endl;
 
-		std::cerr << "ERROR compiling shader: " << buffer << "\nSource: " << sourceBuff << std::endl;
 		delete[] buffer;
 		delete[] sourceBuff;
+	}
+	
+	if (status != GL_TRUE) {
 		exit(1);
 	}
-
+	
 	return shader;
 }
 
@@ -125,6 +134,28 @@ GLuint compileProgram(const char* vertex, const char* fragment)
 	glAttachShader(prog, vertexShader);
 	glAttachShader(prog, fragmentShader);
 	glLinkProgram(prog);
+		
+	GLint status;
+	glGetProgramiv(prog, GL_LINK_STATUS, &status);
+	
+	if( status != GL_TRUE ) {
+		std::cerr << "[OGL] Program Link Failed" << std::endl;
+	}
+	
+	GLint len;
+	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
+	if( len > 1 ) {
+		GLchar *buffer = new GLchar[len];
+		glGetProgramInfoLog(prog, len, NULL, buffer);
+
+		std::cerr << "[OGL] Program InfoLog(" << prog << "):\n" << buffer << std::endl;
+
+		delete[] buffer;
+	}
+	
+	if (status != GL_TRUE) {
+		exit(1);
+	}
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
@@ -294,7 +325,6 @@ void GameRenderer::renderWorld(float alpha)
 	glm::vec3 skyBottom = weather.skyBottomColor;
 	glm::vec3 ambient = weather.ambientColor;
 	glm::vec3 dynamic = weather.directLightColor;
-	weather.poleShading;
 
 	float theta = (tod/(60.f * 24.f) - 0.5f) * 2 * 3.14159265;
 	glm::vec3 sunDirection{

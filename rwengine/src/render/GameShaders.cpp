@@ -28,9 +28,10 @@ const char* WaterHQ::FragmentShader = R"(
 in vec3 Normal;
 in vec2 TexCoords;
 uniform sampler2D texture;
+out vec4 outColour;
 void main() {
 	vec4 c = texture2D(texture, TexCoords);
-	gl_FragColor = c;
+	outColour = c;
 })";
 
 const char* Sky::VertexShader = R"(
@@ -52,8 +53,9 @@ const char* Sky::FragmentShader = R"(
 in vec3 Position;
 uniform vec4 TopColor;
 uniform vec4 BottomColor;
+out vec4 outColour;
 void main() {
-	gl_FragColor = mix(BottomColor, TopColor, clamp(Position.z, 0, 1));
+	outColour = mix(BottomColor, TopColor, clamp(Position.z, 0, 1));
 })";
 
 /*
@@ -160,6 +162,7 @@ in vec3 Normal;
 in vec2 TexCoords;
 in vec4 Colour;
 uniform sampler2D texture;
+out vec4 outColour;
 
 layout(std140) uniform SceneData {
 	mat4 projection;
@@ -177,6 +180,7 @@ layout(std140) uniform ObjectData {
 	vec4 colour;
 	float diffusefac;
 	float ambientfac;
+	float visibility;
 };
 
 #define ALPHA_DISCARD_THRESHOLD 0.01
@@ -188,7 +192,7 @@ void main()
 	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
 	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
 	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
-	gl_FragColor = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
+	outColour = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
 					   * (vec4(0.5) + dynamic * 0.5) * c, 1.f);
 })";
 
@@ -214,13 +218,14 @@ const char* ScreenSpaceRect::FragmentShader = R"(
 #version 130
 in vec2 TexCoords;
 in vec4 Colour;
-uniform	vec4 colour;
+uniform vec4 colour;
 uniform sampler2D texture;
+out vec4 outColour;
 
 void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
 	// Set colour to 0, 0, 0, 1 for textured mode.
-	gl_FragColor = colour + vec4(c.rgb, 0.0);
+	outColour = colour + vec4(c.rgb, 0.0);
 })";
 }
