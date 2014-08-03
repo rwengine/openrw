@@ -180,7 +180,6 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	waterPosition = glGetUniformLocation(waterProgram, "worldP");
 	waterWave = glGetUniformLocation(waterProgram, "waveParams");
 
-	
 	glGenVertexArrays( 1, &vao );
 
 	// Upload water plane
@@ -329,7 +328,7 @@ void GameRenderer::renderWorld(float alpha)
 
 	camera.frustum.update(proj * view);
 	
-	rendered = culled = 0;
+	rendered = culled = geoms = frames = 0;
 
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(uniTexture, 0);
@@ -457,7 +456,7 @@ void GameRenderer::renderWorld(float alpha)
 
 	renderParticles();
 
-	glActiveTexture(0);
+	glActiveTexture(GL_TEXTURE0);
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -481,7 +480,6 @@ void GameRenderer::renderWorld(float alpha)
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
 
-		glActiveTexture(0);
 		glUniform1i(ssRectTexture, 0);
 
 		if(splashTexName != 0) {
@@ -835,6 +833,7 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 
 void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, float opacity, GameObject* object)
 {
+	geoms++;
 	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
@@ -925,6 +924,7 @@ void GameRenderer::drawOnScreenText()
 
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent)
 {
+	frames++;
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {

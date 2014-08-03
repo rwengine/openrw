@@ -73,6 +73,9 @@ class GameRenderer
 
 	float _renderAlpha;
 
+	/** Internal non-descript VAOs */
+	GLuint vao, debugVAO;
+
 public:
 
 	/**
@@ -141,6 +144,8 @@ public:
 	size_t rendered;
 	/** Number of culling events */
 	size_t culled;
+	size_t frames;
+	size_t geoms;
 
 	/** @todo Clean up all these shader program and location variables */
 	GLuint worldProgram;
@@ -155,9 +160,6 @@ public:
 
 	GLuint ssRectProgram;
 	GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
-	
-	/** Internal non-descript VAOs */
-    GLuint vao, debugVAO;
 
 	GLuint skydomeVBO, skydomeIBO, debugVBO;
     GLuint debugTex;

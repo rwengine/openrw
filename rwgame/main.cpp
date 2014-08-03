@@ -28,7 +28,7 @@
 #include "game.hpp"
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
-#define GAME_TIMESTEP (1.f/20.f)
+#define GAME_TIMESTEP (1.f/30.f)
 
 constexpr int WIDTH  = 800,
               HEIGHT = 600;
@@ -230,6 +230,8 @@ void init(std::string gtapath, bool loadWorld)
 
 void update(float dt)
 {
+	gta->_work->update();
+
 	static float clockAccumulator = 0.f;
 	if (inFocus) {
 		gta->gameTime += dt;
@@ -272,8 +274,6 @@ void update(float dt)
 
 void render(float alpha)
 {
-	gta->_work->update();
-
 	float qpi = glm::half_pi<float>();
 
 	glm::mat4 view;
@@ -358,7 +358,7 @@ void render(float alpha)
 	ss << std::setfill('0') << "Time: " << std::setw(2) << gta->getHour() 
 		<< ":" << std::setw(2) << gta->getMinute() << " (" << gta->gameTime << "s)\n";
 	ss << "View: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << "\n";
-	ss << "Drawn " << gta->renderer.rendered << " / " << gta->renderer.culled << " Culled\n";
+	ss << "Drawn " << gta->renderer.rendered << " / " << gta->renderer.culled << " Culled " << " " << gta->renderer.frames << "	" << gta->renderer.geoms << "\n";
 	if( player ) {
 		ss << "Activity: ";
 		if( player->controller->getCurrentActivity() ) {
