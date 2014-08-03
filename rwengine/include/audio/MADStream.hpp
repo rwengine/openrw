@@ -13,8 +13,6 @@
 static inline
 signed int scale(mad_fixed_t sample)
 {
-  double s = mad_f_todouble(sample);
-
   /* round */
   sample += (1L << (MAD_F_FRACBITS - 16));
 
@@ -124,6 +122,7 @@ public:
 		{
 			munmap( mFdm, mStat.st_size );
 		}
+		mad_decoder_finish(&mDecoder);
 	}
 
 	bool open(const std::string& loc)
@@ -150,7 +149,7 @@ public:
 		mad_decoder_init(&mDecoder, this,
 			ms_input, ms_header, 0, ms_output, ms_error, 0);
 
-		int res = mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
+		mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
 
 		this->initialize(2, mMadSampleRate);
 

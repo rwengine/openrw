@@ -260,7 +260,7 @@ public:
 	void clearCutscene();
 
 	MADStream fgAudio;
-	void playForegroundAudio(const std::string& name);
+	bool cutsceneAudioLoaded;
 
 	/**
 	 * @brief loads a model into a special character slot.

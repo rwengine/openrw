@@ -691,6 +691,8 @@ void GameWorld::loadCutscene(const std::string &name)
 
 	gameData.loadIFP(lowerName + ".ifp");
 
+	cutsceneAudioLoaded = gameData.loadAudio(fgAudio, name+".mp3");
+
 	if( state.currentCutscene ) {
 		delete state.currentCutscene;
 	}
@@ -702,7 +704,9 @@ void GameWorld::loadCutscene(const std::string &name)
 void GameWorld::startCutscene()
 {
 	state.cutsceneStartTime = gameTime;
-	playForegroundAudio(state.currentCutscene->meta.name);
+	if( cutsceneAudioLoaded ) {
+		fgAudio.play();
+	}
 }
 
 void GameWorld::clearCutscene()
@@ -719,13 +723,6 @@ void GameWorld::clearCutscene()
 	delete state.currentCutscene;
 	state.currentCutscene = nullptr;
 	state.cutsceneStartTime = -1.f;
-}
-
-void GameWorld::playForegroundAudio(const std::string &name)
-{
-	if( gameData.loadAudio(fgAudio, name+".mp3") ) {
-		fgAudio.play();
-	}
 }
 
 void GameWorld::loadSpecialCharacter(const unsigned short index, const std::string &name)
