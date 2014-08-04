@@ -20,9 +20,17 @@ enum AttributeSemantic {
 struct AttributeIndex {
 	AttributeSemantic sem;
 	GLsizei size;
-	/*GLenum type*/
 	GLsizei stride;
 	GLsizei offset;
+	GLenum type;
+
+	AttributeIndex(AttributeSemantic s,
+				   GLsizei sz,
+				   GLsizei strd,
+				   GLsizei offs,
+				   GLenum type = GL_FLOAT)
+			: sem(s), size(sz), stride(strd), offset(offs), type(type)
+	{}
 };
 
 typedef std::vector<AttributeIndex> AttributeList;

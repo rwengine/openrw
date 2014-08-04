@@ -8,6 +8,7 @@
 #include <data/ObjectData.hpp>
 #include <data/WeaponData.hpp>
 #include <script/SCMFile.hpp>
+#include <render/Model.hpp>
 
 #include <loaders/LoaderGXT.hpp>
 
@@ -79,6 +80,16 @@ GameData::GameData(const std::string& path)
 : datpath(path), engine(nullptr)
 {
 
+}
+
+GameData::~GameData()
+{
+	for(auto& m : models) {
+		if(m.second->model) {
+			delete m.second->model;
+		}
+		delete m.second;
+	}
 }
 
 void GameData::load()

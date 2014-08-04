@@ -7,7 +7,79 @@
 #include <cassert>
 
 /**
+ * @brief Class for working with RenderWare binary streams.
+ *
+ * Stream files are split into chunks, each of which may have numerous
+ * child chunks (in particular, the "struct" chunk which is used to store
+ * data relating to the parent chunk).
+ */
+class RWBStream
+{
+	char* _data;
+	std::ptrdiff_t _size;
+	char* _dataCur;
+	char* _nextChunk;
+	std::uint32_t _chunkVersion;
+	std::ptrdiff_t _currChunkSz;
+
+public:
+
+	typedef std::uint32_t ChunkID;
+
+	RWBStream(char* data, size_t size)
+	: _data(data), _size(size), _dataCur(data), _nextChunk(data)
+	{}
+
+	/**
+	 * Moves the stream to the next chunk and returns it's ID
+	 */
+	ChunkID getNextChunk()
+	{
+		// Check that there's any data left
+		if( (unsigned)(_dataCur - _data) >= _size ) return 0;
+
+		// _nextChunk is initally = to _data, making this a non-op
+		_dataCur = _nextChunk;
+
+		ChunkID id = *(ChunkID*)(_dataCur);
+		_dataCur += sizeof(ChunkID);
+		_currChunkSz = *(std::uint32_t*)(_dataCur);
+		_dataCur += sizeof(std::uint32_t);
+		_chunkVersion = *(std::uint32_t*)(_dataCur);
+		_dataCur += sizeof(std::uint32_t);
+
+		_nextChunk = _dataCur + _currChunkSz;
+
+		return id;
+	}
+
+	char* getCursor() const
+	{
+		return _dataCur;
+	}
+
+	size_t getCurrentChunkSize() const
+	{
+		return _currChunkSz;
+	}
+
+	std::uint32_t getChunkVersion() const
+	{
+		return _chunkVersion;
+	}
+
+	/**
+	 * @brief Returns a new stream for the data inside this one.
+	 */
+	RWBStream getInnerStream() const
+	{
+		return RWBStream(_dataCur, _currChunkSz);
+	}
+};
+
+/**
  * @file rwbinarystream.h 
+ * Deprecated RenderWare binary stream interface.
  * Contains the structs for the shared Render Ware binary stream data.
  * Many thanks to http://www.gtamodding.com/index.php?title=RenderWare_binary_stream_file
  */
@@ -39,17 +111,11 @@ namespace RW
 		
 		SID_NodeName     = 0x0253F2FE
 	};
-	
-	/**
-	 * Vector data
-	 */
+
 	typedef glm::vec3 BSTVector3;
-	
-	/**
-	 * Rotation Matrix
-	 */
+
 	typedef glm::mat3 BSTMatrix;
-	
+
 	struct BSSectionHeader
 	{
 		uint32_t id;
@@ -66,14 +132,7 @@ namespace RW
 	{
 		uint32_t numframes;
 	};
-	
-	struct BSFrameListFrame //??????
-	{
-		BSTMatrix rotation;
-		BSTVector3 position;
-		int32_t index;
-		uint32_t matrixflags; // UNUSED BY ANYTHING.
-	};
+
 	
 	struct BSClump 
 	{

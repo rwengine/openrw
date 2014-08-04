@@ -10,19 +10,51 @@
 #include <vector>
 #include <string>
 #include <WorkContext.hpp>
+#include <engine/RWTypes.hpp>
 
 class Model;
-
 class GameData;
+
+class DFFLoaderException
+{
+	std::string _message;
+public:
+
+	DFFLoaderException(const std::string& message)
+		: _message(message)
+	{}
+
+	const std::string& which() { return _message; }
+};
 
 class LoaderDFF
 {
-private:
-	template<class T> T readStructure(char *data, size_t &dataI);
-	RW::BSSectionHeader readHeader(char *data, size_t &dataI);
+
+	/**
+	 * @brief loads a Frame List chunk from stream into model.
+	 * @param model
+	 * @param stream
+	 */
+	void readFrameList(Model* model, const RWBStream &stream);
+
+	void readGeometryList(Model* model, const RWBStream& stream);
+
+	void readGeometry(Model* model, const RWBStream& stream);
+
+	void readMaterialList(Model* model, const RWBStream& stream);
+
+	void readMaterial(Model* model, const RWBStream& stream);
+
+	void readTexture(Model* model, const RWBStream& stream);
+
+	void readGeometryExtension(Model* model, const RWBStream& stream);
+
+	void readBinMeshPLG(Model* model, const RWBStream& stream);
+
+	void readAtomic(Model* model, const RWBStream& stream);
 
 public:
-	Model* loadFromMemory(char *data, GameData* gameData);
+	Model* loadFromMemory(FileHandle file, GameData* gameData);
 };
 
 #include <functional>
@@ -36,7 +68,7 @@ private:
 	GameData* _gameData;
 	std::string _file;
 	ModelCallback _callback;
-	char* _data;
+	FileHandle _data;
 public:
 
 	LoadModelJob(WorkContext* context, GameData* gd, const std::string& file, ModelCallback cb);

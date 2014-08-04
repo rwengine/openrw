@@ -7,302 +7,453 @@
 #include <set>
 #include <cstring>
 
-Model* LoaderDFF::loadFromMemory(char *data, GameData *gameData)
+enum DFFChunks
 {
-    auto model = new Model;
-	RW::BinaryStreamSection root(data);
+	CHUNK_STRUCT       = 0x0001,
+	CHUNK_EXTENSION    = 0x0003,
+	CHUNK_TEXTURE      = 0x0006,
+	CHUNK_MATERIAL     = 0x0007,
+	CHUNK_MATERIALLIST = 0x0008,
+	CHUNK_FRAMELIST    = 0x000E,
+	CHUNK_GEOMETRY     = 0x000F,
+	CHUNK_CLUMP        = 0x0010,
 
-	model->clump = root.readStructure<RW::BSClump>();
+	CHUNK_ATOMIC       = 0x0014,
 
-	size_t dataI = 0, clumpID = 0;
-	while (root.hasMoreData(dataI)) {
-		auto sec = root.getNextChildSection(dataI);
+	CHUNK_GEOMETRYLIST = 0x001A,
 
-		switch (sec.header.id) {
-		case RW::SID_FrameList: {
-			auto list = sec.readStructure<RW::BSFrameList>();
-			size_t fdataI = sizeof(RW::BSFrameList) + sizeof(RW::BSSectionHeader);
-			
-			model->frames.reserve(list.numframes);
-			
-			for(size_t f = 0; f < list.numframes; ++f) {
-				RW::BSFrameListFrame& rawframe = sec.readSubStructure<RW::BSFrameListFrame>(fdataI);
-				fdataI += sizeof(RW::BSFrameListFrame);
-				ModelFrame* parent = nullptr;
-				if(rawframe.index != -1) {
-					parent = model->frames[rawframe.index];
-				}
-				else {
-					model->rootFrameIdx = f;
-				}
-				model->frames.push_back(
-					new ModelFrame(parent, rawframe.rotation, rawframe.position)
-				);
-			}
-			
-			size_t fldataI = 0;
-			size_t fn = 0;
-			while( sec.hasMoreData(fldataI)) {
-				auto listsec = sec.getNextChildSection(fldataI);
-				if( listsec.header.id == RW::SID_Extension) {
-					size_t extI = 0;
-					while( listsec.hasMoreData(extI)) {
-						auto extSec = listsec.getNextChildSection(extI);
-						if( extSec.header.id == RW::SID_NodeName) {
-							std::string framename(extSec.raw(), extSec.header.size);
-							std::transform(framename.begin(), framename.end(), framename.begin(), ::tolower );
-							
-							if( fn < model->frames.size() ) {
-								model->frames[fn]->setName(framename);
-								fn++;
-							}
-						}
-					}
-				}
-			}
-			
-			break;
+	CHUNK_BINMESHPLG   = 0x050E,
+
+	CHUNK_NODENAME = 0x0253F2FE,
+};
+
+// These structs are used to interpret raw bytes from the stream.
+/// @todo worry about endianness.
+
+typedef glm::vec3 BSTVector3;
+typedef glm::mat3 BSTMatrix;
+typedef glm::i8vec4 BSTColour;
+
+struct RWBSFrame
+{
+	BSTMatrix rotation;
+	BSTVector3 position;
+	int32_t index;
+	uint32_t matrixflags; // Not used
+};
+
+void LoaderDFF::readFrameList(Model *model, const RWBStream &stream)
+{
+	auto listStream = stream.getInnerStream();
+
+	auto listStructID = listStream.getNextChunk();
+	if( listStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Frame List missing struct chunk");
+	}
+
+	char* headerPtr = listStream.getCursor();
+
+	unsigned int numFrames = *(std::uint32_t*)headerPtr;
+	headerPtr += sizeof(std::uint32_t);
+
+	model->frames.reserve(numFrames);
+
+	for( size_t f = 0; f < numFrames; ++f ) {
+		auto data = (RWBSFrame*)headerPtr;
+		headerPtr += sizeof(RWBSFrame);
+
+		ModelFrame* parent = nullptr;
+		if( data->index != -1 ) {
+			parent = model->frames[data->index];
 		}
-		case RW::SID_GeometryList: {
-			/*auto list =*/ sec.readStructure<RW::BSGeometryList>();
-			size_t gdataI = 0;
-			while (sec.hasMoreData(gdataI)) {
-				std::shared_ptr<Model::Geometry> geom(new Model::Geometry);
-				
-				auto item = sec.getNextChildSection(gdataI);
+		else {
+			model->rootFrameIdx = f;
+		}
 
-				if (item.header.id == RW::SID_Geometry) {
-					size_t dataI = 0, secI = 0;
-					auto geometry = item.readStructure<RW::BSGeometry>();
-					// std::cout << " verts(" << geometry.numverts << ") tris(" << geometry.numtris << ")" << std::endl;
-					
-					geom->flags = geometry.flags;
+		auto frame = new ModelFrame(parent, data->rotation, data->position);
+		model->frames.push_back(frame);
+	}
 
-					item.getNextChildSection(secI);
-					char *data = item.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSGeometry);
+	size_t namedFrames = 0;
 
-					if (item.header.versionid < 0x1003FFFF)
-						/*auto colors =*/ readStructure<RW::BSGeometryColor>(data, dataI);
-					
-					std::vector<Model::GeometryVertex> vertices;
-					vertices.resize(geometry.numverts);
-					
-					if ((geometry.flags & RW::BSGeometry::VertexColors) == RW::BSGeometry::VertexColors) {
-						for (size_t v = 0; v < geometry.numverts; ++v) {
-							auto s = readStructure<RW::BSColor>(data, dataI);
-							vertices[v].colour = glm::vec4(s.r/255.f, s.g/255.f, s.b/255.f, s.a/255.f);
-						}
+	/// @todo perhaps flatten this out a little
+	for( auto chunkID = listStream.getNextChunk(); chunkID != 0; chunkID = listStream.getNextChunk() )
+	{
+		switch(chunkID) {
+		case CHUNK_EXTENSION: {
+			auto extStream = listStream.getInnerStream();
+			for( auto chunkID = extStream.getNextChunk(); chunkID != 0; chunkID = extStream.getNextChunk() )
+			{
+				switch( chunkID ) {
+				case CHUNK_NODENAME: {
+					std::string fname(extStream.getCursor(), extStream.getCurrentChunkSize());
+					std::transform(fname.begin(), fname.end(), fname.begin(), ::tolower );
+
+					if( namedFrames < model->frames.size() ) {
+						model->frames[namedFrames++]->setName(fname);
 					}
-					else {
-						// To save needing another shader, just insert a white colour for each vertex
-						for (size_t v = 0; v < geometry.numverts; ++v) {
-							vertices[v].colour = glm::vec4(1.f, 1.f, 1.f, 1.f);
-						}
-					}
-					
-					/** TEX COORDS **/
-					if ((geometry.flags & RW::BSGeometry::TexCoords1) == RW::BSGeometry::TexCoords1 || 
-						(geometry.flags & RW::BSGeometry::TexCoords2) == RW::BSGeometry::TexCoords1) {
-						for (size_t v = 0; v < geometry.numverts; ++v) {
-							vertices[v].texcoord = readStructure<glm::vec2>(data, dataI);
-						}
-					}
-
-					for (size_t j = 0; j < geometry.numtris; ++j) {
-						readStructure<RW::BSGeometryTriangle>(data, dataI);
-					}
-
-					/** GEOMETRY BOUNDS **/
-					geom->geometryBounds = readStructure<RW::BSGeometryBounds>(data, dataI);
-
-					/** VERTICES **/
-					for (size_t v = 0; v < geometry.numverts; ++v) {
-						vertices[v].position = readStructure<glm::vec3>(data, dataI);
-					}
-					
-					/** NORMALS **/
-					if ((geometry.flags & RW::BSGeometry::StoreNormals) == RW::BSGeometry::StoreNormals) {
-						for (size_t v = 0; v < geometry.numverts; ++v) {
-							vertices[v].normal = readStructure<glm::vec3>(data, dataI);
-						}
-					}
-					else {
-						for (size_t v = 0; v < geometry.numverts; ++v) {
-							vertices[v].normal = glm::vec3(0.f, 0.f, 1.f);
-						}
-						// Generate normals.
-						/*geometryStruct.normals.resize(geometry.numverts);
-						for (auto &subgeom : geometryStruct.subgeom) {
-							glm::vec3 normal{0, 0, 0};
-							for (size_t i = 0; i+2 < subgeom.indices.size(); i += 3) {
-								glm::vec3 p1 = geometryStruct.vertices[subgeom.indices[i]];
-								glm::vec3 p2 = geometryStruct.vertices[subgeom.indices[i+1]];
-								glm::vec3 p3 = geometryStruct.vertices[subgeom.indices[i+2]];
-
-								glm::vec3 U = p2 - p1;
-								glm::vec3 V = p3 - p1;
-
-								normal.x = (U.y * V.z) - (U.z * V.y);
-								normal.y = (U.z * V.x) - (U.x * V.z);
-								normal.z = (U.x * V.y) - (U.y * V.x);
-
-								if (glm::length(normal) > 0.0000001)
-									normal = glm::normalize(normal);
-
-								geometryStruct.normals[subgeom.indices[i]]   = normal;
-								geometryStruct.normals[subgeom.indices[i+1]] = normal;
-								geometryStruct.normals[subgeom.indices[i+2]] = normal;
-							}
-						}*/
-					}
-
-					/** TEXTURES **/
-					auto materiallistsec = item.getNextChildSection(secI);
-					auto materialList = materiallistsec.readStructure<RW::BSMaterialList>();
-
-					// Skip over the per-material byte values that I don't know what do.
-					dataI += sizeof(uint32_t) * materialList.nummaterials;
-
-					size_t matI = 0;
-					materiallistsec.getNextChildSection(matI);
-					
-					geom->materials.resize(materialList.nummaterials);
-
-					for (size_t m = 0; m < materialList.nummaterials; ++m) {
-						auto materialsec = materiallistsec.getNextChildSection(matI);
-						if (materialsec.header.id != RW::SID_Material)
-							continue;
-
-						auto material = materialsec.readStructure<RW::BSMaterial>();
-						geom->materials[m].textures.resize(material.numtextures);
-						
-						geom->materials[m].colour = material.color;
-						geom->materials[m].diffuseIntensity = material.diffuse;
-						geom->materials[m].ambientIntensity = material.ambient;
-						geom->materials[m].flags = 0;
-						
-						if( material.color.r == 60 && material.color.g == 255 && material.color.b == 0 ) {
-							geom->materials[m].flags |= Model::MTF_PrimaryColour;
-						}
-						else if( material.color.r == 255 && material.color.g == 0 && material.color.b == 175 ) {
-							geom->materials[m].flags |= Model::MTF_SecondaryColour;
-						}
-
-						size_t texI = 0;
-						materialsec.getNextChildSection(texI);
-						
-						for (size_t t = 0; t < material.numtextures; ++t) {
-							auto texsec = materialsec.getNextChildSection(texI);
-							/*auto texture =*/ texsec.readStructure<RW::BSTexture>();
-
-							std::string textureName, alphaName;
-							size_t yetAnotherI = 0;
-							texsec.getNextChildSection(yetAnotherI);
-
-							auto namesec = texsec.getNextChildSection(yetAnotherI);
-							auto alphasec = texsec.getNextChildSection(yetAnotherI);
-
-							// The data is null terminated anyway.
-							textureName = namesec.raw();
-							alphaName = alphasec.raw();
-							
-							std::transform(textureName.begin(), textureName.end(), textureName.begin(), ::tolower );
-							std::transform(alphaName.begin(), alphaName.end(), alphaName.begin(), ::tolower );
-
-							geom->materials[m].textures[t] = {textureName, alphaName};
-						}
-
-						if(geom->materials[m].textures.size() < 1) continue;
-					}
-
-					if(item.hasMoreData(secI))
-					{
-						auto extensions = item.getNextChildSection(secI);
-						size_t extI = 0;
-						while(extensions.hasMoreData(extI))
-						{
-							auto extsec = extensions.getNextChildSection(extI);
-							if(extsec.header.id == RW::SID_BinMeshPLG)
-							{
-								auto meshplg = extsec.readSubStructure<RW::BSBinMeshPLG>(0);
-								geom->subgeom.resize(meshplg.numsplits);
-								geom->facetype = static_cast<Model::FaceType>(meshplg.facetype);
-								size_t meshplgI = sizeof(RW::BSBinMeshPLG);
-								size_t sgstart = 0;
-								for(size_t i = 0; i < meshplg.numsplits; ++i)
-								{
-                                    auto plgHeader = extsec.readSubStructure<RW::BSMaterialSplit>(meshplgI);
-									meshplgI += sizeof(RW::BSMaterialSplit);
-									geom->subgeom[i].material = plgHeader.index;
-									geom->subgeom[i].indices = new uint32_t[plgHeader.numverts];
-									geom->subgeom[i].numIndices = plgHeader.numverts;
-									geom->subgeom[i].start = sgstart;
-									sgstart += plgHeader.numverts;
-									for (size_t j = 0; j < plgHeader.numverts; ++j) {
-										geom->subgeom[i].indices[j] = extsec.readSubStructure<uint32_t>(meshplgI);
-										meshplgI += sizeof(uint32_t);
-									}
-								}
-							}
-						}
-					}
-					
-					/* Upload Vertex Data */
-					geom->dbuff.setFaceType(geom->facetype == Model::Triangles ?
-								GL_TRIANGLES : GL_TRIANGLE_STRIP);
-					
-					/* uploadVertices uses magic to determine what is inside vertices */
-					geom->gbuff.uploadVertices(vertices);
-					/* dbuff asks gbuff for it's contents */
-					geom->dbuff.addGeometry(&geom->gbuff);
-					
-					/* TODO: Migrate indicies to new framework */
-					glGenBuffers(1, &geom->EBO);
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->EBO);
-					
-					size_t icount = std::accumulate(
-						geom->subgeom.begin(), 
-						geom->subgeom.end(), 0u, 
-						[](size_t a, const Model::SubGeometry& b) {return a + b.numIndices;});
-					glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0, GL_STATIC_DRAW);
-					for(auto& sg : geom->subgeom) {
-						glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 
-										sg.start * sizeof(uint32_t),
-										sizeof(uint32_t) * sg.numIndices, 
-										sg.indices);
-					}
-					
-					geom->clumpNum = clumpID;
-					
-					// Add it
-					model->geometries.push_back(geom);
+				}
+					break;
+				default:
+					break;
 				}
 			}
-			clumpID++;
+		}
+			break;
+		default:
 			break;
 		}
-		case RW::SID_Atomic: {
-			const Model::Atomic& at = sec.readStructure<Model::Atomic>();
-			model->frames[at.frame]->addGeometry(at.geometry);
-			model->atomics.push_back(at);
+	}
+}
+
+void LoaderDFF::readGeometryList(Model *model, const RWBStream &stream)
+{
+	auto listStream = stream.getInnerStream();
+
+	auto listStructID = listStream.getNextChunk();
+	if( listStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Geometry List missing struct chunk");
+	}
+
+	char* headerPtr = listStream.getCursor();
+
+	unsigned int numGeometries = *(std::uint32_t*)headerPtr;
+	headerPtr += sizeof(std::uint32_t);
+
+	model->geometries.reserve(numGeometries);
+
+	for( auto chunkID = listStream.getNextChunk(); chunkID != 0; chunkID = listStream.getNextChunk() )
+	{
+		switch(chunkID) {
+		case CHUNK_GEOMETRY:
+			readGeometry(model, listStream);
+			break;
+		default:
 			break;
 		}
+	}
+}
+
+void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
+{
+	auto geomStream = stream.getInnerStream();
+
+	auto geomStructID = geomStream.getNextChunk();
+	if( geomStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Geometry missing struct chunk");
+	}
+
+	std::shared_ptr<Model::Geometry> geom(new Model::Geometry);
+
+	char* headerPtr = geomStream.getCursor();
+
+	geom->flags = *(std::uint16_t*)headerPtr;
+	headerPtr += sizeof(std::uint16_t);
+
+	unsigned short numUVs = *(std::uint8_t*)headerPtr;
+	headerPtr += sizeof(std::uint8_t);
+	unsigned short moreFlags = *(std::uint8_t*)headerPtr;
+	headerPtr += sizeof(std::uint8_t);
+
+	unsigned int numTris = *(std::uint32_t*)headerPtr;
+	headerPtr += sizeof(std::uint32_t);
+	unsigned int numVerts = *(std::uint32_t*)headerPtr;
+	headerPtr += sizeof(std::uint32_t);
+	unsigned int numFrames = *(std::uint32_t*)headerPtr;
+	headerPtr += sizeof(std::uint32_t);
+
+	std::vector<Model::GeometryVertex> verts;
+	verts.resize(numVerts);
+
+	if( geomStream.getChunkVersion() < 0x1003FFFF ) {
+		headerPtr += sizeof(RW::BSGeometryColor);
+	}
+
+	/// @todo extract magic numbers.
+
+	if( (geom->flags & 8) == 8 ) {
+		for(size_t v = 0; v < numVerts; ++v) {
+			verts[v].colour = *(glm::u8vec4*)headerPtr;
+			headerPtr += sizeof(glm::u8vec4);
+		}
+	}
+	else {
+		for(size_t v = 0; v < numVerts; ++v) {
+			verts[v].colour = {255, 255, 255, 255};
+		}
+	}
+
+	if( (geom->flags & 4) == 4 || (geom->flags & 128) == 128) {
+		for(size_t v = 0; v < numVerts; ++v) {
+			verts[v].texcoord = *(glm::vec2*)headerPtr;
+			headerPtr += sizeof(glm::vec2);
+		}
+	}
+
+	// Skip indicies data for now.
+	headerPtr += sizeof(RW::BSGeometryTriangle) * numTris;
+
+	geom->geometryBounds = *(RW::BSGeometryBounds*)headerPtr;
+	geom->geometryBounds.radius = std::abs(geom->geometryBounds.radius);
+	headerPtr += sizeof(RW::BSGeometryBounds);
+
+	for(size_t v = 0; v < numVerts; ++v) {
+		verts[v].position = *(glm::vec3*)headerPtr;
+		headerPtr += sizeof(glm::vec3);
+	}
+
+	if( (geom->flags & 16) == 16 ) {
+		for(size_t v = 0; v < numVerts; ++v) {
+			verts[v].normal = *(glm::vec3*)headerPtr;
+			headerPtr += sizeof(glm::vec3);
+		}
+	}
+
+	// Add the geometry to the model now so that it can be accessed.
+	model->geometries.push_back(geom);
+
+	// Process the geometry child sections
+	for(auto chunkID = geomStream.getNextChunk(); chunkID != 0; chunkID = geomStream.getNextChunk())
+	{
+		switch( chunkID ) {
+		case CHUNK_MATERIALLIST:
+			readMaterialList(model, geomStream);
+			break;
+		case CHUNK_EXTENSION:
+			readGeometryExtension(model, geomStream);
+			break;
+		default:
+			break;
+		}
+	}
+
+	geom->dbuff.setFaceType(geom->facetype == Model::Triangles ?
+									GL_TRIANGLES : GL_TRIANGLE_STRIP);
+	geom->gbuff.uploadVertices(verts);
+	geom->dbuff.addGeometry(&geom->gbuff);
+
+	glGenBuffers(1, &geom->EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->EBO);
+
+	size_t icount = std::accumulate(geom->subgeom.begin(), geom->subgeom.end(),
+									0u,
+									[](size_t a, const Model::SubGeometry& b) {return a + b.numIndices;});
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0, GL_STATIC_DRAW);
+	for(auto& sg : geom->subgeom) {
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
+						sg.start * sizeof(uint32_t),
+						sizeof(uint32_t) * sg.numIndices,
+						sg.indices);
+	}
+}
+
+void LoaderDFF::readMaterialList(Model *model, const RWBStream &stream)
+{
+	auto listStream = stream.getInnerStream();
+
+	auto listStructID = listStream.getNextChunk();
+	if( listStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("MaterialList missing struct chunk");
+	}
+
+	unsigned int numMaterials = *(std::uint32_t*)listStream.getCursor();
+
+	model->geometries.back()->materials.reserve(numMaterials);
+
+	RWBStream::ChunkID chunkID;
+	while( (chunkID = listStream.getNextChunk()) ) {
+		switch( chunkID ) {
+		case CHUNK_MATERIAL:
+			readMaterial(model, listStream);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void LoaderDFF::readMaterial(Model *model, const RWBStream &stream)
+{
+	auto materialStream = stream.getInnerStream();
+
+	auto matStructID = materialStream.getNextChunk();
+	if( matStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Material missing struct chunk");
+	}
+
+	char* matData = materialStream.getCursor();
+
+	Model::Material material;
+
+	// Unkown
+	matData += sizeof(std::uint32_t);
+	material.colour = *(glm::u8vec4*)matData;
+	matData += sizeof(std::uint32_t);
+	// Unkown
+	matData += sizeof(std::uint32_t);
+	// uses texture
+	bool usesTexture = *(std::uint32_t*)matData;
+	matData += sizeof(std::uint32_t);
+
+	material.ambientIntensity = *(float*)matData;
+	matData += sizeof(float);
+	/*float specular = *(float*)matData;*/
+	matData += sizeof(float);
+	material.diffuseIntensity = *(float*)matData;
+	matData += sizeof(float);
+	material.flags = 0;
+
+	model->geometries.back()->materials.push_back(material);
+
+	RWBStream::ChunkID chunkID;
+	while( chunkID = materialStream.getNextChunk() ) {
+		switch( chunkID ) {
+		case CHUNK_TEXTURE:
+			readTexture(model, materialStream);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void LoaderDFF::readTexture(Model *model, const RWBStream &stream)
+{
+	auto texStream = stream.getInnerStream();
+
+	auto texStructID = texStream.getNextChunk();
+	if( texStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Texture missing struct chunk");
+	}
+
+	// There's some data in the Texture's struct, but we don't know what it is.
+
+	/// @todo improve how these strings are read.
+	std::string name, alpha;
+
+	texStream.getNextChunk();
+	name = texStream.getCursor();
+	texStream.getNextChunk();
+	alpha = texStream.getCursor();
+
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower );
+	std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
+
+	model->geometries.back()->materials.back().textures.push_back({name, alpha});
+}
+
+void LoaderDFF::readGeometryExtension(Model *model, const RWBStream &stream)
+{
+	auto extStream = stream.getInnerStream();
+
+	RWBStream::ChunkID chunkID;
+	while( (chunkID = extStream.getNextChunk()) ) {
+		switch( chunkID ) {
+		case CHUNK_BINMESHPLG:
+			readBinMeshPLG(model, extStream);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void LoaderDFF::readBinMeshPLG(Model *model, const RWBStream &stream)
+{
+	auto data = stream.getCursor();
+
+	model->geometries.back()->facetype = static_cast<Model::FaceType>(
+				*(std::uint32_t*)data);
+	data += sizeof(std::uint32_t);
+
+	unsigned int numSplits = *(std::uint32_t*)data;
+	data += sizeof(std::uint32_t);
+
+	// Number of triangles.
+	data += sizeof(std::uint32_t);
+
+	model->geometries.back()->subgeom.reserve(numSplits);
+
+	size_t start = 0;
+
+	for(size_t s = 0; s < numSplits; ++s) {
+		Model::SubGeometry sg;
+		sg.numIndices = *(std::uint32_t*)data;
+		data += sizeof(std::uint32_t);
+		sg.material = *(std::uint32_t*)data;
+		data += sizeof(std::uint32_t);
+		sg.start = start;
+		start += sg.numIndices;
+
+		sg.indices = new std::uint32_t[sg.numIndices];
+
+		for(size_t i = 0; i < sg.numIndices; ++i) {
+			sg.indices[i] = *(std::uint32_t*)data;
+			data += sizeof(std::uint32_t);
+		}
+		model->geometries.back()->subgeom.push_back(sg);
+	}
+}
+
+void LoaderDFF::readAtomic(Model *model, const RWBStream &stream)
+{
+	auto atomicStream = stream.getInnerStream();
+
+	auto atomicStructID = atomicStream.getNextChunk();
+	if( atomicStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Atomic missing struct chunk");
+	}
+
+	Model::Atomic atom;
+	auto data = atomicStream.getCursor();
+	atom.frame = *(std::uint32_t*)data;
+	data += sizeof(std::uint32_t);
+	atom.geometry = *(std::uint32_t*)data;
+	model->frames[atom.frame]->addGeometry(atom.geometry);
+	model->atomics.push_back(atom);
+
+	/// @todo are any atomic extensions important?
+}
+
+Model* LoaderDFF::loadFromMemory(FileHandle file, GameData *gameData)
+{
+	auto model = new Model;
+
+	RWBStream rootStream(file->data, file->length);
+
+	auto rootID = rootStream.getNextChunk();
+	if( rootID != CHUNK_CLUMP ) {
+		throw DFFLoaderException("Invalid root section ID " + std::to_string(rootID));
+	}
+
+	RWBStream modelStream = rootStream.getInnerStream();
+	auto rootStructID = modelStream.getNextChunk();
+	if( rootStructID != CHUNK_STRUCT ) {
+		throw DFFLoaderException("Clump missing struct chunk");
+	}
+
+	// There is only one value in the struct section.
+	model->numAtomics = *(std::uint32_t*)rootStream.getCursor();
+
+	// Process everything inside the clump stream.
+	RWBStream::ChunkID chunkID;
+	while( chunkID = modelStream.getNextChunk() ) {
+		switch( chunkID ) {
+		case CHUNK_FRAMELIST:
+			readFrameList(model, modelStream);
+			break;
+		case CHUNK_GEOMETRYLIST:
+			readGeometryList(model, modelStream);
+			break;
+		case CHUNK_ATOMIC:
+			readAtomic(model, modelStream);
+			break;
+		default:
+			break;
 		}
 	}
 
 	return model;
-}
-
-template<class T> T LoaderDFF::readStructure(char *data, size_t &dataI)
-{
-	size_t originalOffset = dataI;
-	dataI += sizeof(T);
-	return *reinterpret_cast<T*>(data + originalOffset);
-}
-
-RW::BSSectionHeader LoaderDFF::readHeader(char *data, size_t &dataI)
-{
-	return readStructure<RW::BSSectionHeader>(data, dataI);
 }
 
 LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, const std::string &file, ModelCallback cb)
@@ -313,7 +464,7 @@ LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, const std::string
 
 void LoadModelJob::work()
 {
-	_data = _gameData->openFile(_file);
+	_data = _gameData->openFile2(_file);
 }
 
 void LoadModelJob::complete()
@@ -329,6 +480,4 @@ void LoadModelJob::complete()
 	}
 
 	_callback(m);
-
-	delete[] _data;
 }

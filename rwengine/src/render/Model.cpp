@@ -13,6 +13,11 @@ Model::Geometry::Geometry()
 
 Model::Geometry::~Geometry()
 {
+	for(auto& sg : subgeom) {
+		if( sg.indices ) {
+			delete[] sg.indices;
+		}
+	}
 }
 
 ModelFrame::ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT)
@@ -32,4 +37,12 @@ void ModelFrame::reset()
 void ModelFrame::addGeometry(size_t idx)
 {
 	geometries.push_back(idx);
+}
+
+
+Model::~Model()
+{
+	for(auto mf : frames) {
+		delete mf;
+	}
 }

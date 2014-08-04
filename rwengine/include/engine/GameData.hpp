@@ -74,6 +74,7 @@ public:
 	 * @param path Path to the root of the game data.
 	 */
 	GameData(const std::string& path = "");
+	~GameData();
 	
 	GameWorld* engine;
 	

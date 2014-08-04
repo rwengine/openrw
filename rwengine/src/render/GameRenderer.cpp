@@ -1027,13 +1027,14 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 
 		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
 			auto col = mat.colour;
+
 			if(col.a < 255 && queueTransparent) return false;
 			if( object && object->type() == GameObject::Vehicle ) {
 				auto vehicle = static_cast<VehicleObject*>(object);
-				if( (mat.flags&Model::MTF_PrimaryColour) != 0 ) {
+				if( col.r == 60 && col.g == 255 && col.b == 0 ) {
 					oudata.colour = glm::vec4(vehicle->colourPrimary, 1.f);
 				}
-				else if( (mat.flags&Model::MTF_SecondaryColour) != 0 ) {
+				else if( col.r == 255 && col.g == 0 && col.b == 175 ) {
 					oudata.colour = glm::vec4(vehicle->colourSecondary, 1.f);
 				}
 				else {
@@ -1055,7 +1056,6 @@ bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const gl
 
 	glDrawElements(model->geometries[g]->dbuff.getFaceType(),
 								subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
-	
 	return true;
 }
 

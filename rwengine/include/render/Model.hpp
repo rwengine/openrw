@@ -27,7 +27,6 @@ class ModelFrame {
 public:
 	
 	ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT);
-	~ModelFrame();
 
 	void reset();
 	void setTransform(const glm::mat4& m);
@@ -72,7 +71,7 @@ public:
         TriangleStrip = 1
     };
 
-	RW::BSClump clump;
+	std::uint32_t numAtomics;
 
 	struct Texture {
 		std::string name;
@@ -105,7 +104,7 @@ public:
 		glm::vec3 position; /* 0 */
 		glm::vec3 normal;   /* 24 */
 		glm::vec2 texcoord; /* 48 */
-		glm::vec4 colour;   /* 64 */
+		glm::u8vec4 colour;   /* 64 */
 		
 		/** @see GeometryBuffer */
 		static const AttributeList vertex_attributes() {
@@ -113,7 +112,7 @@ public:
 				{ATRS_Position, 3, sizeof(GeometryVertex),  0ul},
 				{ATRS_Normal,   3, sizeof(GeometryVertex), sizeof(float)*3},
 				{ATRS_TexCoord, 2, sizeof(GeometryVertex), sizeof(float)*6},
-				{ATRS_Colour,   4, sizeof(GeometryVertex), sizeof(float)*8}
+				{ATRS_Colour,   4, sizeof(GeometryVertex), sizeof(float)*8, GL_UNSIGNED_BYTE}
 			};
 		}
 	};
@@ -157,6 +156,8 @@ public:
 					[&](ModelFrame* f) { return f->getName() == name; });
 		return fit != frames.end() ? *fit : nullptr;
 	}
+
+	~Model();
 };
 
 #endif
