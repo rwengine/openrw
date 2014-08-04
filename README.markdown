@@ -11,6 +11,7 @@ Dependencies:
 * Bullet
 * GLM (0.9.5+)
 * SFML (2.0+)
+* Boost Test
 
 Options:
 
