@@ -121,8 +121,8 @@ public:
 		if( mFdm )
 		{
 			munmap( mFdm, mStat.st_size );
+			mad_decoder_finish(&mDecoder);
 		}
-		mad_decoder_finish(&mDecoder);
 	}
 
 	bool open(const std::string& loc)
