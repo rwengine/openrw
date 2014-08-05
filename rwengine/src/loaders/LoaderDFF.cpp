@@ -150,16 +150,16 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 	geom->flags = *(std::uint16_t*)headerPtr;
 	headerPtr += sizeof(std::uint16_t);
 
-	unsigned short numUVs = *(std::uint8_t*)headerPtr;
+	/*unsigned short numUVs = *(std::uint8_t*)headerPtr;*/
 	headerPtr += sizeof(std::uint8_t);
-	unsigned short moreFlags = *(std::uint8_t*)headerPtr;
+	/*unsigned short moreFlags = *(std::uint8_t*)headerPtr;*/
 	headerPtr += sizeof(std::uint8_t);
 
 	unsigned int numTris = *(std::uint32_t*)headerPtr;
 	headerPtr += sizeof(std::uint32_t);
 	unsigned int numVerts = *(std::uint32_t*)headerPtr;
 	headerPtr += sizeof(std::uint32_t);
-	unsigned int numFrames = *(std::uint32_t*)headerPtr;
+	/*unsigned int numFrames = *(std::uint32_t*)headerPtr;*/
 	headerPtr += sizeof(std::uint32_t);
 
 	std::vector<Model::GeometryVertex> verts;
@@ -291,8 +291,7 @@ void LoaderDFF::readMaterial(Model *model, const RWBStream &stream)
 	matData += sizeof(std::uint32_t);
 	// Unkown
 	matData += sizeof(std::uint32_t);
-	// uses texture
-	bool usesTexture = *(std::uint32_t*)matData;
+	/*bool usesTexture = *(std::uint32_t*)matData;*/
 	matData += sizeof(std::uint32_t);
 
 	material.ambientIntensity = *(float*)matData;
@@ -306,7 +305,7 @@ void LoaderDFF::readMaterial(Model *model, const RWBStream &stream)
 	model->geometries.back()->materials.push_back(material);
 
 	RWBStream::ChunkID chunkID;
-	while( chunkID = materialStream.getNextChunk() ) {
+	while( ( chunkID = materialStream.getNextChunk() ) ) {
 		switch( chunkID ) {
 		case CHUNK_TEXTURE:
 			readTexture(model, materialStream);
@@ -437,7 +436,7 @@ Model* LoaderDFF::loadFromMemory(FileHandle file, GameData *gameData)
 
 	// Process everything inside the clump stream.
 	RWBStream::ChunkID chunkID;
-	while( chunkID = modelStream.getNextChunk() ) {
+	while( ( chunkID = modelStream.getNextChunk() ) ) {
 		switch( chunkID ) {
 		case CHUNK_FRAMELIST:
 			readFrameList(model, modelStream);

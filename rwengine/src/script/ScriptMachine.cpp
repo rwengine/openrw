@@ -143,7 +143,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 
 #include <iostream>
 ScriptMachine::ScriptMachine(GameWorld *world, SCMFile *file, SCMOpcodes *ops)
-	: _world(world), _file(file), _ops(ops)
+	: _file(file), _ops(ops), _world(world)
 {
 	startThread(0);
 	auto globals = _file->getGlobalsSize() / 4;

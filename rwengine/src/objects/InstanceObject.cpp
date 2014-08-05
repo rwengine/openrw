@@ -31,8 +31,10 @@ InstanceObject::InstanceObject(GameWorld* engine,
 
 InstanceObject::~InstanceObject()
 {
-	engine->dynamicsWorld->removeRigidBody(body);
-	delete body;
+	if( body ) {
+		engine->dynamicsWorld->removeRigidBody(body);
+		delete body;
+	}
 }
 
 void InstanceObject::tick(float dt)

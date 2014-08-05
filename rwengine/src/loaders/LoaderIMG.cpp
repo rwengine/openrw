@@ -25,14 +25,19 @@ bool LoaderIMG::load(const std::string& filename)
 
 		m_assetCount = fileSize / 32;
 
-		fread(&m_assets[0], sizeof(LoaderIMGFile), fileSize / 32, fp);
+		if( fread(&m_assets[0], sizeof(LoaderIMGFile), fileSize / 32, fp) == 0 )
+		{
+			std::cout << "No Records in IMG archive" << std::endl;
+		}
 
 		fclose(fp);
 		m_archive = filename;
 		return true;
 	}
 	else
+	{
 		return false;
+	}
 }
 
 /// Get the information of a asset in the examining archive
@@ -75,7 +80,9 @@ char* LoaderIMG::loadToMemory(const std::string& assetname)
 		char* raw_data = new char[assetInfo.size * 2048];
 
 		fseek(fp, assetInfo.offset * 2048, SEEK_SET);
-		fread(raw_data, 2048, assetInfo.size, fp);
+		if( fread(raw_data, 2048, assetInfo.size, fp) == 0 ) {
+			std::cerr << "Error reading asset " << assetInfo.name << std::endl;
+		}
 
 		fclose(fp);
 		return raw_data;

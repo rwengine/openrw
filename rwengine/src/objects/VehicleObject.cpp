@@ -122,7 +122,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			bool isDam = name.find("_dam") != name.npos;
 			bool isLod = name.find("lo") != name.npos;
 			bool isDum = name.find("_dummy") != name.npos;
-			bool isOk = name.find("_ok") != name.npos;
+			/*bool isOk = name.find("_ok") != name.npos;*/
 			if(isDam || isLod || isDum ) {
 				animator->setFrameVisibility(f, false);
 			}
