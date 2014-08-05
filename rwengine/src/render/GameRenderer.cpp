@@ -551,7 +551,8 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 
 	if(!pedestrian->model->model) return;
 
-	renderModel(pedestrian->model->model, matrixModel, pedestrian, pedestrian->animator);
+	auto root = pedestrian->model->model->frames[0];
+	renderFrame(pedestrian->model->model, root->getChildren()[0], matrixModel, pedestrian, 1.f, pedestrian->animator);
 
 	if(pedestrian->getActiveItem()) {
 		auto handFrame = pedestrian->model->model->findFrame("srhand");
@@ -958,7 +959,11 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 	auto localmatrix = matrix;
 
 	if(object && object->animator) {
-		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, false); //object->isAnimationFixed());
+		bool animFixed = false;
+		if( object->type() == GameObject::Character ) {
+			animFixed = static_cast<CharacterObject*>(object)->isAnimationFixed();
+		}
+		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, animFixed);
 	}
 	else {
 		localmatrix *= f->getTransform();

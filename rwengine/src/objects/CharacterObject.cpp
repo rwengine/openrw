@@ -256,7 +256,12 @@ void CharacterObject::updateCharacter(float dt)
 		else 
 		{
 			glm::vec3 walkDir;
-			glm::vec3 animTranslate = animator->getRootTranslation();
+			glm::vec3 animTranslate;
+
+			if( isAnimationFixed() ) {
+				auto d = animator->getDurationTransform() / animator->getAnimation()->duration;
+				animTranslate = d * dt;
+			}
 
 			position = getPosition();
 
@@ -469,10 +474,7 @@ void CharacterObject::clearTargetPosition()
 
 bool CharacterObject::isAnimationFixed() const
 {
-	// TODO probably get rid of how this works.
-	auto ca = animator->getAnimation();
-	return ca != animations.car_getin_lhs &&
-			ca != animations.car_getout_lhs;
+	return currentActivity == Walk || currentActivity == Run;
 }
 
 void CharacterObject::addToInventory(InventoryItem *item)

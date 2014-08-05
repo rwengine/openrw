@@ -177,6 +177,22 @@ glm::vec3 Animator::getRootTranslation() const
 	return glm::vec3();
 }
 
+glm::vec3 Animator::getDurationTransform() const
+{
+	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
+		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
+
+		auto it = getAnimation()->bones.find(realRoot->getName());
+		if(it != getAnimation()->bones.end()) {
+			auto start = it->second->frames.front().position;
+			auto end = it->second->frames.back().position;
+			return end - start;
+		}
+	}
+
+	return glm::vec3();
+}
+
 glm::quat Animator::getRootRotation() const
 {
 	return glm::quat();

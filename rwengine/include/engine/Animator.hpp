@@ -127,6 +127,12 @@ public:
 	glm::vec3 getRootTranslation() const;
 
 	/**
+	 * @brief getDurationTransform returns the translation of the root bone over the duration of the animation.
+	 * @return
+	 */
+	glm::vec3 getDurationTransform() const;
+
+	/**
 	 * @brief getRootRotation see getRootTranslation
 	 * @return
 	 */
