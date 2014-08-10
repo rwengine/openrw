@@ -13,11 +13,7 @@ Model::Geometry::Geometry()
 
 Model::Geometry::~Geometry()
 {
-	for(auto& sg : subgeom) {
-		if( sg.indices ) {
-			delete[] sg.indices;
-		}
-	}
+
 }
 
 ModelFrame::ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT)

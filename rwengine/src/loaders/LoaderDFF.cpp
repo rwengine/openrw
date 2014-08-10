@@ -243,7 +243,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
 						sg.start * sizeof(uint32_t),
 						sizeof(uint32_t) * sg.numIndices,
-						sg.indices);
+						sg.indices.data());
 	}
 }
 
@@ -384,12 +384,10 @@ void LoaderDFF::readBinMeshPLG(Model *model, const RWBStream &stream)
 		sg.start = start;
 		start += sg.numIndices;
 
-		sg.indices = new std::uint32_t[sg.numIndices];
+		sg.indices.resize(sg.numIndices);
+		std::memcpy(sg.indices.data(), data, sizeof(std::uint32_t) * sg.numIndices);
+		data += sizeof(std::uint32_t) * sg.numIndices;
 
-		for(size_t i = 0; i < sg.numIndices; ++i) {
-			sg.indices[i] = *(std::uint32_t*)data;
-			data += sizeof(std::uint32_t);
-		}
 		model->geometries.back()->subgeom.push_back(sg);
 	}
 }

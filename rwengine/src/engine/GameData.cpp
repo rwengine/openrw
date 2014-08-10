@@ -699,8 +699,8 @@ FileHandle GameData::openFile2(const std::string &name)
 	auto i = _knownFiles.find(name);
 	if(i != _knownFiles.end())
 	{
-		char* data;
-		size_t length;
+		char* data = nullptr;
+		size_t length = 0;
 
 		if(i->second.archived)
 		{

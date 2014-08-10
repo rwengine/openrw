@@ -93,10 +93,10 @@ public:
 		float ambientIntensity;
 	};
 	
-    struct SubGeometry {
+	struct SubGeometry {
 		GLuint start = 0;
-        size_t material;
-		uint32_t* indices;
+		size_t material;
+		std::vector<uint32_t> indices;
 		size_t numIndices;
 	};
 	
