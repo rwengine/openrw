@@ -2,6 +2,13 @@
 #include "objects/InstanceObject.hpp"
 #include <ai/AIGraphNode.hpp>
 
+AIGraph::~AIGraph()
+{
+	for( auto n : nodes ) {
+		delete n;
+	}
+}
+
 void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path)
 {
 	size_t startIndex = nodes.size();

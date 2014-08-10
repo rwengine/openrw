@@ -11,106 +11,51 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
 	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
-	  colourSecondary(sec), physBody(nullptr), physVehicle(nullptr)
+	  colourSecondary(sec), collision(nullptr), physBody(nullptr), physVehicle(nullptr)
 {
 	mHealth = 1000.f;
-	if(! data->modelName.empty()) {
-		btTransform wt(
-					btQuaternion(
-						rot.x, rot.y, rot.z, rot.w
-					),
-					btVector3(
-						pos.x, pos.y, pos.z
-					));
 
-		auto phyit = engine->gameData.collisions.find(data->modelName);
-		if( phyit != engine->gameData.collisions.end()) {
-			btCompoundShape* cmpShape = new btCompoundShape;
-			btDefaultMotionState* msta = new btDefaultMotionState;
-			msta->setWorldTransform(wt);
-			CollisionModel& physInst = *phyit->second.get();
+	collision = new CollisionInstance;
+	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
+		physBody = collision->body;
 
-			btVector3 com(info->handling.centerOfMass.x, info->handling.centerOfMass.y, info->handling.centerOfMass.z);
+		physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
+		btRaycastVehicle::btVehicleTuning tuning;
 
-			// Boxes
-			for( size_t i = 0; i < physInst.boxes.size(); ++i ) {
-				auto& box = physInst.boxes[i];
-				auto size = (box.max - box.min) / 2.f;
-				auto mid = (box.min + box.max) / 2.f;
-				btCollisionShape* bshape = new btBoxShape( btVector3(size.x, size.y, size.z)  );
-				btTransform t; t.setIdentity();
-				t.setOrigin(btVector3(mid.x, mid.y, mid.z));
-				cmpShape->addChildShape(t, bshape);
-			}
+		float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
+		tuning.m_frictionSlip = 2.5f;
+		tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
-			// Spheres
-			for( size_t i = 0; i < physInst.spheres.size(); ++i ) {
-				auto& sphere = physInst.spheres[i];
-				btCollisionShape* sshape = new btSphereShape(sphere.radius/2.f);
-				btTransform t; t.setIdentity();
-				t.setOrigin(btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
-				cmpShape->addChildShape(t, sshape);
-			}
+		physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
+		physVehicle->setCoordinateSystem(0, 2, 1);
+		//physBody->setActivationState(DISABLE_DEACTIVATION);
+		engine->dynamicsWorld->addVehicle(physVehicle);
 
-			if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
-				btConvexHullShape* trishape = new btConvexHullShape();
-				for(size_t i = 0; i < physInst.indices.size(); ++i) {
-					auto vert = physInst.vertices[physInst.indices[i]];
-					trishape->addPoint({ vert.x, vert.y, vert.z });
-				}
-				trishape->setMargin(0.02f);
-				btTransform t; t.setIdentity();
-				cmpShape->addChildShape(t, trishape);
-			}
+		float kC = 0.5f;
+		float kR = 0.6f;
 
-			btVector3 inertia(0,0,0);
-			cmpShape->calculateLocalInertia(info->handling.mass, inertia);
+		for(size_t w = 0; w < info->wheels.size(); ++w) {
+			auto restLength = travel;
+			auto heightOffset = info->handling.suspensionUpperLimit;
+			btVector3 connection(
+						info->wheels[w].position.x,
+						info->wheels[w].position.y,
+						info->wheels[w].position.z + heightOffset );
+			bool front = connection.y() > 0;
+			btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
+			wi.m_suspensionRestLength1 = restLength;
 
-			btRigidBody::btRigidBodyConstructionInfo rginfo(info->handling.mass, msta, cmpShape, inertia);
+			// Max force slightly more than gravity.
+			wi.m_maxSuspensionForce = info->handling.mass * 12.f;
+			wi.m_suspensionStiffness = (info->handling.suspensionForce * 10.f);
 
-			physBody = new btRigidBody(rginfo);
-			physBody->setUserPointer(this);
-			engine->dynamicsWorld->addRigidBody(physBody);
+			//float dampEffect = (info->handling.suspensionDamping) / travel;
+			//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
 
-			physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
-			btRaycastVehicle::btVehicleTuning tuning;
-
-			float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
-			tuning.m_frictionSlip = 2.5f;
-			tuning.m_maxSuspensionTravelCm = travel * 100.f;
-
-			physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
-			physVehicle->setCoordinateSystem(0, 2, 1);
-			//physBody->setActivationState(DISABLE_DEACTIVATION);
-			engine->dynamicsWorld->addVehicle(physVehicle);
-
-			float kC = 0.5f;
-			float kR = 0.6f;
-
-			for(size_t w = 0; w < info->wheels.size(); ++w) {
-				auto restLength = travel;
-				auto heightOffset = info->handling.suspensionUpperLimit;
-				btVector3 connection(
-							info->wheels[w].position.x,
-							info->wheels[w].position.y,
-							info->wheels[w].position.z + heightOffset );
-				bool front = connection.y() > 0;
-				btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
-				wi.m_suspensionRestLength1 = restLength;
-
-				// Max force slightly more than gravity.
-				wi.m_maxSuspensionForce = info->handling.mass * 12.f;
-				wi.m_suspensionStiffness = (info->handling.suspensionForce * 10.f);
-
-				//float dampEffect = (info->handling.suspensionDamping) / travel;
-				//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
-
-				wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
-				wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-				wi.m_rollInfluence = 0.45f;
-				wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
-			}
-
+			wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
+			wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
+			wi.m_rollInfluence = 0.45f;
+			wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 		}
 
 		// Hide all LOD and damage frames.
@@ -139,9 +84,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 VehicleObject::~VehicleObject()
 {
-	engine->dynamicsWorld->removeRigidBody(physBody);
+	delete collision;
+
 	engine->dynamicsWorld->removeVehicle(physVehicle);
-	delete physBody;
+
 	delete physVehicle;
 	delete physRaycaster;
 	delete animator;
@@ -152,7 +98,7 @@ VehicleObject::~VehicleObject()
 void VehicleObject::setPosition(const glm::vec3& pos)
 {
 	GameObject::setPosition(pos);
-	if(physBody) {
+	if( physBody ) {
 		auto t = physBody->getWorldTransform();
 		t.setOrigin(btVector3(pos.x, pos.y, pos.z));
 		physBody->setWorldTransform(t);
@@ -161,8 +107,8 @@ void VehicleObject::setPosition(const glm::vec3& pos)
 
 glm::vec3 VehicleObject::getPosition() const
 {
-	if(physVehicle) {
-		btVector3 Pos = physVehicle->getChassisWorldTransform().getOrigin();
+	if( physBody ) {
+		btVector3 Pos = physBody->getWorldTransform().getOrigin();
 		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}
 	return position;

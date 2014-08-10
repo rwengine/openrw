@@ -82,7 +82,18 @@ GameWorld::GameWorld(const std::string& path)
 GameWorld::~GameWorld()
 {
 	delete _work;
-	// TODO: delete other things.
+
+	for(auto o : objects) {
+		delete o;
+	}
+
+	delete dynamicsWorld;
+	delete solver;
+	delete broadphase;
+	delete collisionDispatcher;
+	delete collisionConfig;
+
+	/// @todo delete other things.
 }
 
 bool GameWorld::load()

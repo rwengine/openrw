@@ -4,6 +4,8 @@
 #include <engine/GameObject.hpp>
 #include <btBulletDynamicsCommon.h>
 
+class CollisionInstance;
+
 /**
  * @struct InstanceObject
  *  A simple object instance
@@ -11,11 +13,10 @@
 struct InstanceObject : public GameObject
 {
 	glm::vec3 scale;
-	btRigidBody* body = nullptr;
+	CollisionInstance* body;
 	std::shared_ptr<ObjectData> object;
 	InstanceObject* LODinstance;
 	std::shared_ptr<DynamicObjectData> dynamics;
-	float _collisionHeight;
 	bool _enablePhysics;
 
 	InstanceObject(GameWorld* engine,

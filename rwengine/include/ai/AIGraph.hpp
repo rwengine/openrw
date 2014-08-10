@@ -11,6 +11,8 @@ struct AIGraphNode;
 class AIGraph
 {
 public:
+
+	~AIGraph();
 	
 	std::vector<AIGraphNode*> nodes;
 	

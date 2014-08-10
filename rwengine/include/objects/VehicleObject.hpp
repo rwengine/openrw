@@ -2,9 +2,9 @@
 #ifndef _VEHICLEOBJECT_HPP_
 #define _VEHICLEOBJECT_HPP_
 #include <engine/GameObject.hpp>
-#include <bullet/btBulletDynamicsCommon.h>
 #include <map>
 #include <objects/VehicleInfo.hpp>
+#include <data/CollisionInstance.hpp>
 
 /**
  * @class VehicleObject
@@ -45,6 +45,7 @@ public:
 	
 	std::map<size_t, GameObject*> seatOccupants;
 
+	CollisionInstance* collision;
 	btRigidBody* physBody;
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;

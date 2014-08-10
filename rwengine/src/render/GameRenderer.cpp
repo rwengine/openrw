@@ -642,7 +642,7 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 
 	glm::mat4 matrixModel;
 	if( instance->body ) {
-		instance->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
+		instance->body->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
 	}
 	else {
 		matrixModel = glm::translate(matrixModel, instance->position);
