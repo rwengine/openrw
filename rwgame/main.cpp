@@ -197,7 +197,7 @@ void handleCommandEvent(sf::Event &event)
 	}
 }
 
-void init(std::string gtapath, bool loadWorld)
+void init(std::string gtapath)
 {
 	// GTA GET
 	gta = new GameWorld(gtapath);
@@ -444,19 +444,15 @@ int main(int argc, char *argv[])
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	bool loadWorld = true;
 	size_t w = WIDTH, h = HEIGHT;
 	int c;
-	while( (c = getopt(argc, argv, "w:h:l")) != -1) {
+	while( (c = getopt(argc, argv, "w:h:")) != -1) {
 		switch(c) {
 		case 'w':
 			w = atoi(optarg);
 			break;
 		case 'h':
 			h = atoi(optarg);
-			break;
-		case 'l':
-			loadWorld = false;
 			break;
 		}
 	}
@@ -467,7 +463,7 @@ int main(int argc, char *argv[])
 	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
-	init(getGamePath(), loadWorld);
+	init(getGamePath());
 	
 	sf::Clock clock;
 
