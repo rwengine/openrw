@@ -124,9 +124,11 @@ void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming)
 
 	if( incoming ) {
 		body = new CollisionInstance;
-		body->createPhysicsBody(this, object->modelName, dynamics.get());
 
-		body->body->setActivationState(ISLAND_SLEEPING);
+		if( body->createPhysicsBody(this, object->modelName, dynamics.get()) )
+		{
+			body->body->setActivationState(ISLAND_SLEEPING);
+		}
 	}
 }
 
