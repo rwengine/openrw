@@ -1,4 +1,4 @@
-#ifndef LOADINGSTATE_HHP
+#ifndef LOADINGSTATE_HPP
 #define LOADINGSTATE_HPP
 
 #include "State.hpp"
@@ -18,4 +18,4 @@ public:
 	virtual void handleEvent(const sf::Event& event);
 };
 
-#endif // MENUSTATE_HPP
+#endif // LOADINGSTATE_HPP

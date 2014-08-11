@@ -10,7 +10,7 @@
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::vec3& prim, const glm::vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
-	  damageFlags(0), vehicle(data), info(info), colourPrimary(prim),
+	  vehicle(data), info(info), colourPrimary(prim),
 	  colourSecondary(sec), collision(nullptr), physBody(nullptr), physVehicle(nullptr)
 {
 	mHealth = 1000.f;
@@ -422,24 +422,6 @@ void VehicleObject::setFrameState(ModelFrame* f, FrameState state)
 			animator->setFrameVisibility(damage, false);
 		}
 	}
-}
-
-unsigned int nameToDamageFlag(const std::string& name)
-{
-	if(name.find("bonnet") != name.npos) return VehicleObject::DF_Bonnet;
-	if(name.find("door_lf") != name.npos) return VehicleObject::DF_Door_lf;
-	if(name.find("door_rf") != name.npos) return VehicleObject::DF_Door_rf;
-	if(name.find("door_lr") != name.npos) return VehicleObject::DF_Door_lr;
-	if(name.find("door_rr") != name.npos) return VehicleObject::DF_Door_rr;
-	if(name.find("boot") != name.npos) return VehicleObject::DF_Boot;
-	if(name.find("windscreen") != name.npos) return VehicleObject::DF_Windscreen;
-	if(name.find("bump_front") != name.npos) return VehicleObject::DF_Bump_front;
-	if(name.find("bump_rear") != name.npos) return VehicleObject::DF_Bump_rear;
-	if(name.find("wing_lf") != name.npos) return VehicleObject::DF_Wing_lf;
-	if(name.find("wing_rf") != name.npos) return VehicleObject::DF_Wing_rf;
-	if(name.find("wing_lr") != name.npos) return VehicleObject::DF_Wing_lr;
-	if(name.find("wing_rr") != name.npos) return VehicleObject::DF_Wing_rr;
-	return 0;
 }
 
 void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)

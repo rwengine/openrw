@@ -18,7 +18,7 @@
 #define WATER_BUOYANCY_K 25000.f
 #define WATER_BUOYANCY_C 2550.f
 
-class Animation;
+struct Animation;
 
 typedef std::map<std::string, Animation*> AnimationSet;
 

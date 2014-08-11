@@ -23,7 +23,7 @@ public:
 	};
 
 	SCMFile()
-		: _data(nullptr), _target(NoTarget), mainOffset(0),
+		: _data(nullptr), _target(NoTarget),
 		  mainSize(0), missionLargestSize(0)
 	{}
 
@@ -63,7 +63,6 @@ private:
 
 	std::vector<std::string> models;
 
-	uint32 mainOffset;
 	std::vector<unsigned int> missionOffsets;
 
 	uint32 mainSize;

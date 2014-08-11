@@ -5,7 +5,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <data/PathData.hpp>
 
-struct InstanceObject;
 struct AIGraphNode;
 
 class AIGraph

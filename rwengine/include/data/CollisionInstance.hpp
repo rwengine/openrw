@@ -7,8 +7,8 @@
 #include <string>
 
 class GameObject;
-class DynamicObjectData;
-class VehicleHandlingInfo;
+struct DynamicObjectData;
+struct VehicleHandlingInfo;
 
 /**
  * @brief Utility object for managing bullet objects.

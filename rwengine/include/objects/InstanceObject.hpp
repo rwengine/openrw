@@ -10,8 +10,9 @@ class CollisionInstance;
  * @struct InstanceObject
  *  A simple object instance
  */
-struct InstanceObject : public GameObject
+class InstanceObject : public GameObject
 {
+public:
 	glm::vec3 scale;
 	CollisionInstance* body;
 	std::shared_ptr<ObjectData> object;

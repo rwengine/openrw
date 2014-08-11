@@ -10,32 +10,13 @@
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-struct VehicleObject : public GameObject
+class VehicleObject : public GameObject
 {
-public:
-
-	enum /*DamageFlags*/ {
-		DF_Bonnet     =  1,
-		DF_Door_lf    =  2,
-		DF_Door_rf    =  4,
-		DF_Door_lr    =  8,
-		DF_Door_rr    = 16,
-		DF_Boot       = 32,
-		DF_Windscreen = 64,
-		DF_Bump_front = 128,
-		DF_Bump_rear  = 256,
-		DF_Wing_lf    = 512,
-		DF_Wing_rf    = 1024,
-		DF_Wing_lr    = 2048,
-		DF_Wing_rr    = 4096,
-	};
-
 private:
 	float steerAngle;
 	float throttle;
 	float brake;
 	bool handbrake;
-	unsigned int damageFlags;
 public:
 
 	VehicleDataHandle vehicle;

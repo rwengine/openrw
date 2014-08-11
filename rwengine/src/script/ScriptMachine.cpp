@@ -44,7 +44,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				t.programCounter += sizeof(SCMByte);
 			}
 
-			parameters.push_back(SCMOpcodeParameter { type, 0 });
+			parameters.push_back(SCMOpcodeParameter { type, { 0 } });
 			switch(type) {
 			case EndOfArgList:
 				hasExtraParameters = false;

@@ -6,7 +6,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-class VehicleData;
+struct VehicleData;
 
 /**
  * @brief Stores data loaded from handling.cfg

@@ -41,7 +41,7 @@ struct AnimationGroup
  * @brief The CharacterObject struct
  * Implements Character object behaviours.
  */
-struct CharacterObject : public GameObject
+class CharacterObject : public GameObject
 {
 private:
 	VehicleObject* currentVehicle;

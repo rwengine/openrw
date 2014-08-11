@@ -7,7 +7,7 @@
 #include <functional>
 
 class ScriptMachine;
-class SCMThread;
+struct SCMThread;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;

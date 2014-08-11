@@ -5,8 +5,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 
-struct CharacterObject;
-struct VehicleObject;
+class CharacterObject;
+class VehicleObject;
 
 /**
  * @class CharacterController

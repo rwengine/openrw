@@ -21,8 +21,8 @@ struct print_log_value<glm::vec3> {
 
 namespace boost { namespace test_tools {
 template<>
-struct print_log_value<nullptr_t> {
-	void operator()( std::ostream& s , nullptr_t )
+struct print_log_value<std::nullptr_t> {
+	void operator()( std::ostream& s , std::nullptr_t )
 	{
 		s << "nullptr";
 	}

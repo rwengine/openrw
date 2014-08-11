@@ -247,7 +247,8 @@ GameRenderer::GameRenderer(GameWorld* engine)
 
     float R = 1.f/(float)(rows-1);
     float S = 1.f/(float)(segments-1);
-    glm::vec3 skydomeBuff[rows * segments];
+	std::vector<glm::vec3> skydomeBuff;
+	skydomeBuff.resize(rows * segments);
     for( size_t r = 0, i = 0; r < rows; ++r) {
         for( size_t s = 0; s < segments; ++s) {
             skydomeBuff[i++] = glm::vec3(
@@ -257,7 +258,7 @@ GameRenderer::GameRenderer(GameWorld* engine)
                         );
 		}
 	}
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &skydomeIBO);
     GLushort skydomeIndBuff[rows*segments*6];

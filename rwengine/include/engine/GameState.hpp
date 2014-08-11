@@ -7,7 +7,7 @@
 #include <vector>
 
 class PlayerController;
-class CutsceneData;
+struct CutsceneData;
 
 struct TextDisplayData
 {

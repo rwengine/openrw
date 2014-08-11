@@ -17,7 +17,7 @@ class CharacterObject;
 class InstanceObject;
 class VehicleObject;
 
-class WeaponScan;
+struct WeaponScan;
 
 class ScriptMachine;
 
