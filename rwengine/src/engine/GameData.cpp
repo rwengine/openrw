@@ -708,9 +708,12 @@ FileHandle GameData::openFile2(const std::string &name)
 			auto ai = archives.find(i->second.path);
 			if(ai != archives.end())
 			{
-				data = ai->second.loadToMemory(name);
-				auto& asset = ai->second.getAssetInfo(name);
-				length = asset.size * 2048;
+				LoaderIMGFile asset;
+				if( ai->second.findAssetInfo(name, asset) )
+				{
+					data = ai->second.loadToMemory(name);
+					length = asset.size * 2048;
+				}
 			}
 			else
 			{

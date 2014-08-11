@@ -41,15 +41,17 @@ bool LoaderIMG::load(const std::string& filename)
 }
 
 /// Get the information of a asset in the examining archive
-LoaderIMGFile &LoaderIMG::getAssetInfo(const std::string& assetname)
+bool LoaderIMG::findAssetInfo(const std::string& assetname, LoaderIMGFile& out)
 {
 	for(size_t i = 0; i < m_assets.size(); ++i)
 	{
 		if(strcasecmp(m_assets[i].name, assetname.c_str()) == 0)
 		{
-			return m_assets[i];
+			out = m_assets[i];
+			return true;
 		}
 	}
+	return false;
 }
 
 char* LoaderIMG::loadToMemory(const std::string& assetname)
@@ -101,10 +103,13 @@ bool LoaderIMG::saveAsset(const std::string& assetname, const std::string& filen
 	FILE* dumpFile = fopen(filename.c_str(), "wb");
 	if(dumpFile)
 	{
-		fwrite(raw_data, getAssetInfo(assetname).size * 2048, 1, dumpFile);
+		LoaderIMGFile asset;
+		if( findAssetInfo( assetname, asset ) )
+		{
+			fwrite(raw_data, asset.size * 2048, 1, dumpFile);
+			printf("=> IMG: Saved %s to disk with filename %s\n", assetname.c_str(), filename.c_str());
+		}
 		fclose(dumpFile);
-
-		printf("=> IMG: Saved %s to disk with filename %s\n", assetname.c_str(), filename.c_str());
 
 		delete[] raw_data;
 		return true;

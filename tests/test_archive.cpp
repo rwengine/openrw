@@ -11,8 +11,10 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 	BOOST_REQUIRE( archive.load(Global::getGamePath() + "/models/gta3") );
 	
 	BOOST_CHECK( archive.getAssetCount() > 0 );
+
+	LoaderIMGFile f, f2;
 	
-	auto& f = archive.getAssetInfoByIndex(0);
+	f = archive.getAssetInfoByIndex(0);
 	
 	// A few assumptions..
 	
@@ -20,7 +22,7 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 	BOOST_CHECK_EQUAL( f.offset, 0);
 	BOOST_CHECK_EQUAL( f.size, 33);
 	
-	auto& f2 = archive.getAssetInfo("radar00.txd");
+	BOOST_CHECK( archive.findAssetInfo("radar00.txd", f2) );
 	
 	BOOST_CHECK_EQUAL( f2.name, f.name );
 	BOOST_CHECK_EQUAL( f2.offset, f.offset );

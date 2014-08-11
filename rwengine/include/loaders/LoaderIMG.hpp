@@ -46,7 +46,7 @@ public:
 	bool saveAsset(const std::string& assetname, const std::string& filename);
 
 	/// Get the information of an asset in the examining archive
-	LoaderIMGFile &getAssetInfo(const std::string& assetname);
+	bool findAssetInfo(const std::string& assetname, LoaderIMGFile& out);
 
 	/// Get the information of an asset by its index
 	const LoaderIMGFile &getAssetInfoByIndex(size_t index) const;
