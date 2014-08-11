@@ -101,7 +101,7 @@ void IngameState::updateView()
 	else if (_lookAngles.y < -qpi)
 		_lookAngles.y = -qpi;
 
-	float localX = _lookAngles.x;
+	float localX = -_lookAngles.x;
 
 	float viewDistance = 2.f;
 	if( _playerCharacter->getCurrentVehicle() ) {
