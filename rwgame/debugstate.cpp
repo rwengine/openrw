@@ -1,9 +1,10 @@
 #include "debugstate.hpp"
 #include "game.hpp"
+#include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
-DebugState::DebugState()
+DebugState::DebugState(const glm::vec3& vp, const glm::quat& vd)
 	: _freeLook( false ), _sonicMode( false )
 {
 	Menu *m = new Menu(getFont());
@@ -18,7 +19,7 @@ DebugState::DebugState()
 		spawnVehicle(it->first);
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Open All Doors/Flaps", [this] {
-		auto pc = getPlayerCharacter();
+		auto pc = getWorld()->state.player->getCharacter();
 		auto pv = pc->getCurrentVehicle();
 		if( pv ) {
 			for(auto& it : pv->_hingedObjects) {
@@ -51,12 +52,12 @@ DebugState::DebugState()
 	}
 	this->enterMenu(m);
 
+	_debugCam.position = vp;
+	_debugCam.rotation = vd;
 }
 
 void DebugState::enter()
 {
-	_debugPos = getViewPosition();
-	_debugAngles = getViewAngles();
 }
 
 void DebugState::exit()
@@ -102,21 +103,19 @@ void DebugState::tick(float dt)
 		sf::Vector2i deltaMouse = mousePos - screenCenter;
 		sf::Mouse::setPosition(screenCenter, getWindow());
 
-		_debugAngles.x += deltaMouse.x / 100.0;
-		_debugAngles.y += deltaMouse.y / 100.0;
+		_debugLook.x -= deltaMouse.x / 100.0f;
+		_debugLook.y += deltaMouse.y / 100.0f;
 
-		if (_debugAngles.y > qpi)
-			_debugAngles.y = qpi;
-		else if (_debugAngles.y < -qpi)
-			_debugAngles.y = -qpi;
+		if (_debugLook.y > qpi)
+			_debugLook.y = qpi;
+		else if (_debugLook.y < -qpi)
+			_debugLook.y = -qpi;
 
-		glm::quat vR = glm::normalize(glm::angleAxis(_debugAngles.x, glm::vec3{0.f, 0.f, 1.f}));
-		vR = vR * glm::angleAxis(_debugAngles.y, glm::vec3(1.f, 0.f, 0.f));
+		_debugCam.rotation = glm::angleAxis(_debugLook.x, glm::vec3(0.f, 0.f, 1.f))
+				* glm::angleAxis(_debugLook.y, glm::vec3(0.f, 1.f, 0.f));
 
-		_debugPos += vR * _movement * dt * (_sonicMode ? 100.f : 10.f);
+		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 100.f : 10.f);
 	}
-
-	setViewParameters( _debugPos, _debugAngles );
 }
 
 void DebugState::handleEvent(const sf::Event &e)
@@ -129,16 +128,16 @@ void DebugState::handleEvent(const sf::Event &e)
 			StateManager::get().exit();
 			break;
 		case sf::Keyboard::W:
-			_movement.y =-1.f;
-			break;
-		case sf::Keyboard::S:
-			_movement.y = 1.f;
-			break;
-		case sf::Keyboard::A:
 			_movement.x = 1.f;
 			break;
-		case sf::Keyboard::D:
+		case sf::Keyboard::S:
 			_movement.x =-1.f;
+			break;
+		case sf::Keyboard::A:
+			_movement.y = 1.f;
+			break;
+		case sf::Keyboard::D:
+			_movement.y =-1.f;
 			break;
 		case sf::Keyboard::F:
 			_freeLook = !_freeLook;
@@ -152,11 +151,11 @@ void DebugState::handleEvent(const sf::Event &e)
 		switch(e.key.code) {
 		case sf::Keyboard::W:
 		case sf::Keyboard::S:
-			_movement.y = 0.f;
+			_movement.x = 0.f;
 			break;
 		case sf::Keyboard::A:
 		case sf::Keyboard::D:
-			_movement.x = 0.f;
+			_movement.y = 0.f;
 			break;
 		case sf::Keyboard::LShift:
 			_sonicMode = false;
@@ -170,7 +169,7 @@ void DebugState::handleEvent(const sf::Event &e)
 
 void DebugState::spawnVehicle(unsigned int id)
 {
-	auto ch = getPlayerCharacter();
+	auto ch = getWorld()->state.player->getCharacter();
 	if(! ch) return;
 
 	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
@@ -180,4 +179,9 @@ void DebugState::spawnVehicle(unsigned int id)
 		auto spawnpos = hit + normal;
 		getWorld()->createVehicle(id, spawnpos, glm::quat());
 	}
+}
+
+const ViewCamera &DebugState::getCamera()
+{
+	return _debugCam;
 }

@@ -66,6 +66,9 @@ struct GameState
 	TextDisplayData nextText;
 	std::vector<TextDisplayData> texts;
 
+	/** The camera near value currently set by the script */
+	float cameraNear;
+
 	GameState() :
 		maxProgress(1),
 		numMissions(0),
@@ -88,7 +91,8 @@ struct GameState
 		minute(0),
 		osTextStyle(0),
 		osTextStart(0.f),
-		osTextTime(0.f)
+		osTextTime(0.f),
+		cameraNear(0.1f)
 	{}
 };
 

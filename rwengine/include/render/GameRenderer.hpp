@@ -134,11 +134,12 @@ private:
 	/** Particles in flight */
 	std::vector<FXParticle> _particles;
 
+	/** Camera values passed to renderWorld() */
+	ViewCamera _camera;
+
 public:
 	
 	GameRenderer(GameWorld*);
-	
-	ViewCamera camera;
 	
 	/** Number of issued draw calls */
 	size_t rendered;
@@ -165,14 +166,15 @@ public:
     GLuint debugTex;
 	
     /**
-	 * Draws the world:
+	 * Renders the world using the parameters of the passed Camera.
+	 * Note: The camera's near and far planes are overriden by weather effects.
 	 *
 	 *  - draws all objects (instances, vehicles etc.)
 	 *  - draws particles
 	 *  - draws water surfaces
 	 *  - draws the skybox
      */
-    void renderWorld(float alpha);
+	void renderWorld(const ViewCamera &camera, float alpha);
 
 	/**
 	 * @brief draws a CharacterObject and any item they are holding.

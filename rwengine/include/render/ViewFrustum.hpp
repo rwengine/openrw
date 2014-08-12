@@ -18,9 +18,7 @@ public:
 	float far;
 	float fov;
 	float aspectRatio;
-	
-	glm::mat4 view;
-	
+
 	ViewPlane planes[6];
 	
 	ViewFrustum(float near, float far, float fov, float aspect)

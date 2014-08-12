@@ -8,7 +8,7 @@
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
-#include <ai/CharacterController.hpp>
+#include <ai/PlayerController.hpp>
 
 #include <script/ScriptMachine.hpp>
 
@@ -36,37 +36,17 @@ constexpr int WIDTH  = 800,
 sf::RenderWindow window;
 
 GameWorld* gta = nullptr;
-CharacterObject* player = nullptr;
 
 DebugDraw* debugDrawer = nullptr;
 
 bool inFocus = true;
 int debugMode = 0;
-
 float accum = 0.f;
 
+// Camera poisitions to interpolate between ticks.
+ViewCamera lastCam, nextCam;
+
 sf::Font font;
-
-glm::vec3 viewPosition { -260.f, -151.5f, 9.f }, lastViewPosition;
-glm::vec2 viewAngles { -0.3f, 0.05f }, lastViewAngles;
-
-void setViewParameters(const glm::vec3 &center, const glm::vec2 &angles)
-{
-	lastViewPosition = viewPosition;
-	lastViewAngles = viewAngles;
-	viewPosition = center;
-	viewAngles = angles;
-}
-
-glm::vec3& getViewPosition()
-{
-	return viewPosition;
-}
-
-glm::vec2& getViewAngles()
-{
-	return viewAngles;
-}
 
 sf::Window& getWindow()
 {
@@ -83,16 +63,6 @@ sf::Font& getFont()
 	return font;
 }
 
-void setPlayerCharacter(CharacterObject *playerCharacter)
-{
-	player = playerCharacter;
-}
-
-CharacterObject* getPlayerCharacter()
-{
-	return player;
-}
-
 void skipTime(float time)
 {
 	accum += time;
@@ -100,13 +70,11 @@ void skipTime(float time)
 
 bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object)
 {
-	glm::mat4 view;
-	view = glm::rotate(view, -90.f, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, viewAngles.y, glm::vec3(1, 0, 0));
-	view = glm::rotate(view, viewAngles.x, glm::vec3(0, 0, 1));
-	glm::vec3 dir = glm::inverse(glm::mat3(view)) * glm::vec3(0.f, 0.f, 1.f) * -50.f;
-	auto from = btVector3(viewPosition.x, viewPosition.y, viewPosition.z);
-	auto to = btVector3(viewPosition.x+dir.x, viewPosition.y+dir.y, viewPosition.z+dir.z);
+	const ViewCamera& vc = StateManager::get().states.back()->getCamera();
+	btVector3 from(vc.position.x, vc.position.y, vc.position.z);
+	glm::vec3 tmp = vc.rotation * glm::vec3(1000.f, 0.f, 0.f);
+	btVector3 to(from.x() + tmp.x, from.y() + tmp.y, from.x() + tmp.z);
+
 	btCollisionWorld::ClosestRayResultCallback ray(from, to);
 	gta->dynamicsWorld->rayTest(from, to, ray);
 	if( ray.hasHit() ) 
@@ -221,7 +189,7 @@ void init(std::string gtapath)
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
-	setViewParameters( { -260.f, -151.5f, 9.f }, { -0.3f, 0.05f } );
+	//setViewParameters( { -260.f, -151.5f, 9.f }, { -0.3f, 0.05f } );
 
 	std::cout << "Loaded "
 			  << gta->gameData.models.size() << " models, "
@@ -270,24 +238,17 @@ void update(float dt)
 			}
 		}
 	}
+
+	// render() needs two cameras to smoothly interpolate between ticks.
+	lastCam = nextCam;
+	nextCam	= StateManager::get().states.back()->getCamera();
 }
 
 void render(float alpha)
 {
-	float qpi = glm::half_pi<float>();
-
-	glm::mat4 view;
-	/// @todo this probably doesn't belong in main.cpp
-	if( gta->state.currentCutscene == nullptr || gta->state.cutsceneStartTime <= 0.f ) {
-		view = glm::translate(view, glm::mix(lastViewPosition, viewPosition, alpha));
-		auto va = glm::mix(lastViewAngles, viewAngles, alpha);
-		view = glm::rotate(view, va.x, glm::vec3(0, 0, 1));
-		view = glm::rotate(view, va.y - qpi, glm::vec3(1, 0, 0));
-		view = glm::inverse(view);
-
-		gta->renderer.camera.worldPos = viewPosition;
-	}
-	else {
+	ViewCamera viewCam;
+	if( gta->state.currentCutscene != nullptr && gta->state.cutsceneStartTime >= 0.f )
+	{
 		auto cutscene = gta->state.currentCutscene;
 		float cutsceneTime = std::min(gta->gameTime - gta->state.cutsceneStartTime,
 									  cutscene->tracks.duration);
@@ -295,33 +256,47 @@ void render(float alpha)
 		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
 				targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
 		float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
-		gta->renderer.camera.frustum.fov = glm::radians(-zoom);
+		viewCam.frustum.fov = glm::radians(zoom);
 		float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
 
-		auto d = glm::normalize(targetPos-cameraPos);
-		auto qtilt = glm::rotate(glm::quat(), glm::radians(tilt), d);
+		auto direction = glm::normalize(targetPos - cameraPos);
+		auto right = glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
+		auto up = glm::normalize(glm::cross(direction, right));
+
+		glm::mat3 m;
+		m[0][0] = direction.x;
+		m[0][1] = right.x;
+		m[0][2] = up.x;
+
+		m[1][0] = direction.y;
+		m[1][1] = right.y;
+		m[1][2] = up.y;
+
+		m[2][0] = direction.z;
+		m[2][1] = right.z;
+		m[2][2] = up.z;
+
+		auto qtilt = glm::angleAxis(glm::radians(tilt), direction);
 
 		cameraPos += cutscene->meta.sceneOffset;
 		targetPos += cutscene->meta.sceneOffset;
 
-		// Update the internal values
-		lastViewPosition = viewPosition = cameraPos;
-
-		view = glm::lookAt(cameraPos, targetPos, qtilt * glm::vec3(0.f, 0.f, -1.f));
-
-		gta->renderer.camera.worldPos = cameraPos;
+		viewCam.position = cameraPos;
+		viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
+	}
+	else
+	{
+		// There's no cutscene playing - use the camera returned by the State.
+		viewCam.position = glm::mix(lastCam.position, nextCam.position, alpha);
+		viewCam.rotation = glm::slerp(lastCam.rotation, nextCam.rotation, alpha);
 	}
 
-	gta->renderer.camera.frustum.view = view;
-
-	// Update aspect ratio..
-	gta->renderer.camera.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
+	viewCam.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	
 	glEnable(GL_DEPTH_TEST);
-    glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-	//glEnable(GL_CULL_FACE);
+	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-	gta->renderer.renderWorld(alpha);
+	gta->renderer.renderWorld(viewCam, alpha);
 
     switch( debugMode ) {
 	case 0: break;
@@ -357,12 +332,12 @@ void render(float alpha)
 	std::stringstream ss;
 	ss << std::setfill('0') << "Time: " << std::setw(2) << gta->getHour() 
 		<< ":" << std::setw(2) << gta->getMinute() << " (" << gta->gameTime << "s)\n";
-	ss << "View: " << viewPosition.x << " " << viewPosition.y << " " << viewPosition.z << "\n";
+	ss << "View: " << viewCam.position.x << " " << viewCam.position.y << " " << viewCam.position.z << "\n";
 	ss << "Drawn " << gta->renderer.rendered << " / " << gta->renderer.culled << " Culled " << " " << gta->renderer.frames << "	" << gta->renderer.geoms << "\n";
-	if( player ) {
+	if( gta->state.player ) {
 		ss << "Activity: ";
-		if( player->controller->getCurrentActivity() ) {
-			ss << player->controller->getCurrentActivity()->name();
+		if( gta->state.player->getCurrentActivity() ) {
+			ss << gta->state.player->getCurrentActivity()->name();
 		}
 		else {
 			ss << "Idle";

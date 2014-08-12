@@ -66,11 +66,6 @@ void ViewerWidget::paintGL()
 	if( gworld == nullptr ) return;
 
 	auto& r = gworld->renderer;
-	
-	r.camera.frustum.far = 500.f;
-	r.camera.frustum.near = 0.1f;
-	r.camera.frustum.fov = 90.f;
-	r.camera.frustum.aspectRatio = width()/(height()*1.f);
 
 	if(dummyObject && dummyObject->animator) {
 		dummyObject->animator->tick(1.f/60.f);
@@ -91,12 +86,19 @@ void ViewerWidget::paintGL()
 		
 		glUseProgram(r.worldProgram);
 
-		glm::mat4 proj = r.camera.frustum.projection();
+		ViewCamera vc;
+
+		vc.frustum.far = 500.f;
+		vc.frustum.near = 0.1f;
+		vc.frustum.fov = 90.f;
+		vc.frustum.aspectRatio = width()/(height()*1.f);
+
+		glm::mat4 proj = vc.frustum.projection();
 		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
 		r.uploadUBO<SceneUniformData>(r.uboScene,
-		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, r.camera.frustum.far });
+		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
 
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);

@@ -2,6 +2,8 @@
 #include "game.hpp"
 #include "pausestate.hpp"
 #include "debugstate.hpp"
+
+#include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/ItemPickup.hpp>
@@ -9,7 +11,6 @@
 #include <items/WeaponItem.hpp>
 
 IngameState::IngameState(bool test)
-	: _player(nullptr), _playerCharacter(nullptr)
 {
 	if( test ) {
 		startTest();
@@ -21,10 +22,10 @@ IngameState::IngameState(bool test)
 
 void IngameState::startTest()
 {
-	_playerCharacter = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
-	_player = new PlayerController(_playerCharacter);
+	auto playerChar = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
+	auto player = new PlayerController(playerChar);
 
-	setPlayerCharacter( _playerCharacter );
+	getWorld()->state.player = player;
 
 	/*auto bat = new WeaponItem(getWorld()->gameData.weaponData["ak47"]);
 	_playerCharacter->addToInventory(bat);
@@ -60,13 +61,11 @@ void IngameState::startTest()
 			carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
 		}
 	}
-
-	getWorld()->renderer.camera.frustum.fov = -2.f * glm::quarter_pi<float>();
 }
 
 void IngameState::spawnPlayerVehicle()
 {
-	if(! _player) return;
+	if(! getWorld()->state.player ) return;
 	glm::vec3 hit, normal;
 	if(hitWorldRay(hit, normal)) {
 
@@ -80,7 +79,8 @@ void IngameState::spawnPlayerVehicle()
 		auto spawnpos = hit + normal;
 		auto vehicle = getWorld()->createVehicle(it->first, spawnpos,
 												 glm::quat(glm::vec3(0.f, 0.f, -_lookAngles.x * PiOver180)));
-		_playerCharacter->enterVehicle(vehicle, 0);
+
+		getWorld()->state.player->getCharacter()->enterVehicle(vehicle, 0);
 	}
 }
 
@@ -104,7 +104,7 @@ void IngameState::updateView()
 	float localX = -_lookAngles.x;
 
 	float viewDistance = 2.f;
-	if( _playerCharacter->getCurrentVehicle() ) {
+	/*if( _playerCharacter->getCurrentVehicle() ) {
 		auto model = _playerCharacter->getCurrentVehicle()->model;
 		for(auto& g : model->model->geometries) {
 			viewDistance = std::max(
@@ -150,9 +150,12 @@ void IngameState::updateView()
 				viewFraction = allrr.m_hitFractions[i] * 0.9f;
 			}
 		}
-	}
+	}*/
+}
 
-	setViewParameters( (viewPos + glm::vec3(0.f, 0.f, 0.75f)) + localview * viewFraction, {localX, _lookAngles.y} );
+PlayerController *IngameState::getPlayer()
+{
+	return getWorld()->state.player;
 }
 
 void IngameState::enter()
@@ -167,18 +170,58 @@ void IngameState::exit()
 
 void IngameState::tick(float dt)
 {
-	if( getWorld()->state.player ) {
-		_player = getWorld()->state.player;
-		_playerCharacter = _player->getCharacter();
-	}
+	auto player = getPlayer();
+	if( player )
+	{
+		float qpi = glm::half_pi<float>();
 
-	if( _player ) {
-		updateView();
+		sf::Vector2i screenCenter{sf::Vector2i{getWindow().getSize()} / 2};
+		sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
+		sf::Vector2i deltaMouse = mousePos - screenCenter;
+		sf::Mouse::setPosition(screenCenter, getWindow());
+
+		_lookAngles.x += deltaMouse.x / 100.0;
+		_lookAngles.y += deltaMouse.y / 100.0;
+
+		if (_lookAngles.y > qpi)
+			_lookAngles.y = qpi;
+		else if (_lookAngles.y < -qpi)
+			_lookAngles.y = -qpi;
+
+		auto angle = glm::angleAxis(-_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
+
+		player->updateMovementDirection(angle * _movement, _movement);
+
+		auto position = player->getCharacter()->getPosition();
+
+		float viewDistance = 2.5f;
+
+		auto vehicle = player->getCharacter()->getCurrentVehicle();
+		if( vehicle ) {
+			auto model = vehicle->model;
+			for(auto& g : model->model->geometries) {
+				viewDistance = std::max(
+							(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 2.0f,
+							viewDistance);
+			}
+			position = player->getCharacter()->getCurrentVehicle()->getPosition();
+		}
+
+		// Move back from the character
+		position += angle * glm::vec3(-viewDistance, 0.f, 1.f);
+
+		// Tilt the final look angle down a tad.
+		angle *= glm::angleAxis(glm::radians(5.f), glm::vec3(0.f, 1.f, 0.f));
+
+		_look.position = position;
+		_look.rotation = angle;
 	}
 }
 
 void IngameState::handleEvent(const sf::Event &event)
 {
+	auto player = getPlayer();
+
 	switch(event.type) {
 	case sf::Event::KeyPressed:
 		switch(event.key.code) {
@@ -186,35 +229,35 @@ void IngameState::handleEvent(const sf::Event &event)
 			StateManager::get().enter(new PauseState);
 			break;
 		case sf::Keyboard::M:
-			StateManager::get().enter(new DebugState);
+			StateManager::get().enter(new DebugState(_look.position, _look.rotation));
 			break;
 		case sf::Keyboard::Space:
-			if(_playerCharacter) {
-				_playerCharacter->jump();
+			if( player ) {
+				player->getCharacter()->jump();
 			}
 			break;
 		case sf::Keyboard::W:
-			_movement.y =-1.f;
-			break;
-		case sf::Keyboard::S:
-			_movement.y = 1.f;
-			break;
-		case sf::Keyboard::A:
 			_movement.x = 1.f;
 			break;
-		case sf::Keyboard::D:
+		case sf::Keyboard::S:
 			_movement.x =-1.f;
 			break;
+		case sf::Keyboard::A:
+			_movement.y = 1.f;
+			break;
+		case sf::Keyboard::D:
+			_movement.y =-1.f;
+			break;
 		case sf::Keyboard::LShift:
-			_player->setRunning(true);
+			player->setRunning(true);
 			break;
 		case sf::Keyboard::F:
-			if(_playerCharacter) {
-				if(_playerCharacter->getCurrentVehicle()) {
-					_player->exitVehicle();
+			if( player ) {
+				if( player->getCharacter()->getCurrentVehicle()) {
+					player->exitVehicle();
 				}
 				else {
-					_player->enterNearestVehicle();
+					player->enterNearestVehicle();
 				}
 			}
 			break;
@@ -225,14 +268,14 @@ void IngameState::handleEvent(const sf::Event &event)
 		switch(event.key.code) {
 		case sf::Keyboard::W:
 		case sf::Keyboard::S:
-			_movement.y = 0.f;
+			_movement.x = 0.f;
 			break;
 		case sf::Keyboard::A:
 		case sf::Keyboard::D:
-			_movement.x = 0.f;
+			_movement.y = 0.f;
 			break;
 		case sf::Keyboard::LShift:
-			_player->setRunning(false);
+			player->setRunning(false);
 			break;
 		case sf::Keyboard::F12:
 			skipTime(10.f);
@@ -243,7 +286,7 @@ void IngameState::handleEvent(const sf::Event &event)
 	case sf::Event::MouseButtonPressed:
 		switch(event.mouseButton.button) {
 		case sf::Mouse::Left:
-			_player->useItem(true, true);
+			player->useItem(true, true);
 			break;
 		default: break;
 		}
@@ -251,15 +294,20 @@ void IngameState::handleEvent(const sf::Event &event)
 	case sf::Event::MouseButtonReleased:
 		switch(event.mouseButton.button) {
 		case sf::Mouse::Left:
-			_player->useItem(false, true);
+			player->useItem(false, true);
 			break;
 		default: break;
 		}
 		break;
 	case sf::Event::MouseWheelMoved:
-		_playerCharacter->cycleInventory(event.mouseWheel.delta > 0);
+		player->getCharacter()->cycleInventory(event.mouseWheel.delta > 0);
 		break;
 	default: break;
 	}
 	State::handleEvent(event);
+}
+
+const ViewCamera &IngameState::getCamera()
+{
+	return _look;
 }

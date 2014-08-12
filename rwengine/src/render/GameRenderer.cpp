@@ -310,9 +310,12 @@ float mix(uint8_t a, uint8_t b, float num)
 	if(errc != GL_NO_ERROR) std::cout << __LINE__ << ": " << errc << std::endl;\
 }
 
-void GameRenderer::renderWorld(float alpha)
+void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 {
 	_renderAlpha = alpha;
+
+	// Store the input camera,
+	_camera = camera;
 
 	glBindVertexArray( vao );
 
@@ -334,12 +337,14 @@ void GameRenderer::renderWorld(float alpha)
 		cos(theta),
 	};
 	sunDirection = glm::normalize(sunDirection);
-	camera.frustum.far = weather.farClipping;
+
+	_camera.frustum.near = engine->state.cameraNear;
+	_camera.frustum.far = weather.farClipping;
 
 	glUseProgram(worldProgram);
 
-	auto view = camera.frustum.view;
-	auto proj = camera.frustum.projection();
+	auto view = _camera.getView();
+	auto proj = _camera.frustum.projection();
 
 	uploadUBO<SceneUniformData>(
 				uboScene,
@@ -349,7 +354,7 @@ void GameRenderer::renderWorld(float alpha)
 					glm::vec4{ambient, 0.0f},
 					glm::vec4{dynamic, 0.0f},
 					glm::vec4(skyBottom, 1.f),
-					glm::vec4(camera.worldPos, 0.f),
+					glm::vec4(camera.position, 0.f),
 					weather.fogStart,
 					camera.frustum.far
 				});
@@ -357,7 +362,7 @@ void GameRenderer::renderWorld(float alpha)
 	glClearColor(skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	camera.frustum.update(proj * view);
+	_camera.frustum.update(proj * view);
 	
 	rendered = culled = geoms = frames = 0;
 
@@ -416,7 +421,7 @@ void GameRenderer::renderWorld(float alpha)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
-	auto camposFlat = glm::vec2(camera.worldPos);
+	auto camposFlat = glm::vec2(camera.position);
 
 	glBindVertexArray( waterHQDraw.getVAOName() );
 
@@ -655,7 +660,7 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	for (size_t g = 0; g < instance->model->model->geometries.size(); g++)
 	{
 		RW::BSGeometryBounds& bounds = instance->model->model->geometries[g]->geometryBounds;
-		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
 	}
 
 	Model* model = nullptr;
@@ -784,7 +789,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 	for (size_t g = 0; g < cutscene->model->model->geometries.size(); g++)
 	{
 		RW::BSGeometryBounds& bounds = cutscene->model->model->geometries[g]->geometryBounds;
-		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - camera.worldPos) - bounds.radius);
+		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
 	}
 
 	if( cutscene->getParentActor() ) {
@@ -832,7 +837,7 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 
 		for( auto& g : firstLod->getGeometries() ) {
 			RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-			if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+			if(! _camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 				culled++;
 				continue;
 			}
@@ -896,8 +901,8 @@ void GameRenderer::renderParticles()
 	glUseProgram( particleProgram );
 	glBindVertexArray( particleDraw.getVAOName() );
 
-	auto cpos = camera.worldPos;
-	auto cfwd = glm::normalize(glm::inverse(glm::mat3(camera.frustum.view)) * glm::vec3(0.f, 1.f, 0.f));
+	auto cpos = _camera.position;
+	auto cfwd = glm::normalize(glm::inverse(_camera.rotation) * glm::vec3(0.f, 1.f, 0.f));
 
 	std::sort( _particles.begin(), _particles.end(),
 			   [&](const FXParticle& a, const FXParticle& b) {
@@ -980,7 +985,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 		/// @todo fix culling animating objects?
 
 		glm::vec3 boundpos = bounds.center + glm::vec3(matrix[3]);
-		if( (!object || !object->animator) && ! camera.frustum.intersects(boundpos, bounds.radius)) {
+		if( (!object || !object->animator) && ! _camera.frustum.intersects(boundpos, bounds.radius)) {
 			continue;
 		}
 

@@ -5,13 +5,13 @@
 
 class DebugState : public State
 {
-	glm::vec3 _debugPos;
+	ViewCamera _debugCam;
 	glm::vec3 _movement;
-	glm::vec2 _debugAngles;
+	glm::vec2 _debugLook;
 	bool _freeLook;
 	bool _sonicMode;
 public:
-	DebugState();
+	DebugState(const glm::vec3& vp = {}, const glm::quat& vd = {});
 
 	virtual void enter();
 	virtual void exit();
@@ -21,6 +21,8 @@ public:
 	virtual void handleEvent(const sf::Event& event);
 
 	void spawnVehicle(unsigned int id);
+
+	const ViewCamera& getCamera();
 };
 
 #endif // DEBUGSTATE_HPP

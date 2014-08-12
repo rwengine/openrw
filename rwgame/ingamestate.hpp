@@ -3,13 +3,11 @@
 
 #include "State.hpp"
 
-#include <ai/PlayerController.hpp>
+class PlayerController;
 
 class IngameState : public State
 {
-	PlayerController* _player;
-	CharacterObject* _playerCharacter;
-
+	ViewCamera _look;
 	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
 public:
@@ -20,12 +18,17 @@ public:
 
 	void updateView();
 
+	/** shortcut for getWorld()->state.player->getCharacter() */
+	PlayerController* getPlayer();
+
 	virtual void enter();
 	virtual void exit();
 
 	virtual void tick(float dt);
 
 	virtual void handleEvent(const sf::Event& event);
+
+	const ViewCamera& getCamera();
 };
 
 #endif // INGAMESTATE_HPP

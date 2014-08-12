@@ -18,18 +18,8 @@ bool hitWorldRay(const glm::vec3& start, const glm::vec3& direction,
 sf::Window& getWindow();
 
 GameWorld* getWorld();
-CharacterObject* getPlayerCharacter();
-void setPlayerCharacter(CharacterObject* playerCharacter);
 
 sf::Font& getFont();
-
-/**
-  Set view parameters.
-*/
-
-void setViewParameters(const glm::vec3& center, const glm::vec2 &angles);
-glm::vec3& getViewPosition();
-glm::vec2& getViewAngles();
 
 void skipTime(float time);
 

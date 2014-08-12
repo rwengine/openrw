@@ -3,7 +3,9 @@
 #include <functional>
 #include <queue>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <render/ViewCamera.hpp>
 #include "MenuSystem.hpp"
+#include <glm/gtc/quaternion.hpp>
 
 struct State
 {
@@ -76,32 +78,8 @@ struct State
 			default: break;
 		};
 	}
-};
 
-struct GenericState : public State
-{
-	typedef std::function<void (State*)> StateChange;
-	typedef std::function<void (State*, float)> Tick;
-	typedef std::function<void (State*, const sf::Event&)> Event;
-	
-	StateChange enter_lambda;
-	Tick tick_lambda;
-	StateChange exit_lambda;
-	Event event_lambda;
-	
-	GenericState(StateChange start, Tick think, StateChange end, Event event)
-	 : enter_lambda(start), tick_lambda(think), 
-	   exit_lambda(end), event_lambda(event) {}
-	 
-	virtual void enter() { enter_lambda(this); }
-	virtual void exit() { exit_lambda(this); }
-	
-	virtual void tick(float dt) { tick_lambda(this, dt); } 
-	
-	virtual void handleEvent(const sf::Event& event) { 
-		event_lambda(this, event); 
-		State::handleEvent(event);
-	}
+	virtual const ViewCamera& getCamera();
 };
 
 struct StateManager

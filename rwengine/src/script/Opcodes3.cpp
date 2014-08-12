@@ -608,7 +608,7 @@ VM_OPCODE_DEF( 0x0408 )
 
 VM_OPCODE_DEF( 0x041D )
 {
-	m->getWorld()->renderer.camera.frustum.near = p->at(0).real;
+	m->getWorld()->state.cameraNear = p->at(0).real;
 }
 
 VM_OPCODE_DEF( 0x042C )
