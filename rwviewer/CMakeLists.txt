@@ -17,7 +17,7 @@ add_executable(rwviewer
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})
 
-target_link_libraries(rwviewer rwengine sfml-graphics sfml-system GL GLEW ${BULLET_LIBRARIES})
+target_link_libraries(rwviewer rwengine sfml-graphics sfml-system GL GLEW ${BULLET_LIBRARIES} iconv)
 qt5_use_modules(rwviewer Widgets OpenGL)
 
 install(TARGETS rwviewer RUNTIME DESTINATION bin)

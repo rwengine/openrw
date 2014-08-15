@@ -12,6 +12,6 @@ add_executable(rwgame
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})
 
-target_link_libraries( rwgame rwengine sfml-graphics sfml-window sfml-system GL GLEW ${BULLET_LIBRARIES} )
+target_link_libraries( rwgame rwengine sfml-graphics sfml-window sfml-system GL GLEW ${BULLET_LIBRARIES} iconv )
 
 install(TARGETS rwgame RUNTIME DESTINATION bin)
