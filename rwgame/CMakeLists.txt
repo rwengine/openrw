@@ -10,7 +10,7 @@ add_executable(rwgame
 	debugstate.cpp
 )
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIRS})
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})
 
 target_link_libraries( rwgame rwengine sfml-graphics sfml-window sfml-system GL GLEW ${BULLET_LIBRARIES} )
 

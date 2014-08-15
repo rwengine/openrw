@@ -11,4 +11,4 @@ add_library(rwengine
 
 target_link_libraries(rwengine sfml-window sfml-audio GLEW mad)
 
-include_directories(include /usr/include/bullet)
+include_directories(include ${BULLET_INCLUDE_DIR})
