@@ -3,6 +3,7 @@
 #define _SCRIPTTYPES_HPP_
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 #include <functional>
 

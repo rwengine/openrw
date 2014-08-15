@@ -22,6 +22,7 @@ ENDIF()
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 
+find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)
 
 IF(BUILD_OLD_TOOLS)
