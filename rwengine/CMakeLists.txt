@@ -9,6 +9,11 @@ add_library(rwengine
     ${RENDERWARE_HEADERS}
 )
 
-target_link_libraries(rwengine sfml-window sfml-audio GLEW mad)
+target_link_libraries(rwengine
+	sfml-window
+	sfml-audio
+	GLEW
+	mad
+	${OPENRW_PLATFORM_LIBS})
 
 include_directories(include ${BULLET_INCLUDE_DIR})

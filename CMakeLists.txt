@@ -19,6 +19,10 @@ ELSE()
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3" )
 ENDIF()
 
+IF(APPLE)
+	set(OPENRW_PLATFORM_LIBS iconv)
+ENDIF()
+
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 
