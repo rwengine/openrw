@@ -21,8 +21,8 @@ public:
 
 	VehicleDataHandle vehicle;
 	VehicleInfoHandle info;
-	glm::vec3 colourPrimary;
-	glm::vec3 colourSecondary;
+	glm::u8vec3 colourPrimary;
+	glm::u8vec3 colourSecondary;
 	
 	std::map<size_t, GameObject*> seatOccupants;
 
@@ -44,8 +44,8 @@ public:
 			   ModelHandle* model,
 			   VehicleDataHandle data,
 			   VehicleInfoHandle info,
-			   const glm::vec3& prim,
-			   const glm::vec3& sec);
+			   const glm::u8vec3& prim,
+			   const glm::u8vec3& sec);
 	
 	virtual ~VehicleObject();
 	

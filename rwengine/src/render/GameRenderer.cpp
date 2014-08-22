@@ -23,8 +23,6 @@
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
 
-GLuint GameRenderer::currentUBO = 0;
-
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
 struct WaterVertex {
@@ -69,16 +67,6 @@ struct ParticleVert {
 GeometryBuffer particleGeom;
 DrawBuffer particleDraw;
 
-struct VertexP2 {
-	static const AttributeList vertex_attributes() {
-		return {
-			{ATRS_Position, 2, sizeof(VertexP2),  0ul}
-		};
-	}
-
-	float x, y;
-};
-
 std::vector<VertexP2> sspaceRect = {
 	{-1.f, -1.f},
 	{ 1.f, -1.f},
@@ -89,98 +77,18 @@ std::vector<VertexP2> sspaceRect = {
 GeometryBuffer ssRectGeom;
 DrawBuffer ssRectDraw;
 
-GLuint compileShader(GLenum type, const char *source)
-{
-	GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, NULL);
-	glCompileShader(shader);
-
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	
-	if( status != GL_TRUE ) {
-		std::cerr << "[OGL] Shader Compilation Failed" << std::endl;
-	}
-	
-	GLint len;
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
-	if( len > 1 ) {
-		GLchar *buffer = new GLchar[len];
-		glGetShaderInfoLog(shader, len, NULL, buffer);
-
-		GLint sourceLen;
-		glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
-		GLchar *sourceBuff = new GLchar[sourceLen];
-		glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
-		
-		std::cerr << "[OGL] Shader InfoLog(" << shader << "):\n" << buffer << "\nSource:\n" << sourceBuff << std::endl;
-
-		delete[] buffer;
-		delete[] sourceBuff;
-	}
-	
-	if (status != GL_TRUE) {
-		exit(1);
-	}
-	
-	return shader;
-}
-
-GLuint compileProgram(const char* vertex, const char* fragment)
-{
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertex);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragment);
-	GLuint prog	= glCreateProgram();
-	glAttachShader(prog, vertexShader);
-	glAttachShader(prog, fragmentShader);
-	glLinkProgram(prog);
-		
-	GLint status;
-	glGetProgramiv(prog, GL_LINK_STATUS, &status);
-	
-	if( status != GL_TRUE ) {
-		std::cerr << "[OGL] Program Link Failed" << std::endl;
-	}
-	
-	GLint len;
-	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
-	if( len > 1 ) {
-		GLchar *buffer = new GLchar[len];
-		glGetProgramInfoLog(prog, len, NULL, buffer);
-
-		std::cerr << "[OGL] Program InfoLog(" << prog << "):\n" << buffer << std::endl;
-
-		delete[] buffer;
-	}
-	
-	if (status != GL_TRUE) {
-		exit(1);
-	}
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	return prog;
-}
-
 GameRenderer::GameRenderer(GameWorld* engine)
-	: engine(engine), _renderAlpha(0.f)
+	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f)
 {
-	worldProgram = compileProgram(GameShaders::WorldObject::VertexShader,
-								  GameShaders::WorldObject::FragmentShader);
-	
-	uniTexture = glGetUniformLocation(worldProgram, "texture");
-	ubiScene = glGetUniformBlockIndex(worldProgram, "SceneData");
-	ubiObject = glGetUniformBlockIndex(worldProgram, "ObjectData");
+	engine->logInfo("[DRAW] " + renderer->getIDString());
 
-	glGenBuffers(1, &uboScene);
-	glGenBuffers(1, &uboObject);
+	worldProg = renderer->createShader(
+				GameShaders::WorldObject::VertexShader,
+				GameShaders::WorldObject::FragmentShader);
 
-	glUniformBlockBinding(worldProgram, ubiScene, 1);
-	glUniformBlockBinding(worldProgram, ubiObject, 2);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboScene);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboObject);
+	renderer->setUniformTexture(worldProg, "texture", 0);
+	renderer->setProgramBlockBinding(worldProg, "SceneData", 1);
+	renderer->setProgramBlockBinding(worldProg, "ObjectData", 2);
 
 	particleProgram = compileProgram(GameShaders::WorldObject::VertexShader,
 								  GameShaders::Particle::FragmentShader);
@@ -189,27 +97,23 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	ubiScene = glGetUniformBlockIndex(particleProgram, "SceneData");
 	ubiObject = glGetUniformBlockIndex(particleProgram, "ObjectData");*/
 
-	glUniformBlockBinding(particleProgram, ubiScene, 1);
-	glUniformBlockBinding(particleProgram, ubiObject, 2);
+	//glUniformBlockBinding(particleProgram, ubiScene, 1);
+	//glUniformBlockBinding(particleProgram, ubiObject, 2);
 
-	skyProgram = compileProgram(GameShaders::Sky::VertexShader,
-								GameShaders::Sky::FragmentShader);
+	skyProg = renderer->createShader(
+				GameShaders::Sky::VertexShader,
+				GameShaders::Sky::FragmentShader);
 
-	skyUniView = glGetUniformLocation(skyProgram, "view");
-	skyUniProj = glGetUniformLocation(skyProgram, "proj");
-	skyUniTop = glGetUniformLocation(skyProgram, "TopColor");
-	skyUniBottom = glGetUniformLocation(skyProgram, "BottomColor");
+	renderer->setProgramBlockBinding(skyProg, "SceneData", 1);
 
-	waterProgram = compileProgram(GameShaders::WaterHQ::VertexShader,
-								  GameShaders::WaterHQ::FragmentShader);
+	waterProg = renderer->createShader(
+				GameShaders::WaterHQ::VertexShader,
+				GameShaders::WaterHQ::FragmentShader);
 
-	waterHeight = glGetUniformLocation(waterProgram, "height");
-	waterTexture = glGetUniformLocation(waterProgram, "texture");
-	waterSize = glGetUniformLocation(waterProgram, "size");
-	waterMVP = glGetUniformLocation(waterProgram, "MVP");
-	waterTime = glGetUniformLocation(waterProgram, "time");
-	waterPosition = glGetUniformLocation(waterProgram, "worldP");
-	waterWave = glGetUniformLocation(waterProgram, "waveParams");
+	renderer->setUniformTexture(waterProg, "texture", 0);
+
+	renderer->setProgramBlockBinding(waterProg, "SceneData", 1);
+	renderer->setProgramBlockBinding(waterProg, "ObjectData", 2);
 
 	glGenVertexArrays( 1, &vao );
 
@@ -240,28 +144,29 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	waterHQDraw.setFaceType(GL_TRIANGLES);
 
 
-	// And our skydome while we're at it.
-	glGenBuffers(1, &skydomeVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
+	// Create the skydome
+
 	size_t segments = skydomeSegments, rows = skydomeRows;
 
     float R = 1.f/(float)(rows-1);
     float S = 1.f/(float)(segments-1);
-	std::vector<glm::vec3> skydomeBuff;
-	skydomeBuff.resize(rows * segments);
+	std::vector<VertexP3> skydomeVerts;
+	skydomeVerts.resize(rows * segments);
     for( size_t r = 0, i = 0; r < rows; ++r) {
         for( size_t s = 0; s < segments; ++s) {
-            skydomeBuff[i++] = glm::vec3(
+			skydomeVerts[i++].position = glm::vec3(
                         cos(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
                         sin(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
                         sin(M_PI_2 * r * R)
                         );
 		}
 	}
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skydomeBuff), skydomeBuff.data(), GL_STATIC_DRAW);
+	skyGbuff.uploadVertices(skydomeVerts);
+	skyDbuff.addGeometry(&skyGbuff);
+	skyDbuff.setFaceType(GL_TRIANGLES);
 
     glGenBuffers(1, &skydomeIBO);
-    GLushort skydomeIndBuff[rows*segments*6];
+	GLuint skydomeIndBuff[rows*segments*6];
     for( size_t r = 0, i = 0; r < (rows-1); ++r ) {
         for( size_t s = 0; s < (segments-1); ++s ) {
             skydomeIndBuff[i++] = r * segments + s;
@@ -274,6 +179,8 @@ GameRenderer::GameRenderer(GameWorld* engine)
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skydomeIndBuff), skydomeIndBuff, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
 
     glGenBuffers(1, &debugVBO);
     glGenTextures(1, &debugTex);
@@ -341,33 +248,31 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	_camera.frustum.near = engine->state.cameraNear;
 	_camera.frustum.far = weather.farClipping;
 
-	glUseProgram(worldProgram);
-
 	auto view = _camera.getView();
 	auto proj = _camera.frustum.projection();
 
-	uploadUBO<SceneUniformData>(
-				uboScene,
-				{
-					proj,
-					view,
-					glm::vec4{ambient, 0.0f},
-					glm::vec4{dynamic, 0.0f},
-					glm::vec4(skyBottom, 1.f),
-					glm::vec4(camera.position, 0.f),
-					weather.fogStart,
-					camera.frustum.far
-				});
+	Renderer::SceneUniformData sceneParams {
+		proj,
+		view,
+		glm::vec4{ambient, 0.0f},
+		glm::vec4{dynamic, 0.0f},
+		glm::vec4(skyBottom, 1.f),
+		glm::vec4(camera.position, 0.f),
+		weather.fogStart,
+		camera.frustum.far
+	};
+
+	renderer->setSceneParameters(sceneParams);
 	
-	glClearColor(skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderer->clear(glm::vec4(skyBottom, 1.f));
 
 	_camera.frustum.update(proj * view);
 	
 	rendered = culled = geoms = frames = 0;
 
+	renderer->useProgram(worldProg);
+
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(uniTexture, 0);
 
 	for( GameObject* object : engine->objects ) {
 		switch(object->type()) {
@@ -398,36 +303,36 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		it != transparentDrawQueue.end();
 		++it)
 	{
-		glBindVertexArray(it->model->geometries[it->g]->dbuff.getVAOName());
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->model->geometries[it->g]->EBO);
-
-		renderSubgeometry(it->model, it->g, it->sg, it->matrix, it->opacity, it->object, false);
+		renderer->draw(it->matrix, &it->model->geometries[it->g]->dbuff, it->dp);
 	}
 	transparentDrawQueue.clear();
 
 	// Draw the water.
-	glUseProgram( waterProgram );
-
-	// TODO: Add some kind of draw distance
+	renderer->useProgram( waterProg );
 
 	float blockLQSize = WATER_WORLD_SIZE/WATER_LQ_DATA_SIZE;
 	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
 
 	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
-	glUniform1i(waterTexture, 0);
-	glUniform2f(waterWave, WATER_SCALE, WATER_HEIGHT);
 	auto waterTex = engine->gameData.textures[{"water_old",""}];
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
 	auto camposFlat = glm::vec2(camera.position);
 
-	glBindVertexArray( waterHQDraw.getVAOName() );
+	Renderer::DrawParameters wdp;
+	wdp.start = 0;
+	wdp.count = waterHQVerts.size();
+	wdp.texture = waterTex.texName;
+
+	renderer->useProgram(waterProg);
+	renderer->setSceneParameters(sceneParams);
 
 	// Draw High detail water
-	glUniform1f(waterSize, blockHQSize);
-	glUniform1f(waterTime, engine->gameTime);
+	renderer->setUniform(waterProg, "size", blockHQSize);
+	renderer->setUniform(waterProg, "time", engine->gameTime);
+	renderer->setUniform(waterProg, "waveParams", glm::vec2(WATER_SCALE, WATER_HEIGHT));
+
 	for( int x = 0; x < WATER_HQ_DATA_SIZE; x++ ) {
 		for( int y = 0; y < WATER_HQ_DATA_SIZE; y++ ) {
 			auto waterWS = waterOffset + glm::vec2(blockHQSize) * glm::vec2(x, y);
@@ -441,18 +346,18 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			if( hI >= NO_WATER_INDEX ) continue;
 			float h = engine->gameData.waterHeights[hI];
 
-			glUniform1f(waterHeight, h);
-			auto MVP = proj * view;
-			glUniform2fv(waterPosition, 1, glm::value_ptr(waterWS));
-			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
-			glDrawArrays(waterHQDraw.getFaceType(), 0, waterHQVerts.size());
+			glm::mat4 m;
+			m = glm::translate(m, glm::vec3(waterWS, h));
+
+			renderer->drawArrays(m, &waterHQDraw, wdp);
 		}
 	}
 
-	glBindVertexArray( waterLQDraw.getVAOName() );
-	glUniform2f(waterWave, 0.0f, 0.0f);
 
-	glUniform1f(waterSize, blockLQSize);
+	wdp.count = waterLQVerts.size();
+	renderer->setUniform(waterProg, "size", blockLQSize);
+	renderer->setUniform(waterProg, "waveParams", glm::vec2(0.f));
+
 	for( int x = 0; x < WATER_LQ_DATA_SIZE; x++ ) {
 		for( int y = 0; y < WATER_LQ_DATA_SIZE; y++ ) {
 			auto waterWS = waterOffset + glm::vec2(blockLQSize) * glm::vec2(x, y);
@@ -467,28 +372,24 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			if( hI >= NO_WATER_INDEX ) continue;
 			float h = engine->gameData.waterHeights[hI];
 
-			glUniform1f(waterHeight, h);
-			auto MVP = proj * view;
-			glUniform2fv(waterPosition, 1, glm::value_ptr(waterWS));
-			glUniformMatrix4fv(waterMVP, 1, GL_FALSE, glm::value_ptr(MVP));
-			glDrawArrays(waterLQDraw.getFaceType(), 0, 4);
+			glm::mat4 m;
+			m = glm::translate(m, glm::vec3(waterWS, h));
+
+			renderer->drawArrays(m, &waterLQDraw, wdp);
 		}
 	}
 
 	glBindVertexArray( vao );
-	
-	glUseProgram(skyProgram);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, skydomeVBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-	glUniformMatrix4fv(skyUniView, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(skyUniProj, 1, GL_FALSE, glm::value_ptr(proj));
-	glUniform4f(skyUniTop, skyTop.r, skyTop.g, skyTop.b, 1.f);
-	glUniform4f(skyUniBottom, skyBottom.r, skyBottom.g, skyBottom.b, 1.f);
 
-	glDrawElements(GL_TRIANGLES, skydomeSegments * skydomeRows * 6, GL_UNSIGNED_SHORT, NULL);
+	Renderer::DrawParameters dp;
+	dp.start = 0;
+	dp.count = skydomeSegments * skydomeRows * 6;
+
+	renderer->useProgram(skyProg);
+	renderer->setUniform(skyProg, "TopColor", glm::vec4(skyTop, 1.f));
+	renderer->setUniform(skyProg, "BottomColor", glm::vec4(skyBottom, 1.f));
+
+	renderer->draw(glm::mat4(), &skyDbuff, dp);
 
 	renderParticles();
 
@@ -871,17 +772,69 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, float opacity, GameObject* object)
 {
 	geoms++;
-	glBindVertexArray(model->geometries[g]->dbuff.getVAOName());
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->geometries[g]->EBO);
 
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
-		if(opacity < 1.f || ! renderSubgeometry(model, g, sg, modelMatrix, opacity, object)) {
-			// If rendering was rejected, queue for later.
+		Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
+
+		bool abortTransparent = false;
+
+		Renderer::DrawParameters dp;
+
+		dp.colour = {255, 255, 255, 255};
+		dp.count = subgeom.numIndices;
+		dp.start = subgeom.start;
+		dp.texture = 0;
+
+		if (model->geometries[g]->materials.size() > subgeom.material) {
+			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
+
+			if(mat.textures.size() > 0 ) {
+				auto& tC = mat.textures[0].name;
+				auto& tA = mat.textures[0].alphaName;
+				auto t = engine->gameData.textures.find({tC, tA});
+				if(t != engine->gameData.textures.end()) {
+					TextureInfo& tex = t->second;
+					if(tex.transparent) {
+						abortTransparent = true;
+					}
+					dp.texture = tex.texName;
+				}
+			}
+
+			if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
+				dp.colour = mat.colour;
+
+				if( object && object->type() == GameObject::Vehicle ) {
+					auto vehicle = static_cast<VehicleObject*>(object);
+					if( dp.colour.r == 60 && dp.colour.g == 255 && dp.colour.b == 0 ) {
+						dp.colour = glm::u8vec4(vehicle->colourPrimary, 255);
+					}
+					else if( dp.colour.r == 255 && dp.colour.g == 0 && dp.colour.b == 175 ) {
+						dp.colour = glm::u8vec4(vehicle->colourSecondary, 255);
+					}
+				}
+			}
+
+			dp.colour.a *= opacity;
+
+			if( dp.colour.a < 255 ) {
+				abortTransparent = true;
+			}
+
+			dp.diffuse = mat.diffuseIntensity;
+			dp.ambient = mat.ambientIntensity;
+		}
+
+		rendered++;
+
+		if( abortTransparent ) {
 			transparentDrawQueue.push_back(
-				{model, g, sg, modelMatrix, opacity, object}
+				{model, g, sg, modelMatrix, dp, object}
 			);
+		}
+		else {
+			renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
 		}
 	}
 }
@@ -943,12 +896,12 @@ void GameRenderer::renderParticles()
 		m[3][2] =-glm::dot(u, p);
 
 		m = glm::scale(glm::inverse(m), glm::vec3(part.size, 1.f));
-		uploadUBO<ObjectUniformData>(
+		/*uploadUBO<ObjectUniformData>(
 							uboObject, {
 								m,
 								part.colour,
 								1.f, 1.f, 1.f
-							});
+							});*/
 
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
@@ -963,6 +916,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 {
 	frames++;
 	auto localmatrix = matrix;
+	bool vis = true;
 
 	if(object && object->animator) {
 		bool animFixed = false;
@@ -970,103 +924,31 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 			animFixed = static_cast<CharacterObject*>(object)->isAnimationFixed();
 		}
 		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, animFixed);
+
+		vis = object->animator->getFrameVisibility(f);
 	}
 	else {
 		localmatrix *= f->getTransform();
 	}
 
-	bool vis = (object == nullptr || object->animator == nullptr) ||
-			object->animator->getFrameVisibility(f);
+	if( vis ) {
+		for(size_t g : f->getGeometries()) {
+			RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
+			/// @todo fix culling animating objects?
 
-	for(size_t g : f->getGeometries()) {
-		if(!vis ) continue;
+			glm::vec3 boundpos = bounds.center + glm::vec3(matrix[3]);
+			if(! _camera.frustum.intersects(boundpos, bounds.radius)) {
+				culled++;
+				continue;
+			}
 
-		RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
-		/// @todo fix culling animating objects?
-
-		glm::vec3 boundpos = bounds.center + glm::vec3(matrix[3]);
-		if( (!object || !object->animator) && ! _camera.frustum.intersects(boundpos, bounds.radius)) {
-			continue;
+			renderGeometry(m, g, localmatrix, opacity, object);
 		}
-
-		renderGeometry(m, g, localmatrix, opacity, object);
 	}
 	
 	for(ModelFrame* c : f->getChildren()) {
 		renderFrame(m, c, localmatrix, object, queueTransparent);
 	}
-	return true;
-}
-
-bool GameRenderer::renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, float opacity, GameObject* object, bool queueTransparent)
-{
-	auto& subgeom = model->geometries[g]->subgeom[sg];
-
-	/*
-	 * model matrix,
-	 * material diffuse
-	 * material ambient
-	 * materialcolour
-	 */
-	ObjectUniformData oudata {
-		matrix,
-		glm::vec4(1.f),
-		1.f, 1.f, opacity
-	};
-
-	if (model->geometries[g]->materials.size() > subgeom.material) {
-		Model::Material& mat = model->geometries[g]->materials[subgeom.material];
-
-		if(mat.textures.size() > 0 ) {
-			auto& tC = mat.textures[0].name;
-			auto& tA = mat.textures[0].alphaName;
-			auto t = engine->gameData.textures.find({tC, tA});
-			if(t != engine->gameData.textures.end()) {
-				TextureInfo& tex = t->second;
-				if(tex.transparent && queueTransparent) {
-					return false;
-				}
-				glBindTexture(GL_TEXTURE_2D, tex.texName);
-			}
-			else {
-				// Texture pair is missing?
-			}
-		}
-		else {
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
-
-		if( (model->geometries[g]->flags & RW::BSGeometry::ModuleMaterialColor) == RW::BSGeometry::ModuleMaterialColor) {
-			auto col = mat.colour;
-
-			if(col.a < 255 && queueTransparent) return false;
-			if( object && object->type() == GameObject::Vehicle ) {
-				auto vehicle = static_cast<VehicleObject*>(object);
-				if( col.r == 60 && col.g == 255 && col.b == 0 ) {
-					oudata.colour = glm::vec4(vehicle->colourPrimary, 1.f);
-				}
-				else if( col.r == 255 && col.g == 0 && col.b == 175 ) {
-					oudata.colour = glm::vec4(vehicle->colourSecondary, 1.f);
-				}
-				else {
-					oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, col.a/255.f};
-				}
-			}
-			else {
-				oudata.colour = {col.r/255.f, col.g/255.f, col.b/255.f, col.a/255.f};
-			}
-		}
-
-		oudata.diffuse = mat.diffuseIntensity;
-		oudata.ambient = mat.ambientIntensity;
-	}
-
-	uploadUBO(uboObject, oudata);
-
-	rendered++;
-
-	glDrawElements(model->geometries[g]->dbuff.getFaceType(),
-								subgeom.numIndices, GL_UNSIGNED_INT, (void*)(sizeof(uint32_t) * subgeom.start));
 	return true;
 }
 
@@ -1077,7 +959,7 @@ void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameO
 
 void GameRenderer::renderPaths()
 {
-    glActiveTexture(GL_TEXTURE0);
+	/*glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, debugTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -1152,7 +1034,7 @@ void GameRenderer::renderPaths()
 
     pedlines.clear();
 	carlines.clear();
-	glBindVertexArray( 0 );
+	glBindVertexArray( 0 );*/
 }
 
 void GameRenderer::renderLetterbox()

@@ -185,7 +185,7 @@ void init(std::string gtapath)
 	gta->gameTime = 0.f;
 	
 	debugDrawer = new DebugDraw;
-	debugDrawer->setShaderProgram(gta->renderer.worldProgram);
+	//debugDrawer->setShaderProgram(gta->renderer.worldProgram);
 	debugDrawer->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 	gta->dynamicsWorld->setDebugDrawer(debugDrawer);
 
@@ -302,24 +302,24 @@ void render(float alpha)
 	case 0: break;
 
 	case 1: {
-        glUseProgram(gta->renderer.worldProgram);
-		gta->renderer.uploadUBO<ObjectUniformData>(
+		//glUseProgram(gta->renderer.worldProgram);
+		/*gta->renderer.uploadUBO<ObjectUniformData>(
 					gta->renderer.uboObject, {
 						glm::mat4(),
 						glm::vec4(1.f),
 						1.f, 1.f
-					});
+					});*/
 		gta->renderer.renderPaths();
         break;
     }
 	case 2: {
-		glUseProgram(gta->renderer.worldProgram);
-		gta->renderer.uploadUBO<ObjectUniformData>(
+		//glUseProgram(gta->renderer.worldProgram);
+		/*gta->renderer.uploadUBO<ObjectUniformData>(
 					gta->renderer.uboObject, {
 						glm::mat4(),
 						glm::vec4(1.f),
 						1.f, 1.f
-					});
+					});*/
 		gta->dynamicsWorld->debugDrawWorld();
         debugDrawer->drawAllLines();
 

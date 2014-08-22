@@ -9,18 +9,38 @@ const char* WaterHQ::VertexShader = R"(
 
 layout(location = 0) in vec2 position;
 out vec2 TexCoords;
-uniform float height;
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	vec4 fogColor;
+	vec4 campos;
+	float fogStart;
+	float fogEnd;
+};
+
+layout(std140) uniform ObjectData {
+	mat4 model;
+	vec4 colour;
+	float diffusefac;
+	float ambientfac;
+	float visibility;
+};
+
 uniform float size;
-uniform mat4 MVP;
+
 uniform float time;
-uniform vec2 worldP;
 uniform vec2 waveParams;
+
 void main()
 {
-	vec2 p = worldP + position * size;
-	float waveHeight = (1.0+sin(time + (p.x + p.y) * waveParams.x)) * waveParams.y;
+	mat4 MVP = projection * view;
+	vec4 vp = model * vec4(position * size, 0.0, 1.0);
+	vp.z = (1.0+sin(time + (vp.x + vp.y) * waveParams.x)) * waveParams.y;
 	TexCoords = position * 2.0;
-	gl_Position = MVP * vec4(p, height + waveHeight, 1.0);
+	gl_Position = MVP * vp;
 })";
 
 const char* WaterHQ::FragmentShader = R"(
@@ -36,14 +56,26 @@ void main() {
 
 const char* Sky::VertexShader = R"(
 #version 130
-in vec3 position;
-uniform mat4 view;
-uniform mat4 proj;
+#extension GL_ARB_explicit_attrib_location : enable
+#extension GL_ARB_uniform_buffer_object : enable
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	vec4 fogColor;
+	vec4 campos;
+	float fogStart;
+	float fogEnd;
+};
+
+layout(location = 0) in vec3 position;
 out vec3 Position;
-uniform float Far;
+
 void main() {
 	Position = position;
-	vec4 viewsp = proj * mat4(mat3(view)) * vec4(position, 1.0);
+	vec4 viewsp = projection * mat4(mat3(view)) * vec4(position, 1.0);
 	viewsp.z = viewsp.w - 0.000001;
 	gl_Position = viewsp;
 })";
@@ -67,7 +99,6 @@ const char* WorldObject::VertexShader = R"(
 #version 130
 #extension GL_ARB_explicit_attrib_location : enable
 #extension GL_ARB_uniform_buffer_object : enable
-#extension GL_ARB_gpu_shader5 : enable
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 _colour;

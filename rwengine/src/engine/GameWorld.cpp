@@ -116,6 +116,7 @@ bool GameWorld::load()
 void GameWorld::logInfo(const std::string& info)
 {
 	log.push_back({LogEntry::Info, gameTime, info});
+	std::cout << info << std::endl;
 }
 
 void GameWorld::logError(const std::string& error)
@@ -418,7 +419,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			gameData.loadTXD(vti->second->textureName + ".txd");
 		}
 		
-		glm::vec3 prim = glm::vec3(1.f), sec = glm::vec3(0.5f);
+		glm::u8vec3 prim(255), sec(128);
 		auto palit = gameData.vehiclePalettes.find(vti->second->modelName); // modelname is conveniently lowercase (usually)
 		if(palit != gameData.vehiclePalettes.end() && palit->second.size() > 0 ) {
 			 std::uniform_int_distribution<int> uniform(0, palit->second.size()-1);

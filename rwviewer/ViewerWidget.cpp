@@ -84,7 +84,7 @@ void ViewerWidget::paintGL()
 		
 		glm::mat4 m;
 		
-		glUseProgram(r.worldProgram);
+		//glUseProgram(r.worldProgram);
 
 		ViewCamera vc;
 
@@ -97,8 +97,8 @@ void ViewerWidget::paintGL()
 		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
-		r.uploadUBO<SceneUniformData>(r.uboScene,
-		{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
+		//r.uploadUBO<SceneUniformData>(r.uboScene,
+		//{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
 
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);

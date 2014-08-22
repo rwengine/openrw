@@ -280,10 +280,10 @@ void GameData::loadCarcols(const std::string& path)
 				std::stringstream ss(line);
 				
 				if( std::getline(ss, r, ',') && std::getline(ss, g, ',') && std::getline(ss, b)) {
-					vehicleColours.push_back(glm::vec3(
-						atoi(r.c_str())/255.f,
-						atoi(g.c_str())/255.f,
-						atoi(b.c_str())/255.f
+					vehicleColours.push_back(glm::u8vec3(
+						atoi(r.c_str()),
+						atoi(g.c_str()),
+						atoi(b.c_str())
 					));
 				}
 			}

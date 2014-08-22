@@ -246,6 +246,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 						sizeof(uint32_t) * sg.numIndices,
 						sg.indices.data());
 	}
+
 }
 
 void LoaderDFF::readMaterialList(Model *model, const RWBStream &stream)

@@ -203,7 +203,7 @@ public:
 	/**
 	 * The vehicle colour palettes
 	 */
-	std::vector<glm::vec3> vehicleColours;
+	std::vector<glm::u8vec3> vehicleColours;
 	
 	/**
 	 * The vehicle colours for each vehicle type

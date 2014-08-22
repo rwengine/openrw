@@ -8,6 +8,8 @@
 
 #include <render/ViewCamera.hpp>
 
+#include <render/OpenGLRenderer.hpp>
+
 class Model;
 class ModelFrame;
 class GameWorld;
@@ -24,6 +26,8 @@ class CutsceneObject;
 class Animator;
 class InventoryItem;
 
+class Renderer;
+
 /**
  * @brief Implements high level drawing logic and low level draw commands
  *
@@ -34,14 +38,17 @@ class GameRenderer
 {
 	/** Pointer to the world instance */
 	GameWorld* engine;
+
+	/** The low-level drawing interface to use */
+	Renderer* renderer;
 	
-	/** Data required to queue transparent objects for delayed rendering */
+	/** Stores data for deferring transparent objects */
 	struct RQueueEntry {
 		Model* model;
 		size_t g;
 		size_t sg;
 		glm::mat4 matrix;
-		float opacity;
+		Renderer::DrawParameters dp;
 		GameObject* object;
 	};
 	
@@ -55,19 +62,7 @@ class GameRenderer
 	 * @return True if the frame was drawn, false if it should be queued
 	 */
 	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent = true);
-	
-	/**
-	 * @brief renders a model's subgeometry
-	 * @param model
-	 * @param g
-	 * @param sg
-	 * @param matrix
-	 * @param object
-	 * @param queueTransparent
-	 * @return @see renderFrame(
-	 */
-	bool renderSubgeometry(Model* model, size_t g, size_t sg, const glm::mat4& matrix, float opacity, GameObject* object, bool queueTransparent = true);
-	
+
 	/** Transparent objects are queued into this list */
 	std::vector<RQueueEntry> transparentDrawQueue;
 
@@ -149,14 +144,10 @@ public:
 	size_t geoms;
 
 	/** @todo Clean up all these shader program and location variables */
-	GLuint worldProgram;
-	GLint uniTexture;
-	GLuint ubiScene, ubiObject;
-	GLuint uboScene, uboObject;
+	Renderer::ShaderProgram* worldProg;
+	Renderer::ShaderProgram* skyProg;
+	Renderer::ShaderProgram* waterProg;
 
-	GLuint skyProgram;
-	GLuint waterProgram, waterMVP, waterHeight, waterTexture, waterSize, waterTime, waterPosition, waterWave;
-	GLint skyUniView, skyUniProj, skyUniTop, skyUniBottom;
 	GLuint particleProgram;
 
 	GLuint ssRectProgram;
@@ -164,6 +155,9 @@ public:
 
 	GLuint skydomeVBO, skydomeIBO, debugVBO;
     GLuint debugTex;
+
+	DrawBuffer skyDbuff;
+	GeometryBuffer skyGbuff;
 	
     /**
 	 * Renders the world using the parameters of the passed Camera.
@@ -233,38 +227,6 @@ public:
 
 	/** Adds a particle to the rendering */
 	void addParticle(const FXParticle& particle);
-
-	static GLuint currentUBO;
-	/**
-	 * Uploads data from T into the specified UBO
-	 */
-	template<class T> void uploadUBO(GLuint buffer, const T& data)
-	{
-		if( currentUBO != buffer ) {
-			glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-			currentUBO = buffer;
-		}
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(T), &data, GL_DYNAMIC_DRAW);
-	}
-};
-
-struct SceneUniformData {
-	glm::mat4 projection;
-	glm::mat4 view;
-	glm::vec4 ambient;
-	glm::vec4 dynamic;
-	glm::vec4 fogColour;
-	glm::vec4 campos;
-	float fogStart;
-	float fogEnd;
-};
-
-struct ObjectUniformData {
-	glm::mat4 model;
-	glm::vec4 colour;
-	float diffuse;
-	float ambient;
-	float visibility;
 };
 
 #endif
