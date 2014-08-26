@@ -3,17 +3,12 @@
 #include <objects/VehicleObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <engine/Animator.hpp>
 
 PlayerController::PlayerController(CharacterObject* character)
-	: CharacterController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), running(false),
-	  _enabled(true)
+	: CharacterController(character), lastRotation(glm::vec3(0.f, 0.f, 0.f)), _enabled(true)
 {
 	
-}
-
-void PlayerController::setRunning(bool run)
-{
-	running = run;
 }
 
 void PlayerController::setInputEnabled(bool enabled)
@@ -28,8 +23,10 @@ void PlayerController::updateCameraDirection(const glm::quat& rot)
 
 void PlayerController::updateMovementDirection(const glm::vec3& dir, const glm::vec3 &rawdirection)
 {
-	direction = dir;
-	_rawDirection = rawdirection;
+	if( _currentActivity == nullptr ) {
+		direction = dir;
+		setRawMovement(rawdirection);
+	}
 }
 
 void PlayerController::exitVehicle()
@@ -68,26 +65,22 @@ void PlayerController::update(float dt)
 		skipActivity();
 	}
 
-	if( _currentActivity == nullptr ) {
-		if( character->currentActivity != CharacterObject::Jump )
-		{
-			if( glm::length(direction) > 0.001f ) {
-				character->enterAction(running ? CharacterObject::Run : CharacterObject::Walk);
-			}
-			else {
-				character->enterAction(CharacterObject::Idle);
-			}
+	if( _currentActivity == nullptr && glm::length(rawMovement) > 0.0f ) {
+		float rotationOffset = 0.f;
 
-			if( character->getCurrentVehicle() ) {
-				character->getCurrentVehicle()->setSteeringAngle(_rawDirection.y);
-
-				// TODO what is handbraking.
-				character->getCurrentVehicle()->setThrottle(_rawDirection.x);
+		if( glm::abs(rawMovement.x) < 0.01f ) {
+			if( rawMovement.y < -0.01f ) {
+				rotationOffset = glm::half_pi<float>();
 			}
-			else if( glm::length(direction) > 0.001f ) {
-				character->rotation = cameraRotation * glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
+			else if( rawMovement.y > 0.01f ) {
+				rotationOffset = -glm::half_pi<float>();
 			}
 		}
+		else if( rawMovement.x < -0.01f ) {
+			rotationOffset = glm::pi<float>();
+		}
+
+		character->rotation = glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y) + rotationOffset));
 	}
 
 	CharacterController::update(dt);

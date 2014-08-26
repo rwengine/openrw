@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_activities)
 		}
 
 		// This check will undoubtably break in the future, please improve.
-		BOOST_CHECK_CLOSE( glm::distance(character->getPosition(), {10.f, 10.f, 0.f}), 0.2f, 100.0f );
+		BOOST_CHECK_CLOSE( glm::distance(character->getPosition(), {10.f, 10.f, 0.f}), 1.0f, 100.0f );
 
 		Global::get().e->destroyObject(character);
 		delete controller;

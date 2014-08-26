@@ -41,6 +41,10 @@ protected:
 	bool updateActivity();
 	void setActivity(Activity* activity);
 
+	glm::vec3 rawMovement;
+
+	bool running;
+
 public:
 	
 	CharacterController(CharacterObject* character);
@@ -82,6 +86,10 @@ public:
 	 * @return Returns the Character Object
 	 */
 	CharacterObject* getCharacter() const;
+
+	void setRawMovement(const glm::vec3& movement);
+
+	void setRunning(bool run);
 };
 
 #define DECL_ACTIVITY( activity_name ) \

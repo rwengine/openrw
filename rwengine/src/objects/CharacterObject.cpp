@@ -13,7 +13,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
   currentVehicle(nullptr), currentSeat(0),
   _hasTargetPosition(false), _activeInventoryItem(0),
   ped(data), physCharacter(nullptr),
-  controller(nullptr), currentActivity(None)
+  controller(nullptr)
 {
 	mHealth = 100.f;
 
@@ -22,6 +22,14 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.walk = engine->gameData.animations["walk_player"];
 	animations.walk_start = engine->gameData.animations["walk_start"];
 	animations.run  = engine->gameData.animations["run_player"];
+
+	animations.walk_right = engine->gameData.animations["walk_player_right"];
+	animations.walk_right_start = engine->gameData.animations["walk_start_right"];
+	animations.walk_left = engine->gameData.animations["walk_player_left"];
+	animations.walk_left_start = engine->gameData.animations["walk_start_left"];
+
+	animations.walk_back = engine->gameData.animations["walk_player_back"];
+	animations.walk_back_start = engine->gameData.animations["walk_start_back"];
 
 	animations.jump_start = engine->gameData.animations["jump_launch"];
 	animations.jump_glide = engine->gameData.animations["jump_glide"];
@@ -39,7 +47,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 		animator->setModel(model->model);
 
 		createActor();
-		enterAction(Idle);
 	}
 }
 
@@ -49,13 +56,6 @@ CharacterObject::~CharacterObject()
 		destroyItem(p.first);
 	}
 	destroyActor();
-}
-
-void CharacterObject::enterAction(CharacterObject::Action act)
-{
-	if(currentActivity != act) {
-		currentActivity = act;
-	}
 }
 
 void CharacterObject::createActor(const glm::vec3& size)
@@ -104,76 +104,6 @@ void CharacterObject::tick(float dt)
 	if(controller) {
 		controller->update(dt);
 	}
-
-	if(currentVehicle
-			&& currentActivity != VehicleGetIn
-			&& currentActivity != VehicleGetOut) {
-		enterAction(VehicleSit);
-	}
-
-	switch(currentActivity) {
-	case Idle: {
-		if(animator->getAnimation() != animations.idle) {
-			animator->setAnimation(animations.idle);
-		}
-	} break;
-	case Walk: {
-		if(animator->getAnimation() != animations.walk) {
-			if(animator->getAnimation() != animations.walk_start) {
-				animator->setAnimation(animations.walk_start, false);
-			}
-			else if(animator->isCompleted()) {
-				animator->setAnimation(animations.walk);
-			}
-		}
-	} break;
-	case Run: {
-		if(animator->getAnimation() != animations.run) {
-			animator->setAnimation(animations.run);
-		}
-	} break;
-	case Jump: {
-		if(animator->getAnimation() != animations.jump_start) {
-			if(animator->getAnimation() != animations.jump_glide) {
-				animator->setAnimation(animations.jump_start, false);
-			}
-			else if(animator->isCompleted()) {
-				animator->setAnimation(animations.jump_glide);
-			}
-		}
-	} break;
-	case VehicleSit: {
-		if(animator->getAnimation() != animations.car_sit) {
-			animator->setAnimation(animations.car_sit);
-		}
-	} break;
-	case VehicleOpen: {
-		if(animator->getAnimation() != animations.car_open_lhs) {
-			animator->setAnimation(animations.car_open_lhs, false);
-		}
-		else if(animator->isCompleted()) {
-			enterAction(VehicleGetIn);
-		}
-	} break;
-	case VehicleGetIn: {
-		if(animator->getAnimation() != animations.car_getin_lhs) {
-			animator->setAnimation(animations.car_getin_lhs, false);
-		}
-		else if( animator->isCompleted() ) {
-			enterAction(VehicleSit);
-		}
-	} break;
-	case VehicleGetOut: {
-		if(animator->getAnimation() != animations.car_getout_lhs) {
-			animator->setAnimation(animations.car_getout_lhs, false);
-		}
-		else if( animator->isCompleted() ) {
-			enterAction(Idle);
-		}
-	} break;
-	default: break;
-	};
-
 
 	animator->tick(dt);
 	updateCharacter(dt);
@@ -237,7 +167,7 @@ void CharacterObject::updateCharacter(float dt)
 							if(object->type() == Vehicle) {
 								VehicleObject* vehicle = static_cast<VehicleObject*>(object);
 								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
-									enterAction(KnockedDown);
+									/// @todo play knocked down animation.
 								}
 							}
 						}
@@ -245,54 +175,44 @@ void CharacterObject::updateCharacter(float dt)
 				}
 			}
 		}
-		
-		if(currentActivity == CharacterObject::Jump)
-		{
-			if(physCharacter->onGround() || isInWater())
-			{
-				enterAction(CharacterObject::Idle);
-			}
+
+		glm::vec3 walkDir;
+		glm::vec3 animTranslate;
+
+		if( isAnimationFixed() ) {
+			auto d = animator->getDurationTransform() / animator->getAnimation()->duration;
+			animTranslate = d * dt;
 		}
-		else 
-		{
-			glm::vec3 walkDir;
-			glm::vec3 animTranslate;
 
-			if( isAnimationFixed() ) {
-				auto d = animator->getDurationTransform() / animator->getAnimation()->duration;
-				animTranslate = d * dt;
-			}
+		position = getPosition();
 
-			position = getPosition();
+		if( _hasTargetPosition && false ) {
+			auto beforedelta = _targetPosition - position;
 
-			if( _hasTargetPosition ) {
-				auto beforedelta = _targetPosition - position;
+			glm::quat faceDir( glm::vec3( 0.f, 0.f, atan2(beforedelta.y, beforedelta.x) - glm::half_pi<float>() ) );
+			glm::vec3 direction = faceDir * animTranslate;
 
-				glm::quat faceDir( glm::vec3( 0.f, 0.f, atan2(beforedelta.y, beforedelta.x) - glm::half_pi<float>() ) );
-				glm::vec3 direction = faceDir * animTranslate;
-
-				auto positiondelta = _targetPosition - (position + direction);
-				if( glm::length(beforedelta) < glm::length(positiondelta) ) {
-					// Warp the character to the target position if we are about to overstep.
-					physObject->getWorldTransform().setOrigin(btVector3(
-																  _targetPosition.x,
-																  _targetPosition.y,
-																  _targetPosition.z));
-					_hasTargetPosition = false;
-				}
-				else {
-					walkDir = direction;
-				}
+			auto positiondelta = _targetPosition - (position + direction);
+			if( glm::length(beforedelta) < glm::length(positiondelta) ) {
+				// Warp the character to the target position if we are about to overstep.
+				physObject->getWorldTransform().setOrigin(btVector3(
+															  _targetPosition.x,
+															  _targetPosition.y,
+															  _targetPosition.z));
+				_hasTargetPosition = false;
 			}
 			else {
-				walkDir = rotation * animTranslate;
+				walkDir = direction;
 			}
-
-			physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
-			
-			auto Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
-			position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 		}
+		else {
+			walkDir = rotation * animTranslate;
+		}
+
+		physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
+
+		auto Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
+		position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 
 		// Handle above waist height water.
 		auto wi = engine->gameData.getWaterIndexAt(getPosition());
@@ -337,9 +257,11 @@ glm::vec3 CharacterObject::getPosition() const
 		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
 	}
 	if(currentVehicle) {
-		if( currentActivity == VehicleGetOut ) {
+		/// @todo this is hacky.
+		if( animator->getAnimation() == animations.car_getout_lhs ) {
 			return currentVehicle->getSeatEntryPosition(currentSeat);
 		}
+
 		auto v = getCurrentVehicle();
 		auto R = glm::mat3_cast(v->getRotation());
 		glm::vec3 offset;
@@ -427,7 +349,6 @@ void CharacterObject::jump()
 {
 	if( physCharacter ) {
 		physCharacter->jump();
-		enterAction(CharacterObject::Jump);
 	}
 }
 
@@ -472,9 +393,15 @@ void CharacterObject::clearTargetPosition()
 	_hasTargetPosition = false;
 }
 
+void CharacterObject::playAnimation(Animation *animation, bool repeat, bool fixed)
+{
+	_fixedAnimation = fixed;
+	animator->setAnimation(animation, repeat);
+}
+
 bool CharacterObject::isAnimationFixed() const
 {
-	return currentActivity == Walk || currentActivity == Run;
+	return _fixedAnimation;
 }
 
 void CharacterObject::addToInventory(InventoryItem *item)

@@ -8,19 +8,14 @@ class PlayerController : public CharacterController
 	glm::quat cameraRotation;
 	
 	glm::vec3 direction;
-	glm::vec3 _rawDirection;
-	
+
 	glm::quat lastRotation;
-	
-	bool running;
 
 	bool _enabled;
 	
 public:
 	
 	PlayerController(CharacterObject* character);
-	
-	void setRunning(bool run);
 
 	/**
 	 * @brief Enables and disables player input.

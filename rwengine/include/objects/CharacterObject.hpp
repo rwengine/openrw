@@ -18,6 +18,14 @@ struct AnimationGroup
 	Animation* walk_start;
 	Animation* run;
 
+	Animation* walk_right;
+	Animation* walk_right_start;
+	Animation* walk_left;
+	Animation* walk_left_start;
+
+	Animation* walk_back;
+	Animation* walk_back_start;
+
 	Animation* jump_start;
 	Animation* jump_glide;
 	Animation* jump_land;
@@ -50,6 +58,8 @@ private:
 	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
 	void destroyActor();
 
+	bool _fixedAnimation;
+
 	// Incredibly hacky "move in this direction".
 	bool _hasTargetPosition;
 	glm::vec3 _targetPosition;
@@ -57,25 +67,6 @@ private:
 	std::map<int, InventoryItem*> _inventory;
 	int _activeInventoryItem;
 public:
-
-	enum Action {
-		None,
-		Idle,
-		Walk,
-		Run,
-		Crouch,
-		Jump,
-		Falling,
-		Landing,
-		VehicleOpen,
-		VehicleGetIn,
-		VehicleGetOut,
-		VehicleDrive,
-		VehicleSit,
-		KnockedDown,
-		GettingUp,
-		FiringWeapon
-	};
 
 	std::shared_ptr<CharacterData> ped;
 
@@ -98,10 +89,6 @@ public:
 	~CharacterObject();
 
 	Type type() { return Character; }
-
-	Action currentActivity;
-
-	void enterAction(Action act);
 
 	void tick(float dt);
 
@@ -142,6 +129,7 @@ public:
 	void setTargetPosition( const glm::vec3& target );
 	void clearTargetPosition();
 
+	void playAnimation(Animation* animation, bool repeat, bool fixed);
 	virtual bool isAnimationFixed() const;
 
 	void addToInventory( InventoryItem* item );
