@@ -10,6 +10,7 @@
 #include <script/SCMFile.hpp>
 #include <render/Model.hpp>
 
+#include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
 
 #include <iostream>
@@ -311,62 +312,9 @@ void GameData::loadWeather(const std::string &path)
 
 void GameData::loadHandling(const std::string& path)
 {
-	std::ifstream hndFile(path.c_str());
+	GenericDATLoader l;
 
-	if(! hndFile.is_open()) {
-		std::cerr << "Error loadind handling data " << path << std::endl;
-		return;
-	}
-
-	std::string lineBuff;
-
-	while(std::getline(hndFile, lineBuff)) {
-		if(lineBuff.at(0) == ';') continue;
-		std::stringstream ss(lineBuff);
-
-		VehicleHandlingInfo info;
-		ss >> info.ID;
-		ss >> info.mass;
-		ss >> info.dimensions.x;
-		ss >> info.dimensions.y;
-		ss >> info.dimensions.z;
-		ss >> info.centerOfMass.x;
-		ss >> info.centerOfMass.y;
-		ss >> info.centerOfMass.z;
-		ss >> info.percentSubmerged;
-		ss >> info.tractionMulti;
-		ss >> info.tractionLoss;
-		ss >> info.tractionBias;
-		ss >> info.numGears;
-		ss >> info.maxVelocity;
-		ss >> info.acceleration;
-		char dt, et;
-		ss >> dt; ss >> et;
-		info.driveType = (VehicleHandlingInfo::DriveType)dt;
-		info.engineType = (VehicleHandlingInfo::EngineType)et;
-		ss >> info.brakeDeceleration;
-		ss >> info.brakeBias;
-		ss >> info.ABS;
-		ss >> info.steeringLock;
-		ss >> info.suspensionForce;
-		ss >> info.suspensionDamping;
-		ss >> info.seatOffset;
-		ss >> info.damageMulti;
-		ss >> info.value;
-		ss >> info.suspensionUpperLimit;
-		ss >> info.suspensionLowerLimit;
-		ss >> info.suspensionBias;
-		ss >> std::hex >> info.flags;
-
-		auto mit = vehicleInfo.find(info.ID);
-		if(mit == vehicleInfo.end()) {
-			vehicleInfo.insert({info.ID,
-								VehicleInfoHandle(new VehicleInfo{info})});
-		}
-		else {
-			mit->second->handling = info;
-		}
-	}
+	l.loadHandling(path, vehicleInfo);
 }
 
 SCMFile *GameData::loadSCM(const std::string &path)
@@ -510,127 +458,16 @@ void GameData::loadIFP(const std::string &name)
 
 void GameData::loadDynamicObjects(const std::string& name)
 {
-	std::ifstream dfile(name.c_str());
-	
-	if(dfile.is_open()) {
-		std::string lineBuff;
+	GenericDATLoader l;
 
-		while(std::getline(dfile, lineBuff)) {
-			if(lineBuff.at(0) == ';') continue;
-			std::stringstream ss(lineBuff);
-			
-			std::shared_ptr<DynamicObjectData> dyndata(new DynamicObjectData);
-			
-			ss >> dyndata->modelName;
-			auto cpos = dyndata->modelName.find(',');
-			if( cpos != dyndata->modelName.npos ) {
-				dyndata->modelName.erase(cpos);
-			}
-			ss >> dyndata->mass;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->turnMass;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->airRes;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->elacticity;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->bouancy;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->uprootForce;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->collDamageMulti;
-			if(ss.peek() == ',') ss.ignore(1);
-			int tmp;
-			ss >> tmp;
-			dyndata->collDamageFlags = tmp;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> tmp;
-			dyndata->collResponseFlags = tmp;
-			if(ss.peek() == ',') ss.ignore(1);
-			ss >> dyndata->cameraAvoid;
-			
-			dynamicObjectData.insert({dyndata->modelName, dyndata});
-		}
-
-	}
-	else {
-		engine->logError("Failed to load dynamic object file: " + name);
-	}
+	l.loadDynamicObjects(name, dynamicObjectData);
 }
 
 void GameData::loadWeaponDAT(const std::string &name)
 {
-	std::ifstream dfile(name.c_str());
+	GenericDATLoader l;
 
-	if(dfile.is_open()) {
-		std::string linebuffer;
-		int slotNum = 0;
-
-		while(std::getline(dfile, linebuffer)) {
-			if(linebuffer[0] == '#') continue;
-			std::stringstream ss(linebuffer);
-
-			std::shared_ptr<WeaponData> data(new WeaponData);
-			ss >> data->name;
-			if( data->name == "ENDWEAPONDATA" ) continue;
-
-			// Skip lines with blank names (probably an empty line).
-			if( std::find_if(data->name.begin(), data->name.end(),
-							 ::isalnum) == std::end( data->name ) ) {
-				continue;
-			}
-
-			std::transform(data->name.begin(), data->name.end(),
-						   data->name.begin(), ::tolower);
-
-			std::string firetype;
-			ss >> firetype;
-			if( firetype == "MELEE" ) {
-				data->fireType = WeaponData::MELEE;
-			}
-			else if( firetype == "INSTANT_HIT" ) {
-				data->fireType = WeaponData::INSTANT_HIT;
-			}
-			else if( firetype == "PROJECTILE" ) {
-				data->fireType = WeaponData::PROJECTILE;
-			}
-			else {
-				engine->logError("Unkown firetype: " + firetype);
-			}
-
-			ss >> data->hitRange;
-			ss >> data->fireRate;
-			ss >> data->reloadMS;
-			ss >> data->clipSize;
-			ss >> data->damage;
-			ss >> data->speed;
-			ss >> data->meleeRadius;
-			ss >> data->lifeSpan;
-			ss >> data->spread;
-			ss >> data->fireOffset.x;
-			ss >> data->fireOffset.y;
-			ss >> data->fireOffset.z;
-			ss >> data->animation1;
-			std::transform(data->animation1.begin(), data->animation1.end(),
-						   data->animation1.begin(), ::tolower);
-			ss >> data->animation2;
-			std::transform(data->animation2.begin(), data->animation2.end(),
-						   data->animation2.begin(), ::tolower);
-			ss >> data->animLoopStart;
-			ss >> data->animLoopEnd;
-			ss >> data->animFirePoint;
-			ss >> data->animCrouchFirePoint;
-			ss >> data->modelID;
-			ss >> data->flags;
-
-			data->inventorySlot = slotNum++;
-
-			weaponData[data->name] = data;
-		}
-	}
-	else {
-		engine->logError("Failed to load weapon data file:" + name);
-	}
+	l.loadWeapons(name, weaponData);
 }
 
 bool GameData::loadAudio(MADStream& music, const std::string &name)
