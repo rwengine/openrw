@@ -6,7 +6,7 @@
 class LoadingState : public State
 {
 public:
-	LoadingState();
+	LoadingState(RWGame* game);
 
 	virtual void enter();
 	virtual void exit();

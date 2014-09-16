@@ -2,14 +2,17 @@
 #include "game.hpp"
 #include "ingamestate.hpp"
 
-MenuState::MenuState()
+#include "RWGame.hpp"
+
+MenuState::MenuState(RWGame* game)
+	: State(game)
 {
-	Menu *m = new Menu(getFont());
+	Menu *m = new Menu(game->getFont());
 	m->offset = glm::vec2(50.f, 100.f);
-	m->addEntry(Menu::lambda("Start", [] { StateManager::get().enter(new IngameState); }));
-	m->addEntry(Menu::lambda("Test", [] { StateManager::get().enter(new IngameState(true)); }));
+	m->addEntry(Menu::lambda("Start", [=] { StateManager::get().enter(new IngameState(game)); }));
+	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true)); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-	m->addEntry(Menu::lambda("Exit", [] { getWindow().close(); }));
+	m->addEntry(Menu::lambda("Exit", [=] { getWindow().close(); }));
 	this->enterMenu(m);
 }
 

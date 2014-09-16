@@ -1,5 +1,5 @@
 #include "ingamestate.hpp"
-#include "game.hpp"
+#include "RWGame.hpp"
 #include "pausestate.hpp"
 #include "debugstate.hpp"
 
@@ -10,7 +10,8 @@
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
 
-IngameState::IngameState(bool test)
+IngameState::IngameState(RWGame* game, bool test)
+	: State(game)
 {
 	if( test ) {
 		startTest();
@@ -67,7 +68,7 @@ void IngameState::spawnPlayerVehicle()
 {
 	if(! getWorld()->state.player ) return;
 	glm::vec3 hit, normal;
-	if(hitWorldRay(hit, normal)) {
+	if(game->hitWorldRay(hit, normal)) {
 
 		// Pick random vehicle.
 		auto it = getWorld()->vehicleTypes.begin();
@@ -226,10 +227,10 @@ void IngameState::handleEvent(const sf::Event &event)
 	case sf::Event::KeyPressed:
 		switch(event.key.code) {
 		case sf::Keyboard::Escape:
-			StateManager::get().enter(new PauseState);
+			StateManager::get().enter(new PauseState(game));
 			break;
 		case sf::Keyboard::M:
-			StateManager::get().enter(new DebugState(_look.position, _look.rotation));
+			StateManager::get().enter(new DebugState(game, _look.position, _look.rotation));
 			break;
 		case sf::Keyboard::Space:
 			if( player ) {
@@ -276,9 +277,6 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::LShift:
 			player->setRunning(false);
-			break;
-		case sf::Keyboard::F12:
-			skipTime(10.f);
 			break;
 		default: break;
 		}

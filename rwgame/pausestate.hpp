@@ -6,7 +6,7 @@
 class PauseState : public State
 {
 public:
-	PauseState();
+	PauseState(RWGame* game);
 
 	virtual void enter();
 	virtual void exit();

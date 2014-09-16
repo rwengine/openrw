@@ -1,13 +1,14 @@
 #include "pausestate.hpp"
-#include "game.hpp"
+#include "RWGame.hpp"
 
-PauseState::PauseState()
+PauseState::PauseState(RWGame* game)
+	: State(game)
 {
-	Menu *m = new Menu(getFont());
+	Menu *m = new Menu(game->getFont());
 	m->offset = glm::vec2(50.f, 100.f);
 	m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-	m->addEntry(Menu::lambda("Exit", [] { getWindow().close(); }));
+	m->addEntry(Menu::lambda("Exit", [&] { getWindow().close(); }));
 	this->enterMenu(m);
 }
 

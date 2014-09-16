@@ -7,14 +7,19 @@
 #include "MenuSystem.hpp"
 #include <glm/gtc/quaternion.hpp>
 
+class RWGame;
+class GameWorld;
+
 struct State
 {
 	// Helper for global menu behaviour
 	Menu* currentMenu;
 	Menu* nextMenu;
+
+	RWGame* game;
 	
-	State()
-	 : currentMenu(nullptr), nextMenu(nullptr) {}
+	State(RWGame* game)
+	 : currentMenu(nullptr), nextMenu(nullptr), game(game) {}
 	
 	virtual void enter() = 0;
 	virtual void exit() = 0;
@@ -80,6 +85,9 @@ struct State
 	}
 
 	virtual const ViewCamera& getCamera();
+
+	GameWorld* getWorld();
+	sf::RenderWindow& getWindow();
 };
 
 struct StateManager

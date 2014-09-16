@@ -11,7 +11,7 @@ class DebugState : public State
 	bool _freeLook;
 	bool _sonicMode;
 public:
-	DebugState(const glm::vec3& vp = {}, const glm::quat& vd = {});
+	DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
 
 	virtual void enter();
 	virtual void exit();

@@ -6,7 +6,7 @@
 class MenuState : public State
 {
 public:
-	MenuState();
+	MenuState(RWGame* game);
 
 	virtual void enter();
 	virtual void exit();

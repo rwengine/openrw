@@ -1,13 +1,13 @@
 #include "debugstate.hpp"
-#include "game.hpp"
+#include "RWGame.hpp"
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
-DebugState::DebugState(const glm::vec3& vp, const glm::quat& vd)
-	: _freeLook( false ), _sonicMode( false )
+DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
+	: State(game), _freeLook( false ), _sonicMode( false )
 {
-	Menu *m = new Menu(getFont());
+	Menu *m = new Menu(game->getFont());
 	m->offset = glm::vec2(50.f, 100.f);
 	float entryHeight = 24.f;
 	m->addEntry(Menu::lambda("Random Vehicle", [this] {
@@ -18,7 +18,7 @@ DebugState::DebugState(const glm::vec3& vp, const glm::quat& vd)
 		}
 		spawnVehicle(it->first);
 	}, entryHeight));
-	m->addEntry(Menu::lambda("Open All Doors/Flaps", [this] {
+	m->addEntry(Menu::lambda("Open All Doors/Flaps", [=] {
 		auto pc = getWorld()->state.player->getCharacter();
 		auto pv = pc->getCurrentVehicle();
 		if( pv ) {
@@ -28,9 +28,9 @@ DebugState::DebugState(const glm::vec3& vp, const glm::quat& vd)
 		}
 	}, entryHeight));
 
-	m->addEntry(Menu::lambda("Spawn Pedestrians", [this] {
+	m->addEntry(Menu::lambda("Spawn Pedestrians", [=] {
 		glm::vec3 hit, normal;
-		if(hitWorldRay(hit, normal)) {
+		if(game->hitWorldRay(hit, normal)) {
 			glm::vec3 spawnPos = hit + glm::vec3(-5, 0.f, 0.0) + normal;
 			size_t k = 1;
 			// Spawn every pedestrian.
@@ -175,7 +175,7 @@ void DebugState::spawnVehicle(unsigned int id)
 	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
 	glm::vec3 hit, normal;
-	if(hitWorldRay(ch->position + (fwd * 5.f), {0.f, 0.f, -2.f}, hit, normal)) {
+	if(game->hitWorldRay(ch->position + (fwd * 5.f), {0.f, 0.f, -2.f}, hit, normal)) {
 		auto spawnpos = hit + normal;
 		getWorld()->createVehicle(id, spawnpos, glm::quat());
 	}
