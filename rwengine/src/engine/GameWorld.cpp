@@ -144,33 +144,7 @@ bool GameWorld::defineItems(const std::string& name)
 	LoaderIDE idel;
 	
 	if(idel.load(path)) {
-		for( size_t o = 0; o < idel.OBJSs.size(); ++o) {
-			objectTypes.insert({
-				idel.OBJSs[o]->ID, 
-				idel.OBJSs[o]
-			});
-		}
-		
-		for( size_t v = 0; v < idel.CARSs.size(); ++v) {
-			vehicleTypes.insert({
-				idel.CARSs[v]->ID,
-				idel.CARSs[v]
-			});
-		}
-
-		for( size_t v = 0; v < idel.PEDSs.size(); ++v) {
-			pedestrianTypes.insert({
-				idel.PEDSs[v]->ID,
-				idel.PEDSs[v]
-			});
-		}
-
-		for( size_t v = 0; v < idel.HIERs.size(); ++v) {
-			cutsceneObjectTypes.insert({
-				idel.HIERs[v]->ID,
-				idel.HIERs[v]
-			});
-		}
+		objectTypes.insert(idel.objects.begin(), idel.objects.end());
 
 		// Load AI information.
 		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
@@ -278,14 +252,14 @@ bool GameWorld::loadZone(const std::string& path)
 
 InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
-	auto oi = objectTypes.find(id);
-	if( oi != objectTypes.end()) {
+	auto oi = findObjectType<ObjectData>(id);
+	if( oi ) {
 
-		std::string modelname = oi->second->modelName;
-		std::string texturename = oi->second->textureName;
+		std::string modelname = oi->modelName;
+		std::string texturename = oi->textureName;
 
 		// Ensure the relevant data is loaded.
-		if(! oi->second->modelName.empty()) {
+		if(! oi->modelName.empty()) {
 			if( modelname != "null" ) {
 				gameData.loadDFF(modelname + ".dff", true);
 			}
@@ -297,7 +271,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		ModelHandle* m = gameData.models[modelname];
 
 		// Check for dynamic data.
-		auto dyit = gameData.dynamicObjectData.find(oi->second->modelName);
+		auto dyit = gameData.dynamicObjectData.find(oi->modelName);
 		std::shared_ptr<DynamicObjectData> dydata;
 		if( dyit != gameData.dynamicObjectData.end() ) {
 			dydata = dyit->second;
@@ -313,13 +287,13 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			rot,
 			m,
 			glm::vec3(1.f, 1.f, 1.f),
-			oi->second, nullptr, dydata
+			oi, nullptr, dydata
 		);
 
 		objects.insert(instance);
 
 		modelInstances.insert({
-			oi->second->modelName,
+			oi->modelName,
 			instance
 		});
 
@@ -334,7 +308,15 @@ uint16_t GameWorld::findModelDefinition(const std::string model)
 {
 	// Dear C++ Why do I have to resort to strcasecmp this isn't C.
 	auto defit = std::find_if(objectTypes.begin(), objectTypes.end(),
-							  [&](const decltype(objectTypes)::value_type& d) { return strcasecmp(d.second->modelName.c_str(), model.c_str()) == 0; });
+							  [&](const decltype(objectTypes)::value_type& d)
+	{
+		if(d.second->class_type == ObjectInformation::_class("OBJS"))
+		{
+			auto dat = static_cast<ObjectData*>(d.second.get());
+			return strcasecmp(dat->modelName.c_str(), model.c_str()) == 0;
+		}
+		return false;
+	});
 	if( defit != objectTypes.end() ) return defit->first;
 	return -1;
 }
@@ -345,23 +327,28 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	std::string modelname;
 	std::string texturename;
 
-	/// @todo merge all object defintion types so we don't have to deal with this.
-	auto ci = cutsceneObjectTypes.find(id);
-	if( ci != cutsceneObjectTypes.end()) {
-		modelname = state.specialModels[id];
-		texturename = state.specialModels[id];
-	}
-	else {
-		auto ii = objectTypes.find(id);
-		if( ii != objectTypes.end() ) {
-			modelname = ii->second->modelName;
-			texturename = ii->second->textureName;
+	auto type = objectTypes.find(id);
+	if( type != objectTypes.end() )
+	{
+		if( type->second->class_type == ObjectInformation::_class("HIER") )
+		{
+			modelname = state.specialModels[id];
+			texturename = state.specialModels[id];
 		}
-		else {
-			auto pi = pedestrianTypes.find(id);
-			if( pi != pedestrianTypes.end() ) {
-				modelname = pi->second->modelName;
-				texturename = pi->second->textureName;
+		else
+		{
+			if( type->second->class_type == ObjectInformation::_class("OBJS") )
+			{
+				auto v = static_cast<ObjectData*>(type->second.get());
+				modelname = v->modelName;
+				texturename = v->textureName;
+			}
+			else if( type->second->class_type == ObjectInformation::_class("PEDS") )
+			{
+				auto v = static_cast<CharacterData*>(type->second.get());
+				modelname = v->modelName;
+				texturename = v->textureName;
+
 
 				static std::string specialPrefix("special");
 				if(! modelname.compare(0, specialPrefix.size(), specialPrefix) ) {
@@ -408,19 +395,19 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 
 VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
-	auto vti = vehicleTypes.find(id);
-	if(vti != vehicleTypes.end()) {
-		std::cout << "Creating Vehicle ID " << id << " (" << vti->second->gameName << ")" << std::endl;
+	auto vti = findObjectType<VehicleData>(id);
+	if( vti ) {
+		std::cout << "Creating Vehicle ID " << id << " (" << vti->gameName << ")" << std::endl;
 		
-		if(! vti->second->modelName.empty()) {
-			gameData.loadDFF(vti->second->modelName + ".dff");
+		if(! vti->modelName.empty()) {
+			gameData.loadDFF(vti->modelName + ".dff");
 		}
-		if(! vti->second->textureName.empty()) {
-			gameData.loadTXD(vti->second->textureName + ".txd");
+		if(! vti->textureName.empty()) {
+			gameData.loadTXD(vti->textureName + ".txd");
 		}
 		
 		glm::u8vec3 prim(255), sec(128);
-		auto palit = gameData.vehiclePalettes.find(vti->second->modelName); // modelname is conveniently lowercase (usually)
+		auto palit = gameData.vehiclePalettes.find(vti->modelName); // modelname is conveniently lowercase (usually)
 		if(palit != gameData.vehiclePalettes.end() && palit->second.size() > 0 ) {
 			 std::uniform_int_distribution<int> uniform(0, palit->second.size()-1);
 			 int set = uniform(randomEngine);
@@ -428,19 +415,20 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			 sec = gameData.vehicleColours[palit->second[set].second];
 		}
 		else {
-			logWarning("No colour palette for vehicle " + vti->second->modelName);
+			logWarning("No colour palette for vehicle " + vti->modelName);
 		}
 		
-		auto wi = objectTypes.find(vti->second->wheelModelID);
-		if( wi != objectTypes.end()) {
-			if(! wi->second->textureName.empty()) {
-				gameData.loadTXD(wi->second->textureName + ".txd");
+		auto wi = findObjectType<ObjectData>(vti->wheelModelID);
+		if( wi )
+		{
+			if(! wi->textureName.empty()) {
+				gameData.loadTXD(wi->textureName + ".txd");
 			}
 		}
 		
-		ModelHandle* m = gameData.models[vti->second->modelName];
+		ModelHandle* m = gameData.models[vti->modelName];
 		auto model = m->model;
-		auto info = gameData.vehicleInfo.find(vti->second->handlingID);
+		auto info = gameData.vehicleInfo.find(vti->handlingID);
 		if(model && info != gameData.vehicleInfo.end()) {
 			if( info->second->wheels.size() == 0 && info->second->seats.size() == 0 ) {
 				for( const ModelFrame* f : model->frames ) {
@@ -461,7 +449,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			}
 		}
 
-		auto vehicle = new VehicleObject{ this, pos, rot, m, vti->second, info->second, prim, sec };
+		auto vehicle = new VehicleObject{ this, pos, rot, m, vti, info->second, prim, sec };
 
 		objects.insert(vehicle);
 
@@ -472,9 +460,8 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
 CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
-	auto pti = pedestrianTypes.find(id);
-	if( pti != pedestrianTypes.end() ) {
-		auto& pt = pti->second;
+	auto pt = findObjectType<CharacterData>(id);
+	if( pt ) {
 
 		std::string modelname = pt->modelName;
 		std::string texturename = pt->textureName;

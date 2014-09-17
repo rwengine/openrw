@@ -1,10 +1,10 @@
 #ifndef _GENERICDATLOADER_HPP_
-#define _GENERICDATLOADER_CPP_
+#define _GENERICDATLOADER_HPP_
 
 #include <map>
 #include <memory>
 
-class DynamicObjectData;
+struct DynamicObjectData;
 typedef std::shared_ptr<DynamicObjectData> DynamicObjectDataPtr;
 typedef std::map<std::string,DynamicObjectDataPtr> DynamicObjectDataPtrs;
 

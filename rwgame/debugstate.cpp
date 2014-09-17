@@ -10,6 +10,7 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	Menu *m = new Menu(game->getFont());
 	m->offset = glm::vec2(50.f, 100.f);
 	float entryHeight = 24.f;
+#if 0
 	m->addEntry(Menu::lambda("Random Vehicle", [this] {
 		auto it = getWorld()->vehicleTypes.begin();
 		std::uniform_int_distribution<int> uniform(0, 3);
@@ -50,6 +51,7 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 			spawnVehicle(v.first);
 		}, entryHeight));
 	}
+#endif
 	this->enterMenu(m);
 
 	_debugCam.position = vp;

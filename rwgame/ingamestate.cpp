@@ -42,30 +42,35 @@ void IngameState::startTest()
 
 	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
 	auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
-	for( auto& vi : getWorld()->vehicleTypes ) {
+	for( auto& vi : getWorld()->objectTypes ) {
 		switch( vi.first ) {
 		case 140: continue;
 		case 141: continue;
 		}
+		if( vi.second->class_type == ObjectInformation::_class("CARS") )
+		{
+			auto vehicle = std::static_pointer_cast<VehicleData>(vi.second);
 
-		auto sp = carPos;
-		if( vi.second->type == VehicleData::BOAT ) {
-			sp = boatPos;
-		}
+			auto sp = carPos;
+			if( vehicle->type == VehicleData::BOAT ) {
+				sp = boatPos;
+			}
 
-		auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
+			auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
 
-		if( vi.second->type == VehicleData::BOAT ) {
-			boatPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
-		}
-		else {
-			carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
+			if( vehicle->type == VehicleData::BOAT ) {
+				boatPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
+			}
+			else {
+				carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
+			}
 		}
 	}
 }
 
 void IngameState::spawnPlayerVehicle()
 {
+#if 0
 	if(! getWorld()->state.player ) return;
 	glm::vec3 hit, normal;
 	if(game->hitWorldRay(hit, normal)) {
@@ -83,6 +88,7 @@ void IngameState::spawnPlayerVehicle()
 
 		getWorld()->state.player->getCharacter()->enterVehicle(vehicle, 0);
 	}
+#endif
 }
 
 void IngameState::updateView()

@@ -173,7 +173,7 @@ void GenericDATLoader::loadHandling(const std::string& name, VehicleInfoPtrs& ve
 			auto mit = vehicleData.find(info.ID);
 			if(mit == vehicleData.end()) {
 				vehicleData.insert({info.ID,
-									VehicleInfoHandle(new VehicleInfo{info})});
+									VehicleInfoHandle(new VehicleInfo{info, {}, {}})});
 			}
 			else {
 				mit->second->handling = info;

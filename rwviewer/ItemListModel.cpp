@@ -2,26 +2,11 @@
 
 qint16 ItemListModel::getIDOf(unsigned int row) const
 {
-	unsigned int j = 0;
-	if( row < world()->objectTypes.size() ) {
-		auto it = world()->objectTypes.begin();
-		while (j < row) {
-			it++; j++;
-			if( it == world()->objectTypes.end() ) return -1;
-		}
-		return it->first;
+	if( row < world()->objectTypes.size() )
+	{
+		return row;
 	}
-	return -1;
 
-	row -= world()->objectTypes.size();
-	if( row < world()->vehicleTypes.size() ) {
-		auto it = world()->vehicleTypes.begin();
-		while (j < row) {
-			it++; j++;
-			if( it == world()->vehicleTypes.end() ) return -1;
-		}
-		return it->first;
-	}
 	return -1;
 }
 
@@ -49,8 +34,7 @@ QVariant ItemListModel::data(const QModelIndex &index, int role) const
 			return id;
 		}
 		else if ( index.column() == 1 ) {
-			return QString::fromStdString(
-						world()->objectTypes[id]->modelName);
+			return QString::fromStdString("TODO");
 		}
 	}
 	return QVariant::Invalid;

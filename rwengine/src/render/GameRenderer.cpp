@@ -487,8 +487,8 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 	// Draw wheels n' stuff
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-		auto woi = engine->objectTypes.find(vehicle->vehicle->wheelModelID);
-		if(woi != engine->objectTypes.end()) {
+		auto woi = engine->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
+		if( woi ) {
 			Model* wheelModel = engine->gameData.models["wheels"]->model;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
 			if( wheelModel ) {
@@ -523,10 +523,10 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 					wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
 				}
 
-				renderWheel(wheelModel, wheelM, woi->second->modelName);
+				renderWheel(wheelModel, wheelM, woi->modelName);
 			}
 			else {
-				std::cout << "Wheel model " << woi->second->modelName << " not loaded" << std::endl;
+				std::cout << "Wheel model " << woi->modelName << " not loaded" << std::endl;
 			}
 		}
 	}
@@ -642,7 +642,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
 	modelMatrix = glm::rotate(modelMatrix, engine->gameTime, glm::vec3(0.f, 0.f, 1.f));
 
-	std::shared_ptr<ObjectData> odata = engine->objectTypes[pickup->getModelID()];
+	auto odata = engine->findObjectType<ObjectData>(pickup->getModelID());
 	auto weapons = engine->gameData.models["weapons"];
 	if( weapons && weapons->model && odata ) {
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
@@ -708,7 +708,7 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 {
 	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(_renderAlpha);
 
-	std::shared_ptr<ObjectData> odata = engine->objectTypes[projectile->getProjectileInfo().weapon->modelID];
+	auto odata = engine->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
 	auto weapons = engine->gameData.models["weapons"];
 	if( weapons && weapons->model ) {
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
@@ -752,7 +752,7 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 {
 	// srhand
-	std::shared_ptr<ObjectData> odata = engine->objectTypes[item->getModelID()];
+	std::shared_ptr<ObjectData> odata = engine->findObjectType<ObjectData>(item->getModelID());
 	auto weapons = engine->gameData.models["weapons"];
 	if( weapons && weapons->model ) {
 		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");

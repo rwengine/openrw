@@ -3,8 +3,7 @@
 #define _LOADERIDE_HPP_
 
 #include <iostream>
-#include <vector>
-#include <memory>
+#include <map>
 #include <glm/glm.hpp>
 #include <data/ObjectData.hpp>
 #include <objects/VehicleInfo.hpp>
@@ -28,11 +27,16 @@ public:
 	// Load the IDE data into memory
 	bool load(const std::string& filename);
 
-	std::vector<std::shared_ptr<ObjectData>> OBJSs;
+	/**
+	 * @brief objects loaded during the call to load()
+	 */
+	std::map<ObjectID, ObjectInformationPtr> objects;
+
+	/*std::vector<std::shared_ptr<ObjectData>> OBJSs;
 	std::vector<std::shared_ptr<VehicleData>> CARSs;
 	std::vector<std::shared_ptr<CharacterData>> PEDSs;
+	std::vector<std::shared_ptr<CutsceneObjectData>> HIERs;*/
 	std::vector<std::shared_ptr<PathData>> PATHs;
-	std::vector<std::shared_ptr<CutsceneObjectData>> HIERs;
 };
 
 #endif

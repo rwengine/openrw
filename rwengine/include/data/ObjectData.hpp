@@ -7,12 +7,36 @@
 #include <memory>
 #include <glm/glm.hpp>
 
+typedef uint16_t ObjectID;
+
 /**
- * Data used by Object Instances
+ * Stores basic information about an Object and it's real type.
  */
-struct ObjectData
+struct ObjectInformation
 {
-	uint16_t ID;
+	typedef size_t ObjectClass;
+	static ObjectClass _class(const std::string& name)
+	{
+		return std::hash<std::string>()(name);
+	}
+
+	ObjectID ID;
+	const ObjectClass class_type;
+
+	ObjectInformation(const ObjectClass type)
+		: class_type(type) { }
+};
+
+typedef std::shared_ptr<ObjectInformation> ObjectInformationPtr;
+
+/**
+ * Data used by	Normal Objects
+ */
+struct ObjectData : public ObjectInformation
+{
+	ObjectData()
+		: ObjectInformation(_class("OBJS")) { }
+
 	std::string modelName;
 	std::string textureName;
 	size_t numClumps;
@@ -42,12 +66,16 @@ struct ObjectData
 	};
 };
 
+typedef std::shared_ptr<ObjectData> ObjectDataPtr;
+
 /**
  * Data used by peds
  */
-struct CharacterData
+struct CharacterData : public ObjectInformation
 {
-	uint16_t ID;
+	CharacterData()
+		: ObjectInformation(_class("PEDS")) { }
+
 	std::string modelName;
 	std::string textureName;
 	std::string type;
@@ -59,8 +87,11 @@ struct CharacterData
 /**
  * @brief Stores vehicle data loaded from item definition files.
  */
-struct VehicleData
+struct VehicleData : public ObjectInformation
 {
+	VehicleData()
+		: ObjectInformation(_class("CARS")) { }
+
 	enum VehicleClass
 	{
 		IGNORE      = 0,
@@ -87,7 +118,6 @@ struct VehicleData
 		HELI,
 	};
 
-	uint16_t ID;
 	std::string modelName;
 	std::string textureName;
 	VehicleType type;
@@ -105,6 +135,15 @@ struct VehicleData
 };
 
 typedef std::shared_ptr<VehicleData> VehicleDataHandle;
+
+struct CutsceneObjectData : public ObjectInformation
+{
+	CutsceneObjectData()
+		: ObjectInformation(_class("HIER")) { }
+
+	std::string modelName;
+	std::string textureName;
+};
 
 /** 
  * This is orthogonal to object class, it gives
@@ -137,11 +176,5 @@ struct DynamicObjectData
 	bool cameraAvoid;
 };
 
-struct CutsceneObjectData
-{
-	uint16_t ID;
-	std::string modelName;
-	std::string textureName;
-};
 
 #endif

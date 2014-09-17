@@ -158,6 +158,7 @@ void ViewerWidget::exportModel()
 
 	if( toSv.size() == 0 ) return;
 
+#if 0
 	auto it = world()->objectTypes.find(currentObjectID);
 	if( it != world()->objectTypes.end() ) {
 		for( auto& archive : world()->gameData.archives ) {
@@ -171,6 +172,7 @@ void ViewerWidget::exportModel()
 			}
 		}
 	}
+#endif
 }
 
 Model* ViewerWidget::currentModel() const

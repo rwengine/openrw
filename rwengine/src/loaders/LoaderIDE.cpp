@@ -94,7 +94,7 @@ bool LoaderIDE::load(const std::string &filename)
 					objs->LOD = true;
 				}
 
-				OBJSs.push_back(objs);
+				objects.insert({objs->ID, objs});
 				break;
 			}
 			case CARS: {
@@ -159,7 +159,7 @@ bool LoaderIDE::load(const std::string &filename)
 					}
 				}
 
-				CARSs.push_back(cars);
+				objects.insert({cars->ID, cars});
 				break;
 			}
 			case PEDS: {
@@ -178,7 +178,7 @@ bool LoaderIDE::load(const std::string &filename)
 				peds->ID = atoi(id.c_str());
 				peds->driveMask = atoi(driveMask.c_str());
 
-				PEDSs.push_back(peds);
+				objects.insert({peds->ID, peds});
 				break;
 			}
 			case PATH: {
@@ -264,7 +264,7 @@ bool LoaderIDE::load(const std::string &filename)
 
 				cut->ID = atoi(id.c_str());
 
-				HIERs.push_back(cut);
+				objects.insert({cut->ID, cut});
 				break;
 			}
 			}

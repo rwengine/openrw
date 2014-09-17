@@ -115,12 +115,16 @@ VM_OPCODE_DEF( 0x00C0 )
 
 VM_CONDOPCODE_DEF( 0x00DE )
 {
-	auto& vdata = m->getWorld()->vehicleTypes[p->at(1).integer];
-	auto controller = (CharacterController*)(*p->at(0).handle);
-	auto character = controller->getCharacter();
-	auto vehicle = character->getCurrentVehicle();
-	if ( vehicle ) {
-		return vehicle->model && vdata->modelName == vehicle->model->name;
+	auto vdata = m->getWorld()->findObjectType<VehicleData>(p->at(1).integer);
+	if( vdata )
+	{
+		auto controller = (CharacterController*)(*p->at(0).handle);
+		auto character = controller->getCharacter();
+		auto vehicle = character->getCurrentVehicle();
+		if ( vehicle ) {
+
+			return vehicle->model && vdata->modelName == vehicle->model->name;
+		}
 	}
 	return false;
 }
@@ -314,9 +318,9 @@ VM_OPCODE_DEF( 0x023C )
 }
 VM_CONDOPCODE_DEF( 0x023D )
 {
-	auto chfind = m->getWorld()->pedestrianTypes.find(p->at(0).integer);
-	if( chfind != m->getWorld()->pedestrianTypes.end() ) {
-		auto modelfind = m->getWorld()->gameData.models.find(chfind->second->modelName);
+	auto chartype = m->getWorld()->findObjectType<CharacterData>(p->at(0).integer);
+	if( chartype ) {
+		auto modelfind = m->getWorld()->gameData.models.find(chartype->modelName);
 		if( modelfind != m->getWorld()->gameData.models.end() && modelfind->second->model != nullptr ) {
 			return true;
 		}
@@ -565,7 +569,7 @@ VM_OPCODE_DEF( 0x03B6 )
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 
 	auto newobjectid = m->getWorld()->findModelDefinition(newmodel);
-	auto& nobj = m->getWorld()->objectTypes[newobjectid];
+	auto nobj = m->getWorld()->findObjectType<ObjectData>(newobjectid);
 
 	/// @todo Objects need to adopt the new object ID, not just the model.
 	for(auto o : m->getWorld()->objects) {

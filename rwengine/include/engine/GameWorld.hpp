@@ -176,29 +176,24 @@ public:
 	/**
 	 * Object Definitions
 	 */
-	std::map<uint16_t, std::shared_ptr<ObjectData>> objectTypes;
+	std::map<ObjectID, ObjectInformationPtr> objectTypes;
+
+	template<class T> std::shared_ptr<T> findObjectType(ObjectID id)
+	{
+		auto f = objectTypes.find(id);
+		/// @TODO don't instanciate an object here just to read .type
+		T tmp;
+		if( f != objectTypes.end() && f->second->class_type == tmp.class_type )
+		{
+			return std::static_pointer_cast<T>(f->second);
+		}
+		return nullptr;
+	}
 
 	/**
 	* Paths associated with each object definition.
 	*/
 	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
-
-	/**
-	 * Stores cutscene object model "names"
-	 */
-	std::map<uint16_t, std::shared_ptr<CutsceneObjectData>> cutsceneObjectTypes;
-
-	/**
-	 * Vehicle type definitions
-	 * @todo move this non-instance data to GameData
-	 */
-	std::map<uint16_t, std::shared_ptr<VehicleData>> vehicleTypes;
-
-	/**
-	* Ped definitions
-	* @todo move this non-instance data to GameData
-	*/
-	std::map<uint16_t, std::shared_ptr<CharacterData>> pedestrianTypes;
 
 	/**
 	 * @brief objects All active GameObjects in the world.
