@@ -3,5 +3,5 @@ documentation/
 *.kdev4
 *~
 *.swp
-*.user
+*.user*
 
