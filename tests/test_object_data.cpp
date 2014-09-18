@@ -15,12 +15,12 @@ BOOST_AUTO_TEST_CASE(test_object_data)
 
 		auto obj = l.objects[1100];
 
-		BOOST_ASSERT(def->type == ObjectInformation::_class("OBJS"));
-
 		std::shared_ptr<ObjectData> def = std::dynamic_pointer_cast<ObjectData>(def);
 
+		BOOST_ASSERT(def->class_type == ObjectInformation::_class("OBJS"));
+
 		BOOST_CHECK_EQUAL( def->modelName, "rd_corner1" );
-		BOOST_CHECK_EQUAL( def->textureName, "generic", );
+		BOOST_CHECK_EQUAL( def->textureName, "generic" );
 		BOOST_CHECK_EQUAL( def->numClumps, 1 );
 		BOOST_CHECK_EQUAL( def->drawDistance[0], 220 );
 		BOOST_CHECK_EQUAL( def->flags, 0 );
@@ -34,12 +34,12 @@ BOOST_AUTO_TEST_CASE(test_object_data)
 
 		auto obj = l.objects[90];
 
-		BOOST_ASSERT(def->type == ObjectInformation::_class("CARS"));
-
 		std::shared_ptr<VehicleData> def = std::dynamic_pointer_cast<VehicleData>(def);
 
+		BOOST_ASSERT(def->type == ObjectInformation::_class("CARS"));
+
 		BOOST_CHECK_EQUAL( def->modelName, "landstal");
-		BOOST_CHECK_EQUAL( def->textureName, "landstal", );
+		BOOST_CHECK_EQUAL( def->textureName, "landstal" );
 		BOOST_CHECK_EQUAL( def->type, VehicleData::CAR );
 		BOOST_CHECK_EQUAL( def->handlingID, "LANDSTAL" );
 		BOOST_CHECK_EQUAL( def->gameName, "LANDSTK" );

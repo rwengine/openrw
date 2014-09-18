@@ -1,36 +1,23 @@
 #include "ViewerWindow.hpp"
+#include "ObjectViewer.hpp"
+
 #include <engine/GameWorld.hpp>
-#include "ViewerWidget.hpp"
-#include "ItemListWidget.hpp"
-#include "ModelFramesWidget.hpp"
-#include "AnimationListWidget.hpp"
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QApplication>
 #include <QSettings>
+#include <QDebug>
 #include <fstream>
+#include <QOffscreenSurface>
+#include <ViewerWidget.hpp>
 
 static int MaxRecentGames = 5;
 
-ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(parent, flags)
+ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
+	: QMainWindow(parent, flags), gameWorld(nullptr)
 {
 	setMinimumSize(640, 480);
-	
-	viewer = new ViewerWidget();
-	this->setCentralWidget(viewer);
-	
-	itemsWidget = new ItemListWidget;
-	itemsWidget->setObjectName("archivewidget");
-	this->addDockWidget(Qt::LeftDockWidgetArea, itemsWidget);
-	
-	frameswidget = new ModelFramesWidget;
-	frameswidget->setObjectName("frameswidget");
-	this->addDockWidget(Qt::RightDockWidgetArea, frameswidget);
 
-	animationswidget = new AnimationListWidget;
-	animationswidget->setObjectName("animationswidget");
-	this->addDockWidget(Qt::RightDockWidgetArea, animationswidget);
-	
 	QMenuBar* mb = this->menuBar();
 	QMenu* file = mb->addMenu("&File");
 
@@ -49,16 +36,24 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags): QMainWindow(
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
 	QMenu* data = mb->addMenu("&Data");
-	data->addAction("Export &Model", viewer, SLOT(exportModel()));
+	//data->addAction("Export &Model", objectViewer, SLOT(exportModel()));
 
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
-	
-	connect(itemsWidget, SIGNAL(selectedItemChanged(qint16)), viewer, SLOT(showItem(qint16)));
-	connect(viewer, SIGNAL(dataLoaded(GameWorld*)), itemsWidget, SLOT(worldLoaded(GameWorld*)));
-	connect(viewer, SIGNAL(modelChanged(Model*)), frameswidget, SLOT(setModel(Model*)));
-	connect(animationswidget, SIGNAL(selectedAnimationChanged(Animation*)), viewer, SLOT(showAnimation(Animation*)));
-	
+
+	viewerWidget = new ViewerWidget;
+
+	viewerWidget->context()->makeCurrent();
+
+	glewExperimental = 1;
+	glewInit();
+
+	objectViewer = new ObjectViewer(viewerWidget);
+	this->setCentralWidget(objectViewer);
+
+	connect(this, SIGNAL(loadedData(GameWorld*)), objectViewer, SLOT(showData(GameWorld*)));
+	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
+
 	updateRecentGames();
 }
 
@@ -83,6 +78,7 @@ void ViewerWindow::closeEvent(QCloseEvent* event)
 
 void ViewerWindow::openAnimations()
 {
+#if 0
 	QFileDialog dialog(this, "Open Animations", QDir::homePath(), "IFP Animations (*.ifp)");
 	if(dialog.exec()) {
 		std::ifstream dfile(dialog.selectedFiles().at(0).toStdString().c_str());
@@ -108,6 +104,7 @@ void ViewerWindow::openAnimations()
 
 		animationswidget->setAnimations(anims);
 	}
+#endif
 }
 
 void ViewerWindow::loadGame()
@@ -126,7 +123,15 @@ void ViewerWindow::loadGame(const QString &path)
 	QDir gameDir( path );
 
 	if( gameDir.exists() && path.size() > 0 ) {
-		viewer->setGamePath( gameDir.absolutePath().toStdString() );
+		gameWorld = new GameWorld( gameDir.absolutePath().toStdString() );
+		gameWorld->load();
+
+		// Initalize all the archives.
+		gameWorld->gameData.loadIMG("/models/gta3");
+		gameWorld->gameData.loadIMG("/models/txd");
+		gameWorld->gameData.loadIMG("/anim/cuts");
+
+		loadedData(gameWorld);
 	}
 
 	QSettings settings("OpenRW", "rwviewer");

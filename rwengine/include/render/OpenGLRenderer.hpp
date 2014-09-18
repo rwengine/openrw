@@ -88,6 +88,8 @@ public:
 
 	virtual void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
 	virtual void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
+
+	virtual void invalidate() = 0;
 };
 
 class OpenGLRenderer : public Renderer
@@ -137,6 +139,8 @@ public:
 
 	void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
 	void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
+
+	void invalidate();
 
 private:
 	DrawBuffer* currentDbuff;

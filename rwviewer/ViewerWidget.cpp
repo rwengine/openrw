@@ -39,9 +39,6 @@ void ViewerWidget::initializeGL()
 	timer.setInterval(16);
 	connect(&timer, SIGNAL(timeout()), SLOT(updateGL()));
 	timer.start();
-	
-	glewExperimental = 1;
-	glewInit();
 
 	_frameWidgetDraw = new DrawBuffer;
 	_frameWidgetDraw->setFaceType(GL_LINES);
@@ -74,17 +71,18 @@ void ViewerWidget::paintGL()
 	if(dummyObject) {
 		gworld->_work->update();
 
+		r.getRenderer()->invalidate();
+
 		if( dummyObject->model->model != _lastModel ) {
 			_lastModel = dummyObject->model->model;
 			emit modelChanged(_lastModel);
 		}
 
-
 		glEnable(GL_DEPTH_TEST);
 		
 		glm::mat4 m;
-		
-		//glUseProgram(r.worldProgram);
+
+		r.getRenderer()->useProgram(r.worldProg);
 
 		ViewCamera vc;
 
@@ -99,6 +97,8 @@ void ViewerWidget::paintGL()
 
 		//r.uploadUBO<SceneUniformData>(r.uboScene,
 		//{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
+
+		r.getRenderer()->invalidate();
 
 		if( dummyObject->model->model ) {
 			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);
@@ -175,27 +175,14 @@ void ViewerWidget::exportModel()
 #endif
 }
 
+void ViewerWidget::dataLoaded(GameWorld *world)
+{
+	gworld = world;
+}
+
 Model* ViewerWidget::currentModel() const
 {
 	return _lastModel;
-}
-
-void ViewerWidget::setGamePath(const std::string &path)
-{
-	if( gworld ) delete gworld;
-	gworld = new GameWorld(path);
-
-	gworld->gameData.loadIMG("/models/gta3");
-	gworld->gameData.loadIMG("/models/txd");
-
-	gworld->load();
-	for(auto it = gworld->gameData.ideLocations.begin();
-		it != gworld->gameData.ideLocations.end();
-		++it) {
-		gworld->defineItems(it->second);
-	}
-
-	emit dataLoaded(gworld);
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e)

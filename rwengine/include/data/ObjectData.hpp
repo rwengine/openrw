@@ -34,6 +34,8 @@ typedef std::shared_ptr<ObjectInformation> ObjectInformationPtr;
  */
 struct ObjectData : public ObjectInformation
 {
+	static const ObjectClass class_id;
+
 	ObjectData()
 		: ObjectInformation(_class("OBJS")) { }
 
@@ -73,6 +75,8 @@ typedef std::shared_ptr<ObjectData> ObjectDataPtr;
  */
 struct CharacterData : public ObjectInformation
 {
+	static const ObjectClass class_id;
+
 	CharacterData()
 		: ObjectInformation(_class("PEDS")) { }
 
@@ -89,6 +93,8 @@ struct CharacterData : public ObjectInformation
  */
 struct VehicleData : public ObjectInformation
 {
+	static const ObjectClass class_id;
+
 	VehicleData()
 		: ObjectInformation(_class("CARS")) { }
 
@@ -138,6 +144,8 @@ typedef std::shared_ptr<VehicleData> VehicleDataHandle;
 
 struct CutsceneObjectData : public ObjectInformation
 {
+	static const ObjectClass class_id;
+
 	CutsceneObjectData()
 		: ObjectInformation(_class("HIER")) { }
 

@@ -2,20 +2,23 @@
 #ifndef _VIEWERWINDOW_HPP_
 #define _VIEWERWINDOW_HPP_
 #include <QMainWindow>
+#include <engine/GameWorld.hpp>
+#include <QGLContext>
 
-class ModelFramesWidget;
-class ItemListWidget;
-class AnimationListWidget;
+class ObjectViewer;
 class ViewerWidget;
 
 class ViewerWindow : public QMainWindow
 {
 	Q_OBJECT
 	
-	ViewerWidget* viewer;
-	ItemListWidget* itemsWidget;
-	ModelFramesWidget* frameswidget;
-	AnimationListWidget* animationswidget;
+	GameWorld* gameWorld;
+
+	/** Contains the OGL context */
+	ViewerWidget* viewerWidget;
+	ObjectViewer* objectViewer;
+
+	QGLContext* context;
 public:
 
 	ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
@@ -26,9 +29,9 @@ public:
 	 */
 	void openGame(const QString& datFile);
 
-    virtual void showEvent(QShowEvent*);
+	virtual void showEvent(QShowEvent*);
 	
-    virtual void closeEvent(QCloseEvent*);
+	virtual void closeEvent(QCloseEvent*);
 
 public slots:
 
@@ -37,6 +40,10 @@ public slots:
 	void loadGame();
 
 	void loadGame( const QString& path );
+
+signals:
+
+	void loadedData(GameWorld* world);
 
 private slots:
 

@@ -227,6 +227,11 @@ public:
 
 	/** Adds a particle to the rendering */
 	void addParticle(const FXParticle& particle);
+
+	Renderer* getRenderer()
+	{
+		return renderer;
+	}
 };
 
 #endif

@@ -79,8 +79,6 @@ GLuint compileProgram(const char* vertex, const char* fragment)
 	return prog;
 }
 
-
-
 void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 {
 	if( dbuff != currentDbuff )
@@ -228,4 +226,12 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const 
 	uploadUBO(UBOObject, oudata);
 
 	glDrawArrays(draw->getFaceType(), p.start, p.count);
+}
+
+void OpenGLRenderer::invalidate()
+{
+	currentDbuff = nullptr;
+	currentProgram = nullptr;
+	currentTexture = 0;
+	currentUBO = 0;
 }

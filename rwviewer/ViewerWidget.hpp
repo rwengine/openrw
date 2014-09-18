@@ -38,18 +38,16 @@ class ViewerWidget : public QGLWidget
 	void drawFrameWidget(ModelFrame* f, const glm::mat4& = {});
 public:
 
-    ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
+	ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
 
-    virtual void initializeGL();
+	virtual void initializeGL();
 	
-    virtual void resizeGL(int w, int h);
+	virtual void resizeGL(int w, int h);
 	
-    virtual void paintGL();
+	virtual void paintGL();
 
 	Model *currentModel() const;
-	
-	// TODO: Move this into the main window or elsewhere, doesn't really belong here.
-	void setGamePath(const std::string& path);
+
 	GameWorld* world();
 
 public slots:
@@ -60,9 +58,9 @@ public slots:
 
 	void exportModel();
 
-signals:
-
 	void dataLoaded(GameWorld* world);
+
+signals:
 
 	void fileOpened(const QString& file);
 
