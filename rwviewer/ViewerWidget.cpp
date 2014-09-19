@@ -6,7 +6,11 @@
 #include <engine/Animator.hpp>
 #include <QFileDialog>
 #include <algorithm>
+
 #include <objects/InstanceObject.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
+
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
 : QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
@@ -95,8 +99,7 @@ void ViewerWidget::paintGL()
 		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
-		//r.uploadUBO<SceneUniformData>(r.uboScene,
-		//{ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
+		r.getRenderer()->setSceneParameters({ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
 
 		r.getRenderer()->invalidate();
 
@@ -134,7 +137,23 @@ void ViewerWidget::showItem(qint16 item)
 
 	if( dummyObject ) gworld->destroyObject( dummyObject );
 
-	dummyObject = gworld->createInstance(item, {});
+	auto def = world()->objectTypes[item];
+
+	if( def )
+	{
+		if(def->class_type == ObjectData::class_id)
+		{
+			dummyObject = gworld->createInstance(item, {});
+		}
+		else if(def->class_type == CharacterData::class_id)
+		{
+			dummyObject = gworld->createPedestrian(item, {});
+		}
+		else if(def->class_type == VehicleData::class_id)
+		{
+			dummyObject = gworld->createVehicle(item, {});
+		}
+	}
 }
 
 void ViewerWidget::showAnimation(Animation *anim)
