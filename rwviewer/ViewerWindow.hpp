@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <engine/GameWorld.hpp>
 #include <QGLContext>
+#include <QStackedWidget>
 
 class ObjectViewer;
 class ViewerWidget;
@@ -17,6 +18,7 @@ class ViewerWindow : public QMainWindow
 	/** Contains the OGL context */
 	ViewerWidget* viewerWidget;
 	ObjectViewer* objectViewer;
+	QStackedWidget* viewSwitcher;
 
 	QGLContext* context;
 public:
@@ -48,6 +50,8 @@ signals:
 private slots:
 
 	void openRecent();
+
+	void switchWidget();
 
 private:
 	

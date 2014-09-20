@@ -35,12 +35,6 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	ex->setShortcut(QKeySequence::Quit);
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
-	QMenu* data = mb->addMenu("&Data");
-	//data->addAction("Export &Model", objectViewer, SLOT(exportModel()));
-
-	QMenu* anim = mb->addMenu("&Animation");
-	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
-
 	viewerWidget = new ViewerWidget;
 
 	viewerWidget->context()->makeCurrent();
@@ -49,10 +43,31 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	glewInit();
 
 	objectViewer = new ObjectViewer(viewerWidget);
-	this->setCentralWidget(objectViewer);
 
 	connect(this, SIGNAL(loadedData(GameWorld*)), objectViewer, SLOT(showData(GameWorld*)));
 	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
+
+	viewSwitcher = new QStackedWidget;
+	viewSwitcher->addWidget(objectViewer);
+	viewSwitcher->addWidget(new QLabel("Model Viewer Not Implemented Yet"));
+
+	QMenu* view = mb->addMenu("&View");
+	QAction* objectAction = view->addAction("&Object");
+	QAction* modelAction = view->addAction("&Model");
+
+	objectAction->setData(0);
+	modelAction->setData(1);
+
+	connect(objectAction, SIGNAL(triggered()), this, SLOT(switchWidget()));
+	connect(modelAction, SIGNAL(triggered()), this, SLOT(switchWidget()));
+
+	QMenu* data = mb->addMenu("&Data");
+	//data->addAction("Export &Model", objectViewer, SLOT(exportModel()));
+
+	QMenu* anim = mb->addMenu("&Animation");
+	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
+
+	this->setCentralWidget(viewSwitcher);
 
 	updateRecentGames();
 }
@@ -149,6 +164,14 @@ void ViewerWindow::openRecent()
 	QAction* r = qobject_cast< QAction* >(sender());
 	if(r) {
 		loadGame( r->data().toString() );
+	}
+}
+
+void ViewerWindow::switchWidget()
+{
+	QAction* r = qobject_cast< QAction* >(sender());
+	if(r) {
+		viewSwitcher->setCurrentIndex(r->data().toInt() );
 	}
 }
 
