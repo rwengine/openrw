@@ -90,16 +90,18 @@ void ViewerWidget::paintGL()
 
 		ViewCamera vc;
 
+		float viewFov = glm::radians(45.f);
+
 		vc.frustum.far = 500.f;
 		vc.frustum.near = 0.1f;
-		vc.frustum.fov = 90.f;
+		vc.frustum.fov = viewFov;
 		vc.frustum.aspectRatio = width()/(height()*1.f);
 
 		glm::mat4 proj = vc.frustum.projection();
 		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
-		r.getRenderer()->setSceneParameters({ proj, view, glm::vec4(1.f), glm::vec4(1.f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
+		r.getRenderer()->setSceneParameters({ proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
 
 		r.getRenderer()->invalidate();
 
