@@ -6,6 +6,8 @@
 #include <QGLWidget>
 #include <QTableView>
 #include <QLabel>
+#include <QGridLayout>
+#include <QHBoxLayout>
 
 class ViewerWidget;
 
@@ -16,11 +18,12 @@ class ObjectViewer : public QWidget
 	QTableView* objectList;
 	GameWorld* _world;
 
+	QHBoxLayout* mainLayout;
+	QGridLayout* infoLayout;
 	ViewerWidget* previewWidget;
 	QLabel* previewID;
 	QLabel* previewModel;
 	QLabel* previewClass;
-
 public:
 
 	ObjectViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
@@ -29,6 +32,8 @@ public:
 	{
 		return _world;
 	}
+
+	void setViewerWidget( ViewerWidget* widget );
 
 public slots:
 

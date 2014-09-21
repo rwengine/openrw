@@ -5,6 +5,7 @@
 #include <engine/GameWorld.hpp>
 #include <QGLContext>
 #include <QStackedWidget>
+#include <QVBoxLayout>
 
 class ObjectViewer;
 class ViewerWidget;
@@ -17,7 +18,11 @@ class ViewerWindow : public QMainWindow
 
 	/** Contains the OGL context */
 	ViewerWidget* viewerWidget;
+
 	ObjectViewer* objectViewer;
+
+	QVBoxLayout* modelLayout;
+
 	QStackedWidget* viewSwitcher;
 
 	QGLContext* context;

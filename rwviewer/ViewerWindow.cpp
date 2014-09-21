@@ -49,7 +49,6 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 
 	viewSwitcher = new QStackedWidget;
 	viewSwitcher->addWidget(objectViewer);
-	viewSwitcher->addWidget(new QLabel("Model Viewer Not Implemented Yet"));
 
 	QMenu* view = mb->addMenu("&View");
 	QAction* objectAction = view->addAction("&Object");
@@ -66,6 +65,13 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
+
+	modelLayout = new QVBoxLayout;
+
+	QWidget* span = new QWidget;
+	span->setLayout(modelLayout);
+
+	viewSwitcher->addWidget(span);
 
 	this->setCentralWidget(viewSwitcher);
 
@@ -171,7 +177,19 @@ void ViewerWindow::switchWidget()
 {
 	QAction* r = qobject_cast< QAction* >(sender());
 	if(r) {
-		viewSwitcher->setCurrentIndex(r->data().toInt() );
+		int index = r->data().toInt();
+
+		if( index == 0 )
+		{
+			modelLayout->removeWidget( viewerWidget );
+			objectViewer->setViewerWidget( viewerWidget );
+		}
+		else if( index == 1 )
+		{
+			modelLayout->addWidget( viewerWidget );
+		}
+
+		viewSwitcher->setCurrentIndex( index );
 	}
 }
 

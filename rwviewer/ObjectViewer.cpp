@@ -1,42 +1,47 @@
 #include "ObjectViewer.hpp"
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <models/ObjectListModel.hpp>
 #include "ViewerWidget.hpp"
+#include <QDebug>
 
 ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
 : QWidget(parent, f)
 {
+	mainLayout = new QHBoxLayout;
+
 	objectList = new QTableView;
 
-	QHBoxLayout* layout = new QHBoxLayout;
-	layout->addWidget(objectList);
-
-	QVBoxLayout* infoLayout = new QVBoxLayout;
-	layout->addItem(infoLayout);
+	mainLayout->addWidget(objectList);
 
 	previewWidget = viewer;
 	previewWidget->setMinimumSize(250,250);
 
-	QGridLayout* dataGrid = new QGridLayout;
-
-	dataGrid->addWidget(previewWidget, 0, 0, 1, 2);
+	infoLayout = new QGridLayout;
 
 	previewID = new QLabel;
 	previewModel = new QLabel;
 	previewClass = new QLabel;
-	dataGrid->addWidget(new QLabel("ID"), 1, 0);
-	dataGrid->addWidget(previewID, 1, 1);
-	dataGrid->addWidget(new QLabel("Type"), 2, 0);
-	dataGrid->addWidget(previewClass, 2, 1);
-	dataGrid->addWidget(new QLabel("Model"), 3, 0);
-	dataGrid->addWidget(previewModel, 3, 1);
+	infoLayout->addWidget(new QLabel("ID"), 1, 0);
+	infoLayout->addWidget(previewID, 1, 1);
+	infoLayout->addWidget(new QLabel("Type"), 2, 0);
+	infoLayout->addWidget(previewClass, 2, 1);
+	infoLayout->addWidget(new QLabel("Model"), 3, 0);
+	infoLayout->addWidget(previewModel, 3, 1);
 
-	infoLayout->addItem(dataGrid);
+	//infoLayout->addStretch(100);
 
-	infoLayout->addStretch(100);
+	mainLayout->addLayout(infoLayout);
 
-	this->setLayout(layout);
+	this->setLayout(mainLayout);
+
+	setViewerWidget(previewWidget);
+}
+
+void ObjectViewer::setViewerWidget(ViewerWidget* widget)
+{
+	static size_t c = 0;
+	//widgetLayout->removeWidget(previewWidget);
+	previewWidget = widget;
+	infoLayout->addWidget(previewWidget, 0, 0, 1, 2);
 }
 
 static std::map<ObjectInformation::ObjectClass, QString> gDataType =
