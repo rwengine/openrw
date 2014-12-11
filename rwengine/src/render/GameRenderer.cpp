@@ -15,6 +15,7 @@
 #include <items/InventoryItem.hpp>
 
 #include <data/CutsceneData.hpp>
+#include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
 
 #include <render/GameShaders.hpp>
@@ -275,6 +276,12 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	glActiveTexture(GL_TEXTURE0);
 
 	for( GameObject* object : engine->objects ) {
+		
+		if( object->skeleton )
+		{
+			object->skeleton->interpolate(_renderAlpha);
+		}
+		
 		switch(object->type()) {
 		case GameObject::Character:
 			renderPedestrian(static_cast<CharacterObject*>(object));
@@ -457,8 +464,16 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( _renderAlpha );
 
 	if(!pedestrian->model->model) return;
+	
+	// Apply the inverse of the root transform from the current animation.
+	if( pedestrian->isAnimationFixed() )
+	{
+		auto rtranslate = pedestrian->animator->getTimeTranslation();
+		matrixModel = glm::translate(matrixModel, -rtranslate);
+	}
 
 	auto root = pedestrian->model->model->frames[0];
+	
 	renderFrame(pedestrian->model->model, root->getChildren()[0], matrixModel, pedestrian, 1.f, pedestrian->animator);
 
 	if(pedestrian->getActiveItem()) {
@@ -466,7 +481,7 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 		glm::mat4 localMatrix;
 		if( handFrame ) {
 			while( handFrame->getParent() ) {
-				localMatrix = pedestrian->animator->getFrameMatrix(handFrame, _renderAlpha) * localMatrix;
+				localMatrix = pedestrian->skeleton->getMatrix(handFrame->getIndex()) * localMatrix;
 				handFrame = handFrame->getParent();
 			}
 		}
@@ -677,7 +692,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 		glm::mat4 localMatrix;
 		auto boneframe = cutscene->getParentFrame();
 		while( boneframe ) {
-			localMatrix = cutscene->getParentActor()->animator->getFrameMatrix(boneframe, _renderAlpha, false) * localMatrix;
+			localMatrix = cutscene->getParentActor()->skeleton->getMatrix(boneframe->getIndex()) * localMatrix;
 			boneframe = boneframe->getParent();
 		}
 		matrixModel = matrixModel * localMatrix;
@@ -918,14 +933,11 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 	auto localmatrix = matrix;
 	bool vis = true;
 
-	if(object && object->animator) {
-		bool animFixed = false;
-		if( object->type() == GameObject::Character ) {
-			animFixed = static_cast<CharacterObject*>(object)->isAnimationFixed();
-		}
-		localmatrix *= object->animator->getFrameMatrix(f, _renderAlpha, animFixed);
+	if(object && object->skeleton) {
+		// Skeleton is loaded with the correct matrix via Animator.
+		localmatrix *= object->skeleton->getMatrix(f);
 
-		vis = object->animator->getFrameVisibility(f);
+		vis = object->skeleton->getData(f->getIndex()).enabled;
 	}
 	else {
 		localmatrix *= f->getTransform();
@@ -933,13 +945,15 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 
 	if( vis ) {
 		for(size_t g : f->getGeometries()) {
-			RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
-			/// @todo fix culling animating objects?
-
-			glm::vec3 boundpos = bounds.center + glm::vec3(matrix[3]);
-			if(! _camera.frustum.intersects(boundpos, bounds.radius)) {
-				culled++;
-				continue;
+			if( !object || !object->animator )
+			{
+				RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
+				
+				glm::vec3 boundpos = bounds.center + glm::vec3(localmatrix[3]);
+				if(! _camera.frustum.intersects(boundpos, bounds.radius)) {
+					culled++;
+					continue;
+				}
 			}
 
 			renderGeometry(m, g, localmatrix, opacity, object);

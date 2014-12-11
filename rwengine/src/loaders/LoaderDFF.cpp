@@ -71,7 +71,7 @@ void LoaderDFF::readFrameList(Model *model, const RWBStream &stream)
 			model->rootFrameIdx = f;
 		}
 
-		auto frame = new ModelFrame(parent, data->rotation, data->position);
+		auto frame = new ModelFrame(f, parent, data->rotation, data->position);
 		model->frames.push_back(frame);
 	}
 

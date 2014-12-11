@@ -17,6 +17,7 @@
  * transformations. 
  */
 class ModelFrame {
+	unsigned int index;
 	glm::mat3 defaultRotation;
 	glm::vec3 defaultTranslation;
 	glm::mat4 matrix;
@@ -26,7 +27,7 @@ class ModelFrame {
 	std::vector<ModelFrame*> childs;
 public:
 	
-	ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT);
+	ModelFrame(unsigned int index, ModelFrame* parent, glm::mat3 dR, glm::vec3 dT);
 
 	void reset();
 	void setTransform(const glm::mat4& m);
@@ -36,6 +37,9 @@ public:
 		{ name = fname; }
 
 	void addGeometry(size_t idx);
+	
+	unsigned int getIndex() const
+		{ return index; }
 
 	glm::vec3 getDefaultTranslation() const
 		{ return defaultTranslation; }

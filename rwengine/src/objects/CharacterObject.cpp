@@ -4,6 +4,7 @@
 #include <engine/Animator.hpp>
 #include <objects/VehicleObject.hpp>
 #include <items/InventoryItem.hpp>
+#include <data/Skeleton.hpp>
 
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
@@ -43,8 +44,8 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.car_getout_lhs   = engine->gameData.animations["car_getout_lhs"];
 
 	if(model) {
-		animator = new Animator();
-		animator->setModel(model->model);
+		skeleton = new Skeleton;
+		animator = new Animator(model->model, skeleton);
 
 		createActor();
 	}
@@ -180,7 +181,7 @@ void CharacterObject::updateCharacter(float dt)
 		glm::vec3 animTranslate;
 
 		if( isAnimationFixed() ) {
-			auto d = animator->getDurationTransform() / animator->getAnimation()->duration;
+			auto d = animator->getRootTranslation() / animator->getAnimation()->duration;
 			animTranslate = d * dt;
 		}
 
@@ -393,15 +394,14 @@ void CharacterObject::clearTargetPosition()
 	_hasTargetPosition = false;
 }
 
-void CharacterObject::playAnimation(Animation *animation, bool repeat, bool fixed)
+void CharacterObject::playAnimation(Animation *animation, bool repeat)
 {
-	_fixedAnimation = fixed;
 	animator->setAnimation(animation, repeat);
 }
 
 bool CharacterObject::isAnimationFixed() const
 {
-	return _fixedAnimation;
+	return getCurrentVehicle() == nullptr;
 }
 
 void CharacterObject::addToInventory(InventoryItem *item)

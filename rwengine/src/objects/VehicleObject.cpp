@@ -4,6 +4,7 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <sys/stat.h>
 #include <data/CollisionModel.hpp>
+#include <data/Skeleton.hpp>
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
 
@@ -59,21 +60,21 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		}
 
 		// Hide all LOD and damage frames.
-		animator = new Animator;
-		animator->setModel(model->model);
-
-		for(ModelFrame* f : model->model->frames) {
-			auto& name = f->getName();
+		skeleton = new Skeleton;
+		
+		for(ModelFrame* frame : model->model->frames)
+		{
+			auto& name = frame->getName();
 			bool isDam = name.find("_dam") != name.npos;
 			bool isLod = name.find("lo") != name.npos;
 			bool isDum = name.find("_dummy") != name.npos;
 			/*bool isOk = name.find("_ok") != name.npos;*/
 			if(isDam || isLod || isDum ) {
-				animator->setFrameVisibility(f, false);
+				skeleton->setEnabled(frame, false);
 			}
 
 			if( isDum ) {
-				_hingedObjects[f] = {
+				_hingedObjects[frame] = {
 					nullptr,
 					nullptr
 				};
@@ -90,7 +91,6 @@ VehicleObject::~VehicleObject()
 
 	delete physVehicle;
 	delete physRaycaster;
-	delete animator;
 	
 	ejectAll();
 }
@@ -286,8 +286,11 @@ void VehicleObject::tickPhysics(float dt)
 			if(it.second.body == nullptr) continue;
 			auto inv = glm::inverse(getRotation());
 			auto rot = it.second.body->getWorldTransform().getRotation();
-			animator->setFrameOrientation(it.first,
-					inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z()));
+			auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
+			
+			auto ldata = skeleton->getData(it.first->getIndex()).a;
+			ldata.rotation = r2;
+			skeleton->setData(it.first->getIndex(), { ldata, ldata, true } );
 		}
 	}
 }
@@ -404,7 +407,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 
 void VehicleObject::setFrameState(ModelFrame* f, FrameState state)
 {
-	bool isOkVis = animator->getFrameVisibility(f);
+	bool isOkVis = skeleton->getData(f->getIndex()).enabled;
 
 	auto damName = f->getName();
 	damName.replace(damName.find("_ok"), 3, "_dam");
@@ -412,14 +415,14 @@ void VehicleObject::setFrameState(ModelFrame* f, FrameState state)
 
 	if(DAM == state) {
 		if( isOkVis ) {
-			animator->setFrameVisibility(f, false);
-			animator->setFrameVisibility(damage, true);
+			skeleton->setEnabled(f, false);
+			skeleton->setEnabled(damage, true);
 		}
 	}
 	else if(OK == state) {
-		if(! isOkVis) {
-			animator->setFrameVisibility(f, true);
-			animator->setFrameVisibility(damage, false);
+		if(!isOkVis ) {
+			skeleton->setEnabled(f, true);
+			skeleton->setEnabled(damage, false);
 		}
 	}
 }
@@ -477,7 +480,6 @@ void VehicleObject::createObjectHinge(btTransform& local, ModelFrame *frame)
 	auto gbounds = geom->geometryBounds;
 
 	if( fn.find("door") != fn.npos ) {
-		std::cout << fn << std::endl;
 		hingeAxis = {0.f, 0.f, 1.f};
 		hingePosition = {0.f, 0.2f, 0.f};
 		boxSize = {0.1f, 0.4f, gbounds.radius/2.f};
@@ -509,8 +511,7 @@ void VehicleObject::createObjectHinge(btTransform& local, ModelFrame *frame)
 
 	auto p = frame->getDefaultTranslation();
 	auto o = glm::toQuat(frame->getDefaultRotation());
-	auto bp = btVector3(p.x, p.y, p.z);
-	tr.setOrigin(bp);
+	tr.setOrigin(btVector3(p.x, p.y, p.z));
 	tr.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
 
 	dms->setWorldTransform(local * tr);
@@ -531,7 +532,7 @@ void VehicleObject::createObjectHinge(btTransform& local, ModelFrame *frame)
 	auto hinge = new btHingeConstraint(
 				*physBody,
 				*subObject,
-				bp, hingePosition,
+				tr.getOrigin(), hingePosition,
 				hingeAxis, hingeAxis);
 	hinge->setLimit(hingeMin, hingeMax);
 

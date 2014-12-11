@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
+class Skeleton;
 class CharacterController;
 class ModelFrame;
 class Animator;
@@ -35,6 +36,7 @@ public:
     GameWorld* engine;
 
 	Animator* animator; /// Object's animator.
+	Skeleton* skeleton;
 
 	/**
 	 * Health value
@@ -49,11 +51,12 @@ public:
 	float _lastHeight;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
-		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot), model(model), engine(engine), animator(nullptr), mHealth(0.f),
+		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
+		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
 		  _inWater(false), _lastHeight(std::numeric_limits<float>::max())
 	{}
 		
-	virtual ~GameObject() {}
+	virtual ~GameObject();
 
 	/**
 	 * @brief Enumeration of possible object types.

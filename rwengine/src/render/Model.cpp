@@ -16,8 +16,8 @@ Model::Geometry::~Geometry()
 
 }
 
-ModelFrame::ModelFrame(ModelFrame* parent, glm::mat3 dR, glm::vec3 dT)
- : defaultRotation(dR), defaultTranslation(dT), parentFrame(parent)
+ModelFrame::ModelFrame(unsigned int index, ModelFrame* parent, glm::mat3 dR, glm::vec3 dT)
+ : index(index), defaultRotation(dR), defaultTranslation(dT), parentFrame(parent)
 {
 	if(parent != nullptr) {
 		parent->childs.push_back(this);

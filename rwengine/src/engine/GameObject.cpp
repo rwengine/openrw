@@ -1,6 +1,21 @@
 #include <engine/GameObject.hpp>
 #include <loaders/LoaderIFP.hpp>
 #include <loaders/LoaderDFF.hpp>
+#include <engine/Animator.hpp>
+#include <data/Skeleton.hpp>
+
+GameObject::~GameObject()
+{
+	if(animator)
+	{
+		delete animator;
+	}
+	if(skeleton)
+	{
+		delete skeleton;
+	}
+}
+
 
 void GameObject::setPosition(const glm::vec3& pos)
 {

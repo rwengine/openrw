@@ -60,63 +60,63 @@ void CharacterController::update(float dt)
 		// if the character isn't doing anything, play sitting anim.
 		if( _currentActivity == nullptr ) {
 			/// @todo play _low variant if car has low flag.
-			character->playAnimation(character->animations.car_sit, true, false);
+			character->playAnimation(character->animations.car_sit, true);
 		}
 	}
 	else {
 		if( d.x > 0.001f ) {
 			if( running ) {
 				if( character->animator->getAnimation() != character->animations.run ) {
-					character->playAnimation(character->animations.run, true, true);
+					character->playAnimation(character->animations.run, true);
 				}
 			}
 			else {
 				if( character->animator->getAnimation() == character->animations.walk_start ) {
 					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk, true, true);
+						character->playAnimation(character->animations.walk, true);
 					}
 				}
 				else if( character->animator->getAnimation() != character->animations.walk ) {
-					character->playAnimation(character->animations.walk_start, false, true);
+					character->playAnimation(character->animations.walk_start, false);
 				}
 			}
 		}
 		else if( d.x < -0.001f ) {
 			if( character->animator->getAnimation() == character->animations.walk_back_start ) {
 				if( character->animator->isCompleted() ) {
-					character->playAnimation(character->animations.walk_back, true, true);
+					character->playAnimation(character->animations.walk_back, true);
 				}
 			}
 			else if( character->animator->getAnimation() != character->animations.walk_back ) {
-				character->playAnimation(character->animations.walk_back_start, false, true);
+				character->playAnimation(character->animations.walk_back_start, false);
 			}
 		}
 		else if( glm::abs(d.y) > 0.001f ) {
 			if( d.y < 0.f ) {
 				if( character->animator->getAnimation() == character->animations.walk_right_start ) {
 					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk_right, true, true);
+						character->playAnimation(character->animations.walk_right, true);
 					}
 				}
 				else if( character->animator->getAnimation() != character->animations.walk_right ) {
-					character->playAnimation(character->animations.walk_right_start, false, true);
+					character->playAnimation(character->animations.walk_right_start, false);
 				}
 			}
 			else {
 				if( character->animator->getAnimation() == character->animations.walk_left_start ) {
 					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk_left, true, true);
+						character->playAnimation(character->animations.walk_left, true);
 					}
 				}
 				else if( character->animator->getAnimation() != character->animations.walk_left ) {
-					character->playAnimation(character->animations.walk_left_start, false, true);
+					character->playAnimation(character->animations.walk_left_start, false);
 				}
 			}
 		}
 
 		if( _currentActivity == nullptr ) {
 			if( glm::length(d) < 0.001f ) {
-				character->playAnimation(character->animations.idle, true, false);
+				character->playAnimation(character->animations.idle, true);
 			}
 		}
 	}
@@ -193,7 +193,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 	if( entering ) {
 		if( character->animator->getAnimation() == anm_open ) {
 			if( character->animator->isCompleted() ) {
-				character->playAnimation(anm_enter, false, false);
+				character->playAnimation(anm_enter, false);
 				character->enterVehicle(vehicle, seat);
 			}
 			else {
@@ -220,7 +220,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			// Warp character to vehicle orientation
 			character->controller->setRawMovement({0.f, 0.f, 0.f});
 			character->rotation = vehicle->getRotation();
-			character->playAnimation(anm_open, false, false);
+			character->playAnimation(anm_open, false);
 		}
 		else if( targetDistance > 15.f ) {
 			return true; // Give up if the vehicle is too far away.
@@ -260,7 +260,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		}
 	}
 	else {
-		character->playAnimation(anm_exit, false, false);
+		character->playAnimation(anm_exit, false);
 	}
 
 	return false;
@@ -281,7 +281,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			auto shootanim = character->engine->gameData.animations[wepdata->animation1];
 			if( shootanim ) {
 				if( character->animator->getAnimation() != shootanim ) {
-					character->playAnimation(shootanim, false, false);
+					character->playAnimation(shootanim, false);
 				}
 
 				auto loopstart = wepdata->animLoopStart / 100.f;

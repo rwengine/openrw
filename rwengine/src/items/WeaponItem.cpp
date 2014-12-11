@@ -5,6 +5,7 @@
 #include <engine/Animator.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/ProjectileObject.hpp>
+#include <data/Skeleton.hpp>
 
 void WeaponItem::fireHitscan()
 {
@@ -12,7 +13,7 @@ void WeaponItem::fireHitscan()
 	glm::mat4 handMatrix;
 	if( handFrame ) {
 		while( handFrame->getParent() ) {
-			handMatrix = _character->animator->getFrameMatrix(handFrame) * handMatrix;
+			handMatrix = _character->skeleton->getMatrix(handFrame->getIndex()) * handMatrix;
 			handFrame = handFrame->getParent();
 		}
 	}

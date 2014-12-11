@@ -58,8 +58,6 @@ private:
 	void createActor(const glm::vec3& size = glm::vec3(0.35f, 0.35f, 1.3f));
 	void destroyActor();
 
-	bool _fixedAnimation;
-
 	// Incredibly hacky "move in this direction".
 	bool _hasTargetPosition;
 	glm::vec3 _targetPosition;
@@ -129,7 +127,7 @@ public:
 	void setTargetPosition( const glm::vec3& target );
 	void clearTargetPosition();
 
-	void playAnimation(Animation* animation, bool repeat, bool fixed);
+	void playAnimation(Animation* animation, bool repeat);
 	virtual bool isAnimationFixed() const;
 
 	void addToInventory( InventoryItem* item );

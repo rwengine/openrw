@@ -12,6 +12,8 @@
 class Model;
 class ModelFrame;
 
+class Skeleton;
+
 /**
  * @brief calculates animation frame matrices, as well as procedural frame
  * animation.
@@ -27,29 +29,21 @@ class Animator
 	 * @brief model The model being animated.
 	 */
 	Model* model;
+	
+	/**
+	 * @brief Skeleton instance.
+	 */
+	Skeleton* skeleton;
 
 	/**
 	 * @brief Stores data required to animate a model frame
 	 */
-	struct FrameInstanceData {
-		bool visible;
-		AnimationBone* bone;
-		// Used if bone is non-null.
-		AnimationKeyframe first;
-		AnimationKeyframe second;
-		// Used if bone is null and entry exists.
-		glm::quat orientation;
-
-		/// Construct from animation data
-		FrameInstanceData(AnimationBone* bone, const AnimationKeyframe& a, const AnimationKeyframe& b)
-			: visible(true), bone(bone), first(a), second(b) {}
-
-		/// Construct from procedural data
-		FrameInstanceData(bool visible, const glm::quat& orientation = {})
-			: visible(visible), bone(nullptr), orientation(orientation) {}
+	struct BoneInstanceData
+	{
+		unsigned int frameIdx;
 	};
 
-	std::map<ModelFrame*, FrameInstanceData> _frameInstances;
+	std::map<AnimationBone*, BoneInstanceData> boneInstances;
 
 	// Used in determining how far the skeleton being animated has moved
 	// From it's local origin.
@@ -67,7 +61,7 @@ class Animator
 
 public:
 
-	Animator();
+	Animator(Model* model, Skeleton* skeleton);
 
 	/**
 	 * @brief setAnimation Sets the currently active animation.
@@ -86,27 +80,6 @@ public:
 
 	const Animation* getAnimation() const
 	{ return _animations.empty() ? nullptr : _animations.front(); }
-
-	void setModel(Model* model);
-
-	void setFrameVisibility(ModelFrame* frame, bool visible);
-	bool getFrameVisibility(ModelFrame* frame) const;
-
-	void setFrameOrientation(ModelFrame* frame, const glm::quat& orientation);
-	glm::quat getFrameOrientation(ModelFrame* frame) const;
-
-	FrameInstanceData* getFrameInstance(ModelFrame* frame);
-
-	/**
-	 * @brief getFrameMatrix returns the matrix for frame at the given time
-	 * @param t
-	 * @param frame
-	 * @return
-	 */
-	glm::mat4 getFrameMatrixAt(ModelFrame* frame, float time, bool disableRoot = true) const;
-	AnimationKeyframe getKeyframeAt(ModelFrame* frame, float time) const;
-
-	glm::mat4 getFrameMatrix(ModelFrame* frame, float alpha = 0.f, bool ignoreRoot = true) const;
 
 	/**
 	 * @brief tick Update animation paramters for server-side data.
@@ -127,10 +100,10 @@ public:
 	glm::vec3 getRootTranslation() const;
 
 	/**
-	 * @brief getDurationTransform returns the translation of the root bone over the duration of the animation.
+	 * @brief getTimeTranslation returns the translation of the root bone at the current time.
 	 * @return
 	 */
-	glm::vec3 getDurationTransform() const;
+	glm::vec3 getTimeTranslation() const;
 
 	/**
 	 * @brief getRootRotation see getRootTranslation

@@ -15,6 +15,7 @@
 #include <ai/DefaultAIController.hpp>
 
 #include <data/CutsceneData.hpp>
+#include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
 
 #include <glm/gtx/string_cast.hpp>
@@ -420,7 +421,6 @@ VM_OPCODE_DEF( 0x02E6 )
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = m->getWorld()->gameData.animations[animName];
 	if( anim ) {
-		object->animator->setModel(object->model->model);
 		object->animator->setAnimation(anim, false);
 	}
 	else {
@@ -465,7 +465,7 @@ VM_OPCODE_DEF( 0x02F4 )
 	CutsceneObject* object = m->getWorld()->createCutsceneObject(id, m->getWorld()->state.currentCutscene->meta.sceneOffset );
 
 	auto headframe = actor->model->model->findFrame("shead");
-	actor->animator->setFrameVisibility(headframe, false);
+	actor->skeleton->setEnabled(headframe, false);
 	object->setParentActor(actor, headframe);
 
 	*p->at(2).handle = object;
@@ -477,7 +477,6 @@ VM_OPCODE_DEF( 0x02F5 )
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = m->getWorld()->gameData.animations[animName];
 	if( anim ) {
-		object->animator->setModel(object->model->model);
 		object->animator->setAnimation(anim, false);
 	}
 	else {

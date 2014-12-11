@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <engine/Animator.hpp>
+#include <data/Skeleton.hpp>
 #include <render/Model.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include "test_globals.hpp"
@@ -9,14 +10,14 @@ BOOST_AUTO_TEST_SUITE(AnimationTests)
 BOOST_AUTO_TEST_CASE(test_matrix)
 {
 	{
-		Animator animator;
-
+		Skeleton skeleton;
+		Animation animation;
+		
+		/** Models are currently needed to relate animation bones <=> model frame #s. */
 		Global::get().e->gameData.loadDFF("player.dff");
 		ModelHandle* test_model = Global::get().e->gameData.models["player"];
-
-		BOOST_REQUIRE( test_model );
-
-		Animation animation;
+		
+		Animator animator(test_model->model, &skeleton);
 
 		animation.duration = 1.f;
 		animation.bones["player"] = new AnimationBone{
@@ -32,88 +33,19 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 			},
 		}
 		};
-
+		
 		animator.setAnimation(&animation);
-		animator.setModel( test_model->model );
-
-		{
-			auto intp_matrix = animator.getFrameMatrixAt( test_model->model->frames[0], 0.0f );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.f, 0.f)), 0.0f );
-		}
-
-		{
-			auto intp_matrix = animator.getFrameMatrixAt( test_model->model->frames[0], 0.5f );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
-		}
-
-	}
-}
-
-BOOST_AUTO_TEST_CASE(test_interpolate)
-{
-	{
-		Animator animator;
-
-		Global::get().e->gameData.loadDFF("player.dff");
-		ModelHandle* test_model = Global::get().e->gameData.models["player"];
-
-		BOOST_REQUIRE( test_model );
-
-		Animation animation;
-
-		animation.duration = 2.0f;
-		animation.bones["player"] = new AnimationBone{
-				"player",
-				0, 0, 2.0f,
-				AnimationBone::RT0,
-		{
-			{
-				glm::quat(), glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f,
-			},
-			{
-				glm::quat(), glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f,
-			},
-			{
-				glm::quat(), glm::vec3(0.f, 2.f, 0.f), glm::vec3(), 2.0f,
-			},
-		}
-		};
-
-		animator.setAnimation(&animation);
-		animator.setModel( test_model->model );
-
-		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0] );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.f, 0.f)), 0.0f );
-		}
-
-		animator.tick( 1.f );
-
-		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
-		}
-
-		animator.tick( 1.f );
-
-		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
-		}
-
-		animator.tick( 1.f );
-
-		{
-			auto intp_matrix = animator.getFrameMatrix( test_model->model->frames[0], 0.5f );
-			auto intp_col = intp_matrix[3];
-			BOOST_CHECK_EQUAL( 0.0f, glm::distance(glm::vec3(intp_col), glm::vec3(0.f, 0.5f, 0.0f)) );
-		}
-
+		
+		animator.tick(0.0f);
+		
+		BOOST_CHECK( skeleton.getData(0).a.translation == glm::vec3(0.f, 0.f, 0.f) );
+		BOOST_CHECK( skeleton.getData(0).b.translation == glm::vec3(0.f, 0.f, 0.f) );
+		
+		animator.tick(1.0f);
+		
+		BOOST_CHECK( skeleton.getData(0).a.translation == glm::vec3(0.f, 1.f, 0.f) );
+		BOOST_CHECK( skeleton.getData(0).b.translation == glm::vec3(0.f, 0.f, 0.f) );
+		
 	}
 }
 

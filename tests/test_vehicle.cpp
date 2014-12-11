@@ -2,7 +2,7 @@
 #include "test_globals.hpp"
 #include <objects/VehicleObject.hpp>
 #include <render/Model.hpp>
-#include <engine/Animator.hpp>
+#include <data/Skeleton.hpp>
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)
 
@@ -38,18 +38,18 @@ BOOST_AUTO_TEST_CASE(vehicle_frame_vis)
 	BOOST_REQUIRE(bonnet_ok != nullptr);
 	BOOST_REQUIRE(bonnet_dam != nullptr);
 
-	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_ok));
-	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
+	BOOST_CHECK( vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
+	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
 
 	vehicle->setFrameState(bonnet_ok, VehicleObject::DAM);
 
-	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_ok));
-	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_dam));
+	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
+	BOOST_CHECK( vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
 
 	vehicle->setFrameState(bonnet_ok, VehicleObject::OK);
 
-	BOOST_CHECK( vehicle->animator->getFrameVisibility(bonnet_ok));
-	BOOST_CHECK(!vehicle->animator->getFrameVisibility(bonnet_dam));
+	BOOST_CHECK( vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
+	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
 
 	Global::get().e->destroyObject(vehicle);
 }

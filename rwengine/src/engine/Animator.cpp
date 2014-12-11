@@ -1,12 +1,15 @@
 #include <engine/Animator.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <render/Model.hpp>
+#include <data/Skeleton.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
-Animator::Animator()
-	: model(nullptr), time(0.f), serverTime(0.f), lastServerTime(0.f), playing(true), repeat(true)
+Animator::Animator(Model* model, Skeleton* skeleton)
+	: model(model), skeleton(skeleton), time(0.f), serverTime(0.f),
+	lastServerTime(0.f), playing(true), repeat(true)
 {
-
+	reset();
 }
 
 void Animator::reset()
@@ -15,21 +18,16 @@ void Animator::reset()
 	serverTime = 0.f;
 	lastServerTime = 0.f;
 
-	if( _frameInstances.empty() ) {
-		if( ! getAnimation() || ! model ) return;
-
-		for( ModelFrame* f : model->frames ) {
-			auto it = getAnimation()->bones.find(f->getName());
-			if( it == getAnimation()->bones.end() ) continue;
-
-			auto A = getKeyframeAt(f, 0.f);
-			auto kfit = _frameInstances.find( f );
-			if( kfit == _frameInstances.end() ) {
-				_frameInstances.insert( { f, { it->second, A, A } } );
-			}
-			else {
-				kfit->second.first = kfit->second.second;
-				kfit->second.second = A;
+	boneInstances.clear();
+	
+	if( getAnimation() )
+	{
+		for( unsigned int f = 0; f < model->frames.size(); ++f )
+		{
+			auto bit = getAnimation()->bones.find( model->frames[f]->getName() );
+			if( bit != getAnimation()->bones.end() )
+			{
+				boneInstances.insert( { bit->second, { f } } );
 			}
 		}
 	}
@@ -61,79 +59,6 @@ void Animator::next()
 	reset();
 }
 
-void Animator::setModel(Model *model)
-{
-	if(model == this->model) {
-		return;
-	}
-
-	this->model = model;
-
-	_frameInstances.clear();
-
-	reset();
-}
-
-void Animator::setFrameVisibility(ModelFrame *frame, bool visible)
-{
-	auto fit = _frameInstances.find(frame);
-	if( fit != _frameInstances.end() ) {
-		fit->second.visible = visible;
-	}
-	else {
-		_frameInstances.insert({
-								   frame,
-								   {
-									   visible
-								   }
-							   });
-	}
-}
-
-bool Animator::getFrameVisibility(ModelFrame *frame) const
-{
-	auto fit = _frameInstances.find(frame);
-	if( fit != _frameInstances.end() ) {
-		return fit->second.visible;
-	}
-	return true;
-}
-
-void Animator::setFrameOrientation(ModelFrame *frame, const glm::quat &orientation)
-{
-	auto fit = _frameInstances.find(frame);
-	if( fit != _frameInstances.end() ) {
-		fit->second.orientation = orientation;
-	}
-	else {
-		_frameInstances.insert({
-								   frame,
-								   {
-									   true,
-									   orientation
-								   }
-							   });
-	}
-}
-
-glm::quat Animator::getFrameOrientation(ModelFrame *frame) const
-{
-	auto fit = _frameInstances.find(frame);
-	if( fit != _frameInstances.end() ) {
-		return fit->second.orientation;
-	}
-	return glm::toQuat(frame->getDefaultRotation());
-}
-
-Animator::FrameInstanceData *Animator::getFrameInstance(ModelFrame *frame)
-{
-	auto fit = _frameInstances.find(frame);
-	if( fit != _frameInstances.end() ) {
-		return &fit->second;
-	}
-	return nullptr;
-}
-
 void Animator::tick(float dt)
 {
 	if( model == nullptr || _animations.empty() ) {
@@ -144,11 +69,34 @@ void Animator::tick(float dt)
 		lastServerTime = serverTime;
 		serverTime += dt;
 	}
-
-	for( auto& p : _frameInstances ) {
-		p.second.second = p.second.first;
-		float t = getAnimationTime();
-		p.second.first = getKeyframeAt(p.first, t);
+	
+	for( auto& b : boneInstances )
+	{
+		auto kf = b.first->getInterpolatedKeyframe(getAnimationTime());
+		
+		auto& data = skeleton->getData(b.second.frameIdx);
+		ModelFrame* frame = model->frames[b.second.frameIdx];
+		
+		Skeleton::FrameData fd;
+		
+		fd.b = data.a;
+		
+		if(b.first->type == AnimationBone::R00 ) {
+			fd.a.rotation = kf.rotation;
+			fd.a.translation = frame->getDefaultTranslation();
+		}
+		else if(b.first->type == AnimationBone::RT0) {
+			fd.a.rotation = kf.rotation;
+			fd.a.translation = kf.position;
+		}
+		else {
+			fd.a.rotation = kf.rotation;
+			fd.a.translation = kf.position;
+		}
+		
+		fd.enabled = data.enabled;
+		
+		skeleton->setData(b.second.frameIdx, fd);
 	}
 
 	if( isCompleted() && ! repeat && _animations.size() > 1 ) {
@@ -157,27 +105,6 @@ void Animator::tick(float dt)
 }
 
 glm::vec3 Animator::getRootTranslation() const
-{
-	// This is a pretty poor assumption.
-	if(!model->frames[model->rootFrameIdx]->getChildren().empty()
-			&& !_animations.empty()) {
-		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
-		auto it = getAnimation()->bones.find(realRoot->getName());
-		if(it != getAnimation()->bones.end()) {
-			float df = fmod(lastServerTime, getAnimation()->duration);
-			float rt = getAnimationTime();
-			if(df < rt) {
-				auto lastKF = it->second->getInterpolatedKeyframe(df);
-				auto KF = it->second->getInterpolatedKeyframe(rt);
-				return KF.position - lastKF.position;
-			}
-		}
-	}
-
-	return glm::vec3();
-}
-
-glm::vec3 Animator::getDurationTransform() const
 {
 	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
 		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
@@ -193,84 +120,25 @@ glm::vec3 Animator::getDurationTransform() const
 	return glm::vec3();
 }
 
+glm::vec3 Animator::getTimeTranslation() const
+{
+	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
+		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
+
+		auto it = getAnimation()->bones.find(realRoot->getName());
+		if(it != getAnimation()->bones.end()) {
+			auto start = it->second->frames.front().position;
+			auto end = it->second->frames.back().position;
+			return glm::mix(start, end, (getAnimationTime() / getAnimation()->duration) );
+		}
+	}
+
+	return glm::vec3();
+}
+
 glm::quat Animator::getRootRotation() const
 {
 	return glm::quat();
-}
-
-glm::mat4 Animator::getFrameMatrixAt(ModelFrame* frame, float time, bool disableRoot) const
-{
-	if(getAnimation()) {
-		auto it = getAnimation()->bones.find(frame->getName());
-		if(it != getAnimation()->bones.end()) {
-			auto kf = it->second->getInterpolatedKeyframe(time);
-			glm::mat4 m;
-			bool isRoot = frame->getParent() ? !! frame->getParent() : false;
-			if(it->second->type == AnimationBone::R00 || ( isRoot && disableRoot ) ) {
-				m = glm::translate(m, frame->getDefaultTranslation());
-				m = m * glm::mat4_cast(kf.rotation);
-			}
-			else if(it->second->type == AnimationBone::RT0) {
-				m = glm::translate(m, kf.position);
-				m = m * glm::mat4_cast(kf.rotation);
-			}
-			else {
-				m = glm::translate(m, kf.position);
-				m = m * glm::mat4_cast(kf.rotation);
-			}
-			return m;
-		}
-	}
-
-	return frame->getTransform();
-}
-
-AnimationKeyframe Animator::getKeyframeAt(ModelFrame *frame, float time) const
-{
-	if(getAnimation()) {
-		auto it = getAnimation()->bones.find(frame->getName());
-		if(it != getAnimation()->bones.end()) {
-			return it->second->getInterpolatedKeyframe(time);
-		}
-	}
-	return { glm::toQuat(frame->getDefaultRotation()), frame->getDefaultTranslation(), glm::vec3(1.f), 0.f, 0 };
-}
-
-glm::mat4 Animator::getFrameMatrix(ModelFrame *frame, float alpha, bool ignoreRoot) const
-{
-	auto it = _frameInstances.find( frame );
-	if( it != _frameInstances.end() && it->second.bone ) {
-		const AnimationKeyframe& S = it->second.first;
-		const AnimationKeyframe& F = it->second.second;
-
-		AnimationKeyframe kf {
-			glm::slerp(F.rotation, S.rotation, alpha),
-			glm::mix(F.position, S.position, alpha),
-			glm::mix(F.scale, S.scale, alpha),
-			glm::mix(F.starttime, S.starttime, alpha),
-			S.id
-		};
-
-		glm::mat4 m;
-		bool isRoot = frame->getParent() ? !! frame->getParent() : false;
-		if(it->second.bone->type == AnimationBone::R00 || ( isRoot && ignoreRoot ) ) {
-			m = glm::translate(m, frame->getDefaultTranslation());
-			m = m * glm::mat4_cast(kf.rotation);
-		}
-		else if(it->second.bone->type == AnimationBone::RT0) {
-			m = glm::translate(m, kf.position);
-			m = m * glm::mat4_cast(kf.rotation);
-		}
-		else {
-			m = glm::translate(m, kf.position);
-			m = m * glm::mat4_cast(kf.rotation);
-		}
-		return m;
-	}
-	else if( it != _frameInstances.end() ) {
-		return frame->getTransform() * glm::mat4_cast(it->second.orientation);
-	}
-	return frame->getTransform();
 }
 
 bool Animator::isCompleted() const
