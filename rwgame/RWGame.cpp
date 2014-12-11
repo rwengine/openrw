@@ -75,6 +75,11 @@ int RWGame::run()
 
 			StateManager::get().states.back()->handleEvent(event);
 		}
+		
+		if(! window.isOpen() )
+		{
+			break;
+		}
 
 		accum += clock.restart().asSeconds() * timescale;
 
