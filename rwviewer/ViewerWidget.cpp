@@ -158,18 +158,6 @@ void ViewerWidget::showItem(qint16 item)
 	}
 }
 
-void ViewerWidget::showAnimation(Animation *anim)
-{
-	canimation = anim;
-	if(dummyObject) {
-		if(dummyObject->animator == nullptr) {
-			dummyObject->animator = new Animator;
-			dummyObject->animator->setModel(dummyObject->model->model);
-		}
-		dummyObject->animator->setAnimation(canimation);
-	}
-}
-
 void ViewerWidget::exportModel()
 {
 	QString toSv = QFileDialog::getSaveFileName(this,

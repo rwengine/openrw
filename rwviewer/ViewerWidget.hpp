@@ -54,8 +54,6 @@ public slots:
 
 	void showItem(qint16 item);
 
-	void showAnimation(Animation* anim);
-
 	void exportModel();
 
 	void dataLoaded(GameWorld* world);
