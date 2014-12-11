@@ -11,7 +11,7 @@ SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
 
 SET(BUILD_OLD_TOOLS FALSE CACHE BOOL "Build old datadump and analyzer tools")
 
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread")
+SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread -Wno-unused-parameter")
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wextra" )
