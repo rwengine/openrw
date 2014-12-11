@@ -25,6 +25,8 @@ struct ObjectInformation
 
 	ObjectInformation(const ObjectClass type)
 		: class_type(type) { }
+		
+	virtual ~ObjectInformation() { }
 };
 
 typedef std::shared_ptr<ObjectInformation> ObjectInformationPtr;
