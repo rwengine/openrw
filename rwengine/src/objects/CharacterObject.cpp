@@ -180,7 +180,7 @@ void CharacterObject::updateCharacter(float dt)
 		glm::vec3 walkDir;
 		glm::vec3 animTranslate;
 
-		if( isAnimationFixed() ) {
+		if( isAnimationFixed() && animator->getAnimation() != nullptr ) {
 			auto d = animator->getRootTranslation() / animator->getAnimation()->duration;
 			animTranslate = d * dt;
 		}

@@ -72,7 +72,7 @@ void Animator::tick(float dt)
 	
 	for( auto& b : boneInstances )
 	{
-		auto kf = b.first->getInterpolatedKeyframe(getAnimationTime());
+		auto kf = b.first->getInterpolatedKeyframe(getAnimationTime(1.f));
 		
 		auto& data = skeleton->getData(b.second.frameIdx);
 		ModelFrame* frame = model->frames[b.second.frameIdx];
@@ -148,10 +148,16 @@ bool Animator::isCompleted() const
 
 float Animator::getAnimationTime(float alpha) const
 {
+	float td = serverTime - lastServerTime;
 	if(repeat) {
-		return fmod(serverTime + alpha, getAnimation()->duration);
+		float t = serverTime + td * alpha;
+		while( t > getAnimation()->duration )
+		{
+			t -= getAnimation()->duration;
+		}
+		return t;
 	}
-	return serverTime + alpha;
+	return serverTime + td * alpha;
 }
 
 void Animator::setAnimationTime(float time)

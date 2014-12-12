@@ -26,10 +26,10 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 				AnimationBone::RT0,
 		{
 			{
-				glm::quat(), glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f,
+				glm::quat(), glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0
 			},
 			{
-				glm::quat(), glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f,
+				glm::quat(), glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1
 			},
 		}
 		};
@@ -45,7 +45,6 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		
 		BOOST_CHECK( skeleton.getData(0).a.translation == glm::vec3(0.f, 1.f, 0.f) );
 		BOOST_CHECK( skeleton.getData(0).b.translation == glm::vec3(0.f, 0.f, 0.f) );
-		
 	}
 }
 
