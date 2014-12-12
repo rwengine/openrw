@@ -120,7 +120,7 @@ glm::vec3 Animator::getRootTranslation() const
 	return glm::vec3();
 }
 
-glm::vec3 Animator::getTimeTranslation() const
+glm::vec3 Animator::getTimeTranslation(float alpha) const
 {
 	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
 		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
@@ -129,7 +129,7 @@ glm::vec3 Animator::getTimeTranslation() const
 		if(it != getAnimation()->bones.end()) {
 			auto start = it->second->frames.front().position;
 			auto end = it->second->frames.back().position;
-			return glm::mix(start, end, (getAnimationTime() / getAnimation()->duration) );
+			return glm::mix(start, end, (getAnimationTime(alpha) / getAnimation()->duration) );
 		}
 	}
 

@@ -103,7 +103,7 @@ public:
 	 * @brief getTimeTranslation returns the translation of the root bone at the current time.
 	 * @return
 	 */
-	glm::vec3 getTimeTranslation() const;
+	glm::vec3 getTimeTranslation(float alpha) const;
 
 	/**
 	 * @brief getRootRotation see getRootTranslation
