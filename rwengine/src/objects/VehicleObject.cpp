@@ -288,9 +288,10 @@ void VehicleObject::tickPhysics(float dt)
 			auto rot = it.second.body->getWorldTransform().getRotation();
 			auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 			
-			auto ldata = skeleton->getData(it.first->getIndex()).a;
-			ldata.rotation = r2;
-			skeleton->setData(it.first->getIndex(), { ldata, ldata, true } );
+			auto& prev = skeleton->getData(it.first->getIndex()).a;
+			auto next = prev;
+			next.rotation = r2;
+			skeleton->setData(it.first->getIndex(), { next, prev, true } );
 		}
 	}
 }
