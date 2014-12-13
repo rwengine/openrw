@@ -293,5 +293,11 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 	case sf::Keyboard::RBracket:
 		engine->state.minute += 30.f;
 		break;
+	case sf::Keyboard::Num9:
+		timescale *= 0.5f;
+		break;
+	case sf::Keyboard::Num0:
+		timescale *= 2.0f;
+		break;
 	}
 }
