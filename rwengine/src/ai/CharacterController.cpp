@@ -178,6 +178,34 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	return false;
 }
 
+bool Activities::Jump::update(CharacterObject* character, CharacterController* controller)
+{
+	if( jumped )
+	{
+		if( character->physCharacter->canJump() )
+		{
+			character->playAnimation(character->animations.jump_land, false);
+			return true;
+		}
+		if( character->animator->getAnimation() == character->animations.jump_start )
+		{
+			if( character->animator->isCompleted() )
+			{
+				character->playAnimation(character->animations.jump_glide, true);
+			}
+		}
+	}
+	else
+	{
+		character->jump();
+		
+		character->playAnimation( character->animations.jump_start, false );
+		
+		jumped = true;
+	}
+	
+	return false;
+}
 
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {

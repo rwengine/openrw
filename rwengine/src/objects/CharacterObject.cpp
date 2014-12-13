@@ -80,6 +80,7 @@ void CharacterObject::createActor(const glm::vec3& size)
 		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.2f, 2);
 		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 0.f), 1.f);
 		physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
+		physCharacter->setJumpSpeed(5.f);
 
 		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter,
 												  btBroadphaseProxy::StaticFilter|btBroadphaseProxy::SensorTrigger);

@@ -114,6 +114,17 @@ namespace Activities {
 
 		bool update(CharacterObject* character, CharacterController* controller);
 	};
+	
+	struct Jump : public CharacterController::Activity
+	{
+		DECL_ACTIVITY( Jump )
+		
+		bool jumped;
+		
+		Jump() : jumped(false) {}
+		
+		bool update(CharacterObject* character, CharacterController* controller);
+	};
 
 	struct EnterVehicle : public CharacterController::Activity {
 		DECL_ACTIVITY( EnterVehicle )

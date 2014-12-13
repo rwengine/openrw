@@ -240,7 +240,7 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::Space:
 			if( player ) {
-				player->getCharacter()->jump();
+				player->jump();
 			}
 			break;
 		case sf::Keyboard::W:
