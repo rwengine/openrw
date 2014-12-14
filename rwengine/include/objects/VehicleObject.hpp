@@ -30,13 +30,17 @@ public:
 	btRigidBody* physBody;
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
-
-	struct HingeInfo {
+	
+	struct Part
+	{
+		ModelFrame* dummy;
+		ModelFrame* normal;
+		ModelFrame* damaged;
 		btRigidBody* body;
 		btHingeConstraint* constraint;
 	};
-
-	std::map<ModelFrame*, HingeInfo> _hingedObjects;
+	
+	std::map<std::string, Part> dynamicParts;
 
 	VehicleObject(GameWorld* engine,
 			   const glm::vec3& pos,
@@ -99,16 +103,19 @@ public:
 		BROKEN
 	};
 
-	void setFrameState(ModelFrame *f, FrameState state);
+    void setPartState(Part* part, FrameState state);
+
+    void setPartLocked(Part* part, bool locked);
+
+	Part* getPart(const std::string& name);
 
 	void applyWaterFloat(const glm::vec3& relPt);
 
-	void setHingeLocked(ModelFrame* frame, bool locked);
-
 private:
 
-	void createObjectHinge(btTransform &local, ModelFrame* frame);
-	void destroyObjectHinge(HingeInfo& hinge);
+	void registerPart(ModelFrame* mf);
+	void createObjectHinge(btTransform &local, Part* part);
+	void destroyObjectHinge(Part* part);
 };
 
 /**

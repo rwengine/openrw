@@ -25,31 +25,45 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle)
 	Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(vehicle_frame_vis)
+BOOST_AUTO_TEST_CASE(vehicle_parts)
 {
 	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
 	BOOST_REQUIRE(vehicle != nullptr);
 	BOOST_REQUIRE(vehicle->model != nullptr);
+	
+	VehicleObject::Part* part = vehicle->getPart("bonnet_dummy");
+	
+	BOOST_REQUIRE( part != nullptr );
+	
+	BOOST_REQUIRE( part->normal != nullptr );
+	BOOST_REQUIRE( part->damaged != nullptr );
+	
+	BOOST_CHECK_EQUAL( part->normal->getName(), "bonnet_hi_ok");
+	BOOST_CHECK_EQUAL( part->damaged->getName(), "bonnet_hi_dam");
+	
+	Global::get().e->destroyObject(vehicle);
+}
 
-	auto bonnet_ok = vehicle->model->model->findFrame("bonnet_hi_ok");
-	auto bonnet_dam = vehicle->model->model->findFrame("bonnet_hi_dam");
+BOOST_AUTO_TEST_CASE(vehicle_part_vis)
+{
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
-	BOOST_REQUIRE(bonnet_ok != nullptr);
-	BOOST_REQUIRE(bonnet_dam != nullptr);
-
-	BOOST_CHECK( vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
-	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
-
-	vehicle->setFrameState(bonnet_ok, VehicleObject::DAM);
-
-	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
-	BOOST_CHECK( vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
-
-	vehicle->setFrameState(bonnet_ok, VehicleObject::OK);
-
-	BOOST_CHECK( vehicle->skeleton->getData(bonnet_ok->getIndex()).enabled );
-	BOOST_CHECK(!vehicle->skeleton->getData(bonnet_dam->getIndex()).enabled);
+	BOOST_REQUIRE(vehicle != nullptr);
+	BOOST_REQUIRE(vehicle->model != nullptr);
+	
+	VehicleObject::Part* bonnetpart = vehicle->getPart("bonnet_dummy");
+	auto skel = vehicle->skeleton;
+	
+	vehicle->setPartState(bonnetpart, VehicleObject::DAM);
+	
+	BOOST_CHECK(!skel->getData(bonnetpart->normal->getIndex()).enabled );
+	BOOST_CHECK( skel->getData(bonnetpart->damaged->getIndex()).enabled );
+	
+	vehicle->setPartState(bonnetpart, VehicleObject::OK);
+	
+	BOOST_CHECK( skel->getData(bonnetpart->normal->getIndex()).enabled );
+	BOOST_CHECK(!skel->getData(bonnetpart->damaged->getIndex()).enabled );
 
 	Global::get().e->destroyObject(vehicle);
 }
@@ -72,23 +86,25 @@ BOOST_AUTO_TEST_CASE(test_door_position)
 BOOST_AUTO_TEST_CASE(test_hinges)
 {
 	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+	
+	BOOST_REQUIRE( vehicle != nullptr );
 
-	BOOST_CHECK( vehicle->_hingedObjects.size() > 0 );
+	VehicleObject::Part* part = vehicle->getPart("door_lf_dummy");
+	
+	BOOST_REQUIRE( part != nullptr );
+	
+	BOOST_CHECK_EQUAL( part->constraint, nullptr );
+	BOOST_CHECK_EQUAL( part->body, nullptr );
+	
+	vehicle->setPartLocked(part, false);
+	
+	BOOST_CHECK_NE( part->body, nullptr );
+	BOOST_CHECK_NE( part->constraint, nullptr );
+	
+	vehicle->setPartLocked(part, true);
 
-	for(auto& ho : vehicle->_hingedObjects) {
-		// All Hinge objects should initalize, but not be locked.
-		BOOST_CHECK( ho.second.body == nullptr );
-	}
-
-	auto fld = vehicle->model->model->findFrame("door_lf_dummy");
-
-	vehicle->setHingeLocked(fld, false);
-
-	BOOST_REQUIRE( vehicle->_hingedObjects[fld].body != nullptr );
-
-	vehicle->setHingeLocked(fld, true);
-
-	BOOST_CHECK( vehicle->_hingedObjects[fld].body == nullptr );
+	BOOST_CHECK_EQUAL( part->constraint, nullptr );
+	BOOST_CHECK_EQUAL( part->body, nullptr );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
