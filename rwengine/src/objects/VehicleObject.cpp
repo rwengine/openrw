@@ -8,6 +8,8 @@
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
 
+#define PART_CLOSE_VELOCITY 0.5f
+
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
@@ -131,6 +133,7 @@ glm::quat VehicleObject::getRotation() const
 }
 
 #include <glm/gtc/type_ptr.hpp>
+#include <boost/concept_check.hpp>
 
 void VehicleObject::tick(float dt)
 {
@@ -279,7 +282,7 @@ void VehicleObject::tickPhysics(float dt)
 		_lastHeight = vH;
 
 		// Update hinge object rotations
-		for(auto it : dynamicParts) {
+		for(auto& it : dynamicParts) {
 			if(it.second.body == nullptr) continue;
 			auto inv = glm::inverse(getRotation());
 			auto rot = it.second.body->getWorldTransform().getRotation();
@@ -289,6 +292,22 @@ void VehicleObject::tickPhysics(float dt)
 			auto next = prev;
 			next.rotation = r2;
 			skeleton->setData(it.second.dummy->getIndex(), { next, prev, true } );
+			
+			if( it.second.holdAngle )
+			{
+				it.second.constraint->setMotorTarget(it.second.targetAngle, 0.1f);
+			}
+			
+			// If the part is moving quite fast and near the limit, lock it.
+			/// @TODO not all parts rotate in the z axis.
+			if(it.second.body->getAngularVelocity().getZ() >= PART_CLOSE_VELOCITY)
+			{
+				auto d = it.second.constraint->getHingeAngle() - it.second.constraint->getLowerLimit();
+				if( std::abs(d) < 0.01f )
+				{
+					setPartLocked(&(it.second), true);
+				}
+			}
 		}
 	}
 }
@@ -371,6 +390,23 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 	}
 }
 
+VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat)
+{
+	auto pos = info->seats.at(seat).offset + glm::vec3(0.f, 0.5f, 0.f);
+	Part* nearestDoor = nullptr;
+	float d = std::numeric_limits<float>::max();
+	for(auto& p : dynamicParts)
+	{
+		float partDist = glm::distance(p.second.dummy->getDefaultTranslation(), pos);
+		if( partDist < d && p.second.dummy->getName().substr(0, 5) == "door_" )
+		{
+			d = partDist;
+			nearestDoor = &p.second;
+		}
+	}
+	return nearestDoor;
+}
+
 bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
 	mHealth -= dmg.hitpoints;
@@ -448,6 +484,39 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked)
 	else if( part->body != nullptr && locked == true )
 	{
 		destroyObjectHinge(part);
+		
+		// Restore default bone transform
+		auto dt = part->dummy->getDefaultTranslation();
+		auto dr = glm::quat_cast(part->dummy->getDefaultRotation());
+		Skeleton::FrameTransform tf { dt, dr };
+		skeleton->setData(part->dummy->getIndex(), { tf, tf, true });
+	}
+}
+
+void VehicleObject::setPartTarget(VehicleObject::Part* part, bool enable, float target)
+{
+	if( enable )
+	{
+		if( part->body == nullptr )
+		{
+			setPartLocked(part, false);
+		}
+		
+		part->targetAngle = target;
+		part->holdAngle = true;
+		
+		part->constraint->enableMotor(true);
+		part->body->activate(true);
+	}
+	else
+	{
+		part->targetAngle = target;
+		part->holdAngle = false;
+		
+		if( part->constraint )
+		{
+			part->constraint->enableMotor(false);
+		}
 	}
 }
 
@@ -492,7 +561,8 @@ void VehicleObject::registerPart(ModelFrame* mf)
 				mf,
 				normal,
 				damage,
-				nullptr, nullptr
+				nullptr, nullptr,
+				false, 0.f
 			}
 		});
 }
@@ -582,14 +652,18 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 
 void VehicleObject::destroyObjectHinge(Part* part)
 {
-	if( part->body ) {
-		engine->dynamicsWorld->removeRigidBody(part->body);
+	if( part->body != nullptr ) {
 		engine->dynamicsWorld->removeConstraint(part->constraint);
+		engine->dynamicsWorld->removeRigidBody(part->body);
 
 		delete part->body;
 		delete part->constraint;
+		
 		part->body = nullptr;
 		part->constraint = nullptr;
+		
+		// Reset target.
+		part->holdAngle = false;
 	}
 }
 

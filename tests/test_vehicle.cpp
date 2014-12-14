@@ -105,6 +105,28 @@ BOOST_AUTO_TEST_CASE(test_hinges)
 
 	BOOST_CHECK_EQUAL( part->constraint, nullptr );
 	BOOST_CHECK_EQUAL( part->body, nullptr );
+	
+	Global::get().e->destroyObject(vehicle);
+}
+
+BOOST_AUTO_TEST_CASE(test_open_part)
+{
+	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+	
+	BOOST_REQUIRE( vehicle != nullptr );
+
+	VehicleObject::Part* part = vehicle->getPart("door_lf_dummy");
+	
+	BOOST_REQUIRE( part != nullptr );
+	
+	BOOST_CHECK_EQUAL( part->body, nullptr );
+	
+	vehicle->setPartLocked(part, true);
+	vehicle->setPartTarget(part, true, 1.f);
+	
+	/// @todo a reasonable test
+	
+	Global::get().e->destroyObject(vehicle);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

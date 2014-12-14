@@ -38,6 +38,8 @@ public:
 		ModelFrame* damaged;
 		btRigidBody* body;
 		btHingeConstraint* constraint;
+		bool holdAngle;
+		float targetAngle;
 	};
 	
 	std::map<std::string, Part> dynamicParts;
@@ -95,6 +97,8 @@ public:
 		return getPosition() + getRotation() * pos;
 	}
 	
+	Part* getSeatEntryDoor(size_t seat);
+	
     virtual bool takeDamage(const DamageInfo& damage);
 
 	enum FrameState {
@@ -103,9 +107,11 @@ public:
 		BROKEN
 	};
 
-    void setPartState(Part* part, FrameState state);
+	void setPartState(Part* part, FrameState state);
 
-    void setPartLocked(Part* part, bool locked);
+	void setPartLocked(Part* part, bool locked);
+	
+	void setPartTarget(Part* part, bool enable, float target);
 
 	Part* getPart(const std::string& name);
 

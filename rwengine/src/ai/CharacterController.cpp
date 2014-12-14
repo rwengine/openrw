@@ -217,12 +217,18 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 
 	auto anm_open = character->animations.car_open_lhs;
 	auto anm_enter = character->animations.car_getin_lhs;
+	
+	auto entryDoor = vehicle->getSeatEntryDoor(seat);
 
 	if( entering ) {
 		if( character->animator->getAnimation() == anm_open ) {
 			if( character->animator->isCompleted() ) {
 				character->playAnimation(anm_enter, false);
 				character->enterVehicle(vehicle, seat);
+			}
+			else if( entryDoor && character->animator->getAnimationTime() >= 0.5f )
+			{
+				vehicle->setPartTarget(entryDoor, true, 1.f);
 			}
 			else {
 				//character->setPosition(vehicle->getSeatEntryPosition(seat));
@@ -231,6 +237,11 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		}
 		else if( character->animator->getAnimation() == anm_enter ) {
 			if( character->animator->isCompleted() ) {
+				if( entryDoor )
+				{
+					vehicle->setPartTarget(entryDoor, true, 0.f);
+				}
+			
 				// VehicleGetIn is over, finish activity
 				return true;
 			}
@@ -248,7 +259,17 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			// Warp character to vehicle orientation
 			character->controller->setRawMovement({0.f, 0.f, 0.f});
 			character->rotation = vehicle->getRotation();
-			character->playAnimation(anm_open, false);
+			
+			// Determine if the door open animation should be skipped.
+			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && entryDoor->constraint->getHingeAngle() >= 0.6f ) )
+			{
+				character->playAnimation(anm_enter, false);
+				character->enterVehicle(vehicle, seat);
+			}
+			else
+			{
+				character->playAnimation(anm_open, false);
+			}
 		}
 		else if( targetDistance > 15.f ) {
 			return true; // Give up if the vehicle is too far away.
@@ -283,12 +304,18 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 			character->enterVehicle(nullptr, 0);
 			character->setPosition(exitpos);
-
+			
 			return true;
 		}
 	}
 	else {
 		character->playAnimation(anm_exit, false);
+		
+		auto door = vehicle->getSeatEntryDoor(character->getCurrentSeat());
+		if( door )
+		{
+			vehicle->setPartTarget(door, true, 1.f);
+		}
 	}
 
 	return false;
