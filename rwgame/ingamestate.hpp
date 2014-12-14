@@ -10,13 +10,12 @@ class IngameState : public State
 	ViewCamera _look;
 	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
+	float autolookTimer;
 public:
 	IngameState(RWGame* game, bool test = false);
 
 	void startTest();
 	void spawnPlayerVehicle();
-
-	void updateView();
 
 	/** shortcut for getWorld()->state.player->getCharacter() */
 	PlayerController* getPlayer();

@@ -9,9 +9,12 @@
 #include <objects/ItemPickup.hpp>
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
+#include <boost/concept_check.hpp>
+
+#define AUTOLOOK_TIME 2.f
 
 IngameState::IngameState(RWGame* game, bool test)
-	: State(game)
+	: State(game), autolookTimer(0.f)
 {
 	if( test ) {
 		startTest();
@@ -91,75 +94,6 @@ void IngameState::spawnPlayerVehicle()
 #endif
 }
 
-void IngameState::updateView()
-{
-	float qpi = glm::half_pi<float>();
-
-	sf::Vector2i screenCenter{sf::Vector2i{getWindow().getSize()} / 2};
-	sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
-	sf::Vector2i deltaMouse = mousePos - screenCenter;
-	sf::Mouse::setPosition(screenCenter, getWindow());
-
-	_lookAngles.x += deltaMouse.x / 100.0;
-	_lookAngles.y += deltaMouse.y / 100.0;
-
-	if (_lookAngles.y > qpi)
-		_lookAngles.y = qpi;
-	else if (_lookAngles.y < -qpi)
-		_lookAngles.y = -qpi;
-
-	float localX = -_lookAngles.x;
-
-	float viewDistance = 2.f;
-	/*if( _playerCharacter->getCurrentVehicle() ) {
-		auto model = _playerCharacter->getCurrentVehicle()->model;
-		for(auto& g : model->model->geometries) {
-			viewDistance = std::max(
-						(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 1.5f,
-						viewDistance);
-		}
-
-		auto vfwd = _playerCharacter->getCurrentVehicle()->getRotation() * glm::vec3(1.f, 0.f, 0.f);
-		localX += atan2( vfwd.y, vfwd.x );
-	}
-
-	glm::quat vR = glm::normalize(glm::angleAxis(localX, glm::vec3{0.f, 0.f, 1.f}));
-	_player->updateMovementDirection(vR * _movement, _movement);
-
-	glm::vec3 localview;
-	float vy = cos(_lookAngles.y);
-	localview.x = -sin(-localX) * vy;
-	localview.y = -cos(-localX) * vy;
-	localview.z = -sin(_lookAngles.y);
-	localview *= -viewDistance;
-
-	glm::vec3 viewPos = _playerCharacter->getPosition();
-	if(_playerCharacter->getCurrentVehicle()) {
-		viewPos = _playerCharacter->getCurrentVehicle()->getPosition();
-	}
-
-	btVector3 rayFrom(viewPos.x, viewPos.y, viewPos.z);
-	btVector3 rayTo = rayFrom + btVector3(localview.x, localview.y, localview.z);
-
-	btDynamicsWorld::AllHitsRayResultCallback allrr(rayFrom, rayTo);
-
-	getWorld()->dynamicsWorld->rayTest( rayFrom, rayTo, allrr );
-
-	float viewFraction = 1.f;
-	btCollisionObject* playobj = _playerCharacter->physObject;
-	if( _playerCharacter->getCurrentVehicle() ) {
-		playobj = _playerCharacter->getCurrentVehicle()->physBody;
-	}
-	if(allrr.hasHit()) {
-		auto& co = allrr.m_collisionObjects;
-		for(int i = 0; i < co.size(); ++i) {
-			if( co[i] != playobj && allrr.m_hitFractions[i] <= viewFraction ) {
-				viewFraction = allrr.m_hitFractions[i] * 0.9f;
-			}
-		}
-	}*/
-}
-
 PlayerController *IngameState::getPlayer()
 {
 	return getWorld()->state.player;
@@ -177,6 +111,8 @@ void IngameState::exit()
 
 void IngameState::tick(float dt)
 {
+	autolookTimer = std::max(autolookTimer - dt, 0.f);
+	
 	auto player = getPlayer();
 	if( player )
 	{
@@ -186,6 +122,11 @@ void IngameState::tick(float dt)
 		sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
 		sf::Vector2i deltaMouse = mousePos - screenCenter;
 		sf::Mouse::setPosition(screenCenter, getWindow());
+		
+		if(deltaMouse.x != 0 || deltaMouse.y != 0)
+		{
+			autolookTimer = AUTOLOOK_TIME;
+		}
 
 		_lookAngles.x += deltaMouse.x / 100.0;
 		_lookAngles.y += deltaMouse.y / 100.0;
@@ -201,24 +142,34 @@ void IngameState::tick(float dt)
 
 		auto position = player->getCharacter()->getPosition();
 
-		float viewDistance = 2.5f;
+		float viewDistance = 4.f;
 
 		auto vehicle = player->getCharacter()->getCurrentVehicle();
 		if( vehicle ) {
 			auto model = vehicle->model;
 			for(auto& g : model->model->geometries) {
 				viewDistance = std::max(
-							(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 2.0f,
+							(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 4.0f,
 							viewDistance);
 			}
-			position = player->getCharacter()->getCurrentVehicle()->getPosition();
+			position = vehicle->getPosition();
+			position.z += (vehicle->info->handling.dimensions.z / 2.f) * 2.5f;
+			
+			float speed = vehicle->physVehicle->getCurrentSpeedKmHour();
+			if( autolookTimer <= 0.f && std::abs(speed) > 1.f )
+			{
+				float d = glm::sign(speed) > 0.f ? 0.f : glm::radians(180.f);
+				auto atrophy = std::min(1.f * glm::sign(_lookAngles.x - d) * dt, _lookAngles.x - d);
+				_lookAngles.x -= atrophy;
+			}
+			angle *= glm::angleAxis(glm::roll(vehicle->getRotation()) + glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
 		}
 
 		// Move back from the character
 		position += angle * glm::vec3(-viewDistance, 0.f, 1.f);
 
 		// Tilt the final look angle down a tad.
-		angle *= glm::angleAxis(glm::radians(5.f), glm::vec3(0.f, 1.f, 0.f));
+		angle *= glm::angleAxis(glm::radians(10.f), glm::vec3(0.f, 1.f, 0.f));
 
 		_look.position = position;
 		_look.rotation = angle;
