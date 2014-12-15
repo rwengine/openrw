@@ -6,7 +6,6 @@
 #include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
 
-#include <loaders/LoaderIPL.hpp>
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
 
@@ -91,11 +90,6 @@ public:
 	bool placeItems(const std::string& name);
 	
 	/**
-	 * Loads the Zones from a zon/IPL file
-	 */
-	bool loadZone(const std::string& path);
-	
-	/**
 	 * Creates an instance
 	 */
 	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
@@ -167,11 +161,6 @@ public:
 	 * Gameplay state
 	 */
 	GameState state;
-	
-	/**
-	 * Map Zones
-	 */
-	std::map<std::string, LoaderIPL::Zone> zones;
 	
 	/**
 	 * Object Definitions
@@ -262,6 +251,10 @@ public:
 	 */
 	void loadSpecialCharacter(const unsigned short index, const std::string& name);
 	void loadSpecialModel(const unsigned short index, const std::string& name);
+	
+	
+	void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
+	void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
 
 private:
 

@@ -230,26 +230,6 @@ bool GameWorld::placeItems(const std::string& name)
 	return false;
 }
 
-bool GameWorld::loadZone(const std::string& path)
-{
-	LoaderIPL ipll;
-
-	if( ipll.load(path)) {
-		if( ipll.zones.size() > 0) {
-			for(auto& z : ipll.zones) {
-				zones.insert({z.name, z});
-			}
-			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
-			return true;
-		}
-	}
-	else {
-		std::cerr << "Failed to load Zones " << path << std::endl;
-	}
-	
-	return false;
-}
-
 InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
 	auto oi = findObjectType<ObjectData>(id);
@@ -739,4 +719,45 @@ void GameWorld::loadSpecialModel(const unsigned short index, const std::string &
 	/// @todo a bit more smarter than this
 	state.specialModels[index] = lowerName;
 }
+
+void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max)
+{
+	for(AIGraphNode* n : aigraph.nodes)
+	{
+		if( n->type == type )
+		{
+			if( n->position.x >= min.x &&
+				n->position.y >= min.y &&
+				n->position.z >= min.z &&
+				n->position.x <= max.x &&
+				n->position.y <= max.y &&
+				n->position.z <= max.z
+			)
+			{
+				n->disabled = true;
+			}
+		}
+	}
+}
+
+void GameWorld::enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max)
+{
+	for(AIGraphNode* n : aigraph.nodes)
+	{
+		if( n->type == type )
+		{
+			if( n->position.x >= min.x &&
+				n->position.y >= min.y &&
+				n->position.z >= min.z &&
+				n->position.x <= max.x &&
+				n->position.y <= max.y &&
+				n->position.z <= max.z
+			)
+			{
+				n->disabled = false;
+			}
+		}
+	}
+}
+
 

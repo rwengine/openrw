@@ -41,6 +41,7 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 			ainode->other_thing2 = node.other_thing2;
 			ainode->position = nodePosition;
 			ainode->external = node.type == PathNode::EXTERNAL;
+			ainode->disabled = false;
 			
 			realNodes.push_back(nodes.size());
 			nodes.push_back(ainode);

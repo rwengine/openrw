@@ -246,6 +246,26 @@ void GameData::loadIPL(const std::string& name)
 	iplLocations.insert({name, name});
 }
 
+bool GameData::loadZone(const std::string& path)
+{
+	LoaderIPL ipll;
+	
+	if( ipll.load(path)) {
+		if( ipll.zones.size() > 0) {
+			for(auto& z : ipll.zones) {
+				zones.insert({z.name, z});
+			}
+			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
+			return true;
+		}
+	}
+	else {
+		std::cerr << "Failed to load Zones " << path << std::endl;
+	}
+	
+	return false;
+}
+
 enum ColSection {
 	Unknown,
 	COL,

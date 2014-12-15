@@ -23,7 +23,7 @@ void LoadingState::enter()
 	for(std::map<std::string, std::string>::iterator it = world->gameData.iplLocations.begin();
 		it != world->gameData.iplLocations.end();
 		++it) {
-		world->loadZone(it->second);
+		world->gameData.loadZone(it->second);
 		world->placeItems(it->second);
 	}
 }

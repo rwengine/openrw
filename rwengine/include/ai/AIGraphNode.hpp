@@ -27,6 +27,8 @@ struct AIGraphNode
 
     int32_t nextIndex;
 	
+	bool disabled;
+	
 	std::vector<AIGraphNode*> connections;
 };
 

@@ -12,6 +12,7 @@
 #include <objects/VehicleInfo.hpp>
 #include <data/CollisionModel.hpp>
 #include <data/GameTexts.hpp>
+#include <data/ZoneData.hpp>
 
 #include <audio/MADStream.hpp>
 
@@ -103,6 +104,11 @@ public:
 	
 	void loadIPL(const std::string& name);
 	
+	/**
+	 * Loads the Zones from a zon/IPL file
+	 */
+	bool loadZone(const std::string& path);
+		
 	void loadCarcols(const std::string& path);
 
 	void loadWeather(const std::string& path);
@@ -199,6 +205,11 @@ public:
 	 * Map of loaded archives
 	 */
 	std::map<std::string, LoaderIMG> archives;
+	
+	/**
+	 * Map Zones
+	 */
+	std::map<std::string, ZoneData> zones;
 	
 	/**
 	 * The vehicle colour palettes

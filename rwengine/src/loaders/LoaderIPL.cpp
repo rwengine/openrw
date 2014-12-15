@@ -94,7 +94,7 @@ bool LoaderIPL::load(const std::string& filename)
 			}
 			else if(section == ZONE) 
 			{
-				Zone zone;
+				ZoneData zone;
 				
 				std::stringstream strstream(line);
 				
@@ -122,6 +122,17 @@ bool LoaderIPL::load(const std::string& filename)
 				
 				getline(strstream, value, ',');
 				zone.island = atoi(value.c_str());
+				
+				for( int i = 0; i < ZONE_GANG_COUNT; i++ )
+				{
+					zone.gangCarDensityDay[i] =
+					zone.gangCarDensityNight[i] =
+					zone.gangDensityDay[i] =
+					zone.gangDensityNight[i] = 0;
+				}
+				
+				zone.pedGroupDay = 0;
+				zone.pedGroupNight = 0;
 				
 				zones.push_back(zone);
 			}

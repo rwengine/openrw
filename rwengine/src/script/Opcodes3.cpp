@@ -177,8 +177,8 @@ VM_CONDOPCODE_DEF( 0x0121 )
 	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
 	std::string zname(p->at(1).string);
 
-	auto zfind = m->getWorld()->zones.find(zname);
-	if( zfind != m->getWorld()->zones.end() ) {
+	auto zfind = m->getWorld()->gameData.zones.find(zname);
+	if( zfind != m->getWorld()->gameData.zones.end() ) {
 		auto player = controller->getCharacter()->getPosition();
 		auto& min = zfind->second.min;
 		auto& max = zfind->second.max;
@@ -189,6 +189,46 @@ VM_CONDOPCODE_DEF( 0x0121 )
 	}
 
 	return false;
+}
+
+VM_OPCODE_DEF( 0x0152 )
+{
+	auto it = m->getWorld()->gameData.zones.find(p->at(0).string);
+	if( it != m->getWorld()->gameData.zones.end() )
+	{
+		auto day = p->at(1).integer == 1;
+		for(int i = 2; i < p->size(); ++i)
+		{
+			if( day )
+			{
+				it->second.gangCarDensityDay[i-2] = p->at(i).integer;
+			}
+			else
+			{
+				it->second.gangCarDensityNight[i-2] = p->at(i).integer;
+			}
+		}
+	}
+}
+
+VM_OPCODE_DEF( 0x015C )
+{
+	auto it = m->getWorld()->gameData.zones.find(p->at(0).string);
+	if( it != m->getWorld()->gameData.zones.end() )
+	{
+		auto day = p->at(1).integer == 1;
+		for(int i = 2; i < p->size(); ++i)
+		{
+			if( day )
+			{
+				it->second.gangDensityDay[i-2] = p->at(i).integer;
+			}
+			else
+			{
+				it->second.gangDensityNight[i-2] = p->at(i).integer;
+			}
+		}
+	}
 }
 
 VM_OPCODE_DEF( 0x0169 )
@@ -256,6 +296,21 @@ VM_OPCODE_DEF( 0x01C7 )
 	std::cout << "Unable to pin object " << inst << ". Object pinning unimplimented" << std::endl;
 }
 
+VM_OPCODE_DEF( 0x01E7 )
+{
+	glm::vec3 min(p->at(0).real,p->at(1).real,p->at(2).real);
+	glm::vec3 max(p->at(3).real,p->at(4).real,p->at(5).real);
+	
+	m->getWorld()->enableAIPaths(AIGraphNode::Vehicle, min, max);
+}
+VM_OPCODE_DEF( 0x01E8 )
+{
+	glm::vec3 min(p->at(0).real,p->at(1).real,p->at(2).real);
+	glm::vec3 max(p->at(3).real,p->at(4).real,p->at(5).real);
+	
+	m->getWorld()->disableAIPaths(AIGraphNode::Vehicle, min, max);
+}
+
 VM_OPCODE_DEF( 0x01F0 )
 {
 	m->getWorld()->state.maxWantedLevel = p->at(0).integer;
@@ -311,6 +366,21 @@ VM_OPCODE_DEF( 0x0229 )
 	auto& colours = m->getWorld()->gameData.vehicleColours;
 	vehicle->colourPrimary = colours[p->at(1).integer];
 	vehicle->colourSecondary = colours[p->at(2).integer];
+}
+
+VM_OPCODE_DEF( 0x022A )
+{
+	glm::vec3 min(p->at(0).real,p->at(1).real,p->at(2).real);
+	glm::vec3 max(p->at(3).real,p->at(4).real,p->at(5).real);
+	
+	m->getWorld()->enableAIPaths(AIGraphNode::Pedestrian, min, max);
+}
+VM_OPCODE_DEF( 0x022B )
+{
+	glm::vec3 min(p->at(0).real,p->at(1).real,p->at(2).real);
+	glm::vec3 max(p->at(3).real,p->at(4).real,p->at(5).real);
+	
+	m->getWorld()->disableAIPaths(AIGraphNode::Pedestrian, min, max);
 }
 
 VM_OPCODE_DEF( 0x023C )
@@ -492,6 +562,23 @@ VM_OPCODE_DEF( 0x030D )
 VM_OPCODE_DEF( 0x0314 )
 {
 	m->getWorld()->state.numUniqueJumps = p->at(0).integer;
+}
+
+VM_OPCODE_DEF( 0x0324 )
+{
+	auto it = m->getWorld()->gameData.zones.find(p->at(0).string);
+	if( it != m->getWorld()->gameData.zones.end() )
+	{
+		auto day = p->at(1).integer == 1;
+		if( day )
+		{
+			it->second.pedGroupDay = p->at(2).integer;
+		}
+		else
+		{
+			it->second.pedGroupNight = p->at(2).integer;
+		}
+	}
 }
 
 VM_OPCODE_DEF( 0x033E )
@@ -677,9 +764,9 @@ Opcodes3::Opcodes3()
 	// 0 -> disable, 1-100 -> number, 101+ -> always
 	VM_OPCODE_DEC_U( 0x014C, 2, "Set Car Generator count" );
 
-	VM_OPCODE_DEC_U( 0x0152, 17, "Set zone car info" );
+	VM_OPCODE_DEC( 0x0152, 17, "Set zone car info" );
 
-	VM_OPCODE_DEC_U( 0x015C, 11, "Set zone ped info" );
+	VM_OPCODE_DEC( 0x015C, 11, "Set zone ped info" );
 
 	VM_OPCODE_DEC_U( 0x0164, 1, "Disable Radar Blip" );
 
@@ -713,8 +800,8 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x01C7, 1, "Don't remove object" );
 
-	VM_OPCODE_DEC_U( 0x01E7, 6, "Enable Roads" );
-	VM_OPCODE_DEC_U( 0x01E8, 6, "Disable Roads" );
+	VM_OPCODE_DEC( 0x01E7, 6, "Enable Roads" );
+	VM_OPCODE_DEC( 0x01E8, 6, "Disable Roads" );
 
 	VM_OPCODE_DEC_U( 0x01ED, 1, "Clear Character Threat Search" );
 
@@ -733,7 +820,8 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x0229, 3, "Set Vehicle Colours" );
 
-	VM_OPCODE_DEC_U( 0x022B, 6, "Disable ped paths" );
+	VM_OPCODE_DEC( 0x022A, 6, "Disable ped paths" );
+	VM_OPCODE_DEC( 0x022B, 6, "Disable ped paths" );
 
 	VM_OPCODE_DEC_U( 0x022D, 2, "Set Character Always Face Player" );
 
@@ -790,7 +878,7 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x0314, 1, "Set Total Unique Jumps" );
 
-	VM_OPCODE_DEC_U( 0x0324, 3, "Set zone ped group" );
+	VM_OPCODE_DEC( 0x0324, 3, "Set zone ped group" );
 	VM_OPCODE_DEC_U( 0x0325, 2, "Create Car Fire" );
 
 	VM_OPCODE_DEC_U( 0x032B, 7, "Create Weapon Pickup" );
