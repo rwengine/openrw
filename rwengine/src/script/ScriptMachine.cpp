@@ -1,10 +1,7 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 
-#define SCRIPTMACHINE_VERBOSE 0
-#define SCRIPTMACHINE_VERBOSE_PARAMETERS 1
-
-#if SCRIPTMACHINE_VERBOSE
+#if SCM_DEBUG_INSTRUCTIONS
 #include <iostream>
 #endif
 
@@ -14,7 +11,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		t.wakeCounter = std::max( t.wakeCounter - msPassed, 0 );
 	}
 	if( t.wakeCounter > 0 ) return;
-
+	
 	while( t.wakeCounter == 0 ) {
 		auto opcode = _file->read<SCMOpcode>(t.programCounter);
 
@@ -28,7 +25,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		SCMMicrocode& code = it->second;
 
 		SCMParams parameters;
-
+		
 		bool hasExtraParameters = code.parameters < 0;
 		auto requiredParams = std::abs(code.parameters);
 
@@ -88,35 +85,40 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			};
 		}
 
-#if SCRIPTMACHINE_VERBOSE
-			std::cout << "[SCM] " << std::hex << std::setw(8) << t.programCounter <<
-						 " EXEC " << std::hex << std::setw(4) << std::setfill('0') << opcode <<
-						 " " << std::setw(8) << std::setfill(' ') << t.name <<
-						 std::dec << std::setfill(' ') << " " << code.name << " ( ";
-#if SCRIPTMACHINE_VERBOSE_PARAMETERS
-		for(auto& p : parameters) {
-			std::cout << p.type << ":";
-			switch(p.type) {
-			case TGlobal:
-			case TLocal:
-				std::cout << *p.globalInteger;
-				break;
-			case TInt8:
-			case TInt16:
-			case TInt32:
-				std::cout << p.integer;
-				break;
-			case TFloat16:
-				std::cout << p.real;
-				break;
+		if(! code.func)
+		{
+#if SCM_DEBUG_INSTRUCTIONS
+			std::cout << std::setw(7) << std::setfill(' ') << t.name <<
+			" " << std::hex  << std::setw(4) << std::setfill('0') << opcode << 
+			" " << std::dec;
+			for(SCMOpcodeParameter& p : parameters) {
+				std::cout << p.type << ":";
+				switch(p.type) {
+					case TGlobal:
+					case TLocal:
+						std::cout << *p.globalInteger;
+						break;
+					case TInt8:
+					case TInt16:
+					case TInt32:
+						std::cout << p.integer;
+						break;
+					case TFloat16:
+						std::cout << p.real;
+						break;
+					case TString:
+						std::cout << p.string;
+						break;
+				}
+				std::cout << " ";
 			}
-			std::cout << " ";
+			std::cout << code.name  << " unimplemented"<< std::endl;
+#endif
 		}
-#endif
-		std::cout << " ) " << std::endl;
-#endif
-
-		code.func(this, &t, &parameters);
+		else
+		{
+			code.func(this, &t, &parameters);
+		}
 
 		if(isNegatedConditional) {
 			t.conditionResult = !t.conditionResult;

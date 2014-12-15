@@ -4,6 +4,7 @@ project(OpenRW)
 
 # Setup options
 SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
+SET(ENABLE_SCRIPT_DEBUG TRUE CACHE BOOL "Enable verbose script execution")
 
 # TODO:
 # - Visual Studio support
@@ -25,6 +26,10 @@ ENDIF()
 
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
+
+IF(${ENABLE_SCRIPT_DEBUG})
+	add_definitions(-DSCM_DEBUG_INSTRUCTIONS)
+ENDIF()
 
 find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)

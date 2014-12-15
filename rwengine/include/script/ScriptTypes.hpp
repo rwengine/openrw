@@ -80,6 +80,6 @@ struct SCMOpcodes
 #define VM_CONDOPCODE_DEC(code, parameters, cname) codes[code] = SCMMicrocode{cname, parameters, \
 	[=](ScriptMachine* m, SCMThread* t, SCMParams* p) { t->conditionResult = _opcode_##code##_func(m, t, p); }}
 
-#define VM_OPCODE_DEC_U(code, parameters, name) codes.insert({code, {name, parameters, OPC_UNIMPLEMENTED_MSG(code, name)}})
+#define VM_OPCODE_DEC_U(code, parameters, name) codes.insert({code, {name, parameters, {}}})
 
 #endif
