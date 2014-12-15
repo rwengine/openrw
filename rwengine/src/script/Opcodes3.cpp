@@ -191,6 +191,41 @@ VM_CONDOPCODE_DEF( 0x0121 )
 	return false;
 }
 
+VM_OPCODE_DEF( 0x014B )
+{
+	glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real);
+	
+	if(p->at(4).type == TString)
+	{
+		std::cerr << "Model names not supported for vehicle generators" << std::endl;
+		return;
+	}
+	
+	VehicleGenerator vg;
+	vg.position = position;
+	vg.heading = p->at(3).real;
+	vg.vehicleID = p->at(4).integer;
+	vg.colourFG = p->at(5).integer;
+	vg.colourBG = p->at(6).integer;
+	vg.alwaysSpawn = p->at(7).integer != 0;
+	vg.alarmThreshold = p->at(8).integer;
+	vg.lockedThreshold = p->at(9).integer;
+	vg.minDelay = p->at(10).integer;
+	vg.maxDelay = p->at(11).integer;
+	
+	vg.lastSpawnTime = 0;
+	vg.remainingSpawns = 0;
+	
+	*p->at(12).globalInteger = m->getWorld()->state.vehicleGenerators.size();
+	
+	m->getWorld()->state.vehicleGenerators.push_back(vg);
+}
+VM_OPCODE_DEF( 0x014C )
+{
+	VehicleGenerator& generator = m->getWorld()->state.vehicleGenerators.at(*p->at(0).globalInteger);
+	generator.remainingSpawns = p->at(1).integer;
+}
+
 VM_OPCODE_DEF( 0x0152 )
 {
 	auto it = m->getWorld()->gameData.zones.find(p->at(0).string);
@@ -759,10 +794,8 @@ Opcodes3::Opcodes3()
 
 	VM_CONDOPCODE_DEC( 0x0121, 2, "Is Player In Zone" );
 
-	VM_OPCODE_DEC_U( 0x014B, 13, "Create Car Generator" );
-
-	// 0 -> disable, 1-100 -> number, 101+ -> always
-	VM_OPCODE_DEC_U( 0x014C, 2, "Set Car Generator count" );
+	VM_OPCODE_DEC( 0x014B, 13, "Create Car Generator" );
+	VM_OPCODE_DEC( 0x014C, 2, "Set Car Generator count" );
 
 	VM_OPCODE_DEC( 0x0152, 17, "Set zone car info" );
 
