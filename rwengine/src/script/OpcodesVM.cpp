@@ -83,7 +83,7 @@ VM_OPCODE_DEF( 0x0039 ) {
 
 VM_OPCODE_DEF( 0x004F )
 {
-	std::cout << "Starting thread at " << p->at(0).integer << std::endl;
+	std::cout << t->name << " spawning thread at " << p->at(0).integer << std::endl;
 	m->startThread(p->at(0).integer);
 }
 
@@ -113,6 +113,11 @@ VM_OPCODE_DEF( 0x0051 )
 	t->calls.pop();
 }
 
+VM_OPCODE_DEF( 0x0060 )
+{
+	*p->at(0).globalInteger -= *p->at(1).globalInteger;
+}
+
 VM_OPCODE_DEF( 0x0061 )
 {
 	*p->at(0).globalReal -= *p->at(1).globalReal;
@@ -134,10 +139,12 @@ VM_OPCODE_DEF( 0x00D6 )
 	if( n <= 7 ) {
 		t->conditionCount = n+1;
 		t->conditionMask = 0xFF;
+		t->conditionAND = true;
 	}
 	else {
 		t->conditionCount = n-7;
 		t->conditionMask = 0x00;
+		t->conditionAND = false;
 	}
 }
 
@@ -162,6 +169,7 @@ VM_OPCODE_DEF( 0x02CD )
 VM_OPCODE_DEF( 0x03A4 )
 {
 	t->name = p->at(0).string;
+	std::cout << "Thread renamed: " << t->name << std::endl;
 }
 
 VM_OPCODE_DEF( 0x0417 )
@@ -208,6 +216,7 @@ VM::VM()
 
 	VM_OPCODE_DEC( 0x0051, 0, "Return" );
 
+	VM_OPCODE_DEC( 0x0060, 2, "Decrement Global Integer by Global Integer" );
 	VM_OPCODE_DEC( 0x0061, 2, "Decrement Global Float by Global Float" );
 
 	VM_OPCODE_DEC( 0x0084, 2, "Set Global Int To Global" );

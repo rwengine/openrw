@@ -55,9 +55,24 @@ VM_CONDOPCODE_DEF( 0x0056 )
 	auto controller = (CharacterController*)(*p->at(0).handle);
 	glm::vec2 min(p->at(1).real, p->at(2).real);
 	glm::vec2 max(p->at(3).real, p->at(4).real);
-	bool drawMarker = !!p->at(5).integer;
 	auto player = controller->getCharacter()->getPosition();
 	if( player.x > min.x && player.y > min.y && player.x < max.x && player.y < max.y ) {
+		return true;
+	}
+	return false;
+}
+VM_CONDOPCODE_DEF( 0x0057 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	glm::vec3 min(p->at(1).real, p->at(2).real, p->at(3).real);
+	glm::vec3 max(p->at(4).real, p->at(5).real, p->at(6).real);
+	auto player = controller->getCharacter()->getPosition();
+	if( player.x > min.x &&
+		player.y > min.y &&
+		player.z > min.z &&
+		player.x < max.x &&
+		player.y < max.y &&
+		player.z < max.z) {
 		return true;
 	}
 	return false;
@@ -165,11 +180,21 @@ VM_OPCODE_DEF( 0x0111 )
 {
 	*m->getWorld()->state.scriptOnMissionFlag = p->at(0).integer;
 }
+VM_CONDOPCODE_DEF( 0x0112 )
+{
+	return false;
+}
 
 VM_CONDOPCODE_DEF( 0x0118 )
 {
 	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
 	return !controller->getCharacter()->isAlive();
+}
+
+VM_CONDOPCODE_DEF( 0x0119 )
+{
+	auto controller = static_cast<VehicleObject*>(*p->at(0).handle);
+	return controller == nullptr;
 }
 
 VM_CONDOPCODE_DEF( 0x0121 )
@@ -314,6 +339,11 @@ VM_OPCODE_DEF( 0x0180 )
 	m->getWorld()->state.scriptOnMissionFlag = (unsigned int*)p->at(0).globalInteger;
 }
 
+VM_CONDOPCODE_DEF( 0x019C )
+{
+	return false;
+}
+
 VM_OPCODE_DEF( 0x01B4 )
 {
 	auto controller = static_cast<PlayerController*>(*p->at(0).handle);
@@ -323,6 +353,11 @@ VM_OPCODE_DEF( 0x01B4 )
 VM_OPCODE_DEF( 0x01B6 )
 {
 	m->getWorld()->state.currentWeather = p->at(0).integer;
+}
+
+VM_OPCODE_DEF( 0x01BD )
+{
+	*p->at(0).globalInteger = m->getWorld()->gameTime * 1000;
 }
 
 VM_OPCODE_DEF( 0x01C7 )
@@ -716,9 +751,18 @@ VM_CONDOPCODE_DEF( 0x03C6 )
 	return true;
 }
 
+VM_CONDOPCODE_DEF( 0x03D0 )
+{
+	return true;
+}
+
 VM_OPCODE_DEF( 0x03E1 )
 {
 	*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
+}
+VM_CONDOPCODE_DEF( 0x03EE )
+{
+	return true;
 }
 
 VM_OPCODE_DEF( 0x03F7 )
@@ -769,38 +813,62 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0053, 5, "Create Player" );
 
 	VM_OPCODE_DEC( 0x0055, 4, "Set Player Position" );
-	VM_CONDOPCODE_DEC( 0x0056, 6, "Is In Area" );
+	VM_CONDOPCODE_DEC( 0x0056, 6, "Is Player In Area 2D" );
+	VM_CONDOPCODE_DEC( 0x0057, 8, "Is Player In Area 3D" );
 
 	VM_OPCODE_DEC( 0x009A, 6, "Create Character" );
 
 	VM_OPCODE_DEC( 0x00A5, 5, "Create Vehicle" );
-
+	
+	VM_OPCODE_DEC_U( 0x00BA, 3, "Print big" );
 	VM_OPCODE_DEC( 0x00BC, 3, "Print Message Now" );
 
 	VM_OPCODE_DEC( 0x00BE, 0, "Clear Message Prints" );
 
 	VM_OPCODE_DEC( 0x00C0, 2, "Set Time Of Day" );
 
+	VM_OPCODE_DEC_U( 0x00DA, 2, "Store Player Car" );
+	
 	VM_CONDOPCODE_DEC( 0x00DE, 2, "Is Player In Model" );
 
 	VM_CONDOPCODE_DEC( 0x00E0, 1, "Is Player In Any Vehicle" );
 	VM_CONDOPCODE_DEC( 0x00E1, 2, "Is Button Pressed" );
+	
+	VM_OPCODE_DEC_U( 0x00F5, 8, "Locate Player In Sphere" );
 
 	VM_CONDOPCODE_DEC( 0x0100, 8, "Is Character near point in car" );
-
+	
+	VM_OPCODE_DEC_U( 0x010D, 2, "Set Wanted Level" );
+	
+	VM_OPCODE_DEC_U( 0x0110, 1, "Clear Wanted Level" );
 	VM_OPCODE_DEC( 0x0111, 1, "Set Dead or Arrested" );
+	VM_CONDOPCODE_DEC( 0x0112, 0, "Is Death or Arrest Finished" );
 
 	VM_CONDOPCODE_DEC( 0x0118, 1, "Is Character Dead" );
+	VM_CONDOPCODE_DEC( 0x0119, 1, "Is Vehicle Dead" );
 
 	VM_CONDOPCODE_DEC( 0x0121, 2, "Is Player In Zone" );
 
 	VM_OPCODE_DEC( 0x014B, 13, "Create Car Generator" );
 	VM_OPCODE_DEC( 0x014C, 2, "Set Car Generator count" );
-
+	
+	VM_OPCODE_DEC_U( 0x014E, 1, "Display Onscreen Timer" );
+	
+	VM_OPCODE_DEC_U( 0x014F, 1, "Stop Timer" );
+	
+	VM_OPCODE_DEC_U( 0x0151, 1, "Clear Counter" );
 	VM_OPCODE_DEC( 0x0152, 17, "Set zone car info" );
-
+	
+	VM_OPCODE_DEC_U( 0x0158, 3, "Camera Follow Vehicle" );
+	
+	VM_OPCODE_DEC_U( 0x015A, 0, "Reset Camera" );
+	
 	VM_OPCODE_DEC( 0x015C, 11, "Set zone ped info" );
 
+	VM_OPCODE_DEC_U( 0x015F, 6, "Set Fixed Camera Position" );
+	
+	VM_OPCODE_DEC_U( 0x0160, 4, "Point Camera at Point" );
+	
 	VM_OPCODE_DEC_U( 0x0164, 1, "Disable Radar Blip" );
 
 	VM_OPCODE_DEC( 0x0169, 3, "Set Fade Colour" );
@@ -820,6 +888,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0180, 1, "Link ONMISSION Flag" );
 	VM_OPCODE_DEC_U( 0x0181, 2, "Link Character Mission Flag" );
 	VM_OPCODE_DEC_U( 0x0182, 2, "Unknown Character Opcode" );
+	
+	VM_CONDOPCODE_DEC( 0x019C, 8, "Is Player in Area on Foot" );
 
 	VM_OPCODE_DEC_U( 0x018B, 2, "Change Blip Display Mode" );
 
@@ -829,20 +899,31 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x01B6, 1, "Set Weather Now" );
 
+	VM_OPCODE_DEC( 0x01BD, 1, "Get Game Timer" );
 	VM_OPCODE_DEC_U( 0x01BE, 4, "Turn Character To Face Point" );
 
 	VM_OPCODE_DEC( 0x01C7, 1, "Don't remove object" );
 
 	VM_OPCODE_DEC( 0x01E7, 6, "Enable Roads" );
 	VM_OPCODE_DEC( 0x01E8, 6, "Disable Roads" );
-
+	
+	VM_OPCODE_DEC_U( 0x01EB, 1, "Set Traffic Density Multiplier" );
+	
 	VM_OPCODE_DEC_U( 0x01ED, 1, "Clear Character Threat Search" );
 
 	VM_OPCODE_DEC( 0x01F0, 1, "Set Max Wanted Level" );
 
 	VM_OPCODE_DEC( 0x01F5, 2, "Get Player Character" );
+	
+	VM_OPCODE_DEC_U( 0x01F7, 2, "Set Cops Ignore Player" );
+	
+	VM_OPCODE_DEC_U( 0x01F9, 9, "Start Kill Frenzy" );
+	
+	VM_OPCODE_DEC_U( 0x01C0, 2, "Store Wanted Level" );
 
 	VM_CONDOPCODE_DEC( 0x0204, 5, "Is Char near Car in Car 2D" );
+	
+	VM_OPCODE_DEC_U( 0x020A, 2, "Lock Car Doors" );
 
 	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0213/
 	VM_OPCODE_DEC_U( 0x0213, 6, "Create pickup" );
@@ -881,9 +962,13 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0293, 1, "Get Controller Mode" );
 
 	VM_OPCODE_DEC_U( 0x0296, 1, "Unload Special Character" );
-
+	
+	VM_OPCODE_DEC_U( 0x0297, 0, "Reset Player Kills" );
+	
 	VM_OPCODE_DEC( 0x029B, 5, "Create Object no offset" );
-
+	
+	VM_OPCODE_DEC_U( 0x02A3, 1, "Set Widescreen" );
+	
 	VM_OPCODE_DEC_U( 0x02A7, 5, "Add Radar Contact Blip" );
 	VM_OPCODE_DEC_U( 0x02A8, 5, "Add Radar Blip" );
 
@@ -910,6 +995,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x030D, 1, "Set Max Progress" );
 
 	VM_OPCODE_DEC( 0x0314, 1, "Set Total Unique Jumps" );
+	
+	VM_OPCODE_DEC_U( 0x0317, 0, "Increment Mission Attempts" );
 
 	VM_OPCODE_DEC( 0x0324, 3, "Set zone ped group" );
 	VM_OPCODE_DEC_U( 0x0325, 2, "Create Car Fire" );
@@ -929,6 +1016,9 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC_U( 0x0348, 1, "Set Text Size Proportional" );
 	VM_OPCODE_DEC_U( 0x0349, 1, "Set Text Font" );
+	
+	VM_OPCODE_DEC_U( 0x034D, 4, "Rotate Object" );
+	VM_OPCODE_DEC_U( 0x034E, 8, "Slide Object" );
 
 	VM_OPCODE_DEC( 0x0352, 2, "Set Character Model" );
 	VM_OPCODE_DEC_U( 0x0353, 1, "Refresh Actor Model" );
@@ -945,6 +1035,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x0374, 1, "Set Motion Blur" );
 
 	VM_OPCODE_DEC_U( 0x038B, 0, "Load Requested Models Now" );
+	
+	VM_OPCODE_DEC_U( 0x0395, 5, "Clear Area Vehicles and Pedestrians" );
 
 	VM_OPCODE_DEC_U( 0x0399, 7, "Disable ped paths in angled cube" );
 
@@ -957,23 +1049,31 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x03B6, 6, "Change Nearest Instance Model" );
 	VM_OPCODE_DEC_U( 0x03B7, 1, "Process Cutscene Only" );
 
+	VM_OPCODE_DEC_U( 0x03BA, 6, "Clear Cars From Area" );
 	VM_OPCODE_DEC_U( 0x03BB, 1, "Set Garage Door to Rotate" );
 
 	VM_OPCODE_DEC_U( 0x03BF, 2, "Set Pedestrians Ignoring Player" );
-
+	
+	VM_OPCODE_DEC_U( 0x03C4, 3, "Display Counter Message" );
+	VM_OPCODE_DEC_U( 0x03C5, 4, "Spawn Parked Vehicle" );
 	VM_CONDOPCODE_DEC( 0x03C6, 1, "Is Collision In Memory" );
 
 	VM_OPCODE_DEC_U( 0x03CB, 3, "Load Area Near" );
+	
+	VM_OPCODE_DEC_U( 0x03CF, 1, "Load Audio" );
+	
+	VM_CONDOPCODE_DEC( 0x03D0, 0, "Audio Loaded" );
 
 	VM_OPCODE_DEC_U( 0x03DA, 1, "Set Garage Camera Follows Player" );
 
 	VM_OPCODE_DEC( 0x03E1, 1, "Get Hidden Packages Found" );
 
 	VM_OPCODE_DEC_U( 0x03E5, 1, "Display Help Text" );
+	VM_OPCODE_DEC_U( 0x03E6, 0, "Clear Help Text" );
 
 	VM_OPCODE_DEC_U( 0x03EB, 0, "Clear Small Prints" );
 
-	VM_OPCODE_DEC_U( 0x03EE, 3, "Draw Text" );
+	VM_CONDOPCODE_DEC( 0x03EE, 1, "Can Player Move" );
 	VM_OPCODE_DEC_U( 0x03EF, 1, "Make Player Safe For Cutscene" );
 
 	VM_OPCODE_DEC_U( 0x03F0, 1, "Enable Text Draw" );
@@ -983,7 +1083,7 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x03F7, 1, "Load Collision" );
 
 	VM_OPCODE_DEC( 0x0408, 1, "Set Total Rampage Missions" );
-
+	VM_OPCODE_DEC_U( 0x0409, 0, "Blow up RC buggy" );
 	VM_OPCODE_DEC_U( 0x040A, 1, "Remove Chase Car" );
 
 	VM_OPCODE_DEC_U( 0x0418, 2, "Set Object Draw Ontop" );
@@ -1002,4 +1102,6 @@ Opcodes3::Opcodes3()
 	VM_CONDOPCODE_DEC( 0x0445, 0, "Are Any Vehicle Cheats enabled" );
 
 	VM_OPCODE_DEC( 0x044D, 1, "Load Splash Screen" );
+	
+	VM_OPCODE_DEC_U( 0x0452, 0, "Enable User Camera Controll" );
 }

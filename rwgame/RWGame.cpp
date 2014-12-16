@@ -11,7 +11,7 @@
 
 RWGame::RWGame(const std::string& gamepath)
 	: engine(nullptr), inFocus(true),
-	  accum(0.f), timescale(1.f)
+	  accum(0.f), timescale(10.f)
 {
 	if(! font.loadFromFile(gamepath + "/DejaVuSansMono.ttf")) {
 		std::cerr << "Failed to load font" << std::endl;

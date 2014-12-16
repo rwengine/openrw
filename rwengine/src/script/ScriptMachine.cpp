@@ -1,5 +1,6 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
+#include <boost/iterator/iterator_concepts.hpp>
 
 #if SCM_DEBUG_INSTRUCTIONS
 #include <iostream>
@@ -14,6 +15,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 	
 	while( t.wakeCounter == 0 ) {
 		auto opcode = _file->read<SCMOpcode>(t.programCounter);
+		auto opcorg = opcode;
 
 		bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) == SCM_NEGATE_CONDITIONAL_MASK);
 		opcode = opcode & ~SCM_NEGATE_CONDITIONAL_MASK;
@@ -89,7 +91,8 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		{
 #if SCM_DEBUG_INSTRUCTIONS
 			std::cout << std::setw(7) << std::setfill(' ') << t.name <<
-			" " << std::hex  << std::setw(4) << std::setfill('0') << opcode << 
+			" " << std::dec << std::setw(8) << std::setfill(' ') << t.programCounter <<
+			" " << std::hex  << std::setw(4) << std::setfill('0') << opcorg << 
 			" " << std::dec;
 			for(SCMOpcodeParameter& p : parameters) {
 				std::cout << p.type << ":";
@@ -117,6 +120,42 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		}
 		else
 		{
+#if SCM_DEBUG_INSTRUCTIONS
+			std::string threadfilter;
+			if(getenv("SCM_DEBUG_THREAD"))
+			{
+				threadfilter = getenv("SCM_DEBUG_THREAD");
+			}
+			if( threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos )
+			{
+				std::cout << std::setw(7) << std::setfill(' ') << t.name <<
+				" " << std::dec << std::setw(8) << std::setfill(' ') << t.programCounter <<
+				" " << std::hex  << std::setw(4) << std::setfill('0') << opcorg << 
+				" " << std::dec;
+				for(SCMOpcodeParameter& p : parameters) {
+					std::cout << p.type << ":";
+					switch(p.type) {
+						case TGlobal:
+						case TLocal:
+							std::cout << *p.globalInteger << "(" << p.globalInteger << ")";
+							break;
+						case TInt8:
+						case TInt16:
+						case TInt32:
+							std::cout << p.integer;
+							break;
+						case TFloat16:
+							std::cout << p.real;
+							break;
+						case TString:
+							std::cout << p.string;
+							break;
+					}
+					std::cout << " ";
+				}
+				std::cout << code.name << std::endl;
+			}
+#endif
 			code.func(this, &t, &parameters);
 		}
 
@@ -125,16 +164,26 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		}
 
 		// Handle conditional results for IF statements.
-		if( t.conditionCount > 0 ) {
+		if( t.conditionCount > 0 && opcode != 0x00D6 ) /// @todo add conditional flag to opcodes instead of checking for 0x00D6
+		{
 			auto cI = --t.conditionCount;
-			t.conditionMask = t.conditionMask & ~(1 << cI);
-			t.conditionMask |= (!! t.conditionResult) << cI;
-			if( t.conditionAND ) {
-				t.conditionResult = (t.conditionMask == SCM_CONDITIONAL_MASK_PASSED);
+			if ( t.conditionAND )
+			{
+				if ( t.conditionResult == false ) 
+				{
+					t.conditionMask = 0;
+				}
+				else
+				{
+					// t.conditionMask is already set to 0xFF by the if and opcode.
+				}
 			}
-			else {
-				t.conditionResult = (t.conditionMask != 0);
+			else
+			{
+				t.conditionMask |= (!! t.conditionResult) << cI;
 			}
+			
+			t.conditionResult = (t.conditionMask != 0);
 		}
 	}
 
