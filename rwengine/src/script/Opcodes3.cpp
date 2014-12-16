@@ -129,6 +129,11 @@ VM_OPCODE_DEF( 0x00C0 )
 	m->getWorld()->state.minute = p->at(1).integer;
 }
 
+VM_CONDOPCODE_DEF( 0x00DB )
+{
+	return false;
+}
+
 VM_CONDOPCODE_DEF( 0x00DE )
 {
 	auto vdata = m->getWorld()->findObjectType<VehicleData>(p->at(1).integer);
@@ -360,6 +365,11 @@ VM_OPCODE_DEF( 0x01BD )
 	*p->at(0).globalInteger = m->getWorld()->gameTime * 1000;
 }
 
+VM_CONDOPCODE_DEF( 0x01C1 )
+{
+	return false;
+}
+
 VM_OPCODE_DEF( 0x01C7 )
 {
 	auto inst = (InstanceObject*)(*p->at(0).handle);
@@ -384,6 +394,11 @@ VM_OPCODE_DEF( 0x01E8 )
 VM_OPCODE_DEF( 0x01F0 )
 {
 	m->getWorld()->state.maxWantedLevel = p->at(0).integer;
+}
+
+VM_CONDOPCODE_DEF( 0x01F4 )
+{
+	return false;
 }
 
 // This does nothing for us.
@@ -756,6 +771,11 @@ VM_CONDOPCODE_DEF( 0x03D0 )
 	return true;
 }
 
+VM_CONDOPCODE_DEF( 0x03D2 )
+{
+	return true;
+}
+
 VM_OPCODE_DEF( 0x03E1 )
 {
 	*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
@@ -828,11 +848,14 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x00C0, 2, "Set Time Of Day" );
 
 	VM_OPCODE_DEC_U( 0x00DA, 2, "Store Player Car" );
+	VM_CONDOPCODE_DEC( 0x00DB, 2, "Is Character in Vehicle" );
 	
 	VM_CONDOPCODE_DEC( 0x00DE, 2, "Is Player In Model" );
 
 	VM_CONDOPCODE_DEC( 0x00E0, 1, "Is Player In Any Vehicle" );
 	VM_CONDOPCODE_DEC( 0x00E1, 2, "Is Button Pressed" );
+	
+	VM_OPCODE_DEC_U( 0x0E4, 6, "Locate Player on foot 2D" );
 	
 	VM_OPCODE_DEC_U( 0x00F5, 8, "Locate Player In Sphere" );
 
@@ -860,6 +883,7 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0152, 17, "Set zone car info" );
 	
 	VM_OPCODE_DEC_U( 0x0158, 3, "Camera Follow Vehicle" );
+	VM_OPCODE_DEC_U( 0x0159, 3, "Camera Follow Character" );
 	
 	VM_OPCODE_DEC_U( 0x015A, 0, "Reset Camera" );
 	
@@ -876,6 +900,7 @@ Opcodes3::Opcodes3()
 	VM_CONDOPCODE_DEC( 0x016B, 0, "Is Screen Fading" );
 	VM_OPCODE_DEC_U( 0x016C, 4, "Add Hospital Restart" );
 	VM_OPCODE_DEC_U( 0x016D, 4, "Add Police Restart" );
+	VM_OPCODE_DEC_U( 0x016E, 4, "Override Next Restart" );
 
 	VM_OPCODE_DEC( 0x0171, 2, "Set Player Heading" );
 
@@ -888,6 +913,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0180, 1, "Link ONMISSION Flag" );
 	VM_OPCODE_DEC_U( 0x0181, 2, "Link Character Mission Flag" );
 	VM_OPCODE_DEC_U( 0x0182, 2, "Unknown Character Opcode" );
+	
+	VM_OPCODE_DEC_U( 0x018E, 1, "Remove Sound" );
 	
 	VM_CONDOPCODE_DEC( 0x019C, 8, "Is Player in Area on Foot" );
 
@@ -910,9 +937,12 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x01EB, 1, "Set Traffic Density Multiplier" );
 	
 	VM_OPCODE_DEC_U( 0x01ED, 1, "Clear Character Threat Search" );
+	
+	VM_OPCODE_DEC_U( 0x01D4, 2, "Character Enter Vehicle as Passenger" );
 
 	VM_OPCODE_DEC( 0x01F0, 1, "Set Max Wanted Level" );
-
+	
+	VM_CONDOPCODE_DEC( 0x01F4, 1, "Is Car Flipped" );
 	VM_OPCODE_DEC( 0x01F5, 2, "Get Player Character" );
 	
 	VM_OPCODE_DEC_U( 0x01F7, 2, "Set Cops Ignore Player" );
@@ -920,6 +950,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x01F9, 9, "Start Kill Frenzy" );
 	
 	VM_OPCODE_DEC_U( 0x01C0, 2, "Store Wanted Level" );
+	VM_CONDOPCODE_DEC( 0x01C1, 1, "Is Vehicle Stopped" );
+	
 
 	VM_CONDOPCODE_DEC( 0x0204, 5, "Is Char near Car in Car 2D" );
 	
@@ -938,6 +970,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x022B, 6, "Disable ped paths" );
 
 	VM_OPCODE_DEC_U( 0x022D, 2, "Set Character Always Face Player" );
+	
+	VM_OPCODE_DEC_U( 0x022F, 1, "Stop Character Looking" );
 
 	VM_OPCODE_DEC_U( 0x0236, 2, "Set Gang Car" );
 	VM_OPCODE_DEC_U( 0x0237, 3, "Set Gang Weapons" );
@@ -967,6 +1001,7 @@ Opcodes3::Opcodes3()
 	
 	VM_OPCODE_DEC( 0x029B, 5, "Create Object no offset" );
 	
+	VM_OPCODE_DEC_U( 0x02A2, 5, "Add Particle" );
 	VM_OPCODE_DEC_U( 0x02A3, 1, "Set Widescreen" );
 	
 	VM_OPCODE_DEC_U( 0x02A7, 5, "Add Radar Contact Blip" );
@@ -1062,7 +1097,12 @@ Opcodes3::Opcodes3()
 	
 	VM_OPCODE_DEC_U( 0x03CF, 1, "Load Audio" );
 	
-	VM_CONDOPCODE_DEC( 0x03D0, 0, "Audio Loaded" );
+	VM_CONDOPCODE_DEC( 0x03D0, 0, "Is Audio Loaded" );
+	VM_OPCODE_DEC_U( 0x03D1, 0, "Play Mission Audio" );
+	VM_CONDOPCODE_DEC( 0x03D2, 0, "Is Mission Audio Finished" );
+	
+	VM_OPCODE_DEC_U( 0x03D5, 1, "Clear This Print" );
+	VM_OPCODE_DEC_U( 0x03D6, 1, "Clear This Big Print" );
 
 	VM_OPCODE_DEC_U( 0x03DA, 1, "Set Garage Camera Follows Player" );
 
