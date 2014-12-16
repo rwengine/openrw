@@ -101,26 +101,54 @@ VM_OPCODE_DEF( 0x00A5 )
 {
 	auto id	= p->at(0).integer;
 	glm::vec3 position(p->at(1).real, p->at(2).real, p->at(3).real);
+	position += spawnMagic;
+	
+	// If there is already a vehicle less than this distance away, it will be destroyed.
+	const float replaceThreshold = 1.f;
+	for( auto it = m->getWorld()->objects.begin();
+		it != m->getWorld()->objects.end();
+		++it)
+	{
+		if( (*it)->type() == GameObject::Vehicle && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
+		{
+			m->getWorld()->destroyObjectQueued(*it);
+		}
+	}
 
-	auto vehicle = m->getWorld()->createVehicle(id, position + spawnMagic);
+	auto vehicle = m->getWorld()->createVehicle(id, position);
 
 	*p->at(4).handle = vehicle;
+}
+
+VM_OPCODE_DEF( 0x00BA )
+{
+	std::string str(p->at(0).string);
+	str = m->getWorld()->gameData.texts.text(str);
+	unsigned short style = p->at(2).integer;
+	m->getWorld()->state.text.push_back({
+		str,
+		m->getWorld()->gameTime,
+		p->at(1).integer / 1000.f,
+		style
+	});
 }
 
 VM_OPCODE_DEF( 0x00BC )
 {
 	std::string str(p->at(0).string);
 	str = m->getWorld()->gameData.texts.text(str);
-	m->getWorld()->state.osTextString = str;
-	m->getWorld()->state.osTextTime = p->at(1).integer / 1000.f;
-	m->getWorld()->state.osTextStart= m->getWorld()->gameTime;
-	m->getWorld()->state.osTextStyle = p->at(2).integer;
+	int flags = p->at(2).integer;
+	m->getWorld()->state.text.push_back({
+		str,
+		m->getWorld()->gameTime,
+		p->at(1).integer / 1000.f,
+		0
+	});
 }
 
 VM_OPCODE_DEF( 0x00BE )
 {
-	m->getWorld()->state.osTextTime = 0.f;
-	m->getWorld()->state.osTextStart= 0.f;
+	m->getWorld()->state.text.clear();
 }
 
 VM_OPCODE_DEF( 0x00C0 )
@@ -296,6 +324,40 @@ VM_OPCODE_DEF( 0x015C )
 	}
 }
 
+VM_OPCODE_DEF( 0x015F )
+{
+	glm::vec3 position( p->at(0).real, p->at(1).real, p->at(2).real );
+	glm::vec3 angles( p->at(3).real, p->at(4).real, p->at(5).real );
+	
+	m->getWorld()->state.cameraFixed = true;
+	m->getWorld()->state.cameraPosition = position;
+	m->getWorld()->state.cameraRotation = glm::quat(angles);
+}
+VM_OPCODE_DEF( 0x0160 )
+{
+	glm::vec3 position( p->at(0).real, p->at(1).real, p->at(2).real );
+	int switchmode = p->at(3).integer;
+	
+	auto direction = glm::normalize(position - m->getWorld()->state.cameraPosition);
+	auto right = glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
+	auto up = glm::normalize(glm::cross(direction, right));
+	
+	glm::mat3 v;
+	v[0][0] = direction.x;
+	v[0][1] = right.x;
+	v[0][2] = up.x;
+	
+	v[1][0] = direction.y;
+	v[1][1] = right.y;
+	v[1][2] = up.y;
+	
+	v[2][0] = direction.z;
+	v[2][1] = right.z;
+	v[2][2] = up.z;
+	
+	m->getWorld()->state.cameraRotation = glm::inverse(glm::quat_cast(v));
+}
+
 VM_OPCODE_DEF( 0x0169 )
 {
 	m->getWorld()->state.fadeColour.r = p->at(0).integer;
@@ -376,6 +438,14 @@ VM_OPCODE_DEF( 0x01C7 )
 	std::cout << "Unable to pin object " << inst << ". Object pinning unimplimented" << std::endl;
 }
 
+VM_OPCODE_DEF( 0x01D4 )
+{
+	auto controller = (CharacterController*)(*p->at(0).handle);
+	auto vehicle = (VehicleObject*)(*p->at(1).handle);
+	/// @todo find next lowest free seat.
+	controller->setNextActivity(new Activities::EnterVehicle(vehicle,1));
+}
+
 VM_OPCODE_DEF( 0x01E7 )
 {
 	glm::vec3 min(p->at(0).real,p->at(1).real,p->at(2).real);
@@ -406,6 +476,13 @@ VM_OPCODE_DEF( 0x01F5 )
 {
 	auto controller = (CharacterController*)(*p->at(0).handle);
 	*p->at(1).handle = controller;
+}
+
+VM_CONDOPCODE_DEF( 0x01F3 )
+{
+	/// @todo IS vehicle in air.
+	auto vehicle = (VehicleObject*)(*p->at(0).handle);
+	return false;	
 }
 
 VM_CONDOPCODE_DEF( 0x0204 )
@@ -544,6 +621,20 @@ VM_OPCODE_DEF( 0x029B )
 
 	*p->at(4).handle = inst;
 }
+VM_CONDOPCODE_DEF( 0x029C )
+{
+	/*auto vehicle = (VehicleObject*)(*p->at(0).handle);
+	if( vehicle )
+	{
+		return vehicle->vehicle->type == VehicleData::BOAT;
+	}*/
+	return false;
+}
+
+VM_OPCODE_DEF( 0x02A3 )
+{
+	m->getWorld()->state.isCinematic = !!p->at(0).integer;
+}
 
 VM_CONDOPCODE_DEF( 0x02DE )
 {
@@ -553,6 +644,14 @@ VM_CONDOPCODE_DEF( 0x02DE )
 	return vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI;
 }
 
+VM_OPCODE_DEF( 0x02E3 )
+{
+	auto vehicle = (VehicleObject*)(*p->at(0).handle);
+	if( vehicle )
+	{
+		*p->at(1).globalReal = vehicle->physVehicle->getCurrentSpeedKmHour();
+	}
+}
 VM_OPCODE_DEF( 0x02E4 )
 {
 	m->getWorld()->loadCutscene(p->at(0).string);
@@ -840,7 +939,7 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x00A5, 5, "Create Vehicle" );
 	
-	VM_OPCODE_DEC_U( 0x00BA, 3, "Print big" );
+	VM_OPCODE_DEC( 0x00BA, 3, "Print big" );
 	VM_OPCODE_DEC( 0x00BC, 3, "Print Message Now" );
 
 	VM_OPCODE_DEC( 0x00BE, 0, "Clear Message Prints" );
@@ -889,9 +988,8 @@ Opcodes3::Opcodes3()
 	
 	VM_OPCODE_DEC( 0x015C, 11, "Set zone ped info" );
 
-	VM_OPCODE_DEC_U( 0x015F, 6, "Set Fixed Camera Position" );
-	
-	VM_OPCODE_DEC_U( 0x0160, 4, "Point Camera at Point" );
+	VM_OPCODE_DEC( 0x015F, 6, "Set Fixed Camera Position" );
+	VM_OPCODE_DEC( 0x0160, 4, "Point Camera at Point" );
 	
 	VM_OPCODE_DEC_U( 0x0164, 1, "Disable Radar Blip" );
 
@@ -928,8 +1026,12 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x01BD, 1, "Get Game Timer" );
 	VM_OPCODE_DEC_U( 0x01BE, 4, "Turn Character To Face Point" );
-
+	
+	VM_OPCODE_DEC_U( 0x01C0, 2, "Store Wanted Level" );
+	VM_CONDOPCODE_DEC( 0x01C1, 1, "Is Vehicle Stopped" );
 	VM_OPCODE_DEC( 0x01C7, 1, "Don't remove object" );
+	
+	VM_OPCODE_DEC( 0x01D4, 2, "Character Enter Vehicle as Passenger" );
 
 	VM_OPCODE_DEC( 0x01E7, 6, "Enable Roads" );
 	VM_OPCODE_DEC( 0x01E8, 6, "Disable Roads" );
@@ -937,11 +1039,10 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x01EB, 1, "Set Traffic Density Multiplier" );
 	
 	VM_OPCODE_DEC_U( 0x01ED, 1, "Clear Character Threat Search" );
-	
-	VM_OPCODE_DEC_U( 0x01D4, 2, "Character Enter Vehicle as Passenger" );
 
 	VM_OPCODE_DEC( 0x01F0, 1, "Set Max Wanted Level" );
 	
+	VM_CONDOPCODE_DEC( 0x01F3, 1, "Is Vehicle In Air" );
 	VM_CONDOPCODE_DEC( 0x01F4, 1, "Is Car Flipped" );
 	VM_OPCODE_DEC( 0x01F5, 2, "Get Player Character" );
 	
@@ -949,10 +1050,6 @@ Opcodes3::Opcodes3()
 	
 	VM_OPCODE_DEC_U( 0x01F9, 9, "Start Kill Frenzy" );
 	
-	VM_OPCODE_DEC_U( 0x01C0, 2, "Store Wanted Level" );
-	VM_CONDOPCODE_DEC( 0x01C1, 1, "Is Vehicle Stopped" );
-	
-
 	VM_CONDOPCODE_DEC( 0x0204, 5, "Is Char near Car in Car 2D" );
 	
 	VM_OPCODE_DEC_U( 0x020A, 2, "Lock Car Doors" );
@@ -1000,15 +1097,17 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x0297, 0, "Reset Player Kills" );
 	
 	VM_OPCODE_DEC( 0x029B, 5, "Create Object no offset" );
+	VM_CONDOPCODE_DEC( 0x029C, 1, "Is Vehicle Boat" );
 	
 	VM_OPCODE_DEC_U( 0x02A2, 5, "Add Particle" );
-	VM_OPCODE_DEC_U( 0x02A3, 1, "Set Widescreen" );
+	VM_OPCODE_DEC( 0x02A3, 1, "Set Widescreen" );
 	
 	VM_OPCODE_DEC_U( 0x02A7, 5, "Add Radar Contact Blip" );
 	VM_OPCODE_DEC_U( 0x02A8, 5, "Add Radar Blip" );
 
 	VM_CONDOPCODE_DEC( 0x02DE, 1, "Is Player In Taxi" );
-
+	
+	VM_OPCODE_DEC( 0x02E3, 2, "Get Vehicle Speed" );
 	VM_OPCODE_DEC( 0x02E4, 1, "Load Cutscene Data" );
 	VM_OPCODE_DEC( 0x02E5, 2, "Create Cutscene Object" );
 	VM_OPCODE_DEC( 0x02E6, 2, "Set Cutscene Animation" );
@@ -1088,6 +1187,8 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x03BB, 1, "Set Garage Door to Rotate" );
 
 	VM_OPCODE_DEC_U( 0x03BF, 2, "Set Pedestrians Ignoring Player" );
+	
+	VM_OPCODE_DEC_U( 0x03C1, 2, "Store Player Vehicle No-Save" );
 	
 	VM_OPCODE_DEC_U( 0x03C4, 3, "Display Counter Message" );
 	VM_OPCODE_DEC_U( 0x03C5, 4, "Spawn Parked Vehicle" );

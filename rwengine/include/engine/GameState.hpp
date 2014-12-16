@@ -19,6 +19,14 @@ struct TextDisplayData
 	glm::vec4 colourBG;
 };
 
+struct OnscreenText
+{
+	std::string osTextString;
+	float osTextStart;
+	float osTextTime;
+	unsigned short osTextStyle;
+};
+
 /**
  * Stores information about where the game can generate vehicles.
  */
@@ -73,25 +81,27 @@ struct GameState
 	bool isIntroPlaying;
 	CutsceneData* currentCutscene;
 	float cutsceneStartTime;
+	/** Flag for rendering cutscene letterbox */
+	bool isCinematic;
 
 	short hour;
 	short minute;
-
-	/// @todo opcodes seem to imply Onscreen text might be queued
-	unsigned short osTextStyle;
-	std::string osTextString;
-	float osTextStart;
-	float osTextTime;
-
+	
+	
 	/// Stores the "special" character and cutscene model indices.
 	std::map<unsigned short, std::string> specialCharacters;
 	std::map<unsigned short, std::string> specialModels;
 
+	std::vector<OnscreenText> text;
+	
 	TextDisplayData nextText;
 	std::vector<TextDisplayData> texts;
 
 	/** The camera near value currently set by the script */
 	float cameraNear;
+	bool cameraFixed;
+	glm::vec3 cameraPosition;
+	glm::quat cameraRotation;
 	
 	std::vector<VehicleGenerator> vehicleGenerators;
 
@@ -113,12 +123,11 @@ struct GameState
 		isIntroPlaying(false),
 		currentCutscene(nullptr),
 		cutsceneStartTime(-1.f),
+		isCinematic(false),
 		hour(0),
 		minute(0),
-		osTextStyle(0),
-		osTextStart(0.f),
-		osTextTime(0.f),
-		cameraNear(0.1f)
+		cameraNear(0.1f),
+		cameraFixed(false)
 	{}
 };
 

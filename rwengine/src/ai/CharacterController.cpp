@@ -54,7 +54,11 @@ void CharacterController::update(float dt)
 		// Nevermind, the player is in a vehicle.
 
 		character->getCurrentVehicle()->setSteeringAngle(d.y);
-		// TODO what is handbraking.
+		
+		if( std::abs(d.x) > 0.01f )
+		{
+			character->getCurrentVehicle()->setHandbraking(false);
+		}
 		character->getCurrentVehicle()->setThrottle(d.x);
 
 		// if the character isn't doing anything, play sitting anim.

@@ -191,7 +191,13 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::Space:
 			if( player ) {
-				player->jump();
+				if( player->getCharacter()->getCurrentVehicle() ) {
+					player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
+				}
+				else
+				{
+					player->jump();
+				}
 			}
 			break;
 		case sf::Keyboard::W:

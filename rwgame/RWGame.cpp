@@ -3,6 +3,7 @@
 #include "loadingstate.hpp"
 
 #include <engine/GameObject.hpp>
+#include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
 
@@ -193,6 +194,11 @@ void RWGame::render(float alpha)
 		viewCam.position = cameraPos;
 		viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
 	}
+	else if( engine->state.cameraFixed )
+	{
+		viewCam.position = engine->state.cameraPosition;
+		viewCam.rotation = engine->state.cameraRotation;
+	}
 	else
 	{
 		// There's no cutscene playing - use the camera returned by the State.
@@ -258,15 +264,53 @@ void RWGame::render(float alpha)
 		window.draw(text);
 		tpos.y -= text.getLocalBounds().height;
 	}
+	
+	for( int i = 0; i < engine->state.text.size(); )
+	{
+		if( engine->gameTime > engine->state.text[i].osTextStart + engine->state.text[i].osTextTime )
+		{
+			engine->state.text.erase(engine->state.text.begin() + i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 
-	/// @todo this should be done by GameRenderer? but it doesn't have any font support yet
-	if( engine->gameTime < engine->state.osTextStart + engine->state.osTextTime ) {
-		sf::Text messageText(engine->state.osTextString, font, 15);
+	for(OnscreenText& t : engine->state.text)
+	{
+		float fontSize = 15.f;
+		switch(t.osTextStyle)
+		{
+			default:
+				fontSize = 15.f;
+				break;
+			case 1:
+				fontSize = 25.f;
+				break;
+			case 2:
+				fontSize = 20.f;
+				break;
+		}
+		
+		sf::Text messageText(t.osTextString, font, fontSize);
 		auto sz = window.getSize();
-
+		
 		auto b = messageText.getLocalBounds();
-		float lowerBar = sz.y - sz.y * 0.1f;
-		messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
+		
+		if(t.osTextStyle == 1)
+		{
+			messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), sz.y / 2.f - std::round(b.height / 2.f));
+		}
+		else if(t.osTextStyle == 2)
+		{
+			messageText.setPosition(sz.x * 0.9f - std::round(b.width), sz.y * 0.8f - std::round(b.height / 2.f));
+		}
+		else
+		{
+			float lowerBar = sz.y - sz.y * 0.1f;
+			messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
+		}
 		window.draw(messageText);
 	}
 

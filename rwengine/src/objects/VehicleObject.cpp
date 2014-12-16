@@ -12,7 +12,7 @@
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
-	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(false),
+	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(true),
 	  vehicle(data), info(info), colourPrimary(prim),
 	  colourSecondary(sec), collision(nullptr), physBody(nullptr), physVehicle(nullptr)
 {
@@ -147,6 +147,13 @@ void VehicleObject::tickPhysics(float dt)
 		float velFac = (info->handling.maxVelocity - physVehicle->getCurrentSpeedKmHour()) / info->handling.maxVelocity;
 		float engineForce = info->handling.acceleration * 150.f * throttle * velFac;
 		if( fabs(engineForce) >= 0.001f ) physBody->activate(true);
+		
+		float brakeF = getBraking();
+		
+		if( handbrake )
+		{
+			brakeF = 2.f;
+		}
 
 		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
 			btWheelInfo& wi = physVehicle->getWheelInfo(w);
@@ -157,8 +164,8 @@ void VehicleObject::tickPhysics(float dt)
 					physVehicle->applyEngineForce(engineForce, w);
 			}
 
-			float brakeReal = info->handling.brakeDeceleration * info->handling.mass * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
-			physVehicle->setBrake(brakeReal * brake, w);
+			float brakeReal = 10.f * info->handling.brakeDeceleration * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
+			physVehicle->setBrake(brakeReal * brakeF, w);
 
 			if(wi.m_bIsFrontWheel) {
 				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
