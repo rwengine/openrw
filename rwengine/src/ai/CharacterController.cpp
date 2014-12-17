@@ -49,17 +49,20 @@ void CharacterController::setNextActivity(CharacterController::Activity* activit
 void CharacterController::update(float dt)
 {
 	auto d = rawMovement;
-
+	
 	if( character->getCurrentVehicle() ) {
 		// Nevermind, the player is in a vehicle.
 
-		character->getCurrentVehicle()->setSteeringAngle(d.y);
-		
-		if( std::abs(d.x) > 0.01f )
+		if( character->getCurrentSeat() == 0 )
 		{
-			character->getCurrentVehicle()->setHandbraking(false);
+			character->getCurrentVehicle()->setSteeringAngle(d.y);
+			
+			if( std::abs(d.x) > 0.01f )
+			{
+				character->getCurrentVehicle()->setHandbraking(false);
+			}
+			character->getCurrentVehicle()->setThrottle(d.x);
 		}
-		character->getCurrentVehicle()->setThrottle(d.x);
 
 		// if the character isn't doing anything, play sitting anim.
 		if( _currentActivity == nullptr ) {

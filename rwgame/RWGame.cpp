@@ -306,6 +306,16 @@ void RWGame::render(float alpha)
 		{
 			messageText.setPosition(sz.x * 0.9f - std::round(b.width), sz.y * 0.8f - std::round(b.height / 2.f));
 		}
+		else if(t.osTextStyle == 12)
+		{
+			messageText.setPosition(10.f, 10.f);
+			
+			auto bds = messageText.getGlobalBounds();
+			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height));
+			bg.setFillColor(sf::Color::Black);
+			bg.setPosition(sf::Vector2f(bds.left, bds.top));
+			window.draw(bg);
+		}
 		else
 		{
 			float lowerBar = sz.y - sz.y * 0.1f;

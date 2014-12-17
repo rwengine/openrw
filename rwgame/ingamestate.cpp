@@ -139,12 +139,19 @@ void IngameState::tick(float dt)
 		auto angle = glm::angleAxis(-_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
 
 		player->updateMovementDirection(angle * _movement, _movement);
+		
+		auto target = getWorld()->state.cameraTarget;
+		
+		if( target == nullptr )
+		{
+			target = player->getCharacter();
+		}
 
-		auto position = player->getCharacter()->getPosition();
+		auto position = target->getPosition();
 
 		float viewDistance = 4.f;
 
-		auto vehicle = player->getCharacter()->getCurrentVehicle();
+		auto vehicle = ( target->type() == GameObject::Character ) ? static_cast<CharacterObject*>(target)->getCurrentVehicle() : nullptr;
 		if( vehicle ) {
 			auto model = vehicle->model;
 			for(auto& g : model->model->geometries) {
@@ -190,7 +197,11 @@ void IngameState::handleEvent(const sf::Event &event)
 			StateManager::get().enter(new DebugState(game, _look.position, _look.rotation));
 			break;
 		case sf::Keyboard::Space:
-			if( player ) {
+			if( getWorld()->state.currentCutscene )
+			{
+				getWorld()->state.skipCutscene = true;
+			}
+			else if( player ) {
 				if( player->getCharacter()->getCurrentVehicle() ) {
 					player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
 				}

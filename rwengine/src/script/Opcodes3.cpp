@@ -11,6 +11,8 @@
 
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameWorld.hpp>
+#include <engine/GameWorld.hpp>
 #include <ai/PlayerController.hpp>
 #include <ai/DefaultAIController.hpp>
 
@@ -122,10 +124,11 @@ VM_OPCODE_DEF( 0x00A5 )
 
 VM_OPCODE_DEF( 0x00BA )
 {
-	std::string str(p->at(0).string);
-	str = m->getWorld()->gameData.texts.text(str);
+	std::string id(p->at(0).string);
+	std::string str = m->getWorld()->gameData.texts.text(id);
 	unsigned short style = p->at(2).integer;
 	m->getWorld()->state.text.push_back({
+		id,
 		str,
 		m->getWorld()->gameTime,
 		p->at(1).integer / 1000.f,
@@ -135,10 +138,11 @@ VM_OPCODE_DEF( 0x00BA )
 
 VM_OPCODE_DEF( 0x00BC )
 {
-	std::string str(p->at(0).string);
-	str = m->getWorld()->gameData.texts.text(str);
+	std::string id(p->at(0).string);
+	std::string str = m->getWorld()->gameData.texts.text(id);
 	int flags = p->at(2).integer;
 	m->getWorld()->state.text.push_back({
+		id,
 		str,
 		m->getWorld()->gameTime,
 		p->at(1).integer / 1000.f,
@@ -159,7 +163,27 @@ VM_OPCODE_DEF( 0x00C0 )
 
 VM_CONDOPCODE_DEF( 0x00DB )
 {
-	return false;
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	auto vehicle = static_cast<VehicleObject*>(*p->at(1).handle);
+	
+	if( controller == nullptr || vehicle == nullptr )
+	{
+		return false;
+	}
+	
+	return controller->getCharacter()->getCurrentVehicle() == vehicle;
+}
+VM_CONDOPCODE_DEF( 0x00DC )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	auto vehicle = static_cast<VehicleObject*>(*p->at(1).handle);
+	
+	if( controller == nullptr || vehicle == nullptr )
+	{
+		return false;
+	}
+	
+	return controller->getCharacter()->getCurrentVehicle() == vehicle;
 }
 
 VM_CONDOPCODE_DEF( 0x00DE )
@@ -189,6 +213,29 @@ VM_CONDOPCODE_DEF( 0x00E0 )
 VM_CONDOPCODE_DEF( 0x00E1 )
 {
 	/// @todo implement
+	return false;
+}
+
+VM_CONDOPCODE_DEF( 0x00E5 )
+{
+	auto character = static_cast<CharacterController*>(*p->at(0).handle);
+	glm::vec2 position(p->at(1).real, p->at(2).real);
+	glm::vec2 radius(p->at(3).real, p->at(4).real);
+	bool show = p->at(5).integer;
+	
+	if( character->getCharacter()->getCurrentVehicle() == nullptr )
+	{
+		return false;
+	}
+	
+	auto vp = character->getCharacter()->getCurrentVehicle()->getPosition();
+	glm::vec2 distance = glm::abs(position - glm::vec2(vp));
+	
+	if(distance.x <= radius.x && distance.y <= radius.y)
+	{
+		return true;
+	}
+	
 	return false;
 }
 
@@ -302,6 +349,22 @@ VM_OPCODE_DEF( 0x0152 )
 			}
 		}
 	}
+}
+
+VM_OPCODE_DEF( 0x0159 )
+{
+	auto controller = static_cast<CharacterController*>(*p->at(0).handle);
+	if( controller != nullptr )
+	{
+		m->getWorld()->state.cameraTarget = controller->getCharacter();
+		m->getWorld()->state.cameraFixed = false;
+	}
+}
+
+VM_OPCODE_DEF( 0x015A )
+{
+	m->getWorld()->state.cameraTarget = nullptr;
+	m->getWorld()->state.cameraFixed = false;
 }
 
 VM_OPCODE_DEF( 0x015C )
@@ -646,7 +709,7 @@ VM_CONDOPCODE_DEF( 0x02DE )
 
 VM_OPCODE_DEF( 0x02E3 )
 {
-	auto vehicle = (VehicleObject*)(*p->at(0).handle);
+	auto vehicle = static_cast<VehicleObject*>(*p->at(0).handle);
 	if( vehicle )
 	{
 		*p->at(1).globalReal = vehicle->physVehicle->getCurrentSpeedKmHour();
@@ -688,12 +751,22 @@ VM_OPCODE_DEF( 0x02E7 )
 VM_OPCODE_DEF( 0x02E8 )
 {
 	float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
-	*p->at(0).globalInteger = time * 1000;
+	if( m->getWorld()->state.skipCutscene )
+	{
+		*p->at(0).globalInteger = m->getWorld()->state.currentCutscene->tracks.duration * 1000;
+	}
+	else
+	{
+		*p->at(0).globalInteger = time * 1000;
+	}
 }
 VM_CONDOPCODE_DEF( 0x02E9 )
 {
 	if( m->getWorld()->state.currentCutscene ) {
 		float time = m->getWorld()->gameTime - m->getWorld()->state.cutsceneStartTime;
+		if( m->getWorld()->state.skipCutscene ) {
+			return true;
+		}
 		return time > m->getWorld()->state.currentCutscene->tracks.duration;
 	}
 	return true;
@@ -865,20 +938,65 @@ VM_CONDOPCODE_DEF( 0x03C6 )
 	return true;
 }
 
+VM_OPCODE_DEF( 0x03CF )
+{
+	std::string name = p->at(0).string;
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+	if(! m->getWorld()->gameData.loadAudio(m->getWorld()->missionAudio, name + ".wav"))
+	{
+		std::cerr << "Couldn't load mission audio " << name << std::endl;
+	}
+}
 VM_CONDOPCODE_DEF( 0x03D0 )
 {
 	return true;
 }
-
+VM_OPCODE_DEF( 0x03D1 )
+{
+	m->getWorld()->missionSound.setBuffer(m->getWorld()->missionAudio);
+	m->getWorld()->missionSound.play();
+	m->getWorld()->missionSound.setLoop(false);
+}
 VM_CONDOPCODE_DEF( 0x03D2 )
 {
-	return true;
+	return m->getWorld()->missionSound.getStatus() == sf::SoundSource::Stopped;
+}
+VM_OPCODE_DEF( 0x03D5 )
+{
+	std::string id(p->at(0).string);
+	
+	for( int i = 0; i < m->getWorld()->state.text.size(); )
+	{
+		if( m->getWorld()->state.text[i].id == id )
+		{
+			m->getWorld()->state.text.erase(m->getWorld()->state.text.begin() + i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 }
 
 VM_OPCODE_DEF( 0x03E1 )
 {
 	*p->at(0).globalInteger = m->getWorld()->state.numHiddenPackagesDiscovered;
 }
+
+VM_OPCODE_DEF( 0x03E5 )
+{
+	std::string id(p->at(0).string);
+	std::string str = m->getWorld()->gameData.texts.text(id);
+	unsigned short style = 12;
+	m->getWorld()->state.text.push_back({
+		id,
+		str,
+		m->getWorld()->gameTime,
+		2.5f,
+		style
+	});
+}
+
 VM_CONDOPCODE_DEF( 0x03EE )
 {
 	return true;
@@ -939,6 +1057,11 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC( 0x00A5, 5, "Create Vehicle" );
 	
+	VM_OPCODE_DEC_U( 0x00A7, 4, "Drive To" );
+	
+	VM_OPCODE_DEC_U( 0x00AD, 2, "Set Driving Speed" );
+	VM_OPCODE_DEC_U( 0x00AE, 2, "Set Driving Style" );
+	
 	VM_OPCODE_DEC( 0x00BA, 3, "Print big" );
 	VM_OPCODE_DEC( 0x00BC, 3, "Print Message Now" );
 
@@ -948,11 +1071,14 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC_U( 0x00DA, 2, "Store Player Car" );
 	VM_CONDOPCODE_DEC( 0x00DB, 2, "Is Character in Vehicle" );
+	VM_CONDOPCODE_DEC( 0x00DC, 2, "Is Player in Vehicle" );
 	
 	VM_CONDOPCODE_DEC( 0x00DE, 2, "Is Player In Model" );
 
 	VM_CONDOPCODE_DEC( 0x00E0, 1, "Is Player In Any Vehicle" );
 	VM_CONDOPCODE_DEC( 0x00E1, 2, "Is Button Pressed" );
+	
+	VM_CONDOPCODE_DEC( 0x00E5, 6, "Is Player in 2D Area in Vehicle" );
 	
 	VM_OPCODE_DEC_U( 0x0E4, 6, "Locate Player on foot 2D" );
 	
@@ -970,6 +1096,8 @@ Opcodes3::Opcodes3()
 	VM_CONDOPCODE_DEC( 0x0119, 1, "Is Vehicle Dead" );
 
 	VM_CONDOPCODE_DEC( 0x0121, 2, "Is Player In Zone" );
+		
+	VM_OPCODE_DEC_U( 0x0129, 4, "Create Character In Car" );
 
 	VM_OPCODE_DEC( 0x014B, 13, "Create Car Generator" );
 	VM_OPCODE_DEC( 0x014C, 2, "Set Car Generator count" );
@@ -982,9 +1110,9 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC( 0x0152, 17, "Set zone car info" );
 	
 	VM_OPCODE_DEC_U( 0x0158, 3, "Camera Follow Vehicle" );
-	VM_OPCODE_DEC_U( 0x0159, 3, "Camera Follow Character" );
+	VM_OPCODE_DEC( 0x0159, 3, "Camera Follow Character" );
 	
-	VM_OPCODE_DEC_U( 0x015A, 0, "Reset Camera" );
+	VM_OPCODE_DEC( 0x015A, 0, "Reset Camera" );
 	
 	VM_OPCODE_DEC( 0x015C, 11, "Set zone ped info" );
 
@@ -1012,13 +1140,16 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x0181, 2, "Link Character Mission Flag" );
 	VM_OPCODE_DEC_U( 0x0182, 2, "Unknown Character Opcode" );
 	
+	VM_OPCODE_DEC_U( 0x0186, 2, "Add Blip for Vehicle" );
+
+	VM_OPCODE_DEC_U( 0x018A, 4, "Add Blip for Coord" );
+	VM_OPCODE_DEC_U( 0x018B, 2, "Change Blip Display Mode" );
+	
+	VM_OPCODE_DEC_U( 0x018D, 5, "Create soundscape" );
+
 	VM_OPCODE_DEC_U( 0x018E, 1, "Remove Sound" );
 	
 	VM_CONDOPCODE_DEC( 0x019C, 8, "Is Player in Area on Foot" );
-
-	VM_OPCODE_DEC_U( 0x018B, 2, "Change Blip Display Mode" );
-
-	VM_OPCODE_DEC_U( 0x018D, 5, "Create soundscape" );
 
 	VM_OPCODE_DEC( 0x01B4, 2, "Set Player Input Enabled" );
 
@@ -1171,10 +1302,13 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x038B, 0, "Load Requested Models Now" );
 	
 	VM_OPCODE_DEC_U( 0x0395, 5, "Clear Area Vehicles and Pedestrians" );
-
+	
+	VM_OPCODE_DEC_U( 0x0397, 2, "Set Vehicle Siren" );
+	
 	VM_OPCODE_DEC_U( 0x0399, 7, "Disable ped paths in angled cube" );
 
 	VM_OPCODE_DEC_U( 0x039D, 12, "Scatter Particles" );
+	VM_OPCODE_DEC_U( 0x039E, 2, "Set Character can be dragged out" );
 
 	VM_OPCODE_DEC_U( 0x03AD, 1, "Set Garbage Enabled" );
 
@@ -1196,20 +1330,20 @@ Opcodes3::Opcodes3()
 
 	VM_OPCODE_DEC_U( 0x03CB, 3, "Load Area Near" );
 	
-	VM_OPCODE_DEC_U( 0x03CF, 1, "Load Audio" );
+	VM_OPCODE_DEC( 0x03CF, 1, "Load Audio" );
 	
 	VM_CONDOPCODE_DEC( 0x03D0, 0, "Is Audio Loaded" );
-	VM_OPCODE_DEC_U( 0x03D1, 0, "Play Mission Audio" );
+	VM_OPCODE_DEC( 0x03D1, 0, "Play Mission Audio" );
 	VM_CONDOPCODE_DEC( 0x03D2, 0, "Is Mission Audio Finished" );
 	
-	VM_OPCODE_DEC_U( 0x03D5, 1, "Clear This Print" );
+	VM_OPCODE_DEC( 0x03D5, 1, "Clear This Print" );
 	VM_OPCODE_DEC_U( 0x03D6, 1, "Clear This Big Print" );
 
 	VM_OPCODE_DEC_U( 0x03DA, 1, "Set Garage Camera Follows Player" );
 
 	VM_OPCODE_DEC( 0x03E1, 1, "Get Hidden Packages Found" );
 
-	VM_OPCODE_DEC_U( 0x03E5, 1, "Display Help Text" );
+	VM_OPCODE_DEC( 0x03E5, 1, "Display Help Text" );
 	VM_OPCODE_DEC_U( 0x03E6, 0, "Clear Help Text" );
 
 	VM_OPCODE_DEC_U( 0x03EB, 0, "Clear Small Prints" );
@@ -1230,6 +1364,7 @@ Opcodes3::Opcodes3()
 	VM_OPCODE_DEC_U( 0x0418, 2, "Set Object Draw Ontop" );
 
 	VM_OPCODE_DEC( 0x041D, 1, "Set Camera Near Clip" );
+	VM_OPCODE_DEC_U( 0x041E, 2, "Set Radio Station" );
 
 	VM_OPCODE_DEC_U( 0x0421, 1, "Force Rain" );
 

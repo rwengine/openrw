@@ -245,6 +245,8 @@ public:
 
 	MADStream fgAudio;
 	bool cutsceneAudioLoaded;
+	sf::SoundBuffer missionAudio;
+	sf::Sound missionSound;
 
 	/**
 	 * @brief loads a model into a special character slot.

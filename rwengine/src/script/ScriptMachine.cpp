@@ -199,6 +199,10 @@ ScriptMachine::ScriptMachine(GameWorld *world, SCMFile *file, SCMOpcodes *ops)
 	startThread(0);
 	auto globals = _file->getGlobalsSize() / 4;
 	_globals = new SCMByte[globals * SCM_VARIABLE_SIZE];
+	for(int i = 0; i < globals * SCM_VARIABLE_SIZE; ++i)
+	{
+		_globals[i] = 0;
+	}
 	std::cout << globals << " " << SCM_VARIABLE_SIZE << std::endl;
 }
 

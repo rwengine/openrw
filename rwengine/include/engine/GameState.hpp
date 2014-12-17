@@ -6,6 +6,7 @@
 #include <map>
 #include <vector>
 
+class GameObject;
 class PlayerController;
 struct CutsceneData;
 
@@ -21,6 +22,7 @@ struct TextDisplayData
 
 struct OnscreenText
 {
+	std::string id;
 	std::string osTextString;
 	float osTextStart;
 	float osTextTime;
@@ -77,7 +79,7 @@ struct GameState
 
 	std::string currentSplash;
 
-
+	bool skipCutscene;
 	bool isIntroPlaying;
 	CutsceneData* currentCutscene;
 	float cutsceneStartTime;
@@ -103,6 +105,8 @@ struct GameState
 	glm::vec3 cameraPosition;
 	glm::quat cameraRotation;
 	
+	GameObject* cameraTarget;
+	
 	std::vector<VehicleGenerator> vehicleGenerators;
 
 	GameState() :
@@ -120,6 +124,7 @@ struct GameState
 		fadeStart(0.f),
 		fadeTime(0.f),
 		fadeSound(false),
+		skipCutscene(false),
 		isIntroPlaying(false),
 		currentCutscene(nullptr),
 		cutsceneStartTime(-1.f),
@@ -127,7 +132,8 @@ struct GameState
 		hour(0),
 		minute(0),
 		cameraNear(0.1f),
-		cameraFixed(false)
+		cameraFixed(false),
+		cameraTarget(nullptr)
 	{}
 };
 

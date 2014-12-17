@@ -158,6 +158,7 @@ public:
 	void loadWeaponDAT(const std::string& name);
 
 	bool loadAudio(MADStream &music, const std::string& name);
+	bool loadAudio(sf::SoundBuffer& sound, const std::string& name);
 
 	void loadSplash(const std::string& name);
 

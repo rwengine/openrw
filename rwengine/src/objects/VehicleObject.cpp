@@ -144,8 +144,8 @@ void VehicleObject::tickPhysics(float dt)
 {
 	if(physVehicle) {
 		// todo: a real engine function
-		float velFac = (info->handling.maxVelocity - physVehicle->getCurrentSpeedKmHour()) / info->handling.maxVelocity;
-		float engineForce = info->handling.acceleration * 150.f * throttle * velFac;
+		float velFac = info->handling.maxVelocity;
+		float engineForce = info->handling.acceleration * throttle * velFac;
 		if( fabs(engineForce) >= 0.001f ) physBody->activate(true);
 		
 		float brakeF = getBraking();

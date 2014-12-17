@@ -495,6 +495,12 @@ bool GameData::loadAudio(MADStream& music, const std::string &name)
 	return music.open(datpath + "/audio/" + name);
 }
 
+bool GameData::loadAudio(sf::SoundBuffer& sound, const std::string& name)
+{
+	auto fname = findPathRealCase(datpath + "/audio/", name);
+	return sound.loadFromFile(fname);
+}
+
 void GameData::loadSplash(const std::string &name)
 {
 	std::string lower(name);

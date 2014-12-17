@@ -683,6 +683,7 @@ void GameWorld::loadCutscene(const std::string &name)
 void GameWorld::startCutscene()
 {
 	state.cutsceneStartTime = gameTime;
+	state.skipCutscene = false;
 	if( cutsceneAudioLoaded ) {
 		fgAudio.play();
 	}

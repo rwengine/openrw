@@ -73,6 +73,10 @@ VM_OPCODE_DEF( 0x001A ) {
 	t->conditionResult =  p->at(0).integer > *p->at(1).globalInteger;
 }
 
+VM_OPCODE_DEF( 0x001B ) {
+	t->conditionResult =  p->at(0).integer > *p->at(1).globalInteger;
+}
+
 VM_OPCODE_DEF( 0x0020 ) {
 	t->conditionResult =  *p->at(0).globalReal > p->at(1).integer;
 }
@@ -205,6 +209,7 @@ VM::VM()
 	VM_OPCODE_DEC( 0x0019, 2, "Local Int Greater than Int" );
 
 	VM_OPCODE_DEC( 0x001A, 2, "Int Greater Than Global Int" );
+	VM_OPCODE_DEC( 0x001B, 2, "Int Greater Than Var Int" );
 	
 	VM_OPCODE_DEC( 0x0020, 2, "Global Float Greather than Float" );
 
