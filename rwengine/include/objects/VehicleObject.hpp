@@ -85,6 +85,8 @@ public:
 
 	void tickPhysics(float dt);
 	
+	bool isFlipped() const;
+	
 	void ejectAll();
 	
 	GameObject* getOccupant(size_t seat);

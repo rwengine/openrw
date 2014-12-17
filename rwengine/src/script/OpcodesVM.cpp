@@ -78,7 +78,20 @@ VM_OPCODE_DEF( 0x001B ) {
 }
 
 VM_OPCODE_DEF( 0x0020 ) {
-	t->conditionResult =  *p->at(0).globalReal > p->at(1).integer;
+	t->conditionResult =  *p->at(0).globalReal > p->at(1).real;
+}
+
+VM_OPCODE_DEF( 0x0028 ) {
+	t->conditionResult =  *p->at(0).globalInteger >= p->at(1).integer;
+}
+VM_OPCODE_DEF( 0x0029 )
+{
+	t->conditionResult = *p->at(0).globalInteger >= p->at(1).integer;
+}
+
+
+VM_OPCODE_DEF( 0x002A ) {
+	t->conditionResult =  p->at(0).integer >= *p->at(1).globalInteger;
 }
 
 VM_OPCODE_DEF( 0x0038 ) {
@@ -150,7 +163,7 @@ VM_OPCODE_DEF( 0x00D6 )
 		t->conditionAND = true;
 	}
 	else {
-		t->conditionCount = n-7;
+		t->conditionCount = n-19;
 		t->conditionMask = 0x00;
 		t->conditionAND = false;
 	}
@@ -165,6 +178,14 @@ VM_OPCODE_DEF( 0x00D7 )
 VM_OPCODE_DEF( 0x00D8 )
 {
 	std::cout << "Ended: " << t->name << std::endl;
+	
+	for( auto& o : m->getWorld()->state.missionObjects )
+	{
+		m->getWorld()->destroyObjectQueued(o);
+	}
+	
+	m->getWorld()->state.missionObjects.clear();
+	
 	*m->getWorld()->state.scriptOnMissionFlag = 0;
 }
 
@@ -212,7 +233,12 @@ VM::VM()
 	VM_OPCODE_DEC( 0x001B, 2, "Int Greater Than Var Int" );
 	
 	VM_OPCODE_DEC( 0x0020, 2, "Global Float Greather than Float" );
-
+	
+	VM_OPCODE_DEC( 0x0028, 2, "Global Int >= Int" );
+	VM_OPCODE_DEC( 0x0029, 2, "Local Int >= Int" );
+	
+	VM_OPCODE_DEC( 0x002A, 2, "Int >= Global Int" );
+	
 	VM_OPCODE_DEC( 0x0038, 2, "Global Int Equal to Int" );
 
 	VM_OPCODE_DEC( 0x0039, 2, "Local Int Equal to Int" );

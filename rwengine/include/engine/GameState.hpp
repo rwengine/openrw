@@ -70,6 +70,11 @@ struct GameState
 	 * @brief Stores a pointer to script global that stores the on-mission state.
 	 */
 	unsigned int *scriptOnMissionFlag;
+	
+	/** Objects created by mission scripts */
+	std::vector<GameObject*> missionObjects;
+	bool overrideNextStart;
+	glm::vec4 nextRestartLocation;
 
 	bool fadeOut;
 	float fadeStart;

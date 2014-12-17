@@ -8,15 +8,16 @@ CollisionInstance::~CollisionInstance()
 {
 	if( body ) {
 		GameObject* object = static_cast<GameObject*>(body->getUserPointer());
+		body->setUserPointer(nullptr);
 
 		// Remove body from existance.
-		object->engine->dynamicsWorld->removeCollisionObject(body);
-
-		delete body;
-
+		object->engine->dynamicsWorld->removeRigidBody(body);
+		
 		for(auto shape : shapes) {
 			delete shape;
 		}
+		
+		delete body;
 	}
 	if( vertArray ) {
 		delete vertArray;

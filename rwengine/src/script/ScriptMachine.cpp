@@ -58,13 +58,13 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				break;
 			case TGlobal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = _globals + v * (SCM_VARIABLE_SIZE/4);
+				parameters.back().globalPtr = _globals + v * sizeof(SCMByte) * 4;
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TLocal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = t.locals + v * (SCM_VARIABLE_SIZE/4);
+				parameters.back().globalPtr = t.locals + v * sizeof(SCMByte) * 4;
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
@@ -180,13 +180,21 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			}
 			else
 			{
-				t.conditionMask |= (!! t.conditionResult) << cI;
+				t.conditionMask = t.conditionMask || t.conditionResult;
 			}
 			
 			t.conditionResult = (t.conditionMask != 0);
 		}
 	}
-
+	
+	SCMOpcodeParameter p;
+	p.globalPtr = (t.locals + 16 * sizeof ( SCMByte ) * 4);
+	*p.globalInteger += msPassed;
+	p.globalPtr = (t.locals + 17 * sizeof ( SCMByte ) * 4);
+	*p.globalInteger += msPassed;
+	
+	
+	
 	if( t.wakeCounter == -1 ) {
 		t.wakeCounter = 0;
 	}

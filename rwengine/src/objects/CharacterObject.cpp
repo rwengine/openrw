@@ -246,10 +246,6 @@ void CharacterObject::setPosition(const glm::vec3& pos)
 {
 	btVector3 bpos(pos.x, pos.y, pos.z);
 	physCharacter->warp(bpos);
-	auto& wt = physObject->getWorldTransform();
-	wt.setOrigin(bpos);
-	physObject->setWorldTransform(wt);
-	GameObject::setPosition(pos);
 }
 
 glm::vec3 CharacterObject::getPosition() const

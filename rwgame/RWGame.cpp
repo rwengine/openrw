@@ -131,12 +131,12 @@ void RWGame::tick(float dt)
 			object->_updateLastTransform();
 			object->tick(dt);
 		}
-
+		
 		engine->destroyQueuedObjects();
 		engine->state.texts.clear();
 
 		engine->dynamicsWorld->stepSimulation(dt, 2, dt);
-
+		
 		if( engine->script ) {
 			try {
 				engine->script->execute(dt);

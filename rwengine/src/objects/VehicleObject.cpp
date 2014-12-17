@@ -133,7 +133,6 @@ glm::quat VehicleObject::getRotation() const
 }
 
 #include <glm/gtc/type_ptr.hpp>
-#include <boost/concept_check.hpp>
 
 void VehicleObject::tick(float dt)
 {
@@ -317,6 +316,12 @@ void VehicleObject::tickPhysics(float dt)
 			}
 		}
 	}
+}
+
+bool VehicleObject::isFlipped() const
+{
+	auto up = getRotation() * glm::vec3(0.f, 0.f, 1.f);
+	return up.z <= -0.1f;
 }
 
 void VehicleObject::setSteeringAngle(float a)

@@ -351,7 +351,7 @@ SCMFile *GameData::loadSCM(const std::string &path)
 	f.read(buff, size);
 	SCMFile* scm = new SCMFile;
 	scm->loadFile(buff, size);
-	delete buff;
+	delete[] buff;
 
 	return scm;
 }
