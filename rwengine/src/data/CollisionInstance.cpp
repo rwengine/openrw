@@ -10,7 +10,7 @@ CollisionInstance::~CollisionInstance()
 		GameObject* object = static_cast<GameObject*>(body->getUserPointer());
 
 		// Remove body from existance.
-		object->engine->dynamicsWorld->removeRigidBody(body);
+		object->engine->dynamicsWorld->removeCollisionObject(body);
 
 		delete body;
 
