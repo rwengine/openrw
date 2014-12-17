@@ -308,12 +308,37 @@ void RWGame::render(float alpha)
 		}
 		else if(t.osTextStyle == 12)
 		{
-			messageText.setPosition(10.f, 10.f);
+			messageText.setPosition(15.f, 15.f);
+			
+			// Insert line breaks into the message string.
+			auto m = messageText.getString();
+			const float boxWidth = 250.f;
+			int lastSpace = 0;
+			float lineLength = 0.f, wordLength = 0.f;
+			for( int c = 0; c < m.getSize(); ++c )
+			{
+				if(m[c] == ' ')
+				{
+					lastSpace = c;
+					lineLength += wordLength;
+					wordLength = 0.f;
+				}
+				
+				auto& metrics = font.getGlyph(m[c], fontSize, false);
+				wordLength += metrics.bounds.width;
+				
+				if( lineLength + wordLength > boxWidth )
+				{
+					m[lastSpace] = '\n';
+					lineLength = 0.f;
+				}
+			}
+			messageText.setString(m);
 			
 			auto bds = messageText.getGlobalBounds();
-			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height));
+			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height) + sf::Vector2f(10.f, 10.f));
 			bg.setFillColor(sf::Color::Black);
-			bg.setPosition(sf::Vector2f(bds.left, bds.top));
+			bg.setPosition(sf::Vector2f(bds.left, bds.top) - sf::Vector2f(5.f, 5.f));
 			window.draw(bg);
 		}
 		else
