@@ -802,17 +802,23 @@ VM_CONDOPCODE_DEF( 0x0248 )
 
 VM_OPCODE_DEF( 0x0255 )
 {
+	std::cout << "Restting player" << std::endl;
 	// Reset player state.
+	glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real + 1.f);
+	
 	auto controller = m->getWorld()->state.player;
 	
-	controller->getCharacter()->setCurrentVehicle(nullptr, 0);
-	
-	glm::vec3 position(p->at(0).real, p->at(1).real, p->at(2).real + 1.f);
 	controller->getCharacter()->setPosition(position + spawnMagic);
 	
 	controller->getCharacter()->setHeading( p->at(3).real );
 	
-	std::cout << glm::distance(controller->getCharacter()->getPosition(), position) << std::endl;
+	/// @todo find a nicer way to implement warping out of vehicles.
+	auto cv = controller->getCharacter()->getCurrentVehicle();
+	if ( cv != nullptr )
+	{
+		cv->setOccupant( controller->getCharacter()->getCurrentSeat(), nullptr );
+		controller->getCharacter()->setCurrentVehicle(nullptr, 0);
+	}
 }
 
 /// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)

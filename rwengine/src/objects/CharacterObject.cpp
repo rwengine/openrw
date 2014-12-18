@@ -57,6 +57,10 @@ CharacterObject::~CharacterObject()
 		destroyItem(p.first);
 	}
 	destroyActor();
+	if( currentVehicle )
+	{
+		currentVehicle->setOccupant(getCurrentSeat(), nullptr);
+	}
 }
 
 void CharacterObject::createActor(const glm::vec3& size)
@@ -244,8 +248,12 @@ void CharacterObject::updateCharacter(float dt)
 
 void CharacterObject::setPosition(const glm::vec3& pos)
 {
-	btVector3 bpos(pos.x, pos.y, pos.z);
-	physCharacter->warp(bpos);
+	if( physCharacter )
+	{
+		btVector3 bpos(pos.x, pos.y, pos.z);
+		physCharacter->warp(bpos);
+	}
+	position = pos;
 }
 
 glm::vec3 CharacterObject::getPosition() const
