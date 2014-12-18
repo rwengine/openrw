@@ -32,7 +32,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
 		physVehicle->setCoordinateSystem(0, 2, 1);
 		//physBody->setActivationState(DISABLE_DEACTIVATION);
-		engine->dynamicsWorld->addVehicle(physVehicle);
+		engine->dynamicsWorld->addAction(physVehicle);
 
 		float kC = 0.5f;
 		float kR = 0.6f;
@@ -84,9 +84,14 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 VehicleObject::~VehicleObject()
 {
+	engine->dynamicsWorld->removeAction(physVehicle);
+	
+	for(auto& p : dynamicParts)
+	{
+		setPartLocked(&p.second, true);
+	}
+	
 	delete collision;
-
-	engine->dynamicsWorld->removeVehicle(physVehicle);
 
 	delete physVehicle;
 	delete physRaycaster;
