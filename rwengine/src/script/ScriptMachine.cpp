@@ -1,10 +1,31 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
-#include <boost/iterator/iterator_concepts.hpp>
+#include <script/ScriptModule.hpp>
 
 #if SCM_DEBUG_INSTRUCTIONS
 #include <iostream>
 #endif
+
+SCMOpcodes::~SCMOpcodes()
+{
+	for(auto m : modules)
+	{
+		delete m;
+	}
+}
+
+bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
+{
+	for(ScriptModule* module : modules)
+	{
+		if( module->findOpcode(id, out) )
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
@@ -20,16 +41,19 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) == SCM_NEGATE_CONDITIONAL_MASK);
 		opcode = opcode & ~SCM_NEGATE_CONDITIONAL_MASK;
 
-		auto it = _ops->codes.find(opcode);
-		if( it == _ops->codes.end() ) throw IllegalInstruction(opcode, t.programCounter, t.name);
+		ScriptFunctionMeta* foundcode;
+		if( ! _ops->findOpcode(opcode, &foundcode) )
+		{
+			throw IllegalInstruction(opcode, t.programCounter, t.name);
+		}
+		auto& code = *foundcode;
+		
 		t.programCounter += sizeof(SCMOpcode);
-
-		SCMMicrocode& code = it->second;
 
 		SCMParams parameters;
 		
-		bool hasExtraParameters = code.parameters < 0;
-		auto requiredParams = std::abs(code.parameters);
+		bool hasExtraParameters = code.arguments < 0;
+		auto requiredParams = std::abs(code.arguments);
 
 		for( int p = 0; p < requiredParams || hasExtraParameters; ++p ) {
 			auto type_r = _file->read<SCMByte>(t.programCounter);
@@ -87,7 +111,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			};
 		}
 
-		if(! code.func)
+		if(! code.function)
 		{
 #if SCM_DEBUG_INSTRUCTIONS
 			std::cout << std::setw(7) << std::setfill(' ') << t.name <<
@@ -115,7 +139,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				}
 				std::cout << " ";
 			}
-			std::cout << code.name  << " unimplemented"<< std::endl;
+			std::cout << code.signature  << " unimplemented"<< std::endl;
 #endif
 		}
 		else
@@ -153,10 +177,11 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 					}
 					std::cout << " ";
 				}
-				std::cout << code.name << std::endl;
+				std::cout << code.signature << std::endl;
 			}
 #endif
-			code.func(this, &t, &parameters);
+			ScriptArguments sca(&parameters, &t, this);
+			code.function(sca);
 		}
 
 		if(isNegatedConditional) {
@@ -193,14 +218,11 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 	p.globalPtr = (t.locals + 17 * sizeof ( SCMByte ) * 4);
 	*p.globalInteger += msPassed;
 	
-	
-	
 	if( t.wakeCounter == -1 ) {
 		t.wakeCounter = 0;
 	}
 }
 
-#include <iostream>
 ScriptMachine::ScriptMachine(GameWorld *world, SCMFile *file, SCMOpcodes *ops)
 	: _file(file), _ops(ops), _world(world)
 {
@@ -211,7 +233,6 @@ ScriptMachine::ScriptMachine(GameWorld *world, SCMFile *file, SCMOpcodes *ops)
 	{
 		_globals[i] = 0;
 	}
-	std::cout << globals << " " << SCM_VARIABLE_SIZE << std::endl;
 }
 
 ScriptMachine::~ScriptMachine()

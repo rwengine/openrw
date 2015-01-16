@@ -7,8 +7,9 @@
 #include <data/WeaponData.hpp>
 #include <WorkContext.hpp>
 
-#include <script/Opcodes3.hpp>
 #include <script/ScriptMachine.hpp>
+#include <script/modules/VMModule.hpp>
+#include <script/modules/GameModule.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>
@@ -172,8 +173,12 @@ void GameWorld::runScript(const std::string &name)
 	SCMFile* f = gameData.loadSCM(name);
 	if( f ) {
 		if( script ) delete script;
+		
+		SCMOpcodes* opcodes = new SCMOpcodes;
+		opcodes->modules.push_back(new VMModule);
+		opcodes->modules.push_back(new GameModule);
 
-		script = new ScriptMachine(this, f, new Opcodes3);
+		script = new ScriptMachine(this, f, opcodes);
 	}
 	else {
 		logError("Failed to load SCM: " + name);
