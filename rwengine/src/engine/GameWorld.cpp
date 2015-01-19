@@ -10,6 +10,7 @@
 #include <script/ScriptMachine.hpp>
 #include <script/modules/VMModule.hpp>
 #include <script/modules/GameModule.hpp>
+#include <script/modules/ObjectModule.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>
@@ -177,6 +178,7 @@ void GameWorld::runScript(const std::string &name)
 		SCMOpcodes* opcodes = new SCMOpcodes;
 		opcodes->modules.push_back(new VMModule);
 		opcodes->modules.push_back(new GameModule);
+		opcodes->modules.push_back(new ObjectModule);
 
 		script = new ScriptMachine(this, f, opcodes);
 	}
