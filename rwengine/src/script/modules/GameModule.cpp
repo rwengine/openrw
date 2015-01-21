@@ -673,8 +673,6 @@ GameModule::GameModule()
 	bindFunction(0x00BF, game_get_time, 2, "Get Time of Day" );
 	bindFunction(0x00C0, game_set_time, 2, "Set Time of Day" );
 
-	bindUnimplemented( 0x00DA, game_store_character_vehicle, 2, "Store Player Car" );
-	
 	bindFunction(0x00E1, game_is_button_pressed, 2, "Is Button Pressed" );
 	
 	bindUnimplemented( 0x010D, game_set_wanted_level, 2, "Set Wanted Level" );
@@ -717,6 +715,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0182, game_unknown, 2, "Unknown Character Opcode" );
 	
 	bindUnimplemented( 0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle" );
+	bindUnimplemented( 0x0187, game_add_character_blip, 2, "Add Blip for Character" );
 
 	bindUnimplemented( 0x018A, game_add_location_blip, 4, "Add Blip for Coord" );
 	bindUnimplemented( 0x018B, game_change_blip_mode, 2, "Change Blip Display Mode" );
@@ -728,6 +727,7 @@ GameModule::GameModule()
 	bindFunction(0x01B4, game_enable_input, 2, "Set Player Input Enabled" );
 
 	bindFunction(0x01B6, game_set_weather, 1, "Set Weather Now" );
+	bindUnimplemented(0x01B7, game_release_weather, 0, "Release Weather Lock" );
 	
 	bindFunction(0x01BD, game_get_runtime, 1, "Get Game Timer" );
 	
@@ -802,6 +802,7 @@ GameModule::GameModule()
 	bindFunction(0x02E8, game_get_cutscene_time, 1, "Get Cutscene Time" );
 	bindFunction(0x02E9, game_cutscene_finished, 0, "Is Cutscene Over" );
 	bindFunction(0x02EA, game_clear_cutscene, 0, "Clear Cutscene" );
+	bindFunction(0x02EB, game_reset_camera, 0, "Reset Camera" );
 
 	bindUnimplemented( 0x02EC, game_create_hidden_package, 3, "Create Hidden Package" );
 
@@ -870,7 +871,9 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03C4, game_display_counter_message, 3, "Display Counter Message" );
 	bindUnimplemented( 0x03C5, game_create_vehicle_parked, 4, "Spawn Parked Vehicle" );
 	bindFunction(0x03C6, game_collision_loaded, 1, "Is Collision In Memory" );
-
+	
+	bindUnimplemented( 0x03C8, game_camera_infront_player, 0, "Put Camera Infront of player" );
+	
 	bindUnimplemented( 0x03CB, game_load_area, 3, "Load Area Near" );
 	
 	bindFunction(0x03CF, game_load_audio, 1, "Load Audio" );
@@ -883,6 +886,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03D6, game_clear_this_print, 1, "Clear This Big Print" );
 
 	bindUnimplemented( 0x03DA, game_set_garage_follow_player, 1, "Set Garage Camera Follows Player" );
+	
+	bindUnimplemented( 0x03DE, game_set_pedestrian_density, 1, "Set Pedestrian density" );
 
 	bindFunction(0x03E1, game_get_found_hidden_packages, 1, "Get Hidden Packages Found" );
 
@@ -913,7 +918,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0421, game_force_rain, 1, "Force Rain" );
 
 	bindUnimplemented( 0x0426, game_create_level_transition, 6, "Create Save Cars Between Levels cube" );
-
+	
 	bindFunction(0x042C, game_set_missions, 1, "Set Total Missions" );
 
 	bindFunction(0x043C, game_set_sound_fade, 1, "Set Sound Fade" );

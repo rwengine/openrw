@@ -176,6 +176,12 @@ void game_get_vehicle_position(const ScriptArguments& args)
 	}
 }
 
+void game_get_character_vehicle(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	*args[1].handle = controller->getCharacter()->getCurrentVehicle();
+}
+
 bool game_character_in_vehicle(const ScriptArguments& args)
 {
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
@@ -246,6 +252,41 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 	auto vehicle = controller->getCharacter()->getCurrentVehicle();
 	if( vehicle ) {
 		auto distance = center - controller->getCharacter()->getPosition();
+		distance /= size;
+		if( glm::length( distance ) < 1.f ) return true;
+	}
+	
+	return false;
+}
+
+bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	auto target = static_cast<CharacterController*>(*args[1].handle);
+	glm::vec2 center(target->getCharacter()->getPosition());
+	glm::vec2 size(args[2].real, args[3].real);
+	bool unkown = !!args[4].integer;
+	
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	if( vehicle ) {
+		auto distance = center - glm::vec2(controller->getCharacter()->getPosition());
+		distance /= size;
+		if( glm::length( distance ) < 1.f ) return true;
+	}
+	
+	return false;
+}
+
+bool game_character_near_point_on_foot_2D(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	glm::vec2 center(args[1].real, args[2].real);
+	glm::vec2 size(args[3].real, args[4].real);
+	bool unkown = !!args[5].integer;
+	
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	if( !vehicle ) {
+		auto distance = center - glm::vec2(controller->getCharacter()->getPosition());
 		distance /= size;
 		if( glm::length( distance ) < 1.f ) return true;
 	}
@@ -361,23 +402,80 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 	
 	if( controller && controller->getCharacter()->getCurrentVehicle() != nullptr )
 	{
-		glm::vec3 min(args[1].real, args[2].real, args[3].real);
-		glm::vec3 max(args[4].real, args[5].real, args[6].real);
+		glm::vec3 vec1(args[1].real, args[2].real, args[3].real);
+		glm::vec3 vec2(args[4].real, args[5].real, args[6].real);
+		glm::vec3 min = glm::min(vec1, vec2);
+		glm::vec3 max = glm::max(vec1, vec2);
 		
 		glm::vec3 pp = controller->getCharacter()->getCurrentVehicle()->getPosition();
 		
 		if( pp.x >= min.x && pp.y >= min.y && pp.z >= min.z &&
 			pp.x <= max.x && pp.y <= max.y && pp.z <= max.z )
 		{
-			return controller->getCharacter()->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.1f;
+			return controller->getCharacter()->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.75f;
 		}
 	}
 	
 	return false;
 }
 
+bool game_is_character_stopped(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	
+	if( controller && controller->getCharacter()->getCurrentVehicle() != nullptr )
+	{
+		return controller->getCharacter()->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.75f;
+	}
+	
+	return true;
+}
+
+
 bool game_character_in_area_9(const ScriptArguments& args)
 {
+	return false;
+}
+
+bool game_objects_in_volume(const ScriptArguments& args)
+{
+	glm::vec3 vec1(args[0].real, args[1].real, args[2].real);
+	glm::vec3 vec2(args[3].real, args[4].real, args[5].real);
+	glm::vec3 min = glm::min(vec1, vec2);
+	glm::vec3 max = glm::max(vec1, vec2);
+	
+	bool solids = args[6].integer;
+	bool cars = args[7].integer;
+	bool actors = args[8].integer;
+	bool objects = args[9].integer;
+	bool particles = args[10].integer;
+	
+	for(GameObject* object : args.getVM()->getWorld()->objects)
+	{
+		switch( object->type() )
+		{
+			case GameObject::Instance:
+				if( !solids ) continue;
+				break;
+			case GameObject::Character:
+				if( !actors ) continue;
+				break;
+			case GameObject::Vehicle:
+				if( !cars ) continue;
+				break;
+			default:
+				continue;
+		}
+		
+		// Maybe consider object bounds?
+		auto pp = object->getPosition();
+		
+		if( pp.x >= min.x && pp.y >= min.y && pp.z >= min.z &&
+			pp.x <= max.x && pp.y <= max.y && pp.z <= max.z )
+		{
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -398,12 +496,62 @@ void game_get_speed(const ScriptArguments& args)
 	}
 }
 
+void game_enter_as_driver(const ScriptArguments& args)
+{
+	auto controller = (CharacterController*)(*args[0].handle);
+	auto vehicle = (VehicleObject*)(*args[1].handle);
+	// Cancel whatever we're currently trying to do.
+	controller->skipActivity();
+	controller->setNextActivity(new Activities::EnterVehicle(vehicle,0));
+}
+
 void game_enter_as_passenger(const ScriptArguments& args)
 {
 	auto controller = (CharacterController*)(*args[0].handle);
 	auto vehicle = (VehicleObject*)(*args[1].handle);
+	
+	// Cancel whatever we're currently trying to do.
+	controller->skipActivity();
 	/// @todo find next lowest free seat.
 	controller->setNextActivity(new Activities::EnterVehicle(vehicle,1));
+}
+
+void game_character_exit_vehicle(const ScriptArguments& args)
+{
+	auto controller = (CharacterController*)(*args[0].handle);
+	auto vehicle = (VehicleObject*)(*args[1].handle);
+	auto cvehcile = controller->getCharacter()->getCurrentVehicle();
+	
+	if( cvehcile && cvehcile == vehicle )
+	{
+		controller->setNextActivity(new Activities::ExitVehicle());
+	}
+}
+
+void game_navigate_on_foot(const ScriptArguments& args)
+{
+	auto controller = (CharacterController*)(*args[0].handle);
+	glm::vec3 target(args[1].real, args[2].real, 0.f);
+	target = args.getVM()->getWorld()->getGroundAtPosition(target);
+	
+	controller->skipActivity();
+	
+	if( controller->getCharacter()->getCurrentVehicle() )
+	{
+		// Since we just cleared the Activities, this will become current immediatley.
+		controller->setNextActivity(new Activities::ExitVehicle);
+	}
+	
+	controller->setNextActivity(new Activities::GoTo(target));
+}
+
+void game_character_run_to(const ScriptArguments& args)
+{
+	auto controller = (CharacterController*)(*args[0].handle);
+	glm::vec3 target(args[1].real, args[2].real, 0.f);
+	target = args.getVM()->getWorld()->getGroundAtPosition(target);
+	
+	controller->setNextActivity(new Activities::GoTo(target));
 }
 
 bool game_vehicle_flipped(const ScriptArguments& args)
@@ -479,6 +627,14 @@ void game_create_object_world(const ScriptArguments& args)
 	
 	*args[4].handle = inst;
 }
+
+void game_destroy_object(const ScriptArguments& args)
+{
+	auto object = static_cast<GameObject*>(*args[0].handle);
+	
+	args.getVM()->getWorld()->destroyObjectQueued(object);
+}
+
 bool game_is_boat(const ScriptArguments& args)
 {
 	/*auto vehicle = (VehicleObject*)(*args[0].handle);
@@ -549,6 +705,18 @@ void game_change_nearest_model(const ScriptArguments& args)
 	}
 }
 
+bool game_rotate_object(const ScriptArguments& args)
+{
+	auto object = static_cast<GameObject*>(*args[0].handle);
+	float start = args[1].real;
+	float finish = args[2].real;
+	
+	// @todo INTERPOLATE instead of just setting the heading.
+	object->setHeading(finish);
+	
+	return true;
+}
+
 void game_get_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(*args[0].handle);
@@ -574,11 +742,16 @@ ObjectModule::ObjectModule()
 	bindFunction(0x009A, game_create_character, 6, "Create Character" );
 	bindFunction(0x009B, game_destroy_character, 1, "Destroy Character" );
 	
+	bindUnimplemented( 0x009F, game_character_make_idle, 1, "Set Character to Idle" );
+	
+	bindFunction(0x00A1, game_set_character_position, 4, "Set Character Position" );
+	
 	bindFunction(0x00A5, game_create_vehicle, 5, "Create Vehicle" );
 	bindFunction(0x00A6, game_destroy_vehicle, 1, "Destroy Vehicle" );
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
 	
+	bindFunction(0x00DA, game_get_character_vehicle, 2, "Get Player Vehicle" );
 	bindFunction(0x00DB, game_character_in_vehicle, 2, "Is Character in Vehicle" );
 	bindFunction(0x00DC, game_character_in_vehicle, 2, "Is Player in Vehicle" );
 	
@@ -590,12 +763,20 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x00E4, game_locate_character_on_foot_2d, 6, "Locate Player on foot 2D" );
 	
+	bindFunction(0x00EB, game_character_near_character_in_vehicle_2D, 5, "Is player near character in vehicle" );
+	
+	bindFunction(0x00ED, game_character_near_point_on_foot_2D, 6, "Is Character near point on foot" );
+	
 	bindUnimplemented( 0x00F5, game_locate_character_in_sphere, 8, "Locate Player In Sphere" );
 	
 	bindFunction(0x0100, game_character_near_point_in_vehicle, 8, "Is Character near point in car" );
 	
+	bindFunction(0x0108, game_destroy_object, 1, "Destroy Object" );
+	
 	bindFunction(0x0118, game_character_dead, 1, "Is Character Dead" );
 	bindFunction(0x0119, game_vehicle_dead, 1, "Is Vehicle Dead" );
+	
+	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
 	bindFunction(0x0121, game_character_in_zone, 2, "Is Player In Zone" );
 	
@@ -609,6 +790,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0175, game_set_vehicle_heading, 2, "Set Vehicle heading" );
 	
 	bindFunction(0x0177, game_set_object_heading, 2, "Set Object heading" );
+	
+	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	
 	bindFunction(0x019C, game_character_in_area_on_foot, 8, "Is Player in Area on Foot" );
 	
@@ -625,7 +808,11 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x01C7, game_make_object_important, 1, "Don't remove object" );
 	
+	bindFunction(0x01D5, game_enter_as_driver, 2, "Character Enter Vehicle as Driver" );
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
+	bindFunction(0x01D3, game_character_exit_vehicle, 2, "Character Exit Vehicle" );
+	
+	bindUnimplemented( 0x01DF, game_character_follow_character, 2, "Make Character Follow Character" );
 	
 	bindFunction(0x01F3, game_vehicle_in_air, 1, "Is Vehicle In Air" );
 	bindFunction(0x01F4, game_vehicle_flipped, 1, "Is Car Flipped" );
@@ -634,10 +821,16 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x020A, game_lock_vehicle_doors, 2, "Lock Car Doors" );
 	
+	bindFunction(0x0211, game_navigate_on_foot, 3, "Character go to on foot" );
+		
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
+	
+	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );
 	
 	bindFunction(0x029B, game_create_object_world, 5, "Create Object no offset" );
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
+	
+	bindFunction(0x029F, game_is_character_stopped, 1, "Is Player Stopped" );
 	
 	bindFunction(0x02B3, game_character_in_area_9, 9, "Is Player In Area" );
 	
@@ -647,7 +840,9 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x02FB, game_create_crane, 10, "Create Crusher Crane" );
 	
-	bindUnimplemented( 0x034D, game_rotate_object, 4, "Rotate Object" );
+	bindFunction(0x0339, game_objects_in_volume, 11, "Are objects in volume" );
+	
+	bindFunction( 0x034D, game_rotate_object, 4, "Rotate Object" );
 	bindUnimplemented( 0x034E, game_slide_object, 8, "Slide Object" );
 	
 	bindUnimplemented( 0x035D, game_set_object_targetable, 1, "Set Object Targetable" );
@@ -661,6 +856,8 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x03BA, game_clear_area_vehicles, 6, "Clear Cars From Area" );
 	
 	bindFunction(0x03F3, game_get_vehicle_colours, 3, "Get Vehicle Colours" );
+	
+	bindUnimplemented( 0x042B, game_clear_volume_pedestrians, 6, "Clear volume pedestrians" );
 	
 	bindFunction(0x0442, game_character_in_vehicle, 2, "Is Player in This Vehicle" );
 	bindFunction(0x0448, game_character_in_vehicle, 2, "Is Character in This Vehicle" );

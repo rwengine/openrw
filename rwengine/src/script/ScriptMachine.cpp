@@ -46,7 +46,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		{
 			throw IllegalInstruction(opcode, t.programCounter, t.name);
 		}
-		auto& code = *foundcode;
+		ScriptFunctionMeta& code = *foundcode;
 		
 		t.programCounter += sizeof(SCMOpcode);
 
@@ -150,7 +150,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			{
 				threadfilter = getenv("SCM_DEBUG_THREAD");
 			}
-			if( threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos )
+			
+			bool debug_op = threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos;
+			if( debug_op )
 			{
 				std::cout << std::setw(7) << std::setfill(' ') << t.name <<
 				" " << std::dec << std::setw(8) << std::setfill(' ') << t.programCounter <<
@@ -182,6 +184,15 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 #endif
 			ScriptArguments sca(&parameters, &t, this);
 			code.function(sca);
+#if SCM_DEBUG_INSTRUCTIONS
+			if( debug_op )
+			{
+				if( code.conditional )
+				{
+					std::cout << " => " << t.conditionResult << std::endl;
+				}
+			}
+#endif
 		}
 
 		if(isNegatedConditional) {

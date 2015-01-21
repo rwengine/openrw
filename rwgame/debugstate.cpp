@@ -52,6 +52,37 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		}, entryHeight));
 	}
 #endif
+	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
+		glm::vec3 ground = game->getWorld()->getGroundAtPosition(glm::vec3(875.0, -309.0, 100.0));
+		if( game->getWorld()->state.player )
+		{
+			auto pl = game->getWorld()->state.player;
+			if( pl->getCharacter()->getCurrentVehicle() )
+			{
+				pl->getCharacter()->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			}
+			else
+			{
+				pl->getCharacter()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			}
+		}
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Jump to Luigi's", [=] {
+		glm::vec3 ground = game->getWorld()->getGroundAtPosition(glm::vec3(902.75, -425.56, 100.0));
+		if( game->getWorld()->state.player )
+		{
+			auto pl = game->getWorld()->state.player;
+			if( pl->getCharacter()->getCurrentVehicle() )
+			{
+				pl->getCharacter()->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			}
+			else
+			{
+				pl->getCharacter()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			}
+		}
+	}, entryHeight));
+
 	this->enterMenu(m);
 
 	_debugCam.position = vp;

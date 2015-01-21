@@ -492,7 +492,8 @@ void GameData::loadWeaponDAT(const std::string &name)
 
 bool GameData::loadAudio(MADStream& music, const std::string &name)
 {
-	return music.open(datpath + "/audio/" + name);
+	auto fname = findPathRealCase(datpath + "/audio/", name);
+	return music.open(fname);
 }
 
 bool GameData::loadAudio(sf::SoundBuffer& sound, const std::string& name)

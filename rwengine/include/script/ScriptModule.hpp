@@ -20,6 +20,7 @@ public:
 	
 	void bind(ScriptFunctionID id,
 	          ScriptFunction func,
+	          bool conditional,
 	          int args,
 	          const std::string& name,
 	          const std::string& desc
@@ -35,10 +36,13 @@ private:
 template<class Tret> ScriptFunction conditional_facade(Tret(*f)(const ScriptArguments&)) { return f; }
 template<> ScriptFunction conditional_facade<bool>(bool(*f)(const ScriptArguments&));
 
+template<class Tret> bool is_conditional(Tret(*f)(const ScriptArguments&)) { return false; }
+template<> bool is_conditional<bool>(bool(*f)(const ScriptArguments&));
+
 // Macro to automatically use function name.
 #define bindFunction(id, func, argc, desc) \
-	bind(id, conditional_facade(func), argc, #func, desc)
+	bind(id, conditional_facade(func), is_conditional(func), argc, #func, desc)
 #define bindUnimplemented(id, func, argc, desc) \
-	bind(id, 0, argc, #func, desc)
+	bind(id, 0, false, argc, #func, desc)
 
 #endif

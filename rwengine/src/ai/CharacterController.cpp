@@ -171,9 +171,12 @@ void CharacterController::setRunning(bool run)
 bool Activities::GoTo::update(CharacterObject *character, CharacterController *controller)
 {
 	/* TODO: Use the ai nodes to navigate to the position */
-	glm::vec3 targetDirection = target - character->getPosition();
+	auto cpos = character->getPosition();
+	glm::vec3 targetDirection = target - cpos;
 
-	if( glm::length(targetDirection) < 0.01f ) {
+	// Ignore vertical axis for the sake of simplicity.
+	if( glm::length(glm::vec2(targetDirection)) < 0.1f ) {
+		character->setPosition(glm::vec3(glm::vec2(target), cpos.z));
 		return true;
 	}
 
@@ -297,19 +300,20 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 	auto vehicle = character->getCurrentVehicle();
 	auto anm_exit = character->animations.car_getout_lhs;
+	auto seat = character->getCurrentSeat();
 
 	if( vehicle->vehicle->type == VehicleData::BOAT ) {
 		auto ppos = character->getPosition();
-		character->enterVehicle(nullptr, 0);
+		character->enterVehicle(nullptr, seat);
 		character->setPosition(ppos);
 		return true;
 	}
 
 	if( character->animator->getAnimation() == anm_exit ) {
 		if( character->animator->isCompleted() ) {
-			auto exitpos = vehicle->getSeatEntryPosition(character->getCurrentSeat());
+			auto exitpos = vehicle->getSeatEntryPosition(seat);
 
-			character->enterVehicle(nullptr, 0);
+			character->enterVehicle(nullptr, seat);
 			character->setPosition(exitpos);
 			
 			return true;

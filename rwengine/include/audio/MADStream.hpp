@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <SFML/Audio.hpp>
 #include <stdint.h>
+#include <iostream>
 
 static inline
 signed int scale(mad_fixed_t sample)
@@ -136,12 +137,14 @@ public:
 		int fd = ::open(loc.c_str(), O_RDONLY);
 
 		if( fstat(fd, &mStat) == -1 || mStat.st_size == 0) {
-			sf::err() << "Fstat failed\n";
+			std::cerr << "Fstat failed" << std::endl;
+			return false;
 		}
 
 		void* m = mmap(0, mStat.st_size, PROT_READ, MAP_SHARED, fd, 0);
 		if( m == MAP_FAILED ) {
-			sf::err() << "mmap failed\n";
+			std::cerr << "mmap failed" << std::endl;
+			return false;
 		}
 		mFdm = (unsigned char*)m;
 		mReadProgress = mStat.st_size;

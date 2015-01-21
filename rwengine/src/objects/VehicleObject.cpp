@@ -660,8 +660,8 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 				hingeAxis, hingeAxis);
 	hinge->setLimit(hingeMin, hingeMax);
 
-	engine->dynamicsWorld->addRigidBody(subObject);
-	engine->dynamicsWorld->addConstraint(hinge, true);
+	//engine->dynamicsWorld->addRigidBody(subObject);
+	//engine->dynamicsWorld->addConstraint(hinge, true);
 	
 	part->body = subObject;
 	part->constraint = hinge;
