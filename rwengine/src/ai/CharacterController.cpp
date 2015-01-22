@@ -24,7 +24,8 @@ void CharacterController::setActivity(CharacterController::Activity* activity)
 }
 
 CharacterController::CharacterController(CharacterObject* character)
-: character(character), _currentActivity(nullptr), _nextActivity(nullptr), running(false)
+: character(character), _currentActivity(nullptr), _nextActivity(nullptr), running(false),
+currentGoal(None), leader(nullptr)
 {
 	character->controller = this;
 }
@@ -127,6 +128,9 @@ void CharacterController::update(float dt)
 			}
 		}
 	}
+	
+	// Reset raw movement between activity updates.
+	setRawMovement(glm::vec3());
 
 	if( updateActivity() ) {
 		if( _currentActivity ) {

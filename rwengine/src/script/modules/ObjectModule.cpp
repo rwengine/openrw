@@ -572,6 +572,15 @@ void game_character_exit_vehicle(const ScriptArguments& args)
 	}
 }
 
+void game_character_follow_character(const ScriptArguments& args)
+{
+	auto controller = (CharacterController*)(*args[0].handle);
+	auto leader = (CharacterController*)(*args[1].handle);
+	
+	controller->setGoal(CharacterController::FollowLeader);
+	controller->setTargetCharacter(leader->getCharacter());
+}
+
 void game_navigate_on_foot(const ScriptArguments& args)
 {
 	auto controller = (CharacterController*)(*args[0].handle);
@@ -867,7 +876,7 @@ ObjectModule::ObjectModule()
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
 	bindFunction(0x01D3, game_character_exit_vehicle, 2, "Character Exit Vehicle" );
 	
-	bindUnimplemented( 0x01DF, game_character_follow_character, 2, "Make Character Follow Character" );
+	bindFunction(0x01DF, game_character_follow_character, 2, "Make Character Follow Character");
 	
 	bindFunction(0x01F3, game_vehicle_in_air, 1, "Is Vehicle In Air" );
 	bindFunction(0x01F4, game_vehicle_flipped, 1, "Is Car Flipped" );

@@ -27,6 +27,21 @@ public:
 
 		virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
 	};
+	
+	/**
+	 * Available AI goals.
+	 */
+	enum Goal
+	{
+		/**
+		 * No goal, will idle or execute external Activities.
+		 */
+		None,
+		/**
+		 * Keep close to leader character
+		 */
+		FollowLeader
+	};
 
 protected:
 	
@@ -44,6 +59,10 @@ protected:
 	glm::vec3 rawMovement;
 
 	bool running;
+	
+	// Goal related variables
+	Goal currentGoal;
+	CharacterObject* leader;
 
 public:
 	
@@ -90,6 +109,12 @@ public:
 	void setRawMovement(const glm::vec3& movement);
 
 	void setRunning(bool run);
+	
+	void setGoal(Goal goal) { currentGoal = goal; }
+	Goal getGoal() const { return currentGoal; }
+	
+	void setTargetCharacter(CharacterObject* c) { leader = c; }
+	CharacterObject* getTargetCharacter() const { return leader; }
 };
 
 #define DECL_ACTIVITY( activity_name ) \

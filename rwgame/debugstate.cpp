@@ -78,6 +78,14 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	m->addEntry(Menu::lambda("Jump to Hospital", [=] {
 		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(1123.77, -569.15, 100.0));
 	}, entryHeight));
+	m->addEntry(Menu::lambda("Add Follower", [=] {
+		auto spawnPos = game->getWorld()->state.player->getCharacter()->getPosition();
+		spawnPos += game->getWorld()->state.player->getCharacter()->getRotation() * glm::vec3(-1.f, 0.f, 0.f);
+		auto follower = game->getWorld()->createPedestrian(12, spawnPos);
+		jumpCharacter(game, follower->controller, spawnPos);
+		follower->controller->setGoal(CharacterController::FollowLeader);
+		follower->controller->setTargetCharacter(game->getWorld()->state.player->getCharacter());
+	}, entryHeight));
 
 	this->enterMenu(m);
 
