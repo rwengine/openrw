@@ -1,11 +1,8 @@
 #pragma once
 
 #include <LinearMath/btIDebugDraw.h>
-
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <vector>
-#include <glm/glm.hpp>
+#include <render/GameRenderer.hpp>
+#include "Model.hpp"
 
 class DebugDraw : public btIDebugDraw
 {
@@ -21,21 +18,21 @@ public:
 	void setDebugMode(int debugMode);
 	int getDebugMode() const;
 
-    void drawAllLines();
+    void flush(GameRenderer* renderer);
 
-	void setShaderProgram(GLuint shaderProgram) {
+	void setShaderProgram(Renderer::ShaderProgram* shaderProgram) {
 		this->shaderProgram = shaderProgram;
 	}
 
 protected:
 	int debugMode;
 
-    std::vector<glm::vec3> lines;
-    size_t maxlines;
+	std::vector<Model::GeometryVertex> lines;
+	size_t maxlines;
+	GeometryBuffer* lineBuff;
+	DrawBuffer* dbuff;
 
-    btVector3 color;
+	Renderer::ShaderProgram* shaderProgram;
 
-	GLuint shaderProgram;
-
-	GLuint vbo, vao, texture;
+	GLuint texture;
 };

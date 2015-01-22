@@ -212,7 +212,6 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 
 void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
 {
-
 	useDrawBuffer(draw);
 	useTexture(p.texture);
 

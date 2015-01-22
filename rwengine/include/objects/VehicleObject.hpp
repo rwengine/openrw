@@ -40,6 +40,8 @@ public:
 		btHingeConstraint* constraint;
 		bool holdAngle;
 		float targetAngle;
+		float openAngle;
+		float closedAngle;
 	};
 	
 	std::map<std::string, Part> dynamicParts;

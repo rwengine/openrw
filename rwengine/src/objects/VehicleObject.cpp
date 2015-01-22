@@ -8,7 +8,7 @@
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
 
-#define PART_CLOSE_VELOCITY 0.5f
+#define PART_CLOSE_VELOCITY 0.25f
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
@@ -297,25 +297,30 @@ void VehicleObject::tickPhysics(float dt)
 			if(it.second.body == nullptr) continue;
 			auto inv = glm::inverse(getRotation());
 			auto rot = it.second.body->getWorldTransform().getRotation();
+			auto pos = it.second.body->getWorldTransform().getOrigin();
 			auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
+			//auto p2 = inv * (glm::vec3(pos.x(), pos.y(), pos.z()) - getPosition());
 			
 			auto& prev = skeleton->getData(it.second.dummy->getIndex()).a;
 			auto next = prev;
 			next.rotation = r2;
+			//next.translation = p2;
 			skeleton->setData(it.second.dummy->getIndex(), { next, prev, true } );
 			
 			if( it.second.holdAngle )
 			{
 				it.second.constraint->setMotorTarget(it.second.targetAngle, 0.1f);
 			}
+			it.second.constraint->enableMotor( it.second.holdAngle );
 			
 			// If the part is moving quite fast and near the limit, lock it.
 			/// @TODO not all parts rotate in the z axis.
 			if(it.second.body->getAngularVelocity().getZ() >= PART_CLOSE_VELOCITY)
 			{
-				auto d = it.second.constraint->getHingeAngle() - it.second.constraint->getLowerLimit();
-				if( std::abs(d) < 0.01f )
+				auto d = it.second.constraint->getHingeAngle() - it.second.closedAngle;
+				if( std::abs(d) < 0.05f )
 				{
+					it.second.holdAngle = false;
 					setPartLocked(&(it.second), true);
 				}
 			}
@@ -602,19 +607,28 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 	
 	auto& geom = model->model->geometries[okframe->getGeometries()[0]];
 	auto gbounds = geom->geometryBounds;
-
+	
 	if( fn.find("door") != fn.npos ) {
 		hingeAxis = {0.f, 0.f, 1.f};
-		hingePosition = {0.f, 0.2f, 0.f};
-		boxSize = {0.1f, 0.4f, gbounds.radius/2.f};
-		boxOffset = {0.f,-0.2f, gbounds.center.z/2.f};
-		if( sign > 0.f ) {
-			hingeMin = -glm::quarter_pi<float>() * 1.5f;
-			hingeMax = 0.f;
-		}
-		else {
+		//hingePosition = {0.f, 0.2f, 0.f};
+		boxSize = {0.15f, 0.5f, 0.6f};
+		//boxOffset = {0.f,-0.2f, gbounds.center.z/2.f};
+		auto tf = gbounds.center;
+		boxOffset = btVector3(tf.x, tf.y, tf.z);
+		hingePosition = -boxOffset;
+		
+		if( sign < 0.f ) {
 			hingeMax = glm::quarter_pi<float>() * 1.5f;
 			hingeMin = 0.f;
+			part->openAngle = hingeMax;
+			part->closedAngle = hingeMin;
+		}
+		else
+		{
+			hingeMin = glm::quarter_pi<float>() * -1.5f;
+			hingeMax = 0.f;
+			part->openAngle = hingeMin;
+			part->closedAngle = hingeMax;
 		}
 	}
 	else if( fn.find("bonnet") != fn.npos ) {
@@ -637,14 +651,11 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 	auto o = glm::toQuat(part->dummy->getDefaultRotation());
 	tr.setOrigin(btVector3(p.x, p.y, p.z));
 	tr.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
-
 	dms->setWorldTransform(local * tr);
 
-	btCompoundShape* cs = new btCompoundShape;
-	btCollisionShape* bshape = new btBoxShape( boxSize );
+	btCollisionShape* cs = new btBoxShape( boxSize );
 	btTransform t; t.setIdentity();
 	t.setOrigin(boxOffset);
-	cs->addChildShape(t, bshape);
 
 	btVector3 inertia;
 	cs->calculateLocalInertia(10.f, inertia);
@@ -659,9 +670,10 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 				tr.getOrigin(), hingePosition,
 				hingeAxis, hingeAxis);
 	hinge->setLimit(hingeMin, hingeMax);
-
-	//engine->dynamicsWorld->addRigidBody(subObject);
-	//engine->dynamicsWorld->addConstraint(hinge, true);
+	hinge->setBreakingImpulseThreshold(250.f);
+	
+	engine->dynamicsWorld->addRigidBody(subObject);
+	engine->dynamicsWorld->addConstraint(hinge, true);
 	
 	part->body = subObject;
 	part->constraint = hinge;

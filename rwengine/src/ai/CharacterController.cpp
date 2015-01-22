@@ -1,8 +1,11 @@
 #include <ai/CharacterController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+
+#include <render/Model.hpp>
 #include <engine/Animator.hpp>
 #include <items/WeaponItem.hpp>
+#include <boost/concept_check.hpp>
 
 bool CharacterController::updateActivity()
 {
@@ -69,6 +72,22 @@ void CharacterController::update(float dt)
 		if( _currentActivity == nullptr ) {
 			/// @todo play _low variant if car has low flag.
 			character->playAnimation(character->animations.car_sit, true);
+			
+			// If character is idle in vehicle, close door.
+			if( glm::length( d ) <= 0.1f )
+			{
+				auto entryDoor = character->getCurrentVehicle()->getSeatEntryDoor(character->getCurrentSeat());
+				
+				if( entryDoor && entryDoor->constraint )
+				{
+					character->getCurrentVehicle()->setPartTarget(entryDoor, true, entryDoor->closedAngle);
+				}
+			}
+			else
+			{
+				auto entryDoor = character->getCurrentVehicle()->getSeatEntryDoor(character->getCurrentSeat());
+				entryDoor->holdAngle = false;
+			}
 		}
 	}
 	else {
@@ -242,7 +261,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			}
 			else if( entryDoor && character->animator->getAnimationTime() >= 0.5f )
 			{
-				vehicle->setPartTarget(entryDoor, true, 1.f);
+				vehicle->setPartTarget(entryDoor, true, entryDoor->openAngle);
 			}
 			else {
 				//character->setPosition(vehicle->getSeatEntryPosition(seat));
@@ -251,11 +270,6 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		}
 		else if( character->animator->getAnimation() == anm_enter ) {
 			if( character->animator->isCompleted() ) {
-				if( entryDoor )
-				{
-					vehicle->setPartTarget(entryDoor, true, 0.f);
-				}
-			
 				// VehicleGetIn is over, finish activity
 				return true;
 			}
@@ -275,7 +289,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			character->rotation = vehicle->getRotation();
 			
 			// Determine if the door open animation should be skipped.
-			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && entryDoor->constraint->getHingeAngle() >= 0.6f ) )
+			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f ) )
 			{
 				character->playAnimation(anm_enter, false);
 				character->enterVehicle(vehicle, seat);
@@ -329,7 +343,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		auto door = vehicle->getSeatEntryDoor(character->getCurrentSeat());
 		if( door )
 		{
-			vehicle->setPartTarget(door, true, 1.f);
+			vehicle->setPartTarget(door, true, door->openAngle);
 		}
 	}
 

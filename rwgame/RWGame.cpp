@@ -5,10 +5,15 @@
 #include <engine/GameObject.hpp>
 #include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
+#include <render/DebugDraw.hpp>
 #include <script/ScriptMachine.hpp>
 
 #include <data/CutsceneData.hpp>
 #include <ai/PlayerController.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
+
+DebugDraw* debug;
 
 RWGame::RWGame(const std::string& gamepath)
 	: engine(nullptr), inFocus(true),
@@ -38,6 +43,9 @@ RWGame::RWGame(const std::string& gamepath)
 
 	/// @TODO expand this here.
 	engine->load();
+	debug = new DebugDraw;
+	debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits);
+	engine->dynamicsWorld->setDebugDrawer(debug);
 
 	engine->gameData.loadDynamicObjects(gamepath + "/data/object.dat");
 
@@ -212,7 +220,25 @@ void RWGame::render(float alpha)
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
 	engine->renderer.renderWorld(viewCam, alpha);
-
+	
+	debug->setShaderProgram(engine->renderer.worldProg);
+	if( engine->state.player )
+	{
+		if( engine->state.player->getCharacter()->getCurrentVehicle() )
+		{
+			auto v = engine->state.player->getCharacter()->getCurrentVehicle();
+			for( auto& p : v->dynamicParts )
+			{
+				if( p.second.body )
+				{
+					engine->dynamicsWorld->debugDrawObject(p.second.body->getWorldTransform(), p.second.body->getCollisionShape(), btVector3(1.f, 0.f, 0.f));
+					engine->dynamicsWorld->debugDrawConstraint(p.second.constraint);
+				}
+			}
+		}
+	}
+	debug->flush(&engine->renderer);
+	
 	window.resetGLStates();
 
 	std::stringstream ss;
