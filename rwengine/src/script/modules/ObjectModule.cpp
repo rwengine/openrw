@@ -259,6 +259,21 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 	return false;
 }
 
+bool game_character_near_character_2D(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	auto target = static_cast<CharacterController*>(*args[1].handle);
+	glm::vec2 center(target->getCharacter()->getPosition());
+	glm::vec2 size(args[2].real, args[3].real);
+	bool unkown = !!args[4].integer;
+
+	auto distance = center - glm::vec2(controller->getCharacter()->getPosition());
+	distance /= size;
+	return glm::length( distance ) < 1.f;
+	
+	return false;
+}
+
 bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
 {
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
@@ -418,6 +433,35 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 	
 	return false;
 }
+
+
+bool game_character_stoped_in_volume(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	
+	glm::vec3 vec1(args[1].real, args[2].real, args[3].real);
+	glm::vec3 vec2(args[4].real, args[5].real, args[6].real);
+	glm::vec3 min = glm::min(vec1, vec2);
+	glm::vec3 max = glm::max(vec1, vec2);
+	
+	glm::vec3 pp = controller->getCharacter()->getPosition();
+	
+	if( pp.x >= min.x && pp.y >= min.y && pp.z >= min.z &&
+		pp.x <= max.x && pp.y <= max.y && pp.z <= max.z )
+	{
+		if( controller->getCharacter()->getCurrentVehicle() != nullptr )
+		{
+			return controller->getCharacter()->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.75f;
+		}
+		else
+		{
+			return controller->getCurrentActivity() == nullptr;
+		}
+	}
+	
+	return false;
+}
+
 
 bool game_is_character_stopped(const ScriptArguments& args)
 {
@@ -645,6 +689,11 @@ bool game_is_boat(const ScriptArguments& args)
 	return false;
 }
 
+bool game_character_in_range(const ScriptArguments& args)
+{
+	return true;
+}
+
 void game_change_nearest_model(const ScriptArguments& args)
 {
 	glm::vec3 position(args[0].real, args[1].real, args[2].real);
@@ -751,17 +800,21 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
 	
+	bindFunction(0x00D9, game_get_character_vehicle, 2, "Get Character Vehicle" );
 	bindFunction(0x00DA, game_get_character_vehicle, 2, "Get Player Vehicle" );
 	bindFunction(0x00DB, game_character_in_vehicle, 2, "Is Character in Vehicle" );
 	bindFunction(0x00DC, game_character_in_vehicle, 2, "Is Player in Vehicle" );
 	
 	bindFunction(0x00DE, game_character_in_model, 2, "Is Player In Model" );
+	bindFunction(0x00DF, game_character_in_any_vehicle, 1, "Is Character Driving" );
 	
 	bindFunction(0x00E0, game_character_in_any_vehicle, 1, "Is Player In Any Vehicle" );
 	
 	bindFunction(0x00E5, game_player_in_area_2d_in_vehicle, 6, "Is Player in 2D Area in Vehicle" );
 	
 	bindUnimplemented( 0x00E4, game_locate_character_on_foot_2d, 6, "Locate Player on foot 2D" );
+	
+	bindFunction(0x00E9, game_character_near_character_2D, 5, "Locate Character near Character 2D");
 	
 	bindFunction(0x00EB, game_character_near_character_in_vehicle_2D, 5, "Is player near character in vehicle" );
 	
@@ -794,8 +847,10 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	
 	bindFunction(0x019C, game_character_in_area_on_foot, 8, "Is Player in Area on Foot" );
+	bindFunction(0x019E, game_character_stoped_in_volume, 8, "Is Player stopped in volume" );
 	
 	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle, 8, "Is Player Stopped in cube in vehicle" );
+	bindFunction(0x01A8, game_character_stoped_in_volume, 8, "Is Char Stopped in volume" );
 	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle, 8, "Is Char Stopped in cube in vehicle" );
 	
 	bindUnimplemented( 0x01BB, game_object_coordinates, 4, "Get Object Coordinates" );
@@ -839,6 +894,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
 	
 	bindUnimplemented( 0x02FB, game_create_crane, 10, "Create Crusher Crane" );
+	
+	bindFunction(0x0320, game_character_in_range, 2, "Is Character in range of character");
 	
 	bindFunction(0x0339, game_objects_in_volume, 11, "Are objects in volume" );
 	

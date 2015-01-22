@@ -4,6 +4,23 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+void jumpCharacter(RWGame* game, CharacterController* controller, const glm::vec3& target)
+{
+	glm::vec3 ground = game->getWorld()->getGroundAtPosition(target);
+	if( controller )
+	{
+		auto pl = controller->getCharacter();
+		if( pl->getCurrentVehicle() )
+		{
+			pl->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+		}
+		else
+		{
+			pl->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+		}
+	}
+}
+
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game), _freeLook( false ), _sonicMode( false )
 {
@@ -53,34 +70,13 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	}
 #endif
 	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
-		glm::vec3 ground = game->getWorld()->getGroundAtPosition(glm::vec3(875.0, -309.0, 100.0));
-		if( game->getWorld()->state.player )
-		{
-			auto pl = game->getWorld()->state.player;
-			if( pl->getCharacter()->getCurrentVehicle() )
-			{
-				pl->getCharacter()->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
-			}
-			else
-			{
-				pl->getCharacter()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
-			}
-		}
+		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(875.0, -309.0, 100.0));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Luigi's", [=] {
-		glm::vec3 ground = game->getWorld()->getGroundAtPosition(glm::vec3(902.75, -425.56, 100.0));
-		if( game->getWorld()->state.player )
-		{
-			auto pl = game->getWorld()->state.player;
-			if( pl->getCharacter()->getCurrentVehicle() )
-			{
-				pl->getCharacter()->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
-			}
-			else
-			{
-				pl->getCharacter()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
-			}
-		}
+		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(902.75, -425.56, 100.0));
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Jump to Hospital", [=] {
+		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(1123.77, -569.15, 100.0));
 	}, entryHeight));
 
 	this->enterMenu(m);

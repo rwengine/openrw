@@ -234,6 +234,11 @@ void game_override_restart(const ScriptArguments& args)
 	);
 }
 
+void game_clear_override(const ScriptArguments& args)
+{
+	args.getVM()->getWorld()->state.overrideNextStart = false;
+}
+
 void game_link_mission_flag(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
@@ -488,6 +493,11 @@ void game_set_head_animation(const ScriptArguments& args)
 	}
 }
 
+void game_increment_progress(const ScriptArguments& args)
+{
+	args.getVM()->getWorld()->state.currentProgress += args[0].integer;
+}
+
 void game_set_max_progress(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.maxProgress = args[0].integer;
@@ -496,6 +506,11 @@ void game_set_max_progress(const ScriptArguments& args)
 void game_set_unique_jumps(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.numUniqueJumps = args[0].integer;
+}
+
+void game_set_last_mission(const ScriptArguments& args)
+{
+	args.getVM()->getWorld()->state.lastMissionName = args[0].string;
 }
 
 void game_set_zone_ped_group(const ScriptArguments& args)
@@ -578,6 +593,25 @@ bool game_is_audio_finished(const ScriptArguments& args)
 {
 	return args.getVM()->getWorld()->missionSound.getStatus() == sf::SoundSource::Stopped;
 }
+
+void game_play_music_id(const ScriptArguments& args)
+{
+	int id = args[0].integer;
+	GameWorld* gw = args.getVM()->getWorld();
+	std::string name = "Miscom";
+	
+	// TODO play anything other than Miscom.wav
+	if(! gw->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".wav") )
+	{
+		std::cerr << "Error loading audio" << std::endl;
+		return;
+	}
+	
+	gw->missionSound.setBuffer(args.getVM()->getWorld()->missionAudio);
+	gw->missionSound.play();
+	gw->missionSound.setLoop(false);
+}
+
 void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
@@ -677,6 +711,8 @@ GameModule::GameModule()
 	
 	bindUnimplemented( 0x010D, game_set_wanted_level, 2, "Set Wanted Level" );
 	
+	bindUnimplemented( 0x0109, game_add_character_money, 2, "Add Character Money" );
+	
 	bindUnimplemented( 0x0110, game_clear_wanted_level, 1, "Clear Wanted Level" );
 	bindFunction(0x0111, game_set_dead_or_arrested, 1, "Set Dead or Arrested" );
 	bindFunction(0x0112, game_has_death_or_arrest_finished, 0, "Is Death or Arrest Finished" );
@@ -733,6 +769,10 @@ GameModule::GameModule()
 	
 	bindUnimplemented( 0x01C0, game_store_wanted_level, 2, "Store Wanted Level" );
 	
+	bindUnimplemented(0x01E0, game_clear_leader, 1, "Clear Leader" );
+	
+	bindUnimplemented(0x01E3, game_print_big_with_number, 4, "Print Big With Number" );
+	
 	bindFunction(0x01E7, game_disable_roads, 6, "Enable Roads" );
 	bindFunction(0x01E8, game_enabled_roads, 6, "Disable Roads" );
 	
@@ -745,6 +785,7 @@ GameModule::GameModule()
 	bindFunction(0x01F5, game_get_player, 2, "Get Player Character" );
 	
 	bindUnimplemented( 0x01F7, game_police_ignore_character, 2, "Set Cops Ignore Player" );
+	bindFunction(0x01F6, game_clear_override, 0, "Clear override restart" );
 	
 	bindUnimplemented( 0x01F9, game_start_kill_frenzy, 9, "Start Kill Frenzy" );
 	
@@ -812,12 +853,14 @@ GameModule::GameModule()
 	bindFunction(0x02F4, game_create_cutscene_head, 3, "Create Cutscene Actor Head" );
 	bindFunction(0x02F5, game_set_head_animation, 2, "Set Cutscene Head Animation" );
 
+	bindFunction(0x030C, game_increment_progress, 1, "Increment Progress" );
 	bindFunction(0x030D, game_set_max_progress, 1, "Set Max Progress" );
 
 	bindFunction(0x0314, game_set_unique_jumps, 1, "Set Total Unique Jumps" );
 	
 	bindUnimplemented( 0x0317, game_increment_mission_attempts, 0, "Increment Mission Attempts" );
-
+	bindFunction(0x0318, game_set_last_mission, 1, "Set Last completed mission" );
+	
 	bindFunction(0x0324, game_set_zone_ped_group, 3, "Set zone ped group" );
 	bindUnimplemented( 0x0325, game_create_car_fire, 2, "Create Car Fire" );
 
@@ -847,6 +890,7 @@ GameModule::GameModule()
 
 	bindUnimplemented( 0x038B, game_load_models_now, 0, "Load Requested Models Now" );
 	
+	bindFunction(0x0394, game_play_music_id, 1, "Play music");
 	bindUnimplemented( 0x0395, game_clear_area, 5, "Clear Area Vehicles and Pedestrians" );
 	
 	bindUnimplemented( 0x0397, game_set_vehicle_siren, 2, "Set Vehicle Siren" );

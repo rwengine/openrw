@@ -55,6 +55,7 @@ struct VehicleGenerator
 
 struct GameState
 {
+	unsigned int currentProgress;
 	unsigned int maxProgress;
 	unsigned int numMissions;
 	unsigned int numHiddenPackages;
@@ -94,6 +95,7 @@ struct GameState
 	short hour;
 	short minute;
 	
+	std::string lastMissionName;
 	
 	/// Stores the "special" character and cutscene model indices.
 	std::map<unsigned short, std::string> specialCharacters;
@@ -115,6 +117,7 @@ struct GameState
 	std::vector<VehicleGenerator> vehicleGenerators;
 
 	GameState() :
+		currentProgress(0),
 		maxProgress(1),
 		numMissions(0),
 		numHiddenPackages(0),
