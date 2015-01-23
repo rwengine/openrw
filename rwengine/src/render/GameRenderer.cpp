@@ -90,6 +90,14 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	renderer->setUniformTexture(worldProg, "texture", 0);
 	renderer->setProgramBlockBinding(worldProg, "SceneData", 1);
 	renderer->setProgramBlockBinding(worldProg, "ObjectData", 2);
+	
+	particleProg = renderer->createShader(
+		GameShaders::WorldObject::VertexShader,
+		GameShaders::Particle::FragmentShader);
+	
+	renderer->setUniformTexture(particleProg, "texture", 0);
+	renderer->setProgramBlockBinding(particleProg, "SceneData", 1);
+	renderer->setProgramBlockBinding(particleProg, "ObjectData", 2);
 
 	particleProgram = compileProgram(GameShaders::WorldObject::VertexShader,
 								  GameShaders::Particle::FragmentShader);
@@ -206,6 +214,30 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	ssRectColour = glGetUniformLocation(ssRectProgram, "colour");
 	ssRectSize = glGetUniformLocation(ssRectProgram, "size");
 	ssRectOffset = glGetUniformLocation(ssRectProgram, "offset");
+	
+	const static int cylsegments = 16;
+	std::vector<Model::GeometryVertex> cylverts;
+	for(int s = 0; s < cylsegments; ++s)
+	{
+		float theta = (2.f*glm::pi<float>()/cylsegments) * (s+0);
+		float gamma = (2.f*glm::pi<float>()/cylsegments) * (s+1);
+		glm::vec2 p0( glm::sin(theta), glm::cos(theta) );
+		glm::vec2 p1( glm::sin(gamma), glm::cos(gamma) );
+		
+		p0 *= 0.5f;
+		p1 *= 0.5f;
+		
+		cylverts.push_back({glm::vec3(p0, 2.f), glm::vec3(), glm::vec2(0.45f,0.6f), glm::u8vec4(255, 255, 255, 50)});
+		cylverts.push_back({glm::vec3(p0,-1.f), glm::vec3(), glm::vec2(0.45f,0.4f), glm::u8vec4(255, 255, 255, 150)});
+		cylverts.push_back({glm::vec3(p1, 2.f), glm::vec3(), glm::vec2(0.55f,0.6f), glm::u8vec4(255, 255, 255, 50)});
+		
+		cylverts.push_back({glm::vec3(p0,-1.f), glm::vec3(), glm::vec2(0.45f,0.4f), glm::u8vec4(255, 255, 255, 150)});
+		cylverts.push_back({glm::vec3(p1,-1.f), glm::vec3(), glm::vec2(0.55f,0.4f), glm::u8vec4(255, 255, 255, 150)});
+		cylverts.push_back({glm::vec3(p1, 2.f), glm::vec3(), glm::vec2(0.55f,0.6f), glm::u8vec4(255, 255, 255, 50)});
+	}
+	cylinderGeometry.uploadVertices<Model::GeometryVertex>(cylverts);
+	cylinderBuffer.addGeometry(&cylinderGeometry);
+	cylinderBuffer.setFaceType(GL_TRIANGLES);
 }
 
 float mix(uint8_t a, uint8_t b, float num)
@@ -317,6 +349,15 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		renderer->draw(it->matrix, &it->model->geometries[it->g]->dbuff, it->dp);
 	}
 	transparentDrawQueue.clear();
+	
+	// Draw goal indicators
+	glDepthMask(GL_FALSE);
+	renderer->useProgram( particleProg );
+	for(auto& i : engine->getAreaIndicators())
+	{
+		renderAreaIndicator( &i );
+	}
+	glDepthMask(GL_TRUE);
 
 	// Draw the water.
 	renderer->useProgram( waterProg );
@@ -855,6 +896,33 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 		else {
 			renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
 		}
+	}
+}
+
+#define GOAL_RINGS 3
+void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
+{
+	glm::mat4 m(1.f);
+	m = glm::translate(m, info->position);
+	glm::vec3 scale = info->radius + 0.15f * glm::sin(engine->gameTime * 5.f);
+	
+	Renderer::DrawParameters dp;
+	dp.texture = engine->gameData.textures[{"cloud1",""}].texName;
+	dp.ambient = 1.f;
+	dp.colour = glm::u8vec4(50, 100, 255, 1);
+	dp.start = 0;
+	dp.count = cylinderGeometry.getCount();
+	dp.diffuse = 1.f;
+	
+	for(int i = 0; i < GOAL_RINGS; i++)
+	{
+		glm::mat4 mt = m;
+		glm::vec3 final = scale * glm::pow(0.9f, i + 1.0f);
+		mt = glm::scale(mt, glm::vec3(final.x, final.y, 1.0f + i * 0.1f));
+		int reverse = (i % 2 ? 1 : -1);
+		mt = glm::rotate(mt, reverse * engine->gameTime * 0.5f, glm::vec3(0.f, 0.f, 1.f) );
+		
+		renderer->drawArrays(mt, &cylinderBuffer, dp);
 	}
 }
 

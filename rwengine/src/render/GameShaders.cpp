@@ -220,12 +220,11 @@ layout(std140) uniform ObjectData {
 void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
-	c.a	= clamp(0, length(c.rgb/3.0), 1);
+	c.a = clamp(0, length(c.rgb/length(vec3(1,1,1))), 1);
 	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
 	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
 	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
-	outColour = mix(ambient, colour * (vec4(0.5) + Colour * 0.5)
-					   * (vec4(0.5) + dynamic * 0.5) * c, 1.f);
+	outColour = mix(ambient, c * colour * Colour, 1.f);
 })";
 
 

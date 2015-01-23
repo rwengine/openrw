@@ -115,6 +115,9 @@ int RWGame::run()
 
 void RWGame::tick(float dt)
 {
+	// Clear out any per-tick state.
+	engine->clearTickData();
+	
 	// Process the Engine's background work.
 	engine->_work->update();
 

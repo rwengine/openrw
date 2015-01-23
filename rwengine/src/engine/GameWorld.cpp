@@ -768,4 +768,14 @@ void GameWorld::enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, 
 	}
 }
 
+void GameWorld::drawAreaIndicator(AreaIndicatorInfo::AreaIndicatorType type, glm::vec3 position, glm::vec3 radius)
+{
+	areaIndicators.push_back({type, position, radius});
+}
+
+void GameWorld::clearTickData()
+{
+	areaIndicators.clear();
+}
+
 

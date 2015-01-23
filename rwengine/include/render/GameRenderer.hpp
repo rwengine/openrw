@@ -15,6 +15,8 @@ class ModelFrame;
 class GameWorld;
 class GameObject;
 
+class AreaIndicatorInfo;
+
 /// @todo migrate to some other way of rendering each object type.
 class CharacterObject;
 class VehicleObject;
@@ -147,6 +149,7 @@ public:
 	Renderer::ShaderProgram* worldProg;
 	Renderer::ShaderProgram* skyProg;
 	Renderer::ShaderProgram* waterProg;
+	Renderer::ShaderProgram* particleProg;
 
 	GLuint particleProgram;
 
@@ -158,6 +161,9 @@ public:
 
 	DrawBuffer skyDbuff;
 	GeometryBuffer skyGbuff;
+	
+	DrawBuffer cylinderBuffer;
+	GeometryBuffer cylinderGeometry;
 	
     /**
 	 * Renders the world using the parameters of the passed Camera.
@@ -218,6 +224,9 @@ public:
 	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, float opacity, GameObject* = nullptr);
+	
+	/** Renders the area indicator */
+	void renderAreaIndicator(const AreaIndicatorInfo* info);
 
 	/** method for rendering AI debug information */
 	void renderPaths();

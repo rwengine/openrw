@@ -9,6 +9,7 @@
 #include <objects/CharacterObject.hpp>
 
 #include <render/Model.hpp>
+#include <render/GameRenderer.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameWorld.hpp>
@@ -224,7 +225,8 @@ bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 	auto character = static_cast<CharacterController*>(*args[0].handle);
 	glm::vec2 position(args[1].real, args[2].real);
 	glm::vec2 radius(args[3].real, args[4].real);
-	bool show = args[5].integer;
+	
+	bool drawCylinder = args[5].integer;
 	
 	if( character->getCharacter()->getCurrentVehicle() == nullptr )
 	{
@@ -237,6 +239,12 @@ bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 	if(distance.x <= radius.x && distance.y <= radius.y)
 	{
 		return true;
+	}
+	
+	if( drawCylinder )
+	{
+		auto ground = args.getVM()->getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground + glm::vec3(0.f, 0.f, 4.5f), glm::vec3(radius, 5.f));
 	}
 	
 	return false;
@@ -414,6 +422,7 @@ bool game_character_in_area_on_foot(const ScriptArguments& args)
 bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 {
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	bool drawCylinder = !!args[7].integer;
 	
 	if( controller && controller->getCharacter()->getCurrentVehicle() != nullptr )
 	{
@@ -429,8 +438,13 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 		{
 			return controller->getCharacter()->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.75f;
 		}
+		
+		// Request the renderer draw a cylinder here.
+		if( drawCylinder )
+		{
+			args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
+		}
 	}
-	
 	return false;
 }
 
@@ -441,6 +455,8 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 	
 	glm::vec3 vec1(args[1].real, args[2].real, args[3].real);
 	glm::vec3 vec2(args[4].real, args[5].real, args[6].real);
+	bool drawCylinder = !!args[7].integer;
+	
 	glm::vec3 min = glm::min(vec1, vec2);
 	glm::vec3 max = glm::max(vec1, vec2);
 	
@@ -457,6 +473,11 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 		{
 			return controller->getCurrentActivity() == nullptr;
 		}
+	}
+	
+	if( drawCylinder )
+	{
+		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
 	}
 	
 	return false;

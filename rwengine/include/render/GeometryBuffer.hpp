@@ -57,6 +57,9 @@ public:
 	GLuint getVBOName() const
 		{ return vbo; }
 	
+	GLsizei getCount() const
+		{ return num; }
+	
 	/**
 	 * Uploads Vertex Buffer data from an STL vector
 	 * 

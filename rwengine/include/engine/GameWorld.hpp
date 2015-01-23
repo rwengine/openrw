@@ -31,6 +31,23 @@ class ScriptMachine;
 #include <random>
 
 /**
+ * Information about "Goal" locations so they can be rendered
+ * (this doesn't really belong here).
+ */
+struct AreaIndicatorInfo
+{
+	enum AreaIndicatorType
+	{
+		Cylinder
+	};
+	
+	AreaIndicatorType type;
+	glm::vec3 position;
+	glm::vec3 radius;
+};
+
+
+/**
  * @brief Handles all data relating to object instances and other "worldly" state.
  */
 class GameWorld
@@ -257,6 +274,12 @@ public:
 	
 	void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
 	void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
+	
+	void drawAreaIndicator(AreaIndicatorInfo::AreaIndicatorType type, glm::vec3 position, glm::vec3 radius);
+	
+	const std::vector<AreaIndicatorInfo>& getAreaIndicators() const { return areaIndicators; }
+	
+	void clearTickData();
 
 private:
 
@@ -264,6 +287,8 @@ private:
 	 * @brief Used by objects to delete themselves during updates.
 	 */
 	std::queue<GameObject*> deletionQueue;
+
+	std::vector<AreaIndicatorInfo> areaIndicators;
 };
 
 #endif
