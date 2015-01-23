@@ -276,6 +276,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	glActiveTexture(GL_TEXTURE0);
 
 	for( GameObject* object : engine->objects ) {
+		if(! object->visible )
+		{
+			continue;
+		}
 		
 		if( object->skeleton )
 		{

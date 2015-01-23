@@ -32,7 +32,7 @@ public:
     glm::quat rotation;
 
 	ModelHandle* model; /// Cached pointer to Object's Model.
-    
+	
     GameWorld* engine;
 
 	Animator* animator; /// Object's animator.
@@ -49,11 +49,16 @@ public:
 	 * @brief stores the height of water at the last tick
 	 */
 	float _lastHeight;
+	
+	/**
+	 * Should object be rendered?
+	 */
+	bool visible;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
 		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
-		  _inWater(false), _lastHeight(std::numeric_limits<float>::max())
+		  _inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true)
 	{}
 		
 	virtual ~GameObject();

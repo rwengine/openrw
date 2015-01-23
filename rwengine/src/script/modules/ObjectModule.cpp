@@ -703,6 +703,47 @@ bool game_character_in_range(const ScriptArguments& args)
 	return true;
 }
 
+void game_set_close_object_visible(const ScriptArguments& args)
+{
+	glm::vec3 position(args[0].real, args[1].real, args[2].real);
+	float radius = args[3].real;
+	int modelid = 0;
+	
+	/// @todo fix this being a problem.
+	switch(args[4].type) {
+		case TInt8:
+			modelid = (std::int8_t)args[4].integer;
+			break;
+		case TInt16:
+			modelid = (std::int16_t)args[4].integer;
+			break;
+	}
+	
+	if( std::abs(modelid) > 178 ) {
+		/// @todo implement this path,
+		return;
+	}
+	
+	std::string model;
+	
+	if(modelid < 0) modelid = -modelid;
+	
+	model = args.getVM()->getFile()->getModels()[modelid];
+	
+	std::transform(model.begin(), model.end(), model.begin(), ::tolower);
+	
+	for(auto o : args.getVM()->getWorld()->objects) {
+		if( o->type() == GameObject::Instance ) {
+			if( !o->model ) continue;
+			if( o->model->name != model ) continue;
+			float d = glm::distance(position, o->getPosition());
+			if( d < radius ) {
+				o->visible = !!args[5].integer;
+			}
+		}
+	}
+}
+
 void game_change_nearest_model(const ScriptArguments& args)
 {
 	glm::vec3 position(args[0].real, args[1].real, args[2].real);
@@ -913,7 +954,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x035D, game_set_object_targetable, 1, "Set Object Targetable" );
 	
-	bindUnimplemented( 0x0363, game_set_close_object_visible, 6, "Set Closest Object Visibility" );
+	bindFunction(0x0363, game_set_close_object_visible, 6, "Set Closest Object Visibility");
 	
 	bindUnimplemented( 0x0368, game_create_ev_crane, 10, "Create ev Crane" );
 	
