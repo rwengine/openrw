@@ -218,10 +218,13 @@ void game_fade_screen(const ScriptArguments& args)
 	args.getVM()->getWorld()->state.fadeTime = args[0].integer / 1000.f;
 	args.getVM()->getWorld()->state.fadeOut = !!args[1].integer;
 	args.getVM()->getWorld()->state.fadeStart = args.getVM()->getWorld()->gameTime;
-	std::cout << "Fade " << args[0].integer << " " << args[1].integer << std::endl;
 }
 bool game_screen_fading(const ScriptArguments& args)
 {
+	if( args.getVM()->getWorld()->state.skipCutscene )
+	{
+		return false;
+	}
 	return args.getVM()->getWorld()->gameTime <
 		args.getVM()->getWorld()->state.fadeStart + args.getVM()->getWorld()->state.fadeTime;
 }

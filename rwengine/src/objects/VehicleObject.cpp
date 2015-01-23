@@ -84,6 +84,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 VehicleObject::~VehicleObject()
 {
+	ejectAll();
+	
 	engine->dynamicsWorld->removeAction(physVehicle);
 	
 	for(auto& p : dynamicParts)
@@ -95,8 +97,6 @@ VehicleObject::~VehicleObject()
 
 	delete physVehicle;
 	delete physRaycaster;
-	
-	ejectAll();
 }
 
 void VehicleObject::setPosition(const glm::vec3& pos)
