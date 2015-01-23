@@ -221,6 +221,7 @@ void RWGame::render(float alpha)
 
 	engine->renderer.renderWorld(viewCam, alpha);
 	
+#if 0
 	debug->setShaderProgram(engine->renderer.worldProg);
 	if( engine->state.player )
 	{
@@ -238,6 +239,7 @@ void RWGame::render(float alpha)
 		}
 	}
 	debug->flush(&engine->renderer);
+#endif
 	
 	window.resetGLStates();
 
