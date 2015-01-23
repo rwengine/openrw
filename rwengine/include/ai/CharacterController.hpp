@@ -60,6 +60,8 @@ protected:
 
 	bool running;
 	
+	float vehicleIdle;
+	
 	// Goal related variables
 	Goal currentGoal;
 	CharacterObject* leader;

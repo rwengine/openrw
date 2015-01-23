@@ -28,7 +28,7 @@ void CharacterController::setActivity(CharacterController::Activity* activity)
 
 CharacterController::CharacterController(CharacterObject* character)
 : character(character), _currentActivity(nullptr), _nextActivity(nullptr), running(false),
-currentGoal(None), leader(nullptr)
+vehicleIdle(0.f), currentGoal(None), leader(nullptr)
 {
 	character->controller = this;
 }
@@ -73,20 +73,25 @@ void CharacterController::update(float dt)
 			/// @todo play _low variant if car has low flag.
 			character->playAnimation(character->animations.car_sit, true);
 			
-			// If character is idle in vehicle, close door.
 			if( glm::length( d ) <= 0.1f )
 			{
-				auto entryDoor = character->getCurrentVehicle()->getSeatEntryDoor(character->getCurrentSeat());
+				vehicleIdle += dt;
+			}
+			else
+			{
+				vehicleIdle = 0.f;
+			}
+			
+			if( vehicleIdle >= 1.f )
+			{
+				// If character is idle in vehicle, try to close the door.
+				auto v = character->getCurrentVehicle();
+				auto entryDoor = v->getSeatEntryDoor(character->getCurrentSeat());
 				
 				if( entryDoor && entryDoor->constraint )
 				{
 					character->getCurrentVehicle()->setPartTarget(entryDoor, true, entryDoor->closedAngle);
 				}
-			}
-			else
-			{
-				auto entryDoor = character->getCurrentVehicle()->getSeatEntryDoor(character->getCurrentSeat());
-				entryDoor->holdAngle = false;
 			}
 		}
 	}
@@ -247,12 +252,18 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		character->enterVehicle(vehicle, seat);
 		return true;
 	}
+	
+	auto entryDoor = vehicle->getSeatEntryDoor(seat);
 
 	auto anm_open = character->animations.car_open_lhs;
 	auto anm_enter = character->animations.car_getin_lhs;
 	
-	auto entryDoor = vehicle->getSeatEntryDoor(seat);
-
+	if( entryDoor->dummy->getDefaultTranslation().x > 0.f )
+	{
+		anm_open = character->animations.car_open_rhs;
+		anm_enter = character->animations.car_getin_rhs;
+	}
+	
 	if( entering ) {
 		if( character->animator->getAnimation() == anm_open ) {
 			if( character->animator->isCompleted() ) {
@@ -317,8 +328,16 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 	if( character->getCurrentVehicle() == nullptr ) return true;
 
 	auto vehicle = character->getCurrentVehicle();
-	auto anm_exit = character->animations.car_getout_lhs;
+	
 	auto seat = character->getCurrentSeat();
+	auto door = vehicle->getSeatEntryDoor(seat);
+	
+	auto anm_exit = character->animations.car_getout_lhs;
+	
+	if( door->dummy->getDefaultTranslation().x > 0.f )
+	{
+		anm_exit = character->animations.car_getout_rhs;
+	}
 
 	if( vehicle->vehicle->type == VehicleData::BOAT ) {
 		auto ppos = character->getPosition();
@@ -339,8 +358,6 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 	}
 	else {
 		character->playAnimation(anm_exit, false);
-		
-		auto door = vehicle->getSeatEntryDoor(character->getCurrentSeat());
 		if( door )
 		{
 			vehicle->setPartTarget(door, true, door->openAngle);

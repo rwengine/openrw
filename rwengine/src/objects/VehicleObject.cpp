@@ -307,20 +307,30 @@ void VehicleObject::tickPhysics(float dt)
 			//next.translation = p2;
 			skeleton->setData(it.second.dummy->getIndex(), { next, prev, true } );
 			
-			if( it.second.holdAngle )
+			if( it.second.moveToAngle )
 			{
-				it.second.constraint->setMotorTarget(it.second.targetAngle, 0.1f);
+				auto angledelta = it.second.targetAngle - it.second.constraint->getHingeAngle();
+				if( glm::abs(angledelta) <= 0.01f )
+				{
+					it.second.constraint->enableAngularMotor(false, 1.f, 1.f);
+					dynamicParts[it.first].moveToAngle = false;
+				}
+				else
+				{
+					it.second.constraint->enableAngularMotor(true, glm::sign(angledelta) * 5.f, 1.f);
+				}
 			}
-			it.second.constraint->enableMotor( it.second.holdAngle );
 			
 			// If the part is moving quite fast and near the limit, lock it.
 			/// @TODO not all parts rotate in the z axis.
-			if(it.second.body->getAngularVelocity().getZ() >= PART_CLOSE_VELOCITY)
+			float zspeed = it.second.body->getAngularVelocity().getZ();
+			if(it.second.openAngle < 0.f) zspeed = -zspeed;
+			if(zspeed >= PART_CLOSE_VELOCITY)
 			{
 				auto d = it.second.constraint->getHingeAngle() - it.second.closedAngle;
-				if( std::abs(d) < 0.05f )
+				if( glm::abs(d) < 0.05f )
 				{
-					it.second.holdAngle = false;
+					dynamicParts[it.first].moveToAngle = false;
 					setPartLocked(&(it.second), true);
 				}
 			}
@@ -525,20 +535,14 @@ void VehicleObject::setPartTarget(VehicleObject::Part* part, bool enable, float 
 		}
 		
 		part->targetAngle = target;
-		part->holdAngle = true;
-		
-		part->constraint->enableMotor(true);
+		part->moveToAngle = true;
+
 		part->body->activate(true);
 	}
 	else
 	{
 		part->targetAngle = target;
-		part->holdAngle = false;
-		
-		if( part->constraint )
-		{
-			part->constraint->enableMotor(false);
-		}
+		part->moveToAngle = false;
 	}
 }
 
@@ -692,7 +696,7 @@ void VehicleObject::destroyObjectHinge(Part* part)
 		part->constraint = nullptr;
 		
 		// Reset target.
-		part->holdAngle = false;
+		part->moveToAngle = false;
 	}
 }
 

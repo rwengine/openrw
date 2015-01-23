@@ -38,7 +38,7 @@ public:
 		ModelFrame* damaged;
 		btRigidBody* body;
 		btHingeConstraint* constraint;
-		bool holdAngle;
+		bool moveToAngle;
 		float targetAngle;
 		float openAngle;
 		float closedAngle;

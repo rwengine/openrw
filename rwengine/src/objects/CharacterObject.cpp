@@ -42,6 +42,10 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.car_open_lhs   = engine->gameData.animations["car_open_lhs"];
 	animations.car_getin_lhs   = engine->gameData.animations["car_getin_lhs"];
 	animations.car_getout_lhs   = engine->gameData.animations["car_getout_lhs"];
+	
+	animations.car_open_rhs   = engine->gameData.animations["car_open_rhs"];
+	animations.car_getin_rhs   = engine->gameData.animations["car_getin_rhs"];
+	animations.car_getout_rhs   = engine->gameData.animations["car_getout_rhs"];
 
 	if(model) {
 		skeleton = new Skeleton;
