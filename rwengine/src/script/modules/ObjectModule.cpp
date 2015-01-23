@@ -578,7 +578,7 @@ void game_enter_as_passenger(const ScriptArguments& args)
 	// Cancel whatever we're currently trying to do.
 	controller->skipActivity();
 	/// @todo find next lowest free seat.
-	controller->setNextActivity(new Activities::EnterVehicle(vehicle,1));
+	controller->setNextActivity(new Activities::EnterVehicle(vehicle,Activities::EnterVehicle::ANY_SEAT));
 }
 
 void game_character_exit_vehicle(const ScriptArguments& args)

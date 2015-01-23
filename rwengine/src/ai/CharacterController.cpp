@@ -253,6 +253,22 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		return true;
 	}
 	
+	if( seat == ANY_SEAT )
+	{
+		// Determine which seat to take.
+		float nearest = std::numeric_limits<float>::max();
+		for(unsigned int s = 1; s < vehicle->info->seats.size(); ++s)
+		{
+			auto entry = vehicle->getSeatEntryPosition(s);
+			float dist = glm::distance(entry, character->getPosition());
+			if( dist < nearest )
+			{
+				seat = s;
+				nearest = dist;
+			}
+		}
+	}
+	
 	auto entryDoor = vehicle->getSeatEntryDoor(seat);
 
 	auto anm_open = character->animations.car_open_lhs;

@@ -157,11 +157,15 @@ namespace Activities {
 		DECL_ACTIVITY( EnterVehicle )
 
 		VehicleObject* vehicle;
-		unsigned int seat;
+		int seat;
+		
+		enum {
+			ANY_SEAT = -1 // Magic number for any seat but the driver's.
+		};
 
 		bool entering;
 
-		EnterVehicle( VehicleObject* vehicle, unsigned int seat = 0 )
+		EnterVehicle( VehicleObject* vehicle, int seat = 0 )
 			: vehicle( vehicle ), seat( seat ), entering(false) {}
 
 		bool update(CharacterObject *character, CharacterController *controller);
