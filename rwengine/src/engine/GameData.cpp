@@ -102,6 +102,7 @@ void GameData::load()
 	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
 	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
+	_knownFiles.insert({"hud.txd", {false, datpath+"/models/hud.txd"}});
 	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
 	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
 
@@ -113,6 +114,7 @@ void GameData::load()
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
 	loadTXD("particle.txd");
+	loadTXD("hud.txd");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
 	loadWeather(datpath+"/data/timecyc.dat");
@@ -122,7 +124,6 @@ void GameData::load()
 	loadWeaponDAT(datpath+"/data/weapon.dat");
 
 	loadIFP("ped.ifp");
-
 }
 
 void GameData::parseDAT(const std::string& path)

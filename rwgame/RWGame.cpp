@@ -51,6 +51,13 @@ RWGame::RWGame(const std::string& gamepath)
 
 	/// @TODO language choices.
 	engine->gameData.loadGXT("english.gxt");
+	
+	for(int m = 0; m < MAP_BLOCK_SIZE; ++m)
+	{
+		std::string num = (m < 10 ? "0" : "");
+		std::string name = "radar" + num +  std::to_string(m);
+		engine->gameData.loadTXD(name + ".txd");
+	}
 
 	StateManager::get().enter(new LoadingState(this));
 

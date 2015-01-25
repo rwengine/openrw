@@ -24,6 +24,7 @@ public:
 	virtual void exit();
 
 	virtual void tick(float dt);
+    virtual void draw(sf::RenderWindow& w);
 
 	virtual void handleEvent(const sf::Event& event);
 
