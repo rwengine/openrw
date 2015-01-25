@@ -712,6 +712,19 @@ void GameWorld::clearCutscene()
 	state.cutsceneStartTime = -1.f;
 }
 
+bool GameWorld::isCutsceneDone()
+{
+	if( state.currentCutscene ) {
+		float time = gameTime - state.cutsceneStartTime;
+		if( state.skipCutscene ) {
+			return true;
+		}
+		return time > state.currentCutscene->tracks.duration;
+	}
+	return true;
+}
+
+
 void GameWorld::loadSpecialCharacter(const unsigned short index, const std::string &name)
 {
 	std::string lowerName(name);

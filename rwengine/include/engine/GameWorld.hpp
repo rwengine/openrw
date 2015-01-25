@@ -259,6 +259,7 @@ public:
 	void loadCutscene(const std::string& name);
 	void startCutscene();
 	void clearCutscene();
+	bool isCutsceneDone();
 
 	MADStream fgAudio;
 	bool cutsceneAudioLoaded;
