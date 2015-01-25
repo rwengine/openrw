@@ -186,10 +186,10 @@ void IngameState::tick(float dt)
 void IngameState::draw(sf::RenderWindow& w)
 {
 	MapRenderer::MapInfo map;
-	map.scale = 0.75f;
+	map.scale = 0.5f;
 	map.viewport = glm::vec2(w.getSize().x, w.getSize().y);
 	
-	map.mapPos = glm::vec2(map.viewport.x * 0.2f, map.viewport.y - map.viewport.y * 0.2f);
+	map.mapPos = glm::vec2(map.viewport.x * 0.2f, map.viewport.y * 0.2f);
 	float aspect = map.viewport.x / map.viewport.y;
 	map.mapSize = map.viewport * 0.3f;
 	map.mapPos.x /= aspect;

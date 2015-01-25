@@ -26,7 +26,7 @@ MapRenderer::MapRenderer(GameWorld* world, Renderer* renderer)
 	renderer->setUniform(rectProg, "offset", glm::vec2(1.f, 1.f));
 }
 
-#define GAME_MAP_SIZE 4048
+#define GAME_MAP_SIZE 4000
 
 glm::vec2 MapRenderer::mapToScreen(const glm::vec2& map, const MapInfo& mi)
 {
