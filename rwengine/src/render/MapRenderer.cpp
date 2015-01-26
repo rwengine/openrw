@@ -93,6 +93,19 @@ void MapRenderer::draw(const MapInfo& mi)
 		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 	}
 	
+	glDisable(GL_SCISSOR_TEST);
+	
+	for(auto& blip : world->state.radarBlips)
+	{
+		glm::vec2 blippos( blip.second.coord );
+		if( blip.second.target )
+		{
+			blippos = glm::vec2( blip.second.target->getPosition() );
+		}
+		
+		drawBlip(blippos, mi, "");
+	}
+	
 	// Draw the player blip
 	auto player = world->state.player;
 	if( player )
@@ -100,8 +113,6 @@ void MapRenderer::draw(const MapInfo& mi)
 		glm::vec2 plyblip(player->getCharacter()->getPosition());
 		drawBlip(plyblip, mi, "radar_centre");
 	}
-	
-	glDisable(GL_SCISSOR_TEST);
 	
 	glBindVertexArray( 0 );
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -112,8 +123,26 @@ void MapRenderer::drawBlip(const glm::vec2& map, const MapInfo& mi, const std::s
 {
 	glm::vec2 screen = mapToScreen(map, mi);
 	
-	auto sprite = world->gameData.textures[{texture,""}];
-	glBindTexture(GL_TEXTURE_2D, sprite.texName);
+	glm::vec2 screenCenter = mi.mapPos / (mi.viewport/2.f) - 1.f;
+	glm::vec2 screenSize = (mi.mapSize) / mi.viewport;
+	glm::vec2 screenMax = screenCenter + screenSize;
+	glm::vec2 screenMin = screenCenter - screenSize;
+	
+	screen = glm::max(screen, screenMin);
+	screen = glm::min(screen, screenMax);
+	
+	GLuint tex = 0;
+	if ( !texture.empty() )
+	{
+		auto sprite= world->gameData.textures[{texture,""}];
+		tex = sprite.texName;
+		renderer->setUniform(rectProg, "colour", glm::vec4(0.0f, 0.0f, 0.0f, 0.f));
+	}
+	else
+	{
+		renderer->setUniform(rectProg, "colour", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
+	}
+	glBindTexture(GL_TEXTURE_2D, tex);
 
 	renderer->setUniform(rectProg, "size", 16.f/mi.viewport);
 	

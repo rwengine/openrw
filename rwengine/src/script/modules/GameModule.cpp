@@ -9,6 +9,7 @@
 
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameWorld.hpp>
 #include <ai/PlayerController.hpp>
@@ -22,6 +23,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <boost/config/no_tr1/complex.hpp>
 
 void game_print_big(const ScriptArguments& args)
 {
@@ -207,6 +209,12 @@ void game_camera_lookat_position(const ScriptArguments& args)
 	args.getVM()->getWorld()->state.cameraRotation = glm::inverse(glm::quat_cast(v));
 }
 
+void game_remove_blip(const ScriptArguments& args)
+{
+	int blip = *args[0].globalInteger;
+	args.getVM()->getWorld()->state.removeBlip(blip);
+}
+
 void game_set_fade_colour(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.fadeColour.r = args[0].integer;
@@ -245,6 +253,32 @@ void game_clear_override(const ScriptArguments& args)
 void game_link_mission_flag(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
+}
+
+void game_add_vehicle_blip(const ScriptArguments& args)
+{
+	BlipData data;
+	data.target = static_cast<VehicleObject*>(*args[0].handle);
+	data.texture = "";
+	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+}
+
+void game_add_character_blip(const ScriptArguments& args)
+{
+	BlipData data;
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	data.target = controller->getCharacter();
+	data.texture = "";
+	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+}
+
+void game_add_location_blip(const ScriptArguments& args)
+{
+	BlipData data;
+	data.target = nullptr;
+	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
+	data.texture = "";
+	*args[3].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
 }
 
 void game_enable_input(const ScriptArguments& args)
@@ -740,7 +774,7 @@ GameModule::GameModule()
 	bindFunction(0x015F, game_camera_fixed_position, 6, "Set Fixed Camera Position" );
 	bindFunction(0x0160, game_camera_lookat_position, 4, "Point Camera at Point" );
 	
-	bindUnimplemented( 0x0164, game_disable_blip, 1, "Disable Radar Blip" );
+	bindFunction(0x0164, game_remove_blip, 1, "Remove Blip");
 
 	bindFunction(0x0169, game_set_fade_colour, 3, "Set Fade Colour" );
 	bindFunction(0x016A, game_fade_screen, 2, "Fade Screen" );
@@ -753,10 +787,10 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0181, game_link_character_mission_flag, 2, "Link Character Mission Flag" );
 	bindUnimplemented( 0x0182, game_unknown, 2, "Unknown Character Opcode" );
 	
-	bindUnimplemented( 0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle" );
-	bindUnimplemented( 0x0187, game_add_character_blip, 2, "Add Blip for Character" );
+	bindFunction( 0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle" );
+	bindFunction( 0x0187, game_add_character_blip, 2, "Add Blip for Character" );
 
-	bindUnimplemented( 0x018A, game_add_location_blip, 4, "Add Blip for Coord" );
+	bindFunction( 0x018A, game_add_location_blip, 4, "Add Blip for Coord" );
 	bindUnimplemented( 0x018B, game_change_blip_mode, 2, "Change Blip Display Mode" );
 	
 	bindUnimplemented( 0x018D, game_create_soundscape, 5, "Create soundscape" );
