@@ -1,5 +1,7 @@
 #include "pausestate.hpp"
 #include "RWGame.hpp"
+#include <ai/PlayerController.hpp>
+#include <objects/CharacterObject.hpp>
 
 PauseState::PauseState(RWGame* game)
 	: State(game)
@@ -25,6 +27,24 @@ void PauseState::exit()
 void PauseState::tick(float dt)
 {
 
+}
+
+void PauseState::draw(sf::RenderWindow& w)
+{
+	MapRenderer::MapInfo map;
+	
+	map.scale = 0.25f;
+	map.viewport = glm::vec2(w.getSize().x, w.getSize().y);
+	map.mapSize = map.viewport;
+	map.mapPos = map.viewport / 2.f;
+	
+	if( getWorld()->state.player )
+	{
+		map.center = glm::vec2(getWorld()->state.player->getCharacter()->getPosition());
+	}
+	getWorld()->renderer.map.draw(map);
+
+    State::draw(w);
 }
 
 void PauseState::handleEvent(const sf::Event &e)

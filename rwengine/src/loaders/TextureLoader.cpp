@@ -126,6 +126,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 			case RW::BSTextureNative::FORMAT_8888:
 				format = GL_BGRA;
 				//type = GL_UNSIGNED_INT_8_8_8_8_REV;
+				coldata += 8;
 				type = GL_UNSIGNED_BYTE;
 				break;
 			case RW::BSTextureNative::FORMAT_888:

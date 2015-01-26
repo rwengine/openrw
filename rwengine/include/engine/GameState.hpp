@@ -2,6 +2,7 @@
 #ifndef _GAMESTATE_HPP_
 #define _GAMESTATE_HPP_
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <string>
 #include <map>
 #include <vector>
@@ -51,6 +52,20 @@ struct VehicleGenerator
 	
 	/** Number of vehicles left to spawn 0-100, 101 = never decrement. */
 	int remainingSpawns;
+};
+
+/**
+ * Data about a blip
+ */
+struct BlipData
+{
+	int id;
+	GameObject* target;
+	// If target is null then use coord
+	glm::vec3 coord;
+	
+	/* Texture for use in the radar */
+	std::string texture;
 };
 
 struct GameState
@@ -115,6 +130,8 @@ struct GameState
 	GameObject* cameraTarget;
 	
 	std::vector<VehicleGenerator> vehicleGenerators;
+	
+	std::map<int, BlipData> radarBlips;
 
 	GameState() :
 		currentProgress(0),
@@ -143,6 +160,16 @@ struct GameState
 		cameraFixed(false),
 		cameraTarget(nullptr)
 	{}
+	
+	/**
+	 * Adds a blip to the state, returning it's ID.
+	 */
+	int addRadarBlip(BlipData& blip);
+	
+	/**
+	 * Removes a blip
+	 */
+	void removeBlip(int blip);
 };
 
 #endif

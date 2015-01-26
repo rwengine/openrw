@@ -79,7 +79,8 @@ GeometryBuffer ssRectGeom;
 DrawBuffer ssRectDraw;
 
 GameRenderer::GameRenderer(GameWorld* engine)
-	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f)
+	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f),
+	map(engine, renderer)
 {
 	engine->logInfo("[DRAW] " + renderer->getIDString());
 
@@ -459,7 +460,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		}
 	}
 
-	if( engine->state.currentCutscene && splashTexName != 0 ) {
+	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName != 0 ) {
 		renderLetterbox();
 	}
 
@@ -493,7 +494,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-
+	
 	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}

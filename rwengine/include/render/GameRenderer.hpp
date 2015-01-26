@@ -9,6 +9,7 @@
 #include <render/ViewCamera.hpp>
 
 #include <render/OpenGLRenderer.hpp>
+#include "MapRenderer.hpp"
 
 class Model;
 class ModelFrame;
@@ -241,6 +242,8 @@ public:
 	{
 		return renderer;
 	}
+	
+	MapRenderer map;
 };
 
 #endif

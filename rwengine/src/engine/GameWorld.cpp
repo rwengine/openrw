@@ -709,7 +709,6 @@ void GameWorld::startCutscene()
 
 void GameWorld::clearCutscene()
 {
-	/// @todo replace with the queued deletion from the projectile branch
 	for(auto o : objects) {
 		if( o->type() == GameObject::Cutscene ) {
 			destroyObjectQueued(o);
@@ -725,8 +724,22 @@ void GameWorld::clearCutscene()
 
 	delete state.currentCutscene;
 	state.currentCutscene = nullptr;
+	state.isCinematic = false;
 	state.cutsceneStartTime = -1.f;
 }
+
+bool GameWorld::isCutsceneDone()
+{
+	if( state.currentCutscene ) {
+		float time = gameTime - state.cutsceneStartTime;
+		if( state.skipCutscene ) {
+			return true;
+		}
+		return time > state.currentCutscene->tracks.duration;
+	}
+	return true;
+}
+
 
 void GameWorld::loadSpecialCharacter(const unsigned short index, const std::string &name)
 {

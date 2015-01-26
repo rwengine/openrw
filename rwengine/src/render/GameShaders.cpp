@@ -257,6 +257,6 @@ void main()
 {
 	vec4 c = texture2D(texture, TexCoords);
 	// Set colour to 0, 0, 0, 1 for textured mode.
-	outColour = colour + vec4(c.rgb, 0.0);
+	outColour = colour + c.rgba;
 })";
 }
