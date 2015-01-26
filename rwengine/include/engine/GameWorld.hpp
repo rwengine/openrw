@@ -260,7 +260,7 @@ public:
 	void startCutscene();
 	void clearCutscene();
 
-	MADStream fgAudio;
+	sf::SoundStream* cutsceneAudio;
 	bool cutsceneAudioLoaded;
 	sf::SoundBuffer missionAudio;
 	sf::Sound missionSound;
@@ -270,7 +270,6 @@ public:
 	 */
 	void loadSpecialCharacter(const unsigned short index, const std::string& name);
 	void loadSpecialModel(const unsigned short index, const std::string& name);
-	
 	
 	void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
 	void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);

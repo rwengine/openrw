@@ -126,7 +126,7 @@ public:
 		}
 	}
 
-	bool open(const std::string& loc)
+	bool openFromFile(const std::string& loc)
 	{
 		if( mFdm ) {
 			munmap( mFdm, mStat.st_size );
@@ -137,13 +137,13 @@ public:
 		int fd = ::open(loc.c_str(), O_RDONLY);
 
 		if( fstat(fd, &mStat) == -1 || mStat.st_size == 0) {
-			std::cerr << "Fstat failed" << std::endl;
+			std::cerr << "Fstat failed (" << loc << ")" << std::endl;
 			return false;
 		}
 
 		void* m = mmap(0, mStat.st_size, PROT_READ, MAP_SHARED, fd, 0);
 		if( m == MAP_FAILED ) {
-			std::cerr << "mmap failed" << std::endl;
+			std::cerr << "mmap failed (" << loc << ")" << std::endl;
 			return false;
 		}
 		mFdm = (unsigned char*)m;

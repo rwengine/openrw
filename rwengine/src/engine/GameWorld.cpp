@@ -76,7 +76,7 @@ public:
 
 GameWorld::GameWorld(const std::string& path)
 	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
-	  _work( new WorkContext( this ) ), script(nullptr)
+	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr)
 {
 	gameData.engine = this;
 }
@@ -677,7 +677,18 @@ void GameWorld::loadCutscene(const std::string &name)
 
 	gameData.loadIFP(lowerName + ".ifp");
 
-	cutsceneAudioLoaded = gameData.loadAudio(fgAudio, name+".mp3");
+	cutsceneAudioLoaded = gameData.loadAudioStream(name+".mp3");
+	
+	if ( !cutsceneAudioLoaded )
+	{
+		cutsceneAudioLoaded = gameData.loadAudioStream(name+".wav");
+	}
+	
+	if ( !cutsceneAudioLoaded )
+	{
+		std::cout << "Failed to load cutscene audio: " << name << std::endl;
+	}
+	
 
 	if( state.currentCutscene ) {
 		delete state.currentCutscene;
@@ -691,8 +702,8 @@ void GameWorld::startCutscene()
 {
 	state.cutsceneStartTime = gameTime;
 	state.skipCutscene = false;
-	if( cutsceneAudioLoaded ) {
-		fgAudio.play();
+	if( cutsceneAudio ) {
+		cutsceneAudio->play();
 	}
 }
 
@@ -705,7 +716,12 @@ void GameWorld::clearCutscene()
 		}
 	}
 
-	fgAudio.stop();
+	if( cutsceneAudio )
+	{
+		cutsceneAudio->stop();
+		delete cutsceneAudio;
+		cutsceneAudio = nullptr;
+	}
 
 	delete state.currentCutscene;
 	state.currentCutscene = nullptr;
