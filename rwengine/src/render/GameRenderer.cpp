@@ -460,7 +460,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		}
 	}
 
-	if( engine->state.currentCutscene && splashTexName != 0 ) {
+	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName != 0 ) {
 		renderLetterbox();
 	}
 
@@ -494,7 +494,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-
+	
 	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}

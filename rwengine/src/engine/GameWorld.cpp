@@ -698,7 +698,6 @@ void GameWorld::startCutscene()
 
 void GameWorld::clearCutscene()
 {
-	/// @todo replace with the queued deletion from the projectile branch
 	for(auto o : objects) {
 		if( o->type() == GameObject::Cutscene ) {
 			destroyObjectQueued(o);
@@ -709,6 +708,7 @@ void GameWorld::clearCutscene()
 
 	delete state.currentCutscene;
 	state.currentCutscene = nullptr;
+	state.isCinematic = false;
 	state.cutsceneStartTime = -1.f;
 }
 
