@@ -704,21 +704,43 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	modelMatrix = glm::rotate(modelMatrix, engine->gameTime, glm::vec3(0.f, 0.f, 1.f));
 
 	auto odata = engine->findObjectType<ObjectData>(pickup->getModelID());
-	auto weapons = engine->gameData.models["weapons"];
-	if( weapons && weapons->model && odata ) {
-		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
-		auto matrix = glm::inverse(itemModel->getTransform());
-		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
-		}
-		else {
-			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+	
+	Model* model = nullptr;
+	ModelFrame* itemModel = nullptr;
+	
+	/// @todo Better determination of is this object a weapon.
+	if( odata->ID >= 170 && odata->ID <= 184 )
+	{
+		auto weapons = engine->gameData.models["weapons"];
+		if( weapons && weapons->model && odata ) {
+			model = weapons->model;
+			itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+			if ( ! itemModel )
+			{
+				std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+			}
 		}
 	}
-	else {
-		std::cerr << "weapons.dff not loaded (" << pickup->getModelID() << ")" << std::endl;
+	else
+	{
+		auto handle = engine->gameData.models[odata->modelName];
+		if ( handle && handle->model )
+		{
+			model = handle->model;
+			itemModel = model->frames[model->rootFrameIdx];
+		}
+		else
+		{
+			std::cerr << "Missing pickup model " << odata->modelName << std::endl;
+		}
+	}
+	
+	if ( itemModel ) {
+		auto matrix = glm::inverse(itemModel->getTransform());
+		renderFrame(model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 	}
 }
+
 
 void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 {

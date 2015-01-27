@@ -344,12 +344,6 @@ void game_get_player(const ScriptArguments& args)
 	*args[1].handle = controller;
 }
 
-bool game_is_pickup_collected(const ScriptArguments& args)
-{
-	/// @todo 
-	return false;
-}
-
 void game_create_garage(const ScriptArguments& args)
 {
 	glm::vec3 min(args[0].real, args[1].real, args[2].real);
@@ -912,11 +906,6 @@ GameModule::GameModule()
 	bindFunction(0x01F6, game_clear_override, 0, "Clear override restart" );
 	
 	bindUnimplemented( 0x01F9, game_start_kill_frenzy, 9, "Start Kill Frenzy" );
-	
-	/// @todo http://gtag.gtagaming.com/opcode-database/opcode/0213/
-	bindUnimplemented( 0x0213, game_create_pickup, 6, "Create pickup" );
-	bindFunction(0x0214, game_is_pickup_collected, 1, "Has Pickup been collected" );
-	bindUnimplemented( 0x0215, game_destroy_pickup, 1, "Destroy Pickup" );
 
 	bindFunction(0x0219, game_create_garage, 8, "Create Garage" );
 

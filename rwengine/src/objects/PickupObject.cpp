@@ -4,7 +4,7 @@
 
 PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int modelID)
 	: GameObject(world, position, glm::quat(), nullptr),
-	  _ghost(nullptr), _shape(nullptr), _enabled(false), _modelID(modelID)
+	  _ghost(nullptr), _shape(nullptr), _enabled(false), collected(false), _modelID(modelID)
 {
 	btTransform tf;
 	tf.setIdentity();
@@ -35,6 +35,7 @@ void PickupObject::tick(float dt)
 		_enableTimer -= dt;
 		if( _enableTimer <= 0.f ) {
 			setEnabled(true);
+			collected = false;
 		}
 	}
 
@@ -55,7 +56,8 @@ void PickupObject::tick(float dt)
 				GameObject* object = static_cast<GameObject*>(otherObject->getUserPointer());
 				if(object->type() == Character) {
 					CharacterObject* character = static_cast<CharacterObject*>(object);
-					setEnabled( !onCharacterTouch(character) );
+					collected = onCharacterTouch(character);
+					setEnabled( !collected );
 					if( ! _enabled ) {
 						_enableTimer = 60.f;
 					}

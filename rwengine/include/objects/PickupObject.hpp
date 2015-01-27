@@ -18,6 +18,7 @@ class PickupObject : public GameObject
 	btSphereShape* _shape;
 	bool _enabled;
 	float _enableTimer;
+	bool collected;
 	int _modelID;
 public:
 
@@ -35,6 +36,8 @@ public:
 
 	bool isEnabled() const { return _enabled; }
 	void setEnabled(bool enabled);
+	
+	bool isCollected() const { return collected; }
 };
 
 #endif

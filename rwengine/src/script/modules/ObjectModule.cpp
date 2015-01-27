@@ -19,6 +19,8 @@
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
+#include <objects/PickupObject.hpp>
+#include <objects/GenericPickup.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -619,6 +621,73 @@ void game_navigate_on_foot(const ScriptArguments& args)
 	controller->setNextActivity(new Activities::GoTo(target));
 }
 
+void game_create_pickup(const ScriptArguments& args)
+{
+	glm::vec3 pos (args[2].real, args[3].real, args[4].real);
+	int id;
+	int type = args[1].integer;
+	
+	switch(args[0].type) {
+		case TInt8:
+			id = (std::int8_t)args[0].integer;
+			break;
+		case TInt16:
+			id = (std::int16_t)args[0].integer;
+			break;
+	}
+	
+	if ( id < 0 )
+	{
+		id = -id;
+		
+		auto model = args.getVM()->getFile()->getModels()[id];
+		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
+	
+		id = args.getVM()->getWorld()->findModelDefinition(model);
+		args.getVM()->getWorld()->gameData.loadDFF(model+".dff");
+		args.getVM()->getWorld()->gameData.loadTXD("icons.txd");
+	}
+	else
+	{
+		auto data = args.getVM()->getWorld()->findObjectType<ObjectData>(id);
+		
+		if ( ! ( id >= 170 && id <= 184 ) )
+		{
+			args.getVM()->getWorld()->gameData.loadDFF(data->modelName+".dff");
+		}
+		args.getVM()->getWorld()->gameData.loadTXD(data->textureName+".txd");
+	}
+	
+	
+	auto pickup = new GenericPickup(args.getVM()->getWorld(), pos, id, type);
+	
+	args.getVM()->getWorld()->objects.insert(pickup);
+	
+	*args[5].handle = pickup;
+}
+
+bool game_is_pickup_collected(const ScriptArguments& args)
+{
+	PickupObject* pickup = args[0].handleOf<PickupObject>();
+	
+	if ( pickup )
+	{
+		return pickup->isCollected();
+	}
+	
+	return false;
+}
+
+void game_destroy_pickup(const ScriptArguments& args)
+{
+	PickupObject* pickup = args[0].handleOf<PickupObject>();
+	
+	if ( pickup )
+	{
+		args.getVM()->getWorld()->destroyObjectQueued(pickup);
+	}
+}
+
 void game_character_run_to(const ScriptArguments& args)
 {
 	auto controller = (CharacterController*)(*args[0].handle);
@@ -948,7 +1017,11 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x020A, game_lock_vehicle_doors, 2, "Lock Car Doors" );
 	
 	bindFunction(0x0211, game_navigate_on_foot, 3, "Character go to on foot" );
-		
+	
+	bindFunction(0x0213, game_create_pickup, 6, "Create pickup");
+	bindFunction(0x0214, game_is_pickup_collected, 1, "Has Pickup been collected");
+	bindFunction(0x0215, game_destroy_pickup, 1, "Destroy Pickup");
+	
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
 	
 	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );

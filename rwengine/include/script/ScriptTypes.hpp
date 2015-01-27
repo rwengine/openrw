@@ -53,6 +53,8 @@ struct SCMOpcodeParameter {
 		int* globalInteger;
 		float* globalReal;
 	};
+	
+	template<class T> T* handleOf() const { return static_cast<T*>(*handle); }
 };
 
 typedef std::vector<SCMOpcodeParameter> SCMParams;
