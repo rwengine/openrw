@@ -18,6 +18,7 @@
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
+#include <objects/PickupObject.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -271,6 +272,15 @@ void game_add_character_blip(const ScriptArguments& args)
 	data.texture = "";
 	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
 }
+
+void game_add_pickup_blip(const ScriptArguments& args)
+{
+	BlipData data;
+	data.target = static_cast<PickupObject*>(*args[0].handle);
+	data.texture = "";
+	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+}
+
 
 void game_add_location_blip(const ScriptArguments& args)
 {
@@ -1071,6 +1081,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03D6, game_clear_this_print, 1, "Clear This Big Print" );
 
 	bindUnimplemented( 0x03DA, game_set_garage_follow_player, 1, "Set Garage Camera Follows Player" );
+	
+	bindFunction(0x03DC, game_add_pickup_blip, 2, "Add blip for pickup");
 	
 	bindUnimplemented( 0x03DE, game_set_pedestrian_density, 1, "Set Pedestrian density" );
 

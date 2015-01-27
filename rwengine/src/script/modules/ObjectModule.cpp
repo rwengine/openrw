@@ -997,6 +997,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0121, game_character_in_zone, 2, "Is Player In Zone" );
 	
 	bindFunction(0x0129, game_create_character_in_vehicle, 4, "Create Character In Car" );
+
+	bindUnimplemented(0x0135, game_set_vehicle_locked, 2, "Set Vehicle locked state");
 	
 	bindFunction(0x0171, game_set_character_heading, 2, "Set Player Heading" );
 	
@@ -1080,6 +1082,8 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x03BA, game_clear_area_vehicles, 6, "Clear Cars From Area" );
 	
 	bindFunction(0x03F3, game_get_vehicle_colours, 3, "Get Vehicle Colours" );
+	
+	bindUnimplemented(0x03F9, game_make_characters_converse, 3, "Make characters converse");
 	
 	bindUnimplemented( 0x042B, game_clear_volume_pedestrians, 6, "Clear volume pedestrians" );
 	
