@@ -76,7 +76,7 @@ public:
 
 GameWorld::GameWorld(const std::string& path)
 	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
-	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr)
+	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr), missionAudio(nullptr)
 {
 	gameData.engine = this;
 }

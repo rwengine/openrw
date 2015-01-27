@@ -689,23 +689,30 @@ void game_load_audio(const ScriptArguments& args)
 {
 	std::string name = args[0].string;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	if(! args.getVM()->getWorld()->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".wav"))
+	if(! args.getVM()->getWorld()->gameData.loadAudioClip(name + ".wav") )
 	{
-		if(! args.getVM()->getWorld()->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".mp3"))
+		if(! args.getVM()->getWorld()->gameData.loadAudioClip(name + ".mp3") )
 		{
-			std::cerr << "Couldn't load mission audio " << name << std::endl;
+			std::cerr << "Couldn't load audio clip " << name << std::endl;
 		}
 	}
 }
+
 bool game_is_audio_loaded(const ScriptArguments& args)
 {
-	return true;
+	auto world = args.getVM()->getWorld();
+	return world->missionAudio != nullptr;
 }
+
 void game_play_mission_audio(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->missionSound.setBuffer(args.getVM()->getWorld()->missionAudio);
-	args.getVM()->getWorld()->missionSound.play();
-	args.getVM()->getWorld()->missionSound.setLoop(false);
+	auto world = args.getVM()->getWorld();
+	if ( world->missionAudio )
+	{
+		world->missionSound.setBuffer(*args.getVM()->getWorld()->missionAudio);
+		world->missionSound.play();
+		world->missionSound.setLoop(false);
+	}
 }
 bool game_is_audio_finished(const ScriptArguments& args)
 {
@@ -719,15 +726,17 @@ void game_play_music_id(const ScriptArguments& args)
 	std::string name = "Miscom";
 	
 	// TODO play anything other than Miscom.wav
-	if(! gw->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".wav") )
+	if(! gw->gameData.loadAudioClip( name + ".wav" ) )
 	{
 		std::cerr << "Error loading audio" << std::endl;
 		return;
 	}
-	
-	gw->missionSound.setBuffer(args.getVM()->getWorld()->missionAudio);
-	gw->missionSound.play();
-	gw->missionSound.setLoop(false);
+	else if ( args.getVM()->getWorld()->missionAudio )
+	{
+		gw->missionSound.setBuffer(* args.getVM()->getWorld()->missionAudio);
+		gw->missionSound.play();
+		gw->missionSound.setLoop(false);
+	}
 }
 
 void game_clear_print(const ScriptArguments& args)

@@ -519,10 +519,34 @@ bool GameData::loadAudioStream(const std::string &name)
 	return result;
 }
 
-bool GameData::loadAudio(sf::SoundBuffer& sound, const std::string& name)
+bool GameData::loadAudioClip(const std::string& name)
 {
 	auto fname = findPathRealCase(datpath + "/audio/", name);
-	return sound.loadFromFile(fname);
+	
+	if ( engine->missionAudio )
+	{
+		delete engine->missionAudio;
+		engine->missionAudio = nullptr;
+	}
+	
+	if ( name.find(".mp3") != name.npos )
+	{
+		std::cerr << "FIXME: MP3 Audio unsupported outside cutscenes" << std::endl;
+		return false;
+	}
+	
+	engine->missionAudio = new sf::SoundBuffer;
+	
+	bool r = engine->missionAudio->loadFromFile(fname);
+	
+	if (! r )
+	{
+		std::cerr << "Error loading audio clip " << fname << std::endl;
+		delete engine->missionAudio;
+		engine->missionAudio = nullptr;
+	}
+	
+	return r;
 }
 
 void GameData::loadSplash(const std::string &name)
