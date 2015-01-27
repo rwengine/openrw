@@ -16,6 +16,11 @@ void PlayerController::setInputEnabled(bool enabled)
 	_enabled = enabled;
 }
 
+bool PlayerController::isInputEnabled() const
+{
+	return _enabled;
+}
+
 void PlayerController::updateCameraDirection(const glm::quat& rot)
 {
 	cameraRotation = rot;

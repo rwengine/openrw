@@ -114,7 +114,7 @@ void IngameState::tick(float dt)
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 	
 	auto player = getPlayer();
-	if( player )
+	if( player && player->isInputEnabled() )
 	{
 		float qpi = glm::half_pi<float>();
 
@@ -212,11 +212,11 @@ void IngameState::handleEvent(const sf::Event &event)
 			{
 				getWorld()->state.skipCutscene = true;
 			}
-			else if( player ) {
+			else if( player && player->isInputEnabled() ) {
 				if( player->getCharacter()->getCurrentVehicle() ) {
 					player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
 				}
-				else
+				else 
 				{
 					player->jump();
 				}
@@ -238,7 +238,7 @@ void IngameState::handleEvent(const sf::Event &event)
 			player->setRunning(true);
 			break;
 		case sf::Keyboard::F:
-			if( player ) {
+			if( player && player->isInputEnabled() ) {
 				if( player->getCharacter()->getCurrentVehicle()) {
 					player->exitVehicle();
 				}

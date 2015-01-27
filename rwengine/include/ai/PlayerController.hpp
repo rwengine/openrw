@@ -22,6 +22,7 @@ public:
 	 * @todo actually implement input being disabled.
 	 */
 	void setInputEnabled(bool enabled);
+	bool isInputEnabled() const;
 	
 	void updateCameraDirection(const glm::quat& rot);
 	
