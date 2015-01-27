@@ -55,6 +55,18 @@ struct SCMOpcodeParameter {
 	};
 	
 	template<class T> T* handleOf() const { return static_cast<T*>(*handle); }
+	
+	int integerValue() const 
+	{
+		if ( type == TGlobal )
+		{
+			return * globalInteger;
+		}
+		else
+		{
+			return integer;
+		}
+	}
 };
 
 typedef std::vector<SCMOpcodeParameter> SCMParams;

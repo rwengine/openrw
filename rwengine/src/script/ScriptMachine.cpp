@@ -29,6 +29,21 @@ bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
+#if SCM_DEBUG_INSTRUCTIONS
+	std::string threadfilter;
+	if(getenv("SCM_DEBUG_THREAD"))
+	{
+		threadfilter = getenv("SCM_DEBUG_THREAD");
+	}
+	
+	bool debug_op = threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos;
+	
+	if ( debug_op )
+	{
+		std::cout << t.name << " " << t.wakeCounter << std::endl;
+	}
+#endif
+	
 	if( t.wakeCounter > 0 ) {
 		t.wakeCounter = std::max( t.wakeCounter - msPassed, 0 );
 	}
@@ -145,13 +160,6 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		else
 		{
 #if SCM_DEBUG_INSTRUCTIONS
-			std::string threadfilter;
-			if(getenv("SCM_DEBUG_THREAD"))
-			{
-				threadfilter = getenv("SCM_DEBUG_THREAD");
-			}
-			
-			bool debug_op = threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos;
 			if( debug_op )
 			{
 				std::cout << std::setw(7) << std::setfill(' ') << t.name <<

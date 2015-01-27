@@ -11,7 +11,7 @@ SCMThread::pc_t localizeLabel(SCMThread* t, int label)
 
 void vm_sleep(const ScriptArguments& args)
 {
-	args.getThread()->wakeCounter = args[0].integer;
+	args.getThread()->wakeCounter = args[0].integerValue();
 	if( args.getThread()->wakeCounter == 0 ) {
 		args.getThread()->wakeCounter = -1;
 	}

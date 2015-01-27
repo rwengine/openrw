@@ -252,6 +252,28 @@ bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 	return false;
 }
 
+bool game_character_near_point_on_foot_3D(const ScriptArguments& args)
+{
+	auto controller = static_cast<CharacterController*>(*args[0].handle);
+	glm::vec3 center(args[1].real, args[2].real, args[3].real);
+	glm::vec3 size(args[4].real, args[5].real, args[6].real);
+	bool drawCylinder = !!args[7].integer;
+	
+	auto vehicle = controller->getCharacter()->getCurrentVehicle();
+	if( ! vehicle ) {
+		auto distance = center - controller->getCharacter()->getPosition();
+		distance /= size;
+		if( glm::length( distance ) < 1.f ) return true;
+	}
+	
+	if( drawCylinder )
+	{
+		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, center, size);
+	}
+	
+	return false;
+}
+
 bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 {
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
@@ -961,6 +983,7 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00ED, game_character_near_point_on_foot_2D, 6, "Is Character near point on foot" );
 	
 	bindUnimplemented( 0x00F5, game_locate_character_in_sphere, 8, "Locate Player In Sphere" );
+	bindFunction(0x00F6, game_character_near_point_on_foot_3D, 8, "Is Character near point on foot" );
 	
 	bindFunction(0x0100, game_character_near_point_in_vehicle, 8, "Is Character near point in car" );
 	
