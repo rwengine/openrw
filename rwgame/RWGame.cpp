@@ -225,6 +225,12 @@ void RWGame::render(float alpha)
 	}
 
 	viewCam.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
+	
+	if ( engine->state.isCinematic )
+	{
+		float cinematicAspect = 19.f/10.f;
+		viewCam.frustum.fov *= cinematicAspect / viewCam.frustum.aspectRatio;
+	}
 
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
