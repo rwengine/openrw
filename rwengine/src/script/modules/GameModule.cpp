@@ -317,6 +317,25 @@ void game_get_runtime(const ScriptArguments& args)
 	*args[0].globalInteger = args.getVM()->getWorld()->gameTime * 1000;
 }
 
+void game_print_big_with_number(const ScriptArguments& args)
+{
+	std::string id(args[0].string);
+	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
+	
+	int number = args[1].integer;
+	str += "\n" + std::to_string(number);
+	
+	unsigned short style = args[3].integer;
+	
+	args.getVM()->getWorld()->state.text.push_back({
+		id,
+		str,
+		args.getVM()->getWorld()->gameTime,
+		args[2].integer / 1000.f,
+		style
+	});
+}
+
 void game_disable_roads(const ScriptArguments& args)
 {
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
@@ -898,7 +917,7 @@ GameModule::GameModule()
 	
 	bindUnimplemented(0x01E0, game_clear_leader, 1, "Clear Leader" );
 	
-	bindUnimplemented(0x01E3, game_print_big_with_number, 4, "Print Big With Number" );
+	bindFunction(0x01E3, game_print_big_with_number, 4, "Print Big With Number");
 	
 	bindFunction(0x01E7, game_disable_roads, 6, "Enable Roads" );
 	bindFunction(0x01E8, game_enabled_roads, 6, "Disable Roads" );
