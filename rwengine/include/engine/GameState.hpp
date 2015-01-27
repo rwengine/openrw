@@ -66,6 +66,20 @@ struct BlipData
 	
 	/* Texture for use in the radar */
 	std::string texture;
+	
+	enum DisplayMode
+	{
+		Hide = 0,
+		RadarOnly = 1,
+		Show = 2
+	};
+	
+	/* Should the blip be displayed? */
+	DisplayMode display;
+	
+	BlipData()
+	: id(-1), target(nullptr), display(Show)
+	{ }
 };
 
 struct GameState

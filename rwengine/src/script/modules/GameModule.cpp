@@ -281,6 +281,26 @@ void game_add_location_blip(const ScriptArguments& args)
 	*args[3].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
 }
 
+void game_change_blip_mode(const ScriptArguments& args)
+{
+	int id = *args[0].globalInteger;
+	BlipData& blip = args.getVM()->getWorld()->state.radarBlips[id];
+	int mode = args[1].integer;
+	
+	switch ( mode )
+	{
+		default:
+			blip.display = BlipData::Hide;
+			break;
+		case 2:
+			blip.display = BlipData::RadarOnly;
+			break;
+		case 3:
+			blip.display = BlipData::Show;
+			break;
+	}
+}
+
 void game_enable_input(const ScriptArguments& args)
 {
 	auto controller = static_cast<PlayerController*>(*args[0].handle);
@@ -432,6 +452,70 @@ void game_controller_mode(const ScriptArguments& args)
 void game_set_widescreen(const ScriptArguments& args)
 {
 	args.getVM()->getWorld()->state.isCinematic = !!args[0].integer;
+}
+
+static const char* sprite_names[] = {
+	"", // 0
+	"radar_asuka",
+	"radar_bomb",
+	"radar_cat",
+	"radar_centre",
+	"radar_copcar",
+	"radar_don",
+	"radar_eight",
+	"radar_el",
+	"radar_ice",
+	"radar_joey",
+	"radar_kenji",
+	"radar_liz",
+	"radar_luigi",
+	"radar_north",
+	"radar_ray",
+	"radar_sal",
+	"radar_save",
+	"radar_spray",
+	"radar_tony",
+	"radar_weapon",
+};
+
+void game_add_contact_blip(const ScriptArguments& args)
+{
+	glm::vec3 c( args[0].real, args[1].real, args[2].real );
+	int sprite = args[3].integer;
+	
+	// Look up the sprite ID.
+	std::string spriteName = "";
+	if ( sprite < sizeof( sprite_names ) )
+	{
+		spriteName = sprite_names[sprite];
+	}
+	
+	BlipData bd;
+	bd.coord = c;
+	bd.target = nullptr;
+	bd.texture = spriteName;
+	
+	*args[4].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(bd);
+}
+
+void game_add_sprite_blip(const ScriptArguments& args)
+{
+	glm::vec3 c( args[0].real, args[1].real, args[2].real );
+	int sprite = args[3].integer;
+	
+	// Look up the sprite ID.
+	std::string spriteName = "";
+	if ( sprite < sizeof( sprite_names ) )
+	{
+		spriteName = sprite_names[sprite];
+	}
+	
+	BlipData bd;
+	bd.coord = c;
+	bd.target = nullptr;
+	bd.texture = spriteName;
+	
+	*args[4].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(bd);
 }
 
 void game_load_cutscene(const ScriptArguments& args)
@@ -787,11 +871,11 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0181, game_link_character_mission_flag, 2, "Link Character Mission Flag" );
 	bindUnimplemented( 0x0182, game_unknown, 2, "Unknown Character Opcode" );
 	
-	bindFunction( 0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle" );
-	bindFunction( 0x0187, game_add_character_blip, 2, "Add Blip for Character" );
+	bindFunction(0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle");
+	bindFunction(0x0187, game_add_character_blip, 2, "Add Blip for Character");
 
-	bindFunction( 0x018A, game_add_location_blip, 4, "Add Blip for Coord" );
-	bindUnimplemented( 0x018B, game_change_blip_mode, 2, "Change Blip Display Mode" );
+	bindFunction(0x018A, game_add_location_blip, 4, "Add Blip for Coord");
+	bindFunction(0x018B, game_change_blip_mode, 2, "Change Blip Display Mode");
 	
 	bindUnimplemented( 0x018D, game_create_soundscape, 5, "Create soundscape" );
 
@@ -868,10 +952,10 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0297, game_reset_kills, 0, "Reset Player Kills" );
 	
 	bindUnimplemented( 0x02A2, game_add_particle, 5, "Add Particle" );
-	bindFunction(0x02A3, game_set_widescreen, 1, "Set Widescreen" );
+	bindFunction(0x02A3, game_set_widescreen, 1, "Set Widescreen");
 	
-	bindUnimplemented( 0x02A7, game_add_contact_blip, 5, "Add Radar Contact Blip" );
-	bindUnimplemented( 0x02A8, game_add_radar_blip, 5, "Add Radar Blip" );
+	bindFunction(0x02A7, game_add_contact_blip, 5, "Add Contact Blip");
+	bindFunction(0x02A8, game_add_sprite_blip, 5, "Add Sprite Blip");
 	
 	bindFunction(0x02E4, game_load_cutscene, 1, "Load Cutscene Data" );
 	bindFunction(0x02E5, game_create_cutscene_object, 2, "Create Cutscene Object" );
