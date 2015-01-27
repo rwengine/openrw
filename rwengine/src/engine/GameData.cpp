@@ -35,6 +35,7 @@ std::string findPathRealCase(const std::string& base, const std::string& path)
 		isDirectory = false;
 	}
 	std::string orgFileName = isDirectory ? path.substr(0, endslash) : path;
+	std::transform(orgFileName.begin(), orgFileName.end(), orgFileName.begin(), ::tolower);
 	std::string realName;
 	
 	// Open the current "base" path (i.e. the real path)
@@ -491,10 +492,31 @@ void GameData::loadWeaponDAT(const std::string &name)
 	l.loadWeapons(name, weaponData);
 }
 
-bool GameData::loadAudio(MADStream& music, const std::string &name)
+bool GameData::loadAudioStream(const std::string &name)
 {
 	auto fname = findPathRealCase(datpath + "/audio/", name);
-	return music.open(fname);
+	
+	if ( engine->cutsceneAudio )
+	{
+		delete engine->cutsceneAudio;
+		engine->cutsceneAudio = nullptr;
+	}
+	
+	bool result = false;
+	if ( name.find(".mp3") != name.npos )
+	{
+		auto stream = new MADStream;
+		engine->cutsceneAudio = stream;
+		result = stream->openFromFile(fname);
+	}
+	else
+	{
+		auto stream = new sf::Music;
+		engine->cutsceneAudio = stream;
+		result = stream->openFromFile(fname);
+	}
+	
+	return result;
 }
 
 bool GameData::loadAudio(sf::SoundBuffer& sound, const std::string& name)

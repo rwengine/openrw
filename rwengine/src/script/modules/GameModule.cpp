@@ -697,7 +697,10 @@ void game_load_audio(const ScriptArguments& args)
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 	if(! args.getVM()->getWorld()->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".wav"))
 	{
-		std::cerr << "Couldn't load mission audio " << name << std::endl;
+		if(! args.getVM()->getWorld()->gameData.loadAudio(args.getVM()->getWorld()->missionAudio, name + ".mp3"))
+		{
+			std::cerr << "Couldn't load mission audio " << name << std::endl;
+		}
 	}
 }
 bool game_is_audio_loaded(const ScriptArguments& args)
