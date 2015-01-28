@@ -48,9 +48,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
 			wi.m_suspensionRestLength1 = restLength;
 
-			// Max force slightly more than gravity.
-			wi.m_maxSuspensionForce = info->handling.mass * 12.f;
-			wi.m_suspensionStiffness = (info->handling.suspensionForce * 10.f);
+			wi.m_maxSuspensionForce = info->handling.mass * 9.f;
+			wi.m_suspensionStiffness = (info->handling.suspensionForce * 9.f);
 
 			//float dampEffect = (info->handling.suspensionDamping) / travel;
 			//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
@@ -58,7 +57,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 			wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
 			wi.m_rollInfluence = 0.45f;
-			wi.m_frictionSlip = tuning.m_frictionSlip * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
+			float halfFriction = tuning.m_frictionSlip * 0.5f;
+			wi.m_frictionSlip = halfFriction + halfFriction * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 		}
 
 		// Hide all LOD and damage frames.
@@ -146,7 +146,21 @@ void VehicleObject::tick(float dt)
 
 void VehicleObject::tickPhysics(float dt)
 {
-	if(physVehicle) {
+	if( physVehicle )
+	{
+		// "Encourage" the vehicle to remain upright.
+		glm::quat rot = getRotation();
+		glm::vec3 t = rot * glm::vec3(1.f, 0.f, 0.f);
+		float roll = btAtan2(t.z, glm::length(glm::vec2(t.x, t.y)));
+		if( glm::abs( roll ) > glm::quarter_pi<float>() )
+		{
+			float steeringBias = glm::abs(steerAngle) > 0.1f ? 2.f : 1.f;
+			glm::vec3 torque(0.f, roll, 0.f);
+			torque = rot * torque;
+			btVector3 impulse( torque.x, torque.y, torque.z );
+			physBody->applyTorqueImpulse(impulse * 200.f * steeringBias);
+		}
+		
 		// todo: a real engine function
 		float velFac = info->handling.maxVelocity;
 		float engineForce = info->handling.acceleration * throttle * velFac;
@@ -249,6 +263,12 @@ void VehicleObject::tickPhysics(float dt)
 		}
 
 		if( _inWater ) {
+			// Ensure that vehicles don't fall asleep at the top of a wave.
+			if(! physBody->isActive() )
+			{
+				physBody->activate(true);
+			}
+			
 			float bbZ = info->handling.dimensions.z/2.f;
 
 			float oZ = 0.f;
@@ -416,9 +436,7 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 		}
 	}
 	else {
-		if(it == seatOccupants.end()) {
-			seatOccupants.insert({seat, occupant});
-		}
+		seatOccupants[seat] = occupant;
 	}
 }
 
@@ -501,7 +519,7 @@ void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)
 		if ( ws.z <= h ) {
 			float x = (h - ws.z);
 			float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * physBody->getLinearVelocity().z();
-			physBody->applyForce(btVector3(0.f, 0.f, F),
+			physBody->applyImpulse(btVector3(0.f, 0.f, F),
 								 btVector3(relPt.x, relPt.y, relPt.z));
 		}
 	}
