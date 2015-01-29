@@ -351,6 +351,49 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	}
 	transparentDrawQueue.clear();
 	
+	// Render arrows above anything that isn't radar only (or hidden)
+	ModelHandle* arrowModel = engine->gameData.models["arrow"];
+	if( arrowModel && arrowModel->model )
+	{
+		auto arrowTex = engine->gameData.textures[{"copblue",""}];
+		auto arrowFrame = arrowModel->model->findFrame( "arrow" );
+		for( auto& blip : engine->state.radarBlips )
+		{
+			if( blip.second.display == BlipData::Show )
+			{
+				glm::mat4 model;
+
+				if( blip.second.target )
+				{
+					model = blip.second.target->getTimeAdjustedTransform( _renderAlpha );
+				}
+				else
+				{
+					model = glm::translate( model, blip.second.coord );
+				}
+
+				float a = engine->gameTime * glm::pi<float>();
+				model = glm::translate( model, glm::vec3(0.f, 0.f, 2.5f + glm::sin( a ) * 0.5f) );
+				model = glm::rotate( model, a, glm::vec3(0.f, 0.f, 1.f) );
+				model = glm::scale( model, glm::vec3(1.5f, 1.5f, 1.5f) );
+
+				Renderer::DrawParameters dp;
+				dp.texture = arrowTex.texName;
+				dp.ambient = 1.f;
+				dp.colour = glm::u8vec4(255, 255, 255, 255);
+
+				auto geom = arrowModel->model->geometries[arrowFrame->getGeometries()[0]];
+				Model::SubGeometry& sg = geom->subgeom[0];
+
+				dp.start = sg.start;
+				dp.count = sg.numIndices;
+				dp.diffuse = 1.f;
+
+				renderer->draw( model, &geom->dbuff, dp );
+			}
+		}
+	}
+
 	// Draw goal indicators
 	glDepthMask(GL_FALSE);
 	renderer->useProgram( particleProg );

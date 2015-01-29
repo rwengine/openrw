@@ -102,6 +102,7 @@ void GameData::load()
 	_knownFiles.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
 	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
 	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
+	_knownFiles.insert({"arrow.dff", {false, datpath+"/models/Generic/arrow.DFF"}});
 	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
 	_knownFiles.insert({"hud.txd", {false, datpath+"/models/hud.txd"}});
 	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
@@ -114,6 +115,7 @@ void GameData::load()
 
 	loadDFF("wheels.DFF");
 	loadDFF("weapons.dff");
+	loadDFF("arrow.dff");
 	loadTXD("particle.txd");
 	loadTXD("hud.txd");
 	
