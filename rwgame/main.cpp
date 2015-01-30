@@ -12,7 +12,7 @@ std::string getGamePath()
 int main(int argc, char *argv[])
 {
 
-	RWGame game(getGamePath());
+	RWGame game( getGamePath(), argc, argv );
 
 	return game.run();
 }

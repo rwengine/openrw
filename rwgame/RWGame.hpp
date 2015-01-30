@@ -19,7 +19,7 @@ class RWGame
 	sf::Font font;
 public:
 
-	RWGame(const std::string& gamepath);
+	RWGame(const std::string& gamepath, int argc, char* argv[]);
 	~RWGame();
 
 	int run();

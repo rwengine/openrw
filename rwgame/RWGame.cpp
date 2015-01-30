@@ -15,7 +15,7 @@
 
 DebugDraw* debug;
 
-RWGame::RWGame(const std::string& gamepath)
+RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	: engine(nullptr), inFocus(true),
 	  accum(0.f), timescale(1.f)
 {
@@ -24,6 +24,18 @@ RWGame::RWGame(const std::string& gamepath)
 	}
 
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
+
+	for( int i = 1; i < argc; ++i )
+	{
+		if( strcasecmp( "-w", argv[i] ) == 0 && i+1 < argc )
+		{
+			w = std::atoi(argv[i+1]);
+		}
+		if( strcasecmp( "-h", argv[i] ) == 0 && i+1 < argc )
+		{
+			h = std::atoi(argv[i+1]);
+		}
+	}
 
 	sf::ContextSettings cs;
 	cs.depthBits = 32;
