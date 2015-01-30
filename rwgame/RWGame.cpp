@@ -24,6 +24,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	}
 
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
+	bool fullscreen = false;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -35,11 +36,22 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		{
 			h = std::atoi(argv[i+1]);
 		}
+		if( strcasecmp( "-f", argv[i] ) == 0 )
+		{
+			fullscreen = true;
+		}
+	}
+	
+	
+	sf::Uint32 style = sf::Style::Default;
+	if( fullscreen )
+	{
+		style |= sf::Style::Fullscreen;
 	}
 
 	sf::ContextSettings cs;
 	cs.depthBits = 32;
-	window.create(sf::VideoMode(w, h), "", sf::Style::Default, cs);
+	window.create(sf::VideoMode(w, h), "",  style, cs);
 	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
