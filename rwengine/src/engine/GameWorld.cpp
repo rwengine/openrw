@@ -76,7 +76,8 @@ public:
 
 GameWorld::GameWorld(const std::string& path)
 	: gameTime(0.f), gameData(path), renderer(this), randomEngine(rand()),
-	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr), missionAudio(nullptr)
+	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr), missionAudio(nullptr),
+	  paused(false)
 {
 	gameData.engine = this;
 }
@@ -807,4 +808,14 @@ void GameWorld::clearTickData()
 	areaIndicators.clear();
 }
 
+void GameWorld::setPaused(bool pause)
+{
+	paused = pause;
+	sound.pause(pause);
+}
+
+bool GameWorld::isPaused() const
+{
+	return paused;
+}
 

@@ -9,7 +9,7 @@
 #include <objects/ItemPickup.hpp>
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
-#include <boost/concept_check.hpp>
+#include <engine/GameWorld.hpp>
 
 #define AUTOLOOK_TIME 2.f
 
@@ -22,6 +22,10 @@ IngameState::IngameState(RWGame* game, bool test)
 	else {
 		getWorld()->runScript("data/main.scm");
 	}
+	
+	// Start playing city.wav
+	
+	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
 }
 
 void IngameState::startTest()

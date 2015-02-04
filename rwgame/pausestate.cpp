@@ -16,12 +16,12 @@ PauseState::PauseState(RWGame* game)
 
 void PauseState::enter()
 {
-
+	getWorld()->setPaused(true);
 }
 
 void PauseState::exit()
 {
-
+	getWorld()->setPaused(false);
 }
 
 void PauseState::tick(float dt)

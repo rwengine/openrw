@@ -88,6 +88,14 @@ public:
 	}
 	
 	/**
+	 * Returns the game data path
+	 */
+	const std::string& getDataPath() const
+	{
+		return datpath;
+	}
+	
+	/**
 	 * Loads the data contained in the given file
 	 */
 	void loadIDE(const std::string& name);

@@ -8,6 +8,7 @@
 
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
+#include <audio/SoundManager.hpp>
 
 class WorkContext;
 
@@ -180,6 +181,11 @@ public:
 	GameState state;
 	
 	/**
+	 * State of playing sounds
+	 */
+	SoundManager sound;
+	
+	/**
 	 * Object Definitions
 	 */
 	std::map<ObjectID, ObjectInformationPtr> objectTypes;
@@ -280,6 +286,9 @@ public:
 	const std::vector<AreaIndicatorInfo>& getAreaIndicators() const { return areaIndicators; }
 	
 	void clearTickData();
+	
+	void setPaused(bool pause);
+	bool isPaused() const;
 
 private:
 
@@ -289,6 +298,11 @@ private:
 	std::queue<GameObject*> deletionQueue;
 
 	std::vector<AreaIndicatorInfo> areaIndicators;
+	
+	/**
+	 * Flag for pausing the simulation
+	 */
+	bool paused;
 };
 
 #endif

@@ -125,9 +125,13 @@ int RWGame::run()
 
 		while ( accum >= GAME_TIMESTEP ) {
 
-			StateManager::get().tick(GAME_TIMESTEP);
+			if( ! getWorld()->isPaused() )
+			{
+				StateManager::get().tick(GAME_TIMESTEP);
 
-			tick(GAME_TIMESTEP);
+				tick(GAME_TIMESTEP);
+			}
+			
 			accum -= GAME_TIMESTEP;
 		}
 
@@ -253,7 +257,7 @@ void RWGame::render(float alpha)
 	if ( engine->state.isCinematic )
 	{
 		float cinematicAspect = 19.f/10.f;
-		viewCam.frustum.fov *= cinematicAspect / viewCam.frustum.aspectRatio;
+		viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
 	}
 
 	glEnable(GL_DEPTH_TEST);
