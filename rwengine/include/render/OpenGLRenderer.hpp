@@ -77,6 +77,7 @@ public:
 	/// @todo dont use GLint in the interface.
 	virtual void setProgramBlockBinding(ShaderProgram* p, const std::string& name, GLint point) = 0;
 	virtual void setUniformTexture(ShaderProgram*p, const std::string& name, GLint tex) = 0;
+	virtual void setUniform(ShaderProgram*p, const std::string& name, const glm::mat4& m) = 0;
 	virtual void setUniform(ShaderProgram*p, const std::string& name, const glm::vec4& v) = 0;
 	virtual void setUniform(ShaderProgram*p, const std::string& name, const glm::vec3& v) = 0;
 	virtual void setUniform(ShaderProgram*p, const std::string& name, const glm::vec2& v) = 0;
@@ -89,7 +90,15 @@ public:
 	virtual void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
 	virtual void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
 
+	void setViewport(const glm::ivec2& vp) { viewport = vp; }
+	const glm::ivec2& getViewport() const { return viewport; }
+
+	glm::mat4 get2DProjection() const;
+
 	virtual void invalidate() = 0;
+
+private:
+	glm::ivec2 viewport;
 };
 
 class OpenGLRenderer : public Renderer
@@ -127,6 +136,7 @@ public:
 	ShaderProgram* createShader(const std::string &vert, const std::string &frag);
 	void setProgramBlockBinding(ShaderProgram* p, const std::string &name, GLint point);
 	void setUniformTexture(ShaderProgram* p, const std::string &name, GLint tex);
+	void setUniform(ShaderProgram* p, const std::string& name, const glm::mat4& m);
 	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec4& m);
 	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec3& m);
 	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec2& m);

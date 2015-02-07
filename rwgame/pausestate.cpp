@@ -6,8 +6,8 @@
 PauseState::PauseState(RWGame* game)
 	: State(game)
 {
-	Menu *m = new Menu(game->getFont());
-	m->offset = glm::vec2(50.f, 100.f);
+	Menu *m = new Menu(2);
+	m->offset = glm::vec2( 200.f, 200.f );
 	m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 	m->addEntry(Menu::lambda("Exit", [&] { getWindow().close(); }));
@@ -29,9 +29,11 @@ void PauseState::tick(float dt)
 
 }
 
-void PauseState::draw(sf::RenderWindow& w)
+void PauseState::draw(GameRenderer* r)
 {
 	MapRenderer::MapInfo map;
+	
+	auto& w = getWindow();
 	
 	map.scale = 0.25f;
 	map.viewport = glm::vec2(w.getSize().x, w.getSize().y);
@@ -44,7 +46,7 @@ void PauseState::draw(sf::RenderWindow& w)
 	}
 	getWorld()->renderer.map.draw(map);
 
-    State::draw(w);
+    State::draw(r);
 }
 
 void PauseState::handleEvent(const sf::Event &e)

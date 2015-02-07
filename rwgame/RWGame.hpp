@@ -15,8 +15,6 @@ class RWGame
 
 	float accum;
 	float timescale;
-
-	sf::Font font;
 public:
 
 	RWGame(const std::string& gamepath, int argc, char* argv[]);
@@ -32,11 +30,6 @@ public:
 	sf::RenderWindow& getWindow()
 	{
 		return window;
-	}
-
-	sf::Font& getFont()
-	{
-		return font;
 	}
 
 	bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object = nullptr)

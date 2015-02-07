@@ -4,6 +4,7 @@
 
 #include <engine/GameObject.hpp>
 #include <engine/GameState.hpp>
+#include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/DebugDraw.hpp>
 #include <script/ScriptMachine.hpp>
@@ -19,10 +20,6 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	: engine(nullptr), inFocus(true),
 	  accum(0.f), timescale(1.f)
 {
-	if(! font.loadFromFile(gamepath + "/DejaVuSansMono.ttf")) {
-		std::cerr << "Failed to load font" << std::endl;
-	}
-
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
 
@@ -64,6 +61,11 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	engine->gameData.loadIMG("/models/gta3");
 	engine->gameData.loadIMG("/models/txd");
 	engine->gameData.loadIMG("/anim/cuts");
+	
+	// Set up text renderer
+	engine->renderer.text.setFontTexture(0, "pager");
+	engine->renderer.text.setFontTexture(1, "font1");
+	engine->renderer.text.setFontTexture(2, "font2");
 
 	/// @TODO expand this here.
 	engine->load();
@@ -139,7 +141,7 @@ int RWGame::run()
 
 		render(alpha);
 
-		StateManager::get().draw(window);
+		StateManager::get().draw(&engine->renderer);
 
 		window.display();
 
@@ -202,6 +204,9 @@ void RWGame::tick(float dt)
 
 void RWGame::render(float alpha)
 {
+	auto size = getWindow().getSize();
+	engine->renderer.getRenderer()->setViewport({size.x, size.y});
+	
 	ViewCamera viewCam;
 	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )
 	{
@@ -285,8 +290,6 @@ void RWGame::render(float alpha)
 	debug->flush(&engine->renderer);
 #endif
 	
-	window.resetGLStates();
-
 	std::stringstream ss;
 	ss << std::setfill('0') << "Time: " << std::setw(2) << engine->getHour()
 		<< ":" << std::setw(2) << engine->getMinute() << " (" << engine->gameTime << "s)\n";
@@ -302,39 +305,40 @@ void RWGame::render(float alpha)
 		}
 		ss << std::endl;
 	}
-
-	sf::Text text(ss.str(), font, 14);
-	text.setPosition(10, 10);
-	window.draw(text);
+	
+	TextRenderer::TextInfo ti;
+	ti.text = ss.str();
+	ti.font = 2;
+	ti.screenPosition = glm::vec2( 10.f, 10.f );
+	ti.size = 20.f;
+	engine->renderer.text.renderText(ti);
 
 	while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
 		engine->log.pop_front();
 	}
 
-	sf::Vector2f tpos(10.f, window.getSize().y - 30.f);
-	text.setCharacterSize(14);
+	ti.screenPosition = glm::vec2( 10.f, 500.f );
+	ti.size = 15.f;
 	for(auto it = engine->log.begin(); it != engine->log.end(); ++it) {
-		text.setString(it->message);
+		ti.text = it->message;
 		switch(it->type) {
 		case GameWorld::LogEntry::Error:
-			text.setColor(sf::Color::Red);
+			ti.baseColour = glm::vec3(1.f, 0.f, 0.f);
 			break;
 		case GameWorld::LogEntry::Warning:
-			text.setColor(sf::Color::Yellow);
+			ti.baseColour = glm::vec3(1.f, 1.f, 0.f);
 			break;
 		default:
-			text.setColor(sf::Color::White);
+			ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
 			break;
 		}
 
 		// Interpolate the color
-		auto c = text.getColor();
-		c.a = (engine->gameTime - it->time > 5.f) ? 255 - (((engine->gameTime - it->time) - 5.f)/5.f) * 255 : 255;
-		text.setColor(c);
+		// c.a = (engine->gameTime - it->time > 5.f) ? 255 - (((engine->gameTime - it->time) - 5.f)/5.f) * 255 : 255;
+		// text.setColor(c);
 
-		text.setPosition(tpos);
-		window.draw(text);
-		tpos.y -= text.getLocalBounds().height;
+		engine->renderer.text.renderText(ti);
+		ti.screenPosition.y -= ti.size;
 	}
 	
 	for( int i = 0; i < engine->state.text.size(); )
@@ -351,77 +355,79 @@ void RWGame::render(float alpha)
 
 	for(OnscreenText& t : engine->state.text)
 	{
-		float fontSize = 15.f;
+		float fontSize = 20.f;
 		switch(t.osTextStyle)
 		{
 			default:
-				fontSize = 15.f;
+				fontSize = 20.f;
 				break;
 			case 1:
-				fontSize = 25.f;
+				fontSize = 40.f;
 				break;
 			case 2:
 				fontSize = 20.f;
 				break;
 		}
 		
-		sf::Text messageText(t.osTextString, font, fontSize);
-		auto sz = window.getSize();
-		
-		auto b = messageText.getLocalBounds();
-		
+		ti.size = fontSize;
+		ti.screenPosition = glm::vec2(0.f);
+		ti.font = 0;
 		if(t.osTextStyle == 1)
 		{
-			messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), sz.y / 2.f - std::round(b.height / 2.f));
+			ti.screenPosition = glm::vec2(500.f, 500.f);
 		}
 		else if(t.osTextStyle == 2)
 		{
-			messageText.setPosition(sz.x * 0.9f - std::round(b.width), sz.y * 0.8f - std::round(b.height / 2.f));
+			ti.screenPosition = glm::vec2(500.f, 500.f);
 		}
 		else if(t.osTextStyle == 12)
 		{
-			messageText.setPosition(15.f, 15.f);
+			ti.screenPosition = glm::vec2(20.f, 20.f);
+			ti.font = 2;
+// 			messageText.setPosition(15.f, 15.f);
 			
-			// Insert line breaks into the message string.
-			auto m = messageText.getString();
-			const float boxWidth = 250.f;
-			int lastSpace = 0;
-			float lineLength = 0.f, wordLength = 0.f;
-			for( int c = 0; c < m.getSize(); ++c )
-			{
-				if(m[c] == ' ')
-				{
-					lastSpace = c;
-					lineLength += wordLength;
-					wordLength = 0.f;
-				}
-				
-				auto& metrics = font.getGlyph(m[c], fontSize, false);
-				wordLength += metrics.bounds.width;
-				
-				if( lineLength + wordLength > boxWidth )
-				{
-					m[lastSpace] = '\n';
-					lineLength = 0.f;
-				}
-			}
-			messageText.setString(m);
-			
-			auto bds = messageText.getGlobalBounds();
-			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height) + sf::Vector2f(10.f, 10.f));
-			bg.setFillColor(sf::Color::Black);
-			bg.setPosition(sf::Vector2f(bds.left, bds.top) - sf::Vector2f(5.f, 5.f));
-			window.draw(bg);
+// 			// Insert line breaks into the message string.
+// 			auto m = messageText.getString();
+// 			const float boxWidth = 250.f;
+// 			int lastSpace = 0;
+// 			float lineLength = 0.f, wordLength = 0.f;
+// 			for( int c = 0; c < m.getSize(); ++c )
+// 			{
+// 				if(m[c] == ' ')
+// 				{
+// 					lastSpace = c;
+// 					lineLength += wordLength;
+// 					wordLength = 0.f;
+// 				}
+// 				
+// 				auto& metrics = font.getGlyph(m[c], fontSize, false);
+// 				wordLength += metrics.bounds.width;
+// 				
+// 				if( lineLength + wordLength > boxWidth )
+// 				{
+// 					m[lastSpace] = '\n';
+// 					lineLength = 0.f;
+// 				}
+// 			}
+// 			messageText.setString(m);
+// 			
+// 			auto bds = messageText.getGlobalBounds();
+// 			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height) + sf::Vector2f(10.f, 10.f));
+// 			bg.setFillColor(sf::Color::Black);
+// 			bg.setPosition(sf::Vector2f(bds.left, bds.top) - sf::Vector2f(5.f, 5.f));
+// 			window.draw(bg);
 		}
 		else
 		{
-			float lowerBar = sz.y - sz.y * 0.1f;
-			messageText.setPosition(sz.x / 2.f - std::round(b.width / 2.f), lowerBar - std::round(b.height / 2.f));
+			float lowerBar = 550.f;
+			ti.screenPosition = glm::vec2(300.f, lowerBar);
 		}
-		window.draw(messageText);
+		
+		ti.text = t.osTextString;
+		engine->renderer.text.renderText(ti);
 	}
 
-	for(auto& t : engine->state.texts) {
+	/*for(auto& t : engine->state.texts) {
 		sf::Text messageText(t.text, font, 15);
 
 		glm::vec2 scpos(t.position.x, t.position.y);
@@ -432,7 +438,7 @@ void RWGame::render(float alpha)
 		messageText.setPosition(scpos.x, scpos.y);
 
 		window.draw(messageText);
-	}
+	}*/
 }
 
 void RWGame::globalKeyEvent(const sf::Event& event)

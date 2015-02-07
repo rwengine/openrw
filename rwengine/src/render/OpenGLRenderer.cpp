@@ -1,6 +1,7 @@
 #include <render/OpenGLRenderer.hpp>
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -79,6 +80,22 @@ GLuint compileProgram(const char* vertex, const char* fragment)
 	return prog;
 }
 
+glm::mat4 Renderer::get2DProjection() const
+{
+	glm::vec2 aspect(1.f, 1.f);
+	if( viewport.x > viewport.y )
+	{
+		// Widescreen
+		aspect.x = viewport.x / (float) viewport.y;
+	}
+	else
+	{
+		// Tall-o-vision
+		aspect.y = viewport.y / (float)viewport.x;
+	}
+	return glm::ortho(0.f, 800.f * aspect.x, 600.f * aspect.y, 0.f, -1.f, 1.f);
+}
+
 void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 {
 	if( dbuff != currentDbuff )
@@ -145,6 +162,13 @@ void OpenGLRenderer::setUniformTexture(Renderer::ShaderProgram* p, const std::st
 	useProgram(p);
 
 	glUniform1i(currentProgram->getUniformLocation(name), tex);
+}
+
+void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p, const std::string& name, const glm::mat4& m)
+{
+	useProgram(p);
+
+	glUniformMatrix4fv(currentProgram->getUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p, const std::string& name, const glm::vec4& m)

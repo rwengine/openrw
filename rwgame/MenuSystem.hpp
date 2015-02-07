@@ -2,17 +2,16 @@
 #define _GAME_MENUSYSTEM_HPP_
 #include <string>
 #include <memory>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
+#include <render/GameRenderer.hpp>
 #include <functional>
 
 class Menu
 {
-	sf::Font font;
+	int font;
 public:
 	
-	Menu(const sf::Font& font)
+	Menu(int font)
 	 : font(font), activeEntry(-1) {}
 	
 	struct MenuEntry
@@ -20,19 +19,26 @@ public:
 		std::string name;
 		float _size;
 		
-		MenuEntry(const std::string& n, float size = 38.f) : name(n), _size(size) {}
+		MenuEntry(const std::string& n, float size = 30.f) : name(n), _size(size) {}
 		
 		float getHeight() { return _size; }
 		
-		virtual void draw(const sf::Font& font, sf::RenderWindow& window, glm::vec2& basis)
+		virtual void draw(int font, bool active, GameRenderer* r, glm::vec2& basis)
 		{
-			sf::Text t;
-			t.setFont(font);
-			t.setPosition(basis.x + 6, basis.y + 2);
-			t.setString(name);
-			auto cSize = getHeight() - 10.f;
-			t.setCharacterSize(cSize);
-			window.draw(t);
+			TextRenderer::TextInfo ti;
+			ti.font = font;
+			ti.screenPosition = basis;
+			ti.text = name;
+			ti.size = getHeight();
+			if( ! active )
+			{
+				ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
+			}
+			else
+			{
+				ti.baseColour = glm::vec3(1.f, 1.f, 0.f);
+			}
+			r->text.renderText(ti);
 			basis.y += getHeight();
 		}
 		
@@ -49,7 +55,7 @@ public:
 		 void activate(float clickX, float clickY) { callback(); }
 	};
 	
-	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 38.f)
+	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 30.f)
 	{
 		return std::shared_ptr<MenuEntry>(new Entry(n, callback, size));
 	}
@@ -68,20 +74,19 @@ public:
 		entries.push_back(entry);
 	}
 	
-	void draw(sf::RenderWindow& window)
+	void draw(GameRenderer* r)
 	{
 		glm::vec2 basis(offset);
 		for(size_t i = 0;
 			i < entries.size();
 			++i)
 		{
-			if(activeEntry >= 0 && i == (unsigned) activeEntry) {
-				sf::RectangleShape rs(sf::Vector2f(250.f, entries[i]->getHeight()));
-				rs.setPosition(basis.x, basis.y);
-				rs.setFillColor(sf::Color::Cyan);
-				window.draw(rs);
+			bool active = false;
+			if(activeEntry >= 0 && i == (unsigned) activeEntry)
+			{
+				active = true;
 			}
-			entries[i]->draw(font, window, basis);
+			entries[i]->draw(font, active, r, basis);
 		}
 	}
 	

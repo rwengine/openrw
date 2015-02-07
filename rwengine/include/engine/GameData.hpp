@@ -28,6 +28,7 @@ class SCMFile;
  * @brief Stores simple data about Textures such as transparency flags.
  *
  * @todo Covert usage to TextureHandles or something for streaming.
+ * @todo Move out of GameData.hpp and into TextureInfo.hpp
  */
 struct TextureInfo
 {

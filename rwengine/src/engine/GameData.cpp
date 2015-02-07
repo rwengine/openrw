@@ -107,6 +107,7 @@ void GameData::load()
 	_knownFiles.insert({"hud.txd", {false, datpath+"/models/hud.txd"}});
 	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
 	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
+	_knownFiles.insert({"fonts.txd", {false, datpath+"/models/fonts.txd"}});
 
 	_knownFiles.insert({"news.txd", {false, datpath+"/txd/NEWS.TXD"}});
 	_knownFiles.insert({"splash1.txd", {false, datpath+"/txd/SPLASH1.TXD"}});
@@ -118,6 +119,7 @@ void GameData::load()
 	loadDFF("arrow.dff");
 	loadTXD("particle.txd");
 	loadTXD("hud.txd");
+	loadTXD("fonts.txd");
 	
 	loadCarcols(datpath+"/data/carcols.dat");
 	loadWeather(datpath+"/data/timecyc.dat");

@@ -80,7 +80,7 @@ DrawBuffer ssRectDraw;
 
 GameRenderer::GameRenderer(GameWorld* engine)
 	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f),
-	map(engine, renderer)
+	map(engine, renderer), text(engine, this)
 {
 	engine->logInfo("[DRAW] " + renderer->getIDString());
 

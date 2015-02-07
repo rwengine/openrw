@@ -7,8 +7,7 @@ BOOST_AUTO_TEST_SUITE(MenuUnitTests)
 BOOST_AUTO_TEST_CASE(menu_test_click)
 {
 	bool clickered = false;
-	sf::Font f;
-	Menu test(f);
+	Menu test(0);
 	test.addEntry(Menu::lambda("Test", [&]{ clickered = true; }));
 	
 	BOOST_CHECK(! clickered );
@@ -32,8 +31,7 @@ BOOST_AUTO_TEST_CASE(menu_test_click)
 BOOST_AUTO_TEST_CASE(menu_test_click_offset)
 {
 	bool clickered = false;
-	sf::Font f;
-	Menu test(f);
+	Menu test(0);
 	test.offset = glm::vec2(200.f, 200.f);
 	test.addEntry(Menu::lambda("Test", [&]{ clickered = true; }));
 	
@@ -58,8 +56,7 @@ BOOST_AUTO_TEST_CASE(menu_test_click_offset)
 BOOST_AUTO_TEST_CASE(menu_test_active_index)
 {
 	int clickindex = -1;
-	sf::Font f;
-	Menu test(f);
+	Menu test(0);
 	test.addEntry(Menu::lambda("Test1", [&]{ clickindex = 0; }));
 	test.addEntry(Menu::lambda("Test2", [&]{ clickindex = 1; }));
 	
@@ -86,8 +83,7 @@ BOOST_AUTO_TEST_CASE(menu_test_active_index)
 BOOST_AUTO_TEST_CASE(menu_test_hover_index)
 {
 	int clickindex = -1;
-	sf::Font f;
-	Menu test(f);
+	Menu test(0);
 	test.addEntry(Menu::lambda("Test1", [&]{ clickindex = 0; }));
 	test.addEntry(Menu::lambda("Test2", [&]{ clickindex = 1; }));
 	

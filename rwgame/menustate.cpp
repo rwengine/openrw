@@ -7,8 +7,8 @@
 MenuState::MenuState(RWGame* game)
 	: State(game)
 {
-	Menu *m = new Menu(game->getFont());
-	m->offset = glm::vec2(50.f, 100.f);
+	Menu *m = new Menu(2);
+	m->offset = glm::vec2(200.f, 200.f);
 	m->addEntry(Menu::lambda("Start", [=] { StateManager::get().enter(new IngameState(game)); }));
 	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true)); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));

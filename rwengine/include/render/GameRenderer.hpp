@@ -10,6 +10,7 @@
 
 #include <render/OpenGLRenderer.hpp>
 #include "MapRenderer.hpp"
+#include "TextRenderer.hpp"
 
 class Model;
 class ModelFrame;
@@ -244,6 +245,7 @@ public:
 	}
 	
 	MapRenderer map;
+	TextRenderer text;
 };
 
 #endif

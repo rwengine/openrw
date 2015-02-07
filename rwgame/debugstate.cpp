@@ -24,8 +24,8 @@ void jumpCharacter(RWGame* game, CharacterController* controller, const glm::vec
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game), _freeLook( false ), _sonicMode( false )
 {
-	Menu *m = new Menu(game->getFont());
-	m->offset = glm::vec2(50.f, 100.f);
+	Menu *m = new Menu(2);
+	m->offset = glm::vec2(200.f, 200.f);
 	float entryHeight = 24.f;
 #if 0
 	m->addEntry(Menu::lambda("Random Vehicle", [this] {

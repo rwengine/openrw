@@ -47,10 +47,13 @@ void LoadingState::handleEvent(const sf::Event &e)
 	State::handleEvent(e);
 }
 
-void LoadingState::draw(sf::RenderWindow &w)
+void LoadingState::draw(GameRenderer* r)
 {
 	// Display some manner of loading screen.
-	sf::Text loadingText("Loading...", game->getFont(), 28);
-	loadingText.setPosition({30.f, 20.f});
-	w.draw(loadingText);
+	TextRenderer::TextInfo ti;
+	ti.text = "Loading...";
+	ti.screenPosition = glm::vec2( -1.f, 0.5f );
+	ti.size = 0.1f;
+	ti.font = 2;
+	r->text.renderText(ti);
 }

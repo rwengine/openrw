@@ -187,14 +187,14 @@ void IngameState::tick(float dt)
 	}
 }
 
-void IngameState::draw(sf::RenderWindow& w)
+void IngameState::draw(GameRenderer* r)
 {
 	if( !getWorld()->state.isCinematic && getWorld()->isCutsceneDone() )
 	{
-		drawHUD(w);
+		drawHUD(getWindow());
 	}
 	
-    State::draw(w);
+    State::draw(r);
 }
 
 

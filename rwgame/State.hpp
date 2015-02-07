@@ -2,7 +2,8 @@
 #define _GAME_STATE_HPP_
 #include <functional>
 #include <queue>
-#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 #include <render/ViewCamera.hpp>
 #include "MenuSystem.hpp"
 #include <glm/gtc/quaternion.hpp>
@@ -26,10 +27,10 @@ struct State
 	
 	virtual void tick(float dt) = 0;
 	
-	virtual void draw(sf::RenderWindow& w)
+	virtual void draw(GameRenderer* r)
 	{
 		if(getCurrentMenu()) {
-			getCurrentMenu()->draw(w);
+			getCurrentMenu()->draw(r);
 		}
 	}
 	
@@ -117,9 +118,9 @@ struct StateManager
 		states.back()->tick(dt);
 	}
 	
-	void draw(sf::RenderWindow& w)
+	void draw(GameRenderer* r)
 	{
-		states.back()->draw(w);
+		states.back()->draw(r);
 	}
 	
 	void exit()
