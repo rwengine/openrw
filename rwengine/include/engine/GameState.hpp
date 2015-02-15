@@ -28,6 +28,18 @@ struct OnscreenText
 	float osTextStart;
 	float osTextTime;
 	unsigned short osTextStyle;
+	
+	enum /*TextStyle*/
+	{
+		/// Used for subtitles
+		HighPriority = 0,
+		/// Mission completed message
+		CenterBig = 1,
+		/// Right aligned mission names
+		MissionName = 2,
+		/// Help text (top left, black background)
+		Help = 12
+	};
 };
 
 /**

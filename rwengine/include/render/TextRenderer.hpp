@@ -21,6 +21,13 @@ public:
 	 */
 	struct TextInfo
 	{
+		enum TextAlignemnt
+		{
+			Left = 0,
+			Right = 1,
+			Center = 2
+		};
+		
 		/// Font index @see TextRenderer::setFontTexture
 		int font;
 		/// Message to be displayed (including markup)
@@ -31,6 +38,8 @@ public:
 		float size;
 		/// Base colour
 		glm::vec3 baseColour;
+		/// Horizontal Alignment
+		TextAlignemnt align;
 		
 		TextInfo();
 	};

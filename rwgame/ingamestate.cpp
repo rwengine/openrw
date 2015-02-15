@@ -2,6 +2,7 @@
 #include "RWGame.hpp"
 #include "pausestate.hpp"
 #include "debugstate.hpp"
+#include "DrawUI.hpp"
 
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
@@ -191,12 +192,11 @@ void IngameState::draw(GameRenderer* r)
 {
 	if( !getWorld()->state.isCinematic && getWorld()->isCutsceneDone() )
 	{
-		drawHUD(r);
+		drawHUD(getPlayer(), getWorld(), r);
 	}
 	
     State::draw(r);
 }
-
 
 void IngameState::handleEvent(const sf::Event &event)
 {
@@ -299,30 +299,4 @@ const ViewCamera &IngameState::getCamera()
 	return _look;
 }
 
-void IngameState::drawHUD(GameRenderer* renderer)
-{
-	MapRenderer::MapInfo map;
-	map.scale = 0.4f;
-	
-	glm::quat plyRot;
-	
-	if( getPlayer() )
-	{
-		auto p = getPlayer();
-		plyRot = p->getCharacter()->getRotation();
-	}
-	
-	map.rotation = glm::roll(plyRot);
-	
-	const glm::ivec2& vp = renderer->getRenderer()->getViewport();
-	
-	map.mapScreenTop = glm::vec2(260.f, vp.y - 10.f);
-	map.mapScreenBottom = glm::vec2(10.f, vp.y - 210.f);
-	
-	if( getWorld()->state.player )
-	{
-		map.center = glm::vec2(getWorld()->state.player->getCharacter()->getPosition());
-	}
-	getWorld()->renderer.map.draw(map);
-}
 

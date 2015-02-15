@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <boost/config/no_tr1/complex.hpp>
 
 void game_print_big(const ScriptArguments& args)
 {

@@ -53,7 +53,7 @@ struct TextVertex
 
 
 TextRenderer::TextInfo::TextInfo()
-: font(0), size(1.f), baseColour({1.f, 1.f, 1.f})
+: font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left)
 {
 
 }
@@ -142,6 +142,16 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	dp.count = gb.getCount();
 	dp.texture = engine->gameData.textures[{fonts[ti.font], ""}].texName;
 	glm::vec2 ss( ti.size );
+	
+	/// @todo smarter alignment
+	if ( ti.align == TextInfo::Right )
+	{
+		coord.x -= ss.x * ti.text.length();
+	}
+	else if ( ti.align == TextInfo::Center )
+	{
+		coord.x -= glm::floor(ss.x * ti.text.length() * 0.5f);
+	}
 	
 	glm::vec3 colour = ti.baseColour;
 	

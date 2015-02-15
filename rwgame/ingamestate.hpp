@@ -29,9 +29,6 @@ public:
 	virtual void handleEvent(const sf::Event& event);
 
 	const ViewCamera& getCamera();
-	
-private:
-	void drawHUD(GameRenderer* r);
 };
 
 #endif // INGAMESTATE_HPP

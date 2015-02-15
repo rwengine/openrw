@@ -10,6 +10,8 @@ add_executable(rwgame
 	pausestate.cpp
 	menustate.cpp
 	debugstate.cpp
+	
+	DrawUI.cpp
 )
 
 include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})

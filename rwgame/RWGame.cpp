@@ -1,6 +1,7 @@
 #include "RWGame.hpp"
 #include "State.hpp"
 #include "loadingstate.hpp"
+#include "DrawUI.hpp"
 
 #include <engine/GameObject.hpp>
 #include <engine/GameState.hpp>
@@ -290,7 +291,7 @@ void RWGame::render(float alpha)
 	debug->flush(&engine->renderer);
 #endif
 	
-	std::stringstream ss;
+	/*std::stringstream ss;
 	ss << std::setfill('0') << "Time: " << std::setw(2) << engine->getHour()
 		<< ":" << std::setw(2) << engine->getMinute() << " (" << engine->gameTime << "s)\n";
 	ss << "View: " << viewCam.position.x << " " << viewCam.position.y << " " << viewCam.position.z << "\n";
@@ -304,16 +305,16 @@ void RWGame::render(float alpha)
 			ss << "Idle";
 		}
 		ss << std::endl;
-	}
+	}*/
 	
 	TextRenderer::TextInfo ti;
-	ti.text = ss.str();
+	//ti.text = ss.str();
 	ti.font = 2;
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
 	ti.size = 20.f;
-	engine->renderer.text.renderText(ti);
+	//engine->renderer.text.renderText(ti);
 
-	while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
+	/*while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
 		engine->log.pop_front();
 	}
 
@@ -339,7 +340,7 @@ void RWGame::render(float alpha)
 
 		engine->renderer.text.renderText(ti);
 		ti.screenPosition.y -= ti.size;
-	}
+	}*/
 	
 	for( int i = 0; i < engine->state.text.size(); )
 	{
@@ -352,93 +353,8 @@ void RWGame::render(float alpha)
 			i++;
 		}
 	}
-
-	for(OnscreenText& t : engine->state.text)
-	{
-		float fontSize = 20.f;
-		switch(t.osTextStyle)
-		{
-			default:
-				fontSize = 20.f;
-				break;
-			case 1:
-				fontSize = 40.f;
-				break;
-			case 2:
-				fontSize = 20.f;
-				break;
-		}
-		
-		ti.size = fontSize;
-		ti.screenPosition = glm::vec2(0.f);
-		ti.font = 0;
-		if(t.osTextStyle == 1)
-		{
-			ti.screenPosition = glm::vec2(500.f, 500.f);
-		}
-		else if(t.osTextStyle == 2)
-		{
-			ti.screenPosition = glm::vec2(500.f, 500.f);
-		}
-		else if(t.osTextStyle == 12)
-		{
-			ti.screenPosition = glm::vec2(20.f, 20.f);
-			ti.font = 2;
-// 			messageText.setPosition(15.f, 15.f);
-			
-// 			// Insert line breaks into the message string.
-// 			auto m = messageText.getString();
-// 			const float boxWidth = 250.f;
-// 			int lastSpace = 0;
-// 			float lineLength = 0.f, wordLength = 0.f;
-// 			for( int c = 0; c < m.getSize(); ++c )
-// 			{
-// 				if(m[c] == ' ')
-// 				{
-// 					lastSpace = c;
-// 					lineLength += wordLength;
-// 					wordLength = 0.f;
-// 				}
-// 				
-// 				auto& metrics = font.getGlyph(m[c], fontSize, false);
-// 				wordLength += metrics.bounds.width;
-// 				
-// 				if( lineLength + wordLength > boxWidth )
-// 				{
-// 					m[lastSpace] = '\n';
-// 					lineLength = 0.f;
-// 				}
-// 			}
-// 			messageText.setString(m);
-// 			
-// 			auto bds = messageText.getGlobalBounds();
-// 			sf::RectangleShape bg(sf::Vector2f(bds.width, bds.height) + sf::Vector2f(10.f, 10.f));
-// 			bg.setFillColor(sf::Color::Black);
-// 			bg.setPosition(sf::Vector2f(bds.left, bds.top) - sf::Vector2f(5.f, 5.f));
-// 			window.draw(bg);
-		}
-		else
-		{
-			float lowerBar = 550.f;
-			ti.screenPosition = glm::vec2(300.f, lowerBar);
-		}
-		
-		ti.text = t.osTextString;
-		engine->renderer.text.renderText(ti);
-	}
-
-	/*for(auto& t : engine->state.texts) {
-		sf::Text messageText(t.text, font, 15);
-
-		glm::vec2 scpos(t.position.x, t.position.y);
-		auto s = window.getSize();
-		scpos /= glm::vec2(640.f, 480.f);
-		scpos *= glm::vec2(s.x, s.y);
-
-		messageText.setPosition(scpos.x, scpos.y);
-
-		window.draw(messageText);
-	}*/
+	
+	drawOnScreenText(engine);
 }
 
 void RWGame::globalKeyEvent(const sf::Event& event)
