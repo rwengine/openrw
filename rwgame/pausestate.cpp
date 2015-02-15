@@ -33,17 +33,12 @@ void PauseState::draw(GameRenderer* r)
 {
 	MapRenderer::MapInfo map;
 	
-	auto& w = getWindow();
+	auto& vp = r->getRenderer()->getViewport();
 	
-	map.scale = 0.25f;
-	map.viewport = glm::vec2(w.getSize().x, w.getSize().y);
-	map.mapSize = map.viewport;
-	map.mapPos = map.viewport / 2.f;
+	map.scale = 0.2f;
+	map.mapScreenTop = glm::vec2(vp.x, vp.y);
+	map.mapScreenBottom = glm::vec2(0.f, 0.f);
 	
-	if( getWorld()->state.player )
-	{
-		map.center = glm::vec2(getWorld()->state.player->getCharacter()->getPosition());
-	}
 	getWorld()->renderer.map.draw(map);
 
     State::draw(r);

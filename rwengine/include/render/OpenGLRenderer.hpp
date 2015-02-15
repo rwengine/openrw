@@ -90,15 +90,16 @@ public:
 	virtual void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
 	virtual void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) = 0;
 
-	void setViewport(const glm::ivec2& vp) { viewport = vp; }
+	void setViewport(const glm::ivec2& vp);
 	const glm::ivec2& getViewport() const { return viewport; }
 
-	glm::mat4 get2DProjection() const;
+	const glm::mat4& get2DProjection() const { return projection2D; }
 
 	virtual void invalidate() = 0;
 
 private:
 	glm::ivec2 viewport;
+	glm::mat4 projection2D;
 };
 
 class OpenGLRenderer : public Renderer

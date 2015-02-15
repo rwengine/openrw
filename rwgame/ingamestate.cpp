@@ -191,7 +191,7 @@ void IngameState::draw(GameRenderer* r)
 {
 	if( !getWorld()->state.isCinematic && getWorld()->isCutsceneDone() )
 	{
-		drawHUD(getWindow());
+		drawHUD(r);
 	}
 	
     State::draw(r);
@@ -299,17 +299,25 @@ const ViewCamera &IngameState::getCamera()
 	return _look;
 }
 
-void IngameState::drawHUD(const sf::RenderWindow& w)
+void IngameState::drawHUD(GameRenderer* renderer)
 {
 	MapRenderer::MapInfo map;
-	map.scale = 0.5f;
-	map.viewport = glm::vec2(w.getSize().x, w.getSize().y);
+	map.scale = 0.4f;
 	
-	map.mapPos = glm::vec2(map.viewport.x * 0.2f, map.viewport.y * 0.2f);
-	float aspect = map.viewport.x / map.viewport.y;
-	map.mapSize = map.viewport * 0.3f;
-	map.mapPos.x /= aspect;
-	map.mapSize.x /= aspect;
+	glm::quat plyRot;
+	
+	if( getPlayer() )
+	{
+		auto p = getPlayer();
+		plyRot = p->getCharacter()->getRotation();
+	}
+	
+	map.rotation = glm::roll(plyRot);
+	
+	const glm::ivec2& vp = renderer->getRenderer()->getViewport();
+	
+	map.mapScreenTop = glm::vec2(260.f, vp.y - 10.f);
+	map.mapScreenBottom = glm::vec2(10.f, vp.y - 210.f);
 	
 	if( getWorld()->state.player )
 	{

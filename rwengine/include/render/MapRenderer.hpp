@@ -14,18 +14,22 @@ public:
 	
 	struct MapInfo
 	{
-		glm::vec2 viewport;
-		float scale;
+		float scale = 1.f;
+		/// World coordinate center
 		glm::vec2 center;
+		/// yaw of the map
+		float rotation = 0.f;
 		
-		glm::vec2 mapSize;
-		glm::vec2 mapPos;
+		/// Top of the map on the screen
+		glm::vec2 mapScreenBottom;
+		/// Bottom of the map on the screen
+		glm::vec2 mapScreenTop;
 	};
 	
 	MapRenderer(GameWorld* world, Renderer* renderer);
 	
+	glm::vec2 worldToMap(const glm::vec2& coord);
 	glm::vec2 mapToScreen(const glm::vec2& map, const MapInfo& mi);
-	glm::vec2 sizeOnScreen(const glm::vec2& map, const MapInfo& mi);
 	
 	void draw(const MapInfo& mi);
 
@@ -38,5 +42,5 @@ private:
 	
 	Renderer::ShaderProgram* rectProg;
 	
-	void drawBlip(const glm::vec2& map, const MapInfo& mi, const std::string& texture);
+	void drawBlip(const glm::vec2& map, const glm::mat4& model, const MapInfo& mi, const std::string& texture, float heading = 0.f);
 };

@@ -31,7 +31,7 @@ public:
 	const ViewCamera& getCamera();
 	
 private:
-	void drawHUD(const sf::RenderWindow& w);
+	void drawHUD(GameRenderer* r);
 };
 
 #endif // INGAMESTATE_HPP

@@ -257,6 +257,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	// Store the input camera,
 	_camera = camera;
+	
+	// Set the viewport
+	const glm::ivec2& vp = getRenderer()->getViewport();
+	glViewport(0, 0, vp.x, vp.y);
 
 	glBindVertexArray( vao );
 

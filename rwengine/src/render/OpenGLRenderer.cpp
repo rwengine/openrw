@@ -80,20 +80,11 @@ GLuint compileProgram(const char* vertex, const char* fragment)
 	return prog;
 }
 
-glm::mat4 Renderer::get2DProjection() const
+void Renderer::setViewport(const glm::ivec2& vp)
 {
-	glm::vec2 aspect(1.f, 1.f);
-	if( viewport.x > viewport.y )
-	{
-		// Widescreen
-		aspect.x = viewport.x / (float) viewport.y;
-	}
-	else
-	{
-		// Tall-o-vision
-		aspect.y = viewport.y / (float)viewport.x;
-	}
-	return glm::ortho(0.f, 800.f * aspect.x, 600.f * aspect.y, 0.f, -1.f, 1.f);
+	viewport = vp;
+
+	projection2D = glm::ortho(0.f, (float)viewport.x, (float)viewport.y, 0.f, -1.f, 1.f);
 }
 
 void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
