@@ -124,7 +124,8 @@ int RWGame::run()
 			break;
 		}
 
-		accum += clock.restart().asSeconds() * timescale;
+		float timer = clock.restart().asSeconds();
+		accum += timer * timescale;
 
 		while ( accum >= GAME_TIMESTEP ) {
 
@@ -146,7 +147,7 @@ int RWGame::run()
 
 		float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
 
-		render(alpha);
+		render(alpha, timer);
 
 		StateManager::get().draw(&engine->renderer);
 
@@ -209,7 +210,7 @@ void RWGame::tick(float dt)
 	nextCam	= StateManager::get().states.back()->getCamera();
 }
 
-void RWGame::render(float alpha)
+void RWGame::render(float alpha, float time)
 {
 	auto size = getWindow().getSize();
 	engine->renderer.getRenderer()->setViewport({size.x, size.y});
@@ -268,7 +269,6 @@ void RWGame::render(float alpha)
 	
 	if ( engine->state.isCinematic )
 	{
-		float cinematicAspect = 19.f/10.f;
 		viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
 	}
 
@@ -299,15 +299,16 @@ void RWGame::render(float alpha)
 
 	if ( showDebugStats )
 	{
-		renderDebugStats();
+		renderDebugStats(time);
 	}
 	
 	drawOnScreenText(engine);
 }
 
-void RWGame::renderDebugStats()
+void RWGame::renderDebugStats(float time)
 {
 	std::stringstream ss;
+	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
 	ss << "Draws: " << engine->renderer.rendered << " (" << engine->renderer.culled << " Culled)\n";
 	
 	if( engine->state.player ) {
@@ -388,5 +389,6 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 	case sf::Keyboard::F1:
 		showDebugStats = ! showDebugStats;
 		break;
+	default: break;
 	}
 }

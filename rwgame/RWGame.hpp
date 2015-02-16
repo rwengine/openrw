@@ -65,9 +65,9 @@ public:
 
 private:
 	void tick(float dt);
-	void render(float alpha);
+	void render(float alpha, float dt);
 	
-	void renderDebugStats();
+	void renderDebugStats(float dt);
 
 	void globalKeyEvent(const sf::Event& event);
 };
