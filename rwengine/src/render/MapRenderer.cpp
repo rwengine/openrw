@@ -123,7 +123,7 @@ void MapRenderer::draw(const MapInfo& mi)
 		std::string name = "radar" + num +  std::to_string(m);
 		auto texture = world->gameData.textures[{name,""}];
 		
-		glBindTexture(GL_TEXTURE_2D, texture.texName);
+		glBindTexture(GL_TEXTURE_2D, texture->getName());
 		
 		int mX = initX + (m % mapBlockLine);
 		int mY = initY + (m / mapBlockLine);
@@ -195,8 +195,8 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& model, const
 	GLuint tex = 0;
 	if ( !texture.empty() )
 	{
-		auto sprite= world->gameData.textures[{texture,""}];
-		tex = sprite.texName;
+		auto sprite= world->gameData.findTexture(texture);
+		tex = sprite->getName();
 		renderer->setUniform(rectProg, "colour", glm::vec4(0.f));
 	}
 	else

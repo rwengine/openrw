@@ -1,6 +1,7 @@
 #include <loaders/TextureLoader.hpp>
 #include <engine/GameData.hpp>
 #include <render/TextureAtlas.hpp>
+#include <render/TextureData.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -29,9 +30,10 @@ GLuint gTextureRed[] = {0xFF0000FF};
 GLuint gTextureGreen[] = {0xFF00FF00};
 GLuint gTextureBlue[] = {0xFFFF0000};
 
-GLuint getErrorTexture()
+TextureData::Handle getErrorTexture()
 {
 	static GLuint errTexName = 0;
+	static TextureData::Handle tex;
 	if(errTexName == 0)
 	{
 		glGenTextures(1, &errTexName);
@@ -42,8 +44,10 @@ GLuint getErrorTexture()
 			GL_RGBA, GL_UNSIGNED_BYTE, gErrorTextureData
 		);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		
+		tex = TextureData::create(errTexName, {2, 2}, false);
 	}
-	return errTexName;
+	return tex;
 }
 
 const size_t paletteSize = 1024;
@@ -62,7 +66,7 @@ void processPalette(uint32_t* fullColor, RW::BSTextureNative& texNative, RW::Bin
 
 }
 
-GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection, bool* transparent)
+TextureData::Handle createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection)
 {
 	// TODO: Exception handling.
 	if(texNative.platform != 8) {
@@ -75,7 +79,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 				texNative.rasterformat == RW::BSTextureNative::FORMAT_8888 ||
 				texNative.rasterformat == RW::BSTextureNative::FORMAT_888;
 	// Export this value
-	*transparent = !((texNative.rasterformat&RW::BSTextureNative::FORMAT_888) == RW::BSTextureNative::FORMAT_888);
+	bool transparent = !((texNative.rasterformat&RW::BSTextureNative::FORMAT_888) == RW::BSTextureNative::FORMAT_888);
 	
 	if(! (isPal8 || isFulc)) {
 		std::cerr << "Unsuported raster format " << std::dec << texNative.rasterformat << std::endl;
@@ -194,7 +198,7 @@ GLuint createTexture(RW::BSTextureNative& texNative, RW::BinaryStreamSection& ro
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	return textureName;
+	return TextureData::create( textureName, { texNative.width, texNative.height }, transparent );
 }
 
 bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
@@ -215,13 +219,12 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 		std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
 
-		bool transparent = false;
-		GLuint id = createTexture(texNative, rootSection, &transparent);
+		auto texture = createTexture(texNative, rootSection);
 
-		gameData->textures[{name, alpha}] = {id, transparent};
+		gameData->textures[{name, alpha}] = texture;
 
 		if( !alpha.empty() ) {
-			gameData->textures[{name, ""}] = {id, transparent};
+			gameData->textures[{name, ""}] = texture;
 		}
 	}
 

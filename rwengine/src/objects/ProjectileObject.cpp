@@ -71,7 +71,7 @@ void ProjectileObject::explode()
 						  });
 		}
 
-		std::pair<std::string, std::string> explodeTexName { "explo02", "" };
+		auto tex = engine->gameData.findTexture("explo02")->getName();
 
 		/// @todo add support for image sets and opacity to the particle system.
 		engine->renderer.addParticle({
@@ -80,7 +80,7 @@ void ProjectileObject::explode()
 										 0.f,
 										 GameRenderer::FXParticle::Camera,
 										 engine->gameTime, 0.5f,
-										 engine->gameData.textures[explodeTexName].texName,
+										 tex,
 										 {exp_size, exp_size}
 					});
 

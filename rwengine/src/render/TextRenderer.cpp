@@ -140,7 +140,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	Renderer::DrawParameters dp;
 	dp.start = 0;
 	dp.count = gb.getCount();
-	dp.texture = engine->gameData.textures[{fonts[ti.font], ""}].texName;
+	auto ftexture = engine->gameData.findTexture(fonts[ti.font]);
+	dp.texture = ftexture->getName();
 	glm::vec2 ss( ti.size );
 	
 	/// @todo smarter alignment

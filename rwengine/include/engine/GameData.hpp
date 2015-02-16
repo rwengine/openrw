@@ -15,6 +15,7 @@
 #include <data/ZoneData.hpp>
 
 #include <audio/MADStream.hpp>
+#include <render/TextureData.hpp>
 
 #include <memory>
 
@@ -23,26 +24,6 @@ struct WeaponData;
 class GameWorld;
 class TextureAtlas;
 class SCMFile;
-
-/**
- * @brief Stores simple data about Textures such as transparency flags.
- *
- * @todo Covert usage to TextureHandles or something for streaming.
- * @todo Move out of GameData.hpp and into TextureInfo.hpp
- */
-struct TextureInfo
-{
-	/// Texture Name
-	GLuint texName;
-	
-	/// Transparent flag.
-	bool transparent;
-
-	TextureInfo(GLuint tex, bool t)
-		: texName(tex), transparent(t) {}
-	TextureInfo()
-		: texName(0), transparent(false) {} 
-};
 
 /**
  * @brief Loads and stores all "static" data such as loaded models, handling
@@ -195,6 +176,11 @@ public:
 	 */
 	TextureAtlas* getAtlas(size_t i);
 	
+	TextureData::Handle findTexture( const std::string& name, const std::string& alpha = "" )
+	{
+		return textures[{name, alpha}];
+	}
+	
 	/**
 	 * Files that have been loaded previously
 	 */
@@ -252,9 +238,9 @@ public:
 	std::map<std::string, ModelHandle*> models;
 
 	/**
-	 * Loaded Textures and their atlas entries.
+	 * Loaded textures (Textures are ID by name and alpha pairs)
 	 */
-	std::map<std::pair<std::string, std::string>, TextureInfo> textures;
+	std::map<std::pair<std::string, std::string>, TextureData::Handle> textures;
 
 	/**
 	 * Texture atlases.

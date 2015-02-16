@@ -382,7 +382,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 				model = glm::scale( model, glm::vec3(1.5f, 1.5f, 1.5f) );
 
 				Renderer::DrawParameters dp;
-				dp.texture = arrowTex.texName;
+				dp.texture = arrowTex->getName();
 				dp.ambient = 1.f;
 				dp.colour = glm::u8vec4(255, 255, 255, 255);
 
@@ -414,16 +414,15 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
 
 	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
-	auto waterTex = engine->gameData.textures[{"water_old",""}];
+	auto waterTex = engine->gameData.findTexture("water_old");
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, waterTex.texName);
 
 	auto camposFlat = glm::vec2(camera.position);
 
 	Renderer::DrawParameters wdp;
 	wdp.start = 0;
 	wdp.count = waterHQVerts.size();
-	wdp.texture = waterTex.texName;
+	wdp.texture = waterTex->getName();
 
 	renderer->useProgram(waterProg);
 	renderer->setSceneParameters(sceneParams);
@@ -500,10 +499,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	GLuint splashTexName = 0;
 	auto fc = engine->state.fadeColour;
 	if((fc.r + fc.g + fc.b) == 0 && engine->state.currentSplash.size() > 0) {
-		std::pair<std::string, std::string> splashName(engine->state.currentSplash, "");
-		auto splshfnd = engine->gameData.textures.find(splashName);
-		if( splshfnd != engine->gameData.textures.end() ) {
-			splashTexName = splshfnd->second.texName;
+		auto splash = engine->gameData.findTexture(engine->state.currentSplash);
+		if ( splash )
+		{
+			splashTexName = splash->getName();
 		}
 	}
 
@@ -920,15 +919,20 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
 
 			if(mat.textures.size() > 0 ) {
-				auto& tC = mat.textures[0].name;
-				auto& tA = mat.textures[0].alphaName;
-				auto t = engine->gameData.textures.find({tC, tA});
-				if(t != engine->gameData.textures.end()) {
-					TextureInfo& tex = t->second;
-					if(tex.transparent) {
+				auto tex = mat.textures[0].texture;
+				if( ! tex )
+				{
+					auto& tC = mat.textures[0].name;
+					auto& tA = mat.textures[0].alphaName;
+					tex = engine->gameData.findTexture(tC, tA);
+					mat.textures[0].texture = tex;
+				}
+				if( tex )
+				{
+					if( tex->isTransparent() ) {
 						abortTransparent = true;
 					}
-					dp.texture = tex.texName;
+					dp.texture = tex->getName();
 				}
 			}
 
@@ -964,6 +968,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 			);
 		}
 		else {
+			
 			renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
 		}
 	}
@@ -977,7 +982,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 	glm::vec3 scale = info->radius + 0.15f * glm::sin(engine->gameTime * 5.f);
 	
 	Renderer::DrawParameters dp;
-	dp.texture = engine->gameData.textures[{"cloud1",""}].texName;
+	dp.texture = engine->gameData.findTexture("cloud1")->getName();
 	dp.ambient = 1.f;
 	dp.colour = glm::u8vec4(50, 100, 255, 1);
 	dp.start = 0;

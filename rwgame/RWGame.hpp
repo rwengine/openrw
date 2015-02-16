@@ -12,6 +12,7 @@ class RWGame
 	sf::Clock clock;
 	bool inFocus;
 	ViewCamera lastCam, nextCam;
+	bool showDebugStats;
 
 	float accum;
 	float timescale;
@@ -65,6 +66,8 @@ public:
 private:
 	void tick(float dt);
 	void render(float alpha);
+	
+	void renderDebugStats();
 
 	void globalKeyEvent(const sf::Event& event);
 };

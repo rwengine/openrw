@@ -65,7 +65,7 @@ void PickupObject::tick(float dt)
 			}
 		}
 
-		auto tex = engine->gameData.textures[{"coronacircle",""}].texName;
+		auto tex = engine->gameData.findTexture("coronacircle")->getName();
 
 		engine->renderer.addParticle({
 										 position,
