@@ -18,7 +18,7 @@
 DebugDraw* debug;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: engine(nullptr), inFocus(true),
+	: engine(nullptr), inFocus(true), showDebugStats(false),
 	  accum(0.f), timescale(1.f)
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
@@ -136,9 +136,15 @@ int RWGame::run()
 			}
 			
 			accum -= GAME_TIMESTEP;
+			
+			// Throw away time if the accumulator reaches too high.
+			if ( accum > GAME_TIMESTEP )
+			{
+				accum = 0.f;
+			}
 		}
 
-		float alpha = accum / GAME_TIMESTEP;
+		float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
 
 		render(alpha);
 
@@ -166,10 +172,10 @@ void RWGame::tick(float dt)
 		clockAccumulator += dt;
 		while( clockAccumulator >= 1.f ) {
 			engine->state.minute ++;
-			if( engine->state.minute >= 60 ) {
+			while( engine->state.minute >= 60 ) {
 				engine->state.minute = 0;
 				engine->state.hour ++;
-				if( engine->state.hour >= 24 ) {
+				while( engine->state.hour >= 24 ) {
 					engine->state.hour = 0;
 				}
 			}
@@ -290,14 +296,22 @@ void RWGame::render(float alpha)
 	}
 	debug->flush(&engine->renderer);
 #endif
+
+	if ( showDebugStats )
+	{
+		renderDebugStats();
+	}
 	
-	/*std::stringstream ss;
-	ss << std::setfill('0') << "Time: " << std::setw(2) << engine->getHour()
-		<< ":" << std::setw(2) << engine->getMinute() << " (" << engine->gameTime << "s)\n";
-	ss << "View: " << viewCam.position.x << " " << viewCam.position.y << " " << viewCam.position.z << "\n";
-	ss << "Drawn " << engine->renderer.rendered << " / " << engine->renderer.culled << " Culled " << " " << engine->renderer.frames << "	" << engine->renderer.geoms << "\n";
+	drawOnScreenText(engine);
+}
+
+void RWGame::renderDebugStats()
+{
+	std::stringstream ss;
+	ss << "Draws: " << engine->renderer.rendered << " (" << engine->renderer.culled << " Culled)\n";
+	
 	if( engine->state.player ) {
-		ss << "Activity: ";
+		ss << "Player Activity: ";
 		if( engine->state.player->getCurrentActivity() ) {
 			ss << engine->state.player->getCurrentActivity()->name();
 		}
@@ -305,16 +319,16 @@ void RWGame::render(float alpha)
 			ss << "Idle";
 		}
 		ss << std::endl;
-	}*/
+	}
 	
 	TextRenderer::TextInfo ti;
-	//ti.text = ss.str();
+	ti.text = ss.str();
 	ti.font = 2;
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
-	ti.size = 20.f;
-	//engine->renderer.text.renderText(ti);
+	ti.size = 15.f;
+	engine->renderer.text.renderText(ti);
 
-	/*while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
+	while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
 		engine->log.pop_front();
 	}
 
@@ -340,7 +354,7 @@ void RWGame::render(float alpha)
 
 		engine->renderer.text.renderText(ti);
 		ti.screenPosition.y -= ti.size;
-	}*/
+	}
 	
 	for( int i = 0; i < engine->state.text.size(); )
 	{
@@ -354,7 +368,6 @@ void RWGame::render(float alpha)
 		}
 	}
 	
-	drawOnScreenText(engine);
 }
 
 void RWGame::globalKeyEvent(const sf::Event& event)
@@ -371,6 +384,9 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 		break;
 	case sf::Keyboard::Num0:
 		timescale *= 2.0f;
+		break;
+	case sf::Keyboard::F1:
+		showDebugStats = ! showDebugStats;
 		break;
 	}
 }
