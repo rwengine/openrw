@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <stdint.h>
+#include <vector>
 
 struct PathNode
 {
