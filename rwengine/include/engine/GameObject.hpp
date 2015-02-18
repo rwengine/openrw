@@ -58,7 +58,8 @@ public:
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
 		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
-		  _inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true)
+		  _inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),
+		  lifetime(GameObject::UnknownLifetime)
 	{}
 		
 	virtual ~GameObject();
@@ -156,7 +157,24 @@ public:
 		t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
 		return t;
 	}
-
+	
+	enum ObjectLifetime
+	{
+		/// lifetime has not been set
+		UnknownLifetime,
+		/// Generic background pedestrians
+		TrafficLifetime,
+		/// Part of a mission
+		MissionLifetime,
+		/// Is owned by the player (or is the player)
+		PlayerLifetime
+	};
+	
+	void setLifetime(ObjectLifetime ol) { lifetime = ol; }
+	ObjectLifetime getLifetime() const { return lifetime; }
+	
+private:
+	ObjectLifetime lifetime;
 };
 
 #endif // __GAMEOBJECTS_HPP__

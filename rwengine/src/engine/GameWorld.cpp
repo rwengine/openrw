@@ -296,8 +296,24 @@ void GameWorld::createTraffic(const glm::vec3& near)
 {
 	TrafficDirector director(&aigraph, this);
 	
-	
 	director.populateNearby( near, 100, 5 );
+}
+
+void GameWorld::cleanupTraffic(const glm::vec3& focus)
+{
+	for ( GameObject* object : objects )
+	{
+		if ( object->getLifetime() != GameObject::TrafficLifetime )
+		{
+			continue;
+		}
+		
+		if ( glm::distance( focus, object->getPosition() ) >= 100.f )
+		{
+			destroyObjectQueued( object );
+		}
+	}
+	destroyQueuedObjects();
 }
 
 #include <strings.h>

@@ -208,6 +208,7 @@ void RWGame::tick(float dt)
 		{
 			// Use the current camera position to spawn pedestrians.
 			auto p = nextCam.position;
+			engine->cleanupTraffic(p);
 			engine->createTraffic(p);
 		}
 	}

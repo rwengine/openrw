@@ -88,6 +88,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 		
 		// spawn a cop
 		auto cop = world->createPedestrian(1, spawn->position + glm::vec3( 0.f, 0.f, 1.f ) );
+		cop->setLifetime(GameObject::TrafficLifetime);
 		created.push_back( cop );
 	}
 	

@@ -108,6 +108,7 @@ public:
 	bool placeItems(const std::string& name);
 	
 	void createTraffic(const glm::vec3& near);
+	void cleanupTraffic(const glm::vec3& focus);
 	
 	/**
 	 * Creates an instance
