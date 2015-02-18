@@ -107,6 +107,8 @@ public:
 	 */
 	bool placeItems(const std::string& name);
 	
+	void createTraffic(const glm::vec3& near);
+	
 	/**
 	 * Creates an instance
 	 */

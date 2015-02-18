@@ -2,6 +2,7 @@
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <ai/DefaultAIController.hpp>
+#include <ai/TrafficDirector.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <render/Model.hpp>
 #include <data/WeaponData.hpp>
@@ -289,6 +290,14 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 	}
 	
 	return nullptr;
+}
+
+void GameWorld::createTraffic(const glm::vec3& near)
+{
+	TrafficDirector director(&aigraph, this);
+	
+	
+	director.populateNearby( near, 100, 5 );
 }
 
 #include <strings.h>

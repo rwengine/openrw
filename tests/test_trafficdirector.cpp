@@ -187,4 +187,33 @@ BOOST_AUTO_TEST_CASE(test_node_density)
 	
 	Global::get().e->destroyObject(ped);
 }
+
+BOOST_AUTO_TEST_CASE(test_create_traffic)
+{
+	AIGraph graph;
+	
+	PathData path {
+		PathData::PATH_PED,
+		0, "",
+		{
+			{
+				PathNode::EXTERNAL,
+				1,
+				{ 10.f, 10.f, 0.f },
+				1.f, 0, 0
+			},
+		}
+	};
+	
+	graph.createPathNodes(glm::vec3(), glm::quat(), path);
+	
+	TrafficDirector director(&graph, Global::get().e);
+	
+	auto created = director.populateNearby(glm::vec3(0.f, 0.f, 0.f), 20.f);
+	
+	BOOST_CHECK( created.size() == 1 );
+	
+	//Global::get().e->destroyObject(created[0]);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

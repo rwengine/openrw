@@ -203,6 +203,13 @@ void RWGame::tick(float dt)
 				throw;
 			}
 		}
+		
+		if ( engine->state.player )
+		{
+			// Use the current camera position to spawn pedestrians.
+			auto p = nextCam.position;
+			engine->createTraffic(p);
+		}
 	}
 
 	// render() needs two cameras to smoothly interpolate between ticks.
@@ -310,6 +317,20 @@ void RWGame::renderDebugStats(float time)
 	std::stringstream ss;
 	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
 	ss << "Draws: " << engine->renderer.rendered << " (" << engine->renderer.culled << " Culled)\n";
+	
+	// Count the number of interesting objects.
+	int peds = 0, cars = 0;
+	for( GameObject* object : engine->objects )
+	{
+		switch ( object->type() )
+		{
+			case GameObject::Character: peds++; break;
+			case GameObject::Vehicle: cars++; break;
+			default: break;
+		}
+	}
+	
+	ss << "P " << peds << " V " << cars << "\n";
 	
 	if( engine->state.player ) {
 		ss << "Player Activity: ";

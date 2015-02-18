@@ -2,6 +2,8 @@
 #include <ai/AIGraphNode.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameObject.hpp>
+#include <objects/CharacterObject.hpp>
+
 #include <glm/gtx/string_cast.hpp>
 
 TrafficDirector::TrafficDirector(AIGraph* graph, GameWorld* world)
@@ -65,3 +67,32 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density)
 			break;
 	}
 }
+
+std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxPopulation)
+{
+	std::vector<GameObject*> created;
+	
+	auto type = AIGraphNode::Pedestrian;
+	auto available = findAvailableNodes(type, center, radius);
+	
+	for ( AIGraphNode* spawn : available )
+	{
+		if ( maxPopulation > -1 )
+		{
+			if ( maxPopulation == 0 )
+			{
+				break;
+			}
+			maxPopulation --;
+		}
+		
+		// spawn a cop
+		auto cop = world->createPedestrian(1, spawn->position + glm::vec3( 0.f, 0.f, 1.f ) );
+		created.push_back( cop );
+	}
+	
+	// Find places it's legal to spawn things
+	
+	return created;
+}
+

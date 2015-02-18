@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+class GameObject;
 class GameWorld;
 
 class TrafficDirector
@@ -18,6 +19,8 @@ public:
 	std::vector< AIGraphNode* > findAvailableNodes(AIGraphNode::NodeType type, const glm::vec3& near, float radius);
 	
 	void setDensity(AIGraphNode::NodeType type, float density);
+	
+	std::vector<GameObject*> populateNearby( const glm::vec3& center, float radius, int maxPopulation = -1 );
 	
 private:
 	AIGraph* graph;
