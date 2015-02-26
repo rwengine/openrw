@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _LOADERGXT_HPP_
 #define _LOADERGXT_HPP_
-#include <engine/RWTypes.hpp>
+#include <core/FileHandle.hpp>
 #include <data/GameTexts.hpp>
 
 class LoaderGXT

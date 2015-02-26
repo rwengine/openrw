@@ -12,6 +12,12 @@ LoaderIMG::LoaderIMG()
 bool LoaderIMG::load(const std::string& filename)
 {
 	std::string dirName = filename;
+	auto extpos = dirName.find(".img");
+	if( extpos != std::string::npos )
+	{
+		dirName.erase(extpos);
+	}
+	
 	dirName.append(".dir");
 
 	FILE* fp = fopen(dirName.c_str(), "rb");
