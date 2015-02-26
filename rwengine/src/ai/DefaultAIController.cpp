@@ -55,6 +55,45 @@ void DefaultAIController::update(float dt)
 			}
 		}
 		break;
+		case TrafficWander:
+		{
+			if( targetNode )
+			{
+				auto targetDistance = glm::vec2(character->getPosition() - targetNode->position);
+				if( glm::length(targetDistance) <= 0.1f )
+				{
+					// Assign the next target node
+					auto lastTarget = targetNode;
+					std::random_device rd;
+					std::default_random_engine re(rd());
+					std::uniform_int_distribution<> d(0, lastTarget->connections.size()-1);
+					targetNode = lastTarget->connections.at(d(re));
+					setNextActivity(new Activities::GoTo(targetNode->position));
+				}
+				else if ( getCurrentActivity() == nullptr )
+				{
+					setNextActivity(new Activities::GoTo(targetNode->position));
+				}
+			}
+			else
+			{
+				// We need to pick an initial node
+				auto& graph = getCharacter()->engine->aigraph;
+				AIGraphNode* node = nullptr;
+				float mindist = std::numeric_limits<float>::max();
+				for( auto n : graph.nodes )
+				{
+					float d = glm::distance( n->position, getCharacter()->getPosition() );
+					if( d < mindist )
+					{
+						node = n;
+						mindist = d;
+					}
+				}
+				targetNode = node;
+			}
+		}
+		break;
 		default: break;
 	}
 	

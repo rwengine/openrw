@@ -1,5 +1,6 @@
 #include "ai/TrafficDirector.hpp"
 #include <ai/AIGraphNode.hpp>
+#include <ai/CharacterController.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameObject.hpp>
 #include <objects/CharacterObject.hpp>
@@ -18,8 +19,8 @@ std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::Nod
 	
 	for ( AIGraphNode* node : graph->nodes )
 	{
-		if ( node->type != type ) continue;
 		if ( ! node->external ) continue;
+		if ( node->type != type ) continue;
 		if ( glm::distance( near, node->position ) < radius )
 		{
 			available.push_back( node );
@@ -75,6 +76,13 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	auto type = AIGraphNode::Pedestrian;
 	auto available = findAvailableNodes(type, center, radius);
 	
+	/// Hardcoded cop Pedestrian
+	std::vector<uint16_t> validPeds = { 1 };
+	validPeds.insert(validPeds.end(), {20, 11, 19, 5});
+	std::random_device rd;
+	std::default_random_engine re(rd());
+	std::uniform_int_distribution<> d(0, validPeds.size()-1);
+	
 	for ( AIGraphNode* spawn : available )
 	{
 		if ( maxPopulation > -1 )
@@ -86,10 +94,11 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 			maxPopulation --;
 		}
 		
-		// spawn a cop
-		auto cop = world->createPedestrian(1, spawn->position + glm::vec3( 0.f, 0.f, 1.f ) );
-		cop->setLifetime(GameObject::TrafficLifetime);
-		created.push_back( cop );
+		// Spawn a pedestrian from the available pool
+		auto ped = world->createPedestrian(validPeds[d(re)], spawn->position + glm::vec3( 0.f, 0.f, 1.f ) );
+		ped->setLifetime(GameObject::TrafficLifetime);
+		ped->controller->setGoal(CharacterController::TrafficWander);
+		created.push_back( ped );
 	}
 	
 	// Find places it's legal to spawn things

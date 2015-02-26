@@ -5,6 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 
+struct AIGraphNode;
 class CharacterObject;
 class VehicleObject;
 
@@ -40,7 +41,11 @@ public:
 		/**
 		 * Keep close to leader character
 		 */
-		FollowLeader
+		FollowLeader,
+		/**
+		 * Wander randomly around the map
+		 */
+		TrafficWander
 	};
 
 protected:
@@ -65,6 +70,7 @@ protected:
 	// Goal related variables
 	Goal currentGoal;
 	CharacterObject* leader;
+	AIGraphNode* targetNode;
 
 public:
 	
