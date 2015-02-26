@@ -58,17 +58,4 @@ struct RGBA
 };
 }
 
-/**
- * @brief Returned by GameData::loadFile()
- */
-struct FileContentsInfo {
-	char* data;
-	size_t length;
-
-	~FileContentsInfo() {
-		delete[] data;
-	}
-};
-typedef std::shared_ptr<FileContentsInfo> FileHandle;
-
 #endif

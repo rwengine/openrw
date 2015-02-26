@@ -1,9 +1,12 @@
-FILE(GLOB TEST_SOURCES "*.cpp")
+FILE(GLOB TEST_SOURCES
+	"*.cpp"
+	"${CMAKE_SOURCE_DIR}/rwengine/tests/*.cpp")
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK) 
 
 add_executable(run_tests ${TEST_SOURCES}) 
 
 include_directories(include)
+include_directories("${CMAKE_SOURCE_DIR}/tests")
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 

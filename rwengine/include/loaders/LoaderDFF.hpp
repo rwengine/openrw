@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 #include <WorkContext.hpp>
-#include <engine/RWTypes.hpp>
+#include <core/FileHandle.hpp>
 
 class Model;
 class GameData;
