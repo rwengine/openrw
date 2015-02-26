@@ -113,6 +113,9 @@ int RWGame::run()
 				break;
 			case sf::Event::KeyPressed:
 				globalKeyEvent(event);
+				break;
+			case sf::Event::Closed:
+				return 0;
 			default: break;
 			}
 
