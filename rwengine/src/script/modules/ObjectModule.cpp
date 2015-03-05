@@ -99,10 +99,6 @@ void game_create_character(const ScriptArguments& args)
 		it != args.getVM()->getWorld()->objects.end();
 	++it)
 		{
-			if( glm::distance(position, (*it)->getPosition()) < replaceThreshold )
-			{
-				std::cout << (*it)->type() << std::endl;
-			}
 			if( (*it)->type() == GameObject::Character && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
 			{
 				args.getVM()->getWorld()->destroyObjectQueued(*it);
@@ -434,7 +430,7 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 void game_make_object_important(const ScriptArguments& args)
 {
 	auto inst = (InstanceObject*)(*args[0].handle);
-	std::cout << "Unable to pin object " << inst << ". Object pinning unimplimented" << std::endl;
+	args.getVM()->getWorld()->logger.warning("SCM", "Object pinning unimplemented!");
 }
 
 bool game_character_in_area_on_foot(const ScriptArguments& args)
@@ -781,7 +777,7 @@ void game_create_object_world(const ScriptArguments& args)
 		auto& modelname = args.getVM()->getFile()->getModels()[-id];
 		id = args.getVM()->getWorld()->findModelDefinition(modelname);
 		if( id == (uint16_t)-1 ) {
-			std::cerr << "Failed to find model: " << modelname << std::endl;
+			args.getVM()->getWorld()->logger.error("SCM", "Failed to find model " + modelname);
 		}
 	}
 	

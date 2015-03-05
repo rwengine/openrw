@@ -121,14 +121,7 @@ bool GameWorld::defineItems(const std::string& name)
 {
 	auto i = gameData.ideLocations.find(name);
 	std::string path = name;
-	
-	if( i != gameData.ideLocations.end()) {
-		path = i->second;
-	}
-	else {
-		std::cout << "IDE not pre-listed" << std::endl;
-	}
-	
+
 	LoaderIDE idel;
 	
 	if(idel.load(path)) {
@@ -149,7 +142,7 @@ bool GameWorld::defineItems(const std::string& name)
 		}
 	}
 	else {
-		std::cerr << "Failed to load IDE " << path << std::endl;
+		logger.error("Data", "Failed to load IDE " + path);
 	}
 	
 	return false;
@@ -178,15 +171,6 @@ bool GameWorld::placeItems(const std::string& name)
 	auto i = gameData.iplLocations.find(name);
 	std::string path = name;
 	
-	if(i != gameData.iplLocations.end())
-	{
-		path = i->second;
-	}
-	else
-	{
-		std::cout << "IPL not pre-listed" << std::endl;
-	}
-	
 	LoaderIPL ipll;
 
 	if(ipll.load(path))
@@ -195,7 +179,7 @@ bool GameWorld::placeItems(const std::string& name)
 		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
 			std::shared_ptr<InstanceData> inst = ipll.m_instances[i];
 			if(! createInstance(inst->id, inst->pos, inst->rot)) {
-				std::cerr << "No object for instance " << inst->id << " Model: " << inst->model << " (" << path << ")" << std::endl;
+				logger.error("World", "No object data for instance " + std::to_string(inst->id) + " in " + path);
 			}
 		}
 		
@@ -216,7 +200,7 @@ bool GameWorld::placeItems(const std::string& name)
 	}
 	else
 	{
-		std::cerr << "Failed to load IPL: " << path << std::endl;
+		logger.error("Data", "Failed to load IPL " + path);
 		return false;
 	}
 	
@@ -364,7 +348,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 
 	// Ensure the relevant data is loaded.
 	if( modelname.empty() ) {
-		std::cerr << "Couldn't find model for id " << id << std::endl;
+		logger.error("World", "Cutscene object " + std::to_string(id) + " has no model");
 		return nullptr;
 	}
 
@@ -394,7 +378,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 {
 	auto vti = findObjectType<VehicleData>(id);
 	if( vti ) {
-		std::cout << "Creating Vehicle ID " << id << " (" << vti->gameName << ")" << std::endl;
+		logger.info("World", "Creating Vehicle ID " + std::to_string(id) + " (" + vti->gameName + ")");
 		
 		if(! vti->modelName.empty()) {
 			gameData.loadDFF(vti->modelName + ".dff");
@@ -696,7 +680,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	
 	if ( !cutsceneAudioLoaded )
 	{
-		std::cout << "Failed to load cutscene audio: " << name << std::endl;
+		logger.warning("Data", "Failed to load cutscene audio: " + name);
 	}
 	
 
@@ -705,7 +689,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	}
 	state.currentCutscene = cutscene;
 	state.currentCutscene->meta.name = name;
-	std::cout << "Loaded cutscene: " << name << std::endl;
+	logger.info("World", "Loaded cutscene: " + name);
 }
 
 void GameWorld::startCutscene()
