@@ -2,6 +2,8 @@
 #ifndef _GAMEWORLD_HPP_
 #define _GAMEWORLD_HPP_
 
+#include <core/Logger.hpp>
+
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <render/GameRenderer.hpp>
@@ -77,22 +79,7 @@ public:
 		std::string message;
 	};
 	
-	std::deque<LogEntry> log;
-	
-	/**
-	 * Displays an informative message
-	 */
-	void logInfo(const std::string& info);
-	
-	/**
-	 * Displays an alarming error
-	 */
-	void logError(const std::string& error);
-	
-	/**
-	 * Displays a comforting warning
-	 */
-    void logWarning(const std::string& warning);
+	Logger logger;
 	
 	/**
 	 * Loads an IDE into the game

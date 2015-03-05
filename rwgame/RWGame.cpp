@@ -17,6 +17,8 @@
 
 DebugDraw* debug;
 
+StdOutReciever logPrinter;
+
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	: engine(nullptr), inFocus(true), showDebugStats(false),
 	  accum(0.f), timescale(1.f)
@@ -57,6 +59,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	glewInit();
 
 	engine = new GameWorld(gamepath);
+	engine->logger.addReciever(&logPrinter);
 
 	// Initalize all the archives.
 	engine->gameData.loadIMG("/models/gta3");
@@ -88,7 +91,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 	StateManager::get().enter(new LoadingState(this));
 
-	engine->logInfo("Started");
+	engine->logger.info("Game", "Started");
 }
 
 RWGame::~RWGame()
@@ -202,7 +205,7 @@ void RWGame::tick(float dt)
 			}
 			catch( SCMException& ex ) {
 				std::cerr << ex.what() << std::endl;
-				engine->logError( ex.what() );
+				engine->logger.error( "Script", ex.what() );
 				throw;
 			}
 		}
@@ -354,7 +357,7 @@ void RWGame::renderDebugStats(float time)
 	ti.size = 15.f;
 	engine->renderer.text.renderText(ti);
 
-	while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
+	/*while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
 		engine->log.pop_front();
 	}
 
@@ -380,7 +383,7 @@ void RWGame::renderDebugStats(float time)
 
 		engine->renderer.text.renderText(ti);
 		ti.screenPosition.y -= ti.size;
-	}
+	}*/
 	
 	for( int i = 0; i < engine->state.text.size(); )
 	{

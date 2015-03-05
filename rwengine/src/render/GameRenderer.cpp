@@ -82,7 +82,7 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f),
 	map(engine, renderer), text(engine, this)
 {
-	engine->logInfo("[DRAW] " + renderer->getIDString());
+	engine->logger.info("Renderer", renderer->getIDString());
 
 	worldProg = renderer->createShader(
 				GameShaders::WorldObject::VertexShader,

@@ -600,10 +600,7 @@ char* GameData::openFile(const std::string& name)
 	}
 	else 
 	{
-		std::stringstream err;
-		err << "Unable to locate file " << name;
-		engine->logError(err.str());
-		std::cerr << err.str() << std::endl;
+		engine->logger.error("Data", "Unable to locate file: " + name);
 	}
 	
 	return nullptr;
@@ -654,10 +651,7 @@ FileHandle GameData::openFile2(const std::string &name)
 	}
 	else
 	{
-		std::stringstream err;
-		err << "Unable to locate file " << name;
-		engine->logError(err.str());
-		std::cerr << err.str() << std::endl;
+		engine->logger.error("Data", "Unable to locate file: " + name);
 	}
 	return nullptr;
 }

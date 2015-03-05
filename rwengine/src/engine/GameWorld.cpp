@@ -117,22 +117,6 @@ bool GameWorld::load()
 	return true;
 }
 
-void GameWorld::logInfo(const std::string& info)
-{
-	log.push_back({LogEntry::Info, gameTime, info});
-	std::cout << info << std::endl;
-}
-
-void GameWorld::logError(const std::string& error)
-{
-	log.push_back({LogEntry::Error, gameTime, error});
-}
-
-void GameWorld::logWarning(const std::string& warning)
-{
-	log.push_back({LogEntry::Warning, gameTime, warning});
-}
-
 bool GameWorld::defineItems(const std::string& name)
 {
 	auto i = gameData.ideLocations.find(name);
@@ -185,7 +169,7 @@ void GameWorld::runScript(const std::string &name)
 		script = new ScriptMachine(this, f, opcodes);
 	}
 	else {
-		logError("Failed to load SCM: " + name);
+		logger.error("World", "Failed to load SCM: " + name);
 	}
 }
 
@@ -267,7 +251,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		}
 
 		if( modelname.empty() ) {
-			logWarning("Instance with missing model: " + std::to_string(id));
+			logger.warning("World", "Instance with missing model: " + std::to_string(id));
 		}
 		
 		auto instance = new InstanceObject(
@@ -428,7 +412,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			 sec = gameData.vehicleColours[palit->second[set].second];
 		}
 		else {
-			logWarning("No colour palette for vehicle " + vti->modelName);
+			logger.warning("World", "No colour palette for vehicle " + vti->modelName);
 		}
 		
 		auto wi = findObjectType<ObjectData>(vti->wheelModelID);
