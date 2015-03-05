@@ -6,12 +6,12 @@
 
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
-#include <render/GameRenderer.hpp>
 
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
 #include <audio/SoundManager.hpp>
 
+class CutsceneObject;
 class WorkContext;
 
 class GameObject;
@@ -159,11 +159,6 @@ public:
 	 * Game data
 	 */
 	GameData gameData;
-	
-	/**
-	 * Renderer
-	 */
-	GameRenderer renderer;
 
 	/**
 	 * Gameplay state

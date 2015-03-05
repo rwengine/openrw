@@ -1,8 +1,9 @@
 #pragma once
 #include <engine/GameWorld.hpp>
+#include <render/GameRenderer.hpp>
 
 class PlayerController;
 
 void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render);
 
-void drawOnScreenText(GameWorld* world);
+void drawOnScreenText(GameWorld* world, GameRenderer* renderer);

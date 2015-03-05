@@ -45,7 +45,8 @@ void WeaponItem::fireHitscan()
 	float flashtime = 0.015f;
 	auto shotdir = glm::normalize(farTarget - fireOrigin);
 
-	_character->engine->renderer.addParticle({
+	/// @TODO move this into rendering logic.
+	/*_character->engine->renderer.addParticle({
 												fireOrigin + shotdir * tracersize / 2.f,
 												shotdir,
 												tracerspeed,
@@ -88,6 +89,7 @@ void WeaponItem::fireHitscan()
 												{0.2f, 0.2f},
 												flashUp
 											});
+											*/
 }
 
 void WeaponItem::fireProjectile()

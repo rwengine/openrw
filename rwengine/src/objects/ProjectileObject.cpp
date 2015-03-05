@@ -73,8 +73,7 @@ void ProjectileObject::explode()
 
 		auto tex = engine->gameData.findTexture("explo02")->getName();
 
-		/// @todo add support for image sets and opacity to the particle system.
-		engine->renderer.addParticle({
+		/*engine->renderer.addParticle({
 										 position,
 										 {0.f, 0.f, 1.f},
 										 0.f,
@@ -82,7 +81,7 @@ void ProjectileObject::explode()
 										 engine->gameTime, 0.5f,
 										 tex,
 										 {exp_size, exp_size}
-					});
+					});*/
 
 		_exploded = true;
 		engine->destroyObjectQueued(this);
