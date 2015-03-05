@@ -137,7 +137,7 @@ void GameData::parseDAT(const std::string& path)
 	
 	if(!datfile.is_open()) 
 	{
-		std::cerr << "Failed to open gta.dat" << std::endl;
+		engine->logger.error("Data", "Failed to open game file " + path);
 	}
 	else
 	{
@@ -230,7 +230,7 @@ void GameData::loadIMG(const std::string& name)
 			
 			if(asset.size == 0)
 			{
-				std::cerr << "Asset " << filename << " has no size, ignoring." << std::endl;
+				engine->logger.warning("Data", "Ignoring asset " + filename + " with size 0");
 			}
 			else
             {
@@ -261,12 +261,12 @@ bool GameData::loadZone(const std::string& path)
 			for(auto& z : ipll.zones) {
 				zones.insert({z.name, z});
 			}
-			std::cout << "Loaded " << ipll.zones.size() << " zones" << std::endl;
+			engine->logger.info("Data", "Loaded " + std::to_string(ipll.zones.size()) + " zones from " + path);
 			return true;
 		}
 	}
 	else {
-		std::cerr << "Failed to load Zones " << path << std::endl;
+		engine->logger.error("Data", "Failed to load zones from " + path);
 	}
 	
 	return false;
@@ -535,7 +535,7 @@ bool GameData::loadAudioClip(const std::string& name)
 	
 	if ( name.find(".mp3") != name.npos )
 	{
-		std::cerr << "FIXME: MP3 Audio unsupported outside cutscenes" << std::endl;
+		engine->logger.error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
 	
@@ -545,7 +545,7 @@ bool GameData::loadAudioClip(const std::string& name)
 	
 	if (! r )
 	{
-		std::cerr << "Error loading audio clip " << fname << std::endl;
+		engine->logger.error("Data", "Error loading audio clip " + fname);
 		delete engine->missionAudio;
 		engine->missionAudio = nullptr;
 	}
@@ -578,14 +578,14 @@ char* GameData::openFile(const std::string& name)
 			}
 			else 
 			{
-				std::cerr << "Archive not found " << i->second.path << std::endl;
+				engine->logger.error("Data", "Archive not found " + i->second.path);
 			}
 		}
 		else
 		{
 			std::ifstream dfile(i->second.path);
 			if ( ! dfile.is_open()) {
-				std::cerr << "Error opening file " << i->second.path << std::endl;
+				engine->logger.error("Data", "Error opening file " + i->second.path);
 				return nullptr;
 			}
 
@@ -629,14 +629,14 @@ FileHandle GameData::openFile2(const std::string &name)
 			}
 			else
 			{
-				std::cerr << "Archive not found " << i->second.path << std::endl;
+				engine->logger.error("Data", "Archive not found " + i->second.path);
 			}
 		}
 		else
 		{
 			std::ifstream dfile(i->second.path);
 			if ( ! dfile.is_open()) {
-				std::cerr << "Error opening file " << i->second.path << std::endl;
+				engine->logger.error("Data", "Error opening file " + i->second.path);
 				return nullptr;
 			}
 
@@ -660,7 +660,7 @@ char* GameData::loadFile(const std::string &name)
 {
 	auto it = loadedFiles.find(name);
 	 if( it != loadedFiles.end() ) {
-		std::cerr << "File " << name << " already loaded?" << std::endl;
+		engine->logger.warning("Data", "File " + name + " already loaded");
 	}
 
 	loadedFiles[name] = true;

@@ -246,11 +246,6 @@ float mix(uint8_t a, uint8_t b, float num)
 	return a+(b-a)*num;
 }
 
-#define GL_PLS() \
-{ auto errc = glGetError(); \
-	if(errc != GL_NO_ERROR) std::cout << __LINE__ << ": " << errc << std::endl;\
-}
-
 void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 {
 	_renderAlpha = alpha;
@@ -585,7 +580,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 {
 	if(!vehicle->model)
 	{
-		std::cout << "model " <<  vehicle->vehicle->modelName << " not loaded (" << engine->gameData.models.size() << " models loaded)" << std::endl;
+		engine->logger.warning("Renderer", "Vehicle model " + vehicle->vehicle->modelName + " not loaded!");
 	}
 
 	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( _renderAlpha );
@@ -631,9 +626,6 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 				}
 
 				renderWheel(wheelModel, wheelM, woi->modelName);
-			}
-			else {
-				std::cout << "Wheel model " << woi->modelName << " not loaded" << std::endl;
 			}
 		}
 	}
@@ -763,7 +755,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 			itemModel = weapons->model->findFrame(odata->modelName + "_l0");
 			if ( ! itemModel )
 			{
-				std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+				engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 			}
 		}
 	}
@@ -777,7 +769,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 		}
 		else
 		{
-			std::cerr << "Missing pickup model " << odata->modelName << std::endl;
+			engine->logger.error("Renderer", "Pickup model " + odata->modelName + " not loaded");
 		}
 	}
 	
@@ -846,11 +838,11 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
-			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 		}
 	}
 	else {
-		std::cerr << "weapons.dff not loaded" << std::endl;
+		engine->logger.error("Renderer", "Weapon.dff not loaded");
 	}
 }
 
@@ -890,11 +882,11 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
-			std::cerr << "weapons.dff missing frame " << odata->modelName << std::endl;
+			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 		}
 	}
 	else {
-		std::cerr << "weapons.dff not loaded" << std::endl;
+		engine->logger.error("Renderer", "Weapon model not loaded");
 	}
 }
 

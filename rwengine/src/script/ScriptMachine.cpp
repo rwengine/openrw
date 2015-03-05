@@ -40,7 +40,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 	
 	if ( debug_op )
 	{
-		std::cout << t.name << " " << t.wakeCounter << std::endl;
+		_world->logger.verbose("SCM", "Thread " + t.name + " woke at " + std::to_string(t.wakeCounter) );
 	}
 #endif
 	
