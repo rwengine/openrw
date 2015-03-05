@@ -20,7 +20,7 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: engine(nullptr), inFocus(true), showDebugStats(false),
+	: engine(nullptr), renderer(nullptr), inFocus(true), showDebugStats(false),
 	  accum(0.f), timescale(1.f)
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
@@ -60,16 +60,19 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 	engine = new GameWorld(gamepath);
 	engine->logger.addReciever(&logPrinter);
-
+	
 	// Initalize all the archives.
 	engine->gameData.loadIMG("/models/gta3");
 	engine->gameData.loadIMG("/models/txd");
 	engine->gameData.loadIMG("/anim/cuts");
 	
+	// Initialize renderer
+	renderer = new GameRenderer(engine);
+	
 	// Set up text renderer
-	engine->renderer.text.setFontTexture(0, "pager");
-	engine->renderer.text.setFontTexture(1, "font1");
-	engine->renderer.text.setFontTexture(2, "font2");
+	renderer->text.setFontTexture(0, "pager");
+	renderer->text.setFontTexture(1, "font1");
+	renderer->text.setFontTexture(2, "font2");
 
 	/// @TODO expand this here.
 	engine->load();
@@ -96,6 +99,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 RWGame::~RWGame()
 {
+	delete renderer;
 	delete engine;
 }
 
@@ -155,7 +159,7 @@ int RWGame::run()
 
 		render(alpha, timer);
 
-		StateManager::get().draw(&engine->renderer);
+		StateManager::get().draw(renderer);
 
 		window.display();
 
@@ -227,7 +231,7 @@ void RWGame::tick(float dt)
 void RWGame::render(float alpha, float time)
 {
 	auto size = getWindow().getSize();
-	engine->renderer.getRenderer()->setViewport({size.x, size.y});
+	renderer->getRenderer()->setViewport({size.x, size.y});
 	
 	ViewCamera viewCam;
 	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )
@@ -289,7 +293,7 @@ void RWGame::render(float alpha, float time)
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-	engine->renderer.renderWorld(viewCam, alpha);
+	renderer->renderWorld(viewCam, alpha);
 	
 #if 0
 	debug->setShaderProgram(engine->renderer.worldProg);
@@ -316,14 +320,14 @@ void RWGame::render(float alpha, float time)
 		renderDebugStats(time);
 	}
 	
-	drawOnScreenText(engine);
+	drawOnScreenText(engine, renderer);
 }
 
 void RWGame::renderDebugStats(float time)
 {
 	std::stringstream ss;
 	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
-	ss << "Draws: " << engine->renderer.rendered << " (" << engine->renderer.culled << " Culled)\n";
+	ss << "Draws: " << renderer->rendered << " (" << renderer->culled << " Culled)\n";
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;
@@ -355,7 +359,7 @@ void RWGame::renderDebugStats(float time)
 	ti.font = 2;
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
 	ti.size = 15.f;
-	engine->renderer.text.renderText(ti);
+	renderer->text.renderText(ti);
 
 	/*while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
 		engine->log.pop_front();

@@ -1,6 +1,7 @@
 #ifndef _RWGAME_HPP_
 #define _RWGAME_HPP_
 #include <engine/GameWorld.hpp>
+#include <render/GameRenderer.hpp>
 #include "game.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -8,6 +9,8 @@
 class RWGame
 {
 	GameWorld* engine;
+	// must be allocated after Logger setup.
+	GameRenderer* renderer;
 	sf::RenderWindow window;
 	sf::Clock clock;
 	bool inFocus;
@@ -26,6 +29,11 @@ public:
 	GameWorld* getWorld() const
 	{
 		return engine;
+	}
+	
+	GameRenderer* getRenderer() const
+	{
+		return renderer;
 	}
 
 	sf::RenderWindow& getWindow()

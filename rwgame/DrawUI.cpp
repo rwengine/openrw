@@ -37,9 +37,9 @@ void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render)
 	drawMap(player, world, render);
 }
 
-void drawOnScreenText(GameWorld* world)
+void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
 {
-	const glm::ivec2& vp = world->renderer.getRenderer()->getViewport();
+	const glm::ivec2& vp = renderer->getRenderer()->getViewport();
 	
 	TextRenderer::TextInfo ti;
 	ti.font = 2;
@@ -127,10 +127,10 @@ void drawOnScreenText(GameWorld* world)
 			shadow.baseColour = glm::vec3(0.f);
 			shadow.screenPosition += shadowOffset;
 			
-			world->renderer.text.renderText(shadow);
+			renderer->text.renderText(shadow);
 		}
 		
-		world->renderer.text.renderText(ti);
+		renderer->text.renderText(ti);
 	}
 
 	for(auto& t : world->state.texts) {
@@ -141,6 +141,6 @@ void drawOnScreenText(GameWorld* world)
 		ti.size = 20.f;
 		ti.text = t.text;
 		
-		world->renderer.text.renderText(ti);
+		renderer->text.renderText(ti);
 	}
 }

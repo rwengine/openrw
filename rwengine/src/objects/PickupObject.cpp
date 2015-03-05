@@ -67,7 +67,8 @@ void PickupObject::tick(float dt)
 
 		auto tex = engine->gameData.findTexture("coronacircle")->getName();
 
-		engine->renderer.addParticle({
+		/// @TODO move this into rendering logic.
+		/*engine->renderer.addParticle({
 										 position,
 										 {0.f, 0.f, 1.f},
 										 0.f,
@@ -75,8 +76,8 @@ void PickupObject::tick(float dt)
 										 engine->gameTime, dt,
 										 tex,
 										 {1.f, 1.f},
-										 {}, {0.75f, 0.f, 0.f, 1.f} /** @todo configurable tint colour */
-					});
+										 {}, {0.75f, 0.f, 0.f, 1.f}
+					});*/
 	}
 }
 
