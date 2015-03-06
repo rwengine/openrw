@@ -224,7 +224,8 @@ void main()
 	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
 	float fogZ = (gl_FragCoord.z / gl_FragCoord.w);
 	float fogfac = clamp( (fogStart-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
-	outColour = mix(ambient, c * colour * Colour, 1.f);
+	vec4 tint = vec4(colour.rgb, visibility);
+	outColour = c * tint;
 })";
 
 

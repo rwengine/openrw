@@ -6,6 +6,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 
+class VisualFX;
 class CharacterObject;
 
 /**
@@ -20,6 +21,7 @@ class PickupObject : public GameObject
 	float _enableTimer;
 	bool collected;
 	int _modelID;
+	VisualFX* corona;
 public:
 
 	PickupObject(GameWorld* world, const glm::vec3& position, int modelID);

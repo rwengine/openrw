@@ -75,64 +75,6 @@ class GameRenderer
 	/** Internal non-descript VAOs */
 	GLuint vao, debugVAO;
 
-public:
-
-	/**
-	 * @brief Stores particle effect instance data
-	 */
-	struct FXParticle {
-
-		/** Initial world position */
-		glm::vec3 position;
-
-		/** Direction of particle */
-		glm::vec3 direction;
-
-		/** Velocity of particle */
-		float velocity;
-
-		/** Particle orientation modes */
-		enum Orientation {
-			Free, /** faces direction using up */
-			Camera, /** Faces towards the camera @todo implement */
-			UpCamera /** Face closes point in camera's look direction */
-		};
-		Orientation orientation;
-
-		/** Game time at particle instantiation */
-		float starttime;
-		float lifetime;
-
-		/** Texture name */
-		GLuint texture;
-
-		/** Size of particle */
-		glm::vec2 size;
-
-		/** Up direction (only used in Free mode) */
-		glm::vec3 up;
-
-		/** Render tint colour */
-		glm::vec4 colour;
-
-		/** Internal cache value */
-		glm::vec3 _currentPosition;
-
-		/** Constructs a particle */
-		FXParticle(const glm::vec3& p, const glm::vec3& d, float v,
-				   Orientation o, float st, float lt, GLuint texture,
-				   const glm::vec2& size, const glm::vec3& up = {0.f, 0.f, 1.f},
-				   const glm::vec4& colour = {1.f, 1.f, 1.f, 1.f})
-			: position(p), direction(d), velocity(v), orientation(o),
-			  starttime(st), lifetime(lt), texture(texture), size(size),
-			  up(up), colour(colour), _currentPosition(p) {}
-	};
-
-private:
-
-	/** Particles in flight */
-	std::vector<FXParticle> _particles;
-
 	/** Camera values passed to renderWorld() */
 	ViewCamera _camera;
 
@@ -152,8 +94,6 @@ public:
 	Renderer::ShaderProgram* skyProg;
 	Renderer::ShaderProgram* waterProg;
 	Renderer::ShaderProgram* particleProg;
-
-	GLuint particleProgram;
 
 	GLuint ssRectProgram;
 	GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
@@ -209,11 +149,11 @@ public:
 	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
 
 	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
-
+	
 	/**
-	 * @brief renders all visible particles and removes expired
+	 * Renders the effects (Particles, Lighttrails etc)
 	 */
-	void renderParticles();
+	void renderEffects();
 
 	/**
 	 * @brief Draws the current on screen text.
@@ -235,9 +175,6 @@ public:
 
 	/** Increases cinematic value */
 	void renderLetterbox();
-
-	/** Adds a particle to the rendering */
-	void addParticle(const FXParticle& particle);
 
 	Renderer* getRenderer()
 	{

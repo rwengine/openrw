@@ -19,6 +19,8 @@ class CharacterObject;
 class InstanceObject;
 class VehicleObject;
 
+#include <render/VisualFX.hpp>
+
 struct WeaponScan;
 
 class ScriptMachine;
@@ -137,7 +139,17 @@ public:
 	 * Performs a weapon scan against things in the world
 	 */
 	void doWeaponScan(const WeaponScan &scan );
+
+	/**
+	 * Allocates a new VisualFX of the given type
+	 */
+	VisualFX* createEffect(VisualFX::EffectType type);
 	
+	/**
+	 * Immediately destoys the given effect
+	 */
+	void destroyEffect(VisualFX* effect);
+
 	/**
 	 * Returns the current hour
 	 */
@@ -208,6 +220,12 @@ public:
 	 * AI Graph
 	 */
 	AIGraph aigraph;
+	
+	/**
+	 * Visual Effects
+	 * @todo Consider using lighter handing mechanism
+	 */
+	std::vector<VisualFX*> effects;
 
 	/**
 	 * Randomness Engine

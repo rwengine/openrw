@@ -71,17 +71,17 @@ void ProjectileObject::explode()
 						  });
 		}
 
-		auto tex = engine->gameData.findTexture("explo02")->getName();
-
-		/*engine->renderer.addParticle({
-										 position,
-										 {0.f, 0.f, 1.f},
-										 0.f,
-										 GameRenderer::FXParticle::Camera,
-										 engine->gameTime, 0.5f,
-										 tex,
-										 {exp_size, exp_size}
-					});*/
+		auto tex = engine->gameData.findTexture("explo02");
+		
+		auto explosion = engine->createEffect(VisualFX::Particle);
+		explosion->particle.size = glm::vec2(exp_size);
+		explosion->particle.texture = tex;
+		explosion->particle.starttime = engine->gameTime;
+		explosion->particle.lifetime = 0.5f;
+		explosion->particle.orientation = VisualFX::ParticleData::Camera;
+		explosion->particle.colour = glm::vec4(1.0f);
+		explosion->particle.position = getPosition();
+		explosion->particle.direction = glm::vec3(0.f, 0.f, 1.f);
 
 		_exploded = true;
 		engine->destroyObjectQueued(this);

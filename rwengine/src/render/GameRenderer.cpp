@@ -23,6 +23,7 @@
 #include <deque>
 #include <cmath>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
@@ -99,16 +100,6 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	renderer->setUniformTexture(particleProg, "texture", 0);
 	renderer->setProgramBlockBinding(particleProg, "SceneData", 1);
 	renderer->setProgramBlockBinding(particleProg, "ObjectData", 2);
-
-	particleProgram = compileProgram(GameShaders::WorldObject::VertexShader,
-								  GameShaders::Particle::FragmentShader);
-
-	/*uniTexture = glGetUniformLocation(particleProgram, "texture");
-	ubiScene = glGetUniformBlockIndex(particleProgram, "SceneData");
-	ubiObject = glGetUniformBlockIndex(particleProgram, "ObjectData");*/
-
-	//glUniformBlockBinding(particleProgram, ubiScene, 1);
-	//glUniformBlockBinding(particleProgram, ubiObject, 2);
 
 	skyProg = renderer->createShader(
 				GameShaders::Sky::VertexShader,
@@ -204,6 +195,7 @@ GameRenderer::GameRenderer(GameWorld* engine)
 					{-0.5f,-0.5f, 0.f, 0.f, 1.f, 1.f, 1.f}
 	});
 	particleDraw.addGeometry(&particleGeom);
+	particleDraw.setFaceType(GL_TRIANGLE_STRIP);
 
 	ssRectGeom.uploadVertices(sspaceRect);
 	ssRectDraw.addGeometry(&ssRectGeom);
@@ -485,7 +477,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	renderer->draw(glm::mat4(), &skyDbuff, dp);
 
-	renderParticles();
+	renderEffects();
 
 	glActiveTexture(GL_TEXTURE0);
 
@@ -997,47 +989,43 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 	}
 }
 
-void GameRenderer::renderParticles()
+void GameRenderer::renderEffects()
 {
-	_particles.erase( std::remove_if(_particles.begin(), _particles.end(),
-				   [&](FXParticle& p) {
-		if ( ( engine->gameTime - p.starttime ) > p.lifetime ) {
-			return true;
-		}
-		float t = engine->gameTime - p.starttime;
-		p._currentPosition = p.position + (p.direction * p.velocity) * t;
-		return false;
-	}), _particles.end() );
-
-	glUseProgram( particleProgram );
-	glBindVertexArray( particleDraw.getVAOName() );
+	renderer->useProgram( particleProg );
 
 	auto cpos = _camera.position;
 	auto cfwd = glm::normalize(glm::inverse(_camera.rotation) * glm::vec3(0.f, 1.f, 0.f));
+	
+	auto& effects = engine->effects;
 
-	std::sort( _particles.begin(), _particles.end(),
-			   [&](const FXParticle& a, const FXParticle& b) {
-		return glm::distance( a._currentPosition, cpos ) > glm::distance( b._currentPosition, cpos );
+	std::sort( effects.begin(), effects.end(),
+			   [&](const VisualFX* a, const VisualFX* b) {
+		return glm::distance( a->getPosition(), cpos ) > glm::distance( b->getPosition(), cpos );
 	});
 
-	for(FXParticle& part : _particles) {
-		glBindTexture(GL_TEXTURE_2D, part.texture);
-		auto& p = part._currentPosition;
+	for(VisualFX* fx : effects) {
+		// Other effects not implemented yet
+		if( fx->getType() != VisualFX::Particle ) continue;
+		
+		auto& particle = fx->particle;
+		
+		glBindTexture(GL_TEXTURE_2D, particle.texture->getName());
+		auto& p = particle.position;
 
 		glm::mat4 m(1.f);
 
 		// Figure the direction to the camera center.
 		auto amp = cpos - p;
-		glm::vec3 ptc = part.up;
+		glm::vec3 ptc = particle.up;
 
-		if( part.orientation == FXParticle::UpCamera ) {
+		if( particle.orientation == VisualFX::ParticleData::UpCamera ) {
 			ptc = glm::normalize(amp - (glm::dot(amp, cfwd))*cfwd);
 		}
-		else if( part.orientation == FXParticle::Camera ) {
+		else if( particle.orientation == VisualFX::ParticleData::Camera ) {
 			ptc = amp;
 		}
 
-		glm::vec3 f = glm::normalize(part.direction);
+		glm::vec3 f = glm::normalize(particle.direction);
 		glm::vec3 s = glm::cross(f, glm::normalize(ptc));
 		glm::vec3 u	= glm::cross(s, f);
 		m[0][0] = s.x;
@@ -1052,16 +1040,19 @@ void GameRenderer::renderParticles()
 		m[3][0] =-glm::dot(s, p);
 		m[3][1] = glm::dot(f, p);
 		m[3][2] =-glm::dot(u, p);
+		m = glm::scale(glm::inverse(m), glm::vec3(particle.size, 1.f));
 
-		m = glm::scale(glm::inverse(m), glm::vec3(part.size, 1.f));
-		/*uploadUBO<ObjectUniformData>(
-							uboObject, {
-								m,
-								part.colour,
-								1.f, 1.f, 1.f
-							});*/
+		//m = glm::translate(m, p);
 
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		Renderer::DrawParameters dp;
+		dp.texture = particle.texture->getName();
+		dp.ambient = 1.f;
+		dp.colour = glm::u8vec4(particle.colour * 255.f);
+		dp.start = 0;
+		dp.count = 4;
+		dp.diffuse = 1.f;
+		
+		renderer->drawArrays(m, &particleDraw, dp);
 	}
 }
 
@@ -1214,7 +1205,3 @@ void GameRenderer::renderLetterbox()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-void GameRenderer::addParticle(const FXParticle &particle)
-{
-	_particles.push_back(particle);
-}
