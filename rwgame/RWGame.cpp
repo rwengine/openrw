@@ -70,7 +70,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	
 	// Initalize all the archives.
 	engine->gameData.loadIMG("/models/gta3");
-	engine->gameData.loadIMG("/models/txd");
+	//engine->gameData.loadIMG("/models/txd");
 	engine->gameData.loadIMG("/anim/cuts");
 	
 	// Initialize renderer

@@ -647,7 +647,7 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	}
 
 	glm::mat4 matrixModel;
-	if( instance->body ) {
+	if( instance->body && instance->body->body ) {
 		instance->body->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
 	}
 	else {
@@ -917,6 +917,10 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 					auto& tC = mat.textures[0].name;
 					auto& tA = mat.textures[0].alphaName;
 					tex = engine->gameData.findTexture(tC, tA);
+					if( ! tex )
+					{
+						//engine->logger.warning("Renderer", "Missing texture: " + tC + " " + tA);
+					}
 					mat.textures[0].texture = tex;
 				}
 				if( tex )

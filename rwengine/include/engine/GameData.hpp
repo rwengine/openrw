@@ -16,6 +16,7 @@
 
 #include <audio/MADStream.hpp>
 #include <render/TextureData.hpp>
+#include <core/FileIndex.hpp>
 
 #include <memory>
 
@@ -41,17 +42,7 @@ private:
 	std::string splash;
 	
 public:
-	
-	/**
-	 * @struct FileInfo
-	 *  Stores information about a file the engine might want to load
-	 */
-	struct FileInfo
-	{
-		bool archived; /// Is the file inside an IMG or on the filesystem?
-		std::string path; /// Path to the file containing the file.
-	};
-	
+
 	/**
 	 * ctor
 	 * @param path Path to the root of the game data.
@@ -152,21 +143,7 @@ public:
 
 	void loadSplash(const std::string& name);
 
-	/**
-	 * Returns a pointer to the named file if it is available,
-	 * the memory must be freed by the caller.
-	 * @param name the filename in the archive
-	 * @return pointer to the data, NULL if it is not available
-	 */
-	char* openFile(const std::string& name);
-	FileHandle openFile2(const std::string& name);
-
-	/**
-	 * @brief loadFile Marks a file as open, and opens it.
-	 * @param name
-	 * @return
-	 */
-	char* loadFile(const std::string& name);
+	FileHandle openFile(const std::string& name);
 
 	/**
 	 * @brief getAtlas Returns atlas i, creating it if the situation calls for it.
@@ -181,6 +158,8 @@ public:
 		return textures[{name, alpha}];
 	}
 	
+	FileIndex index;
+	
 	/**
 	 * Files that have been loaded previously
 	 */
@@ -191,12 +170,7 @@ public:
 	 */
 	std::map<std::string, std::string> iplLocations;
 	std::map<std::string, std::string> ideLocations;
-	
-	/**
-	 * Maps file names to data about the file.
-	 */
-	std::map<std::string, FileInfo> _knownFiles;
-	
+
 	/**
 	 * Map of loaded archives
 	 */

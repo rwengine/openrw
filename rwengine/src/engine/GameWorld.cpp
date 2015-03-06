@@ -215,6 +215,9 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		std::string modelname = oi->modelName;
 		std::string texturename = oi->textureName;
 
+		std::transform(std::begin(modelname), std::end(modelname), std::begin(modelname), tolower);
+		std::transform(std::begin(texturename), std::end(texturename), std::begin(texturename), tolower);
+
 		// Ensure the relevant data is loaded.
 		if(! oi->modelName.empty()) {
 			if( modelname != "null" ) {
@@ -660,7 +663,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	std::string lowerName(name);
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
-	auto datfile = gameData.openFile2(lowerName + ".dat");
+	auto datfile = gameData.openFile(lowerName + ".dat");
 
 	CutsceneData* cutscene = new CutsceneData;
 

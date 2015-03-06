@@ -456,26 +456,26 @@ Model* LoaderDFF::loadFromMemory(FileHandle file, GameData *gameData)
 }
 
 LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, const std::string &file, ModelCallback cb)
-	: WorkJob(context), _gameData(gd), _file(file), _callback(cb), _data(nullptr)
+	: WorkJob(context), _gameData(gd), _file(file), _callback(cb)
 {
 
 }
 
 void LoadModelJob::work()
 {
-	_data = _gameData->openFile2(_file);
+	data = _gameData->openFile(_file);
 }
 
 void LoadModelJob::complete()
 {
 	Model* m = nullptr;
 	// TODO error status
-	if( _data ) {
+	if( data ) {
 
 		// TODO allow some of the loading to process in a seperate thread.
 		LoaderDFF loader;
 
-		m = loader.loadFromMemory(_data, _gameData);
+		m = loader.loadFromMemory(data, _gameData);
 	}
 
 	_callback(m);

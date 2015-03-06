@@ -7,23 +7,6 @@
 #include <iostream>
 #include <algorithm>
 
-bool TextureLoader::loadFromFile(std::string filename, GameData* gameData)
-{
-	std::ifstream dfile(filename);
-	if ( ! dfile.is_open()) {
-		std::cerr << "Error opening file " << filename << std::endl;
-		return false;
-	}
-
-	dfile.seekg(0, std::ios_base::end);
-	size_t length = dfile.tellg();
-	dfile.seekg(0);
-	char *data = new char[length];
-	dfile.read(data, length);
-
-	return loadFromMemory(data, gameData);
-}
-
 GLuint gErrorTextureData[] = { 0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF };
 GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
 GLuint gTextureRed[] = {0xFF0000FF};
@@ -201,8 +184,9 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative, RW::BinaryStre
 	return TextureData::create( textureName, { texNative.width, texNative.height }, transparent );
 }
 
-bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
+bool TextureLoader::loadFromMemory(FileHandle file, GameData *gameData)
 {
+	auto data = file->data;
 	RW::BinaryStreamSection root(data);
 	/*auto texDict =*/ root.readStructure<RW::BSTextureDictionary>();
 
@@ -218,7 +202,7 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 		std::string alpha = std::string(texNative.alphaName);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 		std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
-
+		
 		auto texture = createTexture(texNative, rootSection);
 
 		gameData->textures[{name, alpha}] = texture;
@@ -233,23 +217,21 @@ bool TextureLoader::loadFromMemory(char *data, GameData *gameData)
 
 
 LoadTextureArchiveJob::LoadTextureArchiveJob(WorkContext *context, GameData *gd, const std::string &file)
-	: WorkJob(context), _gameData(gd), _file(file), _data(nullptr)
+	: WorkJob(context), _gameData(gd), _file(file)
 {
 
 }
 
 void LoadTextureArchiveJob::work()
 {
-	_data = _gameData->openFile(_file);
+	data = _gameData->openFile(_file);
 }
 
 void LoadTextureArchiveJob::complete()
 {
 	// TODO error status
-	if(_data) {
+	if(data) {
 		TextureLoader loader;
-		loader.loadFromMemory(_data, _gameData);
+		loader.loadFromMemory(data, _gameData);
 	}
-
-	delete[] _data;
 }
