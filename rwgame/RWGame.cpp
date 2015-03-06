@@ -192,6 +192,22 @@ void RWGame::tick(float dt)
 			}
 			clockAccumulator -= 1.f;
 		}
+		
+		// Clean up old VisualFX
+		for( int i = 0; i < engine->effects.size(); ++i )
+		{
+			VisualFX* effect = engine->effects[i];
+			if( effect->getType() == VisualFX::Particle )
+			{
+				auto& part = effect->particle;
+				if( part.lifetime < 0.f ) continue;
+				if( engine->gameTime >= part.starttime + part.lifetime )
+				{
+					engine->destroyEffect( effect );
+					--i;
+				}
+			}
+		}
 
 		for( GameObject* object : engine->objects ) {
 			object->_updateLastTransform();

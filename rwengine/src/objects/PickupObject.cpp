@@ -17,6 +17,13 @@ PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int mode
 	_ghost->setCollisionShape(_shape);
 	_ghost->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT|btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
+	corona = world->createEffect(VisualFX::Particle);
+	corona->particle.position = getPosition();
+	corona->particle.direction = glm::vec3(0.f, 0.f, 1.f);
+	corona->particle.orientation = VisualFX::ParticleData::Camera;
+	corona->particle.colour = glm::vec4(1.0f, 0.3f, 0.3f, 0.3f);
+	corona->particle.texture = engine->gameData.findTexture("coronacircle");
+
 	setEnabled(true);
 }
 
@@ -24,6 +31,7 @@ PickupObject::~PickupObject()
 {
 	if(_ghost) {
 		setEnabled(false);
+		engine->destroyEffect(corona);
 		delete _ghost;
 		delete _shape;
 	}
@@ -64,20 +72,6 @@ void PickupObject::tick(float dt)
 				}
 			}
 		}
-
-		auto tex = engine->gameData.findTexture("coronacircle")->getName();
-
-		/// @TODO move this into rendering logic.
-		/*engine->renderer.addParticle({
-										 position,
-										 {0.f, 0.f, 1.f},
-										 0.f,
-										 GameRenderer::FXParticle::Camera,
-										 engine->gameTime, dt,
-										 tex,
-										 {1.f, 1.f},
-										 {}, {0.75f, 0.f, 0.f, 1.f}
-					});*/
 	}
 }
 
@@ -85,9 +79,11 @@ void PickupObject::setEnabled(bool enabled)
 {
 	if( ! _enabled && enabled ) {
 		engine->dynamicsWorld->addCollisionObject(_ghost, btBroadphaseProxy::SensorTrigger);
+		corona->particle.size = glm::vec2(1.5f, 1.5f);
 	}
 	else if( _enabled && ! enabled ) {
 		engine->dynamicsWorld->removeCollisionObject(_ghost);
+		corona->particle.size = glm::vec2(0.f, 0.f);
 	}
 
 	_enabled = enabled;

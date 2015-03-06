@@ -504,6 +504,28 @@ void GameWorld::destroyQueuedObjects()
 	}
 }
 
+VisualFX* GameWorld::createEffect(VisualFX::EffectType type)
+{
+	auto effect = new VisualFX( type );
+	effects.push_back(effect);
+	return effect;
+}
+
+void GameWorld::destroyEffect(VisualFX* effect)
+{
+	for( auto it = effects.begin(); it != effects.end(); )
+	{
+		if( *it == effect )
+		{
+			it = effects.erase( it );
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
+
 void GameWorld::doWeaponScan(const WeaponScan &scan)
 {
 	if( scan.type == WeaponScan::RADIUS ) {
