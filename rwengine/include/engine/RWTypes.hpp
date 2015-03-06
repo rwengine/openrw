@@ -22,16 +22,6 @@ struct Animation;
 
 typedef std::map<std::string, Animation*> AnimationSet;
 
-class Model;
-
-// TODO: Make generic.
-struct ModelHandle {
-	Model* model;
-	std::string name;
-
-	ModelHandle(const std::string& name) : model( nullptr ), name(name) {}
-};
-
 namespace RWTypes
 {
 

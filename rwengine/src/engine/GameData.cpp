@@ -12,6 +12,7 @@
 
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
+#include <loaders/BackgroundLoader.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -87,10 +88,9 @@ GameData::GameData(const std::string& path)
 GameData::~GameData()
 {
 	for(auto& m : models) {
-		if(m.second->model) {
-			delete m.second->model;
+		if(m.second->resource) {
+			delete m.second->resource;
 		}
-		delete m.second;
 	}
 }
 
@@ -408,22 +408,18 @@ void GameData::loadDFF(const std::string& name, bool async)
 	// Before starting the job make sure the file isn't loaded again.
 	loadedFiles.insert({name, true});
 
-	models[realname] = new ModelHandle(realname);
-
-	auto j = new LoadModelJob(this->engine->_work, this, name,
-							  [&, realname]( Model* model ) {
-								  models[realname]->model = model;
-							  }
-						  );
-
+	models[realname] = ModelRef( new ResourceHandle<Model>(realname) );
+	
+	auto job = new BackgroundLoaderJob<Model, LoaderDFF> 
+	    { this->engine->_work, &this->index, name, models[realname] };
 
 	if( async ) {
-		this->engine->_work->queueJob( j );
+		this->engine->_work->queueJob( job  );
 	}
 	else {
-		j->work();
-		j->complete();
-		delete j;
+		job->work();
+		job->complete();
+		delete job;
 	}
 
 }

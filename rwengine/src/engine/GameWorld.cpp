@@ -228,7 +228,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			gameData.loadTXD(texturename + ".txd", true);
 		}
 
-		ModelHandle* m = gameData.models[modelname];
+		ModelRef m = gameData.models[modelname];
 
 		// Check for dynamic data.
 		auto dyit = gameData.dynamicObjectData.find(oi->modelName);
@@ -364,7 +364,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	}
 
 
-	ModelHandle* m = gameData.models[modelname];
+	ModelRef m = gameData.models[modelname];
 
 	auto instance = new CutsceneObject(
 		this,
@@ -410,8 +410,8 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			}
 		}
 		
-		ModelHandle* m = gameData.models[vti->modelName];
-		auto model = m->model;
+		ModelRef& m = gameData.models[vti->modelName];
+		auto model = m->resource;
 		auto info = gameData.vehicleInfo.find(vti->handlingID);
 		if(model && info != gameData.vehicleInfo.end()) {
 			if( info->second->wheels.size() == 0 && info->second->seats.size() == 0 ) {
@@ -470,9 +470,9 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 			gameData.loadTXD(texturename + ".txd");
 		}
 
-		ModelHandle* m = gameData.models[modelname];
+		ModelRef m = gameData.models[modelname];
 
-		if(m && m->model) {
+		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			objects.insert(ped);
 			new DefaultAIController(ped);

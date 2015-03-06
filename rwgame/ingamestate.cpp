@@ -159,7 +159,7 @@ void IngameState::tick(float dt)
 		auto vehicle = ( target->type() == GameObject::Character ) ? static_cast<CharacterObject*>(target)->getCurrentVehicle() : nullptr;
 		if( vehicle ) {
 			auto model = vehicle->model;
-			for(auto& g : model->model->geometries) {
+			for(auto& g : model->resource->geometries) {
 				viewDistance = std::max(
 							(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 4.0f,
 							viewDistance);

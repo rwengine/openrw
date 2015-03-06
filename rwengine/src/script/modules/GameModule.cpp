@@ -408,7 +408,7 @@ bool game_special_char_loaded(const ScriptArguments& args)
 	auto chartype = args.getVM()->getWorld()->findObjectType<CharacterData>(args[0].integer);
 	if( chartype ) {
 		auto modelfind = args.getVM()->getWorld()->gameData.models.find(chartype->modelName);
-		if( modelfind != args.getVM()->getWorld()->gameData.models.end() && modelfind->second->model != nullptr ) {
+		if( modelfind != args.getVM()->getWorld()->gameData.models.end() && modelfind->second->resource != nullptr ) {
 			return true;
 		}
 	}
@@ -616,7 +616,7 @@ void game_create_cutscene_head(const ScriptArguments& args)
 	auto actor = static_cast<GameObject*>(*args[0].handle);
 	CutsceneObject* object = args.getVM()->getWorld()->createCutsceneObject(id, args.getVM()->getWorld()->state.currentCutscene->meta.sceneOffset );
 
-	auto headframe = actor->model->model->findFrame("shead");
+	auto headframe = actor->model->resource->findFrame("shead");
 	actor->skeleton->setEnabled(headframe, false);
 	object->setParentActor(actor, headframe);
 

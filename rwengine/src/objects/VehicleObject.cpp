@@ -10,7 +10,7 @@
 
 #define PART_CLOSE_VELOCITY 0.25f
 
-VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
+VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
 	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(true),
 	  vehicle(data), info(info), colourPrimary(prim),
@@ -64,7 +64,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		// Hide all LOD and damage frames.
 		skeleton = new Skeleton;
 		
-		for(ModelFrame* frame : model->model->frames)
+		for(ModelFrame* frame : model->resource->frames)
 		{
 			auto& name = frame->getName();
 			bool isDam = name.find("_dam") != name.npos;
@@ -477,7 +477,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 			
 			if( skeleton->getData(p->normal->getIndex()).enabled )
 			{
-				auto& geom = model->model->geometries[p->normal->getGeometries()[0]];
+				auto& geom = model->resource->geometries[p->normal->getGeometries()[0]];
 				auto pp = p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
 				float td = glm::distance(glm::vec3(pp)+geom->geometryBounds.center
 										 , dpoint);
@@ -627,7 +627,7 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 
 	if( okframe->getGeometries().size() == 0 ) return;
 	
-	auto& geom = model->model->geometries[okframe->getGeometries()[0]];
+	auto& geom = model->resource->geometries[okframe->getGeometries()[0]];
 	auto gbounds = geom->geometryBounds;
 	
 	if( fn.find("door") != fn.npos ) {
