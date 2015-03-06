@@ -5,6 +5,7 @@
 #include <engine/RWTypes.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
+#include <render/Model.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
@@ -31,7 +32,8 @@ public:
     glm::vec3 position;
     glm::quat rotation;
 
-	ModelHandle* model; /// Cached pointer to Object's Model.
+	/// Reference to Model data
+	ModelRef model;
 	
     GameWorld* engine;
 
@@ -55,7 +57,7 @@ public:
 	 */
 	bool visible;
 
-	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model)
+	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
 		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
 		  _inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),

@@ -351,11 +351,11 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	transparentDrawQueue.clear();
 	
 	// Render arrows above anything that isn't radar only (or hidden)
-	ModelHandle* arrowModel = engine->gameData.models["arrow"];
-	if( arrowModel && arrowModel->model )
+	ModelRef& arrowModel = engine->gameData.models["arrow"];
+	if( arrowModel && arrowModel->resource )
 	{
 		auto arrowTex = engine->gameData.textures[{"copblue",""}];
-		auto arrowFrame = arrowModel->model->findFrame( "arrow" );
+		auto arrowFrame = arrowModel->resource->findFrame( "arrow" );
 		for( auto& blip : engine->state.radarBlips )
 		{
 			if( blip.second.display == BlipData::Show )
@@ -381,7 +381,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 				dp.ambient = 1.f;
 				dp.colour = glm::u8vec4(255, 255, 255, 255);
 
-				auto geom = arrowModel->model->geometries[arrowFrame->getGeometries()[0]];
+				auto geom = arrowModel->resource->geometries[arrowFrame->getGeometries()[0]];
 				Model::SubGeometry& sg = geom->subgeom[0];
 
 				dp.start = sg.start;
@@ -550,7 +550,7 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 {
 	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( _renderAlpha );
 
-	if(!pedestrian->model->model) return;
+	if(!pedestrian->model->resource) return;
 	
 	if( pedestrian->isAnimationFixed() )
 	{
@@ -559,12 +559,12 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 		matrixModel = glm::translate(matrixModel, -rtranslate);
 	}
 
-	auto root = pedestrian->model->model->frames[0];
+	auto root = pedestrian->model->resource->frames[0];
 	
-	renderFrame(pedestrian->model->model, root->getChildren()[0], matrixModel, pedestrian, 1.f, pedestrian->animator);
+	renderFrame(pedestrian->model->resource, root->getChildren()[0], matrixModel, pedestrian, 1.f, pedestrian->animator);
 
 	if(pedestrian->getActiveItem()) {
-		auto handFrame = pedestrian->model->model->findFrame("srhand");
+		auto handFrame = pedestrian->model->resource->findFrame("srhand");
 		glm::mat4 localMatrix;
 		if( handFrame ) {
 			while( handFrame->getParent() ) {
@@ -585,13 +585,13 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( _renderAlpha );
 
-	renderModel(vehicle->model->model, matrixModel, vehicle);
+	renderModel(vehicle->model->resource, matrixModel, vehicle);
 
 	// Draw wheels n' stuff
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
 		auto woi = engine->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
-			Model* wheelModel = engine->gameData.models["wheels"]->model;
+			Model* wheelModel = engine->gameData.models["wheels"]->resource;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
 			if( wheelModel ) {
 				// Construct our own matrix so we can use the local transform
@@ -641,7 +641,7 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 		}
 	}
 
-	if(!instance->model->model)
+	if(!instance->model->resource)
 	{
 		return;
 	}
@@ -657,9 +657,9 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 	}
 
 	float mindist = 100000.f;
-	for (size_t g = 0; g < instance->model->model->geometries.size(); g++)
+	for (size_t g = 0; g < instance->model->resource->geometries.size(); g++)
 	{
-		RW::BSGeometryBounds& bounds = instance->model->model->geometries[g]->geometryBounds;
+		RW::BSGeometryBounds& bounds = instance->model->resource->geometries[g]->geometryBounds;
 		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
 	}
 
@@ -680,20 +680,20 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 					culled++;
 					return;
 				}
-				else if (instance->LODinstance->model->model) {
-					model = instance->LODinstance->model->model;
+				else if (instance->LODinstance->model->resource) {
+					model = instance->LODinstance->model->resource;
 
-					fadingModel = instance->model->model;
+					fadingModel = instance->model->resource;
 					opacity = (mindist) / instance->object->drawDistance[0];
 				}
 			}
 			else {
-				fadingModel = instance->model->model;
+				fadingModel = instance->model->resource;
 				opacity = (mindist) / instance->object->drawDistance[0];
 			}
 		}
 		else if (! instance->object->LOD ) {
-			model = instance->model->model;
+			model = instance->model->resource;
 			opacity = (mindist) / instance->object->drawDistance[0];
 		}
 	}
@@ -703,14 +703,14 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 			return;
 		}
 
-		auto root = instance->model->model->frames[0];
+		auto root = instance->model->resource->frames[0];
 		int lodInd = 1;
 		if( mindist > instance->object->drawDistance[0] ) {
 			lodInd = 2;
 		}
 		auto LODindex = root->getChildren().size() - lodInd;
 		auto f = root->getChildren()[LODindex];
-		model = instance->model->model;
+		model = instance->model->resource;
 		frame = f;
 
 		if( lodInd == 2 ) {
@@ -750,9 +750,9 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	if( odata->ID >= 170 && odata->ID <= 184 )
 	{
 		auto weapons = engine->gameData.models["weapons"];
-		if( weapons && weapons->model && odata ) {
-			model = weapons->model;
-			itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+		if( weapons && weapons->resource && odata ) {
+			model = weapons->resource;
+			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 			if ( ! itemModel )
 			{
 				engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
@@ -762,9 +762,9 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	else
 	{
 		auto handle = engine->gameData.models[odata->modelName];
-		if ( handle && handle->model )
+		if ( handle && handle->resource )
 		{
-			model = handle->model;
+			model = handle->resource;
 			itemModel = model->frames[model->rootFrameIdx];
 		}
 		else
@@ -784,7 +784,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 {
 	if(!engine->state.currentCutscene) return;
 
-	if(!cutscene->model->model)
+	if(!cutscene->model->resource)
 	{
 		return;
 	}
@@ -808,9 +808,9 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 	}
 
 	float mindist = 100000.f;
-	for (size_t g = 0; g < cutscene->model->model->geometries.size(); g++)
+	for (size_t g = 0; g < cutscene->model->resource->geometries.size(); g++)
 	{
-		RW::BSGeometryBounds& bounds = cutscene->model->model->geometries[g]->geometryBounds;
+		RW::BSGeometryBounds& bounds = cutscene->model->resource->geometries[g]->geometryBounds;
 		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
 	}
 
@@ -818,10 +818,10 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 		glm::mat4 align;
 		/// @todo figure out where this 90 degree offset is coming from.
 		align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
-		renderModel(cutscene->model->model, matrixModel * align, cutscene);
+		renderModel(cutscene->model->resource, matrixModel * align, cutscene);
 	}
 	else {
-		renderModel(cutscene->model->model, matrixModel, cutscene);
+		renderModel(cutscene->model->resource, matrixModel, cutscene);
 	}
 }
 
@@ -831,11 +831,11 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 
 	auto odata = engine->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
 	auto weapons = engine->gameData.models["weapons"];
-	if( weapons && weapons->model ) {
-		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+	if( weapons && weapons->resource ) {
+		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
+			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
 			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
@@ -875,11 +875,11 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 	// srhand
 	std::shared_ptr<ObjectData> odata = engine->findObjectType<ObjectData>(item->getModelID());
 	auto weapons = engine->gameData.models["weapons"];
-	if( weapons && weapons->model ) {
-		auto itemModel = weapons->model->findFrame(odata->modelName + "_l0");
+	if( weapons && weapons->resource ) {
+		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(weapons->model, itemModel, modelMatrix * matrix, nullptr, 1.f);
+			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
 			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");

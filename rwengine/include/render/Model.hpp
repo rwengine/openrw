@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <GL/glew.h>
 
+#include <data/ResourceHandle.hpp>
 #include <loaders/rwbinarystream.h>
 #include "DrawBuffer.hpp"
 #include "GeometryBuffer.hpp"
@@ -165,5 +166,7 @@ public:
 
 	~Model();
 };
+
+typedef ResourceHandle<Model>::Ref ModelRef;
 
 #endif

@@ -414,7 +414,7 @@ void LoaderDFF::readAtomic(Model *model, const RWBStream &stream)
 	/// @todo are any atomic extensions important?
 }
 
-Model* LoaderDFF::loadFromMemory(FileHandle file, GameData *gameData)
+Model* LoaderDFF::loadFromMemory(FileHandle file)
 {
 	auto model = new Model;
 
@@ -453,30 +453,4 @@ Model* LoaderDFF::loadFromMemory(FileHandle file, GameData *gameData)
 	}
 
 	return model;
-}
-
-LoadModelJob::LoadModelJob(WorkContext *context, GameData* gd, const std::string &file, ModelCallback cb)
-	: WorkJob(context), _gameData(gd), _file(file), _callback(cb)
-{
-
-}
-
-void LoadModelJob::work()
-{
-	data = _gameData->openFile(_file);
-}
-
-void LoadModelJob::complete()
-{
-	Model* m = nullptr;
-	// TODO error status
-	if( data ) {
-
-		// TODO allow some of the loading to process in a seperate thread.
-		LoaderDFF loader;
-
-		m = loader.loadFromMemory(data, _gameData);
-	}
-
-	_callback(m);
 }

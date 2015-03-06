@@ -2,11 +2,11 @@
 #include <engine/Animator.hpp>
 #include <data/Skeleton.hpp>
 
-CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos, ModelHandle *model)
+CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos, const ModelRef& model)
 	: GameObject(engine, pos, {}, model), _parent(nullptr), _bone(nullptr)
 {
 	skeleton = new Skeleton;
-	animator = new Animator(model->model, skeleton);
+	animator = new Animator(model->resource, skeleton);
 }
 
 CutsceneObject::~CutsceneObject()

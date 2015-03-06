@@ -209,7 +209,7 @@ public:
 	/**
 	 * Loaded models
 	 */
-	std::map<std::string, ModelHandle*> models;
+	std::map<std::string, ResourceHandle<Model>::Ref> models;
 
 	/**
 	 * Loaded textures (Textures are ID by name and alpha pairs)

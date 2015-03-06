@@ -9,7 +9,7 @@
 
 void WeaponItem::fireHitscan()
 {
-	auto handFrame = _character->model->model->findFrame("srhand");
+	auto handFrame = _character->model->resource->findFrame("srhand");
 	glm::mat4 handMatrix;
 	if( handFrame ) {
 		while( handFrame->getParent() ) {

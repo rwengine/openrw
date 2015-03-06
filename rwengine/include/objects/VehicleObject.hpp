@@ -46,14 +46,7 @@ public:
 	
 	std::map<std::string, Part> dynamicParts;
 
-	VehicleObject(GameWorld* engine,
-			   const glm::vec3& pos,
-			   const glm::quat& rot,
-			   ModelHandle* model,
-			   VehicleDataHandle data,
-			   VehicleInfoHandle info,
-			   const glm::u8vec3& prim,
-			   const glm::u8vec3& sec);
+	VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec);
 	
 	virtual ~VehicleObject();
 	

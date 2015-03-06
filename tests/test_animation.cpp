@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		
 		/** Models are currently needed to relate animation bones <=> model frame #s. */
 		Global::get().e->gameData.loadDFF("player.dff");
-		ModelHandle* test_model = Global::get().e->gameData.models["player"];
+		ModelRef& test_model = Global::get().e->gameData.models["player"];
 		
-		Animator animator(test_model->model, &skeleton);
+		Animator animator(test_model->resource, &skeleton);
 
 		animation.duration = 1.f;
 		animation.bones["player"] = new AnimationBone{

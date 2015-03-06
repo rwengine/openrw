@@ -7,7 +7,7 @@
 InstanceObject::InstanceObject(GameWorld* engine,
 		const glm::vec3& pos,
 		const glm::quat& rot,
-		ModelHandle *model,
+		const ModelRef& model,
 		const glm::vec3& scale,
 		std::shared_ptr<ObjectData> obj,
 		InstanceObject* lod,

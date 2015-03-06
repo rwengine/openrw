@@ -11,6 +11,8 @@
 #include <string>
 #include <WorkContext.hpp>
 #include <core/FileHandle.hpp>
+#include <core/FileIndex.hpp>
+#include <data/ResourceHandle.hpp>
 
 class Model;
 class GameData;
@@ -54,28 +56,7 @@ class LoaderDFF
 	void readAtomic(Model* model, const RWBStream& stream);
 
 public:
-	Model* loadFromMemory(FileHandle file, GameData* gameData);
-};
-
-#include <functional>
-
-class LoadModelJob : public WorkJob
-{
-public:
-	typedef std::function<void ( Model* )> ModelCallback;
-
-private:
-	GameData* _gameData;
-	std::string _file;
-	ModelCallback _callback;
-	FileHandle data;
-public:
-
-	LoadModelJob(WorkContext* context, GameData* gd, const std::string& file, ModelCallback cb);
-
-	void work();
-
-	void complete();
+	Model* loadFromMemory(FileHandle file);
 };
 
 #endif

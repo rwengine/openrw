@@ -9,7 +9,7 @@
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
-CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelHandle* model, std::shared_ptr<CharacterData> data)
+CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
   _hasTargetPosition(false), _activeInventoryItem(0),
@@ -49,7 +49,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 
 	if(model) {
 		skeleton = new Skeleton;
-		animator = new Animator(model->model, skeleton);
+		animator = new Animator(model->resource, skeleton);
 
 		createActor();
 	}
