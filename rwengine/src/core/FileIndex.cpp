@@ -29,6 +29,27 @@ void FileIndex::indexDirectory(const std::string& directory)
 			};
 		}
 	}
+	closedir(dp);
+}
+
+void FileIndex::indexTree(const std::string& root)
+{
+	indexDirectory(root);
+	
+	DIR* dp = opendir(root.c_str());
+	dirent* ep;
+	if ( dp == NULL ) {
+		throw std::runtime_error("Unable to open directory: " + root);
+	}
+	while( (ep = readdir(dp)) )
+	{
+		if( ep->d_type == DT_DIR && ep->d_name[0] != '.' )
+		{
+			std::string path = root + "/" + ep->d_name;
+			indexTree(path);
+		}
+	}
+	closedir(dp);
 }
 
 void FileIndex::indexArchive(const std::string& archive)
@@ -120,10 +141,15 @@ FileHandle FileIndex::openFile(const std::string& filename)
 		}
 
 		dfile.seekg(0, std::ios_base::end);
-		size_t length = dfile.tellg();
+		length = dfile.tellg();
 		dfile.seekg(0);
-		char *data = new char[length];
+		data = new char[length];
 		dfile.read(data, length);
+	}
+	
+	if( data == nullptr )
+	{
+		return nullptr;
 	}
 	
 	return FileHandle( new FileContentsInfo{ data, length } );

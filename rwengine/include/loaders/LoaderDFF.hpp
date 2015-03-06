@@ -68,7 +68,7 @@ private:
 	GameData* _gameData;
 	std::string _file;
 	ModelCallback _callback;
-	FileHandle _data;
+	FileHandle data;
 public:
 
 	LoadModelJob(WorkContext* context, GameData* gd, const std::string& file, ModelCallback cb);

@@ -41,7 +41,7 @@ std::string findPathRealCase(const std::string& base, const std::string& path)
 	// Open the current "base" path (i.e. the real path)
 	DIR* dp = opendir(base.c_str());
 	dirent* ep;
-		
+	
 	if( dp != NULL) {
 		while( (ep = readdir(dp)) ) {
 			realName = ep->d_name;
@@ -96,25 +96,12 @@ GameData::~GameData()
 
 void GameData::load()
 {
+	index.indexTree(datpath);
+	
 	parseDAT(datpath+"/data/default.dat");
 	parseDAT(datpath+"/data/gta3.dat");
 	
-	_knownFiles.insert({"wheels.DFF", {false, datpath+"/models/Generic/wheels.DFF"}});
-	_knownFiles.insert({"loplyguy.dff", {false, datpath+"/models/Generic/loplyguy.dff"}});
-	_knownFiles.insert({"weapons.dff", {false, datpath+"/models/Generic/weapons.dff"}});
-	_knownFiles.insert({"arrow.dff", {false, datpath+"/models/Generic/arrow.DFF"}});
-	_knownFiles.insert({"particle.txd", {false, datpath+"/models/particle.txd"}});
-	_knownFiles.insert({"hud.txd", {false, datpath+"/models/hud.txd"}});
-	_knownFiles.insert({"english.gxt", {false, datpath+"/TEXT/english.gxt"}});
-	_knownFiles.insert({"ped.ifp", {false, datpath+"/anim/ped.ifp"}});
-	_knownFiles.insert({"fonts.txd", {false, datpath+"/models/fonts.txd"}});
-
-	_knownFiles.insert({"news.txd", {false, datpath+"/txd/NEWS.TXD"}});
-	_knownFiles.insert({"splash1.txd", {false, datpath+"/txd/SPLASH1.TXD"}});
-	_knownFiles.insert({"splash2.txd", {false, datpath+"/txd/SPLASH2.TXD"}});
-	_knownFiles.insert({"splash3.txd", {false, datpath+"/txd/SPLASH3.TXD"}});
-
-	loadDFF("wheels.DFF");
+	loadDFF("wheels.dff");
 	loadDFF("weapons.dff");
 	loadDFF("arrow.dff");
 	loadTXD("particle.txd");
@@ -179,9 +166,7 @@ void GameData::parseDAT(const std::string& path)
 							texpath[t] = '/';
 						}
 					}
-					texpath = findPathRealCase(datpath, texpath);
 					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
-					_knownFiles.insert({ texname, { false, texpath }});
 					loadTXD(texname);
 				}
 			}
@@ -219,32 +204,7 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 void GameData::loadIMG(const std::string& name)
 {
-	LoaderIMG imgLoader; 
-	std::string archivePath = datpath + name;
-
-	if (imgLoader.load(archivePath)) {
-		for (size_t i = 0; i < imgLoader.getAssetCount(); i++) {
-			auto &asset = imgLoader.getAssetInfoByIndex(i);
-
-			std::string filename = asset.name;
-			
-			if(asset.size == 0)
-			{
-				engine->logger.warning("Data", "Ignoring asset " + filename + " with size 0");
-			}
-			else
-            {
-				// Enter the asset twice.. 
-				_knownFiles.insert({ filename, { true, archivePath }});
-				for(size_t t = 0; t < filename.size(); ++t)
-				{
-					filename[t] = tolower(filename[t]);
-				}
-				_knownFiles.insert({ filename, { true, archivePath }});
-			}
-		}
-		archives.insert({archivePath, imgLoader});
-	}
+	index.indexArchive(datpath + name);
 }
 
 void GameData::loadIPL(const std::string& name)
@@ -364,7 +324,7 @@ SCMFile *GameData::loadSCM(const std::string &path)
 
 void GameData::loadGXT(const std::string &name)
 {
-	auto d = openFile2(name);
+	auto d = openFile(name);
 
 	LoaderGXT loader;
 
@@ -470,7 +430,7 @@ void GameData::loadDFF(const std::string& name, bool async)
 
 void GameData::loadIFP(const std::string &name)
 {
-	auto f = openFile2(name);
+	auto f = openFile(name);
 
 	if(f)
 	{
@@ -563,109 +523,14 @@ void GameData::loadSplash(const std::string &name)
 	engine->state.currentSplash = lower;
 }
 
-char* GameData::openFile(const std::string& name)
+FileHandle GameData::openFile(const std::string &name)
 {
-	auto i = _knownFiles.find(name);
-	if(i != _knownFiles.end())
+	auto file = index.openFile(name);
+	if( file == nullptr )
 	{
-		if(i->second.archived)
-		{
-			// Find the archive
-			auto ai = archives.find(i->second.path);
-			if(ai != archives.end())
-			{
-				return ai->second.loadToMemory(name);
-			}
-			else 
-			{
-				engine->logger.error("Data", "Archive not found " + i->second.path);
-			}
-		}
-		else
-		{
-			std::ifstream dfile(i->second.path);
-			if ( ! dfile.is_open()) {
-				engine->logger.error("Data", "Error opening file " + i->second.path);
-				return nullptr;
-			}
-
-			dfile.seekg(0, std::ios_base::end);
-			size_t length = dfile.tellg();
-			dfile.seekg(0);
-			char *data = new char[length];
-			dfile.read(data, length);
-			
-			return data;
-		}
+		engine->logger.error("Data", "Unable to open file: " + name);
 	}
-	else 
-	{
-		engine->logger.error("Data", "Unable to locate file: " + name);
-	}
-	
-	return nullptr;
-}
-
-FileHandle GameData::openFile2(const std::string &name)
-{
-	auto i = _knownFiles.find(name);
-	if(i != _knownFiles.end())
-	{
-		char* data = nullptr;
-		size_t length = 0;
-
-		if(i->second.archived)
-		{
-			// Find the archive
-			auto ai = archives.find(i->second.path);
-			if(ai != archives.end())
-			{
-				LoaderIMGFile asset;
-				if( ai->second.findAssetInfo(name, asset) )
-				{
-					data = ai->second.loadToMemory(name);
-					length = asset.size * 2048;
-				}
-			}
-			else
-			{
-				engine->logger.error("Data", "Archive not found " + i->second.path);
-			}
-		}
-		else
-		{
-			std::ifstream dfile(i->second.path);
-			if ( ! dfile.is_open()) {
-				engine->logger.error("Data", "Error opening file " + i->second.path);
-				return nullptr;
-			}
-
-			dfile.seekg(0, std::ios_base::end);
-			length = dfile.tellg();
-			dfile.seekg(0);
-			data = new char[length];
-			dfile.read(data, length);
-		}
-
-		return FileHandle( new FileContentsInfo{ data, length } );
-	}
-	else
-	{
-		engine->logger.error("Data", "Unable to locate file: " + name);
-	}
-	return nullptr;
-}
-
-char* GameData::loadFile(const std::string &name)
-{
-	auto it = loadedFiles.find(name);
-	 if( it != loadedFiles.end() ) {
-		engine->logger.warning("Data", "File " + name + " already loaded");
-	}
-
-	loadedFiles[name] = true;
-
-	return openFile(name);
+	return file;
 }
 
 TextureAtlas* GameData::getAtlas(size_t i)

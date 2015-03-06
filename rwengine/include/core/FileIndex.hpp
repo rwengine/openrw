@@ -27,6 +27,12 @@ public:
 	void indexDirectory(const std::string& directory);
 	
 	/**
+	 * Adds the files contained within the given directory tree to the
+	 * file index.
+	 */
+	void indexTree(const std::string& root);
+	
+	/**
 	 * Adds the files contained within the given Archive file to the
 	 * file index.
 	 */
