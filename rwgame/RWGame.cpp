@@ -265,6 +265,10 @@ void RWGame::tick(float dt)
 
 void RWGame::render(float alpha, float time)
 {
+	lastDraws = getRenderer()->getRenderer()->getDrawCount();
+	
+	getRenderer()->getRenderer()->swap();
+	
 	auto size = getWindow().getSize();
 	renderer->setViewport(size.x, size.y);
 	
@@ -362,7 +366,7 @@ void RWGame::renderDebugStats(float time)
 {
 	std::stringstream ss;
 	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
-	ss << "Draws: " << renderer->rendered << " (" << renderer->culled << " Culled)\n";
+	ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;

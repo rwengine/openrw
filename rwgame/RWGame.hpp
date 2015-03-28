@@ -16,6 +16,7 @@ class RWGame
 	bool inFocus;
 	ViewCamera lastCam, nextCam;
 	bool showDebugStats;
+	int lastDraws; /// Number of draws issued for the last frame.
 
 	float accum;
 	float timescale;
