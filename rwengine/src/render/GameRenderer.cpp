@@ -282,7 +282,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	_camera.frustum.update(proj * view);
 	
-	rendered = culled = geoms = frames = 0;
+	culled = 0;
 
 	renderer->useProgram(worldProg);
 
@@ -816,8 +816,6 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 
 void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, float opacity, GameObject* object)
 {
-	geoms++;
-
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
 		Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
@@ -879,8 +877,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 			dp.diffuse = mat.diffuseIntensity;
 			dp.ambient = mat.ambientIntensity;
 		}
-
-		rendered++;
 
 		if( abortTransparent ) {
 			transparentDrawQueue.push_back(
@@ -995,7 +991,6 @@ void GameRenderer::drawOnScreenText()
 
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent)
 {
-	frames++;
 	auto localmatrix = matrix;
 	bool vis = true;
 

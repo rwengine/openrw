@@ -97,9 +97,21 @@ public:
 
 	virtual void invalidate() = 0;
 
+	/**
+	 * Resets all per-frame counters.
+	 */
+	void swap();
+	
+	/**
+	 * Returns the number of draw calls issued for the current frame.
+	 */
+	int getDrawCount();
+
 private:
 	glm::ivec2 viewport;
 	glm::mat4 projection2D;
+protected:
+	int drawCounter;
 };
 
 class OpenGLRenderer : public Renderer

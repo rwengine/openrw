@@ -89,12 +89,8 @@ public:
 	GameRenderer(GameWorld*);
 	~GameRenderer();
 	
-	/** Number of issued draw calls */
-	size_t rendered;
 	/** Number of culling events */
 	size_t culled;
-	size_t frames;
-	size_t geoms;
 
 	/** @todo Clean up all these shader program and location variables */
 	Renderer::ShaderProgram* worldProg;

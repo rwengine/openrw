@@ -87,6 +87,16 @@ void Renderer::setViewport(const glm::ivec2& vp)
 	projection2D = glm::ortho(0.f, (float)viewport.x, (float)viewport.y, 0.f, -1.f, 1.f);
 }
 
+void Renderer::swap()
+{
+	drawCounter = 0;
+}
+
+int Renderer::getDrawCount()
+{
+	return drawCounter;
+}
+
 void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 {
 	if( dbuff != currentDbuff )
@@ -122,6 +132,8 @@ OpenGLRenderer::OpenGLRenderer()
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBOScene);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, UBOObject);
+	
+	swap();
 }
 
 std::string OpenGLRenderer::getIDString() const
@@ -221,6 +233,7 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 	};
 	uploadUBO(UBOObject, oudata);
 
+	drawCounter++;
 	glDrawElements(draw->getFaceType(), p.count, GL_UNSIGNED_INT,
 				   (void*) (sizeof(RenderIndex) * p.start));
 }
@@ -239,6 +252,7 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const 
 	};
 	uploadUBO(UBOObject, oudata);
 
+	drawCounter++;
 	glDrawArrays(draw->getFaceType(), p.start, p.count);
 }
 
