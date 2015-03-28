@@ -93,6 +93,8 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	}
 
 	StateManager::get().enter(new LoadingState(this));
+	
+	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
 
 	engine->logger.info("Game", "Started");
 }
@@ -247,7 +249,7 @@ void RWGame::tick(float dt)
 void RWGame::render(float alpha, float time)
 {
 	auto size = getWindow().getSize();
-	renderer->getRenderer()->setViewport({size.x, size.y});
+	renderer->setViewport(size.x, size.y);
 	
 	ViewCamera viewCam;
 	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )

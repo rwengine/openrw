@@ -37,20 +37,6 @@ struct WaterVertex {
 	float x, y;
 };
 
-std::vector<WaterVertex> waterLQVerts = {
-	{1.0f, 1.0f},
-	{0.0f, 1.0f},
-	{1.0f,-0.0f},
-	{0.0f,-0.0f}
-};
-
-std::vector<WaterVertex> waterHQVerts;
-
-GeometryBuffer waterLQBuffer;
-DrawBuffer waterLQDraw;
-GeometryBuffer waterHQBuffer;
-DrawBuffer waterHQDraw;
-
 /// @todo collapse all of these into "VertPNC" etc.
 struct ParticleVert {
 	static const AttributeList vertex_attributes() {
@@ -81,7 +67,7 @@ DrawBuffer ssRectDraw;
 
 GameRenderer::GameRenderer(GameWorld* engine)
 	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f),
-	map(engine, renderer), text(engine, this)
+	map(engine, renderer), water(this), text(engine, this)
 {
 	engine->logger.info("Renderer", renderer->getIDString());
 
@@ -102,49 +88,44 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	renderer->setProgramBlockBinding(particleProg, "ObjectData", 2);
 
 	skyProg = renderer->createShader(
-				GameShaders::Sky::VertexShader,
-				GameShaders::Sky::FragmentShader);
+		GameShaders::Sky::VertexShader,
+		GameShaders::Sky::FragmentShader);
 
 	renderer->setProgramBlockBinding(skyProg, "SceneData", 1);
 
-	waterProg = renderer->createShader(
-				GameShaders::WaterHQ::VertexShader,
-				GameShaders::WaterHQ::FragmentShader);
-
-	renderer->setUniformTexture(waterProg, "texture", 0);
-
-	renderer->setProgramBlockBinding(waterProg, "SceneData", 1);
-	renderer->setProgramBlockBinding(waterProg, "ObjectData", 2);
+	postProg = renderer->createShader(
+		GameShaders::DefaultPostProcess::VertexShader,
+		GameShaders::DefaultPostProcess::FragmentShader);
 
 	glGenVertexArrays( 1, &vao );
+	
+	glGenFramebuffers(1, &framebufferName);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
+	glGenTextures(2, fbTextures);
+	
+	glBindTexture(GL_TEXTURE_2D, fbTextures[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 128, 128, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+	glBindTexture(GL_TEXTURE_2D, fbTextures[1]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 128, 128, 0, GL_RED, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// Upload water plane
-	waterLQBuffer.uploadVertices(waterLQVerts);
-	waterLQDraw.addGeometry(&waterLQBuffer);
-	waterLQDraw.setFaceType(GL_TRIANGLE_STRIP);
-
-	// Generate HQ water geometry
-	int waterverts = 5;
-	float vertStep = 1.f/waterverts;
-	for(int x = 0; x < waterverts; ++x) {
-		float xB = vertStep * x;
-		for(int y = 0; y < waterverts; ++y) {
-			float yB = vertStep * y;
-			waterHQVerts.push_back({xB + vertStep, yB + vertStep});
-			waterHQVerts.push_back({xB,            yB + vertStep});
-			waterHQVerts.push_back({xB + vertStep, yB           });
-
-			waterHQVerts.push_back({xB + vertStep, yB           });
-			waterHQVerts.push_back({xB,            yB + vertStep});
-			waterHQVerts.push_back({xB,            yB           });
-		}
-	}
-
-	waterHQBuffer.uploadVertices(waterHQVerts);
-	waterHQDraw.addGeometry(&waterHQBuffer);
-	waterHQDraw.setFaceType(GL_TRIANGLES);
-
-
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbTextures[0], 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, fbTextures[1], 0);
+	
+	// Give water renderer the data texture
+	water.setDataTexture(1, fbTextures[1]);
+	
+	glGenRenderbuffers(1, fbRenderBuffers);
+	glBindRenderbuffer(GL_RENDERBUFFER, fbRenderBuffers[0]);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 128, 128);
+	glFramebufferRenderbuffer(
+		GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fbRenderBuffers[0]
+	);
+	
 	// Create the skydome
 
 	size_t segments = skydomeSegments, rows = skydomeRows;
@@ -199,6 +180,7 @@ GameRenderer::GameRenderer(GameWorld* engine)
 
 	ssRectGeom.uploadVertices(sspaceRect);
 	ssRectDraw.addGeometry(&ssRectGeom);
+	ssRectDraw.setFaceType(GL_TRIANGLE_STRIP);
 
 	ssRectProgram = compileProgram(GameShaders::ScreenSpaceRect::VertexShader,
 								  GameShaders::ScreenSpaceRect::FragmentShader);
@@ -233,6 +215,11 @@ GameRenderer::GameRenderer(GameWorld* engine)
 	cylinderBuffer.setFaceType(GL_TRIANGLES);
 }
 
+GameRenderer::~GameRenderer()
+{
+	glDeleteFramebuffers(1, &framebufferName);
+}
+
 float mix(uint8_t a, uint8_t b, float num)
 {
 	return a+(b-a)*num;
@@ -248,6 +235,8 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	// Set the viewport
 	const glm::ivec2& vp = getRenderer()->getViewport();
 	glViewport(0, 0, vp.x, vp.y);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
+	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glBindVertexArray( vao );
 
@@ -394,76 +383,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	}
 	glDepthMask(GL_TRUE);
 
-	// Draw the water.
-	renderer->useProgram( waterProg );
-
-	float blockLQSize = WATER_WORLD_SIZE/WATER_LQ_DATA_SIZE;
-	float blockHQSize = WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE;
-
-	glm::vec2 waterOffset { -WATER_WORLD_SIZE/2.f, -WATER_WORLD_SIZE/2.f };
-	auto waterTex = engine->gameData.findTexture("water_old");
-	glActiveTexture(GL_TEXTURE0);
-
-	auto camposFlat = glm::vec2(camera.position);
-
-	Renderer::DrawParameters wdp;
-	wdp.start = 0;
-	wdp.count = waterHQVerts.size();
-	wdp.texture = waterTex->getName();
-
-	renderer->useProgram(waterProg);
-	renderer->setSceneParameters(sceneParams);
-
-	// Draw High detail water
-	renderer->setUniform(waterProg, "size", blockHQSize);
-	renderer->setUniform(waterProg, "time", engine->gameTime);
-	renderer->setUniform(waterProg, "waveParams", glm::vec2(WATER_SCALE, WATER_HEIGHT));
-
-	for( int x = 0; x < WATER_HQ_DATA_SIZE; x++ ) {
-		for( int y = 0; y < WATER_HQ_DATA_SIZE; y++ ) {
-			auto waterWS = waterOffset + glm::vec2(blockHQSize) * glm::vec2(x, y);
-			auto cullWS = waterWS + (blockHQSize / 2.f);
-
-			// Check that this is the right time to draw the HQ water
-			if( glm::distance(camposFlat, cullWS) - blockHQSize >= WATER_HQ_DISTANCE ) continue;
-
-			int i = (x*WATER_HQ_DATA_SIZE) + y;
-			int hI = engine->gameData.realWater[i];
-			if( hI >= NO_WATER_INDEX ) continue;
-			float h = engine->gameData.waterHeights[hI];
-
-			glm::mat4 m;
-			m = glm::translate(m, glm::vec3(waterWS, h));
-
-			renderer->drawArrays(m, &waterHQDraw, wdp);
-		}
-	}
-
-
-	wdp.count = waterLQVerts.size();
-	renderer->setUniform(waterProg, "size", blockLQSize);
-	renderer->setUniform(waterProg, "waveParams", glm::vec2(0.f));
-
-	for( int x = 0; x < WATER_LQ_DATA_SIZE; x++ ) {
-		for( int y = 0; y < WATER_LQ_DATA_SIZE; y++ ) {
-			auto waterWS = waterOffset + glm::vec2(blockLQSize) * glm::vec2(x, y);
-			auto cullWS = waterWS + (blockLQSize / 2.f);
-
-			// Check that this is the right time to draw the LQ
-			if( glm::distance(camposFlat, cullWS) - blockHQSize/4.f < WATER_HQ_DISTANCE ) continue;
-			if( glm::distance(camposFlat, cullWS) - blockLQSize/2.f > camera.frustum.far ) continue;
-
-			int i = (x*WATER_LQ_DATA_SIZE) + y;
-			int hI = engine->gameData.visibleWater[i];
-			if( hI >= NO_WATER_INDEX ) continue;
-			float h = engine->gameData.waterHeights[hI];
-
-			glm::mat4 m;
-			m = glm::translate(m, glm::vec3(waterWS, h));
-
-			renderer->drawArrays(m, &waterLQDraw, wdp);
-		}
-	}
+	water.render(this, engine);
 
 	glBindVertexArray( vao );
 
@@ -531,6 +451,18 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
+	renderer->useProgram(postProg);
+	
+	Renderer::DrawParameters wdp;
+	wdp.start = 0;
+	wdp.count = ssRectGeom.getCount();
+	wdp.texture = fbTextures[0];
+	
+	renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
 
 	glUseProgram(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1205,3 +1137,19 @@ void GameRenderer::renderLetterbox()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+void GameRenderer::setViewport(int w, int h)
+{
+	auto& lastViewport = renderer->getViewport();
+	if( lastViewport.x != w || lastViewport.y != h)
+	{
+		renderer->setViewport({w, h});
+		
+		glBindTexture(GL_TEXTURE_2D, fbTextures[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glBindTexture(GL_TEXTURE_2D, fbTextures[1]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT, NULL);
+		
+		glBindRenderbuffer(GL_RENDERBUFFER, fbRenderBuffers[0]);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
+	}
+}

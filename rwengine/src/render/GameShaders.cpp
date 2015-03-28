@@ -21,26 +21,43 @@ layout(std140) uniform SceneData {
 	float fogEnd;
 };
 
-layout(std140) uniform ObjectData {
-	mat4 model;
-	vec4 colour;
-	float diffusefac;
-	float ambientfac;
-	float visibility;
-};
-
-uniform float size;
-
 uniform float time;
 uniform vec2 waveParams;
+uniform sampler2D data;
+
+vec3 waterNormal = vec3(0.0, 0.0, 1.0);
+
+vec3 planeIntercept( vec3 start, vec3 dir, float height )
+{
+	float dist = (height - dot(waterNormal, start)) / dot(dir, waterNormal);
+	if( dist < 0.0 )
+	{
+		return start + dir * dist;
+	}
+	else
+	{
+		// uh oh
+		return vec3(0.0);
+	}
+}
 
 void main()
 {
-	mat4 MVP = projection * view;
-	vec4 vp = model * vec4(position * size, 0.0, 1.0);
-	vp.z = (1.0+sin(time + (vp.x + vp.y) * waveParams.x)) * waveParams.y;
-	TexCoords = position * 2.0;
-	gl_Position = MVP * vp;
+	TexCoords = position * vec2(0.5,0.5) + vec2(0.5);
+	
+	mat4 vp = projection * view;
+	mat4 projector = inverse(vp);
+	
+	mat3 rot = mat3(view);
+	vec3 ray = vec3(-position.x, -position.y, projection[0][0] ) * rot;
+	
+	float plane = texture2D( data, TexCoords ).r;
+	
+	vec3 ws = planeIntercept( campos.xyz, ray, plane );
+	
+	ws.z = ws.z + (-1.0+(sin(time + (ws.x + ws.y) * waveParams.x)) * waveParams.y);
+	TexCoords = ws.xy / 5.0;
+	gl_Position = vp * vec4(ws, 1.0);
 })";
 
 const char* WaterHQ::FragmentShader = R"(
@@ -49,9 +66,44 @@ in vec3 Normal;
 in vec2 TexCoords;
 uniform sampler2D texture;
 out vec4 outColour;
+in vec3 test;
 void main() {
 	vec4 c = texture2D(texture, TexCoords);
 	outColour = c;
+})";
+
+const char* Mask3D::VertexShader = R"(
+#version 130
+#extension GL_ARB_explicit_attrib_location : enable
+#extension GL_ARB_uniform_buffer_object : enable
+
+layout(location = 0) in vec3 position;
+
+layout(std140) uniform SceneData {
+	mat4 projection;
+	mat4 view;
+	vec4 ambient;
+	vec4 dynamic;
+	vec4 fogColor;
+	vec4 campos;
+	float fogStart;
+	float fogEnd;
+};
+
+out vec3 pp;
+
+void main()
+{
+	pp = position;
+	gl_Position = projection * view * vec4(position, 1.0);
+})";
+
+const char* Mask3D::FragmentShader = R"(
+#version 130
+in vec3 pp;
+out vec4 outColour;
+void main() {
+	outColour = vec4(pp.z, 0.0, 0.0, 1.0);
 })";
 
 const char* Sky::VertexShader = R"(
@@ -260,4 +312,33 @@ void main()
 	// Set colour to 0, 0, 0, 1 for textured mode.
 	outColour = vec4(colour.rgb + c.rgb, colour.a);
 })";
+
+const char* DefaultPostProcess::VertexShader = R"(
+#version 130
+#extension GL_ARB_explicit_attrib_location : enable
+#extension GL_ARB_uniform_buffer_object : enable
+
+layout(location = 0) in vec2 position;
+out vec2 TexCoords;
+void main()
+{
+	TexCoords = position * vec2(0.5,0.5) + vec2(0.5);
+	gl_Position = vec4(position, 0.0, 1.0);
+})";
+
+const char* DefaultPostProcess::FragmentShader = R"(
+#version 130
+in vec2 TexCoords;
+
+uniform sampler2D colour;
+uniform sampler2D data;
+
+out vec4 outColour;
+
+void main()
+{
+	vec4 c = texture2D(colour, TexCoords);
+	outColour = c;
+})";
+
 }
