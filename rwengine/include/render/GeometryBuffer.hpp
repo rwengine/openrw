@@ -79,6 +79,8 @@ public:
 	
 	const AttributeList& getDataAttributes() const 
 		{ return attributes; }
+	AttributeList& getDataAttributes()
+		{ return attributes; }
 };
 
 #endif

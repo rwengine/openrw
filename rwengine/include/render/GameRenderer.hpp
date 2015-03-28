@@ -11,6 +11,7 @@
 #include <render/OpenGLRenderer.hpp>
 #include "MapRenderer.hpp"
 #include "TextRenderer.hpp"
+#include "WaterRenderer.hpp"
 
 class Model;
 class ModelFrame;
@@ -77,10 +78,16 @@ class GameRenderer
 
 	/** Camera values passed to renderWorld() */
 	ViewCamera _camera;
+	
+	GLuint framebufferName;
+	GLuint fbTextures[2];
+	GLuint fbRenderBuffers[1];
+	Renderer::ShaderProgram* postProg;
 
 public:
 	
 	GameRenderer(GameWorld*);
+	~GameRenderer();
 	
 	/** Number of issued draw calls */
 	size_t rendered;
@@ -92,7 +99,6 @@ public:
 	/** @todo Clean up all these shader program and location variables */
 	Renderer::ShaderProgram* worldProg;
 	Renderer::ShaderProgram* skyProg;
-	Renderer::ShaderProgram* waterProg;
 	Renderer::ShaderProgram* particleProg;
 
 	GLuint ssRectProgram;
@@ -181,7 +187,10 @@ public:
 		return renderer;
 	}
 	
+	void setViewport(int w, int h);
+	
 	MapRenderer map;
+	WaterRenderer water;
 	TextRenderer text;
 };
 

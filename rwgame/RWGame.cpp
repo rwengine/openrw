@@ -92,6 +92,8 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	/// @TODO language choices.
 	engine->gameData.loadGXT("english.gxt");
 	
+	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
+	
 	for(int m = 0; m < MAP_BLOCK_SIZE; ++m)
 	{
 		std::string num = (m < 10 ? "0" : "");
@@ -108,7 +110,6 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	{
 		loading->setNextState(new MenuState(this));
 	}
-	
 	
 	StateManager::get().enter(loading);
 
@@ -265,7 +266,7 @@ void RWGame::tick(float dt)
 void RWGame::render(float alpha, float time)
 {
 	auto size = getWindow().getSize();
-	renderer->getRenderer()->setViewport({size.x, size.y});
+	renderer->setViewport(size.x, size.y);
 	
 	ViewCamera viewCam;
 	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )
