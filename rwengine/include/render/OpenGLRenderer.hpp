@@ -106,12 +106,15 @@ public:
 	 * Returns the number of draw calls issued for the current frame.
 	 */
 	int getDrawCount();
+	
+	const SceneUniformData& getSceneData() const;
 
 private:
 	glm::ivec2 viewport;
 	glm::mat4 projection2D;
 protected:
 	int drawCounter;
+	SceneUniformData lastSceneData;
 };
 
 class OpenGLRenderer : public Renderer
