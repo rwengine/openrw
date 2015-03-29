@@ -256,6 +256,7 @@ void RWGame::render(float alpha, float time)
 	renderer->setViewport(size.x, size.y);
 	
 	ViewCamera viewCam;
+	viewCam.frustum.fov = glm::radians(90);
 	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )
 	{
 		auto cutscene = engine->state.currentCutscene;
