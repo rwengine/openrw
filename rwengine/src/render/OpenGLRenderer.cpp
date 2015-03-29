@@ -97,6 +97,11 @@ int Renderer::getDrawCount()
 	return drawCounter;
 }
 
+const Renderer::SceneUniformData& Renderer::getSceneData() const
+{
+	return lastSceneData;
+}
+
 void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 {
 	if( dbuff != currentDbuff )
@@ -217,6 +222,7 @@ void OpenGLRenderer::clear(const glm::vec4& colour, bool clearColour, bool clear
 void OpenGLRenderer::setSceneParameters(const Renderer::SceneUniformData& data)
 {
 	uploadUBO(UBOScene, data);
+	lastSceneData = data;
 }
 
 void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)

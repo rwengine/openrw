@@ -142,6 +142,8 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world)
 
 	r->setUniform(waterProg, "time", world->gameTime);
 	r->setUniform(waterProg, "waveParams", glm::vec2(WATER_SCALE, WATER_HEIGHT));
+	auto ivp = glm::inverse(r->getSceneData().projection * r->getSceneData().view);
+	r->setUniform(waterProg, "inverseVP", ivp);
 	
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, dataTexture);

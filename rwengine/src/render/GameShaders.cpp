@@ -21,6 +21,8 @@ layout(std140) uniform SceneData {
 	float fogEnd;
 };
 
+uniform mat4 inverseVP;
+
 uniform float time;
 uniform vec2 waveParams;
 uniform sampler2D data;
@@ -46,7 +48,7 @@ void main()
 	TexCoords = position * vec2(0.5,0.5) + vec2(0.5);
 	
 	mat4 vp = projection * view;
-	mat4 projector = inverse(vp);
+	mat4 projector = inverseVP;
 	
 	mat3 rot = mat3(view);
 	vec3 ray = vec3(-position.x, -position.y, projection[0][0] ) * rot;
