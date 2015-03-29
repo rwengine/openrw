@@ -124,6 +124,7 @@ void IngameState::tick(float dt)
 			_lookAngles.y = -qpi;
 
 		auto angle = glm::angleAxis(-_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
+		angle *= glm::angleAxis(_lookAngles.y, glm::vec3(0.f, 1.f, 0.f));
 
 		player->updateMovementDirection(angle * _movement, _movement);
 		
