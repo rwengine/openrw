@@ -2,15 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenRW)
 
-# Setup options
+# Optional components
 SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
-SET(ENABLE_SCRIPT_DEBUG TRUE CACHE BOOL "Enable verbose script execution")
-
-# TODO:
-# - Visual Studio support
-# - Find libraries correctly, e.g. FindBullet
-
+SET(BUILD_TESTS TRUE CACHE BOOL "Build test suite")
 SET(BUILD_OLD_TOOLS FALSE CACHE BOOL "Build old datadump and analyzer tools")
+SET(BUILD_TOOLS FALSE CACHE BOOL "Build editor application")
+
+# Options
+SET(ENABLE_SCRIPT_DEBUG FALSE CACHE BOOL "Enable verbose script execution")
 
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wextra" )
@@ -39,12 +38,17 @@ IF(BUILD_OLD_TOOLS)
 	add_subdirectory(datadump)
 ENDIF()
 
+
+add_subdirectory(rwengine)
+add_subdirectory(rwgame)
+
 IF(BUILD_SCRIPT_TOOL)
 	add_subdirectory(scripttool)
 ENDIF()
+IF(${BUILD_TOOLS})
+	add_subdirectory(rwviewer)
+ENDIF()
 
-add_subdirectory(rwgame)
-add_subdirectory(rwviewer)
-add_subdirectory(rwengine)
-
-add_subdirectory(tests)
+IF(${BUILD_TESTS})
+	add_subdirectory(tests)	
+ENDIF()
