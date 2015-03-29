@@ -1,8 +1,10 @@
 # OpenRW
 
-A project to re-implement gta3.exe, adding support for more platforms and fixing all of the bugs that have piled up.
+This is an attempt at re-implementing the GTA III game binary, adding support for more platforms
+and input methods, while fixing some issues that plauge the original release.
 
-**REQURIES A LEGITAMATE COPY OF GTA III PC TO RUN**, this project only functions with the original game's data.
+**REQURIES A COPY OF GTA III PC**.
+Without an original copy of the game, it will not be possible to run openrw.
 
 ## Building
 
@@ -15,13 +17,23 @@ Dependencies:
 
 Options:
 
+* BUILD_TESTS — Builds the test suite
+* BUILD_TOOLS — Builds the rwviewer application
 * BUILD\_OLD\_TOOLS – Builds old, unmaintained tools (datadump & analyzer)
+
+### Recomended build
+
+```
+$ mkdir build
+$ cd build
+$ cmake ../
+```
 
 ## Running
 
-### rwgame
+Once compiled, set `OPENRW_GAME_PATH` to the directory containing "gta3.exe" and run rwgame.
 
-Implementation of the game itself.
+### rwgame
 
 * Options:
     * env: OPENRW\_GAME\_PATH, must be set to the folder containing "gta3.exe"
@@ -29,9 +41,7 @@ Implementation of the game itself.
 
 ### rwviewer
 
-File viewer for game data, open the folder containing "gta3.exe" and it will load the data.
-
-Currently only supports viewing instance data, pending some rewriting.
+Intended to be a tool for viewing the various game data types, such as objects and models. Currently awaiting refactoring.
 
 ## Documentation
 
@@ -39,16 +49,12 @@ Run Doxygen on the included Doxyfile to generate documentation.
 
 ## Things to do
 
-* Make it work on Windows (shouldn't be too difficult for anyone with CMake and C++ experience)
-* Write FindSFML and FindGLM scripts for cmake.
-* Improve the vehicle dynamics
-* Add more views to rwviewer
-    * Handling data
-    * Collision data
-    * Animation scrubbing
-* Improve file loading
-    * One-off loaders should be moved out of GameData into some DATLoader or something.
-    * Some error mechanism that allows for useful error messages.
+* Finish rwng reorganisation
+	* Split basic functionality from rwengine into core library.
+	* Clean up more of GameObject's member variables.
+	* Implement script debugging.
+	* Fix rwviewer for new paradigm.
+* Fix water rendering artefacts.
 
 ## License
 
