@@ -175,7 +175,6 @@ void IngameState::tick(float dt)
 				auto atrophy = std::min(1.f * glm::sign(_lookAngles.x - d) * dt, _lookAngles.x - d);
 				_lookAngles.x -= atrophy;
 			}
-			angle *= glm::angleAxis(glm::roll(vehicle->getRotation()) + glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
 		}
 
 		// Move back from the character
