@@ -13,6 +13,7 @@
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include <loaders/BackgroundLoader.hpp>
+#include <core/Logger.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -79,10 +80,9 @@ std::string fixPath(std::string path) {
 }
 
 
-GameData::GameData(const std::string& path)
-: datpath(path), engine(nullptr)
+GameData::GameData(Logger* log, const std::string& path)
+: datpath(path), logger(log), engine(nullptr)
 {
-
 }
 
 GameData::~GameData()
@@ -124,7 +124,7 @@ void GameData::parseDAT(const std::string& path)
 	
 	if(!datfile.is_open()) 
 	{
-		engine->logger.error("Data", "Failed to open game file " + path);
+		logger->error("Data", "Failed to open game file " + path);
 	}
 	else
 	{
@@ -221,12 +221,12 @@ bool GameData::loadZone(const std::string& path)
 			for(auto& z : ipll.zones) {
 				zones.insert({z.name, z});
 			}
-			engine->logger.info("Data", "Loaded " + std::to_string(ipll.zones.size()) + " zones from " + path);
+			logger->info("Data", "Loaded " + std::to_string(ipll.zones.size()) + " zones from " + path);
 			return true;
 		}
 	}
 	else {
-		engine->logger.error("Data", "Failed to load zones from " + path);
+		logger->error("Data", "Failed to load zones from " + path);
 	}
 	
 	return false;
@@ -491,7 +491,7 @@ bool GameData::loadAudioClip(const std::string& name)
 	
 	if ( name.find(".mp3") != name.npos )
 	{
-		engine->logger.error("Data", "MP3 Audio unsupported outside cutscenes");
+		logger->error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
 	
@@ -501,7 +501,7 @@ bool GameData::loadAudioClip(const std::string& name)
 	
 	if (! r )
 	{
-		engine->logger.error("Data", "Error loading audio clip " + fname);
+		logger->error("Data", "Error loading audio clip " + fname);
 		delete engine->missionAudio;
 		engine->missionAudio = nullptr;
 	}
@@ -524,7 +524,7 @@ FileHandle GameData::openFile(const std::string &name)
 	auto file = index.openFile(name);
 	if( file == nullptr )
 	{
-		engine->logger.error("Data", "Unable to open file: " + name);
+		logger->error("Data", "Unable to open file: " + name);
 	}
 	return file;
 }
@@ -559,3 +559,20 @@ float GameData::getWaveHeightAt(const glm::vec3 &ws) const
 {
 	return (1+sin(engine->gameTime + (ws.x + ws.y) * WATER_SCALE)) * WATER_HEIGHT;
 }
+
+bool GameData::isValidGameDirectory(const std::string& path)
+{
+	if(path.empty())
+	{
+		return false;
+	}
+	
+	LoaderIMG i;
+	if(! i.load(path + "/models/gta3.img") )
+	{
+		return false;
+	}
+	
+	return true;
+}
+

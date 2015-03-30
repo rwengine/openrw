@@ -1,5 +1,7 @@
 #ifndef _RWGAME_HPP_
 #define _RWGAME_HPP_
+
+#include <core/Logger.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include "game.hpp"
@@ -8,6 +10,7 @@
 
 class RWGame
 {
+	Logger log;
 	GameWorld* engine;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;

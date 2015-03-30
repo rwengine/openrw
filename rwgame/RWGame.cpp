@@ -57,25 +57,33 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+	
+	log.addReciever(&logPrinter);	
+	log.info("Game", "Game directory: " + gamepath);
+	
+	if(! GameData::isValidGameDirectory(gamepath) )
+	{
+		std::string envname(ENV_GAME_PATH_NAME);
+		throw std::runtime_error("Invalid game directory path, is " +envname+ " set?");
+	}
 
-	engine = new GameWorld(gamepath);
-	engine->logger.addReciever(&logPrinter);
+	engine = new GameWorld(&log, gamepath);
 	
 	// Initalize all the archives.
 	engine->gameData.loadIMG("/models/gta3");
 	//engine->gameData.loadIMG("/models/txd");
 	engine->gameData.loadIMG("/anim/cuts");
 	
+	engine->gameData.load();
+	
 	// Initialize renderer
-	renderer = new GameRenderer(engine);
+	renderer = new GameRenderer(&log, engine);
 	
 	// Set up text renderer
 	renderer->text.setFontTexture(0, "pager");
 	renderer->text.setFontTexture(1, "font1");
 	renderer->text.setFontTexture(2, "font2");
 
-	/// @TODO expand this here.
-	engine->load();
 	debug = new DebugDraw;
 	debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits);
 	engine->dynamicsWorld->setDebugDrawer(debug);
@@ -96,7 +104,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	
 	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
 
-	engine->logger.info("Game", "Started");
+	log.info("Game", "Started");
 }
 
 RWGame::~RWGame()
@@ -227,7 +235,7 @@ void RWGame::tick(float dt)
 			}
 			catch( SCMException& ex ) {
 				std::cerr << ex.what() << std::endl;
-				engine->logger.error( "Script", ex.what() );
+				log.error( "Script", ex.what() );
 				throw;
 			}
 		}

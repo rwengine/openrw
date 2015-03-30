@@ -2,6 +2,8 @@
 #ifndef _GAMEDATA_HPP_
 #define _GAMEDATA_HPP_
 
+class Logger;
+
 #include <engine/RWTypes.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/TextureLoader.hpp>
@@ -41,13 +43,15 @@ private:
 	std::string datpath;
 	std::string splash;
 	
+	Logger* logger;
+	
 public:
 
 	/**
 	 * ctor
 	 * @param path Path to the root of the game data.
 	 */
-	GameData(const std::string& path = "");
+	GameData(Logger* log, const std::string& path = "");
 	~GameData();
 	
 	GameWorld* engine;
@@ -273,6 +277,11 @@ public:
 	float getWaveHeightAt(const glm::vec3& ws) const;
 
 	GameTexts texts;
+	
+	/**
+	 * Determines whether the given path is a valid game directory.
+	 */
+	static bool isValidGameDirectory(const std::string& path);
 };
 
 #endif

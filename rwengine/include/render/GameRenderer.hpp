@@ -1,6 +1,8 @@
 #ifndef _GAMERENDERER_HPP_
 #define _GAMERENDERER_HPP_
 
+class Logger;
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <memory>
@@ -43,6 +45,9 @@ class GameRenderer
 {
 	/** Pointer to the world instance */
 	GameWorld* engine;
+	
+	/** Logger to output messages */
+	Logger* logger;
 
 	/** The low-level drawing interface to use */
 	Renderer* renderer;
@@ -86,7 +91,7 @@ class GameRenderer
 
 public:
 	
-	GameRenderer(GameWorld*);
+	GameRenderer(Logger* log, GameWorld*);
 	~GameRenderer();
 	
 	/** Number of culling events */
