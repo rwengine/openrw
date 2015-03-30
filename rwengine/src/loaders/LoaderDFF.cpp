@@ -191,7 +191,8 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 		}
 	}
 
-	// Skip indicies data for now.
+	// Grab indicies data to generate normals (if applicable).
+	RW::BSGeometryTriangle* triangles = (RW::BSGeometryTriangle*)headerPtr;
 	headerPtr += sizeof(RW::BSGeometryTriangle) * numTris;
 
 	geom->geometryBounds = *(RW::BSGeometryBounds*)headerPtr;
@@ -207,6 +208,19 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 		for(size_t v = 0; v < numVerts; ++v) {
 			verts[v].normal = *(glm::vec3*)headerPtr;
 			headerPtr += sizeof(glm::vec3);
+		}
+	}
+	else {
+		// Use triangle data to calculate normals for each vert.
+		for( int t = 0; t < numTris; ++t ) {
+			auto& triangle = triangles[t];
+			auto& A = verts[triangle.first];
+			auto& B = verts[triangle.second];
+			auto& C = verts[triangle.third];
+			auto normal = glm::normalize(glm::cross(C.position-A.position, B.position-A.position));
+			A.normal = normal;
+			B.normal = normal;
+			C.normal = normal;
 		}
 	}
 
