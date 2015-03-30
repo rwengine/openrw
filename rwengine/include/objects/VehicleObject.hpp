@@ -28,7 +28,7 @@ public:
 
 	CollisionInstance* collision;
 	btRigidBody* physBody;
-	btVehicleRaycaster* physRaycaster;
+	btVehicleRaycaster* physRaycaster = nullptr;
 	btRaycastVehicle* physVehicle;
 	
 	struct Part
