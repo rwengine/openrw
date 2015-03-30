@@ -67,22 +67,9 @@ public:
 	 * Loads the game data
 	 */
 	bool load();
-	
-	struct LogEntry
-	{
-		enum Type {
-			Info,
-			Error,
-			Warning
-		};
-		
-		Type type;
-		float time;
-		std::string message;
-	};
-	
+
 	Logger logger;
-	
+
 	/**
 	 * Loads an IDE into the game
 	 */
