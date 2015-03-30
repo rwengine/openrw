@@ -2,7 +2,7 @@
 #ifndef _GAMEWORLD_HPP_
 #define _GAMEWORLD_HPP_
 
-#include <core/Logger.hpp>
+class Logger;
 
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
@@ -59,16 +59,11 @@ class GameWorld
 {
 public:
 
-	GameWorld(const std::string& gamepath);
+	GameWorld(Logger* log, const std::string& gamepath);
 
 	~GameWorld();
-	
-	/**
-	 * Loads the game data
-	 */
-	bool load();
 
-	Logger logger;
+	Logger* logger;
 
 	/**
 	 * Loads an IDE into the game

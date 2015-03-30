@@ -19,6 +19,7 @@
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <objects/PickupObject.hpp>
+#include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -91,7 +92,7 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 	
 	if(args[4].type == TString)
 	{
-		args.getVM()->getWorld()->logger.error("SCM", "Model names not supported for vehicle generator");
+		args.getVM()->getWorld()->logger->error("SCM", "Model names not supported for vehicle generator");
 		return;
 	}
 	
@@ -381,7 +382,7 @@ void game_create_garage(const ScriptArguments& args)
 	int garageType = args[6].integer;
 	auto garageHandle = args[7].handle;
 
-	args.getVM()->getWorld()->logger.warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
+	args.getVM()->getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
 }
 
 void game_disable_ped_paths(const ScriptArguments& args)
@@ -438,7 +439,7 @@ bool game_model_loaded(const ScriptArguments& args)
 
 void game_restart_critical_mission(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->logger.info("SCM", "Restarting Critical Mission");
+	args.getVM()->getWorld()->logger->info("SCM", "Restarting Critical Mission");
 	// Reset player state.
 	glm::vec3 position(args[0].real, args[1].real, args[2].real + 1.f);
 	
@@ -553,7 +554,7 @@ void game_create_cutscene_object(const ScriptArguments& args)
 	*args[1].handle = object;
 
 	if( object == nullptr ) {
-		args.getVM()->getWorld()->logger.error("SCM", "Could not create cutscene object " + std::to_string(id));
+		args.getVM()->getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
 	}
 }
 void game_set_cutscene_anim(const ScriptArguments& args)
@@ -566,7 +567,7 @@ void game_set_cutscene_anim(const ScriptArguments& args)
 		object->animator->setAnimation(anim, false);
 	}
 	else {
-		args.getVM()->getWorld()->logger.error("SCM", "Failed to load cutscene anim: " + animName);
+		args.getVM()->getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
 	}
 }
 void game_start_cutscene(const ScriptArguments& args)
@@ -632,7 +633,7 @@ void game_set_head_animation(const ScriptArguments& args)
 		object->animator->setAnimation(anim, false);
 	}
 	else {
-		args.getVM()->getWorld()->logger.error("SCM", "Failed to load cutscene anim: " + animName);
+		args.getVM()->getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
 	}
 }
 
@@ -721,7 +722,7 @@ void game_load_audio(const ScriptArguments& args)
 	{
 		if(! args.getVM()->getWorld()->gameData.loadAudioClip(name + ".mp3") )
 		{
-			args.getVM()->getWorld()->logger.error("SCM", "Failed to load audio: " + name);
+			args.getVM()->getWorld()->logger->error("SCM", "Failed to load audio: " + name);
 		}
 	}
 }
@@ -756,7 +757,7 @@ void game_play_music_id(const ScriptArguments& args)
 	// TODO play anything other than Miscom.wav
 	if(! gw->gameData.loadAudioClip( name + ".wav" ) )
 	{
-		args.getVM()->getWorld()->logger.error("SCM", "Error loading audio " + name);
+		args.getVM()->getWorld()->logger->error("SCM", "Error loading audio " + name);
 		return;
 	}
 	else if ( args.getVM()->getWorld()->missionAudio )

@@ -1,4 +1,7 @@
 #include <engine/GameWorld.hpp>
+
+#include <core/Logger.hpp>
+
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <ai/DefaultAIController.hpp>
@@ -75,12 +78,22 @@ public:
 	}
 };
 
-GameWorld::GameWorld(const std::string& path)
-	: gameTime(0.f), gameData(path), randomEngine(rand()),
+GameWorld::GameWorld(Logger* log, const std::string& path)
+	: logger(log), gameTime(0.f), gameData(log, path), randomEngine(rand()),
 	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr), missionAudio(nullptr),
 	  paused(false)
 {
 	gameData.engine = this;
+	
+	collisionConfig = new btDefaultCollisionConfiguration;
+	collisionDispatcher = new WorldCollisionDispatcher(collisionConfig);
+	broadphase = new btDbvtBroadphase();
+	solver = new btSequentialImpulseConstraintSolver;
+	dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, solver, collisionConfig);
+	dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
+	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+	gContactProcessedCallback = ContactProcessedCallback;
+	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
 }
 
 GameWorld::~GameWorld()
@@ -98,23 +111,6 @@ GameWorld::~GameWorld()
 	delete collisionConfig;
 
 	/// @todo delete other things.
-}
-
-bool GameWorld::load()
-{
-	collisionConfig = new btDefaultCollisionConfiguration;
-	collisionDispatcher = new WorldCollisionDispatcher(collisionConfig);
-	broadphase = new btDbvtBroadphase();
-	solver = new btSequentialImpulseConstraintSolver;
-	dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, solver, collisionConfig);
-	dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
-	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-	gContactProcessedCallback = ContactProcessedCallback;
-	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
-
-	gameData.load();
-
-	return true;
 }
 
 bool GameWorld::defineItems(const std::string& name)
@@ -142,7 +138,7 @@ bool GameWorld::defineItems(const std::string& name)
 		}
 	}
 	else {
-		logger.error("Data", "Failed to load IDE " + path);
+		logger->error("Data", "Failed to load IDE " + path);
 	}
 	
 	return false;
@@ -162,7 +158,7 @@ void GameWorld::runScript(const std::string &name)
 		script = new ScriptMachine(this, f, opcodes);
 	}
 	else {
-		logger.error("World", "Failed to load SCM: " + name);
+		logger->error("World", "Failed to load SCM: " + name);
 	}
 }
 
@@ -179,7 +175,7 @@ bool GameWorld::placeItems(const std::string& name)
 		for( size_t i = 0; i < ipll.m_instances.size(); ++i) {
 			std::shared_ptr<InstanceData> inst = ipll.m_instances[i];
 			if(! createInstance(inst->id, inst->pos, inst->rot)) {
-				logger.error("World", "No object data for instance " + std::to_string(inst->id) + " in " + path);
+				logger->error("World", "No object data for instance " + std::to_string(inst->id) + " in " + path);
 			}
 		}
 		
@@ -200,7 +196,7 @@ bool GameWorld::placeItems(const std::string& name)
 	}
 	else
 	{
-		logger.error("Data", "Failed to load IPL " + path);
+		logger->error("Data", "Failed to load IPL " + path);
 		return false;
 	}
 	
@@ -238,7 +234,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		}
 
 		if( modelname.empty() ) {
-			logger.warning("World", "Instance with missing model: " + std::to_string(id));
+			logger->warning("World", "Instance with missing model: " + std::to_string(id));
 		}
 		
 		auto instance = new InstanceObject(
@@ -306,6 +302,7 @@ uint16_t GameWorld::findModelDefinition(const std::string model)
 }
 
 #include <ai/PlayerController.hpp>
+#include <core/Logger.hpp>
 CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::vec3 &pos, const glm::quat &rot)
 {
 	std::string modelname;
@@ -351,7 +348,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 
 	// Ensure the relevant data is loaded.
 	if( modelname.empty() ) {
-		logger.error("World", "Cutscene object " + std::to_string(id) + " has no model");
+		logger->error("World", "Cutscene object " + std::to_string(id) + " has no model");
 		return nullptr;
 	}
 
@@ -381,7 +378,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 {
 	auto vti = findObjectType<VehicleData>(id);
 	if( vti ) {
-		logger.info("World", "Creating Vehicle ID " + std::to_string(id) + " (" + vti->gameName + ")");
+		logger->info("World", "Creating Vehicle ID " + std::to_string(id) + " (" + vti->gameName + ")");
 		
 		if(! vti->modelName.empty()) {
 			gameData.loadDFF(vti->modelName + ".dff");
@@ -399,7 +396,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			 sec = gameData.vehicleColours[palit->second[set].second];
 		}
 		else {
-			logger.warning("World", "No colour palette for vehicle " + vti->modelName);
+			logger->warning("World", "No colour palette for vehicle " + vti->modelName);
 		}
 		
 		auto wi = findObjectType<ObjectData>(vti->wheelModelID);
@@ -705,7 +702,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	
 	if ( !cutsceneAudioLoaded )
 	{
-		logger.warning("Data", "Failed to load cutscene audio: " + name);
+		logger->warning("Data", "Failed to load cutscene audio: " + name);
 	}
 	
 
@@ -714,7 +711,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	}
 	state.currentCutscene = cutscene;
 	state.currentCutscene->meta.name = name;
-	logger.info("World", "Loaded cutscene: " + name);
+	logger->info("World", "Loaded cutscene: " + name);
 }
 
 void GameWorld::startCutscene()

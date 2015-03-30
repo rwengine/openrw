@@ -19,6 +19,7 @@
 #include <objects/CutsceneObject.hpp>
 
 #include <render/GameShaders.hpp>
+#include <core/Logger.hpp>
 
 #include <deque>
 #include <cmath>
@@ -65,11 +66,11 @@ std::vector<VertexP2> sspaceRect = {
 GeometryBuffer ssRectGeom;
 DrawBuffer ssRectDraw;
 
-GameRenderer::GameRenderer(GameWorld* engine)
-	: engine(engine), renderer(new OpenGLRenderer), _renderAlpha(0.f),
+GameRenderer::GameRenderer(Logger* log, GameWorld* engine)
+	: engine(engine), logger(log), renderer(new OpenGLRenderer), _renderAlpha(0.f),
 	map(engine, renderer), water(this), text(engine, this)
 {
-	engine->logger.info("Renderer", renderer->getIDString());
+	logger->info("Renderer", renderer->getIDString());
 
 	worldProg = renderer->createShader(
 				GameShaders::WorldObject::VertexShader,
@@ -504,7 +505,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 {
 	if(!vehicle->model)
 	{
-		engine->logger.warning("Renderer", "Vehicle model " + vehicle->vehicle->modelName + " not loaded!");
+		logger->warning("Renderer", "Vehicle model " + vehicle->vehicle->modelName + " not loaded!");
 	}
 
 	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( _renderAlpha );
@@ -679,7 +680,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 			if ( ! itemModel )
 			{
-				engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
+				logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 			}
 		}
 	}
@@ -693,7 +694,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 		}
 		else
 		{
-			engine->logger.error("Renderer", "Pickup model " + odata->modelName + " not loaded");
+			logger->error("Renderer", "Pickup model " + odata->modelName + " not loaded");
 		}
 	}
 	
@@ -762,11 +763,11 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
-			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
+			logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 		}
 	}
 	else {
-		engine->logger.error("Renderer", "Weapon.dff not loaded");
+		logger->error("Renderer", "Weapon.dff not loaded");
 	}
 }
 
@@ -806,11 +807,11 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
 		}
 		else {
-			engine->logger.error("Renderer", "Weapon frame " + odata->modelName + " not in model");
+			logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
 		}
 	}
 	else {
-		engine->logger.error("Renderer", "Weapon model not loaded");
+		logger->error("Renderer", "Weapon model not loaded");
 	}
 }
 
@@ -841,7 +842,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 					tex = engine->gameData.findTexture(tC, tA);
 					if( ! tex )
 					{
-						//engine->logger.warning("Renderer", "Missing texture: " + tC + " " + tA);
+						//logger->warning("Renderer", "Missing texture: " + tC + " " + tA);
 					}
 					mat.textures[0].texture = tex;
 				}

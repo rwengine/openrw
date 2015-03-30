@@ -3,6 +3,7 @@
 
 #include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
+#include <core/Logger.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
@@ -39,11 +40,12 @@ public:
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		e = new GameWorld(getGamePath());
+		Logger log;
+		e = new GameWorld(&log, getGamePath());
 
 		e->gameData.loadIMG("/models/gta3");
 		e->gameData.loadIMG("/anim/cuts");
-		e->load();
+		e->gameData.load();
 		for(std::map<std::string, std::string>::iterator it = e->gameData.ideLocations.begin();
 			it != e->gameData.ideLocations.end();
 			++it) {

@@ -21,6 +21,7 @@
 #include <objects/CutsceneObject.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/GenericPickup.hpp>
+#include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -430,7 +431,7 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 void game_make_object_important(const ScriptArguments& args)
 {
 	auto inst = (InstanceObject*)(*args[0].handle);
-	args.getVM()->getWorld()->logger.warning("SCM", "Object pinning unimplemented!");
+	args.getVM()->getWorld()->logger->warning("SCM", "Object pinning unimplemented!");
 }
 
 bool game_character_in_area_on_foot(const ScriptArguments& args)
@@ -777,7 +778,7 @@ void game_create_object_world(const ScriptArguments& args)
 		auto& modelname = args.getVM()->getFile()->getModels()[-id];
 		id = args.getVM()->getWorld()->findModelDefinition(modelname);
 		if( id == (uint16_t)-1 ) {
-			args.getVM()->getWorld()->logger.error("SCM", "Failed to find model " + modelname);
+			args.getVM()->getWorld()->logger->error("SCM", "Failed to find model " + modelname);
 		}
 	}
 	
