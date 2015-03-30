@@ -428,10 +428,13 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 	return false;
 }
 
-void game_make_object_important(const ScriptArguments& args)
+/// Remove object from cleanup at end of missions.
+void game_dont_remove_object(const ScriptArguments& args)
 {
-	auto inst = (InstanceObject*)(*args[0].handle);
-	args.getVM()->getWorld()->logger->warning("SCM", "Object pinning unimplemented!");
+	auto object = (GameObject*)(*args[0].handle);
+	
+	auto& mO = args.getVM()->getWorld()->state.missionObjects;
+	mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
 }
 
 bool game_character_in_area_on_foot(const ScriptArguments& args)
@@ -1023,7 +1026,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x01C3, game_release_vehicle, 1, "Mark Car Unneeded" );
 	
-	bindFunction(0x01C7, game_make_object_important, 1, "Don't remove object" );
+	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
 	
 	bindFunction(0x01D5, game_enter_as_driver, 2, "Character Enter Vehicle as Driver" );
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
