@@ -135,6 +135,15 @@ void IngameState::tick(float dt)
 
 		_lookAngles.x += deltaMouse.x / 100.0;
 		_lookAngles.y += deltaMouse.y / 100.0;
+		
+		while(_lookAngles.x > glm::pi<float>())
+		{
+			_lookAngles.x -= 2.f * glm::pi<float>();
+		}
+		while(_lookAngles.x < -glm::pi<float>())
+		{
+			_lookAngles.x += 2.f * glm::pi<float>();
+		}
 
 		if (_lookAngles.y > qpi)
 			_lookAngles.y = qpi;
@@ -171,9 +180,38 @@ void IngameState::tick(float dt)
 			float speed = vehicle->physVehicle->getCurrentSpeedKmHour();
 			if( autolookTimer <= 0.f && std::abs(speed) > 1.f )
 			{
-				float d = glm::sign(speed) > 0.f ? 0.f : glm::radians(180.f);
-				auto atrophy = std::min(1.f * glm::sign(_lookAngles.x - d) * dt, _lookAngles.x - d);
-				_lookAngles.x -= atrophy;
+				float b = glm::roll(vehicle->getRotation()) + glm::half_pi<float>();
+				while( b > glm::pi<float>() )
+				{
+					b -= 2.f * glm::pi<float>();
+				}
+				while( b < -glm::pi<float>() )
+				{
+					b += 2.f * glm::pi<float>();
+				}
+				if( speed < 0.f )
+				{
+					if( _lookAngles.x < 0.f )
+					{
+						b -= glm::pi<float>();
+					}
+					else
+					{
+						b += glm::pi<float>();
+					}
+				}
+				
+				float aD = b - _lookAngles.x;
+				const float rotateSpeed = 1.f;
+				if( std::abs(aD) <= rotateSpeed * dt )
+				{
+					_lookAngles.x = b;
+				}
+				else
+				{
+					_lookAngles.x += glm::sign(aD) * rotateSpeed * dt;
+				}
+				angle = glm::angleAxis(_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
 			}
 		}
 
