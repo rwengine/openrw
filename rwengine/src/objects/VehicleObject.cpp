@@ -245,24 +245,24 @@ void VehicleObject::tickPhysics(float dt)
 					// and was not underwater here in the last tick
 					if( _lastHeight >= wH ) {
 						// we are for real, underwater
-						_inWater = true;
+						inWater = true;
 					}
-					else if( _inWater == false ) {
+					else if( inWater == false ) {
 						// It's just a tunnel or something, we good.
-						_inWater = false;
+						inWater = false;
 					}
 				}
 				else {
 					// The water is beneath us
-					_inWater = false;
+					inWater = false;
 				}
 			}
 			else {
-				_inWater = false;
+				inWater = false;
 			}
 		}
 
-		if( _inWater ) {
+		if( inWater ) {
 			// Ensure that vehicles don't fall asleep at the top of a wave.
 			if(! physBody->isActive() )
 			{

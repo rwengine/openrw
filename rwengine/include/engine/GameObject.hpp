@@ -45,7 +45,7 @@ public:
 	 */
 	float mHealth;
 
-	bool _inWater;
+	bool inWater;
 
 	/**
 	 * @brief stores the height of water at the last tick
@@ -60,7 +60,7 @@ public:
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
 		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
-		  _inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),
+		  inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),
 		  lifetime(GameObject::UnknownLifetime)
 	{}
 		
@@ -139,7 +139,7 @@ public:
 
 	virtual bool isAnimationFixed() const { return true; }
 
-	virtual bool isInWater() const { return _inWater; }
+	virtual bool isInWater() const { return inWater; }
 
 	virtual void tick(float dt) = 0;
 
