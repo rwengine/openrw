@@ -108,6 +108,8 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		std::string name = "radar" + num +  std::to_string(m);
 		engine->gameData.loadTXD(name + ".txd");
 	}
+	
+	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
 
 	auto loading = new LoadingState(this);
 	if( newgame )

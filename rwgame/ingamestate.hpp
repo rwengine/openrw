@@ -10,8 +10,10 @@ class IngameState : public State
 	bool started;
 	bool test;
 	ViewCamera _look;
+	/** Player input */
 	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
+	/** Timer to reset _lookAngles to forward in vehicles */
 	float autolookTimer;
 public:
 	IngameState(RWGame* game, bool test = false);

@@ -230,7 +230,15 @@ void CharacterObject::updateCharacter(float dt)
 			float wh = engine->gameData.waterHeights[wi];
 			auto ws = getPosition();
 			wh += engine->gameData.getWaveHeightAt(ws);
-			if( ws.z < wh ) {
+			
+			// If Not in water before
+			//  If last position was above water
+			//   Now Underwater
+			//  Else Not Underwater
+			// Else
+			//  Underwater
+			
+			if( ! inWater && ws.z < wh && _lastHeight > wh ) {
 				ws.z = wh;
 
 				btVector3 bpos(ws.x, ws.y, ws.z);
@@ -240,13 +248,14 @@ void CharacterObject::updateCharacter(float dt)
 				physObject->setWorldTransform(wt);
 
 				physCharacter->setGravity(0.f);
-				_inWater = true;
+				inWater = true;
 			}
 			else {
 				physCharacter->setGravity(9.81f);
-				_inWater = false;
+				inWater = false;
 			}
 		}
+		_lastHeight = getPosition().z;
 	}
 }
 

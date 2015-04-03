@@ -65,19 +65,19 @@ void InstanceObject::tick(float dt)
 				wH = engine->gameData.waterHeights[hI];
 				wH += engine->gameData.getWaveHeightAt(ws);
 				if( vH <= wH ) {
-					_inWater = true;
+					inWater = true;
 				}
 				else {
-					_inWater = false;
+					inWater = false;
 				}
 			}
 			else {
-				_inWater = false;
+				inWater = false;
 			}
 		}
 		_lastHeight = ws.z;
 
-		if( _inWater ) {
+		if( inWater ) {
 			float oZ = -(body->collisionHeight * (dynamics->bouancy/100.f));
 			body->body->activate(true);
 			// Damper motion
