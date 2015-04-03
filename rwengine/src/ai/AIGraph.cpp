@@ -1,6 +1,7 @@
 #include "ai/AIGraph.hpp"
 #include "objects/InstanceObject.hpp"
 #include <ai/AIGraphNode.hpp>
+#include <glm/gtx/norm.hpp>
 
 AIGraph::~AIGraph()
 {
@@ -22,7 +23,11 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 		
 		if( node.type == PathNode::EXTERNAL ) {
 			for( size_t rn = 0; rn < nodes.size(); ++rn ) {
-				auto d = glm::length(nodes[rn]->position - nodePosition);
+				if(! nodes[rn]->external )
+				{
+					continue;
+				}
+				auto d = glm::distance2(nodes[rn]->position, nodePosition);
 				if( d < 1.f ) {
 					realNodes.push_back(rn);
 					ainode = nodes[rn];
