@@ -135,9 +135,11 @@ RWGame::~RWGame()
 int RWGame::run()
 {
 	clock.restart();
-
+	
 	// Loop until the window is closed or we run out of state.
 	while (window.isOpen() && StateManager::get().states.size()) {
+		State* state = StateManager::get().states.back();
+		
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			switch (event.type) {
@@ -155,7 +157,7 @@ int RWGame::run()
 			default: break;
 			}
 
-			StateManager::get().states.back()->handleEvent(event);
+			state->handleEvent(event);
 		}
 		
 		if(! window.isOpen() )
@@ -167,31 +169,30 @@ int RWGame::run()
 		accum += timer * timescale;
 
 		while ( accum >= GAME_TIMESTEP ) {
+			StateManager::get().tick(GAME_TIMESTEP);
 
-			if( ! getWorld()->isPaused() )
-			{
-				StateManager::get().tick(GAME_TIMESTEP);
-
-				tick(GAME_TIMESTEP);
-			}
+			tick(GAME_TIMESTEP);
 			
 			accum -= GAME_TIMESTEP;
 			
 			// Throw away time if the accumulator reaches too high.
-			if ( accum > GAME_TIMESTEP )
+			if ( accum > GAME_TIMESTEP * 5.f )
 			{
 				accum = 0.f;
 			}
 		}
 
 		float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
+		if( ! state->shouldWorldUpdate() )
+		{
+			alpha = 1.f;
+		}
 
 		render(alpha, timer);
 
 		StateManager::get().draw(renderer);
 
 		window.display();
-
 	}
 
 	return 0;
@@ -201,12 +202,13 @@ void RWGame::tick(float dt)
 {
 	// Clear out any per-tick state.
 	engine->clearTickData();
-	
 	// Process the Engine's background work.
 	engine->_work->update();
-
+	
+	State* state = StateManager::get().states.back();
+	
 	static float clockAccumulator = 0.f;
-	if (inFocus) {
+	if (inFocus && state->shouldWorldUpdate() ) {
 		engine->gameTime += dt;
 
 		clockAccumulator += dt;
@@ -267,10 +269,10 @@ void RWGame::tick(float dt)
 			engine->createTraffic(p);
 		}
 	}
-
+	
 	// render() needs two cameras to smoothly interpolate between ticks.
 	lastCam = nextCam;
-	nextCam	= StateManager::get().states.back()->getCamera();
+	nextCam = state->getCamera();
 }
 
 void RWGame::render(float alpha, float time)

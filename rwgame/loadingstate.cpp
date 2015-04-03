@@ -40,6 +40,11 @@ void LoadingState::tick(float dt)
 	}
 }
 
+bool LoadingState::shouldWorldUpdate()
+{
+	return false;
+}
+
 void LoadingState::setNextState(State* nextState)
 {
 	next = nextState;

@@ -314,6 +314,11 @@ void IngameState::handleEvent(const sf::Event &event)
 	State::handleEvent(event);
 }
 
+bool IngameState::shouldWorldUpdate()
+{
+    return true;
+}
+
 const ViewCamera &IngameState::getCamera()
 {
 	return _look;

@@ -9,6 +9,11 @@ const ViewCamera& State::getCamera()
 	return defaultView;
 }
 
+bool State::shouldWorldUpdate()
+{
+	return false;
+}
+
 GameWorld* State::getWorld()
 {
 	return game->getWorld();

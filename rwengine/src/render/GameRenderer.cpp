@@ -419,7 +419,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	}
 
 	float fadeTimer = engine->gameTime - engine->state.fadeStart;
-	if( fadeTimer <= engine->state.fadeTime || !engine->state.fadeOut ) {
+	if( fadeTimer < engine->state.fadeTime || !engine->state.fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);

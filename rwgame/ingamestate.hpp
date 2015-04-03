@@ -31,6 +31,8 @@ public:
     virtual void draw(GameRenderer* r);
 
 	virtual void handleEvent(const sf::Event& event);
+	
+	virtual bool shouldWorldUpdate();
 
 	const ViewCamera& getCamera();
 };

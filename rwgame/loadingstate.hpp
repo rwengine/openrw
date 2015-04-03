@@ -17,6 +17,8 @@ public:
 	virtual void draw(GameRenderer* r);
 
 	void setNextState(State* nextState);
+	
+    virtual bool shouldWorldUpdate();
 
 	virtual void handleEvent(const sf::Event& event);
 };

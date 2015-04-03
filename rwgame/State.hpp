@@ -86,6 +86,12 @@ struct State
 	}
 
 	virtual const ViewCamera& getCamera();
+	
+	/**
+	 * Returns false if the game world should not should
+	 * not update while this state is active
+	 */
+	virtual bool shouldWorldUpdate();
 
 	GameWorld* getWorld();
 	sf::RenderWindow& getWindow();
