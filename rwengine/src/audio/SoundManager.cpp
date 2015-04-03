@@ -30,12 +30,15 @@ bool SoundManager::playBackground(const std::string& fileName)
 
 void SoundManager::pause(bool p)
 {
-	if( p )
+	if( backgroundNoise )
 	{
-		backgroundNoise->pause();
-	}
-	else
-	{
-		backgroundNoise->play();
+		if( p )
+		{
+			backgroundNoise->pause();
+		}
+		else
+		{
+			backgroundNoise->play();
+		}
 	}
 }
