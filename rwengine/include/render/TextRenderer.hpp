@@ -3,6 +3,7 @@
 #include "OpenGLRenderer.hpp"
 
 #define GAME_FONTS 3
+#define GAME_GLYPHS 192
 
 class GameWorld;
 class GameRenderer;
@@ -44,6 +45,14 @@ public:
 		TextInfo();
 	};
 	
+	/**
+	 * Stores the information for kerning a glyph
+	 */
+	struct GlyphInfo
+	{
+		float widthFrac;
+	};
+	
 	TextRenderer(GameWorld* engine, GameRenderer* renderer);
 	~TextRenderer();
 	
@@ -53,6 +62,8 @@ public:
 	
 private:
 	std::string fonts[GAME_FONTS];
+	GlyphInfo glyphData[GAME_GLYPHS];
+	
 	GameWorld* engine;
 	GameRenderer* renderer;
 	Renderer::ShaderProgram* textShader;

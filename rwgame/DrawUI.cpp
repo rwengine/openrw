@@ -52,44 +52,44 @@ void drawOnScreenText(GameWorld* world)
 		
 		switch(t.osTextStyle)
 		{
-			default:
-				ti.size = 15.f;
-				ti.font = 0;
-				ti.align = TextRenderer::TextInfo::Left;
-				ti.baseColour = glm::vec3(1.f);
-				ti.screenPosition = vp / 2;
-				break;
-			case OnscreenText::HighPriority:
-				ti.size = 20.f;
-				ti.font = 2;
-				ti.baseColour = glm::vec3(1.f);
-				ti.screenPosition = glm::vec2(vp.x * 0.5f, vp.y - ti.size * 2.f);
-				ti.align = TextRenderer::TextInfo::Center;
-				break;
-			case OnscreenText::CenterBig:
-				ti.size = 30.f;
-				ti.font = 1;
-				ti.baseColour = glm::vec3(82, 114, 128) / 255.f;
-				ti.align = TextRenderer::TextInfo::Center;
-				ti.screenPosition = vp / 2;
-				ti.screenPosition += glm::vec2(0.f, ti.size / 2.f);
-				shadowOffset = glm::vec2(2.f, 0.f);
-				break;
-			case OnscreenText::MissionName:
-				ti.size = 30.f;
-				ti.font = 1;
-				ti.baseColour = glm::vec3(205, 162, 7)/255.f;
-				ti.screenPosition = glm::vec2(vp.x - 10.f, vp.y * 0.79f);
-				ti.align = TextRenderer::TextInfo::Right;
-				shadowOffset = glm::vec2(2.f, 2.f);
-				break;
-			case OnscreenText::Help:
-				ti.screenPosition = glm::vec2(20.f, 20.f);
-				ti.font = 2;
-				ti.size = 20.f;
-				ti.baseColour = glm::vec3(1.f);
-				ti.align = TextRenderer::TextInfo::Left;
-				break;
+		default:
+			ti.size = 15.f;
+			ti.font = 0;
+			ti.align = TextRenderer::TextInfo::Left;
+			ti.baseColour = glm::vec3(1.f);
+			ti.screenPosition = vp / 2;
+			break;
+		case OnscreenText::HighPriority:
+			ti.size = 16.f;
+			ti.font = 2;
+			ti.baseColour = glm::vec3(1.f);
+			ti.screenPosition = glm::vec2(vp.x * 0.5f, vp.y * 0.9f);
+			ti.align = TextRenderer::TextInfo::Center;
+			break;
+		case OnscreenText::CenterBig:
+			ti.size = 30.f;
+			ti.font = 1;
+			ti.baseColour = glm::vec3(82, 114, 128) / 255.f;
+			ti.align = TextRenderer::TextInfo::Center;
+			ti.screenPosition = vp / 2;
+			ti.screenPosition += glm::vec2(0.f, ti.size / 2.f);
+			shadowOffset = glm::vec2(2.f, 0.f);
+			break;
+		case OnscreenText::MissionName:
+			ti.size = 30.f;
+			ti.font = 1;
+			ti.baseColour = glm::vec3(205, 162, 7)/255.f;
+			ti.screenPosition = glm::vec2(vp.x - 10.f, vp.y * 0.79f);
+			ti.align = TextRenderer::TextInfo::Right;
+			shadowOffset = glm::vec2(2.f, 2.f);
+			break;
+		case OnscreenText::Help:
+			ti.screenPosition = glm::vec2(20.f, 20.f);
+			ti.font = 2;
+			ti.size = 20.f;
+			ti.baseColour = glm::vec3(1.f);
+			ti.align = TextRenderer::TextInfo::Left;
+			break;
 		}
 
 		ti.text = t.osTextString;
