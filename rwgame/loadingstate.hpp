@@ -5,6 +5,7 @@
 
 class LoadingState : public State
 {
+	State* next;
 public:
 	LoadingState(RWGame* game);
 
@@ -14,6 +15,8 @@ public:
 	virtual void tick(float dt);
 
 	virtual void draw(GameRenderer* r);
+
+	void setNextState(State* nextState);
 
 	virtual void handleEvent(const sf::Event& event);
 };

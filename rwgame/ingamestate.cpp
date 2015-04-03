@@ -15,18 +15,8 @@
 #define AUTOLOOK_TIME 2.f
 
 IngameState::IngameState(RWGame* game, bool test)
-	: State(game), autolookTimer(0.f)
+	: State(game), started(false), test(test), autolookTimer(0.f)
 {
-	if( test ) {
-		startTest();
-	}
-	else {
-		getWorld()->runScript("data/main.scm");
-	}
-	
-	// Start playing city.wav
-	
-	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
 }
 
 void IngameState::startTest()
@@ -76,27 +66,10 @@ void IngameState::startTest()
 	}
 }
 
-void IngameState::spawnPlayerVehicle()
+void IngameState::startGame()
 {
-#if 0
-	if(! getWorld()->state.player ) return;
-	glm::vec3 hit, normal;
-	if(game->hitWorldRay(hit, normal)) {
-
-		// Pick random vehicle.
-		auto it = getWorld()->vehicleTypes.begin();
-		std::uniform_int_distribution<int> uniform(0, 9);
-		for(size_t i = 0, n = uniform(getWorld()->randomEngine); i != n; i++) {
-			it++;
-		}
-
-		auto spawnpos = hit + normal;
-		auto vehicle = getWorld()->createVehicle(it->first, spawnpos,
-												 glm::quat(glm::vec3(0.f, 0.f, -_lookAngles.x * PiOver180)));
-
-		getWorld()->state.player->getCharacter()->enterVehicle(vehicle, 0);
-	}
-#endif
+	getWorld()->runScript("data/main.scm");
+	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
 }
 
 PlayerController *IngameState::getPlayer()
@@ -106,7 +79,16 @@ PlayerController *IngameState::getPlayer()
 
 void IngameState::enter()
 {
-
+	if( ! started )
+	{
+		if( test ) {
+			startTest();
+		}
+		else {
+			startGame();
+		}
+		started = true;
+	}
 }
 
 void IngameState::exit()

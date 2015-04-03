@@ -1,9 +1,8 @@
 #include "loadingstate.hpp"
-#include "menustate.hpp"
 #include "RWGame.hpp"
 
 LoadingState::LoadingState(RWGame* game)
-	: State(game)
+	: State(game), next(nullptr)
 {
 }
 
@@ -35,11 +34,15 @@ void LoadingState::exit()
 
 void LoadingState::tick(float dt)
 {
-	// Check to see if the GameWorld has run out of jobs
-	// (i.e. it's time to open the main menu)
+	// If background work is completed, switch to the next state
 	if( getWorld()->_work->isEmpty() ) {
-		StateManager::get().exec(new MenuState(game));
+		StateManager::get().exec(next);
 	}
+}
+
+void LoadingState::setNextState(State* nextState)
+{
+	next = nextState;
 }
 
 void LoadingState::handleEvent(const sf::Event &e)
@@ -52,8 +55,8 @@ void LoadingState::draw(GameRenderer* r)
 	// Display some manner of loading screen.
 	TextRenderer::TextInfo ti;
 	ti.text = "Loading...";
-	ti.screenPosition = glm::vec2( -1.f, 0.5f );
-	ti.size = 0.1f;
+	ti.screenPosition = glm::vec2( 50.f, 50.f );
+	ti.size = 10.f;
 	ti.font = 2;
 	r->text.renderText(ti);
 }

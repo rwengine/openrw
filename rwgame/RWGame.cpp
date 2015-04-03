@@ -2,6 +2,8 @@
 #include "State.hpp"
 #include "loadingstate.hpp"
 #include "DrawUI.hpp"
+#include "ingamestate.hpp"
+#include "menustate.hpp"
 
 #include <engine/GameObject.hpp>
 #include <engine/GameState.hpp>
@@ -23,6 +25,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
+	bool newgame = false;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -37,6 +40,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		if( strcasecmp( "-f", argv[i] ) == 0 )
 		{
 			fullscreen = true;
+		}
+		if( strcmp( "--newgame", argv[i] ) == 0 )
+		{
+			newgame = true;
 		}
 	}
 	
@@ -86,7 +93,18 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		engine->gameData.loadTXD(name + ".txd");
 	}
 
-	StateManager::get().enter(new LoadingState(this));
+	auto loading = new LoadingState(this);
+	if( newgame )
+	{
+		loading->setNextState(new IngameState(this));
+	}
+	else
+	{
+		loading->setNextState(new MenuState(this));
+	}
+	
+	
+	StateManager::get().enter(loading);
 
 	engine->logInfo("Started");
 }

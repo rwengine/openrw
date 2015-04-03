@@ -7,6 +7,8 @@ class PlayerController;
 
 class IngameState : public State
 {
+	bool started;
+	bool test;
 	ViewCamera _look;
 	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
@@ -15,7 +17,7 @@ public:
 	IngameState(RWGame* game, bool test = false);
 
 	void startTest();
-	void spawnPlayerVehicle();
+	void startGame();
 
 	/** shortcut for getWorld()->state.player->getCharacter() */
 	PlayerController* getPlayer();
