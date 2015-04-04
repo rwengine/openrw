@@ -138,6 +138,15 @@ void CharacterObject::changeCharacterModel(const std::string &name)
 	if( mfind != models.end() ) {
 		model = mfind->second;
 	}
+
+	if( skeleton )
+	{
+		delete animator;
+		delete skeleton;
+	}
+
+	skeleton = new Skeleton;
+	animator = new Animator(model->resource, skeleton);
 }
 
 void CharacterObject::updateCharacter(float dt)
