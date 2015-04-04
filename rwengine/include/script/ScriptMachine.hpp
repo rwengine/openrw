@@ -159,9 +159,24 @@ public:
 	
 	typedef std::function<void (const SCMBreakpoint&)> BreakpointHandler;
 
+	/**
+	 * Set the breakpoint handler callback.
+	 *
+	 * When the VM reaches an instruction marked as a brekapoint
+	 * by addBreakpoint, the handler will be called with information
+	 * about the state of the VM and the active thread.
+	 */
 	void setBreakpointHandler(const BreakpointHandler& handler);
 
+	/**
+	 * Adds a breakpoint
+	 * @param pc The instruction address to break on.
+	 */
 	void addBreakpoint(SCMThread::pc_t pc);
+
+	/**
+	 * Removes a breakpoint.
+	 */
 	void removeBreakpoint(SCMThread::pc_t pc);
 
 	/**
