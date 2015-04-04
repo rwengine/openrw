@@ -103,6 +103,17 @@ void VehicleObject::setPosition(const glm::vec3& pos)
 {
 	GameObject::setPosition(pos);
 	if( physBody ) {
+		// Move each active part
+		for(auto& part : dynamicParts)
+		{
+			if( part.second.body == nullptr ) continue;
+			auto body = part.second.body;
+			auto rel = body->getWorldTransform().getOrigin()
+				- physBody->getWorldTransform().getOrigin();
+			body->getWorldTransform().setOrigin(
+				btVector3(pos.x + rel.x(), pos.y + rel.y(), pos.z + rel.z()));
+		}
+
 		auto t = physBody->getWorldTransform();
 		t.setOrigin(btVector3(pos.x, pos.y, pos.z));
 		physBody->setWorldTransform(t);
