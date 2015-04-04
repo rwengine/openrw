@@ -26,7 +26,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		btRaycastVehicle::btVehicleTuning tuning;
 
 		float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
-		tuning.m_frictionSlip = 2.5f;
+		tuning.m_frictionSlip = 4.f;
 		tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
 		physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
@@ -49,14 +49,14 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			wi.m_suspensionRestLength1 = restLength;
 
 			wi.m_maxSuspensionForce = info->handling.mass * 9.f;
-			wi.m_suspensionStiffness = (info->handling.suspensionForce * 9.f);
+			wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
 
 			//float dampEffect = (info->handling.suspensionDamping) / travel;
 			//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
 
 			wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 			wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-			wi.m_rollInfluence = 0.45f;
+			wi.m_rollInfluence = 0.25f;
 			float halfFriction = tuning.m_frictionSlip * 0.5f;
 			wi.m_frictionSlip = halfFriction + halfFriction * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 		}
