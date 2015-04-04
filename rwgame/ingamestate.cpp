@@ -15,6 +15,26 @@
 
 #define AUTOLOOK_TIME 2.f
 
+/**
+ * This should be kept in rwengine/physics
+ */
+class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
+{
+	btCollisionObject* _self;
+public:
+
+	ClosestNotMeRayResultCallback( btCollisionObject* self, const btVector3& from, const btVector3& to )
+		: ClosestRayResultCallback( from, to ), _self( self ) {}
+
+	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace)
+	{
+		if( rayResult.m_collisionObject == _self ) {
+			return 1.0;
+		}
+		return ClosestRayResultCallback::addSingleResult( rayResult, normalInWorldSpace );
+	}
+};
+
 IngameState::IngameState(RWGame* game, bool test)
 	: State(game), started(false), test(test), autolookTimer(0.f)
 {
@@ -143,6 +163,7 @@ void IngameState::tick(float dt)
 		auto position = target->getPosition();
 
 		float viewDistance = 4.f;
+		btCollisionObject* physTarget = player->getCharacter()->physObject;
 
 		auto vehicle = ( target->type() == GameObject::Character ) ? static_cast<CharacterObject*>(target)->getCurrentVehicle() : nullptr;
 		if( vehicle ) {
@@ -154,6 +175,7 @@ void IngameState::tick(float dt)
 			}
 			position = vehicle->getPosition();
 			position.z += (vehicle->info->handling.dimensions.z / 2.f) * 2.5f;
+			physTarget = vehicle->physBody;
 			
 			float speed = vehicle->physVehicle->getCurrentSpeedKmHour();
 			if( autolookTimer <= 0.f && std::abs(speed) > 1.f )
@@ -193,8 +215,26 @@ void IngameState::tick(float dt)
 			}
 		}
 
+		auto rayEnd = position + angle * glm::vec3(-viewDistance, 0.f, 1.f);
+		auto rayStart = position + glm::vec3(0.f, 0.f, 1.f);
+		auto to = btVector3(rayEnd.x, rayEnd.y, rayEnd.z);
+		auto from = btVector3(rayStart.x, rayStart.y, rayStart.z);
+		ClosestNotMeRayResultCallback ray(physTarget, from, to);
+
+		getWorld()->dynamicsWorld->rayTest(from, to, ray);
+		if( ray.hasHit() && ray.m_closestHitFraction < 1.f )
+		{
+			position = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
+							ray.m_hitPointWorld.z());
+			position += glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
+							ray.m_hitNormalWorld.z()) * 0.1f;
+		}
+		else
+		{
+			position = rayEnd;
+		}
+
 		// Move back from the character
-		position += angle * glm::vec3(-viewDistance, 0.f, 1.f);
 
 		// Tilt the final look angle down a tad.
 		angle *= glm::angleAxis(glm::radians(10.f), glm::vec3(0.f, 1.f, 0.f));
