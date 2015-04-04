@@ -8,7 +8,8 @@
 #include <glm/gtx/string_cast.hpp>
 
 TrafficDirector::TrafficDirector(AIGraph* graph, GameWorld* world)
-: graph( graph ), world( world ), pedDensity(1.f), carDensity(1.f)
+: graph( graph ), world( world ), pedDensity(1.f), carDensity(1.f),
+maximumPedestrians(20), maximumCars(10)
 {
 
 }
@@ -69,12 +70,34 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density)
 	}
 }
 
-std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxPopulation)
+std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxSpawn)
 {
+	// TODO this should be optimised, GameWorld needs to keep seperate class lists.
+	int availablePeds = maximumPedestrians, availableCars = maximumCars;
+	for(auto& go : world->objects)
+	{
+		switch( go->type() )
+		{
+		case GameObject::Character:
+			availablePeds--;
+			break;
+		case GameObject::Vehicle:
+			availableCars--;
+			break;
+		default: break;
+		}
+	}
+
 	std::vector<GameObject*> created;
 	
 	auto type = AIGraphNode::Pedestrian;
 	auto available = findAvailableNodes(type, center, radius);
+	
+	if( availablePeds <= 0 )
+	{
+		// We have already reached the limit of spawned traffic
+		return { };
+	}
 	
 	/// Hardcoded cop Pedestrian
 	std::vector<uint16_t> validPeds = { 1 };
@@ -82,16 +105,23 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	std::random_device rd;
 	std::default_random_engine re(rd());
 	std::uniform_int_distribution<> d(0, validPeds.size()-1);
-	
+
+	int counter = availablePeds;
+	// maxSpawn can be -1 for "as many as possible"
+	if( maxSpawn > -1 )
+	{
+		counter = std::min( availablePeds, maxSpawn );
+	}
+
 	for ( AIGraphNode* spawn : available )
 	{
-		if ( maxPopulation > -1 )
+		if ( counter > -1 )
 		{
-			if ( maxPopulation == 0 )
+			if ( counter == 0 )
 			{
 				break;
 			}
-			maxPopulation --;
+			counter --;
 		}
 		
 		// Spawn a pedestrian from the available pool
@@ -104,5 +134,11 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	// Find places it's legal to spawn things
 	
 	return created;
+}
+
+void TrafficDirector::setPopulationLimits(int maxPeds, int maxCars)
+{
+	maximumPedestrians = maxPeds;
+	maximumCars = maxCars;
 }
 
