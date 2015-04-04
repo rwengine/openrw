@@ -88,6 +88,12 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		follower->controller->setGoal(CharacterController::FollowLeader);
 		follower->controller->setTargetCharacter(game->getWorld()->state.player->getCharacter());
 	}, entryHeight));
+	m->addEntry(Menu::lambda("Set Super Jump", [=] {
+		game->getWorld()->state.player->getCharacter()->setJumpSpeed(20.f);
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Set Normal Jump", [=] {
+		game->getWorld()->state.player->getCharacter()->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
+	}, entryHeight));
 
 	this->enterMenu(m);
 

@@ -69,7 +69,12 @@ private:
 
 	std::map<int, InventoryItem*> _inventory;
 	int _activeInventoryItem;
+
+	bool jumped = false;
+	float jumpSpeed;
 public:
+
+	static const float DefaultJumpSpeed;
 
 	std::shared_ptr<CharacterData> ped;
 
@@ -122,6 +127,8 @@ public:
     virtual bool takeDamage(const DamageInfo& damage);
 	
 	void jump();
+	void setJumpSpeed(float speed);
+	float getJumpSpeed() const;
 	
 	/**
 	 * Resets the Actor to the nearest AI Graph node

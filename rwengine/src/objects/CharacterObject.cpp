@@ -9,12 +9,14 @@
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
+const float CharacterObject::DefaultJumpSpeed = 2.f;
+
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, std::shared_ptr<CharacterData> data)
 : GameObject(engine, pos, rot, model),
   currentVehicle(nullptr), currentSeat(0),
   _hasTargetPosition(false), _activeInventoryItem(0),
   ped(data), physCharacter(nullptr),
-  controller(nullptr)
+  controller(nullptr), jumped(false), jumpSpeed(DefaultJumpSpeed)
 {
 	mHealth = 100.f;
 
@@ -230,6 +232,18 @@ void CharacterObject::updateCharacter(float dt)
 			walkDir = rotation * animTranslate;
 		}
 
+		if( jumped )
+		{
+			if( physCharacter->onGround() )
+			{
+				jumped = false;
+			}
+			else
+			{
+				walkDir = rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
+			}
+		}
+
 		physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
 
 		auto Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
@@ -379,7 +393,18 @@ void CharacterObject::jump()
 {
 	if( physCharacter ) {
 		physCharacter->jump();
+		jumped = true;
 	}
+}
+
+float CharacterObject::getJumpSpeed() const
+{
+	return jumpSpeed;
+}
+
+void CharacterObject::setJumpSpeed(float speed)
+{
+	jumpSpeed = speed;
 }
 
 void CharacterObject::resetToAINode()
