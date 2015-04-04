@@ -29,25 +29,12 @@ bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
-#if SCM_DEBUG_INSTRUCTIONS
-	std::string threadfilter;
-	if(getenv("SCM_DEBUG_THREAD"))
-	{
-		threadfilter = getenv("SCM_DEBUG_THREAD");
-	}
-	
-	bool debug_op = threadfilter.empty() || threadfilter.find(t.name) != std::string::npos || threadfilter.find(std::to_string(t.baseAddress)) != std::string::npos;
-	
-	if ( debug_op )
-	{
-		_world->logger.verbose("SCM", "Thread " + t.name + " woke at " + std::to_string(t.wakeCounter) );
-	}
-#endif
-	
 	if( t.wakeCounter > 0 ) {
 		t.wakeCounter = std::max( t.wakeCounter - msPassed, 0 );
 	}
 	if( t.wakeCounter > 0 ) return;
+	
+	bool hasDebugging = !! bpHandler;
 	
 	while( t.wakeCounter == 0 ) {
 		auto opcode = _file->read<SCMOpcode>(t.programCounter);
@@ -63,6 +50,8 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		}
 		ScriptFunctionMeta& code = *foundcode;
 		
+		// Keep the pc for the debugger
+		auto pc = t.programCounter;
 		t.programCounter += sizeof(SCMOpcode);
 
 		SCMParams parameters;
@@ -126,81 +115,25 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			};
 		}
 
-		if(! code.function)
+		if(code.function)
 		{
-#if SCM_DEBUG_INSTRUCTIONS
-			std::cout << std::setw(7) << std::setfill(' ') << t.name <<
-			" " << std::dec << std::setw(8) << std::setfill(' ') << t.programCounter <<
-			" " << std::hex  << std::setw(4) << std::setfill('0') << opcorg << 
-			" " << std::dec;
-			for(SCMOpcodeParameter& p : parameters) {
-				std::cout << p.type << ":";
-				switch(p.type) {
-					case TGlobal:
-					case TLocal:
-						std::cout << *p.globalInteger;
-						break;
-					case TInt8:
-					case TInt16:
-					case TInt32:
-						std::cout << p.integer;
-						break;
-					case TFloat16:
-						std::cout << p.real;
-						break;
-					case TString:
-						std::cout << p.string;
-						break;
-				}
-				std::cout << " ";
-			}
-			std::cout << code.signature  << " unimplemented"<< std::endl;
-#endif
-		}
-		else
-		{
-#if SCM_DEBUG_INSTRUCTIONS
-			if( debug_op )
-			{
-				std::cout << std::setw(7) << std::setfill(' ') << t.name <<
-				" " << std::dec << std::setw(8) << std::setfill(' ') << t.programCounter <<
-				" " << std::hex  << std::setw(4) << std::setfill('0') << opcorg << 
-				" " << std::dec;
-				for(SCMOpcodeParameter& p : parameters) {
-					std::cout << p.type << ":";
-					switch(p.type) {
-						case TGlobal:
-						case TLocal:
-							std::cout << *p.globalInteger << "(" << p.globalInteger << ")";
-							break;
-						case TInt8:
-						case TInt16:
-						case TInt32:
-							std::cout << p.integer;
-							break;
-						case TFloat16:
-							std::cout << p.real;
-							break;
-						case TString:
-							std::cout << p.string;
-							break;
-					}
-					std::cout << " ";
-				}
-				std::cout << code.signature << std::endl;
-			}
-#endif
 			ScriptArguments sca(&parameters, &t, this);
-			code.function(sca);
-#if SCM_DEBUG_INSTRUCTIONS
-			if( debug_op )
+			
+			if( hasDebugging )
 			{
-				if( code.conditional )
+				if( breakpoints.find(pc) != breakpoints.end() )
 				{
-					std::cout << " => " << t.conditionResult << std::endl;
+					SCMBreakpoint bp;
+					bp.pc = pc;
+					bp.thread = &t;
+					bp.vm = this;
+					bp.function = &code;
+					bp.args = &sca;
+					bpHandler(bp);
 				}
 			}
-#endif
+			
+			code.function(sca);
 		}
 
 		if(isNegatedConditional) {
@@ -299,3 +232,20 @@ void ScriptMachine::execute(float dt)
 		}
 	}
 }
+
+void ScriptMachine::setBreakpointHandler(const ScriptMachine::BreakpointHandler& handler)
+{
+	bpHandler = handler;
+}
+
+void ScriptMachine::addBreakpoint(SCMThread::pc_t pc)
+{
+	breakpoints.insert(pc);
+}
+
+void ScriptMachine::removeBreakpoint(SCMThread::pc_t pc)
+{
+	breakpoints.erase(pc);
+}
+
+

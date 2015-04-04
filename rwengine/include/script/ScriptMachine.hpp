@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <stack>
+#include <set>
 
 #define SCM_NEGATE_CONDITIONAL_MASK 0x8000
 #define SCM_CONDITIONAL_MASK_PASSED 0xFF
@@ -130,18 +131,20 @@ struct SCMThread
 	std::stack<pc_t> calls;
 };
 
+/**
+ * Breakpoint callback information
+ */
+struct SCMBreakpoint
+{
+	SCMThread::pc_t pc;
+	SCMThread* thread;
+	ScriptMachine* vm;
+	ScriptFunctionMeta* function;
+	ScriptArguments* args;
+};
+
 class ScriptMachine
 {
-	SCMFile* _file;
-	SCMOpcodes* _ops;
-	GameWorld* _world;
-
-	std::vector<SCMThread> _activeThreads;
-
-	void executeThread(SCMThread& t, int msPassed);
-
-	SCMByte* _globals;
-
 public:
 	ScriptMachine(GameWorld* world, SCMFile* file, SCMOpcodes* ops);
 	~ScriptMachine();
@@ -153,11 +156,32 @@ public:
 	SCMByte* getGlobals();
 
 	GameWorld* getWorld() const { return _world; }
+	
+	typedef std::function<void (const SCMBreakpoint&)> BreakpointHandler;
+
+	void setBreakpointHandler(const BreakpointHandler& handler);
+
+	void addBreakpoint(SCMThread::pc_t pc);
+	void removeBreakpoint(SCMThread::pc_t pc);
 
 	/**
 	 * @brief executes threads until they are all in waiting state.
 	 */
 	void execute(float dt);
+	
+private:
+	SCMFile* _file;
+	SCMOpcodes* _ops;
+	GameWorld* _world;
+
+	std::vector<SCMThread> _activeThreads;
+
+	void executeThread(SCMThread& t, int msPassed);
+
+	SCMByte* _globals;
+
+	BreakpointHandler bpHandler;
+	std::set<SCMThread::pc_t> breakpoints;
 };
 
 #endif

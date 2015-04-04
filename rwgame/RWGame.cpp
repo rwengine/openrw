@@ -10,7 +10,11 @@
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/DebugDraw.hpp>
+
 #include <script/ScriptMachine.hpp>
+#include <script/modules/VMModule.hpp>
+#include <script/modules/GameModule.hpp>
+#include <script/modules/ObjectModule.hpp>
 
 #include <data/CutsceneData.hpp>
 #include <ai/PlayerController.hpp>
@@ -22,12 +26,13 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: engine(nullptr), renderer(nullptr), inFocus(true), showDebugStats(false),
+	: engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true), showDebugStats(false),
 	  accum(0.f), timescale(1.f)
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
 	bool newgame = false;
+	bool debugscript = false;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -46,6 +51,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		if( strcmp( "--newgame", argv[i] ) == 0 )
 		{
 			newgame = true;
+		}
+		if( strcmp( "--debug", argv[i] ) == 0 )
+		{
+			debugscript = true;
 		}
 	}
 	
@@ -128,8 +137,49 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 RWGame::~RWGame()
 {
+	delete script;
 	delete renderer;
 	delete engine;
+}
+
+void RWGame::startScript(const std::string& name)
+{
+	SCMFile* f = engine->gameData.loadSCM(name);
+	if( f ) {
+		if( script ) delete script;
+		
+		SCMOpcodes* opcodes = new SCMOpcodes;
+		opcodes->modules.push_back(new VMModule);
+		opcodes->modules.push_back(new GameModule);
+		opcodes->modules.push_back(new ObjectModule);
+
+		script = new ScriptMachine(engine, f, opcodes);
+		
+		// Set up breakpoint handler
+		script->setBreakpointHandler(
+			[&](const SCMBreakpoint& bp)
+			{
+				log.info("Script", "Breakpoint hit!");
+				std::stringstream ss;
+				ss << " " << bp.function->description << ".";
+				ss << " Args:";
+				for(int a = 0; a < bp.args->getParameters().size(); a++)
+				{
+					auto& arg = bp.args->getParameters()[a];
+					ss << " " << arg.integerValue();
+					if( a != bp.args->getParameters().size()-1 )
+					{
+						ss << ",";
+					}
+				}
+				
+				log.info("Script", ss.str());
+			});
+		script->addBreakpoint(0);
+	}
+	else {
+		log.error("Game", "Failed to load SCM: " + name);
+	}
 }
 
 int RWGame::run()
@@ -250,9 +300,9 @@ void RWGame::tick(float dt)
 
 		engine->dynamicsWorld->stepSimulation(dt, 2, dt);
 		
-		if( engine->script ) {
+		if( script ) {
 			try {
-				engine->script->execute(dt);
+				script->execute(dt);
 			}
 			catch( SCMException& ex ) {
 				std::cerr << ex.what() << std::endl;

@@ -11,6 +11,7 @@
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
 #include <engine/GameWorld.hpp>
+#include <script/ScriptMachine.hpp>
 
 #define AUTOLOOK_TIME 2.f
 
@@ -68,7 +69,7 @@ void IngameState::startTest()
 
 void IngameState::startGame()
 {
-	getWorld()->runScript("data/main.scm");
+	game->startScript("data/main.scm");	
 	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
 }
 

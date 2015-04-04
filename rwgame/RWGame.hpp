@@ -4,6 +4,7 @@
 #include <core/Logger.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
+#include <script/ScriptMachine.hpp>
 #include "game.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -14,6 +15,7 @@ class RWGame
 	GameWorld* engine;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
+	ScriptMachine* script;
 	sf::RenderWindow window;
 	sf::Clock clock;
 	bool inFocus;
@@ -45,6 +47,11 @@ public:
 		return window;
 	}
 
+	ScriptMachine* getScript() const
+	{
+		return script;
+	}
+
 	bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object = nullptr)
 	{
 		auto vc = nextCam;
@@ -74,6 +81,8 @@ public:
 		}
 		return false;
 	}
+	
+	void startScript(const std::string& name);
 
 private:
 	void tick(float dt);

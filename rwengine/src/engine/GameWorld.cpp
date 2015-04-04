@@ -11,11 +11,6 @@
 #include <data/WeaponData.hpp>
 #include <WorkContext.hpp>
 
-#include <script/ScriptMachine.hpp>
-#include <script/modules/VMModule.hpp>
-#include <script/modules/GameModule.hpp>
-#include <script/modules/ObjectModule.hpp>
-
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
@@ -80,7 +75,7 @@ public:
 
 GameWorld::GameWorld(Logger* log, const std::string& path)
 	: logger(log), gameTime(0.f), gameData(log, path), randomEngine(rand()),
-	  _work( new WorkContext( this ) ), script(nullptr), cutsceneAudio(nullptr), missionAudio(nullptr),
+	  _work( new WorkContext( this ) ), cutsceneAudio(nullptr), missionAudio(nullptr),
 	  paused(false)
 {
 	gameData.engine = this;
@@ -142,24 +137,6 @@ bool GameWorld::defineItems(const std::string& name)
 	}
 	
 	return false;
-}
-
-void GameWorld::runScript(const std::string &name)
-{
-	SCMFile* f = gameData.loadSCM(name);
-	if( f ) {
-		if( script ) delete script;
-		
-		SCMOpcodes* opcodes = new SCMOpcodes;
-		opcodes->modules.push_back(new VMModule);
-		opcodes->modules.push_back(new GameModule);
-		opcodes->modules.push_back(new ObjectModule);
-
-		script = new ScriptMachine(this, f, opcodes);
-	}
-	else {
-		logger->error("World", "Failed to load SCM: " + name);
-	}
 }
 
 bool GameWorld::placeItems(const std::string& name)

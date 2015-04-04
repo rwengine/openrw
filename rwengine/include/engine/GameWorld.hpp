@@ -23,8 +23,6 @@ class VehicleObject;
 
 struct WeaponScan;
 
-class ScriptMachine;
-
 #include <glm/glm.hpp>
 
 #include <btBulletDynamicsCommon.h>
@@ -70,8 +68,6 @@ public:
 	 */
 	bool defineItems(const std::string& name);
 
-	void runScript(const std::string& name);
-	
 	/**
 	 * Loads an IPL into the game.
 	 * @param name The name of the IPL as it appears in the games' gta.dat
@@ -240,8 +236,6 @@ public:
 	 * Work related
 	 */
 	WorkContext* _work;
-
-	ScriptMachine* script;
 
 	/**
 	 * @brief Loads and starts the named cutscene.
