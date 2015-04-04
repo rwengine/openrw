@@ -12,28 +12,9 @@
 #include <items/WeaponItem.hpp>
 #include <engine/GameWorld.hpp>
 #include <script/ScriptMachine.hpp>
+#include <dynamics/RaycastCallbacks.hpp>
 
 #define AUTOLOOK_TIME 2.f
-
-/**
- * This should be kept in rwengine/physics
- */
-class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
-{
-	btCollisionObject* _self;
-public:
-
-	ClosestNotMeRayResultCallback( btCollisionObject* self, const btVector3& from, const btVector3& to )
-		: ClosestRayResultCallback( from, to ), _self( self ) {}
-
-	virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult &rayResult, bool normalInWorldSpace)
-	{
-		if( rayResult.m_collisionObject == _self ) {
-			return 1.0;
-		}
-		return ClosestRayResultCallback::addSingleResult( rayResult, normalInWorldSpace );
-	}
-};
 
 IngameState::IngameState(RWGame* game, bool test)
 	: State(game), started(false), test(test), autolookTimer(0.f)
