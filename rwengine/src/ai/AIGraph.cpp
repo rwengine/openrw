@@ -20,17 +20,14 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 		auto& node = path.nodes[n];
 		AIGraphNode* ainode = nullptr;
 		glm::vec3 nodePosition = position + (rotation * node.position);
-		
+
 		if( node.type == PathNode::EXTERNAL ) {
-			for( size_t rn = 0; rn < nodes.size(); ++rn ) {
-				if(! nodes[rn]->external )
-				{
-					continue;
-				}
-				auto d = glm::distance2(nodes[rn]->position, nodePosition);
+			for( size_t rn = 0; rn < externalNodes.size(); ++rn ) {
+				auto& realNode = externalNodes[rn];
+				auto d = glm::distance2(realNode->position, nodePosition);
 				if( d < 1.f ) {
 					realNodes.push_back(rn);
-					ainode = nodes[rn];
+					ainode = realNode;
 					break;
 				}
 			}
@@ -47,9 +44,14 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 			ainode->position = nodePosition;
 			ainode->external = node.type == PathNode::EXTERNAL;
 			ainode->disabled = false;
-			
+
 			realNodes.push_back(nodes.size());
 			nodes.push_back(ainode);
+
+			if( ainode->external )
+			{
+				externalNodes.push_back(ainode);
+			}
 		}
 	}
 

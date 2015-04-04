@@ -18,9 +18,8 @@ std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::Nod
 {
 	std::vector<AIGraphNode*> available;
 	
-	for ( AIGraphNode* node : graph->nodes )
+	for ( AIGraphNode* node : graph->externalNodes )
 	{
-		if ( ! node->external ) continue;
 		if ( node->type != type ) continue;
 		if ( glm::distance( near, node->position ) < radius )
 		{
@@ -89,7 +88,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	}
 
 	std::vector<GameObject*> created;
-	
+
 	auto type = AIGraphNode::Pedestrian;
 	auto available = findAvailableNodes(type, center, radius);
 	

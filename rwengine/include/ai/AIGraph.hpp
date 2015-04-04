@@ -14,6 +14,12 @@ public:
 	~AIGraph();
 	
 	std::vector<AIGraphNode*> nodes;
+	/**
+	 * List of external nodes, which are links between each
+	 * Instance's paths and where new pedestrians and vehicles
+	 * are spawned
+	 */
+	std::vector<AIGraphNode*> externalNodes;
 	
 	void createPathNodes(const glm::vec3& position, const glm::quat& rotation, PathData& path);
 
