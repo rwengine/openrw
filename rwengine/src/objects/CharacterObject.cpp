@@ -67,7 +67,7 @@ CharacterObject::~CharacterObject()
 	}
 }
 
-void CharacterObject::createActor(const glm::vec3& size)
+void CharacterObject::createActor(const glm::vec2& size)
 {
 	if(physCharacter) {
 		destroyActor();
@@ -82,11 +82,13 @@ void CharacterObject::createActor(const glm::vec3& size)
 		physObject = new btPairCachingGhostObject;
 		physObject->setUserPointer(this);
 		physObject->setWorldTransform(tf);
-		physShape = new btCapsuleShapeZ(size.x, size.z);
+		physShape = new btCapsuleShapeZ(size.x, size.y);
 		physObject->setCollisionShape(physShape);
 		physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
-		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.1f, 2);
-		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 0.f), 1.f);
+		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
+		physCharacter->setFallSpeed(20.f);
+		physCharacter->setUseGhostSweepTest(true);
+		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 1.f), 1.f);
 		physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
 		physCharacter->setJumpSpeed(5.f);
 

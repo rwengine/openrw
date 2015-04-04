@@ -107,6 +107,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 	debug = new DebugDraw;
 	debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits);
+	debug->setShaderProgram(renderer->worldProg);
 	engine->dynamicsWorld->setDebugDrawer(debug);
 
 	engine->gameData.loadDynamicObjects(gamepath + "/data/object.dat");
