@@ -32,6 +32,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
 	bool newgame = false;
+	bool test = false;
 	bool debugscript = false;
 
 	for( int i = 1; i < argc; ++i )
@@ -51,6 +52,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		if( strcmp( "--newgame", argv[i] ) == 0 )
 		{
 			newgame = true;
+		}
+		if( strcmp( "--test", argv[i] ) == 0 )
+		{
+			test = true;
 		}
 		if( strcmp( "--debug", argv[i] ) == 0 )
 		{
@@ -123,7 +128,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	auto loading = new LoadingState(this);
 	if( newgame )
 	{
-		loading->setNextState(new IngameState(this));
+		loading->setNextState(new IngameState(this,test));
 	}
 	else
 	{

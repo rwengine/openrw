@@ -22,7 +22,7 @@ IngameState::IngameState(RWGame* game, bool test)
 
 void IngameState::startTest()
 {
-	auto playerChar = getWorld()->createPedestrian(1, {-1000.f, -990.f, 13.f});
+	auto playerChar = getWorld()->createPedestrian(1, {270.f, -605.f, 40.f});
 	auto player = new PlayerController(playerChar);
 
 	getWorld()->state.player = player;
@@ -31,7 +31,7 @@ void IngameState::startTest()
 	_playerCharacter->addToInventory(bat);
 	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
 
-	glm::vec3 itemspawn(-1000.f, -980.f, 11.0f);
+	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
 	for( auto& w : getWorld()->gameData.weaponData ) {
 		if( w.first == "unarmed" ) continue;
 		getWorld()->objects.insert(new ItemPickup(getWorld(), itemspawn,
@@ -39,8 +39,10 @@ void IngameState::startTest()
 		itemspawn.x += 2.5f;
 	}
 
-	auto carPos = glm::vec3( -1000.f, -1000.f, 12.f );
-	auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
+	auto carPos = glm::vec3( 286.f, -591.f, 37.f );
+	auto carRot = glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+	//auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
+	int i = 0;
 	for( auto& vi : getWorld()->objectTypes ) {
 		switch( vi.first ) {
 		case 140: continue;
@@ -48,28 +50,21 @@ void IngameState::startTest()
 		}
 		if( vi.second->class_type == ObjectInformation::_class("CARS") )
 		{
+			if ( i++ > 20 ) break;
 			auto vehicle = std::static_pointer_cast<VehicleData>(vi.second);
 
-			auto sp = carPos;
-			if( vehicle->type == VehicleData::BOAT ) {
-				sp = boatPos;
-			}
+			auto& sp = carPos;
+			auto& sr = carRot;
+			auto v = getWorld()->createVehicle(vi.first, sp, sr);
 
-			auto v = getWorld()->createVehicle(vi.first, sp, glm::quat());
-
-			if( vehicle->type == VehicleData::BOAT ) {
-				boatPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
-			}
-			else {
-				carPos -= glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
-			}
+			sp += sr * glm::vec3( 2.f + v->info->handling.dimensions.x, 0.f, 0.f);
 		}
 	}
 }
 
 void IngameState::startGame()
 {
-	game->startScript("data/main.scm");	
+	game->startScript("data/main.scm");
 	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
 }
 

@@ -3,6 +3,8 @@
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <sstream>
+#include <glm/gtx/string_cast.hpp>
 
 void jumpCharacter(RWGame* game, CharacterController* controller, const glm::vec3& target)
 {
@@ -153,6 +155,22 @@ void DebugState::tick(float dt)
 
 		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 100.f : 10.f);
 	}
+}
+
+void DebugState::draw(GameRenderer* r)
+{
+	// Draw useful information like camera position.
+	std::stringstream ss;
+	ss << "Camera Position: " << glm::to_string(_debugCam.position);
+
+	TextRenderer::TextInfo ti;
+	ti.text = ss.str();
+	ti.font = 2;
+	ti.screenPosition = glm::vec2( 10.f, 10.f );
+	ti.size = 15.f;
+	r->text.renderText(ti);
+
+	State::draw(r);
 }
 
 void DebugState::handleEvent(const sf::Event &e)
