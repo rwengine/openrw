@@ -4,7 +4,7 @@
 #include <engine/GameObject.hpp>
 #include <map>
 #include <objects/VehicleInfo.hpp>
-#include <data/CollisionInstance.hpp>
+#include <dynamics/CollisionInstance.hpp>
 
 /**
  * @class VehicleObject

@@ -1,4 +1,4 @@
-#include "data/CollisionInstance.hpp"
+#include <dynamics/CollisionInstance.hpp>
 
 #include <engine/GameObject.hpp>
 #include <engine/GameWorld.hpp>

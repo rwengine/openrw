@@ -1,7 +1,7 @@
 #include <objects/InstanceObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <data/CollisionModel.hpp>
-#include <data/CollisionInstance.hpp>
+#include <dynamics/CollisionInstance.hpp>
 #include <engine/Animator.hpp>
 
 InstanceObject::InstanceObject(GameWorld* engine,
