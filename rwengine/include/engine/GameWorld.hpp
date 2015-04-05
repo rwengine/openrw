@@ -189,6 +189,8 @@ public:
 	 */
 	std::set<GameObject*> objects;
 
+	std::set<GameObject*> characters;
+
 	/**
 	 * Map of Model Names to Instances
 	 */

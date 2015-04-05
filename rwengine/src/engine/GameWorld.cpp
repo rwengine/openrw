@@ -449,6 +449,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			objects.insert(ped);
+			characters.insert(ped);
 			new DefaultAIController(ped);
 			return ped;
 		}
@@ -462,6 +463,11 @@ void GameWorld::destroyObject(GameObject* object)
 	if( iterator != objects.end() ) {
 		delete object;
 		objects.erase(iterator);
+	}
+	
+	auto cit = characters.find(object);
+	if( cit != characters.end() ) {
+		characters.erase(cit);
 	}
 }
 

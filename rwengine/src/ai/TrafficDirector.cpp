@@ -4,11 +4,12 @@
 #include <engine/GameWorld.hpp>
 #include <engine/GameObject.hpp>
 #include <objects/CharacterObject.hpp>
+#include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
-TrafficDirector::TrafficDirector(AIGraph* graph, GameWorld* world)
-: graph( graph ), world( world ), pedDensity(1.f), carDensity(1.f),
+TrafficDirector::TrafficDirector(AIGraph* g, GameWorld* w)
+: graph( g ), world( w ), pedDensity(1.f), carDensity(1.f),
 maximumPedestrians(20), maximumCars(10)
 {
 
@@ -21,22 +22,24 @@ std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::Nod
 	for ( AIGraphNode* node : graph->externalNodes )
 	{
 		if ( node->type != type ) continue;
-		if ( glm::distance( near, node->position ) < radius )
+		if ( glm::distance2( near, node->position ) < radius*radius )
 		{
 			available.push_back( node );
 		}
 	}
-	
+
 	float density = type == AIGraphNode::Vehicle ? carDensity : pedDensity;
+	float minDist = (10.f / density) * (10.f / density);
+
 	// Determine if anything in the open set is blocked
 	for ( auto it = available.begin(); it != available.end(); )
 	{
-		float minDist = 10.f / density;
 		bool blocked = false;
-		for ( auto obj : world->objects )
+		for ( auto obj : world->characters )
 		{
+			// Sanity check
 			if ( obj->type() != GameObject::Character ) continue;
-			if ( glm::distance( (*it)->position, obj->getPosition() ) <= minDist )
+			if ( glm::distance2( (*it)->position, obj->getPosition() ) <= minDist )
 			{
 				blocked = true;
 				break;
@@ -52,7 +55,7 @@ std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::Nod
 			it++;
 		}
 	}
-	
+
 	return available;
 }
 
@@ -71,21 +74,7 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density)
 
 std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxSpawn)
 {
-	// TODO this should be optimised, GameWorld needs to keep seperate class lists.
-	int availablePeds = maximumPedestrians, availableCars = maximumCars;
-	for(auto& go : world->objects)
-	{
-		switch( go->type() )
-		{
-		case GameObject::Character:
-			availablePeds--;
-			break;
-		case GameObject::Vehicle:
-			availableCars--;
-			break;
-		default: break;
-		}
-	}
+	int availablePeds = maximumPedestrians - world->characters.size();
 
 	std::vector<GameObject*> created;
 
