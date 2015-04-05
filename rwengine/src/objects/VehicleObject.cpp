@@ -26,7 +26,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		btRaycastVehicle::btVehicleTuning tuning;
 
 		float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
-		tuning.m_frictionSlip = 4.f;
+		tuning.m_frictionSlip = 3.f;
 		tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
 		physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
@@ -56,7 +56,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 
 			wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
 			wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-			wi.m_rollInfluence = 0.25f;
+			wi.m_rollInfluence = 0.30f;
 			float halfFriction = tuning.m_frictionSlip * 0.5f;
 			wi.m_frictionSlip = halfFriction + halfFriction * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
 		}
@@ -181,7 +181,7 @@ void VehicleObject::tickPhysics(float dt)
 		
 		if( handbrake )
 		{
-			brakeF = 2.f;
+			brakeF = 5.f;
 		}
 
 		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
@@ -193,7 +193,7 @@ void VehicleObject::tickPhysics(float dt)
 					physVehicle->applyEngineForce(engineForce, w);
 			}
 
-			float brakeReal = 10.f * info->handling.brakeDeceleration * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
+			float brakeReal = 5.f * info->handling.brakeDeceleration * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
 			physVehicle->setBrake(brakeReal * brakeF, w);
 
 			if(wi.m_bIsFrontWheel) {
