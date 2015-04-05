@@ -71,6 +71,12 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		}, entryHeight));
 	}
 #endif
+	m->addEntry(Menu::lambda("Jump to Garage", [=] {
+		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(270.f, -605.f, 40.f));
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Jump to Airport", [=] {
+		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(-950.f, -980.f, 12.f));
+	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
 		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(875.0, -309.0, 100.0));
 	}, entryHeight));
