@@ -18,15 +18,9 @@ maximumPedestrians(20), maximumCars(10)
 std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::NodeType type, const glm::vec3& near, float radius)
 {
 	std::vector<AIGraphNode*> available;
-	
-	for ( AIGraphNode* node : graph->externalNodes )
-	{
-		if ( node->type != type ) continue;
-		if ( glm::distance2( near, node->position ) < radius*radius )
-		{
-			available.push_back( node );
-		}
-	}
+	available.reserve(20);
+
+	graph->gatherExternalNodesNear(near, radius, available);
 
 	float density = type == AIGraphNode::Vehicle ? carDensity : pedDensity;
 	float minDist = (10.f / density) * (10.f / density);

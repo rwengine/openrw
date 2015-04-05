@@ -18,6 +18,16 @@
 #define WATER_BUOYANCY_K 1500.f
 #define WATER_BUOYANCY_C 1000.f
 
+/**
+ * These control the size of grid that is applied to
+ * AI Graph and culling.
+ */
+#define WORLD_GRID_SIZE (4000l)
+#define WORLD_CELL_SIZE (100l)
+#define WORLD_GRID_WIDTH (WORLD_GRID_SIZE/WORLD_CELL_SIZE)
+#define WORLD_GRID_CELLS (WORLD_GRID_WIDTH*WORLD_GRID_WIDTH)
+
+
 struct Animation;
 
 typedef std::map<std::string, Animation*> AnimationSet;

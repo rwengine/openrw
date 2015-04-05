@@ -1,7 +1,8 @@
 #include "ai/AIGraph.hpp"
-#include "objects/InstanceObject.hpp"
+#include "engine/GameObject.hpp"
 #include <ai/AIGraphNode.hpp>
 #include <glm/gtx/norm.hpp>
+#include <iostream>
 
 AIGraph::~AIGraph()
 {
@@ -51,6 +52,17 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 			if( ainode->external )
 			{
 				externalNodes.push_back(ainode);
+				
+				// Determine which grid cell this node falls into
+				float lowerCoord = -(WORLD_GRID_SIZE)/2.f;
+				auto gridrel = glm::vec2(ainode->position) - glm::vec2(lowerCoord, lowerCoord);
+				auto gridcoord = glm::floor(gridrel / glm::vec2(WORLD_CELL_SIZE));
+				if( gridcoord.x < 0 || gridcoord.y < 0 || gridcoord.x >= WORLD_GRID_WIDTH || gridcoord.y >= WORLD_GRID_WIDTH )
+				{
+					std::cout << "Warning: Node outside of grid at coord " << gridcoord.x << " " << gridcoord.y << std::endl;
+				}
+				auto index = (gridcoord.x * WORLD_GRID_WIDTH) + gridcoord.y;
+				gridNodes[index].push_back(ainode);
 			}
 		}
 	}
@@ -63,3 +75,40 @@ void AIGraph::createPathNodes(const glm::vec3& position, const glm::quat& rotati
 		}
 	}
 }
+
+glm::ivec2 worldToGrid(const glm::vec2& world)
+{
+	static const float lowerCoord = -(WORLD_GRID_SIZE)/2.f;
+	return glm::ivec2((world - glm::vec2(lowerCoord)) / glm::vec2(WORLD_CELL_SIZE));
+}
+
+void AIGraph::gatherExternalNodesNear(const glm::vec3& center, const float radius, std::vector< AIGraphNode* >& nodes)
+{
+	// the bounds end up covering more than might fit
+	auto planecoords = glm::vec2(center);
+	auto minWorld = planecoords - glm::vec2(radius);
+	auto maxWorld = planecoords + glm::vec2(radius);
+	auto minGrid = worldToGrid(minWorld);
+	auto maxGrid = worldToGrid(maxWorld);
+
+	for( int x = minGrid.x; x <= maxGrid.x; ++x )
+	{
+		for( int y = minGrid.y; y <= maxGrid.y; ++y )
+		{
+			int i = (x * WORLD_GRID_WIDTH) + y;
+			if( i < 0 || i >= gridNodes.size() )
+			{
+				continue;
+			}
+			auto& external = gridNodes[i];
+			for ( AIGraphNode* node : external )
+			{
+				if ( glm::distance2( center, node->position ) < radius*radius )
+				{
+					nodes.push_back( node );
+				}
+			}
+		}
+	}
+}
+
