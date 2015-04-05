@@ -1,5 +1,6 @@
 #include "loadingstate.hpp"
 #include "RWGame.hpp"
+#include <render/OpenGLRenderer.hpp>
 
 LoadingState::LoadingState(RWGame* game)
 	: State(game), next(nullptr)
@@ -60,8 +61,9 @@ void LoadingState::draw(GameRenderer* r)
 	// Display some manner of loading screen.
 	TextRenderer::TextInfo ti;
 	ti.text = "Loading...";
-	ti.screenPosition = glm::vec2( 50.f, 50.f );
-	ti.size = 10.f;
+	auto size = r->getRenderer()->getViewport();
+	ti.size = 25.f;
+	ti.screenPosition = glm::vec2( 50.f, size.y - ti.size - 50.f );
 	ti.font = 2;
 	r->text.renderText(ti);
 }
