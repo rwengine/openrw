@@ -446,8 +446,23 @@ void RWGame::render(float alpha, float time)
 
 void RWGame::renderDebugStats(float time)
 {
+	constexpr size_t average_every_frame = 15;
+	static float times[average_every_frame];
+	static size_t times_index = 0;
+	static float time_average = 0;
+	times[times_index++] = time;
+	if (times_index >= average_every_frame) {
+		times_index = 0;
+
+		for (int i = 0; i < average_every_frame; ++i) {
+			time_average += times[i];
+		}
+		time_average /= average_every_frame;
+	}
+
 	std::stringstream ss;
 	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
+	ss << "Average (per " << average_every_frame << " frames); Frametime: " << time_average << " (FPS " << (1.f/time_average) << ")\n";
 	ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
 	
 	// Count the number of interesting objects.
