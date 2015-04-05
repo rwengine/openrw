@@ -304,6 +304,19 @@ void RWGame::tick(float dt)
 		engine->destroyQueuedObjects();
 		engine->state.texts.clear();
 
+		for( int i = 0; i < engine->state.text.size(); )
+		{
+			auto& text = engine->state.text[i];
+			if( engine->gameTime > text.osTextStart + text.osTextTime )
+			{
+				engine->state.text.erase(engine->state.text.begin() + i);
+			}
+			else
+			{
+				i++;
+			}
+		}
+
 		engine->dynamicsWorld->stepSimulation(dt, 2, dt);
 		
 		if( script ) {
@@ -496,19 +509,6 @@ void RWGame::renderDebugStats(float time)
 		engine->renderer.text.renderText(ti);
 		ti.screenPosition.y -= ti.size;
 	}*/
-	
-	for( int i = 0; i < engine->state.text.size(); )
-	{
-		if( engine->gameTime > engine->state.text[i].osTextStart + engine->state.text[i].osTextTime )
-		{
-			engine->state.text.erase(engine->state.text.begin() + i);
-		}
-		else
-		{
-			i++;
-		}
-	}
-	
 }
 
 void RWGame::globalKeyEvent(const sf::Event& event)

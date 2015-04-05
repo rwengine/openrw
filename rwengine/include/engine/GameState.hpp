@@ -143,9 +143,15 @@ struct GameState
 	std::map<unsigned short, std::string> specialCharacters;
 	std::map<unsigned short, std::string> specialModels;
 
+	/**
+	 * Stores long-lasting on screen messages
+	 */
 	std::vector<OnscreenText> text;
 	
 	TextDisplayData nextText;
+	/**
+	 * Stores temporary, one-tick messages
+	 */
 	std::vector<TextDisplayData> texts;
 
 	/** The camera near value currently set by the script */

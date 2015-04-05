@@ -771,7 +771,7 @@ void game_play_music_id(const ScriptArguments& args)
 void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	
+
 	for( int i = 0; i < args.getVM()->getWorld()->state.text.size(); )
 	{
 		if( args.getVM()->getWorld()->state.text[i].id == id )
@@ -794,7 +794,7 @@ void game_display_help(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
-	unsigned short style = 12;
+	unsigned short style = OnscreenText::Help;
 	args.getVM()->getWorld()->state.text.push_back({
 		id,
 		str,
@@ -802,6 +802,18 @@ void game_display_help(const ScriptArguments& args)
 		2.5f,
 		style
 	});
+}
+
+void game_clear_help(const ScriptArguments& args)
+{
+	for( int i = 0; i < args.getVM()->getWorld()->state.text.size(); )
+	{
+		auto& texts = args.getVM()->getWorld()->state.text;
+		if( texts[i].osTextStyle == OnscreenText::Help )
+		{
+			texts.erase(texts.begin() + i);
+		}
+	}
 }
 
 bool game_can_player_move(const ScriptArguments& args)
@@ -1089,7 +1101,7 @@ GameModule::GameModule()
 	bindFunction(0x03E1, game_get_found_hidden_packages, 1, "Get Hidden Packages Found" );
 
 	bindFunction(0x03E5, game_display_help, 1, "Display Help Text" );
-	bindUnimplemented( 0x03E6, game_clear_help, 0, "Clear Help Text" );
+	bindFunction(0x03E6, game_clear_help, 0, "Clear Help Text" );
 	bindUnimplemented( 0x03E7, game_flash_hud, 1, "Flash HUD Item" );
 	
 	bindUnimplemented( 0x03EB, game_clear_prints, 0, "Clear Small Prints" );
