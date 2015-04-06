@@ -34,9 +34,12 @@ class Renderer
 {
 public:
 
+	typedef std::vector<GLuint> Textures;
+
 	struct DrawParameters
 	{
-		GLuint texture; /// @todo replace with texture handle.
+		/// Textures to bind to each texture unit
+		Textures textures;
 		glm::u8vec4 colour;
 		float ambient;
 		float diffuse;
@@ -182,8 +185,8 @@ private:
 
 	void useDrawBuffer(DrawBuffer* dbuff);
 
-	GLuint currentTexture;
-	void useTexture(GLuint tex);
+	std::map<GLuint,GLuint> currentTextures;
+	void useTexture(GLuint unit, GLuint tex);
 
 	OpenGLShaderProgram* currentProgram;
 

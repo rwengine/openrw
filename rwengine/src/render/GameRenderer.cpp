@@ -287,8 +287,6 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	renderer->useProgram(worldProg);
 
-	glActiveTexture(GL_TEXTURE0);
-
 	renderer->pushDebugGroup("Objects");
 	renderer->pushDebugGroup("Dynamic");
 
@@ -397,7 +395,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 				model = glm::scale( model, glm::vec3(1.5f, 1.5f, 1.5f) );
 
 				Renderer::DrawParameters dp;
-				dp.texture = arrowTex->getName();
+				dp.textures = {arrowTex->getName()};
 				dp.ambient = 1.f;
 				dp.colour = glm::u8vec4(255, 255, 255, 255);
 
@@ -447,8 +445,6 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	renderer->pushDebugGroup("Effects");
 	renderEffects();
 	renderer->popDebugGroup();
-
-	glActiveTexture(GL_TEXTURE0);
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -509,7 +505,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	Renderer::DrawParameters wdp;
 	wdp.start = 0;
 	wdp.count = ssRectGeom.getCount();
-	wdp.texture = fbTextures[0];
+	wdp.textures = {fbTextures[0]};
 	
 	renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
 
@@ -868,7 +864,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 		dp.colour = {255, 255, 255, 255};
 		dp.count = subgeom.numIndices;
 		dp.start = subgeom.start;
-		dp.texture = 0;
+		dp.textures = {0};
 
 		if (model->geometries[g]->materials.size() > subgeom.material) {
 			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
@@ -891,7 +887,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 					if( tex->isTransparent() ) {
 						abortTransparent = true;
 					}
-					dp.texture = tex->getName();
+					dp.textures = {tex->getName()};
 				}
 			}
 
@@ -939,7 +935,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 	glm::vec3 scale = info->radius + 0.15f * glm::sin(engine->gameTime * 5.f);
 	
 	Renderer::DrawParameters dp;
-	dp.texture = engine->gameData.findTexture("cloud1")->getName();
+	dp.textures = {engine->gameData.findTexture("cloud1")->getName()};
 	dp.ambient = 1.f;
 	dp.colour = glm::u8vec4(50, 100, 255, 1);
 	dp.start = 0;
@@ -977,8 +973,7 @@ void GameRenderer::renderEffects()
 		if( fx->getType() != VisualFX::Particle ) continue;
 		
 		auto& particle = fx->particle;
-		
-		glBindTexture(GL_TEXTURE_2D, particle.texture->getName());
+
 		auto& p = particle.position;
 
 		glm::mat4 m(1.f);
@@ -1014,7 +1009,7 @@ void GameRenderer::renderEffects()
 		//m = glm::translate(m, p);
 
 		Renderer::DrawParameters dp;
-		dp.texture = particle.texture->getName();
+		dp.textures = {particle.texture->getName()};
 		dp.ambient = 1.f;
 		dp.colour = glm::u8vec4(particle.colour * 255.f);
 		dp.start = 0;

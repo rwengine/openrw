@@ -111,12 +111,13 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 	}
 }
 
-void OpenGLRenderer::useTexture(GLuint tex)
+void OpenGLRenderer::useTexture(GLuint unit, GLuint tex)
 {
-	if( tex != currentTexture )
+	if( currentTextures[unit] != tex )
 	{
+		glActiveTexture(GL_TEXTURE0 + unit);
 		glBindTexture(GL_TEXTURE_2D, tex);
-		currentTexture = tex;
+		currentTextures[unit] = tex;
 	}
 }
 
@@ -130,7 +131,7 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p)
 }
 
 OpenGLRenderer::OpenGLRenderer()
-	: currentDbuff(nullptr), currentTexture(0), currentProgram(nullptr)
+	: currentDbuff(nullptr), currentProgram(nullptr)
 {
 	glGenBuffers(1, &UBOScene);
 	glGenBuffers(1, &UBOObject);
@@ -228,7 +229,11 @@ void OpenGLRenderer::setSceneParameters(const Renderer::SceneUniformData& data)
 void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
 {
 	useDrawBuffer(draw);
-	useTexture(p.texture);
+
+	for( GLuint u = 0; u < p.textures.size(); ++u )
+	{
+		useTexture(u, p.textures[u]);
+	}
 
 	ObjectUniformData oudata {
 		model,
@@ -247,7 +252,11 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
 {
 	useDrawBuffer(draw);
-	useTexture(p.texture);
+
+	for( GLuint u = 0; u < p.textures.size(); ++u )
+	{
+		useTexture(u, p.textures[u]);
+	}
 
 	ObjectUniformData oudata {
 		model,
@@ -266,7 +275,7 @@ void OpenGLRenderer::invalidate()
 {
 	currentDbuff = nullptr;
 	currentProgram = nullptr;
-	currentTexture = 0;
+	currentTextures.clear();
 	currentUBO = 0;
 }
 
