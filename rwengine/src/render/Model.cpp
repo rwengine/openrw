@@ -42,3 +42,14 @@ Model::~Model()
 		delete mf;
 	}
 }
+
+float Model::getBoundingRadius() const
+{
+	float mindist = std::numeric_limits<float>::min();
+	for (size_t g = 0; g < geometries.size(); g++)
+	{
+		RW::BSGeometryBounds& bounds = geometries[g]->geometryBounds;
+		mindist = std::max(mindist, glm::length(bounds.center) + bounds.radius);
+	}
+	return mindist;
+}

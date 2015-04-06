@@ -194,7 +194,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		// Ensure the relevant data is loaded.
 		if(! oi->modelName.empty()) {
 			if( modelname != "null" ) {
-				gameData.loadDFF(modelname + ".dff", true);
+				gameData.loadDFF(modelname + ".dff", false);
 			}
 		}
 		if(! texturename.empty()) {
@@ -224,6 +224,11 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		);
 
 		objects.insert(instance);
+
+		if( shouldBeOnGrid(instance) )
+		{
+			addToGrid( instance );
+		}
 
 		modelInstances.insert({
 			oi->modelName,
@@ -459,6 +464,14 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 void GameWorld::destroyObject(GameObject* object)
 {
+	auto coord = worldToGrid(glm::vec2(object->getPosition()));
+	if( coord.x < 0 || coord.y < 0 || coord.x >= WORLD_GRID_WIDTH || coord.y >= WORLD_GRID_WIDTH )
+	{
+		return;
+	}
+	auto index = (coord.x * WORLD_GRID_WIDTH) + coord.y;
+	worldGrid[index].instances.erase(object);
+	
 	auto iterator = objects.find(object);
 	if( iterator != objects.end() ) {
 		delete object;
@@ -482,6 +495,42 @@ void GameWorld::destroyQueuedObjects()
 		destroyObject( deletionQueue.front() );
 		deletionQueue.pop();
 	}
+}
+
+bool GameWorld::shouldBeOnGrid(GameObject* object)
+{
+	if( object->type() != GameObject::Instance )
+	{
+		// Only static instances currently.
+		return false;
+	}
+	auto instance = static_cast<InstanceObject*>(object);
+	return instance->body == nullptr || instance->body->body->isStaticObject();
+}
+
+void GameWorld::addToGrid(GameObject* object)
+{
+	auto coord = worldToGrid(glm::vec2(object->getPosition()));
+	if( coord.x < 0 || coord.y < 0 || coord.x >= WORLD_GRID_WIDTH || coord.y >= WORLD_GRID_WIDTH )
+	{
+		return;
+	}
+	auto index = (coord.x * WORLD_GRID_WIDTH) + coord.y;
+	worldGrid[index].instances.insert(object);
+	if( object->model->resource )
+	{
+		float cellhalf = WORLD_CELL_SIZE/2.f;
+		auto world = glm::vec3(glm::vec2(coord) * glm::vec2(WORLD_CELL_SIZE) - glm::vec2(WORLD_GRID_SIZE/2.f) + glm::vec2(cellhalf), 0.f);
+		auto offset = world - object->getPosition();
+		float maxRadius = glm::length(offset) + object->model->resource->getBoundingRadius();
+		worldGrid[index].boundingRadius = std::max(worldGrid[index].boundingRadius, maxRadius);
+	}
+}
+
+glm::ivec2 GameWorld::worldToGrid(const glm::vec2& world)
+{
+	static const float lowerCoord = -(WORLD_GRID_SIZE)/2.f;
+	return glm::ivec2((world - glm::vec2(lowerCoord)) / glm::vec2(WORLD_CELL_SIZE));
 }
 
 VisualFX* GameWorld::createEffect(VisualFX::EffectType type)

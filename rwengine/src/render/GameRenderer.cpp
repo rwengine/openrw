@@ -308,7 +308,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			renderVehicle(static_cast<VehicleObject*>(object));
 			break;
 		case GameObject::Instance:
-			renderInstance(static_cast<InstanceObject*>(object));
+			if(! engine->shouldBeOnGrid(object) )
+			{
+				renderInstance(static_cast<InstanceObject*>(object));
+			}
 			break;
 		case GameObject::Pickup:
 			renderPickup(static_cast<PickupObject*>(object));
@@ -320,6 +323,29 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			renderCutsceneObject(static_cast<CutsceneObject*>(object));
 			break;
 		default: break;
+		}
+	}
+
+	// Draw the static instance objects. k = % culled
+	int c = 0, k = 0;
+	for(auto& cell : engine->worldGrid )
+	{
+		c++;
+		int y = c % WORLD_GRID_WIDTH;
+		int x = c / WORLD_GRID_WIDTH;
+		float cellhalf = WORLD_CELL_SIZE/2.f;
+		float radius = cell.boundingRadius;
+		auto world = glm::vec3(glm::vec2(x,y) * glm::vec2(WORLD_CELL_SIZE) - glm::vec2(WORLD_GRID_SIZE/2.f) + glm::vec2(cellhalf), 0.f);
+		if( _camera.frustum.intersects(world, radius) )
+		{
+			for( auto& inst : cell.instances )
+			{
+				renderInstance(static_cast<InstanceObject*>(inst));
+			}
+		}
+		else
+		{
+			k++;
 		}
 	}
 	
@@ -571,15 +597,7 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 		return;
 	}
 
-	glm::mat4 matrixModel;
-	if( instance->body && instance->body->body ) {
-		instance->body->body->getWorldTransform().getOpenGLMatrix(glm::value_ptr(matrixModel));
-	}
-	else {
-		matrixModel = glm::translate(matrixModel, instance->position);
-		matrixModel = glm::scale(matrixModel, instance->scale);
-		matrixModel = matrixModel * glm::mat4_cast(instance->rotation);
-	}
+	auto matrixModel = instance->getTimeAdjustedTransform(_renderAlpha);
 
 	float mindist = 100000.f;
 	for (size_t g = 0; g < instance->model->resource->geometries.size(); g++)

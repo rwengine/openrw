@@ -32,6 +32,7 @@ struct WeaponScan;
 #include <set>
 #include <queue>
 #include <random>
+#include <array>
 
 /**
  * Information about "Goal" locations so they can be rendered
@@ -190,6 +191,32 @@ public:
 	std::set<GameObject*> objects;
 
 	std::set<GameObject*> characters;
+
+	/**
+	 * Stores objects within a grid cell, and their maximum
+	 * bounding radius
+	 */
+	struct GridCell
+	{
+		/**
+		 * Static instances within this grid cell
+		 */
+		std::set<GameObject*> instances;
+		float boundingRadius = 0.f;
+	};
+	std::array<GridCell, WORLD_GRID_CELLS> worldGrid;
+
+	/**
+	 * returns true if the given object should be stored
+	 * within the grid
+	 */
+	bool shouldBeOnGrid(GameObject* object);
+	void addToGrid(GameObject* object);
+
+	/**
+	 * Returns the grid coordinates for a world coordinates
+	 */
+	glm::ivec2 worldToGrid(const glm::vec2& world);
 
 	/**
 	 * Map of Model Names to Instances

@@ -165,6 +165,8 @@ public:
 	}
 
 	~Model();
+
+	float getBoundingRadius() const;
 };
 
 typedef ResourceHandle<Model>::Ref ModelRef;
