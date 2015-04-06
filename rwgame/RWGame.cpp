@@ -453,6 +453,7 @@ void RWGame::renderDebugStats(float time)
 	times[times_index++] = time;
 	if (times_index >= average_every_frame) {
 		times_index = 0;
+		time_average = 0;
 
 		for (int i = 0; i < average_every_frame; ++i) {
 			time_average += times[i];
