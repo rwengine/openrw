@@ -97,6 +97,10 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 
 	for ( AIGraphNode* spawn : available )
 	{
+		if( spawn->type != AIGraphNode::Pedestrian )
+		{
+			continue;
+		}
 		if ( counter > -1 )
 		{
 			if ( counter == 0 )
@@ -105,7 +109,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 			}
 			counter --;
 		}
-		
+
 		// Spawn a pedestrian from the available pool
 		auto ped = world->createPedestrian(validPeds[d(re)], spawn->position + glm::vec3( 0.f, 0.f, 1.f ) );
 		ped->setLifetime(GameObject::TrafficLifetime);
