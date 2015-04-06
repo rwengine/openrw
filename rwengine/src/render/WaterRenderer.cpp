@@ -106,7 +106,7 @@ void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex)
 void WaterRenderer::render(GameRenderer* renderer, GameWorld* world)
 {
 	auto r = renderer->getRenderer();
-	
+
 	auto waterTex = world->gameData.findTexture("water_old");
 
 	Renderer::DrawParameters wdp;

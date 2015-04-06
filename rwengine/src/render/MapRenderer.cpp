@@ -73,6 +73,7 @@ glm::vec2 MapRenderer::mapToScreen(const glm::vec2& map, const MapInfo& mi)
 
 void MapRenderer::draw(const MapInfo& mi)
 {
+	renderer->pushDebugGroup("Map");
 	renderer->useProgram(rectProg);
 	
 	glm::vec2 bottom = glm::min(mi.mapScreenBottom, mi.mapScreenTop);
@@ -169,6 +170,7 @@ void MapRenderer::draw(const MapInfo& mi)
 	
 	/// @TODO migrate to using the renderer
 	renderer->invalidate();
+	renderer->popDebugGroup();
 }
 
 void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& model, const MapInfo& mi, const std::string& texture, float heading)

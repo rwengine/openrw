@@ -269,3 +269,19 @@ void OpenGLRenderer::invalidate()
 	currentTexture = 0;
 	currentUBO = 0;
 }
+
+void OpenGLRenderer::pushDebugGroup(const std::string& title)
+{
+	if( GLEW_KHR_debug )
+	{
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
+	}
+}
+
+void OpenGLRenderer::popDebugGroup()
+{
+	if( GLEW_KHR_debug )
+	{
+		glPopDebugGroup();
+	}
+}

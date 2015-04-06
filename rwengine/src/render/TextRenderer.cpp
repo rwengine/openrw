@@ -162,6 +162,7 @@ void TextRenderer::setFontTexture(int index, const std::string& texture)
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 {
+	renderer->getRenderer()->pushDebugGroup("Text");
 	renderer->getRenderer()->useProgram(textShader);
 	
 	glEnable(GL_BLEND);
@@ -238,4 +239,6 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	dp.texture = ftexture->getName();
 	
 	renderer->getRenderer()->drawArrays(glm::mat4(), &db, dp);
+
+	renderer->getRenderer()->popDebugGroup();
 }

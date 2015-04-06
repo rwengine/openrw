@@ -109,6 +109,12 @@ public:
 	
 	const SceneUniformData& getSceneData() const;
 
+	/**
+	 * Signals the start of a debug group
+	 */
+	virtual void pushDebugGroup(const std::string& title) = 0;
+	virtual void popDebugGroup() = 0;
+
 private:
 	glm::ivec2 viewport;
 	glm::mat4 projection2D;
@@ -167,6 +173,9 @@ public:
 	void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
 
 	void invalidate();
+
+	virtual void pushDebugGroup(const std::string& title);
+	virtual void popDebugGroup();
 
 private:
 	DrawBuffer* currentDbuff;

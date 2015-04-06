@@ -289,6 +289,9 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	glActiveTexture(GL_TEXTURE0);
 
+	renderer->pushDebugGroup("Objects");
+	renderer->pushDebugGroup("Dynamic");
+
 	for( GameObject* object : engine->objects ) {
 		if(! object->visible )
 		{
@@ -326,6 +329,9 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		}
 	}
 
+	renderer->popDebugGroup();
+	renderer->pushDebugGroup("Static");
+
 	// Draw the static instance objects. k = % culled
 	int c = 0, k = 0;
 	for(auto& cell : engine->worldGrid )
@@ -348,7 +354,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			k++;
 		}
 	}
-	
+
+	renderer->popDebugGroup();
+	renderer->pushDebugGroup("Transparent");
+
 	// Draw anything that got queued.
 	for(auto it = transparentDrawQueue.begin();
 		it != transparentDrawQueue.end();
@@ -357,7 +366,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		renderer->draw(it->matrix, &it->model->geometries[it->g]->dbuff, it->dp);
 	}
 	transparentDrawQueue.clear();
-	
+
+	renderer->popDebugGroup();
+	renderer->popDebugGroup();
+
 	// Render arrows above anything that isn't radar only (or hidden)
 	ModelRef& arrowModel = engine->gameData.models["arrow"];
 	if( arrowModel && arrowModel->resource )
@@ -410,7 +422,13 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	}
 	glDepthMask(GL_TRUE);
 
+	renderer->pushDebugGroup("Water");
+
 	water.render(this, engine);
+
+	renderer->popDebugGroup();
+
+	renderer->pushDebugGroup("Sky");
 
 	glBindVertexArray( vao );
 
@@ -424,7 +442,11 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	renderer->draw(glm::mat4(), &skyDbuff, dp);
 
+	renderer->popDebugGroup();
+
+	renderer->pushDebugGroup("Effects");
 	renderEffects();
+	renderer->popDebugGroup();
 
 	glActiveTexture(GL_TEXTURE0);
 
