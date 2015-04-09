@@ -88,7 +88,7 @@ private:
 	void tick(float dt);
 	void render(float alpha, float dt);
 	
-	void renderDebugStats(float dt);
+	void renderDebugStats(float time, GLuint worldRenderTime);
 
 	void globalKeyEvent(const sf::Event& event);
 };

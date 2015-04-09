@@ -90,11 +90,23 @@ void Renderer::setViewport(const glm::ivec2& vp)
 void Renderer::swap()
 {
 	drawCounter = 0;
+	textureCounter = 0;
+	bufferCounter = 0;
 }
 
 int Renderer::getDrawCount()
 {
 	return drawCounter;
+}
+
+int Renderer::getBufferCount()
+{
+	return bufferCounter;
+}
+
+int Renderer::getTextureCount()
+{
+	return textureCounter;
 }
 
 const Renderer::SceneUniformData& Renderer::getSceneData() const
@@ -108,6 +120,7 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 	{
 		glBindVertexArray(dbuff->getVAOName());
 		currentDbuff = dbuff;
+		bufferCounter++;
 	}
 }
 
@@ -118,6 +131,7 @@ void OpenGLRenderer::useTexture(GLuint unit, GLuint tex)
 		glActiveTexture(GL_TEXTURE0 + unit);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		currentTextures[unit] = tex;
+		textureCounter++;
 	}
 }
 
@@ -131,7 +145,7 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p)
 }
 
 OpenGLRenderer::OpenGLRenderer()
-	: currentDbuff(nullptr), currentProgram(nullptr)
+	: currentDbuff(nullptr), currentProgram(nullptr), currentDebugDepth(0)
 {
 	glGenBuffers(1, &UBOScene);
 	glGenBuffers(1, &UBOObject);
@@ -140,6 +154,8 @@ OpenGLRenderer::OpenGLRenderer()
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, UBOObject);
 	
 	swap();
+
+	glGenQueries(1, &debugQuery);
 }
 
 std::string OpenGLRenderer::getIDString() const
@@ -284,13 +300,27 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title)
 	if( GLEW_KHR_debug )
 	{
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
+		
+		glQueryCounter(debugQuery, GL_TIMESTAMP);
+		glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &debugTimes[currentDebugDepth]);
+		currentDebugDepth++;
+		assert( currentDebugDepth < MAX_DEBUG_DEPTH );
 	}
 }
 
-void OpenGLRenderer::popDebugGroup()
+GLuint OpenGLRenderer::popDebugGroup()
 {
 	if( GLEW_KHR_debug )
 	{
 		glPopDebugGroup();
+		currentDebugDepth--;
+		assert( currentDebugDepth >= 0 );
+		
+		glQueryCounter(debugQuery, GL_TIMESTAMP);
+		GLuint64 current_time;
+		glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &current_time);
+		
+		return current_time - debugTimes[currentDebugDepth];
 	}
+	return 0;
 }

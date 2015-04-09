@@ -414,8 +414,12 @@ void RWGame::render(float alpha, float time)
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
+	renderer->getRenderer()->pushDebugGroup("World");
+
 	renderer->renderWorld(viewCam, alpha);
-	
+
+	auto rendertime = renderer->getRenderer()->popDebugGroup();
+
 #if 0
 	debug->setShaderProgram(engine->renderer.worldProg);
 	if( engine->state.player )
@@ -438,13 +442,13 @@ void RWGame::render(float alpha, float time)
 
 	if ( showDebugStats )
 	{
-		renderDebugStats(time);
+		renderDebugStats(time, rendertime);
 	}
 	
 	drawOnScreenText(engine, renderer);
 }
 
-void RWGame::renderDebugStats(float time)
+void RWGame::renderDebugStats(float time, GLuint worldRenderTime)
 {
 	constexpr size_t average_every_frame = 15;
 	static float times[average_every_frame];
@@ -464,6 +468,12 @@ void RWGame::renderDebugStats(float time)
 	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
 	ss << "Average (per " << average_every_frame << " frames); Frametime: " << time_average << " (FPS " << (1.f/time_average) << ")\n";
 	ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
+	ss << " Texture binds: " << renderer->getRenderer()->getTextureCount() << "\n";
+	ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount() << "\n";
+	ss << " World time: " << (worldRenderTime/1000000) << "ms\n";
+	ss << "  Objects: " << (renderer->timeObj/1000000) << "ms\n";
+	ss << "  Water: " << (renderer->timeWater/1000000) << "ms\n";
+	ss << "  Sky: " << (renderer->timeSky/1000000) << "ms\n";
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;

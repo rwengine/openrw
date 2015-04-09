@@ -193,6 +193,11 @@ public:
 	MapRenderer map;
 	WaterRenderer water;
 	TextRenderer text;
+
+	// Rendering timers
+	GLuint timeObj;
+	GLuint timeSky;
+	GLuint timeWater;
 };
 
 #endif

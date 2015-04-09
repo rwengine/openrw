@@ -6,6 +6,9 @@
 #include <render/DrawBuffer.hpp>
 #include <render/GeometryBuffer.hpp>
 
+// Maximum depth of debug group stack
+#define MAX_DEBUG_DEPTH 5
+
 typedef std::uint32_t RenderIndex;
 
 struct VertexP3
@@ -109,6 +112,8 @@ public:
 	 * Returns the number of draw calls issued for the current frame.
 	 */
 	int getDrawCount();
+	int getTextureCount();
+	int getBufferCount();
 	
 	const SceneUniformData& getSceneData() const;
 
@@ -116,13 +121,15 @@ public:
 	 * Signals the start of a debug group
 	 */
 	virtual void pushDebugGroup(const std::string& title) = 0;
-	virtual void popDebugGroup() = 0;
+	virtual GLuint popDebugGroup() = 0;
 
 private:
 	glm::ivec2 viewport;
 	glm::mat4 projection2D;
 protected:
 	int drawCounter;
+	int textureCounter;
+	int bufferCounter;
 	SceneUniformData lastSceneData;
 };
 
@@ -178,7 +185,7 @@ public:
 	void invalidate();
 
 	virtual void pushDebugGroup(const std::string& title);
-	virtual void popDebugGroup();
+	virtual GLuint popDebugGroup();
 
 private:
 	DrawBuffer* currentDbuff;
@@ -202,6 +209,11 @@ private:
 
 	GLuint UBOObject;
 	GLuint UBOScene;
+
+	// Debug group profiling timers
+	GLuint64 debugTimes[MAX_DEBUG_DEPTH];
+	GLuint debugQuery;
+	int currentDebugDepth;
 };
 
 /// @todo remove these from here
