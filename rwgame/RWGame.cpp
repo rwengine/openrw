@@ -450,11 +450,13 @@ void RWGame::render(float alpha, float time)
 
 void RWGame::renderDebugStats(float time, GLuint worldRenderTime)
 {
+	// Turn time into milliseconds
+	float time_ms = time * 1000.f;
 	constexpr size_t average_every_frame = 15;
 	static float times[average_every_frame];
 	static size_t times_index = 0;
 	static float time_average = 0;
-	times[times_index++] = time;
+	times[times_index++] = time_ms;
 	if (times_index >= average_every_frame) {
 		times_index = 0;
 
@@ -465,8 +467,8 @@ void RWGame::renderDebugStats(float time, GLuint worldRenderTime)
 	}
 
 	std::stringstream ss;
-	ss << "Frametime: " << time << " (FPS " << (1.f/time) << ")\n";
-	ss << "Average (per " << average_every_frame << " frames); Frametime: " << time_average << " (FPS " << (1.f/time_average) << ")\n";
+	ss << "Frametime: " << time_ms << " (FPS " << (1.f/time) << ")\n";
+	ss << "Average (per " << average_every_frame << " frames); Frametime: " << time_average << " (FPS " << (1000.f/time_average) << ")\n";
 	ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
 	ss << " Texture binds: " << renderer->getRenderer()->getTextureCount() << "\n";
 	ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount() << "\n";
