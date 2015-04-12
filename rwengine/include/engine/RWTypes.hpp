@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#define RW_USING(feature) 1 == feature
+
 #define NO_WATER_INDEX 48
 #define WATER_LQ_DATA_SIZE 64
 #define WATER_HQ_DATA_SIZE 128

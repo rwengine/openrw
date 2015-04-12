@@ -118,10 +118,31 @@ public:
 	const SceneUniformData& getSceneData() const;
 
 	/**
+	 * Profiling data returned by popDebugGroup.
+	 * Not all fields will be populated, depending on
+	 * USING(RENDER_PROFILER)
+	 */
+	struct ProfileInfo
+	{
+		GLuint64 timerStart;
+		GLuint64 duration;
+		unsigned int primitives;
+		unsigned int draws;
+		unsigned int textures;
+		unsigned int buffers;
+		unsigned int uploads;
+	};
+
+	/**
 	 * Signals the start of a debug group
 	 */
 	virtual void pushDebugGroup(const std::string& title) = 0;
-	virtual GLuint popDebugGroup() = 0;
+	/**
+	 * Ends the current debug group and returns the profiling information
+	 * for that group. The returned value is valid until the next call to
+	 * pushDebugGroup
+	 */
+	virtual const ProfileInfo& popDebugGroup() = 0;
 
 private:
 	glm::ivec2 viewport;
@@ -185,7 +206,7 @@ public:
 	void invalidate();
 
 	virtual void pushDebugGroup(const std::string& title);
-	virtual GLuint popDebugGroup();
+	virtual const ProfileInfo& popDebugGroup();
 
 private:
 	DrawBuffer* currentDbuff;
@@ -205,13 +226,19 @@ private:
 			currentUBO = buffer;
 		}
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(T), &data, GL_DYNAMIC_DRAW);
+#if RW_USING(RENDER_PROFILER)
+		if( currentDebugDepth > 0 )
+		{
+			profileInfo[currentDebugDepth-1].uploads++;
+		}
+#endif
 	}
 
 	GLuint UBOObject;
 	GLuint UBOScene;
 
 	// Debug group profiling timers
-	GLuint64 debugTimes[MAX_DEBUG_DEPTH];
+	ProfileInfo profileInfo[MAX_DEBUG_DEPTH];
 	GLuint debugQuery;
 	int currentDebugDepth;
 };

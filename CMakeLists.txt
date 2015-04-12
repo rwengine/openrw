@@ -8,6 +8,9 @@ SET(BUILD_TESTS TRUE CACHE BOOL "Build test suite")
 SET(BUILD_OLD_TOOLS FALSE CACHE BOOL "Build old datadump and analyzer tools")
 SET(BUILD_TOOLS FALSE CACHE BOOL "Build editor application")
 
+# Features
+SET(ENABLE_PROFILE_RENDERER TRUE CACHE BOOL "Enable higher precision rendering profiler")
+
 # Options
 SET(ENABLE_SCRIPT_DEBUG FALSE CACHE BOOL "Enable verbose script execution")
 
@@ -25,6 +28,12 @@ ENDIF()
 
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
+
+IF(${ENABLE_PROFILE_RENDERER})
+	add_definitions(-DRENDER_PROFILER=1)
+else()
+	add_definitions(-DRENDER_PROFILER=0)
+ENDIF()
 
 IF(${ENABLE_SCRIPT_DEBUG})
 	add_definitions(-DSCM_DEBUG_INSTRUCTIONS)

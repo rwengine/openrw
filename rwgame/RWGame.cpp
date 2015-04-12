@@ -448,7 +448,7 @@ void RWGame::render(float alpha, float time)
 	drawOnScreenText(engine, renderer);
 }
 
-void RWGame::renderDebugStats(float time, GLuint worldRenderTime)
+void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime)
 {
 	// Turn time into milliseconds
 	float time_ms = time * 1000.f;
@@ -466,16 +466,26 @@ void RWGame::renderDebugStats(float time, GLuint worldRenderTime)
 		time_average /= average_every_frame;
 	}
 
+	std::map<std::string, Renderer::ProfileInfo*> profGroups {
+		{"Objects", &renderer->profObjects},
+		{"Effects", &renderer->profEffects},
+		{"Sky", &renderer->profSky},
+		{"Water", &renderer->profWater},
+	};
+
 	std::stringstream ss;
 	ss << "Frametime: " << time_ms << " (FPS " << (1.f/time) << ")\n";
 	ss << "Average (per " << average_every_frame << " frames); Frametime: " << time_average << " (FPS " << (1000.f/time_average) << ")\n";
 	ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
 	ss << " Texture binds: " << renderer->getRenderer()->getTextureCount() << "\n";
 	ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount() << "\n";
-	ss << " World time: " << (worldRenderTime/1000000) << "ms\n";
-	ss << "  Objects: " << (renderer->timeObj/1000000) << "ms\n";
-	ss << "  Water: " << (renderer->timeWater/1000000) << "ms\n";
-	ss << "  Sky: " << (renderer->timeSky/1000000) << "ms\n";
+	ss << " World time: " << (worldRenderTime.duration/1000000) << "ms\n";
+	for(auto& perf : profGroups)
+	{
+		ss << "  " << perf.first << ": "
+		<< perf.second->draws << " draws " << perf.second->primitives << " prims "
+		<< (perf.second->duration/1000000) << "ms\n";
+	}
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;

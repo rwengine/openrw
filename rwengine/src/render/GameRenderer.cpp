@@ -233,8 +233,6 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	// Store the input camera,
 	_camera = camera;
 
-	timeObj = timeSky = timeWater = 0;
-
 	// Set the viewport
 	const glm::ivec2& vp = getRenderer()->getViewport();
 	glViewport(0, 0, vp.x, vp.y);
@@ -368,7 +366,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	transparentDrawQueue.clear();
 
 	renderer->popDebugGroup();
-	timeObj = renderer->popDebugGroup();
+	profObjects = renderer->popDebugGroup();
 
 	// Render arrows above anything that isn't radar only (or hidden)
 	ModelRef& arrowModel = engine->gameData.models["arrow"];
@@ -426,7 +424,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	water.render(this, engine);
 
-	timeWater = renderer->popDebugGroup();
+	profWater = renderer->popDebugGroup();
 
 	renderer->pushDebugGroup("Sky");
 
@@ -442,11 +440,11 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	renderer->draw(glm::mat4(), &skyDbuff, dp);
 
-	timeSky = renderer->popDebugGroup();
+	profSky = renderer->popDebugGroup();
 
 	renderer->pushDebugGroup("Effects");
 	renderEffects();
-	renderer->popDebugGroup();
+	profEffects = renderer->popDebugGroup();
 
 	glDisable(GL_DEPTH_TEST);
 

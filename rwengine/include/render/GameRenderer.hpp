@@ -194,10 +194,11 @@ public:
 	WaterRenderer water;
 	TextRenderer text;
 
-	// Rendering timers
-	GLuint timeObj;
-	GLuint timeSky;
-	GLuint timeWater;
+	// Profiling data
+	Renderer::ProfileInfo profObjects;
+	Renderer::ProfileInfo profSky;
+	Renderer::ProfileInfo profWater;
+	Renderer::ProfileInfo profEffects;
 };
 
 #endif

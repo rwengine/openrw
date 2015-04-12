@@ -121,6 +121,12 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff)
 		glBindVertexArray(dbuff->getVAOName());
 		currentDbuff = dbuff;
 		bufferCounter++;
+#if RW_USING(RENDER_PROFILER)
+		if( currentDebugDepth > 0 )
+		{
+			profileInfo[currentDebugDepth-1].buffers++;
+		}
+#endif
 	}
 }
 
@@ -132,6 +138,13 @@ void OpenGLRenderer::useTexture(GLuint unit, GLuint tex)
 		glBindTexture(GL_TEXTURE_2D, tex);
 		currentTextures[unit] = tex;
 		textureCounter++;
+#if RW_USING(RENDER_PROFILER)
+		if( currentDebugDepth > 0 )
+		{
+			profileInfo[currentDebugDepth-1].textures++;
+		}
+#endif
+
 	}
 }
 
@@ -261,6 +274,14 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 	uploadUBO(UBOObject, oudata);
 
 	drawCounter++;
+#if RW_USING(RENDER_PROFILER)
+	if( currentDebugDepth > 0 )
+	{
+		profileInfo[currentDebugDepth-1].draws++;
+		profileInfo[currentDebugDepth-1].primitives += p.count;
+	}
+#endif
+
 	glDrawElements(draw->getFaceType(), p.count, GL_UNSIGNED_INT,
 				   (void*) (sizeof(RenderIndex) * p.start));
 }
@@ -284,6 +305,14 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const 
 	uploadUBO(UBOObject, oudata);
 
 	drawCounter++;
+#if RW_USING(RENDER_PROFILER)
+	if( currentDebugDepth > 0 )
+	{
+		profileInfo[currentDebugDepth-1].draws++;
+		profileInfo[currentDebugDepth-1].primitives += p.count;
+	}
+#endif
+
 	glDrawArrays(draw->getFaceType(), p.start, p.count);
 }
 
@@ -297,30 +326,52 @@ void OpenGLRenderer::invalidate()
 
 void OpenGLRenderer::pushDebugGroup(const std::string& title)
 {
+#if RW_USING(RENDER_PROFILER)
 	if( GLEW_KHR_debug )
 	{
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
+		ProfileInfo& prof = profileInfo[currentDebugDepth];
+		prof.buffers = prof.draws = prof.textures = prof.uploads = prof.primitives = 0;
 		
 		glQueryCounter(debugQuery, GL_TIMESTAMP);
-		glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &debugTimes[currentDebugDepth]);
+		glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &prof.timerStart);
+		
 		currentDebugDepth++;
 		assert( currentDebugDepth < MAX_DEBUG_DEPTH );
 	}
+#endif
 }
 
-GLuint OpenGLRenderer::popDebugGroup()
+const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup()
 {
+#if RW_USING(RENDER_PROFILER)
 	if( GLEW_KHR_debug )
 	{
 		glPopDebugGroup();
 		currentDebugDepth--;
 		assert( currentDebugDepth >= 0 );
-		
+
+		ProfileInfo& prof = profileInfo[currentDebugDepth];
+
 		glQueryCounter(debugQuery, GL_TIMESTAMP);
 		GLuint64 current_time;
 		glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &current_time);
-		
-		return current_time - debugTimes[currentDebugDepth];
+
+		prof.duration = current_time - prof.timerStart;
+
+		// Add counters to the parent group
+		if( currentDebugDepth > 0 )
+		{
+			ProfileInfo& p = profileInfo[currentDebugDepth-1];
+			p.draws += prof.draws;
+			p.buffers += prof.buffers;
+			p.primitives += prof.primitives;
+			p.textures += prof.textures;
+			p.uploads += prof.uploads;
+		}
+
+		return prof;
 	}
-	return 0;
+#endif
+	return profileInfo[0];
 }
