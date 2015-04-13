@@ -3,14 +3,14 @@
 #define _MODELFRAMESWIDGET_HPP_
 #include <QDockWidget>
 #include <QTreeView>
-#include "DFFFramesTreeModel.hpp"
+#include "models/DFFFramesTreeModel.hpp"
 #include <engine/RWTypes.hpp>
 #include <QVBoxLayout>
 #include <QLabel>
 
 class ModelFrame;
 
-class ModelFramesWidget : public QDockWidget
+class ModelFramesWidget : public QWidget
 {
 	Q_OBJECT
 

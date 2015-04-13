@@ -3,25 +3,30 @@
 #define _VIEWERWINDOW_HPP_
 #include <QMainWindow>
 #include <engine/GameWorld.hpp>
+#include <core/Logger.hpp>
 #include <QGLContext>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
 class ObjectViewer;
+class ModelViewer;
 class ViewerWidget;
+class GameRenderer;
 
 class ViewerWindow : public QMainWindow
 {
 	Q_OBJECT
-	
+
+	Logger engineLog;
+
 	GameWorld* gameWorld;
+	GameRenderer* renderer;
 
 	/** Contains the OGL context */
 	ViewerWidget* viewerWidget;
 
 	ObjectViewer* objectViewer;
-
-	QVBoxLayout* modelLayout;
+	ModelViewer* modelViewer;
 
 	QStackedWidget* viewSwitcher;
 

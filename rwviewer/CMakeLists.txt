@@ -6,16 +6,19 @@ find_package(Qt5Core REQUIRED)
 add_executable(rwviewer
 	main.cpp
 	ViewerWindow.cpp
-	ObjectViewer.cpp
 
 	models/ObjectListModel.cpp
+	models/DFFFramesTreeModel.cpp
+
+
+	views/ObjectViewer.cpp
+	views/ModelViewer.cpp
 
 	ViewerWidget.cpp
 	ItemListModel.cpp
 	ItemListWidget.cpp
 	IMGArchiveModel.cpp
-	DFFFramesTreeModel.cpp
-	ModelFramesWidget.cpp
+	widgets/ModelFramesWidget.cpp
 	AnimationListModel.cpp
 	AnimationListWidget.cpp)
 

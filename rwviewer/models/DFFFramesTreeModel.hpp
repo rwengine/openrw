@@ -4,6 +4,8 @@
 #include <QAbstractItemModel>
 #include <engine/RWTypes.hpp>
 
+class Model;
+
 class DFFFramesTreeModel : public QAbstractItemModel
 {
 	Model* model;

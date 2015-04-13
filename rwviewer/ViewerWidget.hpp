@@ -8,18 +8,23 @@
 #include <loaders/LoaderIFP.hpp>
 #include <render/DrawBuffer.hpp>
 #include <render/GeometryBuffer.hpp>
+#include <render/Model.hpp>
 #include <glm/glm.hpp>
 
+class GameRenderer;
 class Model;
 class ViewerWidget : public QGLWidget
 {
 	Q_OBJECT
+
+	GameRenderer* renderer;
 
 	QString currentFile;
 
 	QTimer timer;
 	GameWorld* gworld;
 
+	Model* activeModel;
 	GameObject* dummyObject;
 	quint16 currentObjectID;
 	
@@ -35,7 +40,7 @@ class ViewerWidget : public QGLWidget
 	
 	DrawBuffer* _frameWidgetDraw;
 	GeometryBuffer* _frameWidgetGeom;
-	void drawFrameWidget(ModelFrame* f, const glm::mat4& = {});
+	void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
 public:
 
 	ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
@@ -53,10 +58,13 @@ public:
 public slots:
 
 	void showItem(qint16 item);
+	void showModel(Model* model);
 
 	void exportModel();
 
 	void dataLoaded(GameWorld* world);
+
+	void setRenderer(GameRenderer* renderer);
 
 signals:
 

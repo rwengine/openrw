@@ -10,6 +10,7 @@
 #include <QHBoxLayout>
 
 class ViewerWidget;
+class Model;
 
 class ObjectViewer : public QWidget
 {
@@ -34,6 +35,10 @@ public:
 	}
 
 	void setViewerWidget( ViewerWidget* widget );
+
+signals:
+
+	void modelChanged(Model* model);
 
 public slots:
 

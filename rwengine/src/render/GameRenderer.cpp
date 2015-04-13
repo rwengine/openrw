@@ -226,6 +226,15 @@ float mix(uint8_t a, uint8_t b, float num)
 	return a+(b-a)*num;
 }
 
+void GameRenderer::setupRender()
+{
+	// Set the viewport
+	const glm::ivec2& vp = getRenderer()->getViewport();
+	glViewport(0, 0, vp.x, vp.y);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
+	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+}
+
 void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 {
 	_renderAlpha = alpha;
@@ -233,11 +242,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	// Store the input camera,
 	_camera = camera;
 
-	// Set the viewport
-	const glm::ivec2& vp = getRenderer()->getViewport();
-	glViewport(0, 0, vp.x, vp.y);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	setupRender();
 
 	glBindVertexArray( vao );
 
@@ -496,7 +501,17 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
-	
+
+	renderPostProcess();
+
+	glUseProgram(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray( 0 );
+}
+
+void GameRenderer::renderPostProcess()
+{
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
@@ -508,11 +523,6 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	wdp.textures = {fbTextures[0]};
 	
 	renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
-
-	glUseProgram(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray( 0 );
 }
 
 void GameRenderer::renderPedestrian(CharacterObject *pedestrian)

@@ -34,19 +34,17 @@ void ModelFramesWidget::selectedModelChanged(const QModelIndex & n, const QModel
 }
 
 ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
-: QDockWidget(parent, flags), gmodel(nullptr), framemodel(nullptr)
+: QWidget(parent, flags), gmodel(nullptr), framemodel(nullptr)
 {
 	setWindowTitle("Frames");
 
-	QWidget* w = new QWidget(this);
-
-	_layout = new QVBoxLayout(w);
+	_layout = new QVBoxLayout;
 	tree = new QTreeView(this);
 	_layout->addWidget(tree);
 	_frameLabel = new QLabel(this);
 	_layout->addWidget(_frameLabel);
 
-	setWidget(w);
+	setLayout(_layout);
 }
 
 void ModelFramesWidget::setModel(Model *model)

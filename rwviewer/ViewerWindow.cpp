@@ -1,7 +1,9 @@
 #include "ViewerWindow.hpp"
-#include "ObjectViewer.hpp"
+#include "views/ObjectViewer.hpp"
+#include "views/ModelViewer.hpp"
 
 #include <engine/GameWorld.hpp>
+#include <render/GameRenderer.hpp>
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QApplication>
@@ -14,7 +16,7 @@
 static int MaxRecentGames = 5;
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
-	: QMainWindow(parent, flags), gameWorld(nullptr)
+	: QMainWindow(parent, flags), gameWorld(nullptr), renderer(nullptr)
 {
 	setMinimumSize(640, 480);
 
@@ -47,8 +49,17 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	connect(this, SIGNAL(loadedData(GameWorld*)), objectViewer, SLOT(showData(GameWorld*)));
 	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
 
+	modelViewer = new ModelViewer(viewerWidget);
+
+	connect(this, SIGNAL(loadedData(GameWorld*)), modelViewer, SLOT(showData(GameWorld*)));
+
 	viewSwitcher = new QStackedWidget;
 	viewSwitcher->addWidget(objectViewer);
+	viewSwitcher->addWidget(modelViewer);
+
+	connect(objectViewer, SIGNAL(modelChanged(Model*)), modelViewer, SLOT(showModel(Model*)));
+
+	objectViewer->setViewerWidget( viewerWidget );
 
 	QMenu* view = mb->addMenu("&View");
 	QAction* objectAction = view->addAction("&Object");
@@ -65,13 +76,6 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
-
-	modelLayout = new QVBoxLayout;
-
-	QWidget* span = new QWidget;
-	span->setLayout(modelLayout);
-
-	viewSwitcher->addWidget(span);
 
 	this->setCentralWidget(viewSwitcher);
 
@@ -144,8 +148,11 @@ void ViewerWindow::loadGame(const QString &path)
 	QDir gameDir( path );
 
 	if( gameDir.exists() && path.size() > 0 ) {
-		gameWorld = new GameWorld( gameDir.absolutePath().toStdString() );
-		gameWorld->load();
+		gameWorld = new GameWorld( &engineLog, gameDir.absolutePath().toStdString() );
+		renderer = new GameRenderer(&engineLog, gameWorld);
+		viewerWidget->setRenderer(renderer);
+
+		gameWorld->gameData.load();
 
 		// Initalize all the archives.
 		gameWorld->gameData.loadIMG("/models/gta3");
@@ -181,12 +188,11 @@ void ViewerWindow::switchWidget()
 
 		if( index == 0 )
 		{
-			modelLayout->removeWidget( viewerWidget );
 			objectViewer->setViewerWidget( viewerWidget );
 		}
 		else if( index == 1 )
 		{
-			modelLayout->addWidget( viewerWidget );
+			modelViewer->setViewerWidget( viewerWidget );
 		}
 
 		viewSwitcher->setCurrentIndex( index );

@@ -1,5 +1,7 @@
 #include "ViewerWidget.hpp"
 #include <render/Model.hpp>
+#include <render/GameRenderer.hpp>
+#include <render/OpenGLRenderer.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QMouseEvent>
 #include <engine/GameObject.hpp>
@@ -13,7 +15,7 @@
 
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), dummyObject(nullptr), currentObjectID(0),
+: QGLWidget(parent, shareWidget, f), gworld(nullptr), activeModel(nullptr), dummyObject(nullptr), currentObjectID(0),
   _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
   _frameWidgetDraw(nullptr), _frameWidgetGeom(nullptr)
 {
@@ -66,25 +68,29 @@ void ViewerWidget::paintGL()
 	
 	if( gworld == nullptr ) return;
 
-	auto& r = gworld->renderer;
+	auto& r = *renderer;
+
+	r.setViewport(width(), height());
 
 	if(dummyObject && dummyObject->animator) {
 		dummyObject->animator->tick(1.f/60.f);
 	}
 	
-	if(dummyObject) {
+	if(activeModel) {
 		gworld->_work->update();
 
 		r.getRenderer()->invalidate();
 
-		if( dummyObject->model->model != _lastModel ) {
-			_lastModel = dummyObject->model->model;
+		Model* model = activeModel;
+
+		if( model != _lastModel ) {
+			_lastModel = model;
 			emit modelChanged(_lastModel);
 		}
 
 		glEnable(GL_DEPTH_TEST);
 		
-		glm::mat4 m;
+		glm::mat4 m(1.f);
 
 		r.getRenderer()->useProgram(r.worldProg);
 
@@ -105,24 +111,31 @@ void ViewerWidget::paintGL()
 
 		r.getRenderer()->invalidate();
 
-		if( dummyObject->model->model ) {
-			gworld->renderer.renderModel(dummyObject->model->model, m, dummyObject);
+		r.setupRender();
+		if( model ) {
+			r.renderModel(model, m, dummyObject);
 
-			drawFrameWidget(dummyObject->model->model->frames[dummyObject->model->model->rootFrameIdx]);
+			drawFrameWidget(model->frames[model->rootFrameIdx]);
 		}
+		r.renderPostProcess();
 	}
 }
 
 void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m)
 {
 	auto thisM = m * f->getTransform();
-	if(f->getGeometries().size() == 0) {
-		glBindTexture(GL_TEXTURE_2D, 0);
-		/*glUniform4f(gworld->renderer.uniCol, 1.f, 1.f, 1.f, 1.f);
-		glUniformMatrix4fv(gworld->renderer.uniModel, 1, GL_FALSE, glm::value_ptr(thisM));*/
-		glBindVertexArray(_frameWidgetDraw->getVAOName());
-		glDrawArrays(_frameWidgetDraw->getFaceType(), 0, 6);
+	if(f->getGeometries().size() == 0)
+	{
+		Renderer::DrawParameters dp;
+		dp.count = _frameWidgetGeom->getCount();
+		dp.start = 0;
+		dp.ambient = 1.f;
+		dp.diffuse = 1.f;
+		dp.colour = {255, 255, 255, 255};
+		dp.textures = { 0 };
+		renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
 	}
+	
 	for(auto c : f->getChildren()) {
 		drawFrameWidget(c, thisM);
 	}
@@ -155,8 +168,17 @@ void ViewerWidget::showItem(qint16 item)
 		{
 			dummyObject = gworld->createVehicle(item, {});
 		}
+		activeModel = dummyObject->model->resource;
 	}
 }
+
+void ViewerWidget::showModel(Model* model)
+{
+	if( dummyObject ) gworld->destroyObject( dummyObject );
+	dummyObject = nullptr;
+	activeModel = model;
+}
+
 
 void ViewerWidget::exportModel()
 {
@@ -189,9 +211,14 @@ void ViewerWidget::dataLoaded(GameWorld *world)
 	gworld = world;
 }
 
+void ViewerWidget::setRenderer(GameRenderer *render)
+{
+	renderer = render;
+}
+
 Model* ViewerWidget::currentModel() const
 {
-	return _lastModel;
+	return activeModel;
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e)

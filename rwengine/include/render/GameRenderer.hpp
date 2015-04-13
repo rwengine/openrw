@@ -183,6 +183,9 @@ public:
 	/** Increases cinematic value */
 	void renderLetterbox();
 
+	void setupRender();
+	void renderPostProcess();
+
 	Renderer* getRenderer()
 	{
 		return renderer;

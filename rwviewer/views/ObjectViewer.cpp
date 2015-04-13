@@ -78,6 +78,7 @@ void ObjectViewer::showItem(qint16 item)
 		}
 
 		previewWidget->showItem(item);
+		modelChanged( previewWidget->currentModel() );
 	}
 }
 
