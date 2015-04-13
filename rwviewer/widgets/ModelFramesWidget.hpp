@@ -32,6 +32,10 @@ public:
 public slots:
 
 	void setModel(Model *model);
+
+signals:
+
+	void selectedFrameChanged(ModelFrame* frame);
 };
 
 #endif

@@ -25,6 +25,7 @@ class ViewerWidget : public QGLWidget
 	GameWorld* gworld;
 
 	Model* activeModel;
+	ModelFrame* selectedFrame;
 	GameObject* dummyObject;
 	quint16 currentObjectID;
 	
@@ -40,6 +41,8 @@ class ViewerWidget : public QGLWidget
 	
 	DrawBuffer* _frameWidgetDraw;
 	GeometryBuffer* _frameWidgetGeom;
+	GLuint whiteTex;
+
 	void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
 public:
 
@@ -59,6 +62,7 @@ public slots:
 
 	void showItem(qint16 item);
 	void showModel(Model* model);
+	void selectFrame(ModelFrame* frame);
 
 	void exportModel();
 

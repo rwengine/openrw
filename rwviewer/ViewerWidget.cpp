@@ -15,7 +15,8 @@
 
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), activeModel(nullptr), dummyObject(nullptr), currentObjectID(0),
+: QGLWidget(parent, shareWidget, f), gworld(nullptr), activeModel(nullptr),
+  selectedFrame(nullptr), dummyObject(nullptr), currentObjectID(0),
   _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
   _frameWidgetDraw(nullptr), _frameWidgetGeom(nullptr)
 {
@@ -25,18 +26,18 @@ struct WidgetVertex {
 	float x, y, z;
 	static const AttributeList vertex_attributes() {
 		return {
-			{ATRS_Position, 2, sizeof(WidgetVertex),  0ul}
+			{ATRS_Position, 3, sizeof(WidgetVertex),  0ul}
 		};
 	}
 };
 
 std::vector<WidgetVertex> widgetVerts = {
-	{-1.f, 0.f, 0.f},
-	{ 1.f, 0.f, 0.f},
-	{ 0.f,-1.f, 0.f},
-	{ 0.f, 1.f, 0.f},
-	{ 0.f, 0.f,-1.f},
-	{ 0.f, 0.f, 1.f}
+	{-.5f, 0.f, 0.f},
+	{ .5f, 0.f, 0.f},
+	{ 0.f,-.5f, 0.f},
+	{ 0.f, .5f, 0.f},
+	{ 0.f, 0.f,-.5f},
+	{ 0.f, 0.f, .5f}
 };
 
 void ViewerWidget::initializeGL()
@@ -51,6 +52,13 @@ void ViewerWidget::initializeGL()
 	_frameWidgetGeom = new GeometryBuffer;
 	_frameWidgetGeom->uploadVertices(widgetVerts);
 	_frameWidgetDraw->addGeometry(_frameWidgetGeom);
+
+	glGenTextures(1, &whiteTex);
+	glBindTexture(GL_TEXTURE_2D, whiteTex);
+	GLuint tex = 0xFFFFFFFF;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, &tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 void ViewerWidget::resizeGL(int w, int h)
@@ -112,7 +120,8 @@ void ViewerWidget::paintGL()
 		r.getRenderer()->invalidate();
 
 		r.setupRender();
-		if( model ) {
+		if( model )
+		{
 			r.renderModel(model, m, dummyObject);
 
 			drawFrameWidget(model->frames[model->rootFrameIdx]);
@@ -131,8 +140,18 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m)
 		dp.start = 0;
 		dp.ambient = 1.f;
 		dp.diffuse = 1.f;
-		dp.colour = {255, 255, 255, 255};
-		dp.textures = { 0 };
+		if( f == selectedFrame )
+		{
+			dp.colour = {255, 255, 0, 255};
+			// Sorry!
+			glLineWidth(10.f);
+		}
+		else
+		{
+			dp.colour = {255, 255, 255, 255};
+			glLineWidth(1.f);
+		}
+		dp.textures = { whiteTex };
 		renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
 	}
 	
@@ -179,6 +198,10 @@ void ViewerWidget::showModel(Model* model)
 	activeModel = model;
 }
 
+void ViewerWidget::selectFrame(ModelFrame* frame)
+{
+	selectedFrame = frame;
+}
 
 void ViewerWidget::exportModel()
 {

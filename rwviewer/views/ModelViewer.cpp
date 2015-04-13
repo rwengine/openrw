@@ -20,6 +20,8 @@ ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags 
 
 	this->setLayout(mainLayout);
 
+	connect(frames, SIGNAL(selectedFrameChanged(ModelFrame*)),
+			viewerWidget, SLOT(selectFrame(ModelFrame*)));
 	setViewerWidget(viewerWidget);
 }
 

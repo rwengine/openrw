@@ -31,6 +31,7 @@ void ModelFramesWidget::updateInfoBox(Model* model, ModelFrame *f)
 void ModelFramesWidget::selectedModelChanged(const QModelIndex & n, const QModelIndex &)
 {
 	updateInfoBox( gmodel, (ModelFrame*) n.internalPointer() );
+	selectedFrameChanged( (ModelFrame*) n.internalPointer() );
 }
 
 ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
