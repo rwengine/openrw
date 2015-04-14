@@ -71,21 +71,7 @@ void PlayerController::update(float dt)
 	}
 
 	if( _currentActivity == nullptr && glm::length(rawMovement) > 0.0f ) {
-		float rotationOffset = 0.f;
-
-		if( glm::abs(rawMovement.x) < 0.01f ) {
-			if( rawMovement.y < -0.01f ) {
-				rotationOffset = glm::half_pi<float>();
-			}
-			else if( rawMovement.y > 0.01f ) {
-				rotationOffset = -glm::half_pi<float>();
-			}
-		}
-		else if( rawMovement.x < -0.01f ) {
-			rotationOffset = glm::pi<float>();
-		}
-
-		character->rotation = glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y) + rotationOffset));
+		character->rotation = glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
 	}
 
 	CharacterController::update(dt);

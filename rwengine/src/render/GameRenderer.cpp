@@ -530,13 +530,6 @@ void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
 	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( _renderAlpha );
 
 	if(!pedestrian->model->resource) return;
-	
-	if( pedestrian->isAnimationFixed() )
-	{
-		// Apply the inverse of the root transform from the current animation.
-		auto rtranslate = pedestrian->skeleton->getInterpolated(1).translation;
-		matrixModel = glm::translate(matrixModel, -rtranslate);
-	}
 
 	auto root = pedestrian->model->resource->frames[0];
 	

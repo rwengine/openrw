@@ -96,7 +96,7 @@ void CharacterController::update(float dt)
 		}
 	}
 	else {
-		if( d.x > 0.001f ) {
+		if( glm::length(d) > 0.01f ) {
 			if( running ) {
 				if( character->animator->getAnimation() != character->animations.run ) {
 					character->playAnimation(character->animations.run, true);
@@ -113,7 +113,9 @@ void CharacterController::update(float dt)
 				}
 			}
 		}
-		else if( d.x < -0.001f ) {
+
+		// TODO how should characters strafe?
+		/*else if( d.x < -0.001f ) {
 			if( character->animator->getAnimation() == character->animations.walk_back_start ) {
 				if( character->animator->isCompleted() ) {
 					character->playAnimation(character->animations.walk_back, true);
@@ -144,7 +146,7 @@ void CharacterController::update(float dt)
 					character->playAnimation(character->animations.walk_left_start, false);
 				}
 			}
-		}
+		}*/
 
 		if( _currentActivity == nullptr ) {
 			if( glm::length(d) < 0.001f ) {

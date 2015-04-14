@@ -140,7 +140,6 @@ public:
 	void clearTargetPosition();
 
 	void playAnimation(Animation* animation, bool repeat);
-	virtual bool isAnimationFixed() const;
 
 	void addToInventory( InventoryItem* item );
 	void setActiveItem( int slot );

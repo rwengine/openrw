@@ -205,32 +205,19 @@ void CharacterObject::updateCharacter(float dt)
 		if( isAnimationFixed() && animator->getAnimation() != nullptr ) {
 			auto d = animator->getRootTranslation() / animator->getAnimation()->duration;
 			animTranslate = d * dt;
+
+			if(! model->resource->frames[0]->getChildren().empty() )
+			{
+				auto root = model->resource->frames[0]->getChildren()[0];
+				Skeleton::FrameData fd = skeleton->getData(root->getIndex());
+				fd.a.translation -= d * animator->getAnimationTime(1.f);
+				skeleton->setData(root->getIndex(), fd);
+			}
 		}
 
 		position = getPosition();
 
-		if( _hasTargetPosition && false ) {
-			auto beforedelta = _targetPosition - position;
-
-			glm::quat faceDir( glm::vec3( 0.f, 0.f, atan2(beforedelta.y, beforedelta.x) - glm::half_pi<float>() ) );
-			glm::vec3 direction = faceDir * animTranslate;
-
-			auto positiondelta = _targetPosition - (position + direction);
-			if( glm::length(beforedelta) < glm::length(positiondelta) ) {
-				// Warp the character to the target position if we are about to overstep.
-				physObject->getWorldTransform().setOrigin(btVector3(
-															  _targetPosition.x,
-															  _targetPosition.y,
-															  _targetPosition.z));
-				_hasTargetPosition = false;
-			}
-			else {
-				walkDir = direction;
-			}
-		}
-		else {
-			walkDir = rotation * animTranslate;
-		}
+		walkDir = rotation * animTranslate;
 
 		if( jumped )
 		{
@@ -451,11 +438,6 @@ void CharacterObject::clearTargetPosition()
 void CharacterObject::playAnimation(Animation *animation, bool repeat)
 {
 	animator->setAnimation(animation, repeat);
-}
-
-bool CharacterObject::isAnimationFixed() const
-{
-	return getCurrentVehicle() == nullptr;
 }
 
 void CharacterObject::addToInventory(InventoryItem *item)
