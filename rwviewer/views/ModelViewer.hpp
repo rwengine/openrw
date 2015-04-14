@@ -12,6 +12,7 @@
 
 class ViewerWidget;
 class Model;
+class Skeleton;
 class ModelFramesWidget;
 
 class ModelViewer : public QWidget
@@ -20,6 +21,7 @@ class ModelViewer : public QWidget
 
 	GameWorld* _world;
 	Model* viewing;
+	Skeleton* skeleton;
 
 	QSplitter* mainSplit;
 	QVBoxLayout* mainLayout;
@@ -39,7 +41,15 @@ public:
 
 public slots:
 
+	/**
+	 * Display a raw model
+	 */
 	void showModel(Model* model);
+
+	/**
+	 * Display a game object's model
+	 */
+	void showObject(uint16_t object);
 
 	void showData(GameWorld* world);
 };

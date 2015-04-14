@@ -2,6 +2,7 @@
 #include <models/ObjectListModel.hpp>
 #include "ViewerWidget.hpp"
 #include <QDebug>
+#include <QMenu>
 
 ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
 : QWidget(parent, f)
@@ -9,6 +10,13 @@ ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlag
 	mainLayout = new QHBoxLayout;
 
 	objectList = new QTableView;
+
+	objectMenu = new QMenu(objectList);
+	objectList->setContextMenuPolicy(Qt::CustomContextMenu);
+	auto viewModelAction = new QAction("View Model", objectMenu);
+	objectMenu->addAction(viewModelAction);
+	connect(viewModelAction, SIGNAL(triggered()), this, SLOT(menuViewModel()));
+	connect(objectList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onCustomContextMenu(QPoint)));
 
 	mainLayout->addWidget(objectList);
 
@@ -26,8 +34,6 @@ ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlag
 	infoLayout->addWidget(previewClass, 2, 1);
 	infoLayout->addWidget(new QLabel("Model"), 3, 0);
 	infoLayout->addWidget(previewModel, 3, 1);
-
-	//infoLayout->addStretch(100);
 
 	mainLayout->addLayout(infoLayout);
 
@@ -77,8 +83,7 @@ void ObjectViewer::showItem(qint16 item)
 			previewModel->setText(QString::fromStdString(v->modelName));
 		}
 
-		previewWidget->showItem(item);
-		modelChanged( previewWidget->currentModel() );
+		previewWidget->showObject(item);
 	}
 }
 
@@ -106,4 +111,23 @@ void ObjectViewer::showItem(QModelIndex model)
 {
 	showItem(model.internalId());
 }
+
+void ObjectViewer::onCustomContextMenu(const QPoint& p)
+{
+	contextMenuIndex = objectList->indexAt(p);
+    if ( contextMenuIndex.isValid() )
+	{
+        objectMenu->exec(objectList->mapToGlobal(p));
+    }    
+}
+
+void ObjectViewer::menuViewModel()
+{
+	if( contextMenuIndex.isValid() )
+	{
+		auto id = contextMenuIndex.internalId();
+		showObjectModel(id);
+	}
+}
+
 

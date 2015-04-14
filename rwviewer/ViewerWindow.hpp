@@ -63,6 +63,8 @@ private slots:
 
 	void switchWidget();
 
+	void showObjectModel(uint16_t object);
+
 private:
 	
 	QList<QAction*> recentGames;

@@ -1,8 +1,9 @@
 #include "DFFFramesTreeModel.hpp"
 #include <render/Model.hpp>
+#include <data/Skeleton.hpp>
 
-DFFFramesTreeModel::DFFFramesTreeModel(Model *m, QObject* parent)
-	: QAbstractItemModel(parent), model(m)
+DFFFramesTreeModel::DFFFramesTreeModel(Model *m, Skeleton* skel, QObject* parent)
+	: QAbstractItemModel(parent), model(m), skeleton(skel)
 {
 
 }
@@ -63,7 +64,63 @@ QVariant DFFFramesTreeModel::data(const QModelIndex& index, int role) const
 			return QString(f->getName().c_str());
 		}
 	}
+	else if( role == Qt::CheckStateRole )
+	{
+		if( index.column() == 0 )
+		{
+			if( skeleton )
+			{
+				return skeleton->getData(f->getIndex()).enabled ?
+					Qt::Checked : Qt::Unchecked;
+			}
+		}
+	}
 	return QVariant();
+}
+
+bool DFFFramesTreeModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+	if(! index.isValid() )
+	{
+		return false;
+	}
+
+	ModelFrame* f = static_cast<ModelFrame*>(index.internalPointer());
+
+	if( role == Qt::CheckStateRole )
+	{
+		if( index.column() == 0 && skeleton )
+		{
+			if( (Qt::CheckState)value.toInt() == Qt::Checked )
+			{
+				skeleton->setEnabled(f, true);
+			}
+			else
+			{
+				skeleton->setEnabled(f, false);
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+
+Qt::ItemFlags DFFFramesTreeModel::flags(const QModelIndex& index) const
+{
+	if(! index.isValid() )
+	{
+		return 0;
+	}
+
+	Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+	if( index.column() == 0 && skeleton )
+	{
+		flags |= Qt::ItemIsUserCheckable;
+	}
+
+	return flags;
 }
 
 QVariant DFFFramesTreeModel::headerData(int section, Qt::Orientation orientation, int role) const

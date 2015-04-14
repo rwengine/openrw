@@ -57,7 +57,8 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	viewSwitcher->addWidget(objectViewer);
 	viewSwitcher->addWidget(modelViewer);
 
-	connect(objectViewer, SIGNAL(modelChanged(Model*)), modelViewer, SLOT(showModel(Model*)));
+	//connect(objectViewer, SIGNAL(modelChanged(Model*)), modelViewer, SLOT(showModel(Model*)));
+	connect(objectViewer, SIGNAL(showObjectModel(uint16_t)), this, SLOT(showObjectModel(uint16_t)));
 
 	objectViewer->setViewerWidget( viewerWidget );
 
@@ -197,6 +198,14 @@ void ViewerWindow::switchWidget()
 
 		viewSwitcher->setCurrentIndex( index );
 	}
+}
+
+void ViewerWindow::showObjectModel(uint16_t object)
+{
+	// Switch to the model viewer
+	modelViewer->setViewerWidget( viewerWidget );
+	viewSwitcher->setCurrentIndex( viewSwitcher->indexOf(modelViewer) );
+	modelViewer->showObject(object);
 }
 
 void ViewerWindow::updateRecentGames()

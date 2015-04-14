@@ -55,12 +55,13 @@ public:
 	virtual void paintGL();
 
 	Model *currentModel() const;
+	GameObject* currentObject() const;
 
 	GameWorld* world();
 
 public slots:
 
-	void showItem(qint16 item);
+	void showObject(qint16 item);
 	void showModel(Model* model);
 	void selectFrame(ModelFrame* frame);
 

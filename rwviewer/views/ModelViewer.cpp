@@ -1,10 +1,12 @@
 #include "ModelViewer.hpp"
 #include <widgets/ModelFramesWidget.hpp>
 #include "ViewerWidget.hpp"
+#include <data/Skeleton.hpp>
+#include <engine/GameObject.hpp>
 #include <QDebug>
 
 ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
-: QWidget(parent, f), _world(nullptr), viewing(nullptr)
+: QWidget(parent, f), _world(nullptr), viewing(nullptr), skeleton(nullptr)
 {
 	mainSplit = new QSplitter;
 	mainLayout = new QVBoxLayout;
@@ -40,6 +42,19 @@ void ModelViewer::showData(GameWorld* world)
 void ModelViewer::showModel(Model* model)
 {
 	viewing = model;
+	if( skeleton )
+	{
+		delete skeleton;
+	}
+	skeleton = new Skeleton();
 	viewerWidget->showModel(model);
-	frames->setModel(model);
+	frames->setModel(model, nullptr);
+}
+
+void ModelViewer::showObject(uint16_t object)
+{
+	viewerWidget->showObject(object);
+	viewing = viewerWidget->currentModel();
+	skeleton = viewerWidget->currentObject()->skeleton;
+	frames->setModel(viewing, skeleton);
 }

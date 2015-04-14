@@ -31,7 +31,7 @@ public:
 
 public slots:
 
-	void setModel(Model *model);
+	void setModel(Model *model, Skeleton* skeleton);
 
 signals:
 

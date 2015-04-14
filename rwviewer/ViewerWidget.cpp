@@ -165,7 +165,7 @@ GameWorld* ViewerWidget::world()
 	return gworld;
 }
 
-void ViewerWidget::showItem(qint16 item)
+void ViewerWidget::showObject(qint16 item)
 {
 	currentObjectID = item;
 
@@ -242,6 +242,11 @@ void ViewerWidget::setRenderer(GameRenderer *render)
 Model* ViewerWidget::currentModel() const
 {
 	return activeModel;
+}
+
+GameObject* ViewerWidget::currentObject() const
+{
+	return dummyObject;
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e)
