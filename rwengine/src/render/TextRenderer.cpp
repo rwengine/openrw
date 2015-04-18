@@ -235,7 +235,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	Renderer::DrawParameters dp;
 	dp.start = 0;
 	dp.count = gb.getCount();
-	auto ftexture = engine->gameData.findTexture(fonts[ti.font]);
+	auto ftexture = engine->data->findTexture(fonts[ti.font]);
 	dp.textures = {ftexture->getName()};
 	
 	renderer->getRenderer()->drawArrays(glm::mat4(), &db, dp);

@@ -1,6 +1,7 @@
 #include <render/MapRenderer.hpp>
 #include <render/GameShaders.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 
@@ -122,7 +123,7 @@ void MapRenderer::draw(const MapInfo& mi)
 	{
 		std::string num = (m < 10 ? "0" : "");
 		std::string name = "radar" + num +  std::to_string(m);
-		auto texture = world->gameData.textures[{name,""}];
+		auto texture = world->data->textures[{name,""}];
 		
 		glBindTexture(GL_TEXTURE_2D, texture->getName());
 		
@@ -197,7 +198,7 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& model, const
 	GLuint tex = 0;
 	if ( !texture.empty() )
 	{
-		auto sprite= world->gameData.findTexture(texture);
+		auto sprite= world->data->findTexture(texture);
 		tex = sprite->getName();
 		renderer->setUniform(rectProg, "colour", glm::vec4(0.f));
 	}

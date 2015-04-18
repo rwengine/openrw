@@ -215,7 +215,7 @@ void ViewerWidget::exportModel()
 #if 0
 	auto it = world()->objectTypes.find(currentObjectID);
 	if( it != world()->objectTypes.end() ) {
-		for( auto& archive : world()->gameData.archives ) {
+		for( auto& archive : world()->data.archives ) {
 			for(size_t i = 0; i < archive.second.getAssetCount(); ++i) {
 				auto& assetI = archive.second.getAssetInfoByIndex(i);
 				std::string q(assetI.name);

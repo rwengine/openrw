@@ -386,6 +386,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 }
 
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 #include <render/Model.hpp>
 bool Activities::ShootWeapon::update(CharacterObject *character, CharacterController *controller)
 {
@@ -397,7 +398,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	if( wepdata->fireType == WeaponData::INSTANT_HIT ) {
 		if( _item->isFiring() ) {
 
-			auto shootanim = character->engine->gameData.animations[wepdata->animation1];
+			auto shootanim = character->engine->data->animations[wepdata->animation1];
 			if( shootanim ) {
 				if( character->animator->getAnimation() != shootanim ) {
 					character->playAnimation(shootanim, false);
@@ -427,8 +428,8 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	}
 	/// @todo Use Thrown flag instead of project (RPG isn't thrown eg.)
 	else if( wepdata->fireType == WeaponData::PROJECTILE ) {
-		auto shootanim = character->engine->gameData.animations[wepdata->animation1];
-		auto throwanim = character->engine->gameData.animations[wepdata->animation2];
+		auto shootanim = character->engine->data->animations[wepdata->animation1];
+		auto throwanim = character->engine->data->animations[wepdata->animation2];
 
 		if( character->animator->getAnimation() == shootanim ) {
 			if( character->animator->isCompleted() ) {

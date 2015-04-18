@@ -28,8 +28,8 @@ CollisionInstance::~CollisionInstance()
 
 bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string& modelName, DynamicObjectData *dynamics, VehicleHandlingInfo *handling)
 {
-	auto phyit = object->engine->gameData.collisions.find(modelName);
-	if( phyit != object->engine->gameData.collisions.end()) {
+	auto phyit = object->engine->data->collisions.find(modelName);
+	if( phyit != object->engine->data->collisions.end()) {
 		btCompoundShape* cmpShape = new btCompoundShape;
 
 		auto p = object->getPosition();

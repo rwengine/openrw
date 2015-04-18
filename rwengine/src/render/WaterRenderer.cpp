@@ -107,7 +107,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world)
 {
 	auto r = renderer->getRenderer();
 
-	auto waterTex = world->gameData.findTexture("water_old");
+	auto waterTex = world->data->findTexture("water_old");
 
 	Renderer::DrawParameters wdp;
 	wdp.start = 0;

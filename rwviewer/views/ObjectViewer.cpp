@@ -92,8 +92,8 @@ void ObjectViewer::showData(GameWorld *world)
 	_world = world;
 
 	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = world->gameData.ideLocations.begin();
-		it != world->gameData.ideLocations.end();
+	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
+		it != world->data->ideLocations.end();
 		++it) {
 		world->defineItems(it->second);
 	}

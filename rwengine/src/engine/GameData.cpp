@@ -550,7 +550,7 @@ int GameData::getWaterIndexAt(const glm::vec3 &ws) const
 
 	if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
 		int i = (wX*WATER_HQ_DATA_SIZE) + wY;
-		return engine->gameData.realWater[i];
+		return engine->data->realWater[i];
 	}
 	return 0;
 }

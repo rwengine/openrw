@@ -250,7 +250,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	// Requires a float 0-24
 	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(engine->state.currentWeather * 24);
-	auto weather = engine->gameData.weatherLoader.getWeatherData(weatherID, tod);
+	auto weather = engine->data->weatherLoader.getWeatherData(weatherID, tod);
 
 	glm::vec3 skyTop = weather.skyTopColor;
 	glm::vec3 skyBottom = weather.skyBottomColor;
@@ -374,10 +374,10 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	profObjects = renderer->popDebugGroup();
 
 	// Render arrows above anything that isn't radar only (or hidden)
-	ModelRef& arrowModel = engine->gameData.models["arrow"];
+	ModelRef& arrowModel = engine->data->models["arrow"];
 	if( arrowModel && arrowModel->resource )
 	{
-		auto arrowTex = engine->gameData.textures[{"copblue",""}];
+		auto arrowTex = engine->data->textures[{"copblue",""}];
 		auto arrowFrame = arrowModel->resource->findFrame( "arrow" );
 		for( auto& blip : engine->state.radarBlips )
 		{
@@ -456,7 +456,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	GLuint splashTexName = 0;
 	auto fc = engine->state.fadeColour;
 	if((fc.r + fc.g + fc.b) == 0 && engine->state.currentSplash.size() > 0) {
-		auto splash = engine->gameData.findTexture(engine->state.currentSplash);
+		auto splash = engine->data->findTexture(engine->state.currentSplash);
 		if ( splash )
 		{
 			splashTexName = splash->getName();
@@ -563,7 +563,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
 		auto woi = engine->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
-			Model* wheelModel = engine->gameData.models["wheels"]->resource;
+			Model* wheelModel = engine->data->models["wheels"]->resource;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
 			if( wheelModel ) {
 				// Construct our own matrix so we can use the local transform
@@ -713,7 +713,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	/// @todo Better determination of is this object a weapon.
 	if( odata->ID >= 170 && odata->ID <= 184 )
 	{
-		auto weapons = engine->gameData.models["weapons"];
+		auto weapons = engine->data->models["weapons"];
 		if( weapons && weapons->resource && odata ) {
 			model = weapons->resource;
 			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
@@ -725,7 +725,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	}
 	else
 	{
-		auto handle = engine->gameData.models[odata->modelName];
+		auto handle = engine->data->models[odata->modelName];
 		if ( handle && handle->resource )
 		{
 			model = handle->resource;
@@ -794,7 +794,7 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(_renderAlpha);
 
 	auto odata = engine->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
-	auto weapons = engine->gameData.models["weapons"];
+	auto weapons = engine->data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
@@ -838,7 +838,7 @@ void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 {
 	// srhand
 	std::shared_ptr<ObjectData> odata = engine->findObjectType<ObjectData>(item->getModelID());
-	auto weapons = engine->gameData.models["weapons"];
+	auto weapons = engine->data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
@@ -878,7 +878,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 				{
 					auto& tC = mat.textures[0].name;
 					auto& tA = mat.textures[0].alphaName;
-					tex = engine->gameData.findTexture(tC, tA);
+					tex = engine->data->findTexture(tC, tA);
 					if( ! tex )
 					{
 						//logger->warning("Renderer", "Missing texture: " + tC + " " + tA);
@@ -938,7 +938,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 	glm::vec3 scale = info->radius + 0.15f * glm::sin(engine->gameTime * 5.f);
 	
 	Renderer::DrawParameters dp;
-	dp.textures = {engine->gameData.findTexture("cloud1")->getName()};
+	dp.textures = {engine->data->findTexture("cloud1")->getName()};
 	dp.ambient = 1.f;
 	dp.colour = glm::u8vec4(50, 100, 255, 1);
 	dp.start = 0;

@@ -28,12 +28,12 @@ void IngameState::startTest()
 
 	getWorld()->state.player = player;
 
-	/*auto bat = new WeaponItem(getWorld()->gameData.weaponData["ak47"]);
+	/*auto bat = new WeaponItem(getWorld()->data.weaponData["ak47"]);
 	_playerCharacter->addToInventory(bat);
 	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
 
 	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
-	for( auto& w : getWorld()->gameData.weaponData ) {
+	for( auto& w : getWorld()->data->weaponData ) {
 		if( w.first == "unarmed" ) continue;
 		getWorld()->objects.insert(new ItemPickup(getWorld(), itemspawn,
 												  w.second));
@@ -66,7 +66,7 @@ void IngameState::startTest()
 void IngameState::startGame()
 {
 	game->startScript("data/main.scm");
-	getWorld()->sound.playBackground( getWorld()->gameData.getDataPath() + "/audio/City.wav" );
+	getWorld()->sound.playBackground( getWorld()->data->getDataPath() + "/audio/City.wav" );
 }
 
 PlayerController *IngameState::getPlayer()

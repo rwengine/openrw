@@ -2,6 +2,7 @@
 #include <ai/CharacterController.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
 #include <objects/VehicleObject.hpp>
 #include <items/InventoryItem.hpp>
 #include <data/Skeleton.hpp>
@@ -21,33 +22,33 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	mHealth = 100.f;
 
 	// TODO move AnimationGroup creation somewhere else.
-	animations.idle = engine->gameData.animations["idle_stance"];
-	animations.walk = engine->gameData.animations["walk_player"];
-	animations.walk_start = engine->gameData.animations["walk_start"];
-	animations.run  = engine->gameData.animations["run_player"];
+	animations.idle = engine->data->animations["idle_stance"];
+	animations.walk = engine->data->animations["walk_player"];
+	animations.walk_start = engine->data->animations["walk_start"];
+	animations.run  = engine->data->animations["run_player"];
 
-	animations.walk_right = engine->gameData.animations["walk_player_right"];
-	animations.walk_right_start = engine->gameData.animations["walk_start_right"];
-	animations.walk_left = engine->gameData.animations["walk_player_left"];
-	animations.walk_left_start = engine->gameData.animations["walk_start_left"];
+	animations.walk_right = engine->data->animations["walk_player_right"];
+	animations.walk_right_start = engine->data->animations["walk_start_right"];
+	animations.walk_left = engine->data->animations["walk_player_left"];
+	animations.walk_left_start = engine->data->animations["walk_start_left"];
 
-	animations.walk_back = engine->gameData.animations["walk_player_back"];
-	animations.walk_back_start = engine->gameData.animations["walk_start_back"];
+	animations.walk_back = engine->data->animations["walk_player_back"];
+	animations.walk_back_start = engine->data->animations["walk_start_back"];
 
-	animations.jump_start = engine->gameData.animations["jump_launch"];
-	animations.jump_glide = engine->gameData.animations["jump_glide"];
-	animations.jump_land  = engine->gameData.animations["jump_land"];
+	animations.jump_start = engine->data->animations["jump_launch"];
+	animations.jump_glide = engine->data->animations["jump_glide"];
+	animations.jump_land  = engine->data->animations["jump_land"];
 
-	animations.car_sit     = engine->gameData.animations["car_sit"];
-	animations.car_sit_low = engine->gameData.animations["car_lsit"];
+	animations.car_sit     = engine->data->animations["car_sit"];
+	animations.car_sit_low = engine->data->animations["car_lsit"];
 
-	animations.car_open_lhs   = engine->gameData.animations["car_open_lhs"];
-	animations.car_getin_lhs   = engine->gameData.animations["car_getin_lhs"];
-	animations.car_getout_lhs   = engine->gameData.animations["car_getout_lhs"];
+	animations.car_open_lhs   = engine->data->animations["car_open_lhs"];
+	animations.car_getin_lhs   = engine->data->animations["car_getin_lhs"];
+	animations.car_getout_lhs   = engine->data->animations["car_getout_lhs"];
 	
-	animations.car_open_rhs   = engine->gameData.animations["car_open_rhs"];
-	animations.car_getin_rhs   = engine->gameData.animations["car_getin_rhs"];
-	animations.car_getout_rhs   = engine->gameData.animations["car_getout_rhs"];
+	animations.car_open_rhs   = engine->data->animations["car_open_rhs"];
+	animations.car_getin_rhs   = engine->data->animations["car_getin_rhs"];
+	animations.car_getout_rhs   = engine->data->animations["car_getout_rhs"];
 
 	if(model) {
 		skeleton = new Skeleton;
@@ -134,10 +135,10 @@ void CharacterObject::changeCharacterModel(const std::string &name)
 	auto modelName = std::string(name);
 	std::transform(modelName.begin(), modelName.end(), modelName.begin(), ::tolower);
 
-	engine->gameData.loadDFF(modelName + ".dff");
-	engine->gameData.loadTXD(modelName + ".txd");
+	engine->data->loadDFF(modelName + ".dff");
+	engine->data->loadTXD(modelName + ".txd");
 
-	auto& models = engine->gameData.models;
+	auto& models = engine->data->models;
 	auto mfind = models.find(modelName);
 	if( mfind != models.end() ) {
 		model = mfind->second;
@@ -237,11 +238,11 @@ void CharacterObject::updateCharacter(float dt)
 		position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
 
 		// Handle above waist height water.
-		auto wi = engine->gameData.getWaterIndexAt(getPosition());
+		auto wi = engine->data->getWaterIndexAt(getPosition());
 		if( wi != NO_WATER_INDEX ) {
-			float wh = engine->gameData.waterHeights[wi];
+			float wh = engine->data->waterHeights[wi];
 			auto ws = getPosition();
-			wh += engine->gameData.getWaveHeightAt(ws);
+			wh += engine->data->getWaveHeightAt(ws);
 			
 			// If Not in water before
 			//  If last position was above water

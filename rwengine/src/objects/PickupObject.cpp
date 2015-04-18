@@ -1,6 +1,7 @@
 #include <objects/PickupObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 
 PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int modelID)
 	: GameObject(world, position, glm::quat(), nullptr),
@@ -22,7 +23,7 @@ PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int mode
 	corona->particle.direction = glm::vec3(0.f, 0.f, 1.f);
 	corona->particle.orientation = VisualFX::ParticleData::Camera;
 	corona->particle.colour = glm::vec4(1.0f, 0.3f, 0.3f, 0.3f);
-	corona->particle.texture = engine->gameData.findTexture("coronacircle");
+	corona->particle.texture = engine->data->findTexture("coronacircle");
 
 	setEnabled(true);
 }

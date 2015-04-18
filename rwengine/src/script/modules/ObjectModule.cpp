@@ -360,8 +360,8 @@ bool game_character_in_zone(const ScriptArguments& args)
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
 	std::string zname(args[1].string);
 	
-	auto zfind = args.getVM()->getWorld()->gameData.zones.find(zname);
-	if( zfind != args.getVM()->getWorld()->gameData.zones.end() ) {
+	auto zfind = args.getVM()->getWorld()->data->zones.find(zname);
+	if( zfind != args.getVM()->getWorld()->data->zones.end() ) {
 		auto player = controller->getCharacter()->getPosition();
 		auto& min = zfind->second.min;
 		auto& max = zfind->second.max;
@@ -666,8 +666,8 @@ void game_create_pickup(const ScriptArguments& args)
 		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
 		id = args.getVM()->getWorld()->findModelDefinition(model);
-		args.getVM()->getWorld()->gameData.loadDFF(model+".dff");
-		args.getVM()->getWorld()->gameData.loadTXD("icons.txd");
+		args.getVM()->getWorld()->data->loadDFF(model+".dff");
+		args.getVM()->getWorld()->data->loadTXD("icons.txd");
 	}
 	else
 	{
@@ -675,9 +675,9 @@ void game_create_pickup(const ScriptArguments& args)
 		
 		if ( ! ( id >= 170 && id <= 184 ) )
 		{
-			args.getVM()->getWorld()->gameData.loadDFF(data->modelName+".dff");
+			args.getVM()->getWorld()->data->loadDFF(data->modelName+".dff");
 		}
-		args.getVM()->getWorld()->gameData.loadTXD(data->textureName+".txd");
+		args.getVM()->getWorld()->data->loadTXD(data->textureName+".txd");
 	}
 	
 	
@@ -760,7 +760,7 @@ void game_set_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = (VehicleObject*)(*args[0].handle);
 	
-	auto& colours = args.getVM()->getWorld()->gameData.vehicleColours;
+	auto& colours = args.getVM()->getWorld()->data->vehicleColours;
 	vehicle->colourPrimary = colours[args[1].integer];
 	vehicle->colourSecondary = colours[args[2].integer];
 }
@@ -907,10 +907,10 @@ void game_change_nearest_model(const ScriptArguments& args)
 			if( o->model->name != oldmodel ) continue;
 			float d = glm::distance(position, o->getPosition());
 			if( d < radius ) {
-				args.getVM()->getWorld()->gameData.loadDFF(newmodel + ".dff", false);
+				args.getVM()->getWorld()->data->loadDFF(newmodel + ".dff", false);
 				InstanceObject* inst = static_cast<InstanceObject*>(o);
 				inst->changeModel(nobj);
-				inst->model = args.getVM()->getWorld()->gameData.models[newmodel];
+				inst->model = args.getVM()->getWorld()->data->models[newmodel];
 			}
 		}
 	}

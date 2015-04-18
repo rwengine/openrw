@@ -88,14 +88,16 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		throw std::runtime_error("Invalid game directory path, is " +envname+ " set?");
 	}
 
-	engine = new GameWorld(&log, gamepath);
+	data = new GameData(&log, gamepath);
+
+	engine = new GameWorld(&log, data);
 	
 	// Initalize all the archives.
-	engine->gameData.loadIMG("/models/gta3");
-	//engine->gameData.loadIMG("/models/txd");
-	engine->gameData.loadIMG("/anim/cuts");
+	engine->data->loadIMG("/models/gta3");
+	//engine->data.loadIMG("/models/txd");
+	engine->data->loadIMG("/anim/cuts");
 	
-	engine->gameData.load();
+	engine->data->load();
 	
 	// Initialize renderer
 	renderer = new GameRenderer(&log, engine);
@@ -110,21 +112,19 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	debug->setShaderProgram(renderer->worldProg);
 	engine->dynamicsWorld->setDebugDrawer(debug);
 
-	engine->gameData.loadDynamicObjects(gamepath + "/data/object.dat");
+	engine->data->loadDynamicObjects(gamepath + "/data/object.dat");
 
 	/// @TODO language choices.
-	engine->gameData.loadGXT("english.gxt");
+	engine->data->loadGXT("english.gxt");
 	
-	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
+	getRenderer()->water.setWaterTable(data->waterHeights, 48, engine->data->realWater, 128*128);
 	
 	for(int m = 0; m < MAP_BLOCK_SIZE; ++m)
 	{
 		std::string num = (m < 10 ? "0" : "");
 		std::string name = "radar" + num +  std::to_string(m);
-		engine->gameData.loadTXD(name + ".txd");
+		engine->data->loadTXD(name + ".txd");
 	}
-	
-	getRenderer()->water.setWaterTable(engine->gameData.waterHeights, 48, engine->gameData.realWater, 128*128);
 
 	auto loading = new LoadingState(this);
 	if( newgame )
@@ -150,7 +150,7 @@ RWGame::~RWGame()
 
 void RWGame::startScript(const std::string& name)
 {
-	SCMFile* f = engine->gameData.loadSCM(name);
+	SCMFile* f = engine->data->loadSCM(name);
 	if( f ) {
 		if( script ) delete script;
 		

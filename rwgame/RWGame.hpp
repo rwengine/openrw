@@ -2,6 +2,7 @@
 #define _RWGAME_HPP_
 
 #include <core/Logger.hpp>
+#include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
@@ -12,6 +13,7 @@
 class RWGame
 {
 	Logger log;
+	GameData* data;
 	GameWorld* engine;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;

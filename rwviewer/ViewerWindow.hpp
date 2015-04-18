@@ -2,6 +2,7 @@
 #ifndef _VIEWERWINDOW_HPP_
 #define _VIEWERWINDOW_HPP_
 #include <QMainWindow>
+#include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <core/Logger.hpp>
 #include <QGLContext>
@@ -19,6 +20,7 @@ class ViewerWindow : public QMainWindow
 
 	Logger engineLog;
 
+	GameData* gameData;
 	GameWorld* gameWorld;
 	GameRenderer* renderer;
 

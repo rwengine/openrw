@@ -7,6 +7,7 @@
 #include <data/Skeleton.hpp>
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
 
@@ -247,10 +248,10 @@ void VehicleObject::tickPhysics(float dt)
 
 		if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
 			int i = (wX*WATER_HQ_DATA_SIZE) + wY;
-			int hI = engine->gameData.realWater[i];
+			int hI = engine->data->realWater[i];
 			if( hI < NO_WATER_INDEX ) {
-				wH = engine->gameData.waterHeights[hI];
-				wH += engine->gameData.getWaveHeightAt(ws);
+				wH = engine->data->waterHeights[hI];
+				wH += engine->data->getWaveHeightAt(ws);
 				// If the vehicle is currently underwater
 				if( vH <= wH ) {
 					// and was not underwater here in the last tick
@@ -520,12 +521,12 @@ void VehicleObject::setPartState(VehicleObject::Part* part, VehicleObject::Frame
 void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)
 {
 	auto ws = getPosition() + relPt;
-	auto wi = engine->gameData.getWaterIndexAt(ws);
+	auto wi = engine->data->getWaterIndexAt(ws);
 	if(wi != NO_WATER_INDEX) {
-		float h = engine->gameData.waterHeights[wi];
+		float h = engine->data->waterHeights[wi];
 
 		// Calculate wave height
-		h += engine->gameData.getWaveHeightAt(ws);
+		h += engine->data->getWaveHeightAt(ws);
 
 		if ( ws.z <= h ) {
 			float x = (h - ws.z);

@@ -4,7 +4,9 @@
 
 class Logger;
 
-#include <engine/GameData.hpp>
+#include <GL/glew.h>
+
+class GameData;
 #include <engine/GameState.hpp>
 
 #include <ai/AIGraphNode.hpp>
@@ -20,6 +22,7 @@ class InstanceObject;
 class VehicleObject;
 
 #include <render/VisualFX.hpp>
+#include <data/ObjectData.hpp>
 
 struct WeaponScan;
 
@@ -58,7 +61,7 @@ class GameWorld
 {
 public:
 
-	GameWorld(Logger* log, const std::string& gamepath);
+	GameWorld(Logger* log, GameData* dat);
 
 	~GameWorld();
 
@@ -149,7 +152,7 @@ public:
 	/**
 	 * Game data
 	 */
-	GameData gameData;
+	GameData* data;
 
 	/**
 	 * Gameplay state

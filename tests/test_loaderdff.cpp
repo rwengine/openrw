@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 BOOST_AUTO_TEST_CASE(test_load_dff)
 {
 	{
-		auto d = Global::get().e->gameData.openFile("landstal.dff");
+		auto d = Global::get().e->data->openFile("landstal.dff");
 
 		LoaderDFF loader;
 
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_loader_job)
 
 		ResourceHandle<Model>::Ref modelRef { new ResourceHandle<Model>("landstal.dff") };
 		
-		auto index = &Global::get().e->gameData.index;
+		auto index = &Global::get().e->data->index;
 		auto job = new BackgroundLoaderJob<Model, LoaderDFF>{ &ctx, index, "landstal.dff", modelRef };
 
 		ctx.queueJob(job);

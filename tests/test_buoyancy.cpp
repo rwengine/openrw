@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy)
 		BOOST_CHECK( ! vehicle->isInWater() );
 
 		// TODO: fix magic numbers
-		auto orgval	= Global::get().e->gameData.realWater[0];
-		Global::get().e->gameData.realWater[0] = NO_WATER_INDEX;
+		auto orgval	= Global::get().e->data->realWater[0];
+		Global::get().e->data->realWater[0] = NO_WATER_INDEX;
 
 		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy)
 		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );
 
-		Global::get().e->gameData.realWater[0] = orgval;
+		Global::get().e->data->realWater[0] = orgval;
 
 		vehicle->tickPhysics(0.0016f);
 		BOOST_CHECK( ! vehicle->isInWater() );

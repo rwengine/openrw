@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		Animation animation;
 		
 		/** Models are currently needed to relate animation bones <=> model frame #s. */
-		Global::get().e->gameData.loadDFF("player.dff");
-		ModelRef& test_model = Global::get().e->gameData.models["player"];
+		Global::get().e->data->loadDFF("player.dff");
+		ModelRef& test_model = Global::get().e->data->models["player"];
 		
 		Animator animator(test_model->resource, &skeleton);
 

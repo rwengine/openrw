@@ -3,6 +3,7 @@
 #include <data/CollisionModel.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
 
 InstanceObject::InstanceObject(GameWorld* engine,
 		const glm::vec3& pos,
@@ -60,10 +61,10 @@ void InstanceObject::tick(float dt)
 
 		if( wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 && wY < WATER_HQ_DATA_SIZE ) {
 			int i = (wX*WATER_HQ_DATA_SIZE) + wY;
-			int hI = engine->gameData.realWater[i];
+			int hI = engine->data->realWater[i];
 			if( hI < NO_WATER_INDEX ) {
-				wH = engine->gameData.waterHeights[hI];
-				wH += engine->gameData.getWaveHeightAt(ws);
+				wH = engine->data->waterHeights[hI];
+				wH += engine->data->getWaveHeightAt(ws);
 				if( vH <= wH ) {
 					inWater = true;
 				}
@@ -83,12 +84,12 @@ void InstanceObject::tick(float dt)
 			// Damper motion
 			body->body->setDamping(0.95f, 0.9f);
 
-			auto wi = engine->gameData.getWaterIndexAt(ws);
+			auto wi = engine->data->getWaterIndexAt(ws);
 			if(wi != NO_WATER_INDEX) {
-				float h = engine->gameData.waterHeights[wi] + oZ;
+				float h = engine->data->waterHeights[wi] + oZ;
 
 				// Calculate wave height
-				h += engine->gameData.getWaveHeightAt(ws);
+				h += engine->data->getWaveHeightAt(ws);
 
 				if ( ws.z <= h ) {
 					/*if( dynamics->uprootForce > 0.f && (body->body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {

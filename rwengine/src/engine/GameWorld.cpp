@@ -1,4 +1,5 @@
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 
 #include <core/Logger.hpp>
 
@@ -73,12 +74,12 @@ public:
 	}
 };
 
-GameWorld::GameWorld(Logger* log, const std::string& path)
-	: logger(log), gameTime(0.f), gameData(log, path), randomEngine(rand()),
+GameWorld::GameWorld(Logger* log, GameData* dat)
+	: logger(log), gameTime(0.f), data(dat), randomEngine(rand()),
 	  _work( new WorkContext( this ) ), cutsceneAudio(nullptr), missionAudio(nullptr),
 	  paused(false)
 {
-	gameData.engine = this;
+	data->engine = this;
 	
 	collisionConfig = new btDefaultCollisionConfiguration;
 	collisionDispatcher = new WorldCollisionDispatcher(collisionConfig);
@@ -110,7 +111,7 @@ GameWorld::~GameWorld()
 
 bool GameWorld::defineItems(const std::string& name)
 {
-	auto i = gameData.ideLocations.find(name);
+	auto i = data->ideLocations.find(name);
 	std::string path = name;
 
 	LoaderIDE idel;
@@ -141,7 +142,7 @@ bool GameWorld::defineItems(const std::string& name)
 
 bool GameWorld::placeItems(const std::string& name)
 {
-	auto i = gameData.iplLocations.find(name);
+	auto i = data->iplLocations.find(name);
 	std::string path = name;
 	
 	LoaderIPL ipll;
@@ -194,19 +195,19 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		// Ensure the relevant data is loaded.
 		if(! oi->modelName.empty()) {
 			if( modelname != "null" ) {
-				gameData.loadDFF(modelname + ".dff", false);
+				data->loadDFF(modelname + ".dff", false);
 			}
 		}
 		if(! texturename.empty()) {
-			gameData.loadTXD(texturename + ".txd", true);
+			data->loadTXD(texturename + ".txd", true);
 		}
 
-		ModelRef m = gameData.models[modelname];
+		ModelRef m = data->models[modelname];
 
 		// Check for dynamic data.
-		auto dyit = gameData.dynamicObjectData.find(oi->modelName);
+		auto dyit = data->dynamicObjectData.find(oi->modelName);
 		std::shared_ptr<DynamicObjectData> dydata;
-		if( dyit != gameData.dynamicObjectData.end() ) {
+		if( dyit != data->dynamicObjectData.end() ) {
 			dydata = dyit->second;
 		}
 
@@ -335,15 +336,15 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	}
 
 	if( modelname != "null" ) {
-		gameData.loadDFF(modelname + ".dff", false);
+		data->loadDFF(modelname + ".dff", false);
 	}
 
 	if(! texturename.empty()) {
-		gameData.loadTXD(texturename + ".txd", true);
+		data->loadTXD(texturename + ".txd", true);
 	}
 
 
-	ModelRef m = gameData.models[modelname];
+	ModelRef m = data->models[modelname];
 
 	auto instance = new CutsceneObject(
 		this,
@@ -363,19 +364,19 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 		logger->info("World", "Creating Vehicle ID " + std::to_string(id) + " (" + vti->gameName + ")");
 		
 		if(! vti->modelName.empty()) {
-			gameData.loadDFF(vti->modelName + ".dff");
+			data->loadDFF(vti->modelName + ".dff");
 		}
 		if(! vti->textureName.empty()) {
-			gameData.loadTXD(vti->textureName + ".txd");
+			data->loadTXD(vti->textureName + ".txd");
 		}
 		
 		glm::u8vec3 prim(255), sec(128);
-		auto palit = gameData.vehiclePalettes.find(vti->modelName); // modelname is conveniently lowercase (usually)
-		if(palit != gameData.vehiclePalettes.end() && palit->second.size() > 0 ) {
+		auto palit = data->vehiclePalettes.find(vti->modelName); // modelname is conveniently lowercase (usually)
+		if(palit != data->vehiclePalettes.end() && palit->second.size() > 0 ) {
 			 std::uniform_int_distribution<int> uniform(0, palit->second.size()-1);
 			 int set = uniform(randomEngine);
-			 prim = gameData.vehicleColours[palit->second[set].first];
-			 sec = gameData.vehicleColours[palit->second[set].second];
+			 prim = data->vehicleColours[palit->second[set].first];
+			 sec = data->vehicleColours[palit->second[set].second];
 		}
 		else {
 			logger->warning("World", "No colour palette for vehicle " + vti->modelName);
@@ -385,14 +386,14 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 		if( wi )
 		{
 			if(! wi->textureName.empty()) {
-				gameData.loadTXD(wi->textureName + ".txd");
+				data->loadTXD(wi->textureName + ".txd");
 			}
 		}
 		
-		ModelRef& m = gameData.models[vti->modelName];
+		ModelRef& m = data->models[vti->modelName];
 		auto model = m->resource;
-		auto info = gameData.vehicleInfo.find(vti->handlingID);
-		if(model && info != gameData.vehicleInfo.end()) {
+		auto info = data->vehicleInfo.find(vti->handlingID);
+		if(model && info != data->vehicleInfo.end()) {
 			if( info->second->wheels.size() == 0 && info->second->seats.size() == 0 ) {
 				for( const ModelFrame* f : model->frames ) {
 					const std::string& name = f->getName();
@@ -442,14 +443,14 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 			}
 
 			if( modelname != "null" ) {
-				gameData.loadDFF(modelname + ".dff");
+				data->loadDFF(modelname + ".dff");
 			}
 		}
 		if(! texturename.empty()) {
-			gameData.loadTXD(texturename + ".txd");
+			data->loadTXD(texturename + ".txd");
 		}
 
-		ModelRef m = gameData.models[modelname];
+		ModelRef m = data->models[modelname];
 
 		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
@@ -714,7 +715,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	std::string lowerName(name);
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
-	auto datfile = gameData.openFile(lowerName + ".dat");
+	auto datfile = data->openFile(lowerName + ".dat");
 
 	CutsceneData* cutscene = new CutsceneData;
 
@@ -723,13 +724,13 @@ void GameWorld::loadCutscene(const std::string &name)
 		loaderdat.load(cutscene->tracks, datfile);
 	}
 
-	gameData.loadIFP(lowerName + ".ifp");
+	data->loadIFP(lowerName + ".ifp");
 
-	cutsceneAudioLoaded = gameData.loadAudioStream(name+".mp3");
+	cutsceneAudioLoaded = data->loadAudioStream(name+".mp3");
 	
 	if ( !cutsceneAudioLoaded )
 	{
-		cutsceneAudioLoaded = gameData.loadAudioStream(name+".wav");
+		cutsceneAudioLoaded = data->loadAudioStream(name+".wav");
 	}
 	
 	if ( !cutsceneAudioLoaded )

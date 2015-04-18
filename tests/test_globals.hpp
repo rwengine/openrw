@@ -3,6 +3,7 @@
 
 #include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 #include <core/Logger.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -34,20 +35,22 @@ class Global
 {
 public:
 	sf::Window wnd;
+	GameData* d;
 	GameWorld* e;
+	Logger log;
 	
 	Global() {
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		Logger log;
-		e = new GameWorld(&log, getGamePath());
+		d = new GameData(&log, getGamePath());
+		e = new GameWorld(&log, d);
 
-		e->gameData.loadIMG("/models/gta3");
-		e->gameData.loadIMG("/anim/cuts");
-		e->gameData.load();
-		for(std::map<std::string, std::string>::iterator it = e->gameData.ideLocations.begin();
-			it != e->gameData.ideLocations.end();
+		e->data->loadIMG("/models/gta3");
+		e->data->loadIMG("/anim/cuts");
+		e->data->load();
+		for(std::map<std::string, std::string>::iterator it = e->data->ideLocations.begin();
+			it != e->data->ideLocations.end();
 			++it) {
 			e->defineItems(it->second);
 		}

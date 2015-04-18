@@ -1,5 +1,6 @@
 #include <objects/ProjectileObject.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 #include <data/WeaponData.hpp>
 
 void ProjectileObject::checkPhysicsContact()
@@ -71,7 +72,7 @@ void ProjectileObject::explode()
 						  });
 		}
 
-		auto tex = engine->gameData.findTexture("explo02");
+		auto tex = engine->data->findTexture("explo02");
 		
 		auto explosion = engine->createEffect(VisualFX::Particle);
 		explosion->particle.size = glm::vec2(exp_size);

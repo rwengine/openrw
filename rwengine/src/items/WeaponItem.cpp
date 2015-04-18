@@ -6,6 +6,7 @@
 #include <engine/GameWorld.hpp>
 #include <objects/ProjectileObject.hpp>
 #include <data/Skeleton.hpp>
+#include <engine/GameData.hpp>
 
 void WeaponItem::fireHitscan()
 {
@@ -34,9 +35,9 @@ void WeaponItem::fireHitscan()
 	// - smoke emited at hit point
 	// - gunflash
 
-	auto tracerTex = _character->engine->gameData.findTexture("shad_exp")->getName();
-	auto flashTex = _character->engine->gameData.findTexture("gunflash2")->getName();
-	auto flashTex1 = _character->engine->gameData.findTexture("gunflash1")->getName();
+	auto tracerTex = _character->engine->data->findTexture("shad_exp")->getName();
+	auto flashTex = _character->engine->data->findTexture("gunflash2")->getName();
+	auto flashTex1 = _character->engine->data->findTexture("gunflash1")->getName();
 
 	float tracertime = 0.1f;
 	auto distance = glm::distance(fireOrigin, farTarget);

@@ -10,6 +10,7 @@
 #include <render/Model.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameState.hpp>
+#include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameWorld.hpp>
 #include <ai/PlayerController.hpp>
@@ -29,7 +30,7 @@
 void game_print_big(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
+	std::string str = args.getVM()->getWorld()->data->texts.text(id);
 	unsigned short style = args[2].integer;
 	args.getVM()->getWorld()->state.text.push_back({
 		id,
@@ -43,7 +44,7 @@ void game_print_big(const ScriptArguments& args)
 void game_print_now(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
+	std::string str = args.getVM()->getWorld()->data->texts.text(id);
 	int flags = args[2].integer;
 	args.getVM()->getWorld()->state.text.push_back({
 		id,
@@ -123,8 +124,8 @@ void game_set_vehicle_generator_count(const ScriptArguments& args)
 
 void game_set_zone_car_info(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->gameData.zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->gameData.zones.end() )
+	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
+	if( it != args.getVM()->getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		for(int i = 2; i < args.getParameters().size(); ++i)
@@ -158,8 +159,8 @@ void game_reset_camera(const ScriptArguments& args)
 
 void game_set_zone_ped_info(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->gameData.zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->gameData.zones.end() )
+	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
+	if( it != args.getVM()->getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		for(int i = 2; i < args.getParameters().size(); ++i)
@@ -330,7 +331,7 @@ void game_get_runtime(const ScriptArguments& args)
 void game_print_big_with_number(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
+	std::string str = args.getVM()->getWorld()->data->texts.text(id);
 	
 	int number = args[1].integer;
 	str += "\n" + std::to_string(number);
@@ -408,8 +409,8 @@ bool game_special_char_loaded(const ScriptArguments& args)
 {
 	auto chartype = args.getVM()->getWorld()->findObjectType<CharacterData>(args[0].integer);
 	if( chartype ) {
-		auto modelfind = args.getVM()->getWorld()->gameData.models.find(chartype->modelName);
-		if( modelfind != args.getVM()->getWorld()->gameData.models.end() && modelfind->second->resource != nullptr ) {
+		auto modelfind = args.getVM()->getWorld()->data->models.find(chartype->modelName);
+		if( modelfind != args.getVM()->getWorld()->data->models.end() && modelfind->second->resource != nullptr ) {
 			return true;
 		}
 	}
@@ -562,7 +563,7 @@ void game_set_cutscene_anim(const ScriptArguments& args)
 	GameObject* object = static_cast<GameObject*>(*args[0].handle);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getVM()->getWorld()->gameData.animations[animName];
+	Animation* anim = args.getVM()->getWorld()->data->animations[animName];
 	if( anim ) {
 		object->animator->setAnimation(anim, false);
 	}
@@ -628,7 +629,7 @@ void game_set_head_animation(const ScriptArguments& args)
 	GameObject* object = static_cast<GameObject*>(*args[0].handle);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getVM()->getWorld()->gameData.animations[animName];
+	Animation* anim = args.getVM()->getWorld()->data->animations[animName];
 	if( anim ) {
 		object->animator->setAnimation(anim, false);
 	}
@@ -659,8 +660,8 @@ void game_set_last_mission(const ScriptArguments& args)
 
 void game_set_zone_ped_group(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->gameData.zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->gameData.zones.end() )
+	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
+	if( it != args.getVM()->getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		if( day )
@@ -678,7 +679,7 @@ void game_display_text(const ScriptArguments& args)
 {
 	glm::vec2 pos(args[0].real, args[1].real);
 	std::string str(args[2].string);
-	str = args.getVM()->getWorld()->gameData.texts.text(str);
+	str = args.getVM()->getWorld()->data->texts.text(str);
 	args.getVM()->getWorld()->state.nextText.text = str;
 	args.getVM()->getWorld()->state.nextText.position = pos;
 	args.getVM()->getWorld()->state.texts.push_back(args.getVM()->getWorld()->state.nextText);
@@ -718,9 +719,9 @@ void game_load_audio(const ScriptArguments& args)
 {
 	std::string name = args[0].string;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	if(! args.getVM()->getWorld()->gameData.loadAudioClip(name + ".wav") )
+	if(! args.getVM()->getWorld()->data->loadAudioClip(name + ".wav") )
 	{
-		if(! args.getVM()->getWorld()->gameData.loadAudioClip(name + ".mp3") )
+		if(! args.getVM()->getWorld()->data->loadAudioClip(name + ".mp3") )
 		{
 			args.getVM()->getWorld()->logger->error("SCM", "Failed to load audio: " + name);
 		}
@@ -755,7 +756,7 @@ void game_play_music_id(const ScriptArguments& args)
 	std::string name = "Miscom";
 	
 	// TODO play anything other than Miscom.wav
-	if(! gw->gameData.loadAudioClip( name + ".wav" ) )
+	if(! gw->data->loadAudioClip( name + ".wav" ) )
 	{
 		args.getVM()->getWorld()->logger->error("SCM", "Error loading audio " + name);
 		return;
@@ -793,7 +794,7 @@ void game_get_found_hidden_packages(const ScriptArguments& args)
 void game_display_help(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->gameData.texts.text(id);
+	std::string str = args.getVM()->getWorld()->data->texts.text(id);
 	unsigned short style = OnscreenText::Help;
 	args.getVM()->getWorld()->state.text.push_back({
 		id,
@@ -857,7 +858,7 @@ bool game_are_vehicle_cheats_enabled(const ScriptArguments& args)
 
 void game_load_splash(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->gameData.loadSplash(args[0].string);
+	args.getVM()->getWorld()->data->loadSplash(args[0].string);
 }
 
 GameModule::GameModule()

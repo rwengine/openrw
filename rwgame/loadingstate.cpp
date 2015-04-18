@@ -13,17 +13,17 @@ void LoadingState::enter()
 	auto world = getWorld();
 
 	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = world->gameData.ideLocations.begin();
-		it != world->gameData.ideLocations.end();
+	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
+		it != world->data->ideLocations.end();
 		++it) {
 		world->defineItems(it->second);
 	}
 
 	// Load IPLs
-	for(std::map<std::string, std::string>::iterator it = world->gameData.iplLocations.begin();
-		it != world->gameData.iplLocations.end();
+	for(std::map<std::string, std::string>::iterator it = world->data->iplLocations.begin();
+		it != world->data->iplLocations.end();
 		++it) {
-		world->gameData.loadZone(it->second);
+		world->data->loadZone(it->second);
 		world->placeItems(it->second);
 	}
 }

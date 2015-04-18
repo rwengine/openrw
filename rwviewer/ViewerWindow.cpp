@@ -16,7 +16,7 @@
 static int MaxRecentGames = 5;
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
-	: QMainWindow(parent, flags), gameWorld(nullptr), renderer(nullptr)
+	: QMainWindow(parent, flags), gameData(nullptr), gameWorld(nullptr), renderer(nullptr)
 {
 	setMinimumSize(640, 480);
 
@@ -149,16 +149,17 @@ void ViewerWindow::loadGame(const QString &path)
 	QDir gameDir( path );
 
 	if( gameDir.exists() && path.size() > 0 ) {
-		gameWorld = new GameWorld( &engineLog, gameDir.absolutePath().toStdString() );
+		gameData = new GameData( &engineLog, gameDir.absolutePath().toStdString() );
+		gameWorld = new GameWorld( &engineLog, gameData );
 		renderer = new GameRenderer(&engineLog, gameWorld);
 		viewerWidget->setRenderer(renderer);
 
-		gameWorld->gameData.load();
+		gameWorld->data->load();
 
 		// Initalize all the archives.
-		gameWorld->gameData.loadIMG("/models/gta3");
-		gameWorld->gameData.loadIMG("/models/txd");
-		gameWorld->gameData.loadIMG("/anim/cuts");
+		gameWorld->data->loadIMG("/models/gta3");
+		gameWorld->data->loadIMG("/models/txd");
+		gameWorld->data->loadIMG("/anim/cuts");
 
 		loadedData(gameWorld);
 	}
