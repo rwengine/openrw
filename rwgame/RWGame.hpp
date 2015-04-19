@@ -10,6 +10,8 @@
 
 #include <SFML/Graphics.hpp>
 
+class HttpServer;
+
 class RWGame
 {
 	Logger log;
@@ -18,6 +20,8 @@ class RWGame
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
 	ScriptMachine* script;
+	HttpServer* httpserver = nullptr;
+	std::thread* httpserver_thread = nullptr;
 	sf::RenderWindow window;
 	sf::Clock clock;
 	bool inFocus;
