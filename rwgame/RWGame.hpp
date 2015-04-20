@@ -23,6 +23,7 @@ class RWGame
 	bool inFocus;
 	ViewCamera lastCam, nextCam;
 	bool showDebugStats;
+	bool showDebugPaths;
 	int lastDraws; /// Number of draws issued for the last frame.
 
 	float accum;
@@ -91,6 +92,7 @@ private:
 	void render(float alpha, float dt);
 	
 	void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
+	void renderDebugPaths(float time);
 
 	void globalKeyEvent(const sf::Event& event);
 };

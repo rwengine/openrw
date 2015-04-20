@@ -26,8 +26,9 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true), showDebugStats(false),
-	  accum(0.f), timescale(1.f)
+	: engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
+	showDebugStats(false), showDebugPaths(false),
+	accum(0.f), timescale(1.f)
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
@@ -440,6 +441,11 @@ void RWGame::render(float alpha, float time)
 	debug->flush(&engine->renderer);
 #endif
 
+	if( showDebugPaths )
+	{
+		renderDebugPaths(time);
+	}
+
 	if ( showDebugStats )
 	{
 		renderDebugStats(time, rendertime);
@@ -549,6 +555,29 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	}*/
 }
 
+void RWGame::renderDebugPaths(float time)
+{
+	btVector3 roadColour(1.f, 0.f, 0.f);
+	btVector3 pedColour(0.f, 0.f, 1.f);
+	
+	for( AIGraphNode* n : engine->aigraph.nodes )
+	{
+		btVector3 p( n->position.x, n->position.y, n->position.z );
+		auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
+		debug->drawLine( p - btVector3(0.f, 0.f, 1.f), p + btVector3(0.f, 0.f, 1.f), col);
+		debug->drawLine( p - btVector3(1.f, 0.f, 0.f), p + btVector3(1.f, 0.f, 0.f), col);
+		debug->drawLine( p - btVector3(0.f, 1.f, 0.f), p + btVector3(0.f, 1.f, 0.f), col);
+
+		for( AIGraphNode* c : n->connections )
+		{
+			btVector3 f( c->position.x, c->position.y, c->position.z );
+			debug->drawLine( p, f, col);
+		}
+	}
+
+	debug->flush(renderer);
+}
+
 void RWGame::globalKeyEvent(const sf::Event& event)
 {
 	switch (event.key.code) {
@@ -566,6 +595,9 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 		break;
 	case sf::Keyboard::F1:
 		showDebugStats = ! showDebugStats;
+		break;
+	case sf::Keyboard::F2:
+		showDebugPaths = ! showDebugPaths;
 		break;
 	default: break;
 	}
