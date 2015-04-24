@@ -37,7 +37,7 @@ void HttpServer::run()
 				std::string http_method = regex_match.str(1);
 				std::string http_path = regex_match.str(2);
 
-				std::string response = dispatch();
+				std::string response = dispatch(http_method, http_path);
 				client.send(response.c_str(), response.size());
 			}
 
@@ -48,7 +48,7 @@ void HttpServer::run()
 	listener.close();
 }
 
-std::string HttpServer::dispatch()
+std::string HttpServer::dispatch(std::string method, std::string path)
 {
 	return "HTTP/1.1 200 OK\n\n<h1>HELLO FROM OPENRW</h1>";
 }

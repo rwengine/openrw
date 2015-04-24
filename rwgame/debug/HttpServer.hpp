@@ -30,5 +30,5 @@ private:
 	RWGame* game;
 	GameWorld* world;
 
-	std::string dispatch();
+	std::string dispatch(std::string method, std::string path);
 };
