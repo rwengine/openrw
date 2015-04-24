@@ -29,4 +29,6 @@ private:
 	ReuseableListener listener;
 	RWGame* game;
 	GameWorld* world;
+
+	std::string dispatch();
 };

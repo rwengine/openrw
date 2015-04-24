@@ -27,9 +27,16 @@ void HttpServer::run()
 		buf[received] = '\0';
 		std::cout << "Got " << received << " bytes: " << buf << std::endl;
 
-		#define DATASEND(x) x, strlen(x)
-		client.send(DATASEND("HTTP/1.1 200 OK\n\n<h1>HELLO FROM OPENRW</h1>"));
+		std::string response = dispatch();
+		client.send(response.c_str(), response.size());
+
+		client.disconnect();
 	}
 
 	listener.close();
+}
+
+std::string HttpServer::dispatch()
+{
+	return "HTTP/1.1 200 OK\n\n<h1>HELLO FROM OPENRW</h1>";
 }
