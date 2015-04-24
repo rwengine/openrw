@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 		// Grenade should have dentonated by this point
 		BOOST_CHECK( character->mHealth < 100.f );
 
-		Global::get().e->destroyObject(projectile);
-		Global::get().e->destroyObject(character);
+		Global::get().e->destroyObjectQueued(character);
+		Global::get().e->destroyQueuedObjects();
 	}
 
 	{
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 
 		BOOST_CHECK( character->mHealth < 100.f );
 
-		Global::get().e->destroyObject(projectile);
-		Global::get().e->destroyObject(character);
+		Global::get().e->destroyObjectQueued(character);
+		Global::get().e->destroyQueuedObjects();
 	}
 	{
 		auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 
 		BOOST_CHECK( character->mHealth < 100.f );
 
-		Global::get().e->destroyObject(projectile);
-		Global::get().e->destroyObject(character);
+		Global::get().e->destroyObjectQueued(character);
+		Global::get().e->destroyQueuedObjects();
 	}
 }
 
