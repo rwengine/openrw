@@ -3,6 +3,7 @@
 #include <SFML/Network.hpp>
 
 #include <iostream>
+#include <regex>
 
 HttpServer::HttpServer(RWGame* game, GameWorld* world)
 	: game(game), world(world)
@@ -28,8 +29,17 @@ void HttpServer::run()
 			buf[received] = '\0';
 			std::cout << "Got " << received << " bytes: " << buf << std::endl;
 
-			std::string response = dispatch();
-			client.send(response.c_str(), response.size());
+			std::regex regex_http_first_line("(\\w+)\\s+(/.*?)\\s+HTTP/\\d+.\\d+");
+			std::cmatch regex_match;
+			std::regex_search(buf, regex_match, regex_http_first_line);
+
+			if (regex_match.size() == 3) {
+				std::string http_method = regex_match.str(1);
+				std::string http_path = regex_match.str(2);
+
+				std::string response = dispatch();
+				client.send(response.c_str(), response.size());
+			}
 
 			client.disconnect();
 		}
