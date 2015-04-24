@@ -7,6 +7,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 
+#include <data/PathData.hpp>
+
 typedef uint16_t ObjectID;
 
 /**
@@ -68,6 +70,9 @@ struct ObjectData : public ObjectInformation
 		WBRIGHTNESS  = 1 << 13, /// Weather PoleShd value effects brightness.
 		EXPLODEONHIT = 1 << 14, /// Object explodes after being hit
 	};
+
+	// Information loaded from PATH sections
+	std::vector<PathData> paths;
 };
 
 typedef std::shared_ptr<ObjectData> ObjectDataPtr;

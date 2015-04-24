@@ -19,13 +19,9 @@ InstanceObject::InstanceObject(GameWorld* engine,
 	if( obj ) {
 		changeModel(obj);
 
-		auto pathit = engine->data->objectNodes.find(obj->ID);
-		if( pathit != engine->data->objectNodes.end() ) {
-			auto& pathlist = pathit->second;
-			for( size_t p = 0; p < pathlist.size(); ++p ) {
-				auto& path = pathlist[p];
-				engine->aigraph.createPathNodes(position, rot, *path);
-			}
+		for( auto& path : obj->paths )
+		{
+			engine->aigraph.createPathNodes(position, rot, path);
 		}
 	}
 

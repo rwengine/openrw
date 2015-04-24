@@ -197,20 +197,6 @@ bool GameData::loadObjects(const std::string& name)
 	
 	if(idel.load(path)) {
 		objectTypes.insert(idel.objects.begin(), idel.objects.end());
-		
-		// Load AI information.
-		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
-			auto pathit = objectNodes.find(idel.PATHs[a]->ID);
-			if( pathit == objectNodes.end() ) {
-				objectNodes.insert({
-					idel.PATHs[a]->ID,
-					{idel.PATHs[a]}
-				});
-			}
-			else {
-				pathit->second.push_back(idel.PATHs[a]);
-			}
-		}
 	}
 	else {
 		logger->error("Data", "Failed to load IDE " + path);

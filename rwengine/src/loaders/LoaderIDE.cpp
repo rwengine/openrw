@@ -182,22 +182,22 @@ bool LoaderIDE::load(const std::string &filename)
 				break;
 			}
 			case PATH: {
-				std::shared_ptr<PathData> path(new PathData);
+				PathData path;
 
 				std::string type;
 				getline(strstream, type, ',');
 				if( type == "ped" ) {
-						path->type = PathData::PATH_PED;
+					path.type = PathData::PATH_PED;
 				}
 				else if( type == "car") {
-						path->type = PathData::PATH_CAR;
+					path.type = PathData::PATH_CAR;
 				}
 
 				std::string id;
 				getline(strstream, id, ',');
-				path->ID = atoi(id.c_str());
+				path.ID = atoi(id.c_str());
 
-				getline(strstream, path->modelName);
+				getline(strstream, path.modelName);
 
 				std::string linebuff, buff;
 				for( size_t p = 0; p < 12; ++p ) {
@@ -246,10 +246,12 @@ bool LoaderIDE::load(const std::string &filename)
 						getline(buffstream, buff, ',');
 						node.other_thing2 = atoi(buff.c_str());
 
-						path->nodes.push_back(node);
+						path.nodes.push_back(node);
 					}
 
-					PATHs.push_back(path);
+					auto& object = objects[path.ID];
+					auto instance = std::dynamic_pointer_cast<ObjectData>(object);
+					instance->paths.push_back(path);
 
 					break;
 				}

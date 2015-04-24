@@ -210,11 +210,6 @@ public:
 	}
 
 	/**
-	 * Paths associated with each object definition.
-	 */
-	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
-
-	/**
 	 * The vehicle colour palettes
 	 */
 	std::vector<glm::u8vec3> vehicleColours;
