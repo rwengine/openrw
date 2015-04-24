@@ -50,4 +50,9 @@ BOOST_AUTO_TEST_CASE(test_object_data)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(test_gamedata_data)
+{
+	
+}
+
 BOOST_AUTO_TEST_SUITE_END()

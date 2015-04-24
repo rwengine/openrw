@@ -561,7 +561,7 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 	// Draw wheels n' stuff
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-		auto woi = engine->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
+		auto woi = engine->data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
 			Model* wheelModel = engine->data->models["wheels"]->resource;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
@@ -705,7 +705,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
 	modelMatrix = glm::rotate(modelMatrix, engine->gameTime, glm::vec3(0.f, 0.f, 1.f));
 
-	auto odata = engine->findObjectType<ObjectData>(pickup->getModelID());
+	auto odata = engine->data->findObjectType<ObjectData>(pickup->getModelID());
 	
 	Model* model = nullptr;
 	ModelFrame* itemModel = nullptr;
@@ -793,7 +793,7 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 {
 	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(_renderAlpha);
 
-	auto odata = engine->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
+	auto odata = engine->data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
 	auto weapons = engine->data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
@@ -837,7 +837,7 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 {
 	// srhand
-	std::shared_ptr<ObjectData> odata = engine->findObjectType<ObjectData>(item->getModelID());
+	std::shared_ptr<ObjectData> odata = engine->data->findObjectType<ObjectData>(item->getModelID());
 	auto weapons = engine->data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");

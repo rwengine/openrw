@@ -109,37 +109,6 @@ GameWorld::~GameWorld()
 	/// @todo delete other things.
 }
 
-bool GameWorld::defineItems(const std::string& name)
-{
-	auto i = data->ideLocations.find(name);
-	std::string path = name;
-
-	LoaderIDE idel;
-	
-	if(idel.load(path)) {
-		objectTypes.insert(idel.objects.begin(), idel.objects.end());
-
-		// Load AI information.
-		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
-			auto pathit = objectNodes.find(idel.PATHs[a]->ID);
-			if( pathit == objectNodes.end() ) {
-					objectNodes.insert({
-															idel.PATHs[a]->ID,
-															{idel.PATHs[a]}
-													});
-			}
-			else {
-					pathit->second.push_back(idel.PATHs[a]);
-			}
-		}
-	}
-	else {
-		logger->error("Data", "Failed to load IDE " + path);
-	}
-	
-	return false;
-}
-
 bool GameWorld::placeItems(const std::string& name)
 {
 	auto i = data->iplLocations.find(name);
@@ -183,7 +152,7 @@ bool GameWorld::placeItems(const std::string& name)
 
 InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
-	auto oi = findObjectType<ObjectData>(id);
+	auto oi = data->findObjectType<ObjectData>(id);
 	if( oi ) {
 
 		std::string modelname = oi->modelName;
@@ -266,24 +235,6 @@ void GameWorld::cleanupTraffic(const glm::vec3& focus)
 	destroyQueuedObjects();
 }
 
-#include <strings.h>
-uint16_t GameWorld::findModelDefinition(const std::string model)
-{
-	// Dear C++ Why do I have to resort to strcasecmp this isn't C.
-	auto defit = std::find_if(objectTypes.begin(), objectTypes.end(),
-							  [&](const decltype(objectTypes)::value_type& d)
-	{
-		if(d.second->class_type == ObjectInformation::_class("OBJS"))
-		{
-			auto dat = static_cast<ObjectData*>(d.second.get());
-			return strcasecmp(dat->modelName.c_str(), model.c_str()) == 0;
-		}
-		return false;
-	});
-	if( defit != objectTypes.end() ) return defit->first;
-	return -1;
-}
-
 #include <ai/PlayerController.hpp>
 #include <core/Logger.hpp>
 CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::vec3 &pos, const glm::quat &rot)
@@ -291,8 +242,8 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	std::string modelname;
 	std::string texturename;
 
-	auto type = objectTypes.find(id);
-	if( type != objectTypes.end() )
+	auto type = data->objectTypes.find(id);
+	if( type != data->objectTypes.end() )
 	{
 		if( type->second->class_type == ObjectInformation::_class("HIER") )
 		{
@@ -359,7 +310,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 
 VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
 {
-	auto vti = findObjectType<VehicleData>(id);
+	auto vti = data->findObjectType<VehicleData>(id);
 	if( vti ) {
 		logger->info("World", "Creating Vehicle ID " + std::to_string(id) + " (" + vti->gameName + ")");
 		
@@ -382,7 +333,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 			logger->warning("World", "No colour palette for vehicle " + vti->modelName);
 		}
 		
-		auto wi = findObjectType<ObjectData>(vti->wheelModelID);
+		auto wi = data->findObjectType<ObjectData>(vti->wheelModelID);
 		if( wi )
 		{
 			if(! wi->textureName.empty()) {
@@ -424,7 +375,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
 CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
 {
-	auto pt = findObjectType<CharacterData>(id);
+	auto pt = data->findObjectType<CharacterData>(id);
 	if( pt ) {
 
 		std::string modelname = pt->modelName;

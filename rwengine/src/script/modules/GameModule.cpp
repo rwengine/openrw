@@ -407,7 +407,7 @@ void game_load_special_char(const ScriptArguments& args)
 }
 bool game_special_char_loaded(const ScriptArguments& args)
 {
-	auto chartype = args.getVM()->getWorld()->findObjectType<CharacterData>(args[0].integer);
+	auto chartype = args.getVM()->getWorld()->data->findObjectType<CharacterData>(args[0].integer);
 	if( chartype ) {
 		auto modelfind = args.getVM()->getWorld()->data->models.find(chartype->modelName);
 		if( modelfind != args.getVM()->getWorld()->data->models.end() && modelfind->second->resource != nullptr ) {

@@ -60,7 +60,7 @@ static std::map<ObjectInformation::ObjectClass, QString> gDataType =
 
 void ObjectViewer::showItem(qint16 item)
 {
-	auto def = world()->objectTypes[item];
+	auto def = world()->data->objectTypes[item];
 
 	if( def )
 	{
@@ -95,7 +95,7 @@ void ObjectViewer::showData(GameWorld *world)
 	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
 		it != world->data->ideLocations.end();
 		++it) {
-		world->defineItems(it->second);
+		world->data->loadObjects(it->second);
 	}
 
 	if( objectList->model() )
@@ -103,7 +103,7 @@ void ObjectViewer::showData(GameWorld *world)
 		delete objectList->model();
 	}
 
-	objectList->setModel(new ObjectListModel(world, objectList));
+	objectList->setModel(new ObjectListModel(world->data, objectList));
 	connect(objectList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(showItem(QModelIndex)));
 }
 

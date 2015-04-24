@@ -197,7 +197,7 @@ bool game_character_in_vehicle(const ScriptArguments& args)
 
 bool game_character_in_model(const ScriptArguments& args)
 {
-	auto vdata = args.getVM()->getWorld()->findObjectType<VehicleData>(args[1].integer);
+	auto vdata = args.getVM()->getWorld()->data->findObjectType<VehicleData>(args[1].integer);
 	if( vdata )
 	{
 		auto controller = (CharacterController*)(*args[0].handle);
@@ -665,13 +665,13 @@ void game_create_pickup(const ScriptArguments& args)
 		auto model = args.getVM()->getFile()->getModels()[id];
 		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
-		id = args.getVM()->getWorld()->findModelDefinition(model);
+		id = args.getVM()->getWorld()->data->findModelObject(model);
 		args.getVM()->getWorld()->data->loadDFF(model+".dff");
 		args.getVM()->getWorld()->data->loadTXD("icons.txd");
 	}
 	else
 	{
-		auto data = args.getVM()->getWorld()->findObjectType<ObjectData>(id);
+		auto data = args.getVM()->getWorld()->data->findObjectType<ObjectData>(id);
 		
 		if ( ! ( id >= 170 && id <= 184 ) )
 		{
@@ -779,17 +779,16 @@ void game_create_object_world(const ScriptArguments& args)
 	
 	if( id < 0 ) {
 		auto& modelname = args.getVM()->getFile()->getModels()[-id];
-		id = args.getVM()->getWorld()->findModelDefinition(modelname);
+		id = args.getVM()->getWorld()->data->findModelObject(modelname);
 		if( id == (uint16_t)-1 ) {
 			args.getVM()->getWorld()->logger->error("SCM", "Failed to find model " + modelname);
 		}
 	}
-	
-	auto& object = args.getVM()->getWorld()->objectTypes[id];
+
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
-	
-	auto inst = args.getVM()->getWorld()->createInstance(object->ID, position);
-	
+
+	auto inst = args.getVM()->getWorld()->createInstance(id, position);
+
 	*args[4].handle = inst;
 }
 
@@ -897,8 +896,8 @@ void game_change_nearest_model(const ScriptArguments& args)
 	std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 	
-	auto newobjectid = args.getVM()->getWorld()->findModelDefinition(newmodel);
-	auto nobj = args.getVM()->getWorld()->findObjectType<ObjectData>(newobjectid);
+	auto newobjectid = args.getVM()->getWorld()->data->findModelObject(newmodel);
+	auto nobj = args.getVM()->getWorld()->data->findObjectType<ObjectData>(newobjectid);
 	
 	/// @todo Objects need to adopt the new object ID, not just the model.
 	for(auto o : args.getVM()->getWorld()->objects) {

@@ -68,11 +68,6 @@ public:
 	Logger* logger;
 
 	/**
-	 * Loads an IDE into the game
-	 */
-	bool defineItems(const std::string& name);
-
-	/**
 	 * Loads an IPL into the game.
 	 * @param name The name of the IPL as it appears in the games' gta.dat
 	 */
@@ -85,7 +80,6 @@ public:
 	 * Creates an instance
 	 */
 	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
-	uint16_t findModelDefinition(const std::string model);
 
 	/**
 	 * @brief Creates an InstanceObject for use in the current Cutscene.
@@ -163,28 +157,6 @@ public:
 	 * State of playing sounds
 	 */
 	SoundManager sound;
-	
-	/**
-	 * Object Definitions
-	 */
-	std::map<ObjectID, ObjectInformationPtr> objectTypes;
-
-	template<class T> std::shared_ptr<T> findObjectType(ObjectID id)
-	{
-		auto f = objectTypes.find(id);
-		/// @TODO don't instanciate an object here just to read .type
-		T tmp;
-		if( f != objectTypes.end() && f->second->class_type == tmp.class_type )
-		{
-			return std::static_pointer_cast<T>(f->second);
-		}
-		return nullptr;
-	}
-
-	/**
-	* Paths associated with each object definition.
-	*/
-	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
 
 	/**
 	 * @brief objects All active GameObjects in the world.

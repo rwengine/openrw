@@ -19,8 +19,8 @@ InstanceObject::InstanceObject(GameWorld* engine,
 	if( obj ) {
 		changeModel(obj);
 
-		auto pathit = engine->objectNodes.find(obj->ID);
-		if( pathit != engine->objectNodes.end() ) {
+		auto pathit = engine->data->objectNodes.find(obj->ID);
+		if( pathit != engine->data->objectNodes.end() ) {
 			auto& pathlist = pathit->second;
 			for( size_t p = 0; p < pathlist.size(); ++p ) {
 				auto& path = pathlist[p];

@@ -3,18 +3,18 @@
 
 #include <QAbstractItemModel>
 
-#include <engine/GameWorld.hpp>
+#include <engine/GameData.hpp>
 
 class ObjectListModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
-	GameWorld* _world;
+	GameData* _gameData;
 
 public:
-	explicit ObjectListModel(GameWorld* _world, QObject *parent = 0);
+	explicit ObjectListModel(GameData* gameDat, QObject *parent = 0);
 
-	GameWorld* world() const { return _world; }
+	GameData* gameData() const { return _gameData; }
 
 	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const;
 

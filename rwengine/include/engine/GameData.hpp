@@ -30,7 +30,7 @@ class SCMFile;
 
 /**
  * @brief Loads and stores all "static" data such as loaded models, handling
- * information, weather etc.
+ * information, weather, object definitions etc.
  *
  * @todo Move parsing of one-off data files from this class.
  * @todo Improve how Loaders and written and used
@@ -73,10 +73,15 @@ public:
 	}
 	
 	/**
-	 * Loads the data contained in the given file
+	 * Stores the given IDE file in the list of item definitions to load.
 	 */
-	void loadIDE(const std::string& name);
-	
+	void addIDE(const std::string& name);
+
+	/**
+	 * Loads the object definitions from the given IDE file
+	 */
+	bool loadObjects(const std::string& name);
+
 	/**
 	 * Handles the parsing of a COL file.
 	 */
@@ -184,7 +189,31 @@ public:
 	 * Map Zones
 	 */
 	std::map<std::string, ZoneData> zones;
-	
+
+	/**
+	 * Object Definitions
+	 */
+	std::map<ObjectID, ObjectInformationPtr> objectTypes;
+
+	uint16_t findModelObject(const std::string model);
+
+	template<class T> std::shared_ptr<T> findObjectType(ObjectID id)
+	{
+		auto f = objectTypes.find(id);
+		/// @TODO don't instanciate an object here just to read .type
+		T tmp;
+		if( f != objectTypes.end() && f->second->class_type == tmp.class_type )
+		{
+			return std::static_pointer_cast<T>(f->second);
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Paths associated with each object definition.
+	 */
+	std::map<uint16_t, std::vector<std::shared_ptr<PathData>>> objectNodes;
+
 	/**
 	 * The vehicle colour palettes
 	 */

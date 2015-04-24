@@ -139,7 +139,7 @@ void GameData::parseDAT(const std::string& path)
 				cmd = line.substr(0, space);
 				if(cmd == "IDE")
 				{
-					loadIDE(line.substr(space+1));
+					addIDE(line.substr(space+1));
 				}
 				else if(cmd == "SPLASH")
 				{
@@ -174,7 +174,7 @@ void GameData::parseDAT(const std::string& path)
 	}
 }
 
-void GameData::loadIDE(const std::string& name)
+void GameData::addIDE(const std::string& name)
 {
 	std::string lowername = name;
 	for(size_t t = 0; t < lowername.size(); ++t)
@@ -186,6 +186,55 @@ void GameData::loadIDE(const std::string& name)
 	}
 	
 	ideLocations.insert({lowername, datpath+"/"+lowername});
+}
+
+bool GameData::loadObjects(const std::string& name)
+{
+	auto i = ideLocations.find(name);
+	std::string path = name;
+	
+	LoaderIDE idel;
+	
+	if(idel.load(path)) {
+		objectTypes.insert(idel.objects.begin(), idel.objects.end());
+		
+		// Load AI information.
+		for( size_t a = 0; a < idel.PATHs.size(); ++a ) {
+			auto pathit = objectNodes.find(idel.PATHs[a]->ID);
+			if( pathit == objectNodes.end() ) {
+				objectNodes.insert({
+					idel.PATHs[a]->ID,
+					{idel.PATHs[a]}
+				});
+			}
+			else {
+				pathit->second.push_back(idel.PATHs[a]);
+			}
+		}
+	}
+	else {
+		logger->error("Data", "Failed to load IDE " + path);
+	}
+	
+	return false;
+}
+
+#include <strings.h>
+uint16_t GameData::findModelObject(const std::string model)
+{
+	// Dear C++ Why do I have to resort to strcasecmp this isn't C.
+	auto defit = std::find_if(objectTypes.begin(), objectTypes.end(),
+							  [&](const decltype(objectTypes)::value_type& d)
+							  {
+								  if(d.second->class_type == ObjectInformation::_class("OBJS"))
+								  {
+									  auto dat = static_cast<ObjectData*>(d.second.get());
+									  return strcasecmp(dat->modelName.c_str(), model.c_str()) == 0;
+								  }
+								  return false;
+							  });
+	if( defit != objectTypes.end() ) return defit->first;
+	return -1;
 }
 
 void GameData::loadCOL(const size_t zone, const std::string& name)

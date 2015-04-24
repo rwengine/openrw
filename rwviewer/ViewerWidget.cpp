@@ -171,7 +171,7 @@ void ViewerWidget::showObject(qint16 item)
 
 	if( dummyObject ) gworld->destroyObject( dummyObject );
 
-	auto def = world()->objectTypes[item];
+	auto def = world()->data->objectTypes[item];
 
 	if( def )
 	{

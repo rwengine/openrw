@@ -16,7 +16,7 @@ void LoadingState::enter()
 	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
 		it != world->data->ideLocations.end();
 		++it) {
-		world->defineItems(it->second);
+		world->data->loadObjects(it->second);
 	}
 
 	// Load IPLs
