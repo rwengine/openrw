@@ -3,6 +3,7 @@
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <engine/GameState.hpp>
 #include <sstream>
 #include <glm/gtx/string_cast.hpp>
 
@@ -39,7 +40,7 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		spawnVehicle(it->first);
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Open All Doors/Flaps", [=] {
-		auto pc = getWorld()->state.player->getCharacter();
+		auto pc = getWorld()->state->player->getCharacter();
 		auto pv = pc->getCurrentVehicle();
 		if( pv ) {
 			for(auto& it : pv->_hingedObjects) {
@@ -72,33 +73,33 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	}
 #endif
 	m->addEntry(Menu::lambda("Jump to Garage", [=] {
-		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(270.f, -605.f, 40.f));
+		jumpCharacter(game, game->getWorld()->state->player, glm::vec3(270.f, -605.f, 40.f));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Airport", [=] {
-		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(-950.f, -980.f, 12.f));
+		jumpCharacter(game, game->getWorld()->state->player, glm::vec3(-950.f, -980.f, 12.f));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
-		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(875.0, -309.0, 100.0));
+		jumpCharacter(game, game->getWorld()->state->player, glm::vec3(875.0, -309.0, 100.0));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Luigi's", [=] {
-		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(902.75, -425.56, 100.0));
+		jumpCharacter(game, game->getWorld()->state->player, glm::vec3(902.75, -425.56, 100.0));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Hospital", [=] {
-		jumpCharacter(game, game->getWorld()->state.player, glm::vec3(1123.77, -569.15, 100.0));
+		jumpCharacter(game, game->getWorld()->state->player, glm::vec3(1123.77, -569.15, 100.0));
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Add Follower", [=] {
-		auto spawnPos = game->getWorld()->state.player->getCharacter()->getPosition();
-		spawnPos += game->getWorld()->state.player->getCharacter()->getRotation() * glm::vec3(-1.f, 0.f, 0.f);
+		auto spawnPos = game->getWorld()->state->player->getCharacter()->getPosition();
+		spawnPos += game->getWorld()->state->player->getCharacter()->getRotation() * glm::vec3(-1.f, 0.f, 0.f);
 		auto follower = game->getWorld()->createPedestrian(12, spawnPos);
 		jumpCharacter(game, follower->controller, spawnPos);
 		follower->controller->setGoal(CharacterController::FollowLeader);
-		follower->controller->setTargetCharacter(game->getWorld()->state.player->getCharacter());
+		follower->controller->setTargetCharacter(game->getWorld()->state->player->getCharacter());
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Set Super Jump", [=] {
-		game->getWorld()->state.player->getCharacter()->setJumpSpeed(20.f);
+		game->getWorld()->state->player->getCharacter()->setJumpSpeed(20.f);
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Set Normal Jump", [=] {
-		game->getWorld()->state.player->getCharacter()->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
+		game->getWorld()->state->player->getCharacter()->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
 	}, entryHeight));
 
 	this->enterMenu(m);
@@ -236,7 +237,7 @@ void DebugState::handleEvent(const sf::Event &e)
 
 void DebugState::spawnVehicle(unsigned int id)
 {
-	auto ch = getWorld()->state.player->getCharacter();
+	auto ch = getWorld()->state->player->getCharacter();
 	if(! ch) return;
 
 	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);

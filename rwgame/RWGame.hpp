@@ -15,7 +15,7 @@ class RWGame
 	Logger log;
 	GameState* state;
 	GameData* data;
-	GameWorld* engine;
+	GameWorld* world;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
 	ScriptMachine* script;
@@ -51,7 +51,7 @@ public:
 
 	GameWorld* getWorld() const
 	{
-		return engine;
+		return world;
 	}
 	
 	GameRenderer* getRenderer() const
@@ -84,7 +84,7 @@ public:
 		auto to = btVector3(start.x+direction.x, start.y+direction.y, start.z+direction.z);
 		btCollisionWorld::ClosestRayResultCallback ray(from, to);
 
-		engine->dynamicsWorld->rayTest(from, to, ray);
+		world->dynamicsWorld->rayTest(from, to, ray);
 		if( ray.hasHit() )
 		{
 			hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),

@@ -17,7 +17,7 @@
  * the native pointer size */
 #define SCM_VARIABLE_SIZE sizeof(void*)
 
-class GameWorld;
+class GameState;
 
 class SCMFile;
 
@@ -146,7 +146,7 @@ struct SCMBreakpoint
 class ScriptMachine
 {
 public:
-	ScriptMachine(GameWorld* world, SCMFile* file, SCMOpcodes* ops);
+	ScriptMachine(GameState* state, SCMFile* file, SCMOpcodes* ops);
 	~ScriptMachine();
 
 	SCMFile* getFile() const { return _file; }
@@ -155,7 +155,7 @@ public:
 
 	SCMByte* getGlobals();
 
-	GameWorld* getWorld() const { return _world; }
+	GameState* getState() const { return state; }
 	
 	typedef std::function<void (const SCMBreakpoint&)> BreakpointHandler;
 
@@ -187,7 +187,7 @@ public:
 private:
 	SCMFile* _file;
 	SCMOpcodes* _ops;
-	GameWorld* _world;
+	GameState* state;
 
 	std::vector<SCMThread> _activeThreads;
 

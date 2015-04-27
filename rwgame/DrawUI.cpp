@@ -46,7 +46,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
 	ti.size = 20.f;
 	
-	for(OnscreenText& t : world->state.text)
+	for(OnscreenText& t : world->state->text)
 	{
 		glm::vec2 shadowOffset( 0, 0 );
 		
@@ -133,7 +133,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
 		renderer->text.renderText(ti);
 	}
 
-	for(auto& t : world->state.texts) {
+	for(auto& t : world->state->texts) {
 		ti.font = 2;
 		ti.screenPosition = t.position / glm::vec2(640, 480);
 		ti.screenPosition *= vp;

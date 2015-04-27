@@ -11,6 +11,7 @@
 #include <render/Model.hpp>
 #include <items/WeaponItem.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameState.hpp>
 #include <script/ScriptMachine.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 
@@ -26,7 +27,7 @@ void IngameState::startTest()
 	auto playerChar = getWorld()->createPedestrian(1, {270.f, -605.f, 40.f});
 	auto player = new PlayerController(playerChar);
 
-	getWorld()->state.player = player;
+	getWorld()->state->player = player;
 
 	/*auto bat = new WeaponItem(getWorld()->data.weaponData["ak47"]);
 	_playerCharacter->addToInventory(bat);
@@ -71,7 +72,7 @@ void IngameState::startGame()
 
 PlayerController *IngameState::getPlayer()
 {
-	return getWorld()->state.player;
+	return getWorld()->state->player;
 }
 
 void IngameState::enter()
@@ -134,7 +135,7 @@ void IngameState::tick(float dt)
 
 		player->updateMovementDirection(angle * _movement, _movement);
 		
-		auto target = getWorld()->state.cameraTarget;
+		auto target = getWorld()->state->cameraTarget;
 		
 		if( target == nullptr )
 		{
@@ -227,7 +228,7 @@ void IngameState::tick(float dt)
 
 void IngameState::draw(GameRenderer* r)
 {
-	if( !getWorld()->state.isCinematic && getWorld()->isCutsceneDone() )
+	if( !getWorld()->state->isCinematic && getWorld()->isCutsceneDone() )
 	{
 		drawHUD(getPlayer(), getWorld(), r);
 	}
@@ -249,9 +250,9 @@ void IngameState::handleEvent(const sf::Event &event)
 			StateManager::get().enter(new DebugState(game, _look.position, _look.rotation));
 			break;
 		case sf::Keyboard::Space:
-			if( getWorld()->state.currentCutscene )
+			if( getWorld()->state->currentCutscene )
 			{
-				getWorld()->state.skipCutscene = true;
+				getWorld()->state->skipCutscene = true;
 			}
 			else if( player && player->isInputEnabled() ) {
 				if( player->getCharacter()->getCurrentVehicle() ) {

@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 
+class GameWorld;
 class GameObject;
 class PlayerController;
 struct CutsceneData;
@@ -95,7 +96,8 @@ struct BlipData
 };
 
 /**
- * Global Gameplay data, that mostly persists across game saves.
+ * Gameplay state object that holds persistent state, and references runtime
+ * world state.
  */
 struct GameState
 {
@@ -168,6 +170,11 @@ struct GameState
 	std::vector<VehicleGenerator> vehicleGenerators;
 	
 	std::map<int, BlipData> radarBlips;
+
+	/**
+	 * World to use for this state, this isn't saved, just used at runtime
+	 */
+	GameWorld* world;
 
 	GameState();
 

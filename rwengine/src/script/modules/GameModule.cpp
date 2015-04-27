@@ -28,12 +28,12 @@
 void game_print_big(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->data->texts.text(id);
+	std::string str = args.getWorld()->data->texts.text(id);
 	unsigned short style = args[2].integer;
-	args.getVM()->getWorld()->state.text.push_back({
+	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getVM()->getWorld()->gameTime,
+		args.getWorld()->gameTime,
 		args[1].integer / 1000.f,
 		style
 	});
@@ -42,12 +42,12 @@ void game_print_big(const ScriptArguments& args)
 void game_print_now(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->data->texts.text(id);
+	std::string str = args.getWorld()->data->texts.text(id);
 	int flags = args[2].integer;
-	args.getVM()->getWorld()->state.text.push_back({
+	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getVM()->getWorld()->gameTime,
+		args.getWorld()->gameTime,
 		args[1].integer / 1000.f,
 		0
 	});
@@ -55,19 +55,19 @@ void game_print_now(const ScriptArguments& args)
 
 void game_clear_prints(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.text.clear();
+	args.getWorld()->state->text.clear();
 }
 
 void game_get_time(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getVM()->getWorld()->getHour();
-	*args[1].globalInteger = args.getVM()->getWorld()->getMinute();
+	*args[0].globalInteger = args.getWorld()->getHour();
+	*args[1].globalInteger = args.getWorld()->getMinute();
 }
 
 void game_set_time(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.hour = args[0].integer;
-	args.getVM()->getWorld()->state.minute = args[1].integer;
+	args.getWorld()->state->hour = args[0].integer;
+	args.getWorld()->state->minute = args[1].integer;
 }
 
 bool game_is_button_pressed(const ScriptArguments& args)
@@ -78,7 +78,7 @@ bool game_is_button_pressed(const ScriptArguments& args)
 
 void game_set_dead_or_arrested(const ScriptArguments& args)
 {
-	*args.getVM()->getWorld()->state.scriptOnMissionFlag = args[0].integer;
+	*args.getWorld()->state->scriptOnMissionFlag = args[0].integer;
 }
 bool game_has_death_or_arrest_finished(const ScriptArguments& args)
 {
@@ -91,7 +91,7 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 	
 	if(args[4].type == TString)
 	{
-		args.getVM()->getWorld()->logger->error("SCM", "Model names not supported for vehicle generator");
+		args.getWorld()->logger->error("SCM", "Model names not supported for vehicle generator");
 		return;
 	}
 	
@@ -110,20 +110,20 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 	vg.lastSpawnTime = 0;
 	vg.remainingSpawns = 0;
 	
-	*args[12].globalInteger = args.getVM()->getWorld()->state.vehicleGenerators.size();
+	*args[12].globalInteger = args.getWorld()->state->vehicleGenerators.size();
 	
-	args.getVM()->getWorld()->state.vehicleGenerators.push_back(vg);
+	args.getWorld()->state->vehicleGenerators.push_back(vg);
 }
 void game_set_vehicle_generator_count(const ScriptArguments& args)
 {
-	VehicleGenerator& generator = args.getVM()->getWorld()->state.vehicleGenerators.at(*args[0].globalInteger);
+	VehicleGenerator& generator = args.getWorld()->state->vehicleGenerators.at(*args[0].globalInteger);
 	generator.remainingSpawns = args[1].integer;
 }
 
 void game_set_zone_car_info(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->data->zones.end() )
+	auto it = args.getWorld()->data->zones.find(args[0].string);
+	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		for(int i = 2; i < args.getParameters().size(); ++i)
@@ -145,20 +145,20 @@ void game_camera_follow_character(const ScriptArguments& args)
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
 	if( controller != nullptr )
 	{
-		args.getVM()->getWorld()->state.cameraTarget = controller->getCharacter();
+		args.getWorld()->state->cameraTarget = controller->getCharacter();
 	}
 }
 
 void game_reset_camera(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.cameraTarget = nullptr;
-	args.getVM()->getWorld()->state.cameraFixed = false;
+	args.getWorld()->state->cameraTarget = nullptr;
+	args.getWorld()->state->cameraFixed = false;
 }
 
 void game_set_zone_ped_info(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->data->zones.end() )
+	auto it = args.getWorld()->data->zones.find(args[0].string);
+	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		for(int i = 2; i < args.getParameters().size(); ++i)
@@ -180,16 +180,16 @@ void game_camera_fixed_position(const ScriptArguments& args)
 	glm::vec3 position( args[0].real, args[1].real, args[2].real );
 	glm::vec3 angles( args[3].real, args[4].real, args[5].real );
 	
-	args.getVM()->getWorld()->state.cameraFixed = true;
-	args.getVM()->getWorld()->state.cameraPosition = position;
-	args.getVM()->getWorld()->state.cameraRotation = glm::quat(angles);
+	args.getWorld()->state->cameraFixed = true;
+	args.getWorld()->state->cameraPosition = position;
+	args.getWorld()->state->cameraRotation = glm::quat(angles);
 }
 void game_camera_lookat_position(const ScriptArguments& args)
 {
 	glm::vec3 position( args[0].real, args[1].real, args[2].real );
 	int switchmode = args[3].integer;
 	
-	auto direction = glm::normalize(position - args.getVM()->getWorld()->state.cameraPosition);
+	auto direction = glm::normalize(position - args.getWorld()->state->cameraPosition);
 	auto right = glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
 	auto up = glm::normalize(glm::cross(direction, right));
 	
@@ -206,53 +206,53 @@ void game_camera_lookat_position(const ScriptArguments& args)
 	v[2][1] = right.z;
 	v[2][2] = up.z;
 	
-	args.getVM()->getWorld()->state.cameraRotation = glm::inverse(glm::quat_cast(v));
+	args.getWorld()->state->cameraRotation = glm::inverse(glm::quat_cast(v));
 }
 
 void game_remove_blip(const ScriptArguments& args)
 {
 	int blip = *args[0].globalInteger;
-	args.getVM()->getWorld()->state.removeBlip(blip);
+	args.getWorld()->state->removeBlip(blip);
 }
 
 void game_set_fade_colour(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.fadeColour.r = args[0].integer;
-	args.getVM()->getWorld()->state.fadeColour.g = args[1].integer;
-	args.getVM()->getWorld()->state.fadeColour.b = args[2].integer;
+	args.getWorld()->state->fadeColour.r = args[0].integer;
+	args.getWorld()->state->fadeColour.g = args[1].integer;
+	args.getWorld()->state->fadeColour.b = args[2].integer;
 }
 void game_fade_screen(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.fadeTime = args[0].integer / 1000.f;
-	args.getVM()->getWorld()->state.fadeOut = !!args[1].integer;
-	args.getVM()->getWorld()->state.fadeStart = args.getVM()->getWorld()->gameTime;
+	args.getWorld()->state->fadeTime = args[0].integer / 1000.f;
+	args.getWorld()->state->fadeOut = !!args[1].integer;
+	args.getWorld()->state->fadeStart = args.getWorld()->gameTime;
 }
 bool game_screen_fading(const ScriptArguments& args)
 {
-	if( args.getVM()->getWorld()->state.skipCutscene )
+	if( args.getWorld()->state->skipCutscene )
 	{
 		return false;
 	}
-	return args.getVM()->getWorld()->gameTime <
-		args.getVM()->getWorld()->state.fadeStart + args.getVM()->getWorld()->state.fadeTime;
+	return args.getWorld()->gameTime <
+		args.getWorld()->state->fadeStart + args.getWorld()->state->fadeTime;
 }
 
 void game_override_restart(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.overrideNextStart = true;
-	args.getVM()->getWorld()->state.nextRestartLocation = glm::vec4(
+	args.getWorld()->state->overrideNextStart = true;
+	args.getWorld()->state->nextRestartLocation = glm::vec4(
 		args[0].real, args[1].real, args[2].real, args[3].real
 	);
 }
 
 void game_clear_override(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.overrideNextStart = false;
+	args.getWorld()->state->overrideNextStart = false;
 }
 
 void game_link_mission_flag(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
+	args.getWorld()->state->scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
 }
 
 void game_add_vehicle_blip(const ScriptArguments& args)
@@ -260,7 +260,7 @@ void game_add_vehicle_blip(const ScriptArguments& args)
 	BlipData data;
 	data.target = static_cast<VehicleObject*>(*args[0].handle);
 	data.texture = "";
-	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
 
 void game_add_character_blip(const ScriptArguments& args)
@@ -269,7 +269,7 @@ void game_add_character_blip(const ScriptArguments& args)
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
 	data.target = controller->getCharacter();
 	data.texture = "";
-	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
 
 void game_add_pickup_blip(const ScriptArguments& args)
@@ -277,7 +277,7 @@ void game_add_pickup_blip(const ScriptArguments& args)
 	BlipData data;
 	data.target = static_cast<PickupObject*>(*args[0].handle);
 	data.texture = "";
-	*args[1].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
 
 
@@ -287,13 +287,13 @@ void game_add_location_blip(const ScriptArguments& args)
 	data.target = nullptr;
 	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
 	data.texture = "";
-	*args[3].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(data);
+	*args[3].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
 
 void game_change_blip_mode(const ScriptArguments& args)
 {
 	int id = *args[0].globalInteger;
-	BlipData& blip = args.getVM()->getWorld()->state.radarBlips[id];
+	BlipData& blip = args.getWorld()->state->radarBlips[id];
 	int mode = args[1].integer;
 	
 	switch ( mode )
@@ -318,28 +318,28 @@ void game_enable_input(const ScriptArguments& args)
 
 void game_set_weather(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.currentWeather = args[0].integer;
+	args.getWorld()->state->currentWeather = args[0].integer;
 }
 
 void game_get_runtime(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getVM()->getWorld()->gameTime * 1000;
+	*args[0].globalInteger = args.getWorld()->gameTime * 1000;
 }
 
 void game_print_big_with_number(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->data->texts.text(id);
+	std::string str = args.getWorld()->data->texts.text(id);
 	
 	int number = args[1].integer;
 	str += "\n" + std::to_string(number);
 	
 	unsigned short style = args[3].integer;
 	
-	args.getVM()->getWorld()->state.text.push_back({
+	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getVM()->getWorld()->gameTime,
+		args.getWorld()->gameTime,
 		args[2].integer / 1000.f,
 		style
 	});
@@ -350,19 +350,19 @@ void game_disable_roads(const ScriptArguments& args)
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
 	glm::vec3 max(args[3].real,args[4].real,args[5].real);
 	
-	args.getVM()->getWorld()->enableAIPaths(AIGraphNode::Vehicle, min, max);
+	args.getWorld()->enableAIPaths(AIGraphNode::Vehicle, min, max);
 }
 void game_enabled_roads(const ScriptArguments& args)
 {
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
 	glm::vec3 max(args[3].real,args[4].real,args[5].real);
 	
-	args.getVM()->getWorld()->disableAIPaths(AIGraphNode::Vehicle, min, max);
+	args.getWorld()->disableAIPaths(AIGraphNode::Vehicle, min, max);
 }
 
 void game_max_wanted_level(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.maxWantedLevel = args[0].integer;
+	args.getWorld()->state->maxWantedLevel = args[0].integer;
 }
 
 // This does nothing for us.
@@ -381,7 +381,7 @@ void game_create_garage(const ScriptArguments& args)
 	int garageType = args[6].integer;
 	auto garageHandle = args[7].handle;
 
-	args.getVM()->getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
+	args.getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
 }
 
 void game_disable_ped_paths(const ScriptArguments& args)
@@ -389,26 +389,26 @@ void game_disable_ped_paths(const ScriptArguments& args)
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
 	glm::vec3 max(args[3].real,args[4].real,args[5].real);
 	
-	args.getVM()->getWorld()->enableAIPaths(AIGraphNode::Pedestrian, min, max);
+	args.getWorld()->enableAIPaths(AIGraphNode::Pedestrian, min, max);
 }
 void game_enable_ped_paths(const ScriptArguments& args)
 {
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
 	glm::vec3 max(args[3].real,args[4].real,args[5].real);
 	
-	args.getVM()->getWorld()->disableAIPaths(AIGraphNode::Pedestrian, min, max);
+	args.getWorld()->disableAIPaths(AIGraphNode::Pedestrian, min, max);
 }
 
 void game_load_special_char(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->loadSpecialCharacter(args[0].integer, args[1].string);
+	args.getWorld()->loadSpecialCharacter(args[0].integer, args[1].string);
 }
 bool game_special_char_loaded(const ScriptArguments& args)
 {
-	auto chartype = args.getVM()->getWorld()->data->findObjectType<CharacterData>(args[0].integer);
+	auto chartype = args.getWorld()->data->findObjectType<CharacterData>(args[0].integer);
 	if( chartype ) {
-		auto modelfind = args.getVM()->getWorld()->data->models.find(chartype->modelName);
-		if( modelfind != args.getVM()->getWorld()->data->models.end() && modelfind->second->resource != nullptr ) {
+		auto modelfind = args.getWorld()->data->models.find(chartype->modelName);
+		if( modelfind != args.getWorld()->data->models.end() && modelfind->second->resource != nullptr ) {
 			return true;
 		}
 	}
@@ -419,8 +419,8 @@ bool game_special_char_loaded(const ScriptArguments& args)
 void game_cutscene_offset(const ScriptArguments& args)
 {
 	glm::vec3 position(args[0].real, args[1].real, args[2].real);
-	if( args.getVM()->getWorld()->state.currentCutscene ) {
-		args.getVM()->getWorld()->state.currentCutscene->meta.sceneOffset = position;
+	if( args.getWorld()->state->currentCutscene ) {
+		args.getWorld()->state->currentCutscene->meta.sceneOffset = position;
 	}
 }
 
@@ -438,11 +438,11 @@ bool game_model_loaded(const ScriptArguments& args)
 
 void game_restart_critical_mission(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->logger->info("SCM", "Restarting Critical Mission");
+	args.getWorld()->logger->info("SCM", "Restarting Critical Mission");
 	// Reset player state.
 	glm::vec3 position(args[0].real, args[1].real, args[2].real + 1.f);
 	
-	auto controller = args.getVM()->getWorld()->state.player;
+	auto controller = args.getWorld()->state->player;
 	
 	glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
 	
@@ -473,7 +473,7 @@ void game_controller_mode(const ScriptArguments& args)
 
 void game_set_widescreen(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.isCinematic = !!args[0].integer;
+	args.getWorld()->state->isCinematic = !!args[0].integer;
 }
 
 static const char* sprite_names[] = {
@@ -517,7 +517,7 @@ void game_add_contact_blip(const ScriptArguments& args)
 	bd.target = nullptr;
 	bd.texture = spriteName;
 	
-	*args[4].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(bd);
+	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
 }
 
 void game_add_sprite_blip(const ScriptArguments& args)
@@ -537,23 +537,23 @@ void game_add_sprite_blip(const ScriptArguments& args)
 	bd.target = nullptr;
 	bd.texture = spriteName;
 	
-	*args[4].globalInteger = args.getVM()->getWorld()->state.addRadarBlip(bd);
+	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
 }
 
 void game_load_cutscene(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->loadCutscene(args[0].string);
-	args.getVM()->getWorld()->state.cutsceneStartTime = -1.f;
+	args.getWorld()->loadCutscene(args[0].string);
+	args.getWorld()->state->cutsceneStartTime = -1.f;
 }
 void game_create_cutscene_object(const ScriptArguments& args)
 {
 	auto id	= args[0].integer;
 
-	GameObject* object = object = args.getVM()->getWorld()->createCutsceneObject(id, args.getVM()->getWorld()->state.currentCutscene->meta.sceneOffset );
+	GameObject* object = object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 	*args[1].handle = object;
 
 	if( object == nullptr ) {
-		args.getVM()->getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
+		args.getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
 	}
 }
 void game_set_cutscene_anim(const ScriptArguments& args)
@@ -561,24 +561,24 @@ void game_set_cutscene_anim(const ScriptArguments& args)
 	GameObject* object = static_cast<GameObject*>(*args[0].handle);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getVM()->getWorld()->data->animations[animName];
+	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
 		object->animator->setAnimation(anim, false);
 	}
 	else {
-		args.getVM()->getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
+		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
 	}
 }
 void game_start_cutscene(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->startCutscene();
+	args.getWorld()->startCutscene();
 }
 void game_get_cutscene_time(const ScriptArguments& args)
 {
-	float time = args.getVM()->getWorld()->gameTime - args.getVM()->getWorld()->state.cutsceneStartTime;
-	if( args.getVM()->getWorld()->state.skipCutscene )
+	float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+	if( args.getWorld()->state->skipCutscene )
 	{
-		*args[0].globalInteger = args.getVM()->getWorld()->state.currentCutscene->tracks.duration * 1000;
+		*args[0].globalInteger = args.getWorld()->state->currentCutscene->tracks.duration * 1000;
 	}
 	else
 	{
@@ -587,34 +587,34 @@ void game_get_cutscene_time(const ScriptArguments& args)
 }
 bool game_cutscene_finished(const ScriptArguments& args)
 {
-	if( args.getVM()->getWorld()->state.currentCutscene ) {
-		float time = args.getVM()->getWorld()->gameTime - args.getVM()->getWorld()->state.cutsceneStartTime;
-		if( args.getVM()->getWorld()->state.skipCutscene ) {
+	if( args.getWorld()->state->currentCutscene ) {
+		float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+		if( args.getWorld()->state->skipCutscene ) {
 			return true;
 		}
-		return time > args.getVM()->getWorld()->state.currentCutscene->tracks.duration;
+		return time > args.getWorld()->state->currentCutscene->tracks.duration;
 	}
 	return true;
 }
 void game_clear_cutscene(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->clearCutscene();
+	args.getWorld()->clearCutscene();
 }
 
 void game_set_hidden_packages(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.numHiddenPackages = args[0].integer;
+	args.getWorld()->state->numHiddenPackages = args[0].integer;
 }
 
 void game_load_special_model(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->loadSpecialModel(args[0].integer, args[1].string);
+	args.getWorld()->loadSpecialModel(args[0].integer, args[1].string);
 }
 void game_create_cutscene_head(const ScriptArguments& args)
 {
 	auto id = args[1].integer;
 	auto actor = static_cast<GameObject*>(*args[0].handle);
-	CutsceneObject* object = args.getVM()->getWorld()->createCutsceneObject(id, args.getVM()->getWorld()->state.currentCutscene->meta.sceneOffset );
+	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
 	auto headframe = actor->model->resource->findFrame("shead");
 	actor->skeleton->setEnabled(headframe, false);
@@ -627,39 +627,39 @@ void game_set_head_animation(const ScriptArguments& args)
 	GameObject* object = static_cast<GameObject*>(*args[0].handle);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getVM()->getWorld()->data->animations[animName];
+	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
 		object->animator->setAnimation(anim, false);
 	}
 	else {
-		args.getVM()->getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
+		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
 	}
 }
 
 void game_increment_progress(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.currentProgress += args[0].integer;
+	args.getWorld()->state->currentProgress += args[0].integer;
 }
 
 void game_set_max_progress(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.maxProgress = args[0].integer;
+	args.getWorld()->state->maxProgress = args[0].integer;
 }
 
 void game_set_unique_jumps(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.numUniqueJumps = args[0].integer;
+	args.getWorld()->state->numUniqueJumps = args[0].integer;
 }
 
 void game_set_last_mission(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.lastMissionName = args[0].string;
+	args.getWorld()->state->lastMissionName = args[0].string;
 }
 
 void game_set_zone_ped_group(const ScriptArguments& args)
 {
-	auto it = args.getVM()->getWorld()->data->zones.find(args[0].string);
-	if( it != args.getVM()->getWorld()->data->zones.end() )
+	auto it = args.getWorld()->data->zones.find(args[0].string);
+	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
 		if( day )
@@ -677,26 +677,26 @@ void game_display_text(const ScriptArguments& args)
 {
 	glm::vec2 pos(args[0].real, args[1].real);
 	std::string str(args[2].string);
-	str = args.getVM()->getWorld()->data->texts.text(str);
-	args.getVM()->getWorld()->state.nextText.text = str;
-	args.getVM()->getWorld()->state.nextText.position = pos;
-	args.getVM()->getWorld()->state.texts.push_back(args.getVM()->getWorld()->state.nextText);
+	str = args.getWorld()->data->texts.text(str);
+	args.getWorld()->state->nextText.text = str;
+	args.getWorld()->state->nextText.position = pos;
+	args.getWorld()->state->texts.push_back(args.getWorld()->state->nextText);
 }
 
 void game_set_text_colour(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.nextText.colourFG.r = args[0].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourFG.g = args[1].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourFG.b = args[2].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourFG.a = args[3].integer / 255.f;
+	args.getWorld()->state->nextText.colourFG.r = args[0].integer / 255.f;
+	args.getWorld()->state->nextText.colourFG.g = args[1].integer / 255.f;
+	args.getWorld()->state->nextText.colourFG.b = args[2].integer / 255.f;
+	args.getWorld()->state->nextText.colourFG.a = args[3].integer / 255.f;
 }
 
 void game_set_background_colour(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.nextText.colourBG.r = args[0].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourBG.g = args[1].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourBG.b = args[2].integer / 255.f;
-	args.getVM()->getWorld()->state.nextText.colourBG.a = args[3].integer / 255.f;
+	args.getWorld()->state->nextText.colourBG.r = args[0].integer / 255.f;
+	args.getWorld()->state->nextText.colourBG.g = args[1].integer / 255.f;
+	args.getWorld()->state->nextText.colourBG.b = args[2].integer / 255.f;
+	args.getWorld()->state->nextText.colourBG.a = args[3].integer / 255.f;
 }
 
 void game_set_character_model(const ScriptArguments& args)
@@ -717,51 +717,51 @@ void game_load_audio(const ScriptArguments& args)
 {
 	std::string name = args[0].string;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	if(! args.getVM()->getWorld()->data->loadAudioClip(name + ".wav") )
+	if(! args.getWorld()->data->loadAudioClip(name + ".wav") )
 	{
-		if(! args.getVM()->getWorld()->data->loadAudioClip(name + ".mp3") )
+		if(! args.getWorld()->data->loadAudioClip(name + ".mp3") )
 		{
-			args.getVM()->getWorld()->logger->error("SCM", "Failed to load audio: " + name);
+			args.getWorld()->logger->error("SCM", "Failed to load audio: " + name);
 		}
 	}
 }
 
 bool game_is_audio_loaded(const ScriptArguments& args)
 {
-	auto world = args.getVM()->getWorld();
+	auto world = args.getWorld();
 	return world->missionAudio != nullptr;
 }
 
 void game_play_mission_audio(const ScriptArguments& args)
 {
-	auto world = args.getVM()->getWorld();
+	auto world = args.getWorld();
 	if ( world->missionAudio )
 	{
-		world->missionSound.setBuffer(*args.getVM()->getWorld()->missionAudio);
+		world->missionSound.setBuffer(*args.getWorld()->missionAudio);
 		world->missionSound.play();
 		world->missionSound.setLoop(false);
 	}
 }
 bool game_is_audio_finished(const ScriptArguments& args)
 {
-	return args.getVM()->getWorld()->missionSound.getStatus() == sf::SoundSource::Stopped;
+	return args.getWorld()->missionSound.getStatus() == sf::SoundSource::Stopped;
 }
 
 void game_play_music_id(const ScriptArguments& args)
 {
 	int id = args[0].integer;
-	GameWorld* gw = args.getVM()->getWorld();
+	GameWorld* gw = args.getWorld();
 	std::string name = "Miscom";
 	
 	// TODO play anything other than Miscom.wav
 	if(! gw->data->loadAudioClip( name + ".wav" ) )
 	{
-		args.getVM()->getWorld()->logger->error("SCM", "Error loading audio " + name);
+		args.getWorld()->logger->error("SCM", "Error loading audio " + name);
 		return;
 	}
-	else if ( args.getVM()->getWorld()->missionAudio )
+	else if ( args.getWorld()->missionAudio )
 	{
-		gw->missionSound.setBuffer(* args.getVM()->getWorld()->missionAudio);
+		gw->missionSound.setBuffer(* args.getWorld()->missionAudio);
 		gw->missionSound.play();
 		gw->missionSound.setLoop(false);
 	}
@@ -771,11 +771,11 @@ void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 
-	for( int i = 0; i < args.getVM()->getWorld()->state.text.size(); )
+	for( int i = 0; i < args.getWorld()->state->text.size(); )
 	{
-		if( args.getVM()->getWorld()->state.text[i].id == id )
+		if( args.getWorld()->state->text[i].id == id )
 		{
-			args.getVM()->getWorld()->state.text.erase(args.getVM()->getWorld()->state.text.begin() + i);
+			args.getWorld()->state->text.erase(args.getWorld()->state->text.begin() + i);
 		}
 		else
 		{
@@ -786,18 +786,18 @@ void game_clear_print(const ScriptArguments& args)
 
 void game_get_found_hidden_packages(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getVM()->getWorld()->state.numHiddenPackagesDiscovered;
+	*args[0].globalInteger = args.getWorld()->state->numHiddenPackagesDiscovered;
 }
 
 void game_display_help(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getVM()->getWorld()->data->texts.text(id);
+	std::string str = args.getWorld()->data->texts.text(id);
 	unsigned short style = OnscreenText::Help;
-	args.getVM()->getWorld()->state.text.push_back({
+	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getVM()->getWorld()->gameTime,
+		args.getWorld()->gameTime,
 		2.5f,
 		style
 	});
@@ -805,9 +805,9 @@ void game_display_help(const ScriptArguments& args)
 
 void game_clear_help(const ScriptArguments& args)
 {
-	for( int i = 0; i < args.getVM()->getWorld()->state.text.size(); )
+	for( int i = 0; i < args.getWorld()->state->text.size(); )
 	{
-		auto& texts = args.getVM()->getWorld()->state.text;
+		auto& texts = args.getWorld()->state->text;
 		if( texts[i].osTextStyle == OnscreenText::Help )
 		{
 			texts.erase(texts.begin() + i);
@@ -827,26 +827,26 @@ void game_load_collision(const ScriptArguments& args)
 
 void game_set_rampages(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.numRampages = args[0].integer;
+	args.getWorld()->state->numRampages = args[0].integer;
 }
 
 void game_set_near_clip(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.cameraNear = args[0].real;
+	args.getWorld()->state->cameraNear = args[0].real;
 }
 
 void game_set_missions(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.numMissions = args[0].integer;
+	args.getWorld()->state->numMissions = args[0].integer;
 }
 
 void game_set_sound_fade(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.fadeSound = !!args[0].integer;
+	args.getWorld()->state->fadeSound = !!args[0].integer;
 }
 void game_set_is_intro_playing(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->state.isIntroPlaying = !!args[0].integer;
+	args.getWorld()->state->isIntroPlaying = !!args[0].integer;
 }
 
 bool game_are_vehicle_cheats_enabled(const ScriptArguments& args)
@@ -856,7 +856,7 @@ bool game_are_vehicle_cheats_enabled(const ScriptArguments& args)
 
 void game_load_splash(const ScriptArguments& args)
 {
-	args.getVM()->getWorld()->data->loadSplash(args[0].string);
+	args.getWorld()->data->loadSplash(args[0].string);
 }
 
 GameModule::GameModule()

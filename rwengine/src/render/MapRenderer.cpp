@@ -2,6 +2,7 @@
 #include <render/GameShaders.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 
@@ -145,7 +146,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	
 	renderer->setUniform(rectProg, "view", view);
 	
-	for(auto& blip : world->state.radarBlips)
+	for(auto& blip : world->state->radarBlips)
 	{
 		glm::vec2 blippos( blip.second.coord );
 		if( blip.second.target )
@@ -157,7 +158,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	}
 	
 	// Draw the player blip
-	auto player = world->state.player;
+	auto player = world->state->player;
 	if( player )
 	{
 		glm::vec2 plyblip(player->getCharacter()->getPosition());

@@ -1,6 +1,7 @@
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameState.hpp>
 #include <render/TextureAtlas.hpp>
 #include <render/Model.hpp>
 
@@ -247,10 +248,10 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 	glBindVertexArray( vao );
 
-	float tod = world->state.hour + world->state.minute/60.f;
+	float tod = world->state->hour + world->state->minute/60.f;
 
 	// Requires a float 0-24
-	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(world->state.currentWeather * 24);
+	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(world->state->currentWeather * 24);
 	auto weather = world->data->weatherLoader.getWeatherData(weatherID, tod);
 
 	glm::vec3 skyTop = weather.skyTopColor;
@@ -266,7 +267,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	};
 	sunDirection = glm::normalize(sunDirection);
 
-	_camera.frustum.near = world->state.cameraNear;
+	_camera.frustum.near = world->state->cameraNear;
 	_camera.frustum.far = weather.farClipping;
 
 	auto view = _camera.getView();
@@ -380,7 +381,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	{
 		auto arrowTex = world->data->textures[{"copblue",""}];
 		auto arrowFrame = arrowModel->resource->findFrame( "arrow" );
-		for( auto& blip : world->state.radarBlips )
+		for( auto& blip : world->state->radarBlips )
 		{
 			if( blip.second.display == BlipData::Show )
 			{
@@ -455,21 +456,21 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	glDisable(GL_DEPTH_TEST);
 
 	GLuint splashTexName = 0;
-	auto fc = world->state.fadeColour;
-	if((fc.r + fc.g + fc.b) == 0 && world->state.currentSplash.size() > 0) {
-		auto splash = world->data->findTexture(world->state.currentSplash);
+	auto fc = world->state->fadeColour;
+	if((fc.r + fc.g + fc.b) == 0 && world->state->currentSplash.size() > 0) {
+		auto splash = world->data->findTexture(world->state->currentSplash);
 		if ( splash )
 		{
 			splashTexName = splash->getName();
 		}
 	}
 
-	if( (world->state.isCinematic || world->state.currentCutscene ) && splashTexName != 0 ) {
+	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName != 0 ) {
 		renderLetterbox();
 	}
 
-	float fadeTimer = world->gameTime - world->state.fadeStart;
-	if( fadeTimer < world->state.fadeTime || !world->state.fadeOut ) {
+	float fadeTimer = world->gameTime - world->state->fadeStart;
+	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
@@ -485,11 +486,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		}
 
 		float fadeFrac = 0.f;
-		if( world->state.fadeTime > 0.f ) {
-			fadeFrac = std::min(fadeTimer / world->state.fadeTime, 1.f);
+		if( world->state->fadeTime > 0.f ) {
+			fadeFrac = std::min(fadeTimer / world->state->fadeTime, 1.f);
 		}
 
-		float a = world->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
+		float a = world->state->fadeOut ? 1.f - fadeFrac : fadeFrac;
 
 		glm::vec4 fadeNormed(fc.r / 255.f, fc.g/ 255.f, fc.b/ 255.f, a);
 
@@ -499,7 +500,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 	
-	if( (world->state.isCinematic || world->state.currentCutscene ) && splashTexName == 0 ) {
+	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
 
@@ -747,7 +748,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 
 void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 {
-	if(!_renderWorld->state.currentCutscene) return;
+	if(!_renderWorld->state->currentCutscene) return;
 
 	if(!cutscene->model->resource)
 	{
@@ -757,7 +758,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 	glm::mat4 matrixModel;
 
 	if( cutscene->getParentActor() ) {
-		matrixModel = glm::translate(matrixModel, _renderWorld->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, _renderWorld->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
 		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
 		glm::mat4 localMatrix;
@@ -769,7 +770,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 		matrixModel = matrixModel * localMatrix;
 	}
 	else {
-		matrixModel = glm::translate(matrixModel, _renderWorld->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, _renderWorld->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 	}
 
 	float mindist = 100000.f;

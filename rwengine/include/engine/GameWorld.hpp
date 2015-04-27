@@ -7,7 +7,7 @@ class Logger;
 #include <GL/glew.h>
 
 class GameData;
-#include <engine/GameState.hpp>
+class GameState;
 
 #include <ai/AIGraphNode.hpp>
 #include <ai/AIGraph.hpp>
@@ -151,7 +151,7 @@ public:
 	/**
 	 * Gameplay state
 	 */
-	GameState state;
+	GameState* state;
 	
 	/**
 	 * State of playing sounds

@@ -11,6 +11,9 @@ class ScriptMachine;
 class ScriptModule;
 struct SCMThread;
 
+class GameState;
+class GameWorld;
+
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
 
@@ -84,7 +87,10 @@ public:
 	const SCMParams& getParameters() const { return *parameters; }
 	SCMThread* getThread() const { return thread; }
 	ScriptMachine* getVM() const { return machine; }
-	
+	// Helper method to get the current state
+	GameState* getState() const;
+	GameWorld* getWorld() const;
+
 	const SCMOpcodeParameter& operator[](unsigned int arg) const
 	{
 		return parameters->at(arg);

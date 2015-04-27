@@ -25,7 +25,8 @@ hour(0),
 minute(0),
 cameraNear(0.1f),
 cameraFixed(false),
-cameraTarget(nullptr)
+cameraTarget(nullptr),
+world(nullptr)
 {
 	
 }

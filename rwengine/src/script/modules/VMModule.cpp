@@ -2,6 +2,7 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameState.hpp>
 
 SCMThread::pc_t localizeLabel(SCMThread* t, int label)
 {
@@ -158,14 +159,14 @@ void vm_new_mission_thread(const ScriptArguments& args)
 
 void vm_mission_over(const ScriptArguments& args)
 {
-	for( auto& o : args.getVM()->getWorld()->state.missionObjects )
+	for( auto& o : args.getState()->missionObjects )
 	{
-		args.getVM()->getWorld()->destroyObjectQueued(o);
+		args.getWorld()->destroyObjectQueued(o);
 	}
 	
-	args.getVM()->getWorld()->state.missionObjects.clear();
+	args.getState()->missionObjects.clear();
 	
-	*args.getVM()->getWorld()->state.scriptOnMissionFlag = 0;
+	*args.getState()->scriptOnMissionFlag = 0;
 }
 
 void vm_name_thread(const ScriptArguments& args)

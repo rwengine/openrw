@@ -11,6 +11,7 @@
 #include <render/Model.hpp>
 #include <render/GameRenderer.hpp>
 #include <engine/Animator.hpp>
+#include <engine/GameState.hpp>
 #include <ai/PlayerController.hpp>
 #include <ai/DefaultAIController.hpp>
 
@@ -34,13 +35,13 @@ void game_create_player(const ScriptArguments& args)
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
 	
 	if( position.z < -99.f ) {
-		position = args.getVM()->getWorld()->getGroundAtPosition(position);
+		position = args.getWorld()->getGroundAtPosition(position);
 	}
 	
-	auto pc = args.getVM()->getWorld()->createPedestrian(1, position + spawnMagic);
-	args.getVM()->getWorld()->state.player = new PlayerController(pc);
+	auto pc = args.getWorld()->createPedestrian(1, position + spawnMagic);
+	args.getState()->player = new PlayerController(pc);
 	
-	*args[4].handle = args.getVM()->getWorld()->state.player;
+	*args[4].handle = args.getState()->player;
 }
 
 void game_set_character_position(const ScriptArguments& args)
@@ -89,28 +90,28 @@ void game_create_character(const ScriptArguments& args)
 		
 	}
 	if( position.z < -99.f ) {
-		position = args.getVM()->getWorld()->getGroundAtPosition(position);
+		position = args.getWorld()->getGroundAtPosition(position);
 	}
 	
 	// If there is already a chracter less than this distance away, it will be destroyed.
 	const float replaceThreshold = 2.f;
-	for( auto it = args.getVM()->getWorld()->objects.begin();
-		it != args.getVM()->getWorld()->objects.end();
+	for( auto it = args.getWorld()->objects.begin();
+		it != args.getWorld()->objects.end();
 	++it)
 		{
 			if( (*it)->type() == GameObject::Character && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
 			{
-				args.getVM()->getWorld()->destroyObjectQueued(*it);
+				args.getWorld()->destroyObjectQueued(*it);
 			}
 		}
 		
 		
-		auto character = args.getVM()->getWorld()->createPedestrian(id, position + spawnMagic);
+		auto character = args.getWorld()->createPedestrian(id, position + spawnMagic);
 		auto controller = new DefaultAIController(character);
 		
 		if ( args.getThread()->isMission )
 		{
-			args.getVM()->getWorld()->state.missionObjects.push_back(character);
+			args.getState()->missionObjects.push_back(character);
 		}
 		
 		*args[5].handle = controller;
@@ -122,7 +123,7 @@ void game_destroy_character(const ScriptArguments& args)
 	
 	if ( controller )
 	{
-		args.getVM()->getWorld()->destroyObjectQueued(controller->getCharacter());
+		args.getWorld()->destroyObjectQueued(controller->getCharacter());
 	}
 }
 
@@ -134,21 +135,21 @@ void game_create_vehicle(const ScriptArguments& args)
 	
 	// If there is already a vehicle less than this distance away, it will be destroyed.
 	const float replaceThreshold = 1.f;
-	for( auto it = args.getVM()->getWorld()->objects.begin();
-		it != args.getVM()->getWorld()->objects.end();
+	for( auto it = args.getWorld()->objects.begin();
+		it != args.getWorld()->objects.end();
 	++it)
 		{
 			if( (*it)->type() == GameObject::Vehicle && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
 			{
-				args.getVM()->getWorld()->destroyObjectQueued(*it);
+				args.getWorld()->destroyObjectQueued(*it);
 			}
 		}
 		
-		auto vehicle = args.getVM()->getWorld()->createVehicle(id, position);
+		auto vehicle = args.getWorld()->createVehicle(id, position);
 		
 		if ( args.getThread()->isMission )
 		{
-			args.getVM()->getWorld()->state.missionObjects.push_back(vehicle);
+			args.getState()->missionObjects.push_back(vehicle);
 		}
 		
 		*args[4].handle = vehicle;
@@ -158,7 +159,7 @@ void game_destroy_vehicle(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(*args[0].handle);
 	
-	args.getVM()->getWorld()->destroyObjectQueued(vehicle);
+	args.getWorld()->destroyObjectQueued(vehicle);
 }
 
 void game_get_vehicle_position(const ScriptArguments& args)
@@ -195,7 +196,7 @@ bool game_character_in_vehicle(const ScriptArguments& args)
 
 bool game_character_in_model(const ScriptArguments& args)
 {
-	auto vdata = args.getVM()->getWorld()->data->findObjectType<VehicleData>(args[1].integer);
+	auto vdata = args.getWorld()->data->findObjectType<VehicleData>(args[1].integer);
 	if( vdata )
 	{
 		auto controller = (CharacterController*)(*args[0].handle);
@@ -240,8 +241,8 @@ bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 	
 	if( drawCylinder )
 	{
-		auto ground = args.getVM()->getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
-		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground + glm::vec3(0.f, 0.f, 4.5f), glm::vec3(radius, 5.f));
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground + glm::vec3(0.f, 0.f, 4.5f), glm::vec3(radius, 5.f));
 	}
 	
 	return false;
@@ -263,7 +264,7 @@ bool game_character_near_point_on_foot_3D(const ScriptArguments& args)
 	
 	if( drawCylinder )
 	{
-		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, center, size);
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, center, size);
 	}
 	
 	return false;
@@ -358,8 +359,8 @@ bool game_character_in_zone(const ScriptArguments& args)
 	auto controller = static_cast<CharacterController*>(*args[0].handle);
 	std::string zname(args[1].string);
 	
-	auto zfind = args.getVM()->getWorld()->data->zones.find(zname);
-	if( zfind != args.getVM()->getWorld()->data->zones.end() ) {
+	auto zfind = args.getWorld()->data->zones.find(zname);
+	if( zfind != args.getWorld()->data->zones.end() ) {
 		auto player = controller->getCharacter()->getPosition();
 		auto& min = zfind->second.min;
 		auto& max = zfind->second.max;
@@ -378,7 +379,7 @@ void game_create_character_in_vehicle(const ScriptArguments& args)
 	auto type = args[1].integer;
 	auto id = args[2].integer;
 	
-	auto character = args.getVM()->getWorld()->createPedestrian(id, vehicle->getPosition() + spawnMagic);
+	auto character = args.getWorld()->createPedestrian(id, vehicle->getPosition() + spawnMagic);
 	auto controller = new DefaultAIController(character);
 	
 	character->setCurrentVehicle(vehicle, 0);
@@ -431,7 +432,7 @@ void game_dont_remove_object(const ScriptArguments& args)
 {
 	auto object = (GameObject*)(*args[0].handle);
 	
-	auto& mO = args.getVM()->getWorld()->state.missionObjects;
+	auto& mO = args.getState()->missionObjects;
 	mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
 }
 
@@ -464,7 +465,7 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 		// Request the renderer draw a cylinder here.
 		if( drawCylinder )
 		{
-			args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
+			args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
 		}
 	}
 	return false;
@@ -499,7 +500,7 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 	
 	if( drawCylinder )
 	{
-		args.getVM()->getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
 	}
 	
 	return false;
@@ -537,7 +538,7 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	bool objects = args[9].integer;
 	bool particles = args[10].integer;
 	
-	for(GameObject* object : args.getVM()->getWorld()->objects)
+	for(GameObject* object : args.getWorld()->objects)
 	{
 		switch( object->type() )
 		{
@@ -628,7 +629,7 @@ void game_navigate_on_foot(const ScriptArguments& args)
 {
 	auto controller = (CharacterController*)(*args[0].handle);
 	glm::vec3 target(args[1].real, args[2].real, 0.f);
-	target = args.getVM()->getWorld()->getGroundAtPosition(target);
+	target = args.getWorld()->getGroundAtPosition(target);
 	
 	controller->skipActivity();
 	
@@ -663,25 +664,25 @@ void game_create_pickup(const ScriptArguments& args)
 		auto model = args.getVM()->getFile()->getModels()[id];
 		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
-		id = args.getVM()->getWorld()->data->findModelObject(model);
-		args.getVM()->getWorld()->data->loadDFF(model+".dff");
-		args.getVM()->getWorld()->data->loadTXD("icons.txd");
+		id = args.getWorld()->data->findModelObject(model);
+		args.getWorld()->data->loadDFF(model+".dff");
+		args.getWorld()->data->loadTXD("icons.txd");
 	}
 	else
 	{
-		auto data = args.getVM()->getWorld()->data->findObjectType<ObjectData>(id);
+		auto data = args.getWorld()->data->findObjectType<ObjectData>(id);
 		
 		if ( ! ( id >= 170 && id <= 184 ) )
 		{
-			args.getVM()->getWorld()->data->loadDFF(data->modelName+".dff");
+			args.getWorld()->data->loadDFF(data->modelName+".dff");
 		}
-		args.getVM()->getWorld()->data->loadTXD(data->textureName+".txd");
+		args.getWorld()->data->loadTXD(data->textureName+".txd");
 	}
 	
 	
-	auto pickup = new GenericPickup(args.getVM()->getWorld(), pos, id, type);
+	auto pickup = new GenericPickup(args.getWorld(), pos, id, type);
 	
-	args.getVM()->getWorld()->objects.insert(pickup);
+	args.getWorld()->objects.insert(pickup);
 	
 	*args[5].handle = pickup;
 }
@@ -704,7 +705,7 @@ void game_destroy_pickup(const ScriptArguments& args)
 	
 	if ( pickup )
 	{
-		args.getVM()->getWorld()->destroyObjectQueued(pickup);
+		args.getWorld()->destroyObjectQueued(pickup);
 	}
 }
 
@@ -712,7 +713,7 @@ void game_character_run_to(const ScriptArguments& args)
 {
 	auto controller = (CharacterController*)(*args[0].handle);
 	glm::vec3 target(args[1].real, args[2].real, 0.f);
-	target = args.getVM()->getWorld()->getGroundAtPosition(target);
+	target = args.getWorld()->getGroundAtPosition(target);
 	
 	controller->setNextActivity(new Activities::GoTo(target));
 }
@@ -758,7 +759,7 @@ void game_set_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = (VehicleObject*)(*args[0].handle);
 	
-	auto& colours = args.getVM()->getWorld()->data->vehicleColours;
+	auto& colours = args.getWorld()->data->vehicleColours;
 	vehicle->colourPrimary = colours[args[1].integer];
 	vehicle->colourSecondary = colours[args[2].integer];
 }
@@ -777,15 +778,15 @@ void game_create_object_world(const ScriptArguments& args)
 	
 	if( id < 0 ) {
 		auto& modelname = args.getVM()->getFile()->getModels()[-id];
-		id = args.getVM()->getWorld()->data->findModelObject(modelname);
+		id = args.getWorld()->data->findModelObject(modelname);
 		if( id == (uint16_t)-1 ) {
-			args.getVM()->getWorld()->logger->error("SCM", "Failed to find model " + modelname);
+			args.getWorld()->logger->error("SCM", "Failed to find model " + modelname);
 		}
 	}
 
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
 
-	auto inst = args.getVM()->getWorld()->createInstance(id, position);
+	auto inst = args.getWorld()->createInstance(id, position);
 
 	*args[4].handle = inst;
 }
@@ -794,7 +795,7 @@ void game_destroy_object(const ScriptArguments& args)
 {
 	auto object = static_cast<GameObject*>(*args[0].handle);
 	
-	args.getVM()->getWorld()->destroyObjectQueued(object);
+	args.getWorld()->destroyObjectQueued(object);
 }
 
 bool game_is_boat(const ScriptArguments& args)
@@ -841,7 +842,7 @@ void game_set_close_object_visible(const ScriptArguments& args)
 	
 	std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
-	for(auto o : args.getVM()->getWorld()->objects) {
+	for(auto o : args.getWorld()->objects) {
 		if( o->type() == GameObject::Instance ) {
 			if( !o->model ) continue;
 			if( o->model->name != model ) continue;
@@ -894,20 +895,20 @@ void game_change_nearest_model(const ScriptArguments& args)
 	std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 	
-	auto newobjectid = args.getVM()->getWorld()->data->findModelObject(newmodel);
-	auto nobj = args.getVM()->getWorld()->data->findObjectType<ObjectData>(newobjectid);
+	auto newobjectid = args.getWorld()->data->findModelObject(newmodel);
+	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
 	
 	/// @todo Objects need to adopt the new object ID, not just the model.
-	for(auto o : args.getVM()->getWorld()->objects) {
+	for(auto o : args.getWorld()->objects) {
 		if( o->type() == GameObject::Instance ) {
 			if( !o->model ) continue;
 			if( o->model->name != oldmodel ) continue;
 			float d = glm::distance(position, o->getPosition());
 			if( d < radius ) {
-				args.getVM()->getWorld()->data->loadDFF(newmodel + ".dff", false);
+				args.getWorld()->data->loadDFF(newmodel + ".dff", false);
 				InstanceObject* inst = static_cast<InstanceObject*>(o);
 				inst->changeModel(nobj);
-				inst->model = args.getVM()->getWorld()->data->models[newmodel];
+				inst->model = args.getWorld()->data->models[newmodel];
 			}
 		}
 	}

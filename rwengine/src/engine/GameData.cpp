@@ -1,5 +1,6 @@
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameState.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
@@ -551,7 +552,7 @@ void GameData::loadSplash(const std::string &name)
 
 	loadTXD(lower + ".txd", false);
 
-	engine->state.currentSplash = lower;
+	engine->state->currentSplash = lower;
 }
 
 FileHandle GameData::openFile(const std::string &name)

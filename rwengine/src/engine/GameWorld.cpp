@@ -1,5 +1,6 @@
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 
 #include <core/Logger.hpp>
 
@@ -245,8 +246,8 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	{
 		if( type->second->class_type == ObjectInformation::_class("HIER") )
 		{
-			modelname = state.specialModels[id];
-			texturename = state.specialModels[id];
+			modelname = state->specialModels[id];
+			texturename = state->specialModels[id];
 		}
 		else
 		{
@@ -267,15 +268,15 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 				if(! modelname.compare(0, specialPrefix.size(), specialPrefix) ) {
 					auto sid = modelname.substr(specialPrefix.size());
 					unsigned short specialID = std::atoi(sid.c_str());
-					modelname = state.specialCharacters[specialID];
-					texturename = state.specialCharacters[specialID];
+					modelname = state->specialCharacters[specialID];
+					texturename = state->specialCharacters[specialID];
 				}
 			}
 		}
 	}
 
 	if( id == 0 ) {
-		modelname = state.player->getCharacter()->model->name;
+		modelname = state->player->getCharacter()->model->name;
 	}
 
 	// Ensure the relevant data is loaded.
@@ -387,8 +388,8 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 			if(! modelname.compare(0, specialPrefix.size(), specialPrefix) ) {
 				auto sid = modelname.substr(specialPrefix.size());
 				unsigned short specialID = std::atoi(sid.c_str());
-				modelname = state.specialCharacters[specialID];
-				texturename = state.specialCharacters[specialID];
+				modelname = state->specialCharacters[specialID];
+				texturename = state->specialCharacters[specialID];
 			}
 
 			if( modelname != "null" ) {
@@ -536,12 +537,12 @@ void GameWorld::doWeaponScan(const WeaponScan &scan)
 
 int GameWorld::getHour()
 {
-	return state.hour;
+	return state->hour;
 }
 
 int GameWorld::getMinute()
 {
-	return state.minute;
+	return state->minute;
 }
 
 glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
@@ -688,18 +689,18 @@ void GameWorld::loadCutscene(const std::string &name)
 	}
 	
 
-	if( state.currentCutscene ) {
-		delete state.currentCutscene;
+	if( state->currentCutscene ) {
+		delete state->currentCutscene;
 	}
-	state.currentCutscene = cutscene;
-	state.currentCutscene->meta.name = name;
+	state->currentCutscene = cutscene;
+	state->currentCutscene->meta.name = name;
 	logger->info("World", "Loaded cutscene: " + name);
 }
 
 void GameWorld::startCutscene()
 {
-	state.cutsceneStartTime = gameTime;
-	state.skipCutscene = false;
+	state->cutsceneStartTime = gameTime;
+	state->skipCutscene = false;
 	if( cutsceneAudio ) {
 		cutsceneAudio->play();
 	}
@@ -720,20 +721,20 @@ void GameWorld::clearCutscene()
 		cutsceneAudio = nullptr;
 	}
 
-	delete state.currentCutscene;
-	state.currentCutscene = nullptr;
-	state.isCinematic = false;
-	state.cutsceneStartTime = -1.f;
+	delete state->currentCutscene;
+	state->currentCutscene = nullptr;
+	state->isCinematic = false;
+	state->cutsceneStartTime = -1.f;
 }
 
 bool GameWorld::isCutsceneDone()
 {
-	if( state.currentCutscene ) {
-		float time = gameTime - state.cutsceneStartTime;
-		if( state.skipCutscene ) {
+	if( state->currentCutscene ) {
+		float time = gameTime - state->cutsceneStartTime;
+		if( state->skipCutscene ) {
 			return true;
 		}
-		return time > state.currentCutscene->tracks.duration;
+		return time > state->currentCutscene->tracks.duration;
 	}
 	return true;
 }
@@ -744,7 +745,7 @@ void GameWorld::loadSpecialCharacter(const unsigned short index, const std::stri
 	std::string lowerName(name);
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 	/// @todo a bit more smarter than this
-	state.specialCharacters[index] = lowerName;
+	state->specialCharacters[index] = lowerName;
 }
 
 void GameWorld::loadSpecialModel(const unsigned short index, const std::string &name)
@@ -752,7 +753,7 @@ void GameWorld::loadSpecialModel(const unsigned short index, const std::string &
 	std::string lowerName(name);
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 	/// @todo a bit more smarter than this
-	state.specialModels[index] = lowerName;
+	state->specialModels[index] = lowerName;
 }
 
 void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max)

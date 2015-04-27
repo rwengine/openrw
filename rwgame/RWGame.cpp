@@ -26,7 +26,7 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: state(nullptr), engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
+	: state(nullptr), world(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
 	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
 	accum(0.f), timescale(1.f)
 {
@@ -145,7 +145,7 @@ RWGame::~RWGame()
 {
 	delete script;
 	delete renderer;
-	delete engine;
+	delete world;
 	delete state;
 }
 
@@ -158,13 +158,17 @@ void RWGame::newGame()
 	}
 
 	state = new GameState;
-	engine = new GameWorld(&log, &work, data);
-	engine->dynamicsWorld->setDebugDrawer(debug);
+	world = new GameWorld(&log, &work, data);
+	world->dynamicsWorld->setDebugDrawer(debug);
+
+	// Associate the new world with the new state and vice versa
+	state->world = world;
+	world->state = state;
 }
 
 void RWGame::startScript(const std::string& name)
 {
-	SCMFile* f = engine->data->loadSCM(name);
+	SCMFile* f = world->data->loadSCM(name);
 	if( f ) {
 		if( script ) delete script;
 		
@@ -173,7 +177,7 @@ void RWGame::startScript(const std::string& name)
 		opcodes->modules.push_back(new GameModule);
 		opcodes->modules.push_back(new ObjectModule);
 
-		script = new ScriptMachine(engine, f, opcodes);
+		script = new ScriptMachine(state, f, opcodes);
 		
 		// Set up breakpoint handler
 		script->setBreakpointHandler(
@@ -271,59 +275,59 @@ int RWGame::run()
 void RWGame::tick(float dt)
 {
 	// Clear out any per-tick state.
-	engine->clearTickData();
+	world->clearTickData();
 	// Process the Engine's background work.
-	engine->_work->update();
+	world->_work->update();
 	
-	State* state = StateManager::get().states.back();
+	State* currState = StateManager::get().states.back();
 	
 	static float clockAccumulator = 0.f;
-	if (inFocus && state->shouldWorldUpdate() ) {
-		engine->gameTime += dt;
+	if (inFocus && currState->shouldWorldUpdate() ) {
+		world->gameTime += dt;
 
 		clockAccumulator += dt;
 		while( clockAccumulator >= 1.f ) {
-			engine->state.minute ++;
-			while( engine->state.minute >= 60 ) {
-				engine->state.minute = 0;
-				engine->state.hour ++;
-				while( engine->state.hour >= 24 ) {
-					engine->state.hour = 0;
+			world->state->minute ++;
+			while( state->minute >= 60 ) {
+				state->minute = 0;
+				state->hour ++;
+				while( state->hour >= 24 ) {
+					state->hour = 0;
 				}
 			}
 			clockAccumulator -= 1.f;
 		}
 		
 		// Clean up old VisualFX
-		for( int i = 0; i < engine->effects.size(); ++i )
+		for( int i = 0; i < world->effects.size(); ++i )
 		{
-			VisualFX* effect = engine->effects[i];
+			VisualFX* effect = world->effects[i];
 			if( effect->getType() == VisualFX::Particle )
 			{
 				auto& part = effect->particle;
 				if( part.lifetime < 0.f ) continue;
-				if( engine->gameTime >= part.starttime + part.lifetime )
+				if( world->gameTime >= part.starttime + part.lifetime )
 				{
-					engine->destroyEffect( effect );
+					world->destroyEffect( effect );
 					--i;
 				}
 			}
 		}
 
-		for( GameObject* object : engine->objects ) {
+		for( GameObject* object : world->objects ) {
 			object->_updateLastTransform();
 			object->tick(dt);
 		}
 		
-		engine->destroyQueuedObjects();
-		engine->state.texts.clear();
+		world->destroyQueuedObjects();
+		state->texts.clear();
 
-		for( int i = 0; i < engine->state.text.size(); )
+		for( int i = 0; i < state->text.size(); )
 		{
-			auto& text = engine->state.text[i];
-			if( engine->gameTime > text.osTextStart + text.osTextTime )
+			auto& text = state->text[i];
+			if( world->gameTime > text.osTextStart + text.osTextTime )
 			{
-				engine->state.text.erase(engine->state.text.begin() + i);
+				state->text.erase(state->text.begin() + i);
 			}
 			else
 			{
@@ -331,7 +335,7 @@ void RWGame::tick(float dt)
 			}
 		}
 
-		engine->dynamicsWorld->stepSimulation(dt, 2, dt);
+		world->dynamicsWorld->stepSimulation(dt, 2, dt);
 		
 		if( script ) {
 			try {
@@ -344,18 +348,18 @@ void RWGame::tick(float dt)
 			}
 		}
 		
-		if ( engine->state.player )
+		if ( state->player )
 		{
 			// Use the current camera position to spawn pedestrians.
 			auto p = nextCam.position;
-			engine->cleanupTraffic(p);
-			engine->createTraffic(p);
+			world->cleanupTraffic(p);
+			world->createTraffic(p);
 		}
 	}
 	
 	// render() needs two cameras to smoothly interpolate between ticks.
 	lastCam = nextCam;
-	nextCam = state->getCamera();
+	nextCam = currState->getCamera();
 }
 
 void RWGame::render(float alpha, float time)
@@ -369,10 +373,10 @@ void RWGame::render(float alpha, float time)
 	
 	ViewCamera viewCam;
 	viewCam.frustum.fov = glm::radians(90.f);
-	if( engine->state.currentCutscene != nullptr && engine->state.cutsceneStartTime >= 0.f )
+	if( state->currentCutscene != nullptr && state->cutsceneStartTime >= 0.f )
 	{
-		auto cutscene = engine->state.currentCutscene;
-		float cutsceneTime = std::min(engine->gameTime - engine->state.cutsceneStartTime,
+		auto cutscene = state->currentCutscene;
+		float cutsceneTime = std::min(world->gameTime - state->cutsceneStartTime,
 									  cutscene->tracks.duration);
 		cutsceneTime += GAME_TIMESTEP * alpha;
 		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
@@ -406,10 +410,10 @@ void RWGame::render(float alpha, float time)
 		viewCam.position = cameraPos;
 		viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
 	}
-	else if( engine->state.cameraFixed )
+	else if( state->cameraFixed )
 	{
-		viewCam.position = engine->state.cameraPosition;
-		viewCam.rotation = engine->state.cameraRotation;
+		viewCam.position = state->cameraPosition;
+		viewCam.rotation = state->cameraRotation;
 	}
 	else
 	{
@@ -420,7 +424,7 @@ void RWGame::render(float alpha, float time)
 
 	viewCam.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
 	
-	if ( engine->state.isCinematic )
+	if ( state->isCinematic )
 	{
 		viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
 	}
@@ -430,7 +434,7 @@ void RWGame::render(float alpha, float time)
 
 	renderer->getRenderer()->pushDebugGroup("World");
 
-	renderer->renderWorld(engine, viewCam, alpha);
+	renderer->renderWorld(world, viewCam, alpha);
 
 	auto rendertime = renderer->getRenderer()->popDebugGroup();
 
@@ -446,14 +450,14 @@ void RWGame::render(float alpha, float time)
 
 	if( showDebugPhysics )
 	{
-		if( engine )
+		if( world )
 		{
-			engine->dynamicsWorld->debugDrawWorld();
+			world->dynamicsWorld->debugDrawWorld();
 			debug->flush(renderer);
 		}
 	}
 	
-	drawOnScreenText(engine, renderer);
+	drawOnScreenText(world, renderer);
 }
 
 void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime)
@@ -498,7 +502,7 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;
-	for( GameObject* object : engine->objects )
+	for( GameObject* object : world->objects )
 	{
 		switch ( object->type() )
 		{
@@ -510,10 +514,10 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	ss << "P " << peds << " V " << cars << "\n";
 	
-	if( engine->state.player ) {
+	if( state->player ) {
 		ss << "Player Activity: ";
-		if( engine->state.player->getCurrentActivity() ) {
-			ss << engine->state.player->getCurrentActivity()->name();
+		if( state->player->getCurrentActivity() ) {
+			ss << state->player->getCurrentActivity()->name();
 		}
 		else {
 			ss << "Idle";
@@ -562,7 +566,7 @@ void RWGame::renderDebugPaths(float time)
 	btVector3 roadColour(1.f, 0.f, 0.f);
 	btVector3 pedColour(0.f, 0.f, 1.f);
 	
-	for( AIGraphNode* n : engine->aigraph.nodes )
+	for( AIGraphNode* n : world->aigraph.nodes )
 	{
 		btVector3 p( n->position.x, n->position.y, n->position.z );
 		auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
@@ -584,10 +588,10 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 {
 	switch (event.key.code) {
 	case sf::Keyboard::LBracket:
-		engine->state.minute -= 30.f;
+		state->minute -= 30.f;
 		break;
 	case sf::Keyboard::RBracket:
-		engine->state.minute += 30.f;
+		state->minute += 30.f;
 		break;
 	case sf::Keyboard::Num9:
 		timescale *= 0.5f;
