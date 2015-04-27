@@ -38,8 +38,8 @@ void main()
 })";
 
 
-MapRenderer::MapRenderer(GameWorld* world, Renderer* renderer)
-: world( world ), renderer(renderer)
+MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
+: data(_data), renderer(renderer)
 {
 	rectGeom.uploadVertices<VertexP2>({
 		{-.5f,  .5f},
@@ -72,7 +72,7 @@ glm::vec2 MapRenderer::mapToScreen(const glm::vec2& map, const MapInfo& mi)
 	return screenSize + screenCenter;
 }
 
-void MapRenderer::draw(const MapInfo& mi)
+void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 {
 	renderer->pushDebugGroup("Map");
 	renderer->useProgram(rectProg);
@@ -198,7 +198,7 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& model, const
 	GLuint tex = 0;
 	if ( !texture.empty() )
 	{
-		auto sprite= world->data->findTexture(texture);
+		auto sprite= data->findTexture(texture);
 		tex = sprite->getName();
 		renderer->setUniform(rectProg, "colour", glm::vec4(0.f));
 	}

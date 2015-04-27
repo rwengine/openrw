@@ -5,7 +5,6 @@
 #define GAME_FONTS 3
 #define GAME_GLYPHS 192
 
-class GameWorld;
 class GameRenderer;
 /**
  * @brief Handles rendering of bitmap font textures.
@@ -53,7 +52,7 @@ public:
 		float widthFrac;
 	};
 	
-	TextRenderer(GameWorld* engine, GameRenderer* renderer);
+	TextRenderer(GameRenderer* renderer);
 	~TextRenderer();
 	
 	void setFontTexture( int index, const std::string& font );
@@ -63,8 +62,7 @@ public:
 private:
 	std::string fonts[GAME_FONTS];
 	GlyphInfo glyphData[GAME_GLYPHS];
-	
-	GameWorld* engine;
+
 	GameRenderer* renderer;
 	Renderer::ShaderProgram* textShader;
 	

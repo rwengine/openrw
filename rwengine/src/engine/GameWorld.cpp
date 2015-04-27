@@ -74,9 +74,9 @@ public:
 	}
 };
 
-GameWorld::GameWorld(Logger* log, GameData* dat)
+GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 	: logger(log), gameTime(0.f), data(dat), randomEngine(rand()),
-	  _work( new WorkContext( this ) ), cutsceneAudio(nullptr), missionAudio(nullptr),
+	  _work( work ), cutsceneAudio(nullptr), missionAudio(nullptr),
 	  paused(false)
 {
 	data->engine = this;
@@ -94,8 +94,6 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
 
 GameWorld::~GameWorld()
 {
-	delete _work;
-
 	for(auto o : objects) {
 		delete o;
 	}

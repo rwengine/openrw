@@ -74,12 +74,10 @@ class WorkContext
 	std::mutex _inMutex;
 	std::mutex _outMutex;
 
-	GameWorld* _world;
-
 public:
 
-	WorkContext(GameWorld* world = nullptr)
-		: _worker(this), _world(world) { }
+	WorkContext()
+		: _worker(this) { }
 
 	void queueJob( WorkJob* job )
 	{
@@ -99,8 +97,6 @@ public:
 
 		return (getWorkQueue().size() + getCompleteQueue().size()) == 0;
 	}
-
-	GameWorld* getWorld() const { return _world; }
 
 	void update();
 };

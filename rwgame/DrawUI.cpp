@@ -29,7 +29,7 @@ void drawMap(PlayerController* player, GameWorld* world, GameRenderer* render)
 		map.center = glm::vec2(player->getCharacter()->getPosition());
 	}
 	
-	render->map.draw(map);
+	render->map.draw(world, map);
 }
 
 void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render)

@@ -6,8 +6,8 @@ BOOST_AUTO_TEST_SUITE(GameDataTests)
 
 BOOST_AUTO_TEST_CASE(test_object_data)
 {
-	GameData gd(&Global::get().log, Global::getGamePath());
-	GameWorld gw(&Global::get().log, &gd);
+	GameData gd(&Global::get().log, &Global::get().work, Global::getGamePath());
+	GameWorld gw(&Global::get().log, &Global::get().work, &gd);
 
 	gd.load();
 

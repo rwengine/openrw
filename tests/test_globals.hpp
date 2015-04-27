@@ -38,13 +38,14 @@ public:
 	GameData* d;
 	GameWorld* e;
 	Logger log;
+	WorkContext work;
 	
 	Global() {
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		glewExperimental = GL_TRUE;
 		glewInit();
-		d = new GameData(&log, getGamePath());
-		e = new GameWorld(&log, d);
+		d = new GameData(&log, &work, getGamePath());
+		e = new GameWorld(&log, &work, d);
 
 		e->data->loadIMG("/models/gta3");
 		e->data->loadIMG("/anim/cuts");

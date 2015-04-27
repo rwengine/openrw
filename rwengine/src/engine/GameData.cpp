@@ -80,8 +80,8 @@ std::string fixPath(std::string path) {
 }
 
 
-GameData::GameData(Logger* log, const std::string& path)
-: datpath(path), logger(log), engine(nullptr)
+GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
+: datpath(path), logger(log), workContext(work), engine(nullptr)
 {
 }
 
@@ -421,10 +421,10 @@ void GameData::loadTXD(const std::string& name, bool async)
 
 	loadedFiles[name] = true;
 
-	auto j = new LoadTextureArchiveJob(this->engine->_work, this, name);
+	auto j = new LoadTextureArchiveJob(workContext, this, name);
 
 	if( async ) {
-		this->engine->_work->queueJob( j );
+		workContext->queueJob( j );
 	}
 	else {
 		j->work();
@@ -446,10 +446,10 @@ void GameData::loadDFF(const std::string& name, bool async)
 	models[realname] = ModelRef( new ResourceHandle<Model>(realname) );
 	
 	auto job = new BackgroundLoaderJob<Model, LoaderDFF> 
-	    { this->engine->_work, &this->index, name, models[realname] };
+	{ workContext, &this->index, name, models[realname] };
 
 	if( async ) {
-		this->engine->_work->queueJob( job  );
+		workContext->queueJob( job  );
 	}
 	else {
 		job->work();

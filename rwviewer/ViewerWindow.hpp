@@ -19,6 +19,7 @@ class ViewerWindow : public QMainWindow
 	Q_OBJECT
 
 	Logger engineLog;
+	WorkContext work;
 
 	GameData* gameData;
 	GameWorld* gameWorld;

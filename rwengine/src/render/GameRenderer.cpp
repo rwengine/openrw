@@ -66,9 +66,9 @@ std::vector<VertexP2> sspaceRect = {
 GeometryBuffer ssRectGeom;
 DrawBuffer ssRectDraw;
 
-GameRenderer::GameRenderer(Logger* log, GameWorld* engine)
-	: engine(engine), logger(log), renderer(new OpenGLRenderer), _renderAlpha(0.f),
-	map(engine, renderer), water(this), text(engine, this)
+GameRenderer::GameRenderer(Logger* log, GameData* _data)
+	: data(_data), logger(log), renderer(new OpenGLRenderer), _renderAlpha(0.f),
+	_renderWorld(nullptr), map(renderer, _data), water(this), text(this)
 {
 	logger->info("Renderer", renderer->getIDString());
 
@@ -235,9 +235,10 @@ void GameRenderer::setupRender()
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }
 
-void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
+void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float alpha)
 {
 	_renderAlpha = alpha;
+	_renderWorld = world;
 
 	// Store the input camera,
 	_camera = camera;
@@ -246,11 +247,11 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	glBindVertexArray( vao );
 
-	float tod = engine->state.hour + engine->state.minute/60.f;
+	float tod = world->state.hour + world->state.minute/60.f;
 
 	// Requires a float 0-24
-	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(engine->state.currentWeather * 24);
-	auto weather = engine->data->weatherLoader.getWeatherData(weatherID, tod);
+	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(world->state.currentWeather * 24);
+	auto weather = world->data->weatherLoader.getWeatherData(weatherID, tod);
 
 	glm::vec3 skyTop = weather.skyTopColor;
 	glm::vec3 skyBottom = weather.skyBottomColor;
@@ -265,7 +266,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	};
 	sunDirection = glm::normalize(sunDirection);
 
-	_camera.frustum.near = engine->state.cameraNear;
+	_camera.frustum.near = world->state.cameraNear;
 	_camera.frustum.far = weather.farClipping;
 
 	auto view = _camera.getView();
@@ -295,7 +296,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	renderer->pushDebugGroup("Objects");
 	renderer->pushDebugGroup("Dynamic");
 
-	for( GameObject* object : engine->objects ) {
+	for( GameObject* object : world->objects ) {
 		if(! object->visible )
 		{
 			continue;
@@ -314,7 +315,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 			renderVehicle(static_cast<VehicleObject*>(object));
 			break;
 		case GameObject::Instance:
-			if(! engine->shouldBeOnGrid(object) )
+			if(! world->shouldBeOnGrid(object) )
 			{
 				renderInstance(static_cast<InstanceObject*>(object));
 			}
@@ -337,15 +338,15 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	// Draw the static instance objects. k = % culled
 	int c = 0, k = 0;
-	for(auto& cell : engine->worldGrid )
+	for(auto& cell : world->worldGrid )
 	{
 		c++;
 		int y = c % WORLD_GRID_WIDTH;
 		int x = c / WORLD_GRID_WIDTH;
 		float cellhalf = WORLD_CELL_SIZE/2.f;
 		float radius = cell.boundingRadius;
-		auto world = glm::vec3(glm::vec2(x,y) * glm::vec2(WORLD_CELL_SIZE) - glm::vec2(WORLD_GRID_SIZE/2.f) + glm::vec2(cellhalf), 0.f);
-		if( _camera.frustum.intersects(world, radius) )
+		auto worldp = glm::vec3(glm::vec2(x,y) * glm::vec2(WORLD_CELL_SIZE) - glm::vec2(WORLD_GRID_SIZE/2.f) + glm::vec2(cellhalf), 0.f);
+		if( _camera.frustum.intersects(worldp, radius) )
 		{
 			for( auto& inst : cell.instances )
 			{
@@ -374,12 +375,12 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	profObjects = renderer->popDebugGroup();
 
 	// Render arrows above anything that isn't radar only (or hidden)
-	ModelRef& arrowModel = engine->data->models["arrow"];
+	ModelRef& arrowModel = world->data->models["arrow"];
 	if( arrowModel && arrowModel->resource )
 	{
-		auto arrowTex = engine->data->textures[{"copblue",""}];
+		auto arrowTex = world->data->textures[{"copblue",""}];
 		auto arrowFrame = arrowModel->resource->findFrame( "arrow" );
-		for( auto& blip : engine->state.radarBlips )
+		for( auto& blip : world->state.radarBlips )
 		{
 			if( blip.second.display == BlipData::Show )
 			{
@@ -394,7 +395,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 					model = glm::translate( model, blip.second.coord );
 				}
 
-				float a = engine->gameTime * glm::pi<float>();
+				float a = world->gameTime * glm::pi<float>();
 				model = glm::translate( model, glm::vec3(0.f, 0.f, 2.5f + glm::sin( a ) * 0.5f) );
 				model = glm::rotate( model, a, glm::vec3(0.f, 0.f, 1.f) );
 				model = glm::scale( model, glm::vec3(1.5f, 1.5f, 1.5f) );
@@ -419,7 +420,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	// Draw goal indicators
 	glDepthMask(GL_FALSE);
 	renderer->useProgram( particleProg );
-	for(auto& i : engine->getAreaIndicators())
+	for(auto& i : world->getAreaIndicators())
 	{
 		renderAreaIndicator( &i );
 	}
@@ -427,7 +428,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 
 	renderer->pushDebugGroup("Water");
 
-	water.render(this, engine);
+	water.render(this, world);
 
 	profWater = renderer->popDebugGroup();
 
@@ -448,27 +449,27 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 	profSky = renderer->popDebugGroup();
 
 	renderer->pushDebugGroup("Effects");
-	renderEffects();
+	renderEffects(world);
 	profEffects = renderer->popDebugGroup();
 
 	glDisable(GL_DEPTH_TEST);
 
 	GLuint splashTexName = 0;
-	auto fc = engine->state.fadeColour;
-	if((fc.r + fc.g + fc.b) == 0 && engine->state.currentSplash.size() > 0) {
-		auto splash = engine->data->findTexture(engine->state.currentSplash);
+	auto fc = world->state.fadeColour;
+	if((fc.r + fc.g + fc.b) == 0 && world->state.currentSplash.size() > 0) {
+		auto splash = world->data->findTexture(world->state.currentSplash);
 		if ( splash )
 		{
 			splashTexName = splash->getName();
 		}
 	}
 
-	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName != 0 ) {
+	if( (world->state.isCinematic || world->state.currentCutscene ) && splashTexName != 0 ) {
 		renderLetterbox();
 	}
 
-	float fadeTimer = engine->gameTime - engine->state.fadeStart;
-	if( fadeTimer < engine->state.fadeTime || !engine->state.fadeOut ) {
+	float fadeTimer = world->gameTime - world->state.fadeStart;
+	if( fadeTimer < world->state.fadeTime || !world->state.fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
@@ -484,11 +485,11 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		}
 
 		float fadeFrac = 0.f;
-		if( engine->state.fadeTime > 0.f ) {
-			fadeFrac = std::min(fadeTimer / engine->state.fadeTime, 1.f);
+		if( world->state.fadeTime > 0.f ) {
+			fadeFrac = std::min(fadeTimer / world->state.fadeTime, 1.f);
 		}
 
-		float a = engine->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
+		float a = world->state.fadeOut ? 1.f - fadeFrac : fadeFrac;
 
 		glm::vec4 fadeNormed(fc.r / 255.f, fc.g/ 255.f, fc.b/ 255.f, a);
 
@@ -498,7 +499,7 @@ void GameRenderer::renderWorld(const ViewCamera &camera, float alpha)
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 	
-	if( (engine->state.isCinematic || engine->state.currentCutscene ) && splashTexName == 0 ) {
+	if( (world->state.isCinematic || world->state.currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
 
@@ -561,9 +562,9 @@ void GameRenderer::renderVehicle(VehicleObject *vehicle)
 
 	// Draw wheels n' stuff
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-		auto woi = engine->data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
+		auto woi = data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
-			Model* wheelModel = engine->data->models["wheels"]->resource;
+			Model* wheelModel = data->models["wheels"]->resource;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
 			if( wheelModel ) {
 				// Construct our own matrix so we can use the local transform
@@ -607,8 +608,8 @@ void GameRenderer::renderInstance(InstanceObject *instance)
 {
 	if(instance->object && instance->object->timeOn != instance->object->timeOff) {
 		// Update rendering flags.
-		if(engine->getHour() < instance->object->timeOn
-			&& engine->getHour() > instance->object->timeOff) {
+		if(_renderWorld->getHour() < instance->object->timeOn
+			&& _renderWorld->getHour() > instance->object->timeOff) {
 			return;
 		}
 	}
@@ -703,9 +704,9 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	if( ! pickup->isEnabled() ) return;
 
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
-	modelMatrix = glm::rotate(modelMatrix, engine->gameTime, glm::vec3(0.f, 0.f, 1.f));
+	modelMatrix = glm::rotate(modelMatrix, _renderWorld->gameTime, glm::vec3(0.f, 0.f, 1.f));
 
-	auto odata = engine->data->findObjectType<ObjectData>(pickup->getModelID());
+	auto odata = data->findObjectType<ObjectData>(pickup->getModelID());
 	
 	Model* model = nullptr;
 	ModelFrame* itemModel = nullptr;
@@ -713,7 +714,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	/// @todo Better determination of is this object a weapon.
 	if( odata->ID >= 170 && odata->ID <= 184 )
 	{
-		auto weapons = engine->data->models["weapons"];
+		auto weapons = data->models["weapons"];
 		if( weapons && weapons->resource && odata ) {
 			model = weapons->resource;
 			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
@@ -725,7 +726,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	}
 	else
 	{
-		auto handle = engine->data->models[odata->modelName];
+		auto handle = data->models[odata->modelName];
 		if ( handle && handle->resource )
 		{
 			model = handle->resource;
@@ -746,7 +747,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 
 void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 {
-	if(!engine->state.currentCutscene) return;
+	if(!_renderWorld->state.currentCutscene) return;
 
 	if(!cutscene->model->resource)
 	{
@@ -756,7 +757,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 	glm::mat4 matrixModel;
 
 	if( cutscene->getParentActor() ) {
-		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, _renderWorld->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
 		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
 		glm::mat4 localMatrix;
@@ -768,7 +769,7 @@ void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
 		matrixModel = matrixModel * localMatrix;
 	}
 	else {
-		matrixModel = glm::translate(matrixModel, engine->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, _renderWorld->state.currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
 	}
 
 	float mindist = 100000.f;
@@ -793,8 +794,8 @@ void GameRenderer::renderProjectile(ProjectileObject *projectile)
 {
 	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(_renderAlpha);
 
-	auto odata = engine->data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
-	auto weapons = engine->data->models["weapons"];
+	auto odata = data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
+	auto weapons = data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
@@ -837,8 +838,8 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 {
 	// srhand
-	std::shared_ptr<ObjectData> odata = engine->data->findObjectType<ObjectData>(item->getModelID());
-	auto weapons = engine->data->models["weapons"];
+	std::shared_ptr<ObjectData> odata = data->findObjectType<ObjectData>(item->getModelID());
+	auto weapons = data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
@@ -878,7 +879,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 				{
 					auto& tC = mat.textures[0].name;
 					auto& tA = mat.textures[0].alphaName;
-					tex = engine->data->findTexture(tC, tA);
+					tex = data->findTexture(tC, tA);
 					if( ! tex )
 					{
 						//logger->warning("Renderer", "Missing texture: " + tC + " " + tA);
@@ -935,10 +936,10 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 {
 	glm::mat4 m(1.f);
 	m = glm::translate(m, info->position);
-	glm::vec3 scale = info->radius + 0.15f * glm::sin(engine->gameTime * 5.f);
+	glm::vec3 scale = info->radius + 0.15f * glm::sin(_renderWorld->gameTime * 5.f);
 	
 	Renderer::DrawParameters dp;
-	dp.textures = {engine->data->findTexture("cloud1")->getName()};
+	dp.textures = {data->findTexture("cloud1")->getName()};
 	dp.ambient = 1.f;
 	dp.colour = glm::u8vec4(50, 100, 255, 1);
 	dp.start = 0;
@@ -951,20 +952,20 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 		glm::vec3 final = scale * glm::pow(0.9f, i + 1.0f);
 		mt = glm::scale(mt, glm::vec3(final.x, final.y, 1.0f + i * 0.1f));
 		int reverse = (i % 2 ? 1 : -1);
-		mt = glm::rotate(mt, reverse * engine->gameTime * 0.5f, glm::vec3(0.f, 0.f, 1.f) );
+		mt = glm::rotate(mt, reverse * _renderWorld->gameTime * 0.5f, glm::vec3(0.f, 0.f, 1.f) );
 		
 		renderer->drawArrays(mt, &cylinderBuffer, dp);
 	}
 }
 
-void GameRenderer::renderEffects()
+void GameRenderer::renderEffects(GameWorld* world)
 {
 	renderer->useProgram( particleProg );
 
 	auto cpos = _camera.position;
 	auto cfwd = glm::normalize(glm::inverse(_camera.rotation) * glm::vec3(0.f, 1.f, 0.f));
 	
-	auto& effects = engine->effects;
+	auto& effects = world->effects;
 
 	std::sort( effects.begin(), effects.end(),
 			   [&](const VisualFX* a, const VisualFX* b) {

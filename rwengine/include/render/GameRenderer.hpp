@@ -43,9 +43,9 @@ class Renderer;
  */
 class GameRenderer
 {
-	/** Pointer to the world instance */
-	GameWorld* engine;
-	
+	/** Game data to use for rendering */
+	GameData* data;
+
 	/** Logger to output messages */
 	Logger* logger;
 
@@ -76,7 +76,9 @@ class GameRenderer
 	/** Transparent objects are queued into this list */
 	std::vector<RQueueEntry> transparentDrawQueue;
 
+	// Temporary variables used during rendering
 	float _renderAlpha;
+	GameWorld* _renderWorld;
 
 	/** Internal non-descript VAOs */
 	GLuint vao, debugVAO;
@@ -91,7 +93,7 @@ class GameRenderer
 
 public:
 	
-	GameRenderer(Logger* log, GameWorld*);
+	GameRenderer(Logger* log, GameData* data);
 	~GameRenderer();
 	
 	/** Number of culling events */
@@ -113,7 +115,9 @@ public:
 	
 	DrawBuffer cylinderBuffer;
 	GeometryBuffer cylinderGeometry;
-	
+
+	GameData* getData() const { return data; }
+
     /**
 	 * Renders the world using the parameters of the passed Camera.
 	 * Note: The camera's near and far planes are overriden by weather effects.
@@ -123,7 +127,7 @@ public:
 	 *  - draws water surfaces
 	 *  - draws the skybox
      */
-	void renderWorld(const ViewCamera &camera, float alpha);
+	void renderWorld(GameWorld* world, const ViewCamera &camera, float alpha);
 
 	/**
 	 * @brief draws a CharacterObject and any item they are holding.
@@ -160,7 +164,7 @@ public:
 	/**
 	 * Renders the effects (Particles, Lighttrails etc)
 	 */
-	void renderEffects();
+	void renderEffects(GameWorld* world);
 
 	/**
 	 * @brief Draws the current on screen text.

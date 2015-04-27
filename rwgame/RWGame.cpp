@@ -26,7 +26,7 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
+	: state(nullptr), engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
 	showDebugStats(false), showDebugPaths(false),
 	accum(0.f), timescale(1.f)
 {
@@ -89,19 +89,17 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		throw std::runtime_error("Invalid game directory path, is " +envname+ " set?");
 	}
 
-	data = new GameData(&log, gamepath);
+	data = new GameData(&log, &work, gamepath);
 
-	engine = new GameWorld(&log, data);
-	
 	// Initalize all the archives.
-	engine->data->loadIMG("/models/gta3");
+	data->loadIMG("/models/gta3");
 	//engine->data.loadIMG("/models/txd");
-	engine->data->loadIMG("/anim/cuts");
+	data->loadIMG("/anim/cuts");
 	
-	engine->data->load();
+	data->load();
 	
 	// Initialize renderer
-	renderer = new GameRenderer(&log, engine);
+	renderer = new GameRenderer(&log, data);
 	
 	// Set up text renderer
 	renderer->text.setFontTexture(0, "pager");
@@ -111,21 +109,22 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	debug = new DebugDraw;
 	debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits);
 	debug->setShaderProgram(renderer->worldProg);
-	engine->dynamicsWorld->setDebugDrawer(debug);
 
-	engine->data->loadDynamicObjects(gamepath + "/data/object.dat");
+	data->loadDynamicObjects(gamepath + "/data/object.dat");
 
 	/// @TODO language choices.
-	engine->data->loadGXT("english.gxt");
+	data->loadGXT("english.gxt");
 	
-	getRenderer()->water.setWaterTable(data->waterHeights, 48, engine->data->realWater, 128*128);
+	getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater, 128*128);
 	
 	for(int m = 0; m < MAP_BLOCK_SIZE; ++m)
 	{
 		std::string num = (m < 10 ? "0" : "");
 		std::string name = "radar" + num +  std::to_string(m);
-		engine->data->loadTXD(name + ".txd");
+		data->loadTXD(name + ".txd");
 	}
+
+	newGame();
 
 	auto loading = new LoadingState(this);
 	if( newgame )
@@ -147,6 +146,20 @@ RWGame::~RWGame()
 	delete script;
 	delete renderer;
 	delete engine;
+	delete state;
+}
+
+void RWGame::newGame()
+{
+	if( state != nullptr )
+	{
+		log.error("Game", "Cannot start a new game: game is already running.");
+		return;
+	}
+
+	state = new GameState;
+	engine = new GameWorld(&log, &work, data);
+	engine->dynamicsWorld->setDebugDrawer(debug);
 }
 
 void RWGame::startScript(const std::string& name)
@@ -417,7 +430,7 @@ void RWGame::render(float alpha, float time)
 
 	renderer->getRenderer()->pushDebugGroup("World");
 
-	renderer->renderWorld(viewCam, alpha);
+	renderer->renderWorld(engine, viewCam, alpha);
 
 	auto rendertime = renderer->getRenderer()->popDebugGroup();
 

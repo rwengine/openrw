@@ -44,14 +44,14 @@ private:
 	std::string splash;
 	
 	Logger* logger;
-	
+	WorkContext* workContext;
 public:
 
 	/**
 	 * ctor
 	 * @param path Path to the root of the game data.
 	 */
-	GameData(Logger* log, const std::string& path = "");
+	GameData(Logger* log, WorkContext* work, const std::string& path = "");
 	~GameData();
 	
 	GameWorld* engine;

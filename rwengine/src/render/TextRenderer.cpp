@@ -105,8 +105,8 @@ TextRenderer::TextInfo::TextInfo()
 
 }
 
-TextRenderer::TextRenderer(GameWorld* engine, GameRenderer* renderer)
-: fonts({}), engine(engine), renderer(renderer)
+TextRenderer::TextRenderer(GameRenderer* renderer)
+: fonts({}), renderer(renderer)
 {
 	textShader = renderer->getRenderer()->createShader(
 		TextVertexShader, TextFragmentShader );
@@ -235,7 +235,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	Renderer::DrawParameters dp;
 	dp.start = 0;
 	dp.count = gb.getCount();
-	auto ftexture = engine->data->findTexture(fonts[ti.font]);
+	auto ftexture = renderer->getData()->findTexture(fonts[ti.font]);
 	dp.textures = {ftexture->getName()};
 	
 	renderer->getRenderer()->drawArrays(glm::mat4(), &db, dp);

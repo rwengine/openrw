@@ -13,11 +13,14 @@
 class RWGame
 {
 	Logger log;
+	GameState* state;
 	GameData* data;
 	GameWorld* engine;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
 	ScriptMachine* script;
+	// Background worker
+	WorkContext work;
 	sf::RenderWindow window;
 	sf::Clock clock;
 	bool inFocus;
@@ -34,6 +37,16 @@ public:
 	~RWGame();
 
 	int run();
+
+	/**
+	 * Initalizes a new game
+	 */
+	void newGame();
+
+	GameState* getState() const
+	{
+		return state;
+	}
 
 	GameWorld* getWorld() const
 	{

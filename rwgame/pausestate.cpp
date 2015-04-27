@@ -39,7 +39,7 @@ void PauseState::draw(GameRenderer* r)
 	map.mapScreenTop = glm::vec2(vp.x, vp.y);
 	map.mapScreenBottom = glm::vec2(0.f, 0.f);
 	
-	game->getRenderer()->map.draw(map);
+	game->getRenderer()->map.draw(getWorld(), map);
 
     State::draw(r);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <render/OpenGLRenderer.hpp>
+class GameData;
 class GameWorld;
 
 #define MAP_BLOCK_SIZE 63
@@ -26,15 +27,15 @@ public:
 		glm::vec2 mapScreenTop;
 	};
 	
-	MapRenderer(GameWorld* world, Renderer* renderer);
+	MapRenderer(Renderer* renderer, GameData* data);
 	
 	glm::vec2 worldToMap(const glm::vec2& coord);
 	glm::vec2 mapToScreen(const glm::vec2& map, const MapInfo& mi);
 	
-	void draw(const MapInfo& mi);
+	void draw(GameWorld* world, const MapInfo& mi);
 
 private:
-	GameWorld* world;
+	GameData* data;
 	Renderer* renderer;
 	
 	GeometryBuffer rectGeom;

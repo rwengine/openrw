@@ -61,7 +61,7 @@ class GameWorld
 {
 public:
 
-	GameWorld(Logger* log, GameData* dat);
+	GameWorld(Logger* log, WorkContext* work, GameData* dat);
 
 	~GameWorld();
 
