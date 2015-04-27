@@ -7,6 +7,7 @@
 #include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/norm.hpp>
 
 TrafficDirector::TrafficDirector(AIGraph* g, GameWorld* w)
 : graph( g ), world( w ), pedDensity(1.f), carDensity(1.f),
