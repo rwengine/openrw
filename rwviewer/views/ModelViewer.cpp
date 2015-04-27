@@ -2,7 +2,7 @@
 #include <widgets/ModelFramesWidget.hpp>
 #include "ViewerWidget.hpp"
 #include <data/Skeleton.hpp>
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <QDebug>
 
 ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)

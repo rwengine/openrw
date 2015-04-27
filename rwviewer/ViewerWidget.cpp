@@ -4,7 +4,7 @@
 #include <render/OpenGLRenderer.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <QMouseEvent>
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <engine/Animator.hpp>
 #include <QFileDialog>
 #include <algorithm>

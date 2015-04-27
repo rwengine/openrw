@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _CUTSCENEOBJECT_HPP_
 #define _CUTSCENEOBJECT_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 
 /**
  * @brief Object type used for cutscene animations.

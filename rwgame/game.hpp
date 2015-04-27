@@ -3,7 +3,7 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <engine/GameWorld.hpp>
 
 constexpr double PiOver180 = 3.1415926535897932384626433832795028/180;

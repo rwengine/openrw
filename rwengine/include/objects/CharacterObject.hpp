@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _CHARACTEROBJECT_HPP_
 #define _CHARACTEROBJECT_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>

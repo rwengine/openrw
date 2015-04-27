@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _PICKUPOBJECT_HPP_
 #define _PICKUPOBJECT_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>

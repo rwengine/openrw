@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _VEHICLEOBJECT_HPP_
 #define _VEHICLEOBJECT_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <map>
 #include <objects/VehicleInfo.hpp>
 #include <dynamics/CollisionInstance.hpp>

@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _OBJECTINSTANCE_HPP_
 #define _OBJECTINSTANCE_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <btBulletDynamicsCommon.h>
 
 class CollisionInstance;

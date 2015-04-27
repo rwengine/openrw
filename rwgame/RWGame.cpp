@@ -5,7 +5,7 @@
 #include "ingamestate.hpp"
 #include "menustate.hpp"
 
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>

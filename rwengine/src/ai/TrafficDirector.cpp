@@ -2,7 +2,7 @@
 #include <ai/AIGraphNode.hpp>
 #include <ai/CharacterController.hpp>
 #include <engine/GameWorld.hpp>
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <core/Logger.hpp>
 

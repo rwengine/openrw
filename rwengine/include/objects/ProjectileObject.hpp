@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _PROJECTILEOBJECT_HPP_
 #define _PROJECTILEOBJECT_HPP_
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <data/WeaponData.hpp>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>

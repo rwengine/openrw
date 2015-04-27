@@ -1,5 +1,5 @@
 #include "ai/AIGraph.hpp"
-#include "engine/GameObject.hpp"
+#include <objects/GameObject.hpp>
 #include <ai/AIGraphNode.hpp>
 #include <glm/gtx/norm.hpp>
 #include <iostream>

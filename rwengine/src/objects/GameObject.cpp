@@ -1,4 +1,4 @@
-#include <engine/GameObject.hpp>
+#include <objects/GameObject.hpp>
 #include <loaders/LoaderIFP.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <engine/Animator.hpp>

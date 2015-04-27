@@ -11,8 +11,6 @@
 #include <render/Model.hpp>
 #include <render/GameRenderer.hpp>
 #include <engine/Animator.hpp>
-#include <engine/GameWorld.hpp>
-#include <engine/GameWorld.hpp>
 #include <ai/PlayerController.hpp>
 #include <ai/DefaultAIController.hpp>
 
