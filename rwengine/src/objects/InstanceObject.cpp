@@ -47,6 +47,10 @@ void InstanceObject::tick(float dt)
 				engine->dynamicsWorld->addRigidBody(body->body);
 			}
 		}
+		else
+		{
+			_updateLastTransform();
+		}
 
 		auto _bws = body->body->getWorldTransform().getOrigin();
 		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
@@ -115,18 +119,38 @@ void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming)
 {
 	if( body ) {
 		delete body;
+		body = nullptr;
 	}
 
 	object = incoming;
 
 	if( incoming ) {
-		body = new CollisionInstance;
+		auto bod = new CollisionInstance;
 
-		if( body->createPhysicsBody(this, object->modelName, dynamics.get()) )
+		if( bod->createPhysicsBody(this, object->modelName, dynamics.get()) )
 		{
-			body->body->setActivationState(ISLAND_SLEEPING);
+			bod->body->setActivationState(ISLAND_SLEEPING);
+			body = bod;
 		}
 	}
+}
+
+glm::vec3 InstanceObject::getPosition() const
+{
+	if( body ) {
+		btVector3 Pos = body->body->getWorldTransform().getOrigin();
+		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
+	}
+	return position;
+}
+
+glm::quat InstanceObject::getRotation() const
+{
+	if( body ) {
+		btQuaternion rot = body->body->getWorldTransform().getRotation();
+		return glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
+	}
+	return rotation;
 }
 
 void InstanceObject::setRotation(const glm::quat &r)

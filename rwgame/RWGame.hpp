@@ -27,6 +27,7 @@ class RWGame
 	ViewCamera lastCam, nextCam;
 	bool showDebugStats;
 	bool showDebugPaths;
+	bool showDebugPhysics;
 	int lastDraws; /// Number of draws issued for the last frame.
 
 	float accum;

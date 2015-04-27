@@ -27,7 +27,7 @@ StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	: state(nullptr), engine(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
-	showDebugStats(false), showDebugPaths(false),
+	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
 	accum(0.f), timescale(1.f)
 {
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
@@ -434,26 +434,6 @@ void RWGame::render(float alpha, float time)
 
 	auto rendertime = renderer->getRenderer()->popDebugGroup();
 
-#if 0
-	debug->setShaderProgram(engine->renderer.worldProg);
-	if( engine->state.player )
-	{
-		if( engine->state.player->getCharacter()->getCurrentVehicle() )
-		{
-			auto v = engine->state.player->getCharacter()->getCurrentVehicle();
-			for( auto& p : v->dynamicParts )
-			{
-				if( p.second.body )
-				{
-					engine->dynamicsWorld->debugDrawObject(p.second.body->getWorldTransform(), p.second.body->getCollisionShape(), btVector3(1.f, 0.f, 0.f));
-					engine->dynamicsWorld->debugDrawConstraint(p.second.constraint);
-				}
-			}
-		}
-	}
-	debug->flush(&engine->renderer);
-#endif
-
 	if( showDebugPaths )
 	{
 		renderDebugPaths(time);
@@ -462,6 +442,15 @@ void RWGame::render(float alpha, float time)
 	if ( showDebugStats )
 	{
 		renderDebugStats(time, rendertime);
+	}
+
+	if( showDebugPhysics )
+	{
+		if( engine )
+		{
+			engine->dynamicsWorld->debugDrawWorld();
+			debug->flush(renderer);
+		}
 	}
 	
 	drawOnScreenText(engine, renderer);
@@ -611,6 +600,9 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 		break;
 	case sf::Keyboard::F2:
 		showDebugPaths = ! showDebugPaths;
+		break;
+	case sf::Keyboard::F3:
+		showDebugPhysics = ! showDebugPhysics;
 		break;
 	default: break;
 	}

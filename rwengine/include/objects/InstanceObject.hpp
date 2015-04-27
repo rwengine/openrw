@@ -30,6 +30,9 @@ public:
 
 	void changeModel(std::shared_ptr<ObjectData> incoming);
 
+	virtual glm::vec3 getPosition() const;
+	virtual glm::quat getRotation() const;
+
 	virtual void setRotation(const glm::quat& r);
 	
 	virtual bool takeDamage(const DamageInfo& damage);
