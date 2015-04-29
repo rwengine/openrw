@@ -297,7 +297,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	renderer->pushDebugGroup("Objects");
 	renderer->pushDebugGroup("Dynamic");
 
-	for( GameObject* object : world->objects ) {
+	for( auto& p  : world->objects ) {
+		auto object = p.second;
 		if(! object->visible )
 		{
 			continue;

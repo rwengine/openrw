@@ -121,7 +121,7 @@ void WeaponItem::fireProjectile()
 											_wepData
 										});
 
-	_character->engine->objects.insert( projectile );
+	_character->engine->insertObject( projectile );
 }
 
 void WeaponItem::primary(bool active)

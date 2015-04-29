@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_pickup_interaction)
 
 		TestPickup* p = new TestPickup(Global::get().e, { 30.f, 0.f, 0.f } );
 
-		Global::get().e->objects.insert(p);
+		Global::get().e->insertObject(p);
 
 		BOOST_CHECK( ! p->picked_up );
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup)
 
 		ItemPickup* p = new ItemPickup(Global::get().e, { 30.f, 0.f, 0.f }, item );
 
-		Global::get().e->objects.insert(p);
+		Global::get().e->insertObject(p);
 
 		// Check the characters inventory is empty.
 		BOOST_CHECK( character->getInventory().empty() );

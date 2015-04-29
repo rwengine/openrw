@@ -49,7 +49,8 @@ void ProjectileObject::explode()
 		const float damage = _info.weapon->damage;
 
 		/// @todo accelerate this with bullet instead of doing this stupid loop.
-		for(auto& o : engine->objects) {
+		for(auto& p : engine->objects) {
+			auto o = p.second;
 			if( o == this ) continue;
 			switch( o->type() ) {
 			case GameObject::Instance:

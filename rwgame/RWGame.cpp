@@ -314,7 +314,8 @@ void RWGame::tick(float dt)
 			}
 		}
 
-		for( GameObject* object : world->objects ) {
+		for( auto& p : world->objects ) {
+			GameObject* object = p.second;
 			object->_updateLastTransform();
 			object->tick(dt);
 		}
@@ -502,8 +503,9 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;
-	for( GameObject* object : world->objects )
+	for( auto& p : world->objects )
 	{
+		GameObject* object = p.second;
 		switch ( object->type() )
 		{
 			case GameObject::Character: peds++; break;

@@ -15,6 +15,7 @@ class GameState;
 
 class CutsceneObject;
 class WorkContext;
+#include <objects/ObjectTypes.hpp>
 
 class GameObject;
 class CharacterObject;
@@ -95,7 +96,12 @@ public:
 	 * Creates a pedestrian.
 	 */
 	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
-	
+
+	/**
+	 * Inserts the given game object into the world.
+	 */
+	void insertObject(GameObject* object);
+
 	/**
 	 * Destroys an existing Object
 	 */
@@ -159,11 +165,9 @@ public:
 	SoundManager sound;
 
 	/**
-	 * @brief objects All active GameObjects in the world.
-	 * @todo add some mechanism to allow objects to be "locked" preventing deletion.
-	 * @todo add deletion queue to allow objects to self delete.
+	 * The active GameObjects within the world, mapped to their allocated ID
 	 */
-	std::set<GameObject*> objects;
+	std::map<GameObjectID, GameObject*> objects;
 
 	std::set<GameObject*> characters;
 

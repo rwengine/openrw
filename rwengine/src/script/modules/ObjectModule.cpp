@@ -99,9 +99,9 @@ void game_create_character(const ScriptArguments& args)
 		it != args.getWorld()->objects.end();
 	++it)
 		{
-			if( (*it)->type() == GameObject::Character && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
+			if( it->second->type() == GameObject::Character && glm::distance(position, it->second->getPosition()) < replaceThreshold )
 			{
-				args.getWorld()->destroyObjectQueued(*it);
+				args.getWorld()->destroyObjectQueued(it->second);
 			}
 		}
 		
@@ -139,9 +139,9 @@ void game_create_vehicle(const ScriptArguments& args)
 		it != args.getWorld()->objects.end();
 	++it)
 		{
-			if( (*it)->type() == GameObject::Vehicle && glm::distance(position, (*it)->getPosition()) < replaceThreshold )
+			if( it->second->type() == GameObject::Vehicle && glm::distance(position, it->second->getPosition()) < replaceThreshold )
 			{
-				args.getWorld()->destroyObjectQueued(*it);
+				args.getWorld()->destroyObjectQueued(it->second);
 			}
 		}
 		
@@ -538,8 +538,9 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	bool objects = args[9].integer;
 	bool particles = args[10].integer;
 	
-	for(GameObject* object : args.getWorld()->objects)
+	for(auto& pair : args.getWorld()->objects)
 	{
+		GameObject* object = pair.second;
 		switch( object->type() )
 		{
 			case GameObject::Instance:
@@ -682,7 +683,7 @@ void game_create_pickup(const ScriptArguments& args)
 	
 	auto pickup = new GenericPickup(args.getWorld(), pos, id, type);
 	
-	args.getWorld()->objects.insert(pickup);
+	args.getWorld()->insertObject( pickup );
 	
 	*args[5].handle = pickup;
 }
@@ -842,7 +843,8 @@ void game_set_close_object_visible(const ScriptArguments& args)
 	
 	std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
-	for(auto o : args.getWorld()->objects) {
+	for(auto& p : args.getWorld()->objects) {
+		auto o = p.second;
 		if( o->type() == GameObject::Instance ) {
 			if( !o->model ) continue;
 			if( o->model->name != model ) continue;
@@ -899,7 +901,8 @@ void game_change_nearest_model(const ScriptArguments& args)
 	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
 	
 	/// @todo Objects need to adopt the new object ID, not just the model.
-	for(auto o : args.getWorld()->objects) {
+	for(auto p : args.getWorld()->objects) {
+		auto o = p.second;
 		if( o->type() == GameObject::Instance ) {
 			if( !o->model ) continue;
 			if( o->model->name != oldmodel ) continue;

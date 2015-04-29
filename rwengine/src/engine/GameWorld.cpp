@@ -95,8 +95,8 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 
 GameWorld::~GameWorld()
 {
-	for(auto o : objects) {
-		delete o;
+	for(auto& p : objects) {
+		delete p.second;
 	}
 
 	delete dynamicsWorld;
@@ -126,7 +126,8 @@ bool GameWorld::placeItems(const std::string& name)
 		}
 		
 		// Attempt to Associate LODs.
-		for(GameObject* object : objects) {
+		for(auto& p: objects) {
+			auto object = p.second;
 			if( object->type() == GameObject::Instance ) {
 				InstanceObject* instance = static_cast<InstanceObject*>(object);
 				if( !instance->object->LOD ) {
@@ -192,7 +193,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			oi, nullptr, dydata
 		);
 
-		objects.insert(instance);
+		insertObject(instance);
 
 		if( shouldBeOnGrid(instance) )
 		{
@@ -219,16 +220,16 @@ void GameWorld::createTraffic(const glm::vec3& near)
 
 void GameWorld::cleanupTraffic(const glm::vec3& focus)
 {
-	for ( GameObject* object : objects )
+	for ( auto& p : objects )
 	{
-		if ( object->getLifetime() != GameObject::TrafficLifetime )
+		if ( p.second->getLifetime() != GameObject::TrafficLifetime )
 		{
 			continue;
 		}
 		
-		if ( glm::distance( focus, object->getPosition() ) >= 100.f )
+		if ( glm::distance( focus, p.second->getPosition() ) >= 100.f )
 		{
-			destroyObjectQueued( object );
+			destroyObjectQueued( p.second );
 		}
 	}
 	destroyQueuedObjects();
@@ -301,7 +302,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 		pos,
 		m);
 
-	objects.insert(instance);
+	insertObject( instance );
 
 
 	return instance;
@@ -365,7 +366,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
 		auto vehicle = new VehicleObject{ this, pos, rot, m, vti, info->second, prim, sec };
 
-		objects.insert(vehicle);
+		insertObject( vehicle );
 
 		return vehicle;
 	}
@@ -404,13 +405,26 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
-			objects.insert(ped);
+			insertObject(ped);
 			characters.insert(ped);
 			new DefaultAIController(ped);
 			return ped;
 		}
 	}
 	return nullptr;
+}
+
+void GameWorld::insertObject(GameObject* object)
+{
+	// Find the lowest free GameObjectID.
+	GameObjectID availID = 1;
+	for( auto& p : objects )
+	{
+		if( p.first == availID ) availID++;
+	}
+
+	object->setGameObjectID( availID );
+	objects[availID] = object;
 }
 
 void GameWorld::destroyObject(GameObject* object)
@@ -423,7 +437,7 @@ void GameWorld::destroyObject(GameObject* object)
 	auto index = (coord.x * WORLD_GRID_WIDTH) + coord.y;
 	worldGrid[index].instances.erase(object);
 	
-	auto iterator = objects.find(object);
+	auto iterator = objects.find(object->getGameObjectID());
 	if( iterator != objects.end() ) {
 		delete object;
 		objects.erase(iterator);
@@ -653,7 +667,8 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeSte
 {
 	GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
-	for( GameObject* object : world->objects ) {
+	for( auto& p : world->objects ) {
+		GameObject* object = p.second;
 		if( object->type() == GameObject::Vehicle ) {
 			static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
 		}
@@ -708,7 +723,8 @@ void GameWorld::startCutscene()
 
 void GameWorld::clearCutscene()
 {
-	for(auto o : objects) {
+	for(auto& p : objects) {
+		auto o = p.second;
 		if( o->type() == GameObject::Cutscene ) {
 			destroyObjectQueued(o);
 		}
