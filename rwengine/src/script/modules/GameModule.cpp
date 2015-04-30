@@ -142,10 +142,10 @@ void game_set_zone_car_info(const ScriptArguments& args)
 
 void game_camera_follow_character(const ScriptArguments& args)
 {
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	if( controller != nullptr )
+	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	if( character != nullptr )
 	{
-		args.getWorld()->state->cameraTarget = controller->getCharacter();
+		args.getWorld()->state->cameraTarget = character;
 	}
 }
 
@@ -258,7 +258,7 @@ void game_link_mission_flag(const ScriptArguments& args)
 void game_add_vehicle_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = static_cast<VehicleObject*>(*args[0].handle);
+	data.target = args.getGameObject(0);
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -266,8 +266,7 @@ void game_add_vehicle_blip(const ScriptArguments& args)
 void game_add_character_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	data.target = controller->getCharacter();
+	data.target = args.getGameObject(0);
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -275,7 +274,7 @@ void game_add_character_blip(const ScriptArguments& args)
 void game_add_pickup_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = static_cast<PickupObject*>(*args[0].handle);
+	data.target = args.getGameObject(0);
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -312,8 +311,8 @@ void game_change_blip_mode(const ScriptArguments& args)
 
 void game_enable_input(const ScriptArguments& args)
 {
-	auto controller = static_cast<PlayerController*>(*args[0].handle);
-	controller->setInputEnabled(!!args[1].integer);
+	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	static_cast<PlayerController*>(character->controller)->setInputEnabled(!!args[1].integer);
 }
 
 void game_set_weather(const ScriptArguments& args)
@@ -368,8 +367,8 @@ void game_max_wanted_level(const ScriptArguments& args)
 // This does nothing for us.
 void game_get_player(const ScriptArguments& args)
 {
-	auto controller = (CharacterController*)(*args[0].handle);
-	*args[1].handle = controller;
+	auto character = args.getGameObject(0);
+	*args[1].globalInteger = character->getGameObjectID();
 }
 
 void game_create_garage(const ScriptArguments& args)
@@ -379,7 +378,8 @@ void game_create_garage(const ScriptArguments& args)
 
 	/// @todo http://www.gtamodding.com/index.php?title=Garage#GTA_III
 	int garageType = args[6].integer;
-	auto garageHandle = args[7].handle;
+	// TODO actually store the garage information and return the handle
+	*args[7].globalInteger = 0;
 
 	args.getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
 }
@@ -462,8 +462,8 @@ void game_restart_critical_mission(const ScriptArguments& args)
 /// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
 bool game_is_player_playing(const ScriptArguments& args)
 {
-	auto controller = (CharacterController*)(*args[0].handle);
-	return controller != nullptr;
+	auto character = args.getGameObject(0);
+	return character != nullptr;
 }
 
 void game_controller_mode(const ScriptArguments& args)
@@ -550,15 +550,18 @@ void game_create_cutscene_object(const ScriptArguments& args)
 	auto id	= args[0].integer;
 
 	GameObject* object = object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
-	*args[1].handle = object;
 
 	if( object == nullptr ) {
 		args.getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
 	}
+	else
+	{
+		*args[1].globalInteger = object->getGameObjectID();
+	}
 }
 void game_set_cutscene_anim(const ScriptArguments& args)
 {
-	GameObject* object = static_cast<GameObject*>(*args[0].handle);
+	GameObject* object = args.getGameObject(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -613,18 +616,18 @@ void game_load_special_model(const ScriptArguments& args)
 void game_create_cutscene_head(const ScriptArguments& args)
 {
 	auto id = args[1].integer;
-	auto actor = static_cast<GameObject*>(*args[0].handle);
+	auto actor = args.getGameObject(0);
 	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
 	auto headframe = actor->model->resource->findFrame("shead");
 	actor->skeleton->setEnabled(headframe, false);
 	object->setParentActor(actor, headframe);
 
-	*args[2].handle = object;
+	*args[2].globalInteger = object->getGameObjectID();
 }
 void game_set_head_animation(const ScriptArguments& args)
 {
-	GameObject* object = static_cast<GameObject*>(*args[0].handle);
+	GameObject* object = args.getGameObject(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -701,8 +704,11 @@ void game_set_background_colour(const ScriptArguments& args)
 
 void game_set_character_model(const ScriptArguments& args)
 {
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	controller->getCharacter()->changeCharacterModel(args[1].string);
+	auto character = args.getGameObject(0);
+	if( character )
+	{
+		static_cast<CharacterObject*>(character)->changeCharacterModel(args[1].string);
+	}
 }
 
 bool game_collision_loaded(const ScriptArguments& args)

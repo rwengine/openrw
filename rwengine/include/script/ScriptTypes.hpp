@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 
+class GameObject;
 class ScriptMachine;
 class ScriptModule;
 struct SCMThread;
@@ -52,13 +53,10 @@ struct SCMOpcodeParameter {
 		float real;
 		char string[8];
 		void* globalPtr;
-		void** handle;
 		int* globalInteger;
 		float* globalReal;
 	};
-	
-	template<class T> T* handleOf() const { return static_cast<T*>(*handle); }
-	
+
 	int integerValue() const 
 	{
 		if ( type == TGlobal )
@@ -95,6 +93,11 @@ public:
 	{
 		return parameters->at(arg);
 	}
+
+	/**
+	 * Returns the GameObject passed at the given argument index
+	 */
+	GameObject* getGameObject(unsigned int arg) const;
 };
 
 typedef std::function<void (const ScriptArguments&)> ScriptFunction;
