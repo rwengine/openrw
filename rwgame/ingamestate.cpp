@@ -99,7 +99,7 @@ void IngameState::tick(float dt)
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 	
 	auto player = getPlayer();
-	if( player && player->isInputEnabled() )
+	if( player && player->isInputEnabled() && game->hasFocus() )
 	{
 		float qpi = glm::half_pi<float>();
 

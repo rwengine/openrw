@@ -101,6 +101,8 @@ public:
 	
 	void startScript(const std::string& name);
 
+	bool hasFocus() const { return inFocus; }
+
 private:
 	void tick(float dt);
 	void render(float alpha, float dt);
