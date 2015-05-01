@@ -12,10 +12,10 @@
 #define SCM_CONDITIONAL_MASK_PASSED 0xFF
 #define SCM_THREAD_LOCAL_SIZE 256
 
-/* as shipped, SCM variables are 4 bytes wide, this isn't enough for 64-bit
- * pointers, so we re-allocate the global and local space taking into account
- * the native pointer size */
-#define SCM_VARIABLE_SIZE sizeof(void*)
+/* Maxium size value that can be stored in each memory address.
+ * Changing this will break saves.
+ */
+#define SCM_VARIABLE_SIZE sizeof(uint32_t)
 
 class GameState;
 
@@ -172,6 +172,8 @@ public:
 	SCMFile* getFile() const { return _file; }
 
 	void startThread(SCMThread::pc_t start, bool mission = false);
+
+	std::vector<SCMThread>& getThreads() { return _activeThreads; }
 
 	SCMByte* getGlobals();
 

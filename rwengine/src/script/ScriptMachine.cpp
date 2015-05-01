@@ -86,13 +86,13 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				break;
 			case TGlobal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = _globals + v * sizeof(SCMByte) * 4;
+				parameters.back().globalPtr = _globals + v * sizeof(SCMByte) * SCM_VARIABLE_SIZE;
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TLocal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = t.locals + v * sizeof(SCMByte) * 4;
+				parameters.back().globalPtr = t.locals + v * sizeof(SCMByte) * SCM_VARIABLE_SIZE;
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
