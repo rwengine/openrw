@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-#define ZONE_GANG_COUNT 11
+#define ZONE_GANG_COUNT 13
 
 /**
  * \class Zone

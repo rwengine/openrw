@@ -49,11 +49,11 @@ static SCMTypeInfoTable typeData = {
 struct SCMOpcodeParameter {
 	SCMType type;
 	union {
-		int integer;
+		uint32_t integer;
 		float real;
 		char string[8];
 		void* globalPtr;
-		int* globalInteger;
+		uint32_t* globalInteger;
 		float* globalReal;
 	};
 

@@ -126,7 +126,7 @@ void game_set_zone_car_info(const ScriptArguments& args)
 	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
-		for(int i = 2; i < args.getParameters().size(); ++i)
+		for(int i = 2; i < args.getParameters().size() && i - 2 < ZONE_GANG_COUNT; ++i)
 		{
 			if( day )
 			{

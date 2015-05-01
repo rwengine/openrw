@@ -15,7 +15,7 @@
 /* Maxium size value that can be stored in each memory address.
  * Changing this will break saves.
  */
-#define SCM_VARIABLE_SIZE sizeof(uint32_t)
+#define SCM_VARIABLE_SIZE 4
 
 class GameState;
 
