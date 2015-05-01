@@ -427,6 +427,12 @@ void GameWorld::insertObject(GameObject* object)
 	objects[availID] = object;
 }
 
+GameObject* GameWorld::findObject(GameObjectID id) const
+{
+	auto it = objects.find( id );
+	return (it == objects.end())? nullptr : it->second;
+}
+
 void GameWorld::destroyObject(GameObject* object)
 {
 	auto coord = worldToGrid(glm::vec2(object->getPosition()));

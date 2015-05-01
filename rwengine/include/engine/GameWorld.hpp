@@ -103,6 +103,11 @@ public:
 	void insertObject(GameObject* object);
 
 	/**
+	 * Finds the GameObject with the given ID, if not found then nullptr.
+	 */
+	GameObject* findObject(GameObjectID id) const;
+
+	/**
 	 * Destroys an existing Object
 	 */
 	void destroyObject(GameObject* object);
