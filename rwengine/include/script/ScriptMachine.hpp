@@ -143,6 +143,26 @@ struct SCMBreakpoint
 	ScriptArguments* args;
 };
 
+/**
+ * Implements the actual fetch-execute mechanism for the game script virtual machine.
+ * 
+ * The unit of functionality is an "instruction", which performs a particular
+ * task such as creating a vehicle, retrieving an object's position or declaring
+ * a new garage.
+ * 
+ * The VM executes multiple pseudo-threads that execute in series. Each thread
+ * is represented by SCMThread, which contains the program counter, stack information
+ * the thread name and some thread-local variable space. At startup, a single
+ * thread is created at address 0, which begins execution. From there, the script
+ * may create additional threads.
+ *
+ * Within ScriptMachine, each thread's program counter is used to execute an instruction
+ * by consuming the correct number of arguments, allowing the next instruction to be found,
+ * and then dispatching a call to the opcode's function.
+ *
+ * Breakpoints can be set which will call the breakpoint hander, where it is possible
+ * to halt execution by refusing to return until the handler is ready to continue.
+ */
 class ScriptMachine
 {
 public:
