@@ -145,13 +145,13 @@ void game_camera_follow_character(const ScriptArguments& args)
 	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
 	if( character != nullptr )
 	{
-		args.getWorld()->state->cameraTarget = character;
+		args.getWorld()->state->cameraTarget = character->getGameObjectID();
 	}
 }
 
 void game_reset_camera(const ScriptArguments& args)
 {
-	args.getWorld()->state->cameraTarget = nullptr;
+	args.getWorld()->state->cameraTarget = 0;
 	args.getWorld()->state->cameraFixed = false;
 }
 

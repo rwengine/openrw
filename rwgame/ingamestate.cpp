@@ -135,7 +135,7 @@ void IngameState::tick(float dt)
 
 		player->updateMovementDirection(angle * _movement, _movement);
 		
-		auto target = getWorld()->state->cameraTarget;
+		auto target = getWorld()->findObject(getWorld()->state->cameraTarget);
 		
 		if( target == nullptr )
 		{

@@ -159,9 +159,10 @@ void vm_new_mission_thread(const ScriptArguments& args)
 
 void vm_mission_over(const ScriptArguments& args)
 {
-	for( auto& o : args.getState()->missionObjects )
+	for( auto oid : args.getState()->missionObjects )
 	{
-		args.getWorld()->destroyObjectQueued(o);
+		auto obj = args.getWorld()->objects[oid];
+		args.getWorld()->destroyObjectQueued(obj);
 	}
 	
 	args.getState()->missionObjects.clear();

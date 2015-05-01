@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <objects/ObjectTypes.hpp>
 
 class GameWorld;
 class GameObject;
@@ -110,6 +111,7 @@ struct GameState
 	unsigned int numRampages;
 	unsigned int maxWantedLevel;
 	PlayerController* player;
+	GameObjectID playerObject;
 
 	unsigned int currentWeather;
 
@@ -119,7 +121,7 @@ struct GameState
 	unsigned int *scriptOnMissionFlag;
 	
 	/** Objects created by the current mission */
-	std::vector<GameObject*> missionObjects;
+	std::vector<GameObjectID> missionObjects;
 	
 	bool overrideNextStart;
 	glm::vec4 nextRestartLocation;
@@ -164,8 +166,8 @@ struct GameState
 	bool cameraFixed;
 	glm::vec3 cameraPosition;
 	glm::quat cameraRotation;
-	
-	GameObject* cameraTarget;
+
+	GameObjectID cameraTarget;
 	
 	std::vector<VehicleGenerator> vehicleGenerators;
 	

@@ -40,6 +40,7 @@ void game_create_player(const ScriptArguments& args)
 	
 	auto pc = args.getWorld()->createPedestrian(1, position + spawnMagic);
 	args.getState()->player = new PlayerController(pc);
+	args.getState()->playerObject = pc->getGameObjectID();
 	
 	*args[4].globalInteger = pc->getGameObjectID();
 }
@@ -110,7 +111,7 @@ void game_create_character(const ScriptArguments& args)
 	
 	if ( args.getThread()->isMission )
 	{
-		args.getState()->missionObjects.push_back(character);
+		args.getState()->missionObjects.push_back(character->getGameObjectID());
 	}
 	
 	*args[5].globalInteger = character->getGameObjectID();
@@ -148,7 +149,7 @@ void game_create_vehicle(const ScriptArguments& args)
 	
 	if ( args.getThread()->isMission )
 	{
-		args.getState()->missionObjects.push_back(vehicle);
+		args.getState()->missionObjects.push_back(vehicle->getGameObjectID());
 	}
 	
 	*args[4].globalInteger = vehicle->getGameObjectID();
@@ -431,7 +432,7 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 /// Remove object from cleanup at end of missions.
 void game_dont_remove_object(const ScriptArguments& args)
 {
-	auto object = args.getGameObject(0);
+	auto object = args.getGameObject(0)->getGameObjectID();
 	
 	auto& mO = args.getState()->missionObjects;
 	mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
