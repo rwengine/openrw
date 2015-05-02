@@ -34,7 +34,6 @@ struct WeaponScan;
 
 #include <vector>
 #include <set>
-#include <queue>
 #include <random>
 #include <array>
 
@@ -287,7 +286,7 @@ private:
 	/**
 	 * @brief Used by objects to delete themselves during updates.
 	 */
-	std::queue<GameObject*> deletionQueue;
+	std::set<GameObject*> deletionQueue;
 
 	std::vector<AreaIndicatorInfo> areaIndicators;
 	

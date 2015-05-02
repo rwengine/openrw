@@ -457,14 +457,14 @@ void GameWorld::destroyObject(GameObject* object)
 
 void GameWorld::destroyObjectQueued(GameObject *object)
 {
-	deletionQueue.push(object);
+	deletionQueue.insert(object);
 }
 
 void GameWorld::destroyQueuedObjects()
 {
 	while( !deletionQueue.empty() ) {
-		destroyObject( deletionQueue.front() );
-		deletionQueue.pop();
+		destroyObject( *deletionQueue.begin() );
+		deletionQueue.erase( deletionQueue.begin() );
 	}
 }
 
