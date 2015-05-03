@@ -17,6 +17,7 @@ class GameWorld;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
+typedef unsigned int SCMAddress;
 
 enum SCMType {
 	EndOfArgList = 0x00,

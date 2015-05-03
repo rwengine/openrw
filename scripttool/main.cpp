@@ -5,6 +5,10 @@
 
 #include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
+#include <script/ScriptDisassembly.hpp>
+#include <script/modules/VMModule.hpp>
+#include <script/modules/GameModule.hpp>
+#include <script/modules/ObjectModule.hpp>
 
 #define FIELD_DESC_WIDTH 30
 #define FIELD_PARAM_WIDTH 8
@@ -37,132 +41,70 @@ void dumpCodeSizes(SCMFile* file)
 	}
 }
 
-void dumpOpcodes(SCMFile* scm, unsigned int offset, unsigned int size)
+void dumpOpcodes(SCMFile* scm, SCMOpcodes* codes, unsigned int offset, unsigned int size)
 {
 	std::cout << "Offs Opcd " << std::setw(FIELD_DESC_WIDTH) << std::left
 			  << "Description" << "Parameters" << std::endl;
 
-	for( unsigned int i = offset; i < offset+size; ) {
-		SCMOpcode op = scm->read<SCMOpcode>(i) & ~SCM_NEGATE_CONDITIONAL_MASK;
+	ScriptDisassembly disassembly(codes, scm);
 
-		auto opit = knownOps.find( op );
+	try
+	{
+		disassembly.disassemble(offset);
+	}
+	catch( IllegalInstruction& ex )
+	{
+		std::cerr << "Error during disassembly: \n"
+			<< ex.what() << std::endl;
+	}
 
-		// If we don't know the size of the operator's parameters we can't jump over it.
-		if( opit == knownOps.end() ) {
-			throw IllegalInstruction(op, i, "");
+	for( auto& inst : disassembly.getInstructions() )
+	{
+		ScriptFunctionMeta* code;
+		if(! codes->findOpcode(inst.second.opcode, &code) )
+		{
+			std::cerr << "Invalid opcode in disassembly (" << inst.second.opcode << ")" << std::endl;
 		}
 
 		std::cout << std::hex << std::setfill('0') << std::right <<
-					 std::setw(4) << i << ":" <<
-					 std::setw(4) << op <<
-					 std::setw(FIELD_DESC_WIDTH) << std::setfill(' ') <<
-					 std::left << opit->second.name << std::right;
+		std::setw(4) << inst.first << ":" <<
+		std::setw(4) << inst.second.opcode << " " <<
+		std::setw(FIELD_DESC_WIDTH) << std::setfill(' ') <<
+		std::left << code->signature << std::right << "(";
 
-		i += sizeof(SCMOpcode);
-
-		bool hasMoreArgs = opit->second.parameters < 0;
-		for( int p = 0; p < std::abs(opit->second.parameters) || hasMoreArgs; ++p ) {
-			SCMByte datatype = scm->read<SCMByte>(i);
-
-			auto typeit = typeData.find(static_cast<SCMType>(datatype));
-			if( typeit == typeData.end()) {
-				if( datatype < 0x06 ) {
-					throw UnknownType(datatype, i, "");
-				}
-				else {
-					datatype = TString;
-				}
-			}
-			else {
-				i += sizeof(SCMByte);
-			}
-
-			std::cout << " " << std::setfill('0') << std::setw(2) <<
-						 static_cast<unsigned int>(datatype) << ": ";
-			std::cout << std::setfill(' ') << std::setw(FIELD_PARAM_WIDTH);
-
-			switch( datatype ) {
-			case TInt32:
-				std::cout << std::dec << scm->read<int32_t>(i);
-				break;
-			case TInt16:
-				std::cout << std::dec << scm->read<int16_t>(i);
-				break;
-			case TGlobal:
-			case TLocal:
-				std::cout << std::hex << scm->read<int16_t>(i);
-				break;
-			case TInt8:
-				std::cout << std::dec << static_cast<int>(scm->read<int8_t>(i));
-				break;
-			case TFloat16:
-				std::cout << (float)scm->read<uint16_t>(i) / 16.f;
-				break;
-			case EndOfArgList:
-				hasMoreArgs = false;
-				break;
-			case TString: {
-				char strbuff[8];
-				for(size_t c = 0; c < 8; ++c) {
-					strbuff[c] = scm->read<char>(i++);
-				}
-				std::cout << strbuff << " ";
-			}
-				break;
-			default:
-				std::cout << "{unknown}";
-				break;
-			}
-
-			if( typeit != typeData.end() ) {
-				i += typeit->second.size;
+		for( SCMOpcodeParameter& param : inst.second.parameters )
+		{
+			switch( param.type )
+			{
+				case TInt8:
+					std::cout << "  i8: " << param.integer;
+					break;
+				case TInt16:
+					std::cout << "  i16: " << param.integer;
+					break;
+				case TInt32:
+					std::cout << "  i32: " << param.integer;
+					break;
+				case TFloat16:
+					std::cout << "  f16: " << param.real;
+					break;
+				case TString:
+					std::cout << "  str: " << param.string;
+					break;
+				case TGlobal:
+					std::cout << "  g: " << param.globalPtr;
+					break;
+				case TLocal:
+					std::cout << "  l: " << param.globalPtr;
+					break;
 			}
 		}
 
-		std::cout << std::endl;
+		std::cout << "  )\n";
 	}
 }
 
-void loadKnownOps(const std::string& dbfile)
-{
-	std::ifstream dbstream(dbfile.c_str());
-
-	if( !dbstream.is_open() ) {
-		std::cerr << "Failed to open " << dbfile << std::endl;
-		return;
-	}
-
-	while( ! dbstream.eof() ) {
-		std::string line;
-		std::getline(dbstream, line);
-		auto fnws = line.find_first_not_of(" ");
-		if( fnws == line.npos || line.at(fnws) == '#' ) continue;
-
-		std::stringstream ss(line);
-
-		std::string sec;
-
-		std::getline(ss, sec, ',');
-
-		SCMMicrocode m;
-
-		uint16_t opcode = std::stoi(sec, 0, 16);
-
-		std::getline(ss, m.name, ',');
-
-		std::getline(ss, sec, ',');
-		m.parameters = std::stoi(sec);
-
-		std::getline(ss, sec, ',');
-		uint16_t flags = std::stoi(sec);
-
-		knownOps.insert({opcode, m});
-	}
-
-	std::cout << knownOps.size() << " known opcodes " << std::endl;
-}
-
-void readSCM(const std::string& scmname)
+void disassemble(const std::string& scmname)
 {
 	std::ifstream scmfile(scmname.c_str());
 
@@ -194,8 +136,13 @@ void readSCM(const std::string& scmname)
 		dumpModels(&scm);
 
 		dumpCodeSizes(&scm);
-
-		dumpOpcodes(&scm, scm.getCodeSection(), size);
+		
+		SCMOpcodes* opcodes = new SCMOpcodes;
+		opcodes->modules.push_back(new VMModule);
+		opcodes->modules.push_back(new GameModule);
+		opcodes->modules.push_back(new ObjectModule);
+		
+		dumpOpcodes(&scm, opcodes, scm.getCodeSection(), size);
 	}
 	catch (SCMException& ex) {
 		std::cerr << ex.what() << std::endl;
@@ -210,9 +157,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	loadKnownOps("knownops.txt");
-
-	readSCM(std::string(argv[1]));
+	disassemble(std::string(argv[1]));
 
 	return 0;
 }

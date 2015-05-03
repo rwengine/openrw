@@ -111,7 +111,7 @@ static SCMMicrocodeTable knownOps;
 
 struct SCMThread
 {
-	typedef unsigned int pc_t;
+	typedef SCMAddress pc_t;
 
 	char name[17];
 	pc_t baseAddress;
