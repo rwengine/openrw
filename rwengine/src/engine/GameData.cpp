@@ -106,6 +106,7 @@ void GameData::load()
 	loadDFF("weapons.dff");
 	loadDFF("arrow.dff");
 	loadTXD("particle.txd");
+	loadTXD("icons.txd");
 	loadTXD("hud.txd");
 	loadTXD("fonts.txd");
 	
