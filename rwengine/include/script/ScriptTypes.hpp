@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 
+class GameObject;
 class ScriptMachine;
 class ScriptModule;
 struct SCMThread;
@@ -16,6 +17,7 @@ class GameWorld;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
+typedef unsigned int SCMAddress;
 
 enum SCMType {
 	EndOfArgList = 0x00,
@@ -48,17 +50,14 @@ static SCMTypeInfoTable typeData = {
 struct SCMOpcodeParameter {
 	SCMType type;
 	union {
-		int integer;
+		uint32_t integer;
 		float real;
 		char string[8];
 		void* globalPtr;
-		void** handle;
-		int* globalInteger;
+		uint32_t* globalInteger;
 		float* globalReal;
 	};
-	
-	template<class T> T* handleOf() const { return static_cast<T*>(*handle); }
-	
+
 	int integerValue() const 
 	{
 		if ( type == TGlobal )
@@ -95,6 +94,11 @@ public:
 	{
 		return parameters->at(arg);
 	}
+
+	/**
+	 * Returns the GameObject passed at the given argument index
+	 */
+	GameObject* getGameObject(unsigned int arg) const;
 };
 
 typedef std::function<void (const ScriptArguments&)> ScriptFunction;

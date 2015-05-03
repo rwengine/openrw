@@ -9,6 +9,7 @@ class IngameState : public State
 {
 	bool started;
 	bool test;
+	bool newgame;
 	ViewCamera _look;
 	/** Player input */
 	glm::vec2 _lookAngles;
@@ -16,13 +17,10 @@ class IngameState : public State
 	/** Timer to reset _lookAngles to forward in vehicles */
 	float autolookTimer;
 public:
-	IngameState(RWGame* game, bool test = false);
+	IngameState(RWGame* game, bool newgame = true, bool test = false);
 
 	void startTest();
 	void startGame();
-
-	/** shortcut for getWorld()->state.player->getCharacter() */
-	PlayerController* getPlayer();
 
 	virtual void enter();
 	virtual void exit();

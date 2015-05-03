@@ -1,6 +1,10 @@
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 #include <script/ScriptModule.hpp>
+#include <engine/GameState.hpp>
+#include <engine/GameWorld.hpp>
+#include <core/Logger.hpp>
+#include <cstring>
 
 #if SCM_DEBUG_INSTRUCTIONS
 #include <iostream>
@@ -86,13 +90,21 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				break;
 			case TGlobal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = _globals + v * sizeof(SCMByte) * 4;
+				parameters.back().globalPtr = globalData.data() + v; //* SCM_VARIABLE_SIZE;
+				if( v >= _file->getGlobalsSize() )
+				{
+					state->world->logger->error("SCM", "Global Out of bounds! "+ std::to_string(v) + " " + std::to_string(_file->getGlobalsSize()));
+				}
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TLocal: {
 				auto v = _file->read<std::uint16_t>(t.programCounter);
-				parameters.back().globalPtr = t.locals + v * sizeof(SCMByte) * 4;
+				parameters.back().globalPtr = t.locals.data() + v * SCM_VARIABLE_SIZE;
+				if( v >= SCM_THREAD_LOCAL_SIZE )
+				{
+					state->world->logger->error("SCM", "Local Out of bounds!");
+				}
 				t.programCounter += sizeof(SCMByte) * 2;
 			}
 				break;
@@ -165,9 +177,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 	}
 	
 	SCMOpcodeParameter p;
-	p.globalPtr = (t.locals + 16 * sizeof ( SCMByte ) * 4);
+	p.globalPtr = (t.locals.data() + 16 * sizeof ( SCMByte ) * 4);
 	*p.globalInteger += msPassed;
-	p.globalPtr = (t.locals + 17 * sizeof ( SCMByte ) * 4);
+	p.globalPtr = (t.locals.data() + 17 * sizeof ( SCMByte ) * 4);
 	*p.globalInteger += msPassed;
 	
 	if( t.wakeCounter == -1 ) {
@@ -178,12 +190,11 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile *file, SCMOpcodes *ops)
 	: _file(file), _ops(ops), state(_state)
 {
-	startThread(0);
-	auto globals = _file->getGlobalsSize() / 4;
-	_globals = new SCMByte[globals * SCM_VARIABLE_SIZE];
-	for(int i = 0; i < globals * SCM_VARIABLE_SIZE; ++i)
+	auto globals = _file->getGlobalsSize();
+	globalData.resize(globals);
+	for(int i = 0; i < globals; ++i)
 	{
-		_globals[i] = 0;
+		globalData[i] = 0;
 	}
 }
 
@@ -191,16 +202,15 @@ ScriptMachine::~ScriptMachine()
 {
 	delete _file;
 	delete _ops;
-	delete[] _globals;
 }
 
 void ScriptMachine::startThread(SCMThread::pc_t start, bool mission)
 {
 	SCMThread t;
-	for(int i = 0; i < SCM_THREAD_LOCAL_SIZE; ++i) {
+	for(int i = 0; i < SCM_THREAD_LOCAL_SIZE * SCM_VARIABLE_SIZE; ++i) {
 		t.locals[i] = 0;
 	}
-	t.name = "THREAD";
+	strncpy(t.name, "THREAD", 16);
 	t.conditionResult = false;
 	t.conditionCount = 0;
 	t.conditionAND = false;
@@ -209,12 +219,13 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission)
 	t.wakeCounter = 0;
 	t.isMission = mission;
 	t.finished = false;
+	t.stackDepth = 0;
 	_activeThreads.push_back(t);
 }
 
 SCMByte *ScriptMachine::getGlobals()
 {
-	return _file->data() + _file->getGlobalSection();
+	return globalData.data();
 }
 
 void ScriptMachine::execute(float dt)

@@ -15,6 +15,7 @@ class GameState;
 
 class CutsceneObject;
 class WorkContext;
+#include <objects/ObjectTypes.hpp>
 
 class GameObject;
 class CharacterObject;
@@ -33,7 +34,6 @@ struct WeaponScan;
 
 #include <vector>
 #include <set>
-#include <queue>
 #include <random>
 #include <array>
 
@@ -89,13 +89,28 @@ public:
 	/**
 	 * Creates a vehicle
 	 */
-	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
 	/**
 	 * Creates a pedestrian.
 	 */
-	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
-	
+	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+
+	/**
+	 * Creates a player
+	 */
+	CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+
+	/**
+	 * Inserts the given game object into the world.
+	 */
+	void insertObject(GameObject* object);
+
+	/**
+	 * Finds the GameObject with the given ID, if not found then nullptr.
+	 */
+	GameObject* findObject(GameObjectID id) const;
+
 	/**
 	 * Destroys an existing Object
 	 */
@@ -137,12 +152,9 @@ public:
 	int getMinute();
 
 	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
-	
-	/** 
-	 * Game Clock
-	 */
-	float gameTime;
-	
+
+	float getGameTime() const;
+
 	/**
 	 * Game data
 	 */
@@ -159,11 +171,9 @@ public:
 	SoundManager sound;
 
 	/**
-	 * @brief objects All active GameObjects in the world.
-	 * @todo add some mechanism to allow objects to be "locked" preventing deletion.
-	 * @todo add deletion queue to allow objects to self delete.
+	 * The active GameObjects within the world, mapped to their allocated ID
 	 */
-	std::set<GameObject*> objects;
+	std::map<GameObjectID, GameObject*> objects;
 
 	std::set<GameObject*> characters;
 
@@ -278,7 +288,7 @@ private:
 	/**
 	 * @brief Used by objects to delete themselves during updates.
 	 */
-	std::queue<GameObject*> deletionQueue;
+	std::set<GameObject*> deletionQueue;
 
 	std::vector<AreaIndicatorInfo> areaIndicators;
 	

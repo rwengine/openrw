@@ -140,7 +140,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world)
 	buffers[0] = GL_COLOR_ATTACHMENT0;
 	glDrawBuffers(1, buffers);
 
-	r->setUniform(waterProg, "time", world->gameTime);
+	r->setUniform(waterProg, "time", world->getGameTime());
 	r->setUniform(waterProg, "waveParams", glm::vec2(WATER_SCALE, WATER_HEIGHT));
 	auto ivp = glm::inverse(r->getSceneData().projection * r->getSceneData().view);
 	r->setUniform(waterProg, "inverseVP", ivp);

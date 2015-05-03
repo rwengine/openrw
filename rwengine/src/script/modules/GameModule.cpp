@@ -33,7 +33,7 @@ void game_print_big(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		style
 	});
@@ -47,7 +47,7 @@ void game_print_now(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		0
 	});
@@ -126,7 +126,7 @@ void game_set_zone_car_info(const ScriptArguments& args)
 	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
-		for(int i = 2; i < args.getParameters().size(); ++i)
+		for(int i = 2; i < args.getParameters().size() && i - 2 < ZONE_GANG_COUNT; ++i)
 		{
 			if( day )
 			{
@@ -142,16 +142,16 @@ void game_set_zone_car_info(const ScriptArguments& args)
 
 void game_camera_follow_character(const ScriptArguments& args)
 {
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	if( controller != nullptr )
+	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	if( character != nullptr )
 	{
-		args.getWorld()->state->cameraTarget = controller->getCharacter();
+		args.getWorld()->state->cameraTarget = character->getGameObjectID();
 	}
 }
 
 void game_reset_camera(const ScriptArguments& args)
 {
-	args.getWorld()->state->cameraTarget = nullptr;
+	args.getWorld()->state->cameraTarget = 0;
 	args.getWorld()->state->cameraFixed = false;
 }
 
@@ -225,7 +225,7 @@ void game_fade_screen(const ScriptArguments& args)
 {
 	args.getWorld()->state->fadeTime = args[0].integer / 1000.f;
 	args.getWorld()->state->fadeOut = !!args[1].integer;
-	args.getWorld()->state->fadeStart = args.getWorld()->gameTime;
+	args.getWorld()->state->fadeStart = args.getWorld()->getGameTime();
 }
 bool game_screen_fading(const ScriptArguments& args)
 {
@@ -233,7 +233,7 @@ bool game_screen_fading(const ScriptArguments& args)
 	{
 		return false;
 	}
-	return args.getWorld()->gameTime <
+	return args.getWorld()->getGameTime() <
 		args.getWorld()->state->fadeStart + args.getWorld()->state->fadeTime;
 }
 
@@ -258,7 +258,7 @@ void game_link_mission_flag(const ScriptArguments& args)
 void game_add_vehicle_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = static_cast<VehicleObject*>(*args[0].handle);
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -266,8 +266,7 @@ void game_add_vehicle_blip(const ScriptArguments& args)
 void game_add_character_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	data.target = controller->getCharacter();
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -275,7 +274,7 @@ void game_add_character_blip(const ScriptArguments& args)
 void game_add_pickup_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = static_cast<PickupObject*>(*args[0].handle);
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -284,7 +283,7 @@ void game_add_pickup_blip(const ScriptArguments& args)
 void game_add_location_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = nullptr;
+	data.target = 0;
 	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
 	data.texture = "";
 	*args[3].globalInteger = args.getWorld()->state->addRadarBlip(data);
@@ -312,8 +311,8 @@ void game_change_blip_mode(const ScriptArguments& args)
 
 void game_enable_input(const ScriptArguments& args)
 {
-	auto controller = static_cast<PlayerController*>(*args[0].handle);
-	controller->setInputEnabled(!!args[1].integer);
+	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	static_cast<PlayerController*>(character->controller)->setInputEnabled(!!args[1].integer);
 }
 
 void game_set_weather(const ScriptArguments& args)
@@ -323,7 +322,7 @@ void game_set_weather(const ScriptArguments& args)
 
 void game_get_runtime(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getWorld()->gameTime * 1000;
+	*args[0].globalInteger = args.getWorld()->getGameTime() * 1000;
 }
 
 void game_print_big_with_number(const ScriptArguments& args)
@@ -339,7 +338,7 @@ void game_print_big_with_number(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[2].integer / 1000.f,
 		style
 	});
@@ -368,8 +367,8 @@ void game_max_wanted_level(const ScriptArguments& args)
 // This does nothing for us.
 void game_get_player(const ScriptArguments& args)
 {
-	auto controller = (CharacterController*)(*args[0].handle);
-	*args[1].handle = controller;
+	auto character = args.getGameObject(0);
+	*args[1].globalInteger = character->getGameObjectID();
 }
 
 void game_create_garage(const ScriptArguments& args)
@@ -379,7 +378,8 @@ void game_create_garage(const ScriptArguments& args)
 
 	/// @todo http://www.gtamodding.com/index.php?title=Garage#GTA_III
 	int garageType = args[6].integer;
-	auto garageHandle = args[7].handle;
+	// TODO actually store the garage information and return the handle
+	*args[7].globalInteger = 0;
 
 	args.getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
 }
@@ -442,28 +442,29 @@ void game_restart_critical_mission(const ScriptArguments& args)
 	// Reset player state.
 	glm::vec3 position(args[0].real, args[1].real, args[2].real + 1.f);
 	
-	auto controller = args.getWorld()->state->player;
+	auto object = args.getWorld()->findObject(args.getState()->playerObject);
+	auto player = static_cast<CharacterObject*>(object);
 	
 	glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
 	
-	controller->getCharacter()->setPosition(position + spawnMagic);
+	player->setPosition(position + spawnMagic);
 	
-	controller->getCharacter()->setHeading( args[3].real );
+	player->setHeading( args[3].real );
 	
 	/// @todo find a nicer way to implement warping out of vehicles.
-	auto cv = controller->getCharacter()->getCurrentVehicle();
+	auto cv = player->getCurrentVehicle();
 	if ( cv != nullptr )
 	{
-		cv->setOccupant( controller->getCharacter()->getCurrentSeat(), nullptr );
-		controller->getCharacter()->setCurrentVehicle(nullptr, 0);
+		cv->setOccupant( player->getCurrentSeat(), nullptr );
+		player->setCurrentVehicle(nullptr, 0);
 	}
 }
 
 /// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
 bool game_is_player_playing(const ScriptArguments& args)
 {
-	auto controller = (CharacterController*)(*args[0].handle);
-	return controller != nullptr;
+	auto character = args.getGameObject(0);
+	return character != nullptr;
 }
 
 void game_controller_mode(const ScriptArguments& args)
@@ -514,7 +515,7 @@ void game_add_contact_blip(const ScriptArguments& args)
 	
 	BlipData bd;
 	bd.coord = c;
-	bd.target = nullptr;
+	bd.target = 0;
 	bd.texture = spriteName;
 	
 	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
@@ -534,7 +535,7 @@ void game_add_sprite_blip(const ScriptArguments& args)
 	
 	BlipData bd;
 	bd.coord = c;
-	bd.target = nullptr;
+	bd.target = 0;
 	bd.texture = spriteName;
 	
 	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
@@ -550,15 +551,18 @@ void game_create_cutscene_object(const ScriptArguments& args)
 	auto id	= args[0].integer;
 
 	GameObject* object = object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
-	*args[1].handle = object;
 
 	if( object == nullptr ) {
 		args.getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
 	}
+	else
+	{
+		*args[1].globalInteger = object->getGameObjectID();
+	}
 }
 void game_set_cutscene_anim(const ScriptArguments& args)
 {
-	GameObject* object = static_cast<GameObject*>(*args[0].handle);
+	GameObject* object = args.getGameObject(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -575,7 +579,7 @@ void game_start_cutscene(const ScriptArguments& args)
 }
 void game_get_cutscene_time(const ScriptArguments& args)
 {
-	float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+	float time = args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime;
 	if( args.getWorld()->state->skipCutscene )
 	{
 		*args[0].globalInteger = args.getWorld()->state->currentCutscene->tracks.duration * 1000;
@@ -588,7 +592,7 @@ void game_get_cutscene_time(const ScriptArguments& args)
 bool game_cutscene_finished(const ScriptArguments& args)
 {
 	if( args.getWorld()->state->currentCutscene ) {
-		float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+		float time = args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime;
 		if( args.getWorld()->state->skipCutscene ) {
 			return true;
 		}
@@ -613,18 +617,18 @@ void game_load_special_model(const ScriptArguments& args)
 void game_create_cutscene_head(const ScriptArguments& args)
 {
 	auto id = args[1].integer;
-	auto actor = static_cast<GameObject*>(*args[0].handle);
+	auto actor = args.getGameObject(0);
 	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
 	auto headframe = actor->model->resource->findFrame("shead");
 	actor->skeleton->setEnabled(headframe, false);
 	object->setParentActor(actor, headframe);
 
-	*args[2].handle = object;
+	*args[2].globalInteger = object->getGameObjectID();
 }
 void game_set_head_animation(const ScriptArguments& args)
 {
-	GameObject* object = static_cast<GameObject*>(*args[0].handle);
+	GameObject* object = args.getGameObject(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -701,8 +705,11 @@ void game_set_background_colour(const ScriptArguments& args)
 
 void game_set_character_model(const ScriptArguments& args)
 {
-	auto controller = static_cast<CharacterController*>(*args[0].handle);
-	controller->getCharacter()->changeCharacterModel(args[1].string);
+	auto character = args.getGameObject(0);
+	if( character )
+	{
+		static_cast<CharacterObject*>(character)->changeCharacterModel(args[1].string);
+	}
 }
 
 bool game_collision_loaded(const ScriptArguments& args)
@@ -797,7 +804,7 @@ void game_display_help(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		2.5f,
 		style
 	});
@@ -811,6 +818,10 @@ void game_clear_help(const ScriptArguments& args)
 		if( texts[i].osTextStyle == OnscreenText::Help )
 		{
 			texts.erase(texts.begin() + i);
+		}
+		else
+		{
+			i++;
 		}
 	}
 }

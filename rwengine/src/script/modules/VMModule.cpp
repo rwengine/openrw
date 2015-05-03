@@ -3,6 +3,7 @@
 #include <script/SCMFile.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameState.hpp>
+#include <cstring>
 
 SCMThread::pc_t localizeLabel(SCMThread* t, int label)
 {
@@ -107,14 +108,13 @@ void vm_halt_thread(const ScriptArguments& args)
 
 void vm_call(const ScriptArguments& args)
 {
-	args.getThread()->calls.push(args.getThread()->programCounter);
+	args.getThread()->calls[args.getThread()->stackDepth++] = args.getThread()->programCounter;
 	args.getThread()->programCounter = localizeLabel(args.getThread(), args[0].integer);
 }
 
 void vm_return(const ScriptArguments& args)
 {
-	args.getThread()->programCounter = args.getThread()->calls.top();
-	args.getThread()->calls.pop();
+	args.getThread()->programCounter = args.getThread()->calls[--args.getThread()->stackDepth];
 }
 
 void vm_dec_global_int_by_global(const ScriptArguments& args)
@@ -159,9 +159,13 @@ void vm_new_mission_thread(const ScriptArguments& args)
 
 void vm_mission_over(const ScriptArguments& args)
 {
-	for( auto& o : args.getState()->missionObjects )
+	for( auto oid : args.getState()->missionObjects )
 	{
-		args.getWorld()->destroyObjectQueued(o);
+		auto obj = args.getWorld()->findObject(oid);
+		if( obj )
+		{
+			args.getWorld()->destroyObjectQueued(obj);
+		}
 	}
 	
 	args.getState()->missionObjects.clear();
@@ -171,7 +175,7 @@ void vm_mission_over(const ScriptArguments& args)
 
 void vm_name_thread(const ScriptArguments& args)
 {
-	args.getThread()->name = args[0].string;
+	strncpy(args.getThread()->name, args[0].string, 16);
 }
 
 void vm_start_mission(const ScriptArguments& args)

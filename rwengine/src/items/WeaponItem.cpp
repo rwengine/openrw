@@ -105,7 +105,7 @@ void WeaponItem::fireProjectile()
 	// Work out the velocity multiplier as a function of how long the player
 	// Was holding down the fire button. If _fireStop < 0.f then the player
 	// is still holding the button down.
-	float throwTime = _character->engine->gameTime - _fireStart;
+	float throwTime = _character->engine->getGameTime() - _fireStart;
 	float forceFactor = throwTime;
 	if( _fireStop > 0.f ) {
 		forceFactor = _fireStop - _fireStart;
@@ -121,21 +121,21 @@ void WeaponItem::fireProjectile()
 											_wepData
 										});
 
-	_character->engine->objects.insert( projectile );
+	_character->engine->insertObject( projectile );
 }
 
 void WeaponItem::primary(bool active)
 {
 	_firing = active;
 	if( active ) {
-		_fireStart = _character->engine->gameTime;
+		_fireStart = _character->engine->getGameTime();
 		_fireStop = -1.f;
 
 		// ShootWeapon will call ::fire() on us at the appropriate time.
 		_character->controller->setNextActivity(new Activities::ShootWeapon(this));
 	}
 	else {
-		_fireStop = _character->engine->gameTime;
+		_fireStop = _character->engine->getGameTime();
 	}
 }
 

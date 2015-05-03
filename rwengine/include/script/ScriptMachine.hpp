@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <vector>
 #include <stack>
 #include <set>
 
@@ -12,10 +13,11 @@
 #define SCM_CONDITIONAL_MASK_PASSED 0xFF
 #define SCM_THREAD_LOCAL_SIZE 256
 
-/* as shipped, SCM variables are 4 bytes wide, this isn't enough for 64-bit
- * pointers, so we re-allocate the global and local space taking into account
- * the native pointer size */
-#define SCM_VARIABLE_SIZE sizeof(void*)
+/* Maxium size value that can be stored in each memory address.
+ * Changing this will break saves.
+ */
+#define SCM_VARIABLE_SIZE 4
+#define SCM_STACK_DEPTH 32
 
 class GameState;
 
@@ -109,9 +111,9 @@ static SCMMicrocodeTable knownOps;
 
 struct SCMThread
 {
-	typedef unsigned int pc_t;
+	typedef SCMAddress pc_t;
 
-	std::string name;
+	char name[17];
 	pc_t baseAddress;
 	pc_t programCounter;
 
@@ -122,13 +124,14 @@ struct SCMThread
 
 	/** Number of MS until the thread should be waked (-1 = yeilded) */
 	int wakeCounter;
-	SCMByte locals[SCM_THREAD_LOCAL_SIZE * (SCM_VARIABLE_SIZE)];
+	std::array<SCMByte, SCM_THREAD_LOCAL_SIZE * (SCM_VARIABLE_SIZE)> locals;
 	bool isMission;
 
 	bool finished;
 
+	unsigned int stackDepth;
 	/// Stores the return-addresses for calls.
-	std::stack<pc_t> calls;
+	std::array<pc_t, SCM_STACK_DEPTH> calls;
 };
 
 /**
@@ -143,6 +146,26 @@ struct SCMBreakpoint
 	ScriptArguments* args;
 };
 
+/**
+ * Implements the actual fetch-execute mechanism for the game script virtual machine.
+ * 
+ * The unit of functionality is an "instruction", which performs a particular
+ * task such as creating a vehicle, retrieving an object's position or declaring
+ * a new garage.
+ * 
+ * The VM executes multiple pseudo-threads that execute in series. Each thread
+ * is represented by SCMThread, which contains the program counter, stack information
+ * the thread name and some thread-local variable space. At startup, a single
+ * thread is created at address 0, which begins execution. From there, the script
+ * may create additional threads.
+ *
+ * Within ScriptMachine, each thread's program counter is used to execute an instruction
+ * by consuming the correct number of arguments, allowing the next instruction to be found,
+ * and then dispatching a call to the opcode's function.
+ *
+ * Breakpoints can be set which will call the breakpoint hander, where it is possible
+ * to halt execution by refusing to return until the handler is ready to continue.
+ */
 class ScriptMachine
 {
 public:
@@ -153,7 +176,10 @@ public:
 
 	void startThread(SCMThread::pc_t start, bool mission = false);
 
+	std::vector<SCMThread>& getThreads() { return _activeThreads; }
+
 	SCMByte* getGlobals();
+	std::vector<SCMByte>& getGlobalData() { return globalData; }
 
 	GameState* getState() const { return state; }
 	
@@ -193,7 +219,7 @@ private:
 
 	void executeThread(SCMThread& t, int msPassed);
 
-	SCMByte* _globals;
+	std::vector<SCMByte> globalData;
 
 	BreakpointHandler bpHandler;
 	std::set<SCMThread::pc_t> breakpoints;

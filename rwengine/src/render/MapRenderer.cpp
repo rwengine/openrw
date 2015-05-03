@@ -149,20 +149,24 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	for(auto& blip : world->state->radarBlips)
 	{
 		glm::vec2 blippos( blip.second.coord );
-		if( blip.second.target )
+		if( blip.second.target > 0 )
 		{
-			blippos = glm::vec2( blip.second.target->getPosition() );
+			auto object = world->findObject(blip.second.target);
+			if( object )
+			{
+				blippos = glm::vec2( object->getPosition() );
+			}
 		}
 		
 		drawBlip(blippos, model, mi, "");
 	}
 	
 	// Draw the player blip
-	auto player = world->state->player;
+	auto player = world->findObject(world->state->playerObject);
 	if( player )
 	{
-		glm::vec2 plyblip(player->getCharacter()->getPosition());
-		float hdg = glm::roll(player->getCharacter()->getRotation());
+		glm::vec2 plyblip(player->getPosition());
+		float hdg = glm::roll(player->getRotation());
 		drawBlip(plyblip, model, mi, "radar_centre", hdg);
 	}
 	

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->objects.insert( projectile );
+		Global::get().e->insertObject( projectile );
 
 		BOOST_CHECK( character->mHealth == 100.f );
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->objects.insert( projectile );
+		Global::get().e->insertObject( projectile );
 
 		BOOST_CHECK( character->mHealth == 100.f );
 
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->objects.insert( projectile );
+		Global::get().e->insertObject( projectile );
 
 		BOOST_CHECK( character->mHealth == 100.f );
 

@@ -106,6 +106,7 @@ void GameData::load()
 	loadDFF("weapons.dff");
 	loadDFF("arrow.dff");
 	loadTXD("particle.txd");
+	loadTXD("icons.txd");
 	loadTXD("hud.txd");
 	loadTXD("fonts.txd");
 	
@@ -593,7 +594,7 @@ int GameData::getWaterIndexAt(const glm::vec3 &ws) const
 
 float GameData::getWaveHeightAt(const glm::vec3 &ws) const
 {
-	return (1+sin(engine->gameTime + (ws.x + ws.y) * WATER_SCALE)) * WATER_HEIGHT;
+	return (1+sin(engine->getGameTime() + (ws.x + ws.y) * WATER_SCALE)) * WATER_HEIGHT;
 }
 
 bool GameData::isValidGameDirectory(const std::string& path)

@@ -10,6 +10,7 @@
 
 #include <SFML/Graphics.hpp>
 
+class PlayerController;
 class RWGame
 {
 	Logger log;
@@ -53,7 +54,12 @@ public:
 	{
 		return world;
 	}
-	
+
+	GameData* getGameData() const
+	{
+		return data;
+	}
+
 	GameRenderer* getRenderer() const
 	{
 		return renderer;
@@ -102,6 +108,12 @@ public:
 	void startScript(const std::string& name);
 
 	bool hasFocus() const { return inFocus; }
+
+	void saveGame(const std::string& savename);
+	void loadGame(const std::string& savename);
+
+	/** shortcut for getWorld()->state.player->getCharacter() */
+	PlayerController* getPlayer();
 
 private:
 	void tick(float dt);

@@ -7,6 +7,7 @@
 
 #include <objects/GameObject.hpp>
 #include <engine/GameState.hpp>
+#include <engine/SaveGame.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/DebugDraw.hpp>
@@ -124,12 +125,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		data->loadTXD(name + ".txd");
 	}
 
-	newGame();
-
 	auto loading = new LoadingState(this);
 	if( newgame )
 	{
-		loading->setNextState(new IngameState(this,test));
+		loading->setNextState(new IngameState(this,true,test));
 	}
 	else
 	{
@@ -164,13 +163,60 @@ void RWGame::newGame()
 	// Associate the new world with the new state and vice versa
 	state->world = world;
 	world->state = state;
+
+	for(std::map<std::string, std::string>::iterator it = world->data->iplLocations.begin();
+		it != world->data->iplLocations.end();
+		++it) {
+		world->data->loadZone(it->second);
+		world->placeItems(it->second);
+	}
+	
+}
+
+void RWGame::saveGame(const std::string& savename)
+{
+	// Save games without a script don't make much sense at the moment
+	if( script )
+	{
+		SaveGame::writeScript(*script, savename+".script");
+		SaveGame::writeState(*state, savename+".state");
+		SaveGame::writeObjects(*world, savename+".world");
+	}
+}
+
+void RWGame::loadGame(const std::string& savename)
+{
+	delete state->world;
+	//delete state;
+	state = nullptr;
+
+	newGame();
+
+	startScript("data/main.scm");
+
+	if(! SaveGame::loadScript(*script, savename+".script") )
+	{
+		log.error("Game", "Failed to restore Script");
+	}
+	if(! SaveGame::loadState(*state, savename+".state") )
+	{
+		log.error("Game", "Failed to restore State");
+	}
+	if(! SaveGame::loadObjects(*world, savename+".world") )
+	{
+		log.error("Game", "Failed to restore World");
+	}
+	// TODO objects.
 }
 
 void RWGame::startScript(const std::string& name)
 {
 	SCMFile* f = world->data->loadSCM(name);
 	if( f ) {
-		if( script ) delete script;
+		if( script )
+		{
+			delete script;
+		}
 		
 		SCMOpcodes* opcodes = new SCMOpcodes;
 		opcodes->modules.push_back(new VMModule);
@@ -204,6 +250,17 @@ void RWGame::startScript(const std::string& name)
 	else {
 		log.error("Game", "Failed to load SCM: " + name);
 	}
+}
+
+PlayerController *RWGame::getPlayer()
+{
+	auto object = world->findObject(state->playerObject);
+	if( object )
+	{
+		auto controller = static_cast<CharacterObject*>(object)->controller;
+		return static_cast<PlayerController*>(controller);
+	}
+	return nullptr;
 }
 
 int RWGame::run()
@@ -283,7 +340,7 @@ void RWGame::tick(float dt)
 	
 	static float clockAccumulator = 0.f;
 	if (inFocus && currState->shouldWorldUpdate() ) {
-		world->gameTime += dt;
+		state->gameTime += dt;
 
 		clockAccumulator += dt;
 		while( clockAccumulator >= 1.f ) {
@@ -306,7 +363,7 @@ void RWGame::tick(float dt)
 			{
 				auto& part = effect->particle;
 				if( part.lifetime < 0.f ) continue;
-				if( world->gameTime >= part.starttime + part.lifetime )
+				if( world->getGameTime() >= part.starttime + part.lifetime )
 				{
 					world->destroyEffect( effect );
 					--i;
@@ -314,7 +371,8 @@ void RWGame::tick(float dt)
 			}
 		}
 
-		for( GameObject* object : world->objects ) {
+		for( auto& p : world->objects ) {
+			GameObject* object = p.second;
 			object->_updateLastTransform();
 			object->tick(dt);
 		}
@@ -325,7 +383,7 @@ void RWGame::tick(float dt)
 		for( int i = 0; i < state->text.size(); )
 		{
 			auto& text = state->text[i];
-			if( world->gameTime > text.osTextStart + text.osTextTime )
+			if( world->getGameTime() > text.osTextStart + text.osTextTime )
 			{
 				state->text.erase(state->text.begin() + i);
 			}
@@ -348,7 +406,7 @@ void RWGame::tick(float dt)
 			}
 		}
 		
-		if ( state->player )
+		if ( state->playerObject )
 		{
 			// Use the current camera position to spawn pedestrians.
 			auto p = nextCam.position;
@@ -376,7 +434,7 @@ void RWGame::render(float alpha, float time)
 	if( state->currentCutscene != nullptr && state->cutsceneStartTime >= 0.f )
 	{
 		auto cutscene = state->currentCutscene;
-		float cutsceneTime = std::min(world->gameTime - state->cutsceneStartTime,
+		float cutsceneTime = std::min(world->getGameTime() - state->cutsceneStartTime,
 									  cutscene->tracks.duration);
 		cutsceneTime += GAME_TIMESTEP * alpha;
 		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
@@ -502,8 +560,9 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;
-	for( GameObject* object : world->objects )
+	for( auto& p : world->objects )
 	{
+		GameObject* object = p.second;
 		switch ( object->type() )
 		{
 			case GameObject::Character: peds++; break;
@@ -514,10 +573,13 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	ss << "P " << peds << " V " << cars << "\n";
 	
-	if( state->player ) {
+	if( state->playerObject ) {
+		ss << "Player (" << state->playerObject << ")\n";
+		auto object = world->findObject(state->playerObject);
+		auto player = static_cast<CharacterObject*>(object)->controller;
 		ss << "Player Activity: ";
-		if( state->player->getCurrentActivity() ) {
-			ss << state->player->getCurrentActivity()->name();
+		if( player->getCurrentActivity() ) {
+			ss << player->getCurrentActivity()->name();
 		}
 		else {
 			ss << "Idle";

@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <objects/ObjectTypes.hpp>
 
 class GameWorld;
 class GameObject;
@@ -73,7 +74,7 @@ struct VehicleGenerator
 struct BlipData
 {
 	int id;
-	GameObject* target;
+	GameObjectID target;
 	// If target is null then use coord
 	glm::vec3 coord;
 	
@@ -91,7 +92,7 @@ struct BlipData
 	DisplayMode display;
 	
 	BlipData()
-	: id(-1), target(nullptr), display(Show)
+	: id(-1), target(0), display(Show)
 	{ }
 };
 
@@ -101,6 +102,10 @@ struct BlipData
  */
 struct GameState
 {
+	/**
+	 * Second since game was started
+	 */
+	float gameTime;
 	unsigned int currentProgress;
 	unsigned int maxProgress;
 	unsigned int numMissions;
@@ -109,7 +114,7 @@ struct GameState
 	unsigned int numUniqueJumps;
 	unsigned int numRampages;
 	unsigned int maxWantedLevel;
-	PlayerController* player;
+	GameObjectID playerObject;
 
 	unsigned int currentWeather;
 
@@ -119,7 +124,7 @@ struct GameState
 	unsigned int *scriptOnMissionFlag;
 	
 	/** Objects created by the current mission */
-	std::vector<GameObject*> missionObjects;
+	std::vector<GameObjectID> missionObjects;
 	
 	bool overrideNextStart;
 	glm::vec4 nextRestartLocation;
@@ -164,8 +169,8 @@ struct GameState
 	bool cameraFixed;
 	glm::vec3 cameraPosition;
 	glm::quat cameraRotation;
-	
-	GameObject* cameraTarget;
+
+	GameObjectID cameraTarget;
 	
 	std::vector<VehicleGenerator> vehicleGenerators;
 	

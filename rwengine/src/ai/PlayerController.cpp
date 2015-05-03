@@ -47,7 +47,8 @@ void PlayerController::enterNearestVehicle()
 		auto world = character->engine;
 		VehicleObject* nearest = nullptr; float d = 10.f;
 
-		for( GameObject* object : world->objects ) {
+		for( auto& p : world->objects ) {
+			auto object = p.second;
 			if( object->type() == GameObject::Vehicle ) {
 				float vd = glm::length( character->getPosition() - object->getPosition());
 				if( vd < d ) {

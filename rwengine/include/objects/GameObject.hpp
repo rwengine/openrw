@@ -3,6 +3,7 @@
 #define _GAMEOBJECT_HPP_
 
 #include <engine/RWTypes.hpp>
+#include <objects/ObjectTypes.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <render/Model.hpp>
@@ -27,7 +28,7 @@ class GameObject
 {
 	glm::vec3 _lastPosition;
 	glm::quat _lastRotation;
-
+	GameObjectID objectID;
 public:
     glm::vec3 position;
     glm::quat rotation;
@@ -58,13 +59,19 @@ public:
 	bool visible;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
-		: _lastPosition(pos), _lastRotation(rot), position(pos), rotation(rot),
+		: _lastPosition(pos), _lastRotation(rot), objectID(0), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
 		  inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),
 		  lifetime(GameObject::UnknownLifetime)
 	{}
 		
 	virtual ~GameObject();
+
+	GameObjectID getGameObjectID() const { return objectID; }
+	/**
+	 * Do not call this, use GameWorld::insertObject
+	 */
+	void setGameObjectID(GameObjectID id) { objectID = id; }
 
 	/**
 	 * @brief Enumeration of possible object types.
