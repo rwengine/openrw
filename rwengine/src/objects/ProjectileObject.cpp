@@ -78,7 +78,7 @@ void ProjectileObject::explode()
 		auto explosion = engine->createEffect(VisualFX::Particle);
 		explosion->particle.size = glm::vec2(exp_size);
 		explosion->particle.texture = tex;
-		explosion->particle.starttime = engine->gameTime;
+		explosion->particle.starttime = engine->getGameTime();
 		explosion->particle.lifetime = 0.5f;
 		explosion->particle.orientation = VisualFX::ParticleData::Camera;
 		explosion->particle.colour = glm::vec4(1.0f);

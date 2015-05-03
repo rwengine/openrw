@@ -17,17 +17,17 @@
 
 #define AUTOLOOK_TIME 2.f
 
-IngameState::IngameState(RWGame* game, bool test)
-	: State(game), started(false), test(test), autolookTimer(0.f)
+IngameState::IngameState(RWGame* game, bool newgame, bool test)
+	: State(game), started(false), newgame(newgame), test(test), autolookTimer(0.f)
 {
 }
 
 void IngameState::startTest()
 {
-	auto playerChar = getWorld()->createPedestrian(1, {270.f, -605.f, 40.f});
+	auto playerChar = getWorld()->createPlayer({270.f, -605.f, 40.f});
 	auto player = new PlayerController(playerChar);
 
-	getWorld()->state->player = player;
+	getWorld()->state->playerObject = playerChar->getGameObjectID();
 
 	/*auto bat = new WeaponItem(getWorld()->data.weaponData["ak47"]);
 	_playerCharacter->addToInventory(bat);
@@ -67,23 +67,22 @@ void IngameState::startTest()
 void IngameState::startGame()
 {
 	game->startScript("data/main.scm");
+	game->getScript()->startThread(0);
 	getWorld()->sound.playBackground( getWorld()->data->getDataPath() + "/audio/City.wav" );
-}
-
-PlayerController *IngameState::getPlayer()
-{
-	return getWorld()->state->player;
 }
 
 void IngameState::enter()
 {
 	if( ! started )
 	{
-		if( test ) {
-			startTest();
-		}
-		else {
-			startGame();
+		if( newgame )
+		{
+			if( test ) {
+				startTest();
+			}
+			else {
+				startGame();
+			}
 		}
 		started = true;
 	}
@@ -98,7 +97,7 @@ void IngameState::tick(float dt)
 {
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 	
-	auto player = getPlayer();
+	auto player = game->getPlayer();
 	if( player && player->isInputEnabled() )
 	{
 		float qpi = glm::half_pi<float>();
@@ -230,7 +229,7 @@ void IngameState::draw(GameRenderer* r)
 {
 	if( !getWorld()->state->isCinematic && getWorld()->isCutsceneDone() )
 	{
-		drawHUD(getPlayer(), getWorld(), r);
+		drawHUD(game->getPlayer(), getWorld(), r);
 	}
 	
     State::draw(r);
@@ -238,7 +237,7 @@ void IngameState::draw(GameRenderer* r)
 
 void IngameState::handleEvent(const sf::Event &event)
 {
-	auto player = getPlayer();
+	auto player = game->getPlayer();
 
 	switch(event.type) {
 	case sf::Event::KeyPressed:

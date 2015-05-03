@@ -76,7 +76,7 @@ public:
 };
 
 GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
-	: logger(log), gameTime(0.f), data(dat), randomEngine(rand()),
+	: logger(log), data(dat), randomEngine(rand()),
 	  _work( work ), cutsceneAudio(nullptr), missionAudio(nullptr),
 	  paused(false)
 {
@@ -277,7 +277,11 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	}
 
 	if( id == 0 ) {
-		modelname = state->player->getCharacter()->model->name;
+		auto playerobj = findObject(state->playerObject);
+		if( playerobj )
+		{
+			modelname = playerobj->model->name;
+		}
 	}
 
 	// Ensure the relevant data is loaded.
@@ -308,7 +312,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	return instance;
 }
 
-VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot)
+VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot, GameObjectID gid)
 {
 	auto vti = data->findObjectType<VehicleData>(id);
 	if( vti ) {
@@ -365,6 +369,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 		}
 
 		auto vehicle = new VehicleObject{ this, pos, rot, m, vti, info->second, prim, sec };
+		vehicle->setGameObjectID(gid);
 
 		insertObject( vehicle );
 
@@ -373,7 +378,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 	return nullptr;
 }
 
-CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 &pos, const glm::quat& rot)
+CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot, GameObjectID gid)
 {
 	auto pt = data->findObjectType<CharacterData>(id);
 	if( pt ) {
@@ -405,6 +410,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 
 		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
+			ped->setGameObjectID(gid);
 			insertObject(ped);
 			characters.insert(ped);
 			new DefaultAIController(ped);
@@ -414,17 +420,48 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3 
 	return nullptr;
 }
 
+CharacterObject* GameWorld::createPlayer(const glm::vec3& pos, const glm::quat& rot, GameObjectID gid)
+{
+	// Player object ID is hardcoded to 0.
+	auto pt = data->findObjectType<CharacterData>(0);
+	if( pt ) {
+		// Model name is also hardcoded.
+		std::string modelname = "player";
+		std::string texturename = "player";
+
+		// Ensure the relevant data is loaded.
+		data->loadDFF(modelname + ".dff");
+		data->loadTXD(texturename + ".txd");
+
+		ModelRef m = data->models[modelname];
+
+		if(m && m->resource) {
+			auto ped = new CharacterObject( this, pos, rot, m, nullptr );
+			ped->setGameObjectID(gid);
+			ped->setLifetime(GameObject::PlayerLifetime);
+			insertObject(ped);
+			characters.insert(ped);
+			new PlayerController(ped);
+			return ped;
+		}
+	}
+	return nullptr;
+}
+
 void GameWorld::insertObject(GameObject* object)
 {
-	// Find the lowest free GameObjectID.
-	GameObjectID availID = 1;
-	for( auto& p : objects )
+	if( object->getGameObjectID() == 0 )
 	{
-		if( p.first == availID ) availID++;
-	}
+		// Find the lowest free GameObjectID.
+		GameObjectID availID = 1;
+		for( auto& p : objects )
+		{
+			if( p.first == availID ) availID++;
+		}
 
-	object->setGameObjectID( availID );
-	objects[availID] = object;
+		object->setGameObjectID( availID );
+	}
+	objects[object->getGameObjectID()] = object;
 }
 
 GameObject* GameWorld::findObject(GameObjectID id) const
@@ -582,6 +619,11 @@ glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
 	return pos;
 }
 
+float GameWorld::getGameTime() const
+{
+	return state->gameTime;
+}
+
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA)
 {
 	bool isVehicle = object->type() == GameObject::Vehicle;
@@ -720,7 +762,7 @@ void GameWorld::loadCutscene(const std::string &name)
 
 void GameWorld::startCutscene()
 {
-	state->cutsceneStartTime = gameTime;
+	state->cutsceneStartTime = getGameTime();
 	state->skipCutscene = false;
 	if( cutsceneAudio ) {
 		cutsceneAudio->play();
@@ -752,7 +794,7 @@ void GameWorld::clearCutscene()
 bool GameWorld::isCutsceneDone()
 {
 	if( state->currentCutscene ) {
-		float time = gameTime - state->cutsceneStartTime;
+		float time = getGameTime() - state->cutsceneStartTime;
 		if( state->skipCutscene ) {
 			return true;
 		}

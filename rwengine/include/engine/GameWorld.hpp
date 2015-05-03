@@ -89,12 +89,17 @@ public:
 	/**
 	 * Creates a vehicle
 	 */
-	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
 	/**
 	 * Creates a pedestrian.
 	 */
-	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+
+	/**
+	 * Creates a player
+	 */
+	CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
 	/**
 	 * Inserts the given game object into the world.
@@ -147,12 +152,9 @@ public:
 	int getMinute();
 
 	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
-	
-	/** 
-	 * Game Clock
-	 */
-	float gameTime;
-	
+
+	float getGameTime() const;
+
 	/**
 	 * Game data
 	 */

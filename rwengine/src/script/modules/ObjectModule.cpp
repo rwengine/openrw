@@ -38,8 +38,7 @@ void game_create_player(const ScriptArguments& args)
 		position = args.getWorld()->getGroundAtPosition(position);
 	}
 	
-	auto pc = args.getWorld()->createPedestrian(1, position + spawnMagic);
-	args.getState()->player = new PlayerController(pc);
+	auto pc = args.getWorld()->createPlayer(position + spawnMagic);
 	args.getState()->playerObject = pc->getGameObjectID();
 	
 	*args[4].globalInteger = pc->getGameObjectID();
@@ -922,11 +921,14 @@ void game_change_nearest_model(const ScriptArguments& args)
 bool game_rotate_object(const ScriptArguments& args)
 {
 	auto object = args.getGameObject(0);
-	float start = args[1].real;
-	float finish = args[2].real;
-	
-	// @todo INTERPOLATE instead of just setting the heading.
-	object->setHeading(finish);
+	if( object )
+	{
+		float start = args[1].real;
+		float finish = args[2].real;
+		
+		// @todo INTERPOLATE instead of just setting the heading.
+		object->setHeading(finish);
+	}
 	
 	return true;
 }

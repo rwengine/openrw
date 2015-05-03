@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <vector>
 #include <stack>
 #include <set>
 
@@ -16,6 +17,7 @@
  * Changing this will break saves.
  */
 #define SCM_VARIABLE_SIZE 4
+#define SCM_STACK_DEPTH 32
 
 class GameState;
 
@@ -111,7 +113,7 @@ struct SCMThread
 {
 	typedef unsigned int pc_t;
 
-	std::string name;
+	char name[17];
 	pc_t baseAddress;
 	pc_t programCounter;
 
@@ -122,13 +124,14 @@ struct SCMThread
 
 	/** Number of MS until the thread should be waked (-1 = yeilded) */
 	int wakeCounter;
-	SCMByte locals[SCM_THREAD_LOCAL_SIZE * (SCM_VARIABLE_SIZE)];
+	std::array<SCMByte, SCM_THREAD_LOCAL_SIZE * (SCM_VARIABLE_SIZE)> locals;
 	bool isMission;
 
 	bool finished;
 
+	unsigned int stackDepth;
 	/// Stores the return-addresses for calls.
-	std::stack<pc_t> calls;
+	std::array<pc_t, SCM_STACK_DEPTH> calls;
 };
 
 /**
@@ -176,6 +179,7 @@ public:
 	std::vector<SCMThread>& getThreads() { return _activeThreads; }
 
 	SCMByte* getGlobals();
+	std::vector<SCMByte>& getGlobalData() { return globalData; }
 
 	GameState* getState() const { return state; }
 	
@@ -215,7 +219,7 @@ private:
 
 	void executeThread(SCMThread& t, int msPassed);
 
-	SCMByte* _globals;
+	std::vector<SCMByte> globalData;
 
 	BreakpointHandler bpHandler;
 	std::set<SCMThread::pc_t> breakpoints;

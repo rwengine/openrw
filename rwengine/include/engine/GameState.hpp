@@ -74,7 +74,7 @@ struct VehicleGenerator
 struct BlipData
 {
 	int id;
-	GameObject* target;
+	GameObjectID target;
 	// If target is null then use coord
 	glm::vec3 coord;
 	
@@ -92,7 +92,7 @@ struct BlipData
 	DisplayMode display;
 	
 	BlipData()
-	: id(-1), target(nullptr), display(Show)
+	: id(-1), target(0), display(Show)
 	{ }
 };
 
@@ -102,6 +102,10 @@ struct BlipData
  */
 struct GameState
 {
+	/**
+	 * Second since game was started
+	 */
+	float gameTime;
 	unsigned int currentProgress;
 	unsigned int maxProgress;
 	unsigned int numMissions;
@@ -110,7 +114,6 @@ struct GameState
 	unsigned int numUniqueJumps;
 	unsigned int numRampages;
 	unsigned int maxWantedLevel;
-	PlayerController* player;
 	GameObjectID playerObject;
 
 	unsigned int currentWeather;

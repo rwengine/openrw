@@ -388,16 +388,20 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 			{
 				glm::mat4 model;
 
-				if( blip.second.target )
+				if( blip.second.target > 0 )
 				{
-					model = blip.second.target->getTimeAdjustedTransform( _renderAlpha );
+					auto object = world->findObject(blip.second.target);
+					if( object )
+					{
+						model = object->getTimeAdjustedTransform( _renderAlpha );
+					}
 				}
 				else
 				{
 					model = glm::translate( model, blip.second.coord );
 				}
 
-				float a = world->gameTime * glm::pi<float>();
+				float a = world->getGameTime() * glm::pi<float>();
 				model = glm::translate( model, glm::vec3(0.f, 0.f, 2.5f + glm::sin( a ) * 0.5f) );
 				model = glm::rotate( model, a, glm::vec3(0.f, 0.f, 1.f) );
 				model = glm::scale( model, glm::vec3(1.5f, 1.5f, 1.5f) );
@@ -470,7 +474,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		renderLetterbox();
 	}
 
-	float fadeTimer = world->gameTime - world->state->fadeStart;
+	float fadeTimer = world->getGameTime() - world->state->fadeStart;
 	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
@@ -706,7 +710,7 @@ void GameRenderer::renderPickup(PickupObject *pickup)
 	if( ! pickup->isEnabled() ) return;
 
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
-	modelMatrix = glm::rotate(modelMatrix, _renderWorld->gameTime, glm::vec3(0.f, 0.f, 1.f));
+	modelMatrix = glm::rotate(modelMatrix, _renderWorld->getGameTime(), glm::vec3(0.f, 0.f, 1.f));
 
 	auto odata = data->findObjectType<ObjectData>(pickup->getModelID());
 	
@@ -938,7 +942,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 {
 	glm::mat4 m(1.f);
 	m = glm::translate(m, info->position);
-	glm::vec3 scale = info->radius + 0.15f * glm::sin(_renderWorld->gameTime * 5.f);
+	glm::vec3 scale = info->radius + 0.15f * glm::sin(_renderWorld->getGameTime() * 5.f);
 	
 	Renderer::DrawParameters dp;
 	dp.textures = {data->findTexture("cloud1")->getName()};
@@ -954,7 +958,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 		glm::vec3 final = scale * glm::pow(0.9f, i + 1.0f);
 		mt = glm::scale(mt, glm::vec3(final.x, final.y, 1.0f + i * 0.1f));
 		int reverse = (i % 2 ? 1 : -1);
-		mt = glm::rotate(mt, reverse * _renderWorld->gameTime * 0.5f, glm::vec3(0.f, 0.f, 1.f) );
+		mt = glm::rotate(mt, reverse * _renderWorld->getGameTime() * 0.5f, glm::vec3(0.f, 0.f, 1.f) );
 		
 		renderer->drawArrays(mt, &cylinderBuffer, dp);
 	}

@@ -33,7 +33,7 @@ void game_print_big(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		style
 	});
@@ -47,7 +47,7 @@ void game_print_now(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		0
 	});
@@ -225,7 +225,7 @@ void game_fade_screen(const ScriptArguments& args)
 {
 	args.getWorld()->state->fadeTime = args[0].integer / 1000.f;
 	args.getWorld()->state->fadeOut = !!args[1].integer;
-	args.getWorld()->state->fadeStart = args.getWorld()->gameTime;
+	args.getWorld()->state->fadeStart = args.getWorld()->getGameTime();
 }
 bool game_screen_fading(const ScriptArguments& args)
 {
@@ -233,7 +233,7 @@ bool game_screen_fading(const ScriptArguments& args)
 	{
 		return false;
 	}
-	return args.getWorld()->gameTime <
+	return args.getWorld()->getGameTime() <
 		args.getWorld()->state->fadeStart + args.getWorld()->state->fadeTime;
 }
 
@@ -258,7 +258,7 @@ void game_link_mission_flag(const ScriptArguments& args)
 void game_add_vehicle_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = args.getGameObject(0);
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -266,7 +266,7 @@ void game_add_vehicle_blip(const ScriptArguments& args)
 void game_add_character_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = args.getGameObject(0);
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -274,7 +274,7 @@ void game_add_character_blip(const ScriptArguments& args)
 void game_add_pickup_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = args.getGameObject(0);
+	data.target = args.getGameObject(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -283,7 +283,7 @@ void game_add_pickup_blip(const ScriptArguments& args)
 void game_add_location_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = nullptr;
+	data.target = 0;
 	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
 	data.texture = "";
 	*args[3].globalInteger = args.getWorld()->state->addRadarBlip(data);
@@ -322,7 +322,7 @@ void game_set_weather(const ScriptArguments& args)
 
 void game_get_runtime(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getWorld()->gameTime * 1000;
+	*args[0].globalInteger = args.getWorld()->getGameTime() * 1000;
 }
 
 void game_print_big_with_number(const ScriptArguments& args)
@@ -338,7 +338,7 @@ void game_print_big_with_number(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		args[2].integer / 1000.f,
 		style
 	});
@@ -442,20 +442,21 @@ void game_restart_critical_mission(const ScriptArguments& args)
 	// Reset player state.
 	glm::vec3 position(args[0].real, args[1].real, args[2].real + 1.f);
 	
-	auto controller = args.getWorld()->state->player;
+	auto object = args.getWorld()->findObject(args.getState()->playerObject);
+	auto player = static_cast<CharacterObject*>(object);
 	
 	glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
 	
-	controller->getCharacter()->setPosition(position + spawnMagic);
+	player->setPosition(position + spawnMagic);
 	
-	controller->getCharacter()->setHeading( args[3].real );
+	player->setHeading( args[3].real );
 	
 	/// @todo find a nicer way to implement warping out of vehicles.
-	auto cv = controller->getCharacter()->getCurrentVehicle();
+	auto cv = player->getCurrentVehicle();
 	if ( cv != nullptr )
 	{
-		cv->setOccupant( controller->getCharacter()->getCurrentSeat(), nullptr );
-		controller->getCharacter()->setCurrentVehicle(nullptr, 0);
+		cv->setOccupant( player->getCurrentSeat(), nullptr );
+		player->setCurrentVehicle(nullptr, 0);
 	}
 }
 
@@ -514,7 +515,7 @@ void game_add_contact_blip(const ScriptArguments& args)
 	
 	BlipData bd;
 	bd.coord = c;
-	bd.target = nullptr;
+	bd.target = 0;
 	bd.texture = spriteName;
 	
 	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
@@ -534,7 +535,7 @@ void game_add_sprite_blip(const ScriptArguments& args)
 	
 	BlipData bd;
 	bd.coord = c;
-	bd.target = nullptr;
+	bd.target = 0;
 	bd.texture = spriteName;
 	
 	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
@@ -578,7 +579,7 @@ void game_start_cutscene(const ScriptArguments& args)
 }
 void game_get_cutscene_time(const ScriptArguments& args)
 {
-	float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+	float time = args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime;
 	if( args.getWorld()->state->skipCutscene )
 	{
 		*args[0].globalInteger = args.getWorld()->state->currentCutscene->tracks.duration * 1000;
@@ -591,7 +592,7 @@ void game_get_cutscene_time(const ScriptArguments& args)
 bool game_cutscene_finished(const ScriptArguments& args)
 {
 	if( args.getWorld()->state->currentCutscene ) {
-		float time = args.getWorld()->gameTime - args.getWorld()->state->cutsceneStartTime;
+		float time = args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime;
 		if( args.getWorld()->state->skipCutscene ) {
 			return true;
 		}
@@ -803,7 +804,7 @@ void game_display_help(const ScriptArguments& args)
 	args.getWorld()->state->text.push_back({
 		id,
 		str,
-		args.getWorld()->gameTime,
+		args.getWorld()->getGameTime(),
 		2.5f,
 		style
 	});
@@ -817,6 +818,10 @@ void game_clear_help(const ScriptArguments& args)
 		if( texts[i].osTextStyle == OnscreenText::Help )
 		{
 			texts.erase(texts.begin() + i);
+		}
+		else
+		{
+			i++;
 		}
 	}
 }

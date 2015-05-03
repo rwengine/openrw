@@ -59,7 +59,7 @@ public:
 	bool visible;
 
 	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
-		: _lastPosition(pos), _lastRotation(rot), objectID(-1), position(pos), rotation(rot),
+		: _lastPosition(pos), _lastRotation(rot), objectID(0), position(pos), rotation(rot),
 		model(model), engine(engine), animator(nullptr), skeleton(nullptr), mHealth(0.f),
 		  inWater(false), _lastHeight(std::numeric_limits<float>::max()), visible(true),
 		  lifetime(GameObject::UnknownLifetime)

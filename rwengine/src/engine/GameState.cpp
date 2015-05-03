@@ -1,6 +1,7 @@
 #include <engine/GameState.hpp>
 
 GameState::GameState() :
+gameTime(0.f),
 currentProgress(0),
 maxProgress(1),
 numMissions(0),
@@ -9,7 +10,6 @@ numHiddenPackagesDiscovered(0),
 numUniqueJumps(0),
 numRampages(0),
 maxWantedLevel(0),
-player(nullptr),
 currentWeather(0),
 scriptOnMissionFlag(nullptr),
 fadeOut(true),

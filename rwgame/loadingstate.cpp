@@ -9,23 +9,13 @@ LoadingState::LoadingState(RWGame* game)
 
 void LoadingState::enter()
 {
-	// Load all of the files waiting to be loaded.
-	auto world = getWorld();
-
-	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
-		it != world->data->ideLocations.end();
-		++it) {
-		world->data->loadObjects(it->second);
+	// Load Item definitions
+	for( auto& def : game->getGameData()->ideLocations )
+	{
+		game->getGameData()->loadObjects(def.second);
 	}
 
-	// Load IPLs
-	for(std::map<std::string, std::string>::iterator it = world->data->iplLocations.begin();
-		it != world->data->iplLocations.end();
-		++it) {
-		world->data->loadZone(it->second);
-		world->placeItems(it->second);
-	}
+	game->newGame();
 }
 
 void LoadingState::exit()

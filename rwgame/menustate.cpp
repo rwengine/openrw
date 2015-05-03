@@ -10,7 +10,11 @@ MenuState::MenuState(RWGame* game)
 	Menu *m = new Menu(2);
 	m->offset = glm::vec2(200.f, 200.f);
 	m->addEntry(Menu::lambda("Start", [=] { StateManager::get().enter(new IngameState(game)); }));
-	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true)); }));
+	m->addEntry(Menu::lambda("Resume", [=] {
+		StateManager::get().enter(new IngameState(game, false));
+		game->loadGame("quicksave");
+	}));
+	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true, true)); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 	m->addEntry(Menu::lambda("Exit", [=] { getWindow().close(); }));
 	this->enterMenu(m);
