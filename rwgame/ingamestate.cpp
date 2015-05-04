@@ -102,48 +102,29 @@ void IngameState::tick(float dt)
 	{
 		float qpi = glm::half_pi<float>();
 
-		sf::Vector2i screenCenter{sf::Vector2i{getWindow().getSize()} / 2};
-		sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
-		sf::Vector2i deltaMouse = mousePos - screenCenter;
-		sf::Mouse::setPosition(screenCenter, getWindow());
+		sf::Vector2f screenSize(getWindow().getSize());
+		sf::Vector2f screenCenter(screenSize / 2.f);
+		sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
+		sf::Vector2f deltaMouse = (mousePos - screenCenter);
+		sf::Vector2f mouseMove(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
+		sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
 		
 		if(deltaMouse.x != 0 || deltaMouse.y != 0)
 		{
 			autolookTimer = AUTOLOOK_TIME;
 		}
 
-		_lookAngles.x += deltaMouse.x / 100.0;
-		_lookAngles.y += deltaMouse.y / 100.0;
-		
-		while(_lookAngles.x > glm::pi<float>())
-		{
-			_lookAngles.x -= 2.f * glm::pi<float>();
-		}
-		while(_lookAngles.x < -glm::pi<float>())
-		{
-			_lookAngles.x += 2.f * glm::pi<float>();
-		}
-
-		if (_lookAngles.y > qpi)
-			_lookAngles.y = qpi;
-		else if (_lookAngles.y < -qpi)
-			_lookAngles.y = -qpi;
-
-		auto angle = glm::angleAxis(-_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
-		angle *= glm::angleAxis(_lookAngles.y, glm::vec3(0.f, 1.f, 0.f));
-
-		player->updateMovementDirection(angle * _movement, _movement);
-		
+		float viewDistance = 4.f;
 		auto target = getWorld()->findObject(getWorld()->state->cameraTarget);
-		
+
 		if( target == nullptr )
 		{
 			target = player->getCharacter();
 		}
 
-		auto position = target->getPosition();
+		glm::vec3 targetPosition = target->getPosition();
+		targetPosition += glm::vec3(0.f, 0.f, 1.f);
 
-		float viewDistance = 4.f;
 		btCollisionObject* physTarget = player->getCharacter()->physObject;
 
 		auto vehicle = ( target->type() == GameObject::Character ) ? static_cast<CharacterObject*>(target)->getCurrentVehicle() : nullptr;
@@ -154,50 +135,47 @@ void IngameState::tick(float dt)
 							(glm::length(g->geometryBounds.center) + g->geometryBounds.radius) * 4.0f,
 							viewDistance);
 			}
-			position = vehicle->getPosition();
-			position.z += (vehicle->info->handling.dimensions.z / 2.f) * 2.5f;
+			targetPosition = vehicle->getPosition();
+			targetPosition.z += (vehicle->info->handling.dimensions.z / 2.f) * 2.0f;
 			physTarget = vehicle->physBody;
-			
-			float speed = vehicle->physVehicle->getCurrentSpeedKmHour();
-			if( autolookTimer <= 0.f && std::abs(speed) > 1.f )
-			{
-				float b = glm::roll(vehicle->getRotation()) + glm::half_pi<float>();
-				while( b > glm::pi<float>() )
-				{
-					b -= 2.f * glm::pi<float>();
-				}
-				while( b < -glm::pi<float>() )
-				{
-					b += 2.f * glm::pi<float>();
-				}
-				if( speed < 0.f )
-				{
-					if( _lookAngles.x < 0.f )
-					{
-						b -= glm::pi<float>();
-					}
-					else
-					{
-						b += glm::pi<float>();
-					}
-				}
-				
-				float aD = b - _lookAngles.x;
-				const float rotateSpeed = 1.f;
-				if( std::abs(aD) <= rotateSpeed * dt )
-				{
-					_lookAngles.x = b;
-				}
-				else
-				{
-					_lookAngles.x += glm::sign(aD) * rotateSpeed * dt;
-				}
-				angle = glm::angleAxis(_lookAngles.x, glm::vec3(0.f, 0.f, 1.f));
-			}
 		}
 
-		auto rayEnd = position + angle * glm::vec3(-viewDistance, 0.f, 1.f);
-		auto rayStart = position + glm::vec3(0.f, 0.f, 1.f);
+		{
+			// Rotate the cameraPosition vector around targetPosition by the mouse movement
+			auto camtotarget = targetPosition - cameraPosition;
+			float camAngle = glm::atan(camtotarget.y, camtotarget.x);
+			glm::quat epsilon( glm::vec3( 0.f, 0.f, camAngle) );
+			glm::quat theta( glm::vec3(0.f, 0.f, -mouseMove.x) );
+			glm::quat rho( epsilon * glm::vec3(0.f, mouseMove.y, 0.f) );
+			cameraPosition = targetPosition - (theta * (rho * camtotarget));
+		}
+
+		glm::quat angle;
+
+		auto camtotarget = targetPosition - cameraPosition;
+		auto dir = glm::normalize(camtotarget);
+		float correction = glm::length(camtotarget) - viewDistance;
+		if( correction < 0.f )
+		{
+			float innerDist = viewDistance * 0.25f;
+			correction = glm::min(0.f, correction + innerDist);
+		}
+		cameraPosition += dir * 10.f * correction * dt;
+
+		// Calculate the yaw to look at the target.
+		float angleYaw = glm::atan(dir.y, dir.x);
+		angle = glm::quat( glm::vec3(0.f, 0.f, angleYaw) );
+
+		// Update player with camera yaw
+		player->updateMovementDirection(angle * _movement, _movement);
+
+		float len2d = glm::length(glm::vec2(dir));
+		float anglePitch = glm::atan(dir.z, len2d);
+		angle *= glm::quat( glm::vec3(0.f, -anglePitch, 0.f) );
+
+		// Use rays to ensure target is visible from cameraPosition
+		auto rayEnd = cameraPosition;
+		auto rayStart = targetPosition;
 		auto to = btVector3(rayEnd.x, rayEnd.y, rayEnd.z);
 		auto from = btVector3(rayStart.x, rayStart.y, rayStart.z);
 		ClosestNotMeRayResultCallback ray(physTarget, from, to);
@@ -205,22 +183,13 @@ void IngameState::tick(float dt)
 		getWorld()->dynamicsWorld->rayTest(from, to, ray);
 		if( ray.hasHit() && ray.m_closestHitFraction < 1.f )
 		{
-			position = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
+			cameraPosition = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
 							ray.m_hitPointWorld.z());
-			position += glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
+			cameraPosition += glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
 							ray.m_hitNormalWorld.z()) * 0.1f;
 		}
-		else
-		{
-			position = rayEnd;
-		}
 
-		// Move back from the character
-
-		// Tilt the final look angle down a tad.
-		angle *= glm::angleAxis(glm::radians(10.f), glm::vec3(0.f, 1.f, 0.f));
-
-		_look.position = position;
+		_look.position = cameraPosition;
 		_look.rotation = angle;
 	}
 }

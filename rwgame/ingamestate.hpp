@@ -12,8 +12,8 @@ class IngameState : public State
 	bool newgame;
 	ViewCamera _look;
 	/** Player input */
-	glm::vec2 _lookAngles;
 	glm::vec3 _movement;
+	glm::vec3 cameraPosition;
 	/** Timer to reset _lookAngles to forward in vehicles */
 	float autolookTimer;
 public:
