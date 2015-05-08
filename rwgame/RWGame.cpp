@@ -339,7 +339,7 @@ void RWGame::tick(float dt)
 	State* currState = StateManager::get().states.back();
 	
 	static float clockAccumulator = 0.f;
-	if (inFocus && currState->shouldWorldUpdate() ) {
+	if ( currState->shouldWorldUpdate() ) {
 		state->gameTime += dt;
 
 		clockAccumulator += dt;
