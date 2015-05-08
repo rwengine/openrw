@@ -947,7 +947,7 @@ void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info)
 	Renderer::DrawParameters dp;
 	dp.textures = {data->findTexture("cloud1")->getName()};
 	dp.ambient = 1.f;
-	dp.colour = glm::u8vec4(50, 100, 255, 1);
+	dp.colour = glm::u8vec4(50, 100, 255, 128);
 	dp.start = 0;
 	dp.count = cylinderGeometry.getCount();
 	dp.diffuse = 1.f;

@@ -331,8 +331,6 @@ int RWGame::run()
 
 void RWGame::tick(float dt)
 {
-	// Clear out any per-tick state.
-	world->clearTickData();
 	// Process the Engine's background work.
 	world->_work->update();
 	
@@ -340,6 +338,9 @@ void RWGame::tick(float dt)
 	
 	static float clockAccumulator = 0.f;
 	if ( currState->shouldWorldUpdate() ) {
+		// Clear out any per-tick state.
+		world->clearTickData();
+
 		state->gameTime += dt;
 
 		clockAccumulator += dt;
