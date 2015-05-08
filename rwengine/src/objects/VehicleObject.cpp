@@ -160,19 +160,6 @@ void VehicleObject::tickPhysics(float dt)
 {
 	if( physVehicle )
 	{
-		// "Encourage" the vehicle to remain upright.
-		glm::quat rot = getRotation();
-		glm::vec3 t = rot * glm::vec3(1.f, 0.f, 0.f);
-		float roll = btAtan2(t.z, glm::length(glm::vec2(t.x, t.y)));
-		if( glm::abs( roll ) > glm::quarter_pi<float>() )
-		{
-			float steeringBias = glm::abs(steerAngle) > 0.1f ? 2.f : 1.f;
-			glm::vec3 torque(0.f, roll, 0.f);
-			torque = rot * torque;
-			btVector3 impulse( torque.x, torque.y, torque.z );
-			physBody->applyTorqueImpulse(impulse * 200.f * steeringBias);
-		}
-		
 		// todo: a real engine function
 		float velFac = info->handling.maxVelocity;
 		float engineForce = info->handling.acceleration * throttle * velFac;
