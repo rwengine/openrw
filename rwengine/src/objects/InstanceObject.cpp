@@ -47,10 +47,8 @@ void InstanceObject::tick(float dt)
 				engine->dynamicsWorld->addRigidBody(body->body);
 			}
 		}
-		else
-		{
-			_updateLastTransform();
-		}
+		
+		_updateLastTransform();
 
 		auto _bws = body->body->getWorldTransform().getOrigin();
 		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
@@ -156,7 +154,7 @@ glm::quat InstanceObject::getRotation() const
 void InstanceObject::setRotation(const glm::quat &r)
 {
 	if( body ) {
-		auto wtr = body->body->getWorldTransform();
+		auto& wtr = body->body->getWorldTransform();
 		wtr.setRotation(btQuaternion(r.x, r.y, r.z, r.w));
 	}
 	GameObject::setRotation(r);

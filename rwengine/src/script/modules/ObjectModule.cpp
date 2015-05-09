@@ -923,9 +923,9 @@ bool game_rotate_object(const ScriptArguments& args)
 	auto object = args.getGameObject(0);
 	if( object )
 	{
-		float start = args[1].real;
-		float finish = args[2].real;
-		
+		float start = args[2].real;
+		float finish = args[1].real;
+
 		// @todo INTERPOLATE instead of just setting the heading.
 		object->setHeading(finish);
 	}
