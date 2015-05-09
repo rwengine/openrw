@@ -207,6 +207,7 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	// Ignore vertical axis for the sake of simplicity.
 	if( glm::length(glm::vec2(targetDirection)) < 0.1f ) {
 		character->setPosition(glm::vec3(glm::vec2(target), cpos.z));
+		character->controller->setRunning(false);
 		return true;
 	}
 
@@ -214,6 +215,7 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	character->rotation = r;
 
 	controller->setRawMovement({1.f, 0.f, 0.f});
+	controller->setRunning(sprint);
 
 	return false;
 }
@@ -315,6 +317,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			entering = true;
 			// Warp character to vehicle orientation
 			character->controller->setRawMovement({0.f, 0.f, 0.f});
+			character->controller->setRunning(false);
 			character->rotation = vehicle->getRotation();
 			
 			// Determine if the door open animation should be skipped.
@@ -328,10 +331,10 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 				character->playAnimation(anm_open, false);
 			}
 		}
-		else if( targetDistance > 15.f ) {
-			return true; // Give up if the vehicle is too far away.
-		}
 		else {
+			if( targetDistance > 5.f ) {
+				character->controller->setRunning(true);
+			}
 			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
 			character->rotation = r;
 			character->controller->setRawMovement({1.f, 0.f, 0.f});

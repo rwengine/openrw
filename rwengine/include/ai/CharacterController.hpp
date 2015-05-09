@@ -141,9 +141,10 @@ namespace Activities {
 		DECL_ACTIVITY( GoTo )
 
 		glm::vec3 target;
+		bool sprint;
 
-		GoTo( const glm::vec3& target )
-			: target( target ) {}
+		GoTo( const glm::vec3& target, bool _sprint = false )
+			: target( target ), sprint(_sprint) {}
 
 		bool update(CharacterObject* character, CharacterController* controller);
 	};

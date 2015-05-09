@@ -60,7 +60,7 @@ private:
 	VehicleObject* currentVehicle;
 	size_t currentSeat;
 
-	void createActor(const glm::vec2& size = glm::vec2(0.7f, 0.8f));
+	void createActor(const glm::vec2& size = glm::vec2(0.45f, 1.2f));
 	void destroyActor();
 
 	// Incredibly hacky "move in this direction".

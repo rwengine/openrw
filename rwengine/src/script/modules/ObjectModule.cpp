@@ -717,7 +717,7 @@ void game_character_run_to(const ScriptArguments& args)
 	glm::vec3 target(args[1].real, args[2].real, 0.f);
 	target = args.getWorld()->getGroundAtPosition(target);
 	
-	character->controller->setNextActivity(new Activities::GoTo(target));
+	character->controller->setNextActivity(new Activities::GoTo(target, true));
 }
 
 bool game_vehicle_flipped(const ScriptArguments& args)
