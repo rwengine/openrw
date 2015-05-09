@@ -331,7 +331,6 @@ void game_print_big_with_number(const ScriptArguments& args)
 	std::string str = args.getWorld()->data->texts.text(id);
 	
 	int number = args[1].integer;
-	str += "\n" + std::to_string(number);
 	
 	unsigned short style = args[3].integer;
 	
@@ -340,7 +339,8 @@ void game_print_big_with_number(const ScriptArguments& args)
 		str,
 		args.getWorld()->getGameTime(),
 		args[2].integer / 1000.f,
-		style
+		style,
+		std::to_string(number),
 	});
 }
 

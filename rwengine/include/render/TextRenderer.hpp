@@ -32,6 +32,8 @@ public:
 		int font;
 		/// Message to be displayed (including markup)
 		std::string text;
+		/// Extra text parameter
+		std::string varText;
 		/// On screen position
 		glm::vec2 screenPosition;
 		/// font size

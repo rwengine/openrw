@@ -30,6 +30,7 @@ struct OnscreenText
 	float osTextStart;
 	float osTextTime;
 	unsigned short osTextStyle;
+	std::string osTextVar;
 	
 	enum /*TextStyle*/
 	{

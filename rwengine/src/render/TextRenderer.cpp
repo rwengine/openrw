@@ -118,6 +118,8 @@ TextRenderer::TextRenderer(GameRenderer* renderer)
 	
 	glyphData[charToIndex(' ')].widthFrac = 0.4f;
 	glyphData[charToIndex('\'')].widthFrac = 0.5f;
+	glyphData[charToIndex('(')].widthFrac = 0.45f;
+	glyphData[charToIndex(')')].widthFrac = 0.45f;
 	// Assumes contigious a-z character encoding
 	for(char g = 0; g <= ('z'-'a'); g++)
 	{
@@ -178,9 +180,45 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	std::vector<TextVertex> geo;
 	
 	float maxWidth = 0.f;
+
+	auto text = ti.text;
 	
-	for( const char& c : ti.text )
+	for( int i = 0; i < text.length(); ++i )
 	{
+		char c = text[i];
+
+		// Handle any markup changes.
+		if( c == '~' && text.length() > i + 1 )
+		{
+			switch( text[i+1] )
+			{
+			case '1':
+			case 'a':
+				text.erase(text.begin()+i, text.begin()+i+3);
+				text.insert(i, ti.varText);
+				break;
+			case 'k': {
+				text.erase(text.begin()+i, text.begin()+i+3);
+				// Extract the key name from the /next/ markup
+				auto keyend = text.find('~', i+1);
+				auto keyname = text.substr(i+1, keyend-i-1);
+				// Since we don't have a key map yet, just print out the name
+				text.erase(text.begin()+i, text.begin()+keyend);
+				text.insert(i, "("+keyname+")");
+			} break;
+			case 'w':
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = ti.baseColour;
+				break;
+			case 'h':
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(1.f);
+				break;
+			}
+			
+			c = text[i];
+		}
+		
 		int glyph = charToIndex(c);
 		if( glyph >= GAME_GLYPHS )
 		{

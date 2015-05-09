@@ -87,39 +87,13 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
 			ti.screenPosition = glm::vec2(20.f, 20.f);
 			ti.font = 2;
 			ti.size = 20.f;
-			ti.baseColour = glm::vec3(1.f);
+			ti.baseColour = glm::vec3(0.9f);
 			ti.align = TextRenderer::TextInfo::Left;
 			break;
 		}
 
 		ti.text = t.osTextString;
-
-		if( t.osTextStyle == OnscreenText::Help )
-		{
-			// Insert line breaks into the message string.
-			auto m = ti.text;
-			const float boxWidth = 250.f;
-			int lastSpace = 0;
-			float lineLength = 0.f, wordLength = 0.f;
-			for( int c = 0; c < m.length(); ++c )
-			{
-				if(m[c] == ' ')
-				{
-					lastSpace = c;
-					lineLength += wordLength;
-					wordLength = 0.f;
-				}
-				
-				wordLength += ti.size;
-				
-				if( lineLength + wordLength > boxWidth )
-				{
-					m[lastSpace] = '\n';
-					lineLength = 0.f;
-				}
-			}
-			ti.text = m;
-		}
+		ti.varText = t.osTextVar;
 		
 		if( glm::length( shadowOffset  ) > 0 )
 		{
