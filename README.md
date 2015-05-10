@@ -1,10 +1,10 @@
 # OpenRW
 
-This is an attempt at re-implementing the GTA III game binary, adding support for more platforms
-and input methods, while fixing some issues that plauge the original release.
+OpenRW is a re-implementation of Rockstar Games' Grand Theft Auto III, a classic 3D action
+game first published in 2001.
 
-**REQURIES A COPY OF GTA III PC**.
-Without an original copy of the game, it will not be possible to run openrw.
+This project requires a legitimate copy of the original PC game data in order to run. Without
+this data it will not be possible to use openrw.
 
 ## Building
 
@@ -15,7 +15,7 @@ Dependencies:
 * SFML (2.0+)
 * Boost Test
 
-Options:
+Global Options:
 
 * BUILD_TESTS — Builds the test suite
 * BUILD_TOOLS — Builds the rwviewer application
@@ -31,30 +31,24 @@ $ cmake ../
 
 ## Running
 
-Once compiled, set `OPENRW_GAME_PATH` to the directory containing "gta3.exe" and run rwgame.
+Once compiled, set the environment variable `OPENRW_GAME_PATH` to the directory containing "gta3.exe" and run the rwgame executable.
 
 ### rwgame
+
+This is the game binary
 
 * Options:
     * env: OPENRW\_GAME\_PATH, must be set to the folder containing "gta3.exe"
     * -w **n**, -h **n** sets initial window size
+    * --newgame starts a new game automatically
 
 ### rwviewer
 
-Intended to be a tool for viewing the various game data types, such as objects and models. Currently awaiting refactoring.
+This Qt application enables viewing of the game data files and models.
 
 ## Documentation
 
 Run Doxygen on the included Doxyfile to generate documentation.
-
-## Things to do
-
-* Finish rwng reorganisation
-	* Split basic functionality from rwengine into core library.
-	* Clean up more of GameObject's member variables.
-	* Implement script debugging.
-	* Fix rwviewer for new paradigm.
-* Fix water rendering artefacts.
 
 ## License
 
