@@ -198,7 +198,14 @@ void IngameState::tick(float dt)
 		angle = glm::quat( glm::vec3(0.f, 0.f, angleYaw) );
 
 		// Update player with camera yaw
-		player->updateMovementDirection(angle * _movement, _movement);
+		if( player->isInputEnabled() )
+		{
+			player->updateMovementDirection(angle * _movement, _movement);
+		}
+		else
+		{
+			player->updateMovementDirection(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f,0.f,0.f));
+		}
 
 		float len2d = glm::length(glm::vec2(lookdir));
 		float anglePitch = glm::atan(lookdir.z, len2d);
@@ -253,15 +260,9 @@ void IngameState::handleEvent(const sf::Event &event)
 			{
 				getWorld()->state->skipCutscene = true;
 			}
-			else if( player && player->isInputEnabled() ) {
-				if( player->getCharacter()->getCurrentVehicle() ) {
-					player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
-				}
-				else 
-				{
-					player->jump();
-				}
-			}
+			break;
+		case sf::Keyboard::C:
+			camMode = CameraMode((camMode+(CameraMode)1)%CAMERA_MAX);
 			break;
 		case sf::Keyboard::W:
 			_movement.x = 1.f;
@@ -274,22 +275,6 @@ void IngameState::handleEvent(const sf::Event &event)
 			break;
 		case sf::Keyboard::D:
 			_movement.y =-1.f;
-			break;
-		case sf::Keyboard::LShift:
-			player->setRunning(true);
-			break;
-		case sf::Keyboard::C:
-			camMode = CameraMode((camMode+(CameraMode)1)%CAMERA_MAX);
-			break;
-		case sf::Keyboard::F:
-			if( player && player->isInputEnabled() ) {
-				if( player->getCharacter()->getCurrentVehicle()) {
-					player->exitVehicle();
-				}
-				else {
-					player->enterNearestVehicle();
-				}
-			}
 			break;
 		default: break;
 		}
@@ -304,12 +289,56 @@ void IngameState::handleEvent(const sf::Event &event)
 		case sf::Keyboard::D:
 			_movement.y = 0.f;
 			break;
+		default: break;
+		}
+		break;
+	default: break;
+	}
+	
+	if( player && player->isInputEnabled() )
+	{
+		handlePlayerInput(event);
+	}
+	State::handleEvent(event);
+}
+
+void IngameState::handlePlayerInput(const sf::Event& event)
+{
+	auto player = game->getPlayer();
+	switch(event.type) {
+	case sf::Event::KeyPressed:
+		switch(event.key.code) {
+		case sf::Keyboard::Space:
+			if( player->getCharacter()->getCurrentVehicle() ) {
+				player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
+			}
+			else
+			{
+				player->jump();
+			}
+			break;
+		case sf::Keyboard::LShift:
+			player->setRunning(true);
+			break;
+		case sf::Keyboard::F:
+			if( player->getCharacter()->getCurrentVehicle()) {
+				player->exitVehicle();
+			}
+			else {
+				player->enterNearestVehicle();
+			}
+			break;
+		default:
+			break;
+		}
+	case sf::Event::KeyReleased:
+		switch(event.key.code) {
 		case sf::Keyboard::LShift:
 			player->setRunning(false);
 			break;
 		default: break;
 		}
-		break;
+	break;
 	case sf::Event::MouseButtonPressed:
 		switch(event.mouseButton.button) {
 		case sf::Mouse::Left:
@@ -329,10 +358,11 @@ void IngameState::handleEvent(const sf::Event &event)
 	case sf::Event::MouseWheelMoved:
 		player->getCharacter()->cycleInventory(event.mouseWheel.delta > 0);
 		break;
-	default: break;
+	default:
+		break;
 	}
-	State::handleEvent(event);
 }
+
 
 bool IngameState::shouldWorldUpdate()
 {
