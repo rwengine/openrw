@@ -317,8 +317,7 @@ glm::quat CharacterObject::getRotation() const
 
 bool CharacterObject::isAlive() const
 {
-	///  @todo remove immortality
-	return true;
+	return mHealth > 0.f;
 }
 
 bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
