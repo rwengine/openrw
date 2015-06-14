@@ -17,7 +17,7 @@
  * Changing this will break saves.
  */
 #define SCM_VARIABLE_SIZE 4
-#define SCM_STACK_DEPTH 32
+#define SCM_STACK_DEPTH 4
 
 class GameState;
 

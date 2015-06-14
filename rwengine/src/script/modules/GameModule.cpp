@@ -373,15 +373,17 @@ void game_get_player(const ScriptArguments& args)
 
 void game_create_garage(const ScriptArguments& args)
 {
+	// http://www.gtamodding.com/index.php?title=Garage#GTA_III
 	glm::vec3 min(args[0].real, args[1].real, args[2].real);
 	glm::vec3 max(args[3].real, args[4].real, args[5].real);
-
-	/// @todo http://www.gtamodding.com/index.php?title=Garage#GTA_III
 	int garageType = args[6].integer;
+	
+	args.getWorld()->state->garages.push_back({
+		min, max, garageType
+	});
+	
 	// TODO actually store the garage information and return the handle
-	*args[7].globalInteger = 0;
-
-	args.getWorld()->logger->warning("SCM", "Garages Unimplemented! " + std::to_string(garageType));
+	*args[7].globalInteger = args.getWorld()->state->garages.size()-1;
 }
 
 void game_disable_ped_paths(const ScriptArguments& args)

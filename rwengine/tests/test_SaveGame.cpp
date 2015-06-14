@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <engine/GameState.hpp>
 #include <engine/SaveGame.hpp>
+#include <script/ScriptMachine.hpp>
 #include <test_globals.hpp>
 
 BOOST_AUTO_TEST_SUITE(SaveGameTests)
@@ -44,6 +45,22 @@ BOOST_AUTO_TEST_CASE(test_write_state)
 	BOOST_CHECK_EQUAL( loaded.overrideNextStart, state.overrideNextStart );
 	BOOST_CHECK_EQUAL( loaded.hour, state.hour );
 	BOOST_CHECK_EQUAL( loaded.minute, state.minute );
+	
+	// Check Garage data + garage vehicle restoration
+}
+
+BOOST_AUTO_TEST_CASE(test_load_game)
+{
+	GameState state;
+	GameWorld world();
+	SCMOpcodes s;
+	auto file = Global::get().d->loadSCM("data/main.scm");
+	ScriptMachine machine(&state, file, &s);
+	
+	state.world = Global::get().e;
+	state.script = &machine;
+
+	BOOST_REQUIRE( SaveGame::loadGame(state, "GTA3sf1.b") );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

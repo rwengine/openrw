@@ -187,26 +187,17 @@ void RWGame::saveGame(const std::string& savename)
 void RWGame::loadGame(const std::string& savename)
 {
 	delete state->world;
-	//delete state;
+	delete state->script;
 	state = nullptr;
 
 	newGame();
 
 	startScript("data/main.scm");
 
-	if(! SaveGame::loadScript(*script, savename+".script") )
+	if(! SaveGame::loadGame(*state, "GTA3sf1.b") )
 	{
-		log.error("Game", "Failed to restore Script");
+		log.error("Game", "Failed to load game");
 	}
-	if(! SaveGame::loadState(*state, savename+".state") )
-	{
-		log.error("Game", "Failed to restore State");
-	}
-	if(! SaveGame::loadObjects(*world, savename+".world") )
-	{
-		log.error("Game", "Failed to restore World");
-	}
-	// TODO objects.
 }
 
 void RWGame::startScript(const std::string& name)
@@ -246,6 +237,7 @@ void RWGame::startScript(const std::string& name)
 				log.info("Script", ss.str());
 			});
 		script->addBreakpoint(0);
+		state->script = script;
 	}
 	else {
 		log.error("Game", "Failed to load SCM: " + name);

@@ -26,7 +26,8 @@ minute(0),
 cameraNear(0.1f),
 cameraFixed(false),
 cameraTarget(0),
-world(nullptr)
+world(nullptr),
+script(nullptr)
 {
 	
 }

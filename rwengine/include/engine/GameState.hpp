@@ -10,6 +10,7 @@
 
 class GameWorld;
 class GameObject;
+class ScriptMachine;
 class PlayerController;
 struct CutsceneData;
 
@@ -98,6 +99,39 @@ struct BlipData
 };
 
 /**
+ * Data for garages
+ */
+struct GarageInfo
+{
+	enum /*GarageType*/ {
+		GARAGE_MISSION = 1,
+		GARAGE_BOMBSHOP1 = 2,
+		GARAGE_BOMBSHOP2 = 3,
+		GARAGE_BOMBSHOP3 = 4,
+		GARAGE_RESPRAY = 5,
+		GARAGE_INVALID = 6,
+		GARAGE_SPECIFIC_CARS_ONLY = 7, /* See Opcode 0x21B */
+		GARAGE_COLLECTCARS1 = 8, /* See Opcode 0x03D4 */
+		GARAGE_COLLECTCARS2 = 9,
+		GARAGE_COLLECTCARS3 = 10, /* Unused */
+		GARAGE_OPENFOREXIT = 11,
+		GARAGE_INVALID2  = 12,
+		GARAGE_CRUSHER = 13, /* Unused */
+		GARAGE_MISSION_KEEPCAR = 14,
+		GARAGE_FOR_SCRIPT = 15,
+		GARAGE_HIDEOUT_ONE = 16, /* Portland */
+		GARAGE_HIDEOUT_TWO = 17, /* Staunton */
+		GARAGE_HIDEOUT_THREE = 18, /* Shoreside */
+		GARAGE_FOR_SCRIPT2 = 19,
+		GARAGE_OPENS_FOR_SPECIFIC_CAR = 20,
+		GARAGE_OPENS_ONCE = 21
+	};
+	glm::vec3 min;
+	glm::vec3 max;
+	int type;
+};
+
+/**
  * Gameplay state object that holds persistent state, and references runtime
  * world state.
  */
@@ -177,10 +211,17 @@ struct GameState
 	
 	std::map<int, BlipData> radarBlips;
 
+	std::vector<GarageInfo> garages;
+
 	/**
 	 * World to use for this state, this isn't saved, just used at runtime
 	 */
 	GameWorld* world;
+
+	/**
+	 * Script Machine associated with this state if it exists.
+	 */
+	ScriptMachine* script;
 
 	GameState();
 
