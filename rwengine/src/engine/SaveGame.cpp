@@ -844,7 +844,7 @@ std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
 		if ( ep->d_type == DT_REG ) {
 			realName = ep->d_name;
 			if(realName.find(".b") != realName.npos) {
-				infos.push_back(getSaveInfo(realName));
+				infos.push_back(getSaveInfo(gamePath+"/"+realName));
 			}
 		}
 	}
