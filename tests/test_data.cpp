@@ -16,9 +16,8 @@ BOOST_AUTO_TEST_CASE(test_weapon_dat)
 	l.loadWeapons(Global::get().getGamePath() + "/data/weapon.dat", weaponData);
 
 	BOOST_ASSERT( weaponData.size() > 0 );
-	BOOST_ASSERT( weaponData.find("unarmed") != weaponData.end() );
 
-	WeaponDataPtr data = weaponData["unarmed"];
+	WeaponDataPtr data = weaponData[0];
 
 	BOOST_CHECK( data->fireType == WeaponData::MELEE );
 	BOOST_CHECK( data->hitRange == 2.8f );

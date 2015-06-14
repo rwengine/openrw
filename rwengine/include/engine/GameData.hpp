@@ -264,7 +264,7 @@ public:
 	 */
 	std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 	
-	std::map<std::string, std::shared_ptr<WeaponData>> weaponData;
+	std::vector<std::shared_ptr<WeaponData>> weaponData;
 
 	/**
 	 * @struct WaterArea

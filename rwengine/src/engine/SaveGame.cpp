@@ -2,12 +2,14 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/GameObject.hpp>
+#include <engine/GameData.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 #include <ai/PlayerController.hpp>
+#include <items/WeaponItem.hpp>
 
 #include <fstream>
 #include <cereal/cereal.hpp>
@@ -738,14 +740,24 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		for(int i = 0; i < SCM_STACK_DEPTH; ++i) {
 			thread.calls[i] = scripts[s].stack[i];
 		}
-		thread.wakeCounter = scripts[s].wakeTimer;
+		 /* TODO not hardcode +33 ms */
+		thread.wakeCounter = scripts[s].wakeTimer - block0Data.lastTick + 33;
 	}
 
 	if( playerCount > 0 ) {
+		auto& ply = players[0];
 		auto player = state.world->createPlayer(players[0].info.position);
 		player->mHealth = players[0].info.health;
 		state.playerObject = player->getGameObjectID();
 		state.maxWantedLevel = players[0].maxWantedLevel;
+		for(int w = 0; w < 13; ++w) {
+			auto& wep = ply.info.weapons[w];
+			if(wep.weaponId != 0) {
+				auto& weaponInfo = state.world->data->weaponData.at(wep.weaponId);
+				auto item = new WeaponItem(player, weaponInfo);
+				player->addToInventory(item);
+			}
+		}
 	}
 
 	// TODO restore garage data

@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup)
 		auto character = Global::get().e->createPedestrian(1, { 30.1f, 0.f, 0.f });
 		BOOST_REQUIRE( character != nullptr );
 
-		auto item = Global::get().e->data->weaponData["ak47"];
+		auto item = Global::get().e->data->weaponData[9];
 
 		ItemPickup* p = new ItemPickup(Global::get().e, { 30.f, 0.f, 0.f }, item );
 

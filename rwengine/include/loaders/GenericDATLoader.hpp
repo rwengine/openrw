@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <vector>
 
 struct DynamicObjectData;
 typedef std::shared_ptr<DynamicObjectData> DynamicObjectDataPtr;
@@ -10,7 +11,7 @@ typedef std::map<std::string,DynamicObjectDataPtr> DynamicObjectDataPtrs;
 
 struct WeaponData;
 typedef std::shared_ptr<WeaponData> WeaponDataPtr;
-typedef std::map<std::string, WeaponDataPtr> WeaponDataPtrs;
+typedef std::vector<WeaponDataPtr> WeaponDataPtrs;
 
 struct VehicleInfo;
 typedef std::shared_ptr<VehicleInfo> VehicleInfoPtr;

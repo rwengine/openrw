@@ -118,7 +118,7 @@ void GenericDATLoader::loadWeapons(const std::string& name, WeaponDataPtrs& weap
 
 			data->inventorySlot = slotNum++;
 
-			weaponData[data->name] = data;
+			weaponData.push_back(data);
 		}
 	}
 }

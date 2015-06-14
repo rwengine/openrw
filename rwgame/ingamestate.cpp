@@ -36,9 +36,9 @@ void IngameState::startTest()
 
 	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
 	for( auto& w : getWorld()->data->weaponData ) {
-		if( w.first == "unarmed" ) continue;
+		if( w->name == "unarmed" ) continue;
 		getWorld()->insertObject(new ItemPickup(getWorld(), itemspawn,
-												  w.second));
+												  w));
 		itemspawn.x += 2.5f;
 	}
 
