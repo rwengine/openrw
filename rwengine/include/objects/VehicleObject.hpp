@@ -114,6 +114,9 @@ public:
 
 	void applyWaterFloat(const glm::vec3& relPt);
 
+	void setPrimaryColour(uint8_t color);
+	void setSecondaryColour(uint8_t color);
+
 private:
 
 	void registerPart(ModelFrame* mf);

@@ -194,7 +194,7 @@ void RWGame::loadGame(const std::string& savename)
 
 	startScript("data/main.scm");
 
-	if(! SaveGame::loadGame(*state, "GTA3sf1.b") )
+	if(! SaveGame::loadGame(*state, savename) )
 	{
 		log.error("Game", "Failed to load game");
 	}
@@ -634,6 +634,22 @@ void RWGame::renderDebugPaths(float time)
 			btVector3 f( c->position.x, c->position.y, c->position.z );
 			debug->drawLine( p, f, col);
 		}
+	}
+
+	// Draw Garage bounds
+	for(size_t g = 0; g < state->garages.size(); ++g) {
+		auto& garage = state->garages[g];
+		btVector3 minColor(1.f, 0.f, 0.f);
+		btVector3 maxColor(0.f, 1.f, 0.f);
+		btVector3 min(garage.min.x,garage.min.y,garage.min.z);
+		btVector3 max(garage.max.x,garage.max.y,garage.max.z);
+		debug->drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
+		debug->drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
+		debug->drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);
+		
+		debug->drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
+		debug->drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
+		debug->drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
 	}
 
 	debug->flush(renderer);

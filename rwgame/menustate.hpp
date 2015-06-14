@@ -13,6 +13,9 @@ public:
 
 	virtual void tick(float dt);
 
+	virtual void enterMainMenu();
+	virtual void enterLoadMenu();
+
 	virtual void handleEvent(const sf::Event& event);
 };
 

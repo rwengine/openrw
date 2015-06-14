@@ -717,6 +717,16 @@ void VehicleObject::destroyObjectHinge(Part* part)
 	}
 }
 
+void VehicleObject::setPrimaryColour(uint8_t color)
+{
+	colourPrimary = engine->data->vehicleColours[color];
+}
+
+void VehicleObject::setSecondaryColour(uint8_t color)
+{
+	colourSecondary = engine->data->vehicleColours[color];
+}
+
 void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycaster::btVehicleRaycasterResult &result)
 {
 	ClosestNotMeRayResultCallback rayCallback( _vehicle->physBody, from, to );

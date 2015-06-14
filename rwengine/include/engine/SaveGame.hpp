@@ -5,10 +5,17 @@
 #include <engine/RWTypes.hpp>
 
 #include <string>
+#include <vector>
 
 struct GameState;
 class GameWorld;
 class ScriptMachine;
+
+struct SaveGameInfo
+{
+	std::string saveName;
+	std::string savePath;
+};
 
 /**
  * Reads and Writes GameStates to disk, restoring the required state information
@@ -32,6 +39,13 @@ public:
 	 * @return status, false if failure occured.
 	 */
 	static bool loadGame(GameState& state, const std::string& file);
+
+	static SaveGameInfo getSaveInfo(const std::string& file);
+
+	/**
+	 * Returns save game information for all found saves
+	 */
+	static std::vector<SaveGameInfo> getAllSaveGameInfo();
 
 	/**
 	 * Writes the current game state out into a file suitable for loading later.

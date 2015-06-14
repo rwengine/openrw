@@ -4,6 +4,7 @@
 #include <objects/GameObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/SCMFile.hpp>
 #include <ai/PlayerController.hpp>
@@ -447,14 +448,117 @@ struct StructPed {
 
 // NOTE commented members are read manually, due to alignment.
 struct Block1PlayerPed {
-	//BlockDword unknown0;
-	//BlockWord unknown1;
-	alignas(uint8_t) BlockDword reference; // 0x0A
-	alignas(uint8_t) StructPed info; // 0x0C
+	BlockDword unknown0;
+	BlockWord unknown1;
+	BlockDword reference;
+	StructPed info;
 	BlockDword maxWantedLevel;
 	BlockDword maxChaosLevel;
 	uint8_t modelName[24];
 	uint8_t align[2];
+};
+
+template<class T> void read(std::FILE* str, T& out) {
+	std::fread(&out, sizeof(out), 1, str);
+}
+
+struct StructStoredCar {
+	BlockDword modelId;
+	glm::vec3 position;
+	glm::vec3 rotation;
+	BlockDword immunities;
+	uint8_t colorFG;
+	uint8_t colorBG;
+	uint8_t radio;
+	uint8_t variantA;
+	uint8_t variantB;
+	uint8_t bombType;
+	uint8_t align0[2];
+	
+	// TODO Migrate to more available location (GameConstants?)
+	enum /*VehicleImmunities*/ {
+		Bulletproof = 1 << 0,
+		Fireproof = 1 << 1,
+		Explosionproof = 1 << 2,
+		CollisionProof = 1 << 3,
+		UnknownProof = 1 << 4
+	};
+	enum /*VehicleBombType*/ {
+		NoBomb = 0,
+		TimerBomb = 1,
+		IgnitionBomb = 2,
+		RemoteBomb = 3,
+		TimerBombArmed = 4,
+		IgnitionBombArmed = 5
+	};
+};
+
+struct StructGarage {
+	uint8_t type;
+	uint8_t unknown0;
+	uint8_t unknown1;
+	uint8_t unknown2;
+	uint8_t unknown3;
+	uint8_t unknown4;
+	uint8_t unknown5;
+	uint8_t align0[2];
+	BlockDword unknown6;
+	BlockDword unknown7;
+	uint8_t unknown8;
+	uint8_t unknown9;
+	uint8_t unknown10;
+	uint8_t unknown11;
+	uint8_t unknown12;
+	uint8_t unknown13;
+	uint8_t unknown14;
+	uint8_t align1;
+	float x1;
+	float x2;
+	float y1;
+	float y2;
+	float z1;
+	float z2;
+	float doorOpenStart;
+	float doorOpenAngle;
+	glm::vec2 unknownCoord1;
+	glm::vec2 unknownCoord2;
+	float doorAZ;
+	float doorBZ;
+	BlockDword unknown15;
+	uint8_t unknown16;
+	uint8_t align2[3];
+	BlockDword unknown17;
+	BlockDword unknown18;
+	BlockDword unknown19;
+	float unknown20;
+	float unknown21;
+	float unknown22;
+	float unknown23;
+	float unknown24;
+	float unknown25;
+	BlockDword unknown26;
+	uint8_t unknown27;
+	uint8_t unknown28;
+	uint8_t unknown29;
+	uint8_t unknown30;
+	uint8_t unknown31;
+	uint8_t unknown32;
+	uint8_t align3[2];
+};
+
+struct Block2GarageData {
+	BlockDword garageCount;
+	BlockDword freeBombs;
+	BlockDword freeResprays;
+	BlockDword unknown0;
+	BlockDword unknown1;
+	BlockDword unknown2;
+	BlockDword bfImportExportPortland;
+	BlockDword bfImportExportShoreside;
+	BlockDword bfImportExportUnused;
+	BlockDword GA_21lastTime;
+	StructStoredCar cars[18];
+	
 };
 
 void SaveGame::writeGame(GameState& state, const std::string& file)
@@ -589,10 +693,26 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	
 	BlockDword playerCount = readDword(loadFile);
 	Block1PlayerPed players[playerCount];
-	BlockDword unknownPlayerValue = readDword(loadFile);
-	BlockWord unknownPlayerValue2;
-	fread(&unknownPlayerValue2, sizeof(BlockWord), 1, loadFile);
-	fread(players, sizeof(Block1PlayerPed), playerCount, loadFile);
+	for(int p = 0; p < playerCount; ++p) {
+		read(loadFile, players[p].unknown0);
+		read(loadFile, players[p].unknown1);
+		read(loadFile, players[p].reference);
+		read(loadFile, players[p].info);
+		read(loadFile, players[p].maxWantedLevel);
+		read(loadFile, players[p].maxChaosLevel);
+		read(loadFile, players[p].modelName);
+		read(loadFile, players[p].align);
+	}
+
+	// BLOCK 2
+	BlockDword garageBlockSize = readDword(loadFile);
+	BlockDword garageDataSize = readDword(loadFile);
+
+	Block2GarageData garageData;
+	fread(&garageData, sizeof(Block2GarageData), 1, loadFile);
+
+	StructGarage garages[garageData.garageCount];
+	fread(garages, sizeof(StructGarage), garageData.garageCount, loadFile);
 
 	// Insert Game State.
 	state.hour = block0Data.gameHour;
@@ -627,7 +747,108 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		state.playerObject = player->getGameObjectID();
 		state.maxWantedLevel = players[0].maxWantedLevel;
 	}
+
+	// TODO restore garage data
+	// http://gtaforums.com/topic/758692-gta-iii-save-file-documentation/
+	for(int g = 0; g < garageData.garageCount; ++g) {
+		auto& garage = garages[g];
+		state.garages.push_back({
+			glm::vec3(garage.x1, garage.y1, garage.z1),
+			glm::vec3(garage.x2, garage.y2, garage.z2),
+			garage.type
+		});
+		auto& gameGarage = state.garages.back();
+		auto center = (gameGarage.min + gameGarage.max)/2.f;
+		// Find the nearest dynamic instance?
+		float distance = std::numeric_limits<float>::max();
+		GameObject* nearinst = nullptr;
+		for(std::pair<GameObjectID, GameObject*> object : state.world->objects) {
+			if( object.second->type() == GameObject::Instance ) {
+				auto instance = static_cast<InstanceObject*>(object.second);
+				if( instance->dynamics ) {
+					float idist = glm::distance(center, instance->getPosition());
+					if( idist < distance ) {
+						distance = idist;
+						nearinst = instance;
+					}
+				}
+			}
+		}
+		// Nearinst is probably the garage door.
+	}
+	for(int c = 0; c < 18; ++c) {
+		if(garageData.cars[c].modelId == 0) continue;
+		auto& car = garageData.cars[c];
+		glm::quat rotation(-glm::vec3(car.rotation.z, car.rotation.y, car.rotation.x));
+		
+		VehicleObject* vehicle = state.world->createVehicle(car.modelId, car.position, rotation);
+		vehicle->setPrimaryColour(car.colorFG);
+		vehicle->setSecondaryColour(car.colorBG);
+	}
+
+	std::fclose(loadFile);
 	
 	return true;
+}
+
+#include <iconv.h>
+#include <dirent.h>
+SaveGameInfo SaveGame::getSaveInfo(const std::string& file)
+{
+	std::FILE* loadFile = std::fopen(file.c_str(), "r");
+	
+	// BLOCK 0
+	BlockDword blockSize;
+	fread(&blockSize, sizeof(BlockDword), 1, loadFile);
+	
+	Block0Data block0Data;
+	fread(&block0Data, sizeof(block0Data), 1, loadFile);
+	
+	std::fclose(loadFile);
+	size_t bytes = 0;
+	for(;; bytes++ ) {
+		if(block0Data.saveName[bytes-1] == 0 && block0Data.saveName[bytes] == 0) break;
+	}
+	size_t len = bytes/2;
+	size_t outSize = 24;
+	char outBuff[outSize];
+	char* outCur = outBuff;
+	auto icv = iconv_open("UTF-8", "UTF-16");
+	char* saveName = (char*)block0Data.saveName;
+	iconv(icv, &saveName, &bytes, &outCur, &outSize);
+	return { std::string(outBuff), file };
+}
+
+std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
+{
+	// TODO consider windows
+	auto homedir = getenv("HOME");
+	if( homedir == nullptr ) {
+		std::cerr << "Unable to determine home directory" << std::endl;
+		return {};
+	}
+	const char gameDir[] = "GTA3 User Files";
+	std::string gamePath(homedir);
+	gamePath.append("/");
+	gamePath.append(gameDir);
+
+	DIR* dp = opendir(gamePath.c_str());
+	dirent* ep;
+	std::string realName;
+	if ( dp == NULL ) {
+		return {};
+	}
+	std::vector<SaveGameInfo> infos;
+	while( (ep = readdir(dp)) )
+	{
+		if ( ep->d_type == DT_REG ) {
+			realName = ep->d_name;
+			if(realName.find(".b") != realName.npos) {
+				infos.push_back(getSaveInfo(realName));
+			}
+		}
+	}
+	closedir(dp);
+	return infos;
 }
 
