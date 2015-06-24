@@ -161,7 +161,7 @@ void vm_mission_over(const ScriptArguments& args)
 {
 	for( auto oid : args.getState()->missionObjects )
 	{
-		auto obj = args.getWorld()->findObject(oid);
+		auto obj = args.getWorld()->vehiclePool.find(oid);
 		if( obj )
 		{
 			args.getWorld()->destroyObjectQueued(obj);

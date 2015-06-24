@@ -46,21 +46,6 @@ public:
 	 * Returns save game information for all found saves
 	 */
 	static std::vector<SaveGameInfo> getAllSaveGameInfo();
-
-	/**
-	 * Writes the current game state out into a file suitable for loading later.
-	 */
-	static void writeState(GameState& state, const std::string& file);
-
-	static bool loadState(GameState& state, const std::string& file);
-
-	static void writeScript(ScriptMachine& sm, const std::string& file);
-
-	static bool loadScript(ScriptMachine&, const std::string& file);
-
-	static void writeObjects(GameWorld& world, const std::string& file);
-
-	static bool loadObjects(GameWorld& world, const std::string& file);
 };
 
 #endif

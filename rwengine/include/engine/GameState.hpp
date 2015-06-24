@@ -76,6 +76,15 @@ struct VehicleGenerator
 struct BlipData
 {
 	int id;
+	
+	enum BlipType
+	{
+		Location = 0,
+		Vehicle = 1,
+		Pickup = 2,
+		Character = 3,
+	};
+	BlipType type;
 	GameObjectID target;
 	// If target is null then use coord
 	glm::vec3 coord;
@@ -94,7 +103,7 @@ struct BlipData
 	DisplayMode display;
 	
 	BlipData()
-	: id(-1), target(0), display(Show)
+	: id(-1), type(Location), target(0), display(Show)
 	{ }
 };
 

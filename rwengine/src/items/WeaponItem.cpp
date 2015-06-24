@@ -121,7 +121,8 @@ void WeaponItem::fireProjectile()
 											_wepData
 										});
 
-	_character->engine->insertObject( projectile );
+	auto& pool = _character->engine->getTypeObjectPool( projectile );
+	pool.insert(projectile);
 }
 
 void WeaponItem::primary(bool active)

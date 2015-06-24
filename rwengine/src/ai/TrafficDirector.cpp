@@ -30,11 +30,10 @@ std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::Nod
 	for ( auto it = available.begin(); it != available.end(); )
 	{
 		bool blocked = false;
-		for ( auto obj : world->characters )
+		for ( auto obj : world->pedestrianPool.objects )
 		{
 			// Sanity check
-			if ( obj->type() != GameObject::Character ) continue;
-			if ( glm::distance2( (*it)->position, obj->getPosition() ) <= minDist )
+			if ( glm::distance2( (*it)->position, obj.second->getPosition() ) <= minDist )
 			{
 				blocked = true;
 				break;
@@ -69,7 +68,7 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density)
 
 std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxSpawn)
 {
-	int availablePeds = maximumPedestrians - world->characters.size();
+	int availablePeds = maximumPedestrians - world->pedestrianPool.objects.size();
 
 	std::vector<GameObject*> created;
 

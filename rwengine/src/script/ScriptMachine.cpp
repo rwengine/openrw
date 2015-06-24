@@ -31,6 +31,7 @@ bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 	return false;
 }
 
+#include <iostream>
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
 	if( t.wakeCounter > 0 ) {
@@ -53,6 +54,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			throw IllegalInstruction(opcode, t.programCounter, t.name);
 		}
 		ScriptFunctionMeta& code = *foundcode;
+		if(t.baseAddress == 60824) {
+			std::cout << opcode << ": " << code.signature << std::endl;
+		}
 		
 		// Keep the pc for the debugger
 		auto pc = t.programCounter;

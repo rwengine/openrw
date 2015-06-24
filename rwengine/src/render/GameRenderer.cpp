@@ -297,8 +297,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	renderer->pushDebugGroup("Objects");
 	renderer->pushDebugGroup("Dynamic");
 
-	for( auto& p  : world->objects ) {
-		auto object = p.second;
+	for( auto& object : world->allObjects ) {
 		if(! object->visible )
 		{
 			continue;
@@ -390,11 +389,13 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 				if( blip.second.target > 0 )
 				{
-					auto object = world->findObject(blip.second.target);
+					// TODO restore arrows
+					/*auto& pool = world->getTypeObjectPool(blip.second.target);
+					auto object = pool.find(blip.second.target);
 					if( object )
 					{
 						model = object->getTimeAdjustedTransform( _renderAlpha );
-					}
+					}*/
 				}
 				else
 				{
@@ -475,7 +476,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	}
 
 	float fadeTimer = world->getGameTime() - world->state->fadeStart;
-	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
+	/*if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
@@ -503,7 +504,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}
+	}*/
 	
 	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();

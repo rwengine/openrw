@@ -44,16 +44,17 @@ void game_create_player(const ScriptArguments& args)
 	*args[4].globalInteger = pc->getGameObjectID();
 }
 
-void game_set_character_position(const ScriptArguments& args)
+template<class Tobject>
+void game_set_object_position(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getObject<Tobject>(0);
 	glm::vec3 position(args[1].real, args[2].real, args[3].real + 1.f);
 	character->setPosition(position + spawnMagic);
 }
 
 bool game_player_in_area_2d(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getPlayer(0);
 	glm::vec2 min(args[1].real, args[2].real);
 	glm::vec2 max(args[3].real, args[4].real);
 	auto player = character->getPosition();
@@ -65,7 +66,7 @@ bool game_player_in_area_2d(const ScriptArguments& args)
 
 bool game_player_in_area_3d(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getPlayer(0);
 	glm::vec3 min(args[1].real, args[2].real, args[3].real);
 	glm::vec3 max(args[4].real, args[5].real, args[6].real);
 	auto player = character->getPosition();
@@ -95,13 +96,11 @@ void game_create_character(const ScriptArguments& args)
 	
 	// If there is already a chracter less than this distance away, it will be destroyed.
 	const float replaceThreshold = 2.f;
-	for( auto it = args.getWorld()->objects.begin();
-		it != args.getWorld()->objects.end();
-	++it)
+	for(auto& p : args.getWorld()->pedestrianPool.objects) 
 	{
-		if( it->second->type() == GameObject::Character && glm::distance(position, it->second->getPosition()) < replaceThreshold )
+		if( glm::distance(position, p.second->getPosition()) < replaceThreshold )
 		{
-			args.getWorld()->destroyObjectQueued(it->second);
+			args.getWorld()->destroyObjectQueued(p.second);
 		}
 	}
 
@@ -116,16 +115,6 @@ void game_create_character(const ScriptArguments& args)
 	*args[5].globalInteger = character->getGameObjectID();
 }
 
-void game_destroy_character(const ScriptArguments& args)
-{
-	auto character = args.getGameObject(0);
-	
-	if ( character )
-	{
-		args.getWorld()->destroyObjectQueued(character);
-	}
-}
-
 void game_create_vehicle(const ScriptArguments& args)
 {
 	auto id	= args[0].integer;
@@ -134,13 +123,11 @@ void game_create_vehicle(const ScriptArguments& args)
 	
 	// If there is already a vehicle less than this distance away, it will be destroyed.
 	const float replaceThreshold = 1.f;
-	for( auto it = args.getWorld()->objects.begin();
-		it != args.getWorld()->objects.end();
-	++it)
+	for(auto& p : args.getWorld()->vehiclePool.objects)
 	{
-		if( it->second->type() == GameObject::Vehicle && glm::distance(position, it->second->getPosition()) < replaceThreshold )
+		if( glm::distance(position, p.second->getPosition()) < replaceThreshold )
 		{
-			args.getWorld()->destroyObjectQueued(it->second);
+			args.getWorld()->destroyObjectQueued(p.second);
 		}
 	}
 	
@@ -154,16 +141,9 @@ void game_create_vehicle(const ScriptArguments& args)
 	*args[4].globalInteger = vehicle->getGameObjectID();
 }
 
-void game_destroy_vehicle(const ScriptArguments& args)
-{
-	auto vehicle = args.getGameObject(0);
-	
-	args.getWorld()->destroyObjectQueued(vehicle);
-}
-
 void game_get_vehicle_position(const ScriptArguments& args)
 {
-	auto vehicle = args.getGameObject(0);
+	auto vehicle = args.getObject<VehicleObject>(0);
 	
 	if( vehicle )
 	{
@@ -176,14 +156,14 @@ void game_get_vehicle_position(const ScriptArguments& args)
 
 void game_get_character_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	*args[1].globalInteger = character->getCurrentVehicle()->getGameObjectID();
 }
 
 bool game_character_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto vehicle = args.getGameObject(1);
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto vehicle = args.getObject<VehicleObject>(1);
 	
 	if( character == nullptr || vehicle == nullptr )
 	{
@@ -198,7 +178,7 @@ bool game_character_in_model(const ScriptArguments& args)
 	auto vdata = args.getWorld()->data->findObjectType<VehicleData>(args[1].integer);
 	if( vdata )
 	{
-		auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+		auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 		auto vehicle = character->getCurrentVehicle();
 		if ( vehicle ) {
 			
@@ -210,7 +190,7 @@ bool game_character_in_model(const ScriptArguments& args)
 
 bool game_character_in_any_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	
 	auto vehicle = character->getCurrentVehicle();
 	return vehicle != nullptr;
@@ -218,7 +198,7 @@ bool game_character_in_any_vehicle(const ScriptArguments& args)
 
 bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getPlayer(0));
 	glm::vec2 position(args[1].real, args[2].real);
 	glm::vec2 radius(args[3].real, args[4].real);
 	
@@ -248,7 +228,7 @@ bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 
 bool game_character_near_point_on_foot_3D(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	glm::vec3 center(args[1].real, args[2].real, args[3].real);
 	glm::vec3 size(args[4].real, args[5].real, args[6].real);
 	bool drawCylinder = !!args[7].integer;
@@ -270,7 +250,7 @@ bool game_character_near_point_on_foot_3D(const ScriptArguments& args)
 
 bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	glm::vec3 center(args[1].real, args[2].real, args[3].real);
 	glm::vec3 size(args[4].real, args[5].real, args[6].real);
 	bool unkown	= !!args[7].integer;
@@ -287,8 +267,8 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 
 bool game_character_near_character_2D(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto target = args.getGameObject(1);
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto target = args.getObject<CharacterObject>(1);
 
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
@@ -303,8 +283,8 @@ bool game_character_near_character_2D(const ScriptArguments& args)
 
 bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto target = args.getGameObject(1);
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto target = args.getObject<CharacterObject>(1);
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
 	bool unkown = !!args[4].integer;
@@ -321,7 +301,7 @@ bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
 
 bool game_character_near_point_on_foot_2D(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	glm::vec2 center(args[1].real, args[2].real);
 	glm::vec2 size(args[3].real, args[4].real);
 	bool unkown = !!args[5].integer;
@@ -338,7 +318,7 @@ bool game_character_near_point_on_foot_2D(const ScriptArguments& args)
 
 bool game_character_dead(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	
 	if ( character )
 	{
@@ -350,13 +330,13 @@ bool game_character_dead(const ScriptArguments& args)
 bool game_vehicle_dead(const ScriptArguments& args)
 {
 	// TODO This won't work until vehicle destruction is finished
-	auto vehicle = args.getGameObject(0);
+	auto vehicle = args.getObject<VehicleObject>(0);
 	return vehicle == nullptr;
 }
 
 bool game_character_in_zone(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	std::string zname(args[1].string);
 	
 	auto zfind = args.getWorld()->data->zones.find(zname);
@@ -375,7 +355,7 @@ bool game_character_in_zone(const ScriptArguments& args)
 
 void game_create_character_in_vehicle(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	auto type = args[1].integer;
 	auto id = args[2].integer;
 	
@@ -388,38 +368,22 @@ void game_create_character_in_vehicle(const ScriptArguments& args)
 	*args[3].globalInteger = character->getGameObjectID();
 }
 
-void game_set_character_heading(const ScriptArguments& args)
+void game_set_player_heading(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	character->setHeading(args[1].real);
-}
-
-void game_get_character_heading(const ScriptArguments& args)
-{
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	
-	if ( character )
-	{
-		// TODO write this
-		*args[1].globalReal = 0.f;
-	}
-}
-
-void game_set_vehicle_heading(const ScriptArguments& args)
-{
-	auto object = args.getGameObject(0);
+	auto object = args.getPlayer(0);
 	object->setHeading(args[1].real);
 }
 
+template <class Tobject>
 void game_set_object_heading(const ScriptArguments& args)
 {
-	auto object = args.getGameObject(0);
+	auto object = args.getObject<Tobject>(0);
 	object->setHeading(args[1].real);
 }
 
 bool game_vehicle_stopped(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	
 	if( vehicle )
 	{
@@ -431,7 +395,7 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 /// Remove object from cleanup at end of missions.
 void game_dont_remove_object(const ScriptArguments& args)
 {
-	auto object = args.getGameObject(0)->getGameObjectID();
+	auto object = args.getObject<VehicleObject>(0)->getGameObjectID();
 	
 	auto& mO = args.getState()->missionObjects;
 	mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
@@ -445,7 +409,7 @@ bool game_character_in_area_on_foot(const ScriptArguments& args)
 
 bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	bool drawCylinder = !!args[7].integer;
 	
 	if( character && character->getCurrentVehicle() != nullptr )
@@ -475,7 +439,7 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 
 bool game_character_stoped_in_volume(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	
 	glm::vec3 vec1(args[1].real, args[2].real, args[3].real);
 	glm::vec3 vec2(args[4].real, args[5].real, args[6].real);
@@ -510,7 +474,7 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 
 bool game_is_character_stopped(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	
 	if( character && character->getCurrentVehicle() != nullptr )
 	{
@@ -539,9 +503,8 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	bool objects = args[9].integer;
 	bool particles = args[10].integer;
 	
-	for(auto& pair : args.getWorld()->objects)
+	for(auto& object : args.getWorld()->allObjects)
 	{
-		GameObject* object = pair.second;
 		switch( object->type() )
 		{
 			case GameObject::Instance:
@@ -571,15 +534,15 @@ bool game_objects_in_volume(const ScriptArguments& args)
 
 bool game_player_in_taxi(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getPlayer(0));
 	
 	auto vehicle = character->getCurrentVehicle();
-	return vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI;
+	return (vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI);
 }
 
 void game_get_speed(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	if( vehicle )
 	{
 		*args[1].globalReal = vehicle->physVehicle->getCurrentSpeedKmHour();
@@ -588,8 +551,8 @@ void game_get_speed(const ScriptArguments& args)
 
 void game_enter_as_driver(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(1));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	// Cancel whatever we're currently trying to do.
 	character->controller->skipActivity();
 	character->controller->setNextActivity(new Activities::EnterVehicle(vehicle,0));
@@ -597,8 +560,8 @@ void game_enter_as_driver(const ScriptArguments& args)
 
 void game_enter_as_passenger(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(1));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	
 	// Cancel whatever we're currently trying to do.
 	character->controller->skipActivity();
@@ -608,8 +571,8 @@ void game_enter_as_passenger(const ScriptArguments& args)
 
 void game_character_exit_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(1));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	auto cvehcile = character->getCurrentVehicle();
 	
 	if( cvehcile && cvehcile == vehicle )
@@ -620,8 +583,8 @@ void game_character_exit_vehicle(const ScriptArguments& args)
 
 void game_character_follow_character(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto leader = static_cast<CharacterObject*>(args.getGameObject(1));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto leader = static_cast<CharacterObject*>(args.getObject<CharacterObject>(1));
 	
 	character->controller->setGoal(CharacterController::FollowLeader);
 	character->controller->setTargetCharacter(leader);
@@ -629,7 +592,7 @@ void game_character_follow_character(const ScriptArguments& args)
 
 void game_navigate_on_foot(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	glm::vec3 target(args[1].real, args[2].real, 0.f);
 	target = args.getWorld()->getGroundAtPosition(target);
 	
@@ -684,14 +647,14 @@ void game_create_pickup(const ScriptArguments& args)
 	
 	auto pickup = new GenericPickup(args.getWorld(), pos, id, type);
 	
-	args.getWorld()->insertObject( pickup );
+	args.getWorld()->pickupPool.insert( pickup );
 	
 	*args[5].globalInteger = pickup->getGameObjectID();
 }
 
 bool game_is_pickup_collected(const ScriptArguments& args)
 {
-	PickupObject* pickup = static_cast<PickupObject*>(args.getGameObject(0));
+	PickupObject* pickup = static_cast<PickupObject*>(args.getObject<PickupObject>(0));
 	
 	if ( pickup )
 	{
@@ -703,7 +666,7 @@ bool game_is_pickup_collected(const ScriptArguments& args)
 
 void game_destroy_pickup(const ScriptArguments& args)
 {
-	PickupObject* pickup = static_cast<PickupObject*>(args.getGameObject(0));
+	PickupObject* pickup = static_cast<PickupObject*>(args.getObject<PickupObject>(0));
 	
 	if ( pickup )
 	{
@@ -713,7 +676,7 @@ void game_destroy_pickup(const ScriptArguments& args)
 
 void game_character_run_to(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	glm::vec3 target(args[1].real, args[2].real, 0.f);
 	target = args.getWorld()->getGroundAtPosition(target);
 	
@@ -722,7 +685,7 @@ void game_character_run_to(const ScriptArguments& args)
 
 bool game_vehicle_flipped(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	
 	if( vehicle )
 	{
@@ -735,14 +698,14 @@ bool game_vehicle_flipped(const ScriptArguments& args)
 bool game_vehicle_in_air(const ScriptArguments& args)
 {
 	/// @todo IS vehicle in air.
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	return false;
 }
 
 bool game_character_near_car_2d(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(1));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	glm::vec2 radius(args[2].real, args[3].real);
 	bool drawMarker = !!args[4].integer;
 	
@@ -759,7 +722,7 @@ bool game_character_near_car_2d(const ScriptArguments& args)
 
 void game_set_vehicle_colours(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	
 	auto& colours = args.getWorld()->data->vehicleColours;
 	vehicle->colourPrimary = colours[args[1].integer];
@@ -793,9 +756,10 @@ void game_create_object_world(const ScriptArguments& args)
 	*args[4].globalInteger = inst->getGameObjectID();
 }
 
+template <class Tobject>
 void game_destroy_object(const ScriptArguments& args)
 {
-	auto object = args.getGameObject(0);
+	auto object = args.getObject<Tobject>(0);
 	
 	args.getWorld()->destroyObjectQueued(object);
 }
@@ -844,15 +808,13 @@ void game_set_close_object_visible(const ScriptArguments& args)
 	
 	std::transform(model.begin(), model.end(), model.begin(), ::tolower);
 	
-	for(auto& p : args.getWorld()->objects) {
+	for(auto& p : args.getWorld()->instancePool.objects) {
 		auto o = p.second;
-		if( o->type() == GameObject::Instance ) {
-			if( !o->model ) continue;
-			if( o->model->name != model ) continue;
-			float d = glm::distance(position, o->getPosition());
-			if( d < radius ) {
-				o->visible = !!args[5].integer;
-			}
+		if( !o->model ) continue;
+		if( o->model->name != model ) continue;
+		float d = glm::distance(position, o->getPosition());
+		if( d < radius ) {
+			o->visible = !!args[5].integer;
 		}
 	}
 }
@@ -902,25 +864,23 @@ void game_change_nearest_model(const ScriptArguments& args)
 	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
 	
 	/// @todo Objects need to adopt the new object ID, not just the model.
-	for(auto p : args.getWorld()->objects) {
+	for(auto p : args.getWorld()->instancePool.objects) {
 		auto o = p.second;
-		if( o->type() == GameObject::Instance ) {
-			if( !o->model ) continue;
-			if( o->model->name != oldmodel ) continue;
-			float d = glm::distance(position, o->getPosition());
-			if( d < radius ) {
-				args.getWorld()->data->loadDFF(newmodel + ".dff", false);
-				InstanceObject* inst = static_cast<InstanceObject*>(o);
-				inst->changeModel(nobj);
-				inst->model = args.getWorld()->data->models[newmodel];
-			}
+		if( !o->model ) continue;
+		if( o->model->name != oldmodel ) continue;
+		float d = glm::distance(position, o->getPosition());
+		if( d < radius ) {
+			args.getWorld()->data->loadDFF(newmodel + ".dff", false);
+			InstanceObject* inst = static_cast<InstanceObject*>(o);
+			inst->changeModel(nobj);
+			inst->model = args.getWorld()->data->models[newmodel];
 		}
 	}
 }
 
 bool game_rotate_object(const ScriptArguments& args)
 {
-	auto object = args.getGameObject(0);
+	auto object = args.getObject<InstanceObject>(0);
 	if( object )
 	{
 		float start = args[2].real;
@@ -935,7 +895,7 @@ bool game_rotate_object(const ScriptArguments& args)
 
 void game_get_vehicle_colours(const ScriptArguments& args)
 {
-	auto vehicle = static_cast<VehicleObject*>(args.getGameObject(0));
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	
 	if ( vehicle )
 	{
@@ -951,19 +911,19 @@ ObjectModule::ObjectModule()
 {
 	bindFunction(0x0053, game_create_player, 5, "Create Player" );
 	
-	bindFunction(0x0055, game_set_character_position, 4, "Set Player Position" );
+	bindFunction(0x0055, game_set_object_position<CharacterObject>, 4, "Set Player Position" );
 	bindFunction(0x0056, game_player_in_area_2d, 6, "Is Player In Area 2D" );
 	bindFunction(0x0057, game_player_in_area_3d, 8, "Is Player In Area 3D" );
 	
 	bindFunction(0x009A, game_create_character, 6, "Create Character" );
-	bindFunction(0x009B, game_destroy_character, 1, "Destroy Character" );
+	bindFunction(0x009B, game_destroy_object<CharacterObject>, 1, "Destroy Character" );
 	
 	bindUnimplemented( 0x009F, game_character_make_idle, 1, "Set Character to Idle" );
 	
-	bindFunction(0x00A1, game_set_character_position, 4, "Set Character Position" );
+	bindFunction(0x00A1, game_set_object_position<CharacterObject>, 4, "Set Character Position" );
 	
 	bindFunction(0x00A5, game_create_vehicle, 5, "Create Vehicle" );
-	bindFunction(0x00A6, game_destroy_vehicle, 1, "Destroy Vehicle" );
+	bindFunction(0x00A6, game_destroy_object<VehicleObject>, 1, "Destroy Vehicle" );
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
 	
@@ -992,7 +952,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x0100, game_character_near_point_in_vehicle, 8, "Is Character near point in car" );
 	
-	bindFunction(0x0108, game_destroy_object, 1, "Destroy Object" );
+	bindFunction(0x0108, game_destroy_object<InstanceObject>, 1, "Destroy Object" );
 	
 	bindFunction(0x0118, game_character_dead, 1, "Is Character Dead" );
 	bindFunction(0x0119, game_vehicle_dead, 1, "Is Vehicle Dead" );
@@ -1005,14 +965,13 @@ ObjectModule::ObjectModule()
 
 	bindUnimplemented(0x0135, game_set_vehicle_locked, 2, "Set Vehicle locked state");
 	
-	bindFunction(0x0171, game_set_character_heading, 2, "Set Player Heading" );
+	bindFunction(0x0171, game_set_player_heading, 2, "Set Player Heading" );
 	
-	bindFunction(0x0173, game_set_character_heading, 2, "Set Character Heading" );
-	bindFunction(0x0174, game_get_character_heading, 2, "Get Vehicle Heading" );
+	bindFunction(0x0173, game_set_object_heading<CharacterObject>, 2, "Set Character Heading" );
+	bindUnimplemented(0x0174, game_get_character_heading, 2, "Get Vehicle Heading" );
+	bindFunction(0x0175, game_set_object_heading<VehicleObject>, 2, "Set Vehicle heading" );
 	
-	bindFunction(0x0175, game_set_vehicle_heading, 2, "Set Vehicle heading" );
-	
-	bindFunction(0x0177, game_set_object_heading, 2, "Set Object heading" );
+	bindFunction(0x0177, game_set_object_heading<InstanceObject>, 2, "Set Object heading" );
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	

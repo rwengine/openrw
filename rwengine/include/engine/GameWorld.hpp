@@ -2,6 +2,7 @@
 #ifndef _GAMEWORLD_HPP_
 #define _GAMEWORLD_HPP_
 
+class PlayerController;
 class Logger;
 
 #include <GL/glew.h>
@@ -102,16 +103,6 @@ public:
 	CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
 	/**
-	 * Inserts the given game object into the world.
-	 */
-	void insertObject(GameObject* object);
-
-	/**
-	 * Finds the GameObject with the given ID, if not found then nullptr.
-	 */
-	GameObject* findObject(GameObjectID id) const;
-
-	/**
 	 * Destroys an existing Object
 	 */
 	void destroyObject(GameObject* object);
@@ -171,11 +162,45 @@ public:
 	SoundManager sound;
 
 	/**
-	 * The active GameObjects within the world, mapped to their allocated ID
+	 * Each object type is allocated from a pool. This object helps manage
+	 * the individual pools.
 	 */
-	std::map<GameObjectID, GameObject*> objects;
+	struct ObjectPool
+	{
+		std::map<GameObjectID, GameObject*> objects;
+		
+		/**
+		 * Allocates the game object a GameObjectID and inserts it into
+		 * the pool
+		 */
+		void insert(GameObject* object);
 
-	std::set<GameObject*> characters;
+		/**
+		 * Removes a game object from this pool
+		 */
+		void remove(GameObject* object);
+
+		/**
+		 * Finds a game object if it exists in this pool
+		 */
+		GameObject* find(GameObjectID id) const;
+	};
+
+	/**
+	 * Stores all game objects
+	 */
+	std::vector<GameObject*> allObjects;
+
+	ObjectPool pedestrianPool;
+	ObjectPool instancePool;
+	ObjectPool vehiclePool;
+	ObjectPool pickupPool;
+	ObjectPool cutscenePool;
+	ObjectPool projectilePool;
+
+	ObjectPool& getTypeObjectPool(GameObject* object);
+
+	std::vector<PlayerController*> players;
 
 	/**
 	 * Stores objects within a grid cell, and their maximum

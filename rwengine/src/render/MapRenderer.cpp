@@ -151,7 +151,19 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		glm::vec2 blippos( blip.second.coord );
 		if( blip.second.target > 0 )
 		{
-			auto object = world->findObject(blip.second.target);
+			GameObject* object = nullptr;
+			switch( blip.second.type ) {
+				case BlipData::Vehicle:
+					object = world->vehiclePool.find(blip.second.target);
+					break;
+				case BlipData::Character:
+					object = world->pedestrianPool.find(blip.second.target);
+					break;
+				case BlipData::Pickup:
+					object = world->pickupPool.find(blip.second.target);
+					break;
+				default: break;
+			}
 			if( object )
 			{
 				blippos = glm::vec2( object->getPosition() );
@@ -162,7 +174,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	}
 	
 	// Draw the player blip
-	auto player = world->findObject(world->state->playerObject);
+	auto player = world->pedestrianPool.find(world->state->playerObject);
 	if( player )
 	{
 		glm::vec2 plyblip(player->getPosition());

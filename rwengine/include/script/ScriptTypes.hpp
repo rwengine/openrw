@@ -7,6 +7,11 @@
 #include <vector>
 #include <functional>
 
+class PickupObject;
+class CutsceneObject;
+class VehicleObject;
+class CharacterObject;
+class InstanceObject;
 class GameObject;
 class ScriptMachine;
 class ScriptModule;
@@ -95,11 +100,17 @@ public:
 		return parameters->at(arg);
 	}
 
-	/**
-	 * Returns the GameObject passed at the given argument index
-	 */
-	GameObject* getGameObject(unsigned int arg) const;
+	template <class T>
+	GameObject* getObject(unsigned int arg) const;
+
+	GameObject* getPlayer(unsigned int player) const;
 };
+
+template<> GameObject* ScriptArguments::getObject<InstanceObject>(unsigned int arg) const;
+template<> GameObject* ScriptArguments::getObject<CharacterObject>(unsigned int arg) const;
+template<> GameObject* ScriptArguments::getObject<VehicleObject>(unsigned int arg) const;
+template<> GameObject* ScriptArguments::getObject<CutsceneObject>(unsigned int arg) const;
+template<> GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const;
 
 typedef std::function<void (const ScriptArguments&)> ScriptFunction;
 typedef std::function<bool (const ScriptArguments&)> ScriptFunctionBoolean;

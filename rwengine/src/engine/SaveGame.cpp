@@ -10,323 +10,7 @@
 #include <script/SCMFile.hpp>
 #include <ai/PlayerController.hpp>
 #include <items/WeaponItem.hpp>
-
-#include <fstream>
-#include <cereal/cereal.hpp>
-#include <cereal/archives/json.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/types/array.hpp>
-#include <cereal/types/map.hpp>
-
-namespace cereal
-{
-
-template<class Archive>
-void serialize(Archive& archive, 
-          glm::vec3& s)
-{ 
-	archive(s.x, s.y, s.z);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          glm::vec4& s)
-{ 
-	archive(s.x, s.y, s.z, s.w);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          glm::u16vec3& s)
-{ 
-	archive(s.x, s.y, s.z);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          glm::quat& s)
-{ 
-	archive(s.x, s.y, s.z, s.w);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          OnscreenText& t)
-{ 
-	archive(
-		t.id,
-		t.osTextString,
-		t.osTextStart,
-		t.osTextTime,
-		t.osTextStyle);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          VehicleGenerator& s)
-{ 
-	archive(
-		s.position,
-		s.heading,
-		s.vehicleID,
-		s.colourFG,
-		s.colourBG,
-		s.alwaysSpawn,
-		s.alarmThreshold,
-		s.lockedThreshold,
-		s.minDelay,
-		s.maxDelay,
-		s.lastSpawnTime,
-		s.remainingSpawns);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          BlipData& s)
-{ 
-	archive(
-		s.id,
-		s.target,
-		s.coord,
-		s.texture,
-		s.display);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          GarageInfo& s)
-{ 
-	archive(
-		s.min,
-		s.max,
-		s.type);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          GameState& s)
-{ 
-	archive(
-		s.gameTime,
-		s.currentProgress,
-		s.maxProgress,
-		s.numMissions,
-		s.numHiddenPackages,
-		s.numHiddenPackagesDiscovered,
-		s.numUniqueJumps,
-		s.numRampages,
-		s.maxWantedLevel,
-		s.playerObject,
-		s.currentWeather,
-		s.missionObjects,
-		s.overrideNextStart,
-		s.nextRestartLocation,
-		s.fadeOut,
-		s.fadeStart,
-		s.fadeTime,
-		s.fadeSound,
-		s.fadeColour,
-		s.currentSplash,
-		s.skipCutscene,
-		s.isIntroPlaying,
-		s.isCinematic,
-		s.hour,
-		s.minute,
-		s.lastMissionName,
-		s.specialCharacters,
-		s.specialModels,
-		s.text,
-		s.cameraNear,
-		s.cameraFixed,
-		s.cameraPosition,
-		s.cameraRotation,
-		s.cameraTarget,
-		s.vehicleGenerators,
-		s.radarBlips); 
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          SCMThread& s)
-{ 
-	archive(
-		s.name,
-		s.baseAddress,
-		s.programCounter,
-		s.conditionCount,
-		s.conditionResult,
-		s.conditionMask,
-		s.conditionAND,
-		s.wakeCounter,
-		s.locals,
-		s.isMission,
-		s.finished,
-		s.stackDepth,
-		s.calls);
-}
-
-template<class Archive>
-void serialize(Archive& archive, 
-          ScriptMachine& s)
-{ 
-	archive(
-		s.getThreads(),
-		s.getGlobalData());
-}
-}
-
-void SaveGame::writeState(GameState& state, const std::string& file)
-{
-	std::ofstream os(file.c_str());
-
-	{
-		cereal::JSONOutputArchive oa(os);
-
-		oa(state);
-	}
-}
-
-bool SaveGame::loadState(GameState& state, const std::string& file)
-{
-	std::ifstream is(file.c_str());
-
-	{
-		cereal::JSONInputArchive ia(is);
-
-		ia(state);
-	}
-
-	return true;
-}
-
-void SaveGame::writeScript(ScriptMachine& sm, const std::string& file)
-{
-	std::ofstream os(file.c_str());
-
-	{
-		cereal::JSONOutputArchive oa(os);
-
-		oa(sm);
-	}
-}
-
-bool SaveGame::loadScript(ScriptMachine& sm, const std::string& file)
-{
-	std::ifstream is(file.c_str());
-
-	{
-		cereal::JSONInputArchive ia(is);
-
-		ia(sm);
-	}
-
-	return true;
-}
-
-void SaveGame::writeObjects(GameWorld& world, const std::string& file)
-{
-	std::ofstream os(file.c_str());
-
-	{
-		cereal::JSONOutputArchive oa(os);
-
-		std::vector<GameObject*> writeable;
-		for( auto& p : world.objects )
-		{
-			switch( p.second->type() )
-			{
-				case GameObject::Vehicle:
-				case GameObject::Character:
-					break;
-				default:
-					continue;
-			}
-			if( p.second->getLifetime() == GameObject::TrafficLifetime )
-			{
-				continue;
-			}
-			writeable.push_back(p.second);
-		}
-
-		// Write object count.
-		oa(writeable.size());
-		for( GameObject* saved : writeable )
-		{
-			oa(saved->getGameObjectID());
-			oa(saved->type());
-			oa(saved->getLifetime());
-			oa(saved->getPosition());
-			oa(saved->getRotation());
-			switch( saved->type() )
-			{
-			case GameObject::Vehicle:
-			{
-				auto vehicle = static_cast<VehicleObject*>(saved);
-				oa(vehicle->vehicle->ID);
-			} break;
-			case GameObject::Character:
-			{
-				auto character = static_cast<CharacterObject*>(saved);
-				oa(character->ped->ID);
-			} break;
-			}
-		}
-	}
-}
-
-
-bool SaveGame::loadObjects(GameWorld& world, const std::string& file)
-{
-	std::ifstream is(file.c_str());
-
-	{
-		cereal::JSONInputArchive ia(is);
-
-		std::size_t num;
-		ia(num);
-		for(int i = 0; i < num; i++)
-		{
-			GameObjectID gameID;
-			GameObject::Type type;
-			GameObject::ObjectLifetime lifetime;
-			glm::vec3 translation;
-			glm::quat orientation;
-
-			ia(gameID);
-			ia(type);
-			ia(lifetime);
-			ia(translation);
-			ia(orientation);
-
-			switch( type )
-			{
-			case GameObject::Vehicle:
-			{
-				ObjectID id;
-				ia(id);
-				auto vehicle = world.createVehicle(id, translation, orientation, gameID);
-				vehicle->setLifetime(lifetime);
-			} break;
-			case GameObject::Character:
-			{
-				ObjectID id;
-				ia(id);
-				CharacterObject* character;
-				if( lifetime == GameObject::PlayerLifetime )
-				{
-					character = world.createPlayer(translation, orientation, gameID);
-				}
-				else
-				{
-					character = world.createPedestrian(id, translation, orientation, gameID);
-				}
-			} break;
-			}
-		}
-	}
-
-	return true;
-}
+#include <cstring>
 
 // Original save game file data structures
 typedef uint16_t BlockWord;
@@ -402,7 +86,7 @@ struct Block0RunningScript {
 	BlockDword unknown1;
 	BlockWord stackCounter;
 	BlockWord unknown2;
-	BlockDword scriptVariables[16];
+	SCMByte variables[16*4];
 	BlockDword timerA;
 	BlockDword timerB;
 	uint8_t ifFlag;
@@ -628,8 +312,8 @@ void SaveGame::writeGame(GameState& state, const std::string& file)
 			script.stack[i] = thread.calls[i];
 		}
 		script.stackCounter = thread.stackDepth;
-		for(int i = 0; i < 16; i++) {
-			script.scriptVariables[i] = *(((BlockDword*)thread.locals.data())+i);
+		for(int i = 0; i < sizeof(Block0RunningScript::variables); i++) {
+			script.variables[i] = thread.locals[i];
 		}
 		script.timerA = *(BlockDword*)(thread.locals.data() + 16 * sizeof ( SCMByte ) * 4);
 		script.timerB = *(BlockDword*)(thread.locals.data() + 16 * sizeof ( SCMByte ) * 4);
@@ -722,9 +406,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	state.gameTime = block0Data.timeMS / 1000.f;
 	state.currentWeather = block0Data.nextWeather;
 	state.cameraPosition = block0Data.cameraPosition;
-	
+	std::cout << scriptVars << " / " << state.script->getFile()->getGlobalsSize() << std::endl;
 	for(int v = 0; v < scriptVars; ++v) {
-		state.script->getGlobals()[v] = bytes[v];
+		state.script->getGlobalData()[v] = bytes[v];
 	}
 
 	state.scriptOnMissionFlag = (unsigned int*)state.script->getGlobals() + (size_t)scriptData.onMissionOffset;
@@ -742,10 +426,14 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		}
 		 /* TODO not hardcode +33 ms */
 		thread.wakeCounter = scripts[s].wakeTimer - block0Data.lastTick + 33;
+		for(int i = 0; i < sizeof(Block0RunningScript::variables); ++i) {
+			thread.locals[i] = scripts[s].variables[i];
+		}
 	}
 
 	if( playerCount > 0 ) {
 		auto& ply = players[0];
+		std::cout << ply.reference << std::endl;
 		auto player = state.world->createPlayer(players[0].info.position);
 		player->mHealth = players[0].info.health;
 		state.playerObject = player->getGameObjectID();
@@ -774,15 +462,13 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		// Find the nearest dynamic instance?
 		float distance = std::numeric_limits<float>::max();
 		GameObject* nearinst = nullptr;
-		for(std::pair<GameObjectID, GameObject*> object : state.world->objects) {
-			if( object.second->type() == GameObject::Instance ) {
-				auto instance = static_cast<InstanceObject*>(object.second);
-				if( instance->dynamics ) {
-					float idist = glm::distance(center, instance->getPosition());
-					if( idist < distance ) {
-						distance = idist;
-						nearinst = instance;
-					}
+		for(std::pair<GameObjectID, GameObject*> object : state.world->instancePool.objects) {
+			auto instance = static_cast<InstanceObject*>(object.second);
+			if( instance->dynamics ) {
+				float idist = glm::distance(center, instance->getPosition());
+				if( idist < distance ) {
+					distance = idist;
+					nearinst = instance;
 				}
 			}
 		}

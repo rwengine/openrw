@@ -37,7 +37,7 @@ void IngameState::startTest()
 	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
 	for( auto& w : getWorld()->data->weaponData ) {
 		if( w->name == "unarmed" ) continue;
-		getWorld()->insertObject(new ItemPickup(getWorld(), itemspawn,
+		getWorld()->pickupPool.insert(new ItemPickup(getWorld(), itemspawn,
 												  w));
 		itemspawn.x += 2.5f;
 	}
@@ -134,7 +134,7 @@ void IngameState::tick(float dt)
 			viewDistance = 4.f;
 		}
 		
-		auto target = getWorld()->findObject(getWorld()->state->cameraTarget);
+		auto target = getWorld()->pedestrianPool.find(getWorld()->state->cameraTarget);
 
 		if( target == nullptr )
 		{

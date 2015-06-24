@@ -175,13 +175,7 @@ void RWGame::newGame()
 
 void RWGame::saveGame(const std::string& savename)
 {
-	// Save games without a script don't make much sense at the moment
-	if( script )
-	{
-		SaveGame::writeScript(*script, savename+".script");
-		SaveGame::writeState(*state, savename+".state");
-		SaveGame::writeObjects(*world, savename+".world");
-	}
+
 }
 
 void RWGame::loadGame(const std::string& savename)
@@ -246,7 +240,7 @@ void RWGame::startScript(const std::string& name)
 
 PlayerController *RWGame::getPlayer()
 {
-	auto object = world->findObject(state->playerObject);
+	auto object = world->pedestrianPool.find(state->playerObject);
 	if( object )
 	{
 		auto controller = static_cast<CharacterObject*>(object)->controller;
@@ -364,8 +358,7 @@ void RWGame::tick(float dt)
 			}
 		}
 
-		for( auto& p : world->objects ) {
-			GameObject* object = p.second;
+		for( auto& object : world->allObjects ) {
 			object->_updateLastTransform();
 			object->tick(dt);
 		}
@@ -553,9 +546,8 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	// Count the number of interesting objects.
 	int peds = 0, cars = 0;
-	for( auto& p : world->objects )
+	for( auto& object : world->allObjects )
 	{
-		GameObject* object = p.second;
 		switch ( object->type() )
 		{
 			case GameObject::Character: peds++; break;
@@ -568,7 +560,7 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	
 	if( state->playerObject ) {
 		ss << "Player (" << state->playerObject << ")\n";
-		auto object = world->findObject(state->playerObject);
+		auto object = world->pedestrianPool.find(state->playerObject);
 		auto player = static_cast<CharacterObject*>(object)->controller;
 		ss << "Player Activity: ";
 		if( player->getCurrentActivity() ) {

@@ -142,7 +142,7 @@ void game_set_zone_car_info(const ScriptArguments& args)
 
 void game_camera_follow_character(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	if( character != nullptr )
 	{
 		args.getWorld()->state->cameraTarget = character->getGameObjectID();
@@ -255,30 +255,14 @@ void game_link_mission_flag(const ScriptArguments& args)
 	args.getWorld()->state->scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
 }
 
-void game_add_vehicle_blip(const ScriptArguments& args)
+template <class Tobject>
+void game_add_object_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = args.getGameObject(0)->getGameObjectID();
+	data.target = args.getObject<Tobject>(0)->getGameObjectID();
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
-
-void game_add_character_blip(const ScriptArguments& args)
-{
-	BlipData data;
-	data.target = args.getGameObject(0)->getGameObjectID();
-	data.texture = "";
-	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
-}
-
-void game_add_pickup_blip(const ScriptArguments& args)
-{
-	BlipData data;
-	data.target = args.getGameObject(0)->getGameObjectID();
-	data.texture = "";
-	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
-}
-
 
 void game_add_location_blip(const ScriptArguments& args)
 {
@@ -311,8 +295,8 @@ void game_change_blip_mode(const ScriptArguments& args)
 
 void game_enable_input(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getGameObject(0));
-	static_cast<PlayerController*>(character->controller)->setInputEnabled(!!args[1].integer);
+	auto player = static_cast<CharacterObject*>(args.getPlayer(0));
+	static_cast<PlayerController*>(player->controller)->setInputEnabled(!!args[1].integer);
 }
 
 void game_set_weather(const ScriptArguments& args)
@@ -364,10 +348,9 @@ void game_max_wanted_level(const ScriptArguments& args)
 	args.getWorld()->state->maxWantedLevel = args[0].integer;
 }
 
-// This does nothing for us.
 void game_get_player(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getPlayer(0);
 	*args[1].globalInteger = character->getGameObjectID();
 }
 
@@ -444,7 +427,7 @@ void game_restart_critical_mission(const ScriptArguments& args)
 	// Reset player state.
 	glm::vec3 position(args[0].real, args[1].real, args[2].real + 1.f);
 	
-	auto object = args.getWorld()->findObject(args.getState()->playerObject);
+	auto object = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
 	auto player = static_cast<CharacterObject*>(object);
 	
 	glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
@@ -465,8 +448,10 @@ void game_restart_critical_mission(const ScriptArguments& args)
 /// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
 bool game_is_player_playing(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getPlayer(0);
+	std::cout << args.getPlayer(0) << std::endl;
 	return character != nullptr;
+	//return args.getWorld()->findObject(args.getState()->playerObject) != nullptr;
 }
 
 void game_controller_mode(const ScriptArguments& args)
@@ -564,7 +549,7 @@ void game_create_cutscene_object(const ScriptArguments& args)
 }
 void game_set_cutscene_anim(const ScriptArguments& args)
 {
-	GameObject* object = args.getGameObject(0);
+	GameObject* object = args.getObject<CutsceneObject>(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -619,7 +604,7 @@ void game_load_special_model(const ScriptArguments& args)
 void game_create_cutscene_head(const ScriptArguments& args)
 {
 	auto id = args[1].integer;
-	auto actor = args.getGameObject(0);
+	auto actor = args.getObject<CutsceneObject>(0);
 	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
 	auto headframe = actor->model->resource->findFrame("shead");
@@ -630,7 +615,7 @@ void game_create_cutscene_head(const ScriptArguments& args)
 }
 void game_set_head_animation(const ScriptArguments& args)
 {
-	GameObject* object = args.getGameObject(0);
+	GameObject* object = args.getObject<CutsceneObject>(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
@@ -707,7 +692,7 @@ void game_set_background_colour(const ScriptArguments& args)
 
 void game_set_character_model(const ScriptArguments& args)
 {
-	auto character = args.getGameObject(0);
+	auto character = args.getObject<CharacterObject>(0);
 	if( character )
 	{
 		static_cast<CharacterObject*>(character)->changeCharacterModel(args[1].string);
@@ -791,6 +776,12 @@ void game_clear_print(const ScriptArguments& args)
 			i++;
 		}
 	}
+}
+
+bool game_did_game_save(const ScriptArguments& args)
+{
+	// TODO not sure what could be false about this.
+	return true;
 }
 
 void game_get_found_hidden_packages(const ScriptArguments& args)
@@ -930,8 +921,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0181, game_link_character_mission_flag, 2, "Link Character Mission Flag" );
 	bindUnimplemented( 0x0182, game_unknown, 2, "Unknown Character Opcode" );
 	
-	bindFunction(0x0186, game_add_vehicle_blip, 2, "Add Blip for Vehicle");
-	bindFunction(0x0187, game_add_character_blip, 2, "Add Blip for Character");
+	bindFunction(0x0186, game_add_object_blip<VehicleObject>, 2, "Add Blip for Vehicle");
+	bindFunction(0x0187, game_add_object_blip<CharacterObject>, 2, "Add Blip for Character");
 
 	bindFunction(0x018A, game_add_location_blip, 4, "Add Blip for Coord");
 	bindFunction(0x018B, game_change_blip_mode, 2, "Change Blip Display Mode");
@@ -1103,10 +1094,10 @@ GameModule::GameModule()
 	
 	bindFunction(0x03D5, game_clear_print, 1, "Clear This Print" );
 	bindUnimplemented( 0x03D6, game_clear_this_print, 1, "Clear This Big Print" );
-
+	bindFunction(0x03D9, game_did_game_save, 0, "Did game save" );
 	bindUnimplemented( 0x03DA, game_set_garage_follow_player, 1, "Set Garage Camera Follows Player" );
 	
-	bindFunction(0x03DC, game_add_pickup_blip, 2, "Add blip for pickup");
+	bindFunction(0x03DC, game_add_object_blip<PickupObject>, 2, "Add blip for pickup");
 	
 	bindUnimplemented( 0x03DE, game_set_pedestrian_density, 1, "Set Pedestrian density" );
 

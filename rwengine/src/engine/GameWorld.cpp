@@ -95,8 +95,8 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 
 GameWorld::~GameWorld()
 {
-	for(auto& p : objects) {
-		delete p.second;
+	for(auto& p : allObjects) {
+		delete p;
 	}
 
 	delete dynamicsWorld;
@@ -110,7 +110,6 @@ GameWorld::~GameWorld()
 
 bool GameWorld::placeItems(const std::string& name)
 {
-	auto i = data->iplLocations.find(name);
 	std::string path = name;
 	
 	LoaderIPL ipll;
@@ -126,15 +125,13 @@ bool GameWorld::placeItems(const std::string& name)
 		}
 		
 		// Attempt to Associate LODs.
-		for(auto& p: objects) {
+		for(auto& p: instancePool.objects) {
 			auto object = p.second;
-			if( object->type() == GameObject::Instance ) {
-				InstanceObject* instance = static_cast<InstanceObject*>(object);
-				if( !instance->object->LOD ) {
-					auto lodInstit = modelInstances.find("LOD" + instance->object->modelName.substr(3));
-					if( lodInstit != modelInstances.end() ) {
-						instance->LODinstance = lodInstit->second;
-					}
+			InstanceObject* instance = static_cast<InstanceObject*>(object);
+			if( !instance->object->LOD ) {
+				auto lodInstit = modelInstances.find("LOD" + instance->object->modelName.substr(3));
+				if( lodInstit != modelInstances.end() ) {
+					instance->LODinstance = lodInstit->second;
 				}
 			}
 		}
@@ -193,7 +190,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 			oi, nullptr, dydata
 		);
 
-		insertObject(instance);
+		instancePool.insert(instance);
 
 		if( shouldBeOnGrid(instance) )
 		{
@@ -220,7 +217,7 @@ void GameWorld::createTraffic(const glm::vec3& near)
 
 void GameWorld::cleanupTraffic(const glm::vec3& focus)
 {
-	for ( auto& p : objects )
+	for ( auto& p : pedestrianPool.objects )
 	{
 		if ( p.second->getLifetime() != GameObject::TrafficLifetime )
 		{
@@ -277,7 +274,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	}
 
 	if( id == 0 ) {
-		auto playerobj = findObject(state->playerObject);
+		auto playerobj = pedestrianPool.find(state->playerObject);
 		if( playerobj )
 		{
 			modelname = playerobj->model->name;
@@ -306,7 +303,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 		pos,
 		m);
 
-	insertObject( instance );
+	cutscenePool.insert( instance );
 
 
 	return instance;
@@ -371,7 +368,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 		auto vehicle = new VehicleObject{ this, pos, rot, m, vti, info->second, prim, sec };
 		vehicle->setGameObjectID(gid);
 
-		insertObject( vehicle );
+		vehiclePool.insert( vehicle );
 
 		return vehicle;
 	}
@@ -411,9 +408,8 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3&
 		if(m && m->resource) {
 			auto ped = new CharacterObject( this, pos, rot, m, pt );
 			ped->setGameObjectID(gid);
-			insertObject(ped);
-			characters.insert(ped);
 			new DefaultAIController(ped);
+			pedestrianPool.insert( ped );
 			return ped;
 		}
 	}
@@ -439,16 +435,15 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos, const glm::quat& 
 			auto ped = new CharacterObject( this, pos, rot, m, nullptr );
 			ped->setGameObjectID(gid);
 			ped->setLifetime(GameObject::PlayerLifetime);
-			insertObject(ped);
-			characters.insert(ped);
-			new PlayerController(ped);
+			players.push_back(new PlayerController(ped));
+			pedestrianPool.insert(ped);
 			return ped;
 		}
 	}
 	return nullptr;
 }
 
-void GameWorld::insertObject(GameObject* object)
+void GameWorld::ObjectPool::insert(GameObject* object)
 {
 	if( object->getGameObjectID() == 0 )
 	{
@@ -464,10 +459,43 @@ void GameWorld::insertObject(GameObject* object)
 	objects[object->getGameObjectID()] = object;
 }
 
-GameObject* GameWorld::findObject(GameObjectID id) const
+GameObject* GameWorld::ObjectPool::find(GameObjectID id) const
 {
 	auto it = objects.find( id );
 	return (it == objects.end())? nullptr : it->second;
+}
+
+void GameWorld::ObjectPool::remove(GameObject* object)
+{
+	if( object )
+	{
+		auto it = objects.find(object->getGameObjectID());
+		if( it != objects.end() ) {
+			it = objects.erase(it);
+		}
+	}
+}
+
+
+GameWorld::ObjectPool& GameWorld::getTypeObjectPool(GameObject* object)
+{
+	switch( object->type() ) {
+		case GameObject::Character:
+			return pedestrianPool;
+		case GameObject::Vehicle:
+			return vehiclePool;
+		case GameObject::Cutscene:
+			return cutscenePool;
+		case GameObject::Instance:
+			return instancePool;
+		case GameObject::Pickup:
+			return pickupPool;
+		case GameObject::Projectile:
+			return projectilePool;
+		default:
+			// error!
+			return pedestrianPool;
+	}
 }
 
 void GameWorld::destroyObject(GameObject* object)
@@ -480,16 +508,9 @@ void GameWorld::destroyObject(GameObject* object)
 	auto index = (coord.x * WORLD_GRID_WIDTH) + coord.y;
 	worldGrid[index].instances.erase(object);
 	
-	auto iterator = objects.find(object->getGameObjectID());
-	if( iterator != objects.end() ) {
-		delete object;
-		objects.erase(iterator);
-	}
-	
-	auto cit = characters.find(object);
-	if( cit != characters.end() ) {
-		characters.erase(cit);
-	}
+	auto& pool = getTypeObjectPool(object);
+	pool.remove(object);
+	delete object;
 }
 
 void GameWorld::destroyObjectQueued(GameObject *object)
@@ -715,11 +736,9 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld *physWorld, btScalar timeSte
 {
 	GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
-	for( auto& p : world->objects ) {
+	for( auto& p : world->vehiclePool.objects ) {
 		GameObject* object = p.second;
-		if( object->type() == GameObject::Vehicle ) {
-			static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
-		}
+		static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
 	}
 }
 
@@ -771,11 +790,8 @@ void GameWorld::startCutscene()
 
 void GameWorld::clearCutscene()
 {
-	for(auto& p : objects) {
-		auto o = p.second;
-		if( o->type() == GameObject::Cutscene ) {
-			destroyObjectQueued(o);
-		}
+	for(auto& p : cutscenePool.objects) {
+		destroyObjectQueued(p.second);
 	}
 
 	if( cutsceneAudio )
