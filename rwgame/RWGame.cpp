@@ -4,6 +4,7 @@
 #include "DrawUI.hpp"
 #include "ingamestate.hpp"
 #include "menustate.hpp"
+#include "debug/HttpServer.hpp"
 
 #include <objects/GameObject.hpp>
 #include <engine/GameState.hpp>
@@ -198,9 +199,13 @@ void RWGame::startScript(const std::string& name)
 {
 	SCMFile* f = world->data->loadSCM(name);
 	if( f ) {
-		if( script )
-		{
-			delete script;
+		if( script ) delete script;
+
+		if ( ! httpserver) {
+			httpserver_thread = new std::thread([&](){
+                httpserver = new HttpServer(this, world);
+				httpserver->run();
+			});
 		}
 		
 		SCMOpcodes* opcodes = new SCMOpcodes;

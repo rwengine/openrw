@@ -11,6 +11,8 @@
 #include <SFML/Graphics.hpp>
 
 class PlayerController;
+class HttpServer;
+
 class RWGame
 {
 	Logger log;
@@ -19,9 +21,11 @@ class RWGame
 	GameWorld* world;
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
-	ScriptMachine* script;
+    ScriptMachine* script;
 	// Background worker
 	WorkContext work;
+    HttpServer* httpserver = nullptr;
+    std::thread* httpserver_thread = nullptr;
 	sf::RenderWindow window;
 	sf::Clock clock;
 	bool inFocus;
