@@ -295,7 +295,7 @@ void game_change_blip_mode(const ScriptArguments& args)
 
 void game_enable_input(const ScriptArguments& args)
 {
-	auto player = static_cast<CharacterObject*>(args.getPlayer(0));
+    auto player = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
 	static_cast<PlayerController*>(player->controller)->setInputEnabled(!!args[1].integer);
 }
 
@@ -350,7 +350,7 @@ void game_max_wanted_level(const ScriptArguments& args)
 
 void game_get_player(const ScriptArguments& args)
 {
-	auto character = args.getPlayer(0);
+    auto character = args.getPlayerCharacter(0);
 	*args[1].globalInteger = character->getGameObjectID();
 }
 
@@ -448,8 +448,7 @@ void game_restart_critical_mission(const ScriptArguments& args)
 /// @todo http://www.gtamodding.com/index.php?title=0256 (e.g. check if dead or busted)
 bool game_is_player_playing(const ScriptArguments& args)
 {
-	auto character = args.getPlayer(0);
-	std::cout << args.getPlayer(0) << std::endl;
+    auto character = args.getPlayerCharacter(0);
 	return character != nullptr;
 	//return args.getWorld()->findObject(args.getState()->playerObject) != nullptr;
 }

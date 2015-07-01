@@ -329,6 +329,7 @@ BlockDword readDword(std::FILE* file)
 {
 	BlockDword sz;
 	fread(&sz, sizeof(BlockDword), 1, file);
+    return sz;
 }
 
 bool SaveGame::loadGame(GameState& state, const std::string& file)
@@ -353,11 +354,11 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 
 	fread(&scriptBlockSize, sizeof(BlockDword), 1, loadFile);
 
-	BlockDword scriptVars;
-	fread(&scriptVars, sizeof(BlockDword), 1, loadFile);
+    BlockDword scriptVarCount;
+    fread(&scriptVarCount, sizeof(BlockDword), 1, loadFile);
+    assert(scriptVarCount == state.script->getFile()->getGlobalsSize());
 
-	SCMByte bytes[scriptVars];
-	fread(bytes, sizeof(SCMByte), scriptVars, loadFile);
+    fread(state.script->getGlobals(), sizeof(SCMByte), scriptVarCount, loadFile);
 
 	BlockDword scriptDataBlockSize;
 	fread(&scriptDataBlockSize, sizeof(BlockDword), 1, loadFile);
@@ -379,7 +380,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	
 	BlockDword playerCount = readDword(loadFile);
 	Block1PlayerPed players[playerCount];
-	for(int p = 0; p < playerCount; ++p) {
+    for(unsigned int p = 0; p < playerCount; ++p) {
 		read(loadFile, players[p].unknown0);
 		read(loadFile, players[p].unknown1);
 		read(loadFile, players[p].reference);
@@ -405,11 +406,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	state.minute = block0Data.gameMinute;
 	state.gameTime = block0Data.timeMS / 1000.f;
 	state.currentWeather = block0Data.nextWeather;
-	state.cameraPosition = block0Data.cameraPosition;
-	std::cout << scriptVars << " / " << state.script->getFile()->getGlobalsSize() << std::endl;
-	for(int v = 0; v < scriptVars; ++v) {
-		state.script->getGlobalData()[v] = bytes[v];
-	}
+    state.cameraPosition = block0Data.cameraPosition;
 
 	state.scriptOnMissionFlag = (unsigned int*)state.script->getGlobals() + (size_t)scriptData.onMissionOffset;
 

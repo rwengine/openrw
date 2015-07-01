@@ -15,11 +15,16 @@ GameWorld* ScriptArguments::getWorld() const
 	return getVM()->getState()->world;
 }
 
-GameObject* ScriptArguments::getPlayer(unsigned int player) const
+GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const
 {
 	auto playerId = parameters->at(player).integerValue();
 	PlayerController* controller = getWorld()->players.at( playerId );
 	return controller->getCharacter();
+}
+
+template<> GameObject* ScriptArguments::getObject< PlayerController >(unsigned int arg) const
+{
+    return getPlayerCharacter(arg);
 }
 
 template<> GameObject* ScriptArguments::getObject< CharacterObject >(unsigned int arg) const

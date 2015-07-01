@@ -12,6 +12,7 @@ class CutsceneObject;
 class VehicleObject;
 class CharacterObject;
 class InstanceObject;
+class PlayerController;
 class GameObject;
 class ScriptMachine;
 class ScriptModule;
@@ -103,7 +104,7 @@ public:
 	template <class T>
 	GameObject* getObject(unsigned int arg) const;
 
-	GameObject* getPlayer(unsigned int player) const;
+    GameObject* getPlayerCharacter(unsigned int player) const;
 };
 
 template<> GameObject* ScriptArguments::getObject<InstanceObject>(unsigned int arg) const;
@@ -111,6 +112,8 @@ template<> GameObject* ScriptArguments::getObject<CharacterObject>(unsigned int 
 template<> GameObject* ScriptArguments::getObject<VehicleObject>(unsigned int arg) const;
 template<> GameObject* ScriptArguments::getObject<CutsceneObject>(unsigned int arg) const;
 template<> GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const;
+/** Special player-index returning function */
+template<> GameObject* ScriptArguments::getObject<PlayerController>(unsigned int arg) const;
 
 typedef std::function<void (const ScriptArguments&)> ScriptFunction;
 typedef std::function<bool (const ScriptArguments&)> ScriptFunctionBoolean;

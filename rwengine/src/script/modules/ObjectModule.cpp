@@ -39,9 +39,8 @@ void game_create_player(const ScriptArguments& args)
 	}
 	
 	auto pc = args.getWorld()->createPlayer(position + spawnMagic);
-	args.getState()->playerObject = pc->getGameObjectID();
-	
-	*args[4].globalInteger = pc->getGameObjectID();
+    args.getState()->playerObject = pc->getGameObjectID();
+    *args[4].globalInteger = args.getWorld()->players.size()-1;
 }
 
 template<class Tobject>
@@ -54,7 +53,7 @@ void game_set_object_position(const ScriptArguments& args)
 
 bool game_player_in_area_2d(const ScriptArguments& args)
 {
-	auto character = args.getPlayer(0);
+    auto character = args.getPlayerCharacter(0);
 	glm::vec2 min(args[1].real, args[2].real);
 	glm::vec2 max(args[3].real, args[4].real);
 	auto player = character->getPosition();
@@ -66,7 +65,7 @@ bool game_player_in_area_2d(const ScriptArguments& args)
 
 bool game_player_in_area_3d(const ScriptArguments& args)
 {
-	auto character = args.getPlayer(0);
+    auto character = args.getPlayerCharacter(0);
 	glm::vec3 min(args[1].real, args[2].real, args[3].real);
 	glm::vec3 max(args[4].real, args[5].real, args[6].real);
 	auto player = character->getPosition();
@@ -188,6 +187,22 @@ bool game_character_in_model(const ScriptArguments& args)
 	return false;
 }
 
+bool game_player_in_model(const ScriptArguments& args)
+{
+    auto vdata = args.getWorld()->data->findObjectType<VehicleData>(args[1].integer);
+    if( vdata )
+    {
+        auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+        auto vehicle = character->getCurrentVehicle();
+        if ( vehicle ) {
+
+            return vehicle->model && vdata->modelName == vehicle->model->name;
+        }
+    }
+    return false;
+}
+
+
 bool game_character_in_any_vehicle(const ScriptArguments& args)
 {
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
@@ -196,9 +211,17 @@ bool game_character_in_any_vehicle(const ScriptArguments& args)
 	return vehicle != nullptr;
 }
 
+bool game_player_in_any_vehicle(const ScriptArguments& args)
+{
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+
+    auto vehicle = character->getCurrentVehicle();
+    return vehicle != nullptr;
+}
+
 bool game_player_in_area_2d_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getPlayer(0));
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
 	glm::vec2 position(args[1].real, args[2].real);
 	glm::vec2 radius(args[3].real, args[4].real);
 	
@@ -246,6 +269,28 @@ bool game_character_near_point_on_foot_3D(const ScriptArguments& args)
 	}
 	
 	return false;
+}
+
+bool game_player_near_point_on_foot_3D(const ScriptArguments& args)
+{
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+    glm::vec3 center(args[1].real, args[2].real, args[3].real);
+    glm::vec3 size(args[4].real, args[5].real, args[6].real);
+    bool drawCylinder = !!args[7].integer;
+
+    auto vehicle = character->getCurrentVehicle();
+    if( ! vehicle ) {
+        auto distance = center - character->getPosition();
+        distance /= size;
+        if( glm::length( distance ) < 1.f ) return true;
+    }
+
+    if( drawCylinder )
+    {
+        args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, center, size);
+    }
+
+    return false;
 }
 
 bool game_character_near_point_in_vehicle(const ScriptArguments& args)
@@ -336,7 +381,7 @@ bool game_vehicle_dead(const ScriptArguments& args)
 
 bool game_character_in_zone(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+    auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	std::string zname(args[1].string);
 	
 	auto zfind = args.getWorld()->data->zones.find(zname);
@@ -351,6 +396,25 @@ bool game_character_in_zone(const ScriptArguments& args)
 	}
 	
 	return false;
+}
+
+bool game_player_in_zone(const ScriptArguments& args)
+{
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+    std::string zname(args[1].string);
+
+    auto zfind = args.getWorld()->data->zones.find(zname);
+    if( zfind != args.getWorld()->data->zones.end() ) {
+        auto player = character->getPosition();
+        auto& min = zfind->second.min;
+        auto& max = zfind->second.max;
+        if( player.x > min.x && player.y > min.y && player.z > min.z &&
+            player.x < max.x && player.y < max.y && player.z < max.z ) {
+            return true;
+            }
+    }
+
+    return false;
 }
 
 void game_create_character_in_vehicle(const ScriptArguments& args)
@@ -370,7 +434,7 @@ void game_create_character_in_vehicle(const ScriptArguments& args)
 
 void game_set_player_heading(const ScriptArguments& args)
 {
-	auto object = args.getPlayer(0);
+    auto object = args.getPlayerCharacter(0);
 	object->setHeading(args[1].real);
 }
 
@@ -395,10 +459,14 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 /// Remove object from cleanup at end of missions.
 void game_dont_remove_object(const ScriptArguments& args)
 {
-	auto object = args.getObject<VehicleObject>(0)->getGameObjectID();
+    auto object = args.getObject<VehicleObject>(0);
+    if(object)
+    {
+        auto id = object->getGameObjectID();
 	
-	auto& mO = args.getState()->missionObjects;
-	mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
+        auto& mO = args.getState()->missionObjects;
+        mO.erase(std::remove(mO.begin(), mO.end(), id), mO.end());
+    }
 }
 
 bool game_character_in_area_on_foot(const ScriptArguments& args)
@@ -534,7 +602,7 @@ bool game_objects_in_volume(const ScriptArguments& args)
 
 bool game_player_in_taxi(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getPlayer(0));
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
 	
 	auto vehicle = character->getCurrentVehicle();
 	return (vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI);
@@ -911,7 +979,7 @@ ObjectModule::ObjectModule()
 {
 	bindFunction(0x0053, game_create_player, 5, "Create Player" );
 	
-	bindFunction(0x0055, game_set_object_position<CharacterObject>, 4, "Set Player Position" );
+    bindFunction(0x0055, game_set_object_position<PlayerController>, 4, "Set Player Position" );
 	bindFunction(0x0056, game_player_in_area_2d, 6, "Is Player In Area 2D" );
 	bindFunction(0x0057, game_player_in_area_3d, 8, "Is Player In Area 3D" );
 	
@@ -932,10 +1000,9 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00DB, game_character_in_vehicle, 2, "Is Character in Vehicle" );
 	bindFunction(0x00DC, game_character_in_vehicle, 2, "Is Player in Vehicle" );
 	
-	bindFunction(0x00DE, game_character_in_model, 2, "Is Player In Model" );
-	bindFunction(0x00DF, game_character_in_any_vehicle, 1, "Is Character Driving" );
-	
-	bindFunction(0x00E0, game_character_in_any_vehicle, 1, "Is Player In Any Vehicle" );
+    bindFunction(0x00DE, game_player_in_model, 2, "Is Player In Model" );
+    bindFunction(0x00DF, game_character_in_any_vehicle, 1, "Is Character In Any Vehicle" );
+    bindFunction(0x00E0, game_player_in_any_vehicle, 1, "Is Player In Any Vehicle" );
 	
 	bindFunction(0x00E5, game_player_in_area_2d_in_vehicle, 6, "Is Player in 2D Area in Vehicle" );
 	
@@ -948,8 +1015,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00ED, game_character_near_point_on_foot_2D, 6, "Is Character near point on foot" );
 	
 	bindUnimplemented( 0x00F5, game_locate_character_in_sphere, 8, "Locate Player In Sphere" );
-	bindFunction(0x00F6, game_character_near_point_on_foot_3D, 8, "Is Character near point on foot" );
-	
+    bindFunction(0x00F6, game_player_near_point_on_foot_3D, 8, "Is Player near point on foot" );
+
 	bindFunction(0x0100, game_character_near_point_in_vehicle, 8, "Is Character near point in car" );
 	
 	bindFunction(0x0108, game_destroy_object<InstanceObject>, 1, "Destroy Object" );
@@ -959,7 +1026,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
-	bindFunction(0x0121, game_character_in_zone, 2, "Is Player In Zone" );
+    bindFunction(0x0121, game_player_in_zone, 2, "Is Player In Zone" );
 	
 	bindFunction(0x0129, game_create_character_in_vehicle, 4, "Create Character In Car" );
 

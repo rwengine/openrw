@@ -158,6 +158,7 @@ struct GameState
 	unsigned int numUniqueJumps;
 	unsigned int numRampages;
 	unsigned int maxWantedLevel;
+
 	GameObjectID playerObject;
 
 	unsigned int currentWeather;
