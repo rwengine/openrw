@@ -37,6 +37,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	bool newgame = false;
 	bool test = false;
 	bool debugscript = false;
+    std::string startSave;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -64,6 +65,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		{
 			debugscript = true;
 		}
+        if( strcmp( "--load", argv[i] ) == 0 && i+1 < argc )
+        {
+            startSave = argv[i+1];
+        }
 	}
 	
 	
@@ -129,8 +134,12 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	auto loading = new LoadingState(this);
 	if( newgame )
 	{
-		loading->setNextState(new IngameState(this,true,test));
+        loading->setNextState(new IngameState(this,true, "test"));
 	}
+    else if( ! startSave.empty() )
+    {
+        loading->setNextState(new IngameState(this,true, startSave));
+    }
 	else
 	{
 		loading->setNextState(new MenuState(this));
@@ -185,6 +194,8 @@ void RWGame::loadGame(const std::string& savename)
 	delete state->script;
 	state = nullptr;
 
+    log.info("Game", "Loading game " + savename);
+
 	newGame();
 
 	startScript("data/main.scm");
@@ -219,7 +230,7 @@ void RWGame::startScript(const std::string& name)
 		script->setBreakpointHandler(
 			[&](const SCMBreakpoint& bp)
 			{
-				log.info("Script", "Breakpoint hit!");
+                log.info("Script", "Breakpoint hit!");
 				std::stringstream ss;
 				ss << " " << bp.function->description << ".";
 				ss << " Args:";
@@ -234,8 +245,8 @@ void RWGame::startScript(const std::string& name)
 				}
 				
 				log.info("Script", ss.str());
-			});
-		script->addBreakpoint(0);
+                httpserver->handleBreakpoint(bp);
+            });
 		state->script = script;
 	}
 	else {

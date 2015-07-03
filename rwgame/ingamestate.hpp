@@ -18,7 +18,7 @@ class IngameState : public State
 	};
 
 	bool started;
-	bool test;
+    std::string save;
 	bool newgame;
 	ViewCamera _look;
 	/** Player input */
@@ -28,7 +28,13 @@ class IngameState : public State
 	float autolookTimer;
 	CameraMode camMode;
 public:
-	IngameState(RWGame* game, bool newgame = true, bool test = false);
+    /**
+     * @brief IngameState
+     * @param game
+     * @param newgame
+     * @param game An empty string, a save game to load, or the string "test".
+     */
+    IngameState(RWGame* game, bool newgame = true, const std::string& save = "");
 
 	void startTest();
 	void startGame();

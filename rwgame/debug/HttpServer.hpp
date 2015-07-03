@@ -25,10 +25,13 @@ public:
 	HttpServer(RWGame* game, GameWorld* world);
 	void run();
 
+    void handleBreakpoint(const SCMBreakpoint& bp);
 private:
 	ReuseableListener listener;
 	RWGame* game;
 	GameWorld* world;
+    bool paused;
 
-	std::string dispatch(std::string method, std::string path);
+    std::string dispatch(std::string method, std::string path);
+    std::string getState() const;
 };

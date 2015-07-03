@@ -31,6 +31,11 @@ bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 	return false;
 }
 
+void ScriptMachine::interuptNext()
+{
+    interupt = true;
+}
+
 #include <iostream>
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
@@ -134,8 +139,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			
 			if( hasDebugging )
 			{
-				if( breakpoints.find(pc) != breakpoints.end() )
+                if( breakpoints.find(pc) != breakpoints.end() || interupt )
 				{
+                    interupt = false;
 					SCMBreakpoint bp;
 					bp.pc = pc;
 					bp.thread = &t;
@@ -189,7 +195,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 }
 
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile *file, SCMOpcodes *ops)
-	: _file(file), _ops(ops), state(_state)
+    : _file(file), _ops(ops), state(_state), interupt(false)
 {
 	auto globals = _file->getGlobalsSize();
 	globalData.resize(globals);

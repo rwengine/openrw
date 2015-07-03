@@ -205,6 +205,11 @@ public:
 	 */
 	void removeBreakpoint(SCMThread::pc_t pc);
 
+    /**
+     * Interupt VM execution at the start of the next instruction
+     */
+    void interuptNext();
+
 	/**
 	 * @brief executes threads until they are all in waiting state.
 	 */
@@ -214,6 +219,7 @@ private:
 	SCMFile* _file;
 	SCMOpcodes* _ops;
 	GameState* state;
+    bool interupt;
 
 	std::vector<SCMThread> _activeThreads;
 

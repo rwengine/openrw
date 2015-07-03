@@ -191,6 +191,7 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 		);
 
 		instancePool.insert(instance);
+        allObjects.push_back(instance);
 
 		if( shouldBeOnGrid(instance) )
 		{
@@ -304,6 +305,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 		m);
 
 	cutscenePool.insert( instance );
+    allObjects.push_back(instance);
 
 
 	return instance;
@@ -369,6 +371,7 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 		vehicle->setGameObjectID(gid);
 
 		vehiclePool.insert( vehicle );
+        allObjects.push_back( vehicle );
 
 		return vehicle;
 	}
@@ -410,6 +413,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id, const glm::vec3&
 			ped->setGameObjectID(gid);
 			new DefaultAIController(ped);
 			pedestrianPool.insert( ped );
+            allObjects.push_back( ped );
 			return ped;
 		}
 	}
@@ -437,6 +441,7 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos, const glm::quat& 
 			ped->setLifetime(GameObject::PlayerLifetime);
 			players.push_back(new PlayerController(ped));
 			pedestrianPool.insert(ped);
+            allObjects.push_back( ped );
 			return ped;
 		}
 	}
@@ -510,6 +515,8 @@ void GameWorld::destroyObject(GameObject* object)
 	
 	auto& pool = getTypeObjectPool(object);
 	pool.remove(object);
+
+    allObjects.erase(std::find(allObjects.begin(), allObjects.end(), object));
 	delete object;
 }
 

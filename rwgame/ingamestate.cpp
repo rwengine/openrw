@@ -17,8 +17,8 @@
 
 #define AUTOLOOK_TIME 2.f
 
-IngameState::IngameState(RWGame* game, bool newgame, bool test)
-	: State(game), started(false), newgame(newgame), test(test),
+IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
+    : State(game), started(false), newgame(newgame), save(save),
 	autolookTimer(0.f), camMode(IngameState::CAMERA_NORMAL)
 {
 }
@@ -78,11 +78,16 @@ void IngameState::enter()
 	{
 		if( newgame )
 		{
-			if( test ) {
+            if( save.empty() )
+            {
+                startGame();
+            }
+            else if( save == "test" )
+            {
 				startTest();
 			}
 			else {
-				startGame();
+                game->loadGame( save );
 			}
 		}
 		started = true;

@@ -21,7 +21,7 @@ void MenuState::enterMainMenu()
 	}));
 	m->addEntry(Menu::lambda("Start", [=] { StateManager::get().enter(new IngameState(game)); }));
 	m->addEntry(Menu::lambda("Load Game", [=] { enterLoadMenu(); }));
-	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true, true)); }));
+    m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true, "true")); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
 	m->addEntry(Menu::lambda("Exit", [=] { getWindow().close(); }));
 	this->enterMenu(m);
