@@ -24,6 +24,12 @@ app.controller('DebugCtrl', function($scope,$http) {
                           $scope.refresh();
                       });
                    }
+   $scope.step = function() {
+       var promise = $http.get('/step')
+                     .success(function(data, status, headers, config) {
+                         $scope.refresh();
+                     });
+                  }
     $scope.continue = function() {
        var promise = $http.get('/continue')
                      .success(function(data, status, headers, config) {
@@ -39,13 +45,32 @@ const char* src_page = R"(
         <html ng-app="debugApp">
         <head>
             <style type="text/css">
-            html,body { font-family: sans-serif; }
+html,body { font-family: sans-serif; }
+.disassembly {
+    background: white;
+    border: 1px solid #CCC
+}
+.disassembly .breakpoint {
+    background: #CFC
+}
+.disassembly .line-number {
+    width: 6em;
+    text-align: right;
+    margin-right: 0.75em;
+    padding-left: 0.25em;
+    background: #F6F6F6;
+    border-right: solid 1px #EEE;
+}
             </style>
         </style>
         <body ng-controller="DebugCtrl">
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.1/angular.min.js"></script>
         <h1>OpenRW Debugger</h1>
-        <button ng-click="interrupt();">Interrupt</button> <button  ng-click="continue();">Continue</button>
+        <div class="debugger-controlls">
+            <button ng-click="interrupt();">Interrupt</button>
+            <button ng-click="step();">Step</button>
+            <button  ng-click="continue();">Continue</button>
+        </div>
         <span id="running" style="background: green; color: white; padding: 2px; border-radius: 2px" ng-show="running">Game is running</span>
         <div>
             <h2>Threads</h2>
@@ -54,6 +79,35 @@ const char* src_page = R"(
                     <h3>{{thread.name}}</h3>
                     <i>program counter: </i> {{thread.program_counter}}<br>
                     <i>wake counter: </i> {{thread.wake_counter}} ms<br>
+                    <h4>Return Stack</h4>
+                    <ol>
+                        <li ng-repeat="return_address in thread.call_stack">
+                            Address {{return_address}}
+                        </li>
+                    </ol>
+                    <h4>Disassembly</h4>
+                    <div class="disassembly">
+                        <div ng-repeat="call in thread.disassembly" class="instruction">
+                            <span class="line-number">
+                                {{ call.address }}
+                            </span>
+                            <span class="function">
+                                {{call.function }}
+                            </span>
+                            <span class="parameters">
+                                (
+                                <span class="param" ng-repeat="param in call.arguments">
+                                    {{param.value}}<span ng-show="!$last">,</span>
+                                </span>
+                                )
+                            </span>
+                        </div>
+                    </div>
+                    <ol>
+                        <li ng-repeat="return_address in thread.call_stack">
+                            Address {{return_address}}
+                        </li>
+                    </ol>
                 </li>
             </ul>
         </div>
@@ -68,12 +122,12 @@ HttpServer::HttpServer(RWGame* game, GameWorld* world)
 
 void HttpServer::run()
 {
-	listener.listen(8091);
-	listener.reuse();
+    listener.create();
+    listener.listen(8091);
 
 	std::cout << "STARTING HTTP SERVER" << std::endl;
 
-	while (true) {
+    while ( game->getWindow().isOpen() ) {
 		sf::TcpSocket client;
 		if (listener.accept(client) == sf::Socket::Done) {
 			std::cout << "New connection from "
@@ -113,6 +167,114 @@ void HttpServer::handleBreakpoint(const SCMBreakpoint &bp)
         // Do nothing
     }
 }
+std::string thread_stack(SCMThread& th)
+{
+    std::stringstream ss;
+    for(unsigned int i = 0; i < th.stackDepth; ++i)
+    {
+        bool last = (th.stackDepth == i+1);
+        ss << th.calls[i]
+            << (last ? "" : ",");
+    }
+    return ss.str();
+}
+
+#include <script/ScriptDisassembly.hpp>
+
+std::string describe_parameter(SCMOpcodeParameter& p)
+{
+    std::stringstream ss;
+
+    switch(p.type) {
+    case TGlobal:
+        ss << "G: " << p.globalPtr;
+        break;
+    case TLocal:
+        ss << "L: " << p.globalPtr;
+        break;
+    case TInt8:
+        ss << "i8: " << std::dec << (uint16_t)((uint8_t)p.integer);
+        break;
+    case TInt16:
+        ss << "i16: " << std::dec << (uint16_t)p.integer;
+        break;
+    case TInt32:
+        ss << "i32: " << std::dec << (uint32_t)p.integer;
+        break;
+    case TString:
+        ss << "str: \\\"" << p.string << "\\\"";
+        break;
+    case TFloat16:
+        ss << "f16: " << p.real;
+        break;
+    default:
+        ss << "OTHER";
+        break;
+    }
+
+    return ss.str();
+}
+
+std::string thread_disassembly(ScriptMachine* script, SCMThread& th)
+{
+    std::stringstream ss;
+
+    ScriptDisassembly ds(script->getOpcodes(), script->getFile());
+    try {
+        ds.disassemble(th.programCounter);
+    }
+    catch(SCMException& ex)
+    {
+
+    }
+
+    auto it = ds.getInstructions().find(th.programCounter);
+    for( int i = 0; i < 5 && it != ds.getInstructions().end(); ++i ) {
+        bool last = i+1 == 5;
+        last = last || it == --ds.getInstructions().end();
+        auto opcode = it->second.opcode;
+        ScriptFunctionMeta* meta = nullptr;
+        ss << "{";
+        if( script->getOpcodes()->findOpcode((uint16_t)opcode, &meta) )
+        {
+            ss << "\"address\": " << it->first << ","
+               << "\"function\": \"" << meta->signature << "\","
+               << "\"arguments\": [";
+            SCMParams& parameters = it->second.parameters;
+            for(size_t p = 0; p < parameters.size(); ++p)
+            {
+                if(p != 0)
+                    ss << ",";
+                ss << "{"
+                   << "\"type\": " << parameters[p].type << ","
+                   << "\"value\": \"" << describe_parameter(parameters[p]) << "\""
+                   << "}";
+            }
+            ss << "]";
+        }
+        else
+        {
+            ss << "\"err\":\"err\"";
+        }
+        ss << (last ? "}" : "},");
+        it++;
+    }
+
+    return ss.str();
+}
+
+std::string thread(ScriptMachine* script, SCMThread& th)
+{
+    std::stringstream ss;
+    ss << "{"
+       << "\"program_counter\": " << th.programCounter << ","
+       << "\"name\": \"" << th.name << "\","
+       << "\"wake_counter\": " << th.wakeCounter << ","
+       << "\"call_stack\": [" << thread_stack(th) << "],"
+       << "\"disassembly\": [" << thread_disassembly(script, th) << "]"
+       << "}";
+    return ss.str();
+}
 
 std::string HttpServer::getState() const
 {
@@ -128,11 +290,7 @@ std::string HttpServer::getState() const
         {
             SCMThread& th = game->getScript()->getThreads()[i];
             bool last = (game->getScript()->getThreads().size() == i+1);
-            ss << "{"
-                << "\"program_counter\": " << th.programCounter << ","
-                << "\"name\": \"" << th.name << "\","
-                << "\"wake_counter\": " << th.wakeCounter << ""
-                << (last ? "}" : "},");
+            ss << thread(game->getScript(), th) << (last ? "" : ",");
         }
         ss << R"(])";
         ss << "}";
@@ -156,6 +314,14 @@ std::string HttpServer::dispatch(std::string method, std::string path)
         game->getScript()->interuptNext();
         /* Block until paused is true */
         while( ! paused ) { std::this_thread::yield(); }
+        ss << getState();
+        mime = "application/json";
+    }
+    else if(path == "/step") {
+        if( paused ) {
+            game->getScript()->interuptNext();
+            paused = false;
+        }
         ss << getState();
         mime = "application/json";
     }

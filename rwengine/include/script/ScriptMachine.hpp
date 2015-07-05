@@ -174,6 +174,8 @@ public:
 
 	SCMFile* getFile() const { return _file; }
 
+    SCMOpcodes* getOpcodes() const { return _ops; }
+
 	void startThread(SCMThread::pc_t start, bool mission = false);
 
 	std::vector<SCMThread>& getThreads() { return _activeThreads; }

@@ -225,6 +225,11 @@ void RWGame::startScript(const std::string& name)
 		opcodes->modules.push_back(new ObjectModule);
 
 		script = new ScriptMachine(state, f, opcodes);
+
+        /* If Debug server is available, break on the first opcode executed */
+        if( httpserver ) {
+            script->interuptNext();
+        }
 		
 		// Set up breakpoint handler
 		script->setBreakpointHandler(
@@ -327,6 +332,11 @@ int RWGame::run()
 
 		window.display();
 	}
+
+    if( httpserver_thread )
+    {
+        httpserver_thread->join();
+    }
 
 	return 0;
 }

@@ -13,9 +13,14 @@
 class ReuseableListener : public sf::TcpListener
 {
 	public:
-	void reuse() {
+    void create() {
 		char reuse = 1;
-		setsockopt(getHandle(), SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+        sf::SocketHandle handle = socket(PF_INET, SOCK_STREAM, 0);
+        if( setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0 )
+        {
+            std::cerr << "Failed to set socket SO_REUSEADDR: errno = " << errno << std::endl;
+        }
+        Socket::create(handle);
 	}
 };
 
