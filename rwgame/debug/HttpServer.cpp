@@ -11,11 +11,13 @@ var app = angular.module('debugApp', []);
 app.controller('DebugCtrl', function($scope,$http) {
     $scope.threads = [];
     $scope.running = true;
+    $scope.breakpoint = {};
     $scope.refresh = function() {
         var promise = $http.get('/state')
                        .success(function(data, status, headers, config) {
                            $scope.running = data.status == 'running';
                            $scope.threads = data.threads;
+                           $scope.breakpoint = data.breakpoint;
                        });
     };
     $scope.interrupt = function() {
@@ -73,10 +75,11 @@ html,body { font-family: sans-serif; }
         </div>
         <span id="running" style="background: green; color: white; padding: 2px; border-radius: 2px" ng-show="running">Game is running</span>
         <div>
+            {{ breakpoint.program_counter }} {{ breakpoint.thread }}
             <h2>Threads</h2>
             <ul>
                 <li ng-repeat="thread in threads">
-                    <h3>{{thread.name}}</h3>
+                    <h3>{{thread.name}} ({{thread.address}})</h3>
                     <i>program counter: </i> {{thread.program_counter}}<br>
                     <i>wake counter: </i> {{thread.wake_counter}} ms<br>
                     <h4>Return Stack</h4>
@@ -87,7 +90,8 @@ html,body { font-family: sans-serif; }
                     </ol>
                     <h4>Disassembly</h4>
                     <div class="disassembly">
-                        <div ng-repeat="call in thread.disassembly" class="instruction">
+                        <div ng-repeat="call in thread.disassembly" class="instruction"
+        ng-class="(breakpoint.program_counter == call.address && thread.address == breakpoint.thread)? 'breakpoint' : ''">
                             <span class="line-number">
                                 {{ call.address }}
                             </span>
@@ -117,12 +121,11 @@ html,body { font-family: sans-serif; }
         </html>)";
 
 HttpServer::HttpServer(RWGame* game, GameWorld* world)
-    : game(game), world(world), paused(false)
+    : game(game), world(world), paused(false), lastBreakpoint(nullptr)
 {}
 
 void HttpServer::run()
 {
-    listener.create();
     listener.listen(8091);
 
 	std::cout << "STARTING HTTP SERVER" << std::endl;
@@ -161,6 +164,7 @@ void HttpServer::run()
 
 void HttpServer::handleBreakpoint(const SCMBreakpoint &bp)
 {
+    lastBreakpoint = &bp;
     paused = true;
 
     while( paused ) {
@@ -237,7 +241,7 @@ std::string thread_disassembly(ScriptMachine* script, SCMThread& th)
         ss << "{";
         if( script->getOpcodes()->findOpcode((uint16_t)opcode, &meta) )
         {
-            ss << "\"address\": " << it->first << ","
+            ss << "\"address\": \"" << it->first << "\","
                << "\"function\": \"" << meta->signature << "\","
                << "\"arguments\": [";
             SCMParams& parameters = it->second.parameters;
@@ -267,12 +271,27 @@ std::string thread(ScriptMachine* script, SCMThread& th)
 {
     std::stringstream ss;
     ss << "{"
+       << "\"address\": \"" << &th << "\","
        << "\"program_counter\": " << th.programCounter << ","
        << "\"name\": \"" << th.name << "\","
        << "\"wake_counter\": " << th.wakeCounter << ","
        << "\"call_stack\": [" << thread_stack(th) << "],"
        << "\"disassembly\": [" << thread_disassembly(script, th) << "]"
        << "}";
+    return ss.str();
+}
+
+std::string breakpoint(const SCMBreakpoint* breakpoint)
+{
+    std::stringstream ss;
+    ss << "{";
+    if( breakpoint != nullptr )
+    {
+        ss << "\"program_counter\": " << breakpoint->pc << ","
+           << "\"thread\": \"" << breakpoint->thread << "\"";
+    }
+    ss << "}";
+
     return ss.str();
 }
 
@@ -285,12 +304,14 @@ std::string HttpServer::getState() const
         std::stringstream ss;
         ss << "{";
         ss << R"("status":"interrupted",)";
+        ss << R"("breakpoint": )" << breakpoint(lastBreakpoint) << ",";
         ss << R"("threads": [)";
         for(unsigned int i = 0; i < game->getScript()->getThreads().size(); ++i)
         {
-            SCMThread& th = game->getScript()->getThreads()[i];
-            bool last = (game->getScript()->getThreads().size() == i+1);
-            ss << thread(game->getScript(), th) << (last ? "" : ",");
+            if( i != 0 )
+                ss << ",";
+            SCMThread& th = game->getScript()->getThreads().at(i);
+            ss << thread(game->getScript(), th);
         }
         ss << R"(])";
         ss << "}";
@@ -320,12 +341,14 @@ std::string HttpServer::dispatch(std::string method, std::string path)
     else if(path == "/step") {
         if( paused ) {
             game->getScript()->interuptNext();
+            lastBreakpoint = nullptr;
             paused = false;
         }
         ss << getState();
         mime = "application/json";
     }
     else if(path == "/continue") {
+        lastBreakpoint = nullptr;
         paused = false;
         ss << getState();
         mime = "application/json";

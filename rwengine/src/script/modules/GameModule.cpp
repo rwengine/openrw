@@ -903,6 +903,7 @@ GameModule::GameModule()
 	bindFunction(0x015A, game_reset_camera, 0, "Reset Camera" );
 	
 	bindFunction(0x015C, game_set_zone_ped_info, 11, "Set zone ped info" );
+    bindUnimplemented( 0x015D, game_set_timescale;, 1, "Set Game Timescale" );
 
 	bindFunction(0x015F, game_camera_fixed_position, 6, "Set Fixed Camera Position" );
 	bindFunction(0x0160, game_camera_lookat_position, 4, "Point Camera at Point" );

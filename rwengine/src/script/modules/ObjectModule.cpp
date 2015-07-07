@@ -293,6 +293,23 @@ bool game_player_near_point_on_foot_3D(const ScriptArguments& args)
     return false;
 }
 
+bool game_player_near_point_in_vehicle_3D(const ScriptArguments& args)
+{
+    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+    glm::vec3 center(args[1].real, args[2].real, args[3].real);
+    glm::vec3 size(args[4].real, args[5].real, args[6].real);
+    bool unkown	= !!args[7].integer;
+
+    auto vehicle = character->getCurrentVehicle();
+    if( vehicle ) {
+        auto distance = center - character->getPosition();
+        distance /= size;
+        if( glm::length( distance ) < 1.f ) return true;
+    }
+
+    return false;
+}
+
 bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 {
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
@@ -431,6 +448,21 @@ void game_create_character_in_vehicle(const ScriptArguments& args)
 	
 	*args[3].globalInteger = character->getGameObjectID();
 }
+
+bool game_is_vehicle_model(const ScriptArguments& args)
+{
+    auto vdata = args.getWorld()->data->findObjectType<VehicleData>(args[1].integer);
+    if( vdata )
+    {
+        auto vehicle = args.getObject<VehicleObject>(0);
+        if ( vehicle ) {
+
+            return vehicle->model && vdata->modelName == vehicle->model->name;
+        }
+    }
+    return false;
+}
+
 
 void game_set_player_heading(const ScriptArguments& args)
 {
@@ -1016,6 +1048,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x00F5, game_locate_character_in_sphere, 8, "Locate Player In Sphere" );
     bindFunction(0x00F6, game_player_near_point_on_foot_3D, 8, "Is Player near point on foot" );
+    bindFunction(0x00F7, game_player_near_point_in_vehicle_3D, 8, "Is Player near point in car" );
 
 	bindFunction(0x0100, game_character_near_point_in_vehicle, 8, "Is Character near point in car" );
 	
@@ -1031,6 +1064,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0129, game_create_character_in_vehicle, 4, "Create Character In Car" );
 
 	bindUnimplemented(0x0135, game_set_vehicle_locked, 2, "Set Vehicle locked state");
+
+    bindFunction(0x0137, game_is_vehicle_model, 2, "Is Vehicle Model" );
 	
 	bindFunction(0x0171, game_set_player_heading, 2, "Set Player Heading" );
 	

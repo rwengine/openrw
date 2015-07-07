@@ -46,9 +46,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 	
 	bool hasDebugging = !! bpHandler;
 	
-	while( t.wakeCounter == 0 ) {
-		auto opcode = _file->read<SCMOpcode>(t.programCounter);
-		auto opcorg = opcode;
+    while( t.wakeCounter == 0 ) {
+        auto pc = t.programCounter;
+        auto opcode = _file->read<SCMOpcode>(pc);
 
 		bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) == SCM_NEGATE_CONDITIONAL_MASK);
 		opcode = opcode & ~SCM_NEGATE_CONDITIONAL_MASK;
@@ -56,13 +56,11 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		ScriptFunctionMeta* foundcode;
 		if( ! _ops->findOpcode(opcode, &foundcode) )
 		{
-			throw IllegalInstruction(opcode, t.programCounter, t.name);
+            throw IllegalInstruction(opcode, pc, t.name);
 		}
 		ScriptFunctionMeta& code = *foundcode;
 
-		// Keep the pc for the debugger
-		auto pc = t.programCounter;
-		t.programCounter += sizeof(SCMOpcode);
+        pc += sizeof(SCMOpcode);
 
 		SCMParams parameters;
 		
@@ -70,7 +68,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		auto requiredParams = std::abs(code.arguments);
 
 		for( int p = 0; p < requiredParams || hasExtraParameters; ++p ) {
-			auto type_r = _file->read<SCMByte>(t.programCounter);
+            auto type_r = _file->read<SCMByte>(pc);
 			auto type = static_cast<SCMType>(type_r);
 
 			if( type_r > 42 ) {
@@ -78,7 +76,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				type = TString;
 			}
 			else {
-				t.programCounter += sizeof(SCMByte);
+                pc += sizeof(SCMByte);
 			}
 
 			parameters.push_back(SCMOpcodeParameter { type, { 0 } });
@@ -87,71 +85,74 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				hasExtraParameters = false;
 				break;
 			case TInt8:
-				parameters.back().integer = _file->read<std::uint8_t>(t.programCounter);
-				t.programCounter += sizeof(SCMByte);
+                parameters.back().integer = _file->read<std::uint8_t>(pc);
+                pc += sizeof(SCMByte);
 				break;
 			case TInt16:
-				parameters.back().integer = _file->read<std::int16_t>(t.programCounter);
-				t.programCounter += sizeof(SCMByte) * 2;
+                parameters.back().integer = _file->read<std::int16_t>(pc);
+                pc += sizeof(SCMByte) * 2;
 				break;
 			case TGlobal: {
-				auto v = _file->read<std::uint16_t>(t.programCounter);
+                auto v = _file->read<std::uint16_t>(pc);
 				parameters.back().globalPtr = globalData.data() + v; //* SCM_VARIABLE_SIZE;
 				if( v >= _file->getGlobalsSize() )
 				{
 					state->world->logger->error("SCM", "Global Out of bounds! "+ std::to_string(v) + " " + std::to_string(_file->getGlobalsSize()));
 				}
-				t.programCounter += sizeof(SCMByte) * 2;
+                pc += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TLocal: {
-				auto v = _file->read<std::uint16_t>(t.programCounter);
+                auto v = _file->read<std::uint16_t>(pc);
 				parameters.back().globalPtr = t.locals.data() + v * SCM_VARIABLE_SIZE;
 				if( v >= SCM_THREAD_LOCAL_SIZE )
 				{
 					state->world->logger->error("SCM", "Local Out of bounds!");
 				}
-				t.programCounter += sizeof(SCMByte) * 2;
+                pc += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TInt32:
-				parameters.back().integer = _file->read<std::uint32_t>(t.programCounter);
-				t.programCounter += sizeof(SCMByte) * 4;
+                parameters.back().integer = _file->read<std::uint32_t>(pc);
+                pc += sizeof(SCMByte) * 4;
 				break;
 			case TString:
-				std::copy(_file->data()+t.programCounter, _file->data()+t.programCounter+8,
+                std::copy(_file->data()+pc, _file->data()+pc+8,
 						  parameters.back().string);
-				t.programCounter += sizeof(SCMByte) * 8;
+                pc += sizeof(SCMByte) * 8;
 				break;
 			case TFloat16:
-				parameters.back().real = _file->read<std::int16_t>(t.programCounter) / 16.f;
-				t.programCounter += sizeof(SCMByte) * 2;
+                parameters.back().real = _file->read<std::int16_t>(pc) / 16.f;
+                pc += sizeof(SCMByte) * 2;
 				break;
 			default:
-				throw UnknownType(type, t.programCounter, t.name);
+                throw UnknownType(type, pc, t.name);
 				break;
 			};
 		}
 
+        ScriptArguments sca(&parameters, &t, this);
+
+        if( hasDebugging )
+        {
+            if( breakpoints.find(pc) != breakpoints.end() || interupt )
+            {
+                interupt = false;
+                SCMBreakpoint bp;
+                bp.pc = t.programCounter;
+                bp.thread = &t;
+                bp.vm = this;
+                bp.function = &code;
+                bp.args = &sca;
+                bpHandler(bp);
+            }
+        }
+
+        // After debugging has been completed, update the program counter
+        t.programCounter = pc;
+
 		if(code.function)
-		{
-			ScriptArguments sca(&parameters, &t, this);
-			
-			if( hasDebugging )
-			{
-                if( breakpoints.find(pc) != breakpoints.end() || interupt )
-				{
-                    interupt = false;
-					SCMBreakpoint bp;
-					bp.pc = pc;
-					bp.thread = &t;
-					bp.vm = this;
-					bp.function = &code;
-					bp.args = &sca;
-					bpHandler(bp);
-				}
-			}
-			
+        {
 			code.function(sca);
 		}
 
@@ -181,7 +182,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			
 			t.conditionResult = (t.conditionMask != 0);
 		}
-	}
+    }
 	
 	SCMOpcodeParameter p;
 	p.globalPtr = (t.locals.data() + 16 * sizeof ( SCMByte ) * 4);
@@ -239,15 +240,12 @@ void ScriptMachine::execute(float dt)
 {
 	int ms = dt * 1000.f;
 	for(size_t ti = 0; ti < _activeThreads.size(); ++ti) {
-		auto thread	= _activeThreads[ti];
+        auto& thread	= _activeThreads[ti];
 		executeThread( thread, ms );
 
 		if( thread.finished ) {
 			_activeThreads.erase( _activeThreads.begin() + ti );
-		}
-		else {
-			_activeThreads[ti] = thread;
-		}
+        }
 	}
 }
 
