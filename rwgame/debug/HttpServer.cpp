@@ -313,12 +313,12 @@ std::string HttpServer::getState() const
         ss << R"("status":"interrupted",)";
         ss << R"("breakpoint": )" << breakpoint(lastBreakpoint) << ",";
         ss << R"("threads": [)";
-        for(unsigned int i = 0; i < game->getScript()->getThreads().size(); ++i)
+		auto it = game->getScript()->getThreads().begin();
+        for(unsigned int i = 0; i < game->getScript()->getThreads().size(); ++i,++it)
         {
             if( i != 0 )
                 ss << ",";
-            SCMThread& th = game->getScript()->getThreads().at(i);
-            ss << thread(game->getScript(), th);
+            ss << thread(game->getScript(), *it);
         }
         ss << R"(])";
         ss << "}";

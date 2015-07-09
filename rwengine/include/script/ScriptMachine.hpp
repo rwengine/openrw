@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <list>
 #include <set>
 
 #define SCM_NEGATE_CONDITIONAL_MASK 0x8000
@@ -205,7 +206,7 @@ public:
 
 	void startThread(SCMThread::pc_t start, bool mission = false);
 
-	std::vector<SCMThread>& getThreads() { return _activeThreads; }
+	std::list<SCMThread>& getThreads() { return _activeThreads; }
 
 	SCMByte* getGlobals();
 	std::vector<SCMByte>& getGlobalData() { return globalData; }
@@ -249,7 +250,7 @@ private:
 	GameState* state;
     bool interupt;
 
-	std::vector<SCMThread> _activeThreads;
+	std::list<SCMThread> _activeThreads;
 
 	void executeThread(SCMThread& t, int msPassed);
 

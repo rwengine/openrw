@@ -240,12 +240,13 @@ SCMByte *ScriptMachine::getGlobals()
 void ScriptMachine::execute(float dt)
 {
 	int ms = dt * 1000.f;
-	for(size_t ti = 0; ti < _activeThreads.size(); ++ti) {
-        auto& thread	= _activeThreads[ti];
+	for(auto t = _activeThreads.begin(); t != _activeThreads.end(); ++t )
+	{
+		auto& thread = *t;
 		executeThread( thread, ms );
 
 		if( thread.finished ) {
-			_activeThreads.erase( _activeThreads.begin() + ti );
+			t = _activeThreads.erase( t );
         }
 	}
 }

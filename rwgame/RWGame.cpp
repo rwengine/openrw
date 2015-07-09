@@ -134,7 +134,14 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	auto loading = new LoadingState(this);
 	if( newgame )
 	{
-        loading->setNextState(new IngameState(this,true, "test"));
+		if( test )
+		{
+			loading->setNextState(new IngameState(this,true, "test"));
+		}
+		else
+		{
+			loading->setNextState(new IngameState(this,true));
+		}
 	}
     else if( ! startSave.empty() )
     {
