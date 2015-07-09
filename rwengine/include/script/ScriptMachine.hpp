@@ -134,8 +134,33 @@ struct SCMThread
 	std::array<pc_t, SCM_STACK_DEPTH> calls;
 };
 
+#include <cstring>
 /**
- * Breakpoint callback information
+ * Stores information about where breakpoints should be triggered.
+ * 
+ * breakpointFlags stores the state to be checked against.
+ */
+struct SCMBreakpointInfo
+{
+	enum /* Breakpoint Flags */ {
+		BP_ProgramCounter = 1,
+		BP_ThreadName = 2
+	};
+	uint8_t breakpointFlags;
+	SCMThread::pc_t programCounter;
+	char threadName[17];
+
+	static SCMBreakpointInfo breakThreadName(char threadName[17])
+	{
+		SCMBreakpointInfo i;
+		i.breakpointFlags = BP_ThreadName;
+		std::strncpy(i.threadName, threadName, 17);
+		return i;
+	}
+};
+
+/**
+ * Information about breakpoints that have been hit
  */
 struct SCMBreakpoint
 {
@@ -144,6 +169,8 @@ struct SCMBreakpoint
 	ScriptMachine* vm;
 	ScriptFunctionMeta* function;
 	ScriptArguments* args;
+	/** The breakpoint entry that triggered this breakpoint */
+	SCMBreakpointInfo* info;
 };
 
 /**
@@ -198,14 +225,13 @@ public:
 
 	/**
 	 * Adds a breakpoint
-	 * @param pc The instruction address to break on.
 	 */
-	void addBreakpoint(SCMThread::pc_t pc);
+	void addBreakpoint(const SCMBreakpointInfo& bpi);
 
 	/**
 	 * Removes a breakpoint.
 	 */
-	void removeBreakpoint(SCMThread::pc_t pc);
+	void removeBreakpoint(const SCMBreakpointInfo& bpi);
 
     /**
      * Interupt VM execution at the start of the next instruction
@@ -227,10 +253,12 @@ private:
 
 	void executeThread(SCMThread& t, int msPassed);
 
+	SCMBreakpointInfo* findBreakpoint(SCMThread& t, SCMThread::pc_t pc);
+
 	std::vector<SCMByte> globalData;
 
 	BreakpointHandler bpHandler;
-	std::set<SCMThread::pc_t> breakpoints;
+	std::vector<SCMBreakpointInfo> breakpoints;
 };
 
 #endif

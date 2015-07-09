@@ -47,8 +47,8 @@ template<class Tobject>
 void game_set_object_position(const ScriptArguments& args)
 {
 	auto character = args.getObject<Tobject>(0);
-	glm::vec3 position(args[1].real, args[2].real, args[3].real + 1.f);
-	character->setPosition(position + spawnMagic);
+	glm::vec3 position(args[1].real, args[2].real, args[3].real);
+	character->setPosition(position);// + spawnMagic);
 }
 
 bool game_player_in_area_2d(const ScriptArguments& args)

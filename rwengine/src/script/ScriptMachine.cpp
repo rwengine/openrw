@@ -135,8 +135,9 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 
         if( hasDebugging )
         {
-            if( breakpoints.find(pc) != breakpoints.end() || interupt )
-            {
+			auto activeBreakpoint = findBreakpoint(t, pc);
+			if( activeBreakpoint || interupt )
+			{
                 interupt = false;
                 SCMBreakpoint bp;
                 bp.pc = t.programCounter;
@@ -249,19 +250,42 @@ void ScriptMachine::execute(float dt)
 	}
 }
 
+SCMBreakpointInfo* ScriptMachine::findBreakpoint(SCMThread& t, SCMThread::pc_t pc)
+{
+	for(std::vector<SCMBreakpointInfo>::iterator bp = breakpoints.begin(); bp != breakpoints.end(); ++bp)
+	{
+		if( (bp->breakpointFlags & SCMBreakpointInfo::BP_ProgramCounter) == SCMBreakpointInfo::BP_ProgramCounter )
+		{
+			if( bp->programCounter != pc )
+			{
+				continue;
+			}
+		}
+		if( (bp->breakpointFlags & SCMBreakpointInfo::BP_ThreadName) == SCMBreakpointInfo::BP_ThreadName )
+		{
+			if( std::strcmp(bp->threadName, t.name) != 0 )
+			{
+				continue;
+			}
+		}
+		return &(*bp);
+	}
+	return nullptr;
+}
+
 void ScriptMachine::setBreakpointHandler(const ScriptMachine::BreakpointHandler& handler)
 {
 	bpHandler = handler;
 }
 
-void ScriptMachine::addBreakpoint(SCMThread::pc_t pc)
+void ScriptMachine::addBreakpoint(const SCMBreakpointInfo& bpi)
 {
-	breakpoints.insert(pc);
+	breakpoints.push_back(bpi);
 }
 
-void ScriptMachine::removeBreakpoint(SCMThread::pc_t pc)
+void ScriptMachine::removeBreakpoint(const SCMBreakpointInfo& bpi)
 {
-	breakpoints.erase(pc);
+	//breakpoints.erase(pc);
 }
 
 

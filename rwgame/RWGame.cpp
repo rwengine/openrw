@@ -28,7 +28,8 @@ DebugDraw* debug;
 StdOutReciever logPrinter;
 
 RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: state(nullptr), world(nullptr), renderer(nullptr), script(nullptr), inFocus(true),
+	: state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
+	debugScript(false), inFocus(true),
 	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
 	accum(0.f), timescale(1.f)
 {
@@ -36,7 +37,6 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	bool fullscreen = false;
 	bool newgame = false;
 	bool test = false;
-	bool debugscript = false;
     std::string startSave;
 
 	for( int i = 1; i < argc; ++i )
@@ -63,7 +63,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 		}
 		if( strcmp( "--debug", argv[i] ) == 0 )
 		{
-			debugscript = true;
+			debugScript = true;
 		}
         if( strcmp( "--load", argv[i] ) == 0 && i+1 < argc )
         {
@@ -212,7 +212,10 @@ void RWGame::startScript(const std::string& name)
 	if( f ) {
 		if( script ) delete script;
 
-		if ( ! httpserver) {
+		if ( debugScript ) {
+			if( httpserver ) {
+				delete httpserver;
+			}
 			httpserver_thread = new std::thread([&](){
                 httpserver = new HttpServer(this, world);
 				httpserver->run();
@@ -228,8 +231,9 @@ void RWGame::startScript(const std::string& name)
 
         /* If Debug server is available, break on the first opcode executed */
         if( httpserver ) {
-            script->interuptNext();
+            //script->interuptNext();
         }
+		//script->addBreakpoint(SCMBreakpointInfo::breakThreadName("i_save"));
 		
 		// Set up breakpoint handler
 		script->setBreakpointHandler(

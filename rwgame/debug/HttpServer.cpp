@@ -143,16 +143,23 @@ void HttpServer::run()
 			buf[received] = '\0';
 			std::cout << "Got " << received << " bytes: " << buf << std::endl;
 
-			std::regex regex_http_first_line("(\\w+)\\s+(/.*?)\\s+HTTP/\\d+.\\d+");
-			std::cmatch regex_match;
-			std::regex_search(buf, regex_match, regex_http_first_line);
+			try
+			{
+				std::regex regex_http_first_line("(\\w+)\\s+(/.*?)\\s+HTTP/\\d+.\\d+");
+				std::cmatch regex_match;
+				std::regex_search(buf, regex_match, regex_http_first_line);
 
-			if (regex_match.size() == 3) {
-				std::string http_method = regex_match.str(1);
-				std::string http_path = regex_match.str(2);
+				if (regex_match.size() == 3) {
+					std::string http_method = regex_match.str(1);
+					std::string http_path = regex_match.str(2);
 
-				std::string response = dispatch(http_method, http_path);
-				client.send(response.c_str(), response.size());
+					std::string response = dispatch(http_method, http_path);
+					client.send(response.c_str(), response.size());
+				}
+			}
+			catch(std::regex_error er)
+			{
+				std::cerr << er.what() << " " << er.code() << std::endl;
 			}
 
 			client.disconnect();

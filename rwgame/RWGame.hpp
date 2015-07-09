@@ -24,6 +24,7 @@ class RWGame
     ScriptMachine* script;
 	// Background worker
 	WorkContext work;
+	bool debugScript;
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
 	sf::RenderWindow window;

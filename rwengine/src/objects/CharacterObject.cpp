@@ -277,6 +277,12 @@ void CharacterObject::setPosition(const glm::vec3& pos)
 	if( physCharacter )
 	{
 		btVector3 bpos(pos.x, pos.y, pos.z);
+		if( std::abs(-100.f - pos.z) < 0.01f )
+		{
+			// Find the ground position
+			auto gpos = engine->getGroundAtPosition(pos);
+			bpos.setZ(gpos.z+1.f);
+		}
 		physCharacter->warp(bpos);
 	}
 	position = pos;
