@@ -1,5 +1,5 @@
 #include <data/Skeleton.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 Skeleton::FrameTransform Skeleton::IdentityTransform = { glm::vec3(0.f), glm::quat() };

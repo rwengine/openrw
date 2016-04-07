@@ -1,6 +1,6 @@
 #include <engine/Animator.hpp>
 #include <loaders/LoaderDFF.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <data/Skeleton.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>

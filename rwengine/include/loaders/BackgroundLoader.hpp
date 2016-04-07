@@ -1,8 +1,8 @@
 #pragma once
 
-#include <WorkContext.hpp>
+#include <job/WorkContext.hpp>
 #include <data/ResourceHandle.hpp>
-#include <core/FileIndex.hpp>
+#include <platform/FileIndex.hpp>
 
 /**
  * Implementation of a worker that loads a resource in the background.

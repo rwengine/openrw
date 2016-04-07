@@ -1,7 +1,5 @@
-#include <loaders/TextureLoader.hpp>
-#include <engine/GameData.hpp>
-#include <render/TextureAtlas.hpp>
-#include <render/TextureData.hpp>
+#include <loaders/LoaderTXD.hpp>
+#include <gl/TextureData.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -184,7 +182,7 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative, RW::BinaryStre
 	return TextureData::create( textureName, { texNative.width, texNative.height }, transparent );
 }
 
-bool TextureLoader::loadFromMemory(FileHandle file, GameData *gameData)
+bool TextureLoader::loadFromMemory(FileHandle file, TextureArchive &inTextures)
 {
 	auto data = file->data;
 	RW::BinaryStreamSection root(data);
@@ -205,26 +203,31 @@ bool TextureLoader::loadFromMemory(FileHandle file, GameData *gameData)
 		
 		auto texture = createTexture(texNative, rootSection);
 
-		gameData->textures[{name, alpha}] = texture;
+		inTextures[{name, alpha}] = texture;
 
 		if( !alpha.empty() ) {
-			gameData->textures[{name, ""}] = texture;
+			inTextures[{name, ""}] = texture;
 		}
 	}
 
 	return true;
 }
 
+// TODO Move the Job system out of the loading code
+#include <platform/FileIndex.hpp>
 
-LoadTextureArchiveJob::LoadTextureArchiveJob(WorkContext *context, GameData *gd, const std::string &file)
-	: WorkJob(context), _gameData(gd), _file(file)
+LoadTextureArchiveJob::LoadTextureArchiveJob(WorkContext *context, FileIndex* index, TextureArchive &inTextures, const std::string &file)
+	: WorkJob(context)
+	, archive(inTextures)
+	, fileIndex(index)
+	, _file(file)
 {
 
 }
 
 void LoadTextureArchiveJob::work()
 {
-	data = _gameData->openFile(_file);
+	data = fileIndex->openFile(_file);
 }
 
 void LoadTextureArchiveJob::complete()
@@ -232,6 +235,6 @@ void LoadTextureArchiveJob::complete()
 	// TODO error status
 	if(data) {
 		TextureLoader loader;
-		loader.loadFromMemory(data, _gameData);
+		loader.loadFromMemory(data, archive);
 	}
 }

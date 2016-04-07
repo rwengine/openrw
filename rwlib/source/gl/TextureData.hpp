@@ -1,5 +1,5 @@
 #pragma once
-#include <GL/gl.h>
+#include <gl/gl_core_3_3.h>
 #include <glm/glm.hpp>
 
 #include <memory>

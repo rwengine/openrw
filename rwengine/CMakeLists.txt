@@ -10,9 +10,9 @@ add_library(rwengine
 )
 
 target_link_libraries(rwengine
+	rwlib
 	sfml-window
 	sfml-audio
-	GLEW
 	mad
 	${OPENRW_PLATFORM_LIBS})
 

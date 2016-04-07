@@ -18,7 +18,6 @@ target_link_libraries(run_tests
 	sfml-system
 	sfml-graphics
 	${OPENGL_LIBRARIES}
-	GLEW
 	BulletDynamics
 	BulletCollision
 	LinearMath

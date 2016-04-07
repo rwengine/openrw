@@ -84,9 +84,6 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
-	glewExperimental = GL_TRUE;
-	glewInit();
-	
 	log.addReciever(&logPrinter);	
 	log.info("Game", "Game directory: " + gamepath);
 	

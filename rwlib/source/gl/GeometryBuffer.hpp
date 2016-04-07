@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _GEOMETRYBUFFER_HPP_
 #define _GEOMETRYBUFFER_HPP_
-#include <GL/glew.h>
+#include <gl/gl_core_3_3.h>
 #include <vector>
 
 /**

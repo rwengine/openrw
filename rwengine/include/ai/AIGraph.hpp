@@ -5,7 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <data/PathData.hpp>
 #include <array>
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 
 struct AIGraphNode;
 

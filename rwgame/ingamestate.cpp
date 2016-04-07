@@ -8,7 +8,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/ItemPickup.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <items/WeaponItem.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameState.hpp>

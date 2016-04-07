@@ -2,7 +2,7 @@
 #ifndef _WEATHERLOADER_HPP_
 #define _WEATHERLOADER_HPP_
 
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 
 #include <string>
 #include <sstream>

@@ -1,5 +1,4 @@
-#include "render/Model.hpp"
-#include <GL/glew.h>
+#include "data/Model.hpp"
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>

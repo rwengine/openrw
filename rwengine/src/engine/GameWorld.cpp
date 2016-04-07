@@ -9,9 +9,9 @@
 #include <ai/DefaultAIController.hpp>
 #include <ai/TrafficDirector.hpp>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <data/WeaponData.hpp>
-#include <WorkContext.hpp>
+#include <job/WorkContext.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>

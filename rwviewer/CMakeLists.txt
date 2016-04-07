@@ -29,7 +29,6 @@ target_link_libraries(rwviewer
 	sfml-graphics
 	sfml-system
 	${OPENGL_LIBRARIES}
-	GLEW
 	${BULLET_LIBRARIES})
 qt5_use_modules(rwviewer Widgets OpenGL)
 

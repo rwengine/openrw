@@ -2,8 +2,7 @@
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameState.hpp>
-#include <render/TextureAtlas.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>

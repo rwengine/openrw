@@ -47,7 +47,7 @@ IF(BUILD_OLD_TOOLS)
 	add_subdirectory(datadump)
 ENDIF()
 
-
+add_subdirectory(rwlib)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 

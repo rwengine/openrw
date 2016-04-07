@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "TextureData.hpp"
+#include <gl/TextureData.hpp>
 
 /**
  * Represents a scene effect: lighting, particles etc.

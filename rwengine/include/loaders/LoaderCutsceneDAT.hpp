@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _LOADERCUTSCENEDAT_HPP_
 #define _LOADERCUTSCENEDAT_HPP_
-#include <core/FileHandle.hpp>
+#include <platform/FileHandle.hpp>
 #include <data/CutsceneData.hpp>
 
 class LoaderCutsceneDAT

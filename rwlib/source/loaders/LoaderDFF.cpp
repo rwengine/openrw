@@ -1,6 +1,5 @@
 #include <loaders/LoaderDFF.hpp>
-#include <engine/GameData.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 
 #include <iostream>
 #include <algorithm>

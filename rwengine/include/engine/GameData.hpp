@@ -4,9 +4,9 @@
 
 class Logger;
 
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 #include <loaders/LoaderIMG.hpp>
-#include <loaders/TextureLoader.hpp>
+#include <loaders/LoaderTXD.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIFP.hpp>
@@ -17,8 +17,8 @@ class Logger;
 #include <data/ZoneData.hpp>
 
 #include <audio/MADStream.hpp>
-#include <render/TextureData.hpp>
-#include <core/FileIndex.hpp>
+#include <gl/TextureData.hpp>
+#include <platform/FileIndex.hpp>
 
 #include <memory>
 
@@ -154,14 +154,6 @@ public:
 
 	FileHandle openFile(const std::string& name);
 
-	/**
-	 * @brief getAtlas Returns atlas i, creating it if the situation calls for it.
-	 *  "the situation" being the last atlas has more than 0 textures packed.
-	 * @param i
-	 * @return
-	 */
-	TextureAtlas* getAtlas(size_t i);
-	
 	TextureData::Handle findTexture( const std::string& name, const std::string& alpha = "" )
 	{
 		return textures[{name, alpha}];

@@ -1,5 +1,4 @@
-#include <WorkContext.hpp>
-#include <loaders/DataLoader.hpp>
+#include <job/WorkContext.hpp>
 
 void LoadWorker::start()
 {

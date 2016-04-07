@@ -1,4 +1,4 @@
-#include <core/FileIndex.hpp>
+#include <platform/FileIndex.hpp>
 #include <loaders/LoaderIMG.hpp>
 
 #include <algorithm>

@@ -1,7 +1,7 @@
 #pragma once 
 #ifndef _DRAWBUFFER_HPP_
 #define _DRAWBUFFER_HPP_
-#include <GL/glew.h>
+#include <gl/gl_core_3_3.h>
 
 class GeometryBuffer;
 

@@ -3,8 +3,8 @@
 
 class Logger;
 
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include <gl/gl_core_3_3.h>
+
 #include <memory>
 #include <vector>
 

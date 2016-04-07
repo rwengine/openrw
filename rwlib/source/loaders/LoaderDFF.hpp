@@ -2,16 +2,11 @@
 #ifndef _LOADERDFF_HPP_
 #define _LOADERDFF_HPP_
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-
-#include <loaders/rwbinarystream.h>
+#include <loaders/RWBinaryStream.hpp>
 
 #include <vector>
 #include <string>
-#include <WorkContext.hpp>
-#include <core/FileHandle.hpp>
-#include <core/FileIndex.hpp>
+#include <platform/FileHandle.hpp>
 #include <data/ResourceHandle.hpp>
 
 class Model;

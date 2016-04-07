@@ -4,12 +4,11 @@
 #include <loaders/LoaderIPL.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
-#include <render/TextureAtlas.hpp>
 #include <loaders/LoaderCOL.hpp>
 #include <data/ObjectData.hpp>
 #include <data/WeaponData.hpp>
 #include <script/SCMFile.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
@@ -423,7 +422,7 @@ void GameData::loadTXD(const std::string& name, bool async)
 
 	loadedFiles[name] = true;
 
-	auto j = new LoadTextureArchiveJob(workContext, this, name);
+	auto j = new LoadTextureArchiveJob(workContext, &index, textures, name);
 
 	if( async ) {
 		workContext->queueJob( j );
@@ -564,20 +563,6 @@ FileHandle GameData::openFile(const std::string &name)
 		logger->error("Data", "Unable to open file: " + name);
 	}
 	return file;
-}
-
-TextureAtlas* GameData::getAtlas(size_t i)
-{
-	if( i < atlases.size() ) {
-		return atlases[i];
-	}
-	if( i == atlases.size() && (i == 0 || atlases[i-1]->getTextureCount() > 0) ) {
-		GLint max_texture_size;
-		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-		atlases.push_back(new TextureAtlas(max_texture_size/2, max_texture_size/2));
-		return atlases[i];
-	}
-	return nullptr;
 }
 
 int GameData::getWaterIndexAt(const glm::vec3 &ws) const

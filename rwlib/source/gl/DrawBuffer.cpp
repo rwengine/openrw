@@ -1,5 +1,5 @@
-#include <render/DrawBuffer.hpp>
-#include <render/GeometryBuffer.hpp>
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
 #include <map>
 
 /* TODO: Come up with a more elegant solution to "WHICH ARRAY IS IT?" */

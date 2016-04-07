@@ -6,13 +6,12 @@
 #include <string>
 #include <memory>
 #include <algorithm>
-#include <GL/glew.h>
 
 #include <data/ResourceHandle.hpp>
-#include <loaders/rwbinarystream.h>
-#include "DrawBuffer.hpp"
-#include "GeometryBuffer.hpp"
-#include "TextureData.hpp"
+#include <loaders/RWBinaryStream.hpp>
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
+#include <gl/TextureData.hpp>
 
 /**
  * ModelFrame stores the hierarchy of a model's geometry as well as default

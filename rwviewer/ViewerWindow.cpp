@@ -41,9 +41,6 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 
 	viewerWidget->context()->makeCurrent();
 
-	glewExperimental = 1;
-	glewInit();
-
 	objectViewer = new ObjectViewer(viewerWidget);
 
 	connect(this, SIGNAL(loadedData(GameWorld*)), objectViewer, SLOT(showData(GameWorld*)));

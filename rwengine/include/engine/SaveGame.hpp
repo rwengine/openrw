@@ -2,7 +2,7 @@
 #ifndef _SAVEGAME_HPP_
 #define _SAVEGAME_HPP_
 
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 
 #include <string>
 #include <vector>

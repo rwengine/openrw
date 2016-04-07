@@ -2,9 +2,9 @@
 #ifndef _OPENGLRENDERER_HPP_
 #define _OPENGLRENDERER_HPP_
 
-#include <engine/RWTypes.hpp>
-#include <render/DrawBuffer.hpp>
-#include <render/GeometryBuffer.hpp>
+#include <rw/types.hpp>
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
 
 // Maximum depth of debug group stack
 #define MAX_DEBUG_DEPTH 5

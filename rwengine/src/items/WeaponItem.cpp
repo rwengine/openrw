@@ -1,7 +1,7 @@
 #include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <ai/CharacterController.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/ProjectileObject.hpp>

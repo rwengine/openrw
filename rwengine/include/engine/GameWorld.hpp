@@ -5,8 +5,6 @@
 class PlayerController;
 class Logger;
 
-#include <GL/glew.h>
-
 class GameData;
 class GameState;
 

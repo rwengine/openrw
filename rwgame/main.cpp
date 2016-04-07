@@ -1,6 +1,3 @@
-#define GLEW_STATIC
-#include <GL/glew.h>
-
 #include "RWGame.hpp"
 
 std::string getGamePath()

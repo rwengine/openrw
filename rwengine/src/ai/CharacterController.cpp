@@ -2,7 +2,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <engine/Animator.hpp>
 #include <items/WeaponItem.hpp>
 #include <boost/concept_check.hpp>
@@ -390,7 +390,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 bool Activities::ShootWeapon::update(CharacterObject *character, CharacterController *controller)
 {
 	auto& wepdata = _item->getWeaponData();

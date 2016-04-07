@@ -25,7 +25,6 @@ target_link_libraries( rwgame
 	sfml-network
 	sfml-system
 	${OPENGL_LIBRARIES}
-	GLEW
 	${BULLET_LIBRARIES})
 
 install(TARGETS rwgame RUNTIME DESTINATION bin)

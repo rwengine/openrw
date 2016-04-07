@@ -2,7 +2,7 @@
 
 #include <LinearMath/btIDebugDraw.h>
 #include <render/GameRenderer.hpp>
-#include "Model.hpp"
+#include <data/Model.hpp>
 
 class DebugDraw : public btIDebugDraw
 {

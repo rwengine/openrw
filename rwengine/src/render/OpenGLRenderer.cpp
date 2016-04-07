@@ -1,5 +1,4 @@
 #include <render/OpenGLRenderer.hpp>
-#include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -160,6 +159,9 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p)
 OpenGLRenderer::OpenGLRenderer()
 	: currentDbuff(nullptr), currentProgram(nullptr), currentDebugDepth(0)
 {
+	// We need to query for some profiling exts.
+	ogl_CheckExtensions();
+
 	glGenBuffers(1, &UBOScene);
 	glGenBuffers(1, &UBOObject);
 
@@ -327,7 +329,7 @@ void OpenGLRenderer::invalidate()
 void OpenGLRenderer::pushDebugGroup(const std::string& title)
 {
 #if RW_USING(RENDER_PROFILER)
-	if( GLEW_KHR_debug )
+	if( ogl_ext_KHR_debug )
 	{
 		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
 		ProfileInfo& prof = profileInfo[currentDebugDepth];
@@ -345,7 +347,7 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title)
 const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup()
 {
 #if RW_USING(RENDER_PROFILER)
-	if( GLEW_KHR_debug )
+	if( ogl_ext_KHR_debug )
 	{
 		glPopDebugGroup();
 		currentDebugDepth--;

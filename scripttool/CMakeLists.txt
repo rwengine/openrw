@@ -9,7 +9,6 @@ sfml-graphics
 sfml-window
 sfml-system
 ${OPENGL_LIBRARIES}
-GLEW
 ${BULLET_LIBRARIES})
 
 install(TARGETS ${SCRIPTTOOL} RUNTIME DESTINATION bin)

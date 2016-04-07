@@ -2,11 +2,11 @@
 #ifndef _GAMEOBJECT_HPP_
 #define _GAMEOBJECT_HPP_
 
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 #include <objects/ObjectTypes.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>

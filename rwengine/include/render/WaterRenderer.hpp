@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 #include <render/OpenGLRenderer.hpp>
 
 class GameRenderer;

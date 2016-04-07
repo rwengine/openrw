@@ -5,7 +5,7 @@
 #include <dynamics/RaycastCallbacks.hpp>
 #include <data/CollisionModel.hpp>
 #include <data/Skeleton.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 
