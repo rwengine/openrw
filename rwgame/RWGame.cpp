@@ -365,12 +365,12 @@ void RWGame::tick(float dt)
 
 		clockAccumulator += dt;
 		while( clockAccumulator >= 1.f ) {
-			world->state->minute ++;
-			while( state->minute >= 60 ) {
-				state->minute = 0;
-				state->hour ++;
-				while( state->hour >= 24 ) {
-					state->hour = 0;
+			world->state->basic.gameMinute ++;
+			while( state->basic.gameMinute >= 60 ) {
+				state->basic.gameMinute = 0;
+				state->basic.gameHour ++;
+				while( state->basic.gameHour >= 24 ) {
+					state->basic.gameHour = 0;
 				}
 			}
 			clockAccumulator -= 1.f;
@@ -685,10 +685,10 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 {
 	switch (event.key.code) {
 	case sf::Keyboard::LBracket:
-		state->minute -= 30.f;
+		state->basic.gameMinute -= 30.f;
 		break;
 	case sf::Keyboard::RBracket:
-		state->minute += 30.f;
+		state->basic.gameMinute += 30.f;
 		break;
 	case sf::Keyboard::Num9:
 		timescale *= 0.5f;

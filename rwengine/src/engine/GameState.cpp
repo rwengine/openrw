@@ -1,16 +1,13 @@
 #include <engine/GameState.hpp>
 
-GameState::GameState() :
-gameTime(0.f),
+GameState::GameState()
+	: basic{}
+	, playerInfo{}
+	, gameStats{}
+	, gameTime(0.f),
 currentProgress(0),
 maxProgress(1),
-numMissions(0),
-numHiddenPackages(0),
-numHiddenPackagesDiscovered(0),
-numUniqueJumps(0),
-numRampages(0),
 maxWantedLevel(0),
-currentWeather(0),
 scriptOnMissionFlag(nullptr),
 fadeOut(true),
 fadeStart(0.f),
@@ -21,8 +18,6 @@ isIntroPlaying(false),
 currentCutscene(nullptr),
 cutsceneStartTime(-1.f),
 isCinematic(false),
-hour(0),
-minute(0),
 cameraNear(0.1f),
 cameraFixed(false),
 cameraTarget(0),

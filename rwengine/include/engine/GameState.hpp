@@ -32,22 +32,22 @@ struct BasicState
 	/// /!\ This is wchar_t[24] in the original format /!\ we convert on load for convenience
 	char saveName[48];
 	SystemTime saveTime;
-	uint16_t unknown;
+	uint32_t unknown;
 	uint16_t islandNumber;
 	glm::vec3 cameraPosition;
-	uint16_t gameMinuteMS;
-	uint16_t lastTick;
+	uint32_t gameMinuteMS;
+	uint32_t lastTick;
 	uint8_t gameHour;
 	uint8_t _align0[3];
 	uint8_t gameMinute;
 	uint8_t _align1[3];
 	uint16_t padMode;
 	uint8_t _align2[2];
-	uint16_t timeMS;
+	uint32_t timeMS;
 	float timeScale;
 	float timeStep;
 	float timeStep_unclipped; // Unknown purpose
-	uint16_t frameCounter;
+	uint32_t frameCounter;
 	float timeStep2;
 	float framesPerUpdate;
 	float timeScale2;
@@ -59,9 +59,94 @@ struct BasicState
 	uint8_t _align5[2];
 	float weatherInterpolation;
 	uint8_t dateTime[24]; // Unused
-	uint16_t weatherType;
+	uint32_t weatherType;
 	float cameraData;
 	float cameraData2;
+};
+
+/** Block 15 player info */
+struct PlayerInfo
+{
+	uint16_t money;
+	uint8_t unknown1;
+	uint16_t unknown2;
+	uint8_t unknown3;
+	float unknown4;
+	uint16_t displayedMoney;
+	uint16_t hiddenPackagesCollected;
+	uint16_t hiddenPackageCount;
+	uint8_t neverTired;
+	uint8_t fastReload;
+	uint8_t thaneOfLibertyCity;
+	uint8_t singlePayerHealthcare;
+	uint8_t unknown5[70];
+};
+
+/** Block 17 */
+struct GameStats
+{
+	uint16_t playerKills;
+	uint16_t otherKills;
+	uint16_t carsExploded;
+	uint16_t shotsHit;
+	uint16_t pedTypesKilled[23];
+	uint16_t helicoptersDestroyed;
+	uint16_t playerProgress;
+	uint16_t explosiveKgsUsed;
+	uint16_t bulletsFired;
+	uint16_t bulletsHit;
+	uint16_t carsCrushed;
+	uint16_t headshots;
+	uint16_t timesBusted;
+	uint16_t timesHospital;
+	uint16_t daysPassed;
+	uint16_t mmRainfall;
+	uint16_t insaneJumpMaxDistance;
+	uint16_t insaneJumpMaxHeight;
+	uint16_t insaneJumpMaxFlips;
+	uint16_t insangeJumpMaxRotation;
+	/*
+	 * 0 none completed
+	 * 1 insane stunt
+	 * 2 perfect insane stunt
+	 * 3 double insane stunt
+	 * 4 perfect double insane stunt
+	 * 5 triple insane stunt
+	 * 6 perfect " " "
+	 * 7 quadruple
+	 * 8 perfect quadruple
+	 */
+	uint16_t bestStunt;
+	uint16_t uniqueStuntsFound;
+	uint16_t uniqueStuntsTotal;
+	uint16_t missionAttempts;
+	uint16_t missionsPassed;
+	uint16_t passengersDroppedOff;
+	uint16_t taxiRevenue;
+	uint16_t portlandPassed;
+	uint16_t stauntonPassed;
+	uint16_t shoresidePassed;
+	uint16_t bestTurismoTime;
+	float distanceWalked;
+	float distanceDriven;
+	uint16_t patriotPlaygroundTime;
+	uint16_t aRideInTheParkTime;
+	uint16_t grippedTime;
+	uint16_t multistoryMayhemTime;
+	uint16_t peopleSaved;
+	uint16_t criminalsKilled;
+	uint16_t highestParamedicLevel;
+	uint16_t firesExtinguished;
+	uint16_t longestDodoFlight;
+	uint16_t bombDefusalTime;
+	uint16_t rampagesPassed;
+	uint16_t totalRampages;
+	uint16_t totalMissions;
+	uint16_t fastestTime[16]; // not used
+	uint16_t highestScore[16];
+	uint16_t peopleKilledSinceCheckpoint; // ?
+	uint16_t peopleKilledSinceLastBustedOrWasted;
+	char lastMissionGXT[8];
 };
 
 struct TextDisplayData
@@ -197,21 +282,30 @@ struct GarageInfo
 struct GameState
 {
 	/**
+	  Basic Game State
+	 */
+	BasicState basic;
+
+	/**
+	  Player stats
+	 */
+	PlayerInfo playerInfo;
+
+	/**
+	  Game Stats
+	  */
+	GameStats gameStats;
+
+	/**
 	 * Second since game was started
 	 */
 	float gameTime;
 	unsigned int currentProgress;
 	unsigned int maxProgress;
-	unsigned int numMissions;
-	unsigned int numHiddenPackages;
-	unsigned int numHiddenPackagesDiscovered;
-	unsigned int numUniqueJumps;
-	unsigned int numRampages;
+
 	unsigned int maxWantedLevel;
 
 	GameObjectID playerObject;
-
-	unsigned int currentWeather;
 
 	/**
 	 * @brief Stores a pointer to script global that stores the on-mission state.
@@ -238,9 +332,6 @@ struct GameState
 	float cutsceneStartTime;
 	/** Flag for rendering cutscene letterbox */
 	bool isCinematic;
-
-	short hour;
-	short minute;
 	
 	std::string lastMissionName;
 	

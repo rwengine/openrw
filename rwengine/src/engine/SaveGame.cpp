@@ -11,6 +11,7 @@
 #include <ai/PlayerController.hpp>
 #include <items/WeaponItem.hpp>
 #include <cstring>
+#include <iconv.h>
 
 // Original save game file data structures
 typedef uint16_t BlockWord;
@@ -101,10 +102,6 @@ struct Block1PlayerPed {
 	uint8_t modelName[24];
 	uint8_t align[2];
 };
-
-template<class T> void read(std::FILE* str, T& out) {
-	std::fread(&out, sizeof(out), 1, str);
-}
 
 struct StructStoredCar {
 	BlockDword modelId;
@@ -210,31 +207,11 @@ void SaveGame::writeGame(GameState& state, const std::string& file)
 	std::FILE* saveFile = std::fopen(file.c_str(), "w");
 	
 	// BLOCK 0 - Variables
-	BasicState block0Data = {};
-	//strcpy(block0Data.saveName, "OpenRW Save Game");
-	block0Data.islandNumber = 1;
-	block0Data.cameraPosition = glm::vec3(0.f);
-	block0Data.gameMinuteMS = 1000;
-	block0Data.lastTick = 1;
-	block0Data.gameHour = 12;
-	block0Data.gameMinute = 13;
-	block0Data.padMode = 1;
-	block0Data.timeMS = 10000;
-	block0Data.timeScale = 1.0;
-	block0Data.timeStep = 1.0/60.f;
-	block0Data.timeStep_unclipped = block0Data.timeStep;
-	block0Data.frameCounter = 1000;
-	block0Data.timeStep2 = 1.0;
-	block0Data.framesPerUpdate = 1.0;
-	block0Data.timeScale2 = 1.0;
-	block0Data.lastWeather = 1;
-	block0Data.nextWeather = 1;
-	block0Data.weatherInterpolation = 1.0;
-	block0Data.weatherType = 1;
-	
-	BlockSize block0Size = sizeof(block0Data); // TODO calculate correctly.
+	BasicState stateCopy = state.basic;
+
+	BlockSize block0Size = sizeof(BasicState);
 	fwrite(&block0Size, sizeof(BlockSize), 1, saveFile);
-	fwrite(&block0Data, sizeof(block0Data), 1, saveFile);
+	fwrite(&state.basic, sizeof(BasicState), 1, saveFile);
 	
 	// BLOCK 0 - 0 Script 
 	const char header[4] = "SCR";
@@ -282,41 +259,77 @@ void SaveGame::writeGame(GameState& state, const std::string& file)
 	}
 }
 
-const size_type DWORDSZ = sizeof(BlockDword);
-BlockDword readDword(std::FILE* file)
-{
-	BlockDword sz;
-	fread(&sz, sizeof(BlockDword), 1, file);
-    return sz;
+template<class T> bool readBlock(std::FILE* str, T& out) {
+	return std::fread(&out, sizeof(out), 1, str) == 1;
+}
+
+#define READ_BLOCK(var) \
+	if (! readBlock(loadFile, var)) { \
+		std::cerr << file << ": Failed to load block " #var << std::endl; \
+		return false; \
+	}
+#define READ_SIZE(var) \
+	if (! readBlock(loadFile, var)) { \
+		std::cerr << file << ": Failed to load size " #var << std::endl; \
+		return false; \
+	}
+#define CHECK_SIG(expected) \
+{\
+	char signature[4]; \
+	if(fread(signature, sizeof(char), 4, loadFile) != 4) { \
+		std::cerr << "Failed to read signature" << std::endl; \
+		return false; \
+	} \
+	if (strncmp(signature, expected, 3) != 0) { \
+		std::cerr << "Signature " expected " incorrect" << std::endl; \
+		return false; \
+	} \
 }
 
 bool SaveGame::loadGame(GameState& state, const std::string& file)
 {
 	std::FILE* loadFile = std::fopen(file.c_str(), "r");
+	if (loadFile == nullptr) {
+		std::cerr << "Failed to open save file" << std::endl;
+		return false;
+	}
 	
 	// BLOCK 0
 	BlockDword blockSize;
-	fread(&blockSize, sizeof(BlockDword), 1, loadFile);
+	READ_SIZE(blockSize)
 	
-	BasicState block0Data;
-	fread(&block0Data, sizeof(BasicState), 1, loadFile);
-	
-	BlockDword scriptBlockSize;
-	fread(&scriptBlockSize, sizeof(BlockDword), 1, loadFile);
+	static_assert(sizeof(BasicState) == 0xBC, "BasicState is not the right size");
+	READ_BLOCK(state.basic)
 
-	char signature[4];
-	fread(signature, sizeof(char), 4, loadFile);
-	if( std::strncmp(signature, "SCR", 3) != 0 ) {
-		return false;
+	// Convert utf-16 to utf-8
+	size_t bytes = 0;
+	for(;; bytes++ ) {
+		if(state.basic.saveName[bytes-1] == 0 && state.basic.saveName[bytes] == 0) break;
 	}
+	size_t outSize = 24;
+	char outBuff[48];
+	char* outCur = outBuff;
+	auto icv = iconv_open("UTF-8", "UTF-16");
+	char* saveName = (char*)state.basic.saveName;
 
-	fread(&scriptBlockSize, sizeof(BlockDword), 1, loadFile);
+	iconv(icv, &saveName, &bytes, &outCur, &outSize);
+	strcpy(state.basic.saveName, outBuff);
+
+	BlockDword scriptBlockSize;
+
+	READ_SIZE(scriptBlockSize)
+	CHECK_SIG("SCR")
+	READ_SIZE(scriptBlockSize)
 
     BlockDword scriptVarCount;
-    fread(&scriptVarCount, sizeof(BlockDword), 1, loadFile);
+	READ_SIZE(scriptVarCount)
     assert(scriptVarCount == state.script->getFile()->getGlobalsSize());
 
-    fread(state.script->getGlobals(), sizeof(SCMByte), scriptVarCount, loadFile);
+	if(fread(state.script->getGlobals(), sizeof(SCMByte), scriptVarCount, loadFile) != scriptVarCount)
+	{
+		std::cerr << "Failed to read script memory" << std::endl;
+		return false;
+	}
 
 	BlockDword scriptDataBlockSize;
 	fread(&scriptDataBlockSize, sizeof(BlockDword), 1, loadFile);
@@ -328,43 +341,37 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	fread(&scriptData, sizeof(Block0ScriptData), 1, loadFile);
 	
 	BlockDword numScripts;
-	fread(&numScripts, DWORDSZ, 1, loadFile);
+	READ_SIZE(numScripts)
 	Block0RunningScript scripts[numScripts];
 	fread(scripts, sizeof(Block0RunningScript), numScripts, loadFile);
 
 	// BLOCK 1
-	BlockDword playerBlockSize = readDword(loadFile);
-	BlockDword playerInfoSize = readDword(loadFile);
+	BlockDword playerBlockSize;
+	READ_SIZE(playerBlockSize)
+	BlockDword playerInfoSize;
+	READ_SIZE(playerInfoSize)
 	
-	BlockDword playerCount = readDword(loadFile);
+	BlockDword playerCount;
+	READ_SIZE(playerCount)
 	Block1PlayerPed players[playerCount];
     for(unsigned int p = 0; p < playerCount; ++p) {
-		read(loadFile, players[p].unknown0);
-		read(loadFile, players[p].unknown1);
-		read(loadFile, players[p].reference);
-		read(loadFile, players[p].info);
-		read(loadFile, players[p].maxWantedLevel);
-		read(loadFile, players[p].maxChaosLevel);
-		read(loadFile, players[p].modelName);
-		read(loadFile, players[p].align);
+		READ_BLOCK(players[p])
 	}
 
 	// BLOCK 2
-	BlockDword garageBlockSize = readDword(loadFile);
-	BlockDword garageDataSize = readDword(loadFile);
+	BlockDword garageBlockSize;
+	READ_SIZE(garageBlockSize)
+	BlockDword garageDataSize;
+	READ_SIZE(garageDataSize)
 
 	Block2GarageData garageData;
-	fread(&garageData, sizeof(Block2GarageData), 1, loadFile);
+	READ_BLOCK(garageData)
 
 	StructGarage garages[garageData.garageCount];
 	fread(garages, sizeof(StructGarage), garageData.garageCount, loadFile);
 
-	// Insert Game State.
-	state.hour = block0Data.gameHour;
-	state.minute = block0Data.gameMinute;
-	state.gameTime = block0Data.timeMS / 1000.f;
-	state.currentWeather = block0Data.nextWeather;
-    state.cameraPosition = block0Data.cameraPosition;
+	// We keep track of the game time as a float for now
+	state.gameTime = state.basic.timeMS / 1000.f;
 
 	state.scriptOnMissionFlag = (unsigned int*)state.script->getGlobals() + (size_t)scriptData.onMissionOffset;
 
@@ -381,7 +388,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 			thread.calls[i] = scripts[s].stack[i];
 		}
 		 /* TODO not hardcode +33 ms */
-		thread.wakeCounter = scripts[s].wakeTimer - block0Data.lastTick + 33;
+		thread.wakeCounter = scripts[s].wakeTimer - state.basic.lastTick + 33;
 		for(int i = 0; i < sizeof(Block0RunningScript::variables); ++i) {
 			thread.locals[i] = scripts[s].variables[i];
 		}
@@ -445,7 +452,6 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	return true;
 }
 
-#include <iconv.h>
 #include <dirent.h>
 bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 {
@@ -466,6 +472,7 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 	}
 	
 	std::fclose(loadFile);
+
 	size_t bytes = 0;
 	for(;; bytes++ ) {
 		if(basicState->saveName[bytes-1] == 0 && basicState->saveName[bytes] == 0) break;

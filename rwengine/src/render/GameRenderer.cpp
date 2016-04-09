@@ -247,10 +247,10 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 	glBindVertexArray( vao );
 
-	float tod = world->state->hour + world->state->minute/60.f;
+	float tod = world->getHour() + world->getMinute()/60.f;
 
 	// Requires a float 0-24
-	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(world->state->currentWeather * 24);
+	auto weatherID = static_cast<WeatherLoader::WeatherCondition>(world->state->basic.nextWeather * 24);
 	auto weather = world->data->weatherLoader.getWeatherData(weatherID, tod);
 
 	glm::vec3 skyTop = weather.skyTopColor;

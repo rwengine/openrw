@@ -622,12 +622,12 @@ void GameWorld::doWeaponScan(const WeaponScan &scan)
 
 int GameWorld::getHour()
 {
-	return state->hour;
+	return state->basic.gameHour;
 }
 
 int GameWorld::getMinute()
 {
-	return state->minute;
+	return state->basic.gameMinute;
 }
 
 glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const

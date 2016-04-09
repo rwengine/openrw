@@ -66,8 +66,8 @@ void game_get_time(const ScriptArguments& args)
 
 void game_set_time(const ScriptArguments& args)
 {
-	args.getWorld()->state->hour = args[0].integer;
-	args.getWorld()->state->minute = args[1].integer;
+	args.getWorld()->state->basic.gameHour = args[0].integer;
+	args.getWorld()->state->basic.gameMinute = args[1].integer;
 }
 
 bool game_is_button_pressed(const ScriptArguments& args)
@@ -301,7 +301,7 @@ void game_enable_input(const ScriptArguments& args)
 
 void game_set_weather(const ScriptArguments& args)
 {
-	args.getWorld()->state->currentWeather = args[0].integer;
+	args.getWorld()->state->basic.nextWeather = args[0].integer;
 }
 
 void game_get_runtime(const ScriptArguments& args)
@@ -593,7 +593,7 @@ void game_clear_cutscene(const ScriptArguments& args)
 
 void game_set_hidden_packages(const ScriptArguments& args)
 {
-	args.getWorld()->state->numHiddenPackages = args[0].integer;
+	args.getWorld()->state->playerInfo.hiddenPackageCount = args[0].integer;
 }
 
 void game_load_special_model(const ScriptArguments& args)
@@ -638,7 +638,7 @@ void game_set_max_progress(const ScriptArguments& args)
 
 void game_set_unique_jumps(const ScriptArguments& args)
 {
-	args.getWorld()->state->numUniqueJumps = args[0].integer;
+	args.getWorld()->state->gameStats.uniqueStuntsTotal = args[0].integer;
 }
 
 void game_set_last_mission(const ScriptArguments& args)
@@ -785,7 +785,7 @@ bool game_did_game_save(const ScriptArguments& args)
 
 void game_get_found_hidden_packages(const ScriptArguments& args)
 {
-	*args[0].globalInteger = args.getWorld()->state->numHiddenPackagesDiscovered;
+	*args[0].globalInteger = args.getWorld()->state->playerInfo.hiddenPackagesCollected;
 }
 
 void game_display_help(const ScriptArguments& args)
@@ -830,7 +830,7 @@ void game_load_collision(const ScriptArguments& args)
 
 void game_set_rampages(const ScriptArguments& args)
 {
-	args.getWorld()->state->numRampages = args[0].integer;
+	args.getWorld()->state->gameStats.totalRampages = args[0].integer;
 }
 
 void game_set_near_clip(const ScriptArguments& args)
@@ -840,7 +840,7 @@ void game_set_near_clip(const ScriptArguments& args)
 
 void game_set_missions(const ScriptArguments& args)
 {
-	args.getWorld()->state->numMissions = args[0].integer;
+	args.getWorld()->state->gameStats.totalMissions = args[0].integer;
 }
 
 void game_set_sound_fade(const ScriptArguments& args)
