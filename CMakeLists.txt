@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenRW)
 
+# Set Global configuration
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	add_definitions(-DRW_DEBUG 1)
+endif()
+
 # Optional components
 SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
 SET(BUILD_TESTS TRUE CACHE BOOL "Build test suite")
