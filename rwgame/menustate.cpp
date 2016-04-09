@@ -31,14 +31,22 @@ void MenuState::enterMainMenu()
 void MenuState::enterLoadMenu()
 {
 	Menu *m = new Menu(2);
-	m->offset = glm::vec2(200.f, 200.f);
+	m->offset = glm::vec2(20.f, 30.f);
 	m->addEntry(Menu::lambda("Back", [=] { enterMainMenu(); }));
 	auto saves = SaveGame::getAllSaveGameInfo();
 	for(SaveGameInfo& save : saves) {
-		m->addEntry(Menu::lambda(save.saveName, [=] {
-			StateManager::get().enter(new IngameState(game, false));
-			game->loadGame(save.savePath);
-		}));
+		if (save.valid) {
+			std::stringstream ss;
+			ss << save.basicState.saveTime.year << "/" << save.basicState.saveTime.month << "/" << save.basicState.saveTime.day
+			   << " " << save.basicState.saveTime.hour << ":" << save.basicState.saveTime.minute << "    " << save.basicState.saveName;
+			m->addEntry(Menu::lambda(ss.str(), [=] {
+				StateManager::get().enter(new IngameState(game, false));
+				game->loadGame(save.savePath);
+			}, 20.f));
+		}
+		else {
+			m->addEntry(Menu::lambda("Corrupt", [=] { }));
+		}
 	}
 	this->enterMenu(m);
 }

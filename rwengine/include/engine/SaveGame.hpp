@@ -4,17 +4,19 @@
 
 #include <rw/types.hpp>
 
+#include <engine/GameState.hpp>
+
 #include <string>
 #include <vector>
 
-struct GameState;
 class GameWorld;
 class ScriptMachine;
 
 struct SaveGameInfo
 {
-	std::string saveName;
 	std::string savePath;
+	bool valid;
+	BasicState basicState;
 };
 
 /**
@@ -40,7 +42,7 @@ public:
 	 */
 	static bool loadGame(GameState& state, const std::string& file);
 
-	static SaveGameInfo getSaveInfo(const std::string& file);
+	static bool getSaveInfo(const std::string& file, BasicState* outState);
 
 	/**
 	 * Returns save game information for all found saves

@@ -17,48 +17,6 @@ typedef uint16_t BlockWord;
 typedef uint32_t BlockDword;
 typedef BlockDword BlockSize;
 
-struct Block0Data {
-	uint16_t saveName[24];
-	BlockWord year;
-	BlockWord month;
-	BlockWord weekday;
-	BlockWord day;
-	BlockWord hour;
-	BlockWord minute;
-	BlockWord second;
-	BlockWord milliseconds;
-	BlockDword unknown;
-	BlockDword islandNumber;
-	glm::vec3 cameraPosition;
-	BlockDword gameMinuteMS;
-	BlockDword lastTick;
-	uint8_t gameHour;
-	uint8_t _align0[3];
-	uint8_t gameMinute;
-	uint8_t _align1[3];
-	BlockWord padMode;
-	uint8_t _align2[2];
-	BlockDword timeMS;
-	float timeScale;
-	float timeStep;
-	float timeStep_unclipped; // Unknown purpose
-	BlockDword frameCounter;
-	float timeStep2;
-	float framesPerUpdate;
-	float timeScale2;
-	BlockWord lastWeather;
-	uint8_t _align3[2];
-	BlockWord nextWeather;
-	uint8_t _align4[2];
-	BlockWord forcedWeather;
-	uint8_t _align5[2];
-	float weatherInterpolation;
-	uint8_t dateTime[24]; // Unused
-	BlockDword weatherType;
-	float cameraData;
-	float cameraData2;
-};
-
 struct Block0ContactInfo {
 	BlockDword missionFlag;
 	BlockDword baseBrief;
@@ -252,7 +210,7 @@ void SaveGame::writeGame(GameState& state, const std::string& file)
 	std::FILE* saveFile = std::fopen(file.c_str(), "w");
 	
 	// BLOCK 0 - Variables
-	Block0Data block0Data = {};
+	BasicState block0Data = {};
 	//strcpy(block0Data.saveName, "OpenRW Save Game");
 	block0Data.islandNumber = 1;
 	block0Data.cameraPosition = glm::vec3(0.f);
@@ -340,8 +298,8 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	BlockDword blockSize;
 	fread(&blockSize, sizeof(BlockDword), 1, loadFile);
 	
-	Block0Data block0Data;
-	fread(&block0Data, sizeof(block0Data), 1, loadFile);
+	BasicState block0Data;
+	fread(&block0Data, sizeof(BasicState), 1, loadFile);
 	
 	BlockDword scriptBlockSize;
 	fread(&scriptBlockSize, sizeof(BlockDword), 1, loadFile);
@@ -489,30 +447,40 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 
 #include <iconv.h>
 #include <dirent.h>
-SaveGameInfo SaveGame::getSaveInfo(const std::string& file)
+bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 {
 	std::FILE* loadFile = std::fopen(file.c_str(), "r");
+
+	SaveGameInfo info;
+	info.savePath = file;
 	
 	// BLOCK 0
 	BlockDword blockSize;
-	fread(&blockSize, sizeof(BlockDword), 1, loadFile);
+	if( fread(&blockSize, sizeof(BlockDword), 1, loadFile) == 0 ) {
+		return false;
+	}
 	
-	Block0Data block0Data;
-	fread(&block0Data, sizeof(block0Data), 1, loadFile);
+	// Read block 0 into state
+	if( fread(basicState, sizeof(BasicState), 1, loadFile) == 0 ) {
+		return false;
+	}
 	
 	std::fclose(loadFile);
 	size_t bytes = 0;
 	for(;; bytes++ ) {
-		if(block0Data.saveName[bytes-1] == 0 && block0Data.saveName[bytes] == 0) break;
+		if(basicState->saveName[bytes-1] == 0 && basicState->saveName[bytes] == 0) break;
 	}
-	size_t len = bytes/2;
 	size_t outSize = 24;
-	char outBuff[outSize];
+	char outBuff[48];
 	char* outCur = outBuff;
 	auto icv = iconv_open("UTF-8", "UTF-16");
-	char* saveName = (char*)block0Data.saveName;
+	char* saveName = (char*)basicState->saveName;
+
+	// Convert to UTF-8 and copy back to the return struct
 	iconv(icv, &saveName, &bytes, &outCur, &outSize);
-	return { std::string(outBuff), file };
+	strcpy(basicState->saveName, outBuff);
+
+	return true;
 }
 
 std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
@@ -540,7 +508,9 @@ std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
 		if ( ep->d_type == DT_REG ) {
 			realName = ep->d_name;
 			if(realName.find(".b") != realName.npos) {
-				infos.push_back(getSaveInfo(gamePath+"/"+realName));
+				std::string path = gamePath+"/"+realName;
+				infos.emplace_back(SaveGameInfo{path, false, {}});
+				infos.back().valid = getSaveInfo(infos.back().savePath, &infos.back().basicState);
 			}
 		}
 	}

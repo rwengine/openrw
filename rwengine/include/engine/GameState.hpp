@@ -14,6 +14,56 @@ class ScriptMachine;
 class PlayerController;
 struct CutsceneData;
 
+struct SystemTime
+{
+	uint16_t year;
+	uint16_t month;
+	uint16_t dayOfWeek;
+	uint16_t day;
+	uint16_t hour;
+	uint16_t minute;
+	uint16_t second;
+	uint16_t millisecond;
+};
+
+/** Block 0 State */
+struct BasicState
+{
+	/// /!\ This is wchar_t[24] in the original format /!\ we convert on load for convenience
+	char saveName[48];
+	SystemTime saveTime;
+	uint16_t unknown;
+	uint16_t islandNumber;
+	glm::vec3 cameraPosition;
+	uint16_t gameMinuteMS;
+	uint16_t lastTick;
+	uint8_t gameHour;
+	uint8_t _align0[3];
+	uint8_t gameMinute;
+	uint8_t _align1[3];
+	uint16_t padMode;
+	uint8_t _align2[2];
+	uint16_t timeMS;
+	float timeScale;
+	float timeStep;
+	float timeStep_unclipped; // Unknown purpose
+	uint16_t frameCounter;
+	float timeStep2;
+	float framesPerUpdate;
+	float timeScale2;
+	uint16_t lastWeather;
+	uint8_t _align3[2];
+	uint16_t nextWeather;
+	uint8_t _align4[2];
+	uint16_t forcedWeather;
+	uint8_t _align5[2];
+	float weatherInterpolation;
+	uint8_t dateTime[24]; // Unused
+	uint16_t weatherType;
+	float cameraData;
+	float cameraData2;
+};
+
 struct TextDisplayData
 {
 	// This is set by the final display text command.
