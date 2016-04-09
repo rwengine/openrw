@@ -4,7 +4,7 @@ project(OpenRW)
 
 # Set Global configuration
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(-DRW_DEBUG 1)
+	add_definitions(-DRW_DEBUG=1)
 endif()
 
 # Optional components
