@@ -1175,7 +1175,8 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		auto& ply = players[0];
 		std::cout << ply.reference << std::endl;
 		auto player = state.world->createPlayer(players[0].info.position);
-		player->mHealth = players[0].info.health;
+		player->getCurrentState().health = players[0].info.health;
+		player->getCurrentState().armour = players[0].info.armour;
 		state.playerObject = player->getGameObjectID();
 		state.maxWantedLevel = players[0].maxWantedLevel;
 		for(int w = 0; w < 13; ++w) {
