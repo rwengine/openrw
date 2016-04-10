@@ -3,7 +3,16 @@
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <engine/GameState.hpp>
-#include <glm/glm.hpp>
+#include <iomanip>
+
+constexpr size_t ui_TextSize = 35;
+constexpr size_t ui_TextHeight = 30;
+constexpr size_t ui_outerMargin = 20;
+constexpr size_t ui_infoMargin = 10;
+constexpr size_t ui_weaponSize = 50;
+const glm::vec3 ui_timeColour(196/255.f, 165/255.f, 119/255.f);
+const glm::vec3 ui_moneyColour(89/255.f, 113/255.f, 147/255.f);
+const glm::vec3 ui_healthColour(187/255.f, 102/255.f, 47/255.f);
 
 void drawMap(PlayerController* player, GameWorld* world, GameRenderer* render)
 {
@@ -32,9 +41,47 @@ void drawMap(PlayerController* player, GameWorld* world, GameRenderer* render)
 	render->map.draw(world, map);
 }
 
+void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* render)
+{
+	float infoTextX = render->getRenderer()->getViewport().x -
+			(ui_outerMargin + ui_weaponSize + ui_infoMargin);
+	float infoTextY = 0.f + ui_outerMargin;
+
+	TextRenderer::TextInfo ti;
+	ti.font = 1;
+	ti.size = ui_TextSize;
+	ti.align = TextRenderer::TextInfo::Right;
+
+	std::stringstream ss;
+	ss << std::setw(2) << std::setfill('0') << world->getHour()
+	   << std::setw(0) << ":"
+	   << std::setw(2) << world->getMinute();
+
+	ti.text = ss.str();
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
+	render->text.renderText(ti);
+
+	ti.baseColour = ui_timeColour;
+	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
+	render->text.renderText(ti);
+
+	infoTextY += ui_TextHeight;
+
+	ti.text = "$" + std::to_string(world->state->playerInfo.money);
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
+	render->text.renderText(ti);
+
+	ti.baseColour = ui_moneyColour;
+	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
+	render->text.renderText(ti);
+}
+
 void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render)
 {
 	drawMap(player, world, render);
+	drawPlayerInfo(player, world, render);
 }
 
 void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
