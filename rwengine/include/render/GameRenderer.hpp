@@ -1,5 +1,6 @@
 #ifndef _GAMERENDERER_HPP_
 #define _GAMERENDERER_HPP_
+#include <rw/defines.hpp>
 
 class Logger;
 
@@ -170,6 +171,11 @@ public:
 	 * @brief Draws the current on screen text.
 	 */
 	void drawOnScreenText();
+
+	/**
+	 * @brief Draws a texture on the screen
+	 */
+	void drawTexture(TextureData* texture, glm::vec4 extents);
 
 	/** 
 	 * Renders a model (who'd have thought)

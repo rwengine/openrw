@@ -844,6 +844,10 @@ void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std:
 void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
 {
 	// srhand
+	if (item->getModelID() == -1) {
+		return; // No model for this item
+	}
+
 	std::shared_ptr<ObjectData> odata = data->findObjectType<ObjectData>(item->getModelID());
 	auto weapons = data->models["weapons"];
 	if( weapons && weapons->resource ) {
@@ -1033,6 +1037,37 @@ void GameRenderer::renderEffects(GameWorld* world)
 void GameRenderer::drawOnScreenText()
 {
 	/// @ TODO
+}
+
+void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents)
+{
+	glUseProgram(ssRectProgram);
+
+	// Move into NDC
+	extents.x /= renderer->getViewport().x;
+	extents.y /= renderer->getViewport().y;
+	extents.z /= renderer->getViewport().x;
+	extents.w /= renderer->getViewport().y;
+	extents.x += extents.z / 2.f;
+	extents.y += extents.w / 2.f;
+	extents.x -= .5f;
+	extents.y -= .5f;
+	extents *= glm::vec4(2.f,-2.f, 1.f, 1.f);
+
+	glEnable(GL_BLEND);
+	glUniform2f(ssRectOffset, extents.x, extents.y);
+	glUniform2f(ssRectSize, extents.z, extents.w);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture->getName());
+	glUniform1i(ssRectTexture, 0);
+	glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+
+	glBindVertexArray( ssRectDraw.getVAOName() );
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	// Ooops
+	renderer->invalidate();
 }
 
 bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent)

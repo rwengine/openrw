@@ -37,16 +37,21 @@ int charToIndex(char g)
 		case '.': return 14;
 		case '/': return 15;
 		case ':': return 26;
+		case '[': return 59;
+		case ']': return 61;
+		// This is a guess.
+		case '@': return 91;
 	}
 }
 
 glm::vec4 indexToCoord(int font, int index)
 {
-	int x = index % 16;
-	int y = index / 16;
-	glm::vec2 gsize( 1.f / 16.f, 1.f / ((font == 0) ? 16.f : 13.f) );
-	return glm::vec4( x, y, x + 1, y + 1 ) * 
-	glm::vec4( gsize, gsize ); // + glm::vec4( 0.0001f, 0.0001f,-0.0001f,-0.0001f);
+	float x = int(index % 16);
+	float y = int(index / 16) + 0.01f;
+	float fontHeight = ((font == 0) ? 16.f : 13.f);
+	glm::vec2 gsize( 1.f / 16.f, 1.f / fontHeight );
+	return glm::vec4( x, y, x + 1, y + 0.98f ) *
+		glm::vec4( gsize, gsize );
 }
 
 
@@ -118,6 +123,7 @@ TextRenderer::TextRenderer(GameRenderer* renderer)
 	}
 	
 	glyphData[charToIndex(' ')].widthFrac = 0.4f;
+	glyphData[charToIndex('-')].widthFrac = 0.5f;
 	glyphData[charToIndex('\'')].widthFrac = 0.5f;
 	glyphData[charToIndex('(')].widthFrac = 0.45f;
 	glyphData[charToIndex(')')].widthFrac = 0.45f;
@@ -269,6 +275,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	{
 		alignment.x -= (maxWidth / 2.f);
 	}
+
+	alignment.y -= ti.size * 0.2f;
 	
 	renderer->getRenderer()->setUniform(textShader, "proj", renderer->getRenderer()->get2DProjection());
 	renderer->getRenderer()->setUniformTexture(textShader, "fontTexture", 0);
