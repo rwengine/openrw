@@ -889,7 +889,7 @@ GameModule::GameModule()
 
 	bindFunction(0x014B, game_create_vehicle_generator, 13, "Create Car Generator" );
 	bindFunction(0x014C, game_set_vehicle_generator_count, 2, "Set Car Generator count" );
-	
+	bindUnimplemented( 0x014D, add_pager_message, 4, "show pager message" );
 	bindUnimplemented( 0x014E, game_show_onscreen_timer, 1, "Display Onscreen Timer" );
 	
 	bindUnimplemented( 0x014F, game_stop_timer, 1, "Stop Timer" );
