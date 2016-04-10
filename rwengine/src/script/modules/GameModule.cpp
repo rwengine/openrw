@@ -116,8 +116,11 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 }
 void game_set_vehicle_generator_count(const ScriptArguments& args)
 {
-	VehicleGenerator& generator = args.getWorld()->state->vehicleGenerators.at(*args[0].globalInteger);
-	generator.remainingSpawns = args[1].integer;
+	RW_CHECK(args.getWorld()->state->vehicleGenerators.size() > *args[0].globalInteger, "VehicleGenerator out of range");
+	if (args.getWorld()->state->vehicleGenerators.size() > *args[0].globalInteger) {
+		VehicleGenerator& generator = args.getWorld()->state->vehicleGenerators.at(*args[0].globalInteger);
+		generator.remainingSpawns = args[1].integer;
+	}
 }
 
 void game_set_zone_car_info(const ScriptArguments& args)
@@ -878,7 +881,7 @@ GameModule::GameModule()
 	bindFunction(0x00C0, game_set_time, 2, "Set Time of Day" );
 
 	bindFunction(0x00E1, game_is_button_pressed, 2, "Is Button Pressed" );
-	
+
 	bindUnimplemented( 0x010D, game_set_wanted_level, 2, "Set Wanted Level" );
 	
 	bindUnimplemented( 0x0109, game_add_character_money, 2, "Add Character Money" );
@@ -979,11 +982,11 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0245, game_set_character_anims, 2, "Set Character Animation Group" );
 
 	bindUnimplemented( 0x0247, game_load_model, 1, "Request Model Loaded" );
-
-	bindUnimplemented( 0x024A, game_get_phone, 3, "Get Phone Near" );
-
 	bindFunction(0x0248, game_model_loaded, 1, "Is Model Loaded" );
 	bindUnimplemented( 0x0249, game_release_model, 1, "Mark Model As Unneeded" );
+	bindUnimplemented( 0x024A, game_get_phone, 3, "Get Phone Near" );
+
+	bindUnimplemented(0x024E, game_disable_phone, 1, "Turn phone off" );
 
 	bindUnimplemented( 0x0250, game_create_light, 6, "Create Light" );
 	
@@ -991,7 +994,7 @@ GameModule::GameModule()
 	bindFunction(0x0256, game_is_player_playing, 1, "Is Player Playing" );
 
 	bindFunction(0x0293, game_controller_mode, 1, "Get Controller Mode" );
-
+	bindUnimplemented( 0x0294, game_set_car_resprayable, 2, "Set Car resprable" );
 	bindUnimplemented( 0x0296, game_unload_special_characters, 1, "Unload Special Character" );
 	
 	bindUnimplemented( 0x0297, game_reset_kills, 0, "Reset Player Kills" );
@@ -1117,6 +1120,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03F2, game_clear_character_hostility, 2, "Clear Ped Hostility" );
 
 	bindFunction(0x03F7, game_load_collision, 1, "Load Collision" );
+
+	bindUnimplemented(0x0405, game_enable_phone, 1, "Turn on phone" );
 
 	bindFunction(0x0408, game_set_rampages, 1, "Set Total Rampage Missions" );
 	bindUnimplemented( 0x0409, game_explode_rc_buggy, 0, "Blow up RC buggy" );

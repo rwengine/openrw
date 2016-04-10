@@ -145,6 +145,12 @@ public:
 	
 	bool enterVehicle(VehicleObject* vehicle, size_t seat);
 
+	/**
+	 * @brief isStopped
+	 * @return True if the character isn't moving
+	 */
+	bool isStopped() const;
+
 	VehicleObject *getCurrentVehicle() const;
 	size_t getCurrentSeat() const;
 	void setCurrentVehicle(VehicleObject *value, size_t seat);

@@ -1,6 +1,7 @@
 #pragma once
 #ifndef _SCRIPTMACHINE_HPP_
 #define _SCRIPTMACHINE_HPP_
+#include <rw/defines.hpp>
 #include <script/ScriptTypes.hpp>
 #include <sstream>
 #include <iomanip>

@@ -369,6 +369,12 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 	return false;
 }
 
+bool CharacterObject::isStopped() const
+{
+	RW_UNIMPLEMENTED("Checking if character is stopped")
+	return true;
+}
+
 VehicleObject *CharacterObject::getCurrentVehicle() const
 {
 	return currentVehicle;
