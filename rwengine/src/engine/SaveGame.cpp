@@ -1181,8 +1181,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		for(int w = 0; w < 13; ++w) {
 			auto& wep = ply.info.weapons[w];
 			if(wep.weaponId != 0) {
-				auto& weaponInfo = state.world->data->weaponData.at(wep.weaponId);
-				auto item = new WeaponItem(player, weaponInfo);
+				auto item = state.world->getInventoryItem(wep.weaponId);
 				player->addToInventory(item);
 			}
 		}

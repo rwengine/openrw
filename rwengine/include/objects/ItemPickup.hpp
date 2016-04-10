@@ -3,7 +3,8 @@
 #define _ITEMPICKUP_HPP_
 #include <objects/PickupObject.hpp>
 #include <glm/glm.hpp>
-#include <data/WeaponData.hpp>
+
+class InventoryItem;
 
 /**
  * @brief The ItemPickup class
@@ -11,10 +12,10 @@
  */
 class ItemPickup : public PickupObject
 {
-	std::shared_ptr<WeaponData> _data;
+	InventoryItem* item;
 public:
 
-	ItemPickup(GameWorld* world, const glm::vec3& position, std::shared_ptr<WeaponData> weapon);
+	ItemPickup(GameWorld* world, const glm::vec3& position, InventoryItem* item);
 
 	bool onCharacterTouch(CharacterObject* character);
 };

@@ -24,6 +24,7 @@ class VehicleObject;
 #include <render/VisualFX.hpp>
 #include <data/ObjectData.hpp>
 
+class InventoryItem;
 struct WeaponScan;
 
 #include <glm/glm.hpp>
@@ -143,6 +144,13 @@ public:
 	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 
 	float getGameTime() const;
+
+	/**
+	 * @brief getInventoryItem
+	 * @param weaponId The Weapon ID (inventory slot) of the weapon to fetch
+	 * @return Instance of the weapon
+	 */
+	InventoryItem* getInventoryItem(uint16_t weaponId) const;
 
 	/**
 	 * Game data
@@ -314,6 +322,11 @@ private:
 	std::set<GameObject*> deletionQueue;
 
 	std::vector<AreaIndicatorInfo> areaIndicators;
+
+	/**
+	 * Inventory Item instances
+	 */
+	std::vector<InventoryItem*> inventoryItems;
 	
 	/**
 	 * Flag for pausing the simulation

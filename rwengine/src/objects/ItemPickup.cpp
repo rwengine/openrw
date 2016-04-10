@@ -2,15 +2,17 @@
 #include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
 #include <items/WeaponItem.hpp>
+#include <rw/defines.hpp>
 
-ItemPickup::ItemPickup(GameWorld *world, const glm::vec3 &position, std::shared_ptr<WeaponData> weapon)
-	: PickupObject(world, position, weapon->modelID), _data(weapon)
+ItemPickup::ItemPickup(GameWorld *world, const glm::vec3 &position, InventoryItem* item)
+	: PickupObject(world, position, item->getModelID())
+	, item(item)
 {
-
+	RW_CHECK(item != nullptr, "Pickup created with null item");
 }
 
 bool ItemPickup::onCharacterTouch(CharacterObject *character)
 {
-	character->addToInventory(new WeaponItem(character, _data));
+	character->addToInventory(item);
 	return true;
 }

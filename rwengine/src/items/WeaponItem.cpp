@@ -8,26 +8,26 @@
 #include <data/Skeleton.hpp>
 #include <engine/GameData.hpp>
 
-void WeaponItem::fireHitscan()
+void WeaponItem::fireHitscan(CharacterObject* owner)
 {
-	auto handFrame = _character->model->resource->findFrame("srhand");
+	auto handFrame = owner->model->resource->findFrame("srhand");
 	glm::mat4 handMatrix;
 	if( handFrame ) {
 		while( handFrame->getParent() ) {
-			handMatrix = _character->skeleton->getMatrix(handFrame->getIndex()) * handMatrix;
+			handMatrix = owner->skeleton->getMatrix(handFrame->getIndex()) * handMatrix;
 			handFrame = handFrame->getParent();
 		}
 	}
 
-	auto farTarget = _character->getPosition() +
-			_character->getRotation() * glm::vec3(0.f, _wepData->hitRange, 0.f);
+	auto farTarget = owner->getPosition() +
+			owner->getRotation() * glm::vec3(0.f, _wepData->hitRange, 0.f);
 	auto handPos = glm::vec3(handMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f));
-	auto fireOrigin = _character->getPosition() +
-			_character->getRotation() * handPos;
-	auto flashDir = _character->getRotation() * glm::vec3{0.f, 0.f, 1.f};
-	auto flashUp = _character->getRotation() * glm::vec3{0.f, -1.f, 0.f};
+	auto fireOrigin = owner->getPosition() +
+			owner->getRotation() * handPos;
+	auto flashDir = owner->getRotation() * glm::vec3{0.f, 0.f, 1.f};
+	auto flashUp = owner->getRotation() * glm::vec3{0.f, -1.f, 0.f};
 
-	_character->engine->doWeaponScan(WeaponScan(_wepData->damage, fireOrigin, farTarget, _wepData.get()));
+	owner->engine->doWeaponScan(WeaponScan(_wepData->damage, fireOrigin, farTarget, _wepData.get()));
 
 	// Particle FX involved:
 	// - smokeII emited around barrel
@@ -35,9 +35,9 @@ void WeaponItem::fireHitscan()
 	// - smoke emited at hit point
 	// - gunflash
 
-	auto tracerTex = _character->engine->data->findTexture("shad_exp")->getName();
-	auto flashTex = _character->engine->data->findTexture("gunflash2")->getName();
-	auto flashTex1 = _character->engine->data->findTexture("gunflash1")->getName();
+	auto tracerTex = owner->engine->data->findTexture("shad_exp")->getName();
+	auto flashTex = owner->engine->data->findTexture("gunflash2")->getName();
+	auto flashTex1 = owner->engine->data->findTexture("gunflash1")->getName();
 
 	float tracertime = 0.1f;
 	auto distance = glm::distance(fireOrigin, farTarget);
@@ -93,26 +93,27 @@ void WeaponItem::fireHitscan()
 											*/
 }
 
-void WeaponItem::fireProjectile()
+void WeaponItem::fireProjectile(CharacterObject* owner)
 {
 	auto handPos = glm::vec3(0.f, 1.5f, 1.f);
-	auto fireOrigin = _character->getPosition() +
-			_character->getRotation() * handPos;
-	auto direction = _character->getRotation() * glm::normalize(glm::vec3{0.f, 1.f, 1.f});
+	auto fireOrigin = owner->getPosition() +
+			owner->getRotation() * handPos;
+	auto direction = owner->getRotation() * glm::normalize(glm::vec3{0.f, 1.f, 1.f});
 
 	auto pt = _wepData->name == "grenade" ? ProjectileObject::Grenade : ProjectileObject::Molotov;
 
 	// Work out the velocity multiplier as a function of how long the player
 	// Was holding down the fire button. If _fireStop < 0.f then the player
 	// is still holding the button down.
-	float throwTime = _character->engine->getGameTime() - _fireStart;
+	float throwTime = owner->engine->getGameTime() - owner->getCurrentState().lastFireTimeMS/1000.f;
 	float forceFactor = throwTime;
+#if 0
 	if( _fireStop > 0.f ) {
 		forceFactor = _fireStop - _fireStart;
 	}
 	forceFactor /= throwTime;
 
-	auto projectile = new ProjectileObject(_character->engine, fireOrigin,
+	auto projectile = new ProjectileObject(owner->engine, fireOrigin,
 	{
 											pt,
 											direction,
@@ -121,41 +122,45 @@ void WeaponItem::fireProjectile()
 											_wepData
 										});
 
-	auto& pool = _character->engine->getTypeObjectPool( projectile );
+	auto& pool = owner->engine->getTypeObjectPool( projectile );
 	pool.insert(projectile);
+#endif
 }
 
-void WeaponItem::primary(bool active)
+void WeaponItem::primary(CharacterObject* owner)
 {
-	_firing = active;
+#if 0
 	if( active ) {
-		_fireStart = _character->engine->getGameTime();
+		_fireStart = owner->engine->getGameTime();
 		_fireStop = -1.f;
 
 		// ShootWeapon will call ::fire() on us at the appropriate time.
-		_character->controller->setNextActivity(new Activities::ShootWeapon(this));
+		owner->controller->setNextActivity(new Activities::ShootWeapon(this));
 	}
-	else {
-		_fireStop = _character->engine->getGameTime();
-	}
+#endif
 }
 
-void WeaponItem::secondary(bool active)
+void WeaponItem::secondary(CharacterObject* owner)
 {
 
 }
 
-void WeaponItem::fire()
+void WeaponItem::fire(CharacterObject* owner)
 {
 	switch( _wepData->fireType ) {
 	case WeaponData::INSTANT_HIT:
-		fireHitscan();
+		fireHitscan(owner);
 		break;
 	case WeaponData::PROJECTILE:
-		fireProjectile();
+		fireProjectile(owner);
 		break;
 	default:
 		/// @todo meele
 		break;
 	}
+}
+
+bool WeaponItem::isFiring(CharacterObject* owner)
+{
+	return owner->getCurrentState().primaryActive;
 }

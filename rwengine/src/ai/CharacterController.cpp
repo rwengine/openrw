@@ -174,10 +174,10 @@ void CharacterController::useItem(bool active, bool primary)
 {
 	if( character->getActiveItem() ) {
 		if( primary ) {
-			character->getActiveItem()->primary(active);
+			character->getCurrentState().primaryActive = active;
 		}
 		else {
-			character->getActiveItem()->secondary(active);
+			character->getCurrentState().secondaryActive = active;
 		}
 	}
 }
@@ -399,7 +399,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	// Thrown projectiles have lob / throw.
 
 	if( wepdata->fireType == WeaponData::INSTANT_HIT ) {
-		if( _item->isFiring() ) {
+		if( _item->isFiring(character) ) {
 
 			auto shootanim = character->engine->data->animations[wepdata->animation1];
 			if( shootanim ) {
@@ -414,7 +414,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 				auto currID = character->animator->getAnimationTime();
 
 				if( currID >= firetime && ! _fired ) {
-					_item->fire();
+					_item->fire(character);
 					_fired = true;
 				}
 				if( currID > loopend ) {
@@ -444,7 +444,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			auto currID = character->animator->getAnimationTime();
 
 			if( currID >= firetime && !_fired ) {
-				_item->fire();
+				_item->fire(character);
 				_fired = true;
 			}
 			if( character->animator->isCompleted() ) {

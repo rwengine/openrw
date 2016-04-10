@@ -7,6 +7,29 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 
+constexpr size_t maxInventorySlots = 13;
+
+struct CharacterWeaponSlot
+{
+	// Assuming these match the entries in weapon.dat
+	uint32_t weaponId;
+	uint32_t bulletsClip;
+	uint32_t bulletsTotal;
+};
+
+struct CharacterState
+{
+	glm::vec3 position;
+	float rotation;
+	float health;
+	float armour;
+	CharacterWeaponSlot weapons[maxInventorySlots];
+	uint16_t currentWeapon;
+	uint32_t lastFireTimeMS;
+	bool primaryActive;
+	bool secondaryActive;
+};
+
 class VehicleObject;
 class GameWorld;
 class InventoryItem;
@@ -57,6 +80,8 @@ struct AnimationGroup
 class CharacterObject : public GameObject
 {
 private:
+	CharacterState currentState;
+
 	VehicleObject* currentVehicle;
 	size_t currentSeat;
 
@@ -66,9 +91,6 @@ private:
 	// Incredibly hacky "move in this direction".
 	bool _hasTargetPosition;
 	glm::vec3 _targetPosition;
-
-	std::map<int, InventoryItem*> _inventory;
-	int _activeInventoryItem;
 
 	bool jumped = false;
 	float jumpSpeed;
@@ -99,6 +121,9 @@ public:
 	Type type() { return Character; }
 
 	void tick(float dt);
+
+	const CharacterState& getCurrentState() const { return currentState; }
+	CharacterState& getCurrentState(){ return currentState; }
 
 	/**
 	 * @brief Loads the model and texture for a character skin.
@@ -144,11 +169,9 @@ public:
 	void addToInventory( InventoryItem* item );
 	void setActiveItem( int slot );
 	InventoryItem* getActiveItem();
-	void destroyItem( int slot );
+	void removeFromInventory( int slot );
 
 	void cycleInventory( bool up );
-
-	const std::map<int, InventoryItem*>& getInventory() const { return _inventory; }
 };
 
 #endif

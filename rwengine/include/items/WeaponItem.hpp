@@ -5,29 +5,32 @@
 #include <data/WeaponData.hpp>
 #include <memory>
 
+/**
+ * @brief The WeaponItem class
+ * Logic for basic weapon types
+ *
+ * This is instanciated once -per item type-, so state is shared between
+ * all instances of the same weapon. Timing is controlled by the CharacterState
+ */
 class WeaponItem : public InventoryItem
 {
 	std::shared_ptr<WeaponData> _wepData;
 
-	bool _firing;
-	float _fireStart;
-	float _fireStop;
-
-	void fireHitscan();
-	void fireProjectile();
+	void fireHitscan(CharacterObject* owner);
+	void fireProjectile(CharacterObject* owner);
 public:
-	WeaponItem(CharacterObject* character, std::shared_ptr<WeaponData> data)
-		: InventoryItem(data->inventorySlot, data->modelID, character), _wepData(data),
-		  _firing(false), _fireStart(0.f), _fireStop(0.f)
+	WeaponItem(int itemID, std::shared_ptr<WeaponData> data)
+		: InventoryItem(itemID, data->inventorySlot, data->modelID)
+		, _wepData(data)
 	{}
 
-	void primary(bool active);
+	void primary(CharacterObject* owner);
 
-	void secondary(bool active);
+	void secondary(CharacterObject* owner);
 
-	bool isFiring() const { return _firing; }
+	void fire(CharacterObject* owner);
 
-	void fire();
+	bool isFiring(CharacterObject* owner);
 
 	std::shared_ptr<WeaponData>& getWeaponData() { return _wepData; }
 };

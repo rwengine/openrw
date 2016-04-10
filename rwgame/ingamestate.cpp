@@ -35,10 +35,14 @@ void IngameState::startTest()
 	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
 
 	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
-	for( auto& w : getWorld()->data->weaponData ) {
-		if( w->name == "unarmed" ) continue;
-		getWorld()->pickupPool.insert(new ItemPickup(getWorld(), itemspawn,
-												  w));
+	for(int i = 1; i < maxInventorySlots; ++i) {
+		ItemPickup* pickup =
+					new ItemPickup(
+						getWorld(),
+						itemspawn,
+						getWorld()->getInventoryItem(i));
+		getWorld()->pickupPool.insert(pickup);
+		getWorld()->allObjects.push_back(pickup);
 		itemspawn.x += 2.5f;
 	}
 

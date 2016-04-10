@@ -5,18 +5,21 @@
 class GameObject;
 class CharacterObject;
 
+/**
+ * @brief The InventoryItem class
+ *
+ * Instanciated once per item type
+ */
 class InventoryItem
 {
+	int _itemID;
 	int _inventorySlot;
 	int _modelID;
 protected:
-	CharacterObject* _character;
-
-	InventoryItem(int invSlot, int model, CharacterObject* character)
-		: _inventorySlot(invSlot), _modelID(model), _character(character)
+	InventoryItem(int itemID, int invSlot, int model)
+		: _itemID(itemID), _inventorySlot(invSlot), _modelID(model)
 	{}
 public:
-
 	virtual ~InventoryItem() {}
 
 	/**
@@ -26,6 +29,12 @@ public:
 	int getModelID() { return _modelID; }
 
 	/**
+	  * @brief getItemID
+	  * @return The index of this item in the item list
+	  */
+	int getItemID() { return _itemID; }
+
+	/**
 	 * @brief getInventorySlot
 	 * @return The inventory slot number for this item
 	 */
@@ -33,14 +42,15 @@ public:
 
 	/**
 	 * @brief primary Implements mouse 1 action
-	 * @param active action starting or ending
+	 * @param owner The character using this item
 	 */
-	virtual void primary(bool active) = 0;
+	virtual void primary(CharacterObject* owner) = 0;
 
 	/**
 	 * @see primary
+	 * @param owner The character using this item
 	 */
-	virtual void secondary(bool active) = 0;
+	virtual void secondary(CharacterObject* owner) = 0;
 
 	constexpr static int NO_INVSLOT = -1;
 };

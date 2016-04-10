@@ -6,6 +6,7 @@
 #include <objects/VehicleObject.hpp>
 #include <items/InventoryItem.hpp>
 #include <data/Skeleton.hpp>
+#include <rw/defines.hpp>
 
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
@@ -13,11 +14,16 @@ static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, std::shared_ptr<CharacterData> data)
-: GameObject(engine, pos, rot, model),
-  currentVehicle(nullptr), currentSeat(0),
-  _hasTargetPosition(false), _activeInventoryItem(0),
-  ped(data), physCharacter(nullptr),
-  controller(nullptr), jumped(false), jumpSpeed(DefaultJumpSpeed)
+	: GameObject(engine, pos, rot, model)
+	, currentState({})
+	, currentVehicle(nullptr)
+	, currentSeat(0)
+	, _hasTargetPosition(false)
+	, ped(data)
+	, physCharacter(nullptr)
+	, controller(nullptr)
+	, jumped(false)
+	, jumpSpeed(DefaultJumpSpeed)
 {
 	mHealth = 100.f;
 
@@ -60,9 +66,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 
 CharacterObject::~CharacterObject()
 {
-	for(auto p : _inventory) {
-		destroyItem(p.first);
-	}
 	destroyActor();
 	if( currentVehicle )
 	{
@@ -122,7 +125,19 @@ void CharacterObject::tick(float dt)
 
 	animator->tick(dt);
 	updateCharacter(dt);
-	
+
+	// Update the item if we're using it
+	if (currentState.primaryActive) {
+		if (getActiveItem()) {
+			getActiveItem()->primary(this);
+		}
+	}
+	if (currentState.secondaryActive) {
+		if (getActiveItem()) {
+			getActiveItem()->secondary(this);
+		}
+	}
+
 	// Ensure the character doesn't need to be reset
 	if(getPosition().z < -100.f) {
 		resetToAINode();
@@ -448,56 +463,56 @@ void CharacterObject::playAnimation(Animation *animation, bool repeat)
 
 void CharacterObject::addToInventory(InventoryItem *item)
 {
-	_inventory[item->getInventorySlot()] = item;
+	RW_CHECK(item->getInventorySlot() < maxInventorySlots, "Inventory Slot greater than maxInventorySlots");
+	if (item->getInventorySlot() < maxInventorySlots) {
+		currentState.weapons[item->getInventorySlot()].weaponId = item->getItemID();
+	}
 }
 
 void CharacterObject::setActiveItem(int slot)
 {
-	_activeInventoryItem = slot;
+	currentState.currentWeapon = slot;
 }
 
 InventoryItem *CharacterObject::getActiveItem()
 {
 	if ( currentVehicle ) return nullptr;
-	return _inventory[_activeInventoryItem];
+	auto weaponId = currentState.weapons[currentState.currentWeapon].weaponId;
+	return engine->getInventoryItem(weaponId);
 }
 
-void CharacterObject::destroyItem(int slot)
+void CharacterObject::removeFromInventory(int slot)
 {
-	delete _inventory[slot];
-	_inventory[slot] = nullptr;
+	currentState.weapons[slot].weaponId = 0;
 }
 
 void CharacterObject::cycleInventory(bool up)
 {
 	if( up ) {
-		for(auto it	= _inventory.begin(); it != _inventory.end(); ++it) {
-			if( it->first < 0 ) continue;
-			if( it->first > _activeInventoryItem ) {
-				setActiveItem(it->first);
+		for(int j = currentState.currentWeapon+1; j < maxInventorySlots; ++j) {
+			if (currentState.weapons[j].weaponId != 0) {
+				currentState.currentWeapon = j;
 				return;
 			}
 		}
 
 		// if there's no higher slot, set the first item.
-		auto next = _inventory.lower_bound(0);
-		if( next != _inventory.end() ) {
-			setActiveItem(next->first);
-		}
+		currentState.currentWeapon = 0;
 	}
 	else {
-		for(auto it	= _inventory.rbegin(); it != _inventory.rend(); ++it) {
-			if( it->first < 0 ) break;
-			if( it->first < _activeInventoryItem ) {
-				setActiveItem(it->first);
+		for(int j = currentState.currentWeapon-1; j >= 0; --j) {
+			if (currentState.weapons[j].weaponId != 0) {
+				currentState.currentWeapon = j;
 				return;
 			}
 		}
 
-		// if there's no lower slot, set the last item.
-		auto next = _inventory.rbegin();
-		if( next != _inventory.rend() ) {
-			setActiveItem(next->first);
+		// Nothing? set the highest
+		for(int j = maxInventorySlots-1; j >= 0; --j) {
+			if (currentState.weapons[j].weaponId != 0 || j == 0) {
+				currentState.currentWeapon = j;
+				return;
+			}
 		}
 	}
 }

@@ -12,6 +12,7 @@
 #include <data/Model.hpp>
 #include <data/WeaponData.hpp>
 #include <job/WorkContext.hpp>
+#include <items/WeaponItem.hpp>
 
 // 3 isn't enough to cause a factory.
 #include <objects/CharacterObject.hpp>
@@ -91,6 +92,14 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	gContactProcessedCallback = ContactProcessedCallback;
 	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
+
+	// Populate inventory items
+	for( auto& w : data->weaponData ) {
+		inventoryItems.push_back(
+					new WeaponItem(
+						inventoryItems.size(),
+						w));
+	}
 }
 
 GameWorld::~GameWorld()
@@ -650,6 +659,11 @@ glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
 float GameWorld::getGameTime() const
 {
 	return state->gameTime;
+}
+
+InventoryItem*GameWorld::getInventoryItem(uint16_t weaponId) const
+{
+	return inventoryItems[weaponId];
 }
 
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA)
