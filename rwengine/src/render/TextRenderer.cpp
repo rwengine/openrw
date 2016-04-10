@@ -36,6 +36,7 @@ int charToIndex(char g)
 		case '-': return 13;
 		case '.': return 14;
 		case '/': return 15;
+		case ':': return 26;
 	}
 }
 
@@ -113,13 +114,20 @@ TextRenderer::TextRenderer(GameRenderer* renderer)
 	
 	for( int g = 0; g < GAME_GLYPHS; g++ )
 	{
-		glyphData[g] = { 1.f };
+		glyphData[g] = { .9f };
 	}
 	
 	glyphData[charToIndex(' ')].widthFrac = 0.4f;
 	glyphData[charToIndex('\'')].widthFrac = 0.5f;
 	glyphData[charToIndex('(')].widthFrac = 0.45f;
 	glyphData[charToIndex(')')].widthFrac = 0.45f;
+	glyphData[charToIndex(':')].widthFrac = 0.65f;
+	glyphData[charToIndex('$')].widthFrac = 0.65f;
+
+	for(char g = '0'; g <= '9'; ++g) {
+		glyphData[charToIndex(g)].widthFrac = 0.65f;
+	}
+
 	// Assumes contigious a-z character encoding
 	for(char g = 0; g <= ('z'-'a'); g++)
 	{
