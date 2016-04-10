@@ -3,16 +3,23 @@
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <engine/GameState.hpp>
+#include <items/WeaponItem.hpp>
+
 #include <iomanip>
 
-constexpr size_t ui_TextSize = 35;
-constexpr size_t ui_TextHeight = 30;
+constexpr size_t ui_textSize = 25;
+constexpr size_t ui_textHeight = 22;
 constexpr size_t ui_outerMargin = 20;
 constexpr size_t ui_infoMargin = 10;
-constexpr size_t ui_weaponSize = 50;
-const glm::vec3 ui_timeColour(196/255.f, 165/255.f, 119/255.f);
-const glm::vec3 ui_moneyColour(89/255.f, 113/255.f, 147/255.f);
-const glm::vec3 ui_healthColour(187/255.f, 102/255.f, 47/255.f);
+constexpr size_t ui_weaponSize = 64;
+constexpr size_t ui_ammoSize = 14;
+constexpr size_t ui_ammoHeight = 16;
+constexpr size_t ui_armourOffset = ui_textSize * 3;
+#define RGB_COLOR(r,g,b) r/255.f, g/255.f, b/255.f
+const glm::vec3 ui_timeColour(RGB_COLOR(196, 165, 119));
+const glm::vec3 ui_moneyColour(RGB_COLOR(89, 113, 147));
+const glm::vec3 ui_healthColour(RGB_COLOR(187, 102, 47));
+const glm::vec3 ui_armourColour(RGB_COLOR(123, 136, 93));
 
 void drawMap(PlayerController* player, GameWorld* world, GameRenderer* render)
 {
@@ -46,18 +53,23 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	float infoTextX = render->getRenderer()->getViewport().x -
 			(ui_outerMargin + ui_weaponSize + ui_infoMargin);
 	float infoTextY = 0.f + ui_outerMargin;
+	float iconX = render->getRenderer()->getViewport().x -
+			(ui_outerMargin + ui_weaponSize);
+	float iconY = ui_outerMargin;
 
 	TextRenderer::TextInfo ti;
 	ti.font = 1;
-	ti.size = ui_TextSize;
+	ti.size = ui_textSize;
 	ti.align = TextRenderer::TextInfo::Right;
 
-	std::stringstream ss;
-	ss << std::setw(2) << std::setfill('0') << world->getHour()
-	   << std::setw(0) << ":"
-	   << std::setw(2) << world->getMinute();
+	{
+		std::stringstream ss;
+		ss << std::setw(2) << std::setfill('0') << world->getHour()
+		   << std::setw(0) << ":"
+		   << std::setw(2) << world->getMinute();
 
-	ti.text = ss.str();
+		ti.text = ss.str();
+	}
 	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
 	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
 	render->text.renderText(ti);
@@ -66,7 +78,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
 	render->text.renderText(ti);
 
-	infoTextY += ui_TextHeight;
+	infoTextY += ui_textHeight;
 
 	ti.text = "$" + std::to_string(world->state->playerInfo.money);
 	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
@@ -76,6 +88,95 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	ti.baseColour = ui_moneyColour;
 	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
 	render->text.renderText(ti);
+
+	infoTextY += ui_textHeight;
+
+	{
+		std::stringstream ss;
+		ss << "@" << std::setw(3) << std::setfill('0')
+		   << player->getCharacter()->getCurrentState().health;
+		ti.text = ss.str();
+	}
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
+	render->text.renderText(ti);
+
+	ti.baseColour = ui_healthColour;
+	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
+	render->text.renderText(ti);
+
+	{
+		std::stringstream ss;
+		ss << "[" << std::setw(3) << std::setfill('0')
+		   << player->getCharacter()->getCurrentState().armour;
+		ti.text = ss.str();
+	}
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY+1.f);
+	render->text.renderText(ti);
+
+	ti.baseColour = ui_armourColour;
+	ti.screenPosition = glm::vec2(infoTextX - ui_armourOffset, infoTextY);
+	render->text.renderText(ti);
+
+#if 0 // Useful for debugging
+	ti.text = "ABCDEFGHIJKLMANOQRTSWXYZ\nM0123456789";
+	ti.size = 30;
+	ti.align = TextRenderer::TextInfo::Left;
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(101.f, 202.f);
+	render->text.renderText(ti);
+	ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
+	ti.screenPosition = glm::vec2(100.f, 200.f);
+	render->text.renderText(ti);
+#endif
+
+	InventoryItem *current = player->getCharacter()->getActiveItem();
+	std::string itemTextureName = "fist";
+	if (current) {
+		uint16_t model = current->getModelID();
+		if (model > 0) {
+			ObjectDataPtr weaponData = world
+					->data
+					->findObjectType<ObjectData>(model);
+			if (weaponData != nullptr) {
+				itemTextureName = weaponData->modelName;
+			}
+		}
+	}
+	// Urgh
+	if (itemTextureName == "colt45") {
+		itemTextureName = "pistol";
+	}
+
+	TextureData::Handle itemTexture = render->getData()->findTexture(itemTextureName);
+	RW_CHECK(itemTexture != nullptr, "Item has 0 texture");
+	if (itemTexture != nullptr) {
+		RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");
+		render->drawTexture(itemTexture.get(),
+							glm::vec4(iconX,
+									  iconY,
+									  ui_weaponSize,
+									  ui_weaponSize));
+	}
+
+	if (current) {
+		WeaponItem* wep = static_cast<WeaponItem*>(current);
+		if (wep->getWeaponData()->fireType != WeaponData::MELEE) {
+			const CharacterState& cs = player->getCharacter()->getCurrentState();
+			const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
+			ti.text = std::to_string(slotInfo.bulletsClip) + "-"
+					+ std::to_string(slotInfo.bulletsTotal);
+
+			ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+			ti.font = 2;
+			ti.size = ui_ammoSize;
+			ti.align = TextRenderer::TextInfo::Center;
+			ti.screenPosition = glm::vec2(iconX + ui_weaponSize / 2.f,
+										  iconY + ui_weaponSize - ui_ammoHeight);
+			render->text.renderText(ti);
+		}
+	}
 }
 
 void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render)

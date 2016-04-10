@@ -99,6 +99,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	data->loadIMG("/models/gta3");
 	//engine->data.loadIMG("/models/txd");
 	data->loadIMG("/anim/cuts");
+	data->loadTXD("/models/hud.txd");
 	
 	data->load();
 	
