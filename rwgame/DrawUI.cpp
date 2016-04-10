@@ -15,6 +15,7 @@ constexpr size_t ui_weaponSize = 64;
 constexpr size_t ui_ammoSize = 14;
 constexpr size_t ui_ammoHeight = 16;
 constexpr size_t ui_armourOffset = ui_textSize * 3;
+constexpr size_t ui_maxWantedLevel = 6;
 #define RGB_COLOR(r,g,b) r/255.f, g/255.f, b/255.f
 const glm::vec3 ui_timeColour(RGB_COLOR(196, 165, 119));
 const glm::vec3 ui_moneyColour(RGB_COLOR(89, 113, 147));
@@ -56,6 +57,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	float iconX = render->getRenderer()->getViewport().x -
 			(ui_outerMargin + ui_weaponSize);
 	float iconY = ui_outerMargin;
+	float wantedX = render->getRenderer()->getViewport().x -
+			(ui_outerMargin);
+	float wantedY = ui_outerMargin + ui_weaponSize + 3.f;
 
 	TextRenderer::TextInfo ti;
 	ti.font = 1;
@@ -105,18 +109,28 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	ti.screenPosition = glm::vec2(infoTextX, infoTextY);
 	render->text.renderText(ti);
 
+	if (player->getCharacter()->getCurrentState().armour > 0)
 	{
 		std::stringstream ss;
 		ss << "[" << std::setw(3) << std::setfill('0')
 		   << player->getCharacter()->getCurrentState().armour;
 		ti.text = ss.str();
-	}
-	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
-	ti.screenPosition = glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY+1.f);
-	render->text.renderText(ti);
+		ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+		ti.screenPosition = glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY+1.f);
+		render->text.renderText(ti);
 
-	ti.baseColour = ui_armourColour;
-	ti.screenPosition = glm::vec2(infoTextX - ui_armourOffset, infoTextY);
+		ti.baseColour = ui_armourColour;
+		ti.screenPosition = glm::vec2(infoTextX - ui_armourOffset, infoTextY);
+		render->text.renderText(ti);
+	}
+
+	std::string s;
+	for (int i = 0; i < ui_maxWantedLevel; ++i) {
+		s += "]";
+	}
+	ti.text = s;
+	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
+	ti.screenPosition = glm::vec2(wantedX + 1.f, wantedY + 1.f);
 	render->text.renderText(ti);
 
 #if 0 // Useful for debugging
