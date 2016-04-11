@@ -5,7 +5,11 @@ project(OpenRW)
 # Set Global configuration
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-DRW_DEBUG=1)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
+
 
 # Optional components
 SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
