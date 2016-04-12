@@ -340,6 +340,7 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 		default:
 			break;
 		}
+	break;
 	case sf::Event::KeyReleased:
 		switch(event.key.code) {
 		case sf::Keyboard::LShift:
