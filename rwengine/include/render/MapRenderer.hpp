@@ -15,22 +15,21 @@ public:
 	
 	struct MapInfo
 	{
-		float scale = 1.f;
 		/// World coordinate center
-		glm::vec2 center;
+		glm::vec2 worldCenter;
+		/// World units to fit on the map
+		float worldSize;
+
 		/// yaw of the map
 		float rotation = 0.f;
-		
-		/// Top of the map on the screen
-		glm::vec2 mapScreenBottom;
-		/// Bottom of the map on the screen
-		glm::vec2 mapScreenTop;
+
+		glm::vec2 screenPosition;
+		float screenSize;
+		/// Make the map circular, or don't.
+		bool clipToSize = true;
 	};
 	
 	MapRenderer(Renderer* renderer, GameData* data);
-	
-	glm::vec2 worldToMap(const glm::vec2& coord);
-	glm::vec2 mapToScreen(const glm::vec2& map, const MapInfo& mi);
 	
 	void draw(GameWorld* world, const MapInfo& mi);
 
@@ -40,8 +39,11 @@ private:
 	
 	GeometryBuffer rectGeom;
 	DrawBuffer rect;
+
+	GeometryBuffer circleGeom;
+	DrawBuffer circle;
 	
 	Renderer::ShaderProgram* rectProg;
 	
-	void drawBlip(const glm::vec2& map, const glm::mat4& model, const MapInfo& mi, const std::string& texture, float heading = 0.f);
+	void drawBlip(const glm::vec2& map, const glm::mat4& view, const MapInfo& mi, const std::string& texture, float heading = 0.f, float size = 18.f);
 };

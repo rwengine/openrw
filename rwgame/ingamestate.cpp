@@ -245,7 +245,7 @@ void IngameState::draw(GameRenderer* r)
 {
 	if( !getWorld()->state->isCinematic && getWorld()->isCutsceneDone() )
 	{
-		drawHUD(game->getPlayer(), getWorld(), r);
+		drawHUD(_look, game->getPlayer(), getWorld(), r);
 	}
 	
     State::draw(r);

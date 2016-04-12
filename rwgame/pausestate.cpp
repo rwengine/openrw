@@ -35,9 +35,10 @@ void PauseState::draw(GameRenderer* r)
 	
 	auto& vp = r->getRenderer()->getViewport();
 	
-	map.scale = 0.2f;
-	map.mapScreenTop = glm::vec2(vp.x, vp.y);
-	map.mapScreenBottom = glm::vec2(0.f, 0.f);
+	map.worldSize = 4000.f;
+	map.clipToSize = false;
+	map.screenPosition = glm::vec2(vp.x/2, vp.y/2);
+	map.screenSize = std::max(vp.x, vp.y);
 	
 	game->getRenderer()->map.draw(getWorld(), map);
 

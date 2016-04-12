@@ -4,6 +4,6 @@
 
 class PlayerController;
 
-void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render);
+void drawHUD(ViewCamera& currentView, PlayerController* player, GameWorld* world, GameRenderer* render);
 
 void drawOnScreenText(GameWorld* world, GameRenderer* renderer);

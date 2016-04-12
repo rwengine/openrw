@@ -21,30 +21,31 @@ const glm::vec3 ui_timeColour(RGB_COLOR(196, 165, 119));
 const glm::vec3 ui_moneyColour(RGB_COLOR(89, 113, 147));
 const glm::vec3 ui_healthColour(RGB_COLOR(187, 102, 47));
 const glm::vec3 ui_armourColour(RGB_COLOR(123, 136, 93));
+const float ui_mapSize = 150.f;
+const float ui_worldSizeMin = 200.f;
+const float ui_worldSizeMax = 300.f;
 
-void drawMap(PlayerController* player, GameWorld* world, GameRenderer* render)
+void drawMap(ViewCamera& currentView,  PlayerController* player, GameWorld* world, GameRenderer* render)
 {
 	MapRenderer::MapInfo map;
-	map.scale = 0.4f;
 	
-	glm::quat plyRot;
+	glm::quat camRot = currentView.rotation;
 	
+	map.rotation = glm::roll(camRot) - M_PI/2.f;
+	map.worldSize = ui_worldSizeMin;
+	map.worldSize = ui_worldSizeMax;
 	if( player )
 	{
-		plyRot = player->getCharacter()->getRotation();
+		map.worldCenter = glm::vec2(player->getCharacter()->getPosition());
 	}
-	
-	map.rotation = glm::roll(plyRot);
-	
-	const glm::ivec2& vp = render->getRenderer()->getViewport();
-	
-	map.mapScreenTop = glm::vec2(260.f, vp.y - 10.f);
-	map.mapScreenBottom = glm::vec2(10.f, vp.y - 210.f);
-	
-	if( player )
-	{
-		map.center = glm::vec2(player->getCharacter()->getPosition());
-	}
+
+	const glm::ivec2 &vp = render->getRenderer()->getViewport();
+
+	glm::vec2 mapTop = glm::vec2(ui_outerMargin, vp.y - (ui_outerMargin + ui_mapSize));
+	glm::vec2 mapBottom = glm::vec2(ui_outerMargin + ui_mapSize, vp.y - ui_outerMargin);
+
+	map.screenPosition = (mapTop + mapBottom)/2.f;
+	map.screenSize = ui_mapSize * 0.95;
 	
 	render->map.draw(world, map);
 }
@@ -193,9 +194,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	}
 }
 
-void drawHUD(PlayerController* player, GameWorld* world, GameRenderer* render)
+void drawHUD(ViewCamera& currentView, PlayerController* player, GameWorld* world, GameRenderer* render)
 {
-	drawMap(player, world, render);
+	drawMap(currentView, player, world, render);
 	drawPlayerInfo(player, world, render);
 }
 

@@ -520,7 +520,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 void GameRenderer::renderPostProcess()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glStencilMask(0xFF);
+	glClearStencil(0x00);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
 	renderer->useProgram(postProg);
 	

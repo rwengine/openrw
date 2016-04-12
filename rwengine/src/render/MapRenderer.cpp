@@ -34,8 +34,8 @@ out vec4 outColour;
 
 void main()
 {
-	vec4 c = texture(spriteTexture, TexCoord);
-	outColour = colour + c;
+	vec4 c = texture(spriteTexture, TexCoord*0.99);
+	outColour = vec4(colour.rgb + c.rgb, colour.a * c.a);
 })";
 
 
@@ -50,6 +50,15 @@ MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
 	});
 	rect.addGeometry(&rectGeom);
 	rect.setFaceType(GL_TRIANGLE_STRIP);
+
+	std::vector<VertexP2> circleVerts;
+	circleVerts.push_back({0.f, 0.f});
+	for (int v = 0; v < 181; ++v) {
+		circleVerts.push_back({0.5f*cos(2*(v/180.f)*M_PI), 0.5f*sin(2*(v/180.f)*M_PI)});
+	}
+	circleGeom.uploadVertices(circleVerts);
+	circle.addGeometry(&circleGeom);
+	circle.setFaceType(GL_TRIANGLE_FAN);
 	
 	rectProg = renderer->createShader(
 		MapVertexShader,
@@ -61,61 +70,53 @@ MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
 
 #define GAME_MAP_SIZE 4000
 
-glm::vec2 MapRenderer::worldToMap(const glm::vec2& coord)
-{
-	return glm::vec2(coord.x, -coord.y);
-}
-
-glm::vec2 MapRenderer::mapToScreen(const glm::vec2& map, const MapInfo& mi)
-{
-	glm::vec2 screenSize = ((map-mi.center) * mi.scale);
-	glm::vec2 screenCenter(500.f, 500.f);
-	return screenSize + screenCenter;
-}
-
 void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 {
 	renderer->pushDebugGroup("Map");
 	renderer->useProgram(rectProg);
-	
-	glm::vec2 bottom = glm::min(mi.mapScreenBottom, mi.mapScreenTop);
-	glm::vec2 top = glm::max(mi.mapScreenBottom, mi.mapScreenTop);
-	glm::vec2 screenPos = (bottom+top)/2.f;
-	glm::vec2 scissorSize = top - bottom;
-	const glm::ivec2& vp = renderer->getViewport();
-	
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(bottom.x, vp.y - bottom.y - scissorSize.y, scissorSize.x, scissorSize.y);
-	
-	auto proj = renderer->get2DProjection();
-	glm::mat4 view, model;
-	view = glm::translate(view, glm::vec3(screenPos, 0.f));
-	view = glm::scale(view, glm::vec3(mi.scale));
-	model = glm::rotate(model, mi.rotation, glm::vec3(0.f, 0.f, 1.f));
-	model = glm::translate(model, glm::vec3(-worldToMap(mi.center), 0.f));
-	renderer->setUniform(rectProg, "view", view);
-	renderer->setUniform(rectProg, "proj", proj);
-	
+
+	// World out the number of units per tile
 	glm::vec2 worldSize(GAME_MAP_SIZE);
 	const int mapBlockLine = 8;
 	glm::vec2 tileSize = worldSize / (float)mapBlockLine;
-	
+	// Determine the scale to show the right number of world units on the screen
+	float worldScale = mi.screenSize / mi.worldSize;
+
+	auto proj = renderer->get2DProjection();
+	glm::mat4 view, model;
+	renderer->setUniform(rectProg, "proj", proj);
+	renderer->setUniform(rectProg, "model", glm::mat4());
+	renderer->setUniform(rectProg, "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
+
+	view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
+
+	if (mi.clipToSize)
+	{
+		glBindVertexArray( circle.getVAOName() );
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glm::mat4 circleView = glm::scale(view, glm::vec3(mi.screenSize));
+		renderer->setUniform(rectProg, "view", circleView);
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glStencilMask(0xFF);
+		glColorMask(0x00, 0x00, 0x00, 0x00);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 182);
+		glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+	}
+
+	view = glm::scale(view, glm::vec3(worldScale));
+	view = glm::rotate(view, mi.rotation, glm::vec3(0.f, 0.f, 1.f));
+	view = glm::translate(view, glm::vec3(glm::vec2(-1.f, 1.f) * mi.worldCenter, 0.f));
+	renderer->setUniform(rectProg, "view", view);
+
 	glBindVertexArray( rect.getVAOName() );
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	renderer->setUniformTexture(rectProg, "spriteTexture", 0);
 
-	glm::mat4 bg = glm::scale( model, glm::vec3( glm::vec2( worldSize ), 1.f ) );
-	
-	renderer->setUniform(rectProg, "model", bg);
-	renderer->setUniform(rectProg, "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.f));
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	
-	// 2048, -2048
-	
-	renderer->setUniform(rectProg, "colour", glm::vec4(0.f));
+	// radar00 = -x, +y
+	// incrementing in X, then Y
 	
 	int initX = -(mapBlockLine/2);
 	int initY = -(mapBlockLine/2);
@@ -141,10 +142,24 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		
 		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 	}
-	
-	glDisable(GL_SCISSOR_TEST);
-	
-	renderer->setUniform(rectProg, "view", view);
+
+	// From here on out we will work in screenspace
+	renderer->setUniform(rectProg, "view", glm::mat4());
+
+	if (mi.clipToSize) {
+		glDisable(GL_STENCIL_TEST);
+		// We only need the outer ring if we're clipping.
+		glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ZERO);
+		TextureData::Handle radarDisc = data->findTexture("radardisc");
+
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
+		model = glm::scale(model, glm::vec3(mi.screenSize*1.07));
+		renderer->setUniform(rectProg, "model", model);
+		glBindTexture(GL_TEXTURE_2D, radarDisc->getName());
+		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	}
 	
 	for(auto& blip : world->state->radarBlips)
 	{
@@ -170,7 +185,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 			}
 		}
 		
-		drawBlip(blippos, model, mi, "");
+		drawBlip(blippos, view, mi, blip.second.texture);
 	}
 	
 	// Draw the player blip
@@ -179,9 +194,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	{
 		glm::vec2 plyblip(player->getPosition());
 		float hdg = glm::roll(player->getRotation());
-		drawBlip(plyblip, model, mi, "radar_centre", hdg);
+		drawBlip(plyblip, view, mi, "radar_centre", mi.rotation - hdg);
 	}
-	
+
+	drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi, "radar_north", 0.f, 24.f);
+
 	glBindVertexArray( 0 );
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(0);
@@ -191,33 +208,31 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	renderer->popDebugGroup();
 }
 
-void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& model, const MapInfo& mi, const std::string& texture, float heading)
+void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, float heading, float size)
 {
-	auto relPos = glm::vec2( model * glm::vec4( worldToMap(coord), 0.f, 1.f ) );
-	
-	// Now that relPos is relative to the rotation of the map, we can clip it.
+	glm::vec2 adjustedCoord = coord;
+	if (mi.clipToSize)
+	{
+		float maxDist = mi.worldSize/2.f;
+		float centerDist = glm::distance(coord, mi.worldCenter);
+		if (centerDist > maxDist) {
+			adjustedCoord = mi.worldCenter + ((coord - mi.worldCenter)/centerDist)*maxDist;
+		}
+	}
 
-	float invScale = 1.f/mi.scale;
-	glm::vec2 mapCenter( (mi.mapScreenTop + mi.mapScreenBottom) / 2.f );
-	glm::vec2 mapMin( (mi.mapScreenBottom - mapCenter) );
-	glm::vec2 mapMax( (mi.mapScreenTop - mapCenter) );
-	
-	relPos = glm::max( mapMin * invScale, glm::min( mapMax * invScale, relPos ) );
-	glm::vec2 map = glm::vec2( glm::inverse(model) * glm::vec4( relPos, 0.f, 1.f ) );
+	glm::vec3 viewPos(view * glm::vec4(glm::vec2(1.f,-1.f)*adjustedCoord, 0.f, 1.f));
+	glm::mat4 model;
+	model = glm::translate(model, viewPos);
+	model = glm::scale(model, glm::vec3(size));
+	model = glm::rotate(model, heading, glm::vec3(0.f, 0.f, 1.f));
+	renderer->setUniform(rectProg, "model", model);
 
-	glm::mat4 m = model;
-	m = glm::translate(m, glm::vec3(map, 0.f));
-	m = glm::scale(m, glm::vec3(16.f * 1.f/mi.scale));
-	m = glm::rotate(m, heading, glm::vec3(0.f, 0.f, -1.f));
-
-	renderer->setUniform(rectProg, "model", m);
-	
 	GLuint tex = 0;
 	if ( !texture.empty() )
 	{
 		auto sprite= data->findTexture(texture);
 		tex = sprite->getName();
-		renderer->setUniform(rectProg, "colour", glm::vec4(0.f));
+		renderer->setUniform(rectProg, "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
 	}
 	else
 	{
