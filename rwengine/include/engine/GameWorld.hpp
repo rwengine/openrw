@@ -27,6 +27,8 @@ class VehicleObject;
 class InventoryItem;
 struct WeaponScan;
 
+#include <data/Chase.hpp>
+
 #include <glm/glm.hpp>
 
 #include <btBulletDynamicsCommon.h>
@@ -166,6 +168,11 @@ public:
 	 * State of playing sounds
 	 */
 	SoundManager sound;
+
+	/**
+	 * Chase state
+	 */
+	ChaseCoordinator chase;
 
 	/**
 	 * Each object type is allocated from a pool. This object helps manage

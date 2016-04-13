@@ -701,6 +701,45 @@ void game_set_character_model(const ScriptArguments& args)
 	}
 }
 
+void game_start_chase_scene(const ScriptArguments& args)
+{
+	// Hardcoded list of vehicles, put this somewhere else.
+
+#define CHASE_VEHICLE(model, x, y, z, hdg, c1, c2, path) \
+	{ \
+		auto vehicle0 = args.getWorld()->createVehicle( \
+					model, \
+					glm::vec3(x, y, z), \
+					glm::angleAxis(glm::radians(hdg), glm::vec3(0.f, 0.f, 1.f))); \
+		vehicle0->setPrimaryColour(c1);\
+		vehicle0->setSecondaryColour(c2);\
+		args.getWorld()->chase.addChaseVehicle(vehicle0, path,\
+											   args.getWorld()->data->getDataPath()+"/data/paths/CHASE" #path ".DAT");\
+	}
+
+	CHASE_VEHICLE(116,   273.5422f,  -1167.1907f,   24.9906f, 64.f,    2, 1,  0);
+	CHASE_VEHICLE(117,   231.1783f,  -1388.832f,    25.9782f, 90.0f,   2, 1,  1);
+	CHASE_VEHICLE(130,  -28.9762f,   -1031.3367f,   25.9781f, 242.0f,  1, 75, 2);
+	CHASE_VEHICLE(96,    114.1564f,  -796.6938f,    24.9782f, 180.0f,  0, 0,  3);
+	CHASE_VEHICLE(110,   184.3156f,  -1473.251f,    25.9782f, 0.0f,    6, 6,  4);
+	CHASE_VEHICLE(105,   173.8868f,  -1377.6514f,   25.9782f, 0.0f,    4, 5,  6);
+	CHASE_VEHICLE(92,    102.5946f,  -943.9363f,    25.9781f, 270.0f,  53,53, 7);
+	CHASE_VEHICLE(105,   177.7157f,  -862.1865f,    25.9782f, 155.0f,  41, 1, 10);
+	CHASE_VEHICLE(92,    170.5698f,  -889.0236f,    25.9782f, 154.0f,  10, 10,11);
+	CHASE_VEHICLE(111,   402.6081f,  -917.4963f,    37.381f,  90.0f,   34, 1, 14);
+	CHASE_VEHICLE(110,  -33.4962f,   -938.4563f,    25.9781f, 266.0f,  6,  6, 16);
+	CHASE_VEHICLE(111,   49.3631f,   -987.605f,     25.9781f, 0.0f,    51, 1, 18);
+	CHASE_VEHICLE(110,   179.0049f,  -1154.6686f,   25.9781f, 0.0f,    6, 76, 19);
+
+	args.getWorld()->chase.start();
+}
+
+void game_stop_chase_scene(const ScriptArguments& args)
+{
+	// Clean up remaining vehicles
+	args.getWorld()->chase.cleanup();
+}
+
 bool game_collision_loaded(const ScriptArguments& args)
 {
 	// The paramter to this is actually the island number.
@@ -834,6 +873,16 @@ void game_load_collision(const ScriptArguments& args)
 void game_set_rampages(const ScriptArguments& args)
 {
 	args.getWorld()->state->gameStats.totalRampages = args[0].integer;
+}
+
+void game_remove_chase_car(const ScriptArguments& args)
+{
+	int chaseCar = args[0].integer;
+	GameObject* car = args.getWorld()->chase.getChaseVehicle(chaseCar);
+	RW_CHECK(car != nullptr, "Tried to remove null car from chase");
+	if (car == nullptr) return;
+	args.getWorld()->chase.removeChaseVehicle(chaseCar);
+	args.getWorld()->destroyObject(car);
 }
 
 void game_set_near_clip(const ScriptArguments& args)
@@ -1051,8 +1100,8 @@ GameModule::GameModule()
 	
 	bindFunction(0x0352, game_set_character_model, 2, "Set Character Model" );
 	bindUnimplemented( 0x0353, game_refresh_character_model, 1, "Refresh Actor Model" );
-	bindUnimplemented( 0x0354, game_start_chase, 1, "Start Chase Scene" );
-	bindUnimplemented( 0x0355, game_stop_chase, 0, "Stop Chase Scene" );
+	bindFunction( 0x0354, game_start_chase_scene, 1, "Start Chase Scene" );
+	bindFunction( 0x0355, game_stop_chase_scene, 0, "Stop Chase Scene" );
 
 	bindUnimplemented( 0x0373, game_camera_behind_player, 0, "Set Camera Behind Player" );
 	bindUnimplemented( 0x0374, game_set_motion_blur, 1, "Set Motion Blur" );
@@ -1125,7 +1174,7 @@ GameModule::GameModule()
 
 	bindFunction(0x0408, game_set_rampages, 1, "Set Total Rampage Missions" );
 	bindUnimplemented( 0x0409, game_explode_rc_buggy, 0, "Blow up RC buggy" );
-	bindUnimplemented( 0x040A, game_remove_chase_car, 1, "Remove Chase Car" );
+	bindFunction( 0x040A, game_remove_chase_car, 1, "Remove Chase Car" );
 
 	bindUnimplemented( 0x0418, game_set_object_ontop, 2, "Set Object Draw Ontop" );
 

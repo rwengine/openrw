@@ -356,6 +356,8 @@ void RWGame::tick(float dt)
 	world->_work->update();
 	
 	State* currState = StateManager::get().states.back();
+
+	world->chase.update(dt);
 	
 	static float clockAccumulator = 0.f;
 	if ( currState->shouldWorldUpdate() ) {
