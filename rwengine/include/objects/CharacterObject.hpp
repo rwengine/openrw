@@ -28,6 +28,8 @@ struct CharacterState
 	uint32_t lastFireTimeMS;
 	bool primaryActive;
 	bool secondaryActive;
+	uint32_t primaryStartTime;
+	uint32_t primaryEndTime;
 };
 
 class VehicleObject;
@@ -176,6 +178,12 @@ public:
 	void setActiveItem( int slot );
 	InventoryItem* getActiveItem();
 	void removeFromInventory( int slot );
+
+	/**
+	 * Uses the character's active item.
+	 * @param primary use the primary action.
+	 */
+	void useItem(bool active, bool primary = true);
 
 	void cycleInventory( bool up );
 };

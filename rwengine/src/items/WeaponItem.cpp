@@ -105,13 +105,13 @@ void WeaponItem::fireProjectile(CharacterObject* owner)
 	// Work out the velocity multiplier as a function of how long the player
 	// Was holding down the fire button. If _fireStop < 0.f then the player
 	// is still holding the button down.
-	float throwTime = owner->engine->getGameTime() - owner->getCurrentState().lastFireTimeMS/1000.f;
+	float throwTime = owner->engine->getGameTime() - owner->getCurrentState().primaryStartTime/1000.f;
 	float forceFactor = throwTime;
-#if 0
-	if( _fireStop > 0.f ) {
-		forceFactor = _fireStop - _fireStart;
+	if (owner->getCurrentState().primaryEndTime >= owner->getCurrentState().primaryStartTime) {
+		uint32_t heldTime = owner->getCurrentState().primaryEndTime - owner->getCurrentState().primaryStartTime;
+		forceFactor = (heldTime)/1000.f;
 	}
-	forceFactor /= throwTime;
+	forceFactor = std::max(0.1f, forceFactor / throwTime);
 
 	auto projectile = new ProjectileObject(owner->engine, fireOrigin,
 	{
@@ -124,20 +124,15 @@ void WeaponItem::fireProjectile(CharacterObject* owner)
 
 	auto& pool = owner->engine->getTypeObjectPool( projectile );
 	pool.insert(projectile);
-#endif
+	owner->engine->allObjects.push_back(projectile);
 }
 
 void WeaponItem::primary(CharacterObject* owner)
 {
-#if 0
-	if( active ) {
-		_fireStart = owner->engine->getGameTime();
-		_fireStop = -1.f;
-
+	if( owner->getCurrentState().primaryActive ) {
 		// ShootWeapon will call ::fire() on us at the appropriate time.
 		owner->controller->setNextActivity(new Activities::ShootWeapon(this));
 	}
-#endif
 }
 
 void WeaponItem::secondary(CharacterObject* owner)

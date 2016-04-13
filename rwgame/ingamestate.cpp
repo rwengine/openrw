@@ -352,7 +352,7 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 	case sf::Event::MouseButtonPressed:
 		switch(event.mouseButton.button) {
 		case sf::Mouse::Left:
-			player->useItem(true, true);
+			player->getCharacter()->useItem(true, true);
 			break;
 		default: break;
 		}
@@ -360,7 +360,7 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 	case sf::Event::MouseButtonReleased:
 		switch(event.mouseButton.button) {
 		case sf::Mouse::Left:
-			player->useItem(false, true);
+			player->getCharacter()->useItem(false, true);
 			break;
 		default: break;
 		}

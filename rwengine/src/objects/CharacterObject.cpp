@@ -126,18 +126,6 @@ void CharacterObject::tick(float dt)
 	animator->tick(dt);
 	updateCharacter(dt);
 
-	// Update the item if we're using it
-	if (currentState.primaryActive) {
-		if (getActiveItem()) {
-			getActiveItem()->primary(this);
-		}
-	}
-	if (currentState.secondaryActive) {
-		if (getActiveItem()) {
-			getActiveItem()->secondary(this);
-		}
-	}
-
 	// Ensure the character doesn't need to be reset
 	if(getPosition().z < -100.f) {
 		resetToAINode();
@@ -523,3 +511,20 @@ void CharacterObject::cycleInventory(bool up)
 	}
 }
 
+void CharacterObject::useItem(bool active, bool primary)
+{
+	if( getActiveItem() ) {
+		if( primary ) {
+			if (active)
+				currentState.primaryStartTime = engine->getGameTime() * 1000.f;
+			else
+				currentState.primaryEndTime = engine->getGameTime() * 1000.f;
+			currentState.primaryActive = active;
+			getActiveItem()->primary(this);
+		}
+		else {
+			currentState.secondaryActive = active;
+			getActiveItem()->secondary(this);
+		}
+	}
+}

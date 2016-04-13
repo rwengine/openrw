@@ -5,7 +5,7 @@
 #include <data/Model.hpp>
 #include <engine/Animator.hpp>
 #include <items/WeaponItem.hpp>
-#include <boost/concept_check.hpp>
+#include <rw/defines.hpp>
 
 bool CharacterController::updateActivity()
 {
@@ -166,18 +166,6 @@ void CharacterController::update(float dt)
 		if( _nextActivity ) {
 			setActivity( _nextActivity );
 			_nextActivity = nullptr;
-		}
-	}
-}
-
-void CharacterController::useItem(bool active, bool primary)
-{
-	if( character->getActiveItem() ) {
-		if( primary ) {
-			character->getCurrentState().primaryActive = active;
-		}
-		else {
-			character->getCurrentState().secondaryActive = active;
 		}
 	}
 }
@@ -455,6 +443,11 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			character->animator->setAnimation(throwanim, false);
 		}
 	}
+	else if( wepdata->fireType == WeaponData::MELEE ) {
+		RW_CHECK(wepdata->fireType != WeaponData::MELEE, "Melee attacks not implemented");
+		return true;
+	}
+
 
 	return false;
 }
