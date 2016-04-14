@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <render/GameRenderer.hpp>
 #include <functional>
+#include <algorithm>
 
 class Menu
 {
@@ -19,7 +20,10 @@ public:
 		std::string name;
 		float _size;
 		
-		MenuEntry(const std::string& n, float size = 30.f) : name(n), _size(size) {}
+		MenuEntry(const std::string& n, float size = 30.f) : name(n), _size(size)
+		{
+			std::transform(name.begin(), name.end(), name.begin(), toupper);
+		}
 		
 		float getHeight() { return _size; }
 		

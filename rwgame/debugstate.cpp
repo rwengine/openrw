@@ -27,8 +27,8 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game), _freeLook( false ), _sonicMode( false )
 {
 	Menu *m = new Menu(2);
-	m->offset = glm::vec2(200.f, 200.f);
-	float entryHeight = 24.f;
+	m->offset = glm::vec2(10.f, 50.f);
+	float entryHeight = 14.f;
 #if 0
 	m->addEntry(Menu::lambda("Random Vehicle", [this] {
 		auto it = getWorld()->vehicleTypes.begin();
@@ -105,6 +105,12 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Set Normal Jump", [=] {
 		game->getPlayer()->getCharacter()->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Full Health", [=] {
+		game->getPlayer()->getCharacter()->getCurrentState().health = 100.f;
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Full Armour", [=] {
+		game->getPlayer()->getCharacter()->getCurrentState().armour = 100.f;
 	}, entryHeight));
 
 	this->enterMenu(m);

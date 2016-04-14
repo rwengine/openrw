@@ -99,7 +99,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	{
 		std::stringstream ss;
 		ss << "@" << std::setw(3) << std::setfill('0')
-		   << player->getCharacter()->getCurrentState().health;
+		   << (int)player->getCharacter()->getCurrentState().health;
 		ti.text = ss.str();
 	}
 	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
@@ -114,7 +114,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	{
 		std::stringstream ss;
 		ss << "[" << std::setw(3) << std::setfill('0')
-		   << player->getCharacter()->getCurrentState().armour;
+		   << (int)player->getCharacter()->getCurrentState().armour;
 		ti.text = ss.str();
 		ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
 		ti.screenPosition = glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY+1.f);
