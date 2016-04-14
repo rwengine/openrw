@@ -162,6 +162,7 @@ void InstanceObject::setRotation(const glm::quat &r)
 
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
+	RW_CHECK(dmg.hitpoints == 0, "Instance damange not implemented yet");
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
 	if( dynamics ) {
@@ -175,10 +176,10 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 	{
 		if(explodeOnHit) {
 			// explode
-			mHealth = -1.f;
+			//mHealth = -1.f;
 		}
 		else {
-			mHealth -= dmg.hitpoints;
+			//mHealth -= dmg.hitpoints;
 		}
 		return true;
 	}

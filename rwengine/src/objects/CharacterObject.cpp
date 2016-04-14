@@ -21,12 +21,10 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	, _hasTargetPosition(false)
 	, ped(data)
 	, physCharacter(nullptr)
-	, controller(nullptr)
 	, jumped(false)
+	, controller(nullptr)
 	, jumpSpeed(DefaultJumpSpeed)
 {
-	mHealth = 100.f;
-
 	// TODO move AnimationGroup creation somewhere else.
 	animations.idle = engine->data->animations["idle_stance"];
 	animations.walk = engine->data->animations["walk_player"];
@@ -326,7 +324,7 @@ glm::quat CharacterObject::getRotation() const
 
 bool CharacterObject::isAlive() const
 {
-	return mHealth > 0.f;
+	return currentState.health > 0.f;
 }
 
 bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
@@ -387,7 +385,15 @@ void CharacterObject::setCurrentVehicle(VehicleObject *value, size_t seat)
 
 bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
-	mHealth -= dmg.hitpoints;
+	// Right now there's no state that determines immunity to any kind of damage
+	float dmgPoints = dmg.hitpoints;
+	if (currentState.armour > 0.f) {
+		dmgPoints -= currentState.armour;
+		currentState.armour = std::max(0.f, currentState.armour - dmg.hitpoints);
+	}
+	if (dmgPoints > 0.f) {
+		currentState.health = std::max(0.f, currentState.health - dmgPoints);
+	}
 	return true;
 }
 

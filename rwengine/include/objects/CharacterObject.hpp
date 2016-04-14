@@ -21,15 +21,15 @@ struct CharacterState
 {
 	glm::vec3 position;
 	float rotation;
-	float health;
-	float armour;
+	float health = 100.f;
+	float armour = 0.f;
 	CharacterWeaponSlot weapons[maxInventorySlots];
-	uint16_t currentWeapon;
-	uint32_t lastFireTimeMS;
-	bool primaryActive;
-	bool secondaryActive;
-	uint32_t primaryStartTime;
-	uint32_t primaryEndTime;
+	uint16_t currentWeapon = 0;
+	uint32_t lastFireTimeMS = 0;
+	bool primaryActive = false;
+	bool secondaryActive = false;
+	uint32_t primaryStartTime = 0;
+	uint32_t primaryEndTime = 0;
 };
 
 class VehicleObject;
@@ -94,7 +94,7 @@ private:
 	bool _hasTargetPosition;
 	glm::vec3 _targetPosition;
 
-	bool jumped = false;
+	bool jumped;
 	float jumpSpeed;
 public:
 
@@ -144,7 +144,8 @@ public:
 	virtual glm::quat getRotation() const;
 
 	bool isAlive() const;
-	
+	bool takeDamage(const DamageInfo& damage) override;
+
 	bool enterVehicle(VehicleObject* vehicle, size_t seat);
 
 	/**
@@ -156,8 +157,6 @@ public:
 	VehicleObject *getCurrentVehicle() const;
 	size_t getCurrentSeat() const;
 	void setCurrentVehicle(VehicleObject *value, size_t seat);
-	
-    virtual bool takeDamage(const DamageInfo& damage);
 	
 	void jump();
 	void setJumpSpeed(float speed);

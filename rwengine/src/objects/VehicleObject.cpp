@@ -17,8 +17,6 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 	  vehicle(data), info(info), colourPrimary(prim),
 	  colourSecondary(sec), collision(nullptr), physBody(nullptr), physVehicle(nullptr)
 {
-	mHealth = 1000.f;
-
 	collision = new CollisionInstance;
 	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
 		physBody = collision->body;
@@ -458,7 +456,7 @@ VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat)
 
 bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
-	mHealth -= dmg.hitpoints;
+	RW_CHECK(dmg.hitpoints == 0, "Vehicle Damage not implemented yet");
 
 	const float frameDamageThreshold = 1500.f;
 
