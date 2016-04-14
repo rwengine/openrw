@@ -1217,7 +1217,12 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	for(int c = 0; c < 18; ++c) {
 		if(garageData.cars[c].modelId == 0) continue;
 		auto& car = garageData.cars[c];
-		glm::quat rotation(-glm::vec3(car.rotation.z, car.rotation.y, car.rotation.x));
+		glm::quat rotation(
+					glm::mat3(
+						glm::cross(car.rotation, glm::vec3(0.f, 0.f, 1.f)),
+						car.rotation,
+						glm::vec3(0.f, 0.f, 1.f)
+						));
 		
 		VehicleObject* vehicle = state.world->createVehicle(car.modelId, car.position, rotation);
 		vehicle->setPrimaryColour(car.colorFG);
