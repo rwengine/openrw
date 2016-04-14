@@ -2,14 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenRW)
 
-# Set Global configuration
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_definitions(-DRW_DEBUG=1)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
-else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-endif()
-
+# Global Build Configuration
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRW_DEBUG=1")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread -Wextra")
 
 # Optional components
 SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
@@ -22,14 +17,6 @@ SET(ENABLE_PROFILE_RENDERER TRUE CACHE BOOL "Enable higher precision rendering p
 
 # Options
 SET(ENABLE_SCRIPT_DEBUG FALSE CACHE BOOL "Enable verbose script execution")
-
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wextra" )
-ELSE()
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3" )
-ENDIF()
-
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread -Wno-unused-parameter")
 
 IF(APPLE)
 	set(OPENRW_PLATFORM_LIBS iconv)
