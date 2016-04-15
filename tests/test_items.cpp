@@ -4,14 +4,15 @@
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(ItemTests)
-
 BOOST_AUTO_TEST_CASE(test_character_inventory)
 {
 	{
 		auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
 		BOOST_REQUIRE( character != nullptr );
 
-		auto item = new WeaponItem(Global::get().e->data->weaponData[0]);
+		auto item = Global::get().e->getInventoryItem(4);
+
+		BOOST_REQUIRE(item != nullptr);
 
 		character->addToInventory(item);
 
@@ -23,7 +24,6 @@ BOOST_AUTO_TEST_CASE(test_character_inventory)
 
 		BOOST_CHECK_EQUAL( character->getActiveItem(), nullptr );
 
-		// Dtor also destroys all items, but w/e
 		Global::get().e->destroyObject(character);
 	}
 }

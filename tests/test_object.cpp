@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(instance_test_damage)
 	
 	BOOST_CHECK( inst.takeDamage(dmg) );
 	
-	BOOST_CHECK( inst.mHealth < 0.f );
+	BOOST_CHECK( inst.getHealth() < 0.f );
 }
 
 BOOST_AUTO_TEST_CASE(instance_test_destroy)
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(instance_test_destroy)
 					);
 	GameObject::DamageInfo dmg;
 	dmg.type = GameObject::DamageInfo::Bullet;
-	dmg.hitpoints = inst.mHealth + 1.f;
+	dmg.hitpoints = inst.getHealth() + 1.f;
 	
 	// Now make it damageable
 	
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(instance_test_destroy)
 	
 	BOOST_CHECK( inst.takeDamage(dmg) );
 	
-	BOOST_CHECK( inst.mHealth < 0.f );
+	BOOST_CHECK( inst.getHealth() < 0.f );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

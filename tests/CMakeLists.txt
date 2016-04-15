@@ -1,9 +1,43 @@
-FILE(GLOB TEST_SOURCES
-	"*.cpp"
-	"${CMAKE_SOURCE_DIR}/rwengine/tests/*.cpp")
-ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK) 
+set(TEST_SOURCES
+	"main.cpp"
+	"test_animation.cpp"
+	"test_archive.cpp"
+	"test_buoyancy.cpp"
+	"test_character.cpp"
+	"test_chase.cpp"
+	"test_cutscene.cpp"
+	"test_data.cpp"
+	"test_FileIndex.cpp"
+	"test_GameData.cpp"
+	"test_GameWorld.cpp"
+	"test_globals.hpp"
+	"test_items.cpp"
+	"test_lifetime.cpp"
+	"test_loaderdff.cpp"
+	"test_Logger.cpp"
+	"test_menu.cpp"
+	"test_object.cpp"
+	"test_object_data.cpp"
+	"test_pickup.cpp"
+	"test_renderer.cpp"
+	"test_Resource.cpp"
+	"test_rwbstream.cpp"
+	"test_SaveGame.cpp"
+	"test_scriptmachine.cpp"
+	"test_skeleton.cpp"
+	"test_state.cpp"
+	"test_text.cpp"
+	"test_trafficdirector.cpp"
+	"test_vehicle.cpp"
+	"test_VisualFX.cpp"
+	"test_weapon.cpp"
+	"test_worker.cpp"
+	"test_world.cpp"
+	)
 
-add_executable(run_tests ${TEST_SOURCES}) 
+ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
+
+add_executable(run_tests ${TEST_SOURCES})
 
 include_directories(include)
 include_directories("${CMAKE_SOURCE_DIR}/tests")

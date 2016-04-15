@@ -66,24 +66,25 @@ BOOST_AUTO_TEST_CASE(test_item_pickup)
 		auto character = Global::get().e->createPedestrian(1, { 30.1f, 0.f, 0.f });
 		BOOST_REQUIRE( character != nullptr );
 
-		auto item = Global::get().e->data->weaponData[9];
+		auto item = Global::get().e->getInventoryItem(3);
+		BOOST_REQUIRE(item != nullptr);
 
 		ItemPickup* p = new ItemPickup(Global::get().e, { 30.f, 0.f, 0.f }, item );
 
-        //  Global::get().e->insertObject(p);
+		Global::get().e->allObjects.push_back(p);
 
 		// Check the characters inventory is empty.
-		BOOST_CHECK( character->getInventory().empty() );
+		for (int i = 0; i < maxInventorySlots; ++i) {
+			BOOST_CHECK( character->getCurrentState().weapons[i].weaponId == 0 );
+		}
 
 		Global::get().e->dynamicsWorld->stepSimulation(0.016f);
 		p->tick(0.f);
 
-		BOOST_CHECK( ! character->getInventory().empty() );
-
-		auto inventory = character->getInventory();
-		BOOST_CHECK( std::any_of( inventory.begin(), inventory.end(),
-								  [&](const std::pair<int, InventoryItem*>& i)
-		{ return i.second->getModelID() == item->modelID; }) );
+		auto& inventory = character->getCurrentState().weapons;
+		BOOST_CHECK( std::any_of( std::begin(inventory), std::end(inventory),
+								  [&](const CharacterWeaponSlot& i)
+		{ return i.weaponId == item->getInventorySlot(); }) );
 
 		Global::get().e->destroyObject(p);
 		Global::get().e->destroyObject(character);

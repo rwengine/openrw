@@ -9,19 +9,20 @@ BOOST_AUTO_TEST_CASE(test_cleanup)
 {
 	GameObject* f = Global::get().e->createInstance(1337, glm::vec3(0.f, 0.f, 1000.f));
 	auto id = f->getGameObjectID();
+	auto& objects = Global::get().e->instancePool.objects;
 
 	f->setLifetime(GameObject::TrafficLifetime);
 	
 	{
-		auto search = Global::get().e->objects.find( id );
-		BOOST_CHECK( search != Global::get().e->objects.end() );
+		auto search = objects.find(id);
+		BOOST_CHECK( search != objects.end() );
 	}
 	
 	Global::get().e->cleanupTraffic(glm::vec3(0.f, 0.f, 0.f));
 	
 	{
-		auto search = Global::get().e->objects.find( id );
-		BOOST_CHECK( search == Global::get().e->objects.end() );
+		auto search = objects.find(id);
+		BOOST_CHECK( search != objects.end() );
 	}
 }
 

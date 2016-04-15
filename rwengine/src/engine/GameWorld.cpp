@@ -525,7 +525,12 @@ void GameWorld::destroyObject(GameObject* object)
 	auto& pool = getTypeObjectPool(object);
 	pool.remove(object);
 
-    allObjects.erase(std::find(allObjects.begin(), allObjects.end(), object));
+	auto it = std::find(allObjects.begin(), allObjects.end(), object);
+	RW_CHECK(it != allObjects.end(), "destroying object not in allObjects");
+	if (it != allObjects.end()) {
+		allObjects.erase(it);
+	}
+
 	delete object;
 }
 
@@ -602,6 +607,8 @@ void GameWorld::destroyEffect(VisualFX* effect)
 
 void GameWorld::doWeaponScan(const WeaponScan &scan)
 {
+	RW_CHECK(scan.type != WeaponScan::RADIUS, "Radius scans not implemented yet");
+
 	if( scan.type == WeaponScan::RADIUS ) {
 		// TODO
 		// Requires custom ConvexResultCallback
@@ -661,8 +668,12 @@ float GameWorld::getGameTime() const
 	return state->gameTime;
 }
 
-InventoryItem*GameWorld::getInventoryItem(uint16_t weaponId) const
+InventoryItem* GameWorld::getInventoryItem(uint16_t weaponId) const
 {
+	RW_CHECK(weaponId < inventoryItems.size(), "InventoryItem ID out of range");
+	if (weaponId >= inventoryItems.size()) {
+		return nullptr;
+	}
 	return inventoryItems[weaponId];
 }
 

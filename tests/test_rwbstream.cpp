@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
-#include <loaders/rwbinarystream.h>
+#include <loaders/RWBinaryStream.hpp>
 
 BOOST_AUTO_TEST_SUITE(RWBStreamTests)
 

@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(TestWeaponScan)
 
 		Global::get().e->doWeaponScan( scan );
 
-		BOOST_CHECK( character->mHealth < 100.f );
+		BOOST_CHECK( character->getCurrentState().health < 100.f );
 
 		Global::get().e->destroyObject(character);
 	}
@@ -42,9 +42,9 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->insertObject( projectile );
+		Global::get().e->allObjects.push_back( projectile );
 
-		BOOST_CHECK( character->mHealth == 100.f );
+		BOOST_CHECK( character->getCurrentState().health == 100.f );
 
 		for(float t = 0.f; t <= 5.f; t += 0.016f) {
 			Global::get().e->dynamicsWorld->stepSimulation(0.016f, 0, 0);
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 		BOOST_CHECK_LT( glm::distance(character->getPosition(), projectile->getPosition()), 1.f );
 
 		// Grenade should have dentonated by this point
-		BOOST_CHECK( character->mHealth < 100.f );
+		BOOST_CHECK( character->getCurrentState().health < 100.f );
 
 		Global::get().e->destroyObjectQueued(character);
 		Global::get().e->destroyQueuedObjects();
@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->insertObject( projectile );
+		Global::get().e->allObjects.push_back( projectile );
 
-		BOOST_CHECK( character->mHealth == 100.f );
+		BOOST_CHECK( character->getCurrentState().health == 100.f );
 
 		for(float t = 0.f; t <= 9.0f; t += 0.016f) {
 			Global::get().e->dynamicsWorld->stepSimulation(0.016f, 0, 0);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 		BOOST_CHECK( projectile->getPosition().z < 10.f );
 		BOOST_CHECK( projectile->getPosition().z > 0.f );
 
-		BOOST_CHECK( character->mHealth < 100.f );
+		BOOST_CHECK( character->getCurrentState().health < 100.f );
 
 		Global::get().e->destroyObjectQueued(character);
 		Global::get().e->destroyQueuedObjects();
@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 												wepdata
 											});
 
-		Global::get().e->insertObject( projectile );
+		Global::get().e->allObjects.push_back( projectile );
 
-		BOOST_CHECK( character->mHealth == 100.f );
+		BOOST_CHECK( character->getCurrentState().health == 100.f );
 
 		for(float t = 0.f; t <= 9.f; t += 0.016f) {
 			Global::get().e->dynamicsWorld->stepSimulation(0.016f, 0, 0);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 
 		BOOST_CHECK( projectile->getPosition().z < 10.f );
 
-		BOOST_CHECK( character->mHealth < 100.f );
+		BOOST_CHECK( character->getCurrentState().health < 100.f );
 
 		Global::get().e->destroyObjectQueued(character);
 		Global::get().e->destroyQueuedObjects();

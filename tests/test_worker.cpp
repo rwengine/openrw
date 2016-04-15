@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <WorkContext.hpp>
+#include <job/WorkContext.hpp>
 
 class TestJob : public WorkJob
 {

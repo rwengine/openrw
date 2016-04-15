@@ -4,6 +4,7 @@
 #include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <core/Logger.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -37,6 +38,7 @@ public:
 	sf::Window wnd;
 	GameData* d;
 	GameWorld* e;
+	GameState* s;
 	Logger log;
 	WorkContext work;
 	
@@ -44,6 +46,8 @@ public:
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		d = new GameData(&log, &work, getGamePath());
 		e = new GameWorld(&log, &work, d);
+		s = new GameState;
+		e->state = s;
 
 		e->data->loadIMG("/models/gta3");
 		e->data->loadIMG("/anim/cuts");

@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <engine/Animator.hpp>
 #include <data/Skeleton.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include "test_globals.hpp"
 

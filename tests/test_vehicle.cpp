@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
 #include <objects/VehicleObject.hpp>
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <data/Skeleton.hpp>
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)

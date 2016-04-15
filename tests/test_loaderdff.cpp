@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include "test_globals.hpp"
-#include <render/Model.hpp>
-#include <WorkContext.hpp>
+#include <data/Model.hpp>
+#include <job/WorkContext.hpp>
 #include <loaders/BackgroundLoader.hpp>
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)

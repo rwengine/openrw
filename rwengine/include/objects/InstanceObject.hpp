@@ -12,6 +12,7 @@ class CollisionInstance;
  */
 class InstanceObject : public GameObject
 {
+	float health;
 public:
 	glm::vec3 scale;
 	CollisionInstance* body;
@@ -36,6 +37,8 @@ public:
 	virtual void setRotation(const glm::quat& r);
 	
 	virtual bool takeDamage(const DamageInfo& damage);
+
+	float getHealth() const { return health; }
 };
 
 

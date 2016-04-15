@@ -13,8 +13,14 @@ InstanceObject::InstanceObject(GameWorld* engine,
 		std::shared_ptr<ObjectData> obj,
 		InstanceObject* lod,
 		std::shared_ptr<DynamicObjectData> dyn)
-: GameObject(engine, pos, rot, model), scale(scale), body(nullptr), object(obj),
-  LODinstance(lod), dynamics(dyn), _enablePhysics(false)
+	: GameObject(engine, pos, rot, model)
+	, health(100.f)
+	, scale(scale)
+	, body(nullptr)
+	, object(obj)
+	, LODinstance(lod)
+	, dynamics(dyn)
+	, _enablePhysics(false)
 {
 	if( obj ) {
 		changeModel(obj);
@@ -162,7 +168,6 @@ void InstanceObject::setRotation(const glm::quat &r)
 
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
-	RW_CHECK(dmg.hitpoints == 0, "Instance damange not implemented yet");
 	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
 	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
 	if( dynamics ) {
@@ -176,10 +181,10 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 	{
 		if(explodeOnHit) {
 			// explode
-			//mHealth = -1.f;
+			health = -1.f;
 		}
 		else {
-			//mHealth -= dmg.hitpoints;
+			health -= dmg.hitpoints;
 		}
 		return true;
 	}
