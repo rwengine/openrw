@@ -196,8 +196,10 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 
 void drawHUD(ViewCamera& currentView, PlayerController* player, GameWorld* world, GameRenderer* render)
 {
-	drawMap(currentView, player, world, render);
-	drawPlayerInfo(player, world, render);
+	if(player && player->getCharacter()) {
+		drawMap(currentView, player, world, render);
+		drawPlayerInfo(player, world, render);
+	}
 }
 
 void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
