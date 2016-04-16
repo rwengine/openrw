@@ -4,7 +4,7 @@
 #include <QDockWidget>
 #include <QTreeView>
 #include "models/DFFFramesTreeModel.hpp"
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 #include <QVBoxLayout>
 #include <QLabel>
 

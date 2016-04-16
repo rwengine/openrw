@@ -5,7 +5,6 @@
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <core/Logger.hpp>
-#include <QGLContext>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
@@ -13,6 +12,7 @@ class ObjectViewer;
 class ModelViewer;
 class ViewerWidget;
 class GameRenderer;
+class QGLContext;
 
 class ViewerWindow : public QMainWindow
 {

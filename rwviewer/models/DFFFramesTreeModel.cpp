@@ -1,5 +1,5 @@
 #include "DFFFramesTreeModel.hpp"
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <data/Skeleton.hpp>
 
 DFFFramesTreeModel::DFFFramesTreeModel(Model *m, Skeleton* skel, QObject* parent)

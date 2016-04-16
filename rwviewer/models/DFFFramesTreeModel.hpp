@@ -2,7 +2,7 @@
 #ifndef _DFFFRAMESTREEMODEL_HPP_
 #define _DFFFRAMESTREEMODEL_HPP_
 #include <QAbstractItemModel>
-#include <engine/RWTypes.hpp>
+#include <rw/types.hpp>
 
 class Model;
 class Skeleton;

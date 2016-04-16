@@ -101,33 +101,10 @@ void ViewerWindow::closeEvent(QCloseEvent* event)
 
 void ViewerWindow::openAnimations()
 {
-#if 0
 	QFileDialog dialog(this, "Open Animations", QDir::homePath(), "IFP Animations (*.ifp)");
 	if(dialog.exec()) {
-		std::ifstream dfile(dialog.selectedFiles().at(0).toStdString().c_str());
-		AnimationList anims;
-
-		if(dfile.is_open())
-		{
-			dfile.seekg(0, std::ios_base::end);
-			size_t length = dfile.tellg();
-			dfile.seekg(0);
-			char *file = new char[length];
-			dfile.read(file, length);
-
-			LoaderIFP loader;
-			if( loader.loadFromMemory(file) ) {
-				for(auto& f : loader.animations) {
-					anims.push_back(f);
-				}
-			}
-
-			delete[] file;
-		}
-
-		animationswidget->setAnimations(anims);
+		modelViewer->loadAnimations(dialog.selectedFiles()[0]);
 	}
-#endif
 }
 
 void ViewerWindow::loadGame()

@@ -3,7 +3,6 @@
 #define _OBJECTVIEWER_HPP_
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include <QGLWidget>
 #include <QTableView>
 #include <QLabel>
 #include <QGridLayout>

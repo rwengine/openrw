@@ -1,5 +1,5 @@
 #include "ViewerWidget.hpp"
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/OpenGLRenderer.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -187,7 +187,10 @@ void ViewerWidget::showObject(qint16 item)
 		{
 			dummyObject = gworld->createVehicle(item, {});
 		}
-		activeModel = dummyObject->model->resource;
+		RW_CHECK(dummyObject != nullptr, "Dummy Object is null");
+		if (dummyObject != nullptr) {
+			activeModel = dummyObject->model->resource;
+		}
 	}
 }
 

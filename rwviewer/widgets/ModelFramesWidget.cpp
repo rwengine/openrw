@@ -1,5 +1,5 @@
 #include "ModelFramesWidget.hpp"
-#include <render/Model.hpp>
+#include <data/Model.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 void ModelFramesWidget::updateInfoBox(Model* model, ModelFrame *f)

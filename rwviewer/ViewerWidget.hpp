@@ -3,13 +3,17 @@
 #define _VIEWERWIDGET_HPP_
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include <QGLWidget>
 #include <QTimer>
 #include <loaders/LoaderIFP.hpp>
-#include <render/DrawBuffer.hpp>
-#include <render/GeometryBuffer.hpp>
-#include <render/Model.hpp>
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
+#include <data/Model.hpp>
 #include <glm/glm.hpp>
+
+// Prevent Qt from conflicting with glLoadGen
+#define GL_ARB_debug_output
+#define GL_KHR_debug
+#include <QGLWidget>
 
 class GameRenderer;
 class Model;
