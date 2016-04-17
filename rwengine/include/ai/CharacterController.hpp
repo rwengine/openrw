@@ -61,10 +61,6 @@ protected:
 	bool updateActivity();
 	void setActivity(Activity* activity);
 
-	glm::vec3 rawMovement;
-
-	bool running;
-	
 	float vehicleIdle;
 	
 	// Goal related variables
@@ -108,7 +104,7 @@ public:
 	 */
 	CharacterObject* getCharacter() const;
 
-	void setRawMovement(const glm::vec3& movement);
+	void setMoveDirection(const glm::vec3& movement);
 
 	void setRunning(bool run);
 	

@@ -1,13 +1,12 @@
 #pragma once
 #ifndef _ANIMATOR_HPP_
 #define _ANIMATOR_HPP_
-
+#include <map>
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <queue>
-#include <map>
+#include <rw/defines.hpp>
 #include <loaders/LoaderIFP.hpp>
-#include <cstdint>
 
 class Model;
 class ModelFrame;
@@ -17,13 +16,37 @@ class Skeleton;
 /**
  * @brief calculates animation frame matrices, as well as procedural frame
  * animation.
+ *
+ * Animations are played using the playAnimation() interface, this will add
+ * the animation to the animator. This sets the configuration to use for the
+ * animation, such as it's speed and time.
+ *
+ * The Animator will blend all active animations together.
  */
 class Animator
 {
 	/**
-	 * @brief _animations Queue of animations to play.
+	 * @brief Stores data required to animate a model frame
 	 */
-	std::queue<Animation*> _animations;
+	struct BoneInstanceData
+	{
+		unsigned int frameIndex;
+	};
+
+	/**
+	 * @brief The AnimationState struct stores information about playing animations
+	 */
+	struct AnimationState
+	{
+		Animation* animation;
+		/// Timestamp of the last frame
+		float time;
+		/// Speed multiplier
+		float speed;
+		/// Automatically restart
+		bool repeat;
+		std::map<AnimationBone*, BoneInstanceData> boneInstances;
+	};
 
 	/**
 	 * @brief model The model being animated.
@@ -36,50 +59,40 @@ class Animator
 	Skeleton* skeleton;
 
 	/**
-	 * @brief Stores data required to animate a model frame
+	 * @brief Currently playing animations
 	 */
-	struct BoneInstanceData
-	{
-		unsigned int frameIdx;
-	};
-
-	std::map<AnimationBone*, BoneInstanceData> boneInstances;
-
-	// Used in determining how far the skeleton being animated has moved
-	// From it's local origin.
-	glm::vec3 lastRootPosition;
-	glm::quat lastRootRotation;
-
-	float time;
-	float serverTime;
-	float lastServerTime;
-
-	bool playing;
-	bool repeat;
-
-	void reset();
+	std::vector<AnimationState> animations;
 
 public:
 
 	Animator(Model* model, Skeleton* skeleton);
 
-	/**
-	 * @brief setAnimation Sets the currently active animation.
-	 * @param animation
-	 * @param repeat If true animation will restart after ending.
-	 * @todo Interpolate between the new and old frames.
-	 */
-	void setAnimation(Animation* animation, bool repeat = true);
+	Animation* getAnimation(unsigned int slot)
+	{
+		if (slot < animations.size())
+		{
+			return animations[slot].animation;
+		}
+		return nullptr;
+	}
 
-	void queueAnimation(Animation* animation);
+	void playAnimation(unsigned int slot, Animation* anim, float speed, bool repeat)
+	{
+		if (slot >= animations.size())
+		{
+			animations.resize(slot+1);
+		}
+		animations[slot] = { anim, 0.f, speed, repeat, {} };
+	}
 
-	void next();
-
-	const std::queue<Animation*> getAnimationQueue() const
-	{ return _animations; }
-
-	const Animation* getAnimation() const
-	{ return _animations.empty() ? nullptr : _animations.front(); }
+	void setAnimationSpeed(unsigned int slot, float speed)
+	{
+		RW_CHECK(slot < animations.size(), "Slot out of range");
+		if (slot < animations.size())
+		{
+			animations[slot].speed = speed;
+		}
+	}
 
 	/**
 	 * @brief tick Update animation paramters for server-side data.
@@ -88,38 +101,11 @@ public:
 	void tick(float dt);
 
 	/**
-	 * @brief render Update frame matricies for client-side animation.
-	 * @param dt
-	 */
-	void render(float dt);
-
-	/**
-	 * @brief getRootTranslation Returns the translation of the root bone from the last server-side frame.
-	 * @return
-	 */
-	glm::vec3 getRootTranslation() const;
-
-	/**
-	 * @brief getTimeTranslation returns the translation of the root bone at the current time.
-	 * @return
-	 */
-	glm::vec3 getTimeTranslation(float alpha) const;
-
-	/**
-	 * @brief getRootRotation see getRootTranslation
-	 * @return
-	 */
-	glm::quat getRootRotation() const;
-
-	/**
 	 * Returns true if the animation has finished playing.
 	 */
-	bool isCompleted() const; 
-
-	float getAnimationTime(float alpha = 0.f) const;
-	void setAnimationTime(float time);
-
-	void setPlaying( bool play ) { playing = play; }
+	bool isCompleted(unsigned int slot) const;
+	float getAnimationTime(unsigned int slot) const;
+	void setAnimationTime(unsigned int slot, float time);
 };
 
 #endif

@@ -18,12 +18,13 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	, currentState({})
 	, currentVehicle(nullptr)
 	, currentSeat(0)
-	, _hasTargetPosition(false)
 	, ped(data)
 	, physCharacter(nullptr)
+	, running(false)
 	, jumped(false)
 	, controller(nullptr)
 	, jumpSpeed(DefaultJumpSpeed)
+	, motionBlockedByActivity(false)
 {
 	// TODO move AnimationGroup creation somewhere else.
 	animations.idle = engine->data->animations["idle_stance"];
@@ -53,6 +54,9 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.car_open_rhs   = engine->data->animations["car_open_rhs"];
 	animations.car_getin_rhs   = engine->data->animations["car_getin_rhs"];
 	animations.car_getout_rhs   = engine->data->animations["car_getout_rhs"];
+
+	animations.kd_front   = engine->data->animations["kd_front"];
+	animations.ko_shot_front   = engine->data->animations["ko_shot_front"];
 
 	if(model) {
 		skeleton = new Skeleton;
@@ -115,6 +119,135 @@ void CharacterObject::destroyActor()
 	}
 }
 
+glm::vec3 CharacterObject::updateMovementAnimation(float dt)
+{
+	glm::vec3 animTranslate;
+
+	if (motionBlockedByActivity)
+	{
+		// Clear any residual motion animation
+		animator->playAnimation(AnimIndexMovement, nullptr, 1.f, false);
+		return glm::vec3();
+	}
+
+	// Things are simpler if we're in a vehicle
+	if (getCurrentVehicle())
+	{
+		animator->playAnimation(0, animations.car_sit, 1.f, true);
+		return glm::vec3();
+	}
+
+	Animation* movementAnimation = animations.idle;
+	Animation* currentAnim = animator->getAnimation(AnimIndexMovement);
+	bool isActionHappening = (animator->getAnimation(AnimIndexAction) != nullptr);
+	float animationSpeed = 1.f;
+	bool repeat = true;
+	constexpr float movementEpsilon = 0.1f;
+
+	float movementLength = glm::length(movement);
+	if (!isAlive()) {
+		movementAnimation = animations.ko_shot_front;
+		repeat = false;
+	}
+	else if (jumped) {
+		repeat = false;
+		if (currentAnim == animations.jump_start &&
+				animator->isCompleted(AnimIndexMovement)) {
+			movementAnimation = animations.jump_start;
+		}
+		if (isOnGround()) {
+			if (currentAnim != animations.jump_land
+					|| !animator->isCompleted(AnimIndexMovement)) {
+				movementAnimation = animations.jump_land;
+			}
+			else {
+				// We are done jumping
+				jumped = false;
+			}
+		}
+		else {
+			movementAnimation = animations.jump_glide;
+		}
+	}
+	else if (movementLength > movementEpsilon)
+	{
+		if (running && !isActionHappening) {
+			// No slow running
+			movementAnimation = animations.run;
+			animationSpeed = 1.f;
+		}
+		else {
+			animationSpeed = 1.f / movementLength;
+			// Determine if we need to play the walk start animation
+			if (currentAnim != animations.walk)
+			{
+				if (currentAnim != animations.walk_start || !animator->isCompleted(AnimIndexMovement))
+				{
+					movementAnimation = animations.walk_start;
+				}
+				else
+				{
+					movementAnimation = animations.walk;
+				}
+			}
+			else
+			{
+				// Keep walkin
+				movementAnimation = animations.walk;
+			}
+		}
+	}
+
+	// Check if we need to change the animation or change speed
+	if (animator->getAnimation(AnimIndexMovement) != movementAnimation)
+	{
+		animator->playAnimation(AnimIndexMovement, movementAnimation, animationSpeed, repeat);
+	}
+	else
+	{
+		animator->setAnimationSpeed(AnimIndexMovement, animationSpeed);
+	}
+
+	// If we have to, interrogate the movement animation
+	if (movementAnimation != animations.idle)
+	{
+		if(! model->resource->frames[0]->getChildren().empty() )
+		{
+			ModelFrame* root = model->resource->frames[0]->getChildren()[0];
+			auto it = movementAnimation->bones.find(root->getName());
+			if (it != movementAnimation->bones.end())
+			{
+				AnimationBone* rootBone = it->second;
+				float step = dt;
+				const float duration = animator->getAnimation(AnimIndexMovement)->duration;
+				float animTime = fmod(animator->getAnimationTime(AnimIndexMovement), duration);
+
+				// Handle any remaining transformation before the end of the keyframes
+				if ((animTime+step) > duration)
+				{
+					glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
+					glm::vec3 b = rootBone->getInterpolatedKeyframe(duration).position;
+					glm::vec3 d = (b-a);
+					animTranslate.y += d.y;
+					step -= (duration - animTime);
+					animTime = 0.f;
+				}
+
+				glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
+				glm::vec3 b = rootBone->getInterpolatedKeyframe(animTime+step).position;
+				glm::vec3 d = (b-a);
+				animTranslate.y += d.y;
+
+				Skeleton::FrameData fd = skeleton->getData(root->getIndex());
+				fd.a.translation.y = 0.f;
+				skeleton->setData(root->getIndex(), fd);
+			}
+		}
+	}
+
+	return animTranslate;
+}
+
 void CharacterObject::tick(float dt)
 {
 	if(controller) {
@@ -157,83 +290,46 @@ void CharacterObject::changeCharacterModel(const std::string &name)
 
 void CharacterObject::updateCharacter(float dt)
 {
+	/*
+	 * You can fire weapons while moving
+	 *
+	 * Two Modes: Moving and Action
+	 * Moving covers walking & jumping
+	 * Action covers complex things like shooting, entering vehicles etc.
+	 *
+	 * Movement animation should be handled here
+	 *  If Current weapon is one handed, then it can be used while walking.
+	 *  This means blending the weapon animation with the walk animation.
+	 *  No weapons can be used while sprinting.
+	 *  Need an "aim vector" to apply torso correction.
+	 *
+	 *  If movement vector is less than some threshold, fully walk animation
+	 *  (time adjusted for velocity).
+	 */
+
 	if(physCharacter) {
-		// Check to see if the character should be knocked down.
-		btManifoldArray   manifoldArray;
-		btBroadphasePairArray& pairArray = physObject->getOverlappingPairCache()->getOverlappingPairArray();
-		int numPairs = pairArray.size();
-	
-		for (int i=0;i<numPairs;i++)
-		{
-			manifoldArray.clear();
-			
-			const btBroadphasePair& pair = pairArray[i];
-	
-			//unless we manually perform collision detection on this pair, the contacts are in the dynamics world paircache:
-			btBroadphasePair* collisionPair = engine->dynamicsWorld->getPairCache()->findPair(pair.m_pProxy0,pair.m_pProxy1);
-			if (!collisionPair)
-				continue;
-	
-			if (collisionPair->m_algorithm)
-				collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
-	
-			for (int j=0;j<manifoldArray.size();j++)
-			{
-				btPersistentManifold* manifold = manifoldArray[j];
-				for (int p=0;p<manifold->getNumContacts();p++)
-				{
-					const btManifoldPoint&pt = manifold->getContactPoint(p);
-					if (pt.getDistance() < 0.f)
-					{
-						auto otherObject = static_cast<const btCollisionObject*>(
-							manifold->getBody0() == physObject ? manifold->getBody1() : manifold->getBody0());
-						if(otherObject->getUserPointer()) {
-							GameObject* object = static_cast<GameObject*>(otherObject->getUserPointer());
-							if(object->type() == Vehicle) {
-								VehicleObject* vehicle = static_cast<VehicleObject*>(object);
-								if(vehicle->physBody->getLinearVelocity().length() > 0.1f) {
-									/// @todo play knocked down animation.
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		glm::vec3 walkDir;
-		glm::vec3 animTranslate;
-
-		if( isAnimationFixed() && animator->getAnimation() != nullptr ) {
-			auto d = animator->getRootTranslation() / animator->getAnimation()->duration;
-			animTranslate = d * dt;
-
-			if(! model->resource->frames[0]->getChildren().empty() )
-			{
-				auto root = model->resource->frames[0]->getChildren()[0];
-				Skeleton::FrameData fd = skeleton->getData(root->getIndex());
-				fd.a.translation -= d * animator->getAnimationTime(1.f);
-				skeleton->setData(root->getIndex(), fd);
-			}
-		}
+		glm::vec3 walkDir = updateMovementAnimation(dt);
 
 		position = getPosition();
 
-		walkDir = rotation * animTranslate;
+		walkDir = rotation * walkDir;
 
 		if( jumped )
 		{
-			if( physCharacter->onGround() )
-			{
-				jumped = false;
-			}
-			else
+			if( !isOnGround() )
 			{
 				walkDir = rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
 			}
 		}
 
-		physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
+		if (isAlive())
+		{
+			physCharacter->setWalkDirection(btVector3(walkDir.x, walkDir.y, walkDir.z));
+		}
+		else
+		{
+			physCharacter->setWalkDirection(btVector3(0.f, 0.f, 0.f));
+		}
 
 		auto Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
 		position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
@@ -271,6 +367,10 @@ void CharacterObject::updateCharacter(float dt)
 		}
 		_lastHeight = getPosition().z;
 	}
+	else
+	{
+		updateMovementAnimation(dt);
+	}
 }
 
 void CharacterObject::setPosition(const glm::vec3& pos)
@@ -297,14 +397,14 @@ glm::vec3 CharacterObject::getPosition() const
 	}
 	if(currentVehicle) {
 		/// @todo this is hacky.
-		if( animator->getAnimation() == animations.car_getout_lhs ) {
+		if( animator->getAnimation(AnimIndexAction) == animations.car_getout_lhs ) {
 			return currentVehicle->getSeatEntryPosition(currentSeat);
 		}
 
 		auto v = getCurrentVehicle();
 		auto R = glm::mat3_cast(v->getRotation());
 		glm::vec3 offset;
-		auto o = (animator->getAnimation() == animations.car_getin_lhs) ? enter_offset : glm::vec3();
+		auto o = (animator->getAnimation(AnimIndexAction) == animations.car_getin_lhs) ? enter_offset : glm::vec3();
 		if(getCurrentSeat() < v->info->seats.size()) {
 			offset = R * (v->info->seats[getCurrentSeat()].offset -
 					o);
@@ -402,12 +502,26 @@ void CharacterObject::jump()
 	if( physCharacter ) {
 		physCharacter->jump();
 		jumped = true;
+		animator->playAnimation(AnimIndexMovement, animations.jump_start, 1.f, false);
 	}
 }
 
 float CharacterObject::getJumpSpeed() const
 {
 	return jumpSpeed;
+}
+
+bool CharacterObject::isOnGround() const
+{
+	if (physCharacter) {
+		return physCharacter->onGround();
+	}
+	return true;
+}
+
+bool CharacterObject::canTurn() const
+{
+	return isOnGround() && !jumped && isAlive();
 }
 
 void CharacterObject::setJumpSpeed(float speed)
@@ -445,20 +559,17 @@ void CharacterObject::resetToAINode()
 	}
 }
 
-void CharacterObject::setTargetPosition(const glm::vec3 &target)
+void CharacterObject::playActivityAnimation(Animation* animation, bool repeat, bool blocked)
 {
-	_targetPosition = target;
-	_hasTargetPosition = true;
+	RW_CHECK(animator != nullptr, "No Animator");
+	animator->playAnimation(AnimIndexAction, animation, 1.f, repeat);
+	motionBlockedByActivity = blocked;
 }
 
-void CharacterObject::clearTargetPosition()
+void CharacterObject::activityFinished()
 {
-	_hasTargetPosition = false;
-}
-
-void CharacterObject::playAnimation(Animation *animation, bool repeat)
-{
-	animator->setAnimation(animation, repeat);
+	animator->playAnimation(AnimIndexAction, nullptr, 1.f, false);
+	motionBlockedByActivity = false;
 }
 
 void CharacterObject::addToInventory(InventoryItem *item)

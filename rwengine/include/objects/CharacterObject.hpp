@@ -9,6 +9,10 @@
 
 constexpr size_t maxInventorySlots = 13;
 
+// Animation slots used for character animation blending
+constexpr unsigned int AnimIndexMovement = 0;
+constexpr unsigned int AnimIndexAction = 1;
+
 struct CharacterWeaponSlot
 {
 	// Assuming these match the entries in weapon.dat
@@ -66,12 +70,18 @@ struct AnimationGroup
 	Animation* car_getin_rhs;
 	Animation* car_getout_rhs;
 
+	Animation* kd_front;
+	Animation* ko_shot_front;
+
 	AnimationGroup()
 	 : idle(nullptr), walk(nullptr), walk_start(nullptr), run(nullptr),
 	   jump_start(nullptr), jump_glide(nullptr), jump_land(nullptr),
 	   car_sit(nullptr), car_sit_low(nullptr), car_open_lhs(nullptr),
 	   car_getin_lhs(nullptr), car_getout_lhs(nullptr), car_open_rhs(nullptr),
-	   car_getin_rhs(nullptr), car_getout_rhs(nullptr)
+	   car_getin_rhs(nullptr)
+	 , car_getout_rhs(nullptr)
+	 , kd_front(nullptr)
+	 , ko_shot_front(nullptr)
 	{}
 };
 
@@ -90,12 +100,15 @@ private:
 	void createActor(const glm::vec2& size = glm::vec2(0.45f, 1.2f));
 	void destroyActor();
 
-	// Incredibly hacky "move in this direction".
-	bool _hasTargetPosition;
-	glm::vec3 _targetPosition;
+	glm::vec3 movement;
 
+	bool running;
 	bool jumped;
 	float jumpSpeed;
+
+	bool motionBlockedByActivity;
+
+	glm::vec3 updateMovementAnimation(float dt);
 public:
 
 	static const float DefaultJumpSpeed;
@@ -161,6 +174,11 @@ public:
 	void jump();
 	void setJumpSpeed(float speed);
 	float getJumpSpeed() const;
+	bool isOnGround() const;
+	bool canTurn() const;
+
+	void setRunning(bool run) { running = run; }
+	bool isRunning() const { return running; }
 	
 	/**
 	 * Resets the Actor to the nearest AI Graph node
@@ -168,10 +186,23 @@ public:
 	 */
 	void resetToAINode();
 
-	void setTargetPosition( const glm::vec3& target );
-	void clearTargetPosition();
+	void setMovement(const glm::vec3& _m) { movement = _m; }
+	const glm::vec3& getMovement() const { return movement; }
 
-	void playAnimation(Animation* animation, bool repeat);
+	/**
+	 * @brief playActivityAnimation Plays an animation for an activity.
+	 * @param animation The animation to play
+	 * @param repeat
+	 * @param blocking Wether movement is still alowed
+	 *
+	 * This allows controller activities to play their own animations and
+	 * controll blending with movement.
+	 */
+	void playActivityAnimation(Animation* animation, bool repeat, bool blocking);
+	/**
+	 * @brief activityFinished removes activity animation
+	 */
+	void activityFinished();
 
 	void addToInventory( InventoryItem* item );
 	void setActiveItem( int slot );

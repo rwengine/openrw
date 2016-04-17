@@ -556,7 +556,7 @@ void game_set_cutscene_anim(const ScriptArguments& args)
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		object->animator->setAnimation(anim, false);
+		object->animator->playAnimation(0, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
@@ -622,7 +622,7 @@ void game_set_head_animation(const ScriptArguments& args)
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		object->animator->setAnimation(anim, false);
+		object->animator->playAnimation(0, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);

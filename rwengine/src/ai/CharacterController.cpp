@@ -20,15 +20,16 @@ void CharacterController::setActivity(CharacterController::Activity* activity)
 {
 	if( _currentActivity ) delete _currentActivity;
 	_currentActivity = activity;
-	if( _currentActivity == nullptr ) {
-		// TODO make idle an actual activity or something,
-		character->clearTargetPosition();
-	}
 }
 
 CharacterController::CharacterController(CharacterObject* character)
-: character(character), _currentActivity(nullptr), _nextActivity(nullptr), running(false),
-vehicleIdle(0.f), currentGoal(None), leader(nullptr), targetNode(nullptr)
+	: character(character)
+	, _currentActivity(nullptr)
+	, _nextActivity(nullptr)
+	, vehicleIdle(0.f)
+	, currentGoal(None)
+	, leader(nullptr)
+	, targetNode(nullptr)
 {
 	character->controller = this;
 }
@@ -52,10 +53,10 @@ void CharacterController::setNextActivity(CharacterController::Activity* activit
 
 void CharacterController::update(float dt)
 {
-	auto d = rawMovement;
-	
 	if( character->getCurrentVehicle() ) {
 		// Nevermind, the player is in a vehicle.
+
+		auto& d = character->getMovement();
 
 		if( character->getCurrentSeat() == 0 )
 		{
@@ -68,11 +69,7 @@ void CharacterController::update(float dt)
 			character->getCurrentVehicle()->setThrottle(d.x);
 		}
 
-		// if the character isn't doing anything, play sitting anim.
 		if( _currentActivity == nullptr ) {
-			/// @todo play _low variant if car has low flag.
-			character->playAnimation(character->animations.car_sit, true);
-			
 			if( glm::length( d ) <= 0.1f )
 			{
 				vehicleIdle += dt;
@@ -95,70 +92,9 @@ void CharacterController::update(float dt)
 			}
 		}
 	}
-	else {
-		if( glm::length(d) > 0.01f ) {
-			if( running ) {
-				if( character->animator->getAnimation() != character->animations.run ) {
-					character->playAnimation(character->animations.run, true);
-				}
-			}
-			else {
-				if( character->animator->getAnimation() == character->animations.walk_start ) {
-					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk, true);
-					}
-				}
-				else if( character->animator->getAnimation() != character->animations.walk ) {
-					character->playAnimation(character->animations.walk_start, false);
-				}
-			}
-		}
-
-		// TODO how should characters strafe?
-		/*else if( d.x < -0.001f ) {
-			if( character->animator->getAnimation() == character->animations.walk_back_start ) {
-				if( character->animator->isCompleted() ) {
-					character->playAnimation(character->animations.walk_back, true);
-				}
-			}
-			else if( character->animator->getAnimation() != character->animations.walk_back ) {
-				character->playAnimation(character->animations.walk_back_start, false);
-			}
-		}
-		else if( glm::abs(d.y) > 0.001f ) {
-			if( d.y < 0.f ) {
-				if( character->animator->getAnimation() == character->animations.walk_right_start ) {
-					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk_right, true);
-					}
-				}
-				else if( character->animator->getAnimation() != character->animations.walk_right ) {
-					character->playAnimation(character->animations.walk_right_start, false);
-				}
-			}
-			else {
-				if( character->animator->getAnimation() == character->animations.walk_left_start ) {
-					if( character->animator->isCompleted() ) {
-						character->playAnimation(character->animations.walk_left, true);
-					}
-				}
-				else if( character->animator->getAnimation() != character->animations.walk_left ) {
-					character->playAnimation(character->animations.walk_left_start, false);
-				}
-			}
-		}*/
-
-		if( _currentActivity == nullptr ) {
-			if( glm::length(d) < 0.001f ) {
-				character->playAnimation(character->animations.idle, true);
-			}
-		}
-	}
-	
-	// Reset raw movement between activity updates.
-	setRawMovement(glm::vec3());
 
 	if( updateActivity() ) {
+		character->activityFinished();
 		if( _currentActivity ) {
 			delete _currentActivity;
 			_currentActivity = nullptr;
@@ -175,14 +111,14 @@ CharacterObject *CharacterController::getCharacter() const
 	return character;
 }
 
-void CharacterController::setRawMovement(const glm::vec3 &movement)
+void CharacterController::setMoveDirection(const glm::vec3 &movement)
 {
-	rawMovement = movement;
+	character->setMovement(movement);
 }
 
 void CharacterController::setRunning(bool run)
 {
-	running = run;
+	character->setRunning(run);
 }
 
 
@@ -202,7 +138,7 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
 	character->rotation = r;
 
-	controller->setRawMovement({1.f, 0.f, 0.f});
+	controller->setMoveDirection({1.f, 0.f, 0.f});
 	controller->setRunning(sprint);
 
 	return false;
@@ -210,28 +146,16 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 
 bool Activities::Jump::update(CharacterObject* character, CharacterController* controller)
 {
-	if( jumped )
+	if( !jumped )
 	{
-		if( character->physCharacter->canJump() )
-		{
-			character->playAnimation(character->animations.jump_land, false);
-			return true;
-		}
-		if( character->animator->getAnimation() == character->animations.jump_start )
-		{
-			if( character->animator->isCompleted() )
-			{
-				character->playAnimation(character->animations.jump_glide, true);
-			}
-		}
+		character->jump();
+		jumped = true;
 	}
 	else
 	{
-		character->jump();
-		
-		character->playAnimation( character->animations.jump_start, false );
-		
-		jumped = true;
+		if (character->physCharacter->canJump()) {
+			return true;
+		}
 	}
 	
 	return false;
@@ -273,12 +197,12 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 	}
 	
 	if( entering ) {
-		if( character->animator->getAnimation() == anm_open ) {
-			if( character->animator->isCompleted() ) {
-				character->playAnimation(anm_enter, false);
+		if( character->animator->getAnimation(AnimIndexAction) == anm_open ) {
+			if( character->animator->isCompleted(AnimIndexAction) ) {
+				character->playActivityAnimation(anm_enter, false, true);
 				character->enterVehicle(vehicle, seat);
 			}
-			else if( entryDoor && character->animator->getAnimationTime() >= 0.5f )
+			else if( entryDoor && character->animator->getAnimationTime(AnimIndexAction) >= 0.5f )
 			{
 				vehicle->setPartTarget(entryDoor, true, entryDoor->openAngle);
 			}
@@ -287,8 +211,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 				character->rotation = vehicle->getRotation();
 			}
 		}
-		else if( character->animator->getAnimation() == anm_enter ) {
-			if( character->animator->isCompleted() ) {
+		else if( character->animator->getAnimation(AnimIndexAction) == anm_enter ) {
+			if( character->animator->isCompleted(AnimIndexAction) ) {
 				// VehicleGetIn is over, finish activity
 				return true;
 			}
@@ -304,19 +228,19 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		if( targetDistance <= 0.4f ) {
 			entering = true;
 			// Warp character to vehicle orientation
-			character->controller->setRawMovement({0.f, 0.f, 0.f});
+			character->controller->setMoveDirection({0.f, 0.f, 0.f});
 			character->controller->setRunning(false);
 			character->rotation = vehicle->getRotation();
 			
 			// Determine if the door open animation should be skipped.
 			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f ) )
 			{
-				character->playAnimation(anm_enter, false);
+				character->playActivityAnimation(anm_enter, false, true);
 				character->enterVehicle(vehicle, seat);
 			}
 			else
 			{
-				character->playAnimation(anm_open, false);
+				character->playActivityAnimation(anm_open, false, true);
 			}
 		}
 		else {
@@ -325,7 +249,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			}
 			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
 			character->rotation = r;
-			character->controller->setRawMovement({1.f, 0.f, 0.f});
+			character->controller->setMoveDirection({1.f, 0.f, 0.f});
 		}
 	}
 	return false;
@@ -355,8 +279,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		return true;
 	}
 
-	if( character->animator->getAnimation() == anm_exit ) {
-		if( character->animator->isCompleted() ) {
+	if( character->animator->getAnimation(AnimIndexAction) == anm_exit ) {
+		if( character->animator->isCompleted(AnimIndexAction) ) {
 			auto exitpos = vehicle->getSeatEntryPosition(seat);
 
 			character->enterVehicle(nullptr, seat);
@@ -366,7 +290,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		}
 	}
 	else {
-		character->playAnimation(anm_exit, false);
+		character->playActivityAnimation(anm_exit, false, true);
 		if( door )
 		{
 			vehicle->setPartTarget(door, true, door->openAngle);
@@ -391,28 +315,28 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 
 			auto shootanim = character->engine->data->animations[wepdata->animation1];
 			if( shootanim ) {
-				if( character->animator->getAnimation() != shootanim ) {
-					character->playAnimation(shootanim, false);
+				if( character->animator->getAnimation(AnimIndexAction) != shootanim ) {
+					character->playActivityAnimation(shootanim, false, false);
 				}
 
 				auto loopstart = wepdata->animLoopStart / 100.f;
 				auto loopend = wepdata->animLoopEnd / 100.f;
 				auto firetime = wepdata->animFirePoint / 100.f;
 
-				auto currID = character->animator->getAnimationTime();
+				auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 				if( currID >= firetime && ! _fired ) {
 					_item->fire(character);
 					_fired = true;
 				}
 				if( currID > loopend ) {
-					character->animator->setAnimationTime( loopstart );
+					character->animator->setAnimationTime( AnimIndexAction, loopstart );
 					_fired = false;
 				}
 			}
 		}
 		else {
-			if( character->animator->isCompleted() ) {
+			if( character->animator->isCompleted(AnimIndexAction) ) {
 				return true;
 			}
 		}
@@ -422,25 +346,25 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 		auto shootanim = character->engine->data->animations[wepdata->animation1];
 		auto throwanim = character->engine->data->animations[wepdata->animation2];
 
-		if( character->animator->getAnimation() == shootanim ) {
-			if( character->animator->isCompleted() ) {
-				character->animator->setAnimation(throwanim, false);
+		if( character->animator->getAnimation(AnimIndexAction) == shootanim ) {
+			if( character->animator->isCompleted(AnimIndexAction) ) {
+				character->playActivityAnimation(throwanim, false, false);
 			}
 		}
-		else if( character->animator->getAnimation() == throwanim ) {
+		else if( character->animator->getAnimation(AnimIndexAction) == throwanim ) {
 			auto firetime = wepdata->animCrouchFirePoint / 100.f;
-			auto currID = character->animator->getAnimationTime();
+			auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 			if( currID >= firetime && !_fired ) {
 				_item->fire(character);
 				_fired = true;
 			}
-			if( character->animator->isCompleted() ) {
+			if( character->animator->isCompleted(AnimIndexAction) ) {
 				return true;
 			}
 		}
 		else {
-			character->animator->setAnimation(throwanim, false);
+			character->playActivityAnimation(throwanim, false, true);
 		}
 	}
 	else if( wepdata->fireType == WeaponData::MELEE ) {

@@ -30,7 +30,7 @@ void PlayerController::updateMovementDirection(const glm::vec3& dir, const glm::
 {
 	if( _currentActivity == nullptr ) {
 		direction = dir;
-		setRawMovement(rawdirection);
+		setMoveDirection(rawdirection);
 	}
 }
 
@@ -64,15 +64,6 @@ void PlayerController::enterNearestVehicle()
 
 void PlayerController::update(float dt)
 {
-	// TODO: Determine if the player is allowed to interupt the current activity.
-	if( glm::length(direction) > 0.001f && _currentActivity != nullptr ) {
-		skipActivity();
-	}
-
-	if( _currentActivity == nullptr && glm::length(rawMovement) > 0.0f ) {
-		character->rotation = glm::quat(glm::vec3(0.f, 0.f, -atan2(direction.x, direction.y)));
-	}
-
 	CharacterController::update(dt);
 }
 

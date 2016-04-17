@@ -3,6 +3,7 @@
 #include <objects/VehicleObject.hpp>
 #include <ai/DefaultAIController.hpp>
 #include "test_globals.hpp"
+#include <engine/Animator.hpp>
 
 BOOST_AUTO_TEST_SUITE(CharacterTests)
 
@@ -81,6 +82,36 @@ BOOST_AUTO_TEST_CASE(test_activities)
 		}
 
 		BOOST_CHECK_EQUAL( vehicle, character->getCurrentVehicle() );
+
+		Global::get().e->destroyObject(character);
+		delete controller;
+	}
+}
+
+BOOST_AUTO_TEST_CASE(test_death)
+{
+	{
+		auto character = Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
+		BOOST_REQUIRE( character != nullptr );
+		auto controller = new DefaultAIController(character);
+
+		BOOST_CHECK_EQUAL( character->getCurrentState().health, 100.f );
+		BOOST_CHECK( character->isAlive() );
+
+		GameObject::DamageInfo dmg;
+		dmg.type = GameObject::DamageInfo::Bullet;
+		dmg.hitpoints = character->getCurrentState().health + 1.f;
+
+		// Do some damage
+		BOOST_CHECK(character->takeDamage(dmg));
+
+		BOOST_CHECK( ! character->isAlive() );
+
+		character->tick(0.16f);
+
+		BOOST_CHECK_EQUAL(
+					character->animator->getAnimation(0),
+					character->animations.ko_shot_front);
 
 		Global::get().e->destroyObject(character);
 		delete controller;

@@ -3,166 +3,129 @@
 #include <data/Model.hpp>
 #include <data/Skeleton.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
 Animator::Animator(Model* model, Skeleton* skeleton)
-	: model(model), skeleton(skeleton), time(0.f), serverTime(0.f),
-	lastServerTime(0.f), playing(true), repeat(true)
+	: model(model)
+	, skeleton(skeleton)
 {
-	reset();
-}
-
-void Animator::reset()
-{
-	time = 0.f;
-	serverTime = 0.f;
-	lastServerTime = 0.f;
-
-	boneInstances.clear();
-	
-	if( getAnimation() )
-	{
-		for( unsigned int f = 0; f < model->frames.size(); ++f )
-		{
-			auto bit = getAnimation()->bones.find( model->frames[f]->getName() );
-			if( bit != getAnimation()->bones.end() )
-			{
-				boneInstances.insert( { bit->second, { f } } );
-			}
-		}
-	}
-}
-
-void Animator::setAnimation(Animation *animation, bool repeat)
-{
-	if(!_animations.empty() && animation == _animations.front()) {
-		return;
-	}
-
-	while(!_animations.empty()) _animations.pop();
-	queueAnimation(animation);
-	this->repeat = repeat;
-
-	//_frameInstances.clear();
-	
-	reset();
-}
-
-void Animator::queueAnimation(Animation *animation)
-{
-	_animations.push(animation);
-}
-
-void Animator::next()
-{
-	_animations.pop();
-	reset();
 }
 
 void Animator::tick(float dt)
 {
-	if( model == nullptr || _animations.empty() ) {
+	if( model == nullptr || animations.empty() ) {
 		return;
 	}
 
-	if( playing ) {
-		lastServerTime = serverTime;
-		serverTime += dt;
-	}
-	
-	for( auto& b : boneInstances )
+	struct BoneTransform
 	{
-		auto kf = b.first->getInterpolatedKeyframe(getAnimationTime(1.f));
-		
-		auto& data = skeleton->getData(b.second.frameIdx);
-		ModelFrame* frame = model->frames[b.second.frameIdx];
-		
-		Skeleton::FrameData fd;
-		
-		fd.b = data.a;
-		
-		if(b.first->type == AnimationBone::R00 ) {
-			fd.a.rotation = kf.rotation;
-			fd.a.translation = frame->getDefaultTranslation();
+		glm::vec3 translation;
+		glm::quat rotation;
+	};
+
+	// Blend all active animations together
+	std::map<unsigned int, BoneTransform> blendFrames;
+
+	for (AnimationState& state : animations)
+	{
+		RW_CHECK(state.animation != nullptr, "AnimationState with no animation");
+		if (state.animation == nullptr) continue;
+
+		if (state.boneInstances.size() == 0) {
+			for( unsigned int f = 0; f < model->frames.size(); ++f )
+			{
+				auto bit = state.animation->bones.find( model->frames[f]->getName() );
+				if( bit != state.animation->bones.end() )
+				{
+					state.boneInstances.insert( { bit->second, { f } } );
+				}
+			}
 		}
-		else if(b.first->type == AnimationBone::RT0) {
-			fd.a.rotation = kf.rotation;
-			fd.a.translation = kf.position;
-		}
-		else {
-			fd.a.rotation = kf.rotation;
-			fd.a.translation = kf.position;
-		}
-		
-		fd.enabled = data.enabled;
-		
-		skeleton->setData(b.second.frameIdx, fd);
-	}
 
-	if( isCompleted() && ! repeat && _animations.size() > 1 ) {
-		next();
-	}
-}
-
-glm::vec3 Animator::getRootTranslation() const
-{
-	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
-		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
-
-		auto it = getAnimation()->bones.find(realRoot->getName());
-		if(it != getAnimation()->bones.end()) {
-			auto start = it->second->frames.front().position;
-			auto end = it->second->frames.back().position;
-			return end - start;
-		}
-	}
-
-	return glm::vec3();
-}
-
-glm::vec3 Animator::getTimeTranslation(float alpha) const
-{
-	if(!model->frames[model->rootFrameIdx]->getChildren().empty() && !_animations.empty()) {
-		ModelFrame* realRoot = model->frames[model->rootFrameIdx]->getChildren()[0];
-
-		auto it = getAnimation()->bones.find(realRoot->getName());
-		if(it != getAnimation()->bones.end()) {
-			auto start = it->second->frames.front().position;
-			auto end = it->second->frames.back().position;
-			return glm::mix(start, end, (getAnimationTime(alpha) / getAnimation()->duration) );
-		}
-	}
-
-	return glm::vec3();
-}
-
-glm::quat Animator::getRootRotation() const
-{
-	return glm::quat();
-}
-
-bool Animator::isCompleted() const
-{
-	return getAnimation() ? serverTime >= getAnimation()->duration : true;
-}
-
-float Animator::getAnimationTime(float alpha) const
-{
-	float td = serverTime - lastServerTime;
-	if(repeat) {
-		float t = serverTime + td * alpha;
-		while( t > getAnimation()->duration )
+		float animTime = state.time;
+		if (! state.repeat)
 		{
-			t -= getAnimation()->duration;
+			animTime = std::min(animTime, state.animation->duration);
 		}
-		return t;
+		else
+		{
+			animTime = fmod(animTime, state.animation->duration);
+		}
+
+		for( auto& b : state.boneInstances )
+		{
+			if (b.first->frames.size() == 0) continue;
+			auto kf = b.first->getInterpolatedKeyframe(animTime);
+
+			BoneTransform xform;
+			if(b.first->type == AnimationBone::R00 ) {
+				xform.rotation = kf.rotation;
+			}
+			else if(b.first->type == AnimationBone::RT0) {
+				xform.rotation = kf.rotation;
+				xform.translation = kf.position;
+			}
+			else {
+				xform.rotation = kf.rotation;
+				xform.translation = kf.position;
+			}
+
+#if 0
+			auto prevAnim = blendFrames.find(b.second.frameIndex);
+			if (prevAnim != blendFrames.end())
+			{
+				prevAnim->second.translation += xform.translation;
+				prevAnim->second.rotation *= xform.rotation;
+			}
+			else
+			{
+				blendFrames[b.second.frameIndex] = xform;
+			}
+#else
+			blendFrames[b.second.frameIndex] = xform;
+#endif
+		}
+		state.time = state.time + dt;
 	}
-	return serverTime + td * alpha;
+
+	for (auto& p : blendFrames)
+	{
+		auto& data = skeleton->getData(p.first);
+		Skeleton::FrameData fd;
+		fd.b = data.a;
+		fd.enabled = data.enabled;
+
+		fd.a.translation = model->frames[p.first]->getDefaultTranslation()
+				+ p.second.translation;
+		fd.a.rotation = p.second.rotation;
+
+		skeleton->setData(p.first, fd);
+	}
 }
 
-void Animator::setAnimationTime(float time)
+bool Animator::isCompleted(unsigned int slot) const
 {
-	lastServerTime = serverTime;
-	serverTime = time;
+	if (slot < animations.size())
+	{
+		return animations[slot].animation ?
+					animations[slot].time >= animations[slot].animation->duration
+				  : true;
+	}
+	return false;
+}
 
+float Animator::getAnimationTime(unsigned int slot) const
+{
+	if (slot < animations.size())
+	{
+		return animations[slot].time;
+	}
+	return 0.f;
+}
+
+void Animator::setAnimationTime(unsigned int slot, float time)
+{
+	if (slot < animations.size())
+	{
+		animations[slot].time = time;
+	}
 }

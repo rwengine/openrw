@@ -209,11 +209,30 @@ void IngameState::tick(float dt)
 		// Update player with camera yaw
 		if( player->isInputEnabled() )
 		{
-			player->updateMovementDirection(angle * _movement, _movement);
+			if (player->getCharacter()->getCurrentVehicle())
+			{
+				player->setMoveDirection(_movement);
+			}
+			else
+			{
+				glm::vec3 direction = glm::normalize(_movement);
+				float length = glm::length(direction);
+				player->setMoveDirection(glm::vec3(length, 0.f, 0.f));
+				float movementAngle = angleYaw - M_PI/2.f;
+				if (length > 0.1f)
+				{
+					movementAngle += atan2(direction.y, direction.x);
+				}
+				if (player->getCharacter()->canTurn())
+				{
+					player->getCharacter()->rotation =
+							glm::angleAxis(movementAngle, glm::vec3(0.f, 0.f, 1.f));
+				}
+			}
 		}
 		else
 		{
-			player->updateMovementDirection(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f,0.f,0.f));
+			player->setMoveDirection(glm::vec3(0.f));
 		}
 
 		float len2d = glm::length(glm::vec2(lookdir));

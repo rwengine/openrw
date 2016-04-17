@@ -93,5 +93,5 @@ void ModelViewer::loadAnimations(const QString& file)
 
 void ModelViewer::playAnimation(Animation* anim)
 {
-	viewerWidget->currentObject()->animator->setAnimation(anim);
+	viewerWidget->currentObject()->animator->playAnimation(0, anim, 1.f, true);
 }
