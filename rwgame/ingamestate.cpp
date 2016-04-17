@@ -215,13 +215,17 @@ void IngameState::tick(float dt)
 			}
 			else
 			{
-				glm::vec3 direction = glm::normalize(_movement);
-				float length = glm::length(direction);
-				player->setMoveDirection(glm::vec3(length, 0.f, 0.f));
+				float length = glm::length(_movement);
 				float movementAngle = angleYaw - M_PI/2.f;
 				if (length > 0.1f)
 				{
+					glm::vec3 direction = glm::normalize(_movement);
 					movementAngle += atan2(direction.y, direction.x);
+					player->setMoveDirection(glm::vec3(1.f, 0.f, 0.f));
+				}
+				else
+				{
+					player->setMoveDirection(glm::vec3(0.f));
 				}
 				if (player->getCharacter()->canTurn())
 				{
