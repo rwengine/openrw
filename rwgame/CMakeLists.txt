@@ -10,6 +10,7 @@ add_executable(rwgame
 	pausestate.cpp
 	menustate.cpp
 	debugstate.cpp
+	benchmarkstate.cpp
 	
 	DrawUI.cpp
 

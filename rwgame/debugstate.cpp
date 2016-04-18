@@ -112,6 +112,9 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	m->addEntry(Menu::lambda("Full Armour", [=] {
 		game->getPlayer()->getCharacter()->getCurrentState().armour = 100.f;
 	}, entryHeight));
+	m->addEntry(Menu::lambda("Cull Here", [=] {
+		game->getRenderer()->setCullOverride(true, _debugCam);
+	}, entryHeight));
 
 	this->enterMenu(m);
 
@@ -224,6 +227,9 @@ void DebugState::handleEvent(const sf::Event &e)
 		case sf::Keyboard::LShift:
 			_sonicMode = true;
 			break;
+		case sf::Keyboard::P:
+			printCameraDetails();
+			break;
 		}
 		break;
 	case sf::Event::KeyReleased:
@@ -244,6 +250,13 @@ void DebugState::handleEvent(const sf::Event &e)
 	default: break;
 	}
 	State::handleEvent(e);
+}
+
+void DebugState::printCameraDetails()
+{
+	std::cout << " " << _debugCam.position.x << " " << _debugCam.position.y << " " << _debugCam.position.z
+			  << " " << _debugCam.rotation.x << " " << _debugCam.rotation.y << " " << _debugCam.rotation.z
+			  << " " << _debugCam.rotation.w << std::endl;
 }
 
 void DebugState::spawnVehicle(unsigned int id)

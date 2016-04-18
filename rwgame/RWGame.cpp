@@ -4,6 +4,7 @@
 #include "DrawUI.hpp"
 #include "ingamestate.hpp"
 #include "menustate.hpp"
+#include "benchmarkstate.hpp"
 #include "debug/HttpServer.hpp"
 
 #include <objects/GameObject.hpp>
@@ -38,6 +39,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	bool newgame = false;
 	bool test = false;
     std::string startSave;
+	std::string benchFile;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -69,6 +71,10 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
         {
             startSave = argv[i+1];
         }
+		if( strcmp( "--benchmark", argv[i]) == 0 && i+1 < argc )
+		{
+			benchFile = argv[i+1];
+		}
 	}
 	
 	
@@ -81,7 +87,6 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	sf::ContextSettings cs;
 	cs.depthBits = 32;
 	window.create(sf::VideoMode(w, h), "",  style, cs);
-	window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 
 	log.addReciever(&logPrinter);	
@@ -130,7 +135,11 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	}
 
 	auto loading = new LoadingState(this);
-	if( newgame )
+	if (! benchFile.empty())
+	{
+		loading->setNextState(new BenchmarkState(this, benchFile));
+	}
+	else if( newgame )
 	{
 		if( test )
 		{
@@ -171,7 +180,7 @@ void RWGame::newGame()
 		return;
 	}
 
-	state = new GameState;
+	state = new GameState();
 	world = new GameWorld(&log, &work, data);
 	world->dynamicsWorld->setDebugDrawer(debug);
 
@@ -317,6 +326,9 @@ int RWGame::run()
 
 		while ( accum >= GAME_TIMESTEP ) {
 			StateManager::get().tick(GAME_TIMESTEP);
+			if (StateManager::get().states.size() == 0) {
+				break;
+			}
 
 			tick(GAME_TIMESTEP);
 			
@@ -337,7 +349,9 @@ int RWGame::run()
 
 		render(alpha, timer);
 
-		StateManager::get().draw(renderer);
+		if (StateManager::get().states.size() > 0) {
+			StateManager::get().draw(renderer);
+		}
 
 		window.display();
 	}

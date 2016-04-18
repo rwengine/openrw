@@ -21,6 +21,8 @@ public:
 
 	virtual void handleEvent(const sf::Event& event);
 
+	void printCameraDetails();
+
 	void spawnVehicle(unsigned int id);
 
 	const ViewCamera& getCamera();
