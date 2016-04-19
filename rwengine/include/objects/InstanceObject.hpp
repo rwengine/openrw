@@ -31,8 +31,8 @@ public:
 
 	void changeModel(std::shared_ptr<ObjectData> incoming);
 
-	virtual glm::vec3 getPosition() const;
-	virtual glm::quat getRotation() const;
+	glm::vec3 getPosition() const override;
+	glm::quat getRotation() const override;
 
 	virtual void setRotation(const glm::quat& r);
 	

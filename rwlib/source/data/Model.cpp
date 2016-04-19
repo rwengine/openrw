@@ -42,13 +42,12 @@ Model::~Model()
 	}
 }
 
-float Model::getBoundingRadius() const
+void Model::recalculateMetrics()
 {
-	float mindist = std::numeric_limits<float>::min();
+	boundingRadius = std::numeric_limits<float>::min();
 	for (size_t g = 0; g < geometries.size(); g++)
 	{
 		RW::BSGeometryBounds& bounds = geometries[g]->geometryBounds;
-		mindist = std::max(mindist, glm::length(bounds.center) + bounds.radius);
+		boundingRadius = std::max(boundingRadius, glm::length(bounds.center) + bounds.radius);
 	}
-	return mindist;
 }

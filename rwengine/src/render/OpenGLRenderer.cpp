@@ -170,6 +170,11 @@ OpenGLRenderer::OpenGLRenderer()
 	
 	swap();
 
+	GLint maxUBOSize;
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUBOSize);
+	std::cout << "Max UBO Size: " << maxUBOSize << std::endl;
+	std::cout << "Max batch size: " << (maxUBOSize/sizeof(ObjectUniformData)) << std::endl;
+
 	glGenQueries(1, &debugQuery);
 }
 

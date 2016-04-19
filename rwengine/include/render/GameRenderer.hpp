@@ -86,6 +86,8 @@ class GameRenderer
 
 	/** Camera values passed to renderWorld() */
 	ViewCamera _camera;
+	ViewCamera cullingCamera;
+	bool cullOverride;
 	
 	GLuint framebufferName;
 	GLuint fbTextures[2];
@@ -129,38 +131,6 @@ public:
 	 *  - draws the skybox
      */
 	void renderWorld(GameWorld* world, const ViewCamera &camera, float alpha);
-
-	/**
-	 * @brief draws a CharacterObject and any item they are holding.
-	 * @param pedestrian the character to render
-	 */
-	void renderPedestrian(CharacterObject* pedestrian);
-
-	/**
-	 * @brief draws a VehicleObject and it's wheels.
-	 * @param vehicle vehicle to render
-	 */
-	void renderVehicle(VehicleObject* vehicle);
-
-	/**
-	 * @brief draw part of the world.
-	 */
-	void renderInstance(InstanceObject* instance);
-
-	/**
-	 * @brief draws a pickup with it's model
-	 * @param pickup
-	 * @todo corona rendering, with tint.
-	 */
-	void renderPickup(PickupObject* pickup);
-
-	void renderProjectile(ProjectileObject* projectile);
-
-	void renderCutsceneObject(CutsceneObject *cutscene);
-
-	void renderWheel(Model*, const glm::mat4& matrix, const std::string& name);
-
-	void renderItem(InventoryItem* item, const glm::mat4& modelMatrix);
 	
 	/**
 	 * Renders the effects (Particles, Lighttrails etc)
@@ -202,6 +172,12 @@ public:
 	}
 	
 	void setViewport(int w, int h);
+
+	void setCullOverride(bool override, const ViewCamera& cullCamera)
+	{
+		cullingCamera = cullCamera;
+		cullOverride = override;
+	}
 	
 	MapRenderer map;
 	WaterRenderer water;

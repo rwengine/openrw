@@ -465,5 +465,8 @@ Model* LoaderDFF::loadFromMemory(FileHandle file)
 		}
 	}
 
+	// Ensure the model has cached metrics
+	model->recalculateMetrics();
+
 	return model;
 }

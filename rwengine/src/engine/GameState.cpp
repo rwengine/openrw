@@ -7,8 +7,9 @@ GameState::GameState()
 	, gameTime(0.f),
 currentProgress(0),
 maxProgress(1),
-maxWantedLevel(0),
-scriptOnMissionFlag(nullptr),
+maxWantedLevel(0)
+	, playerObject(0)
+	, scriptOnMissionFlag(nullptr),
 fadeOut(true),
 fadeStart(0.f),
 fadeTime(0.f),

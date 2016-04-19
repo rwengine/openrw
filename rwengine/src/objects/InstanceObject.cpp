@@ -141,19 +141,11 @@ void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming)
 
 glm::vec3 InstanceObject::getPosition() const
 {
-	if( body ) {
-		btVector3 Pos = body->body->getWorldTransform().getOrigin();
-		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
-	}
 	return position;
 }
 
 glm::quat InstanceObject::getRotation() const
 {
-	if( body ) {
-		btQuaternion rot = body->body->getWorldTransform().getRotation();
-		return glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
-	}
 	return rotation;
 }
 

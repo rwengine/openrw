@@ -45,7 +45,7 @@ struct ObjectData : public ObjectInformation
 
 	std::string modelName;
 	std::string textureName;
-	size_t numClumps;
+	uint8_t numClumps;
 	float drawDistance[3];
 	int32_t flags;
 	bool LOD;

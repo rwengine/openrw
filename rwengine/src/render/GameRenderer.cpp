@@ -17,6 +17,7 @@
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
+#include <render/ObjectRenderer.hpp>
 
 #include <render/GameShaders.hpp>
 #include <core/Logger.hpp>
@@ -288,88 +289,48 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	renderer->clear(glm::vec4(skyBottom, 1.f));
 
 	_camera.frustum.update(proj * view);
+	if (cullOverride)
+	{
+		cullingCamera.frustum.update(
+					cullingCamera.frustum.projection() * cullingCamera.getView());
+	}
 	
 	culled = 0;
 
 	renderer->useProgram(worldProg);
 
+	//===============================================================
+	//	Render List Construction
+	//---------------------------------------------------------------
+
+	// This is sequential at the moment, it should be easy to make it
+	// run in parallel with a good threading system.
+	RenderList renderList;
+	// Naive optimisation, assume 10% hitrate
+	renderList.reserve(world->allObjects.size() * 0.1f);
+
+	// World Objects
+	for (auto object : world->allObjects) {
+		ObjectRenderer::buildRenderList(
+					_renderWorld,
+					object,
+					(cullOverride ? cullingCamera : _camera),
+					_renderAlpha,
+					renderList);
+	}
+
 	renderer->pushDebugGroup("Objects");
-	renderer->pushDebugGroup("Dynamic");
+	renderer->pushDebugGroup("RenderList");
 
-	for( auto& object : world->allObjects ) {
-		if(! object->visible )
-		{
-			continue;
-		}
-		
-		if( object->skeleton )
-		{
-			object->skeleton->interpolate(_renderAlpha);
-		}
-		
-		switch(object->type()) {
-		case GameObject::Character:
-			renderPedestrian(static_cast<CharacterObject*>(object));
-			break;
-		case GameObject::Vehicle:
-			renderVehicle(static_cast<VehicleObject*>(object));
-			break;
-		case GameObject::Instance:
-			if(! world->shouldBeOnGrid(object) )
-			{
-				renderInstance(static_cast<InstanceObject*>(object));
-			}
-			break;
-		case GameObject::Pickup:
-			renderPickup(static_cast<PickupObject*>(object));
-			break;
-		case GameObject::Projectile:
-			renderProjectile(static_cast<ProjectileObject*>(object));
-			break;
-		case GameObject::Cutscene:
-			renderCutsceneObject(static_cast<CutsceneObject*>(object));
-			break;
-		default: break;
-		}
+	// Also parallelizable
+	std::sort(renderList.begin(), renderList.end(),
+			  [](const RenderInstruction&a, const RenderInstruction&b) {
+					return a.sortKey < b.sortKey;
+				});
+
+	for (RenderInstruction& ri : renderList) {
+		renderer->draw(ri.model, ri.dbuff, ri.drawInfo);
 	}
-
-	renderer->popDebugGroup();
-	renderer->pushDebugGroup("Static");
-
-	// Draw the static instance objects. k = % culled
-	int c = 0, k = 0;
-	for(auto& cell : world->worldGrid )
-	{
-		c++;
-		int y = c % WORLD_GRID_WIDTH;
-		int x = c / WORLD_GRID_WIDTH;
-		float cellhalf = WORLD_CELL_SIZE/2.f;
-		float radius = cell.boundingRadius;
-		auto worldp = glm::vec3(glm::vec2(x,y) * glm::vec2(WORLD_CELL_SIZE) - glm::vec2(WORLD_GRID_SIZE/2.f) + glm::vec2(cellhalf), 0.f);
-		if( _camera.frustum.intersects(worldp, radius) )
-		{
-			for( auto& inst : cell.instances )
-			{
-				renderInstance(static_cast<InstanceObject*>(inst));
-			}
-		}
-		else
-		{
-			k++;
-		}
-	}
-
-	renderer->popDebugGroup();
-	renderer->pushDebugGroup("Transparent");
-
-	// Draw anything that got queued.
-	for(auto it = transparentDrawQueue.begin();
-		it != transparentDrawQueue.end();
-		++it)
-	{
-		renderer->draw(it->matrix, &it->model->geometries[it->g]->dbuff, it->dp);
-	}
-	transparentDrawQueue.clear();
 
 	renderer->popDebugGroup();
 	profObjects = renderer->popDebugGroup();
@@ -532,339 +493,6 @@ void GameRenderer::renderPostProcess()
 	wdp.textures = {fbTextures[0]};
 	
 	renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
-}
-
-void GameRenderer::renderPedestrian(CharacterObject *pedestrian)
-{
-	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( _renderAlpha );
-
-	if(!pedestrian->model->resource) return;
-
-	auto root = pedestrian->model->resource->frames[0];
-	
-	renderFrame(pedestrian->model->resource, root->getChildren()[0], matrixModel, pedestrian, 1.f, pedestrian->animator);
-
-	if(pedestrian->getActiveItem()) {
-		auto handFrame = pedestrian->model->resource->findFrame("srhand");
-		glm::mat4 localMatrix;
-		if( handFrame ) {
-			while( handFrame->getParent() ) {
-				localMatrix = pedestrian->skeleton->getMatrix(handFrame->getIndex()) * localMatrix;
-				handFrame = handFrame->getParent();
-			}
-		}
-		renderItem(pedestrian->getActiveItem(), matrixModel * localMatrix);
-	}
-}
-
-void GameRenderer::renderVehicle(VehicleObject *vehicle)
-{
-	if(!vehicle->model)
-	{
-		logger->warning("Renderer", "Vehicle model " + vehicle->vehicle->modelName + " not loaded!");
-	}
-
-	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( _renderAlpha );
-
-	renderModel(vehicle->model->resource, matrixModel, vehicle);
-
-	// Draw wheels n' stuff
-	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-		auto woi = data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
-		if( woi ) {
-			Model* wheelModel = data->models["wheels"]->resource;
-			auto& wi = vehicle->physVehicle->getWheelInfo(w);
-			if( wheelModel ) {
-				// Construct our own matrix so we can use the local transform
-				vehicle->physVehicle->updateWheelTransform(w, false);
-				/// @todo migrate this into Vehicle physics tick so we can interpolate old -> new
-
-				glm::mat4 wheelM ( matrixModel );
-
-				auto up = -wi.m_wheelDirectionCS;
-				auto right = wi.m_wheelAxleCS;
-				auto fwd = up.cross(right);
-				btQuaternion steerQ(up, wi.m_steering);
-				btQuaternion rollQ(right, -wi.m_rotation);
-
-				btMatrix3x3 basis(
-						right[0], fwd[0], up[0],
-						right[1], fwd[1], up[1],
-						right[2], fwd[2], up[2]
-						);
-
-
-				btTransform t;
-				t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
-				t.setOrigin(wi.m_chassisConnectionPointCS + wi.m_wheelDirectionCS * wi.m_raycastInfo.m_suspensionLength);
-
-				t.getOpenGLMatrix(glm::value_ptr(wheelM));
-				wheelM = matrixModel * wheelM;
-
-				wheelM = glm::scale(wheelM, glm::vec3(vehicle->vehicle->wheelScale));
-				if(wi.m_chassisConnectionPointCS.x() < 0.f) {
-					wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
-				}
-
-				renderWheel(wheelModel, wheelM, woi->modelName);
-			}
-		}
-	}
-}
-
-void GameRenderer::renderInstance(InstanceObject *instance)
-{
-	if(instance->object && instance->object->timeOn != instance->object->timeOff) {
-		// Update rendering flags.
-		if(_renderWorld->getHour() < instance->object->timeOn
-			&& _renderWorld->getHour() > instance->object->timeOff) {
-			return;
-		}
-	}
-
-	if(!instance->model->resource)
-	{
-		return;
-	}
-
-	auto matrixModel = instance->getTimeAdjustedTransform(_renderAlpha);
-
-	float mindist = 100000.f;
-	for (size_t g = 0; g < instance->model->resource->geometries.size(); g++)
-	{
-		RW::BSGeometryBounds& bounds = instance->model->resource->geometries[g]->geometryBounds;
-		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
-	}
-
-	Model* model = nullptr;
-	ModelFrame* frame = nullptr;
-
-	// These are used to gracefully fade out things that are just out of view distance.
-	Model* fadingModel = nullptr;
-	ModelFrame* fadingFrame = nullptr;
-	float opacity = 0.f;
-
-	if( instance->object->numClumps == 1 ) {
-		// Object consists of a single clump.
-		if( mindist > instance->object->drawDistance[0] ) {
-			// Check for LOD instances
-			if ( instance->LODinstance ) {
-				if( mindist > instance->LODinstance->object->drawDistance[0] ) {
-					culled++;
-					return;
-				}
-				else if (instance->LODinstance->model->resource) {
-					model = instance->LODinstance->model->resource;
-
-					fadingModel = instance->model->resource;
-					opacity = (mindist) / instance->object->drawDistance[0];
-				}
-			}
-			else {
-				fadingModel = instance->model->resource;
-				opacity = (mindist) / instance->object->drawDistance[0];
-			}
-		}
-		else if (! instance->object->LOD ) {
-			model = instance->model->resource;
-			opacity = (mindist) / instance->object->drawDistance[0];
-		}
-	}
-	else {
-		if( mindist > instance->object->drawDistance[1] ) {
-			culled++;
-			return;
-		}
-
-		auto root = instance->model->resource->frames[0];
-		int lodInd = 1;
-		if( mindist > instance->object->drawDistance[0] ) {
-			lodInd = 2;
-		}
-		auto LODindex = root->getChildren().size() - lodInd;
-		auto f = root->getChildren()[LODindex];
-		model = instance->model->resource;
-		frame = f;
-
-		if( lodInd == 2 ) {
-			fadingModel = model;
-			fadingFrame = root->getChildren()[LODindex+1];
-			opacity = (mindist) / instance->object->drawDistance[0];
-		}
-	}
-
-	if( model ) {
-		frame = frame ? frame : model->frames[0];
-		renderFrame(model, frame, matrixModel * glm::inverse(frame->getTransform()), nullptr, 1.f);
-	}
-	if( fadingModel ) {
-		// opacity is the distance over the culling limit,
-		opacity = 2.0f - opacity;
-		if(opacity > 0.f) {
-			fadingFrame = fadingFrame ? fadingFrame : fadingModel->frames[0];
-			renderFrame(fadingModel, fadingFrame, matrixModel * glm::inverse(fadingFrame->getTransform()), nullptr, opacity);
-		}
-	}
-}
-
-void GameRenderer::renderPickup(PickupObject *pickup)
-{
-	if( ! pickup->isEnabled() ) return;
-
-	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
-	modelMatrix = glm::rotate(modelMatrix, _renderWorld->getGameTime(), glm::vec3(0.f, 0.f, 1.f));
-
-	auto odata = data->findObjectType<ObjectData>(pickup->getModelID());
-	
-	Model* model = nullptr;
-	ModelFrame* itemModel = nullptr;
-	
-	/// @todo Better determination of is this object a weapon.
-	if( odata->ID >= 170 && odata->ID <= 184 )
-	{
-		auto weapons = data->models["weapons"];
-		if( weapons && weapons->resource && odata ) {
-			model = weapons->resource;
-			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-			if ( ! itemModel )
-			{
-				logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
-			}
-		}
-	}
-	else
-	{
-		auto handle = data->models[odata->modelName];
-		if ( handle && handle->resource )
-		{
-			model = handle->resource;
-			itemModel = model->frames[model->rootFrameIdx];
-		}
-		else
-		{
-			logger->error("Renderer", "Pickup model " + odata->modelName + " not loaded");
-		}
-	}
-	
-	if ( itemModel ) {
-		auto matrix = glm::inverse(itemModel->getTransform());
-		renderFrame(model, itemModel, modelMatrix * matrix, nullptr, 1.f);
-	}
-}
-
-
-void GameRenderer::renderCutsceneObject(CutsceneObject *cutscene)
-{
-	if(!_renderWorld->state->currentCutscene) return;
-
-	if(!cutscene->model->resource)
-	{
-		return;
-	}
-
-	glm::mat4 matrixModel;
-
-	if( cutscene->getParentActor() ) {
-		matrixModel = glm::translate(matrixModel, _renderWorld->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
-		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
-		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
-		glm::mat4 localMatrix;
-		auto boneframe = cutscene->getParentFrame();
-		while( boneframe ) {
-			localMatrix = cutscene->getParentActor()->skeleton->getMatrix(boneframe->getIndex()) * localMatrix;
-			boneframe = boneframe->getParent();
-		}
-		matrixModel = matrixModel * localMatrix;
-	}
-	else {
-		matrixModel = glm::translate(matrixModel, _renderWorld->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
-	}
-
-	float mindist = 100000.f;
-	for (size_t g = 0; g < cutscene->model->resource->geometries.size(); g++)
-	{
-		RW::BSGeometryBounds& bounds = cutscene->model->resource->geometries[g]->geometryBounds;
-		mindist = std::min(mindist, glm::length((glm::vec3(matrixModel[3])+bounds.center) - _camera.position) - bounds.radius);
-	}
-
-	if( cutscene->getParentActor() ) {
-		glm::mat4 align;
-		/// @todo figure out where this 90 degree offset is coming from.
-		align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
-		renderModel(cutscene->model->resource, matrixModel * align, cutscene);
-	}
-	else {
-		renderModel(cutscene->model->resource, matrixModel, cutscene);
-	}
-}
-
-void GameRenderer::renderProjectile(ProjectileObject *projectile)
-{
-	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(_renderAlpha);
-
-	auto odata = data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
-	auto weapons = data->models["weapons"];
-	if( weapons && weapons->resource ) {
-		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-		auto matrix = glm::inverse(itemModel->getTransform());
-		if(itemModel) {
-			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
-		}
-		else {
-			logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
-		}
-	}
-	else {
-		logger->error("Renderer", "Weapon.dff not loaded");
-	}
-}
-
-void GameRenderer::renderWheel(Model* model, const glm::mat4 &matrix, const std::string& name)
-{
-	for (const ModelFrame* f : model->frames) 
-	{
-		const std::string& fname = f->getName();
-		if( fname != name ) {
-			continue;
-		}
-
-		auto firstLod = f->getChildren()[0];
-
-		for( auto& g : firstLod->getGeometries() ) {
-			RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-			if(! _camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
-				culled++;
-				continue;
-			}
-
-			renderGeometry(model, g, matrix, 1.f);
-		}
-		break;
-	}
-}
-
-void GameRenderer::renderItem(InventoryItem *item, const glm::mat4 &modelMatrix)
-{
-	// srhand
-	if (item->getModelID() == -1) {
-		return; // No model for this item
-	}
-
-	std::shared_ptr<ObjectData> odata = data->findObjectType<ObjectData>(item->getModelID());
-	auto weapons = data->models["weapons"];
-	if( weapons && weapons->resource ) {
-		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-		auto matrix = glm::inverse(itemModel->getTransform());
-		if(itemModel) {
-			renderFrame(weapons->resource, itemModel, modelMatrix * matrix, nullptr, 1.f);
-		}
-		else {
-			logger->error("Renderer", "Weapon frame " + odata->modelName + " not in model");
-		}
-	}
-	else {
-		logger->error("Renderer", "Weapon model not loaded");
-	}
 }
 
 void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix, float opacity, GameObject* object)

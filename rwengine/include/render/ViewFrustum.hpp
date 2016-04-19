@@ -49,7 +49,7 @@ public:
 		}
 	}
 	
-	bool intersects(glm::vec3 center, float radius)
+	bool intersects(glm::vec3 center, float radius) const
 	{
 		float d;
 		bool result = true;
