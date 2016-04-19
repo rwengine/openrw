@@ -25,7 +25,7 @@ ENDIF()
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 
-IF(${ENABLE_PROFILE_RENDERER})
+IF(${PROFILING})
 	add_definitions(-DRENDER_PROFILER=1)
 else()
 	add_definitions(-DRENDER_PROFILER=0)
