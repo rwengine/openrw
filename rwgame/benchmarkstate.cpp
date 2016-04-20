@@ -64,7 +64,8 @@ void BenchmarkState::exit()
 			  << "Benchmark: " << benchfile << "\n"
 			  << "Frames: " << frameCounter << "\n"
 			  << "Duration: " << duration << " seconds\n"
-			  << "Avg FPS: " << (frameCounter/duration) << std::endl;
+			  << "Avg frametime: " << std::setprecision(3) << (duration/frameCounter)
+			  << " (" << (frameCounter/duration) << " fps)" << std::endl;
 }
 
 void BenchmarkState::tick(float dt)
