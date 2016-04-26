@@ -211,7 +211,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream)
 	}
 	else {
 		// Use triangle data to calculate normals for each vert.
-		for( int t = 0; t < numTris; ++t ) {
+		for (size_t t = 0; t < numTris; ++t) {
 			auto& triangle = triangles[t];
 			auto& A = verts[triangle.first];
 			auto& B = verts[triangle.second];
@@ -353,7 +353,7 @@ void LoaderDFF::readTexture(Model *model, const RWBStream &stream)
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 	std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
 
-	model->geometries.back()->materials.back().textures.push_back({name, alpha});
+	model->geometries.back()->materials.back().textures.push_back({name, alpha, nullptr});
 }
 
 void LoaderDFF::readGeometryExtension(Model *model, const RWBStream &stream)

@@ -32,7 +32,7 @@ TextureData::Handle getErrorTexture()
 }
 
 const size_t paletteSize = 1024;
-void processPalette(uint32_t* fullColor, RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection)
+void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection)
 {
 	uint8_t* dataBase = reinterpret_cast<uint8_t*>(rootSection.raw() + sizeof(RW::BSSectionHeader) + sizeof(RW::BSTextureNative) - 4);
 
@@ -69,24 +69,11 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative, RW::BinaryStre
 
 	GLuint textureName = 0;
 	
-#if ENABLE_ABHORENT_DEBUGGING
-	if(true)
-	{
-		glGenTextures(1, &textureName);
-		glBindTexture(GL_TEXTURE_2D, textureName);
-		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_RGBA,
-			1, 1, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)(gDebugTextureData) + (*transparent ? 0 : 4)
-		);
-	}
-	else 
-#endif
 	if(isPal8)
 	{
 		uint32_t fullColor[texNative.width * texNative.height];
 
-		processPalette(fullColor, texNative, rootSection);
+		processPalette(fullColor, rootSection);
 
 		glGenTextures(1, &textureName);
 		glBindTexture(GL_TEXTURE_2D, textureName);
