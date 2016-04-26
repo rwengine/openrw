@@ -7,6 +7,8 @@
 #include "benchmarkstate.hpp"
 #include "debug/HttpServer.hpp"
 
+#include <core/Profiler.hpp>
+
 #include <objects/GameObject.hpp>
 #include <engine/GameState.hpp>
 #include <engine/SaveGame.hpp>
@@ -295,7 +297,10 @@ int RWGame::run()
 	// Loop until the window is closed or we run out of state.
 	while (window.isOpen() && StateManager::get().states.size()) {
 		State* state = StateManager::get().states.back();
+
+		RW_PROFILE_FRAME_BOUNDARY();
 		
+		RW_PROFILE_BEGIN("Input");
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			switch (event.type) {
@@ -313,8 +318,11 @@ int RWGame::run()
 			default: break;
 			}
 
+			RW_PROFILE_BEGIN("State");
 			state->handleEvent(event);
+			RW_PROFILE_END()
 		}
+		RW_PROFILE_END();
 		
 		if(! window.isOpen() )
 		{
@@ -324,13 +332,19 @@ int RWGame::run()
 		float timer = clock.restart().asSeconds();
 		accum += timer * timescale;
 
-		while ( accum >= GAME_TIMESTEP ) {
+		RW_PROFILE_BEGIN("Update");
+		if ( accum >= GAME_TIMESTEP ) {
+			RW_PROFILE_BEGIN("state");
 			StateManager::get().tick(GAME_TIMESTEP);
+			RW_PROFILE_END();
+
 			if (StateManager::get().states.size() == 0) {
 				break;
 			}
 
+			RW_PROFILE_BEGIN("engine");
 			tick(GAME_TIMESTEP);
+			RW_PROFILE_END();
 			
 			accum -= GAME_TIMESTEP;
 			
@@ -340,6 +354,7 @@ int RWGame::run()
 				accum = 0.f;
 			}
 		}
+		RW_PROFILE_END();
 
 		float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
 		if( ! state->shouldWorldUpdate() )
@@ -347,11 +362,19 @@ int RWGame::run()
 			alpha = 1.f;
 		}
 
+		RW_PROFILE_BEGIN("Render");
+		RW_PROFILE_BEGIN("engine");
 		render(alpha, timer);
+		RW_PROFILE_END();
 
+		RW_PROFILE_BEGIN("state");
 		if (StateManager::get().states.size() > 0) {
 			StateManager::get().draw(renderer);
 		}
+		RW_PROFILE_END();
+		RW_PROFILE_END();
+
+		renderProfile();
 
 		window.display();
 	}
@@ -529,10 +552,14 @@ void RWGame::render(float alpha, float time)
 
 	renderer->getRenderer()->pushDebugGroup("World");
 
+	RW_PROFILE_BEGIN("world");
 	renderer->renderWorld(world, viewCam, alpha);
+	RW_PROFILE_END();
+
 
 	auto rendertime = renderer->getRenderer()->popDebugGroup();
 
+	RW_PROFILE_BEGIN("debug");
 	if( showDebugPaths )
 	{
 		renderDebugPaths(time);
@@ -551,6 +578,7 @@ void RWGame::render(float alpha, float time)
 			debug->flush(renderer);
 		}
 	}
+	RW_PROFILE_END();
 	
 	drawOnScreenText(world, renderer);
 }
@@ -698,6 +726,60 @@ void RWGame::renderDebugPaths(float time)
 	debug->flush(renderer);
 }
 
+void RWGame::renderProfile()
+{
+#if RW_PROFILER
+	auto& frame = perf::Profiler::get().getFrame();
+	constexpr float upperlimit = 30000.f;
+	constexpr float lineHeight = 15.f;
+	static std::vector<glm::vec4> perf_colours;
+	if (perf_colours.size() == 0) {
+		float c = 8.f;
+		for (int r = 0; r < c; ++r) {
+			for (int g = 0; g < c; ++g) {
+				for (int b = 0; b < c; ++b) {
+					perf_colours.push_back({
+											   r / c, g / c, b / c, 1.f
+										   });
+				}
+			}
+		}
+	}
+
+
+	float xscale = renderer->getRenderer()->getViewport().x / upperlimit;
+	TextRenderer::TextInfo ti;
+	ti.align = TextRenderer::TextInfo::Left;
+	ti.font = 2;
+	ti.size = lineHeight - 2.f;
+	std::function<void(const perf::ProfileEntry&,int)> renderEntry = [&](const perf::ProfileEntry& entry, int depth)
+	{
+		int g = 0;
+		for(auto& event : entry.childProfiles)
+		{
+			auto duration = event.end - event.start;
+			float y = 60.f + (depth * (lineHeight + 5.f));
+			renderer->drawColour(perf_colours[(std::hash<std::string>()(entry.label) * (g++))%perf_colours.size()],
+			{
+				xscale * event.start,
+				y,
+				xscale * duration,
+				lineHeight
+			});
+			ti.screenPosition.x = xscale * (event.start);
+			ti.screenPosition.y = y + 2.f;
+			ti.text = event.label + " " + std::to_string(duration) + " us ";
+			renderer->text.renderText(ti);
+			renderEntry(event, depth+1);
+		}
+	};
+	renderEntry(frame, 0);
+	ti.screenPosition = glm::vec2( xscale * (16000), 40.f);
+	ti.text = ".16 ms";
+	renderer->text.renderText(ti);
+#endif
+}
+
 void RWGame::globalKeyEvent(const sf::Event& event)
 {
 	switch (event.key.code) {
@@ -721,6 +803,9 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 		break;
 	case sf::Keyboard::F3:
 		showDebugPhysics = ! showDebugPhysics;
+		break;
+	case sf::Keyboard::F12:
+		window.capture().saveToFile("/home/dan/screenshot.png");
 		break;
 	default: break;
 	}

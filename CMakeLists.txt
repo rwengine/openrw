@@ -26,9 +26,9 @@ ENDIF()
 add_definitions(-DGLM_FORCE_RADIANS)
 
 IF(${PROFILING})
-	add_definitions(-DRENDER_PROFILER=1)
+	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=1)
 else()
-	add_definitions(-DRENDER_PROFILER=0)
+	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=0)
 ENDIF()
 
 IF(${ENABLE_SCRIPT_DEBUG})

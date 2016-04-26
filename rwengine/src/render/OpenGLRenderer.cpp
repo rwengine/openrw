@@ -156,8 +156,39 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p)
 	}
 }
 
+#if 0
+template<>
+void OpenGLRenderer::uploadUBO<OpenGLRenderer::ObjectUniformData>(GLuint buffer, const ObjectUniformData& data)
+{
+	if( currentUBO != buffer ) {
+		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+		currentUBO = buffer;
+	}
+	/*glBindBufferRange(GL_UNIFORM_BUFFER,
+					  2,
+					  UBOObject,
+					  entryAlignment * currentObjectEntry,
+					  sizeof(ObjectUniformData));*/
+	glBufferSubData(GL_UNIFORM_BUFFER,
+					0,
+					sizeof(ObjectUniformData), &data);
+#if RW_USING(RENDER_PROFILER)
+	if( currentDebugDepth > 0 )
+	{
+		profileInfo[currentDebugDepth-1].uploads++;
+	}
+#endif
+	currentObjectEntry = (currentObjectEntry+1) % maxObjectEntries;
+}
+#endif
+
 OpenGLRenderer::OpenGLRenderer()
-	: currentDbuff(nullptr), currentProgram(nullptr), currentDebugDepth(0)
+	: currentDbuff(nullptr)
+	, currentProgram(nullptr)
+	, maxObjectEntries(0)
+	, currentObjectEntry(0)
+	, entryAlignment(0)
+	, currentDebugDepth(0)
 {
 	// We need to query for some profiling exts.
 	ogl_CheckExtensions();
@@ -170,10 +201,20 @@ OpenGLRenderer::OpenGLRenderer()
 	
 	swap();
 
-	GLint maxUBOSize;
+	GLint maxUBOSize, UBOAlignment;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUBOSize);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &UBOAlignment);
+	entryAlignment = 128;
+	maxObjectEntries = maxUBOSize / entryAlignment;
 	std::cout << "Max UBO Size: " << maxUBOSize << std::endl;
-	std::cout << "Max batch size: " << (maxUBOSize/sizeof(ObjectUniformData)) << std::endl;
+	std::cout << "UBO Alignment: " << UBOAlignment << std::endl;
+	std::cout << "Max batch size: " << maxObjectEntries << std::endl;
+
+	glBindBuffer(GL_UNIFORM_BUFFER, UBOObject);
+	glBufferData(GL_UNIFORM_BUFFER,
+				 entryAlignment * maxObjectEntries,
+				 NULL,
+				 GL_STREAM_DRAW);
 
 	glGenQueries(1, &debugQuery);
 }
@@ -321,6 +362,58 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const 
 #endif
 
 	glDrawArrays(draw->getFaceType(), p.start, p.count);
+}
+
+void OpenGLRenderer::drawBatched(const RenderList& list)
+{
+#if 0 // Needs shader changes
+	// Determine how many batches we need to process the entire list
+	auto entries = list.size();
+	glBindBuffer(GL_UNIFORM_BUFFER, UBOObject);
+	for (int b = 0; b < entries; b += maxObjectEntries)
+	{
+		auto toConsume = std::min((GLuint)entries, b + maxObjectEntries) - b;
+		std::vector<ObjectUniformData> uploadBuffer;
+		uploadBuffer.resize(toConsume);
+		for (int d = 0; d < toConsume; ++d)
+		{
+			auto& draw = list[b+d];
+			uploadBuffer[d] = {
+				draw.model,
+				glm::vec4(draw.drawInfo.colour.r/255.f,
+				draw.drawInfo.colour.g/255.f,
+				draw.drawInfo.colour.b/255.f, 1.f),
+				1.f,
+				1.f,
+				draw.drawInfo.colour.a/255.f
+			};
+		}
+		glBufferData(GL_UNIFORM_BUFFER,
+					 toConsume * sizeof(ObjectUniformData),
+					 uploadBuffer.data(),
+					 GL_STREAM_DRAW);
+
+		// Dispatch individual draws
+		for (int d = 0; d < toConsume; ++d)
+		{
+			auto& draw = list[b+d];
+			useDrawBuffer(draw.dbuff);
+
+			for( GLuint u = 0; u < draw.drawInfo.textures.size(); ++u )
+			{
+				useTexture(u, draw.drawInfo.textures[u]);
+			}
+
+			glDrawElements(draw.dbuff->getFaceType(), draw.drawInfo.count, GL_UNSIGNED_INT,
+						   (void*) (sizeof(RenderIndex) * draw.drawInfo.start));
+		}
+	}
+#else
+	for(auto& ri : list)
+	{
+		draw(ri.model, ri.dbuff, ri.drawInfo);
+	}
+#endif
 }
 
 void OpenGLRenderer::invalidate()

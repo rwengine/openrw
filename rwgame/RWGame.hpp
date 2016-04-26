@@ -126,6 +126,7 @@ private:
 	
 	void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
 	void renderDebugPaths(float time);
+	void renderProfile();
 
 	void globalKeyEvent(const sf::Event& event);
 };

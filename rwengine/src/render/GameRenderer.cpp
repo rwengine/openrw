@@ -27,6 +27,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <core/Profiler.hpp>
+
 const size_t skydomeSegments = 8, skydomeRows = 10;
 
 struct WaterVertex {
@@ -303,11 +305,15 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 	//	Render List Construction
 	//---------------------------------------------------------------
 
+	RW_PROFILE_BEGIN("RenderList");
+
 	// This is sequential at the moment, it should be easy to make it
 	// run in parallel with a good threading system.
 	RenderList renderList;
 	// Naive optimisation, assume 10% hitrate
-	renderList.reserve(world->allObjects.size() * 0.1f);
+	renderList.reserve(world->allObjects.size() * 0.5f);
+
+	RW_PROFILE_BEGIN("Build");
 
 	// World Objects
 	for (auto object : world->allObjects) {
@@ -318,22 +324,29 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 					_renderAlpha,
 					renderList);
 	}
+	RW_PROFILE_END();
 
 	renderer->pushDebugGroup("Objects");
 	renderer->pushDebugGroup("RenderList");
 
 	// Also parallelizable
+	RW_PROFILE_BEGIN("Sort");
 	std::sort(renderList.begin(), renderList.end(),
-			  [](const RenderInstruction&a, const RenderInstruction&b) {
+			  [](const Renderer::RenderInstruction& a,
+				 const Renderer::RenderInstruction&b) {
 					return a.sortKey < b.sortKey;
 				});
 
-	for (RenderInstruction& ri : renderList) {
-		renderer->draw(ri.model, ri.dbuff, ri.drawInfo);
-	}
+	RW_PROFILE_END();
+
+	RW_PROFILE_BEGIN("Draw");
+	renderer->drawBatched(renderList);
+	RW_PROFILE_END();
 
 	renderer->popDebugGroup();
 	profObjects = renderer->popDebugGroup();
+
+	RW_PROFILE_END();
 
 	// Render arrows above anything that isn't radar only (or hidden)
 	ModelRef& arrowModel = world->data->models["arrow"];
@@ -692,6 +705,37 @@ void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents)
 	glBindTexture(GL_TEXTURE_2D, texture->getName());
 	glUniform1i(ssRectTexture, 0);
 	glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+
+	glBindVertexArray( ssRectDraw.getVAOName() );
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	// Ooops
+	renderer->invalidate();
+}
+
+void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents)
+{
+	glUseProgram(ssRectProgram);
+
+	// Move into NDC
+	extents.x /= renderer->getViewport().x;
+	extents.y /= renderer->getViewport().y;
+	extents.z /= renderer->getViewport().x;
+	extents.w /= renderer->getViewport().y;
+	extents.x += extents.z / 2.f;
+	extents.y += extents.w / 2.f;
+	extents.x -= .5f;
+	extents.y -= .5f;
+	extents *= glm::vec4(2.f,-2.f, 1.f, 1.f);
+
+	glEnable(GL_BLEND);
+	glUniform2f(ssRectOffset, extents.x, extents.y);
+	glUniform2f(ssRectSize, extents.z, extents.w);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glUniform1i(ssRectTexture, 0);
+	glUniform4f(ssRectColour, colour.r, colour.g, colour.b, colour.a);
 
 	glBindVertexArray( ssRectDraw.getVAOName() );
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

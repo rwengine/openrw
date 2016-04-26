@@ -146,6 +146,7 @@ public:
 	 * @brief Draws a texture on the screen
 	 */
 	void drawTexture(TextureData* texture, glm::vec4 extents);
+	void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
 	/** 
 	 * Renders a model (who'd have thought)

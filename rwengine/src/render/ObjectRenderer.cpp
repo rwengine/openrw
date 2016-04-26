@@ -180,7 +180,7 @@ void renderInstance(GameWorld* world,
 					InstanceObject *instance,
 					const ViewCamera& camera,
 					float renderAlpha,
-					std::vector<RenderInstruction>& outList)
+					RenderList& outList)
 {
 	if(!instance->model->resource)
 	{
