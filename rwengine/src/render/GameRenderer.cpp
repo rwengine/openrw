@@ -336,7 +336,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 				 const Renderer::RenderInstruction&b) {
 					return a.sortKey < b.sortKey;
 				});
-
 	RW_PROFILE_END();
 
 	RW_PROFILE_BEGIN("Draw");

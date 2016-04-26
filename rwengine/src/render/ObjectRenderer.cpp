@@ -42,6 +42,7 @@ void renderGeometry(GameWorld* world,
 		dp.count = subgeom.numIndices;
 		dp.start = subgeom.start;
 		dp.textures = {0};
+		dp.visibility = 1.f;
 
 		if (model->geometries[g]->materials.size() > subgeom.material) {
 			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
@@ -82,7 +83,7 @@ void renderGeometry(GameWorld* world,
 				}
 			}
 
-			dp.colour.a *= opacity;
+			dp.visibility = opacity;
 
 			if( dp.colour.a < 255 ) {
 				isTransparent = true;
@@ -91,6 +92,8 @@ void renderGeometry(GameWorld* world,
 			dp.diffuse = mat.diffuseIntensity;
 			dp.ambient = mat.ambientIntensity;
 		}
+
+		dp.blend = isTransparent;
 
 		glm::vec3 position(modelMatrix[3]);
 		float distance = glm::length(camera.position - position);
@@ -197,52 +200,71 @@ void renderInstance(GameWorld* world,
 	// These are used to gracefully fade out things that are just out of view distance.
 	Model* fadingModel = nullptr;
 	ModelFrame* fadingFrame = nullptr;
+	auto fadingMatrix = matrixModel;
 	float opacity = 0.f;
+	constexpr float fadeRange = 50.f;
 
 	if( instance->object->numClumps == 1 ) {
-		// Object consists of a single clump.
-		if( mindist > instance->object->drawDistance[0] ) {
+		// Is closest point greater than the *object* draw distance
+		float objectRange = instance->object->drawDistance[0];
+		float overlap = (mindist - objectRange);
+		if( mindist > objectRange ) {
 			// Check for LOD instances
 			if ( instance->LODinstance ) {
-				if( mindist > instance->LODinstance->object->drawDistance[0] ) {
-					return;
+				// Is the closest point greater than the *LOD* draw distance
+				float LODrange = instance->LODinstance->object->drawDistance[0];
+				if( mindist > LODrange ) {
 				}
 				else if (instance->LODinstance->model->resource) {
-					model = instance->LODinstance->model->resource;
-
-					fadingModel = instance->model->resource;
-					opacity = (mindist) / instance->object->drawDistance[0];
+					// The model matrix needs to be for the LOD instead
+					matrixModel = instance->LODinstance->getTimeAdjustedTransform(renderAlpha);
+					// If the object is only just out of range, keep
+					// rendering it and screen-door the LOD.
+					if (overlap < fadeRange)
+					{
+						model = instance->LODinstance->model->resource;
+						fadingModel = instance->model->resource;
+						opacity = 1.f - (overlap / fadeRange);
+					}
+					else
+					{
+						model = instance->LODinstance->model->resource;
+					}
 				}
 			}
-			else {
+			// We don't have a LOD object, so fade out gracefully.
+			else if (overlap < fadeRange) {
 				fadingModel = instance->model->resource;
-				opacity = (mindist) / instance->object->drawDistance[0];
+				opacity = 1.f - (overlap / fadeRange);
 			}
 		}
+		// Otherwise, if we aren't marked as a LOD model, we can render
 		else if (! instance->object->LOD ) {
 			model = instance->model->resource;
-			opacity = (mindist) / instance->object->drawDistance[0];
 		}
 	}
 	else {
-		if( mindist > instance->object->drawDistance[1] ) {
-			return;
-		}
-
 		auto root = instance->model->resource->frames[0];
-		int lodInd = 1;
-		if( mindist > instance->object->drawDistance[0] ) {
-			lodInd = 2;
-		}
-		auto LODindex = root->getChildren().size() - lodInd;
-		auto f = root->getChildren()[LODindex];
-		model = instance->model->resource;
-		frame = f;
+		auto objectModel = instance->model->resource;
+		fadingFrame = nullptr;
+		fadingModel = nullptr;
 
-		if( lodInd == 2 ) {
-			fadingModel = model;
-			fadingFrame = root->getChildren()[LODindex+1];
-			opacity = (mindist) / instance->object->drawDistance[0];
+		matrixModel *= root->getTransform();
+
+		for (int i = 0; i < instance->object->numClumps-1; ++i)
+		{
+			auto ind = (instance->object->numClumps-1) - i;
+			float lodDistance = instance->object->drawDistance[i];
+			if( mindist > lodDistance ) {
+				fadingFrame = root->getChildren()[ind];
+				fadingModel = objectModel;
+				opacity = 1.f - ((mindist - lodDistance)/fadeRange);
+			}
+			else
+			{
+				model = objectModel;
+				frame = root->getChildren()[ind];
+			}
 		}
 	}
 
@@ -258,13 +280,12 @@ void renderInstance(GameWorld* world,
 					outList);
 	}
 	if( fadingModel ) {
-		// opacity is the distance over the culling limit,
-		opacity = 2.0f - opacity;
-		if(opacity > 0.f) {
+		if(opacity >= 0.01f) {
 			fadingFrame = fadingFrame ? fadingFrame : fadingModel->frames[0];
 			renderFrame(world,
 						fadingModel,
-						fadingFrame, matrixModel * glm::inverse(fadingFrame->getTransform()),
+						fadingFrame,
+						fadingMatrix * glm::inverse(fadingFrame->getTransform()),
 						instance,
 						opacity,
 						camera,

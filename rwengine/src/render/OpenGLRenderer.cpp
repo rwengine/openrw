@@ -188,6 +188,7 @@ OpenGLRenderer::OpenGLRenderer()
 	, maxObjectEntries(0)
 	, currentObjectEntry(0)
 	, entryAlignment(0)
+	, blendEnabled(false)
 	, currentDebugDepth(0)
 {
 	// We need to query for some profiling exts.
@@ -303,7 +304,7 @@ void OpenGLRenderer::setSceneParameters(const Renderer::SceneUniformData& data)
 	lastSceneData = data;
 }
 
-void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
+void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
 {
 	useDrawBuffer(draw);
 
@@ -312,12 +313,14 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 		useTexture(u, p.textures[u]);
 	}
 
+	setBlend(p.blend);
+
 	ObjectUniformData oudata {
 		model,
-		glm::vec4(p.colour.r/255.f, p.colour.g/255.f, p.colour.b/255.f, 1.f),
+		glm::vec4(p.colour.r/255.f, p.colour.g/255.f, p.colour.b/255.f, p.colour.a/255.f),
 		1.f,
 		1.f,
-		p.colour.a/255.f
+		p.visibility
 	};
 	uploadUBO(UBOObject, oudata);
 
@@ -329,6 +332,11 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 		profileInfo[currentDebugDepth-1].primitives += p.count;
 	}
 #endif
+}
+
+void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
+{
+	setDrawState(model, draw, p);
 
 	glDrawElements(draw->getFaceType(), p.count, GL_UNSIGNED_INT,
 				   (void*) (sizeof(RenderIndex) * p.start));
@@ -336,30 +344,7 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw, const Render
 
 void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw, const Renderer::DrawParameters& p)
 {
-	useDrawBuffer(draw);
-
-	for( GLuint u = 0; u < p.textures.size(); ++u )
-	{
-		useTexture(u, p.textures[u]);
-	}
-
-	ObjectUniformData oudata {
-		model,
-		glm::vec4(p.colour.r/255.f, p.colour.g/255.f, p.colour.b/255.f, 1.f),
-		1.f,
-		1.f,
-		p.colour.a/255.f
-	};
-	uploadUBO(UBOObject, oudata);
-
-	drawCounter++;
-#if RW_USING(RENDER_PROFILER)
-	if( currentDebugDepth > 0 )
-	{
-		profileInfo[currentDebugDepth-1].draws++;
-		profileInfo[currentDebugDepth-1].primitives += p.count;
-	}
-#endif
+	setDrawState(model, draw, p);
 
 	glDrawArrays(draw->getFaceType(), p.start, p.count);
 }

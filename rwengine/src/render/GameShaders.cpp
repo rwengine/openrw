@@ -222,23 +222,25 @@ layout(std140) uniform ObjectData {
 	float visibility;
 };
 
-#define ALPHA_DISCARD_THRESHOLD 0.01
-
-vec4 crunch(vec4 c)
-{
-	return vec4(0.5) + c * 0.5;
-}
+// Ordered dithering matrix used to implement thresholded
+// screen-door transparency to fade objects without blending
+// https://en.wikipedia.org/wiki/Ordered_dithering
+mat4 filterMatrix = mat4(
+		1.0/17.0, 9.0/17.0, 3.0/17.0, 11.0/17.0,
+		13.0/17.0, 5.0/17.0, 15.0/17.0, 7.0/17.0,
+		4.0/17.0, 12.0/17.0, 2.0/17.0, 10.0/17.0,
+		16.0/17.0, 8.0/17.0, 14.0/17.0, 6.0/17.0
+	);
+float alphaThreshold = (1.0/255.0);
 
 void main()
 {
-	vec4 c = texture2D(texture, TexCoords);
-	if(c.a <= ALPHA_DISCARD_THRESHOLD) discard;
-	float fogZ = length(campos.xyz - WorldSpace.xyz);
-	float fogfac = 1.0 - clamp( (fogEnd-fogZ)/(fogEnd-fogStart), 0.0, 1.0 );
-	vec3 tmp = (ambient.rgb + c.rgb) * crunch(Colour).rgb;
-	vec4 diffuseC = vec4(colour.rgb * tmp, c.a * colour.a);
-	vec2 cscale = vec2(1.0, visibility);
-	fragOut = cscale.xxxy *	(fogfac * fogColor + (1.0-fogfac) * diffuseC);
+	// Only the visibility parameter invokes the screen door.
+	vec4 diffuse  = texture2D(texture, TexCoords);
+	if(visibility <= filterMatrix[int(gl_FragCoord.x)%4][int(gl_FragCoord.y)%4]) discard;
+	if(diffuse.a <= alphaThreshold) discard;
+	vec4 colour_dyn = diffuse * colour;
+	fragOut = vec4(colour_dyn.rgb * dynamic.rgb + ambient.rgb * ambient.a, colour_dyn.a);
 })";
 
 const char* Particle::FragmentShader = R"(

@@ -41,16 +41,41 @@ public:
 
 	typedef std::vector<GLuint> Textures;
 
+	/**
+	 * @brief The DrawParameters struct stores drawing state
+	 *
+	 * The state for texture units, blending and material properties
+	 * are recieved for drawing through this structure.
+	 *
+	 * Since not all draws use the same shaders, material properties
+	 * should be controlled via a different mechanism.
+	 */
 	struct DrawParameters
 	{
-		/// Textures to bind to each texture unit
+		/// Number of indicies
+		size_t count;
+		/// Start index.
+		unsigned int start;
+		/// Textures to use
 		Textures textures;
+		/// Alpha blending state
+		bool blend;
+		/// Material
 		glm::u8vec4 colour;
+		/// Material
 		float ambient;
+		/// Material
 		float diffuse;
+		/// Material
+		float visibility;
 
-		size_t count; /// The number of indicies to draw
-		unsigned int start; /// Start index.
+		// Default state -- should be moved to materials
+		DrawParameters()
+			: blend(false)
+			, ambient(1.f)
+			, diffuse(1.f)
+			, visibility(1.f)
+		{ }
 	};
 
 	/**
@@ -234,6 +259,8 @@ public:
 
 	void setSceneParameters(const SceneUniformData &data);
 
+	void setDrawState(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
+
 	void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
 	void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
 
@@ -275,6 +302,22 @@ private:
 	GLuint currentObjectEntry;
 	GLuint entryAlignment;
 	GLuint UBOScene;
+
+	// State Cache
+	bool blendEnabled;
+
+	// Set state
+	void setBlend(bool enable)
+	{
+		if (enable && !blendEnabled)
+		{
+			glEnable(GL_BLEND);
+		}
+		else if(!enable && blendEnabled)
+		{
+			glDisable(GL_BLEND);
+		}
+	}
 
 	// Debug group profiling timers
 	ProfileInfo profileInfo[MAX_DEBUG_DEPTH];
