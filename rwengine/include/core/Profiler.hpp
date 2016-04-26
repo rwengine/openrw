@@ -77,6 +77,7 @@ public:
 #define RW_PROFILE_END() \
 	perf::Profiler::get().endEvent();
 #else
+#define RW_PROFILE_FRAME_BOUNDARY()
 #define RW_PROFILE_BEGIN(label)
 #define RW_PROFILE_END()
 #endif
