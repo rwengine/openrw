@@ -13,10 +13,15 @@ void ScriptDisassembly::disassemble(SCMAddress startAddress)
 	for( SCMAddress a = startAddress; a < scm->getMainSize(); )
 	{
 		auto opcode = scm->read<SCMOpcode>(a);
-		auto opcorg = opcode;
+		uint8_t flags = 0;
 		
 		bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) == SCM_NEGATE_CONDITIONAL_MASK);
 		opcode = opcode & ~SCM_NEGATE_CONDITIONAL_MASK;
+
+		if (isNegatedConditional)
+		{
+			flags |= OpcodeFlagNegatedConditional;
+		}
 		
 		ScriptFunctionMeta* foundcode;
 		if( ! codes->findOpcode(opcode, &foundcode) )
@@ -59,13 +64,13 @@ void ScriptDisassembly::disassemble(SCMAddress startAddress)
 					break;
 				case TGlobal: {
 					auto v = scm->read<std::uint16_t>(a);
-					parameters.back().globalPtr = (void*)v; //* SCM_VARIABLE_SIZE;
+					parameters.back().globalPtr = reinterpret_cast<void*>(v); //* SCM_VARIABLE_SIZE;
 					a += sizeof(SCMByte) * 2;
 				}
 				break;
 				case TLocal: {
 					auto v = scm->read<std::uint16_t>(a);
-					parameters.back().globalPtr = (void*)(v * SCM_VARIABLE_SIZE);
+					parameters.back().globalPtr = reinterpret_cast<void*>(v * SCM_VARIABLE_SIZE);
 					a += sizeof(SCMByte) * 2;
 				}
 				break;
@@ -87,6 +92,6 @@ void ScriptDisassembly::disassemble(SCMAddress startAddress)
 					break;
 			};
 		}
-		instructions[instructionAddress] = InstructionInfo { opcode, parameters };
+		instructions[instructionAddress] = InstructionInfo { opcode, parameters, flags };
 	}
 }

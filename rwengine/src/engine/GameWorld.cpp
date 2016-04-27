@@ -311,6 +311,7 @@ CutsceneObject *GameWorld::createCutsceneObject(const uint16_t id, const glm::ve
 	auto instance = new CutsceneObject(
 		this,
 		pos,
+		rot,
 		m);
 
 	cutscenePool.insert( instance );

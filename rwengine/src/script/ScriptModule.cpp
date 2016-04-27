@@ -30,4 +30,4 @@ bool ScriptModule::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 template<> ScriptFunction conditional_facade<bool>(bool(*f)(const ScriptArguments&))
 { return [=](const ScriptArguments& a) { return a.getThread()->conditionResult = f(a); }; }
 
-template<> bool is_conditional<bool>(bool(*f)(const ScriptArguments&)) { return true; }
+template<> bool is_conditional<bool>(bool(*)(const ScriptArguments&)) { return true; }

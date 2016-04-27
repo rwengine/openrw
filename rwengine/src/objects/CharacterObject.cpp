@@ -18,13 +18,15 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	, currentState({})
 	, currentVehicle(nullptr)
 	, currentSeat(0)
-	, ped(data)
-	, physCharacter(nullptr)
 	, running(false)
 	, jumped(false)
-	, controller(nullptr)
 	, jumpSpeed(DefaultJumpSpeed)
 	, motionBlockedByActivity(false)
+	, ped(data)
+	, physCharacter(nullptr)
+	, physObject(nullptr)
+	, physShape(nullptr)
+	, controller(nullptr)
 {
 	// TODO move AnimationGroup creation somewhere else.
 	animations.idle = engine->data->animations["idle_stance"];
@@ -457,7 +459,7 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 
 bool CharacterObject::isStopped() const
 {
-	RW_UNIMPLEMENTED("Checking if character is stopped")
+	RW_UNIMPLEMENTED("Checking if character is stopped");
 	return true;
 }
 

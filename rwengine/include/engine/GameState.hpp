@@ -179,6 +179,20 @@ struct OnscreenText
 		/// Help text (top left, black background)
 		Help = 12
 	};
+
+	OnscreenText(const std::string& id,
+				 const std::string& string,
+				 float start,
+				 float time,
+				 unsigned short style,
+				 const std::string& var = "")
+		: id (id)
+		, osTextString(string)
+		, osTextStart(start)
+		, osTextTime(time)
+		, osTextStyle(style)
+		, osTextVar(var)
+	{ }
 };
 
 /**

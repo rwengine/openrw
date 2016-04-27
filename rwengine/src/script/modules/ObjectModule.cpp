@@ -31,7 +31,11 @@ glm::vec3 spawnMagic( 0.f, 0.f, 1.f );
 
 void game_create_player(const ScriptArguments& args)
 {
-	auto id	= args[0].integer;
+	auto id = args[0].integer;
+	if (id != 0) {
+		RW_UNIMPLEMENTED("Multiple player characters not supported");
+	}
+
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
 	
 	if( position.z < -99.f ) {
@@ -104,7 +108,8 @@ void game_create_character(const ScriptArguments& args)
 	}
 
 	auto character = args.getWorld()->createPedestrian(id, position + spawnMagic);
-	auto controller = new DefaultAIController(character);
+	/* Controller will give ownership to character */
+	new DefaultAIController(character);
 	
 	if ( args.getThread()->isMission )
 	{
@@ -299,6 +304,7 @@ bool game_player_near_point_in_vehicle_3D(const ScriptArguments& args)
     glm::vec3 center(args[1].real, args[2].real, args[3].real);
     glm::vec3 size(args[4].real, args[5].real, args[6].real);
     bool unkown	= !!args[7].integer;
+	RW_UNUSED(unkown);
 
     auto vehicle = character->getCurrentVehicle();
     if( vehicle ) {
@@ -340,7 +346,8 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 	glm::vec3 center(args[1].real, args[2].real, args[3].real);
 	glm::vec3 size(args[4].real, args[5].real, args[6].real);
 	bool unkown	= !!args[7].integer;
-	
+	RW_UNUSED(unkown);
+
 	auto vehicle = character->getCurrentVehicle();
 	if( vehicle ) {
 		auto distance = center - character->getPosition();
@@ -359,6 +366,7 @@ bool game_character_near_character_2D(const ScriptArguments& args)
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
 	bool unkown = !!args[4].integer;
+	RW_UNUSED(unkown);
 
 	auto distance = center - glm::vec2(character->getPosition());
 	distance /= size;
@@ -374,7 +382,8 @@ bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
 	bool unkown = !!args[4].integer;
-	
+	RW_UNUSED(unkown);
+
 	auto vehicle = character->getCurrentVehicle();
 	if( vehicle ) {
 		auto distance = center - glm::vec2(character->getPosition());
@@ -391,7 +400,8 @@ bool game_character_near_point_on_foot_2D(const ScriptArguments& args)
 	glm::vec2 center(args[1].real, args[2].real);
 	glm::vec2 size(args[3].real, args[4].real);
 	bool unkown = !!args[5].integer;
-	
+	RW_UNUSED(unkown);
+
 	auto vehicle = character->getCurrentVehicle();
 	if( !vehicle ) {
 		auto distance = center - glm::vec2(character->getPosition());
@@ -462,10 +472,12 @@ void game_create_character_in_vehicle(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
 	auto type = args[1].integer;
+	RW_UNUSED(type);
+	RW_UNIMPLEMENTED("game_create_character_in_vehicle(): character type");
 	auto id = args[2].integer;
 	
 	auto character = args.getWorld()->createPedestrian(id, vehicle->getPosition() + spawnMagic);
-	auto controller = new DefaultAIController(character);
+	new DefaultAIController(character);
 	
 	character->setCurrentVehicle(vehicle, 0);
 	vehicle->setOccupant(0, character);
@@ -527,6 +539,7 @@ void game_dont_remove_object(const ScriptArguments& args)
 
 bool game_character_in_area_on_foot(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
 	/// @todo
 	return false;
 }
@@ -611,6 +624,7 @@ bool game_is_character_stopped(const ScriptArguments& args)
 
 bool game_character_in_area_9(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
 	return false;
 }
 
@@ -626,6 +640,8 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	bool actors = args[8].integer;
 	bool objects = args[9].integer;
 	bool particles = args[10].integer;
+	RW_UNUSED(objects);
+	RW_UNUSED(particles);
 	
 	for(auto& object : args.getWorld()->allObjects)
 	{
@@ -744,6 +760,10 @@ void game_create_pickup(const ScriptArguments& args)
 		case TInt16:
 			id = (std::int16_t)args[0].integer;
 			break;
+		default:
+			RW_ERROR("Unhandled integer type");
+			*args[5].globalInteger = 0;
+			return;
 	}
 	
 	if ( id < 0 )
@@ -823,6 +843,8 @@ bool game_vehicle_in_air(const ScriptArguments& args)
 {
 	/// @todo IS vehicle in air.
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	RW_UNUSED(vehicle);
+	RW_UNIMPLEMENTED("game_vehicle_in_air()");
 	return false;
 }
 
@@ -832,7 +854,9 @@ bool game_character_near_car_2d(const ScriptArguments& args)
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	glm::vec2 radius(args[2].real, args[3].real);
 	bool drawMarker = !!args[4].integer;
-	
+	RW_UNUSED(drawMarker);
+	RW_UNIMPLEMENTED("Draw marker in game_character_near_car_2D");
+
 	auto charVehicle = character->getCurrentVehicle();
 	if( charVehicle ) {
 		auto dist = charVehicle->getPosition() - vehicle->getPosition();
@@ -863,6 +887,9 @@ void game_create_object_world(const ScriptArguments& args)
 		case TInt16:
 			id = (std::int16_t)args[0].integer;
 			break;
+		default:
+			RW_ERROR("Unhandled integer type");
+			break;
 	}
 	
 	if( id < 0 ) {
@@ -890,6 +917,8 @@ void game_destroy_object(const ScriptArguments& args)
 
 bool game_is_boat(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_is_boat()");
 	/*auto vehicle = (VehicleObject*)(*args[0].handle);
 	 *	if( vehicle )
 	 *	{
@@ -900,6 +929,8 @@ bool game_is_boat(const ScriptArguments& args)
 
 bool game_character_in_range(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_character_in_range()");
 	return true;
 }
 
@@ -916,6 +947,9 @@ void game_set_close_object_visible(const ScriptArguments& args)
 			break;
 		case TInt16:
 			modelid = (std::int16_t)args[4].integer;
+			break;
+		default:
+			RW_ERROR("Unhandled integer type");
 			break;
 	}
 	
@@ -957,6 +991,9 @@ void game_change_nearest_model(const ScriptArguments& args)
 		case TInt16:
 			oldid = (std::int16_t)args[4].integer;
 			break;
+		default:
+			RW_ERROR("Unhandled integer type");
+			break;
 	}
 	
 	switch(args[5].type) {
@@ -965,6 +1002,9 @@ void game_change_nearest_model(const ScriptArguments& args)
 			break;
 		case TInt16:
 			newid = (std::int16_t)args[5].integer;
+			break;
+		default:
+			RW_ERROR("Unhandled integer type");
 			break;
 	}
 	
@@ -1009,6 +1049,7 @@ bool game_rotate_object(const ScriptArguments& args)
 	{
 		float start = args[2].real;
 		float finish = args[1].real;
+		RW_UNUSED(start);
 
 		// @todo INTERPOLATE instead of just setting the heading.
 		object->setHeading(finish);

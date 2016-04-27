@@ -146,6 +146,8 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 
 bool Activities::Jump::update(CharacterObject* character, CharacterController* controller)
 {
+	RW_UNUSED(controller);
+
 	if( !jumped )
 	{
 		character->jump();
@@ -163,6 +165,8 @@ bool Activities::Jump::update(CharacterObject* character, CharacterController* c
 
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {
+	RW_UNUSED(controller);
+
 	// Boats don't have any kind of entry animation unless you're onboard.
 	if( vehicle->vehicle->type == VehicleData::BOAT ) {
 		character->enterVehicle(vehicle, seat);
@@ -258,6 +262,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 
 bool Activities::ExitVehicle::update(CharacterObject *character, CharacterController *controller)
 {
+	RW_UNUSED(controller);
+
 	if( character->getCurrentVehicle() == nullptr ) return true;
 
 	auto vehicle = character->getCurrentVehicle();
@@ -305,6 +311,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 #include <data/Model.hpp>
 bool Activities::ShootWeapon::update(CharacterObject *character, CharacterController *controller)
 {
+	RW_UNUSED(controller);
+
 	auto& wepdata = _item->getWeaponData();
 
 	// Instant hit weapons loop their anim

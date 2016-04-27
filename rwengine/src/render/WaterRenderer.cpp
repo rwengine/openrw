@@ -72,6 +72,9 @@ void WaterRenderer::setWaterTable(float* waterHeights, unsigned int nHeights, ui
 		int xi = x * WATER_HQ_DATA_SIZE;
 		for( int y = 0; y < edgeNum; y++ )
 		{
+			RW_CHECK (tiles[xi + y] < nHeights, "Tile index out of bounds");
+			if (tiles[xi+y] >= nHeights) continue;
+
 			// Tiles with the magic value contain no water.
 			if( tiles[xi + y] >= NO_WATER_INDEX ) continue;
 			float h = waterHeights[tiles[xi + y]];

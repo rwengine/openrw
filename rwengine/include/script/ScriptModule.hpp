@@ -36,7 +36,7 @@ private:
 template<class Tret> ScriptFunction conditional_facade(Tret(*f)(const ScriptArguments&)) { return f; }
 template<> ScriptFunction conditional_facade<bool>(bool(*f)(const ScriptArguments&));
 
-template<class Tret> bool is_conditional(Tret(*f)(const ScriptArguments&)) { return false; }
+template<class Tret> bool is_conditional(Tret(*)(const ScriptArguments&)) { return false; }
 template<> bool is_conditional<bool>(bool(*f)(const ScriptArguments&));
 
 // Macro to automatically use function name.

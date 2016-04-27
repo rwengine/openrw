@@ -151,7 +151,7 @@ public:
 	/** 
 	 * Renders a model (who'd have thought)
 	 */
-	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr, Animator* animator = nullptr);
+	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr);
 
 	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, float opacity, GameObject* = nullptr);
 	

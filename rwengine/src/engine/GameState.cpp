@@ -1,29 +1,26 @@
 #include <engine/GameState.hpp>
 
 GameState::GameState()
-	: basic{}
-	, playerInfo{}
-	, gameStats{}
-	, gameTime(0.f),
-currentProgress(0),
-maxProgress(1),
-maxWantedLevel(0)
+	: gameTime(0.f)
+	, currentProgress(0)
+	, maxProgress(1)
+	, maxWantedLevel(0)
 	, playerObject(0)
-	, scriptOnMissionFlag(nullptr),
-fadeOut(true),
-fadeStart(0.f),
-fadeTime(0.f),
-fadeSound(false),
-skipCutscene(false),
-isIntroPlaying(false),
-currentCutscene(nullptr),
-cutsceneStartTime(-1.f),
-isCinematic(false),
-cameraNear(0.1f),
-cameraFixed(false),
-cameraTarget(0),
-world(nullptr),
-script(nullptr)
+	, scriptOnMissionFlag(nullptr)
+	, fadeOut(true)
+	, fadeStart(0.f)
+	, fadeTime(0.f)
+	, fadeSound(false)
+	, skipCutscene(false)
+	, isIntroPlaying(false)
+	, currentCutscene(nullptr)
+	, cutsceneStartTime(-1.f)
+	, isCinematic(false)
+	, cameraNear(0.1f)
+	, cameraFixed(false)
+	, cameraTarget(0)
+	, world(nullptr)
+	, script(nullptr)
 {
 	
 }

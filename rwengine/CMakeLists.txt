@@ -16,4 +16,10 @@ target_link_libraries(rwengine
 	mad
 	${OPENRW_PLATFORM_LIBS})
 
-include_directories(include ${BULLET_INCLUDE_DIR})
+include_directories(SYSTEM
+	${BULLET_INCLUDE_DIR}
+	)
+
+include_directories(
+	include
+	)

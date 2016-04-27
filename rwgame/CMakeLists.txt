@@ -17,7 +17,12 @@ add_executable(rwgame
 	debug/HttpServer.cpp
 )
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})
+include_directories(SYSTEM
+	${BULLET_INCLUDE_DIR}
+	)
+include_directories(
+	"${CMAKE_SOURCE_DIR}/rwengine/include"
+	)
 
 target_link_libraries( rwgame
 	rwengine

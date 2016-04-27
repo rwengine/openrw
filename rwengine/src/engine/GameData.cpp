@@ -191,7 +191,6 @@ void GameData::addIDE(const std::string& name)
 
 bool GameData::loadObjects(const std::string& name)
 {
-	auto i = ideLocations.find(name);
 	std::string path = name;
 	
 	LoaderIDE idel;
@@ -226,6 +225,8 @@ uint16_t GameData::findModelObject(const std::string model)
 
 void GameData::loadCOL(const size_t zone, const std::string& name)
 {
+	RW_UNUSED(zone);
+
 	LoaderCOL col;
 	
 	std::string realPath = fixPath(name);

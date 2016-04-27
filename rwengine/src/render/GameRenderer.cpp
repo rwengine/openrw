@@ -447,8 +447,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		renderLetterbox();
 	}
 
+#if 0 // Disable while warnings are fixed
 	float fadeTimer = world->getGameTime() - world->state->fadeStart;
-	/*if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
+	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
 		glUniform2f(ssRectOffset, 0.f, 0.f);
 		glUniform2f(ssRectSize, 1.f, 1.f);
@@ -476,7 +477,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}*/
+	}
+#endif
 	
 	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
@@ -781,7 +783,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
 	return true;
 }
 
-void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object, Animator *animator)
+void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix, GameObject* object)
 {
 	renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object, 1.f);
 }

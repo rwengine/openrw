@@ -30,13 +30,13 @@ void game_print_big(const ScriptArguments& args)
 	std::string id(args[0].string);
 	std::string str = args.getWorld()->data->texts.text(id);
 	unsigned short style = args[2].integer;
-	args.getWorld()->state->text.push_back({
+	args.getWorld()->state->text.emplace_back(
 		id,
 		str,
 		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		style
-	});
+	);
 }
 
 void game_print_now(const ScriptArguments& args)
@@ -44,13 +44,15 @@ void game_print_now(const ScriptArguments& args)
 	std::string id(args[0].string);
 	std::string str = args.getWorld()->data->texts.text(id);
 	int flags = args[2].integer;
-	args.getWorld()->state->text.push_back({
+	RW_UNUSED(flags);
+	RW_UNIMPLEMENTED("game_print_now(): flags");
+	args.getWorld()->state->text.emplace_back(
 		id,
 		str,
 		args.getWorld()->getGameTime(),
 		args[1].integer / 1000.f,
 		0
-	});
+	);
 }
 
 void game_clear_prints(const ScriptArguments& args)
@@ -73,6 +75,8 @@ void game_set_time(const ScriptArguments& args)
 bool game_is_button_pressed(const ScriptArguments& args)
 {
 	/// @todo implement
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_is_button_pressed()");
 	return false;
 }
 
@@ -80,8 +84,11 @@ void game_set_dead_or_arrested(const ScriptArguments& args)
 {
 	*args.getWorld()->state->scriptOnMissionFlag = args[0].integer;
 }
+
 bool game_has_death_or_arrest_finished(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_is_button_pressed()");
 	return false;
 }
 
@@ -129,7 +136,7 @@ void game_set_zone_car_info(const ScriptArguments& args)
 	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
-		for(int i = 2; i < args.getParameters().size() && i - 2 < ZONE_GANG_COUNT; ++i)
+		for (size_t i = 2; i < args.getParameters().size() && i - 2 < ZONE_GANG_COUNT; ++i)
 		{
 			if( day )
 			{
@@ -164,7 +171,7 @@ void game_set_zone_ped_info(const ScriptArguments& args)
 	if( it != args.getWorld()->data->zones.end() )
 	{
 		auto day = args[1].integer == 1;
-		for(int i = 2; i < args.getParameters().size(); ++i)
+		for(size_t i = 2; i < args.getParameters().size(); ++i)
 		{
 			if( day )
 			{
@@ -187,10 +194,14 @@ void game_camera_fixed_position(const ScriptArguments& args)
 	args.getWorld()->state->cameraPosition = position;
 	args.getWorld()->state->cameraRotation = glm::quat(angles);
 }
+
 void game_camera_lookat_position(const ScriptArguments& args)
 {
 	glm::vec3 position( args[0].real, args[1].real, args[2].real );
 	int switchmode = args[3].integer;
+	RW_UNUSED(switchmode);
+	RW_UNIMPLEMENTED("game_camera_lookat_position(): camera switch mode");
+
 	
 	auto direction = glm::normalize(position - args.getWorld()->state->cameraPosition);
 	auto right = glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
@@ -493,7 +504,7 @@ static const char* sprite_names[] = {
 void game_add_contact_blip(const ScriptArguments& args)
 {
 	glm::vec3 c( args[0].real, args[1].real, args[2].real );
-	int sprite = args[3].integer;
+	unsigned int sprite = args[3].integer;
 	
 	// Look up the sprite ID.
 	std::string spriteName = "";
@@ -513,7 +524,7 @@ void game_add_contact_blip(const ScriptArguments& args)
 void game_add_sprite_blip(const ScriptArguments& args)
 {
 	glm::vec3 c( args[0].real, args[1].real, args[2].real );
-	int sprite = args[3].integer;
+	unsigned int sprite = args[3].integer;
 	
 	// Look up the sprite ID.
 	std::string spriteName = "";
@@ -539,7 +550,7 @@ void game_create_cutscene_object(const ScriptArguments& args)
 {
 	auto id	= args[0].integer;
 
-	GameObject* object = object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
+	GameObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
 	if( object == nullptr ) {
 		args.getWorld()->logger->error("SCM", "Could not create cutscene object " + std::to_string(id));
@@ -745,6 +756,8 @@ bool game_collision_loaded(const ScriptArguments& args)
 	// The paramter to this is actually the island number.
 	// Not sure how that will fit into the scheme of full paging
 	/// @todo use the current player zone island number to return the correct value.
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_collision_loaded()");
 	return true;
 }
 
@@ -785,6 +798,8 @@ bool game_is_audio_finished(const ScriptArguments& args)
 void game_play_music_id(const ScriptArguments& args)
 {
 	int id = args[0].integer;
+	RW_UNUSED(id);
+	RW_UNIMPLEMENTED("game_play_music_id(): should be play mission passed tune");
 	GameWorld* gw = args.getWorld();
 	std::string name = "Miscom";
 	
@@ -806,7 +821,7 @@ void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 
-	for( int i = 0; i < args.getWorld()->state->text.size(); )
+	for( size_t i = 0; i < args.getWorld()->state->text.size(); )
 	{
 		if( args.getWorld()->state->text[i].id == id )
 		{
@@ -822,6 +837,8 @@ void game_clear_print(const ScriptArguments& args)
 bool game_did_game_save(const ScriptArguments& args)
 {
 	// TODO not sure what could be false about this.
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_did_game_save(): Saving the game");
 	return true;
 }
 
@@ -846,7 +863,7 @@ void game_display_help(const ScriptArguments& args)
 
 void game_clear_help(const ScriptArguments& args)
 {
-	for( int i = 0; i < args.getWorld()->state->text.size(); )
+	for( size_t i = 0; i < args.getWorld()->state->text.size(); )
 	{
 		auto& texts = args.getWorld()->state->text;
 		if( texts[i].osTextStyle == OnscreenText::Help )
@@ -862,12 +879,16 @@ void game_clear_help(const ScriptArguments& args)
 
 bool game_can_player_move(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_can_player_move()");
 	return true;
 }
 
 void game_load_collision(const ScriptArguments& args)
 {
 	// Collision is loaded when required, not sure what this is supposed to mean.
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_load_collision();");
 }
 
 void game_set_rampages(const ScriptArguments& args)
@@ -906,6 +927,8 @@ void game_set_is_intro_playing(const ScriptArguments& args)
 
 bool game_are_vehicle_cheats_enabled(const ScriptArguments& args)
 {
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_are_vehicle_cheats_enabled()");
 	return false;
 }
 

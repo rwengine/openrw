@@ -54,7 +54,10 @@ MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
 	std::vector<VertexP2> circleVerts;
 	circleVerts.push_back({0.f, 0.f});
 	for (int v = 0; v < 181; ++v) {
-		circleVerts.push_back({0.5f*cos(2*(v/180.f)*M_PI), 0.5f*sin(2*(v/180.f)*M_PI)});
+		circleVerts.push_back({
+					0.5f * glm::cos(2*(v/180.f)*glm::pi<float>()),
+					0.5f * glm::sin(2*(v/180.f)*glm::pi<float>())
+		});
 	}
 	circleGeom.uploadVertices(circleVerts);
 	circle.addGeometry(&circleGeom);

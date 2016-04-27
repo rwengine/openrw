@@ -164,7 +164,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 		// Handle conditional results for IF statements.
 		if( t.conditionCount > 0 && opcode != 0x00D6 ) /// @todo add conditional flag to opcodes instead of checking for 0x00D6
 		{
-			auto cI = --t.conditionCount;
+			--t.conditionCount;
 			if ( t.conditionAND )
 			{
 				if ( t.conditionResult == false ) 
@@ -201,7 +201,7 @@ ScriptMachine::ScriptMachine(GameState* _state, SCMFile *file, SCMOpcodes *ops)
 {
 	auto globals = _file->getGlobalsSize();
 	globalData.resize(globals);
-	for(int i = 0; i < globals; ++i)
+	for(size_t i = 0; i < globals; ++i)
 	{
 		globalData[i] = 0;
 	}
@@ -286,7 +286,14 @@ void ScriptMachine::addBreakpoint(const SCMBreakpointInfo& bpi)
 
 void ScriptMachine::removeBreakpoint(const SCMBreakpointInfo& bpi)
 {
-	//breakpoints.erase(pc);
+	for (size_t i = 0; i < breakpoints.size(); ++i)
+	{
+		if (bpi == breakpoints[i])
+		{
+			breakpoints.erase(breakpoints.begin() + i);
+			return;
+		}
+	}
 }
 
 

@@ -441,6 +441,8 @@ void renderPickup(GameWorld* world,
 				  float renderAlpha,
 				  RenderList& outList)
 {
+	RW_UNUSED(renderAlpha);
+
 	if( ! pickup->isEnabled() ) return;
 
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
@@ -495,6 +497,8 @@ void renderCutsceneObject(GameWorld* world,
 						  float renderAlpha,
 						  RenderList& outList)
 {
+	RW_UNUSED(renderAlpha);
+
 	if(!world->state->currentCutscene) return;
 
 	if(!cutscene->model->resource)

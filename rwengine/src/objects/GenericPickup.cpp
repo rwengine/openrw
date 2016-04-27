@@ -8,5 +8,6 @@ GenericPickup::GenericPickup(GameWorld* world, const glm::vec3& position, int mo
 
 bool GenericPickup::onCharacterTouch(CharacterObject* character)
 {
+	RW_UNUSED(character);
 	return true;
 }

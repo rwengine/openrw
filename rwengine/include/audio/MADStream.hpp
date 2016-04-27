@@ -10,6 +10,7 @@
 #include <SFML/Audio.hpp>
 #include <stdint.h>
 #include <iostream>
+#include <rw/defines.hpp>
 
 static inline
 signed int scale(mad_fixed_t sample)
@@ -69,6 +70,8 @@ class MADStream : public sf::SoundStream
 	static mad_flow ms_output(void* user, mad_header const* header,
 							  mad_pcm* pcm)
 	{
+		RW_UNUSED(header);
+
 		MADStream* self = static_cast<MADStream*>(user);
 
 		int nsamples = pcm->length;
@@ -92,6 +95,9 @@ class MADStream : public sf::SoundStream
 
 	static mad_flow ms_error(void* user, mad_stream* stream, mad_frame* frame)
 	{
+		RW_UNUSED(user);
+		RW_UNUSED(frame);
+
 		sf::err() << "libmad error: " << mad_stream_errorstr(stream);
 		return MAD_FLOW_BREAK;
 	}
@@ -106,6 +112,7 @@ class MADStream : public sf::SoundStream
 
 	virtual void onSeek(sf::Time timeOffset)
 	{
+		RW_UNUSED(timeOffset);
 		/// @todo support seeking.
 	}
 

@@ -12,14 +12,23 @@ class ScriptDisassembly
 {
 public:
 
+	enum
+	{
+		/// The opcode's conditional is negated
+		OpcodeFlagNegatedConditional = 1
+	};
+
 	/**
 	 * Information about a single call to a single opcode and
 	 * it's parameters
 	 */
 	struct InstructionInfo
 	{
+		/// Numeric Opcode ID
 		SCMOpcode opcode;
+		/// Parameter information
 		SCMParams parameters;
+		uint8_t flags;
 	};
 
 	ScriptDisassembly(SCMOpcodes* codes, SCMFile* scm);

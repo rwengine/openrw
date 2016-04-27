@@ -24,8 +24,6 @@ void WeaponItem::fireHitscan(CharacterObject* owner)
 	auto handPos = glm::vec3(handMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f));
 	auto fireOrigin = owner->getPosition() +
 			owner->getRotation() * handPos;
-	auto flashDir = owner->getRotation() * glm::vec3{0.f, 0.f, 1.f};
-	auto flashUp = owner->getRotation() * glm::vec3{0.f, -1.f, 0.f};
 
 	owner->engine->doWeaponScan(WeaponScan(_wepData->damage, fireOrigin, farTarget, _wepData.get()));
 
@@ -34,6 +32,9 @@ void WeaponItem::fireHitscan(CharacterObject* owner)
 	// - Some circle particle used for the tracer
 	// - smoke emited at hit point
 	// - gunflash
+#if 0 // Should be merged into the VisualFX system
+	auto flashDir = owner->getRotation() * glm::vec3{0.f, 0.f, 1.f};
+	auto flashUp = owner->getRotation() * glm::vec3{0.f, -1.f, 0.f};
 
 	auto tracerTex = owner->engine->data->findTexture("shad_exp")->getName();
 	auto flashTex = owner->engine->data->findTexture("gunflash2")->getName();
@@ -91,6 +92,7 @@ void WeaponItem::fireHitscan(CharacterObject* owner)
 												flashUp
 											});
 											*/
+#endif
 }
 
 void WeaponItem::fireProjectile(CharacterObject* owner)
@@ -137,7 +139,7 @@ void WeaponItem::primary(CharacterObject* owner)
 
 void WeaponItem::secondary(CharacterObject* owner)
 {
-
+	RW_UNUSED(owner);
 }
 
 void WeaponItem::fire(CharacterObject* owner)

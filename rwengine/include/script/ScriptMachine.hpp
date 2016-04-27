@@ -152,6 +152,20 @@ struct SCMBreakpointInfo
 	SCMThread::pc_t programCounter;
 	char threadName[17];
 
+	bool operator == (const SCMBreakpointInfo& rhs) const
+	{
+		if (breakpointFlags != rhs.breakpointFlags) return false;
+		if ((breakpointFlags & BP_ProgramCounter) != 0)
+		{
+			if (programCounter != rhs.programCounter) return false;
+		}
+		if ((breakpointFlags & BP_ThreadName) != 0)
+		{
+			if (strncmp(threadName, rhs.threadName, 17) != 0) return false;
+		}
+		return true;
+	}
+
 	static SCMBreakpointInfo breakThreadName(char threadName[17])
 	{
 		SCMBreakpointInfo i;

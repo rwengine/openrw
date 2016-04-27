@@ -98,7 +98,7 @@ void AIGraph::gatherExternalNodesNear(const glm::vec3& center, const float radiu
 		for( int y = minGrid.y; y <= maxGrid.y; ++y )
 		{
 			int i = (x * WORLD_GRID_WIDTH) + y;
-			if( i < 0 || i >= gridNodes.size() )
+			if( i < 0 || i >= (int)gridNodes.size() )
 			{
 				continue;
 			}

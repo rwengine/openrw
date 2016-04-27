@@ -7,7 +7,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 
-constexpr size_t maxInventorySlots = 13;
+constexpr int maxInventorySlots = 13;
 
 // Animation slots used for character animation blending
 constexpr unsigned int AnimIndexMovement = 0;

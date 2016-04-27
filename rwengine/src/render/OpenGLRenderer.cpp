@@ -281,6 +281,8 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p, const std::string& n
 
 void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p, const std::string& name, float f)
 {
+	useProgram(p);
+
 	glUniform1fv(currentProgram->getUniformLocation(name.c_str()), 1, &f);
 }
 
@@ -424,6 +426,8 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title)
 		currentDebugDepth++;
 		assert( currentDebugDepth < MAX_DEBUG_DEPTH );
 	}
+#else
+	RW_UNUSED(title);
 #endif
 }
 

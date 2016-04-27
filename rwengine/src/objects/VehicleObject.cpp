@@ -151,11 +151,14 @@ glm::quat VehicleObject::getRotation() const
 
 void VehicleObject::tick(float dt)
 {
+	RW_UNUSED(dt);
 	// Moved to tickPhysics
 }
 
 void VehicleObject::tickPhysics(float dt)
 {
+	RW_UNUSED(dt);
+
 	if( physVehicle )
 	{
 		// todo: a real engine function
@@ -314,7 +317,7 @@ void VehicleObject::tickPhysics(float dt)
 			if(it.second.body == nullptr) continue;
 			auto inv = glm::inverse(getRotation());
 			auto rot = it.second.body->getWorldTransform().getRotation();
-			auto pos = it.second.body->getWorldTransform().getOrigin();
+			//auto pos = it.second.body->getWorldTransform().getOrigin();
 			auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 			//auto p2 = inv * (glm::vec3(pos.x(), pos.y(), pos.z()) - getPosition());
 			
@@ -603,7 +606,10 @@ void VehicleObject::registerPart(ModelFrame* mf)
 				normal,
 				damage,
 				nullptr, nullptr,
-				false, 0.f
+				false,
+				0.f,
+				0.f,
+				0.f
 			}
 		});
 }
