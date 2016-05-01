@@ -17,7 +17,7 @@ namespace RW
 		/// Loading the resource failed
 		Failed = 2
 	};
-};
+}
 
 
 template<class T> class ResourceHandle

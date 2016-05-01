@@ -25,7 +25,7 @@ TextureData::Handle getErrorTexture()
 			GL_RGBA, GL_UNSIGNED_BYTE, gErrorTextureData
 		);
 		glGenerateMipmap(GL_TEXTURE_2D);
-		
+
 		tex = TextureData::create(errTexName, {2, 2}, false);
 	}
 	return tex;
@@ -42,7 +42,7 @@ void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection)
 
 	for(size_t j = 0; j < raster_size; ++j)
 	{
-		fullColor[j] = palette[coldata[j]];
+		*(fullColor++) = palette[coldata[j]];
 	}
 
 }
@@ -61,26 +61,26 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative, RW::BinaryStre
 				texNative.rasterformat == RW::BSTextureNative::FORMAT_888;
 	// Export this value
 	bool transparent = !((texNative.rasterformat&RW::BSTextureNative::FORMAT_888) == RW::BSTextureNative::FORMAT_888);
-	
+
 	if(! (isPal8 || isFulc)) {
 		std::cerr << "Unsuported raster format " << std::dec << texNative.rasterformat << std::endl;
 		return getErrorTexture();
 	}
 
 	GLuint textureName = 0;
-	
+
 	if(isPal8)
 	{
-		uint32_t fullColor[texNative.width * texNative.height];
+		std::vector<uint32_t> fullColor(texNative.width * texNative.height);
 
-		processPalette(fullColor, rootSection);
+		processPalette(fullColor.data(), rootSection);
 
 		glGenTextures(1, &textureName);
 		glBindTexture(GL_TEXTURE_2D, textureName);
 		glTexImage2D(
 			GL_TEXTURE_2D, 0, GL_RGBA,
 			texNative.width, texNative.height, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, fullColor
+			GL_RGBA, GL_UNSIGNED_BYTE, fullColor.data()
 		);
 	}
 	else if(isFulc)
@@ -187,7 +187,7 @@ bool TextureLoader::loadFromMemory(FileHandle file, TextureArchive &inTextures)
 		std::string alpha = std::string(texNative.alphaName);
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower );
 		std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower );
-		
+
 		auto texture = createTexture(texNative, rootSection);
 
 		inTextures[{name, alpha}] = texture;

@@ -6,7 +6,7 @@
 struct Name {\
 	static const char* VertexShader;\
 	static const char* FragmentShader;\
-};
+}
 
 /**
  * @brief collection of shaders to make managing them a little easier.
@@ -16,12 +16,12 @@ namespace GameShaders {
 /**
  * High Quality Projected-Grid water shader
  */
-SHADER_VF(WaterHQ)
+SHADER_VF(WaterHQ);
 
 /**
  * Simple 3D masking shader
  */
-SHADER_VF(Mask3D)
+SHADER_VF(Mask3D);
 
 struct Sky {
 	static const char* VertexShader;

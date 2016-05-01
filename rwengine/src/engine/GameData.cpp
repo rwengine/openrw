@@ -59,8 +59,9 @@ std::string findPathRealCase(const std::string& base, const std::string& path)
 				}
 			}
 		}
+		closedir(dp);
 	}
-	
+
 	return "";
 #else 
 	// Is anything other than Windows likely to fall here?

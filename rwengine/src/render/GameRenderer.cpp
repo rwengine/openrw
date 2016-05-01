@@ -159,7 +159,8 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 	skyDbuff.setFaceType(GL_TRIANGLES);
 
     glGenBuffers(1, &skydomeIBO);
-	GLuint skydomeIndBuff[rows*segments*6];
+	std::vector<GLuint> skydomeIndBuff;
+	skydomeIndBuff.resize(rows*segments*6);
     for( size_t r = 0, i = 0; r < (rows-1); ++r ) {
         for( size_t s = 0; s < (segments-1); ++s ) {
             skydomeIndBuff[i++] = r * segments + s;
@@ -171,7 +172,7 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skydomeIndBuff), skydomeIndBuff, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * skydomeIndBuff.size(), skydomeIndBuff.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 

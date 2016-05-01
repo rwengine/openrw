@@ -565,7 +565,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	
 	BlockDword numScripts;
 	READ_SIZE(numScripts)
-	Block0RunningScript scripts[numScripts];
+	std::vector<Block0RunningScript> scripts(numScripts);
 	for (size_t i = 0; i < numScripts; ++i)
 	{
 		READ_VALUE(scripts[i]);
@@ -579,7 +579,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	BlockDword playerCount;
 	READ_SIZE(playerCount)
 
-	Block1PlayerPed players[playerCount];
+	std::vector<Block1PlayerPed> players(playerCount);
 	for(unsigned int p = 0; p < playerCount; ++p) {
 		Block1PlayerPed& ped = players[p];
 		READ_VALUE(ped.unknown0)
@@ -620,7 +620,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	READ_VALUE(garageData.GA_21lastTime)
 	READ_VALUE(garageData.cars)
 
-	StructGarage garages[garageData.garageCount];
+	std::vector<StructGarage> garages(garageData.garageCount);
 	for (size_t i = 0; i < garageData.garageCount; ++i)
 	{
 		READ_VALUE(garages[i]);
@@ -652,7 +652,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	READ_VALUE(vehicleCount)
 	READ_VALUE(boatCount)
 
-	Block3Vehicle vehicles[vehicleCount];
+	std::vector<Block3Vehicle> vehicles(vehicleCount);
 	for(size_t v = 0; v < vehicleCount; ++v) {
 		Block3Vehicle& veh = vehicles[v];
 		READ_VALUE(veh.unknown1)
@@ -663,7 +663,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		std::cout << " v " << veh.modelId << " " << veh.state.position.x << " " << veh.state.position.y << " " << veh.state.position.z << std::endl;
 #endif
 	}
-	Block3Boat boats[boatCount];
+	std::vector<Block3Boat> boats(boatCount);
 	for(size_t v = 0; v < boatCount; ++v) {
 		Block3Boat& veh = boats[v];
 		READ_VALUE(veh.unknown1)
@@ -684,7 +684,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	BlockDword objectCount;
 	READ_VALUE(objectCount);
 
-	Block4Object objects[objectCount];
+	std::vector<Block4Object> objects(objectCount);
 	for(size_t o = 0; o < objectCount; ++o)
 	{
 		Block4Object &obj = objects[o];
@@ -772,7 +772,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 
 	Block8Data phoneData;
 	READ_VALUE(phoneData);
-	Block8Phone phones[phoneData.numPhones];
+	std::vector<Block8Phone> phones(phoneData.numPhones);
 	for (size_t p = 0; p < phoneData.numPhones; ++p) {
 		Block8Phone &phone = phones[p];
 		READ_VALUE(phone)
@@ -922,7 +922,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	Block13Data carGeneratorData;
 	READ_VALUE(carGeneratorData);
 
-	Block13CarGenerator carGenerators[carGeneratorData.generatorCount];
+	std::vector<Block13CarGenerator> carGenerators(carGeneratorData.generatorCount);
 	for(size_t g = 0; g < carGeneratorData.generatorCount; ++g) {
 		READ_VALUE(carGenerators[g])
 	}
@@ -943,7 +943,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 
 	BlockDword particleCount;
 	READ_VALUE(particleCount);
-	Block14Particle particles[particleCount];
+	std::vector<Block14Particle> particles(particleCount);
 	for(size_t p = 0; p < particleCount; ++p) {
 		READ_VALUE(particles[p])
 	}
@@ -963,7 +963,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	BlockDword audioCount;
 	READ_VALUE(audioCount)
 
-	Block15AudioObject audioObjects[audioCount];
+	std::vector<Block15AudioObject> audioObjects(audioCount);
 	for(size_t a = 0; a < audioCount; ++a) {
 		READ_VALUE(audioObjects[a])
 	}
