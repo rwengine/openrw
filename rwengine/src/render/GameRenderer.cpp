@@ -70,8 +70,15 @@ GeometryBuffer ssRectGeom;
 DrawBuffer ssRectDraw;
 
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
-	: data(_data), logger(log), renderer(new OpenGLRenderer), _renderAlpha(0.f),
-	_renderWorld(nullptr), map(renderer, _data), water(this), text(this)
+	: data(_data)
+	, logger(log)
+	, renderer(new OpenGLRenderer)
+	, _renderAlpha(0.f)
+	, _renderWorld(nullptr)
+	, cullOverride(false)
+	, map(renderer, _data)
+	, water(this)
+	, text(this)
 {
 	logger->info("Renderer", renderer->getIDString());
 
