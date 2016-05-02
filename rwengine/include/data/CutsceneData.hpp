@@ -38,7 +38,7 @@ struct CutsceneTracks
 	std::map<float, glm::vec3> position;
 	std::map<float, glm::vec3> target; /// Rotation is around the direction to this vector
 
-	float duration;
+	float duration { 0.f };
 
 	glm::vec3 getPositionAt(float time)
 	{
