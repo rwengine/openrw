@@ -11,13 +11,17 @@ BOOST_AUTO_TEST_CASE(frustum_test_visible)
 
 		f.update(f.projection());
 
-		BOOST_CHECK( f.intersects({10.f, 0.f, 0.f}, 1.f ) );
-		BOOST_CHECK(!f.intersects({-10.f, 0.f, 0.f}, 1.f ) );
+		BOOST_CHECK( f.intersects({10.f, 0.f,-10.f}, 1.f ) );
+		BOOST_CHECK(!f.intersects({ 0.f, 0.f, 10.f}, 1.f ) );
 
 		BOOST_CHECK(!f.intersects({0.f, 10.f, 0.f}, 1.f ) );
 		BOOST_CHECK(!f.intersects({0.f,-10.f, 0.f}, 1.f ) );
 
-		BOOST_CHECK( f.intersects({10.f, 10.f, 0.f}, 1.f ) );
+		BOOST_CHECK(!f.intersects({ 10.f, 0.f, 0.f}, 1.f ) );
+		BOOST_CHECK(!f.intersects({-10.f, 0.f, 0.f}, 1.f ) );
+
+		BOOST_CHECK( f.intersects({ 10.f, 0.f,-10.f}, 1.f ) );
+		BOOST_CHECK( f.intersects({-10.f, 0.f,-10.f}, 1.f ) );
 	}
 }
 

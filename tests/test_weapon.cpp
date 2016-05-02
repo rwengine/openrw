@@ -51,7 +51,8 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 			projectile->tick(0.016f);
 		}
 
-		BOOST_CHECK_LT( glm::distance(character->getPosition(), projectile->getPosition()), 1.f );
+		BOOST_CHECK_LT( glm::distance(character->getPosition(), projectile->getPosition()), 10.f );
+		BOOST_CHECK_LT( glm::distance(character->getPosition(), projectile->getPosition()), 5.f );
 
 		// Grenade should have dentonated by this point
 		BOOST_CHECK( character->getCurrentState().health < 100.f );

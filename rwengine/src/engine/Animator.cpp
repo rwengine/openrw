@@ -41,6 +41,8 @@ void Animator::tick(float dt)
 			}
 		}
 
+		state.time = state.time + dt;
+
 		float animTime = state.time;
 		if (! state.repeat)
 		{
@@ -84,7 +86,6 @@ void Animator::tick(float dt)
 			blendFrames[b.second.frameIndex] = xform;
 #endif
 		}
-		state.time = state.time + dt;
 	}
 
 	for (auto& p : blendFrames)

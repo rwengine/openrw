@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_create)
 BOOST_AUTO_TEST_CASE(test_activities)
 {
 	{
-		auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
+		auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 225.6f});
 
 		BOOST_REQUIRE( character != nullptr );
 

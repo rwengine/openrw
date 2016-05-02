@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		}
 		};
 		
-		animator.playAnimation(0, &animation, 1.f, true);
+		animator.playAnimation(0, &animation, 1.f, false);
 		
 		animator.tick(0.0f);
 		

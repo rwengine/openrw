@@ -11,10 +11,15 @@ BOOST_AUTO_TEST_CASE(test_character_inventory)
 		BOOST_REQUIRE( character != nullptr );
 
 		auto item = Global::get().e->getInventoryItem(4);
+		auto fist = Global::get().e->getInventoryItem(0);
 
 		BOOST_REQUIRE(item != nullptr);
+		BOOST_REQUIRE(fist != nullptr );
+		BOOST_CHECK_NE( fist, item );
 
 		character->addToInventory(item);
+
+		BOOST_CHECK_EQUAL( character->getActiveItem(), fist );
 
 		character->setActiveItem( item->getInventorySlot() );
 
@@ -22,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_character_inventory)
 
 		character->removeFromInventory( item->getInventorySlot() );
 
-		BOOST_CHECK_EQUAL( character->getActiveItem(), nullptr );
+		BOOST_CHECK_EQUAL( character->getActiveItem(), fist );
 
 		Global::get().e->destroyObject(character);
 	}

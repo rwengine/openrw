@@ -76,13 +76,12 @@ BOOST_AUTO_TEST_CASE(test_available_nodes)
 			{-10.f, 0.f, 0.f }
 	};
 	
+	BOOST_REQUIRE(expected.size() == 3);
 	BOOST_ASSERT( expected.size() == open.size() );
 	
-	auto left = open.begin();
-	auto right = expected.begin();
-	for ( ; left != open.end() && right != expected.end(); ++left, ++right )
-	{
-		BOOST_CHECK( ! ( *left != *right ) );
+	for (auto& v : expected) {
+		BOOST_CHECK(std::find_if(open.begin(), open.end(),
+					[v](AIGraphNode* n) { return n->position == v; }) != open.end());
 	}
 }
 

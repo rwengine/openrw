@@ -45,13 +45,15 @@ public:
 	Global() {
 		wnd.create(sf::VideoMode(640, 360), "Testing");
 		d = new GameData(&log, &work, getGamePath());
+
+		d->loadIMG("/models/gta3");
+		d->loadIMG("/anim/cuts");
+		d->load();
+
 		e = new GameWorld(&log, &work, d);
 		s = new GameState;
 		e->state = s;
 
-		e->data->loadIMG("/models/gta3");
-		e->data->loadIMG("/anim/cuts");
-		e->data->load();
 		for(std::map<std::string, std::string>::iterator it = e->data->ideLocations.begin();
 			it != e->data->ideLocations.end();
 			++it) {
