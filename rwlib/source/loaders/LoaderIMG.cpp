@@ -11,14 +11,14 @@ LoaderIMG::LoaderIMG()
 
 bool LoaderIMG::load(const std::string& filename)
 {
-	std::string dirName = filename;
-	auto extpos = dirName.find(".img");
-	if( extpos != std::string::npos )
+	auto baseName = filename;
+	auto extpos = filename.find(".img");
+	if (extpos != std::string::npos)
 	{
-		dirName.erase(extpos);
+		baseName.erase(extpos);
 	}
-	
-	dirName.append(".dir");
+	auto dirName = baseName + ".dir";
+	auto imgName = baseName + ".img";
 
 	FILE* fp = fopen(dirName.c_str(), "rb");
 	if(fp)
@@ -37,7 +37,7 @@ bool LoaderIMG::load(const std::string& filename)
 		}
 
 		fclose(fp);
-		m_archive = filename;
+		m_archive = imgName;
 		return true;
 	}
 	else
@@ -80,7 +80,6 @@ char* LoaderIMG::loadToMemory(const std::string& assetname)
 	}
 	
 	std::string dirName = m_archive;
-	dirName.append(".img");
 
 	FILE* fp = fopen(dirName.c_str(), "rb");
 	if(fp)
