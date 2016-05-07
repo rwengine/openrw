@@ -36,11 +36,11 @@ public:
 			ti.size = getHeight();
 			if( ! active )
 			{
-				ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
+				ti.baseColour = glm::u8vec3(255);
 			}
 			else
 			{
-				ti.baseColour = glm::vec3(1.f, 1.f, 0.f);
+				ti.baseColour = glm::u8vec3(255, 255, 0);
 			}
 			r->text.renderText(ti);
 			basis.y += getHeight();

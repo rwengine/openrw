@@ -19,45 +19,56 @@
 #include <objects/CutsceneObject.hpp>
 #include <objects/PickupObject.hpp>
 #include <core/Logger.hpp>
+#include <engine/ScreenText.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
 #include <iostream>
 #include <algorithm>
 
+
+// Helper function to format script numbers to strings
+// for use in the text printing opcodes.
+std::string formatValue(const SCMOpcodeParameter& p)
+{
+	switch (p.type) {
+	case TFloat16:
+		return std::to_string(p.real);
+	default:
+		return std::to_string(p.integerValue());
+	}
+	return "";
+}
+
 void game_print_big(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 	std::string str = args.getWorld()->data->texts.text(id);
+	unsigned short time = args[1].integer;
 	unsigned short style = args[2].integer;
-	args.getWorld()->state->text.emplace_back(
-		id,
-		str,
-		args.getWorld()->getGameTime(),
-		args[1].integer / 1000.f,
-		style
-	);
+	args.getWorld()->state->text.addText<ScreenTextType::Big>(
+				ScreenTextEntry::makeBig(
+					id, str, style, time
+					));
 }
 
 void game_print_now(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 	std::string str = args.getWorld()->data->texts.text(id);
+	int time = args[1].integer;
 	int flags = args[2].integer;
 	RW_UNUSED(flags);
-	RW_UNIMPLEMENTED("game_print_now(): flags");
-	args.getWorld()->state->text.emplace_back(
-		id,
-		str,
-		args.getWorld()->getGameTime(),
-		args[1].integer / 1000.f,
-		0
-	);
+	RW_UNIMPLEMENTED("Unclear what style should be used");
+	args.getWorld()->state->text.addText<ScreenTextType::HighPriority>(
+				ScreenTextEntry::makeHighPriority(
+					id, str, time
+					));
 }
 
 void game_clear_prints(const ScriptArguments& args)
 {
-	args.getWorld()->state->text.clear();
+	args.getWorld()->state->text.clear<ScreenTextType::Big>();
 }
 
 void game_get_time(const ScriptArguments& args)
@@ -326,20 +337,15 @@ void game_get_runtime(const ScriptArguments& args)
 void game_print_big_with_number(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getWorld()->data->texts.text(id);
-	
-	int number = args[1].integer;
-	
+	std::string str =
+			ScreenText::format(
+				args.getWorld()->data->texts.text(id),
+				formatValue(args[1]));
 	unsigned short style = args[3].integer;
-	
-	args.getWorld()->state->text.push_back({
-		id,
-		str,
-		args.getWorld()->getGameTime(),
-		args[2].integer / 1000.f,
-		style,
-		std::to_string(number),
-	});
+	args.getWorld()->state->text.addText<ScreenTextType::Big>(
+				ScreenTextEntry::makeBig(
+					id, str, style, 5000
+					));
 }
 
 void game_disable_roads(const ScriptArguments& args)
@@ -821,17 +827,7 @@ void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 
-	for( size_t i = 0; i < args.getWorld()->state->text.size(); )
-	{
-		if( args.getWorld()->state->text[i].id == id )
-		{
-			args.getWorld()->state->text.erase(args.getWorld()->state->text.begin() + i);
-		}
-		else
-		{
-			i++;
-		}
-	}
+	args.getWorld()->state->text.remove<ScreenTextType::Big>(id);
 }
 
 bool game_did_game_save(const ScriptArguments& args)
@@ -851,30 +847,16 @@ void game_display_help(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
 	std::string str = args.getWorld()->data->texts.text(id);
-	unsigned short style = OnscreenText::Help;
-	args.getWorld()->state->text.push_back({
-		id,
-		str,
-		args.getWorld()->getGameTime(),
-		2.5f,
-		style
-	});
+
+	args.getWorld()->state->text.addText<ScreenTextType::Big>(
+				ScreenTextEntry::makeHelp(
+					id, str
+					));
 }
 
 void game_clear_help(const ScriptArguments& args)
 {
-	for( size_t i = 0; i < args.getWorld()->state->text.size(); )
-	{
-		auto& texts = args.getWorld()->state->text;
-		if( texts[i].osTextStyle == OnscreenText::Help )
-		{
-			texts.erase(texts.begin() + i);
-		}
-		else
-		{
-			i++;
-		}
-	}
+	args.getWorld()->state->text.clear<ScreenTextType::Help>();
 }
 
 bool game_can_player_move(const ScriptArguments& args)

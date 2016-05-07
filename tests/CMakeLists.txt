@@ -44,7 +44,8 @@ include_directories("${CMAKE_SOURCE_DIR}/tests")
 
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" "${CMAKE_SOURCE_DIR}/rwgame" ${BULLET_INCLUDE_DIR})
+include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" "${CMAKE_SOURCE_DIR}/rwgame")
+include_directories(${BULLET_INCLUDE_DIR} SYSTEM)
 
 target_link_libraries(run_tests
 	rwengine

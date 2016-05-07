@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <objects/ObjectTypes.hpp>
+#include <engine/ScreenText.hpp>
 
 class GameWorld;
 class GameObject;
@@ -157,42 +158,6 @@ struct TextDisplayData
 
 	glm::vec4 colourFG;
 	glm::vec4 colourBG;
-};
-
-struct OnscreenText
-{
-	std::string id;
-	std::string osTextString;
-	float osTextStart;
-	float osTextTime;
-	unsigned short osTextStyle;
-	std::string osTextVar;
-	
-	enum /*TextStyle*/
-	{
-		/// Used for subtitles
-		HighPriority = 0,
-		/// Mission completed message
-		CenterBig = 1,
-		/// Right aligned mission names
-		MissionName = 2,
-		/// Help text (top left, black background)
-		Help = 12
-	};
-
-	OnscreenText(const std::string& id,
-				 const std::string& string,
-				 float start,
-				 float time,
-				 unsigned short style,
-				 const std::string& var = "")
-		: id (id)
-		, osTextString(string)
-		, osTextStart(start)
-		, osTextTime(time)
-		, osTextStyle(style)
-		, osTextVar(var)
-	{ }
 };
 
 /**
@@ -353,11 +318,9 @@ struct GameState
 	std::map<unsigned short, std::string> specialCharacters;
 	std::map<unsigned short, std::string> specialModels;
 
-	/**
-	 * Stores long-lasting on screen messages
-	 */
-	std::vector<OnscreenText> text;
-	
+	/// Handles on screen text behaviour
+	ScreenText text;
+
 	TextDisplayData nextText;
 	/**
 	 * Stores temporary, one-tick messages

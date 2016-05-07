@@ -438,20 +438,8 @@ void RWGame::tick(float dt)
 		}
 		
 		world->destroyQueuedObjects();
-		state->texts.clear();
 
-		for( int i = 0; i < state->text.size(); )
-		{
-			auto& text = state->text[i];
-			if( world->getGameTime() > text.osTextStart + text.osTextTime )
-			{
-				state->text.erase(state->text.begin() + i);
-			}
-			else
-			{
-				i++;
-			}
-		}
+		state->text.tick(dt);
 
 		world->dynamicsWorld->stepSimulation(dt, 2, dt);
 		
@@ -656,6 +644,7 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	ti.font = 2;
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
 	ti.size = 15.f;
+	ti.baseColour = glm::u8vec3(255);
 	renderer->text.renderText(ti);
 
 	/*while( engine->log.size() > 0 && engine->log.front().time + 10.f < engine->gameTime ) {
@@ -752,6 +741,7 @@ void RWGame::renderProfile()
 	ti.align = TextRenderer::TextInfo::Left;
 	ti.font = 2;
 	ti.size = lineHeight - 2.f;
+	ti.baseColour = glm::u8vec3(255);
 	std::function<void(const perf::ProfileEntry&,int)> renderEntry = [&](const perf::ProfileEntry& entry, int depth)
 	{
 		int g = 0;

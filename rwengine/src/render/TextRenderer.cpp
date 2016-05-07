@@ -187,13 +187,17 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	
 	glm::vec2 coord( 0.f, 0.f );
 	glm::vec2 alignment = ti.screenPosition;
+	// We should track real size not just chars.
+	auto lineLength = 0;
 	
 	glm::vec2 ss( ti.size );
 
-	glm::vec3 colour = ti.baseColour;
+	glm::vec3 colour = glm::vec3(ti.baseColour) * (1/255.f);
+	glm::vec4 colourBG  = glm::vec4(ti.backgroundColour) * (1/255.f);
 	std::vector<TextVertex> geo;
 	
 	float maxWidth = 0.f;
+	float maxHeight = 0.f;
 
 	auto text = ti.text;
 	
@@ -206,11 +210,6 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 		{
 			switch( text[i+1] )
 			{
-			case '1':
-			case 'a':
-				text.erase(text.begin()+i, text.begin()+i+3);
-				text.insert(i, ti.varText);
-				break;
 			case 'k': {
 				text.erase(text.begin()+i, text.begin()+i+3);
 				// Extract the key name from the /next/ markup
@@ -218,7 +217,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 				auto keyname = text.substr(i+1, keyend-i-1);
 				// Since we don't have a key map yet, just print out the name
 				text.erase(text.begin()+i, text.begin()+keyend);
-				text.insert(i, "("+keyname+")");
+				text.insert(i, keyname);
 			} break;
 			case 'w':
 				text.erase(text.begin()+i, text.begin()+i+3);
@@ -238,6 +237,26 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 		{
 			continue;
 		}
+
+		// If we're not at the start of the column, check if the current word
+		// will need to be wrapped
+		if (ti.wrapX > 0 && coord.x > 0.f && !std::isspace(c))
+		{
+			auto wend = std::find_if(std::begin(text)+i,
+									 std::end(text),
+									 [](char x) { return std::isspace(x); });
+			if (wend != std::end(text))
+			{
+				auto word = std::distance(std::begin(text)+i, wend);
+				if (lineLength + word >= ti.wrapX)
+				{
+					coord.x = 0;
+					coord.y += ss.y;
+					maxHeight = coord.y + ss.y;
+					lineLength = 0;
+				}
+			}
+		}
 		
 		auto& data = glyphData[glyph];
 		auto tex = indexToCoord(ti.font, glyph);
@@ -248,11 +267,14 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 		// Handle special chars.
 		if( c == '\n' )
 		{
-			coord.x = ti.screenPosition.x;
+			coord.x = 0.f;
 			coord.y += ss.y;
+			maxHeight = coord.y + ss.y;
+			lineLength = 0;
 			continue;
 		}
-		
+		lineLength ++;
+
 		glm::vec2 p = coord;
 		coord.x += ss.x;
 		maxWidth = std::max(coord.x, maxWidth);
@@ -277,6 +299,17 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	}
 
 	alignment.y -= ti.size * 0.2f;
+
+	// If we need to, draw the background.
+	if (colourBG.a > 0.f)
+	{
+		renderer->drawColour(
+					colourBG,
+					glm::vec4(
+						ti.screenPosition - (ss/3.f),
+						glm::vec2(maxWidth, maxHeight)+(ss/2.f)));
+
+	}
 	
 	renderer->getRenderer()->setUniform(textShader, "proj", renderer->getRenderer()->get2DProjection());
 	renderer->getRenderer()->setUniformTexture(textShader, "fontTexture", 0);

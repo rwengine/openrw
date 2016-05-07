@@ -55,5 +55,6 @@ void LoadingState::draw(GameRenderer* r)
 	ti.size = 25.f;
 	ti.screenPosition = glm::vec2( 50.f, size.y - ti.size - 50.f );
 	ti.font = 2;
+	ti.baseColour = glm::u8vec3(255);
 	r->text.renderText(ti);
 }

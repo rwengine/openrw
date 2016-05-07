@@ -32,17 +32,19 @@ public:
 		int font;
 		/// Message to be displayed (including markup)
 		std::string text;
-		/// Extra text parameter
-		std::string varText;
 		/// On screen position
 		glm::vec2 screenPosition;
 		/// font size
 		float size;
 		/// Base colour
-		glm::vec3 baseColour;
+		glm::u8vec3 baseColour;
+		/// Background colour
+		glm::u8vec4 backgroundColour;
 		/// Horizontal Alignment
 		TextAlignemnt align;
-		
+		/// Wrap width
+		int wrapX;
+
 		TextInfo();
 	};
 	
