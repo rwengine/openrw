@@ -10,9 +10,10 @@ add_executable(rwviewer
 	models/ObjectListModel.cpp
 	models/DFFFramesTreeModel.cpp
 
-
+	views/ViewerInterface.hpp
 	views/ObjectViewer.cpp
 	views/ModelViewer.cpp
+	views/WorldViewer.cpp
 
 	ViewerWidget.cpp
 	ItemListModel.cpp

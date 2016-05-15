@@ -7,7 +7,7 @@
 #include "ViewerWidget.hpp"
 
 ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
-: QWidget(parent, f), _world(nullptr), viewing(nullptr), skeleton(nullptr)
+: ViewerInterface(parent, f), viewing(nullptr), skeleton(nullptr)
 {
 	mainSplit = new QSplitter;
 	mainLayout = new QVBoxLayout;
@@ -38,11 +38,6 @@ void ModelViewer::setViewerWidget(ViewerWidget* widget)
 	viewerWidget = widget;
 	mainSplit->addWidget(viewerWidget);
 	showModel(viewing);
-}
-
-void ModelViewer::showData(GameWorld* world)
-{
-	_world = world;
 }
 
 void ModelViewer::showModel(Model* model)

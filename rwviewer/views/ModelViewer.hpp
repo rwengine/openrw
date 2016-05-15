@@ -1,14 +1,17 @@
 #pragma once
 #ifndef _MODELVIEWER_HPP_
 #define _MODELVIEWER_HPP_
+#include <engine/GameData.hpp>
+#include <engine/GameWorld.hpp>
+#include "AnimationListWidget.hpp"
+
+#include "ViewerInterface.hpp"
+
 #include <QTreeView>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QSplitter>
 #include <QLayout>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include "AnimationListWidget.hpp"
 
 class ViewerWidget;
 class Model;
@@ -16,11 +19,10 @@ class Skeleton;
 class ModelFramesWidget;
 class Animation;
 
-class ModelViewer : public QWidget
+class ModelViewer : public ViewerInterface
 {
 	Q_OBJECT
 
-	GameWorld* _world;
 	Model* viewing;
 	Skeleton* skeleton;
 
@@ -36,12 +38,7 @@ public:
 
 	ModelViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-	GameWorld* world()
-	{
-		return _world;
-	}
-
-	void setViewerWidget( ViewerWidget* widget );
+	void setViewerWidget( ViewerWidget* widget ) override;
 
 public slots:
 
@@ -54,8 +51,6 @@ public slots:
 	 * Display a game object's model
 	 */
 	void showObject(uint16_t object);
-
-	void showData(GameWorld* world);
 
 	void loadAnimations(const QString& file);
 	void playAnimation(Animation* anim);

@@ -1,22 +1,33 @@
 #pragma once 
 #ifndef _VIEWERWINDOW_HPP_
 #define _VIEWERWINDOW_HPP_
-#include <QMainWindow>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <core/Logger.hpp>
+
+#include <QMainWindow>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 
-class ObjectViewer;
-class ModelViewer;
+#include <array>
+
 class ViewerWidget;
+class ViewerInterface;
 class GameRenderer;
 class QGLContext;
 
 class ViewerWindow : public QMainWindow
 {
 	Q_OBJECT
+
+	enum ViewMode {
+		Object = 0,
+		Model = 1,
+#if 0
+		World = 2,
+#endif
+		_Count
+	};
 
 	Logger engineLog;
 	WorkContext work;
@@ -28,8 +39,8 @@ class ViewerWindow : public QMainWindow
 	/** Contains the OGL context */
 	ViewerWidget* viewerWidget;
 
-	ObjectViewer* objectViewer;
-	ModelViewer* modelViewer;
+	std::array<ViewerInterface*, ViewMode::_Count> m_views;
+	std::array<std::string, ViewMode::_Count> m_viewNames;
 
 	QStackedWidget* viewSwitcher;
 
@@ -59,12 +70,13 @@ public slots:
 signals:
 
 	void loadedData(GameWorld* world);
+	void loadAnimations(const QString& file);
 
 private slots:
 
 	void openRecent();
 
-	void switchWidget();
+	void switchView(int mode);
 
 	void showObjectModel(uint16_t object);
 

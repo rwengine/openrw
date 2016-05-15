@@ -1,22 +1,29 @@
 #include "ViewerWindow.hpp"
 #include "views/ObjectViewer.hpp"
 #include "views/ModelViewer.hpp"
+#include "views/WorldViewer.hpp"
+#include <ViewerWidget.hpp>
 
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
+
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QApplication>
 #include <QSettings>
+#include <QPushButton>
+#include <QSignalMapper>
 #include <QDebug>
 #include <fstream>
 #include <QOffscreenSurface>
-#include <ViewerWidget.hpp>
 
 static int MaxRecentGames = 5;
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
-	: QMainWindow(parent, flags), gameData(nullptr), gameWorld(nullptr), renderer(nullptr)
+	: QMainWindow(parent, flags)
+	, gameData(nullptr)
+	, gameWorld(nullptr)
+	, renderer(nullptr)
 {
 	setMinimumSize(640, 480);
 
@@ -37,37 +44,55 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	ex->setShortcut(QKeySequence::Quit);
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
+	//----------------------- View Mode setup
 	viewerWidget = new ViewerWidget;
-
 	viewerWidget->context()->makeCurrent();
-
-	objectViewer = new ObjectViewer(viewerWidget);
-
-	connect(this, SIGNAL(loadedData(GameWorld*)), objectViewer, SLOT(showData(GameWorld*)));
 	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
 
-	modelViewer = new ModelViewer(viewerWidget);
+	//------------- Object Viewer
+	m_views[ViewMode::Object] = new ObjectViewer(viewerWidget);
+	m_viewNames[ViewMode::Object] = "Objects";
 
-	connect(this, SIGNAL(loadedData(GameWorld*)), modelViewer, SLOT(showData(GameWorld*)));
+	//------------- Model Viewer
+	m_views[ViewMode::Model]  = new ModelViewer(viewerWidget);
+	m_viewNames[ViewMode::Model] = "Model";
 
+#if 0
+	//------------- World Viewer
+	m_views[ViewMode::World] = new WorldViewer(viewerWidget);
+	m_viewNames[ViewMode::World] = "World";
+#endif
+
+	//------------- display mode switching
 	viewSwitcher = new QStackedWidget;
-	viewSwitcher->addWidget(objectViewer);
-	viewSwitcher->addWidget(modelViewer);
+	auto signalMapper = new QSignalMapper(this);
+	auto switchPanel = new QVBoxLayout();
+	int i = 0;
+	for(auto viewer : m_views) {
+		viewSwitcher->addWidget(viewer);
+		connect(this, SIGNAL(loadedData(GameWorld*)), viewer, SLOT(showData(GameWorld*)));
 
-	//connect(objectViewer, SIGNAL(modelChanged(Model*)), modelViewer, SLOT(showModel(Model*)));
-	connect(objectViewer, SIGNAL(showObjectModel(uint16_t)), this, SLOT(showObjectModel(uint16_t)));
+		auto viewerButton = new QPushButton(m_viewNames[i].c_str());
+		signalMapper->setMapping(viewerButton, i++);
+		connect(viewerButton, SIGNAL(clicked()), signalMapper, SLOT(map()));
+		switchPanel->addWidget(viewerButton);
+	}
 
-	objectViewer->setViewerWidget( viewerWidget );
+	switchView(ViewMode::Object);
 
-	QMenu* view = mb->addMenu("&View");
-	QAction* objectAction = view->addAction("&Object");
-	QAction* modelAction = view->addAction("&Model");
+	connect(m_views[ViewMode::Object], SIGNAL(showObjectModel(uint16_t)), this, SLOT(showObjectModel(uint16_t)));
+	connect(m_views[ViewMode::Object], SIGNAL(showObjectModel(uint16_t)), m_views[ViewMode::Model], SLOT(showObject(uint16_t)));
+	connect(this, SIGNAL(loadAnimations(QString)), m_views[ViewMode::Model], SLOT(loadAnimations(QString)));
 
-	objectAction->setData(0);
-	modelAction->setData(1);
+	connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(switchView(int)));
+	connect(signalMapper, SIGNAL(mapped(int)), viewSwitcher, SLOT(setCurrentIndex(int)));
 
-	connect(objectAction, SIGNAL(triggered()), this, SLOT(switchWidget()));
-	connect(modelAction, SIGNAL(triggered()), this, SLOT(switchWidget()));
+	switchPanel->addStretch();
+	auto mainlayout = new QHBoxLayout();
+	mainlayout->addLayout(switchPanel);
+	mainlayout->addWidget(viewSwitcher);
+	auto mainwidget = new QWidget();
+	mainwidget->setLayout(mainlayout);
 
 	QMenu* data = mb->addMenu("&Data");
 	//data->addAction("Export &Model", objectViewer, SLOT(exportModel()));
@@ -75,7 +100,7 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
 
-	this->setCentralWidget(viewSwitcher);
+	this->setCentralWidget(mainwidget);
 
 	updateRecentGames();
 }
@@ -103,7 +128,7 @@ void ViewerWindow::openAnimations()
 {
 	QFileDialog dialog(this, "Open Animations", QDir::homePath(), "IFP Animations (*.ifp)");
 	if(dialog.exec()) {
-		modelViewer->loadAnimations(dialog.selectedFiles()[0]);
+		loadAnimations(dialog.selectedFiles()[0]);
 	}
 }
 
@@ -156,31 +181,23 @@ void ViewerWindow::openRecent()
 	}
 }
 
-void ViewerWindow::switchWidget()
+void ViewerWindow::switchView(int mode)
 {
-	QAction* r = qobject_cast< QAction* >(sender());
-	if(r) {
-		int index = r->data().toInt();
-
-		if( index == 0 )
-		{
-			objectViewer->setViewerWidget( viewerWidget );
-		}
-		else if( index == 1 )
-		{
-			modelViewer->setViewerWidget( viewerWidget );
-		}
-
-		viewSwitcher->setCurrentIndex( index );
+	if( mode < int(m_views.size()) )
+	{
+		m_views[mode]->setViewerWidget( viewerWidget );
+	}
+	else
+	{
+		RW_ERROR("Unhandled view mode" << mode);
 	}
 }
 
-void ViewerWindow::showObjectModel(uint16_t object)
+void ViewerWindow::showObjectModel(uint16_t)
 {
 	// Switch to the model viewer
-	modelViewer->setViewerWidget( viewerWidget );
-	viewSwitcher->setCurrentIndex( viewSwitcher->indexOf(modelViewer) );
-	modelViewer->showObject(object);
+	switchView(ViewMode::Model);
+	viewSwitcher->setCurrentIndex( viewSwitcher->indexOf(m_views[ViewMode::Model]) );
 }
 
 void ViewerWindow::updateRecentGames()

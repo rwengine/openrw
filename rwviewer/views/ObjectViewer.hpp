@@ -3,6 +3,9 @@
 #define _OBJECTVIEWER_HPP_
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
+
+#include "ViewerInterface.hpp"
+
 #include <QTableView>
 #include <QLabel>
 #include <QGridLayout>
@@ -11,12 +14,11 @@
 class ViewerWidget;
 class Model;
 
-class ObjectViewer : public QWidget
+class ObjectViewer : public ViewerInterface
 {
 	Q_OBJECT
 
 	QTableView* objectList;
-	GameWorld* _world;
 
 	QHBoxLayout* mainLayout;
 	QGridLayout* infoLayout;
@@ -31,12 +33,10 @@ public:
 
 	ObjectViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-	GameWorld* world()
-	{
-		return _world;
-	}
-
 	void setViewerWidget( ViewerWidget* widget );
+
+protected:
+	void worldChanged() override;
 
 signals:
 
@@ -47,8 +47,6 @@ signals:
 public slots:
 
 	void showItem(qint16 item);
-
-	void showData(GameWorld* world);
 
 private slots:
 

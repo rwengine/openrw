@@ -5,7 +5,7 @@
 #include <QMenu>
 
 ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
-: QWidget(parent, f)
+: ViewerInterface(parent, f)
 {
 	mainLayout = new QHBoxLayout;
 
@@ -44,10 +44,27 @@ ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlag
 
 void ObjectViewer::setViewerWidget(ViewerWidget* widget)
 {
-	static size_t c = 0;
 	//widgetLayout->removeWidget(previewWidget);
 	previewWidget = widget;
 	infoLayout->addWidget(previewWidget, 0, 0, 1, 2);
+}
+
+void ObjectViewer::worldChanged()
+{
+	// Loade all of the IDEs.
+	for(std::map<std::string, std::string>::iterator it = world()->data->ideLocations.begin();
+		it != world()->data->ideLocations.end();
+		++it) {
+		world()->data->loadObjects(it->second);
+	}
+
+	if( objectList->model() )
+	{
+		delete objectList->model();
+	}
+
+	objectList->setModel(new ObjectListModel(world()->data, objectList));
+	connect(objectList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(showItem(QModelIndex)));
 }
 
 static std::map<ObjectInformation::ObjectClass, QString> gDataType =
@@ -85,26 +102,6 @@ void ObjectViewer::showItem(qint16 item)
 
 		previewWidget->showObject(item);
 	}
-}
-
-void ObjectViewer::showData(GameWorld *world)
-{
-	_world = world;
-
-	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = world->data->ideLocations.begin();
-		it != world->data->ideLocations.end();
-		++it) {
-		world->data->loadObjects(it->second);
-	}
-
-	if( objectList->model() )
-	{
-		delete objectList->model();
-	}
-
-	objectList->setModel(new ObjectListModel(world->data, objectList));
-	connect(objectList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(showItem(QModelIndex)));
 }
 
 void ObjectViewer::showItem(QModelIndex model)
