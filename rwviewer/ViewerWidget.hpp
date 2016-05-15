@@ -38,10 +38,12 @@ class ViewerWidget : public QGLWidget
 	
 	float viewDistance;
 	glm::vec2 viewAngles;
+	glm::vec3 viewPosition;
 	
 	bool dragging;
 	QPointF dstart;
 	glm::vec2 dastart;
+	bool moveFast;
 	
 	DrawBuffer* _frameWidgetDraw;
 	GeometryBuffer* _frameWidgetGeom;
@@ -83,10 +85,12 @@ signals:
 
 protected:
 	
-	virtual void mousePressEvent(QMouseEvent*);
-	virtual void mouseReleaseEvent(QMouseEvent*);
-    virtual void mouseMoveEvent(QMouseEvent*);
-    virtual void wheelEvent(QWheelEvent*);
+	void keyPressEvent(QKeyEvent*) override;
+	void keyReleaseEvent(QKeyEvent*) override;
+	void mousePressEvent(QMouseEvent*) override;
+	void mouseReleaseEvent(QMouseEvent*) override;
+	void mouseMoveEvent(QMouseEvent*) override;
+	void wheelEvent(QWheelEvent*) override;
 };
 
 #endif

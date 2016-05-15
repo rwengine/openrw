@@ -23,9 +23,7 @@ class ViewerWindow : public QMainWindow
 	enum ViewMode {
 		Object = 0,
 		Model = 1,
-#if 0
 		World = 2,
-#endif
 		_Count
 	};
 
@@ -35,6 +33,7 @@ class ViewerWindow : public QMainWindow
 	GameData* gameData;
 	GameWorld* gameWorld;
 	GameRenderer* renderer;
+	GameState* state;
 
 	/** Contains the OGL context */
 	ViewerWidget* viewerWidget;

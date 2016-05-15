@@ -4,6 +4,7 @@
 #include "views/WorldViewer.hpp"
 #include <ViewerWidget.hpp>
 
+#include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 
@@ -57,11 +58,9 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	m_views[ViewMode::Model]  = new ModelViewer(viewerWidget);
 	m_viewNames[ViewMode::Model] = "Model";
 
-#if 0
 	//------------- World Viewer
 	m_views[ViewMode::World] = new WorldViewer(viewerWidget);
 	m_viewNames[ViewMode::World] = "World";
-#endif
 
 	//------------- display mode switching
 	viewSwitcher = new QStackedWidget;
@@ -73,10 +72,14 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 		connect(this, SIGNAL(loadedData(GameWorld*)), viewer, SLOT(showData(GameWorld*)));
 
 		auto viewerButton = new QPushButton(m_viewNames[i].c_str());
-		signalMapper->setMapping(viewerButton, i++);
+		signalMapper->setMapping(m_views[i], i);
+		signalMapper->setMapping(viewerButton, i);
 		connect(viewerButton, SIGNAL(clicked()), signalMapper, SLOT(map()));
 		switchPanel->addWidget(viewerButton);
+		i++;
 	}
+	// Map world viewer loading placements to switch to the world viewer
+	connect(m_views[ViewMode::World], SIGNAL(placementsLoaded(QString)), signalMapper, SLOT(map()));
 
 	switchView(ViewMode::Object);
 
@@ -99,6 +102,9 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 
 	QMenu* anim = mb->addMenu("&Animation");
 	anim->addAction("Load &Animations", this, SLOT(openAnimations()));
+
+	QMenu* map = mb->addMenu("&Map");
+	map->addAction("Load IPL", m_views[ViewMode::World], SLOT(loadPlacements()));
 
 	this->setCentralWidget(mainwidget);
 
@@ -151,6 +157,7 @@ void ViewerWindow::loadGame(const QString &path)
 		gameData = new GameData( &engineLog, &work, gameDir.absolutePath().toStdString() );
 		gameWorld = new GameWorld( &engineLog, &work, gameData );
 		renderer = new GameRenderer(&engineLog, gameData );
+		gameWorld->state = new GameState;
 		viewerWidget->setRenderer(renderer);
 
 		gameWorld->data->load();

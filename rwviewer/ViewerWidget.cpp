@@ -16,11 +16,21 @@
 
 
 ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), gworld(nullptr), activeModel(nullptr),
-  selectedFrame(nullptr), dummyObject(nullptr), currentObjectID(0),
-  _lastModel(nullptr), canimation(nullptr), viewDistance(1.f), dragging(false),
-  _frameWidgetDraw(nullptr), _frameWidgetGeom(nullptr)
+	: QGLWidget(parent, shareWidget, f)
+	, gworld(nullptr)
+	, activeModel(nullptr)
+	, selectedFrame(nullptr)
+	, dummyObject(nullptr)
+	, currentObjectID(0)
+	, _lastModel(nullptr)
+	, canimation(nullptr)
+	, viewDistance(1.f)
+	, dragging(false)
+	, moveFast(false)
+	, _frameWidgetDraw(nullptr)
+	, _frameWidgetGeom(nullptr)
 {
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 struct WidgetVertex {
@@ -75,7 +85,7 @@ void ViewerWidget::paintGL()
 	
 	glViewport(0, 0, width(), height());
 	
-	if( gworld == nullptr ) return;
+	if( world() == nullptr ) return;
 
 	auto& r = *renderer;
 
@@ -86,35 +96,36 @@ void ViewerWidget::paintGL()
 		dummyObject->skeleton->interpolate(1.f);
 	}
 	
-	if(activeModel) {
-		gworld->_work->update();
+	gworld->_work->update();
 
-		r.getRenderer()->invalidate();
+	r.getRenderer()->invalidate();
 
-		Model* model = activeModel;
+	glEnable(GL_DEPTH_TEST);
 
-		if( model != _lastModel ) {
-			_lastModel = model;
-			emit modelChanged(_lastModel);
-		}
+	glm::mat4 m(1.f);
 
-		glEnable(GL_DEPTH_TEST);
-		
-		glm::mat4 m(1.f);
+	r.getRenderer()->useProgram(r.worldProg);
 
-		r.getRenderer()->useProgram(r.worldProg);
+	ViewCamera vc;
 
-		ViewCamera vc;
+	float viewFov = glm::radians(45.f);
 
-		float viewFov = glm::radians(45.f);
+	vc.frustum.far = 500.f;
+	vc.frustum.near = 0.1f;
+	vc.frustum.fov = viewFov;
+	vc.frustum.aspectRatio = width()/(height()*1.f);
 
-		vc.frustum.far = 500.f;
-		vc.frustum.near = 0.1f;
-		vc.frustum.fov = viewFov;
-		vc.frustum.aspectRatio = width()/(height()*1.f);
+	Model* model = activeModel;
+	if( model != _lastModel ) {
+		_lastModel = model;
+		emit modelChanged(_lastModel);
+	}
 
+	glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
+
+	if( model )
+	{
 		glm::mat4 proj = vc.frustum.projection();
-		glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y), cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 		glm::mat4 view = glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
 
 		r.getRenderer()->setSceneParameters({ proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f), glm::vec4(0.f), 90.f, vc.frustum.far });
@@ -122,13 +133,20 @@ void ViewerWidget::paintGL()
 		r.getRenderer()->invalidate();
 
 		r.setupRender();
-		if( model )
-		{
-			r.renderModel(model, m, dummyObject);
 
-			drawFrameWidget(model->frames[model->rootFrameIdx]);
-		}
+		r.renderModel(model, m, dummyObject);
+
+		drawFrameWidget(model->frames[model->rootFrameIdx]);
 		r.renderPostProcess();
+	}
+	else if (world()->allObjects.size() > 0)
+	{
+		vc.frustum.fov = glm::radians(90.f);
+		vc.frustum.far = 1000.f;
+		vc.position = viewPosition;
+		vc.rotation = glm::angleAxis(glm::half_pi<float>() + viewAngles.x, glm::vec3(0.f, 0.f, 1.f))
+					* glm::angleAxis(viewAngles.y, glm::vec3(0.f, 1.f, 0.f));
+		r.renderWorld(world(), vc, 0.f);
 	}
 }
 
@@ -242,6 +260,35 @@ void ViewerWidget::dataLoaded(GameWorld *world)
 void ViewerWidget::setRenderer(GameRenderer *render)
 {
 	renderer = render;
+}
+
+void ViewerWidget::keyPressEvent(QKeyEvent* e)
+{
+	if (e->key() == Qt::Key_Shift)
+		moveFast = true;
+
+	glm::vec3 movement;
+	if (e->key() == Qt::Key_W)
+		movement.y += moveFast ? 10.f : 1.f;
+	if (e->key() == Qt::Key_S)
+		movement.y -= moveFast ? 10.f : 1.f;
+	if (e->key() == Qt::Key_A)
+		movement.x -= moveFast ? 10.f : 1.f;
+	if (e->key() == Qt::Key_D)
+		movement.x += moveFast? 10.f : 1.f;
+
+	if (movement.length() > 0.f)
+	{
+		movement = (glm::angleAxis(viewAngles.x, glm::vec3(0.f, 0.f, 1.f))
+					* glm::angleAxis(viewAngles.y, glm::vec3(-1.f, 0.f, 0.f))) * movement;
+		viewPosition += movement;
+	}
+}
+
+void ViewerWidget::keyReleaseEvent(QKeyEvent* e)
+{
+	if (e->key() == Qt::Key_Shift)
+		moveFast = false;
 }
 
 Model* ViewerWidget::currentModel() const
