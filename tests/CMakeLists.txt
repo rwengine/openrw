@@ -1,3 +1,9 @@
+##############################################################################
+#    Unit Tests
+##############################################################################
+
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+
 set(TEST_SOURCES
 	"main.cpp"
 	"test_animation.cpp"
@@ -39,23 +45,21 @@ ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
 add_executable(run_tests ${TEST_SOURCES})
 
-include_directories(include)
-include_directories("${CMAKE_SOURCE_DIR}/tests")
+include_directories(
+	include
+	"${CMAKE_SOURCE_DIR}/tests"
+	"${CMAKE_SOURCE_DIR}/rwengine/include"
+	"${CMAKE_SOURCE_DIR}/rwgame")
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" "${CMAKE_SOURCE_DIR}/rwgame")
-include_directories(${BULLET_INCLUDE_DIR} SYSTEM)
+include_directories(SYSTEM
+	${BULLET_INCLUDE_DIR}
+	${SFML_INCLUDE_DIR})
 
 target_link_libraries(run_tests
 	rwengine
-	sfml-window
-	sfml-system
-	sfml-graphics
 	${OPENGL_LIBRARIES}
-	BulletDynamics
-	BulletCollision
-	LinearMath
+	${SFML_LIBRARIES}
+	${BULLET_LIBRARIES}
 	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 add_test(UnitTests run_tests)

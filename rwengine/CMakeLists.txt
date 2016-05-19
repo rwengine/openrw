@@ -11,13 +11,14 @@ add_library(rwengine
 
 target_link_libraries(rwengine
 	rwlib
-	sfml-window
-	sfml-audio
-	mad
+	${MAD_LIBRARY}
+	${SFML_LIBRARIES}
 	${OPENRW_PLATFORM_LIBS})
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
+	${MAD_INCLUDE_DIR}
+	${SFML_INCLUDE_DIR}
 	)
 
 include_directories(

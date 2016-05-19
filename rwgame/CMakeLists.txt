@@ -19,6 +19,7 @@ add_executable(rwgame
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
+	${SFML_INCLUDE_DIR}
 	)
 include_directories(
 	"${CMAKE_SOURCE_DIR}/rwengine/include"
@@ -26,10 +27,7 @@ include_directories(
 
 target_link_libraries( rwgame
 	rwengine
-	sfml-graphics
-	sfml-window
-	sfml-network
-	sfml-system
+	${SFML_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES})
 

@@ -1,10 +1,10 @@
 # OpenRW
 
-OpenRW is a re-implementation of Rockstar Games' Grand Theft Auto III, a classic 3D action
-game first published in 2001.
+OpenRW is an open source re-implementation of Rockstar Games' Grand Theft Auto III,
+a classic 3D action game first published in 2001.
 
-This project requires a legitimate copy of the original PC game data in order to run. Without
-this data it will not be possible to use openrw.
+OpenRW requires a legitimate copy of the original PC game data in order to run.
+Without this data it will not be possible to run openrw.
 
 ## Building
 
@@ -13,20 +13,21 @@ Dependencies:
 * Bullet
 * GLM (0.9.5+)
 * SFML (2.0+)
+* libmad
 * Boost Test
 
 Global Options:
 
-* BUILD_TESTS — Builds the test suite
-* BUILD_TOOLS — Builds the rwviewer application
-* BUILD\_OLD\_TOOLS – Builds old, unmaintained tools (datadump & analyzer)
+* BUILD_TESTS — Build the test suite
+* BUILD_VIEWER - Build the Qt GUI for viewing data
+* BUILD_SCRIPT_TOOL - Build the script dissassembler
 
 ### Recomended build
 
 ```
 $ mkdir build
 $ cd build
-$ cmake ../
+$ cmake ../ -DCMAKE_BUILD_TYPE=Release
 ```
 
 ## Running
@@ -44,7 +45,9 @@ This is the game binary
 
 ### rwviewer
 
-This Qt application enables viewing of the game data files and models.
+This is a Qt tool for opening the game data. It currently supports  looking at
+objects and their models, and a primitive world viewer. It needs more work to
+be useful for looking inside archives and viewing textures.
 
 ## Documentation
 
