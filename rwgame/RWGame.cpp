@@ -794,9 +794,18 @@ void RWGame::globalKeyEvent(const sf::Event& event)
 	case sf::Keyboard::F3:
 		showDebugPhysics = ! showDebugPhysics;
 		break;
-	case sf::Keyboard::F12:
-		window.capture().saveToFile("/home/dan/screenshot.png");
+	case sf::Keyboard::F12: {
+		auto homedir = getenv("HOME");
+		if( homedir == nullptr ) {
+			std::cerr << "Unable to determine home directory for screenshot" << std::endl;
+			break;
+		}
+
+		std::string savePath(homedir);
+		std::string path = savePath+"/screenshot.png";
+		window.capture().saveToFile(path);
 		break;
+	}
 	default: break;
 	}
 }
