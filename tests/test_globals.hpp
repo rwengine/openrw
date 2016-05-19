@@ -12,7 +12,17 @@
 
 std::ostream& operator<<( std::ostream& stream, glm::vec3 const& v );
 
-namespace boost { namespace test_tools {
+// Boost moved the print_log_value struct in version 1.59
+// TODO: use another testing library
+#if BOOST_VERSION >= 105900
+	#define BOOST_NS_MAGIC namespace tt_detail {
+	#define BOOST_NS_MAGIC_CLOSING }
+#else
+	#define BOOST_NS_MAGIC
+	#define BOOST_NS_MAGIC_CLOSING
+#endif
+
+namespace boost { namespace test_tools { BOOST_NS_MAGIC
 template<>
 struct print_log_value<glm::vec3> {
 	void operator()( std::ostream& s , glm::vec3 const& v )
@@ -20,9 +30,9 @@ struct print_log_value<glm::vec3> {
 		s << glm::to_string(v);
 	}
 };
-}}
+}} BOOST_NS_MAGIC_CLOSING
 
-namespace boost { namespace test_tools {
+namespace boost { namespace test_tools { BOOST_NS_MAGIC
 template<>
 struct print_log_value<std::nullptr_t> {
 	void operator()( std::ostream& s , std::nullptr_t )
@@ -30,7 +40,10 @@ struct print_log_value<std::nullptr_t> {
 		s << "nullptr";
 	}
 };
-}}
+}} BOOST_NS_MAGIC_CLOSING
+
+#undef BOOST_NS_MAGIC
+#undef BOOST_NS_MAGIC_CLOSING
 
 class Global
 {
