@@ -32,6 +32,10 @@ else ()
 	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()
 
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
+endif()
+
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 

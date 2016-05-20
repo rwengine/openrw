@@ -30,7 +30,7 @@
  */
 std::string findPathRealCase(const std::string& base, const std::string& path) 
 {
-#ifdef __unix__
+#ifndef _WIN32
 	size_t endslash = path.find("/");
 	bool isDirectory = true;
 	if(endslash == path.npos) {

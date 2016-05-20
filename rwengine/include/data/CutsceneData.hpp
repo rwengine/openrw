@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <vector>
+#include <string>
 
 /**
  * @brief Stores data from .CUT files
