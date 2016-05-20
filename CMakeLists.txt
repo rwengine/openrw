@@ -24,6 +24,12 @@ option(ENABLE_PROFILING "Enable detailed profiling metrics")
 # Build configuration
 #
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_definitions(-DRW_LINUX=1)
+else ()
+	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
+endif ()
+
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 
@@ -45,6 +51,9 @@ find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(SFML 2 COMPONENTS system window audio graphics network REQUIRED)
 find_package(MAD REQUIRED)
+
+# External-internal dependencies
+add_subdirectory(cmake/external)
 
 #
 # Components

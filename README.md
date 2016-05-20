@@ -32,14 +32,19 @@ $ cmake ../ -DCMAKE_BUILD_TYPE=Release
 
 ## Running
 
-Once compiled, set the environment variable `OPENRW_GAME_PATH` to the directory containing "gta3.exe" and run the rwgame executable.
-
 ### rwgame
 
-This is the game binary
+This is the game binary. Before running the game a config file is needed, by default
+the game will look for ``~/.config/OpenRW/openrw.ini``, which should look like:
+
+```
+[game]
+path=/opt/games/Grand Theft Auto 3/        ; Game data path
+```
+Eventually the game will write this for you, but currently it must be done by
+hand.
 
 * Options:
-    * env: OPENRW\_GAME\_PATH, must be set to the folder containing "gta3.exe"
     * -w **n**, -h **n** sets initial window size
     * --newgame starts a new game automatically
 

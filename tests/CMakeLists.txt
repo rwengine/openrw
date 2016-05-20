@@ -12,6 +12,7 @@ set(TEST_SOURCES
 	"test_character.cpp"
 	"test_chase.cpp"
 	"test_cutscene.cpp"
+	"test_config.cpp"
 	"test_data.cpp"
 	"test_FileIndex.cpp"
 	"test_GameData.cpp"
@@ -39,6 +40,9 @@ set(TEST_SOURCES
 	"test_weapon.cpp"
 	"test_worker.cpp"
 	"test_world.cpp"
+
+	# Hack in rwgame sources until there's a per-target test suite
+	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
 	)
 
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
@@ -57,6 +61,7 @@ include_directories(SYSTEM
 
 target_link_libraries(run_tests
 	rwengine
+	inih
 	${OPENGL_LIBRARIES}
 	${SFML_LIBRARIES}
 	${BULLET_LIBRARIES}

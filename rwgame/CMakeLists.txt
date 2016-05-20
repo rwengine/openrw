@@ -3,6 +3,9 @@ add_executable(rwgame
 
 	RWGame.cpp
 
+	GameConfig.hpp
+	GameConfig.cpp
+
 	State.cpp
 
 	loadingstate.cpp
@@ -27,6 +30,7 @@ include_directories(
 
 target_link_libraries( rwgame
 	rwengine
+	inih
 	${SFML_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES})
