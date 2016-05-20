@@ -1,9 +1,8 @@
 #ifndef _LIBRW_DEFINES_HPP_
 #define _LIBRW_DEFINES_HPP_
 
-#include <iostream>
-
 #if RW_DEBUG
+#include <iostream>
 #define RW_MESSAGE(msg) \
 	std::cout << __FILE__ << ":"<< __LINE__ << ": " << msg << std::endl
 #define RW_ERROR(msg) \
