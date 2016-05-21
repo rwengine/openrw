@@ -1,6 +1,6 @@
 #include "GameConfig.hpp"
-#include <rw/defines.hpp>
 #include <cstring>
+#include <rw/defines.hpp>
 
 #include <ini.h>
 
@@ -41,7 +41,7 @@ bool GameConfig::isValid()
 
 std::string GameConfig::getDefaultConfigPath()
 {
-#if RW_LINUX
+#if defined(RW_LINUX) || defined(RW_OSX)
 	char* config_home = getenv("XDG_CONFIG_HOME");
 	if (config_home != nullptr) {
 		return std::string(config_home) + "/" + kConfigDirectoryName;
