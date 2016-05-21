@@ -15,6 +15,13 @@
 #include <objects/CutsceneObject.hpp>
 #include <items/InventoryItem.hpp>
 
+constexpr float kDrawDistanceFactor = 1.0f;
+constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
+#if 0 // There's no distance based culling for these types of objects yet
+constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
+constexpr float kPedestrianDrawDistanceFactor = kDrawDistanceFactor;
+#endif
+
 RenderKey createKey(bool transparent, float normalizedDepth, Renderer::Textures& textures)
 {
 	return ((transparent?0x1:0x0) << 31)
@@ -193,6 +200,7 @@ void renderInstance(GameWorld* world,
 	auto matrixModel = instance->getTimeAdjustedTransform(renderAlpha);
 
 	float mindist = glm::length(instance->getPosition()-camera.position) - instance->model->resource->getBoundingRadius();
+	mindist *= 1.f / kDrawDistanceFactor;
 
 	Model* model = nullptr;
 	ModelFrame* frame = nullptr;
