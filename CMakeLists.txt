@@ -48,15 +48,20 @@ ENDIF()
 IF(${ENABLE_SCRIPT_DEBUG})
 	add_definitions(-DSCM_DEBUG_INSTRUCTIONS)
 ENDIF()
-
-# Find dependancies
-IF(APPLE)
-	set(OPENRW_PLATFORM_LIBS iconv)
-ENDIF()
 find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(SFML 2 COMPONENTS system window audio graphics network REQUIRED)
 find_package(MAD REQUIRED)
+find_package(GLM REQUIRED)
+
+
+
+# Find dependancies
+IF(APPLE)
+	set(OPENRW_PLATFORM_LIBS iconv)
+	include_directories("${GLM_INCLUDE_DIRS}")
+ENDIF()
+
 
 # External-internal dependencies
 add_subdirectory(cmake/external)
@@ -78,4 +83,3 @@ ENDIF()
 IF(${BUILD_TESTS})
 	add_subdirectory(tests)
 ENDIF()
-
