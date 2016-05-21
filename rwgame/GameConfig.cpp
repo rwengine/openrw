@@ -1,6 +1,7 @@
 #include "GameConfig.hpp"
 #include <rw/defines.hpp>
 #include <cstring>
+#include <cstdlib>
 
 #include <ini.h>
 
@@ -50,12 +51,19 @@ std::string GameConfig::getDefaultConfigPath()
 	if (home != nullptr) {
 		return std::string(home) + "/.config/" + kConfigDirectoryName;
 	}
-	// Well now we're stuck.
-	RW_ERROR("No default config path found.");
-	return ".";
+
+#elif RW_OSX
+	char* home = getenv("HOME");
+	if (home)
+		return std::string(home) + "/Library/Preferences/" + kConfigDirectoryName;
+
 #else
 #error Dont know how to find default config path
 #endif
+
+	// Well now we're stuck.
+	RW_ERROR("No default config path found.");
+	return ".";
 }
 
 int GameConfig::handler(void* user,
