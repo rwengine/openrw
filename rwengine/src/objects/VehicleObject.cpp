@@ -46,6 +46,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			bool front = connection.y() > 0;
 			btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
 			wi.m_suspensionRestLength1 = restLength;
+			wi.m_raycastInfo.m_suspensionLength = 0.f;
 
 			wi.m_maxSuspensionForce = info->handling.mass * 9.f;
 			wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
