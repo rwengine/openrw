@@ -537,7 +537,9 @@ void GameWorld::destroyObject(GameObject* object)
 
 void GameWorld::destroyObjectQueued(GameObject *object)
 {
-	deletionQueue.insert(object);
+	RW_CHECK(object != nullptr, "destroying a null object?");
+	if (object)
+		deletionQueue.insert(object);
 }
 
 void GameWorld::destroyQueuedObjects()

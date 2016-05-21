@@ -911,6 +911,7 @@ template <class Tobject>
 void game_destroy_object(const ScriptArguments& args)
 {
 	auto object = args.getObject<Tobject>(0);
+	RW_CHECK(object != nullptr, "destroying a null object?");
 	
 	args.getWorld()->destroyObjectQueued(object);
 }
