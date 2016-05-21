@@ -81,6 +81,8 @@ public:
 	void tickPhysics(float dt);
 	
 	bool isFlipped() const;
+
+	float getVelocity() const;
 	
 	void ejectAll();
 	

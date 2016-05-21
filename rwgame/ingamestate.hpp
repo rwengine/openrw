@@ -27,6 +27,9 @@ class IngameState : public State
 	/** Timer to hold user camera position */
 	float autolookTimer;
 	CameraMode camMode;
+
+	/// Current camera yaw and pitch
+	glm::vec2 m_cameraAngles;
 public:
     /**
      * @brief IngameState

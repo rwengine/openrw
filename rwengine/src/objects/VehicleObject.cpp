@@ -365,6 +365,14 @@ bool VehicleObject::isFlipped() const
 	return up.z <= -0.1f;
 }
 
+float VehicleObject::getVelocity() const
+{
+	if (physVehicle) {
+		return (physVehicle->getCurrentSpeedKmHour()*1000.f)/(60.f*60.f);
+	}
+	return 0.f;
+}
+
 void VehicleObject::setSteeringAngle(float a)
 {
 	steerAngle = a;
