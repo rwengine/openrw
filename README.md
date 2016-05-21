@@ -47,6 +47,13 @@ hand.
 * Options:
     * -w **n**, -h **n** sets initial window size
     * --newgame starts a new game automatically
+* Controls:
+    * W/A/S/D: Move
+    * Shift: Sprint
+    * Space: Jump
+    * F: Enter/Exit Vehicle
+    * Mouse Wheel: Cycle weapons
+    * Mouse 1: Fire Weapon
 
 ### rwviewer
 
