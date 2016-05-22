@@ -24,7 +24,7 @@ public:
 	bool isValid();
 
 	const std::string& getGameDataPath() const { return m_gamePath; }
-	const bool getInputInvertY() const { return m_inputInvertY; }
+	bool getInputInvertY() const { return m_inputInvertY; }
 
 private:
 	static std::string getDefaultConfigPath();
