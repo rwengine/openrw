@@ -21,8 +21,13 @@ const float kMaxRotationRate = glm::half_pi<float>();
 const float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
 
 IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
-    : State(game), started(false), newgame(newgame), save(save),
-	autolookTimer(0.f), camMode(IngameState::CAMERA_NORMAL), m_cameraAngles { 0.f, glm::half_pi<float>() }
+	: State(game)
+	, started(false)
+	, save(save)
+	, newgame(newgame)
+	, autolookTimer(0.f)
+	, camMode(IngameState::CAMERA_NORMAL)
+	, m_cameraAngles { 0.f, glm::half_pi<float>() }
 {
 }
 
@@ -113,26 +118,22 @@ void IngameState::tick(float dt)
 	auto player = game->getPlayer();
 	if( player && player->isInputEnabled() )
 	{
-		sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
-		sf::Vector2f deltaMouse = (mousePos - screenCenter);
-		mouseMove = sf::Vector2f(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
-		sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
-		if(deltaMouse.x != 0 || deltaMouse.y != 0)
-		{
-			autolookTimer = kAutoLookTime;
-			m_cameraAngles += glm::vec2(mouseMove.x, mouseMove.y)
-			m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
-		}
-		}
-
 		sf::Vector2f screenSize(getWindow().getSize());
 		sf::Vector2f screenCenter(screenSize / 2.f);
 		sf::Vector2f mouseMove;
 		if (game->hasFocus())
-
 		{
-			
-			m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
+			sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
+			sf::Vector2f deltaMouse = (mousePos - screenCenter);
+			mouseMove = sf::Vector2f(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
+			sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
+
+			if(deltaMouse.x != 0 || deltaMouse.y != 0)
+			{
+				autolookTimer = kAutoLookTime;
+				m_cameraAngles += glm::vec2(mouseMove.x, mouseMove.y);
+				m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
+			}
 		}
 
 		float viewDistance = 4.f;
@@ -199,7 +200,6 @@ void IngameState::tick(float dt)
 				}
 				m_cameraAngles.x += glm::sign(rotation) * std::min(kMaxRotationRate * dt, glm::abs(rotation));
 			}
-			
 		}
 
 		// Non-topdown camera can orbit
@@ -211,7 +211,6 @@ void IngameState::tick(float dt)
 			auto cameraOffset =
 					yaw * pitch * glm::vec3(0.f, 0.f, viewDistance);
 			cameraPosition = targetPosition + cameraOffset;
-			
 		}
 		else
 		{
