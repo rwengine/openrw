@@ -83,6 +83,11 @@ public:
 		return script;
 	}
 
+	const GameConfig& getConfig() const
+	{
+		return config;
+	}
+
 	bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object = nullptr)
 	{
 		auto vc = nextCam;

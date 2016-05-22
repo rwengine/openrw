@@ -11,6 +11,7 @@ GameConfig::GameConfig(const std::string& configName, const std::string& configP
 	: m_configName(configName)
 	, m_configPath(configPath)
 	, m_valid(false)
+	, m_inputInvertY(false)
 {
 	if (m_configPath.empty())
 	{
@@ -77,6 +78,10 @@ int GameConfig::handler(void* user,
 	if (MATCH("game", "path"))
 	{
 		self->m_gamePath = value;
+	}
+	else if (MATCH("input", "invert_y"))
+	{
+		self->m_inputInvertY = atoi(value) > 0;
 	}
 	else
 	{

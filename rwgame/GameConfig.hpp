@@ -24,6 +24,7 @@ public:
 	bool isValid();
 
 	const std::string& getGameDataPath() const { return m_gamePath; }
+	const bool getInputInvertY() const { return m_inputInvertY; }
 
 private:
 	static std::string getDefaultConfigPath();
@@ -38,6 +39,9 @@ private:
 
 	/// Path to the game data
 	std::string m_gamePath;
+
+	/// Invert the y axis for camera control.
+	bool m_inputInvertY;
 };
 
 #endif

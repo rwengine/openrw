@@ -40,6 +40,9 @@ the game will look for ``~/.config/OpenRW/openrw.ini``, which should look like:
 ```
 [game]
 path=/opt/games/Grand Theft Auto 3/        ; Game data path
+
+[input]
+invert_y=0                                 ; Invert camera Y
 ```
 Eventually the game will write this for you, but currently it must be done by
 hand.
