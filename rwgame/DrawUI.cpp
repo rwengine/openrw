@@ -21,7 +21,7 @@ const glm::u8vec3 ui_moneyColour(89, 113, 147);
 const glm::u8vec3 ui_healthColour(187, 102, 47);
 const glm::u8vec3 ui_armourColour(123, 136, 93);
 const glm::u8vec3 ui_shadowColour(0, 0, 0);
-const float ui_mapSize = 150.f;
+const float ui_mapSize = 1.f;
 const float ui_worldSizeMin = 200.f;
 const float ui_worldSizeMax = 300.f;
 
