@@ -4,17 +4,15 @@ OpenRW is an open source re-implementation of Rockstar Games' Grand Theft Auto I
 a classic 3D action game first published in 2001.
 
 OpenRW requires a legitimate copy of the original PC game data in order to run.
-Without this data it will not be possible to run openrw.
+Without this data it will not be possible to run OpenRW.
 
 ## Building
 
 Dependencies:
 
-* Bullet
-* GLM (0.9.5+)
-* SFML (2.0+)
-* libmad
-* Boost Test
+Ubuntu/Debian:
+`build-essential git cmake libbullet-dev libboost-dev libboost-test-dev libglm-dev libsfml-dev libmad0-dev
+`
 
 Global Options:
 
