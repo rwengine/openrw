@@ -185,6 +185,7 @@ void OpenGLRenderer::uploadUBO<OpenGLRenderer::ObjectUniformData>(GLuint buffer,
 OpenGLRenderer::OpenGLRenderer()
 	: currentDbuff(nullptr)
 	, currentProgram(nullptr)
+	, currentUBO(0)
 	, maxObjectEntries(0)
 	, currentObjectEntry(0)
 	, entryAlignment(0)

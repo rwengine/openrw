@@ -106,7 +106,7 @@ struct TextVertex
 };
 
 TextRenderer::TextInfo::TextInfo()
-: font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left)
+: font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left), wrapX(0)
 {
 
 }
