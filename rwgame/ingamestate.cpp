@@ -15,19 +15,11 @@
 #include <script/ScriptMachine.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 
-constexpr float kAutoLookTime = 2.f;
-constexpr float kAutolookMinVelocity = 0.2f;
-const float kMaxRotationRate = glm::half_pi<float>();
+#define AUTOLOOK_TIME 2.f
 const float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
-
 IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
-	: State(game)
-	, started(false)
-	, save(save)
-	, newgame(newgame)
-	, autolookTimer(0.f)
-	, camMode(IngameState::CAMERA_NORMAL)
-	, m_cameraAngles { 0.f, glm::half_pi<float>() }
+    : State(game), started(false), newgame(newgame), save(save),
+	autolookTimer(0.f), camMode(IngameState::CAMERA_NORMAL)
 {
 }
 
@@ -116,24 +108,21 @@ void IngameState::tick(float dt)
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 
 	auto player = game->getPlayer();
-	if( player && player->isInputEnabled() )
+	if( player && player->isInputEnabled() && game->hasFocus() )
 	{
+		float qpi = glm::half_pi<float>();
+
 		sf::Vector2f screenSize(getWindow().getSize());
 		sf::Vector2f screenCenter(screenSize / 2.f);
-		sf::Vector2f mouseMove;
-		if (game->hasFocus())
+		sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
+		sf::Vector2f deltaMouse = (mousePos - screenCenter);
+		sf::Vector2f mouseMove(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
+		sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
+		
+		if(deltaMouse.x != 0 || deltaMouse.y != 0)
 		{
-			sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
-			sf::Vector2f deltaMouse = (mousePos - screenCenter);
-			mouseMove = sf::Vector2f(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
-			sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
-
-			if(deltaMouse.x != 0 || deltaMouse.y != 0)
-			{
-				autolookTimer = kAutoLookTime;
-				m_cameraAngles += glm::vec2(mouseMove.x, mouseMove.y);
-				m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
-			}
+			autolookTimer = AUTOLOOK_TIME;
+			m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
 		}
 
 		float viewDistance = 4.f;
@@ -183,34 +172,18 @@ void IngameState::tick(float dt)
 			lookTargetPosition.z += (vehicle->info->handling.dimensions.z);
 			targetPosition.z += (vehicle->info->handling.dimensions.z * 2.f);
 			physTarget = vehicle->physBody;
-			m_cameraAngles.y = glm::half_pi<float>();
-
-			// Rotate the camera to the ideal angle if the player isn't moving it
-			float velocity = vehicle->getVelocity();
-			if (autolookTimer <= 0.f && glm::abs(velocity) > kAutolookMinVelocity)
-			{
-				auto idealAngle = -glm::roll(vehicle->getRotation()) - glm::half_pi<float>();
-				if (velocity < 0.f) {
-					idealAngle = glm::mod(idealAngle - glm::pi<float>(), glm::pi<float>() * 2.f);
-				}
-				float currentAngle = glm::mod(m_cameraAngles.x, glm::pi<float>()*2);
-				float rotation = idealAngle - currentAngle;
-				if (glm::abs(rotation) > glm::pi<float>()) {
-					rotation -= glm::sign(rotation) * glm::pi<float>()*2.f;
-				}
-				m_cameraAngles.x += glm::sign(rotation) * std::min(kMaxRotationRate * dt, glm::abs(rotation));
-			}
 		}
 
 		// Non-topdown camera can orbit
 		if( camMode != IngameState::CAMERA_TOPDOWN )
 		{
-			// Determine the "ideal" camera position for the current view angles
-			auto yaw = glm::angleAxis(m_cameraAngles.x, glm::vec3(0.f, 0.f,-1.f));
-			auto pitch = glm::angleAxis(m_cameraAngles.y, glm::vec3(0.f,-1.f, 0.f));
-			auto cameraOffset =
-					yaw * pitch * glm::vec3(0.f, 0.f, viewDistance);
-			cameraPosition = targetPosition + cameraOffset;
+			// Rotate the cameraPosition vector around targetPosition by the mouse movement
+			auto camtotarget = targetPosition - cameraPosition;
+			float camAngle = glm::atan(camtotarget.y, camtotarget.x);
+			glm::quat epsilon( glm::vec3( 0.f, 0.f, camAngle) );
+			glm::quat theta( glm::vec3(0.f, 0.f, -mouseMove.x) );
+			glm::quat rho( epsilon * glm::vec3(0.f, mouseMove.y, 0.f) );
+			cameraPosition = targetPosition - (theta * (rho * camtotarget));
 		}
 		else
 		{
