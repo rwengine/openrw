@@ -94,6 +94,7 @@ RWGame::RWGame(int argc, char* argv[])
 
 	sf::ContextSettings cs;
 	cs.depthBits = 32;
+	cs.stencilBits = 8;
 	window.create(sf::VideoMode(w, h), "",  style, cs);
 	window.setMouseCursorVisible(false);
 
