@@ -11,7 +11,7 @@ Without this data it will not be possible to run openrw.
 Dependencies:
 
 * Bullet
-* GLM (0.9.5+)
+* GLM (0.9.7+)
 * SFML (2.0+)
 * libmad
 * Boost Test
