@@ -1,7 +1,8 @@
 #include <engine/GameState.hpp>
 
 GameState::GameState()
-	: gameTime(0.f)
+	: basic{}
+	, gameTime(0.f)
 	, currentProgress(0)
 	, maxProgress(1)
 	, maxWantedLevel(0)
