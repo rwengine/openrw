@@ -46,7 +46,7 @@ else()
 ENDIF()
 
 IF(${ENABLE_SCRIPT_DEBUG})
-	add_definitions(-DSCM_DEBUG_INSTRUCTIONS)
+	add_definitions(-DRW_SCRIPT_DEBUG)
 ENDIF()
 
 # Find dependancies

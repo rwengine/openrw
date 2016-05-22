@@ -19,6 +19,7 @@ GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const
 {
 	auto playerId = parameters->at(player).integerValue();
 	PlayerController* controller = getWorld()->players.at( playerId );
+	RW_CHECK(controller != nullptr, "No controller for player " << player);
 	return controller->getCharacter();
 }
 
@@ -30,31 +31,41 @@ template<> GameObject* ScriptArguments::getObject< PlayerController >(unsigned i
 template<> GameObject* ScriptArguments::getObject< CharacterObject >(unsigned int arg) const
 {
 	auto gameObjectID = parameters->at(arg).integerValue();
-	return getWorld()->pedestrianPool.find( gameObjectID );
+	auto object = getWorld()->pedestrianPool.find( gameObjectID );
+	RW_CHECK(object != nullptr, "No pedestrian for ID " << gameObjectID);
+	return object;
 }
 
 template<> GameObject* ScriptArguments::getObject< CutsceneObject >(unsigned int arg) const
 {
 	auto gameObjectID = parameters->at(arg).integerValue();
-	return getWorld()->cutscenePool.find( gameObjectID );
+	auto object = getWorld()->cutscenePool.find( gameObjectID );
+	RW_CHECK(object != nullptr, "No cutscene object for ID " << gameObjectID);
+	return object;
 }
 
 template<> GameObject* ScriptArguments::getObject< InstanceObject >(unsigned int arg) const
 {
 	auto gameObjectID = parameters->at(arg).integerValue();
-	return getWorld()->instancePool.find( gameObjectID );
+	auto object = getWorld()->instancePool.find( gameObjectID );
+	RW_CHECK(object != nullptr, "No instance for ID " << gameObjectID);
+	return object;
 }
 
 template<> GameObject* ScriptArguments::getObject< PickupObject >(unsigned int arg) const
 {
 	auto gameObjectID = parameters->at(arg).integerValue();
-	return getWorld()->pickupPool.find( gameObjectID );
+	auto object = getWorld()->pickupPool.find( gameObjectID );
+	RW_CHECK(object != nullptr, "No pickup for ID " << gameObjectID);
+	return object;
 }
 
 template<> GameObject* ScriptArguments::getObject< VehicleObject >(unsigned int arg) const
 {
 	auto gameObjectID = parameters->at(arg).integerValue();
-	return getWorld()->vehiclePool.find( gameObjectID );
+	auto object = getWorld()->vehiclePool.find( gameObjectID );
+	RW_CHECK(object != nullptr, "No pedestrian for ID " << gameObjectID);
+	return object;
 }
 
 /*GameObject* ScriptArguments::getGameObject(unsigned int arg) const
