@@ -114,7 +114,7 @@ void IngameState::exit()
 void IngameState::tick(float dt)
 {
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
-
+//CAMERA CONTROLS HERE
 	auto player = game->getPlayer();
 	if( player && player->isInputEnabled() )
 	{
@@ -183,7 +183,7 @@ void IngameState::tick(float dt)
 			lookTargetPosition.z += (vehicle->info->handling.dimensions.z);
 			targetPosition.z += (vehicle->info->handling.dimensions.z * 1.f);
 			physTarget = vehicle->physBody;
-			m_cameraAngles.y = glm::half_pi<float>();
+			
 
 			// Rotate the camera to the ideal angle if the player isn't moving it
 			float velocity = vehicle->getVelocity();
@@ -434,5 +434,3 @@ const ViewCamera &IngameState::getCamera()
 {
 	return _look;
 }
-
-
