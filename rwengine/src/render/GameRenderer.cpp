@@ -455,7 +455,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		renderLetterbox();
 	}
 
-#if 0 // Disable while warnings are fixed
 	float fadeTimer = world->getGameTime() - world->state->fadeStart;
 	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
@@ -486,8 +485,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-#endif
-	
+
 	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
