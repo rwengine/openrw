@@ -58,7 +58,7 @@ find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(SFML 2 COMPONENTS system window audio graphics network REQUIRED)
 find_package(MAD REQUIRED)
-find_package(GLM REQUIRED)
+find_package(glm REQUIRED CONFIG)
 
 include_directories("${GLM_INCLUDE_DIRS}")
 
