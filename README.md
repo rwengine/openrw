@@ -16,6 +16,10 @@ Dependencies:
 * libmad
 * Boost Test
 
+Mac users should install Xcode and those packages from Homebrew:
+
+brew install boost bullet glm mad sfml
+
 Global Options:
 
 * BUILD_TESTS — Build the test suite
