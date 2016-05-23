@@ -17,6 +17,8 @@ PauseState::PauseState(RWGame* game)
 void PauseState::enter()
 {
 	getWorld()->setPaused(true);
+
+	game->getWindow().setMouseCursorVisible(true);
 }
 
 void PauseState::exit()

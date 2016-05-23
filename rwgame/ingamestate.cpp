@@ -107,6 +107,8 @@ void IngameState::enter()
 		}
 		started = true;
 	}
+
+	game->getWindow().setMouseCursorVisible(false);
 }
 
 void IngameState::exit()
