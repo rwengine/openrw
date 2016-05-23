@@ -20,6 +20,10 @@ Dependencies:
 * libmad
 * Boost Test
 
+On Ubuntu these can be installed with
+
+`sudo apt-get install libbullet-dev libsfml-dev libmad0-dev libglm-dev`
+
 Mac users should install Xcode and those packages from Homebrew:
 
 brew install boost bullet glm mad sfml
