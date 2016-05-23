@@ -136,12 +136,13 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	// Ignore vertical axis for the sake of simplicity.
 	if( glm::length(glm::vec2(targetDirection)) < 0.1f ) {
 		character->setPosition(glm::vec3(glm::vec2(target), cpos.z));
+		controller->setMoveDirection({0.f, 0.f, 0.f});
 		character->controller->setRunning(false);
 		return true;
 	}
 
-	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-	character->rotation = r;
+	float hdg = atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
+	character->setHeading(glm::degrees(hdg));
 
 	controller->setMoveDirection({1.f, 0.f, 0.f});
 	controller->setRunning(sprint);
