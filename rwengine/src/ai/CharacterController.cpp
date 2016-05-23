@@ -165,6 +165,9 @@ bool Activities::Jump::update(CharacterObject* character, CharacterController* c
 
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {
+	constexpr float kSprintToEnterDistance = 5.f;
+	constexpr float kGiveUpDistance = 100.f;
+
 	RW_UNUSED(controller);
 
 	// Boats don't have any kind of entry animation unless you're onboard.
@@ -234,7 +237,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			// Warp character to vehicle orientation
 			character->controller->setMoveDirection({0.f, 0.f, 0.f});
 			character->controller->setRunning(false);
-			character->rotation = vehicle->getRotation();
+			character->setHeading(
+						glm::degrees(glm::roll(vehicle->getRotation())));
 			
 			// Determine if the door open animation should be skipped.
 			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f ) )
@@ -247,12 +251,15 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 				character->playActivityAnimation(anm_open, false, true);
 			}
 		}
+		else if (targetDistance > kGiveUpDistance) {
+			return true;
+		}
 		else {
-			if( targetDistance > 5.f ) {
+			if( targetDistance > kSprintToEnterDistance ) {
 				character->controller->setRunning(true);
 			}
-			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-			character->rotation = r;
+			character->setHeading(
+						glm::degrees(atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>()));
 			character->controller->setMoveDirection({1.f, 0.f, 0.f});
 		}
 	}
