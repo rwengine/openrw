@@ -116,6 +116,11 @@ void CharacterController::setMoveDirection(const glm::vec3 &movement)
 	character->setMovement(movement);
 }
 
+void CharacterController::setLookDirection(const glm::vec2 &look)
+{
+	character->setLook(look);
+}
+
 void CharacterController::setRunning(bool run)
 {
 	character->setRunning(run);
@@ -324,6 +329,9 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 
 	// Instant hit weapons loop their anim
 	// Thrown projectiles have lob / throw.
+
+	// Update player direction
+	character->setRotation(glm::angleAxis(character->getLook().x, glm::vec3{0.f, 0.f, 1.f}));
 
 	if( wepdata->fireType == WeaponData::INSTANT_HIT ) {
 		if( _item->isFiring(character) ) {

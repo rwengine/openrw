@@ -101,6 +101,7 @@ private:
 	void destroyActor();
 
 	glm::vec3 movement;
+	glm::vec2 m_look;
 
 	bool running;
 	bool jumped;
@@ -188,6 +189,8 @@ public:
 
 	void setMovement(const glm::vec3& _m) { movement = _m; }
 	const glm::vec3& getMovement() const { return movement; }
+	void setLook(const glm::vec2& look) { m_look = look; }
+	const glm::vec2& getLook() const { return m_look; }
 
 	/**
 	 * @brief playActivityAnimation Plays an animation for an activity.

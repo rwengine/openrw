@@ -105,6 +105,7 @@ public:
 	CharacterObject* getCharacter() const;
 
 	void setMoveDirection(const glm::vec3& movement);
+	void setLookDirection(const glm::vec2& look);
 
 	void setRunning(bool run);
 	

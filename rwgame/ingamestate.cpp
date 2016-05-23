@@ -271,11 +271,7 @@ void IngameState::tick(float dt)
 				{
 					player->setMoveDirection(glm::vec3(0.f));
 				}
-				if (player->getCharacter()->canTurn())
-				{
-					player->getCharacter()->rotation =
-							glm::angleAxis(movementAngle, glm::vec3(0.f, 0.f, 1.f));
-				}
+				player->setLookDirection({movementAngle, 0.f});
 			}
 		}
 		else

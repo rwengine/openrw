@@ -314,6 +314,10 @@ void CharacterObject::updateCharacter(float dt)
 
 		position = getPosition();
 
+		if (canTurn()) {
+			rotation = glm::angleAxis(m_look.x, glm::vec3{0.f, 0.f, 1.f});
+		}
+
 		walkDir = rotation * walkDir;
 
 		if( jumped )
@@ -523,7 +527,7 @@ bool CharacterObject::isOnGround() const
 
 bool CharacterObject::canTurn() const
 {
-	return isOnGround() && !jumped && isAlive();
+	return isOnGround() && !jumped && isAlive() && controller->getCurrentActivity() == nullptr;
 }
 
 void CharacterObject::setJumpSpeed(float speed)
