@@ -1,7 +1,6 @@
 #include "render/TextRenderer.hpp"
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
-#include <boost/concept_check.hpp>
 
 /// @todo This is very rough
 int charToIndex(char g)
