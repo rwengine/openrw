@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 void FileIndex::indexDirectory(const std::string& directory)
@@ -19,8 +20,17 @@ void FileIndex::indexDirectory(const std::string& directory)
 		realName = ep->d_name;
 		lowerName = realName;
 		std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-		if ( ep->d_type == DT_REG )
-		{
+		bool isRegularFile = false;
+		if (ep->d_type != DT_UNKNOWN) {
+			isRegularFile = ep->d_type == DT_REG;
+		} else {
+			std::string filepath = directory +"/"+ realName;
+			struct stat filedata;
+			if (stat(filepath.c_str(), &filedata) == 0) {
+				isRegularFile = S_ISREG(filedata.st_mode);
+			}
+		}
+		if (isRegularFile) {
 			files[ lowerName ] = {
 				lowerName,
 				realName,
@@ -43,10 +53,20 @@ void FileIndex::indexTree(const std::string& root)
 	}
 	while( (ep = readdir(dp)) )
 	{
-		if( ep->d_type == DT_DIR && ep->d_name[0] != '.' )
-		{
-			std::string path = root + "/" + ep->d_name;
-			indexTree(path);
+		std::string filepath = root +"/"+ ep->d_name;
+
+		bool isDirectory = false;
+		if (ep->d_type != DT_UNKNOWN) {
+			isDirectory = ep->d_type == DT_DIR;
+		} else {
+			struct stat filedata;
+			if (stat(filepath.c_str(), &filedata) == 0) {
+				isDirectory = S_ISDIR(filedata.st_mode);
+			}
+		}
+
+		if (isDirectory && ep->d_name[0] != '.') {
+			indexTree(filepath);
 		}
 	}
 	closedir(dp);
