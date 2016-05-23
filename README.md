@@ -3,8 +3,12 @@
 OpenRW is an open source re-implementation of Rockstar Games' Grand Theft Auto III,
 a classic 3D action game first published in 2001.
 
+* IRC: #openrw @ chat.freenode.net
+
+Check out the [FAQ](https://github.com/rwengine/openrw/wiki/FAQ) and the rest of the [wiki](https://github.com/rwengine/openrw/wiki). Report any bugs by creating an [issue](https://github.com/rwengine/openrw/issues).
+
 OpenRW requires a legitimate copy of the original PC game data in order to run.
-Without this data it will not be possible to run openrw.
+Without this data it will not be possible to run OpenRW.
 
 ## Building
 
