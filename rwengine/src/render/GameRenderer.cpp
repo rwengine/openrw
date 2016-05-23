@@ -521,8 +521,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 	{
 		Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
-		bool abortTransparent = false;
-
 		Renderer::DrawParameters dp;
 
 		dp.colour = {255, 255, 255, 255};
@@ -548,9 +546,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 				}
 				if( tex )
 				{
-					if( tex->isTransparent() ) {
-						abortTransparent = true;
-					}
 					dp.textures = {tex->getName()};
 				}
 			}
@@ -571,23 +566,11 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 
 			dp.colour.a *= opacity;
 
-			if( dp.colour.a < 255 ) {
-				abortTransparent = true;
-			}
-
 			dp.diffuse = mat.diffuseIntensity;
 			dp.ambient = mat.ambientIntensity;
 		}
 
-		if( abortTransparent ) {
-			transparentDrawQueue.push_back(
-				{model, g, sg, modelMatrix, dp, object}
-			);
-		}
-		else {
-			
-			renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
-		}
+		renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
 	}
 }
 

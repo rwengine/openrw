@@ -74,9 +74,6 @@ class GameRenderer
 	 */
 	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent = true);
 
-	/** Transparent objects are queued into this list */
-	std::vector<RQueueEntry> transparentDrawQueue;
-
 	// Temporary variables used during rendering
 	float _renderAlpha;
 	GameWorld* _renderWorld;
