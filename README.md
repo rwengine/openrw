@@ -10,71 +10,10 @@ Check out the [FAQ](https://github.com/rwengine/openrw/wiki/FAQ) and the rest of
 OpenRW requires a legitimate copy of the original PC game data in order to run.
 Without this data it will not be possible to run OpenRW.
 
-## Building
+## Getting Started
 
-Dependencies:
-
-* Bullet
-* GLM (0.9.7+)
-* SFML (2.0+)
-* libmad
-* Boost Test
-
-Mac users should install Xcode and those packages from Homebrew:
-
-brew install boost bullet glm mad sfml
-
-Global Options:
-
-* BUILD_TESTS — Build the test suite
-* BUILD_VIEWER - Build the Qt GUI for viewing data
-* BUILD_SCRIPT_TOOL - Build the script dissassembler
-
-### Recomended build
-
-```
-$ mkdir build
-$ cd build
-$ cmake ../ -DCMAKE_BUILD_TYPE=Release
-```
-
-## Running
-
-### rwgame
-
-This is the game binary. Before running the game a config file is needed, by default
-the game will look for ``~/.config/OpenRW/openrw.ini``, which should look like:
-
-```
-[game]
-path=/opt/games/Grand Theft Auto 3/        ; Game data path
-
-[input]
-invert_y=0                                 ; Invert camera Y
-```
-Eventually the game will write this for you, but currently it must be done by
-hand.
-
-* Options:
-    * -w **n**, -h **n** sets initial window size
-    * --newgame starts a new game automatically
-* Controls:
-    * W/A/S/D: Move
-    * Shift: Sprint
-    * Space: Jump
-    * F: Enter/Exit Vehicle
-    * Mouse Wheel: Cycle weapons
-    * Mouse 1: Fire Weapon
-
-### rwviewer
-
-This is a Qt tool for opening the game data. It currently supports  looking at
-objects and their models, and a primitive world viewer. It needs more work to
-be useful for looking inside archives and viewing textures.
-
-## Documentation
-
-Run Doxygen on the included Doxyfile to generate documentation.
+ * [Getting Started](https://github.com/rwengine/openrw/wiki/Getting-Started)
+ * [FAQ](https://github.com/rwengine/openrw/wiki/FAQ)
 
 ## License
 
