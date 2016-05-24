@@ -153,6 +153,7 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 bool Activities::Jump::update(CharacterObject* character, CharacterController* controller)
 {
 	RW_UNUSED(controller);
+	if (character->physCharacter == nullptr) return true;
 
 	if( !jumped )
 	{
