@@ -23,12 +23,6 @@ public:
 	
 private:
 
-	struct PlayingSound
-	{
-		sf::Sound sound;
-		sf::SoundBuffer buffer;
-	};
-
 	class SoundSource
 	{
 		friend class SoundManager;
@@ -65,7 +59,6 @@ private:
 	ALCdevice* alDevice;
 
 	std::map<std::string, Sound> sounds;
-	std::vector<PlayingSound> sounds;
 	
 	sf::SoundStream* backgroundNoise;
 
