@@ -298,13 +298,32 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		return true;
 	}
 
+	bool isDriver = vehicle->isOccupantDriver(character->getCurrentSeat());
+
+	// If the vehicle is going too fast, slow down
+	if (isDriver)
+	{
+		if (!vehicle->canOccupantExit())
+		{
+			vehicle->setBraking(1.f);
+			return false;
+		}
+	}
+
 	if( character->animator->getAnimation(AnimIndexAction) == anm_exit ) {
 		if( character->animator->isCompleted(AnimIndexAction) ) {
 			auto exitpos = vehicle->getSeatEntryPosition(seat);
 
 			character->enterVehicle(nullptr, seat);
 			character->setPosition(exitpos);
-			
+
+			if (isDriver)
+			{
+				// Apply the handbrake
+				vehicle->setHandbraking(true);
+				vehicle->setThrottle(0.f);
+			}
+
 			return true;
 		}
 	}

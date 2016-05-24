@@ -10,6 +10,7 @@
 #include <engine/GameData.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
+constexpr float kVehicleMaxExitVelocity = 0.15f;
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
@@ -447,6 +448,17 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 	else {
 		seatOccupants[seat] = occupant;
 	}
+}
+
+bool VehicleObject::canOccupantExit() const
+{
+	return getVelocity() <= kVehicleMaxExitVelocity;
+}
+
+bool VehicleObject::isOccupantDriver(size_t seat) const
+{
+	// This isn't true for all vehicles, but it'll do until we figure it out
+	return seat == 0;
 }
 
 VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat)
