@@ -4,6 +4,8 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#include <map>
+#include <string>
 #include <vector>
 #include <SFML/Audio.hpp>
 
@@ -49,11 +51,19 @@ private:
 		ALuint buffer;
 	};
 
+	struct Sound
+	{
+		SoundSource source;
+		SoundBuffer buffer;
+		bool isLoaded = false;
+	};
+
 	bool initializeOpenAL();
 
 	ALCcontext* alContext;
 	ALCdevice* alDevice;
 
+	std::map<std::string, Sound> sounds;
 	std::vector<PlayingSound> sounds;
 	
 	sf::SoundStream* backgroundNoise;
