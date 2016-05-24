@@ -57,7 +57,24 @@ bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource)
 SoundManager::SoundManager()
 : backgroundNoise(nullptr)
 {
+	initializeOpenAL();
+}
 
+bool SoundManager::initializeOpenAL()
+{
+	alDevice = alcOpenDevice(NULL);
+	if ( ! alDevice) {
+		std::cerr << "Could not find OpenAL device!" << std::endl;
+		return false;
+	}
+
+	alContext = alcCreateContext(alDevice, NULL);
+	if ( ! alContext) {
+		std::cerr << "Could not create OpenAL context!" << std::endl;
+		return false;
+	}
+
+	return true;
 }
 
 bool SoundManager::playBackground(const std::string& fileName)

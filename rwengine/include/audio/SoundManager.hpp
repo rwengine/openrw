@@ -49,6 +49,11 @@ private:
 		ALuint buffer;
 	};
 
+	bool initializeOpenAL();
+
+	ALCcontext* alContext;
+	ALCdevice* alDevice;
+
 	std::vector<PlayingSound> sounds;
 	
 	sf::SoundStream* backgroundNoise;
