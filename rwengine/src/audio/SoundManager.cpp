@@ -1,6 +1,7 @@
 #include <audio/SoundManager.hpp>
 #include <audio/MADStream.hpp>
 
+#include <array>
 #include <iostream>
 
 void checkALerror(const std::string& file, unsigned int line);
@@ -75,6 +76,20 @@ bool SoundManager::initializeOpenAL()
 	}
 
 	return true;
+}
+
+bool SoundManager::loadSound(const std::string& name, const std::string& fileName)
+{
+	auto emplaced = sounds.emplace(name, Sound{});
+	if ( ! emplaced.second) {
+		return false;
+	}
+	Sound& sound = emplaced.first->second;
+
+	sound.source.loadFromFile(fileName);
+	sound.isLoaded = sound.buffer.bufferData(sound.source);
+
+	return sound.isLoaded;
 }
 
 bool SoundManager::playBackground(const std::string& fileName)
