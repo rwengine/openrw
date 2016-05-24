@@ -11,6 +11,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRW_DEBUG=1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread -Wextra -Wpedantic")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 
+set(RW_VERBOSE_DEBUG_MESSAGES 1 CACHE BOOL "Print verbose debugging messages")
+
 # Optional components
 option(BUILD_TESTS "Build test suite")
 option(BUILD_VIEWER "Build GUI data viewer")
@@ -48,6 +50,12 @@ ENDIF()
 IF(${ENABLE_SCRIPT_DEBUG})
 	add_definitions(-DRW_SCRIPT_DEBUG)
 ENDIF()
+
+if(${RW_VERBOSE_DEBUG_MESSAGES})
+	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=1)
+else()
+	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=0)
+endif()
 
 # Find dependancies
 IF(APPLE)
