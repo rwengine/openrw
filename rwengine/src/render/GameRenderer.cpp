@@ -30,6 +30,12 @@
 #include <core/Profiler.hpp>
 
 const size_t skydomeSegments = 8, skydomeRows = 10;
+constexpr uint32_t kMissingTextureBytes[] = {
+	0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
+	0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
+	0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
+	0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
+};
 
 struct WaterVertex {
 	static const AttributeList vertex_attributes() {
@@ -109,7 +115,13 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 		GameShaders::DefaultPostProcess::FragmentShader);
 
 	glGenVertexArrays( 1, &vao );
-	
+
+	glGenTextures(1, &m_missingTexture);
+	glBindTexture(GL_TEXTURE_2D, m_missingTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, kMissingTextureBytes);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	glGenFramebuffers(1, &framebufferName);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
 	glGenTextures(2, fbTextures);
@@ -323,14 +335,14 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 	RW_PROFILE_BEGIN("Build");
 
+	ObjectRenderer objectRenderer(_renderWorld,
+					  (cullOverride ? cullingCamera : _camera),
+					  _renderAlpha,
+					  getMissingTexture());
+
 	// World Objects
 	for (auto object : world->allObjects) {
-		ObjectRenderer::buildRenderList(
-					_renderWorld,
-					object,
-					(cullOverride ? cullingCamera : _camera),
-					_renderAlpha,
-					renderList);
+		objectRenderer.buildRenderList(object, renderList);
 	}
 	RW_PROFILE_END();
 

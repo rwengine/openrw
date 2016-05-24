@@ -91,6 +91,9 @@ class GameRenderer
 	GLuint fbRenderBuffers[1];
 	Renderer::ShaderProgram* postProg;
 
+	/// Texture used to replace textures missing from the data
+	GLuint m_missingTexture;
+
 public:
 	
 	GameRenderer(Logger* log, GameData* data);
@@ -117,6 +120,8 @@ public:
 	GeometryBuffer cylinderGeometry;
 
 	GameData* getData() const { return data; }
+
+	GLuint getMissingTexture() const { return m_missingTexture; }
 
     /**
 	 * Renders the world using the parameters of the passed Camera.
