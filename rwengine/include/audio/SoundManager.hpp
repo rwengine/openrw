@@ -15,6 +15,7 @@ public:
 	SoundManager();
 	
 	bool loadSound(const std::string& name, const std::string& fileName);
+	bool isLoaded(const std::string& name);
 	void playSound(const std::string& fileName);
 	
 	bool playBackground(const std::string& fileName);

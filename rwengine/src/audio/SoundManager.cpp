@@ -91,6 +91,14 @@ bool SoundManager::loadSound(const std::string& name, const std::string& fileNam
 
 	return sound.isLoaded;
 }
+bool SoundManager::isLoaded(const std::string& name)
+{
+	if (sounds.find(name) != sounds.end()) {
+		return sounds[name].isLoaded;
+	}
+
+	return false;
+}
 
 bool SoundManager::playBackground(const std::string& fileName)
 {
