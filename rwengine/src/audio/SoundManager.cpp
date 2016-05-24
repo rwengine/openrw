@@ -28,6 +28,32 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename)
 	}
 }
 
+SoundManager::SoundBuffer::SoundBuffer()
+{
+	alCheck(alGenSources(1, &source));
+	alCheck(alGenBuffers(1, &buffer));
+
+	alCheck(alSourcef(source, AL_PITCH, 1));
+	alCheck(alSourcef(source, AL_GAIN, 1));
+	alCheck(alSource3f(source, AL_POSITION, 0, 0, 0));
+	alCheck(alSource3f(source, AL_VELOCITY, 0, 0, 0));
+	alCheck(alSourcei(source, AL_LOOPING, AL_FALSE));
+}
+
+bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource)
+{
+	alCheck(alBufferData(
+		buffer,
+		soundSource.fileInfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+		&soundSource.data.front(),
+		soundSource.data.size() * sizeof(uint16_t),
+		soundSource.fileInfo.samplerate
+	));
+	alCheck(alSourcei(source, AL_BUFFER, buffer));
+
+	return true;
+}
+
 SoundManager::SoundManager()
 : backgroundNoise(nullptr)
 {

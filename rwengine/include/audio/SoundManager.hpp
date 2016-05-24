@@ -29,12 +29,24 @@ private:
 	class SoundSource
 	{
 		friend class SoundManager;
+		friend class SoundBuffer;
 	public:
 		void loadFromFile(const std::string& filename);
 	private:
 		SF_INFO fileInfo;
 		SNDFILE* file;
 		std::vector<uint16_t> data;
+	};
+
+	class SoundBuffer
+	{
+		friend class SoundManager;
+	public:
+		SoundBuffer();
+		bool bufferData(SoundSource& soundSource);
+	private:
+		ALuint source;
+		ALuint buffer;
 	};
 
 	std::vector<PlayingSound> sounds;
