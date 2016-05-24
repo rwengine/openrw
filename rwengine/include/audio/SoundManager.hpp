@@ -62,7 +62,5 @@ private:
 	ALCdevice* alDevice;
 
 	std::map<std::string, Sound> sounds;
-	
-	sf::SoundStream* backgroundNoise;
-
+	std::string backgroundNoise;
 };

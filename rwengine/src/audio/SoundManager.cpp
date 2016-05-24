@@ -56,7 +56,6 @@ bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource)
 }
 
 SoundManager::SoundManager()
-: backgroundNoise(nullptr)
 {
 	initializeOpenAL();
 }
@@ -124,36 +123,22 @@ bool SoundManager::isPlaying(const std::string& name)
 
 bool SoundManager::playBackground(const std::string& fileName)
 {
-	if( backgroundNoise )
-	{
-		delete backgroundNoise;
-	}
-	
-	sf::Music* bg = new sf::Music;
-	
-	if( bg->openFromFile( fileName ) )
-	{
-		backgroundNoise = bg;
-		backgroundNoise->setLoop(true);
-		bg->play();
+	if (this->loadSound(fileName, fileName)) {
+		backgroundNoise = fileName;
+		this->playSound(fileName);
 		return true;
 	}
-	
-	delete bg;
+
 	return false;
 }
 
 void SoundManager::pause(bool p)
 {
-	if( backgroundNoise )
-	{
-		if( p )
-		{
-			backgroundNoise->pause();
-		}
-		else
-		{
-			backgroundNoise->play();
+	if (backgroundNoise.length() > 0) {
+		if (p) {
+			pauseSound(backgroundNoise);
+		} else {
+			playSound(backgroundNoise);
 		}
 	}
 }
