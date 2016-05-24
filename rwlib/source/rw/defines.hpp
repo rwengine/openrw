@@ -6,7 +6,7 @@
 	#define RW_MESSAGE(msg) \
 		std::cout << __FILE__ << ":"<< __LINE__ << ": " << msg << std::endl
 	#define RW_ERROR(msg) \
-		std::cout << __FILE__ << ":"<< __LINE__ << ": " << msg << std::endl
+		std::cerr << __FILE__ << ":"<< __LINE__ << ": " << msg << std::endl
 	#define RW_CHECK(cond, msg) \
 		if(!(cond)) RW_ERROR(msg)
 #else
