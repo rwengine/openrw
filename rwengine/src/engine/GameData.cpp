@@ -517,34 +517,23 @@ bool GameData::loadAudioStream(const std::string &name)
 	return result;
 }
 
-bool GameData::loadAudioClip(const std::string& name)
+bool GameData::loadAudioClip(const std::string& name, const std::string& fileName)
 {
-	auto fname = findPathRealCase(datpath + "/audio/", name);
+	auto filePath = findPathRealCase(datpath + "/audio/", fileName);
 	
-	if ( engine->missionAudio )
-	{
-		delete engine->missionAudio;
-		engine->missionAudio = nullptr;
-	}
-	
-	if ( name.find(".mp3") != name.npos )
+	if (fileName.find(".mp3") != fileName.npos)
 	{
 		logger->error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
-	
-	engine->missionAudio = new sf::SoundBuffer;
-	
-	bool r = engine->missionAudio->loadFromFile(fname);
-	
-	if (! r )
-	{
-		logger->error("Data", "Error loading audio clip " + fname);
-		delete engine->missionAudio;
-		engine->missionAudio = nullptr;
+
+	bool loaded = engine->sound.loadSound(name, filePath);
+
+	if ( ! loaded) {
+		logger->error("Data", "Error loading audio clip "+ filePath);
 	}
-	
-	return r;
+
+	return loaded;
 }
 
 void GameData::loadSplash(const std::string &name)

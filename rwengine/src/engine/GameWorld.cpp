@@ -78,7 +78,7 @@ public:
 
 GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 	: logger(log), data(dat), randomEngine(rand()),
-	  _work( work ), cutsceneAudio(nullptr), missionAudio(nullptr),
+	  _work( work ), cutsceneAudio(nullptr),
 	  paused(false)
 {
 	data->engine = this;

@@ -308,7 +308,7 @@ public:
 
 	sf::SoundStream* cutsceneAudio;
 	bool cutsceneAudioLoaded;
-	sf::SoundBuffer* missionAudio;
+	std::string missionAudio;
 	sf::Sound missionSound;
 
 	/**
