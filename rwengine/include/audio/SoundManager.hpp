@@ -1,4 +1,9 @@
 #pragma once
+
+#include <sndfile.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+
 #include <vector>
 #include <SFML/Audio.hpp>
 
