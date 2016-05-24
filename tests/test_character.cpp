@@ -83,6 +83,33 @@ BOOST_AUTO_TEST_CASE(test_activities)
 
 		BOOST_CHECK_EQUAL( vehicle, character->getCurrentVehicle() );
 
+		controller->setNextActivity( new Activities::ExitVehicle( ) );
+
+		for(float t = 0.f; t < 9.0f; t+=(1.f/60.f)) {
+			character->tick(1.f/60.f);
+			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
+		}
+
+		BOOST_CHECK_EQUAL( nullptr, character->getCurrentVehicle() );
+
+		character->setPosition(glm::vec3(5.f, 0.f, 0.f));
+		controller->setNextActivity( new Activities::EnterVehicle( vehicle, 0 ) );
+
+		for(float t = 0.f; t < 0.5f; t+=(1.f/60.f)) {
+			character->tick(1.f/60.f);
+			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
+		}
+
+		BOOST_CHECK_EQUAL( nullptr, character->getCurrentVehicle() );
+		controller->skipActivity();
+
+		for(float t = 0.f; t < 5.0f; t+=(1.f/60.f)) {
+			character->tick(1.f/60.f);
+			Global::get().e->dynamicsWorld->stepSimulation(1.f/60.f);
+		}
+
+		BOOST_CHECK_EQUAL( nullptr, character->getCurrentVehicle() );
+
 		Global::get().e->destroyObject(character);
 		delete controller;
 	}

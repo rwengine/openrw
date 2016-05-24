@@ -26,6 +26,12 @@ public:
 
 		virtual std::string name() const = 0;
 
+		/**
+		 * @brief canSkip
+		 * @return true if the activity can be skipped.
+		 */
+		virtual bool canSkip(CharacterObject*, CharacterController*) const { return false; }
+
 		virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
 	};
 	
@@ -74,12 +80,12 @@ public:
 
 	virtual ~CharacterController() { }
 
-	Activity* getCurrentActivity() { return _currentActivity; }
+	Activity* getCurrentActivity() const { return _currentActivity; }
 
-	Activity* getNextActivity() { return _nextActivity; }
+	Activity* getNextActivity() const { return _nextActivity; }
 
 	/**
-	 * @brief skipActivity Cancel the current activity, immediatley.
+	 * @brief skipActivity Cancel the current activity immediatley, if possible.
 	 */
 	void skipActivity();
 
@@ -89,6 +95,13 @@ public:
 	 * @param position
 	 */
 	void setNextActivity( Activity* activity );
+
+	/**
+	 * @brief IsCurrentActivity
+	 * @param activity Name of activity to check for
+	 * @return if the given activity is the current activity
+	 */
+	bool isCurrentActivity(const std::string& activity) const;
 	
 	/**
 	 * @brief update Updates the controller.
@@ -117,7 +130,8 @@ public:
 };
 
 #define DECL_ACTIVITY( activity_name ) \
-	std::string name() const { return #activity_name; }
+	static constexpr auto ActivityName = #activity_name; \
+	std::string name() const { return ActivityName; }
 
 // TODO: Refactor this with an ugly macro to reduce code dup.
 class WeaponItem;
@@ -138,6 +152,8 @@ namespace Activities {
 			: target( target ), sprint(_sprint) {}
 
 		bool update(CharacterObject* character, CharacterController* controller);
+
+		bool canSkip(CharacterObject *, CharacterController *) const { return true; }
 	};
 	
 	struct Jump : public CharacterController::Activity
@@ -165,6 +181,8 @@ namespace Activities {
 
 		EnterVehicle( VehicleObject* vehicle, int seat = 0 )
 			: vehicle( vehicle ), seat( seat ), entering(false) {}
+
+		bool canSkip(CharacterObject* character, CharacterController*) const override;
 
 		bool update(CharacterObject *character, CharacterController *controller);
 	};

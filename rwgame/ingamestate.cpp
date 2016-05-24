@@ -396,6 +396,13 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 			if( player->getCharacter()->getCurrentVehicle()) {
 				player->exitVehicle();
 			}
+			else
+				if (player->isCurrentActivity(
+							Activities::EnterVehicle::ActivityName))
+			{
+				// Give up entering a vehicle if we're alreadying doing so
+				player->skipActivity();
+			}
 			else {
 				player->enterNearestVehicle();
 			}

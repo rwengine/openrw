@@ -7,6 +7,18 @@
 #include <items/WeaponItem.hpp>
 #include <rw/defines.hpp>
 
+CharacterController::CharacterController(CharacterObject* character)
+	: character(character)
+	, _currentActivity(nullptr)
+	, _nextActivity(nullptr)
+	, vehicleIdle(0.f)
+	, currentGoal(None)
+	, leader(nullptr)
+	, targetNode(nullptr)
+{
+	character->controller = this;
+}
+
 bool CharacterController::updateActivity()
 {
 	if( _currentActivity ) {
@@ -22,21 +34,13 @@ void CharacterController::setActivity(CharacterController::Activity* activity)
 	_currentActivity = activity;
 }
 
-CharacterController::CharacterController(CharacterObject* character)
-	: character(character)
-	, _currentActivity(nullptr)
-	, _nextActivity(nullptr)
-	, vehicleIdle(0.f)
-	, currentGoal(None)
-	, leader(nullptr)
-	, targetNode(nullptr)
-{
-	character->controller = this;
-}
-
 void CharacterController::skipActivity()
 {
-	setActivity(nullptr);
+	// Some activities can't be cancelled, such as the final phase of entering a vehicle
+	// or jumping.
+	if (getCurrentActivity() != nullptr &&
+			getCurrentActivity()->canSkip(character, this))
+		setActivity(nullptr);
 }
 
 void CharacterController::setNextActivity(CharacterController::Activity* activity)
@@ -49,6 +53,12 @@ void CharacterController::setNextActivity(CharacterController::Activity* activit
 		if(_nextActivity) delete _nextActivity;
 		_nextActivity = activity;
 	}
+}
+
+bool CharacterController::isCurrentActivity(const std::string& activity) const
+{
+	if (getCurrentActivity() == nullptr) return false;
+	return getCurrentActivity()->name() == activity;
 }
 
 void CharacterController::update(float dt)
@@ -168,6 +178,12 @@ bool Activities::Jump::update(CharacterObject* character, CharacterController* c
 	}
 	
 	return false;
+}
+
+bool Activities::EnterVehicle::canSkip(CharacterObject *character, CharacterController *) const
+{
+	// If we're already inside the vehicle, it can't helped.
+	return character->getCurrentVehicle() == nullptr;
 }
 
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
