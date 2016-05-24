@@ -105,6 +105,12 @@ void SoundManager::playSound(const std::string& name)
 		alSourcePlay(sounds[name].buffer.source);
 	}
 }
+void SoundManager::pauseSound(const std::string& name)
+{
+	if (sounds.find(name) != sounds.end()) {
+		alSourcePause(sounds[name].buffer.source);
+	}
+}
 bool SoundManager::isPlaying(const std::string& name)
 {
 	if (sounds.find(name) != sounds.end()) {
