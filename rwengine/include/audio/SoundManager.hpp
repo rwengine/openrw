@@ -16,7 +16,7 @@ public:
 	
 	bool loadSound(const std::string& name, const std::string& fileName);
 	bool isLoaded(const std::string& name);
-	void playSound(const std::string& fileName);
+	void playSound(const std::string& name);
 	
 	bool playBackground(const std::string& fileName);
 	

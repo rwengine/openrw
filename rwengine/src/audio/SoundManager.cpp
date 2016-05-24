@@ -99,6 +99,12 @@ bool SoundManager::isLoaded(const std::string& name)
 
 	return false;
 }
+void SoundManager::playSound(const std::string& name)
+{
+	if (sounds.find(name) != sounds.end()) {
+		alSourcePlay(sounds[name].buffer.source);
+	}
+}
 
 bool SoundManager::playBackground(const std::string& fileName)
 {
