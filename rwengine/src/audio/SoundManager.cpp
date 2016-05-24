@@ -11,6 +11,23 @@ void checkALerror(const std::string& file, unsigned int line);
 	#define alCheck(stmt) stmt
 #endif
 
+void SoundManager::SoundSource::loadFromFile(const std::string& filename)
+{
+	fileInfo.format = 0;
+	file = sf_open(filename.c_str(), SFM_READ, &fileInfo);
+
+	if (file) {
+		size_t numRead = 0;
+		std::array<int16_t, 4096> readBuffer;
+
+		while ((numRead = sf_read_short(file, readBuffer.data(), readBuffer.size())) != 0) {
+			data.insert(data.end(), readBuffer.begin(), readBuffer.begin() + numRead);
+		}
+	} else {
+		std::cerr << "Error opening sound file \"" << filename << "\": " << sf_strerror(file) << std::endl;
+	}
+}
+
 SoundManager::SoundManager()
 : backgroundNoise(nullptr)
 {
