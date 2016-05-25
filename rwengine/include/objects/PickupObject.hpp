@@ -58,6 +58,7 @@ public:
 	
 	bool isCollected() const { return m_collected; }
 
+	PickupType getPickupType() const { return m_type; }
 
 private:
 	btPairCachingGhostObject* m_ghost;

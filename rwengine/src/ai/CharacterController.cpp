@@ -370,8 +370,16 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	// Update player direction
 	character->setRotation(glm::angleAxis(character->getLook().x, glm::vec3{0.f, 0.f, 1.f}));
 
+	RW_CHECK(wepdata->inventorySlot < maxInventorySlots, "Inventory slot out of bounds");
+	auto& itemState = character->getCurrentState().weapons[wepdata->inventorySlot];
+	if (itemState.bulletsClip == 0 && itemState.bulletsTotal > 0) {
+		itemState.bulletsClip += std::min(int(itemState.bulletsTotal), wepdata->clipSize);
+		itemState.bulletsTotal -= itemState.bulletsClip;
+	}
+	bool hasammo = itemState.bulletsClip > 0;
+
 	if( wepdata->fireType == WeaponData::INSTANT_HIT ) {
-		if( _item->isFiring(character) ) {
+		if( _item->isFiring(character) && hasammo ) {
 
 			auto shootanim = character->engine->data->animations[wepdata->animation1];
 			if( shootanim ) {
@@ -386,6 +394,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 				auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 				if( currID >= firetime && ! _fired ) {
+					itemState.bulletsClip --;
 					_item->fire(character);
 					_fired = true;
 				}
@@ -402,7 +411,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 		}
 	}
 	/// @todo Use Thrown flag instead of project (RPG isn't thrown eg.)
-	else if( wepdata->fireType == WeaponData::PROJECTILE ) {
+	else if( wepdata->fireType == WeaponData::PROJECTILE && hasammo ) {
 		auto shootanim = character->engine->data->animations[wepdata->animation1];
 		auto throwanim = character->engine->data->animations[wepdata->animation2];
 
@@ -416,6 +425,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 			if( currID >= firetime && !_fired ) {
+				itemState.bulletsClip --;
 				_item->fire(character);
 				_fired = true;
 			}
@@ -429,6 +439,11 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	}
 	else if( wepdata->fireType == WeaponData::MELEE ) {
 		RW_CHECK(wepdata->fireType != WeaponData::MELEE, "Melee attacks not implemented");
+		return true;
+	}
+	else
+	{
+		RW_ERROR("Unrecognized fireType: " << wepdata->fireType);
 		return true;
 	}
 
