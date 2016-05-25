@@ -41,16 +41,13 @@ void IngameState::startTest()
 
 	getWorld()->state->playerObject = playerChar->getGameObjectID();
 
-	/*auto bat = new WeaponItem(getWorld()->data.weaponData["ak47"]);
-	_playerCharacter->addToInventory(bat);
-	_playerCharacter->setActiveItem(bat->getInventorySlot());*/
-
 	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
 	for(int i = 1; i < maxInventorySlots; ++i) {
 		ItemPickup* pickup =
 					new ItemPickup(
 						getWorld(),
 						itemspawn,
+						PickupObject::OnStreet,
 						getWorld()->getInventoryItem(i));
 		getWorld()->pickupPool.insert(pickup);
 		getWorld()->allObjects.push_back(pickup);

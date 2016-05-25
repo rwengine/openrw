@@ -18,9 +18,9 @@
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/GenericPickup.hpp>
+#include <objects/ItemPickup.hpp>
 #include <core/Logger.hpp>
+#include <items/InventoryItem.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -801,12 +801,31 @@ void game_create_pickup(const ScriptArguments& args)
 		args.getWorld()->data->loadTXD(data->textureName+".txd");
 	}
 	
+	PickupObject* pickup = nullptr;
+
+	if ( id >= 170 && id <= 184 )
+	{
+		// Find the item for this model ID
+		auto world = args.getWorld();
+		InventoryItem *item = nullptr;
+		for (auto i = 0; i < maxInventorySlots; ++i)
+		{
+			item = world->getInventoryItem(i);
+			if (item->getModelID() == id) {
+				auto pickuptype = (PickupObject::PickupType)type;
+				pickup = new ItemPickup(args.getWorld(), pos, pickuptype, item);
+				world->pickupPool.insert( pickup );
+				world->allObjects.push_back(pickup);
+				*args[5].globalInteger = pickup->getGameObjectID();
+			}
+		}
+	}
+	else
+	{
+		RW_UNIMPLEMENTED("non-item pickups");
+		*args[5].globalInteger = 0;
+	}
 	
-	auto pickup = new GenericPickup(args.getWorld(), pos, id, type);
-	
-	args.getWorld()->pickupPool.insert( pickup );
-	
-	*args[5].globalInteger = pickup->getGameObjectID();
 }
 
 bool game_is_pickup_collected(const ScriptArguments& args)

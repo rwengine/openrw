@@ -12,7 +12,7 @@ public:
 	bool picked_up = false;
 
 	TestPickup(GameWorld* engine, const glm::vec3& position)
-		: PickupObject(engine, position, 0)
+		: PickupObject(engine, position, 0, OnStreet)
 	{}
 
 	bool onCharacterTouch(CharacterObject *character) {
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup)
 		auto item = Global::get().e->getInventoryItem(3);
 		BOOST_REQUIRE(item != nullptr);
 
-		ItemPickup* p = new ItemPickup(Global::get().e, { 30.f, 0.f, 0.f }, item );
+		ItemPickup* p = new ItemPickup(Global::get().e, { 30.f, 0.f, 0.f }, PickupObject::OnStreet, item);
 
 		Global::get().e->allObjects.push_back(p);
 
