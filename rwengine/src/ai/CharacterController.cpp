@@ -21,7 +21,7 @@ CharacterController::CharacterController(CharacterObject* character)
 
 bool CharacterController::updateActivity()
 {
-	if( _currentActivity ) {
+	if( _currentActivity && character->isAlive() ) {
 		return _currentActivity->update(character, this);
 	}
 
