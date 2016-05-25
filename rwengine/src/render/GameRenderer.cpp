@@ -303,7 +303,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		glm::vec4(skyBottom, 1.f),
 		glm::vec4(camera.position, 0.f),
 		weather.fogStart,
-		camera.frustum.far
+		_camera.frustum.far
 	};
 
 	renderer->setSceneParameters(sceneParams);
