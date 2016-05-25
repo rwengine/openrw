@@ -27,9 +27,11 @@ option(ENABLE_PROFILING "Enable detailed profiling metrics")
 #
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DRW_LINUX=1)
+	add_definitions(-DRW_LINUX)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_definitions(-DRW_OSX=1)
+	add_definitions(-DRW_OSX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+	add_definitions(-DRW_FREEBSD)
 else ()
 	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()

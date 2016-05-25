@@ -43,7 +43,7 @@ bool GameConfig::isValid()
 
 std::string GameConfig::getDefaultConfigPath()
 {
-#if RW_LINUX
+#if defined(RW_LINUX) || defined(RW_FREEBSD)
 	char* config_home = getenv("XDG_CONFIG_HOME");
 	if (config_home != nullptr) {
 		return std::string(config_home) + "/" + kConfigDirectoryName;
@@ -53,7 +53,7 @@ std::string GameConfig::getDefaultConfigPath()
 		return std::string(home) + "/.config/" + kConfigDirectoryName;
 	}
 
-#elif RW_OSX
+#elif defined(RW_OSX)
 	char* home = getenv("HOME");
 	if (home)
 		return std::string(home) + "/Library/Preferences/" + kConfigDirectoryName;
