@@ -381,13 +381,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 				if( blip.second.target > 0 )
 				{
-					// TODO restore arrows
-					/*auto& pool = world->getTypeObjectPool(blip.second.target);
-					auto object = pool.find(blip.second.target);
+					auto object = world->getBlipTarget(blip.second);
 					if( object )
 					{
 						model = object->getTimeAdjustedTransform( _renderAlpha );
-					}*/
+					}
 				}
 				else
 				{

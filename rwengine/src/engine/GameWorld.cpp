@@ -513,6 +513,21 @@ GameWorld::ObjectPool& GameWorld::getTypeObjectPool(GameObject* object)
 	}
 }
 
+GameObject*GameWorld::getBlipTarget(const BlipData& blip) const
+{
+	switch( blip.type )
+	{
+		case BlipData::Vehicle:
+			return vehiclePool.find(blip.target);
+		case BlipData::Character:
+			return pedestrianPool.find(blip.target);
+		case BlipData::Pickup:
+			return pickupPool.find(blip.target);
+		default:
+			return nullptr;
+	}
+}
+
 void GameWorld::destroyObject(GameObject* object)
 {
 	auto coord = worldToGrid(glm::vec2(object->getPosition()));
