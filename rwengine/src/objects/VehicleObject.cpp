@@ -1,6 +1,7 @@
 #include <objects/VehicleObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <engine/GameWorld.hpp>
+#include <dynamics/CollisionInstance.hpp>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <dynamics/RaycastCallbacks.hpp>
 #include <data/CollisionModel.hpp>
@@ -12,15 +13,56 @@
 #define PART_CLOSE_VELOCITY 0.25f
 constexpr float kVehicleMaxExitVelocity = 0.15f;
 
+/**
+ * A raycaster that will ignore the body of the vehicle when casting rays
+ */
+class VehicleRaycaster : public btVehicleRaycaster
+{
+	btDynamicsWorld* _world;
+	VehicleObject* _vehicle;
+public:
+	VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
+		: _world(world), _vehicle(vehicle) {}
+
+	void* castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result)
+	{
+		ClosestNotMeRayResultCallback rayCallback( _vehicle->collision->getBulletBody(), from, to );
+		const void *res = 0;
+
+		_world->rayTest(from, to, rayCallback);
+
+		if( rayCallback.hasHit() ) {
+			const btRigidBody* body = btRigidBody::upcast( rayCallback.m_collisionObject );
+
+			if( body && body->hasContactResponse() ) {
+				result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+				result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+				result.m_hitNormalInWorld.normalize();
+				result.m_distFraction = rayCallback.m_closestHitFraction;
+				res = body;
+			}
+		}
+
+		return (void* )res;
+	}
+};
+
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
-	: GameObject(engine, pos, rot, model),
-	  steerAngle(0.f), throttle(0.f), brake(0.f), handbrake(true),
-	  vehicle(data), info(info), colourPrimary(prim),
-	  colourSecondary(sec), collision(nullptr), physBody(nullptr), physVehicle(nullptr)
+	: GameObject(engine, pos, rot, model)
+	, steerAngle(0.f)
+	, throttle(0.f)
+	, brake(0.f)
+	, handbrake(true)
+	, vehicle(data)
+	, info(info)
+	, colourPrimary(prim)
+	, colourSecondary(sec)
+	, collision(nullptr)
+	, physRaycaster(nullptr)
+	, physVehicle(nullptr)
 {
 	collision = new CollisionInstance;
 	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
-		physBody = collision->body;
 
 		physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
 		btRaycastVehicle::btVehicleTuning tuning;
@@ -29,7 +71,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		tuning.m_frictionSlip = 3.f;
 		tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
-		physVehicle = new btRaycastVehicle(tuning, physBody, physRaycaster);
+		physVehicle = new btRaycastVehicle(tuning, collision->getBulletBody(), physRaycaster);
 		physVehicle->setCoordinateSystem(0, 2, 1);
 		//physBody->setActivationState(DISABLE_DEACTIVATION);
 		engine->dynamicsWorld->addAction(physVehicle);
@@ -103,49 +145,43 @@ VehicleObject::~VehicleObject()
 void VehicleObject::setPosition(const glm::vec3& pos)
 {
 	GameObject::setPosition(pos);
-	if( physBody ) {
-		// Move each active part
+	if( collision->getBulletBody() ) {
+		auto bodyOrigin = btVector3(position.x, position.y, position.z);
 		for(auto& part : dynamicParts)
 		{
 			if( part.second.body == nullptr ) continue;
 			auto body = part.second.body;
-			auto rel = body->getWorldTransform().getOrigin()
-				- physBody->getWorldTransform().getOrigin();
+			auto rel = body->getWorldTransform().getOrigin() -
+					bodyOrigin;
 			body->getWorldTransform().setOrigin(
 				btVector3(pos.x + rel.x(), pos.y + rel.y(), pos.z + rel.z()));
 		}
 
-		auto t = physBody->getWorldTransform();
+		auto t = collision->getBulletBody()->getWorldTransform();
 		t.setOrigin(btVector3(pos.x, pos.y, pos.z));
-		physBody->setWorldTransform(t);
+		collision->getBulletBody()->setWorldTransform(t);
 	}
 }
 
 glm::vec3 VehicleObject::getPosition() const
 {
-	if( physBody ) {
-		btVector3 Pos = physBody->getWorldTransform().getOrigin();
-		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
-	}
+#warning update our position from the motion state
 	return position;
 }
 
 void VehicleObject::setRotation(const glm::quat &orientation)
 {
-	if( physBody ) {
-		auto t = physBody->getWorldTransform();
+	if( collision->getBulletBody() ) {
+		auto t = collision->getBulletBody()->getWorldTransform();
 		t.setRotation(btQuaternion(orientation.x, orientation.y, orientation.z, orientation.w));
-		physBody->setWorldTransform(t);
+		collision->getBulletBody()->setWorldTransform(t);
 	}
 	GameObject::setRotation(orientation);
 }
 
 glm::quat VehicleObject::getRotation() const
 {
-	if(physVehicle) {
-		btQuaternion rot = physVehicle->getChassisWorldTransform().getRotation();
-		return glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
-	}
+#warning update our rotation from the motion state
 	return rotation;
 }
 
@@ -166,7 +202,10 @@ void VehicleObject::tickPhysics(float dt)
 		// todo: a real engine function
 		float velFac = info->handling.maxVelocity;
 		float engineForce = info->handling.acceleration * throttle * velFac;
-		if( fabs(engineForce) >= 0.001f ) physBody->activate(true);
+		if( fabs(engineForce) >= 0.001f )
+		{
+			collision->getBulletBody()->activate(true);
+		}
 		
 		float brakeF = getBraking();
 		
@@ -198,10 +237,11 @@ void VehicleObject::tickPhysics(float dt)
 			if( isInWater() ) {
 				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
 				float steer = std::min(info->handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign;
-				auto orient = physBody->getOrientation();
+#warning get orientation from motion state
+				auto orient = collision->getBulletBody()->getOrientation();
 
 				// Find the local-space velocity
-				auto velocity = physBody->getLinearVelocity();
+				auto velocity = collision->getBulletBody()->getLinearVelocity();
 				velocity = velocity.rotate(-orient.getAxis(), orient.getAngle());
 
 				// Rudder force is proportional to velocity.
@@ -210,19 +250,19 @@ void VehicleObject::tickPhysics(float dt)
 						.rotate(orient.getAxis(), orient.getAngle());
 				btVector3 rudderPoint = btVector3(0.f, -info->handling.dimensions.y/2.f, 0.f)
 						.rotate(orient.getAxis(), orient.getAngle());
-				physBody->applyForce(
+				collision->getBulletBody()->applyForce(
 							rForce,
 							rudderPoint);
 
 				btVector3 rudderVector = btVector3(0.f, 1.f, 0.f)
 						.rotate(orient.getAxis(), orient.getAngle());
-				physBody->applyForce(
+				collision->getBulletBody()->applyForce(
 							rudderVector * engineForce * 100.f,
 							rudderPoint);
 
 
 				btVector3 dampforce( 10000.f * velocity.x(), velocity.y() * 100.f, 0.f );
-				physBody->applyCentralForce(-dampforce.rotate(orient.getAxis(), orient.getAngle()));
+				collision->getBulletBody()->applyCentralForce(-dampforce.rotate(orient.getAxis(), orient.getAngle()));
 			}
 		}
 
@@ -231,7 +271,7 @@ void VehicleObject::tickPhysics(float dt)
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		btVector3 bbmin, bbmax;
 		// This is in world space.
-		physBody->getAabb(bbmin, bbmax);
+		collision->getBulletBody()->getAabb(bbmin, bbmax);
 		float vH = bbmin.z();
 		float wH = 0.f;
 
@@ -266,9 +306,9 @@ void VehicleObject::tickPhysics(float dt)
 
 		if( inWater ) {
 			// Ensure that vehicles don't fall asleep at the top of a wave.
-			if(! physBody->isActive() )
+			if(! collision->getBulletBody()->isActive() )
 			{
-				physBody->activate(true);
+				collision->getBulletBody()->activate(true);
 			}
 			
 			float bbZ = info->handling.dimensions.z/2.f;
@@ -278,7 +318,7 @@ void VehicleObject::tickPhysics(float dt)
 
 			if( vehicle->type != VehicleData::BOAT ) {
 				// Damper motion
-				physBody->setDamping(0.95f, 0.9f);
+				collision->getBulletBody()->setDamping(0.95f, 0.9f);
 			}
 
 			if( vehicle->type == VehicleData::BOAT ) {
@@ -305,10 +345,10 @@ void VehicleObject::tickPhysics(float dt)
 		}
 		else {
 			if( vehicle->type == VehicleData::BOAT ) {
-				physBody->setDamping(0.1f, 0.8f);
+				collision->getBulletBody()->setDamping(0.1f, 0.8f);
 			}
 			else {
-				physBody->setDamping(0.05f, 0.0f);
+				collision->getBulletBody()->setDamping(0.05f, 0.0f);
 			}
 		}
 
@@ -539,8 +579,9 @@ void VehicleObject::applyWaterFloat(const glm::vec3 &relPt)
 
 		if ( ws.z <= h ) {
 			float x = (h - ws.z);
-			float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * physBody->getLinearVelocity().z();
-			physBody->applyImpulse(btVector3(0.f, 0.f, F),
+			float F = WATER_BUOYANCY_K * x +
+					-WATER_BUOYANCY_C * collision->getBulletBody()->getLinearVelocity().z();
+			collision->getBulletBody()->applyImpulse(btVector3(0.f, 0.f, F),
 								 btVector3(relPt.x, relPt.y, relPt.z));
 		}
 	}
@@ -550,7 +591,7 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked)
 {
 	if( part->body == nullptr && locked == false )
 	{
-		createObjectHinge(physBody->getWorldTransform(), part);
+		createObjectHinge(collision->getBulletBody()->getWorldTransform(), part);
 	}
 	else if( part->body != nullptr && locked == true )
 	{
@@ -711,7 +752,7 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 	subObject->setUserPointer(this);
 
 	auto hinge = new btHingeConstraint(
-				*physBody,
+				*collision->getBulletBody(),
 				*subObject,
 				tr.getOrigin(), hingePosition,
 				hingeAxis, hingeAxis);
@@ -752,25 +793,3 @@ void VehicleObject::setSecondaryColour(uint8_t color)
 	colourSecondary = engine->data->vehicleColours[color];
 }
 
-void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycaster::btVehicleRaycasterResult &result)
-{
-	ClosestNotMeRayResultCallback rayCallback( _vehicle->physBody, from, to );
-
-	const void *res = 0;
-
-	_world->rayTest(from, to, rayCallback);
-
-	if( rayCallback.hasHit() ) {
-		const btRigidBody* body = btRigidBody::upcast( rayCallback.m_collisionObject );
-
-		if( body && body->hasContactResponse() ) {
-			result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
-			result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
-			result.m_hitNormalInWorld.normalize();
-			result.m_distFraction = rayCallback.m_closestHitFraction;
-			res = body;
-		}
-	}
-
-	return (void* )res;
-}

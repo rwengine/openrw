@@ -6,23 +6,23 @@
 
 CollisionInstance::~CollisionInstance()
 {
-	if( body ) {
-		GameObject* object = static_cast<GameObject*>(body->getUserPointer());
+	if( m_body ) {
+		GameObject* object = static_cast<GameObject*>(m_body->getUserPointer());
 
 		// Remove body from existance.
-		object->engine->dynamicsWorld->removeRigidBody(body);
+		object->engine->dynamicsWorld->removeRigidBody(m_body);
 		
-		for(btCollisionShape* shape : shapes) {
+		for(btCollisionShape* shape : m_shapes) {
 			delete shape;
 		}
 		
-		delete body;
+		delete m_body;
 	}
-	if( vertArray ) {
-		delete vertArray;
+	if( m_vertArray ) {
+		delete m_vertArray;
 	}
-	if( motionState ) {
-		delete motionState;
+	if( m_motionState ) {
+		delete m_motionState;
 	}
 }
 
@@ -35,14 +35,14 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 		auto p = object->getPosition();
 		auto r = object->getRotation();
 
-		motionState = new btDefaultMotionState;
-		motionState->setWorldTransform(btTransform(
+		m_motionState = new btDefaultMotionState;
+		m_motionState->setWorldTransform(btTransform(
 									btQuaternion(r.x, r.y, r.z, -r.w).inverse(),
 									btVector3(p.x, p.y, p.z)
 									));
-		shapes.push_back(cmpShape);
+		m_shapes.push_back(cmpShape);
 
-		btRigidBody::btRigidBodyConstructionInfo info(0.f, motionState, cmpShape);
+		btRigidBody::btRigidBodyConstructionInfo info(0.f, m_motionState, cmpShape);
 
 		CollisionModel& physInst = *phyit->second.get();
 
@@ -62,7 +62,7 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 			colMin = std::min(colMin, mid.z - size.z);
 			colMax = std::max(colMax, mid.z + size.z);
 
-			shapes.push_back(bshape);
+			m_shapes.push_back(bshape);
 		}
 
 		// Spheres
@@ -76,26 +76,26 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 			colMin = std::min(colMin, sphere.center.z - sphere.radius);
 			colMax = std::max(colMax, sphere.center.z + sphere.radius);
 
-			shapes.push_back(sshape);
+			m_shapes.push_back(sshape);
 		}
 
 		if( physInst.vertices.size() > 0 && physInst.indices.size() >= 3 ) {
-			vertArray = new btTriangleIndexVertexArray(
+			m_vertArray = new btTriangleIndexVertexArray(
 						physInst.indices.size()/3,
 						(int*) physInst.indices.data(),
 						sizeof(uint32_t)*3,
 						physInst.vertices.size(),
 						&(physInst.vertices[0].x),
 					sizeof(glm::vec3));
-			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(vertArray, false);
+			btBvhTriangleMeshShape* trishape = new btBvhTriangleMeshShape(m_vertArray, false);
 			trishape->setMargin(0.05f);
 			btTransform t; t.setIdentity();
 			cmpShape->addChildShape(t, trishape);
 
-			shapes.push_back(trishape);
+			m_shapes.push_back(trishape);
 		}
 
-		collisionHeight = colMax - colMin;
+		m_collisionHeight = colMax - colMin;
 
 		if( dynamics ) {
 			if( dynamics->uprootForce > 0.f ) {
@@ -115,12 +115,12 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 			info.m_localInertia = inert;
 		}
 
-		body = new btRigidBody(info);
-		body->setUserPointer(object);
-		object->engine->dynamicsWorld->addRigidBody(body);
+		m_body = new btRigidBody(info);
+		m_body->setUserPointer(object);
+		object->engine->dynamicsWorld->addRigidBody(m_body);
 
 		if( dynamics && dynamics->uprootForce > 0.f ) {
-			body->setCollisionFlags(body->getCollisionFlags()
+			m_body->setCollisionFlags(m_body->getCollisionFlags()
 									| btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 		}
 	}
@@ -130,4 +130,15 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 	}
 
 	return true;
+}
+
+void CollisionInstance::changeMass(float newMass)
+{
+	GameObject* object = static_cast<GameObject*>(m_body->getUserPointer());
+	auto dynamicsWorld = object->engine->dynamicsWorld;
+	dynamicsWorld->removeRigidBody(m_body);
+	btVector3 inert;
+	m_body->getCollisionShape()->calculateLocalInertia(newMass, inert);
+	m_body->setMassProps(newMass, inert);
+	dynamicsWorld->addRigidBody(m_body);
 }
