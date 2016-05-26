@@ -99,7 +99,7 @@ void game_set_dead_or_arrested(const ScriptArguments& args)
 bool game_has_death_or_arrest_finished(const ScriptArguments& args)
 {
 	RW_UNUSED(args);
-	RW_UNIMPLEMENTED("game_is_button_pressed()");
+	RW_UNIMPLEMENTED("game_has_death_or_arrest_finished()");
 	return false;
 }
 
