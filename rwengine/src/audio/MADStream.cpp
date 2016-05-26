@@ -1,6 +1,6 @@
 #include "audio/MADStream.hpp"
 
-static inline signed int scale(mad_fixed_t sample)
+inline signed int MADStream::scale(mad_fixed_t sample)
 {
 	/* round */
 	sample += (1L << (MAD_F_FRACBITS - 16));

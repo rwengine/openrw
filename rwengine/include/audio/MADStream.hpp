@@ -12,8 +12,6 @@
 #include <iostream>
 #include <rw/defines.hpp>
 
-static inline
-signed int scale(mad_fixed_t sample);
 
 #include <vector>
 
@@ -27,6 +25,7 @@ class MADStream : public sf::SoundStream
 	unsigned int mReadProgress;
 	std::vector<int16_t> mCurrentSamples;
 
+	static inline signed int scale(mad_fixed_t sample);
 	static mad_flow ms_header(void* user, mad_header const* header);
 	static mad_flow ms_input(void* user, mad_stream* stream);
 	static mad_flow ms_output(void* user, mad_header const* header, mad_pcm* pcm);
