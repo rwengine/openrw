@@ -43,20 +43,17 @@ InstanceObject::~InstanceObject()
 void InstanceObject::tick(float dt)
 {
 	if( dynamics && body ) {
-		if( body->body->isStaticObject() ) {
-			if( _enablePhysics ) {
+		if( _enablePhysics ) {
+			if( body->getBulletBody()->isStaticObject() ) {
 				// Apparently bodies must be removed and re-added if their mass changes.
-				engine->dynamicsWorld->removeRigidBody(body->body);
-				btVector3 inert;
-				body->body->getCollisionShape()->calculateLocalInertia(dynamics->mass, inert);
-				body->body->setMassProps(dynamics->mass, inert);
-				engine->dynamicsWorld->addRigidBody(body->body);
+				body->changeMass(dynamics->mass);
 			}
 		}
 		
 		_updateLastTransform();
 
-		auto _bws = body->body->getWorldTransform().getOrigin();
+		/// @todo replace with position from motionstate
+		auto _bws = body->getBulletBody()->getWorldTransform().getOrigin();
 		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
@@ -83,10 +80,10 @@ void InstanceObject::tick(float dt)
 		_lastHeight = ws.z;
 
 		if( inWater ) {
-			float oZ = -(body->collisionHeight * (dynamics->bouancy/100.f));
-			body->body->activate(true);
+			float oZ = -(body->getBoundingHeight() * (dynamics->bouancy/100.f));
+			body->getBulletBody()->activate(true);
 			// Damper motion
-			body->body->setDamping(0.95f, 0.9f);
+			body->getBulletBody()->setDamping(0.95f, 0.9f);
 
 			auto wi = engine->data->getWaterIndexAt(ws);
 			if(wi != NO_WATER_INDEX) {
@@ -106,10 +103,10 @@ void InstanceObject::tick(float dt)
 					}*/
 
 					float x = (h - ws.z);
-					float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * body->body->getLinearVelocity().z();
+					float F = WATER_BUOYANCY_K * x + -WATER_BUOYANCY_C * body->getBulletBody()->getLinearVelocity().z();
 					btVector3 forcePos = btVector3(0.f, 0.f, 2.f).rotate(
-								body->body->getOrientation().getAxis(), body->body->getOrientation().getAngle());
-					body->body->applyForce(btVector3(0.f, 0.f, F),
+								body->getBulletBody()->getOrientation().getAxis(), body->getBulletBody()->getOrientation().getAngle());
+					body->getBulletBody()->applyForce(btVector3(0.f, 0.f, F),
 										 forcePos);
 				}
 			}
@@ -133,7 +130,7 @@ void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming)
 
 		if( bod->createPhysicsBody(this, object->modelName, dynamics.get()) )
 		{
-			bod->body->setActivationState(ISLAND_SLEEPING);
+			bod->getBulletBody()->setActivationState(ISLAND_SLEEPING);
 			body = bod;
 		}
 	}
@@ -152,7 +149,7 @@ glm::quat InstanceObject::getRotation() const
 void InstanceObject::setRotation(const glm::quat &r)
 {
 	if( body ) {
-		auto& wtr = body->body->getWorldTransform();
+		auto& wtr = body->getBulletBody()->getWorldTransform();
 		wtr.setRotation(btQuaternion(r.x, r.y, r.z, r.w));
 	}
 	GameObject::setRotation(r);
@@ -163,7 +160,8 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 	bool smash = false;
 	if( dynamics ) {
 		smash = dynamics->collDamageFlags == 80;
-		if( dmg.impulse >= dynamics->uprootForce && (body->body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
+
+		if( dmg.impulse >= dynamics->uprootForce && (body->getBulletBody()->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
 			_enablePhysics = true;
 		}
 	}
@@ -177,17 +175,17 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 void InstanceObject::setSolid(bool solid)
 {
 	// Early out in case we don't have a collision body
-	if (body == nullptr || body->body == nullptr) {
+	if (body == nullptr || body->getBulletBody() == nullptr) {
 		return;
 	}
 
-	int flags = body->body->getCollisionFlags();
+	int flags = body->getBulletBody()->getCollisionFlags();
 	if (solid) {
 		flags &= ~btCollisionObject::CF_NO_CONTACT_RESPONSE;
 	} else {
 		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
 	}
-	body->body->setCollisionFlags(flags);
+	body->getBulletBody()->setCollisionFlags(flags);
 }
 
 

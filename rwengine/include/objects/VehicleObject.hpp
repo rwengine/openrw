@@ -4,7 +4,13 @@
 #include <objects/GameObject.hpp>
 #include <map>
 #include <objects/VehicleInfo.hpp>
-#include <dynamics/CollisionInstance.hpp>
+
+class CollisionInstance;
+class btVehicleRaycaster;
+class btRaycastVehicle;
+class btRigidBody;
+class btHingeConstraint;
+class btTransform;
 
 /**
  * @class VehicleObject
@@ -27,8 +33,7 @@ public:
 	std::map<size_t, GameObject*> seatOccupants;
 
 	CollisionInstance* collision;
-	btRigidBody* physBody;
-	btVehicleRaycaster* physRaycaster = nullptr;
+	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
 	
 	struct Part
@@ -143,21 +148,6 @@ private:
 	void registerPart(ModelFrame* mf);
 	void createObjectHinge(btTransform &local, Part* part);
 	void destroyObjectHinge(Part* part);
-};
-
-/**
- * Implements vehicle ray casting behaviour.
- * i.e. ignore the god damn vehicle body when casting rays.
- */
-class VehicleRaycaster : public btVehicleRaycaster
-{
-	btDynamicsWorld* _world;
-	VehicleObject* _vehicle;
-public:
-	VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
-		: _world(world), _vehicle(vehicle) {}
-
-	void* castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result);
 };
 
 #endif

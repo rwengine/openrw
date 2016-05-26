@@ -1,6 +1,7 @@
 #include <ai/CharacterController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
 
 #include <data/Model.hpp>
 #include <engine/Animator.hpp>
