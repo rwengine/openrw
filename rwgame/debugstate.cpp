@@ -5,6 +5,7 @@
 #include <objects/VehicleObject.hpp>
 #include <engine/GameState.hpp>
 #include <sstream>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 void jumpCharacter(RWGame* game, CharacterObject* player, const glm::vec3& target)
@@ -71,6 +72,13 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		}, entryHeight));
 	}
 #endif
+	m->addEntry(Menu::lambda("Add car", [=] {
+		auto playerRot = game->getPlayer()->getCharacter()->getRotation();
+		auto spawnPos = game->getPlayer()->getCharacter()->getPosition();
+		spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f);
+		auto spawnRot = glm::quat(glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
+		auto car = game->getWorld()->createVehicle(136, spawnPos, spawnRot);
+	}, entryHeight));
 	m->addEntry(Menu::lambda("Quicksave", [=] {
 		game->saveGame("quicksave");
 	}, entryHeight));
