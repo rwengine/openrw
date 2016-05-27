@@ -513,6 +513,13 @@ void game_set_player_heading(const ScriptArguments& args)
 }
 
 template <class Tobject>
+void game_get_object_heading(const ScriptArguments& args)
+{
+	auto object = args.getObject<Tobject>(0);
+	*args[1].globalReal = object->getHeading();
+}
+
+template <class Tobject>
 void game_set_object_heading(const ScriptArguments& args)
 {
 	auto object = args.getObject<Tobject>(0);
@@ -1172,6 +1179,7 @@ ObjectModule::ObjectModule()
 	bindUnimplemented(0x0174, game_get_character_heading, 2, "Get Vehicle Heading" );
 	bindFunction(0x0175, game_set_object_heading<VehicleObject>, 2, "Set Vehicle heading" );
 	
+	bindFunction(0x0176, game_get_object_heading<InstanceObject>, 2, "Get Object heading" );
 	bindFunction(0x0177, game_set_object_heading<InstanceObject>, 2, "Set Object heading" );
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );

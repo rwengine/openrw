@@ -104,6 +104,7 @@ public:
 	virtual glm::quat getRotation() const;
 	virtual void setRotation(const glm::quat &orientation);
 
+	float getHeading() const;
 	/**
 	 * @brief setHeading Rotates the object to face heading, in degrees.
 	 */

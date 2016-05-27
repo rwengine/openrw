@@ -3,6 +3,7 @@
 #include <loaders/LoaderDFF.hpp>
 #include <engine/Animator.hpp>
 #include <data/Skeleton.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 GameObject::~GameObject()
 {
@@ -30,6 +31,12 @@ glm::quat GameObject::getRotation() const
 void GameObject::setRotation(const glm::quat& orientation)
 {
 	rotation = orientation;
+}
+
+float GameObject::getHeading() const
+{
+  auto hdg = glm::roll(getRotation());
+	return hdg / glm::pi<float>() * 180.f;
 }
 
 void GameObject::setHeading(float heading)
