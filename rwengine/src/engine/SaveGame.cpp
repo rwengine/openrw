@@ -230,7 +230,8 @@ struct Block4Object {
 	BlockWord modelId;
 	BlockDword reference;
 	glm::vec3 position;
-	uint8_t unknown1[12];
+	int8_t rotation[9]; /// @todo Confirm that this is: right, forward, down
+	uint8_t unknown1[3];
 	float unknown2;
 	float unknown3[3];
 	uint8_t unknown4[12];
@@ -691,6 +692,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		READ_VALUE(obj.modelId)
 		READ_VALUE(obj.reference)
 		READ_VALUE(obj.position)
+		READ_VALUE(obj.rotation)
 		READ_VALUE(obj.unknown1)
 		READ_VALUE(obj.unknown2)
 		READ_VALUE(obj.unknown3)
@@ -703,10 +705,28 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		READ_VALUE(obj.unknown10)
 	}
 
+	for (size_t o = 0; o < objectCount; ++o) {
+		auto &obj = objects[o];
+		GameObject* inst = state.world->createInstance(obj.modelId, obj.position);
+		glm::vec3 right = glm::normalize(glm::vec3(obj.rotation[0], obj.rotation[1], obj.rotation[2]));
+		glm::vec3 forward = glm::normalize(glm::vec3(obj.rotation[3], obj.rotation[4], obj.rotation[5]));
+		glm::vec3 down = glm::normalize(glm::vec3(obj.rotation[6], obj.rotation[7], obj.rotation[8]));
+		glm::mat3 m = glm::mat3(right, forward, -down);
+		inst->setRotation(glm::normalize(static_cast<glm::quat>(m)));
+	}
+
 #if RW_DEBUG
 	std::cout << "Objects " << objectCount << std::endl;
 	for (size_t o = 0; o < objectCount; ++o) {
-		std::cout << objects[o].modelId << " ";
+		auto &obj = objects[o];
+		glm::vec3 right = glm::normalize(glm::vec3(obj.rotation[0], obj.rotation[1], obj.rotation[2]));
+		glm::vec3 forward = glm::normalize(glm::vec3(obj.rotation[3], obj.rotation[4], obj.rotation[5]));
+		glm::vec3 down = glm::normalize(glm::vec3(obj.rotation[6], obj.rotation[7], obj.rotation[8]));
+		std::cout << "modelId " << obj.modelId << " ";
+		std::cout << "position " << obj.position.x << " "<< obj.position.y << " " << obj.position.z << " ";
+		std::cout << "right " << right.x << " "<< right.y << " " << right.z << " ";
+		std::cout << "forward " << forward.x << " "<< forward.y << " " << forward.z << " ";
+		std::cout << "down " << down.x << " " << down.y << " " << down.z << std::endl;
 	}
 	std::cout << std::endl;
 #endif
