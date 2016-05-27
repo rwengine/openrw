@@ -7,7 +7,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <SFML/Audio.hpp>
 #include <stdint.h>
 #include <iostream>
 #include <rw/defines.hpp>
@@ -18,7 +17,7 @@
 
 #include <vector>
 
-class MADStream : public sf::SoundStream
+class MADStream
 {
 	mad_decoder mDecoder;
 	unsigned int mMadSampleRate;
@@ -42,10 +41,6 @@ class MADStream : public sf::SoundStream
 	static mad_flow ms_input(void* user, mad_stream* stream);
 	static mad_flow ms_output(void* user, mad_header const* header, mad_pcm* pcm);
 	static mad_flow ms_error(void* user, mad_stream* stream, mad_frame* frame);
-
-	virtual bool onGetData(sf::SoundStream::Chunk& data);
-
-	virtual void onSeek(sf::Time timeOffset);
 
 public:
 

@@ -97,22 +97,8 @@ mad_flow MADStream::ms_error(void* user, mad_stream* stream, mad_frame* frame)
 	RW_UNUSED(user);
 	RW_UNUSED(frame);
 
-	sf::err() << "libmad error: " << mad_stream_errorstr(stream);
+	std::cerr << "libmad error: " << mad_stream_errorstr(stream) << std::endl;
 	return MAD_FLOW_BREAK;
-}
-
-bool MADStream::onGetData(sf::SoundStream::Chunk& data)
-{
-	data.samples = mCurrentSamples.data();
-	data.sampleCount = mCurrentSamples.size();
-
-	return false;
-}
-
-void MADStream::onSeek(sf::Time timeOffset)
-{
-	RW_UNUSED(timeOffset);
-	/// @todo support seeking.
 }
 
 MADStream::MADStream()
@@ -160,8 +146,6 @@ bool MADStream::openFromFile(const std::string& loc)
 	new std::thread([&] () {
 		mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
 	});
-
-	this->initialize(2, mMadSampleRate);
 
 	alCheck(alSourcef(alSource, AL_PITCH, 1));
 	alCheck(alSourcef(alSource, AL_GAIN, 1));

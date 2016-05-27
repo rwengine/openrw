@@ -7,7 +7,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <SFML/Audio.hpp>
 
 class MADStream;
 

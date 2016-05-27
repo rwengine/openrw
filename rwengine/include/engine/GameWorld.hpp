@@ -309,7 +309,6 @@ public:
 	std::string cutsceneAudio;
 	bool cutsceneAudioLoaded;
 	std::string missionAudio;
-	sf::Sound missionSound;
 
 	/**
 	 * @brief loads a model into a special character slot.
