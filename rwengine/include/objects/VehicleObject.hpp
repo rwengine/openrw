@@ -57,11 +57,7 @@ public:
 	
 	void setPosition(const glm::vec3& pos);
 
-	glm::vec3 getPosition() const;
-
 	void setRotation(const glm::quat &orientation);
-
-	glm::quat getRotation() const;
 
 	Type type() { return Vehicle; }
 
@@ -111,7 +107,10 @@ public:
 	glm::vec3 getSeatEntryPosition(size_t seat) const {
 		auto pos = info->seats[seat].offset;
 		pos -= glm::vec3(glm::sign(pos.x) * -0.81756252f, 0.34800607f, -0.486281008f);
-		return getPosition() + getRotation() * pos;
+		return pos;
+	}
+	glm::vec3 getSeatEntryPositionWorld(size_t seat) const {
+		return getPosition() + getRotation() * getSeatEntryPosition(seat);
 	}
 	
 	Part* getSeatEntryDoor(size_t seat);

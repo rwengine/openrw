@@ -49,12 +49,8 @@ void InstanceObject::tick(float dt)
 				body->changeMass(dynamics->mass);
 			}
 		}
-		
-		_updateLastTransform();
 
-#warning replace with position from motionstate
-		auto _bws = body->getBulletBody()->getWorldTransform().getOrigin();
-		glm::vec3 ws(_bws.x(), _bws.y(), _bws.z());
+		const glm::vec3& ws = getPosition();
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		float vH = ws.z;// - _collisionHeight/2.f;
@@ -134,16 +130,6 @@ void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming)
 			body = bod;
 		}
 	}
-}
-
-glm::vec3 InstanceObject::getPosition() const
-{
-	return position;
-}
-
-glm::quat InstanceObject::getRotation() const
-{
-	return rotation;
 }
 
 void InstanceObject::setRotation(const glm::quat &r)

@@ -316,8 +316,6 @@ void CharacterObject::updateCharacter(float dt)
 	if(physCharacter) {
 		glm::vec3 walkDir = updateMovementAnimation(dt);
 
-		position = getPosition();
-
 		if (canTurn()) {
 			rotation = glm::angleAxis(m_look.x, glm::vec3{0.f, 0.f, 1.f});
 		}
@@ -399,39 +397,6 @@ void CharacterObject::setPosition(const glm::vec3& pos)
 	position = pos;
 }
 
-glm::vec3 CharacterObject::getPosition() const
-{
-	if(physCharacter) {
-		btVector3 Pos = physCharacter->getGhostObject()->getWorldTransform().getOrigin();
-		return glm::vec3(Pos.x(), Pos.y(), Pos.z());
-	}
-	if(currentVehicle) {
-		/// @todo this is hacky.
-		if( animator->getAnimation(AnimIndexAction) == animations.car_getout_lhs ) {
-			return currentVehicle->getSeatEntryPosition(currentSeat);
-		}
-
-		auto v = getCurrentVehicle();
-		auto R = glm::mat3_cast(v->getRotation());
-		glm::vec3 offset;
-		auto o = (animator->getAnimation(AnimIndexAction) == animations.car_getin_lhs) ? enter_offset : glm::vec3();
-		if(getCurrentSeat() < v->info->seats.size()) {
-			offset = R * (v->info->seats[getCurrentSeat()].offset -
-					o);
-		}
-		return currentVehicle->getPosition() + offset;
-	}
-	return position;
-}
-
-glm::quat CharacterObject::getRotation() const
-{
-	if(currentVehicle) {
-		return currentVehicle->getRotation();
-	}
-	return GameObject::getRotation();
-}
-
 bool CharacterObject::isAlive() const
 {
 	return currentState.health > 0.f;
@@ -463,6 +428,12 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 		}
 	}
 	return false;
+}
+
+bool CharacterObject::isEnteringOrExitingVehicle() const
+{
+	return animator->getAnimation(AnimIndexAction) == animations.car_getout_lhs ||
+			animator->getAnimation(AnimIndexAction) == animations.car_getin_lhs;
 }
 
 bool CharacterObject::isStopped() const

@@ -163,12 +163,6 @@ void VehicleObject::setPosition(const glm::vec3& pos)
 	}
 }
 
-glm::vec3 VehicleObject::getPosition() const
-{
-#warning update our position from the motion state
-	return position;
-}
-
 void VehicleObject::setRotation(const glm::quat &orientation)
 {
 	if( collision->getBulletBody() ) {
@@ -177,12 +171,6 @@ void VehicleObject::setRotation(const glm::quat &orientation)
 		collision->getBulletBody()->setWorldTransform(t);
 	}
 	GameObject::setRotation(orientation);
-}
-
-glm::quat VehicleObject::getRotation() const
-{
-#warning update our rotation from the motion state
-	return rotation;
 }
 
 #include <glm/gtc/type_ptr.hpp>
@@ -233,11 +221,30 @@ void VehicleObject::tickPhysics(float dt)
 			}
 		}
 
+		// Update passenger positions
+		for (auto& seat : seatOccupants)
+		{
+			auto character = static_cast<CharacterObject*>(seat.second);
+
+			glm::vec3 passPosition;
+			if (character->isEnteringOrExitingVehicle())
+			{
+				passPosition = getSeatEntryPositionWorld(seat.first);
+			}
+			else
+			{
+				passPosition = getPosition();
+				if (seat.first < info->seats.size()) {
+					passPosition += getRotation() * (info->seats[seat.first].offset);
+				}
+			}
+			seat.second->updateTransform(passPosition, getRotation());
+		}
+
 		if( vehicle->type == VehicleData::BOAT ) {
 			if( isInWater() ) {
 				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
 				float steer = std::min(info->handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign;
-#warning get orientation from motion state
 				auto orient = collision->getBulletBody()->getOrientation();
 
 				// Find the local-space velocity
@@ -266,7 +273,7 @@ void VehicleObject::tickPhysics(float dt)
 			}
 		}
 
-		auto ws = getPosition();
+		const auto& ws = getPosition();
 		auto wX = (int) ((ws.x + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		auto wY = (int) ((ws.y + WATER_WORLD_SIZE/2.f) / (WATER_WORLD_SIZE/WATER_HQ_DATA_SIZE));
 		btVector3 bbmin, bbmax;
