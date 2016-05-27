@@ -1269,5 +1269,6 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x042B, game_clear_volume_pedestrians, 6, "Clear volume pedestrians" );
 	
 	bindFunction(0x0442, game_character_in_vehicle<PlayerController>, 2, "Is Player in This Vehicle" );
+  bindFunction(0x0443, game_player_in_any_vehicle, 1, "Is Player In Any Vehicle" ); /// Duplicate of 00E0?!
 	bindFunction(0x0448, game_character_in_vehicle<CharacterObject>, 2, "Is Character in This Vehicle" );
 }
