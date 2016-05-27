@@ -55,6 +55,16 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 		return MAD_FLOW_STOP;
 	}
 
+	if ( ! self->numFreeBuffers) {
+		ALint buffersProcessed;
+		do {
+			alGetSourcei(self->alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
+		} while (buffersProcessed <= 0);
+
+		alCheck(alSourceUnqueueBuffers(self->alSource, buffersProcessed, self->unqueuedBuffers));
+		self->numFreeBuffers += buffersProcessed;
+	}
+
 	int nsamples = pcm->length;
 	mad_fixed_t const *left, *right;
 
@@ -77,6 +87,7 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 	self->mCurrentSamples.clear();
 	self->currentBuffer++;
 	self->currentBuffer %= numALbuffers;
+	self->numFreeBuffers--;
 
 	return MAD_FLOW_CONTINUE;
 }

@@ -30,6 +30,8 @@ class MADStream : public sf::SoundStream
 
 	constexpr static size_t numALbuffers = 8;
 	ALuint buffers[numALbuffers];
+	ALuint unqueuedBuffers[numALbuffers];
+	size_t numFreeBuffers = numALbuffers;
 	size_t currentBuffer = 0;
 	ALuint alSource;
 
