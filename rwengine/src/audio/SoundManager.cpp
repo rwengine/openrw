@@ -132,6 +132,10 @@ bool SoundManager::loadMusic(const std::string& name, const std::string& fileNam
 	musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
 	return musics[name].openFromFile(fileName);
 }
+void SoundManager::playMusic(const std::string& name)
+{
+	musics[name].play();
+}
 
 void SoundManager::pause(bool p)
 {

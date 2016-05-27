@@ -49,6 +49,7 @@ public:
 	~MADStream();
 
 	bool openFromFile(const std::string& loc);
+	void play();
 };
 
 #endif

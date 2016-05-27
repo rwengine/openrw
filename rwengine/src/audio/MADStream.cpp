@@ -148,3 +148,8 @@ bool MADStream::openFromFile(const std::string& loc)
 
 	return true;
 }
+
+void MADStream::play()
+{
+	alCheck(alSourcePlay(alSource));
+}
