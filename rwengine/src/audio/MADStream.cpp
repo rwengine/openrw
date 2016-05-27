@@ -69,6 +69,10 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 		s++;
 	}
 
+	alCheck(alBufferData(self->buffers[self->currentBuffer], AL_FORMAT_STEREO16, self->mCurrentSamples.data(), self->mCurrentSamples.size() * sizeof(uint16_t), pcm->samplerate));
+	alCheck(alSourceQueueBuffers(self->alSource, 1, self->buffers + self->currentBuffer));
+
+	self->mCurrentSamples.clear();
 	self->currentBuffer++;
 	self->currentBuffer %= numALbuffers;
 
