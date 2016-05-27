@@ -98,10 +98,10 @@ public:
 	
 	virtual void setPosition(const glm::vec3& pos);
 
-	virtual glm::vec3 getPosition() const { return position; }
+	const glm::vec3& getPosition() const { return position; }
 	const glm::vec3& getLastPosition() const { return _lastPosition; }
 
-	virtual glm::quat getRotation() const;
+	const glm::quat& getRotation() const { return rotation; }
 	virtual void setRotation(const glm::quat &orientation);
 
 	float getHeading() const;
@@ -185,7 +185,15 @@ public:
 	
 	void setLifetime(ObjectLifetime ol) { lifetime = ol; }
 	ObjectLifetime getLifetime() const { return lifetime; }
-	
+
+	void updateTransform(const glm::vec3& pos, const glm::quat& rot)
+	{
+		_lastPosition = position;
+		_lastRotation = rotation;
+		position = pos;
+		rotation = rot;
+	}
+
 private:
 	ObjectLifetime lifetime;
 };

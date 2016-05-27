@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_door_position)
 	BOOST_REQUIRE(vehicle->info != nullptr);
 	BOOST_REQUIRE(vehicle->vehicle != nullptr);
 
-	BOOST_CHECK( vehicle->getSeatEntryPosition(0).x > 5.f );
+	BOOST_CHECK( vehicle->getSeatEntryPositionWorld(0).x > 5.f );
 
 
 	Global::get().e->destroyObject(vehicle);

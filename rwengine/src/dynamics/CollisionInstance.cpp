@@ -4,6 +4,34 @@
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
 
+class GameObjectMotionState : public btMotionState
+{
+public:
+	GameObjectMotionState(GameObject *object)
+		: m_object(object)
+	{ }
+
+	virtual void getWorldTransform(btTransform& tform) const
+	{
+		auto& position = m_object->getPosition();
+		auto& rotation = m_object->getRotation();
+		tform.setOrigin(btVector3(position.x, position.y, position.z));
+		tform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+	}
+
+	virtual void setWorldTransform(const btTransform& tform)
+	{
+		auto& o = tform.getOrigin();
+		auto r = tform.getRotation();
+		glm::vec3 position(o.x(), o.y(), o.z());
+		glm::quat rotation(r.w(), r.x(), r.y(), r.z());
+		m_object->updateTransform(position, rotation);
+	}
+
+private:
+	GameObject *m_object;
+};
+
 CollisionInstance::~CollisionInstance()
 {
 	if( m_body ) {
@@ -32,14 +60,7 @@ bool CollisionInstance::createPhysicsBody(GameObject *object, const std::string&
 	if( phyit != object->engine->data->collisions.end()) {
 		btCompoundShape* cmpShape = new btCompoundShape;
 
-		auto p = object->getPosition();
-		auto r = object->getRotation();
-
-		m_motionState = new btDefaultMotionState;
-		m_motionState->setWorldTransform(btTransform(
-									btQuaternion(r.x, r.y, r.z, -r.w).inverse(),
-									btVector3(p.x, p.y, p.z)
-									));
+		m_motionState = new GameObjectMotionState(object);
 		m_shapes.push_back(cmpShape);
 
 		btRigidBody::btRigidBodyConstructionInfo info(0.f, m_motionState, cmpShape);
