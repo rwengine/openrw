@@ -1,5 +1,7 @@
 #include "audio/MADStream.hpp"
 
+#include <thread>
+
 inline signed int MADStream::scale(mad_fixed_t sample)
 {
 	/* round */
@@ -144,7 +146,9 @@ bool MADStream::openFromFile(const std::string& loc)
 	mad_decoder_init(&mDecoder, this,
 		ms_input, ms_header, 0, ms_output, ms_error, 0);
 
-	mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
+	new std::thread([&] () {
+		mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
+	});
 
 	this->initialize(2, mMadSampleRate);
 
