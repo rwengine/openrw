@@ -9,6 +9,8 @@
 #include <vector>
 #include <SFML/Audio.hpp>
 
+class MADStream;
+
 class SoundManager
 {
 public:
@@ -21,6 +23,8 @@ public:
 	bool isPlaying(const std::string& name);
 	
 	bool playBackground(const std::string& fileName);
+
+	bool loadMusic(const std::string& name, const std::string& fileName);
 	
 	void pause(bool p);
 	
@@ -62,5 +66,6 @@ private:
 	ALCdevice* alDevice;
 
 	std::map<std::string, Sound> sounds;
+	std::map<std::string, MADStream> musics;
 	std::string backgroundNoise;
 };

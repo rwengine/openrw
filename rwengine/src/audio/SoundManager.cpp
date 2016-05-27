@@ -2,6 +2,7 @@
 #include <audio/MADStream.hpp>
 
 #include "audio/alCheck.hpp"
+#include "audio/MADStream.hpp"
 
 #include <array>
 #include <iostream>
@@ -124,6 +125,12 @@ bool SoundManager::playBackground(const std::string& fileName)
 	}
 
 	return false;
+}
+
+bool SoundManager::loadMusic(const std::string& name, const std::string& fileName)
+{
+	musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
+	return musics[name].openFromFile(fileName);
 }
 
 void SoundManager::pause(bool p)
