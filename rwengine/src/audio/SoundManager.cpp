@@ -136,6 +136,10 @@ void SoundManager::playMusic(const std::string& name)
 {
 	musics[name].play();
 }
+void SoundManager::stopMusic(const std::string& name)
+{
+	musics[name].stop();
+}
 
 void SoundManager::pause(bool p)
 {

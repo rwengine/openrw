@@ -33,6 +33,8 @@ class MADStream : public sf::SoundStream
 	size_t currentBuffer = 0;
 	ALuint alSource;
 
+	bool stopped = false;
+
 	static inline signed int scale(mad_fixed_t sample);
 	static mad_flow ms_header(void* user, mad_header const* header);
 	static mad_flow ms_input(void* user, mad_stream* stream);
@@ -50,6 +52,7 @@ public:
 
 	bool openFromFile(const std::string& loc);
 	void play();
+	void stop();
 };
 
 #endif

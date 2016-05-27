@@ -49,6 +49,10 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 
 	MADStream* self = static_cast<MADStream*>(user);
 
+	if (self->stopped) {
+		return MAD_FLOW_STOP;
+	}
+
 	int nsamples = pcm->length;
 	mad_fixed_t const *left, *right;
 
@@ -151,5 +155,11 @@ bool MADStream::openFromFile(const std::string& loc)
 
 void MADStream::play()
 {
+	alCheck(alSourcePlay(alSource));
+}
+
+void MADStream::stop()
+{
+	stopped = true;
 	alCheck(alSourcePlay(alSource));
 }

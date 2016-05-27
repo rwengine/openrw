@@ -26,6 +26,7 @@ public:
 
 	bool loadMusic(const std::string& name, const std::string& fileName);
 	void playMusic(const std::string& name);
+	void stopMusic(const std::string& name);
 	
 	void pause(bool p);
 	
