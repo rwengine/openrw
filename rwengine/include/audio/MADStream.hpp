@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include <iostream>
 #include <rw/defines.hpp>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include "audio/alCheck.hpp"
 
 
 #include <vector>
@@ -24,6 +27,10 @@ class MADStream : public sf::SoundStream
 	struct stat mStat;
 	unsigned int mReadProgress;
 	std::vector<int16_t> mCurrentSamples;
+
+	constexpr static size_t numALbuffers = 8;
+	ALuint buffers[numALbuffers];
+	ALuint alSource;
 
 	static inline signed int scale(mad_fixed_t sample);
 	static mad_flow ms_header(void* user, mad_header const* header);

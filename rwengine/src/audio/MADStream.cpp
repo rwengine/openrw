@@ -94,7 +94,8 @@ void MADStream::onSeek(sf::Time timeOffset)
 MADStream::MADStream()
 	: mFdm(nullptr)
 {
-
+	alCheck(alGenBuffers(numALbuffers, buffers));
+	alCheck(alGenSources(1, &alSource));
 }
 
 MADStream::~MADStream()
@@ -135,6 +136,12 @@ bool MADStream::openFromFile(const std::string& loc)
 	mad_decoder_run(&mDecoder, MAD_DECODER_MODE_SYNC);
 
 	this->initialize(2, mMadSampleRate);
+
+	alCheck(alSourcef(alSource, AL_PITCH, 1));
+	alCheck(alSourcef(alSource, AL_GAIN, 1));
+	alCheck(alSource3f(alSource, AL_POSITION, 0, 0, 0));
+	alCheck(alSource3f(alSource, AL_VELOCITY, 0, 0, 0));
+	alCheck(alSourcei(alSource, AL_LOOPING, AL_FALSE));
 
 	return true;
 }
