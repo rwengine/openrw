@@ -123,6 +123,9 @@ void game_create_vehicle(const ScriptArguments& args)
 {
 	auto id	= args[0].integer;
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
+	if( position.z < -99.f ) {
+		position = args.getWorld()->getGroundAtPosition(position);
+	}
 	position += spawnMagic;
 	
 	// If there is already a vehicle less than this distance away, it will be destroyed.
