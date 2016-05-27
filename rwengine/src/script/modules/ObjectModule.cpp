@@ -1098,6 +1098,13 @@ bool game_rotate_object(const ScriptArguments& args)
 	return true;
 }
 
+template<class Tobject>
+void game_destroy_object_with_fade(const ScriptArguments& args)
+{
+	/// @todo Fade not handled yet!
+	game_destroy_object<Tobject>(args);
+}
+
 void game_get_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1243,6 +1250,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction( 0x034D, game_rotate_object, 4, "Rotate Object" );
 	bindUnimplemented( 0x034E, game_slide_object, 8, "Slide Object" );
+	bindFunction(0x034F, game_destroy_object_with_fade<CharacterObject>, 1, "Destroy Character with Fade" );
 	
 	bindUnimplemented( 0x035D, game_set_object_targetable, 1, "Set Object Targetable" );
 	
