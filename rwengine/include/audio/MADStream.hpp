@@ -30,6 +30,7 @@ class MADStream : public sf::SoundStream
 
 	constexpr static size_t numALbuffers = 8;
 	ALuint buffers[numALbuffers];
+	size_t currentBuffer = 0;
 	ALuint alSource;
 
 	static inline signed int scale(mad_fixed_t sample);

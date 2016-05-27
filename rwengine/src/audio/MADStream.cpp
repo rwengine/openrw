@@ -65,6 +65,9 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 		s++;
 	}
 
+	self->currentBuffer++;
+	self->currentBuffer %= numALbuffers;
+
 	return MAD_FLOW_CONTINUE;
 }
 
