@@ -58,6 +58,7 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 	if ( ! self->numFreeBuffers) {
 		ALint buffersProcessed;
 		do {
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 			alGetSourcei(self->alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
 		} while (buffersProcessed <= 0);
 
