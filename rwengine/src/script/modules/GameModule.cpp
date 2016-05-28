@@ -790,8 +790,6 @@ void game_load_audio(const ScriptArguments& args)
 	std::string name = args[0].string;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
-	args.getWorld()->missionAudio = name;
-
 	if ( ! args.getWorld()->data->loadAudioClip(name, name + ".wav")) {
 		if ( ! args.getWorld()->data->loadAudioClip(name, name + ".mp3")) {
 			args.getWorld()->logger->error("SCM", "Failed to load audio: " + name);

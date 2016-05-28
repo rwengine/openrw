@@ -520,9 +520,12 @@ bool GameData::loadAudioClip(const std::string& name, const std::string& fileNam
 
 	if ( ! loaded) {
 		logger->error("Data", "Error loading audio clip "+ filePath);
+		return false;
 	}
 
-	return loaded;
+	engine->missionAudio = name;
+
+	return true;
 }
 
 void GameData::loadSplash(const std::string &name)
