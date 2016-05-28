@@ -69,6 +69,11 @@ bool SoundManager::initializeOpenAL()
 		return false;
 	}
 
+	if ( ! alcMakeContextCurrent(alContext)) {
+		std::cerr << "Unable to make OpenAL context current!" << std::endl;
+		return false;
+	}
+
 	return true;
 }
 
