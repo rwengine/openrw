@@ -134,16 +134,22 @@ bool SoundManager::playBackground(const std::string& fileName)
 
 bool SoundManager::loadMusic(const std::string& name, const std::string& fileName)
 {
-	musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
-	return musics[name].openFromFile(fileName);
+	auto music = musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
+	return music.first->second.openFromFile(fileName);
 }
 void SoundManager::playMusic(const std::string& name)
 {
-	musics[name].play();
+	auto music = musics.find(name);
+	if (music != musics.end()) {
+		music->second.play();
+	}
 }
 void SoundManager::stopMusic(const std::string& name)
 {
-	musics[name].stop();
+	auto music = musics.find(name);
+	if (music != musics.end()) {
+		music->second.stop();
+	}
 }
 
 void SoundManager::pause(bool p)
