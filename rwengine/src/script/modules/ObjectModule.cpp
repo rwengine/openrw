@@ -97,16 +97,6 @@ void game_create_character(const ScriptArguments& args)
 		position = args.getWorld()->getGroundAtPosition(position);
 	}
 	
-	// If there is already a chracter less than this distance away, it will be destroyed.
-	const float replaceThreshold = 2.f;
-	for(auto& p : args.getWorld()->pedestrianPool.objects) 
-	{
-		if( glm::distance(position, p.second->getPosition()) < replaceThreshold )
-		{
-			args.getWorld()->destroyObjectQueued(p.second);
-		}
-	}
-
 	auto character = args.getWorld()->createPedestrian(id, position + spawnMagic);
 	/* Controller will give ownership to character */
 	new DefaultAIController(character);
@@ -127,24 +117,14 @@ void game_create_vehicle(const ScriptArguments& args)
 		position = args.getWorld()->getGroundAtPosition(position);
 	}
 	position += spawnMagic;
-	
-	// If there is already a vehicle less than this distance away, it will be destroyed.
-	const float replaceThreshold = 1.f;
-	for(auto& p : args.getWorld()->vehiclePool.objects)
-	{
-		if( glm::distance(position, p.second->getPosition()) < replaceThreshold )
-		{
-			args.getWorld()->destroyObjectQueued(p.second);
-		}
-	}
-	
+
 	auto vehicle = args.getWorld()->createVehicle(id, position);
-	
+
 	if ( args.getThread()->isMission )
 	{
 		args.getState()->missionObjects.push_back(vehicle->getGameObjectID());
 	}
-	
+
 	*args[4].globalInteger = vehicle->getGameObjectID();
 }
 
