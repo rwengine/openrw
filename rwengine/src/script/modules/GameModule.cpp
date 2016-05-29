@@ -1255,6 +1255,7 @@ GameModule::GameModule()
 
 	bindUnimplemented( 0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
 
+	bindUnimplemented( 0x0335, game_free_resprays, 1, "Set Free Respray" );
 	bindUnimplemented( 0x0336, game_set_character_visible, 2, "Set Player Visible" );
 
 	bindFunction(0x033E, game_display_text, 3, "Display Text" );
