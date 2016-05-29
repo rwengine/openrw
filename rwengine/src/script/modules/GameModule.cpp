@@ -898,6 +898,32 @@ bool game_is_audio_finished(const ScriptArguments& args)
 	return isFinished;
 }
 
+bool game_import_garage_contains_needed_car(const ScriptArguments& args)
+{
+	const auto& garages = args.getWorld()->state->garages;
+
+	int garageIndex = args[0].integerValue();
+	RW_CHECK(garageIndex >= 0, "Garage index too low");
+	RW_CHECK(garageIndex < static_cast<int>(garages.size()), "Garage index too high");
+	const auto& garage = garages[garageIndex];
+
+	int entryIndex = args[1].integerValue();
+	RW_CHECK(entryIndex >= 0, "Entry index too low");
+	RW_CHECK(entryIndex < 32, "Entry index too high");
+
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS1) {
+		return args.getState()->importExportPortland[entryIndex];
+	}
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS2) {
+		return args.getState()->importExportShoreside[entryIndex];
+	}
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS3) {
+		return args.getState()->importExportUnused[entryIndex];
+	}
+
+	return false;
+}
+
 void game_play_music_id(const ScriptArguments& args)
 {
 	int id = args[0].integer;
@@ -1249,6 +1275,7 @@ GameModule::GameModule()
 	bindFunction(0x03D1, game_play_mission_audio, 0, "Play Mission Audio" );
 	bindFunction(0x03D2, game_is_audio_finished, 0, "Is Mission Audio Finished" );
 	
+	bindFunction(0x03D4, game_import_garage_contains_needed_car, 2, "Import Garage Contains Needed Car" );
 	bindFunction(0x03D5, game_clear_print, 1, "Clear This Print" );
 	bindUnimplemented( 0x03D6, game_clear_this_print, 1, "Clear This Big Print" );
 	bindFunction(0x03D9, game_did_game_save, 0, "Did game save" );
