@@ -105,20 +105,20 @@ bool SoundManager::isLoaded(const std::string& name)
 void SoundManager::playSound(const std::string& name)
 {
 	if (sounds.find(name) != sounds.end()) {
-		alSourcePlay(sounds[name].buffer.source);
+		alCheck(alSourcePlay(sounds[name].buffer.source));
 	}
 }
 void SoundManager::pauseSound(const std::string& name)
 {
 	if (sounds.find(name) != sounds.end()) {
-		alSourcePause(sounds[name].buffer.source);
+		alCheck(alSourcePause(sounds[name].buffer.source));
 	}
 }
 bool SoundManager::isPlaying(const std::string& name)
 {
 	if (sounds.find(name) != sounds.end()) {
 		ALint sourceState;
-		alGetSourcei(sounds[name].buffer.source, AL_SOURCE_STATE, &sourceState);
+		alCheck(alGetSourcei(sounds[name].buffer.source, AL_SOURCE_STATE, &sourceState));
 		return AL_PLAYING == sourceState;
 	}
 
