@@ -92,7 +92,7 @@ PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int mode
 	RW_UNUSED(flags);
 	
 	RW_CHECK((flags & PickupInVehicle)==0, "In Vehicle pickup not implemented yet");
-	
+
 	setEnabled(true);
 }
 
