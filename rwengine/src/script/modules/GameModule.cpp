@@ -944,6 +944,39 @@ void game_play_music_id(const ScriptArguments& args)
 	}
 }
 
+void game_clear_area(const ScriptArguments& args)
+{
+	glm::vec3 position(args[0].real, args[1].real, args[2].real);
+	float radius = args[3].real;
+	bool clearParticles = args[4].integer;
+
+	GameWorld* gw = args.getWorld();
+
+	for(auto& v : gw->vehiclePool.objects)
+	{
+		if( glm::distance(position, v.second->getPosition()) < radius )
+		{
+			gw->destroyObjectQueued(v.second);
+		}
+	}
+
+	for(auto& p : gw->pedestrianPool.objects)
+	{
+		if( glm::distance(position, p.second->getPosition()) < radius )
+		{
+			gw->destroyObjectQueued(p.second);
+		}
+	}
+
+	/// @todo Do we also have to clear all projectiles + particles *in this area*, even if the bool is false?
+
+	if (clearParticles)
+	{
+		RW_UNUSED(clearParticles);
+		RW_UNIMPLEMENTED("game_clear_area(): should clear all particles and projectiles (not limited to area!)");
+	}
+}
+
 void game_clear_print(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
@@ -1247,7 +1280,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x038B, game_load_models_now, 0, "Load Requested Models Now" );
 	
 	bindFunction(0x0394, game_play_music_id, 1, "Play music");
-	bindUnimplemented( 0x0395, game_clear_area, 5, "Clear Area Vehicles and Pedestrians" );
+	bindFunction(0x0395, game_clear_area, 5, "Clear Area Vehicles and Pedestrians" );
 	
 	bindUnimplemented( 0x0397, game_set_vehicle_siren, 2, "Set Vehicle Siren" );
 	
