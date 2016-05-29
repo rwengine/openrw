@@ -1354,6 +1354,9 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x03BA, game_clear_area_vehicles, 6, "Clear Cars From Area" );
 	
+	bindUnimplemented( 0x03BC, game_create_cylinder, 5, "Create Cylinder" ); /// @todo Other sources call this "sphere", this should be our AreaIndicator?
+	bindUnimplemented( 0x03BD, game_destroy_cylinder, 1, "Destroy Cylinder" );
+
 	bindFunction(0x03F3, game_get_vehicle_colours, 3, "Get Vehicle Colours" );
 	
 	bindUnimplemented(0x03F9, game_make_characters_converse, 3, "Make characters converse");
