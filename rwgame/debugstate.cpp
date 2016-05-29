@@ -8,18 +8,21 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void jumpCharacter(RWGame* game, CharacterObject* player, const glm::vec3& target)
+static void jumpCharacter(RWGame* game, CharacterObject* player, const glm::vec3& target, bool ground = true)
 {
-	glm::vec3 ground = game->getWorld()->getGroundAtPosition(target);
+	glm::vec3 newPosition = target;
+	if (ground) {
+		newPosition = game->getWorld()->getGroundAtPosition(newPosition) + glm::vec3(0.f, 0.f, 1.f);
+	}
 	if( player )
 	{
 		if( player->getCurrentVehicle() )
 		{
-			player->getCurrentVehicle()->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			player->getCurrentVehicle()->setPosition(newPosition);
 		}
 		else
 		{
-			player->setPosition(ground + glm::vec3(0.f, 0.f, 1.f));
+			player->setPosition(newPosition);
 		}
 	}
 }
@@ -84,6 +87,9 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Quickload", [=] {
 		game->loadGame("quicksave");
+	}, entryHeight));
+	m->addEntry(Menu::lambda("Jump to Debug Camera", [=] {
+		jumpCharacter(game, game->getPlayer()->getCharacter(), _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f), false);
 	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Garage", [=] {
 		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(270.f, -605.f, 40.f));
