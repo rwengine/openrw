@@ -79,16 +79,20 @@ bool SoundManager::initializeOpenAL()
 
 bool SoundManager::loadSound(const std::string& name, const std::string& fileName)
 {
-	auto emplaced = sounds.emplace(name, Sound{});
-	if ( ! emplaced.second) {
-		return false;
+	Sound* sound = nullptr;
+	auto sound_iter = sounds.find(name);
+
+	if (sound_iter != sounds.end()) {
+		sound = &sound_iter->second;
+	} else {
+		auto emplaced = sounds.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
+		sound = &emplaced.first->second;
+
+		sound->source.loadFromFile(fileName);
+		sound->isLoaded = sound->buffer.bufferData(sound->source);
 	}
-	Sound& sound = emplaced.first->second;
 
-	sound.source.loadFromFile(fileName);
-	sound.isLoaded = sound.buffer.bufferData(sound.source);
-
-	return sound.isLoaded;
+	return sound->isLoaded;
 }
 bool SoundManager::isLoaded(const std::string& name)
 {
@@ -134,8 +138,17 @@ bool SoundManager::playBackground(const std::string& fileName)
 
 bool SoundManager::loadMusic(const std::string& name, const std::string& fileName)
 {
-	auto music = musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
-	return music.first->second.openFromFile(fileName);
+	MADStream* music = nullptr;
+	auto music_iter = musics.find(name);
+
+	if (music_iter != musics.end()) {
+		music = &music_iter->second;
+	} else {
+		auto emplaced = musics.emplace(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple());
+		music = &emplaced.first->second;
+	}
+
+	return music->openFromFile(fileName);
 }
 void SoundManager::playMusic(const std::string& name)
 {
