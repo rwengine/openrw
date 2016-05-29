@@ -130,6 +130,15 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		game->getRenderer()->setCullOverride(true, _debugCam);
 	}, entryHeight));
 
+	// Optional block if the player is in a vehicle
+	auto player = game->getPlayer()->getCharacter();
+	auto cv = player->getCurrentVehicle();
+	if(cv) {
+		m->addEntry(Menu::lambda("Flip vehicle", [=] {
+			cv->setRotation(cv->getRotation() * glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
+		}, entryHeight));
+	}
+
 	this->enterMenu(m);
 
 	_debugCam.position = vp;
