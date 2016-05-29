@@ -60,6 +60,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 	, collision(nullptr)
 	, physRaycaster(nullptr)
 	, physVehicle(nullptr)
+	, dynamics(this)
 {
 	collision = new CollisionInstance;
 	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
@@ -80,6 +81,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 		float kR = 0.6f;
 
 		for(size_t w = 0; w < info->wheels.size(); ++w) {
+			dynamics.addWheel(info->wheels[w].position, glm::vec3(1.f, 0.f, 0.f), data->wheelScale/2.f);
+#if 0
 			auto restLength = travel;
 			auto heightOffset = info->handling.suspensionUpperLimit;
 			btVector3 connection(
@@ -102,6 +105,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			wi.m_rollInfluence = 0.30f;
 			float halfFriction = tuning.m_frictionSlip * 0.5f;
 			wi.m_frictionSlip = halfFriction + halfFriction * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
+#endif
 		}
 
 		// Hide all LOD and damage frames.
@@ -184,6 +188,8 @@ void VehicleObject::tick(float dt)
 void VehicleObject::tickPhysics(float dt)
 {
 	RW_UNUSED(dt);
+
+	dynamics.tickPhysics(dt);
 
 	if( physVehicle )
 	{

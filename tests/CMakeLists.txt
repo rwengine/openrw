@@ -46,6 +46,7 @@ set(TEST_SOURCES
 	"test_weapon.cpp"
 	"test_worker.cpp"
 	"test_world.cpp"
+	"test_VehicleDynamics.cpp"
 
 	# Hack in rwgame sources until there's a per-target test suite
 	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"

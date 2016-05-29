@@ -4,6 +4,7 @@
 #include <objects/GameObject.hpp>
 #include <map>
 #include <objects/VehicleInfo.hpp>
+#include <dynamics/VehicleDynamics.hpp>
 
 class CollisionInstance;
 class btVehicleRaycaster;
@@ -35,6 +36,7 @@ public:
 	CollisionInstance* collision;
 	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
+	VehicleDynamics dynamics;
 	
 	struct Part
 	{

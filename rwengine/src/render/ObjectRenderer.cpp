@@ -394,46 +394,25 @@ void ObjectRenderer::renderVehicle(VehicleObject *vehicle,
 				outList);
 
 	// Draw wheels n' stuff
-	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
+	const auto &wheels = vehicle->dynamics.getWheels();
+	for( size_t w = 0; w < wheels.size(); ++w) {
 		auto woi = m_world->data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
 			Model* wheelModel = m_world->data->models["wheels"]->resource;
-			auto& wi = vehicle->physVehicle->getWheelInfo(w);
+			const auto& wi = wheels[w];
 			if( wheelModel ) {
-				// Construct our own matrix so we can use the local transform
-				vehicle->physVehicle->updateWheelTransform(w, false);
-				/// @todo migrate this into Vehicle physics tick so we can interpolate old -> new
+				auto wheelPosition = wi.position + glm::vec3(0.f, 0.f, vehicle->info->handling.suspensionUpperLimit + wi.displacement);
+				glm::mat4 wheelMatrix = matrixModel;
+				wheelMatrix = glm::translate(wheelMatrix, wheelPosition);
 
-				glm::mat4 wheelM ( matrixModel );
-
-				auto up = -wi.m_wheelDirectionCS;
-				auto right = wi.m_wheelAxleCS;
-				auto fwd = up.cross(right);
-				btQuaternion steerQ(up, wi.m_steering);
-				btQuaternion rollQ(right, -wi.m_rotation);
-
-				btMatrix3x3 basis(
-						right[0], fwd[0], up[0],
-						right[1], fwd[1], up[1],
-						right[2], fwd[2], up[2]
-						);
-
-
-				btTransform t;
-				t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
-				t.setOrigin(wi.m_chassisConnectionPointCS + wi.m_wheelDirectionCS * wi.m_raycastInfo.m_suspensionLength);
-
-				t.getOpenGLMatrix(glm::value_ptr(wheelM));
-				wheelM = matrixModel * wheelM;
-
-				wheelM = glm::scale(wheelM, glm::vec3(vehicle->vehicle->wheelScale));
-				if(wi.m_chassisConnectionPointCS.x() < 0.f) {
-					wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
+				wheelMatrix = glm::scale(wheelMatrix, glm::vec3(vehicle->vehicle->wheelScale));
+				if(wi.position.x < 0.f) {
+					wheelMatrix = glm::scale(wheelMatrix, glm::vec3(-1.f, 1.f, 1.f));
 				}
 
 				renderWheel(vehicle,
 							wheelModel,
-							wheelM,
+							wheelMatrix,
 							woi->modelName,
 							outList);
 			}
