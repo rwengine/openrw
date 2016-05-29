@@ -442,24 +442,27 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 		}
 		else {
 			// Make sure we leave any vehicle we're inside
-			enterVehicle(nullptr, 0);
+			leaveVehicle();
 			vehicle->setOccupant(seat, this);
 			setCurrentVehicle(vehicle, seat);
 			//enterAction(VehicleSit);
 			return true;
 		}
 	}
-	else {
-		if(currentVehicle) {
-			currentVehicle->setOccupant(seat, nullptr);
-			// Disabled due to crashing.
-			//setPosition(currentVehicle->getPosition()); 
-			setCurrentVehicle(nullptr, 0);
-			return true;
-		}
+	return false;
+}
+bool CharacterObject::leaveVehicle()
+{
+	if(currentVehicle) {
+		currentVehicle->setOccupant(currentSeat, nullptr);
+		// Disabled due to crashing.
+		//setPosition(currentVehicle->getPosition()); 
+		setCurrentVehicle(nullptr, 0);
+		return true;
 	}
 	return false;
 }
+
 
 bool CharacterObject::isStopped() const
 {
