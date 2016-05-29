@@ -187,9 +187,13 @@ void VehicleObject::tickPhysics(float dt)
 
 	if( physVehicle )
 	{
-		// todo: a real engine function
-		float velFac = info->handling.maxVelocity;
-		float engineForce = info->handling.acceleration * throttle * velFac;
+		float currentVelocity = physVehicle->getCurrentSpeedKmHour();
+		float velFac = 1.f;
+		if (currentVelocity >= info->handling.maxVelocity) // (info->handling.maxVelocity - currentVelocity) / info->handling.maxVelocity;
+		{
+			velFac = 0.f;
+		}
+		float engineForce = glm::sqrt(info->handling.acceleration) * throttle * info->handling.mass * velFac;
 		if( fabs(engineForce) >= 0.001f )
 		{
 			collision->getBulletBody()->activate(true);

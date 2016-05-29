@@ -647,6 +647,10 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 			ss << "Idle";
 		}
 		ss << std::endl;
+		auto vehicle = player->getCharacter()->getCurrentVehicle();
+		if (vehicle) {
+			ss << "Velocity: " << (vehicle->getVelocity()/1000.f)*60*60 << " km/h\n";
+		}
 	}
 	
 	TextRenderer::TextInfo ti;
