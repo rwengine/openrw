@@ -160,24 +160,15 @@ void InstanceObject::setRotation(const glm::quat &r)
 
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 {
-	bool explodeOnHit = (object->flags&ObjectData::EXPLODEONHIT) == ObjectData::EXPLODEONHIT;
-	bool smash = (object->flags&ObjectData::SMASHABLE) == ObjectData::SMASHABLE;
+	bool smash = false;
 	if( dynamics ) {
 		smash = dynamics->collDamageFlags == 80;
-
 		if( dmg.impulse >= dynamics->uprootForce && (body->body->getCollisionFlags() & btRigidBody::CF_STATIC_OBJECT) != 0 ) {
 			_enablePhysics = true;
 		}
 	}
-	if(explodeOnHit || smash)
-	{
-		if(explodeOnHit) {
-			// explode
-			health = -1.f;
-		}
-		else {
-			health -= dmg.hitpoints;
-		}
+	if(smash) {
+		health -= dmg.hitpoints;
 		return true;
 	}
 	return false;

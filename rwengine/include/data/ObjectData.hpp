@@ -52,23 +52,15 @@ struct ObjectData : public ObjectInformation
 	
 	short timeOn;
 	short timeOff;
-	
+
 	enum {
-		WET          = 1,       /// Render with a wet effect
-		NIGHTONLY    = 1 << 1,  /// Render only during the night
-		ALPHA1       = 1 << 2,  /// Alpha 
-		ALPHA2       = 1 << 3,  /// Alpha
-		DAYONLY      = 1 << 4,  /// Render only during the day
-		INTERIOR     = 1 << 5,  /// Is part of an interior
-		NOSHADOWMESH = 1 << 6,  /// Disable shadow mesh
-		DONTCULL     = 1 << 7,  /// Disable culling
-		NODRAWDIST   = 1 << 8,  /// Object won't be affected by draw distance
-		BREAKABLE    = 1 << 9,  /// Object can be broken
-		SMASHABLE    = 1 << 10, /// Object can be smashed and broken
-		GRGEDOOR     = 1 << 11, /// Is a garage door (SA and IV only)
-		MULTICLUMP   = 1 << 12, /// Multiclump
-		WBRIGHTNESS  = 1 << 13, /// Weather PoleShd value effects brightness.
-		EXPLODEONHIT = 1 << 14, /// Object explodes after being hit
+		NORMAL_CULL = 1,           /// Cull model if player doesn't look at it. Ignored in GTA 3.
+		DO_NOT_FADE = 1 << 1,      /// Do not fade the object when it is being loaded into or out of view.
+		DRAW_LAST = 1 << 2,        /// Model is transparent. Render this object after all opaque objects, allowing transparencies of other objects to be visible through this object.
+		ADDITIVE = 1 << 3,         /// Render with additive blending. Previous flag must be enabled too.
+		IS_SUBWAY = 1 << 4,        /// Model is a tunnel, i.e. set the object as invisible unless the player enters cull zone flag 128. This flag works only with static models.
+		IGNORE_LIGHTING = 1 << 5,  /// Don't use static lighting, we want dynamic if it's possible.
+		NO_ZBUFFER_WRITE = 1 << 6, /// Model is a shadow. Disable writing to z-buffer when rendering it, allowing transparencies of other objects, shadows, and lights to be visible through this object. (Not implemented in the PS2 version)
 	};
 
 	// Information loaded from PATH sections
