@@ -27,13 +27,12 @@ bool LoaderIMG::load(const std::string& filename)
 		unsigned long fileSize = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
-		m_assets.resize(fileSize / 32);
-
 		m_assetCount = fileSize / 32;
+		m_assets.resize(m_assetCount);
 
-		if( fread(&m_assets[0], sizeof(LoaderIMGFile), fileSize / 32, fp) == 0 )
-		{
-			std::cout << "No Records in IMG archive" << std::endl;
+		if ((m_assetCount = fread(&m_assets[0], sizeof(LoaderIMGFile), m_assetCount, fp)) != fileSize / 32) {
+			m_assets.resize(m_assetCount);
+			std::cout << "Error reading records in IMG archive" << std::endl;
 		}
 
 		fclose(fp);
@@ -63,31 +62,22 @@ bool LoaderIMG::findAssetInfo(const std::string& assetname, LoaderIMGFile& out)
 char* LoaderIMG::loadToMemory(const std::string& assetname)
 {
 	LoaderIMGFile assetInfo;
-	bool found = false;
-	for(size_t i = 0; i < m_assets.size(); ++i)
-	{
-		if(strcasecmp(m_assets[i].name, assetname.c_str()) == 0)
-		{
-			assetInfo = m_assets[i];
-			found = true;
-		}
-	}
+	bool found = findAssetInfo(assetname, assetInfo);
 
-	if(!found)
-	{
+	if (!found) {
 		std::cerr << "Asset '" << assetname << "' not found!" << std::endl;
-		return 0;
+		return nullptr;
 	}
 	
-	std::string dirName = m_archive;
+	std::string imgName = m_archive;
 
-	FILE* fp = fopen(dirName.c_str(), "rb");
+	FILE* fp = fopen(imgName.c_str(), "rb");
 	if(fp)
 	{
 		char* raw_data = new char[assetInfo.size * 2048];
 
 		fseek(fp, assetInfo.offset * 2048, SEEK_SET);
-		if( fread(raw_data, 2048, assetInfo.size, fp) == 0 ) {
+		if( fread(raw_data, 2048, assetInfo.size, fp) != assetInfo.size ) {
 			std::cerr << "Error reading asset " << assetInfo.name << std::endl;
 		}
 
@@ -111,7 +101,7 @@ bool LoaderIMG::saveAsset(const std::string& assetname, const std::string& filen
 		LoaderIMGFile asset;
 		if( findAssetInfo( assetname, asset ) )
 		{
-			fwrite(raw_data, asset.size * 2048, 1, dumpFile);
+			fwrite(raw_data, 2048, asset.size, dumpFile);
 			printf("=> IMG: Saved %s to disk with filename %s\n", assetname.c_str(), filename.c_str());
 		}
 		fclose(dumpFile);

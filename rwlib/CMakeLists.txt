@@ -29,6 +29,8 @@ SET(RWLIB_SOURCES
 	"source/loaders/RWBinaryStream.hpp"
 	"source/loaders/LoaderDFF.hpp"
 	"source/loaders/LoaderDFF.cpp"
+	"source/loaders/LoaderSDT.hpp"
+	"source/loaders/LoaderSDT.cpp"
 	"source/loaders/LoaderTXD.hpp"
 	"source/loaders/LoaderTXD.cpp"
 
