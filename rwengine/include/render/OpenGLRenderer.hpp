@@ -313,14 +313,18 @@ private:
 	// Set state
 	void setBlend(bool enable)
 	{
-		if (enable && !blendEnabled)
-		{
+		/// @todo set blendEnabled, currently not possible because other functions keep trashing the state
+#if 0
+		if (enable && !blendEnabled) {
 			glEnable(GL_BLEND);
-		}
-		else if(!enable && blendEnabled)
-		{
+			blendEnabled = enable;
+		} else if(!enable && blendEnabled) {
 			glDisable(GL_BLEND);
+			blendEnabled = enable;
 		}
+#else
+		glEnable(GL_BLEND);
+#endif
 	}
 
 	void setDepthWrite(bool enable)
