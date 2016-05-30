@@ -325,6 +325,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 	dp.count = gb.getCount();
 	auto ftexture = renderer->getData()->findTexture(fonts[ti.font]);
 	dp.textures = {ftexture->getName()};
+	dp.depthWrite = false;
 	
 	renderer->getRenderer()->drawArrays(glm::mat4(), &db, dp);
 

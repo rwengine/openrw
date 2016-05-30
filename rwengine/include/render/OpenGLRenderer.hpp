@@ -60,6 +60,8 @@ public:
 		Textures textures;
 		/// Alpha blending state
 		bool blend;
+		// Depth writing state
+		bool depthWrite;
 		/// Material
 		glm::u8vec4 colour;
 		/// Material
@@ -72,6 +74,7 @@ public:
 		// Default state -- should be moved to materials
 		DrawParameters()
 			: blend(false)
+			, depthWrite(true)
 			, ambient(1.f)
 			, diffuse(1.f)
 			, visibility(1.f)
@@ -305,17 +308,30 @@ private:
 
 	// State Cache
 	bool blendEnabled;
+	bool depthWriteEnabled;
 
 	// Set state
 	void setBlend(bool enable)
 	{
-		if (enable && !blendEnabled)
-		{
+		/// @todo set blendEnabled, currently not possible because other functions keep trashing the state
+#if 0
+		if (enable && !blendEnabled) {
 			glEnable(GL_BLEND);
-		}
-		else if(!enable && blendEnabled)
-		{
+			blendEnabled = enable;
+		} else if(!enable && blendEnabled) {
 			glDisable(GL_BLEND);
+			blendEnabled = enable;
+		}
+#else
+		glEnable(GL_BLEND);
+#endif
+	}
+
+	void setDepthWrite(bool enable)
+	{
+		if (enable != depthWriteEnabled) {
+			glDepthMask(enable ? GL_TRUE : GL_FALSE);
+			depthWriteEnabled = enable;
 		}
 	}
 

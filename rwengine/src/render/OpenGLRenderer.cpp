@@ -190,6 +190,7 @@ OpenGLRenderer::OpenGLRenderer()
 	, currentObjectEntry(0)
 	, entryAlignment(0)
 	, blendEnabled(false)
+	, depthWriteEnabled(true)
 	, currentDebugDepth(0)
 {
 	// We need to query for some profiling exts.
@@ -294,11 +295,17 @@ void OpenGLRenderer::clear(const glm::vec4& colour, bool clearColour, bool clear
 		flags |= GL_COLOR_BUFFER_BIT;
 		glClearColor(colour.r, colour.g, colour.b, colour.a);
 	}
+	bool depthWriteWasEnabled = depthWriteEnabled;
 	if( clearDepth ) {
 		flags |= GL_DEPTH_BUFFER_BIT;
+		setDepthWrite(true);
 	}
 
 	glClear(flags);
+
+	if(depthWriteWasEnabled != depthWriteEnabled) {
+		setDepthWrite(depthWriteWasEnabled);
+	}
 }
 
 void OpenGLRenderer::setSceneParameters(const Renderer::SceneUniformData& data)
@@ -317,6 +324,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw, cons
 	}
 
 	setBlend(p.blend);
+	setDepthWrite(p.depthWrite);
 
 	ObjectUniformData oudata {
 		model,
