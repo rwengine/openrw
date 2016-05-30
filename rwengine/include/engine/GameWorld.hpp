@@ -24,6 +24,7 @@ class VehicleObject;
 #include <render/VisualFX.hpp>
 #include <data/ObjectData.hpp>
 
+struct BlipData;
 class InventoryItem;
 struct WeaponScan;
 
@@ -214,6 +215,13 @@ public:
 	ObjectPool& getTypeObjectPool(GameObject* object);
 
 	std::vector<PlayerController*> players;
+
+	/**
+	 * @brief getBlipTarget
+	 * @param blip
+	 * @return The targetted object of the given blip
+	 */
+	GameObject *getBlipTarget(const BlipData &blip) const;
 
 	/**
 	 * Stores objects within a grid cell, and their maximum

@@ -6,10 +6,6 @@
 #include <core/Logger.hpp>
 #include <cstring>
 
-#if SCM_DEBUG_INSTRUCTIONS
-#include <iostream>
-#endif
-
 SCMOpcodes::~SCMOpcodes()
 {
 	for(auto m : modules)
@@ -93,7 +89,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
                 pc += sizeof(SCMByte) * 2;
 				break;
 			case TGlobal: {
-                auto v = _file->read<std::uint16_t>(pc);
+				auto v = _file->read<std::uint16_t>(pc);
 				parameters.back().globalPtr = globalData.data() + v; //* SCM_VARIABLE_SIZE;
 				if( v >= _file->getGlobalsSize() )
 				{
@@ -103,7 +99,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 			}
 				break;
 			case TLocal: {
-                auto v = _file->read<std::uint16_t>(pc);
+				auto v = _file->read<std::uint16_t>(pc);
 				parameters.back().globalPtr = t.locals.data() + v * SCM_VARIABLE_SIZE;
 				if( v >= SCM_THREAD_LOCAL_SIZE )
 				{
@@ -148,6 +144,18 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
                 bpHandler(bp);
             }
         }
+
+#if RW_SCRIPT_DEBUG
+		if (strcmp(t.name, "EIGHT") == 0)
+		{
+			printf("% 8s  %04x %04x % 25s", t.name, t.programCounter, opcode, code.signature.c_str());
+			for (auto& a : sca.getParameters())
+			{
+				printf(" %08x", a.integerValue());
+			}
+			printf("\n");
+		}
+#endif
 
         // After debugging has been completed, update the program counter
         t.programCounter = pc;

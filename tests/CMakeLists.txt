@@ -1,3 +1,9 @@
+##############################################################################
+#    Unit Tests
+##############################################################################
+
+find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+
 set(TEST_SOURCES
 	"main.cpp"
 	"test_animation.cpp"
@@ -6,6 +12,7 @@ set(TEST_SOURCES
 	"test_character.cpp"
 	"test_chase.cpp"
 	"test_cutscene.cpp"
+	"test_config.cpp"
 	"test_data.cpp"
 	"test_FileIndex.cpp"
 	"test_GameData.cpp"
@@ -33,29 +40,31 @@ set(TEST_SOURCES
 	"test_weapon.cpp"
 	"test_worker.cpp"
 	"test_world.cpp"
+
+	# Hack in rwgame sources until there's a per-target test suite
+	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
 	)
 
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
 add_executable(run_tests ${TEST_SOURCES})
 
-include_directories(include)
-include_directories("${CMAKE_SOURCE_DIR}/tests")
+include_directories(
+	include
+	"${CMAKE_SOURCE_DIR}/tests"
+	"${CMAKE_SOURCE_DIR}/rwengine/include"
+	"${CMAKE_SOURCE_DIR}/rwgame")
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
-
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" "${CMAKE_SOURCE_DIR}/rwgame")
-include_directories(${BULLET_INCLUDE_DIR} SYSTEM)
+include_directories(SYSTEM
+	${BULLET_INCLUDE_DIR}
+	${SFML_INCLUDE_DIR})
 
 target_link_libraries(run_tests
 	rwengine
-	sfml-window
-	sfml-system
-	sfml-graphics
+	inih
 	${OPENGL_LIBRARIES}
-	BulletDynamics
-	BulletCollision
-	LinearMath
+	${SFML_LIBRARIES}
+	${BULLET_LIBRARIES}
 	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 add_test(UnitTests run_tests)

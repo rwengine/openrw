@@ -18,9 +18,9 @@
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/GenericPickup.hpp>
+#include <objects/ItemPickup.hpp>
 #include <core/Logger.hpp>
+#include <items/InventoryItem.hpp>
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -52,7 +52,7 @@ void game_set_object_position(const ScriptArguments& args)
 {
 	auto character = args.getObject<Tobject>(0);
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
-	character->setPosition(position);// + spawnMagic);
+	character->setPosition(position + spawnMagic);
 }
 
 bool game_player_in_area_2d(const ScriptArguments& args)
@@ -158,15 +158,17 @@ void game_get_vehicle_position(const ScriptArguments& args)
 	}
 }
 
+template <class T>
 void game_get_character_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	*args[1].globalInteger = character->getCurrentVehicle()->getGameObjectID();
 }
 
+template <class T>
 bool game_character_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	auto vehicle = args.getObject<VehicleObject>(1);
 	
 	if( character == nullptr || vehicle == nullptr )
@@ -361,7 +363,10 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 bool game_character_near_character_2D(const ScriptArguments& args)
 {
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	RW_CHECK(character != nullptr, "character is null");
 	auto target = args.getObject<CharacterObject>(1);
+	RW_CHECK(target != nullptr, "target is null");
+	if (character == nullptr || target == nullptr) return false;
 
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
@@ -375,9 +380,10 @@ bool game_character_near_character_2D(const ScriptArguments& args)
 	return false;
 }
 
+template <class T>
 bool game_character_near_character_in_vehicle_2D(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	auto target = args.getObject<CharacterObject>(1);
 	glm::vec2 center(target->getPosition());
 	glm::vec2 size(args[2].real, args[3].real);
@@ -537,16 +543,19 @@ void game_dont_remove_object(const ScriptArguments& args)
     }
 }
 
+template <class T>
 bool game_character_in_area_on_foot(const ScriptArguments& args)
 {
+	RW_UNIMPLEMENTED("game_character_in_area_on_foot");
 	RW_UNUSED(args);
 	/// @todo
 	return false;
 }
 
+template <class T>
 bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	bool drawCylinder = !!args[7].integer;
 	
 	if( character && character->getCurrentVehicle() != nullptr )
@@ -574,9 +583,10 @@ bool game_character_stoped_in_volume_in_vehicle(const ScriptArguments& args)
 }
 
 
+template <class T>
 bool game_character_stoped_in_volume(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	
 	glm::vec3 vec1(args[1].real, args[2].real, args[3].real);
 	glm::vec3 vec2(args[4].real, args[5].real, args[6].real);
@@ -609,9 +619,10 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 }
 
 
+template <class T>
 bool game_is_character_stopped(const ScriptArguments& args)
 {
-	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	
 	if( character && character->getCurrentVehicle() != nullptr )
 	{
@@ -622,9 +633,11 @@ bool game_is_character_stopped(const ScriptArguments& args)
 }
 
 
+template <class T>
 bool game_character_in_area_9(const ScriptArguments& args)
 {
 	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_character_in_area_9");
 	return false;
 }
 
@@ -788,12 +801,31 @@ void game_create_pickup(const ScriptArguments& args)
 		args.getWorld()->data->loadTXD(data->textureName+".txd");
 	}
 	
+	PickupObject* pickup = nullptr;
+
+	if ( id >= 170 && id <= 184 )
+	{
+		// Find the item for this model ID
+		auto world = args.getWorld();
+		InventoryItem *item = nullptr;
+		for (auto i = 0; i < maxInventorySlots; ++i)
+		{
+			item = world->getInventoryItem(i);
+			if (item->getModelID() == id) {
+				auto pickuptype = (PickupObject::PickupType)type;
+				pickup = new ItemPickup(args.getWorld(), pos, pickuptype, item);
+				world->pickupPool.insert( pickup );
+				world->allObjects.push_back(pickup);
+				*args[5].globalInteger = pickup->getGameObjectID();
+			}
+		}
+	}
+	else
+	{
+		RW_UNIMPLEMENTED("non-item pickups");
+		*args[5].globalInteger = 0;
+	}
 	
-	auto pickup = new GenericPickup(args.getWorld(), pos, id, type);
-	
-	args.getWorld()->pickupPool.insert( pickup );
-	
-	*args[5].globalInteger = pickup->getGameObjectID();
 }
 
 bool game_is_pickup_collected(const ScriptArguments& args)
@@ -911,6 +943,7 @@ template <class Tobject>
 void game_destroy_object(const ScriptArguments& args)
 {
 	auto object = args.getObject<Tobject>(0);
+	RW_CHECK(object != nullptr, "destroying a null object?");
 	
 	args.getWorld()->destroyObjectQueued(object);
 }
@@ -1092,10 +1125,10 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
 	
-	bindFunction(0x00D9, game_get_character_vehicle, 2, "Get Character Vehicle" );
-	bindFunction(0x00DA, game_get_character_vehicle, 2, "Get Player Vehicle" );
-	bindFunction(0x00DB, game_character_in_vehicle, 2, "Is Character in Vehicle" );
-	bindFunction(0x00DC, game_character_in_vehicle, 2, "Is Player in Vehicle" );
+	bindFunction(0x00D9, game_get_character_vehicle<CharacterObject>, 2, "Get Character Vehicle" );
+	bindFunction(0x00DA, game_get_character_vehicle<PlayerController>, 2, "Get Player Vehicle" );
+	bindFunction(0x00DB, game_character_in_vehicle<CharacterObject>, 2, "Is Character in Vehicle" );
+	bindFunction(0x00DC, game_character_in_vehicle<PlayerController>, 2, "Is Player in Vehicle" );
 	
     bindFunction(0x00DE, game_player_in_model, 2, "Is Player In Model" );
     bindFunction(0x00DF, game_character_in_any_vehicle, 1, "Is Character In Any Vehicle" );
@@ -1107,7 +1140,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x00E9, game_character_near_character_2D, 5, "Locate Character near Character 2D");
 	
-	bindFunction(0x00EB, game_character_near_character_in_vehicle_2D, 5, "Is player near character in vehicle" );
+	bindFunction(0x00EB, game_character_near_character_in_vehicle_2D<PlayerController>, 5, "Is player near character in vehicle" );
 	
 	bindFunction(0x00ED, game_character_near_point_on_foot_2D, 6, "Is Character near point on foot" );
 	
@@ -1143,12 +1176,12 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	
-	bindFunction(0x019C, game_character_in_area_on_foot, 8, "Is Player in Area on Foot" );
-	bindFunction(0x019E, game_character_stoped_in_volume, 8, "Is Player stopped in volume" );
+	bindFunction(0x019C, game_character_in_area_on_foot<PlayerController>, 8, "Is Player in Area on Foot" );
+	bindFunction(0x019E, game_character_stoped_in_volume<PlayerController>, 8, "Is Player stopped in volume" );
 	
-	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle, 8, "Is Player Stopped in cube in vehicle" );
-	bindFunction(0x01A8, game_character_stoped_in_volume, 8, "Is Char Stopped in volume" );
-	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle, 8, "Is Char Stopped in cube in vehicle" );
+	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle<PlayerController>, 8, "Is Player Stopped in cube in vehicle" );
+	bindFunction(0x01A8, game_character_stoped_in_volume<CharacterObject>, 8, "Is Char Stopped in volume" );
+	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle<CharacterObject>, 8, "Is Char Stopped in cube in vehicle" );
 	
 	bindUnimplemented( 0x01BB, game_object_coordinates, 4, "Get Object Coordinates" );
 	
@@ -1186,9 +1219,9 @@ ObjectModule::ObjectModule()
 	bindFunction(0x029B, game_create_object_world, 5, "Create Object no offset" );
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
 	
-	bindFunction(0x029F, game_is_character_stopped, 1, "Is Player Stopped" );
+	bindFunction(0x029F, game_is_character_stopped<PlayerController>, 1, "Is Player Stopped" );
 	
-	bindFunction(0x02B3, game_character_in_area_9, 9, "Is Player In Area" );
+	bindFunction(0x02B3, game_character_in_area_9<PlayerController>, 9, "Is Player In Area" );
 	
 	bindFunction(0x02DE, game_player_in_taxi, 1, "Is Player In Taxi" );
 	
@@ -1219,6 +1252,6 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x042B, game_clear_volume_pedestrians, 6, "Clear volume pedestrians" );
 	
-	bindFunction(0x0442, game_character_in_vehicle, 2, "Is Player in This Vehicle" );
-	bindFunction(0x0448, game_character_in_vehicle, 2, "Is Character in This Vehicle" );
+	bindFunction(0x0442, game_character_in_vehicle<PlayerController>, 2, "Is Player in This Vehicle" );
+	bindFunction(0x0448, game_character_in_vehicle<CharacterObject>, 2, "Is Character in This Vehicle" );
 }

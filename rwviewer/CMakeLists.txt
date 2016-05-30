@@ -23,12 +23,13 @@ add_executable(rwviewer
 	AnimationListModel.cpp
 	AnimationListWidget.cpp)
 
-include_directories("${CMAKE_SOURCE_DIR}/rwengine/include" ${BULLET_INCLUDE_DIR})
+include_directories(
+	"${CMAKE_SOURCE_DIR}/rwengine/include")
+include_directories(SYSTEM
+	${BULLET_INCLUDE_DIR})
 
 target_link_libraries(rwviewer
 	rwengine
-	sfml-graphics
-	sfml-system
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES})
 qt5_use_modules(rwviewer Widgets OpenGL)

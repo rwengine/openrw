@@ -289,7 +289,7 @@ private:
 			currentUBO = buffer;
 		}
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(T), &data, GL_DYNAMIC_DRAW);
-#if RW_USING(RENDER_PROFILER)
+#if RW_PROFILER
 		if( currentDebugDepth > 0 )
 		{
 			profileInfo[currentDebugDepth-1].uploads++;

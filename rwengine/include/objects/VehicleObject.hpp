@@ -81,12 +81,27 @@ public:
 	void tickPhysics(float dt);
 	
 	bool isFlipped() const;
+
+	float getVelocity() const;
 	
 	void ejectAll();
 	
 	GameObject* getOccupant(size_t seat);
 	
 	void setOccupant(size_t seat, GameObject* occupant);
+
+	/**
+	 * @brief canOccupantExit
+	 * @return true if the vehicle is currently exitable
+	 */
+	bool canOccupantExit() const;
+
+	/**
+	 * @brief isOccupantDriver
+	 * @param seat
+	 * @return True if the given seat is the driver's seat.
+	 */
+	bool isOccupantDriver(size_t seat) const;
 
 	glm::vec3 getSeatEntryPosition(size_t seat) const {
 		auto pos = info->seats[seat].offset;

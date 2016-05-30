@@ -284,7 +284,25 @@ template <class Tobject>
 void game_add_object_blip(const ScriptArguments& args)
 {
 	BlipData data;
-	data.target = args.getObject<Tobject>(0)->getGameObjectID();
+	auto target = args.getObject<Tobject>(0);
+	data.target = target->getGameObjectID();
+
+	switch(target->type()) {
+	case GameObject::Vehicle:
+		data.type = BlipData::Vehicle;
+		break;
+	case GameObject::Character:
+		data.type = BlipData::Character;
+		break;
+	case GameObject::Pickup:
+		data.type = BlipData::Pickup;
+		break;
+	default:
+		data.type = BlipData::Location;
+		RW_ERROR("Unhandled blip type");
+		break;
+	}
+
 	data.texture = "";
 	*args[1].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }

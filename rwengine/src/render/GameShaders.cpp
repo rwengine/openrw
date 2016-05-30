@@ -160,7 +160,7 @@ layout(location = 3) in vec2 texCoords;
 out vec3 Normal;
 out vec2 TexCoords;
 out vec4 Colour;
-out vec3 WorldSpace;
+out vec4 WorldSpace;
 
 layout(std140) uniform SceneData {
 	mat4 projection;
@@ -190,7 +190,7 @@ void main()
 	vec4 viewspace = view * worldspace;
 	gl_Position = projection * viewspace;
 
-	WorldSpace = worldspace.xyz;
+	WorldSpace = vec4(worldspace.xyz, length(worldspace.xyz - campos.xyz));
 })";
 
 const char* WorldObject::FragmentShader = R"(
@@ -199,7 +199,7 @@ const char* WorldObject::FragmentShader = R"(
 in vec3 Normal;
 in vec2 TexCoords;
 in vec4 Colour;
-in vec3 WorldSpace;
+in vec4 WorldSpace;
 uniform sampler2D texture;
 out vec4 fragOut;
 
@@ -240,7 +240,8 @@ void main()
 	if(visibility <= filterMatrix[int(gl_FragCoord.x)%4][int(gl_FragCoord.y)%4]) discard;
 	if(diffuse.a <= alphaThreshold) discard;
 	vec4 colour_dyn = diffuse * colour;
-	fragOut = vec4(colour_dyn.rgb * dynamic.rgb + ambient.rgb * ambient.a, colour_dyn.a);
+	float fog = 1.0 - clamp( (fogEnd-WorldSpace.w)/(fogEnd-fogStart), 0.0, 1.0 );
+	fragOut = vec4(mix(colour_dyn.rgb * dynamic.rgb + ambient.rgb * ambient.a, fogColor.rgb, fog), colour_dyn.a);
 })";
 
 const char* Particle::FragmentShader = R"(

@@ -63,6 +63,8 @@ struct BasicState
 	uint32_t weatherType;
 	float cameraData;
 	float cameraData2;
+
+	BasicState ();
 };
 
 /** Block 15 player info */
@@ -81,6 +83,8 @@ struct PlayerInfo
 	uint8_t thaneOfLibertyCity;
 	uint8_t singlePayerHealthcare;
 	uint8_t unknown5[70];
+
+	PlayerInfo ();
 };
 
 /** Block 17 */
@@ -148,6 +152,8 @@ struct GameStats
 	uint16_t peopleKilledSinceCheckpoint; // ?
 	uint16_t peopleKilledSinceLastBustedOrWasted;
 	char lastMissionGXT[8];
+
+	GameStats ();
 };
 
 struct TextDisplayData

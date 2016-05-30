@@ -7,21 +7,6 @@
 #include <items/WeaponItem.hpp>
 #include <rw/defines.hpp>
 
-bool CharacterController::updateActivity()
-{
-	if( _currentActivity ) {
-		return _currentActivity->update(character, this);
-	}
-
-	return false;
-}
-
-void CharacterController::setActivity(CharacterController::Activity* activity)
-{
-	if( _currentActivity ) delete _currentActivity;
-	_currentActivity = activity;
-}
-
 CharacterController::CharacterController(CharacterObject* character)
 	: character(character)
 	, _currentActivity(nullptr)
@@ -34,9 +19,28 @@ CharacterController::CharacterController(CharacterObject* character)
 	character->controller = this;
 }
 
+bool CharacterController::updateActivity()
+{
+	if( _currentActivity && character->isAlive() ) {
+		return _currentActivity->update(character, this);
+	}
+
+	return false;
+}
+
+void CharacterController::setActivity(CharacterController::Activity* activity)
+{
+	if( _currentActivity ) delete _currentActivity;
+	_currentActivity = activity;
+}
+
 void CharacterController::skipActivity()
 {
-	setActivity(nullptr);
+	// Some activities can't be cancelled, such as the final phase of entering a vehicle
+	// or jumping.
+	if (getCurrentActivity() != nullptr &&
+			getCurrentActivity()->canSkip(character, this))
+		setActivity(nullptr);
 }
 
 void CharacterController::setNextActivity(CharacterController::Activity* activity)
@@ -49,6 +53,12 @@ void CharacterController::setNextActivity(CharacterController::Activity* activit
 		if(_nextActivity) delete _nextActivity;
 		_nextActivity = activity;
 	}
+}
+
+bool CharacterController::isCurrentActivity(const std::string& activity) const
+{
+	if (getCurrentActivity() == nullptr) return false;
+	return getCurrentActivity()->name() == activity;
 }
 
 void CharacterController::update(float dt)
@@ -116,6 +126,11 @@ void CharacterController::setMoveDirection(const glm::vec3 &movement)
 	character->setMovement(movement);
 }
 
+void CharacterController::setLookDirection(const glm::vec2 &look)
+{
+	character->setLook(look);
+}
+
 void CharacterController::setRunning(bool run)
 {
 	character->setRunning(run);
@@ -131,12 +146,13 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 	// Ignore vertical axis for the sake of simplicity.
 	if( glm::length(glm::vec2(targetDirection)) < 0.1f ) {
 		character->setPosition(glm::vec3(glm::vec2(target), cpos.z));
+		controller->setMoveDirection({0.f, 0.f, 0.f});
 		character->controller->setRunning(false);
 		return true;
 	}
 
-	glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-	character->rotation = r;
+	float hdg = atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
+	character->setHeading(glm::degrees(hdg));
 
 	controller->setMoveDirection({1.f, 0.f, 0.f});
 	controller->setRunning(sprint);
@@ -147,6 +163,7 @@ bool Activities::GoTo::update(CharacterObject *character, CharacterController *c
 bool Activities::Jump::update(CharacterObject* character, CharacterController* controller)
 {
 	RW_UNUSED(controller);
+	if (character->physCharacter == nullptr) return true;
 
 	if( !jumped )
 	{
@@ -163,8 +180,17 @@ bool Activities::Jump::update(CharacterObject* character, CharacterController* c
 	return false;
 }
 
+bool Activities::EnterVehicle::canSkip(CharacterObject *character, CharacterController *) const
+{
+	// If we're already inside the vehicle, it can't helped.
+	return character->getCurrentVehicle() == nullptr;
+}
+
 bool Activities::EnterVehicle::update(CharacterObject *character, CharacterController *controller)
 {
+	constexpr float kSprintToEnterDistance = 5.f;
+	constexpr float kGiveUpDistance = 100.f;
+
 	RW_UNUSED(controller);
 
 	// Boats don't have any kind of entry animation unless you're onboard.
@@ -234,7 +260,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			// Warp character to vehicle orientation
 			character->controller->setMoveDirection({0.f, 0.f, 0.f});
 			character->controller->setRunning(false);
-			character->rotation = vehicle->getRotation();
+			character->setHeading(
+						glm::degrees(glm::roll(vehicle->getRotation())));
 			
 			// Determine if the door open animation should be skipped.
 			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f ) )
@@ -247,12 +274,15 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 				character->playActivityAnimation(anm_open, false, true);
 			}
 		}
+		else if (targetDistance > kGiveUpDistance) {
+			return true;
+		}
 		else {
-			if( targetDistance > 5.f ) {
+			if( targetDistance > kSprintToEnterDistance ) {
 				character->controller->setRunning(true);
 			}
-			glm::quat r( glm::vec3{ 0.f, 0.f, atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>() } );
-			character->rotation = r;
+			character->setHeading(
+						glm::degrees(atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>()));
 			character->controller->setMoveDirection({1.f, 0.f, 0.f});
 		}
 	}
@@ -285,13 +315,32 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		return true;
 	}
 
+	bool isDriver = vehicle->isOccupantDriver(character->getCurrentSeat());
+
+	// If the vehicle is going too fast, slow down
+	if (isDriver)
+	{
+		if (!vehicle->canOccupantExit())
+		{
+			vehicle->setBraking(1.f);
+			return false;
+		}
+	}
+
 	if( character->animator->getAnimation(AnimIndexAction) == anm_exit ) {
 		if( character->animator->isCompleted(AnimIndexAction) ) {
 			auto exitpos = vehicle->getSeatEntryPosition(seat);
 
 			character->enterVehicle(nullptr, seat);
 			character->setPosition(exitpos);
-			
+
+			if (isDriver)
+			{
+				// Apply the handbrake
+				vehicle->setHandbraking(true);
+				vehicle->setThrottle(0.f);
+			}
+
 			return true;
 		}
 	}
@@ -318,8 +367,19 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	// Instant hit weapons loop their anim
 	// Thrown projectiles have lob / throw.
 
+	// Update player direction
+	character->setRotation(glm::angleAxis(character->getLook().x, glm::vec3{0.f, 0.f, 1.f}));
+
+	RW_CHECK(wepdata->inventorySlot < maxInventorySlots, "Inventory slot out of bounds");
+	auto& itemState = character->getCurrentState().weapons[wepdata->inventorySlot];
+	if (itemState.bulletsClip == 0 && itemState.bulletsTotal > 0) {
+		itemState.bulletsClip += std::min(int(itemState.bulletsTotal), wepdata->clipSize);
+		itemState.bulletsTotal -= itemState.bulletsClip;
+	}
+	bool hasammo = itemState.bulletsClip > 0;
+
 	if( wepdata->fireType == WeaponData::INSTANT_HIT ) {
-		if( _item->isFiring(character) ) {
+		if( _item->isFiring(character) && hasammo ) {
 
 			auto shootanim = character->engine->data->animations[wepdata->animation1];
 			if( shootanim ) {
@@ -334,6 +394,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 				auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 				if( currID >= firetime && ! _fired ) {
+					itemState.bulletsClip --;
 					_item->fire(character);
 					_fired = true;
 				}
@@ -350,7 +411,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 		}
 	}
 	/// @todo Use Thrown flag instead of project (RPG isn't thrown eg.)
-	else if( wepdata->fireType == WeaponData::PROJECTILE ) {
+	else if( wepdata->fireType == WeaponData::PROJECTILE && hasammo ) {
 		auto shootanim = character->engine->data->animations[wepdata->animation1];
 		auto throwanim = character->engine->data->animations[wepdata->animation2];
 
@@ -364,6 +425,7 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 			auto currID = character->animator->getAnimationTime(AnimIndexAction);
 
 			if( currID >= firetime && !_fired ) {
+				itemState.bulletsClip --;
 				_item->fire(character);
 				_fired = true;
 			}
@@ -377,6 +439,11 @@ bool Activities::ShootWeapon::update(CharacterObject *character, CharacterContro
 	}
 	else if( wepdata->fireType == WeaponData::MELEE ) {
 		RW_CHECK(wepdata->fireType != WeaponData::MELEE, "Melee attacks not implemented");
+		return true;
+	}
+	else
+	{
+		RW_ERROR("Unrecognized fireType: " << wepdata->fireType);
 		return true;
 	}
 

@@ -8,6 +8,8 @@
 #include <script/ScriptMachine.hpp>
 #include "game.hpp"
 
+#include "GameConfig.hpp"
+
 #include <SFML/Graphics.hpp>
 
 class PlayerController;
@@ -16,6 +18,7 @@ class HttpServer;
 class RWGame
 {
 	Logger log;
+	GameConfig config;
 	GameState* state;
 	GameData* data;
 	GameWorld* world;
@@ -40,7 +43,7 @@ class RWGame
 	float timescale;
 public:
 
-	RWGame(const std::string& gamepath, int argc, char* argv[]);
+	RWGame(int argc, char* argv[]);
 	~RWGame();
 
 	int run();
@@ -78,6 +81,11 @@ public:
 	ScriptMachine* getScript() const
 	{
 		return script;
+	}
+
+	const GameConfig& getConfig() const
+	{
+		return config;
 	}
 
 	bool hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject** object = nullptr)

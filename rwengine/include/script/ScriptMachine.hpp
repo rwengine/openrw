@@ -10,6 +10,7 @@
 #include <stack>
 #include <list>
 #include <set>
+#include <array>
 
 #define SCM_NEGATE_CONDITIONAL_MASK 0x8000
 #define SCM_CONDITIONAL_MASK_PASSED 0xFF

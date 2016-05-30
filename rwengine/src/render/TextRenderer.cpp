@@ -1,7 +1,6 @@
 #include "render/TextRenderer.hpp"
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
-#include <boost/concept_check.hpp>
 
 /// @todo This is very rough
 int charToIndex(char g)
@@ -106,7 +105,7 @@ struct TextVertex
 };
 
 TextRenderer::TextInfo::TextInfo()
-: font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left)
+: font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left), wrapX(0)
 {
 
 }

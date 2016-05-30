@@ -27,6 +27,13 @@ class IngameState : public State
 	/** Timer to hold user camera position */
 	float autolookTimer;
 	CameraMode camMode;
+
+	/// Current camera yaw and pitch
+	glm::vec2 m_cameraAngles;
+	/// Invert Y axis movement
+	bool m_invertedY;
+	/// Free look in vehicles.
+	bool m_vehicleFreeLook;
 public:
     /**
      * @brief IngameState

@@ -10,6 +10,7 @@
 #include <engine/GameData.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
+constexpr float kVehicleMaxExitVelocity = 0.15f;
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model),
@@ -46,6 +47,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 			bool front = connection.y() > 0;
 			btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
 			wi.m_suspensionRestLength1 = restLength;
+			wi.m_raycastInfo.m_suspensionLength = 0.f;
 
 			wi.m_maxSuspensionForce = info->handling.mass * 9.f;
 			wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
@@ -364,6 +366,14 @@ bool VehicleObject::isFlipped() const
 	return up.z <= -0.1f;
 }
 
+float VehicleObject::getVelocity() const
+{
+	if (physVehicle) {
+		return (physVehicle->getCurrentSpeedKmHour()*1000.f)/(60.f*60.f);
+	}
+	return 0.f;
+}
+
 void VehicleObject::setSteeringAngle(float a)
 {
 	steerAngle = a;
@@ -438,6 +448,17 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant)
 	else {
 		seatOccupants[seat] = occupant;
 	}
+}
+
+bool VehicleObject::canOccupantExit() const
+{
+	return getVelocity() <= kVehicleMaxExitVelocity;
+}
+
+bool VehicleObject::isOccupantDriver(size_t seat) const
+{
+	// This isn't true for all vehicles, but it'll do until we figure it out
+	return seat == 0;
 }
 
 VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat)

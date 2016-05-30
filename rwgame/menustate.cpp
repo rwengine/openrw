@@ -53,7 +53,7 @@ void MenuState::enterLoadMenu()
 
 void MenuState::enter()
 {
-
+	game->getWindow().setMouseCursorVisible(true);
 }
 
 void MenuState::exit()

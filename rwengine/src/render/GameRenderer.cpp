@@ -30,6 +30,12 @@
 #include <core/Profiler.hpp>
 
 const size_t skydomeSegments = 8, skydomeRows = 10;
+constexpr uint32_t kMissingTextureBytes[] = {
+	0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
+	0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
+	0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
+	0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
+};
 
 struct WaterVertex {
 	static const AttributeList vertex_attributes() {
@@ -109,7 +115,13 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 		GameShaders::DefaultPostProcess::FragmentShader);
 
 	glGenVertexArrays( 1, &vao );
-	
+
+	glGenTextures(1, &m_missingTexture);
+	glBindTexture(GL_TEXTURE_2D, m_missingTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, kMissingTextureBytes);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	glGenFramebuffers(1, &framebufferName);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
 	glGenTextures(2, fbTextures);
@@ -291,7 +303,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		glm::vec4(skyBottom, 1.f),
 		glm::vec4(camera.position, 0.f),
 		weather.fogStart,
-		camera.frustum.far
+		_camera.frustum.far
 	};
 
 	renderer->setSceneParameters(sceneParams);
@@ -323,14 +335,14 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 	RW_PROFILE_BEGIN("Build");
 
+	ObjectRenderer objectRenderer(_renderWorld,
+					  (cullOverride ? cullingCamera : _camera),
+					  _renderAlpha,
+					  getMissingTexture());
+
 	// World Objects
 	for (auto object : world->allObjects) {
-		ObjectRenderer::buildRenderList(
-					_renderWorld,
-					object,
-					(cullOverride ? cullingCamera : _camera),
-					_renderAlpha,
-					renderList);
+		objectRenderer.buildRenderList(object, renderList);
 	}
 	RW_PROFILE_END();
 
@@ -369,13 +381,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 
 				if( blip.second.target > 0 )
 				{
-					// TODO restore arrows
-					/*auto& pool = world->getTypeObjectPool(blip.second.target);
-					auto object = pool.find(blip.second.target);
+					auto object = world->getBlipTarget(blip.second);
 					if( object )
 					{
 						model = object->getTimeAdjustedTransform( _renderAlpha );
-					}*/
+					}
 				}
 				else
 				{
@@ -455,7 +465,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		renderLetterbox();
 	}
 
-#if 0 // Disable while warnings are fixed
 	float fadeTimer = world->getGameTime() - world->state->fadeStart;
 	if( fadeTimer < world->state->fadeTime || !world->state->fadeOut ) {
 		glUseProgram(ssRectProgram);
@@ -486,8 +495,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		glBindVertexArray( ssRectDraw.getVAOName() );
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
-#endif
-	
+
 	if( (world->state->isCinematic || world->state->currentCutscene ) && splashTexName == 0 ) {
 		renderLetterbox();
 	}
@@ -523,8 +531,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 	{
 		Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
-		bool abortTransparent = false;
-
 		Renderer::DrawParameters dp;
 
 		dp.colour = {255, 255, 255, 255};
@@ -550,9 +556,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 				}
 				if( tex )
 				{
-					if( tex->isTransparent() ) {
-						abortTransparent = true;
-					}
 					dp.textures = {tex->getName()};
 				}
 			}
@@ -573,23 +576,11 @@ void GameRenderer::renderGeometry(Model* model, size_t g, const glm::mat4& model
 
 			dp.colour.a *= opacity;
 
-			if( dp.colour.a < 255 ) {
-				abortTransparent = true;
-			}
-
 			dp.diffuse = mat.diffuseIntensity;
 			dp.ambient = mat.ambientIntensity;
 		}
 
-		if( abortTransparent ) {
-			transparentDrawQueue.push_back(
-				{model, g, sg, modelMatrix, dp, object}
-			);
-		}
-		else {
-			
-			renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
-		}
+		renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
 	}
 }
 

@@ -15,6 +15,13 @@
 #include <objects/CutsceneObject.hpp>
 #include <items/InventoryItem.hpp>
 
+constexpr float kDrawDistanceFactor = 1.0f;
+constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
+#if 0 // There's no distance based culling for these types of objects yet
+constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
+constexpr float kPedestrianDrawDistanceFactor = kDrawDistanceFactor;
+#endif
+
 RenderKey createKey(bool transparent, float normalizedDepth, Renderer::Textures& textures)
 {
 	return ((transparent?0x1:0x0) << 31)
@@ -22,13 +29,12 @@ RenderKey createKey(bool transparent, float normalizedDepth, Renderer::Textures&
 			| uint8_t(0xFF & (textures.size() > 0 ? textures[0] : 0)) << 0;
 }
 
-void renderGeometry(GameWorld* world,
-					Model* model, size_t g,
-					const glm::mat4& modelMatrix,
-					float opacity,
-					GameObject* object,
-					const ViewCamera& camera,
-					RenderList& outList)
+void ObjectRenderer::renderGeometry(Model* model,
+									size_t g,
+									const glm::mat4& modelMatrix,
+									float opacity,
+									GameObject* object,
+									RenderList& outList)
 {
 	for(size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg)
 	{
@@ -53,10 +59,11 @@ void renderGeometry(GameWorld* world,
 				{
 					auto& tC = mat.textures[0].name;
 					auto& tA = mat.textures[0].alphaName;
-					tex = world->data->findTexture(tC, tA);
+					tex = m_world->data->findTexture(tC, tA);
 					if( ! tex )
 					{
 						//logger->warning("Renderer", "Missing texture: " + tC + " " + tA);
+						dp.textures = { m_errorTexture };
 					}
 					mat.textures[0].texture = tex;
 				}
@@ -96,8 +103,8 @@ void renderGeometry(GameWorld* world,
 		dp.blend = isTransparent;
 
 		glm::vec3 position(modelMatrix[3]);
-		float distance = glm::length(camera.position - position);
-		float depth = (distance - camera.frustum.near) / (camera.frustum.far - camera.frustum.near);
+		float distance = glm::length(m_camera.position - position);
+		float depth = (distance - m_camera.frustum.near) / (m_camera.frustum.far - m_camera.frustum.near);
 		outList.emplace_back(
 							  createKey(isTransparent, depth * depth, dp.textures),
 							  modelMatrix,
@@ -106,14 +113,12 @@ void renderGeometry(GameWorld* world,
 						  );
 	}
 }
-bool renderFrame(GameWorld* world,
-				 Model* m,
-				 ModelFrame* f,
-				 const glm::mat4& matrix,
-				 GameObject* object,
-				 float opacity,
-				 const ViewCamera& camera,
-				 RenderList& outList)
+bool ObjectRenderer::renderFrame(Model* m,
+								 ModelFrame* f,
+								 const glm::mat4& matrix,
+								 GameObject* object,
+								 float opacity,
+								 RenderList& outList)
 {
 	auto localmatrix = matrix;
 	bool vis = true;
@@ -135,64 +140,59 @@ bool renderFrame(GameWorld* world,
 				RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
 
 				glm::vec3 boundpos = bounds.center + glm::vec3(localmatrix[3]);
-				if(! camera.frustum.intersects(boundpos, bounds.radius)) {
+				if(! m_camera.frustum.intersects(boundpos, bounds.radius)) {
 					continue;
 				}
 			}
 
-			renderGeometry(world, m, g, localmatrix, opacity, object, camera, outList);
+			renderGeometry(m, g, localmatrix, opacity, object, outList);
 		}
 	}
 
 	for(ModelFrame* c : f->getChildren()) {
-		renderFrame(world, m, c, localmatrix, object, opacity, camera, outList);
+		renderFrame(m, c, localmatrix, object, opacity, outList);
 	}
 	return true;
 }
 
-void renderItem(GameWorld* world,
-				InventoryItem *item,
-				const glm::mat4 &modelMatrix,
-				const ViewCamera& camera,
-				RenderList& outList)
+void ObjectRenderer::renderItem(InventoryItem *item,
+								const glm::mat4 &modelMatrix,
+								RenderList& outList)
 {
 	// srhand
 	if (item->getModelID() == -1) {
 		return; // No model for this item
 	}
 
-	std::shared_ptr<ObjectData> odata = world->data->findObjectType<ObjectData>(item->getModelID());
-	auto weapons = world->data->models["weapons"];
+	std::shared_ptr<ObjectData> odata = m_world->data->findObjectType<ObjectData>(item->getModelID());
+	auto weapons = m_world->data->models["weapons"];
 	if( weapons && weapons->resource ) {
 		auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
 		auto matrix = glm::inverse(itemModel->getTransform());
 		if(itemModel) {
-			renderFrame(world,
-						weapons->resource,
+			renderFrame(weapons->resource,
 						itemModel,
 						modelMatrix * matrix,
 						nullptr,
 						1.f,
-						camera,
 						outList);
 		}
 	}
 }
 
-void renderInstance(GameWorld* world,
-					InstanceObject *instance,
-					const ViewCamera& camera,
-					float renderAlpha,
-					RenderList& outList)
+void ObjectRenderer::renderInstance(InstanceObject *instance,
+									RenderList& outList)
 {
 	if(!instance->model->resource)
 	{
 		return;
 	}
 
-	auto matrixModel = instance->getTimeAdjustedTransform(renderAlpha);
+	auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
 
-	float mindist = glm::length(instance->getPosition()-camera.position) - instance->model->resource->getBoundingRadius();
+	float mindist = glm::length(instance->getPosition()-m_camera.position)
+			- instance->model->resource->getBoundingRadius();
+	mindist *= 1.f / kDrawDistanceFactor;
 
 	Model* model = nullptr;
 	ModelFrame* frame = nullptr;
@@ -217,7 +217,7 @@ void renderInstance(GameWorld* world,
 				}
 				else if (instance->LODinstance->model->resource) {
 					// The model matrix needs to be for the LOD instead
-					matrixModel = instance->LODinstance->getTimeAdjustedTransform(renderAlpha);
+					matrixModel = instance->LODinstance->getTimeAdjustedTransform(m_renderAlpha);
 					// If the object is only just out of range, keep
 					// rendering it and screen-door the LOD.
 					if (overlap < fadeRange)
@@ -270,49 +270,40 @@ void renderInstance(GameWorld* world,
 
 	if( model ) {
 		frame = frame ? frame : model->frames[0];
-		renderFrame(world,
-					model,
+		renderFrame(model,
 					frame,
 					matrixModel * glm::inverse(frame->getTransform()),
 					instance,
 					1.f,
-					camera,
 					outList);
 	}
 	if( fadingModel ) {
 		if(opacity >= 0.01f) {
 			fadingFrame = fadingFrame ? fadingFrame : fadingModel->frames[0];
-			renderFrame(world,
-						fadingModel,
+			renderFrame(fadingModel,
 						fadingFrame,
 						fadingMatrix * glm::inverse(fadingFrame->getTransform()),
 						instance,
 						opacity,
-						camera,
 						outList);
 		}
 	}
 }
 
-void renderCharacter(GameWorld* world,
-					 CharacterObject *pedestrian,
-					 const ViewCamera& camera,
-					 float renderAlpha,
-					 RenderList& outList)
+void ObjectRenderer::renderCharacter(CharacterObject *pedestrian,
+									 RenderList& outList)
 {
-	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( renderAlpha );
+	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( m_renderAlpha );
 
 	if(!pedestrian->model->resource) return;
 
 	auto root = pedestrian->model->resource->frames[0];
 
-	renderFrame(world,
-				pedestrian->model->resource,
+	renderFrame(pedestrian->model->resource,
 				root->getChildren()[0],
 				matrixModel,
 				pedestrian,
 				1.f,
-				camera,
 				outList);
 
 	if(pedestrian->getActiveItem()) {
@@ -324,21 +315,17 @@ void renderCharacter(GameWorld* world,
 				handFrame = handFrame->getParent();
 			}
 		}
-		renderItem(world,
-				   pedestrian->getActiveItem(),
+		renderItem(pedestrian->getActiveItem(),
 				   matrixModel * localMatrix,
-				   camera,
 				   outList);
 	}
 }
 
-void renderWheel(
-		GameWorld* world,
+void ObjectRenderer::renderWheel(
 		VehicleObject* vehicle,
 		Model* model,
 		const glm::mat4 &matrix,
 		const std::string& name,
-		const ViewCamera& camera,
 		RenderList& outList)
 {
 	for (const ModelFrame* f : model->frames)
@@ -352,21 +339,18 @@ void renderWheel(
 
 		for( auto& g : firstLod->getGeometries() ) {
 			RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-			if(! camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
+			if(! m_camera.frustum.intersects(bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
 				continue;
 			}
 
-			renderGeometry(world, model, g, matrix, 1.f, vehicle, camera, outList);
+			renderGeometry( model, g, matrix, 1.f, vehicle, outList);
 		}
 		break;
 	}
 }
 
-void renderVehicle(GameWorld* world,
-				   VehicleObject *vehicle,
-				   const ViewCamera& camera,
-				   float renderAlpha,
-				   RenderList& outList)
+void ObjectRenderer::renderVehicle(VehicleObject *vehicle,
+								  RenderList& outList)
 {
 	RW_CHECK(vehicle->model, "Vehicle model is null");
 
@@ -374,22 +358,20 @@ void renderVehicle(GameWorld* world,
 		return;
 	}
 
-	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( renderAlpha );
+	glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform( m_renderAlpha );
 
-	renderFrame(world,
-				vehicle->model->resource,
+	renderFrame(vehicle->model->resource,
 				vehicle->model->resource->frames[0],
 				matrixModel,
 				vehicle,
 				1.f,
-				camera,
 				outList);
 
 	// Draw wheels n' stuff
 	for( size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-		auto woi = world->data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
+		auto woi = m_world->data->findObjectType<ObjectData>(vehicle->vehicle->wheelModelID);
 		if( woi ) {
-			Model* wheelModel = world->data->models["wheels"]->resource;
+			Model* wheelModel = m_world->data->models["wheels"]->resource;
 			auto& wi = vehicle->physVehicle->getWheelInfo(w);
 			if( wheelModel ) {
 				// Construct our own matrix so we can use the local transform
@@ -423,32 +405,25 @@ void renderVehicle(GameWorld* world,
 					wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
 				}
 
-				renderWheel(world,
-							vehicle,
+				renderWheel(vehicle,
 							wheelModel,
 							wheelM,
 							woi->modelName,
-							camera,
 							outList);
 			}
 		}
 	}
 }
 
-void renderPickup(GameWorld* world,
-				  PickupObject *pickup,
-				  const ViewCamera& camera,
-				  float renderAlpha,
-				  RenderList& outList)
+void ObjectRenderer::renderPickup(PickupObject *pickup,
+								  RenderList& outList)
 {
-	RW_UNUSED(renderAlpha);
-
 	if( ! pickup->isEnabled() ) return;
 
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
-	modelMatrix = glm::rotate(modelMatrix, world->getGameTime(), glm::vec3(0.f, 0.f, 1.f));
+	modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime(), glm::vec3(0.f, 0.f, 1.f));
 
-	auto odata = world->data->findObjectType<ObjectData>(pickup->getModelID());
+	auto odata = m_world->data->findObjectType<ObjectData>(pickup->getModelID());
 
 	Model* model = nullptr;
 	ModelFrame* itemModel = nullptr;
@@ -456,7 +431,7 @@ void renderPickup(GameWorld* world,
 	/// @todo Better determination of is this object a weapon.
 	if( odata->ID >= 170 && odata->ID <= 184 )
 	{
-		auto weapons = world->data->models["weapons"];
+		auto weapons = m_world->data->models["weapons"];
 		if( weapons && weapons->resource && odata ) {
 			model = weapons->resource;
 			itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
@@ -469,7 +444,7 @@ void renderPickup(GameWorld* world,
 	}
 	else
 	{
-		auto handle = world->data->models[odata->modelName];
+		auto handle = m_world->data->models[odata->modelName];
 		RW_CHECK( handle && handle->resource, "Pickup has no model");
 		if ( handle && handle->resource )
 		{
@@ -480,26 +455,19 @@ void renderPickup(GameWorld* world,
 
 	if ( itemModel ) {
 		auto matrix = glm::inverse(itemModel->getTransform());
-		renderFrame(world,
-					model,
+		renderFrame(model,
 					itemModel,
 					modelMatrix * matrix,
 					pickup,
 					1.f,
-					camera,
 					outList);
 	}
 }
 
-void renderCutsceneObject(GameWorld* world,
-						  CutsceneObject *cutscene,
-						  const ViewCamera& camera,
-						  float renderAlpha,
-						  RenderList& outList)
+void ObjectRenderer::renderCutsceneObject(CutsceneObject *cutscene,
+										  RenderList& outList)
 {
-	RW_UNUSED(renderAlpha);
-
-	if(!world->state->currentCutscene) return;
+	if(!m_world->state->currentCutscene) return;
 
 	if(!cutscene->model->resource)
 	{
@@ -507,9 +475,10 @@ void renderCutsceneObject(GameWorld* world,
 	}
 
 	glm::mat4 matrixModel;
+	auto cutsceneOffset = m_world->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f);
 
 	if( cutscene->getParentActor() ) {
-		matrixModel = glm::translate(matrixModel, world->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, cutsceneOffset);
 		//matrixModel = cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
 		//matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
 		glm::mat4 localMatrix;
@@ -521,7 +490,7 @@ void renderCutsceneObject(GameWorld* world,
 		matrixModel = matrixModel * localMatrix;
 	}
 	else {
-		matrixModel = glm::translate(matrixModel, world->state->currentCutscene->meta.sceneOffset + glm::vec3(0.f, 0.f, 1.f));
+		matrixModel = glm::translate(matrixModel, cutsceneOffset);
 	}
 
 	auto model = cutscene->model->resource;
@@ -529,37 +498,30 @@ void renderCutsceneObject(GameWorld* world,
 		glm::mat4 align;
 		/// @todo figure out where this 90 degree offset is coming from.
 		align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
-		renderFrame(world,
-					model,
+		renderFrame(model,
 					model->frames[0],
 					matrixModel * align,
 					cutscene,
 					1.f,
-					camera,
 					outList);
 	}
 	else {
-		renderFrame(world,
-					model,
+		renderFrame(model,
 					model->frames[0],
 					matrixModel,
 					cutscene,
 					1.f,
-					camera,
 					outList);
 	}
 }
 
-void renderProjectile(GameWorld* world,
-					  ProjectileObject *projectile,
-					  const ViewCamera& camera,
-					  float renderAlpha,
-					  RenderList& outList)
+void ObjectRenderer::renderProjectile(ProjectileObject *projectile,
+									  RenderList& outList)
 {
-	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(renderAlpha);
+	glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(m_renderAlpha);
 
-	auto odata = world->data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
-	auto weapons = world->data->models["weapons"];
+	auto odata = m_world->data->findObjectType<ObjectData>(projectile->getProjectileInfo().weapon->modelID);
+	auto weapons = m_world->data->models["weapons"];
 
 	RW_CHECK(weapons, "Weapons model not loaded");
 
@@ -568,71 +530,47 @@ void renderProjectile(GameWorld* world,
 		auto matrix = glm::inverse(itemModel->getTransform());
 		RW_CHECK(itemModel, "Weapon frame not in model");
 		if(itemModel) {
-			renderFrame(world,
-						weapons->resource,
+			renderFrame(weapons->resource,
 						itemModel,
 						modelMatrix * matrix,
 						projectile,
 						1.f,
-						camera,
 						outList);
 		}
 	}
 }
 
-void ObjectRenderer::buildRenderList(GameWorld* world,
-		GameObject* object,
-		const ViewCamera& camera,
-		float renderAlpha,
-		RenderList& outList)
+void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList)
 {
 	if( object->skeleton )
 	{
-		object->skeleton->interpolate(renderAlpha);
+		object->skeleton->interpolate(m_renderAlpha);
 	}
 
 	// Right now specialized on each object type
 	switch(object->type()) {
 	case GameObject::Instance:
-		renderInstance(world,
-					   static_cast<InstanceObject*>(object),
-					   camera,
-					   renderAlpha,
+		renderInstance(static_cast<InstanceObject*>(object),
 					   outList);
 		break;
 	case GameObject::Character:
-		renderCharacter(world,
-						static_cast<CharacterObject*>(object),
-						camera,
-						renderAlpha,
+		renderCharacter(static_cast<CharacterObject*>(object),
 						outList);
 		break;;
 	case GameObject::Vehicle:
-		renderVehicle(world,
-						static_cast<VehicleObject*>(object),
-						camera,
-						renderAlpha,
-						outList);
+		renderVehicle(static_cast<VehicleObject*>(object),
+					  outList);
 		break;;
 	case GameObject::Pickup:
-		renderPickup(world,
-					 static_cast<PickupObject*>(object),
-					 camera,
-					 renderAlpha,
+		renderPickup(static_cast<PickupObject*>(object),
 					 outList);
 		break;
 	case GameObject::Projectile:
-		renderProjectile(world,
-						 static_cast<ProjectileObject*>(object),
-						 camera,
-						 renderAlpha,
+		renderProjectile(static_cast<ProjectileObject*>(object),
 						 outList);
 		break;
 	case GameObject::Cutscene:
-		renderCutsceneObject(world,
-							 static_cast<CutsceneObject*>(object),
-							 camera,
-							 renderAlpha,
+		renderCutsceneObject(static_cast<CutsceneObject*>(object),
 							 outList);
 		break;
 	default:

@@ -2,58 +2,94 @@ cmake_minimum_required(VERSION 2.8)
 
 project(OpenRW)
 
+#
+# Options
+#
+
 # Global Build Configuration
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRW_DEBUG=1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pthread -Wextra -Wpedantic")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+set(RW_VERBOSE_DEBUG_MESSAGES 1 CACHE BOOL "Print verbose debugging messages")
 
 # Optional components
-SET(BUILD_SCRIPT_TOOL TRUE CACHE BOOL "Build script decompiler tool")
-SET(BUILD_TESTS TRUE CACHE BOOL "Build test suite")
-SET(BUILD_OLD_TOOLS FALSE CACHE BOOL "Build old datadump and analyzer tools")
-SET(BUILD_TOOLS FALSE CACHE BOOL "Build editor application")
+option(BUILD_TESTS "Build test suite")
+option(BUILD_VIEWER "Build GUI data viewer")
+option(BUILD_SCRIPT_TOOL "Build script decompiler tool")
 
-# Features
-SET(ENABLE_PROFILE_RENDERER TRUE CACHE BOOL "Enable higher precision rendering profiler")
+# Compile-time Options & Features
+option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
+option(ENABLE_PROFILING "Enable detailed profiling metrics")
 
-# Options
-SET(ENABLE_SCRIPT_DEBUG FALSE CACHE BOOL "Enable verbose script execution")
+#
+# Build configuration
+#
 
-IF(APPLE)
-	set(OPENRW_PLATFORM_LIBS iconv)
-ENDIF()
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_definitions(-DRW_LINUX)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	add_definitions(-DRW_OSX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+	add_definitions(-DRW_FREEBSD)
+else ()
+	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
+endif ()
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
+endif()
 
 # Make GLM use radians
 add_definitions(-DGLM_FORCE_RADIANS)
 
-IF(${PROFILING})
+IF(${ENABLE_PROFILING})
 	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=1)
 else()
 	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=0)
 ENDIF()
 
 IF(${ENABLE_SCRIPT_DEBUG})
-	add_definitions(-DSCM_DEBUG_INSTRUCTIONS)
+	add_definitions(-DRW_SCRIPT_DEBUG)
+ENDIF()
+
+if(${RW_VERBOSE_DEBUG_MESSAGES})
+	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=1)
+else()
+	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=0)
+endif()
+
+# Find dependancies
+IF(APPLE)
+	set(OPENRW_PLATFORM_LIBS iconv)
 ENDIF()
 
 find_package(OpenGL REQUIRED)
 find_package(Bullet REQUIRED)
+find_package(SFML 2 COMPONENTS system window audio graphics network REQUIRED)
+find_package(MAD REQUIRED)
+find_package(GLM REQUIRED)
 
-IF(BUILD_OLD_TOOLS)
-	add_subdirectory(analyzer)
-	add_subdirectory(datadump)
-ENDIF()
+include_directories("${GLM_INCLUDE_DIRS}")
+
+
+# External-internal dependencies
+add_subdirectory(cmake/external)
+
+#
+# Components
+#
 
 add_subdirectory(rwlib)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 
-IF(BUILD_SCRIPT_TOOL)
+IF(${BUILD_SCRIPT_TOOL})
 	add_subdirectory(scripttool)
 ENDIF()
-IF(${BUILD_TOOLS})
+IF(${BUILD_VIEWER})
 	add_subdirectory(rwviewer)
 ENDIF()
-
 IF(${BUILD_TESTS})
-	add_subdirectory(tests)	
+	add_subdirectory(tests)
 ENDIF()

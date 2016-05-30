@@ -74,9 +74,6 @@ class GameRenderer
 	 */
 	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent = true);
 
-	/** Transparent objects are queued into this list */
-	std::vector<RQueueEntry> transparentDrawQueue;
-
 	// Temporary variables used during rendering
 	float _renderAlpha;
 	GameWorld* _renderWorld;
@@ -93,6 +90,9 @@ class GameRenderer
 	GLuint fbTextures[2];
 	GLuint fbRenderBuffers[1];
 	Renderer::ShaderProgram* postProg;
+
+	/// Texture used to replace textures missing from the data
+	GLuint m_missingTexture;
 
 public:
 	
@@ -120,6 +120,8 @@ public:
 	GeometryBuffer cylinderGeometry;
 
 	GameData* getData() const { return data; }
+
+	GLuint getMissingTexture() const { return m_missingTexture; }
 
     /**
 	 * Renders the world using the parameters of the passed Camera.

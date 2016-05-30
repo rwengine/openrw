@@ -30,12 +30,18 @@ DebugDraw* debug;
 
 StdOutReciever logPrinter;
 
-RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
-	: state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
+RWGame::RWGame(int argc, char* argv[])
+	: config("openrw.ini")
+	, state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
 	debugScript(false), inFocus(true),
 	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
 	accum(0.f), timescale(1.f)
 {
+	if (!config.isValid())
+	{
+		throw std::runtime_error("Invalid configuration file at: " + config.getConfigFile());
+	}
+
 	size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
 	bool fullscreen = false;
 	bool newgame = false;
@@ -88,19 +94,18 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 
 	sf::ContextSettings cs;
 	cs.depthBits = 32;
+	cs.stencilBits = 8;
 	window.create(sf::VideoMode(w, h), "",  style, cs);
-	window.setMouseCursorVisible(false);
 
-	log.addReciever(&logPrinter);	
-	log.info("Game", "Game directory: " + gamepath);
+	log.addReciever(&logPrinter);
+	log.info("Game", "Game directory: " + config.getGameDataPath());
 	
-	if(! GameData::isValidGameDirectory(gamepath) )
+	if(! GameData::isValidGameDirectory(config.getGameDataPath()) )
 	{
-		std::string envname(ENV_GAME_PATH_NAME);
-		throw std::runtime_error("Invalid game directory path, is " +envname+ " set?");
+		throw std::runtime_error("Invalid game directory path: " + config.getGameDataPath());
 	}
 
-	data = new GameData(&log, &work, gamepath);
+	data = new GameData(&log, &work, config.getGameDataPath());
 
 	// Initalize all the archives.
 	data->loadIMG("/models/gta3");
@@ -122,7 +127,7 @@ RWGame::RWGame(const std::string& gamepath, int argc, char* argv[])
 	debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawConstraints | btIDebugDraw::DBG_DrawConstraintLimits);
 	debug->setShaderProgram(renderer->worldProg);
 
-	data->loadDynamicObjects(gamepath + "/data/object.dat");
+	data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
 	/// @TODO language choices.
 	data->loadGXT("english.gxt");
