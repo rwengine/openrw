@@ -492,59 +492,40 @@ void GameData::loadWeaponDAT(const std::string &name)
 
 bool GameData::loadAudioStream(const std::string &name)
 {
-	auto fname = findPathRealCase(datpath + "/audio/", name);
+	auto filePath = findPathRealCase(datpath + "/audio/", name);
 	
-	if ( engine->cutsceneAudio )
-	{
-		delete engine->cutsceneAudio;
-		engine->cutsceneAudio = nullptr;
+	if (engine->cutsceneAudio.length() > 0) {
+		engine->sound.stopMusic(engine->cutsceneAudio);
 	}
-	
-	bool result = false;
-	if ( name.find(".mp3") != name.npos )
-	{
-		auto stream = new MADStream;
-		engine->cutsceneAudio = stream;
-		result = stream->openFromFile(fname);
+
+	if (engine->sound.loadMusic(name, filePath)) {
+		engine->cutsceneAudio = name;
+		return true;
 	}
-	else
-	{
-		auto stream = new sf::Music;
-		engine->cutsceneAudio = stream;
-		result = stream->openFromFile(fname);
-	}
-	
-	return result;
+
+	return false;
 }
 
-bool GameData::loadAudioClip(const std::string& name)
+bool GameData::loadAudioClip(const std::string& name, const std::string& fileName)
 {
-	auto fname = findPathRealCase(datpath + "/audio/", name);
+	auto filePath = findPathRealCase(datpath + "/audio/", fileName);
 	
-	if ( engine->missionAudio )
-	{
-		delete engine->missionAudio;
-		engine->missionAudio = nullptr;
-	}
-	
-	if ( name.find(".mp3") != name.npos )
+	if (fileName.find(".mp3") != fileName.npos)
 	{
 		logger->error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
-	
-	engine->missionAudio = new sf::SoundBuffer;
-	
-	bool r = engine->missionAudio->loadFromFile(fname);
-	
-	if (! r )
-	{
-		logger->error("Data", "Error loading audio clip " + fname);
-		delete engine->missionAudio;
-		engine->missionAudio = nullptr;
+
+	bool loaded = engine->sound.loadSound(name, filePath);
+
+	if ( ! loaded) {
+		logger->error("Data", "Error loading audio clip "+ filePath);
+		return false;
 	}
-	
-	return r;
+
+	engine->missionAudio = name;
+
+	return true;
 }
 
 void GameData::loadSplash(const std::string &name)

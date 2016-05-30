@@ -789,10 +789,9 @@ void game_load_audio(const ScriptArguments& args)
 {
 	std::string name = args[0].string;
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	if(! args.getWorld()->data->loadAudioClip(name + ".wav") )
-	{
-		if(! args.getWorld()->data->loadAudioClip(name + ".mp3") )
-		{
+
+	if ( ! args.getWorld()->data->loadAudioClip(name, name + ".wav")) {
+		if ( ! args.getWorld()->data->loadAudioClip(name, name + ".mp3")) {
 			args.getWorld()->logger->error("SCM", "Failed to load audio: " + name);
 		}
 	}
@@ -801,22 +800,26 @@ void game_load_audio(const ScriptArguments& args)
 bool game_is_audio_loaded(const ScriptArguments& args)
 {
 	auto world = args.getWorld();
-	return world->missionAudio != nullptr;
+	return world->sound.isLoaded(world->missionAudio);
 }
 
 void game_play_mission_audio(const ScriptArguments& args)
 {
 	auto world = args.getWorld();
-	if ( world->missionAudio )
-	{
-		world->missionSound.setBuffer(*args.getWorld()->missionAudio);
-		world->missionSound.play();
-		world->missionSound.setLoop(false);
+	if (world->missionAudio.length() > 0) {
+		world->sound.playSound(world->missionAudio);
 	}
 }
 bool game_is_audio_finished(const ScriptArguments& args)
 {
-	return args.getWorld()->missionSound.getStatus() == sf::SoundSource::Stopped;
+	auto world = args.getWorld();
+	bool isFinished = ! world->sound.isPlaying(world->missionAudio);
+
+	if (isFinished) {
+		world->missionAudio = "";
+	}
+
+	return isFinished;
 }
 
 void game_play_music_id(const ScriptArguments& args)
@@ -828,16 +831,14 @@ void game_play_music_id(const ScriptArguments& args)
 	std::string name = "Miscom";
 	
 	// TODO play anything other than Miscom.wav
-	if(! gw->data->loadAudioClip( name + ".wav" ) )
+	if(! gw->data->loadAudioClip( name, name + ".wav" ) )
 	{
 		args.getWorld()->logger->error("SCM", "Error loading audio " + name);
 		return;
 	}
-	else if ( args.getWorld()->missionAudio )
+	else if (args.getWorld()->missionAudio.length() > 0)
 	{
-		gw->missionSound.setBuffer(* args.getWorld()->missionAudio);
-		gw->missionSound.play();
-		gw->missionSound.setLoop(false);
+		args.getWorld()->sound.playSound(args.getWorld()->missionAudio);
 	}
 }
 

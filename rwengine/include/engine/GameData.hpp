@@ -148,7 +148,7 @@ public:
 	void loadWeaponDAT(const std::string& name);
 
 	bool loadAudioStream(const std::string& name);
-	bool loadAudioClip(const std::string& name);
+	bool loadAudioClip(const std::string& name, const std::string& fileName);
 
 	void loadSplash(const std::string& name);
 

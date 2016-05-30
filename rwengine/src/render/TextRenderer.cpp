@@ -2,6 +2,8 @@
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
 
+#include <algorithm>
+
 /// @todo This is very rough
 int charToIndex(char g)
 {

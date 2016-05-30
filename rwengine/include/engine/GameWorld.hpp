@@ -306,10 +306,9 @@ public:
 	void clearCutscene();
 	bool isCutsceneDone();
 
-	sf::SoundStream* cutsceneAudio;
+	std::string cutsceneAudio;
 	bool cutsceneAudioLoaded;
-	sf::SoundBuffer* missionAudio;
-	sf::Sound missionSound;
+	std::string missionAudio;
 
 	/**
 	 * @brief loads a model into a special character slot.

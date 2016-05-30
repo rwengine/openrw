@@ -78,7 +78,7 @@ public:
 
 GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 	: logger(log), data(dat), randomEngine(rand()),
-	  _work( work ), cutsceneAudio(nullptr), missionAudio(nullptr),
+	  _work( work ),
 	  paused(false)
 {
 	data->engine = this;
@@ -833,8 +833,9 @@ void GameWorld::startCutscene()
 {
 	state->cutsceneStartTime = getGameTime();
 	state->skipCutscene = false;
-	if( cutsceneAudio ) {
-		cutsceneAudio->play();
+
+	if (cutsceneAudio.length() > 0) {
+		sound.playMusic(cutsceneAudio);
 	}
 }
 
@@ -844,11 +845,9 @@ void GameWorld::clearCutscene()
 		destroyObjectQueued(p.second);
 	}
 
-	if( cutsceneAudio )
-	{
-		cutsceneAudio->stop();
-		delete cutsceneAudio;
-		cutsceneAudio = nullptr;
+	if (cutsceneAudio.length() > 0) {
+		sound.stopMusic(cutsceneAudio);
+		cutsceneAudio = "";
 	}
 
 	delete state->currentCutscene;
