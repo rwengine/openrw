@@ -27,6 +27,11 @@ class MADStream
 	unsigned int mReadProgress;
 	std::vector<int16_t> mCurrentSamples;
 
+	/**
+	 * The number of OpenAL buffers is arbitrary, but due to the kind of small
+	 * buffer/audio sample size, we need a bunch of them so the computer can
+	 * keep up with filling them.
+	 */
 	constexpr static size_t numALbuffers = 8;
 	ALuint buffers[numALbuffers];
 	ALuint unqueuedBuffers[numALbuffers];

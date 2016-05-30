@@ -58,6 +58,11 @@ mad_flow MADStream::ms_output(void* user, mad_header const* header, mad_pcm* pcm
 	if ( ! self->numFreeBuffers) {
 		ALint buffersProcessed;
 		do {
+			/**
+			 * Sleep a bit while waiting for OpenAL buffers to become available.
+			 * The number is arbitrary and depends on the size of the buffer/audio samples,
+			 * as well as how quickly the computer can feed more buffers into OpenAL.
+			 */
 			std::this_thread::sleep_for(std::chrono::milliseconds(20));
 			alGetSourcei(self->alSource, AL_BUFFERS_PROCESSED, &buffersProcessed);
 		} while (buffersProcessed <= 0);
