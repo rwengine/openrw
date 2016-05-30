@@ -360,6 +360,62 @@ bool game_character_near_point_in_vehicle(const ScriptArguments& args)
 	return false;
 }
 
+template <class T>
+bool game_locate_character_stopped_2d(const ScriptArguments& args)
+{
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
+	glm::vec2 position(args[1].real, args[2].real);
+	glm::vec2 radius(args[3].real, args[4].real);
+	
+	bool drawCylinder = args[5].integer;
+	
+	auto cp = character->getPosition();
+	glm::vec2 distance = glm::abs(position - glm::vec2(cp));
+	
+	if(distance.x <= radius.x && distance.y <= radius.y && character->isStopped())
+	{
+		return true;
+	}
+	
+	if( drawCylinder )
+	{
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground, glm::vec3(radius, 5.f));
+	}
+	
+	return false;
+}
+
+bool game_locate_player_stopped_in_vehicle_2d(const ScriptArguments& args)
+{
+  auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+	glm::vec2 position(args[1].real, args[2].real);
+	glm::vec2 radius(args[3].real, args[4].real);
+	
+	bool drawCylinder = args[5].integer;
+	
+	if( character->getCurrentVehicle() == nullptr )
+	{
+		return false;
+	}
+	
+	auto vp = character->getCurrentVehicle()->getPosition();
+	glm::vec2 distance = glm::abs(position - glm::vec2(vp));
+	
+	if(distance.x <= radius.x && distance.y <= radius.y && character->isStopped())
+	{
+		return true;
+	}
+	
+	if( drawCylinder )
+	{
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground, glm::vec3(radius, 5.f));
+	}
+	
+	return false;
+}
+
 bool game_character_near_character_2D(const ScriptArguments& args)
 {
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
@@ -474,6 +530,29 @@ bool game_player_in_zone(const ScriptArguments& args)
     return false;
 }
 
+bool game_player_pressing_horn(const ScriptArguments& args)
+{
+	auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
+	if ( character->getCurrentVehicle() != nullptr )
+	{
+		/// @todo Respect actual horn key.
+		return true;
+	}
+
+	return false;
+}
+
+bool game_character_objective_passed(const ScriptArguments& args)
+{
+  auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	if( character && character->controller->getCurrentActivity() == nullptr )
+	{
+		return true;
+	}
+
+	return false;
+}
+
 void game_create_character_in_vehicle(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -510,6 +589,13 @@ void game_set_player_heading(const ScriptArguments& args)
 {
     auto object = args.getPlayerCharacter(0);
 	object->setHeading(args[1].real);
+}
+
+template <class Tobject>
+void game_get_object_heading(const ScriptArguments& args)
+{
+	auto object = args.getObject<Tobject>(0);
+	*args[1].globalReal = object->getHeading();
 }
 
 template <class Tobject>
@@ -1091,6 +1177,13 @@ bool game_rotate_object(const ScriptArguments& args)
 	return true;
 }
 
+template<class Tobject>
+void game_destroy_object_with_fade(const ScriptArguments& args)
+{
+	/// @todo Fade not handled yet!
+	game_destroy_object<Tobject>(args);
+}
+
 void game_get_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1137,13 +1230,18 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00E5, game_player_in_area_2d_in_vehicle, 6, "Is Player in 2D Area in Vehicle" );
 	
 	bindUnimplemented( 0x00E4, game_locate_character_on_foot_2d, 6, "Locate Player on foot 2D" );
+
+	bindFunction(0x00E6, game_locate_character_stopped_2d<PlayerController>, 6, "Locate Player Stopped 2D" );
 	
+	bindFunction(0x00E8, game_locate_player_stopped_in_vehicle_2d, 6, "Locate Player Stopped in Vehicle 2D" );
 	bindFunction(0x00E9, game_character_near_character_2D, 5, "Locate Character near Character 2D");
 	
 	bindFunction(0x00EB, game_character_near_character_in_vehicle_2D<PlayerController>, 5, "Is player near character in vehicle" );
 	
 	bindFunction(0x00ED, game_character_near_point_on_foot_2D, 6, "Is Character near point on foot" );
 	
+	bindFunction(0x00EF, game_locate_character_stopped_2d<CharacterObject>, 6, "Locate Character Stopped 2D" );
+
 	bindUnimplemented( 0x00F5, game_locate_character_in_sphere, 8, "Locate Player In Sphere" );
     bindFunction(0x00F6, game_player_near_point_on_foot_3D, 8, "Is Player near point on foot" );
     bindFunction(0x00F7, game_player_near_point_in_vehicle_3D, 8, "Is Player near point in car" );
@@ -1159,6 +1257,9 @@ ObjectModule::ObjectModule()
 	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
     bindFunction(0x0121, game_player_in_zone, 2, "Is Player In Zone" );
+    bindFunction(0x0122, game_player_pressing_horn, 1, "Is Player Pressing Horn" );
+
+    bindFunction(0x0126, game_character_objective_passed, 1, "Character Objective Passed" );
 	
 	bindFunction(0x0129, game_create_character_in_vehicle, 4, "Create Character In Car" );
 
@@ -1172,6 +1273,7 @@ ObjectModule::ObjectModule()
 	bindUnimplemented(0x0174, game_get_character_heading, 2, "Get Vehicle Heading" );
 	bindFunction(0x0175, game_set_object_heading<VehicleObject>, 2, "Set Vehicle heading" );
 	
+	bindFunction(0x0176, game_get_object_heading<InstanceObject>, 2, "Get Object heading" );
 	bindFunction(0x0177, game_set_object_heading<InstanceObject>, 2, "Set Object heading" );
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
@@ -1235,6 +1337,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction( 0x034D, game_rotate_object, 4, "Rotate Object" );
 	bindUnimplemented( 0x034E, game_slide_object, 8, "Slide Object" );
+	bindFunction(0x034F, game_destroy_object_with_fade<CharacterObject>, 1, "Destroy Character with Fade" );
 	
 	bindUnimplemented( 0x035D, game_set_object_targetable, 1, "Set Object Targetable" );
 	
@@ -1253,5 +1356,6 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x042B, game_clear_volume_pedestrians, 6, "Clear volume pedestrians" );
 	
 	bindFunction(0x0442, game_character_in_vehicle<PlayerController>, 2, "Is Player in This Vehicle" );
+  bindFunction(0x0443, game_player_in_any_vehicle, 1, "Is Player In Any Vehicle" ); /// Duplicate of 00E0?!
 	bindFunction(0x0448, game_character_in_vehicle<CharacterObject>, 2, "Is Character in This Vehicle" );
 }
