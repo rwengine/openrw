@@ -50,6 +50,11 @@ void ObjectRenderer::renderGeometry(Model* model,
 		dp.textures = {0};
 		dp.visibility = 1.f;
 
+		if(object && object->type() == GameObject::Instance) {
+			auto instance = static_cast<InstanceObject*>(object);
+			dp.depthWrite = !(instance->object->flags & ObjectData::NO_ZBUFFER_WRITE);
+		}
+
 		if (model->geometries[g]->materials.size() > subgeom.material) {
 			Model::Material& mat = model->geometries[g]->materials[subgeom.material];
 
