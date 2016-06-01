@@ -7,8 +7,6 @@
 #include <dynamics/VehicleDynamics.hpp>
 
 class CollisionInstance;
-class btVehicleRaycaster;
-class btRaycastVehicle;
 class btRigidBody;
 class btHingeConstraint;
 class btTransform;
@@ -34,8 +32,6 @@ public:
 	std::map<size_t, GameObject*> seatOccupants;
 
 	CollisionInstance* collision;
-	btVehicleRaycaster* physRaycaster;
-	btRaycastVehicle* physVehicle;
 	VehicleDynamics dynamics;
 	
 	struct Part

@@ -11,10 +11,10 @@ BOOST_AUTO_TEST_CASE(test_wheels)
 	const glm::vec3 axle = glm::vec3(1.f, 0.f, 0.f);
 	const float radius = 0.25f;
 
-	dynamics.addWheel(glm::vec3( 1.f, 1.f, 0.f), axle, radius);
-	dynamics.addWheel(glm::vec3(-1.f, 1.f, 0.f), axle, radius);
-	dynamics.addWheel(glm::vec3( 1.f,-1.f, 0.f), axle, radius);
-	dynamics.addWheel(glm::vec3(-1.f,-1.f, 0.f), axle, radius);
+	dynamics.addWheel(glm::vec3( 1.f, 1.f, 0.f), axle, radius, 1.f);
+	dynamics.addWheel(glm::vec3(-1.f, 1.f, 0.f), axle, radius, 1.f);
+	dynamics.addWheel(glm::vec3( 1.f,-1.f, 0.f), axle, radius, 1.f);
+	dynamics.addWheel(glm::vec3(-1.f,-1.f, 0.f), axle, radius, 1.f);
 
 	BOOST_CHECK_EQUAL(4, dynamics.getWheels().size());
 
@@ -35,9 +35,8 @@ BOOST_AUTO_TEST_CASE(test_dynamics)
 	BOOST_REQUIRE(vehicle->info != nullptr);
 	BOOST_REQUIRE(vehicle->vehicle != nullptr);
 
-	// We should have the vehicle rest on a surface
-	// but I can't be bothered to write that now.
-	// gg me rip
+	// This should test acceleration and handling versus some
+	// ground truth, but no data yet.
 
 	Global::get().e->destroyObject(vehicle);
 }

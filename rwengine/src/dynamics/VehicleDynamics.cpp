@@ -12,47 +12,116 @@ void VehicleDynamics::tickPhysics(float dt)
 	const float upperLimit = m_vehicle->info->handling.suspensionUpperLimit;
 	const float restLength = upperLimit -
 			m_vehicle->info->handling.suspensionLowerLimit;
-	// ??
-	const float springForce = (m_vehicle->info->handling.suspensionForce / restLength) * 1000.f;
-	const float springDamp = (m_vehicle->info->handling.suspensionDamping / restLength) * 10000.f;
+	const float vehicleMass = m_vehicle->info->handling.mass;
+
+	const float springForce = (m_vehicle->info->handling.suspensionForce / restLength)
+			* vehicleMass * 10.f;
+	const float springDamp = (m_vehicle->info->handling.suspensionDamping / restLength)
+			* vehicleMass * 10.f;
 	auto bulletBody = m_vehicle->collision->getBulletBody();
 
-	// Downforce = 16677
-	// Force per wheel ~= 4169.25
+	auto r = m_vehicle->getRotation();
 
+	// Handle suspension, determine which wheels are on the ground
+	float totalPower = 0.f;
+	const float vehicleSuspensionBias = m_vehicle->info->handling.suspensionBias;
 	for(auto& wheel : m_wheels)
 	{
 		// Calculate the ray length to ensure this ray can't fall through the ground.
 		wheel.rayLength = restLength + wheel.radius;
-		if (raycastWheel(wheel, distFrac, worldHit, body))
+		wheel.isOnGround = raycastWheel(wheel, distFrac, worldHit, body);
+		totalPower += wheel.maxPowerFrac;
+		if (wheel.isOnGround)
 		{
 			float distance = std::min((distFrac * wheel.rayLength) - wheel.radius,
 									  restLength);
+			float suspensionBias = (wheel.position.y > 0.f) ? vehicleSuspensionBias : 1.f - vehicleSuspensionBias;
+
 			// The center of the wheel must be radius above the end point.
 			wheel.displacement = glm::min(0.f, -distance);
 			float force = std::max(0.f, springForce * (restLength - distance)/restLength);
-			printf("force: %f displacement: %f distFrac %f\n", force, wheel.displacement, (restLength - distance)/restLength);
+
 			// Move force location into local space.
 			auto ws = m_vehicle->getRotation() * wheel.position;
 			auto btws = btVector3(ws.x, ws.y, ws.z);
-			auto pointVel = bulletBody->getLinearVelocity();
-			force += -pointVel.z() * springDamp;
-#if 1
-			bulletBody->applyImpulse(
-						btVector3(0.f, 0.f, force * dt),
-						btws);
-#else
+
+			auto pointVel = bulletBody->getVelocityInLocalPoint(btws);
+			auto localVelocity = glm::inverse(r) * glm::vec3(pointVel.x(), pointVel.y(), pointVel.z());
+
+			force += -localVelocity.z * springDamp;
+			auto f = glm::vec3(0.f, 0.f, force) * suspensionBias;
+			wheel.suspensionForce = force;
+			wheel.suspensionForceWS = f;
 			bulletBody->applyForce(
-						btVector3(0.f, 0.f, force),
+						btVector3(f.x, f.y, f.z),
 						btws);
-#endif
 		}
 		else
 		{
 			wheel.displacement = -restLength;
+			wheel.suspensionForceWS = glm::vec3(0.f, 0.f, 0.f);
 		}
 	}
 
+	const float vehicleTractionBias = m_vehicle->info->handling.tractionBias;
+	const float vehicleTractionMulti = m_vehicle->info->handling.tractionMulti;
+	const float vehicleTractionLoss = m_vehicle->info->handling.tractionLoss;
+	const float vehicleBrakeBias = m_vehicle->info->handling.brakeBias;
+	// Handle traction & engine force
+	for(auto& wheel : m_wheels)
+	{
+		if (wheel.isOnGround)
+		{
+			float tractionBias = (wheel.position.y > 0.f) ? vehicleTractionBias : 1.f - vehicleTractionBias;
+			float brakeBias = (wheel.position.y > 0.f) ? vehicleBrakeBias : 1.f - vehicleBrakeBias;
+			auto maxImpulse = wheel.suspensionForce
+					* glm::vec2(vehicleTractionMulti, vehicleTractionLoss) * tractionBias * 2.f;
+
+			auto ws = m_vehicle->getRotation() * wheel.position;
+			auto btws = btVector3(ws.x, ws.y, ws.z);
+
+			// Assume power is always distributed equally, some kind of magic differential.
+			float force = (wheel.maxPowerFrac * m_engineForce)/totalPower;
+			auto f = glm::vec3(0.f, -force, 0.f);
+			// Rotate force to face wheel's steering direction
+			glm::quat wheelRotation(wheel.steerAngle, glm::vec3(0.f, 0.f,-1.f));
+			auto wr = r * wheelRotation;
+			auto pointVel = bulletBody->getVelocityInLocalPoint(btws);
+			auto localVelocity = glm::inverse(wr) * glm::vec3(pointVel.x(), pointVel.y(), pointVel.z());
+
+			float mu = 0.8f;
+			float brakePower = m_breakForce * m_vehicle->info->handling.brakeDeceleration * -localVelocity.y * brakeBias;
+			auto impulse = glm::vec2(-localVelocity.x, brakePower) * vehicleMass * mu;
+			auto impulseSq = impulse * impulse;
+			auto maxImpulseSq = maxImpulse * maxImpulse;
+
+			// +x is to the right hand side
+			if (impulseSq.x > maxImpulseSq.x)
+			{
+				impulse.x = glm::sign(impulse.x) * maxImpulse.x;
+				// skidding =  yes
+			}
+			if (impulseSq.y > maxImpulseSq.y)
+			{
+				impulse.y = glm::sign(impulse.y) * maxImpulse.y;
+				// slipping = also yes
+			}
+
+			f = wr * f;
+			f += wr * glm::vec3(impulse, 0.f);
+			wheel.tractionForceWS = f;
+			bulletBody->applyForce(
+						btVector3(f.x, f.y, f.z),
+						btws);
+			float radiusVel = localVelocity.y * dt;
+
+			wheel.rotation += 1.f/((glm::pi<float>()*2*wheel.radius)/(glm::pi<float>() * 2 * radiusVel));
+		}
+		else
+		{
+			wheel.tractionForceWS = glm::vec3(0.f, 0.f, 0.f);
+		}
+	}
 }
 
 bool VehicleDynamics::raycastWheel(const VehicleDynamics::WheelInfo& wheel, float& distFrac, glm::vec3& worldHit, const btRigidBody* &body)

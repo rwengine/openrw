@@ -404,6 +404,8 @@ void ObjectRenderer::renderVehicle(VehicleObject *vehicle,
 				auto wheelPosition = wi.position + glm::vec3(0.f, 0.f, vehicle->info->handling.suspensionUpperLimit + wi.displacement);
 				glm::mat4 wheelMatrix = matrixModel;
 				wheelMatrix = glm::translate(wheelMatrix, wheelPosition);
+				wheelMatrix = glm::rotate(wheelMatrix, wi.steerAngle, glm::vec3(0.f, 0.f, 1.f));
+				wheelMatrix = glm::rotate(wheelMatrix, wi.rotation, glm::vec3(1.f, 0.f, 0.f));
 
 				wheelMatrix = glm::scale(wheelMatrix, glm::vec3(vehicle->vehicle->wheelScale));
 				if(wi.position.x < 0.f) {

@@ -12,40 +12,7 @@
 
 #define PART_CLOSE_VELOCITY 0.25f
 constexpr float kVehicleMaxExitVelocity = 0.15f;
-
-/**
- * A raycaster that will ignore the body of the vehicle when casting rays
- */
-class VehicleRaycaster : public btVehicleRaycaster
-{
-	btDynamicsWorld* _world;
-	VehicleObject* _vehicle;
-public:
-	VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
-		: _world(world), _vehicle(vehicle) {}
-
-	void* castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result)
-	{
-		ClosestNotMeRayResultCallback rayCallback( _vehicle->collision->getBulletBody(), from, to );
-		const void *res = 0;
-
-		_world->rayTest(from, to, rayCallback);
-
-		if( rayCallback.hasHit() ) {
-			const btRigidBody* body = btRigidBody::upcast( rayCallback.m_collisionObject );
-
-			if( body && body->hasContactResponse() ) {
-				result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
-				result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
-				result.m_hitNormalInWorld.normalize();
-				result.m_distFraction = rayCallback.m_closestHitFraction;
-				res = body;
-			}
-		}
-
-		return (void* )res;
-	}
-};
+constexpr bool kAckermannSteering = false;
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model)
@@ -58,54 +25,21 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 	, colourPrimary(prim)
 	, colourSecondary(sec)
 	, collision(nullptr)
-	, physRaycaster(nullptr)
-	, physVehicle(nullptr)
 	, dynamics(this)
 {
 	collision = new CollisionInstance;
 	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
-
-		physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
-		btRaycastVehicle::btVehicleTuning tuning;
-
-		float travel = fabs(info->handling.suspensionUpperLimit - info->handling.suspensionLowerLimit);
-		tuning.m_frictionSlip = 3.f;
-		tuning.m_maxSuspensionTravelCm = travel * 100.f;
-
-		physVehicle = new btRaycastVehicle(tuning, collision->getBulletBody(), physRaycaster);
-		physVehicle->setCoordinateSystem(0, 2, 1);
-		//physBody->setActivationState(DISABLE_DEACTIVATION);
-		engine->dynamicsWorld->addAction(physVehicle);
-
-		float kC = 0.5f;
-		float kR = 0.6f;
-
 		for(size_t w = 0; w < info->wheels.size(); ++w) {
-			dynamics.addWheel(info->wheels[w].position, glm::vec3(1.f, 0.f, 0.f), data->wheelScale/2.f);
-#if 0
-			auto restLength = travel;
-			auto heightOffset = info->handling.suspensionUpperLimit;
-			btVector3 connection(
-						info->wheels[w].position.x,
-						info->wheels[w].position.y,
-						info->wheels[w].position.z + heightOffset );
-			bool front = connection.y() > 0;
-			btWheelInfo& wi = physVehicle->addWheel(connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f), restLength, data->wheelScale / 2.f, tuning, front);
-			wi.m_suspensionRestLength1 = restLength;
-			wi.m_raycastInfo.m_suspensionLength = 0.f;
+			bool front = info->wheels[w].position.y > 0;
+			float maxPower = 0.f;
+			if( info->handling.driveType == VehicleHandlingInfo::All ||
+					(info->handling.driveType == VehicleHandlingInfo::Forward && front) ||
+					(info->handling.driveType == VehicleHandlingInfo::Rear && !front))
+			{
+				maxPower = 1.f;
+			}
 
-			wi.m_maxSuspensionForce = info->handling.mass * 9.f;
-			wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
-
-			//float dampEffect = (info->handling.suspensionDamping) / travel;
-			//wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation = dampEffect;
-
-			wi.m_wheelsDampingCompression = kC * 2.f * btSqrt(wi.m_suspensionStiffness);
-			wi.m_wheelsDampingRelaxation = kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-			wi.m_rollInfluence = 0.30f;
-			float halfFriction = tuning.m_frictionSlip * 0.5f;
-			wi.m_frictionSlip = halfFriction + halfFriction * (front ? info->handling.tractionBias : 1.f - info->handling.tractionBias);
-#endif
+			dynamics.addWheel(info->wheels[w].position, glm::vec3(1.f, 0.f, 0.f), data->wheelScale/2.f, maxPower);
 		}
 
 		// Hide all LOD and damage frames.
@@ -133,17 +67,12 @@ VehicleObject::~VehicleObject()
 {
 	ejectAll();
 	
-	engine->dynamicsWorld->removeAction(physVehicle);
-	
 	for(auto& p : dynamicParts)
 	{
 		setPartLocked(&p.second, true);
 	}
 	
 	delete collision;
-
-	delete physVehicle;
-	delete physRaycaster;
 }
 
 void VehicleObject::setPosition(const glm::vec3& pos)
@@ -191,11 +120,11 @@ void VehicleObject::tickPhysics(float dt)
 
 	dynamics.tickPhysics(dt);
 
-	if( physVehicle )
+	if( collision->getBulletBody() )
 	{
-		float currentVelocity = physVehicle->getCurrentSpeedKmHour();
+		float currentVelocity = (getVelocity()*60*60)/1000.f;
 		float velFac = 1.f;
-		if (currentVelocity >= info->handling.maxVelocity) // (info->handling.maxVelocity - currentVelocity) / info->handling.maxVelocity;
+		if (currentVelocity >= info->handling.maxVelocity)
 		{
 			velFac = 0.f;
 		}
@@ -204,30 +133,32 @@ void VehicleObject::tickPhysics(float dt)
 		{
 			collision->getBulletBody()->activate(true);
 		}
+		dynamics.setEngineForce(engineForce);
 		
 		float brakeF = getBraking();
 		
 		if( handbrake )
 		{
-			brakeF = 5.f;
+			brakeF = 1.f;
 		}
+		dynamics.setBreakForce(brakeF);
 
-		for(int w = 0; w < physVehicle->getNumWheels(); ++w) {
-			btWheelInfo& wi = physVehicle->getWheelInfo(w);
-			if( info->handling.driveType == VehicleHandlingInfo::All ||
-					(info->handling.driveType == VehicleHandlingInfo::Forward && wi.m_bIsFrontWheel) ||
-					(info->handling.driveType == VehicleHandlingInfo::Rear && !wi.m_bIsFrontWheel))
-			{
-					physVehicle->applyEngineForce(engineForce, w);
-			}
+		for(unsigned int w = 0; w < dynamics.getWheels().size(); ++w) {
+			const VehicleDynamics::WheelInfo& wheel = dynamics.getWheels()[w];
 
-			float brakeReal = 5.f * info->handling.brakeDeceleration * (wi.m_bIsFrontWheel? info->handling.brakeBias : 1.f - info->handling.brakeBias);
-			physVehicle->setBrake(brakeReal * brakeF, w);
-
-			if(wi.m_bIsFrontWheel) {
+			if(wheel.position.y > 0.f) {
 				float sign = std::signbit(steerAngle) ? -1.f : 1.f;
-				physVehicle->setSteeringValue(std::min(info->handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign, w);
-				//physVehicle->setSteeringValue(std::min(3.141f/2.f, std::abs(steerAngle)) * sign, w);
+				float angle = std::min(info->handling.steeringLock*(3.141f/180.f), std::abs(steerAngle)) * sign;
+				if (kAckermannSteering)
+				{
+					if (angle < 0.f && wheel.position.x < 0.f) {
+						angle *= 0.7f;
+					}
+					else if (angle > 0.f && wheel.position.x > 0.f) {
+						angle *= 0.7f;
+					}
+				}
+				dynamics.setWheelAngle(w, angle);
 			}
 		}
 
@@ -425,8 +356,10 @@ bool VehicleObject::isFlipped() const
 
 float VehicleObject::getVelocity() const
 {
-	if (physVehicle) {
-		return (physVehicle->getCurrentSpeedKmHour()*1000.f)/(60.f*60.f);
+	if (collision->getBulletBody()) {
+		auto velocity = collision->getBulletBody()->getLinearVelocity();
+		auto gvelocity = glm::vec3(velocity.x(), velocity.y(), velocity.z());
+		return (glm::dot(getRotation() * glm::vec3(0.f, 1.f, 0.f), gvelocity));
 	}
 	return 0.f;
 }
