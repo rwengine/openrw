@@ -91,7 +91,7 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
 	dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
 	broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 	gContactProcessedCallback = ContactProcessedCallback;
-	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
+	dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this, true);
 
 	// Populate inventory items
 	for( auto& w : data->weaponData ) {
