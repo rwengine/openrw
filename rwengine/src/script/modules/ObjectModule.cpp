@@ -633,6 +633,25 @@ void game_dont_remove_object(const ScriptArguments& args)
 }
 
 template <class T>
+bool game_character_in_area_or_cylinder(const ScriptArguments& args)
+{
+	auto character = args.getPlayerCharacter(0);
+	glm::vec2 min(args[1].real, args[2].real);
+	glm::vec2 max(args[3].real, args[4].real);
+	bool isCylinder = !!args[5].integerValue();
+
+	RW_UNIMPLEMENTED("game_character_in_area_or_cylinder: should use cylinder if requested?");
+	RW_UNUSED(isCylinder);
+	/// @todo
+
+	auto player = character->getPosition();
+	if( player.x > min.x && player.y > min.y && player.x < max.x && player.y < max.y ) {
+		return true;
+	}
+	return false;
+}
+
+template <class T>
 bool game_character_in_area_on_foot(const ScriptArguments& args)
 {
 	RW_UNIMPLEMENTED("game_character_in_area_on_foot");
@@ -1283,6 +1302,8 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	
+	bindFunction(0x0199, game_character_in_area_or_cylinder<PlayerController>, 6, "Is Player in Area or Cylinder" );
+
 	bindFunction(0x019C, game_character_in_area_on_foot<PlayerController>, 8, "Is Player in Area on Foot" );
 	bindFunction(0x019E, game_character_stoped_in_volume<PlayerController>, 8, "Is Player stopped in volume" );
 	
