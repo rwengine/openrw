@@ -36,8 +36,9 @@ RWGame::RWGame(int argc, char* argv[])
 	: config("openrw.ini")
 	, state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
 	debugScript(false), inFocus(true),
-	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
-	accum(0.f), timescale(1.f)
+	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false)
+  , showDebugSuspension(false)
+  , accum(0.f), timescale(1.f)
 {
 	if (!config.isValid())
 	{
@@ -576,6 +577,12 @@ void RWGame::render(float alpha, float time)
 			debug->flush(renderer);
 		}
 	}
+
+	if (showDebugSuspension)
+	{
+		renderSuspension();
+		debug->flush(renderer);
+	}
 	RW_PROFILE_END();
 	
 	drawOnScreenText(world, renderer);
@@ -784,6 +791,28 @@ void RWGame::renderProfile()
 #endif
 }
 
+void RWGame::renderSuspension()
+{
+	btVector3 minColor(1.f, 0.f, 0.f);
+	for (const auto& entry : world->vehiclePool.objects)
+	{
+		VehicleObject* vehicle = static_cast<VehicleObject*>(entry.second);
+
+		for (const VehicleDynamics::WheelInfo& wheel : vehicle->dynamics.getWheels())
+		{
+			auto b = vehicle->getPosition() + vehicle->getRotation() * wheel.position;
+			auto f1 = wheel.suspensionForceWS / 1000.f;
+			auto f2 = wheel.tractionForceWS / 1000.f;
+			btVector3 suspensionBegin(b.x, b.y, b.z);
+			btVector3 suspensionEnd(b.x + f1.x, b.y + f1.y, b.z + f1.z);
+			debug->drawLine(suspensionBegin, suspensionEnd, minColor);
+			btVector3 tractionBegin(b.x, b.y, b.z);
+			btVector3 tractionEnd(b.x + f2.x, b.y + f2.y, b.z + f2.z);
+			debug->drawLine(tractionBegin, tractionEnd, minColor);
+		}
+	}
+}
+
 void RWGame::globalKeyEvent(const SDL_Event& event)
 {
 	switch (event.key.keysym.sym) {
@@ -807,6 +836,9 @@ void RWGame::globalKeyEvent(const SDL_Event& event)
 		break;
 	case SDLK_F3:
 		showDebugPhysics = ! showDebugPhysics;
+		break;
+	case SDLK_F4:
+		showDebugSuspension = ! showDebugSuspension;
 		break;
 	default: break;
 	}
