@@ -777,6 +777,29 @@ void game_set_zone_ped_group(const ScriptArguments& args)
 	}
 }
 
+bool game_has_respray_happened(const ScriptArguments& args)
+{
+	const auto& garages = args.getWorld()->state->garages;
+	int garageIndex = args[0].integerValue();
+
+	RW_CHECK(garageIndex >= 0, "Garage index too low");
+	RW_CHECK(garageIndex < static_cast<int>(garages.size()), "Garage index too high");
+	const auto& garage = garages[garageIndex];
+
+	if (garage.type != GarageInfo::GARAGE_RESPRAY) {
+		return false;
+	}
+
+	auto playerobj = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
+	auto pp = playerobj->getPosition();
+	if (pp.x >= garage.min.x && pp.y >= garage.min.y && pp.z >= garage.min.z &&
+	    pp.x <= garage.max.x && pp.y <= garage.max.y && pp.z <= garage.max.z) {
+		return true;
+	}
+
+	return false;
+}
+
 void game_display_text(const ScriptArguments& args)
 {
 	glm::vec2 pos(args[0].real, args[1].real);
@@ -1252,6 +1275,8 @@ GameModule::GameModule()
 	
 	bindFunction(0x0324, game_set_zone_ped_group, 3, "Set zone ped group" );
 	bindUnimplemented( 0x0325, game_create_car_fire, 2, "Create Car Fire" );
+
+	bindFunction( 0x0329, game_has_respray_happened, 1, "Has Respray Happened" );
 
 	bindUnimplemented( 0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
 
