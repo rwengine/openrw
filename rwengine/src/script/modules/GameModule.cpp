@@ -402,9 +402,9 @@ void game_create_garage(const ScriptArguments& args)
 	args.getWorld()->state->garages.push_back({
 		min, max, garageType
 	});
+	int garageIndex = args.getWorld()->state->garages.size() - 1;
 	
-	// TODO actually store the garage information and return the handle
-	*args[7].globalInteger = args.getWorld()->state->garages.size()-1;
+	*args[7].globalInteger = garageIndex;
 }
 
 void game_disable_ped_paths(const ScriptArguments& args)
