@@ -29,45 +29,124 @@ void ScreenText::tick(float dt)
 ScreenTextEntry ScreenTextEntry::makeBig(const std::string& id, const std::string& str, int style, int durationMS)
 {
 	switch(style) {
+
+	// Color: Blue
+	// Font: Pricedown
+	// Style: Italic (lowercase only)
+	// Horizontally: Centered
+	// Vertically: Baseline at y = 252 (from top)
+	// Size: 25 Pixel high letters ('S', 'l')
 	case 1:
 		return {
 			str,
-			{320.f, 400.f},
+			{320.f, 252.f},
 			1,
 			50,
-			{ 3,  3,   0,   0},
-			{20, 20, 200},
+			{ 2,  0,   0,   0},
+			{58, 119, 133},
 			1,
 			durationMS,
 			0,
 			600,
 			id
 		};
+
+	// Color: Yellow/Gold
+	// Font: Pricedown
+	// Style: Italic (lowercase only)
+	// Horizontally: Right at x = 620 (from left)
+	// Vertically: Baseline at y = 380 (from top)
+	// Size: 22 Pixel high letters ('S', 'l')
 	case 2:
 		return {
 			str,
 			{620.f, 380.f},
 			1,
 			30,
-			{  3,   3, 0,   0},
-			{205, 162, 7},
+			{  2,   3, 0,   0},
+			{214, 171, 9},
 			2,
 			durationMS,
 			0,
 			600,
 			id
 		};
+
+	// Color: Light brown
+	// Font: Pricedown
+	// Style: Italic (lowercase only)
+	// Horizontally: Right at x = 620 (from left)
+	// Vertically: Baseline at y = 427 (from top)
+	// Size: 28 Pixel high letters ('S', 'l')
+	case 3:
+		return {
+			str,
+			{320.f, 400.f},
+			1,
+			50,
+			{ 5,  5,   0,   0},
+			{169, 123, 88}, /// @todo verify
+			1,
+			durationMS,
+			0,
+			600,
+			id
+		};
+
+	// Color: Blue
+	// Font: Arial
+	// Style: Italic
+	// Horizontally: Centered
+	// Vertically: Baseline at y = 176 (from top)
+	// Size: 20 Pixel high letters ('S', 'l')
+	case 4:
+	case 5:
+		return {
+			str,
+			{320.f, 176.f},
+			2,
+			50,
+			((style == 4) ? glm::u8vec4({ 2, 2, 0, 0}) : glm::u8vec4({ -2, -2, 0, 0 })),
+			{90, 115, 150}, /// @todo verify
+			1,
+			durationMS,
+			0,
+			600,
+			id
+		};
+
+	// Color: Brown
+	// Font: Arial
+	// Style: Italic
+	// Horizontally: Centered
+	// Vertically: Baseline at y = 240 (from top)
+	// Size: 16 Pixel high letters ('S', 'l')
+	case 6:
+		return {
+			str,
+			{320.f, 240.f},
+			2,
+			50,
+			{ 2, 2, 0, 0},
+			{152, 89, 39},
+			1,
+			durationMS,
+			0,
+			600,
+			id
+		};
+
 	default:
 		RW_ERROR("Unhandled text style");
 		break;
 	}
 
 	return {
-		"Error",
+		"Error, style " + std::to_string(style),
 		{320.f, 400.f},
-		1,
+		2,
 		50,
-		{20, 20,   0,   0},
+		{20, 20, 0, 0},
 		{20, 20, 200},
 		1,
 		durationMS,
