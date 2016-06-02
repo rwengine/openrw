@@ -158,12 +158,18 @@ ScreenTextEntry ScreenTextEntry::makeBig(const std::string& id, const std::strin
 
 ScreenTextEntry ScreenTextEntry::makeHighPriority(const std::string& id, const std::string& str, int durationMS)
 {
+	// Color: ?
+	// Font: Arial
+	// Style: Italic
+	// Horizontally: Centered
+	// @todo verify: Vertically: Baseline at y = 431 (from top)
+	// @todo verify: Size: 15 Pixel high letters ('S', 'l')
 	return {
 		str,
 		{320.f, 420.f},
 		2,
 		18,
-		{0, 0,   0,   0},
+		{1, 0, 0, 0},
 		{255, 255, 255},
 		1,
 		durationMS,
