@@ -38,6 +38,8 @@ public:
 	
 	virtual bool takeDamage(const DamageInfo& damage);
 
+	void setSolid(bool solid);
+
 	float getHealth() const { return health; }
 };
 

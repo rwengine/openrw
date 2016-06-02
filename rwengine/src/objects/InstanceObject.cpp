@@ -174,4 +174,20 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg)
 	return false;
 }
 
+void InstanceObject::setSolid(bool solid)
+{
+	// Early out in case we don't have a collision body
+	if (body == nullptr || body->body == nullptr) {
+		return;
+	}
+
+	int flags = body->body->getCollisionFlags();
+	if (solid) {
+		flags &= ~btCollisionObject::CF_NO_CONTACT_RESPONSE;
+	} else {
+		flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
+	}
+	body->body->setCollisionFlags(flags);
+}
+
 
