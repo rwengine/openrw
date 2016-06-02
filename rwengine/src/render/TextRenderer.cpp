@@ -177,7 +177,7 @@ void TextRenderer::setFontTexture(int index, const std::string& texture)
 	}
 }
 
-void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
+void TextRenderer::renderText(const TextRenderer::TextInfo& ti, bool forceColour)
 {
 	renderer->getRenderer()->pushDebugGroup("Text");
 	renderer->getRenderer()->useProgram(textShader);
@@ -231,6 +231,10 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti)
 			}
 			
 			c = text[i];
+		}
+
+		if (forceColour) {
+			colour = glm::vec3(ti.baseColour) * (1/255.f);
 		}
 		
 		int glyph = charToIndex(c);
