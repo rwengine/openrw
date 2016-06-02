@@ -1114,6 +1114,7 @@ GameModule::GameModule()
 
 	bindFunction(0x0219, game_create_garage, 8, "Create Garage" );
 
+	bindUnimplemented( 0x021B, game_set_target_car_for_mission_garage, 2, "Set Target Car for Mission Garage" );
 	bindFunction(0x021C, game_is_car_inside_garage, 1, "Is Car Inside Garage" );
 
 	bindFunction(0x022A, game_disable_ped_paths, 6, "Disable ped paths" );
