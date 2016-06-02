@@ -211,7 +211,15 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti, bool forceColour
 		{
 			switch( text[i+1] )
 			{
-			case 'k': {
+			case 'g': // Green
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(glm::u8vec3(90, 157, 102)) * (1/255.f);
+				break;
+			case 'h': // White
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(1.f); /// @todo FIXME! Use proper colour!
+				break;
+			case 'k': { // Key
 				text.erase(text.begin()+i, text.begin()+i+3);
 				// Extract the key name from the /next/ markup
 				auto keyend = text.find('~', i+1);
@@ -219,14 +227,23 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti, bool forceColour
 				// Since we don't have a key map yet, just print out the name
 				text.erase(text.begin()+i, text.begin()+keyend);
 				text.insert(i, keyname);
-			} break;
-			case 'w':
-				text.erase(text.begin()+i, text.begin()+i+3);
-				colour = ti.baseColour;
 				break;
-			case 'h':
+			}
+			case 'l': // Black
 				text.erase(text.begin()+i, text.begin()+i+3);
-				colour = glm::vec3(1.f);
+				colour = glm::vec3(0.f); /// @todo FIXME! Use proper colour!
+				break;
+			case 'r': // Red
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(1.f, 0.0f, 0.0f); /// @todo FIXME! Use proper colour!
+				break;
+			case 'w': // Gray
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(0.5f); /// @todo FIXME! Use proper colour!
+				break;
+			case 'y': // Yellow
+				text.erase(text.begin()+i, text.begin()+i+3);
+				colour = glm::vec3(1.0f, 1.0f, 0.0f); /// @todo FIXME! Use proper colour!
 				break;
 			}
 			
