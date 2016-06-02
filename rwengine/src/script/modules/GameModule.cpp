@@ -664,6 +664,33 @@ void game_set_head_animation(const ScriptArguments& args)
 	}
 }
 
+void game_create_crusher_crane(const ScriptArguments& args)
+{
+	glm::vec2 crane_location(args[0].real, args[1].real);
+	glm::vec2 park_min(args[2].real, args[3].real);
+	glm::vec2 park_max(args[4].real, args[5].real);
+	glm::vec3 crusher_position(args[6].real, args[7].real, args[8].real);
+	float crusher_heading = args[9].real;
+
+	RW_UNIMPLEMENTED("create_crusher_crane is incomplete");
+	/// @todo check how to store all parameters and how to create the actual crusher
+	RW_UNUSED(crane_location);
+	RW_UNUSED(crusher_position);
+	/// @todo check how the savegame stores the heading value etc.
+	RW_UNUSED(crusher_heading);
+
+	// NOTE: These values come from a savegame from the original game
+	glm::vec3 min(park_min, -1.f);
+	glm::vec3 max(park_max, 3.5f);
+	int garageType = GarageInfo::GARAGE_CRUSHER;
+
+	// NOTE: This instruction also creates or controls a garage
+	/// @todo find out if this creates a garage or if it just controls garage[0]
+	args.getWorld()->state->garages.push_back({
+		min, max, garageType
+	});
+}
+
 void game_increment_progress(const ScriptArguments& args)
 {
 	args.getWorld()->state->currentProgress += args[0].integer;
@@ -1094,6 +1121,8 @@ GameModule::GameModule()
 	bindFunction(0x02F3, game_load_special_model, 2, "Load Special Model" );
 	bindFunction(0x02F4, game_create_cutscene_head, 3, "Create Cutscene Actor Head" );
 	bindFunction(0x02F5, game_set_head_animation, 2, "Set Cutscene Head Animation" );
+
+	bindFunction(0x02FB, game_create_crusher_crane, 10, "Create Crusher Crane");
 
 	bindFunction(0x030C, game_increment_progress, 1, "Increment Progress" );
 	bindFunction(0x030D, game_set_max_progress, 1, "Set Max Progress" );

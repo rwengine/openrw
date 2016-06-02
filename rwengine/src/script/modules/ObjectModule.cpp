@@ -1328,9 +1328,7 @@ ObjectModule::ObjectModule()
 	bindFunction(0x02DE, game_player_in_taxi, 1, "Is Player In Taxi" );
 	
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
-	
-	bindUnimplemented( 0x02FB, game_create_crane, 10, "Create Crusher Crane" );
-	
+
 	bindFunction(0x0320, game_character_in_range, 2, "Is Character in range of character");
 	
 	bindFunction(0x0339, game_objects_in_volume, 11, "Are objects in volume" );
