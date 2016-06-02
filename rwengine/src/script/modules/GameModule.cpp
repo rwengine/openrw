@@ -407,6 +407,30 @@ void game_create_garage(const ScriptArguments& args)
 	*args[7].globalInteger = garageIndex;
 }
 
+bool game_is_car_inside_garage(const ScriptArguments& args)
+{
+	/// @todo move to garage code
+
+	GameWorld* gw = args.getWorld();
+	const auto& garages = gw->state->garages;
+	int garageIndex = args[0].integerValue();
+
+	RW_CHECK(garageIndex >= 0, "Garage index too low");
+	RW_CHECK(garageIndex < static_cast<int>(garages.size()), "Garage index too high");
+	const auto& garage = garages[garageIndex];
+
+	for(auto& v : gw->vehiclePool.objects) {
+		// @todo if this car only accepts mission cars we probably have to filter here / only check for one specific car
+		auto vp = v.second->getPosition();
+		if (vp.x >= garage.min.x && vp.y >= garage.min.y && vp.z >= garage.min.z &&
+		    vp.x <= garage.max.x && vp.y <= garage.max.y && vp.z <= garage.max.z) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void game_disable_ped_paths(const ScriptArguments& args)
 {
 	glm::vec3 min(args[0].real,args[1].real,args[2].real);
@@ -1064,6 +1088,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x01F9, game_start_kill_frenzy, 9, "Start Kill Frenzy" );
 
 	bindFunction(0x0219, game_create_garage, 8, "Create Garage" );
+
+	bindFunction(0x021C, game_is_car_inside_garage, 1, "Is Car Inside Garage" );
 
 	bindFunction(0x022A, game_disable_ped_paths, 6, "Disable ped paths" );
 	bindFunction(0x022B, game_enable_ped_paths, 6, "Disable ped paths" );
