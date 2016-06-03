@@ -1228,6 +1228,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x009A, game_create_character, 6, "Create Character" );
 	bindFunction(0x009B, game_destroy_object<CharacterObject>, 1, "Destroy Character" );
+	bindUnimplemented( 0x009C, game_set_character_wander_path, 2, "Set Character Wander Path" );
 	
 	bindUnimplemented( 0x009F, game_character_make_idle, 1, "Set Character to Idle" );
 	
