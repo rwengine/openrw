@@ -605,6 +605,26 @@ void game_set_object_heading(const ScriptArguments& args)
 	object->setHeading(args[1].real);
 }
 
+void game_give_weapon_to_character(const ScriptArguments& args)
+{
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	CharacterState& cs = character->getCurrentState();
+	int weaponId = args[1].integerValue();
+	int bulletsTotal = args[2].integerValue();
+
+	RW_CHECK(weaponId >= 0, "Weapon-ID too low");
+	RW_CHECK(weaponId < cs.weapons.size(), "Weapon-ID too high");
+
+	// Give character the weapon
+	auto& weapon = cs.weapons[weaponId];
+	weapon.weaponId = weaponId;
+	weapon.bulletsClip = bulletsTotal; /// @todo what to set here?
+	weapon.bulletsTotal = bulletsTotal;
+
+	// Set active weapon
+	cs.currentWeapon = weaponId;
+}
+
 bool game_vehicle_stopped(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1284,7 +1304,9 @@ ObjectModule::ObjectModule()
 	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle<PlayerController>, 8, "Is Player Stopped in cube in vehicle" );
 	bindFunction(0x01A8, game_character_stoped_in_volume<CharacterObject>, 8, "Is Char Stopped in volume" );
 	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle<CharacterObject>, 8, "Is Char Stopped in cube in vehicle" );
-	
+
+	bindFunction(0x01B2, game_give_weapon_to_character, 3, "Give Weapon to Character" );
+
 	bindUnimplemented( 0x01BB, game_object_coordinates, 4, "Get Object Coordinates" );
 	
 	bindUnimplemented( 0x01BE, game_turn_character, 4, "Turn Character To Face Point" );

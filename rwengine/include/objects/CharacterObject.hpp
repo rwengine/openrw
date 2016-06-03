@@ -27,7 +27,7 @@ struct CharacterState
 	float rotation;
 	float health = 100.f;
 	float armour = 0.f;
-	CharacterWeaponSlot weapons[maxInventorySlots];
+	std::array<CharacterWeaponSlot, maxInventorySlots> weapons;
 	uint16_t currentWeapon = 0;
 	uint32_t lastFireTimeMS = 0;
 	bool primaryActive = false;
