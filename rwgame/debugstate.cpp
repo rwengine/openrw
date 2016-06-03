@@ -2,6 +2,7 @@
 #include "RWGame.hpp"
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <engine/GameState.hpp>
 #include <sstream>
@@ -129,6 +130,53 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	m->addEntry(Menu::lambda("Cull Here", [=] {
 		game->getRenderer()->setCullOverride(true, _debugCam);
 	}, entryHeight));
+	m->addEntry(Menu::lambda("Unsolid garage doors", [=] {
+
+		std::vector<std::string> garageDoorModels {
+			"8ballsuburbandoor",
+			"amcogaragedoor",
+			"bankjobdoor",
+			"bombdoor",
+			"crushercrush",
+			"crushertop",
+			"door2_garage",
+			"door3_garage",
+			"door4_garage",
+			"door_bombshop",
+			"door_col_compnd_01",
+			"door_col_compnd_02",
+			"door_col_compnd_03",
+			"door_col_compnd_04",
+			"door_col_compnd_05",
+			"door_jmsgrage",
+			"door_sfehousegrge",
+			"double_garage_dr",
+			"impex_door",
+			"impexpsubgrgdoor",
+			"ind_plyrwoor",
+			"ind_slidedoor",
+			"jamesgrge_kb",
+			"leveldoor2",
+			"oddjgaragdoor",
+			"plysve_gragedoor",
+			"SalvGarage",
+			"shedgaragedoor",
+			"Sub_sprayshopdoor",
+			"towergaragedoor1",
+			"towergaragedoor2",
+			"towergaragedoor3",
+			"vheistlocdoor"
+		};
+
+		auto gw = game->getWorld();
+		for(auto& i : gw->instancePool.objects) {
+			auto obj = static_cast<InstanceObject*>(i.second);
+			if (std::find(garageDoorModels.begin(), garageDoorModels.end(), obj->model->name) != garageDoorModels.end()) {
+				obj->setSolid(false);
+			}
+		}
+	}, entryHeight));
+
 
 	// Optional block if the player is in a vehicle
 	auto player = game->getPlayer()->getCharacter();
