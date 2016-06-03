@@ -1274,6 +1274,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x0118, game_character_dead, 1, "Is Character Dead" );
 	bindFunction(0x0119, game_vehicle_dead, 1, "Is Vehicle Dead" );
+	bindUnimplemented(0x011A, game_set_character_search_threat, 2, "Set Character Search Threat" );
 	
 	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
