@@ -1314,8 +1314,8 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x01BE, game_turn_character, 4, "Turn Character To Face Point" );
 	
 	bindFunction(0x01C1, game_vehicle_stopped, 1, "Is Vehicle Stopped" );
-	
-	bindUnimplemented( 0x01C3, game_release_vehicle, 1, "Mark Car Unneeded" );
+	bindUnimplemented( 0x01C2, game_mark_object_as_unneeded<CharacterObject>, 1, "Mark Character Unneeded" );
+	bindUnimplemented( 0x01C3, game_mark_object_as_unneeded<VehicleObject>, 1, "Mark Vehicle Unneeded" );
 	
 	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
 	
