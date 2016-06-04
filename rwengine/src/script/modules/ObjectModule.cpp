@@ -605,6 +605,26 @@ void game_set_object_heading(const ScriptArguments& args)
 	object->setHeading(args[1].real);
 }
 
+void game_give_weapon_to_character(const ScriptArguments& args)
+{
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	CharacterState& cs = character->getCurrentState();
+	int weaponId = args[1].integerValue();
+	int bulletsTotal = args[2].integerValue();
+
+	RW_CHECK(weaponId >= 0, "Weapon-ID too low");
+	RW_CHECK(weaponId < cs.weapons.size(), "Weapon-ID too high");
+
+	// Give character the weapon
+	auto& weapon = cs.weapons[weaponId];
+	weapon.weaponId = weaponId;
+	weapon.bulletsClip = bulletsTotal; /// @todo what to set here?
+	weapon.bulletsTotal = bulletsTotal;
+
+	// Set active weapon
+	cs.currentWeapon = weaponId;
+}
+
 bool game_vehicle_stopped(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1208,6 +1228,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x009A, game_create_character, 6, "Create Character" );
 	bindFunction(0x009B, game_destroy_object<CharacterObject>, 1, "Destroy Character" );
+	bindUnimplemented( 0x009C, game_set_character_wander_path, 2, "Set Character Wander Path" );
 	
 	bindUnimplemented( 0x009F, game_character_make_idle, 1, "Set Character to Idle" );
 	
@@ -1253,6 +1274,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x0118, game_character_dead, 1, "Is Character Dead" );
 	bindFunction(0x0119, game_vehicle_dead, 1, "Is Vehicle Dead" );
+	bindUnimplemented(0x011A, game_set_character_search_threat, 2, "Set Character Search Threat" );
 	
 	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
@@ -1284,14 +1306,16 @@ ObjectModule::ObjectModule()
 	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle<PlayerController>, 8, "Is Player Stopped in cube in vehicle" );
 	bindFunction(0x01A8, game_character_stoped_in_volume<CharacterObject>, 8, "Is Char Stopped in volume" );
 	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle<CharacterObject>, 8, "Is Char Stopped in cube in vehicle" );
-	
+
+	bindFunction(0x01B2, game_give_weapon_to_character, 3, "Give Weapon to Character" );
+
 	bindUnimplemented( 0x01BB, game_object_coordinates, 4, "Get Object Coordinates" );
 	
 	bindUnimplemented( 0x01BE, game_turn_character, 4, "Turn Character To Face Point" );
 	
 	bindFunction(0x01C1, game_vehicle_stopped, 1, "Is Vehicle Stopped" );
-	
-	bindUnimplemented( 0x01C3, game_release_vehicle, 1, "Mark Car Unneeded" );
+	bindUnimplemented( 0x01C2, game_mark_object_as_unneeded<CharacterObject>, 1, "Mark Character Unneeded" );
+	bindUnimplemented( 0x01C3, game_mark_object_as_unneeded<VehicleObject>, 1, "Mark Vehicle Unneeded" );
 	
 	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
 	
