@@ -1189,6 +1189,11 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		vehicle->setSecondaryColour(car.colorBG);
 	}
 
+	// Load import / export lists
+	state.importExportPortland = garageData.bfImportExportPortland;
+	state.importExportShoreside = garageData.bfImportExportShoreside;
+	state.importExportUnused = garageData.bfImportExportUnused;
+
 	std::fclose(loadFile);
 	
 	return true;
