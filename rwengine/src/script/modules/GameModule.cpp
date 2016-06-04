@@ -1223,7 +1223,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x039D, game_scatter_particles, 12, "Scatter Particles" );
 	bindUnimplemented( 0x039E, game_set_character_hijackable, 2, "Set Character can be dragged out" );
 
-	bindUnimplemented( 0x03AD, game_set_garage_enabled, 1, "Set Garbage Enabled" );
+	bindUnimplemented( 0x03AD, game_set_rubbish_enabled, 1, "Set Rubbish Enabled" );
 	bindUnimplemented( 0x03AE, game_clear_area_particles, 6, "Remove Particles in Area" );
 	bindUnimplemented( 0x03AF, game_set_streaming_enabled, 1, "Set Map Streaming Enabled" );
 
