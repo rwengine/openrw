@@ -980,6 +980,13 @@ void game_clear_help(const ScriptArguments& args)
 	args.getWorld()->state->text.clear<ScreenTextType::Help>();
 }
 
+bool game_has_crane_collected_all_cars(const ScriptArguments& args)
+{
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_has_crane_collected_all_cars()");
+	return false;
+}
+
 bool game_can_player_move(const ScriptArguments& args)
 {
 	RW_UNUSED(args);
@@ -1292,6 +1299,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03E7, game_flash_hud, 1, "Flash HUD Item" );
 	
 	bindUnimplemented( 0x03EB, game_clear_prints, 0, "Clear Small Prints" );
+	bindFunction(0x03EC, game_has_crane_collected_all_cars, 0, "Has Crane Collected All Cars" );
 
 	bindFunction(0x03EE, game_can_player_move, 1, "Can Player Move" );
 	bindUnimplemented( 0x03EF, game_safe_player, 1, "Make Player Safe For Cutscene" );
