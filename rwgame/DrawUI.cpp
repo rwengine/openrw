@@ -237,13 +237,15 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer)
 			// Check for the background type
 			if (t.colourBG.a == 0)
 			{
+				glm::vec2 shadowPosition((int8_t)t.colourBG.x, (int8_t)t.colourBG.y);
+
 				ti.baseColour = glm::vec3(0.f);
-				ti.screenPosition += glm::vec2(t.colourBG.x, t.colourBG.y);
+				ti.screenPosition += shadowPosition;
 				ti.backgroundColour = {0, 0, 0, 0};
 
-				renderer->text.renderText(ti);
+				renderer->text.renderText(ti, true);
 
-				ti.screenPosition -= glm::vec2(t.colourBG.x, t.colourBG.y);
+				ti.screenPosition -= shadowPosition;
 			}
 			else if(t.colourBG.a > 0)
 			{

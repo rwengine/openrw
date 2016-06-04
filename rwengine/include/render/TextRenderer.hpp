@@ -61,7 +61,7 @@ public:
 	
 	void setFontTexture( int index, const std::string& font );
 	
-	void renderText( const TextInfo& ti );
+	void renderText( const TextInfo& ti, bool forceColour = false );
 	
 private:
 	std::string fonts[GAME_FONTS];
