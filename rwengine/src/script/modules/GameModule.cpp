@@ -777,6 +777,29 @@ void game_set_zone_ped_group(const ScriptArguments& args)
 	}
 }
 
+bool game_has_respray_happened(const ScriptArguments& args)
+{
+	const auto& garages = args.getWorld()->state->garages;
+	int garageIndex = args[0].integerValue();
+
+	RW_CHECK(garageIndex >= 0, "Garage index too low");
+	RW_CHECK(garageIndex < static_cast<int>(garages.size()), "Garage index too high");
+	const auto& garage = garages[garageIndex];
+
+	if (garage.type != GarageInfo::GARAGE_RESPRAY) {
+		return false;
+	}
+
+	auto playerobj = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
+	auto pp = playerobj->getPosition();
+	if (pp.x >= garage.min.x && pp.y >= garage.min.y && pp.z >= garage.min.z &&
+	    pp.x <= garage.max.x && pp.y <= garage.max.y && pp.z <= garage.max.z) {
+		return true;
+	}
+
+	return false;
+}
+
 void game_display_text(const ScriptArguments& args)
 {
 	glm::vec2 pos(args[0].real, args[1].real);
@@ -941,6 +964,39 @@ void game_play_music_id(const ScriptArguments& args)
 	else if (args.getWorld()->missionAudio.length() > 0)
 	{
 		args.getWorld()->sound.playSound(args.getWorld()->missionAudio);
+	}
+}
+
+void game_clear_area(const ScriptArguments& args)
+{
+	glm::vec3 position(args[0].real, args[1].real, args[2].real);
+	float radius = args[3].real;
+	bool clearParticles = args[4].integer;
+
+	GameWorld* gw = args.getWorld();
+
+	for(auto& v : gw->vehiclePool.objects)
+	{
+		if( glm::distance(position, v.second->getPosition()) < radius )
+		{
+			gw->destroyObjectQueued(v.second);
+		}
+	}
+
+	for(auto& p : gw->pedestrianPool.objects)
+	{
+		if( glm::distance(position, p.second->getPosition()) < radius )
+		{
+			gw->destroyObjectQueued(p.second);
+		}
+	}
+
+	/// @todo Do we also have to clear all projectiles + particles *in this area*, even if the bool is false?
+
+	if (clearParticles)
+	{
+		RW_UNUSED(clearParticles);
+		RW_UNIMPLEMENTED("game_clear_area(): should clear all particles and projectiles (not limited to area!)");
 	}
 }
 
@@ -1220,8 +1276,11 @@ GameModule::GameModule()
 	bindFunction(0x0324, game_set_zone_ped_group, 3, "Set zone ped group" );
 	bindUnimplemented( 0x0325, game_create_car_fire, 2, "Create Car Fire" );
 
+	bindFunction( 0x0329, game_has_respray_happened, 1, "Has Respray Happened" );
+
 	bindUnimplemented( 0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
 
+	bindUnimplemented( 0x0335, game_free_resprays, 1, "Set Free Respray" );
 	bindUnimplemented( 0x0336, game_set_character_visible, 2, "Set Player Visible" );
 
 	bindFunction(0x033E, game_display_text, 3, "Display Text" );
@@ -1247,7 +1306,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x038B, game_load_models_now, 0, "Load Requested Models Now" );
 	
 	bindFunction(0x0394, game_play_music_id, 1, "Play music");
-	bindUnimplemented( 0x0395, game_clear_area, 5, "Clear Area Vehicles and Pedestrians" );
+	bindFunction(0x0395, game_clear_area, 5, "Clear Area Vehicles and Pedestrians" );
 	
 	bindUnimplemented( 0x0397, game_set_vehicle_siren, 2, "Set Vehicle Siren" );
 	

@@ -92,6 +92,9 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	m->addEntry(Menu::lambda("Jump to Debug Camera", [=] {
 		jumpCharacter(game, game->getPlayer()->getCharacter(), _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f), false);
 	}, entryHeight));
+	m->addEntry(Menu::lambda("Jump to Docks", [=] {
+		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(1390.f, -837.f, 100.f));
+	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Garage", [=] {
 		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(270.f, -605.f, 40.f));
 	}, entryHeight));
