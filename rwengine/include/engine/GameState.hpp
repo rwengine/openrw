@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <string>
+#include <bitset>
 #include <map>
 #include <vector>
 #include <objects/ObjectTypes.hpp>
@@ -346,6 +347,13 @@ struct GameState
 	std::map<int, BlipData> radarBlips;
 
 	std::vector<GarageInfo> garages;
+
+	/**
+	 * Bitsets for the car import / export list mission
+	 */
+	std::bitset<32> importExportPortland;
+	std::bitset<32> importExportShoreside;
+	std::bitset<32> importExportUnused;
 
 	/**
 	 * World to use for this state, this isn't saved, just used at runtime

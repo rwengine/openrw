@@ -898,6 +898,32 @@ bool game_is_audio_finished(const ScriptArguments& args)
 	return isFinished;
 }
 
+bool game_import_garage_contains_needed_car(const ScriptArguments& args)
+{
+	const auto& garages = args.getWorld()->state->garages;
+
+	int garageIndex = args[0].integerValue();
+	RW_CHECK(garageIndex >= 0, "Garage index too low");
+	RW_CHECK(garageIndex < static_cast<int>(garages.size()), "Garage index too high");
+	const auto& garage = garages[garageIndex];
+
+	int entryIndex = args[1].integerValue();
+	RW_CHECK(entryIndex >= 0, "Entry index too low");
+	RW_CHECK(entryIndex < 32, "Entry index too high");
+
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS1) {
+		return args.getState()->importExportPortland[entryIndex];
+	}
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS2) {
+		return args.getState()->importExportShoreside[entryIndex];
+	}
+	if (garage.type == GarageInfo::GARAGE_COLLECTCARS3) {
+		return args.getState()->importExportUnused[entryIndex];
+	}
+
+	return false;
+}
+
 void game_play_music_id(const ScriptArguments& args)
 {
 	int id = args[0].integer;
@@ -952,6 +978,13 @@ void game_display_help(const ScriptArguments& args)
 void game_clear_help(const ScriptArguments& args)
 {
 	args.getWorld()->state->text.clear<ScreenTextType::Help>();
+}
+
+bool game_has_crane_collected_all_cars(const ScriptArguments& args)
+{
+	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("game_has_crane_collected_all_cars()");
+	return false;
 }
 
 bool game_can_player_move(const ScriptArguments& args)
@@ -1223,7 +1256,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x039D, game_scatter_particles, 12, "Scatter Particles" );
 	bindUnimplemented( 0x039E, game_set_character_hijackable, 2, "Set Character can be dragged out" );
 
-	bindUnimplemented( 0x03AD, game_set_garage_enabled, 1, "Set Garbage Enabled" );
+	bindUnimplemented( 0x03AD, game_set_rubbish_enabled, 1, "Set Rubbish Enabled" );
 	bindUnimplemented( 0x03AE, game_clear_area_particles, 6, "Remove Particles in Area" );
 	bindUnimplemented( 0x03AF, game_set_streaming_enabled, 1, "Set Map Streaming Enabled" );
 
@@ -1249,6 +1282,7 @@ GameModule::GameModule()
 	bindFunction(0x03D1, game_play_mission_audio, 0, "Play Mission Audio" );
 	bindFunction(0x03D2, game_is_audio_finished, 0, "Is Mission Audio Finished" );
 	
+	bindFunction(0x03D4, game_import_garage_contains_needed_car, 2, "Import Garage Contains Needed Car" );
 	bindFunction(0x03D5, game_clear_print, 1, "Clear This Print" );
 	bindUnimplemented( 0x03D6, game_clear_this_print, 1, "Clear This Big Print" );
 	bindFunction(0x03D9, game_did_game_save, 0, "Did game save" );
@@ -1265,6 +1299,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03E7, game_flash_hud, 1, "Flash HUD Item" );
 	
 	bindUnimplemented( 0x03EB, game_clear_prints, 0, "Clear Small Prints" );
+	bindFunction(0x03EC, game_has_crane_collected_all_cars, 0, "Has Crane Collected All Cars" );
 
 	bindFunction(0x03EE, game_can_player_move, 1, "Can Player Move" );
 	bindUnimplemented( 0x03EF, game_safe_player, 1, "Make Player Safe For Cutscene" );
