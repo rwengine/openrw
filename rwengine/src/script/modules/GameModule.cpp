@@ -614,6 +614,41 @@ void game_add_sprite_blip(const ScriptArguments& args)
 	*args[4].globalInteger = args.getWorld()->state->addRadarBlip(bd);
 }
 
+template <class Tobject>
+void game_add_object_sprite_blip(const ScriptArguments& args)
+{
+	BlipData data;
+	auto target = args.getObject<Tobject>(0);
+	data.target = target->getGameObjectID();
+	unsigned int sprite = args[1].integerValue();
+
+	// Look up the sprite ID.
+	std::string spriteName = "";
+	if ( sprite < sizeof( sprite_names ) )
+	{
+		spriteName = sprite_names[sprite];
+	}
+
+	switch(target->type()) {
+	case GameObject::Vehicle:
+		data.type = BlipData::Vehicle;
+		break;
+	case GameObject::Character:
+		data.type = BlipData::Character;
+		break;
+	case GameObject::Pickup:
+		data.type = BlipData::Pickup;
+		break;
+	default:
+		data.type = BlipData::Location;
+		RW_ERROR("Unhandled blip type");
+		break;
+	}
+
+	data.texture = spriteName;
+	*args[2].globalInteger = args.getWorld()->state->addRadarBlip(data);
+}
+
 void game_load_cutscene(const ScriptArguments& args)
 {
 	args.getWorld()->loadCutscene(args[0].string);
@@ -1352,6 +1387,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03DA, game_set_garage_follow_player, 1, "Set Garage Camera Follows Player" );
 	
 	bindFunction(0x03DC, game_add_object_blip<PickupObject>, 2, "Add blip for pickup");
+	bindUnimplemented(0x03DD, game_add_object_sprite_blip<PickupObject>, 3, "Add Sprite Blip for Pickup"); /// @todo crashes LUIGI4 because of missing 032B
 	
 	bindUnimplemented( 0x03DE, game_set_pedestrian_density, 1, "Set Pedestrian density" );
 
