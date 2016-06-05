@@ -1052,6 +1052,16 @@ bool game_character_near_car_2d(const ScriptArguments& args)
 	return false;
 }
 
+void game_get_vehicle_health(const ScriptArguments& args)
+{
+	RW_UNIMPLEMENTED("game_get_vehicle_health");
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	if (vehicle) {
+		/// @todo
+		*args[1].globalReal = 1000.f;
+	}
+}
+
 void game_set_vehicle_colours(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1388,7 +1398,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0213, game_create_pickup, 6, "Create pickup");
 	bindFunction(0x0214, game_is_pickup_collected, 1, "Has Pickup been collected");
 	bindFunction(0x0215, game_destroy_pickup, 1, "Destroy Pickup");
-	
+
+	bindFunction(0x0227, game_get_vehicle_health, 2, "Get Vehicle Health" );
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
 	
 	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );
