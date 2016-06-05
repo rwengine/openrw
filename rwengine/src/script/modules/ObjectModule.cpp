@@ -796,6 +796,14 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	return false;
 }
 
+bool game_is_vehicle_in_water(const ScriptArguments& args)
+{
+	RW_UNIMPLEMENTED("game_is_vehicle_in_water");
+	RW_UNUSED(args);
+	/// @todo
+	return false;
+}
+
 bool game_player_in_taxi(const ScriptArguments& args)
 {
     auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
@@ -1357,6 +1365,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x029F, game_is_character_stopped<PlayerController>, 1, "Is Player Stopped" );
 	
 	bindFunction(0x02B3, game_character_in_area_9<PlayerController>, 9, "Is Player In Area" );
+
+	bindFunction(0x02BF, game_is_vehicle_in_water, 1, "Is Vehicle in Water" );
 	
 	bindFunction(0x02DE, game_player_in_taxi, 1, "Is Player In Taxi" );
 	
