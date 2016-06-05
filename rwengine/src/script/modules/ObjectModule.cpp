@@ -1294,6 +1294,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00A6, game_destroy_object<VehicleObject>, 1, "Destroy Vehicle" );
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
+
+	bindUnimplemented( 0x00AF, game_set_vehicle_objective, 2, "Set Vehicle Objective" );
 	
 	bindFunction(0x00D9, game_get_character_vehicle<CharacterObject>, 2, "Get Character Vehicle" );
 	bindFunction(0x00DA, game_get_character_vehicle<PlayerController>, 2, "Get Player Vehicle" );
