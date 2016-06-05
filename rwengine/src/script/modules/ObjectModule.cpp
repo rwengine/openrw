@@ -1435,6 +1435,8 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x0368, game_create_ev_crane, 10, "Create ev Crane" );
 	
+	bindUnimplemented( 0x039C, game_set_car_watertight, 2, "Set Car Watertight" );
+
 	bindFunction(0x03B6, game_change_nearest_model, 6, "Change Nearest Instance Model" );
 	
 	bindUnimplemented( 0x03BA, game_clear_area_vehicles, 6, "Clear Cars From Area" );
