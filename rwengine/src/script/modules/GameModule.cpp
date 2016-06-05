@@ -985,6 +985,10 @@ void game_clear_area(const ScriptArguments& args)
 
 	for(auto& p : gw->pedestrianPool.objects)
 	{
+		// Hack: Not sure what other objects are exempt from this opcode
+		if (p.second->getLifetime() == GameObject::PlayerLifetime) {
+			continue;
+		}
 		if( glm::distance(position, p.second->getPosition()) < radius )
 		{
 			gw->destroyObjectQueued(p.second);
