@@ -475,9 +475,10 @@ bool game_vehicle_dead(const ScriptArguments& args)
 	return vehicle == nullptr;
 }
 
+template <class T>
 bool game_character_in_zone(const ScriptArguments& args)
 {
-    auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	auto character = static_cast<CharacterObject*>(args.getObject<T>(0));
 	std::string zname(args[1].string);
 	
 	auto zfind = args.getWorld()->data->zones.find(zname);
@@ -492,25 +493,6 @@ bool game_character_in_zone(const ScriptArguments& args)
 	}
 	
 	return false;
-}
-
-bool game_player_in_zone(const ScriptArguments& args)
-{
-    auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
-    std::string zname(args[1].string);
-
-    auto zfind = args.getWorld()->data->zones.find(zname);
-    if( zfind != args.getWorld()->data->zones.end() ) {
-        auto player = character->getPosition();
-        auto& min = zfind->second.min;
-        auto& max = zfind->second.max;
-        if( player.x > min.x && player.y > min.y && player.z > min.z &&
-            player.x < max.x && player.y < max.y && player.z < max.z ) {
-            return true;
-            }
-    }
-
-    return false;
 }
 
 bool game_player_pressing_horn(const ScriptArguments& args)
@@ -1280,7 +1262,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented(0x011C, game_character_clear_objective, 1, "Clear Character Objective" );
 	
-    bindFunction(0x0121, game_player_in_zone, 2, "Is Player In Zone" );
+	bindFunction(0x0121, game_character_in_zone<PlayerController>, 2, "Is Player In Zone" );
     bindFunction(0x0122, game_player_pressing_horn, 1, "Is Player Pressing Horn" );
 
     bindFunction(0x0126, game_character_objective_passed, 1, "Character Objective Passed" );
