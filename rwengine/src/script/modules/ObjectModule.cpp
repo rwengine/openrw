@@ -708,6 +708,27 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 	return false;
 }
 
+bool game_locate_vehicle_near_point_2D(const ScriptArguments& args)
+{
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	glm::vec2 position(args[1].real, args[2].real);
+	glm::vec2 radius(args[3].real, args[4].real);
+	bool drawCylinder = !!args[5].integerValue();
+
+	auto vp = vehicle->getPosition();
+	glm::vec2 distance = glm::abs(position - glm::vec2(vp));
+
+	if(distance.x <= radius.x && distance.y <= radius.y) {
+		return true;
+	}
+
+	if(drawCylinder) {
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground + glm::vec3(0.f, 0.f, 4.5f), glm::vec3(radius, 5.f));
+	}
+
+	return false;
+}
 
 template <class T>
 bool game_is_character_stopped(const ScriptArguments& args)
@@ -1292,6 +1313,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x01A0, game_character_stoped_in_volume_in_vehicle<PlayerController>, 8, "Is Player Stopped in cube in vehicle" );
 	bindFunction(0x01A8, game_character_stoped_in_volume<CharacterObject>, 8, "Is Char Stopped in volume" );
 	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle<CharacterObject>, 8, "Is Char Stopped in cube in vehicle" );
+
+	bindFunction(0x01AD, game_locate_vehicle_near_point_2D, 6, "Locate Vehicle Near Point 2D" );
 
 	bindFunction(0x01B2, game_give_weapon_to_character, 3, "Give Weapon to Character" );
 
