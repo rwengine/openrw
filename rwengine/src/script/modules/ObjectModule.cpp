@@ -821,6 +821,39 @@ void game_get_speed(const ScriptArguments& args)
 	}
 }
 
+void game_create_character_as_passenger(const ScriptArguments& args)
+{
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	auto type = args[1].integerValue();
+	RW_UNUSED(type);
+	RW_UNIMPLEMENTED("game_create_character_as_passenger(): character type");
+	auto id = args[2].integerValue();
+	auto seat = args[3].integerValue();
+
+	auto character = args.getWorld()->createPedestrian(id, vehicle->getPosition() + spawnMagic);
+	new DefaultAIController(character);
+
+	if (seat <= -1) {
+		for (seat = 0; seat < static_cast<int>(vehicle->info->seats.size()); seat++) {
+			if (vehicle->getOccupant(seat) == nullptr && !vehicle->isOccupantDriver(seat)) {
+				break;
+			}
+		}
+	} else {
+		/// @todo 0 - passenger seat (or back seat of bike); 1 - left rear seat; 2 - right rear seat
+		seat++;
+	}
+
+	RW_CHECK(seat < static_cast<int>(vehicle->info->seats.size()), "Seat index too high");
+	RW_CHECK(vehicle->getOccupant(seat) == nullptr, "Seat is not free");
+	RW_CHECK(vehicle->isOccupantDriver(seat) == false, "Seat is not a passenger seat");
+
+	character->setCurrentVehicle(vehicle, seat);
+	vehicle->setOccupant(seat, character);
+
+	*args[4].globalInteger = character->getGameObjectID();
+}
+
 void game_enter_as_driver(const ScriptArguments& args)
 {
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
@@ -1335,6 +1368,7 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x01C3, game_mark_object_as_unneeded<VehicleObject>, 1, "Mark Vehicle Unneeded" );
 	
 	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
+	bindFunction(0x01C8, game_create_character_as_passenger, 5, "Create Character as Passenger" );
 	
 	bindFunction(0x01D5, game_enter_as_driver, 2, "Character Enter Vehicle as Driver" );
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
