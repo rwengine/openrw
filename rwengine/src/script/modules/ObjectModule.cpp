@@ -578,7 +578,7 @@ void game_give_weapon_to_character(const ScriptArguments& args)
 	int bulletsTotal = args[2].integerValue();
 
 	RW_CHECK(weaponId >= 0, "Weapon-ID too low");
-	RW_CHECK(weaponId < cs.weapons.size(), "Weapon-ID too high");
+	RW_CHECK(weaponId < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
 
 	// Give character the weapon
 	auto& weapon = cs.weapons[weaponId];
