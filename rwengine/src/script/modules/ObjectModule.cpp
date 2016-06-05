@@ -1410,6 +1410,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
 	
 	bindFunction(0x029F, game_is_character_stopped<PlayerController>, 1, "Is Player Stopped" );
+
+	bindUnimplemented( 0x02AA, game_set_car_only_damageable_by_player, 2, "Set Car Only Damageable by Player" );
 	
 	bindFunction(0x02B3, game_character_in_area_9<PlayerController>, 9, "Is Player In Area" );
 
