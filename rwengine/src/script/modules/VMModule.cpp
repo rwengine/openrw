@@ -141,6 +141,15 @@ void vm_return(const ScriptArguments& args)
 	args.getThread()->programCounter = args.getThread()->calls[--args.getThread()->stackDepth];
 }
 
+void vm_inc_global_int_by_global(const ScriptArguments& args)
+{
+	*args[0].globalInteger += *args[1].globalInteger;
+}
+void vm_inc_global_float_by_global(const ScriptArguments& args)
+{
+	*args[0].globalReal += *args[1].globalReal;
+}
+
 void vm_dec_global_int_by_global(const ScriptArguments& args)
 {
 	*args[0].globalInteger -= *args[1].globalInteger;
@@ -259,6 +268,9 @@ VMModule::VMModule()
 	bindFunction(0x050, vm_call, 1, "Gosub");
 
 	bindFunction(0x051, vm_return, 0, "Return");
+
+	bindFunction(0x058, vm_inc_global_int_by_global, 2, "Increment Global Integer by Global Integer");
+	bindFunction(0x059, vm_inc_global_float_by_global, 2, "Increment Global Float by Global Float");
 
 	bindFunction(0x060, vm_dec_global_int_by_global, 2, "Decrement Global Integer by Global Integer");
 	bindFunction(0x061, vm_dec_global_float_by_global, 2, "Decrement Global Float by Global Float");
