@@ -1247,7 +1247,7 @@ GameModule::GameModule()
 
 	bindFunction(0x018A, game_add_location_blip, 4, "Add Blip for Coord");
 	bindFunction(0x018B, game_change_blip_mode, 2, "Change Blip Display Mode");
-	
+	bindUnimplemented( 0x018C, game_play_sound_at, 4, "Play Sound At" );
 	bindUnimplemented( 0x018D, game_create_soundscape, 5, "Create soundscape" );
 
 	bindUnimplemented( 0x018E, game_remove_sound, 1, "Remove Sound" );
