@@ -160,6 +160,11 @@ void vm_dec_global_float_by_global(const ScriptArguments& args)
 	*args[0].globalReal -= *args[1].globalReal;
 }
 
+void vm_mul_global_float_by_global(const ScriptArguments& args)
+{
+	*args[0].globalReal *= *args[1].globalReal;
+}
+
 void vm_global_int_to_global(const ScriptArguments& args)
 {
 	*args[0].globalInteger = *args[1].globalInteger;
@@ -274,6 +279,8 @@ VMModule::VMModule()
 
 	bindFunction(0x060, vm_dec_global_int_by_global, 2, "Decrement Global Integer by Global Integer");
 	bindFunction(0x061, vm_dec_global_float_by_global, 2, "Decrement Global Float by Global Float");
+
+	bindFunction(0x069, vm_mul_global_float_by_global, 2, "Multiply Global Float by Global Float");
 
 	bindFunction(0x084, vm_global_int_to_global, 2, "Set Global Int To Global");
 
