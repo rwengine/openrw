@@ -1491,6 +1491,8 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x035D, game_set_object_targetable, 1, "Set Object Targetable" );
 	
 	bindFunction(0x0363, game_set_close_object_visible, 6, "Set Closest Object Visibility");
+
+	bindUnimplemented( 0x0365, game_set_character_objective_to_hail_taxi, 1, "Set Character Objective to Hail Taxi" );
 	
 	bindUnimplemented( 0x0368, game_create_ev_crane, 10, "Create ev Crane" );
 	
