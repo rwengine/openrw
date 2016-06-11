@@ -106,6 +106,11 @@ void vm_global_float_eq_float(const ScriptArguments& args)
 	args.getThread()->conditionResult =  *args[0].globalReal == args[1].real;
 }
 
+bool vm_global_int_eq_global_int(const ScriptArguments& args)
+{
+	return *args[0].globalInteger == *args[1].globalInteger;
+}
+
 void vm_new_thread(const ScriptArguments& args)
 {
 	args.getVM()->startThread(args[0].integer);
@@ -241,6 +246,7 @@ VMModule::VMModule()
 	
 	bindFunction(0x038, vm_global_int_eq_int, 2, "Global Int Equal to Int");
 	bindFunction(0x039, vm_global_int_eq_int, 2, "Local Int Equal to Int");
+	bindFunction(0x03A, vm_global_int_eq_global_int, 2, "Global Int Equal to Global Int");
 
 	bindFunction(0x042, vm_global_float_eq_float, 2, "Global Float Equal to Float");
 
