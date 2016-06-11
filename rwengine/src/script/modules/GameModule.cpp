@@ -85,9 +85,18 @@ void game_set_time(const ScriptArguments& args)
 
 bool game_is_button_pressed(const ScriptArguments& args)
 {
-	/// @todo implement
-	RW_UNUSED(args);
+	int player = args[0].integerValue();
+	int index = args[1].integerValue();
 	RW_UNIMPLEMENTED("game_is_button_pressed()");
+	// NOTE: This is a hack. Hence we'll keep the unimplemented message for now.
+	if (player == 0) {
+		if (index == 19) { // look behind / sub-mission
+			/// @todo Return the keystate instead
+			auto object = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
+			auto player = static_cast<CharacterObject*>(object);
+			return player->isRunning();
+		}
+	}
 	return false;
 }
 
