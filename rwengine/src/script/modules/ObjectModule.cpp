@@ -48,11 +48,21 @@ void game_create_player(const ScriptArguments& args)
 }
 
 template<class Tobject>
+void game_get_object_position(const ScriptArguments& args)
+{
+	auto object = args.getObject<Tobject>(0);
+	auto position = object->getPosition();
+	*args[1].globalReal = position.x;
+	*args[2].globalReal = position.y;
+	*args[3].globalReal = position.z;
+}
+
+template<class Tobject>
 void game_set_object_position(const ScriptArguments& args)
 {
-	auto character = args.getObject<Tobject>(0);
+	auto object = args.getObject<Tobject>(0);
 	glm::vec3 position(args[1].real, args[2].real, args[3].real);
-	character->setPosition(position + spawnMagic);
+	object->setPosition(position + spawnMagic);
 }
 
 bool game_player_in_area_2d(const ScriptArguments& args)
@@ -1234,6 +1244,7 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x009F, game_character_make_idle, 1, "Set Character to Idle" );
 	
+	bindFunction(0x00A0, game_get_object_position<CharacterObject>, 4, "Get Character Position" );
 	bindFunction(0x00A1, game_set_object_position<CharacterObject>, 4, "Set Character Position" );
 	
 	bindFunction(0x00A5, game_create_vehicle, 5, "Create Vehicle" );
