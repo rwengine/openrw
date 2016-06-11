@@ -1465,6 +1465,8 @@ ObjectModule::ObjectModule()
 
 	bindUnimplemented( 0x0243, game_set_character_personality, 2, "Set Character Personality" );
 	
+	bindUnimplemented( 0x0291, set_character_attack_when_provoked, 2, "Set Character Attack When Provoked" );
+
 	bindFunction(0x029B, game_create_object_world, 5, "Create Object no offset" );
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
 	
