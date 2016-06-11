@@ -89,6 +89,8 @@ PickupObject::PickupObject(GameWorld *world, const glm::vec3 &position, int mode
 	m_corona->particle.texture = engine->data->findTexture("coronacircle");
 
 	auto flags = behaviourFlags(m_type);
+	RW_UNUSED(flags);
+	
 	RW_CHECK((flags & PickupInVehicle)==0, "In Vehicle pickup not implemented yet");
 
 	setEnabled(true);
