@@ -52,6 +52,15 @@ void vm_dec_global_float(const ScriptArguments& args)
 	*args[0].globalReal -= args[1].real;
 }
 
+void vm_mul_global_int(const ScriptArguments& args)
+{
+	*args[0].globalInteger *= args[1].integer;
+}
+
+void vm_div_global_int(const ScriptArguments& args)
+{
+	*args[0].globalInteger /= args[1].integer;
+}
 void vm_div_global_float(const ScriptArguments& args)
 {
 	*args[0].globalReal /= args[1].real;
@@ -205,7 +214,10 @@ VMModule::VMModule()
 	bindFunction(0x009, vm_inc_global_float, 2, "Increment Global Float");
 	bindFunction(0x00C, vm_dec_global_int, 2, "Decrement Global Int");
 	bindFunction(0x00D, vm_dec_global_float, 2, "Decrement Global Float");
-	
+
+	bindFunction(0x010, vm_mul_global_int, 2, "Multiply Global Int by Int");
+
+	bindFunction(0x014, vm_div_global_int, 2, "Divide Global by Integer");
 	bindFunction(0x015, vm_div_global_float, 2, "Divide Global by Float");
 
 	bindFunction(0x018, vm_global_int_gt_int, 2, "Global Int Greater than Int");
