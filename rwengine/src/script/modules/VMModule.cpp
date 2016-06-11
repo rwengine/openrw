@@ -217,6 +217,18 @@ void vm_mission_over(const ScriptArguments& args)
 	*args.getState()->scriptOnMissionFlag = 0;
 }
 
+void vm_sqrt(const ScriptArguments& args)
+{
+	*args[1].globalReal -= std::sqrt(args[0].real);
+}
+
+void vm_random_int_in_range(const ScriptArguments& args)
+{
+  auto min = args[0].integerValue();
+  auto max = args[1].integerValue();
+	*args[2].globalInteger = std::rand() % (max - min) + min;
+}
+
 void vm_name_thread(const ScriptArguments& args)
 {
 	strncpy(args.getThread()->name, args[0].string, 16);
@@ -299,6 +311,10 @@ VMModule::VMModule()
 	bindFunction(0x0D7, vm_new_mission_thread, 1, "Start Mission Thread");
 
 	bindFunction(0x0D8, vm_mission_over, 0, "Set Mission Finished");
+
+	bindFunction(0x1FB, vm_sqrt, 2, "Sqrt");
+
+	bindFunction(0x209, vm_random_int_in_range, 3, "Random Int in Range");
 
 	bindFunction(0x2CD, vm_call, 2, "Call");
 
