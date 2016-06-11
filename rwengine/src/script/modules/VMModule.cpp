@@ -175,6 +175,12 @@ void vm_global_float_to_global(const ScriptArguments& args)
 	*args[0].globalReal = *args[1].globalReal;
 }
 
+void vm_floor_float_to_int(const ScriptArguments& args)
+{
+	/// @todo Not sure if this might round to zero
+	*args[0].globalInteger = floorf(*args[1].globalReal);
+}
+
 void vm_if(const ScriptArguments& args)
 {
 	auto n = args[0].integer;
@@ -285,6 +291,8 @@ VMModule::VMModule()
 	bindFunction(0x084, vm_global_int_to_global, 2, "Set Global Int To Global");
 
 	bindFunction(0x086, vm_global_float_to_global, 2, "Set Global Float To Global");
+
+	bindFunction(0x08C, vm_floor_float_to_int, 2, "Floor Float To Int");
 
 	bindFunction(0x0D6, vm_if, 1, "If");
 
