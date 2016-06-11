@@ -846,6 +846,56 @@ bool game_player_in_taxi(const ScriptArguments& args)
 	return (vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI);
 }
 
+void game_get_random_character_in_zone(const ScriptArguments& args)
+{
+	const auto& zones = args.getWorld()->data->zones;
+
+	std::string zname(args[0].string);
+
+	// Only try to find a character if this is a known zone
+	auto zfind = zones.find(zname);
+	if(zfind != zones.end()) {
+
+		// Create a list of candidate characters by iterating and checking if the char is in this zone
+		std::vector<std::pair<GameObjectID, GameObject*>> candidates;
+		for(auto& p : args.getWorld()->pedestrianPool.objects) {
+			auto character = static_cast<CharacterObject*>(p.second);
+
+			// We only consider characters walking around normally
+			/// @todo not sure if we are able to grab script objects or players too
+			if(character->getLifetime() != GameObject::TrafficLifetime) {
+				continue;
+			}
+
+			// Check if character is in this zone
+			auto cp = character->getPosition();
+			auto& min = zfind->second.min;
+			auto& max = zfind->second.max;
+			if (cp.x > min.x && cp.y > min.y && cp.z > min.z &&
+			    cp.x < max.x && cp.y < max.y && cp.z < max.z) {
+				candidates.push_back(p);
+			}
+		}
+
+		// Only return a result if we found a character
+		unsigned int candidateCount = candidates.size();
+		if (candidateCount > 0) {
+			// Return the handle for any random character in this zone and use lifetime for use by script
+			// @todo verify if the lifetime is actually changed in the original game
+			unsigned int randomIndex = std::rand() % candidateCount;
+			const auto p = candidates[randomIndex];
+			auto character = static_cast<CharacterObject*>(p.second);
+			character->setLifetime(GameObject::UnknownLifetime);
+			*args[1].globalInteger = p.first;
+			return;
+		}
+
+	}
+
+	// If we didn't find any character in the zone return -1
+	*args[1].globalInteger = -1;
+}
+
 void game_get_speed(const ScriptArguments& args)
 {
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
@@ -1415,6 +1465,7 @@ ObjectModule::ObjectModule()
 
 	bindFunction(0x02BF, game_is_vehicle_in_water, 1, "Is Vehicle in Water" );
 	
+	bindFunction(0x02DD, game_get_random_character_in_zone, 2, "Get Random Character In Zone");
 	bindFunction(0x02DE, game_player_in_taxi, 1, "Is Player In Taxi" );
 	
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
