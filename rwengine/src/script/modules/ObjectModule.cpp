@@ -1211,6 +1211,13 @@ void game_set_close_object_visible(const ScriptArguments& args)
 	}
 }
 
+void game_set_character_running(const ScriptArguments& args)
+{
+	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
+	bool running = !!args[1].integerValue();
+	character->setRunning(running);
+}
+
 void game_change_nearest_model(const ScriptArguments& args)
 {
 	glm::vec3 position(args[0].real, args[1].real, args[2].real);
@@ -1470,6 +1477,7 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
 
+	bindFunction(0x0319, game_set_character_running, 2, "Set Character Running" );
 	bindFunction(0x0320, game_character_in_range, 2, "Is Character in range of character");
 
 	bindFunction(0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
