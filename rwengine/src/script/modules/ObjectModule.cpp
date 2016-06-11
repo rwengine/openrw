@@ -636,6 +636,14 @@ bool game_vehicle_stopped(const ScriptArguments& args)
 	return false;
 }
 
+bool game_is_vehicle_health_greater_than(const ScriptArguments& args)
+{
+	RW_UNIMPLEMENTED("game_is_vehicle_health_greater_than");
+	RW_UNUSED(args);
+	/// @todo
+	return true;
+}
+
 /// Remove object from cleanup at end of missions.
 void game_dont_remove_object(const ScriptArguments& args)
 {
@@ -1339,6 +1347,8 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x0176, game_get_object_heading<InstanceObject>, 2, "Get Object heading" );
 	bindFunction(0x0177, game_set_object_heading<InstanceObject>, 2, "Set Object heading" );
+
+	bindFunction(0x0185, game_is_vehicle_health_greater_than, 2, "Is Vehicle Health Greater Than" );
 	
 	bindUnimplemented( 0x0192, game_character_stand_still, 1, "Make character stand still" );
 	
