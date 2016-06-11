@@ -439,15 +439,15 @@ void DebugState::printCameraDetails()
 void DebugState::spawnVehicle(unsigned int id)
 {
 	auto ch = game->getPlayer()->getCharacter();
-	if(! ch) return;
+	if (!ch)
+		return;
 
-	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
-
-	glm::vec3 hit, normal;
-	if(game->hitWorldRay(ch->position + (fwd * 10.f), {0.f, 0.f, -2.f}, hit, normal)) {
-		auto spawnpos = hit + normal;
-		getWorld()->createVehicle(id, spawnpos, glm::quat());
-	}
+	auto playerRot = ch->getRotation();
+	auto spawnPos = ch->getPosition();
+	spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f);
+	auto spawnRot = glm::quat(
+	    glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
+	getWorld()->createVehicle(id, spawnPos, spawnRot);
 }
 
 void DebugState::spawnFollower(unsigned int id)
