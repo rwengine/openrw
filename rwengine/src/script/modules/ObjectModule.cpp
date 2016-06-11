@@ -687,21 +687,12 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 	
 	glm::vec3 pp = character->getPosition();
 	
-	if( pp.x >= min.x && pp.y >= min.y && pp.z >= min.z &&
-		pp.x <= max.x && pp.y <= max.y && pp.z <= max.z )
-	{
-		if( character->getCurrentVehicle() != nullptr )
-		{
-			return character->getCurrentVehicle()->physVehicle->getCurrentSpeedKmHour() < 0.75f;
-		}
-		else
-		{
-			return character->controller->getCurrentActivity() == nullptr;
-		}
+	if (pp.x >= min.x && pp.y >= min.y && pp.z >= min.z &&
+	    pp.x <= max.x && pp.y <= max.y && pp.z <= max.z) {
+		return character->isStopped();
 	}
 	
-	if( drawCylinder )
-	{
+	if (drawCylinder) {
 		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, (max+min)/2.f, (max-min)/2.f);
 	}
 	
