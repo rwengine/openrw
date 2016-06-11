@@ -1349,7 +1349,8 @@ GameModule::GameModule()
 	bindFunction(0x030D, game_set_max_progress, 1, "Set Max Progress" );
 
 	bindFunction(0x0314, game_set_unique_jumps, 1, "Set Total Unique Jumps" );
-	
+	bindUnimplemented( 0x0315, game_increment_taxi_dropoffs, 0, "Increment Taxi Dropoffs" );
+	bindUnimplemented( 0x0316, game_register_taxi_money, 1, "Register Taxi Money" );
 	bindUnimplemented( 0x0317, game_increment_mission_attempts, 0, "Increment Mission Attempts" );
 	bindFunction(0x0318, game_set_last_mission, 1, "Set Last completed mission" );
 	
