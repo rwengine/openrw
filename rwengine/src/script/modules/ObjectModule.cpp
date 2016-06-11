@@ -1447,6 +1447,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0204, game_character_near_car_2d, 5, "Is Char near Car in Car 2D" );
 	
 	bindUnimplemented( 0x020A, game_lock_vehicle_doors, 2, "Lock Car Doors" );
+
+	bindUnimplemented( 0x020F, game_turn_character_to_face_player, 2, "Turn Character to Face Player" );
 	
 	bindFunction(0x0211, game_navigate_on_foot, 3, "Character go to on foot" );
 	
