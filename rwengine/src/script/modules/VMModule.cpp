@@ -79,12 +79,12 @@ void vm_global_int_ge_int(const ScriptArguments& args)
 
 void vm_int_ge_global_int(const ScriptArguments& args)
 {
-	args.getThread()->conditionResult =  args[0].integer >= *args[1].globalInteger;
+	args.getThread()->conditionResult =  args[0].integerValue() >= *args[1].globalInteger;
 }
 
 void vm_global_int_eq_int(const ScriptArguments& args)
 {
-	args.getThread()->conditionResult =  *args[0].globalInteger == args[1].integer;
+	args.getThread()->conditionResult =  *args[0].globalInteger == args[1].integerValue();
 }
 
 void vm_global_float_eq_float(const ScriptArguments& args)
