@@ -1455,8 +1455,10 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0213, game_create_pickup, 6, "Create pickup");
 	bindFunction(0x0214, game_is_pickup_collected, 1, "Has Pickup been collected");
 	bindFunction(0x0215, game_destroy_pickup, 1, "Destroy Pickup");
+	bindUnimplemented( 0x0216, game_set_taxi_available_light, 2, "Set Taxi Available Light" );
 
 	bindFunction(0x0227, game_get_vehicle_health, 2, "Get Vehicle Health" );
+	
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
 	
 	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );
