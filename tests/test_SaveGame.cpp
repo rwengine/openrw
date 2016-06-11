@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_load_game)
 	GameState state;
 	GameWorld world();
 	SCMOpcodes s;
-	auto file = Global::get().d->loadSCM("data/main.scm");
+	auto file = Global::get().d->loadSCM("main.scm");
 	ScriptMachine machine(&state, file, &s);
 	
 	state.world = Global::get().e;

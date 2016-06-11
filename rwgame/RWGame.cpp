@@ -218,7 +218,7 @@ void RWGame::loadGame(const std::string& savename)
 
 	newGame();
 
-	startScript("data/main.scm");
+	startScript("main.scm");
 
 	if(! SaveGame::loadGame(*state, savename) )
 	{
