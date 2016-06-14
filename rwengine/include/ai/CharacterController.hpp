@@ -190,7 +190,10 @@ namespace Activities {
 	struct ExitVehicle : public CharacterController::Activity {
 		DECL_ACTIVITY( ExitVehicle )
 
-		ExitVehicle( )
+		const bool jacked;
+
+		ExitVehicle(bool jacked_ = false)
+			: jacked(jacked_)
 			{}
 
 		bool update(CharacterObject *character, CharacterController *controller);

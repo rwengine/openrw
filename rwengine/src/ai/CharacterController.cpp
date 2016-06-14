@@ -219,18 +219,24 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 
 	auto anm_open = character->animations.car_open_lhs;
 	auto anm_enter = character->animations.car_getin_lhs;
-	
+	auto anm_pullout = character->animations.car_pullout_lhs;
+
 	if( entryDoor->dummy->getDefaultTranslation().x > 0.f )
 	{
 		anm_open = character->animations.car_open_rhs;
 		anm_enter = character->animations.car_getin_rhs;
+		anm_pullout = character->animations.car_pullout_rhs;
 	}
+
+	// If there's someone in this seat already, we may have to ask them to leave.
+	auto currentOccupant= static_cast<CharacterObject*>(vehicle->getOccupant(seat));
+
+	bool tryToEnter = false;
 	
 	if( entering ) {
 		if( character->animator->getAnimation(AnimIndexAction) == anm_open ) {
 			if( character->animator->isCompleted(AnimIndexAction) ) {
-				character->playActivityAnimation(anm_enter, false, true);
-				character->enterVehicle(vehicle, seat);
+				tryToEnter = true;
 			}
 			else if( entryDoor && character->animator->getAnimationTime(AnimIndexAction) >= 0.5f )
 			{
@@ -239,6 +245,11 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			else {
 				//character->setPosition(vehicle->getSeatEntryPosition(seat));
 				character->rotation = vehicle->getRotation();
+			}
+		}
+		else if (character->animator->getAnimation(AnimIndexAction) == anm_pullout) {
+			if (character->animator->isCompleted(AnimIndexAction)) {
+				tryToEnter = true;
 			}
 		}
 		else if( character->animator->getAnimation(AnimIndexAction) == anm_enter ) {
@@ -266,8 +277,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			// Determine if the door open animation should be skipped.
 			if( entryDoor == nullptr || (entryDoor->constraint != nullptr && glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f ) )
 			{
-				character->playActivityAnimation(anm_enter, false, true);
-				character->enterVehicle(vehicle, seat);
+				tryToEnter = true;
 			}
 			else
 			{
@@ -286,6 +296,18 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 			character->controller->setMoveDirection({1.f, 0.f, 0.f});
 		}
 	}
+
+	if (tryToEnter) {
+		if (currentOccupant != nullptr && currentOccupant != character) {
+			// Play the pullout animation and tell the other character to get out.
+			character->playActivityAnimation(anm_pullout, false, true);
+			currentOccupant->controller->setNextActivity(new Activities::ExitVehicle(true));
+		}
+		else {
+			character->playActivityAnimation(anm_enter, false, true);
+			character->enterVehicle(vehicle, seat);
+		}
+	}
 	return false;
 }
 
@@ -294,15 +316,49 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 {
 	RW_UNUSED(controller);
 
+	if (jacked) {
+		auto anm_jacked_lhs = character->animations.car_jacked_lhs;
+		auto anm_jacked_rhs = character->animations.car_jacked_lhs;
+		auto anm_current = character->animator->getAnimation(AnimIndexAction);
+
+		if (anm_current == anm_jacked_lhs || anm_current == anm_jacked_rhs) {
+			if (character->animator->isCompleted(AnimIndexAction)) {
+				return true;
+			}
+		}
+		else {
+			if (character->getCurrentVehicle() == nullptr) return true;
+
+			auto vehicle = character->getCurrentVehicle();
+			auto seat = character->getCurrentSeat();
+			auto door = vehicle->getSeatEntryDoor(seat);
+
+			character->rotation = vehicle->getRotation();
+
+			// Exit the vehicle immediatley
+			auto exitpos = vehicle->getSeatEntryPosition(seat);
+			character->enterVehicle(nullptr, seat);
+			character->setPosition(exitpos);
+
+			if (door->dummy->getDefaultTranslation().x > 0.f) {
+				character->playActivityAnimation(anm_jacked_rhs, false, true);
+			}
+			else {
+				character->playActivityAnimation(anm_jacked_lhs, false, true);
+			}
+			// No need to open the door, it should already be open.
+		}
+		return false;
+	}
+
 	if( character->getCurrentVehicle() == nullptr ) return true;
 
 	auto vehicle = character->getCurrentVehicle();
-	
 	auto seat = character->getCurrentSeat();
 	auto door = vehicle->getSeatEntryDoor(seat);
-	
+
 	auto anm_exit = character->animations.car_getout_lhs;
-	
+
 	if( door->dummy->getDefaultTranslation().x > 0.f )
 	{
 		anm_exit = character->animations.car_getout_rhs;
