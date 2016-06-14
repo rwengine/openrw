@@ -128,6 +128,13 @@ void VehicleObject::tickPhysics(float dt)
 		{
 			velFac = 0.f;
 		}
+
+		/// @todo make this be correct
+		// There's some resources here:
+		// http://projectcerbera.com/gta/3-vc/tutorials/acceleration
+		//  and here:
+		// http://projectcerbera.com/gta/3-vc/tutorials/dimensions
+		// But I haven't gotten this matching that yet.
 		float engineForce = glm::sqrt(info->handling.acceleration) * throttle * info->handling.mass * velFac;
 		if( fabs(engineForce) >= 0.001f )
 		{
