@@ -7,11 +7,13 @@
 #include <items/WeaponItem.hpp>
 #include <rw/defines.hpp>
 
+constexpr float kCloseDoorIdleTime = 2.f;
+
 CharacterController::CharacterController(CharacterObject* character)
 	: character(character)
 	, _currentActivity(nullptr)
 	, _nextActivity(nullptr)
-	, vehicleIdle(0.f)
+	, m_closeDoorTimer(0.f)
 	, currentGoal(None)
 	, leader(nullptr)
 	, targetNode(nullptr)
@@ -80,27 +82,26 @@ void CharacterController::update(float dt)
 		}
 
 		if( _currentActivity == nullptr ) {
-			if( glm::length( d ) <= 0.1f )
-			{
-				vehicleIdle += dt;
-			}
-			else
-			{
-				vehicleIdle = 0.f;
-			}
-			
-			if( vehicleIdle >= 1.f )
-			{
-				// If character is idle in vehicle, try to close the door.
-				auto v = character->getCurrentVehicle();
-				auto entryDoor = v->getSeatEntryDoor(character->getCurrentSeat());
-				
-				if( entryDoor && entryDoor->constraint )
-				{
-					character->getCurrentVehicle()->setPartTarget(entryDoor, true, entryDoor->closedAngle);
+			// If character is idle in vehicle, try to close the door.
+			auto v = character->getCurrentVehicle();
+			auto entryDoor = v->getSeatEntryDoor(character->getCurrentSeat());
+
+			if (entryDoor && entryDoor->constraint) {
+				if (glm::length( d ) <= 0.1f) {
+					if (m_closeDoorTimer >= kCloseDoorIdleTime) {
+						character->getCurrentVehicle()->setPartTarget(entryDoor, true, entryDoor->closedAngle);
+					}
+					m_closeDoorTimer += dt;
+				}
+				else {
+					m_closeDoorTimer = 0.f;
 				}
 			}
 		}
+	}
+	else
+	{
+		m_closeDoorTimer = 0.f;
 	}
 
 	if( updateActivity() ) {

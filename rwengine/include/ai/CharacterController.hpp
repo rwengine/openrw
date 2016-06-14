@@ -67,7 +67,7 @@ protected:
 	bool updateActivity();
 	void setActivity(Activity* activity);
 
-	float vehicleIdle;
+	float m_closeDoorTimer;
 	
 	// Goal related variables
 	Goal currentGoal;
