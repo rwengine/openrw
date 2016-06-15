@@ -65,10 +65,14 @@ struct AnimationGroup
 	Animation* car_open_lhs;
 	Animation* car_getin_lhs;
 	Animation* car_getout_lhs;
+	Animation* car_jacked_lhs;
+	Animation* car_pullout_lhs;
 
 	Animation* car_open_rhs;
 	Animation* car_getin_rhs;
 	Animation* car_getout_rhs;
+	Animation* car_jacked_rhs;
+	Animation* car_pullout_rhs;
 
 	Animation* kd_front;
 	Animation* ko_shot_front;

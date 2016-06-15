@@ -52,10 +52,14 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.car_open_lhs   = engine->data->animations["car_open_lhs"];
 	animations.car_getin_lhs   = engine->data->animations["car_getin_lhs"];
 	animations.car_getout_lhs   = engine->data->animations["car_getout_lhs"];
-	
+	animations.car_pullout_lhs   = engine->data->animations["car_pullout_lhs"];
+	animations.car_jacked_lhs   = engine->data->animations["car_jackedlhs"];
+
 	animations.car_open_rhs   = engine->data->animations["car_open_rhs"];
 	animations.car_getin_rhs   = engine->data->animations["car_getin_rhs"];
 	animations.car_getout_rhs   = engine->data->animations["car_getout_rhs"];
+	animations.car_pullout_rhs   = engine->data->animations["car_pullout_rhs"];
+	animations.car_jacked_rhs   = engine->data->animations["car_jackedrhs"];
 
 	animations.kd_front   = engine->data->animations["kd_front"];
 	animations.ko_shot_front   = engine->data->animations["ko_shot_front"];
