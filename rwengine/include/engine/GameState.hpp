@@ -9,6 +9,7 @@
 #include <vector>
 #include <objects/ObjectTypes.hpp>
 #include <engine/ScreenText.hpp>
+#include <data/VehicleGenerator.hpp>
 
 class GameWorld;
 class GameObject;
@@ -165,30 +166,6 @@ struct TextDisplayData
 
 	glm::vec4 colourFG;
 	glm::vec4 colourBG;
-};
-
-/**
- * Stores information about where the game can generate vehicles.
- */
-struct VehicleGenerator
-{
-	glm::vec3 position;
-	float heading;
-	/** ID of the vehicle to spawn, or -1 for random. */
-	int vehicleID;
-	int colourFG;
-	int colourBG;
-	bool alwaysSpawn;
-	short alarmThreshold;
-	short lockedThreshold;
-	
-	int minDelay;
-	int maxDelay;
-	/** Incrementing timer (in ms), will only spawn a vehicle when minDelay < spawnTimer and will always spawn if maxDelay < spawnTimer */
-	int lastSpawnTime;
-	
-	/** Number of vehicles left to spawn 0-100, 101 = never decrement. */
-	int remainingSpawns;
 };
 
 /**

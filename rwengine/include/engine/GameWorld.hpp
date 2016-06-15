@@ -27,6 +27,7 @@ class VehicleObject;
 struct BlipData;
 class InventoryItem;
 struct WeaponScan;
+struct VehicleGenerator;
 
 #include <data/Chase.hpp>
 
@@ -327,6 +328,11 @@ public:
 	
 	void setPaused(bool pause);
 	bool isPaused() const;
+
+	/**
+	 * Attempt to spawn a vehicle at a vehicle generator
+	 */
+	VehicleObject* tryToSpawnVehicle(VehicleGenerator& gen);
 
 private:
 

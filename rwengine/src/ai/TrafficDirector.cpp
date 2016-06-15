@@ -2,8 +2,10 @@
 #include <ai/AIGraphNode.hpp>
 #include <ai/CharacterController.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/GameState.hpp>
 #include <objects/GameObject.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
@@ -71,6 +73,18 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	int availablePeds = maximumPedestrians - world->pedestrianPool.objects.size();
 
 	std::vector<GameObject*> created;
+
+	// Spawn vehicles at vehicle generators
+	/// @todo avoid spawning in view frustum unless alwaysSpawn == true
+
+	for (auto& gen : world->state->vehicleGenerators) {
+		if (glm::distance2(center, gen.position) < radius * radius) {
+			auto spawned = world->tryToSpawnVehicle(gen);
+			if (spawned) {
+				created.push_back(spawned);
+			}
+		}
+	}
 
 	auto type = AIGraphNode::Pedestrian;
 	auto available = findAvailableNodes(type, center, radius);
