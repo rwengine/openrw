@@ -1407,6 +1407,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
 	
 	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );
+
+	bindUnimplemented( 0x0243, game_set_character_personality, 2, "Set Character Personality" );
 	
 	bindFunction(0x029B, game_create_object_world, 5, "Create Object no offset" );
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
