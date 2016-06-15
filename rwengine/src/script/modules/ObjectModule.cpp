@@ -1381,6 +1381,8 @@ ObjectModule::ObjectModule()
 	
 	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
 	bindFunction(0x01C8, game_create_character_as_passenger, 5, "Create Character as Passenger" );
+
+	bindUnimplemented( 0x01CC, game_set_character_objective_kill_player_any_means, 2, "Set Character Objective to Kill Player by Any Means" );
 	
 	bindFunction(0x01D5, game_enter_as_driver, 2, "Character Enter Vehicle as Driver" );
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
