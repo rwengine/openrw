@@ -10,6 +10,11 @@ class DebugState : public State
 	glm::vec2 _debugLook;
 	bool _freeLook;
 	bool _sonicMode;
+
+	Menu* createDebugMenu();
+	Menu* createMapMenu();
+	Menu* createVehicleMenu();
+	Menu* createAIMenu();
 public:
 	DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
 
