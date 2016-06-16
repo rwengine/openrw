@@ -578,7 +578,7 @@ void game_give_weapon_to_character(const ScriptArguments& args)
 	int bulletsTotal = args[2].integerValue();
 
 	RW_CHECK(weaponId >= 0, "Weapon-ID too low");
-	RW_CHECK(weaponId < cs.weapons.size(), "Weapon-ID too high");
+	RW_CHECK(weaponId < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
 
 	// Give character the weapon
 	auto& weapon = cs.weapons[weaponId];
@@ -708,6 +708,27 @@ bool game_character_stoped_in_volume(const ScriptArguments& args)
 	return false;
 }
 
+bool game_locate_vehicle_near_point_2D(const ScriptArguments& args)
+{
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	glm::vec2 position(args[1].real, args[2].real);
+	glm::vec2 radius(args[3].real, args[4].real);
+	bool drawCylinder = !!args[5].integerValue();
+
+	auto vp = vehicle->getPosition();
+	glm::vec2 distance = glm::abs(position - glm::vec2(vp));
+
+	if(distance.x <= radius.x && distance.y <= radius.y) {
+		return true;
+	}
+
+	if(drawCylinder) {
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(position, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground + glm::vec3(0.f, 0.f, 4.5f), glm::vec3(radius, 5.f));
+	}
+
+	return false;
+}
 
 template <class T>
 bool game_is_character_stopped(const ScriptArguments& args)
@@ -775,6 +796,14 @@ bool game_objects_in_volume(const ScriptArguments& args)
 	return false;
 }
 
+bool game_is_vehicle_in_water(const ScriptArguments& args)
+{
+	RW_UNIMPLEMENTED("game_is_vehicle_in_water");
+	RW_UNUSED(args);
+	/// @todo
+	return false;
+}
+
 bool game_player_in_taxi(const ScriptArguments& args)
 {
     auto character = static_cast<CharacterObject*>(args.getPlayerCharacter(0));
@@ -790,6 +819,39 @@ void game_get_speed(const ScriptArguments& args)
 	{
 		*args[1].globalReal = vehicle->physVehicle->getCurrentSpeedKmHour();
 	}
+}
+
+void game_create_character_as_passenger(const ScriptArguments& args)
+{
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	auto type = args[1].integerValue();
+	RW_UNUSED(type);
+	RW_UNIMPLEMENTED("game_create_character_as_passenger(): character type");
+	auto id = args[2].integerValue();
+	auto seat = args[3].integerValue();
+
+	auto character = args.getWorld()->createPedestrian(id, vehicle->getPosition() + spawnMagic);
+	new DefaultAIController(character);
+
+	if (seat <= -1) {
+		for (seat = 0; seat < static_cast<int>(vehicle->info->seats.size()); seat++) {
+			if (vehicle->getOccupant(seat) == nullptr && !vehicle->isOccupantDriver(seat)) {
+				break;
+			}
+		}
+	} else {
+		/// @todo 0 - passenger seat (or back seat of bike); 1 - left rear seat; 2 - right rear seat
+		seat++;
+	}
+
+	RW_CHECK(seat < static_cast<int>(vehicle->info->seats.size()), "Seat index too high");
+	RW_CHECK(vehicle->getOccupant(seat) == nullptr, "Seat is not free");
+	RW_CHECK(vehicle->isOccupantDriver(seat) == false, "Seat is not a passenger seat");
+
+	character->setCurrentVehicle(vehicle, seat);
+	vehicle->setOccupant(seat, character);
+
+	*args[4].globalInteger = character->getGameObjectID();
 }
 
 void game_enter_as_driver(const ScriptArguments& args)
@@ -988,6 +1050,16 @@ bool game_character_near_car_2d(const ScriptArguments& args)
 	}
 	
 	return false;
+}
+
+void game_get_vehicle_health(const ScriptArguments& args)
+{
+	RW_UNIMPLEMENTED("game_get_vehicle_health");
+	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(0));
+	if (vehicle) {
+		/// @todo
+		*args[1].globalReal = 1000.f;
+	}
 }
 
 void game_set_vehicle_colours(const ScriptArguments& args)
@@ -1222,6 +1294,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x00A6, game_destroy_object<VehicleObject>, 1, "Destroy Vehicle" );
 	
 	bindFunction(0x00AA, game_get_vehicle_position, 4, "Get Vehicle Position" );
+
+	bindUnimplemented( 0x00AF, game_set_vehicle_objective, 2, "Set Vehicle Objective" );
 	
 	bindFunction(0x00D9, game_get_character_vehicle<CharacterObject>, 2, "Get Character Vehicle" );
 	bindFunction(0x00DA, game_get_character_vehicle<PlayerController>, 2, "Get Player Vehicle" );
@@ -1293,6 +1367,8 @@ ObjectModule::ObjectModule()
 	bindFunction(0x01A8, game_character_stoped_in_volume<CharacterObject>, 8, "Is Char Stopped in volume" );
 	bindFunction(0x01AA, game_character_stoped_in_volume_in_vehicle<CharacterObject>, 8, "Is Char Stopped in cube in vehicle" );
 
+	bindFunction(0x01AD, game_locate_vehicle_near_point_2D, 6, "Locate Vehicle Near Point 2D" );
+
 	bindFunction(0x01B2, game_give_weapon_to_character, 3, "Give Weapon to Character" );
 
 	bindUnimplemented( 0x01BB, game_object_coordinates, 4, "Get Object Coordinates" );
@@ -1304,6 +1380,9 @@ ObjectModule::ObjectModule()
 	bindUnimplemented( 0x01C3, game_mark_object_as_unneeded<VehicleObject>, 1, "Mark Vehicle Unneeded" );
 	
 	bindFunction(0x01C7, game_dont_remove_object, 1, "Don't remove object" );
+	bindFunction(0x01C8, game_create_character_as_passenger, 5, "Create Character as Passenger" );
+
+	bindUnimplemented( 0x01CC, game_set_character_objective_kill_player_any_means, 2, "Set Character Objective to Kill Player by Any Means" );
 	
 	bindFunction(0x01D5, game_enter_as_driver, 2, "Character Enter Vehicle as Driver" );
 	bindFunction(0x01D4, game_enter_as_passenger, 2, "Character Enter Vehicle as Passenger" );
@@ -1323,17 +1402,24 @@ ObjectModule::ObjectModule()
 	bindFunction(0x0213, game_create_pickup, 6, "Create pickup");
 	bindFunction(0x0214, game_is_pickup_collected, 1, "Has Pickup been collected");
 	bindFunction(0x0215, game_destroy_pickup, 1, "Destroy Pickup");
-	
+
+	bindFunction(0x0227, game_get_vehicle_health, 2, "Get Vehicle Health" );
 	bindFunction(0x0229, game_set_vehicle_colours, 3, "Set Vehicle Colours" );
 	
 	bindFunction(0x0239, game_character_run_to, 3, "Character Run to" );
+
+	bindUnimplemented( 0x0243, game_set_character_personality, 2, "Set Character Personality" );
 	
 	bindFunction(0x029B, game_create_object_world, 5, "Create Object no offset" );
 	bindFunction(0x029C, game_is_boat, 1, "Is Vehicle Boat" );
 	
 	bindFunction(0x029F, game_is_character_stopped<PlayerController>, 1, "Is Player Stopped" );
+
+	bindUnimplemented( 0x02AA, game_set_car_only_damageable_by_player, 2, "Set Car Only Damageable by Player" );
 	
 	bindFunction(0x02B3, game_character_in_area_9<PlayerController>, 9, "Is Player In Area" );
+
+	bindFunction(0x02BF, game_is_vehicle_in_water, 1, "Is Vehicle in Water" );
 	
 	bindFunction(0x02DE, game_player_in_taxi, 1, "Is Player In Taxi" );
 	
@@ -1353,6 +1439,8 @@ ObjectModule::ObjectModule()
 	
 	bindUnimplemented( 0x0368, game_create_ev_crane, 10, "Create ev Crane" );
 	
+	bindUnimplemented( 0x039C, game_set_car_watertight, 2, "Set Car Watertight" );
+
 	bindFunction(0x03B6, game_change_nearest_model, 6, "Change Nearest Instance Model" );
 	
 	bindUnimplemented( 0x03BA, game_clear_area_vehicles, 6, "Clear Cars From Area" );
