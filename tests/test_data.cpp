@@ -8,6 +8,7 @@
 
 BOOST_AUTO_TEST_SUITE(DataTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_weapon_dat)
 {
 	GenericDATLoader l;
@@ -85,6 +86,7 @@ BOOST_AUTO_TEST_CASE(test_handling_data_loader)
 	BOOST_CHECK_EQUAL( handling.driveType, VehicleHandlingInfo::All );
 	BOOST_CHECK_EQUAL( handling.engineType, VehicleHandlingInfo::Petrol );
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -5,6 +5,7 @@
 
 BOOST_AUTO_TEST_SUITE(CutsceneTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_load)
 {
 	{
@@ -28,5 +29,6 @@ BOOST_AUTO_TEST_CASE(test_load)
 		BOOST_CHECK( tracks.duration == 64.8f );
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

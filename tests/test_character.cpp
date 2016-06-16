@@ -7,6 +7,7 @@
 
 BOOST_AUTO_TEST_SUITE(CharacterTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_create)
 {
 	{
@@ -143,6 +144,7 @@ BOOST_AUTO_TEST_CASE(test_death)
 		delete controller;
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

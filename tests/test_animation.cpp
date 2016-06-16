@@ -7,6 +7,7 @@
 
 BOOST_AUTO_TEST_SUITE(AnimationTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_matrix)
 {
 	{
@@ -47,6 +48,7 @@ BOOST_AUTO_TEST_CASE(test_matrix)
 		BOOST_CHECK( skeleton.getData(0).b.translation == glm::vec3(0.f, 0.f, 0.f) );
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

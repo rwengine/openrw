@@ -1,0 +1,20 @@
+sudo: required
+dist: trusty
+language: cpp
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libbullet-dev libsfml-dev libmad0-dev libglm-dev libsndfile-dev libopenal-dev libboost-test-dev
+git:
+    depth: 3
+script:
+    - mkdir build
+    - cd build
+    - cmake .. -DBUILD_TESTS=1 -DTESTS_NODATA=1 && make
+    - tests/run_tests
+notifications:
+    email: false
+#    irc:
+#        channels:
+#            - chat.freenode.net#openrw
+#        template:
+#            - "%{repository}/%{branch} (%{commit} - %{author}): %{build_url}: %{message}"

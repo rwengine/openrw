@@ -8,7 +8,9 @@
 #include <core/Logger.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#if RW_TEST_WITH_DATA
 #define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
+#endif
 
 std::ostream& operator<<( std::ostream& stream, glm::vec3 const& v );
 
@@ -49,14 +51,17 @@ class Global
 {
 public:
 	sf::Window wnd;
+#if RW_TEST_WITH_DATA
 	GameData* d;
 	GameWorld* e;
 	GameState* s;
 	Logger log;
 	WorkContext work;
-	
+#endif
+
 	Global() {
 		wnd.create(sf::VideoMode(640, 360), "Testing");
+#if RW_TEST_WITH_DATA
 		d = new GameData(&log, &work, getGamePath());
 
 		d->loadIMG("/models/gta3");
@@ -78,19 +83,24 @@ public:
 		while( ! e->_work->isEmpty() ) {
 			std::this_thread::yield();
 		}
+#endif
 	}
 
 	~Global() {
 		wnd.close();
+#if RW_TEST_WITH_DATA
 		delete e;
+#endif
 	}
 
+#if RW_TEST_WITH_DATA
 	static std::string getGamePath()
 	{
 		// TODO: Is this "the way to do it" on windows.
 		auto v = getenv(ENV_GAME_PATH_NAME);
 		return v ? v : "";
 	}
+#endif
 	
 	static Global& get()
 	{

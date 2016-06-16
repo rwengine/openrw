@@ -6,6 +6,7 @@
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_load_dff)
 {
 	{
@@ -64,5 +65,6 @@ BOOST_AUTO_TEST_CASE(test_loader_job)
 	}
 
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -4,6 +4,8 @@
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(ItemTests)
+
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_character_inventory)
 {
 	{
@@ -32,6 +34,7 @@ BOOST_AUTO_TEST_CASE(test_character_inventory)
 		Global::get().e->destroyObject(character);
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

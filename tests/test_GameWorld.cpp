@@ -6,6 +6,7 @@
 
 BOOST_AUTO_TEST_SUITE(GameWorldTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_gameobject_id)
 {
 	GameWorld gw(&Global::get().log, &Global::get().work, Global::get().d);
@@ -15,5 +16,6 @@ BOOST_AUTO_TEST_CASE(test_gameobject_id)
 
 	BOOST_CHECK_NE( object1->getGameObjectID(), object2->getGameObjectID() );
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

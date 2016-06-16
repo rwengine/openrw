@@ -11,6 +11,7 @@ std::ostream &operator<<(std::ostream &os, const AIGraphNode* yt) { os << glm::t
 
 BOOST_AUTO_TEST_SUITE(TrafficDirectorTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_available_nodes)
 {
 	AIGraph graph;
@@ -214,5 +215,6 @@ BOOST_AUTO_TEST_CASE(test_create_traffic)
 	
 	//Global::get().e->destroyObject(created[0]);
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

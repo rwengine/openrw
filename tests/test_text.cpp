@@ -6,6 +6,7 @@
 
 BOOST_AUTO_TEST_SUITE(TextTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(load_test)
 {
 	{
@@ -166,5 +167,6 @@ BOOST_AUTO_TEST_CASE(format_remove)
 
 	BOOST_CHECK_EQUAL(1, st.getText<ScreenTextType::Big>().size());
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

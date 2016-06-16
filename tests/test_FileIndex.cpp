@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_index)
 {
 	FileIndex index;
@@ -49,5 +50,6 @@ BOOST_AUTO_TEST_CASE(test_file_archive)
 	auto handle = index.openFile("landstal.dff");
 	BOOST_CHECK( handle != nullptr );
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(ObjectDataTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_object_data)
 {
 	{
@@ -54,5 +55,6 @@ BOOST_AUTO_TEST_CASE(test_gamedata_data)
 {
 	
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

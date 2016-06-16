@@ -23,6 +23,7 @@ public:
 
 BOOST_AUTO_TEST_SUITE(PickupTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_pickup_interaction)
 {
 	{
@@ -90,6 +91,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup)
 		Global::get().e->destroyObject(character);
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

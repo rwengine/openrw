@@ -21,6 +21,7 @@ option(BUILD_SCRIPT_TOOL "Build script decompiler tool")
 # Compile-time Options & Features
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
+option(TESTS_NODATA "Build tests for no-data testing")
 
 #
 # Build configuration
