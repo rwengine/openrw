@@ -9,6 +9,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+constexpr float kDebugEntryHeight = 14.f;
+const glm::vec2 kDebugMenuOffset = glm::vec2(10.f, 50.f);
+
 static void jumpCharacter(RWGame* game, CharacterObject* player, const glm::vec3& target, bool ground = true)
 {
 	glm::vec3 newPosition = target;
@@ -28,12 +31,15 @@ static void jumpCharacter(RWGame* game, CharacterObject* player, const glm::vec3
 	}
 }
 
-DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
-	: State(game), _freeLook( false ), _sonicMode( false )
+Menu* DebugState::createDebugMenu()
 {
-	Menu *m = new Menu(2);
-	m->offset = glm::vec2(10.f, 50.f);
-	float entryHeight = 14.f;
+	CharacterObject* player = nullptr;
+	if (game->getPlayer()) {
+		player = game->getPlayer()->getCharacter();
+	}
+
+	Menu* m = new Menu(2);
+	m->offset = kDebugMenuOffset;
 #if 0
 	m->addEntry(Menu::lambda("Random Vehicle", [this] {
 		auto it = getWorld()->vehicleTypes.begin();
@@ -76,63 +82,80 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		}, entryHeight));
 	}
 #endif
-	m->addEntry(Menu::lambda("Add car", [=] {
-		auto playerRot = game->getPlayer()->getCharacter()->getRotation();
-		auto spawnPos = game->getPlayer()->getCharacter()->getPosition();
-		spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f);
-		auto spawnRot = glm::quat(glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
-		auto car = game->getWorld()->createVehicle(136, spawnPos, spawnRot);
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Quicksave", [=] {
-		game->saveGame("quicksave");
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Quickload", [=] {
-		game->loadGame("quicksave");
-	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Debug Camera", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f), false);
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Docks", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(1390.f, -837.f, 100.f));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Garage", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(270.f, -605.f, 40.f));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Airport", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(-950.f, -980.f, 12.f));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(875.0, -309.0, 100.0));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Luigi's", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(902.75, -425.56, 100.0));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Jump to Hospital", [=] {
-		jumpCharacter(game, game->getPlayer()->getCharacter(), glm::vec3(1123.77, -569.15, 100.0));
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Add Follower", [=] {
-		auto spawnPos = game->getPlayer()->getCharacter()->getPosition();
-		spawnPos += game->getPlayer()->getCharacter()->getRotation() * glm::vec3(-1.f, 0.f, 0.f);
-		auto follower = game->getWorld()->createPedestrian(12, spawnPos);
-		jumpCharacter(game, follower, spawnPos);
-		follower->controller->setGoal(CharacterController::FollowLeader);
-		follower->controller->setTargetCharacter(game->getPlayer()->getCharacter());
-	}, entryHeight));
+		jumpCharacter(game, player, _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f), false);
+	}, kDebugEntryHeight));
+
+	m->addEntry(Menu::lambda("-Map", [=] {
+		this->enterMenu(createMapMenu());
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("-Vehicles", [=] {
+		this->enterMenu(createVehicleMenu());
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("-AI", [=] {
+		this->enterMenu(createAIMenu());
+	}, kDebugEntryHeight));
+
 	m->addEntry(Menu::lambda("Set Super Jump", [=] {
-		game->getPlayer()->getCharacter()->setJumpSpeed(20.f);
-	}, entryHeight));
+		player->setJumpSpeed(20.f);
+	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("Set Normal Jump", [=] {
-		game->getPlayer()->getCharacter()->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
-	}, entryHeight));
+		player->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
+	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("Full Health", [=] {
-		game->getPlayer()->getCharacter()->getCurrentState().health = 100.f;
-	}, entryHeight));
+		player->getCurrentState().health = 100.f;
+	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("Full Armour", [=] {
-		game->getPlayer()->getCharacter()->getCurrentState().armour = 100.f;
-	}, entryHeight));
+		player->getCurrentState().armour = 100.f;
+	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("Cull Here", [=] {
 		game->getRenderer()->setCullOverride(true, _debugCam);
-	}, entryHeight));
+	}, kDebugEntryHeight));
+
+
+	// Optional block if the player is in a vehicle
+	auto cv = player->getCurrentVehicle();
+	if(cv) {
+		m->addEntry(Menu::lambda("Flip vehicle", [=] {
+			cv->setRotation(cv->getRotation() * glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
+		}, kDebugEntryHeight));
+	}
+
+	return m;
+}
+
+Menu* DebugState::createMapMenu()
+{
+	CharacterObject* player = nullptr;
+	if (game->getPlayer()) {
+		player = game->getPlayer()->getCharacter();
+	}
+
+	Menu* m = new Menu(2);
+	m->offset = kDebugMenuOffset;
+
+	m->addEntry(Menu::lambda("Back", [=] {
+		this->enterMenu(createDebugMenu());
+	}, kDebugEntryHeight));
+
+	m->addEntry(Menu::lambda("Jump to Docks", [=] {
+		jumpCharacter(game, player, glm::vec3(1390.f, -837.f, 100.f));
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("Jump to Garage", [=] {
+		jumpCharacter(game, player, glm::vec3(270.f, -605.f, 40.f));
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("Jump to Airport", [=] {
+		jumpCharacter(game, player, glm::vec3(-950.f, -980.f, 12.f));
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("Jump to Hideout", [=] {
+		jumpCharacter(game, player, glm::vec3(875.0, -309.0, 100.0));
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("Jump to Luigi's", [=] {
+		jumpCharacter(game, player, glm::vec3(902.75, -425.56, 100.0));
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("Jump to Hospital", [=] {
+		jumpCharacter(game, player, glm::vec3(1123.77, -569.15, 100.0));
+	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("Unsolid garage doors", [=] {
 
 		std::vector<std::string> garageDoorModels {
@@ -178,19 +201,89 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 				obj->setSolid(false);
 			}
 		}
-	}, entryHeight));
+	}, kDebugEntryHeight));
 
+	return m;
+}
 
-	// Optional block if the player is in a vehicle
-	auto player = game->getPlayer()->getCharacter();
-	auto cv = player->getCurrentVehicle();
-	if(cv) {
-		m->addEntry(Menu::lambda("Flip vehicle", [=] {
-			cv->setRotation(cv->getRotation() * glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
-		}, entryHeight));
+Menu* DebugState::createVehicleMenu()
+{
+	CharacterObject* player = nullptr;
+	if (game->getPlayer()) {
+		player = game->getPlayer()->getCharacter();
 	}
 
-	this->enterMenu(m);
+	Menu* m = new Menu(2);
+	m->offset = kDebugMenuOffset;
+
+	m->addEntry(Menu::lambda("Back", [=] {
+		this->enterMenu(createDebugMenu());
+	}, kDebugEntryHeight));
+
+#define SPAWN_VEHICLE(name, id) \
+	m->addEntry(Menu::lambda("Add " name, [=] { \
+		auto playerRot = player->getRotation(); \
+		auto spawnPos = player->getPosition(); \
+		spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f); \
+		auto spawnRot = glm::quat(glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>())); \
+		auto car = game->getWorld()->createVehicle(id, spawnPos, spawnRot); \
+		RW_UNUSED(car);\
+	}, kDebugEntryHeight))
+
+	SPAWN_VEHICLE("Yakuza", 136);
+	SPAWN_VEHICLE("Landstalker", 90);
+	SPAWN_VEHICLE("Bobcat", 112);
+	SPAWN_VEHICLE("Banshee", 119);
+	SPAWN_VEHICLE("Rhino", 122);
+	SPAWN_VEHICLE("Barracks", 123);
+	SPAWN_VEHICLE("Rumpo", 130);
+	SPAWN_VEHICLE("Columbian", 138);
+	SPAWN_VEHICLE("Dodo", 126);
+	SPAWN_VEHICLE("Speeder", 142);
+#undef SPAWN_VEHCILE
+
+	return m;
+}
+
+Menu* DebugState::createAIMenu()
+{
+	CharacterObject* player = nullptr;
+	if (game->getPlayer()) {
+		player = game->getPlayer()->getCharacter();
+	}
+
+	Menu* m = new Menu(2);
+	m->offset = kDebugMenuOffset;
+
+	m->addEntry(Menu::lambda("Back", [=] {
+		this->enterMenu(createDebugMenu());
+	}, kDebugEntryHeight));
+
+#define SPAWN_FOLLOWER(name, id) \
+	m->addEntry(Menu::lambda("Add " name " Follower", [=] { \
+		auto spawnPos = player->getPosition() + player->getRotation() * glm::vec3(0.f, 1.f, 0.f); \
+		auto follower = game->getWorld()->createPedestrian(id, spawnPos); \
+		jumpCharacter(game, follower, spawnPos); \
+		follower->controller->setGoal(CharacterController::FollowLeader); \
+		follower->controller->setTargetCharacter(player); \
+	}, kDebugEntryHeight))
+	SPAWN_FOLLOWER("Triad", 12);
+	SPAWN_FOLLOWER("Cop", 1);
+	SPAWN_FOLLOWER("SWAT", 2);
+	SPAWN_FOLLOWER("FBI", 3);
+	SPAWN_FOLLOWER("Fireman", 6);
+	SPAWN_FOLLOWER("Construction", 74);
+#undef SPAWN_FOLLOWER
+
+	return m;
+}
+
+DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
+	: State(game)
+	, _freeLook( false )
+	, _sonicMode( false )
+{
+	this->enterMenu(createDebugMenu());
 
 	_debugCam.position = vp;
 	_debugCam.rotation = vd;
