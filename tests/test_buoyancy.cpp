@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(BuoyancyTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy)
 {
 	glm::vec2 tpos(-WATER_WORLD_SIZE/2.f + 10.f);
@@ -56,6 +57,7 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy)
 		Global::get().e->destroyObject(vehicle);
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
 

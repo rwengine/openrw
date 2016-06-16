@@ -2,6 +2,12 @@
 #    Unit Tests
 ##############################################################################
 
+if(${TESTS_NODATA})
+	add_definitions(-DRW_TEST_WITH_DATA=0)
+else()
+	add_definitions(-DRW_TEST_WITH_DATA=1)
+endif()
+
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 set(TEST_SOURCES

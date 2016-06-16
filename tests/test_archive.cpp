@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(ArchiveTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_open_archive)
 {
 	LoaderIMG archive;
@@ -28,5 +29,6 @@ BOOST_AUTO_TEST_CASE(test_open_archive)
 	BOOST_CHECK_EQUAL( f2.offset, f.offset );
 	BOOST_CHECK_EQUAL( f2.size, f.size );
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

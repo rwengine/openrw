@@ -6,6 +6,7 @@
 
 BOOST_AUTO_TEST_SUITE(WeaponTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(TestWeaponScan)
 {
 	{
@@ -125,5 +126,6 @@ BOOST_AUTO_TEST_CASE(TestProjectile)
 		Global::get().e->destroyQueuedObjects();
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(RWBStreamTests)
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(iterate_stream_test)
 {
 	{
@@ -27,5 +28,6 @@ BOOST_AUTO_TEST_CASE(iterate_stream_test)
 		BOOST_CHECK_EQUAL( *(std::uint32_t*)innerCursor, 0x10 );
 	}
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
