@@ -83,12 +83,6 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 		auto spawnRot = glm::quat(glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
 		auto car = game->getWorld()->createVehicle(136, spawnPos, spawnRot);
 	}, entryHeight));
-	m->addEntry(Menu::lambda("Quicksave", [=] {
-		game->saveGame("quicksave");
-	}, entryHeight));
-	m->addEntry(Menu::lambda("Quickload", [=] {
-		game->loadGame("quicksave");
-	}, entryHeight));
 	m->addEntry(Menu::lambda("Jump to Debug Camera", [=] {
 		jumpCharacter(game, game->getPlayer()->getCharacter(), _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f), false);
 	}, entryHeight));
