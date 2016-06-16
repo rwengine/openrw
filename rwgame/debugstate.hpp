@@ -29,6 +29,7 @@ public:
 	void printCameraDetails();
 
 	void spawnVehicle(unsigned int id);
+	void spawnFollower(unsigned int id);
 
 	const ViewCamera& getCamera();
 };

@@ -220,27 +220,27 @@ Menu* DebugState::createVehicleMenu()
 		this->enterMenu(createDebugMenu());
 	}, kDebugEntryHeight));
 
-#define SPAWN_VEHICLE(name, id) \
-	m->addEntry(Menu::lambda("Add " name, [=] { \
-		auto playerRot = player->getRotation(); \
-		auto spawnPos = player->getPosition(); \
-		spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f); \
-		auto spawnRot = glm::quat(glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>())); \
-		auto car = game->getWorld()->createVehicle(id, spawnPos, spawnRot); \
-		RW_UNUSED(car);\
-	}, kDebugEntryHeight))
+	const std::map<std::string, int> kVehicleTypes = {
+	    {"Landstalker", 90},
+	    {"Taxi", 110},
+	    {"Firetruck", 97},
+	    {"Police", 116},
+	    {"Ambulance", 106},
+	    {"Bobcat", 112},
+	    {"Banshee", 119},
+	    {"Rhino", 122},
+	    {"Barracks", 123},
+	    {"Rumpo", 130},
+	    {"Columbian", 138},
+	    {"Dodo", 126},
+	    {"Speeder", 142},
+	    {"Yakuza", 136},
+	};
 
-	SPAWN_VEHICLE("Yakuza", 136);
-	SPAWN_VEHICLE("Landstalker", 90);
-	SPAWN_VEHICLE("Bobcat", 112);
-	SPAWN_VEHICLE("Banshee", 119);
-	SPAWN_VEHICLE("Rhino", 122);
-	SPAWN_VEHICLE("Barracks", 123);
-	SPAWN_VEHICLE("Rumpo", 130);
-	SPAWN_VEHICLE("Columbian", 138);
-	SPAWN_VEHICLE("Dodo", 126);
-	SPAWN_VEHICLE("Speeder", 142);
-#undef SPAWN_VEHCILE
+	for (auto& e : kVehicleTypes) {
+		m->addEntry(Menu::lambda(e.first, [=] { spawnVehicle(e.second); },
+		                         kDebugEntryHeight));
+	}
 
 	return m;
 }
@@ -259,21 +259,20 @@ Menu* DebugState::createAIMenu()
 		this->enterMenu(createDebugMenu());
 	}, kDebugEntryHeight));
 
-#define SPAWN_FOLLOWER(name, id) \
-	m->addEntry(Menu::lambda("Add " name " Follower", [=] { \
-		auto spawnPos = player->getPosition() + player->getRotation() * glm::vec3(0.f, 1.f, 0.f); \
-		auto follower = game->getWorld()->createPedestrian(id, spawnPos); \
-		jumpCharacter(game, follower, spawnPos); \
-		follower->controller->setGoal(CharacterController::FollowLeader); \
-		follower->controller->setTargetCharacter(player); \
-	}, kDebugEntryHeight))
-	SPAWN_FOLLOWER("Triad", 12);
-	SPAWN_FOLLOWER("Cop", 1);
-	SPAWN_FOLLOWER("SWAT", 2);
-	SPAWN_FOLLOWER("FBI", 3);
-	SPAWN_FOLLOWER("Fireman", 6);
-	SPAWN_FOLLOWER("Construction", 74);
-#undef SPAWN_FOLLOWER
+	const std::map<std::string, int> kPedTypes = {
+	    {"Triad", 12},
+	    {"Cop", 1},
+	    {"SWAT", 2},
+	    {"FBI", 3},
+	    {"Fireman", 6},
+	    {"Construction", 74},
+	};
+
+	for (auto& e : kPedTypes) {
+		m->addEntry(Menu::lambda(e.first + " Follower", [=] {
+			spawnFollower(e.second);
+		}, kDebugEntryHeight));
+	}
 
 	return m;
 }
@@ -435,9 +434,26 @@ void DebugState::spawnVehicle(unsigned int id)
 	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
 	glm::vec3 hit, normal;
-	if(game->hitWorldRay(ch->position + (fwd * 5.f), {0.f, 0.f, -2.f}, hit, normal)) {
+	if(game->hitWorldRay(ch->position + (fwd * 10.f), {0.f, 0.f, -2.f}, hit, normal)) {
 		auto spawnpos = hit + normal;
 		getWorld()->createVehicle(id, spawnpos, glm::quat());
+	}
+}
+
+void DebugState::spawnFollower(unsigned int id)
+{
+	auto ch = game->getPlayer()->getCharacter();
+	if(! ch) return;
+
+	glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
+
+	glm::vec3 hit, normal;
+	if(game->hitWorldRay(ch->position + (fwd * 10.f), {0.f, 0.f, -2.f}, hit, normal)) {
+		auto spawnPos = hit + normal;
+		auto follower = game->getWorld()->createPedestrian(id, spawnPos);
+		jumpCharacter(game, follower, spawnPos);
+		follower->controller->setGoal(CharacterController::FollowLeader);
+		follower->controller->setTargetCharacter(ch);
 	}
 }
 
