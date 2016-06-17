@@ -274,6 +274,16 @@ Menu* DebugState::createAIMenu()
 		}, kDebugEntryHeight));
 	}
 
+	m->addEntry(Menu::lambda("Kill All Peds", [=] {
+		for (auto& p : game->getWorld()->pedestrianPool.objects) {
+			if (p.second->getLifetime() == GameObject::PlayerLifetime) {
+				continue;
+			}
+			p.second->takeDamage({p.second->getPosition(),
+			                      p.second->getPosition(), 100.f,
+			                      GameObject::DamageInfo::Explosion, 0.f});
+		}
+	}, kDebugEntryHeight));
 	return m;
 }
 
