@@ -5,6 +5,8 @@
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <engine/GameState.hpp>
+#include <items/InventoryItem.hpp>
+#include <data/WeaponData.hpp>
 #include <sstream>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -94,6 +96,9 @@ Menu* DebugState::createDebugMenu()
 	}, kDebugEntryHeight));
 	m->addEntry(Menu::lambda("-AI", [=] {
 		this->enterMenu(createAIMenu());
+	}, kDebugEntryHeight));
+	m->addEntry(Menu::lambda("-Weapons", [=] {
+		this->enterMenu(createWeaponMenu());
 	}, kDebugEntryHeight));
 
 	m->addEntry(Menu::lambda("Set Super Jump", [=] {
@@ -287,6 +292,26 @@ Menu* DebugState::createAIMenu()
 	return m;
 }
 
+Menu*DebugState::createWeaponMenu()
+{
+	Menu* m = new Menu(2);
+	m->offset = kDebugMenuOffset;
+
+	m->addEntry(Menu::lambda("Back", [=] {
+		this->enterMenu(createDebugMenu());
+	}, kDebugEntryHeight));
+
+	for (int i = 1; i < maxInventorySlots; ++i) {
+		auto item = getWorld()->getInventoryItem(i);
+		auto& name = getWorld()->data->weaponData[i]->name;
+		m->addEntry(Menu::lambda(name, [=] {
+			giveItem(item);
+		}, kDebugEntryHeight));
+	}
+
+	return m;
+}
+
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game)
 	, _freeLook( false )
@@ -464,6 +489,22 @@ void DebugState::spawnFollower(unsigned int id)
 		jumpCharacter(game, follower, spawnPos);
 		follower->controller->setGoal(CharacterController::FollowLeader);
 		follower->controller->setTargetCharacter(ch);
+	}
+}
+
+void DebugState::giveItem(InventoryItem* item)
+{
+	CharacterObject* player = nullptr;
+	if (game->getPlayer()) {
+		player = game->getPlayer()->getCharacter();
+	}
+
+	if (player) {
+		player->addToInventory(item);
+		auto& wep =
+		    player->getCurrentState().weapons[item->getInventorySlot()];
+		wep.bulletsTotal = 100;
+		wep.bulletsClip = 0;
 	}
 }
 
