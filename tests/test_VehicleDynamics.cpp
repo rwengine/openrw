@@ -26,6 +26,7 @@ BOOST_AUTO_TEST_CASE(test_wheels)
 	BOOST_CHECK_EQUAL(-1.f, wheels[3].position.y);
 }
 
+#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_dynamics)
 {
 	VehicleObject* vehicle = Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
@@ -40,5 +41,6 @@ BOOST_AUTO_TEST_CASE(test_dynamics)
 
 	Global::get().e->destroyObject(vehicle);
 }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
