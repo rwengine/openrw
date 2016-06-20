@@ -213,11 +213,6 @@ Menu* DebugState::createMapMenu()
 
 Menu* DebugState::createVehicleMenu()
 {
-	CharacterObject* player = nullptr;
-	if (game->getPlayer()) {
-		player = game->getPlayer()->getCharacter();
-	}
-
 	Menu* m = new Menu(2);
 	m->offset = kDebugMenuOffset;
 
@@ -252,11 +247,6 @@ Menu* DebugState::createVehicleMenu()
 
 Menu* DebugState::createAIMenu()
 {
-	CharacterObject* player = nullptr;
-	if (game->getPlayer()) {
-		player = game->getPlayer()->getCharacter();
-	}
-
 	Menu* m = new Menu(2);
 	m->offset = kDebugMenuOffset;
 
