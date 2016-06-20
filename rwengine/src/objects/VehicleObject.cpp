@@ -29,6 +29,17 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm:
 {
 	collision = new CollisionInstance;
 	if( collision->createPhysicsBody(this, data->modelName, nullptr, &info->handling) ) {
+
+		// calculate the intertia from the handling information
+		auto& dim = info->handling.dimensions;
+		auto mass = info->handling.mass;
+		// see: https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+		btVector3 handlingInertia(
+		    1.f / ((mass / 12) * (dim.y * dim.y + dim.z * dim.z)),
+		    1.f / ((mass / 12) * (dim.x * dim.x + dim.z * dim.z)),
+		    1.f / ((mass / 12) * (dim.x * dim.x + dim.y * dim.y)));
+		collision->getBulletBody()->setInvInertiaDiagLocal(handlingInertia);
+
 		for(size_t w = 0; w < info->wheels.size(); ++w) {
 			bool front = info->wheels[w].position.y > 0;
 			float maxPower = 0.f;
