@@ -16,10 +16,8 @@ class btRigidBody;
  */
 class VehicleDynamics
 {
-public:
-
-	struct WheelInfo
-	{
+   public:
+	struct WheelInfo {
 		/// Position of the wheel relative to the chassis
 		glm::vec3 position;
 		/// Axle direction
@@ -47,28 +45,34 @@ public:
 		// Applied traction force
 		glm::vec3 tractionForceWS;
 
-		WheelInfo(const glm::vec3& pos, const glm::vec3& axle, float radius, float powerFrac)
-			: position(pos)
-			, axle(axle)
-			, radius(radius)
-			, maxPowerFrac(powerFrac)
-			, displacement(0.f)
-			, steerAngle(0.f)
-			, rotation(0.f)
-			, rotationVelocity(0.f)
-			, rayLength(0.f)
-			, isOnGround(false)
-			, suspensionForce(0.f)
-		{}
+		WheelInfo(const glm::vec3& pos,
+		          const glm::vec3& axle,
+		          float radius,
+		          float powerFrac)
+		    : position(pos)
+		    , axle(axle)
+		    , radius(radius)
+		    , maxPowerFrac(powerFrac)
+		    , displacement(0.f)
+		    , steerAngle(0.f)
+		    , rotation(0.f)
+		    , rotationVelocity(0.f)
+		    , rayLength(0.f)
+		    , isOnGround(false)
+		    , suspensionForce(0.f)
+		{
+		}
 	};
 
-	VehicleDynamics(VehicleObject *vehicle)
-		: m_vehicle(vehicle)
-		, m_engineForce(0.f)
-		, m_breakForce(0.f)
-	{ }
+	VehicleDynamics(VehicleObject* vehicle)
+	    : m_vehicle(vehicle), m_engineForce(0.f), m_breakForce(0.f)
+	{
+	}
 
-	void addWheel(const glm::vec3& position, const glm::vec3& axle, float radius, float power)
+	void addWheel(const glm::vec3& position,
+	              const glm::vec3& axle,
+	              float radius,
+	              float power)
 	{
 		m_wheels.emplace_back(position, axle, radius, power);
 	}
@@ -79,33 +83,28 @@ public:
 	 */
 	void tickPhysics(float dt);
 
-	const std::vector<WheelInfo>& getWheels() const
-	{
-		return m_wheels;
-	}
+	const std::vector<WheelInfo>& getWheels() const { return m_wheels; }
 
-	void setEngineForce(float force)
-	{
-		m_engineForce = force;
-	}
+	void setEngineForce(float force) { m_engineForce = force; }
 
-	void setBreakForce(float force)
-	{
-		m_breakForce = force;
-	}
+	void setBreakForce(float force) { m_breakForce = force; }
 
 	void setWheelAngle(int wheel, float angle)
 	{
 		m_wheels[wheel].steerAngle = angle;
 	}
 
-private:
-	VehicleObject *m_vehicle;
+   private:
+	VehicleObject* m_vehicle;
 	std::vector<WheelInfo> m_wheels;
 	float m_engineForce;
 	float m_breakForce;
 
-	bool raycastWheel(const WheelInfo& wheel, float& distFrac, glm::vec3& worldHit, const btRigidBody*& body);
+	bool raycastWheel(const WheelInfo& wheel,
+	                  float& distFrac,
+	                  glm::vec3& worldHit,
+	                  glm::vec3& worldNormal,
+	                  const btRigidBody*& body);
 };
 
 #endif

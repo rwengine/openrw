@@ -8,16 +8,19 @@ void VehicleDynamics::tickPhysics(float dt)
 {
 	float distFrac;
 	glm::vec3 worldHit;
+	glm::vec3 worldNormal;
 	const btRigidBody* body;
 	const float upperLimit = m_vehicle->info->handling.suspensionUpperLimit;
 	const float restLength = upperLimit -
 			m_vehicle->info->handling.suspensionLowerLimit;
 	const float vehicleMass = m_vehicle->info->handling.mass;
 
-	const float springForce = (m_vehicle->info->handling.suspensionForce / restLength)
-			* vehicleMass * 10.f;
-	const float springDamp = (m_vehicle->info->handling.suspensionDamping / restLength)
-			* vehicleMass * 10.f;
+	const float suspensionMod =
+	    m_vehicle->info->handling.suspensionForce / restLength;
+	const float dampingMod =
+	    m_vehicle->info->handling.suspensionDamping / restLength;
+	const float springForce = suspensionMod * vehicleMass * 10.f;
+	const float springDamp = dampingMod * vehicleMass * 10.f;
 	auto bulletBody = m_vehicle->collision->getBulletBody();
 
 	auto r = m_vehicle->getRotation();
@@ -29,7 +32,8 @@ void VehicleDynamics::tickPhysics(float dt)
 	{
 		// Calculate the ray length to ensure this ray can't fall through the ground.
 		wheel.rayLength = restLength + wheel.radius;
-		wheel.isOnGround = raycastWheel(wheel, distFrac, worldHit, body);
+		wheel.isOnGround =
+		    raycastWheel(wheel, distFrac, worldHit, worldNormal, body);
 		totalPower += wheel.maxPowerFrac;
 		if (wheel.isOnGround)
 		{
@@ -41,6 +45,10 @@ void VehicleDynamics::tickPhysics(float dt)
 			wheel.displacement = glm::min(0.f, -distance);
 			float force = std::max(0.f, springForce * (restLength - distance)/restLength);
 
+			// Calculate the Normal force
+			float norm = glm::dot(glm::vec3(0.f, 0.f, 1.f), worldNormal);
+			glm::vec3 normalForce = norm * worldNormal * force;
+
 			// Move force location into local space.
 			auto ws = m_vehicle->getRotation() * wheel.position;
 			auto btws = btVector3(ws.x, ws.y, ws.z);
@@ -48,8 +56,8 @@ void VehicleDynamics::tickPhysics(float dt)
 			auto pointVel = bulletBody->getVelocityInLocalPoint(btws);
 			auto localVelocity = glm::inverse(r) * glm::vec3(pointVel.x(), pointVel.y(), pointVel.z());
 
-			force += -localVelocity.z * springDamp;
-			auto f = glm::vec3(0.f, 0.f, force) * suspensionBias;
+			float damp = -localVelocity.z * springDamp;
+			auto f = normalForce * suspensionBias + glm::vec3(0.f, 0.f, damp);
 			wheel.suspensionForce = force;
 			wheel.suspensionForceWS = f;
 			bulletBody->applyForce(
@@ -124,7 +132,11 @@ void VehicleDynamics::tickPhysics(float dt)
 	}
 }
 
-bool VehicleDynamics::raycastWheel(const VehicleDynamics::WheelInfo& wheel, float& distFrac, glm::vec3& worldHit, const btRigidBody* &body)
+bool VehicleDynamics::raycastWheel(const VehicleDynamics::WheelInfo& wheel,
+                                   float& distFrac,
+                                   glm::vec3& worldHit,
+                                   glm::vec3& worldNormal,
+                                   const btRigidBody*& body)
 {
 	const float& handling_upperlimit = m_vehicle->info->handling.suspensionUpperLimit;
 
@@ -151,8 +163,9 @@ bool VehicleDynamics::raycastWheel(const VehicleDynamics::WheelInfo& wheel, floa
 			worldHit.y = rayCallback.m_hitPointWorld.y();
 			worldHit.z = rayCallback.m_hitPointWorld.z();
 
-			//result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld; //??
-			//result.m_hitNormalInWorld.normalize();
+			worldNormal.x = rayCallback.m_hitNormalWorld.x();
+			worldNormal.y = rayCallback.m_hitNormalWorld.y();
+			worldNormal.z = rayCallback.m_hitNormalWorld.z();
 
 			distFrac = rayCallback.m_closestHitFraction;
 			body = raybody;
