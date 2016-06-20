@@ -108,6 +108,8 @@ public:
 		return parameters->at(arg);
 	}
 
+	int getModel(unsigned int arg) const;
+
 	template <class T>
 	GameObject* getObject(unsigned int arg) const;
 
