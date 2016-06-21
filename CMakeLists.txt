@@ -107,3 +107,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
 			DESTINATION share/openrw
 			)
 endif()
+# And copy to build directory for CI
+file(COPY COPYING
+	 DESTINATION .
+	 )
