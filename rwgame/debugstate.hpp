@@ -15,6 +15,7 @@ class DebugState : public State
 	Menu* createMapMenu();
 	Menu* createVehicleMenu();
 	Menu* createAIMenu();
+	Menu* createWeaponMenu();
 public:
 	DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
 
@@ -29,6 +30,8 @@ public:
 	void printCameraDetails();
 
 	void spawnVehicle(unsigned int id);
+	void spawnFollower(unsigned int id);
+	void giveItem(InventoryItem* item);
 
 	const ViewCamera& getCamera();
 };

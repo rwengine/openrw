@@ -19,6 +19,6 @@
 	(void) var
 
 #define RW_UNIMPLEMENTED(msg) \
-	RW_MESSAGE("Unimplemented" << msg)
+	RW_MESSAGE("Unimplemented: " << msg)
 
 #endif

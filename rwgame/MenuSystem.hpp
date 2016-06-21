@@ -48,17 +48,26 @@ public:
 		
 		virtual void activate(float clickX, float clickY) = 0;
 	};
-	
+
 	struct Entry : public MenuEntry
 	{
-		std::function<void (void)> callback;
-		
-		Entry(const std::string& title, std::function<void (void)> cb, float size)
-		 : MenuEntry(title, size), callback(cb) {}
-		 
-		 void activate(float clickX, float clickY) { callback(); }
+		std::function<void(void)> callback;
+
+		Entry(const std::string& title,
+		      std::function<void(void)> cb,
+		      float size)
+		    : MenuEntry(title, size), callback(cb)
+		{
+		}
+
+		void activate(float clickX, float clickY)
+		{
+			RW_UNUSED(clickX);
+			RW_UNUSED(clickY);
+			callback();
+		}
 	};
-	
+
 	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 30.f)
 	{
 		return std::shared_ptr<MenuEntry>(new Entry(n, callback, size));
@@ -138,7 +147,13 @@ public:
 	
 	void move(int movement)
 	{
-		activeEntry = std::min<const int>(entries.size()-1, std::max<const int>(0, activeEntry + movement));
+		activeEntry += movement;
+		if (activeEntry >= int(entries.size())) {
+			activeEntry = 0;
+		}
+		else if (activeEntry < 0) {
+			activeEntry = entries.size() - 1;
+		}
 	}
 };
 

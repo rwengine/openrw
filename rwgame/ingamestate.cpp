@@ -185,8 +185,8 @@ void IngameState::tick(float dt)
 			viewDistance = viewDistance + maxDist;
 			targetPosition = vehicle->getPosition();
 			lookTargetPosition = targetPosition;
-			lookTargetPosition.z += (vehicle->info->handling.dimensions.z);
-			targetPosition.z += (vehicle->info->handling.dimensions.z * 1.f);
+			lookTargetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);
+			targetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);
 			physTarget = vehicle->physBody;
 
 			if (!m_vehicleFreeLook)
