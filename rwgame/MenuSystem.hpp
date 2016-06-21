@@ -147,7 +147,13 @@ public:
 	
 	void move(int movement)
 	{
-		activeEntry = std::min<const int>(entries.size()-1, std::max<const int>(0, activeEntry + movement));
+		activeEntry += movement;
+		if (activeEntry >= int(entries.size())) {
+			activeEntry = 0;
+		}
+		else if (activeEntry < 0) {
+			activeEntry = entries.size() - 1;
+		}
 	}
 };
 
