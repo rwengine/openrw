@@ -10,6 +10,10 @@ Check out the [FAQ](https://github.com/rwengine/openrw/wiki/FAQ) and the rest of
 OpenRW requires a legitimate copy of the original PC game data in order to run.
 Without this data it will not be possible to run OpenRW.
 
+## Screenshots
+![Staunton Skyline from Portland](https://cloud.githubusercontent.com/assets/418211/16287457/1a434b7e-38db-11e6-9814-79a926a66071.png)
+![Opening cutscene](https://cloud.githubusercontent.com/assets/418211/16287461/1cc53f38-38db-11e6-9f26-196a516798d4.png)
+
 ## Getting Started
 
  * [Getting Started](https://github.com/rwengine/openrw/wiki/Getting-Started)
