@@ -165,6 +165,7 @@ public:
 	bool takeDamage(const DamageInfo& damage) override;
 
 	bool enterVehicle(VehicleObject* vehicle, size_t seat);
+	bool leaveVehicle();
 
 	/**
 	 * @brief isStopped

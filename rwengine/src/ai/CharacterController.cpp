@@ -367,7 +367,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 	if( vehicle->vehicle->type == VehicleData::BOAT ) {
 		auto ppos = character->getPosition();
-		character->enterVehicle(nullptr, seat);
+		character->leaveVehicle();
 		character->setPosition(ppos);
 		return true;
 	}
@@ -388,7 +388,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 		if( character->animator->isCompleted(AnimIndexAction) ) {
 			auto exitpos = vehicle->getSeatEntryPosition(seat);
 
-			character->enterVehicle(nullptr, seat);
+			character->leaveVehicle();
 			character->setPosition(exitpos);
 
 			if (isDriver)
