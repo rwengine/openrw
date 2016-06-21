@@ -96,3 +96,14 @@ ENDIF()
 IF(${BUILD_TESTS})
 	add_subdirectory(tests)
 ENDIF()
+
+#
+# Finally
+#
+
+# Copy License file to install directory
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
+	install(FILES COPYING
+			DESTINATION share/openrw
+			)
+endif()
