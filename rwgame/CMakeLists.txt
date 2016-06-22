@@ -18,6 +18,7 @@ add_executable(rwgame
 	DrawUI.cpp
 
 	debug/HttpServer.cpp
+	debug/TcpSocket.cpp
 )
 
 include_directories(SYSTEM
