@@ -315,6 +315,7 @@ DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 
 void DebugState::enter()
 {
+	getWindow().showCursor();
 }
 
 void DebugState::exit()
@@ -352,26 +353,11 @@ void DebugState::tick(float dt)
 		}
 	}*/
 
-	if( _freeLook ) {
-		float qpi = glm::half_pi<float>();
-
-		sf::Vector2i screenCenter{sf::Vector2i{getWindow().getSize()} / 2};
-		sf::Vector2i mousePos = sf::Mouse::getPosition(getWindow());
-		sf::Vector2i deltaMouse = mousePos - screenCenter;
-		sf::Mouse::setPosition(screenCenter, getWindow());
-
-		_debugLook.x -= deltaMouse.x / 100.0f;
-		_debugLook.y += deltaMouse.y / 100.0f;
-
-		if (_debugLook.y > qpi)
-			_debugLook.y = qpi;
-		else if (_debugLook.y < -qpi)
-			_debugLook.y = -qpi;
-
+	if (_freeLook) {
 		_debugCam.rotation = glm::angleAxis(_debugLook.x, glm::vec3(0.f, 0.f, 1.f))
-				* glm::angleAxis(_debugLook.y, glm::vec3(0.f, 1.f, 0.f));
+			* glm::angleAxis(_debugLook.y, glm::vec3(0.f, 1.f, 0.f));
 
-		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 100.f : 10.f);
+		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 1000.f : 100.f);
 	}
 }
 
@@ -392,56 +378,89 @@ void DebugState::draw(GameRenderer* r)
 	State::draw(r);
 }
 
-void DebugState::handleEvent(const sf::Event &e)
+void DebugState::handleEvent(const SDL_Event& event)
 {
-	switch(e.type) {
-	case sf::Event::KeyPressed:
-		switch(e.key.code) {
+	switch(event.type) {
+	case SDL_KEYDOWN:
+		switch(event.key.keysym.sym) {
 		default: break;
-		case sf::Keyboard::Escape:
+		case SDLK_ESCAPE:
 			StateManager::get().exit();
 			break;
-		case sf::Keyboard::W:
+		case SDLK_w:
 			_movement.x = 1.f;
 			break;
-		case sf::Keyboard::S:
+		case SDLK_s:
 			_movement.x =-1.f;
 			break;
-		case sf::Keyboard::A:
+		case SDLK_a:
 			_movement.y = 1.f;
 			break;
-		case sf::Keyboard::D:
+		case SDLK_d:
 			_movement.y =-1.f;
 			break;
-		case sf::Keyboard::F:
+		case SDLK_f:
 			_freeLook = !_freeLook;
+			if (_freeLook)
+				getWindow().hideCursor();
+			else
+				getWindow().showCursor();
 			break;
-		case sf::Keyboard::LShift:
-			_sonicMode = true;
-			break;
-		case sf::Keyboard::P:
+		case SDLK_p:
 			printCameraDetails();
 			break;
 		}
+
+		switch (event.key.keysym.mod) {
+		case KMOD_LSHIFT:
+			_sonicMode = true;
+			break;
+		default: break;
+		}
+
 		break;
-	case sf::Event::KeyReleased:
-		switch(e.key.code) {
-		case sf::Keyboard::W:
-		case sf::Keyboard::S:
+
+	case SDL_KEYUP:
+		switch(event.key.keysym.sym) {
+		case SDLK_w:
+		case SDLK_s:
 			_movement.x = 0.f;
 			break;
-		case sf::Keyboard::A:
-		case sf::Keyboard::D:
+		case SDLK_a:
+		case SDLK_d:
 			_movement.y = 0.f;
 			break;
-		case sf::Keyboard::LShift:
+		}
+
+		switch (event.key.keysym.mod) {
+		case KMOD_LSHIFT:
 			_sonicMode = false;
 			break;
 		default: break;
 		}
+
+		break;
+
+	case SDL_MOUSEMOTION:
+		if (game->hasFocus())
+		{
+			glm::ivec2 screenSize = getWindow().getSize();
+			glm::vec2 mouseMove(event.motion.xrel / static_cast<float>(screenSize.x),
+			                    event.motion.yrel / static_cast<float>(screenSize.y));
+
+			if (!_invertedY)
+				mouseMove.y = -mouseMove.y;
+
+			_debugLook.x -= mouseMove.x;
+
+			float qpi = glm::half_pi<float>();
+			_debugLook.y -= glm::clamp(mouseMove.y, -qpi, qpi);
+		}
+		break;
+
 	default: break;
 	}
-	State::handleEvent(e);
+	State::handleEvent(event);
 }
 
 void DebugState::printCameraDetails()

@@ -49,7 +49,7 @@ void MenuState::enterLoadMenu()
 
 void MenuState::enter()
 {
-	game->getWindow().setMouseCursorVisible(true);
+	getWindow().showCursor();
 }
 
 void MenuState::exit()
@@ -62,12 +62,12 @@ void MenuState::tick(float dt)
 
 }
 
-void MenuState::handleEvent(const sf::Event &e)
+void MenuState::handleEvent(const SDL_Event& e)
 {
 	switch(e.type) {
-		case sf::Event::KeyPressed:
-			switch(e.key.code) {
-				case sf::Keyboard::Escape:
+		case SDL_KEYUP:
+			switch(e.key.keysym.sym) {
+				case SDLK_ESCAPE:
 					StateManager::get().exit();
 				default: break;
 			}

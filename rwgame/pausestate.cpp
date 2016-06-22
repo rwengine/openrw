@@ -18,7 +18,7 @@ void PauseState::enter()
 {
 	getWorld()->setPaused(true);
 
-	game->getWindow().setMouseCursorVisible(true);
+	getWindow().showCursor();
 }
 
 void PauseState::exit()
@@ -34,25 +34,25 @@ void PauseState::tick(float dt)
 void PauseState::draw(GameRenderer* r)
 {
 	MapRenderer::MapInfo map;
-	
+
 	auto& vp = r->getRenderer()->getViewport();
-	
+
 	map.worldSize = 4000.f;
 	map.clipToSize = false;
 	map.screenPosition = glm::vec2(vp.x/2, vp.y/2);
 	map.screenSize = std::max(vp.x, vp.y);
-	
+
 	game->getRenderer()->map.draw(getWorld(), map);
 
     State::draw(r);
 }
 
-void PauseState::handleEvent(const sf::Event &e)
+void PauseState::handleEvent(const SDL_Event& e)
 {
 	switch(e.type) {
-		case sf::Event::KeyPressed:
-			switch(e.key.code) {
-				case sf::Keyboard::Escape:
+		case SDL_KEYDOWN:
+			switch(e.key.keysym.sym) {
+				case SDLK_ESCAPE:
 					StateManager::get().exit();
 					break;
 				default: break;

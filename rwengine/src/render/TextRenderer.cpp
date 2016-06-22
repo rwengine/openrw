@@ -57,7 +57,7 @@ glm::vec4 indexToCoord(int font, int index)
 
 
 const char* TextVertexShader = R"(
-#version 130
+#version 330
 #extension GL_ARB_explicit_attrib_location : enable
 #extension GL_ARB_uniform_buffer_object : enable
 
@@ -78,7 +78,8 @@ void main()
 })";
 
 const char* TextFragmentShader = R"(
-#version 130
+#version 330
+
 in vec2 TexCoord;
 in vec3 Colour;
 uniform vec4 colour;

@@ -105,7 +105,7 @@ void IngameState::enter()
 		started = true;
 	}
 
-	game->getWindow().setMouseCursorVisible(false);
+	getWindow().hideCursor();
 }
 
 void IngameState::exit()
@@ -120,27 +120,6 @@ void IngameState::tick(float dt)
 	auto player = game->getPlayer();
 	if( player && player->isInputEnabled() )
 	{
-		sf::Vector2f screenSize(getWindow().getSize());
-		sf::Vector2f screenCenter(screenSize / 2.f);
-		sf::Vector2f mouseMove;
-		if (game->hasFocus())
-		{
-			sf::Vector2f mousePos(sf::Mouse::getPosition(getWindow()));
-			sf::Vector2f deltaMouse = (mousePos - screenCenter);
-			mouseMove = sf::Vector2f(deltaMouse.x / screenSize.x, deltaMouse.y / screenSize.y);
-			sf::Mouse::setPosition(sf::Vector2i(screenCenter), getWindow());
-
-			if(deltaMouse.x != 0 || deltaMouse.y != 0)
-			{
-				autolookTimer = kAutoLookTime;
-				if (!m_invertedY) {
-					mouseMove.y = -mouseMove.y;
-				}
-				m_cameraAngles += glm::vec2(mouseMove.x, mouseMove.y);
-				m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
-			}
-		}
-
 		float viewDistance = 4.f;
 		switch( camMode )
 		{
@@ -311,51 +290,52 @@ void IngameState::draw(GameRenderer* r)
     State::draw(r);
 }
 
-void IngameState::handleEvent(const sf::Event &event)
+void IngameState::handleEvent(const SDL_Event& event)
 {
 	auto player = game->getPlayer();
 
 	switch(event.type) {
-	case sf::Event::KeyPressed:
-		switch(event.key.code) {
-		case sf::Keyboard::Escape:
+	case SDL_KEYDOWN:
+		switch(event.key.keysym.sym) {
+		case SDLK_ESCAPE:
 			StateManager::get().enter(new PauseState(game));
 			break;
-		case sf::Keyboard::M:
+		case SDLK_m:
 			StateManager::get().enter(new DebugState(game, _look.position, _look.rotation));
 			break;
-		case sf::Keyboard::Space:
+		case SDLK_SPACE:
 			if( getWorld()->state->currentCutscene )
 			{
 				getWorld()->state->skipCutscene = true;
 			}
 			break;
-		case sf::Keyboard::C:
+		case SDLK_c:
 			camMode = CameraMode((camMode+(CameraMode)1)%CAMERA_MAX);
 			break;
-		case sf::Keyboard::W:
+		case SDLK_w:
 			_movement.x = 1.f;
 			break;
-		case sf::Keyboard::S:
+		case SDLK_s:
 			_movement.x =-1.f;
 			break;
-		case sf::Keyboard::A:
+		case SDLK_a:
 			_movement.y = 1.f;
 			break;
-		case sf::Keyboard::D:
+		case SDLK_d:
 			_movement.y =-1.f;
 			break;
 		default: break;
 		}
 		break;
-	case sf::Event::KeyReleased:
-		switch(event.key.code) {
-		case sf::Keyboard::W:
-		case sf::Keyboard::S:
+
+	case SDL_KEYUP:
+		switch(event.key.keysym.sym) {
+		case SDLK_w:
+		case SDLK_s:
 			_movement.x = 0.f;
 			break;
-		case sf::Keyboard::A:
-		case sf::Keyboard::D:
+		case SDLK_a:
+		case SDLK_d:
 			_movement.y = 0.f;
 			break;
 		default: break;
@@ -371,13 +351,13 @@ void IngameState::handleEvent(const sf::Event &event)
 	State::handleEvent(event);
 }
 
-void IngameState::handlePlayerInput(const sf::Event& event)
+void IngameState::handlePlayerInput(const SDL_Event& event)
 {
 	auto player = game->getPlayer();
 	switch(event.type) {
-	case sf::Event::KeyPressed:
-		switch(event.key.code) {
-		case sf::Keyboard::Space:
+	case SDL_KEYDOWN:
+		switch(event.key.keysym.sym) {
+		case SDLK_SPACE:
 			if( player->getCharacter()->getCurrentVehicle() ) {
 				player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
 			}
@@ -386,10 +366,7 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 				player->jump();
 			}
 			break;
-		case sf::Keyboard::LShift:
-			player->setRunning(true);
-			break;
-		case sf::Keyboard::F:
+		case SDLK_f:
 			if( player->getCharacter()->getCurrentVehicle()) {
 				player->exitVehicle();
 			}
@@ -404,36 +381,56 @@ void IngameState::handlePlayerInput(const sf::Event& event)
 				player->enterNearestVehicle();
 			}
 			break;
+		case SDLK_LSHIFT:
+			player->setRunning(true);
+			break;
 		default:
 			break;
 		}
-	break;
-	case sf::Event::KeyReleased:
-		switch(event.key.code) {
-		case sf::Keyboard::LShift:
+		break;
+
+	case SDL_KEYUP:
+		switch (event.key.keysym.sym) {
+		case SDLK_LSHIFT:
 			player->setRunning(false);
 			break;
 		default: break;
 		}
-	break;
-	case sf::Event::MouseButtonPressed:
-		switch(event.mouseButton.button) {
-		case sf::Mouse::Left:
+		break;
+
+	case SDL_MOUSEBUTTONDOWN:
+		switch(event.button.button) {
+		case SDL_BUTTON_LEFT:
 			player->getCharacter()->useItem(true, true);
 			break;
 		default: break;
 		}
 		break;
-	case sf::Event::MouseButtonReleased:
-		switch(event.mouseButton.button) {
-		case sf::Mouse::Left:
+	case SDL_MOUSEBUTTONUP:
+		switch(event.button.button) {
+		case SDL_BUTTON_LEFT:
 			player->getCharacter()->useItem(false, true);
 			break;
 		default: break;
 		}
 		break;
-	case sf::Event::MouseWheelMoved:
-		player->getCharacter()->cycleInventory(event.mouseWheel.delta > 0);
+	case SDL_MOUSEWHEEL:
+		player->getCharacter()->cycleInventory(event.wheel.y > 0);
+		break;
+	case SDL_MOUSEMOTION:
+		if (game->hasFocus())
+		{
+			glm::ivec2 screenSize = getWindow().getSize();
+			glm::vec2 mouseMove(event.motion.xrel / static_cast<float>(screenSize.x),
+			                    event.motion.yrel / static_cast<float>(screenSize.y));
+
+			autolookTimer = kAutoLookTime;
+			if (!m_invertedY) {
+				mouseMove.y = -mouseMove.y;
+			}
+			m_cameraAngles += glm::vec2(mouseMove.x, mouseMove.y);
+			m_cameraAngles.y = glm::clamp(m_cameraAngles.y, kCameraPitchLimit, glm::pi<float>() - kCameraPitchLimit);
+		}
 		break;
 	default:
 		break;

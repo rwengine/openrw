@@ -68,13 +68,19 @@ ENDIF()
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
-find_package(SFML 2 COMPONENTS system window graphics network REQUIRED)
 find_package(MAD REQUIRED)
 find_package(GLM REQUIRED)
 find_package(LibSndFile REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(PNG REQUIRED)
 
-include_directories("${GLM_INCLUDE_DIRS}")
+# CMake otherwise fails with CMP0004
+string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
 
+include_directories(
+	${SDL2_INCLUDE_DIR}
+	${GLM_INCLUDE_DIRS}
+)
 
 # External-internal dependencies
 add_subdirectory(cmake/external)

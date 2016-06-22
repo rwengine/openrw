@@ -1,16 +1,14 @@
 #ifndef _TESTGLOBABLS_HPP_
 #define _TESTGLOBABLS_HPP_
 
-#include <SFML/Window.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <core/Logger.hpp>
 #include <glm/gtx/string_cast.hpp>
-
-#if RW_TEST_WITH_DATA
-#define ENV_GAME_PATH_NAME ("OPENRW_GAME_PATH")
-#endif
+#include <SDL2/SDL.h>
+#include <GameWindow.hpp>
+#include <GameConfig.hpp>
 
 std::ostream& operator<<( std::ostream& stream, glm::vec3 const& v );
 
@@ -50,7 +48,7 @@ struct print_log_value<std::nullptr_t> {
 class Global
 {
 public:
-	sf::Window wnd;
+	GameWindow window;
 #if RW_TEST_WITH_DATA
 	GameData* d;
 	GameWorld* e;
@@ -60,7 +58,12 @@ public:
 #endif
 
 	Global() {
-		wnd.create(sf::VideoMode(640, 360), "Testing");
+		if (SDL_Init(SDL_INIT_VIDEO) < 0)
+			throw std::runtime_error("Failed to initialize SDL2!");
+
+		window.create(800, 600, false);
+		window.hideCursor();
+
 #if RW_TEST_WITH_DATA
 		d = new GameData(&log, &work, getGamePath());
 
@@ -87,7 +90,7 @@ public:
 	}
 
 	~Global() {
-		wnd.close();
+		window.close();
 #if RW_TEST_WITH_DATA
 		delete e;
 #endif
@@ -96,12 +99,10 @@ public:
 #if RW_TEST_WITH_DATA
 	static std::string getGamePath()
 	{
-		// TODO: Is this "the way to do it" on windows.
-		auto v = getenv(ENV_GAME_PATH_NAME);
-		return v ? v : "";
+		return GameConfig("openrw.ini").getGameDataPath();
 	}
 #endif
-	
+
 	static Global& get()
 	{
 		static Global g;
@@ -109,4 +110,4 @@ public:
 	}
 };
 
-#endif 
+#endif

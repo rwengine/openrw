@@ -3,8 +3,8 @@ add_executable(rwgame
 
 	RWGame.cpp
 
-	GameConfig.hpp
 	GameConfig.cpp
+	GameWindow.cpp
 
 	State.cpp
 
@@ -23,17 +23,18 @@ add_executable(rwgame
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
-	${SFML_INCLUDE_DIR}
 	)
 include_directories(
 	"${CMAKE_SOURCE_DIR}/rwengine/include"
 	)
 
-target_link_libraries( rwgame
+target_link_libraries(rwgame
 	rwengine
 	inih
-	${SFML_LIBRARIES}
 	${OPENGL_LIBRARIES}
-	${BULLET_LIBRARIES})
+	${BULLET_LIBRARIES}
+	${SDL2_LIBRARIES}
+	${PNG_LIBRARIES}
+	)
 
 install(TARGETS rwgame RUNTIME DESTINATION bin)

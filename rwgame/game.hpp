@@ -1,8 +1,6 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 #include <objects/GameObject.hpp>
 #include <engine/GameWorld.hpp>
 

@@ -10,8 +10,9 @@
 #include "game.hpp"
 
 #include "GameConfig.hpp"
+#include "GameWindow.hpp"
 
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL.h>
 
 class PlayerController;
 class HttpServer;
@@ -31,7 +32,7 @@ class RWGame
 	bool debugScript;
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
-	sf::RenderWindow window;
+	GameWindow window;
 	std::chrono::steady_clock clock;
 	std::chrono::steady_clock::time_point last_clock_time;
 
@@ -76,7 +77,7 @@ public:
 		return renderer;
 	}
 
-	sf::RenderWindow& getWindow()
+	GameWindow& getWindow()
 	{
 		return window;
 	}
@@ -139,7 +140,7 @@ private:
 	void renderDebugPaths(float time);
 	void renderProfile();
 
-	void globalKeyEvent(const sf::Event& event);
+	void globalKeyEvent(const SDL_Event& event);
 };
 
 #endif

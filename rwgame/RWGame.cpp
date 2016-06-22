@@ -26,6 +26,8 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+#define MOUSE_SENSITIVITY_SCALE 2.5f
+
 DebugDraw* debug;
 
 StdOutReciever logPrinter;
@@ -84,18 +86,12 @@ RWGame::RWGame(int argc, char* argv[])
 			benchFile = argv[i+1];
 		}
 	}
-	
-	
-	sf::Uint32 style = sf::Style::Default;
-	if( fullscreen )
-	{
-		style |= sf::Style::Fullscreen;
-	}
 
-	sf::ContextSettings cs;
-	cs.depthBits = 32;
-	cs.stencilBits = 8;
-	window.create(sf::VideoMode(w, h), "",  style, cs);
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		throw std::runtime_error("Failed to initialize SDL2!");
+
+	window.create(w, h, fullscreen);
+	window.hideCursor();
 
 	log.addReciever(&logPrinter);
 	log.info("Game", "Game directory: " + config.getGameDataPath());
@@ -306,21 +302,33 @@ int RWGame::run()
 		RW_PROFILE_FRAME_BOUNDARY();
 		
 		RW_PROFILE_BEGIN("Input");
-		sf::Event event;
-		while (window.pollEvent(event)) {
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
-			case sf::Event::GainedFocus:
-				inFocus = true;
+			case SDL_QUIT:
+				window.close();
 				break;
-			case sf::Event::LostFocus:
-				inFocus = false;
+
+			case SDL_WINDOWEVENT:
+				switch (event.window.event) {
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					inFocus = true;
+					break;
+
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					inFocus = false;
+					break;
+				}
 				break;
-			case sf::Event::KeyPressed:
+
+			case SDL_KEYDOWN:
 				globalKeyEvent(event);
 				break;
-			case sf::Event::Closed:
-				return 0;
-			default: break;
+
+			case SDL_MOUSEMOTION:
+				event.motion.xrel *= MOUSE_SENSITIVITY_SCALE;
+				event.motion.yrel *= MOUSE_SENSITIVITY_SCALE;
+				break;
 			}
 
 			RW_PROFILE_BEGIN("State");
@@ -328,11 +336,6 @@ int RWGame::run()
 			RW_PROFILE_END()
 		}
 		RW_PROFILE_END();
-		
-		if(! window.isOpen() )
-		{
-			break;
-		}
 
 		auto now = clock.now();
 		float timer = std::chrono::duration<float>(now - last_clock_time).count();
@@ -383,7 +386,7 @@ int RWGame::run()
 
 		renderProfile();
 
-		window.display();
+		window.swap();
 	}
 
     if( httpserver_thread )
@@ -480,10 +483,10 @@ void RWGame::render(float alpha, float time)
 	lastDraws = getRenderer()->getRenderer()->getDrawCount();
 	
 	getRenderer()->getRenderer()->swap();
-	
-	auto size = getWindow().getSize();
-	renderer->setViewport(size.x, size.y);
-	
+
+	glm::ivec2 windowSize = window.getSize();
+	renderer->setViewport(windowSize.x, windowSize.y);
+
 	ViewCamera viewCam;
 	viewCam.frustum.fov = glm::radians(90.f);
 	if( state->currentCutscene != nullptr && state->cutsceneStartTime >= 0.f )
@@ -535,8 +538,8 @@ void RWGame::render(float alpha, float time)
 		viewCam.rotation = glm::slerp(lastCam.rotation, nextCam.rotation, alpha);
 	}
 
-	viewCam.frustum.aspectRatio = window.getSize().x / (float) window.getSize().y;
-	
+	viewCam.frustum.aspectRatio = windowSize.x / static_cast<float>(windowSize.y);
+
 	if ( state->isCinematic )
 	{
 		viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
@@ -777,40 +780,38 @@ void RWGame::renderProfile()
 #endif
 }
 
-void RWGame::globalKeyEvent(const sf::Event& event)
+void RWGame::globalKeyEvent(const SDL_Event& event)
 {
-	switch (event.key.code) {
-	case sf::Keyboard::LBracket:
+	switch (event.key.keysym.sym) {
+	case SDLK_LEFTBRACKET:
 		state->basic.gameMinute -= 30.f;
 		break;
-	case sf::Keyboard::RBracket:
+	case SDLK_RIGHTBRACKET:
 		state->basic.gameMinute += 30.f;
 		break;
-	case sf::Keyboard::Num9:
+	case SDLK_9:
 		timescale *= 0.5f;
 		break;
-	case sf::Keyboard::Num0:
+	case SDLK_0:
 		timescale *= 2.0f;
 		break;
-	case sf::Keyboard::F1:
+	case SDLK_F1:
 		showDebugStats = ! showDebugStats;
 		break;
-	case sf::Keyboard::F2:
+	case SDLK_F2:
 		showDebugPaths = ! showDebugPaths;
 		break;
-	case sf::Keyboard::F3:
+	case SDLK_F3:
 		showDebugPhysics = ! showDebugPhysics;
 		break;
-	case sf::Keyboard::F12: {
+	case SDLK_F12: {
 		auto homedir = getenv("HOME");
 		if( homedir == nullptr ) {
 			std::cerr << "Unable to determine home directory for screenshot" << std::endl;
 			break;
 		}
 
-		std::string savePath(homedir);
-		std::string path = savePath+"/screenshot.png";
-		window.capture().saveToFile(path);
+		window.captureToFile(std::string(homedir) + "/screenshot.png", renderer);
 		break;
 	}
 	default: break;
