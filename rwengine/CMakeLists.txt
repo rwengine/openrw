@@ -1,12 +1,143 @@
-FILE(GLOB_RECURSE RENDERWARE_SOURCES "src/*.cpp")
-FILE(GLOB_RECURSE RENDERWARE_HEADERS "include/*.hpp")
+###########################################################
+##      RWENGINE
+###########################################################
 
-source_group("Header Files" FILES ${RENDERWARE_HEADERS})
-source_group("Source Files" FILES ${RENDERWARE_SOURCES})
+set(RWENGINE_SOURCES
+	include/items/WeaponItem.hpp
+	include/items/InventoryItem.hpp
+	include/engine/GameWorld.hpp
+	include/engine/ScreenText.hpp
+	include/engine/GameData.hpp
+	include/engine/Animator.hpp
+	include/engine/SaveGame.hpp
+	include/engine/GameState.hpp
+	include/script/ScriptDisassembly.hpp
+	include/script/ScriptTypes.hpp
+	include/script/ScriptModule.hpp
+	include/script/modules/VMModule.hpp
+	include/script/modules/GameModule.hpp
+	include/script/modules/ObjectModule.hpp
+	include/script/ScriptMachine.hpp
+	include/script/SCMFile.hpp
+	include/objects/CharacterObject.hpp
+	include/objects/VehicleInfo.hpp
+	include/objects/CutsceneObject.hpp
+	include/objects/VehicleObject.hpp
+	include/objects/PickupObject.hpp
+	include/objects/ItemPickup.hpp
+	include/objects/ObjectTypes.hpp
+	include/objects/InstanceObject.hpp
+	include/objects/ProjectileObject.hpp
+	include/objects/GameObject.hpp
+	include/loaders/BackgroundLoader.hpp
+	include/loaders/LoaderIPL.hpp
+	include/loaders/LoaderCutsceneDAT.hpp
+	include/loaders/DataLoader.hpp
+	include/loaders/GenericDATLoader.hpp
+	include/loaders/LoaderIDE.hpp
+	include/loaders/LoaderGXT.hpp
+	include/loaders/LoaderIFP.hpp
+	include/loaders/WeatherLoader.hpp
+	include/loaders/LoaderCOL.hpp
+	include/BinaryStream.hpp
+	include/audio/MADStream.hpp
+	include/audio/alCheck.hpp
+	include/audio/SoundManager.hpp
+	include/data/CollisionModel.hpp
+	include/data/GameTexts.hpp
+	include/data/CutsceneData.hpp
+	include/data/WeaponData.hpp
+	include/data/InstanceData.hpp
+	include/data/ObjectData.hpp
+	include/data/Skeleton.hpp
+	include/data/ZoneData.hpp
+	include/data/Chase.hpp
+	include/data/PathData.hpp
+	include/TextureArchive.hpp
+	include/dynamics/CollisionInstance.hpp
+	include/dynamics/RaycastCallbacks.hpp
+	include/ai/AIGraphNode.hpp
+	include/ai/AIGraph.hpp
+	include/ai/PlayerController.hpp
+	include/ai/CharacterController.hpp
+	include/ai/DefaultAIController.hpp
+	include/ai/TrafficDirector.hpp
+	include/core/FileArchive.hpp
+	include/core/Logger.hpp
+	include/core/Profiler.hpp
+	include/render/VisualFX.hpp
+	include/render/GameShaders.hpp
+	include/render/MapRenderer.hpp
+	include/render/ViewFrustum.hpp
+	include/render/GameRenderer.hpp
+	include/render/OpenGLRenderer.hpp
+	include/render/ViewCamera.hpp
+	include/render/DebugDraw.hpp
+	include/render/WaterRenderer.hpp
+	include/render/ObjectRenderer.hpp
+	include/render/TextRenderer.hpp
+	src/items/WeaponItem.cpp
+	src/engine/GameData.cpp
+	src/engine/Animator.cpp
+	src/engine/GameState.cpp
+	src/engine/SaveGame.cpp
+	src/engine/ScreenText.cpp
+	src/engine/GameWorld.cpp
+	src/script/ScriptMachine.cpp
+	src/script/ScriptDisassembly.cpp
+	src/script/modules/VMModule.cpp
+	src/script/modules/ObjectModule.cpp
+	src/script/modules/GameModule.cpp
+	src/script/SCMFile.cpp
+	src/script/ScriptTypes.cpp
+	src/script/ScriptModule.cpp
+	src/BinaryStream.cpp
+	src/objects/VehicleObject.cpp
+	src/objects/PickupObject.cpp
+	src/objects/GameObject.cpp
+	src/objects/ProjectileObject.cpp
+	src/objects/ItemPickup.cpp
+	src/objects/InstanceObject.cpp
+	src/objects/CutsceneObject.cpp
+	src/objects/CharacterObject.cpp
+	src/loaders/GenericDATLoader.cpp
+	src/loaders/LoaderIPL.cpp
+	src/loaders/LoaderGXT.cpp
+	src/loaders/LoaderIDE.cpp
+	src/loaders/LoaderCutsceneDAT.cpp
+	src/loaders/WeatherLoader.cpp
+	src/loaders/LoaderIFP.cpp
+	src/loaders/LoaderCOL.cpp
+	src/loaders/DataLoader.cpp
+	src/audio/MADStream.cpp
+	src/audio/SoundManager.cpp
+	src/audio/alCheck.cpp
+	src/TextureArchive.cpp
+	src/data/ObjectData.cpp
+	src/data/Chase.cpp
+	src/data/Skeleton.cpp
+	src/dynamics/CollisionInstance.cpp
+	src/ai/DefaultAIController.cpp
+	src/ai/AIGraph.cpp
+	src/ai/AIGraphNode.cpp
+	src/ai/TrafficDirector.cpp
+	src/ai/CharacterController.cpp
+	src/ai/PlayerController.cpp
+	src/core/Profiler.cpp
+	src/core/Logger.cpp
+	src/render/VisualFX.cpp
+	src/render/OpenGLRenderer.cpp
+	src/render/DebugDraw.cpp
+	src/render/TextRenderer.cpp
+	src/render/GameRenderer.cpp
+	src/render/WaterRenderer.cpp
+	src/render/MapRenderer.cpp
+	src/render/GameShaders.cpp
+	src/render/ObjectRenderer.cpp
+)
 
 add_library(rwengine
-    ${RENDERWARE_SOURCES}
-    ${RENDERWARE_HEADERS}
+    ${RWENGINE_SOURCES}
 )
 
 if(MINGW)
