@@ -6,6 +6,7 @@
 #include <bullet/btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
+#include <array>
 
 constexpr int maxInventorySlots = 13;
 
