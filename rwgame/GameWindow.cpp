@@ -76,14 +76,14 @@ void GameWindow::captureToFile(const std::string& path, GameRenderer* renderer)
 		} }, { [](png_structp) { } } );
 
 	auto size = getSize();
-	png_set_IHDR(png_ptr, info_ptr, size.x, size.y, 8, PNG_COLOR_TYPE_RGB,
+	png_set_IHDR(png_ptr, info_ptr, size.x, size.y, 8, PNG_COLOR_TYPE_RGBA,
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
 	png_write_info(png_ptr, info_ptr);
 
 	unsigned char* buffer = renderer->getRenderer()->readPixels(size);
 	for (int y = size.y-1; y >= 0; y--)
-		png_write_row(png_ptr, &buffer[y * size.x * 3]);
+		png_write_row(png_ptr, &buffer[y * size.x * 4]);
 
 	png_write_end(png_ptr, nullptr);
 	png_destroy_write_struct(&png_ptr, &info_ptr);

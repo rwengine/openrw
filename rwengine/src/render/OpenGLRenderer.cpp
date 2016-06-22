@@ -422,8 +422,8 @@ void OpenGLRenderer::invalidate()
 
 unsigned char* OpenGLRenderer::readPixels(const glm::ivec2& size) const
 {
-	unsigned char* buffer = new unsigned char[size.x * size.y * 3];
-	glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	unsigned char* buffer = new unsigned char[size.x * size.y * 4];
+	glReadPixels(0, 0, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
 	return buffer;
 }
