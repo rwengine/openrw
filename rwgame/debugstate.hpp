@@ -1,6 +1,7 @@
 #ifndef DEBUGSTATE_HPP
 #define DEBUGSTATE_HPP
 
+#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class DebugState : public State
@@ -10,12 +11,14 @@ class DebugState : public State
 	glm::vec2 _debugLook;
 	bool _freeLook;
 	bool _sonicMode;
+	bool _invertedY;
 
 	Menu* createDebugMenu();
 	Menu* createMapMenu();
 	Menu* createVehicleMenu();
 	Menu* createAIMenu();
 	Menu* createWeaponMenu();
+
 public:
 	DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
 
@@ -25,7 +28,7 @@ public:
 	virtual void tick(float dt);
 	virtual void draw(GameRenderer* r);
 
-	virtual void handleEvent(const sf::Event& event);
+	virtual void handleEvent(const SDL_Event& event);
 
 	void printCameraDetails();
 

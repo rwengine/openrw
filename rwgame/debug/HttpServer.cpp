@@ -1,8 +1,6 @@
 #include "HttpServer.hpp"
 #include <engine/GameState.hpp>
 
-#include <SFML/Network.hpp>
-
 #include <iostream>
 #include <regex>
 
@@ -126,47 +124,43 @@ HttpServer::HttpServer(RWGame* game, GameWorld* world)
 
 void HttpServer::run()
 {
-    listener.listen(8091);
+	if (!socket.bind(8091))
+		return;
 
 	std::cout << "STARTING HTTP SERVER" << std::endl;
 
-    while ( game->getWindow().isOpen() ) {
-		sf::TcpSocket client;
-		if (listener.accept(client) == sf::Socket::Done) {
-			std::cout << "New connection from "
-				<< client.getRemoteAddress() << ":" << client.getRemotePort()
-				<< std::endl;
+	TcpSocket client;
+	while (game->getWindow().isOpen() && socket.listen(client)) {
+		std::cout << "New connection from "
+			<< client.getRemoteAddress() << ":" << client.getRemotePort()
+			<< std::endl;
 
-			char buf[1024];
-			size_t received;
-			client.receive(buf, 1023, received);
-			buf[received] = '\0';
-			std::cout << "Got " << received << " bytes: " << buf << std::endl;
+		std::string buffer;
+		client.recv(buffer, 1024);
 
-			try
-			{
-				std::regex regex_http_first_line("(\\w+)\\s+(/.*?)\\s+HTTP/\\d+.\\d+");
-				std::cmatch regex_match;
-				std::regex_search(buf, regex_match, regex_http_first_line);
+		std::cout << "Got " << buffer.length() << " bytes: " << buffer.c_str() << std::endl;
 
-				if (regex_match.size() == 3) {
-					std::string http_method = regex_match.str(1);
-					std::string http_path = regex_match.str(2);
+		try
+		{
+			std::regex regex_http_first_line("(\\w+)\\s+(/.*?)\\s+HTTP/\\d+.\\d+");
+			std::cmatch regex_match;
+			std::regex_search(buffer.c_str(), regex_match, regex_http_first_line);
 
-					std::string response = dispatch(http_method, http_path);
-					client.send(response.c_str(), response.size());
-				}
+			if (regex_match.size() == 3) {
+				std::string http_method = regex_match.str(1);
+				std::string http_path = regex_match.str(2);
+
+				std::string response = dispatch(http_method, http_path);
+				client.send(response);
 			}
-			catch(std::regex_error er)
-			{
-				std::cerr << er.what() << " " << er.code() << std::endl;
-			}
-
-			client.disconnect();
 		}
-	}
+		catch(std::regex_error er)
+		{
+			std::cerr << er.what() << " " << er.code() << std::endl;
+		}
 
-	listener.close();
+		client.disconnect();
+	}
 }
 
 void HttpServer::handleBreakpoint(const SCMBreakpoint &bp)

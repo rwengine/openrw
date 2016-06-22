@@ -1,6 +1,7 @@
 #ifndef LOADINGSTATE_HPP
 #define LOADINGSTATE_HPP
 
+#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class LoadingState : public State
@@ -20,7 +21,7 @@ public:
 	
     virtual bool shouldWorldUpdate();
 
-	virtual void handleEvent(const sf::Event& event);
+	virtual void handleEvent(const SDL_Event& event);
 };
 
 #endif // LOADINGSTATE_HPP

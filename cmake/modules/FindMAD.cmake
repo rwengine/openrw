@@ -2,7 +2,7 @@
 # This script defines the following variables:
 # - MAD_LIBRARY:    The mad library
 # - MAD_FOUND:        true if all the required modules are found
-# - MAD_INCLUDE_DIR:  the path where SFML headers are located (the directory containing the SFML/Config.hpp file)
+# - MAD_INCLUDE_DIR:  the path where MAD headers are located
 #
 
 set(FIND_MAD_PATHS

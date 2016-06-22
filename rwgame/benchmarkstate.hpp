@@ -1,6 +1,7 @@
 #ifndef _RWGAME_BENCHMARKSTATE_HPP_
 #define _RWGAME_BENCHMARKSTATE_HPP_
 
+#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class BenchmarkState : public State
@@ -28,7 +29,7 @@ public:
 	virtual void tick(float dt);
 	virtual void draw(GameRenderer* r);
 
-	virtual void handleEvent(const sf::Event& event);
+	virtual void handleEvent(const SDL_Event& event);
 
 	const ViewCamera& getCamera();
 };

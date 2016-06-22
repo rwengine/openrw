@@ -1,6 +1,7 @@
 #ifndef INGAMESTATE_HPP
 #define INGAMESTATE_HPP
 
+#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class PlayerController;
@@ -52,9 +53,9 @@ public:
 	virtual void tick(float dt);
     virtual void draw(GameRenderer* r);
 
-	virtual void handleEvent(const sf::Event& event);
-	virtual void handlePlayerInput(const sf::Event& event);
-	
+	virtual void handleEvent(const SDL_Event& event);
+	virtual void handlePlayerInput(const SDL_Event& event);
+
 	virtual bool shouldWorldUpdate();
 
 	const ViewCamera& getCamera();
