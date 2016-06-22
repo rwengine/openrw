@@ -70,7 +70,7 @@ target_link_libraries(run_tests
 	inih
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}
-	${SDL2_LIBRARIES}
+	${SDL2_LIBRARY}
 	${PNG_LIBRARIES}
 	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 

@@ -74,9 +74,6 @@ find_package(LibSndFile REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(PNG REQUIRED)
 
-# CMake otherwise fails with CMP0004
-string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
-
 include_directories(
 	${SDL2_INCLUDE_DIR}
 	${GLM_INCLUDE_DIRS}

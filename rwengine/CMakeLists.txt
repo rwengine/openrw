@@ -15,7 +15,7 @@ target_link_libraries(rwengine
 	${LIBSNDFILE_LIBRARY}
 	${OPENAL_LIBRARY}
 	${OPENRW_PLATFORM_LIBS}
-	${SDL2_LIBRARIES})
+	${SDL2_LIBRARY})
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
