@@ -6,6 +6,7 @@
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
+#include <chrono>
 #include "game.hpp"
 
 #include "GameConfig.hpp"
@@ -31,7 +32,9 @@ class RWGame
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
 	sf::RenderWindow window;
-	sf::Clock clock;
+	std::chrono::steady_clock clock;
+	std::chrono::steady_clock::time_point last_clock_time;
+
 	bool inFocus;
 	ViewCamera lastCam, nextCam;
 	bool showDebugStats;

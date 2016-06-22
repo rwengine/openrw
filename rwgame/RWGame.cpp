@@ -297,8 +297,8 @@ PlayerController *RWGame::getPlayer()
 
 int RWGame::run()
 {
-	clock.restart();
-	
+	last_clock_time = clock.now();
+
 	// Loop until the window is closed or we run out of state.
 	while (window.isOpen() && StateManager::get().states.size()) {
 		State* state = StateManager::get().states.back();
@@ -334,7 +334,9 @@ int RWGame::run()
 			break;
 		}
 
-		float timer = clock.restart().asSeconds();
+		auto now = clock.now();
+		float timer = std::chrono::duration<float>(now - last_clock_time).count();
+		last_clock_time = now;
 		accum += timer * timescale;
 
 		RW_PROFILE_BEGIN("Update");
