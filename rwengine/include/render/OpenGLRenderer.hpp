@@ -5,6 +5,7 @@
 #include <rw/types.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
+#include <glm/vec2.hpp>
 
 typedef uint64_t RenderKey;
 
@@ -165,6 +166,8 @@ public:
 
 	virtual void invalidate() = 0;
 
+	virtual unsigned char* readPixels(const glm::ivec2& size) const { return nullptr; };
+
 	/**
 	 * Resets all per-frame counters.
 	 */
@@ -270,6 +273,8 @@ public:
 	void drawBatched(const RenderList& list) override;
 
 	void invalidate();
+
+	unsigned char* readPixels(const glm::ivec2& size) const;
 
 	virtual void pushDebugGroup(const std::string& title);
 	virtual const ProfileInfo& popDebugGroup();
