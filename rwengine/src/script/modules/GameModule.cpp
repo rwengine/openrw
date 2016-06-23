@@ -320,7 +320,8 @@ void game_add_location_blip(const ScriptArguments& args)
 {
 	BlipData data;
 	data.target = 0;
-	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
+	/// @todo this might use ground coords if z is -100.0
+	data.coord = glm::vec3(args[0].realValue(), args[1].realValue(), args[2].realValue());
 	data.texture = "";
 	*args[3].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
