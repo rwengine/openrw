@@ -804,16 +804,6 @@ void RWGame::globalKeyEvent(const SDL_Event& event)
 	case SDLK_F3:
 		showDebugPhysics = ! showDebugPhysics;
 		break;
-	case SDLK_F12: {
-		auto homedir = getenv("HOME");
-		if( homedir == nullptr ) {
-			std::cerr << "Unable to determine home directory for screenshot" << std::endl;
-			break;
-		}
-
-		window.captureToFile(std::string(homedir) + "/screenshot.png", renderer);
-		break;
-	}
 	default: break;
 	}
 }

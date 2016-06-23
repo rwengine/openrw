@@ -72,7 +72,6 @@ find_package(MAD REQUIRED)
 find_package(GLM REQUIRED)
 find_package(LibSndFile REQUIRED)
 find_package(SDL2 REQUIRED)
-find_package(PNG REQUIRED)
 
 include_directories(
 	${SDL2_INCLUDE_DIR}

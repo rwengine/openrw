@@ -420,14 +420,6 @@ void OpenGLRenderer::invalidate()
 	currentUBO = 0;
 }
 
-unsigned char* OpenGLRenderer::readPixels(const glm::ivec2& size) const
-{
-	unsigned char* buffer = new unsigned char[size.x * size.y * 3];
-	glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, buffer);
-
-	return buffer;
-}
-
 void OpenGLRenderer::pushDebugGroup(const std::string& title)
 {
 #if RW_PROFILER
