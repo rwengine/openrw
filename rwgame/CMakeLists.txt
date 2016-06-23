@@ -34,7 +34,6 @@ target_link_libraries(rwgame
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}
 	${SDL2_LIBRARY}
-	${PNG_LIBRARIES}
 	)
 
 install(TARGETS rwgame RUNTIME DESTINATION bin)

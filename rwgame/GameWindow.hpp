@@ -22,8 +22,6 @@ public:
 	void showCursor();
 	void hideCursor();
 
-	void captureToFile(const std::string& path, GameRenderer* renderer);
-
 	glm::ivec2 getSize() const;
 
 	void swap() const

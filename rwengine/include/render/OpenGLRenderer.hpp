@@ -166,8 +166,6 @@ public:
 
 	virtual void invalidate() = 0;
 
-	virtual unsigned char* readPixels(const glm::ivec2& size) const { return nullptr; };
-
 	/**
 	 * Resets all per-frame counters.
 	 */
@@ -273,8 +271,6 @@ public:
 	void drawBatched(const RenderList& list) override;
 
 	void invalidate();
-
-	unsigned char* readPixels(const glm::ivec2& size) const;
 
 	virtual void pushDebugGroup(const std::string& title);
 	virtual const ProfileInfo& popDebugGroup();
