@@ -82,6 +82,22 @@ struct SCMOpcodeParameter {
 			return 0;
 		}
 	}
+
+	float realValue() const
+	{
+		switch (type)
+		{
+		case TGlobal:
+		case TLocal:
+			return *globalReal;
+		case TFloat16:
+			return real;
+		default:
+			RW_ERROR("Unhandled type");
+			return 0;
+		}
+	}
+
 };
 
 typedef std::vector<SCMOpcodeParameter> SCMParams;
