@@ -236,12 +236,14 @@ float alphaThreshold = (1.0/255.0);
 void main()
 {
 	// Only the visibility parameter invokes the screen door.
-	vec4 diffuse  = texture(tex, TexCoords);
+	vec4 diffuse = Colour;
+	diffuse.rgb += ambient.rgb*ambientfac;
+	diffuse *= colour;
+	diffuse *= texture(tex, TexCoords);
 	if(visibility <= filterMatrix[int(gl_FragCoord.x)%4][int(gl_FragCoord.y)%4]) discard;
 	if(diffuse.a <= alphaThreshold) discard;
-	vec4 colour_dyn = diffuse * colour;
 	float fog = 1.0 - clamp( (fogEnd-WorldSpace.w)/(fogEnd-fogStart), 0.0, 1.0 );
-	fragOut = vec4(mix(colour_dyn.rgb * dynamic.rgb + ambient.rgb * ambient.a, fogColor.rgb, fog), colour_dyn.a);
+	fragOut = vec4(mix(diffuse.rgb, fogColor.rgb, fog), diffuse.a);
 })";
 
 const char* Particle::FragmentShader = R"(
