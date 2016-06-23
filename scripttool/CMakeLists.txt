@@ -5,10 +5,8 @@ include_directories(${CMAKE_SOURCE_DIR}/rwengine/include)
 
 target_link_libraries(${SCRIPTTOOL} 
 rwengine
-sfml-graphics
-sfml-window
-sfml-system
 ${OPENGL_LIBRARIES}
-${BULLET_LIBRARIES})
+${BULLET_LIBRARIES}
+${SDL2_LIBRARY})
 
 install(TARGETS ${SCRIPTTOOL} RUNTIME DESTINATION bin)

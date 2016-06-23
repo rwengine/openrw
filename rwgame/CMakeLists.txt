@@ -33,7 +33,7 @@ target_link_libraries(rwgame
 	inih
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}
-	${SDL2_LIBRARIES}
+	${SDL2_LIBRARY}
 	${PNG_LIBRARIES}
 	)
 
