@@ -20,6 +20,7 @@ class GameObject;
 class CharacterObject;
 class InstanceObject;
 class VehicleObject;
+class PickupObject;
 
 #include <render/VisualFX.hpp>
 #include <data/ObjectData.hpp>
@@ -103,6 +104,11 @@ public:
 	 * Creates a player
 	 */
 	CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+
+	/**
+	 * Creates a pickup
+	 */
+	PickupObject* createPickup(const glm::vec3& pos, int id, int type);
 
 	/**
 	 * Destroys an existing Object

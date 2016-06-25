@@ -915,69 +915,11 @@ void game_navigate_on_foot(const ScriptArguments& args)
 void game_create_pickup(const ScriptArguments& args)
 {
 	glm::vec3 pos (args[2].real, args[3].real, args[4].real);
-	int id;
+	int id = args.getModel(0);
 	int type = args[1].integer;
-	
-	switch(args[0].type) {
-		case TInt8:
-			id = (std::int8_t)args[0].integer;
-			break;
-		case TInt16:
-			id = (std::int16_t)args[0].integer;
-			break;
-		default:
-			RW_ERROR("Unhandled integer type");
-			*args[5].globalInteger = 0;
-			return;
-	}
-	
-	if ( id < 0 )
-	{
-		id = -id;
-		
-		auto model = args.getVM()->getFile()->getModels()[id];
-		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
-	
-		id = args.getWorld()->data->findModelObject(model);
-		args.getWorld()->data->loadDFF(model+".dff");
-		args.getWorld()->data->loadTXD("icons.txd");
-	}
-	else
-	{
-		auto data = args.getWorld()->data->findObjectType<ObjectData>(id);
-		
-		if ( ! ( id >= 170 && id <= 184 ) )
-		{
-			args.getWorld()->data->loadDFF(data->modelName+".dff");
-		}
-		args.getWorld()->data->loadTXD(data->textureName+".txd");
-	}
-	
-	PickupObject* pickup = nullptr;
 
-	if ( id >= 170 && id <= 184 )
-	{
-		// Find the item for this model ID
-		auto world = args.getWorld();
-		InventoryItem *item = nullptr;
-		for (auto i = 0; i < maxInventorySlots; ++i)
-		{
-			item = world->getInventoryItem(i);
-			if (item->getModelID() == id) {
-				auto pickuptype = (PickupObject::PickupType)type;
-				pickup = new ItemPickup(args.getWorld(), pos, pickuptype, item);
-				world->pickupPool.insert( pickup );
-				world->allObjects.push_back(pickup);
-				*args[5].globalInteger = pickup->getGameObjectID();
-			}
-		}
-	}
-	else
-	{
-		RW_UNIMPLEMENTED("non-item pickups");
-		*args[5].globalInteger = 0;
-	}
-	
+	PickupObject* pickup = args.getWorld()->createPickup(pos, id, type);
+	*args[5].globalInteger = pickup->getGameObjectID();
 }
 
 bool game_is_pickup_collected(const ScriptArguments& args)
