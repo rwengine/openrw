@@ -1071,6 +1071,19 @@ bool game_character_in_range(const ScriptArguments& args)
 	return true;
 }
 
+void game_create_weapon_pickup(const ScriptArguments& args)
+{
+	glm::vec3 pos (args[3].real, args[4].real, args[5].real);
+	int id = args.getModel(0);
+	int type = args[1].integer;
+	int ammo = args[2].integer;
+	RW_UNUSED(ammo);
+	RW_UNIMPLEMENTED("game_create_weapon_pickup(): ammo count");
+
+	PickupObject* pickup = args.getWorld()->createPickup(pos, id, type);
+	*args[6].globalInteger = pickup->getGameObjectID();
+}
+
 void game_set_close_object_visible(const ScriptArguments& args)
 {
 	glm::vec3 position(args[0].real, args[1].real, args[2].real);
@@ -1368,7 +1381,9 @@ ObjectModule::ObjectModule()
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
 
 	bindFunction(0x0320, game_character_in_range, 2, "Is Character in range of character");
-	
+
+	bindFunction(0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
+
 	bindFunction(0x0339, game_objects_in_volume, 11, "Are objects in volume" );
 	
 	bindFunction( 0x034D, game_rotate_object, 4, "Rotate Object" );
