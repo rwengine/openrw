@@ -4,6 +4,8 @@
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
 #include <ai/PlayerController.hpp>
+#include <script/SCMFile.hpp>
+#include <engine/GameData.hpp>
 
 GameState* ScriptArguments::getState() const
 {
@@ -13,6 +15,25 @@ GameState* ScriptArguments::getState() const
 GameWorld* ScriptArguments::getWorld() const
 {
 	return getVM()->getState()->world;
+}
+
+int ScriptArguments::getModel(unsigned int arg) const
+{
+	RW_CHECK(arg < getParameters().size(), "arg out of range");
+	if (arg >= getParameters().size()) {
+		return 0;
+	}
+
+	int id =  getParameters()[arg].integerValue();
+
+	/// @todo verify this behaviour
+	if (id < 0) {
+		id = -id;
+		const auto& model = getVM()->getFile()->getModels()[id];
+		id = getWorld()->data->findModelObject(model);
+	}
+
+	return id;
 }
 
 GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const

@@ -1317,8 +1317,6 @@ GameModule::GameModule()
 
 	bindFunction( 0x0329, game_has_respray_happened, 1, "Has Respray Happened" );
 
-	bindUnimplemented( 0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
-
 	bindUnimplemented( 0x0335, game_free_resprays, 1, "Set Free Respray" );
 	bindUnimplemented( 0x0336, game_set_character_visible, 2, "Set Player Visible" );
 
@@ -1387,7 +1385,7 @@ GameModule::GameModule()
 	bindUnimplemented( 0x03DA, game_set_garage_follow_player, 1, "Set Garage Camera Follows Player" );
 	
 	bindFunction(0x03DC, game_add_object_blip<PickupObject>, 2, "Add blip for pickup");
-	bindUnimplemented(0x03DD, game_add_object_sprite_blip<PickupObject>, 3, "Add Sprite Blip for Pickup"); /// @todo crashes LUIGI4 because of missing 032B
+	bindFunction(0x03DD, game_add_object_sprite_blip<PickupObject>, 3, "Add Sprite Blip for Pickup");
 	
 	bindUnimplemented( 0x03DE, game_set_pedestrian_density, 1, "Set Pedestrian density" );
 

@@ -1,6 +1,8 @@
 #pragma once
 #ifndef _SCRIPTTYPES_HPP_
 #define _SCRIPTTYPES_HPP_
+#include <rw/defines.hpp>
+
 #include <cstdint>
 #include <map>
 #include <string>
@@ -56,23 +58,28 @@ static SCMTypeInfoTable typeData = {
 struct SCMOpcodeParameter {
 	SCMType type;
 	union {
-		uint32_t integer;
+		int32_t integer;
 		float real;
 		char string[8];
 		void* globalPtr;
-		uint32_t* globalInteger;
+		int32_t* globalInteger;
 		float* globalReal;
 	};
 
 	int integerValue() const 
 	{
-		if ( type == TGlobal )
+		switch (type)
 		{
-			return * globalInteger;
-		}
-		else
-		{
+		case TGlobal:
+		case TLocal:
+			return *globalInteger;
+		case TInt8:
+		case TInt16:
+		case TInt32:
 			return integer;
+		default:
+			RW_ERROR("Unhandled type");
+			return 0;
 		}
 	}
 };
@@ -100,6 +107,8 @@ public:
 	{
 		return parameters->at(arg);
 	}
+
+	int getModel(unsigned int arg) const;
 
 	template <class T>
 	GameObject* getObject(unsigned int arg) const;

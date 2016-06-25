@@ -41,16 +41,11 @@ void IngameState::startTest()
 
 	getWorld()->state->playerObject = playerChar->getGameObjectID();
 
-	glm::vec3 itemspawn( 276.5f, -609.f, 36.5f);
-	for(int i = 1; i < maxInventorySlots; ++i) {
-		ItemPickup* pickup =
-					new ItemPickup(
-						getWorld(),
-						itemspawn,
-						PickupObject::OnStreet,
-						getWorld()->getInventoryItem(i));
-		getWorld()->pickupPool.insert(pickup);
-		getWorld()->allObjects.push_back(pickup);
+	glm::vec3 itemspawn(276.5f, -609.f, 36.5f);
+	for (int i = 1; i < maxInventorySlots; ++i) {
+		auto item = getWorld()->getInventoryItem(i);
+		getWorld()->createPickup(itemspawn, item->getModelID(),
+		                         PickupObject::OnStreet);
 		itemspawn.x += 2.5f;
 	}
 

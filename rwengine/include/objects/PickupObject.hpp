@@ -51,7 +51,11 @@ public:
 
 	void tick(float dt);
 
-	virtual bool onCharacterTouch(CharacterObject* character) = 0;
+	virtual bool onCharacterTouch(CharacterObject* character)
+	{
+		RW_UNUSED(character);
+		return false;
+	}
 
 	bool isEnabled() const { return m_enabled; }
 	void setEnabled(bool enabled);

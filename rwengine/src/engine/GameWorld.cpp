@@ -19,6 +19,7 @@
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <objects/CutsceneObject.hpp>
+#include <objects/ItemPickup.hpp>
 
 #include <data/CutsceneData.hpp>
 #include <loaders/LoaderCutsceneDAT.hpp>
@@ -456,6 +457,36 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos, const glm::quat& 
 		}
 	}
 	return nullptr;
+}
+
+PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type)
+{
+	auto modelInfo = data->findObjectType<ObjectData>(id);
+
+	data->loadDFF(modelInfo->modelName + ".dff");
+	data->loadTXD(modelInfo->textureName + ".txd");
+
+	PickupObject* pickup = nullptr;
+	auto pickuptype = (PickupObject::PickupType)type;
+
+	// Attempt to find an InventoryItem associated with this model
+	auto it = std::find_if(
+	    inventoryItems.begin(), inventoryItems.end(),
+	    [=](InventoryItem* itm) { return itm->getModelID() == id; });
+
+	// If nothing, create a generic pickup instead of an item pickup
+	if (it != inventoryItems.end()) {
+		pickup = new ItemPickup(this, pos, pickuptype, *it);
+	}
+	else {
+		RW_UNIMPLEMENTED("Non-weapon pickups");
+		pickup = new PickupObject(this, pos, id, pickuptype);
+	}
+
+	pickupPool.insert(pickup);
+	allObjects.push_back(pickup);
+
+	return pickup;
 }
 
 void GameWorld::ObjectPool::insert(GameObject* object)

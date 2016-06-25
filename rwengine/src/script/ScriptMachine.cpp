@@ -81,12 +81,12 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				hasExtraParameters = false;
 				break;
 			case TInt8:
-                parameters.back().integer = _file->read<std::uint8_t>(pc);
-                pc += sizeof(SCMByte);
+				parameters.back().integer = _file->read<std::int8_t>(pc);
+				pc += sizeof(SCMByte);
 				break;
 			case TInt16:
-                parameters.back().integer = _file->read<std::int16_t>(pc);
-                pc += sizeof(SCMByte) * 2;
+				parameters.back().integer = _file->read<std::int16_t>(pc);
+				pc += sizeof(SCMByte) * 2;
 				break;
 			case TGlobal: {
 				auto v = _file->read<std::uint16_t>(pc);
@@ -95,7 +95,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				{
 					state->world->logger->error("SCM", "Global Out of bounds! "+ std::to_string(v) + " " + std::to_string(_file->getGlobalsSize()));
 				}
-                pc += sizeof(SCMByte) * 2;
+				pc += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TLocal: {
@@ -105,12 +105,12 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 				{
 					state->world->logger->error("SCM", "Local Out of bounds!");
 				}
-                pc += sizeof(SCMByte) * 2;
+				pc += sizeof(SCMByte) * 2;
 			}
 				break;
 			case TInt32:
-                parameters.back().integer = _file->read<std::uint32_t>(pc);
-                pc += sizeof(SCMByte) * 4;
+				parameters.back().integer = _file->read<std::int32_t>(pc);
+				pc += sizeof(SCMByte) * 4;
 				break;
 			case TString:
                 std::copy(_file->data()+pc, _file->data()+pc+8,

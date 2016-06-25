@@ -915,69 +915,11 @@ void game_navigate_on_foot(const ScriptArguments& args)
 void game_create_pickup(const ScriptArguments& args)
 {
 	glm::vec3 pos (args[2].real, args[3].real, args[4].real);
-	int id;
+	int id = args.getModel(0);
 	int type = args[1].integer;
-	
-	switch(args[0].type) {
-		case TInt8:
-			id = (std::int8_t)args[0].integer;
-			break;
-		case TInt16:
-			id = (std::int16_t)args[0].integer;
-			break;
-		default:
-			RW_ERROR("Unhandled integer type");
-			*args[5].globalInteger = 0;
-			return;
-	}
-	
-	if ( id < 0 )
-	{
-		id = -id;
-		
-		auto model = args.getVM()->getFile()->getModels()[id];
-		std::transform(model.begin(), model.end(), model.begin(), ::tolower);
-	
-		id = args.getWorld()->data->findModelObject(model);
-		args.getWorld()->data->loadDFF(model+".dff");
-		args.getWorld()->data->loadTXD("icons.txd");
-	}
-	else
-	{
-		auto data = args.getWorld()->data->findObjectType<ObjectData>(id);
-		
-		if ( ! ( id >= 170 && id <= 184 ) )
-		{
-			args.getWorld()->data->loadDFF(data->modelName+".dff");
-		}
-		args.getWorld()->data->loadTXD(data->textureName+".txd");
-	}
-	
-	PickupObject* pickup = nullptr;
 
-	if ( id >= 170 && id <= 184 )
-	{
-		// Find the item for this model ID
-		auto world = args.getWorld();
-		InventoryItem *item = nullptr;
-		for (auto i = 0; i < maxInventorySlots; ++i)
-		{
-			item = world->getInventoryItem(i);
-			if (item->getModelID() == id) {
-				auto pickuptype = (PickupObject::PickupType)type;
-				pickup = new ItemPickup(args.getWorld(), pos, pickuptype, item);
-				world->pickupPool.insert( pickup );
-				world->allObjects.push_back(pickup);
-				*args[5].globalInteger = pickup->getGameObjectID();
-			}
-		}
-	}
-	else
-	{
-		RW_UNIMPLEMENTED("non-item pickups");
-		*args[5].globalInteger = 0;
-	}
-	
+	PickupObject* pickup = args.getWorld()->createPickup(pos, id, type);
+	*args[5].globalInteger = pickup->getGameObjectID();
 }
 
 bool game_is_pickup_collected(const ScriptArguments& args)
@@ -1127,6 +1069,19 @@ bool game_character_in_range(const ScriptArguments& args)
 	RW_UNUSED(args);
 	RW_UNIMPLEMENTED("game_character_in_range()");
 	return true;
+}
+
+void game_create_weapon_pickup(const ScriptArguments& args)
+{
+	glm::vec3 pos (args[3].real, args[4].real, args[5].real);
+	int id = args.getModel(0);
+	int type = args[1].integer;
+	int ammo = args[2].integer;
+	RW_UNUSED(ammo);
+	RW_UNIMPLEMENTED("game_create_weapon_pickup(): ammo count");
+
+	PickupObject* pickup = args.getWorld()->createPickup(pos, id, type);
+	*args[6].globalInteger = pickup->getGameObjectID();
 }
 
 void game_set_close_object_visible(const ScriptArguments& args)
@@ -1426,7 +1381,9 @@ ObjectModule::ObjectModule()
 	bindFunction(0x02E3, game_get_speed, 2, "Get Vehicle Speed" );
 
 	bindFunction(0x0320, game_character_in_range, 2, "Is Character in range of character");
-	
+
+	bindFunction(0x032B, game_create_weapon_pickup, 7, "Create Weapon Pickup" );
+
 	bindFunction(0x0339, game_objects_in_volume, 11, "Are objects in volume" );
 	
 	bindFunction( 0x034D, game_rotate_object, 4, "Rotate Object" );
