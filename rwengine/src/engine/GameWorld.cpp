@@ -23,6 +23,12 @@
 #include <data/CutsceneData.hpp>
 #include <loaders/LoaderCutsceneDAT.hpp>
 
+#include <render/ViewCamera.hpp>
+
+// Behaviour Tuning
+constexpr float kMaxTrafficSpawnRadius = 100.f;
+constexpr float kMaxTrafficCleanupRadius = kMaxTrafficSpawnRadius * 1.25f;
+
 class WorldCollisionDispatcher : public btCollisionDispatcher
 {
 public:
@@ -218,39 +224,38 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 	return nullptr;
 }
 
-void GameWorld::createTraffic(const glm::vec3& near)
+void GameWorld::createTraffic(const ViewCamera& viewCamera)
 {
 	TrafficDirector director(&aigraph, this);
 	
-	director.populateNearby( near, 100, 5 );
+	director.populateNearby( viewCamera, kMaxTrafficSpawnRadius, 5 );
 }
 
-void GameWorld::cleanupTraffic(const glm::vec3& focus)
+void GameWorld::cleanupTraffic(const ViewCamera& focus)
 {
-	for ( auto& p : pedestrianPool.objects )
-	{
-		if ( p.second->getLifetime() != GameObject::TrafficLifetime )
-		{
+	for (auto& p : pedestrianPool.objects) {
+		if (p.second->getLifetime() != GameObject::TrafficLifetime) {
 			continue;
 		}
 		
-		if ( glm::distance( focus, p.second->getPosition() ) >= 100.f )
-		{
-			destroyObjectQueued( p.second );
+		if (glm::distance( focus.position, p.second->getPosition() ) >= kMaxTrafficCleanupRadius) {
+			if (! focus.frustum.intersects(p.second->getPosition(), 1.f)) {
+				destroyObjectQueued( p.second );
+			}
 		}
 	}
-	for ( auto& p : vehiclePool.objects )
-	{
-		if ( p.second->getLifetime() != GameObject::TrafficLifetime )
-		{
+	for ( auto& p : vehiclePool.objects ) {
+		if (p.second->getLifetime() != GameObject::TrafficLifetime) {
 			continue;
 		}
 
-		if ( glm::distance( focus, p.second->getPosition() ) >= 100.f )
-		{
-			destroyObjectQueued( p.second );
+		if (glm::distance( focus.position, p.second->getPosition() ) >= kMaxTrafficCleanupRadius) {
+			if (! focus.frustum.intersects(p.second->getPosition(), 1.f)) {
+				destroyObjectQueued( p.second );
+			}
 		}
 	}
+
 	destroyQueuedObjects();
 }
 

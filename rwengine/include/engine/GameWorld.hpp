@@ -21,6 +21,7 @@ class CharacterObject;
 class InstanceObject;
 class VehicleObject;
 
+class ViewCamera;
 #include <render/VisualFX.hpp>
 #include <data/ObjectData.hpp>
 
@@ -76,10 +77,23 @@ public:
 	 * @param name The name of the IPL as it appears in the games' gta.dat
 	 */
 	bool placeItems(const std::string& name);
-	
-	void createTraffic(const glm::vec3& near);
-	void cleanupTraffic(const glm::vec3& focus);
-	
+
+	/**
+	 * @brief createTraffic spawn transitory peds and vehicles
+	 * @param viewCamera The camera to create traffic near
+	 *
+	 * The position and frustum of the passed in camera is used to determine
+	 * the radius where traffic can be spawned, and the frustum is used to avoid
+	 * spawning traffic in view of the player.
+	 */
+	void createTraffic(const ViewCamera& viewCamera);
+
+	/**
+	 * @brief cleanupTraffic Cleans up traffic too far away from the given camera
+	 * @param viewCamera
+	 */
+	void cleanupTraffic(const ViewCamera& viewCamera);
+
 	/**
 	 * Creates an instance
 	 */

@@ -5,6 +5,7 @@
 #include <ai/AIGraph.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/CharacterObject.hpp>
+#include <render/ViewCamera.hpp>
 
 bool operator!=(const AIGraphNode* lhs, const glm::vec3 &rhs) { return lhs->position != rhs; }
 std::ostream &operator<<(std::ostream &os, const AIGraphNode* yt) { os << glm::to_string(yt->position); return os; }
@@ -68,8 +69,10 @@ BOOST_AUTO_TEST_CASE(test_available_nodes)
 	graph.createPathNodes(glm::vec3(), glm::quat(), path);
 	
 	TrafficDirector director(&graph, Global::get().e);
+
+	ViewCamera testCamera(glm::vec3(-5.f, -5.f, 0.f));
 	
-	auto open = director.findAvailableNodes(AIGraphNode::Pedestrian, glm::vec3(-5.f, -5.f, 0.f), 10.f);
+	auto open = director.findAvailableNodes(AIGraphNode::Pedestrian, testCamera, 10.f);
 	
 	std::vector<glm::vec3> expected {
 			{ 0.f,-10.f, 0.f },

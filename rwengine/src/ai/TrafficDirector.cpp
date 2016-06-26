@@ -6,6 +6,7 @@
 #include <objects/GameObject.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <render/ViewCamera.hpp>
 #include <core/Logger.hpp>
 
 #include <glm/gtx/string_cast.hpp>
@@ -18,36 +19,39 @@ maximumPedestrians(20), maximumCars(10)
 
 }
 
-std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::NodeType type, const glm::vec3& near, float radius)
+std::vector< AIGraphNode* > TrafficDirector::findAvailableNodes(AIGraphNode::NodeType type, const ViewCamera& camera, float radius)
 {
 	std::vector<AIGraphNode*> available;
 	available.reserve(20);
 
-	graph->gatherExternalNodesNear(near, radius, available);
+	graph->gatherExternalNodesNear(camera.position, radius, available);
 
 	float density = type == AIGraphNode::Vehicle ? carDensity : pedDensity;
 	float minDist = (10.f / density) * (10.f / density);
+	float halfRadius2 = std::pow(radius / 2.f, 2.f);
 
-	// Determine if anything in the open set is blocked
-	for ( auto it = available.begin(); it != available.end(); )
-	{
+	// Check if any of the nearby nodes are blocked by a pedestrian standing on it
+	// or because it's inside the view frustum
+	for (auto it = available.begin(); it != available.end();) {
 		bool blocked = false;
-		for ( auto obj : world->pedestrianPool.objects )
-		{
-			// Sanity check
-			if ( glm::distance2( (*it)->position, obj.second->getPosition() ) <= minDist )
-			{
+		float dist2 = glm::distance2(camera.position, (*it)->position);
+
+		for (auto& obj : world->pedestrianPool.objects) {
+			if (glm::distance2( (*it)->position, obj.second->getPosition() ) <= minDist) {
 				blocked = true;
 				break;
 			}
 		}
+
+		// Check that we're not going to spawn something right where the player is looking
+		if (dist2 <= halfRadius2 && camera.frustum.intersects((*it)->position, 1.f)) {
+			blocked = true;
+		}
 		
-		if ( blocked )
-		{
+		if (blocked) {
 			it = available.erase( it );
 		}
-		else
-		{
+		else {
 			it++;
 		}
 	}
@@ -68,17 +72,28 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density)
 	}
 }
 
-std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center, float radius, int maxSpawn)
+std::vector<GameObject*> TrafficDirector::populateNearby(const ViewCamera& camera, float radius, int maxSpawn)
 {
 	int availablePeds = maximumPedestrians - world->pedestrianPool.objects.size();
 
 	std::vector<GameObject*> created;
 
-	// Spawn vehicles at vehicle generators
-	/// @todo avoid spawning in view frustum unless alwaysSpawn == true
+	/// @todo Check how "in player view" should be determined.
 
+	// Don't check the frustum for things more than 1/2 of the radius away
+	// so that things will spawn as you drive towards them
+	float halfRadius2 = std::pow(radius/ 2.f, 2.f);
+
+	// Spawn vehicles at vehicle generators
 	for (auto& gen : world->state->vehicleGenerators) {
-		if (glm::distance2(center, gen.position) < radius * radius) {
+		float dist2 = glm::distance2(camera.position, gen.position);
+		if (dist2 < radius * radius) {
+			if (dist2 <= halfRadius2 && camera.frustum.intersects(gen.position, 1.f)) {
+				if (! gen.alwaysSpawn) {
+					// Don't spawn in the view frustum unless we're forced to
+					continue;
+				}
+			}
 			auto spawned = world->tryToSpawnVehicle(gen);
 			if (spawned) {
 				created.push_back(spawned);
@@ -87,7 +102,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const glm::vec3& center
 	}
 
 	auto type = AIGraphNode::Pedestrian;
-	auto available = findAvailableNodes(type, center, radius);
+	auto available = findAvailableNodes(type, camera, radius);
 	
 	if( availablePeds <= 0 )
 	{

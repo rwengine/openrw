@@ -463,13 +463,13 @@ void RWGame::tick(float dt)
 				throw;
 			}
 		}
-		
-		if ( state->playerObject )
-		{
+
+		/// @todo this doesn't make sense as the condition
+		if ( state->playerObject ) {
+			nextCam.frustum.update(nextCam.frustum.projection() * nextCam.getView());
 			// Use the current camera position to spawn pedestrians.
-			auto p = nextCam.position;
-			world->cleanupTraffic(p);
-			world->createTraffic(p);
+			world->cleanupTraffic(nextCam);
+			world->createTraffic(nextCam);
 		}
 	}
 	
