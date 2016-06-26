@@ -85,11 +85,21 @@ std::vector<GameObject*> TrafficDirector::populateNearby(const ViewCamera& camer
 	float halfRadius2 = std::pow(radius/ 2.f, 2.f);
 
 	// Spawn vehicles at vehicle generators
+	auto camera2D = glm::vec2(camera.position);
 	for (auto& gen : world->state->vehicleGenerators) {
-		float dist2 = glm::distance2(camera.position, gen.position);
+		/// @todo verify how vehicle generator proximity is determined
+		auto gen2D = glm::vec2(gen.position);
+		float dist2 = glm::distance2(camera2D, gen2D);
 		if (dist2 < radius * radius) {
-			if (dist2 <= halfRadius2 && camera.frustum.intersects(gen.position, 1.f)) {
-				if (! gen.alwaysSpawn) {
+			auto position = gen.position;
+			// Check that the on-ground position is not in view
+			if (gen.position.z < -90.f) {
+				position = world->getGroundAtPosition(position);
+			}
+
+			if (dist2 <= halfRadius2 &&
+			    camera.frustum.intersects(position, 1.f)) {
+				if (!gen.alwaysSpawn) {
 					// Don't spawn in the view frustum unless we're forced to
 					continue;
 				}
