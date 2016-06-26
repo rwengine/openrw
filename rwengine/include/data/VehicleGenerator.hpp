@@ -1,5 +1,6 @@
 #ifndef RWENGINE_VEHICLEGENERATOR_HPP
 #define RWENGINE_VEHICLEGENERATOR_HPP
+#include <glm/glm.hpp>
 
 /**
  * Stores information about where the game can generate vehicles.
@@ -30,6 +31,32 @@ struct VehicleGenerator
 	 * Intentionally disabled to match behaviour
 	*/
 	int remainingSpawns;
+
+	VehicleGenerator(const glm::vec3& position_,
+					 float heading_,
+					 int modelID_,
+					 int colourFG_,
+					 int colourBG_,
+					 bool alwaysSpawn_,
+					 short alarmThreshold_,
+					 short lockedThreshold_,
+					 int minDelay_,
+					 int maxDelay_,
+					 int lastSpawnTime_,
+					 int remainingSpawns_)
+		: position(position_)
+		, heading(heading_)
+		, vehicleID(modelID_)
+		, colourFG(colourFG_)
+		, colourBG(colourBG_)
+		, alwaysSpawn(alwaysSpawn_)
+		, alarmThreshold(alarmThreshold_)
+		, lockedThreshold(lockedThreshold_)
+		, minDelay(minDelay_)
+		, maxDelay(maxDelay_)
+		, lastSpawnTime(lastSpawnTime_)
+		, remainingSpawns(remainingSpawns_)
+	{}
 };
 
 #endif

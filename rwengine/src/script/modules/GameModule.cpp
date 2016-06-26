@@ -113,21 +113,29 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 		return;
 	}
 	
-	VehicleGenerator vg;
-	vg.position = position;
-	vg.heading = args[3].real;
-	vg.vehicleID = args[4].integer;
-	vg.colourFG = args[5].integer;
-	vg.colourBG = args[6].integer;
-	vg.alwaysSpawn = args[7].integer != 0;
-	vg.alarmThreshold = args[8].integer;
-	vg.lockedThreshold = args[9].integer;
-	vg.minDelay = args[10].integer;
-	vg.maxDelay = args[11].integer;
-	
-	vg.lastSpawnTime = 0;
-	vg.remainingSpawns = 0;
-	
+	float heading = args[3].real;
+	int vehicleID = args[4].integer;
+	int colourFG = args[5].integer;
+	int colourBG = args[6].integer;
+	bool alwaysSpawn = args[7].integer != 0;
+	short alarmThreshold = args[8].integer;
+	short lockedThreshold = args[9].integer;
+	int minDelay = args[10].integer;
+	int maxDelay = args[11].integer;
+
+	VehicleGenerator vg{position,
+	                    heading,
+	                    vehicleID,
+	                    colourFG,
+	                    colourBG,
+	                    alwaysSpawn,
+	                    alarmThreshold,
+	                    lockedThreshold,
+	                    minDelay,
+	                    maxDelay,
+	                    0,
+	                    0};
+
 	*args[12].globalInteger = args.getWorld()->state->vehicleGenerators.size();
 	
 	args.getWorld()->state->vehicleGenerators.push_back(vg);
