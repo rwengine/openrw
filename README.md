@@ -13,8 +13,9 @@ OpenRW requires a legitimate copy of the original PC game data in order to run.
 Without this data it will not be possible to run OpenRW.
 
 ## Screenshots
-![Staunton Skyline from Portland](https://cloud.githubusercontent.com/assets/418211/16287457/1a434b7e-38db-11e6-9814-79a926a66071.png)
-![Opening cutscene](https://cloud.githubusercontent.com/assets/418211/16287461/1cc53f38-38db-11e6-9f26-196a516798d4.png)
+![Looking west to Staunton](https://cloud.githubusercontent.com/assets/418211/16398933/40a62c20-3cc6-11e6-8c6a-9c50de47510c.png)
+![Poor driving skill](https://cloud.githubusercontent.com/assets/418211/16398932/40a03de2-3cc6-11e6-9e48-acc9b44a600a.png)
+![Duplicate claude in cutscene](https://cloud.githubusercontent.com/assets/418211/16399129/aa019d52-3cc7-11e6-9a33-a9fcce0b972c.png)
 
 ## Getting Started
 
