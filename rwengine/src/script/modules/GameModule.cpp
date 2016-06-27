@@ -66,6 +66,20 @@ void game_print_now(const ScriptArguments& args)
 					));
 }
 
+void game_print_soon(const ScriptArguments& args)
+{
+	const auto& world = args.getWorld();
+
+	std::string id(args[0].string);
+	int time = args[1].integerValue();
+	unsigned short style = args[2].integerValue();
+
+	auto str = world->data->texts.text(id);
+
+	auto textEntry = ScreenTextEntry::makeBig(id, str, style, time);
+	world->state->text.addText<ScreenTextType::BigLowPriority>(textEntry);
+}
+
 void game_clear_prints(const ScriptArguments& args)
 {
 	args.getWorld()->state->text.clear<ScreenTextType::Big>();
@@ -85,9 +99,18 @@ void game_set_time(const ScriptArguments& args)
 
 bool game_is_button_pressed(const ScriptArguments& args)
 {
-	/// @todo implement
-	RW_UNUSED(args);
+	int player = args[0].integerValue();
+	int index = args[1].integerValue();
 	RW_UNIMPLEMENTED("game_is_button_pressed()");
+	// NOTE: This is a hack. Hence we'll keep the unimplemented message for now.
+	if (player == 0) {
+		if (index == 19) { // look behind / sub-mission
+			/// @todo Return the keystate instead
+			auto object = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
+			auto player = static_cast<CharacterObject*>(object);
+			return player->isRunning();
+		}
+	}
 	return false;
 }
 
@@ -311,7 +334,8 @@ void game_add_location_blip(const ScriptArguments& args)
 {
 	BlipData data;
 	data.target = 0;
-	data.coord = glm::vec3(args[0].real, args[1].real, args[2].real);
+	/// @todo this might use ground coords if z is -100.0
+	data.coord = glm::vec3(args[0].realValue(), args[1].realValue(), args[2].realValue());
 	data.texture = "";
 	*args[3].globalInteger = args.getWorld()->state->addRadarBlip(data);
 }
@@ -903,6 +927,22 @@ void game_start_chase_scene(const ScriptArguments& args)
 	args.getWorld()->chase.start();
 }
 
+void game_print_big_with_2_numbers(const ScriptArguments& args)
+{
+	const auto& world = args.getWorld();
+
+	auto id(args[0].string);
+	int time = args[3].integerValue();
+	unsigned short style = args[4].integerValue();
+
+	std::string str = ScreenText::format(world->data->texts.text(id),
+	                                     formatValue(args[1]),
+	                                     formatValue(args[2]));
+
+	auto textEntry = ScreenTextEntry::makeBig(id, str, style, time);
+	world->state->text.addText<ScreenTextType::Big>(textEntry);
+}
+
 void game_stop_chase_scene(const ScriptArguments& args)
 {
 	// Clean up remaining vehicles
@@ -1152,6 +1192,7 @@ GameModule::GameModule()
 	
 	bindFunction(0x00BA, game_print_big, 3, "Print big" );
 	bindFunction(0x00BC, game_print_now, 3, "Print Message Now" );
+	bindFunction(0x00BD, game_print_soon, 3, "Print Message Soon" );
 	
 	bindFunction(0x00BE, game_clear_prints, 0, "Clear Message Prints" );
 	bindFunction(0x00BF, game_get_time, 2, "Get Time of Day" );
@@ -1336,6 +1377,8 @@ GameModule::GameModule()
 	bindUnimplemented( 0x0353, game_refresh_character_model, 1, "Refresh Actor Model" );
 	bindFunction( 0x0354, game_start_chase_scene, 1, "Start Chase Scene" );
 	bindFunction( 0x0355, game_stop_chase_scene, 0, "Stop Chase Scene" );
+
+	bindFunction(0x036D, game_print_big_with_2_numbers, 5, "Print Big With 2 Numbers");
 
 	bindUnimplemented( 0x0373, game_camera_behind_player, 0, "Set Camera Behind Player" );
 	bindUnimplemented( 0x0374, game_set_motion_blur, 1, "Set Motion Blur" );
