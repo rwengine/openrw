@@ -17,10 +17,11 @@ Without this data it will not be possible to run OpenRW.
 ![Poor driving skill](https://cloud.githubusercontent.com/assets/418211/16398932/40a03de2-3cc6-11e6-9e48-acc9b44a600a.png)
 ![Duplicate claude in cutscene](https://cloud.githubusercontent.com/assets/418211/16399129/aa019d52-3cc7-11e6-9a33-a9fcce0b972c.png)
 
-## Getting Started
+## Links
 
  * [Getting Started](https://github.com/rwengine/openrw/wiki/Getting-Started)
  * [FAQ](https://github.com/rwengine/openrw/wiki/FAQ)
+ * [Contributing](https://github.com/rwengine/openrw/wiki/Contributing)
 
 ## License
 
