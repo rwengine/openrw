@@ -10,6 +10,7 @@
 #include <objects/ObjectTypes.hpp>
 #include <engine/ScreenText.hpp>
 #include <data/VehicleGenerator.hpp>
+#include <engine/GameInputState.hpp>
 
 class GameWorld;
 class GameObject;
@@ -331,6 +332,11 @@ struct GameState
 	std::bitset<32> importExportPortland;
 	std::bitset<32> importExportShoreside;
 	std::bitset<32> importExportUnused;
+
+	/**
+	 * State of the game input
+	 */
+	GameInputState input;
 
 	/**
 	 * World to use for this state, this isn't saved, just used at runtime
