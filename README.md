@@ -21,6 +21,7 @@ Without this data it will not be possible to run OpenRW.
 
  * [Getting Started](https://github.com/rwengine/openrw/wiki/Getting-Started)
  * [FAQ](https://github.com/rwengine/openrw/wiki/FAQ)
+ * [Completable Missions](https://github.com/rwengine/openrw/issues/52)
  * [Contributing](https://github.com/rwengine/openrw/wiki/Contributing)
 
 ## License
