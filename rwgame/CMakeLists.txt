@@ -36,4 +36,4 @@ target_link_libraries(rwgame
 	${SDL2_LIBRARY}
 	)
 
-install(TARGETS rwgame RUNTIME DESTINATION bin)
+install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
