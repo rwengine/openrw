@@ -22,8 +22,6 @@ class IngameState : public State
     std::string save;
 	bool newgame;
 	ViewCamera _look;
-	/** Player input */
-	glm::vec3 _movement;
 	glm::vec3 cameraPosition;
 	/** Timer to hold user camera position */
 	float autolookTimer;

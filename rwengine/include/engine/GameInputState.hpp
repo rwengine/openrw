@@ -3,6 +3,8 @@
 
 struct GameInputState
 {
+	static constexpr float kButtonOnThreshold = 0.1f;
+
 	/// Inputs that can be controlled
 	/// @todo find any sensible values
 	enum Control {
@@ -55,6 +57,16 @@ struct GameInputState
 	 * For buttons, this will result in either 0 or 1.
 	 */
 	float currentLevels[_MaxControls] = { };
+
+	float operator[] (Control c) const
+	{
+		return currentLevels[c];
+	}
+
+	bool pressed(Control c) const
+	{
+		return currentLevels[c] > kButtonOnThreshold;
+	}
 };
 
 #endif

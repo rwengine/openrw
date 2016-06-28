@@ -283,21 +283,52 @@ void IngameState::tick(float dt)
 		// Calculate the yaw to look at the target.
 		float angleYaw = glm::atan(lookdir.y, lookdir.x);
 		angle = glm::quat( glm::vec3(0.f, 0.f, angleYaw) );
+		glm::vec3 movement;
 
-		// Update player with camera yaw
+		// Update player input
+		const auto& input = getWorld()->state->input;
+		movement.x = input[GameInputState::GoForward] - input[GameInputState::GoBackwards];
+		movement.y = input[GameInputState::GoLeft] - input[GameInputState::GoRight];
+
 		if( player->isInputEnabled() )
 		{
+			player->setRunning(!input.pressed(GameInputState::Walk));
+			/// @todo find the correct behaviour for entering & exiting
+			if (input.pressed(GameInputState::EnterExitVehicle)) {
+				/// @todo move me
+				if (player->getCharacter()->getCurrentVehicle()) {
+					player->exitVehicle();
+				}
+				else if (!player->isCurrentActivity(
+				             Activities::EnterVehicle::ActivityName)) {
+					player->enterNearestVehicle();
+				}
+			}
+			else if (glm::length2(movement) > 0.001f) {
+				if (player->isCurrentActivity(
+				        Activities::EnterVehicle::ActivityName)) {
+					// Give up entering a vehicle if we're alreadying doing so
+					player->skipActivity();
+				}
+			}
+
 			if (player->getCharacter()->getCurrentVehicle())
 			{
-				player->setMoveDirection(_movement);
+				auto vehicle = player->getCharacter()->getCurrentVehicle();
+				vehicle->setHandbraking(input.pressed(GameInputState::Handbrake));
+				player->setMoveDirection(movement);
 			}
 			else
 			{
-				float length = glm::length(_movement);
+				if (input.pressed(GameInputState::Jump)) {
+					player->jump();
+				}
+
+				float length = glm::length(movement);
 				float movementAngle = angleYaw - M_PI/2.f;
 				if (length > 0.1f)
 				{
-					glm::vec3 direction = glm::normalize(_movement);
+					glm::vec3 direction = glm::normalize(movement);
 					movementAngle += atan2(direction.y, direction.x);
 					player->setMoveDirection(glm::vec3(1.f, 0.f, 0.f));
 				}
@@ -370,32 +401,6 @@ void IngameState::handleEvent(const SDL_Event& event)
 		case SDLK_c:
 			camMode = CameraMode((camMode+(CameraMode)1)%CAMERA_MAX);
 			break;
-		case SDLK_w:
-			_movement.x = 1.f;
-			break;
-		case SDLK_s:
-			_movement.x =-1.f;
-			break;
-		case SDLK_a:
-			_movement.y = 1.f;
-			break;
-		case SDLK_d:
-			_movement.y =-1.f;
-			break;
-		default: break;
-		}
-		break;
-
-	case SDL_KEYUP:
-		switch(event.key.keysym.sym) {
-		case SDLK_w:
-		case SDLK_s:
-			_movement.x = 0.f;
-			break;
-		case SDLK_a:
-		case SDLK_d:
-			_movement.y = 0.f;
-			break;
 		default: break;
 		}
 		break;
@@ -415,48 +420,6 @@ void IngameState::handlePlayerInput(const SDL_Event& event)
 {
 	auto player = game->getPlayer();
 	switch(event.type) {
-	case SDL_KEYDOWN:
-		switch(event.key.keysym.sym) {
-		case SDLK_SPACE:
-			if( player->getCharacter()->getCurrentVehicle() ) {
-				player->getCharacter()->getCurrentVehicle()->setHandbraking(true);
-			}
-			else
-			{
-				player->jump();
-			}
-			break;
-		case SDLK_f:
-			if( player->getCharacter()->getCurrentVehicle()) {
-				player->exitVehicle();
-			}
-			else
-				if (player->isCurrentActivity(
-							Activities::EnterVehicle::ActivityName))
-			{
-				// Give up entering a vehicle if we're alreadying doing so
-				player->skipActivity();
-			}
-			else {
-				player->enterNearestVehicle();
-			}
-			break;
-		case SDLK_LSHIFT:
-			player->setRunning(true);
-			break;
-		default:
-			break;
-		}
-		break;
-
-	case SDL_KEYUP:
-		switch (event.key.keysym.sym) {
-		case SDLK_LSHIFT:
-			player->setRunning(false);
-			break;
-		default: break;
-		}
-		break;
 
 	case SDL_MOUSEBUTTONDOWN:
 		switch(event.button.button) {
