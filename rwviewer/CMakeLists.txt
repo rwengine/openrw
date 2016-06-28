@@ -34,4 +34,4 @@ target_link_libraries(rwviewer
 	${BULLET_LIBRARIES})
 qt5_use_modules(rwviewer Widgets OpenGL)
 
-install(TARGETS rwviewer RUNTIME DESTINATION ${BIN_DIR}")
+install(TARGETS rwviewer RUNTIME DESTINATION "${BIN_DIR}")
