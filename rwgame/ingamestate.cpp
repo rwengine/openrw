@@ -401,6 +401,8 @@ void IngameState::handleEvent(const SDL_Event& event)
 		break;
 	default: break;
 	}
+
+	updateInputState(event);
 	
 	if( player && player->isInputEnabled() )
 	{
@@ -492,6 +494,23 @@ void IngameState::handlePlayerInput(const SDL_Event& event)
 		break;
 	default:
 		break;
+	}
+}
+
+void IngameState::updateInputState(const SDL_Event& event)
+{
+	switch (event.type) {
+	case SDL_KEYDOWN:
+	case SDL_KEYUP: {
+		auto sym = event.key.keysym.sym;
+		auto level = event.type == SDL_KEYDOWN ? 1.f : 0.f;
+		auto& levels = getWorld()->state->input.currentLevels;
+
+		auto range = kDefaultControls.equal_range(sym);
+		for (auto it = range.first; it != range.second; ++it) {
+			levels[it->second] = level;
+		}
+	} break;
 	}
 }
 
