@@ -106,7 +106,7 @@ void dumpOpcodes(SCMFile* scm, SCMOpcodes* codes, unsigned int offset, unsigned 
 
 void disassemble(const std::string& scmname)
 {
-	std::ifstream scmfile(scmname.c_str());
+	std::ifstream scmfile(scmname.c_str(), std::ios_base::binary);
 
 	if( !scmfile.is_open() ) {
 		std::cerr << "Failed to open " << scmname << std::endl;

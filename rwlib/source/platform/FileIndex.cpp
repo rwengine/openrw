@@ -155,7 +155,7 @@ FileHandle FileIndex::openFile(const std::string& filename)
 	}
 	else
 	{
-		std::ifstream dfile(fsName.c_str());
+		std::ifstream dfile(fsName.c_str(), std::ios_base::binary);
 		if ( ! dfile.is_open()) {
 			throw std::runtime_error("Unable to open file: " + fsName);
 		}

@@ -341,22 +341,12 @@ void GameData::loadHandling(const std::string& path)
 	l.loadHandling(path, vehicleInfo);
 }
 
-SCMFile *GameData::loadSCM(const std::string &path)
+SCMFile *GameData::loadSCM(const std::string &name)
 {
-	std::ifstream f(datpath + "/" + path);
-
-	if(! f.is_open() ) return nullptr;
-
-	f.seekg(0, std::ios_base::end);
-	unsigned int size = f.tellg();
-	f.seekg(0);
-
-	char* buff = new char[size];
-	f.read(buff, size);
+	auto scm_h = openFile(name);
 	SCMFile* scm = new SCMFile;
-	scm->loadFile(buff, size);
-	delete[] buff;
-
+	scm->loadFile(scm_h->data, scm_h->length);
+	scm_h.reset();
 	return scm;
 }
 
@@ -371,7 +361,7 @@ void GameData::loadGXT(const std::string &name)
 
 void GameData::loadWaterpro(const std::string& path)
 {
-	std::ifstream ifstr(path.c_str());
+	std::ifstream ifstr(path.c_str(), std::ios_base::binary);
 	
 	if(ifstr.is_open()) {
 		uint32_t numlevels;

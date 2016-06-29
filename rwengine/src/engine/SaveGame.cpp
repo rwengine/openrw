@@ -510,7 +510,7 @@ template<class T> bool readBlock(std::FILE* str, T& out) {
 
 bool SaveGame::loadGame(GameState& state, const std::string& file)
 {
-	std::FILE* loadFile = std::fopen(file.c_str(), "r");
+	std::FILE* loadFile = std::fopen(file.c_str(), "rb");
 	if (loadFile == nullptr) {
 		std::cerr << "Failed to open save file" << std::endl;
 		return false;
@@ -1202,7 +1202,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 #include <dirent.h>
 bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 {
-	std::FILE* loadFile = std::fopen(file.c_str(), "r");
+	std::FILE* loadFile = std::fopen(file.c_str(), "rb");
 
 	SaveGameInfo info;
 	info.savePath = file;

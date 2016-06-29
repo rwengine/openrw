@@ -107,7 +107,6 @@ RWGame::RWGame(int argc, char* argv[])
 	data->loadIMG("/models/gta3");
 	//engine->data.loadIMG("/models/txd");
 	data->loadIMG("/anim/cuts");
-	data->loadTXD("/models/hud.txd");
 	
 	data->load();
 	
@@ -215,7 +214,7 @@ void RWGame::loadGame(const std::string& savename)
 
 	newGame();
 
-	startScript("data/main.scm");
+	startScript("main.scm");
 
 	if(! SaveGame::loadGame(*state, savename) )
 	{
