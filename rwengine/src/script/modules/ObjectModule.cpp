@@ -989,9 +989,12 @@ void game_character_exit_vehicle(const ScriptArguments& args)
 	auto character = static_cast<CharacterObject*>(args.getObject<CharacterObject>(0));
 	auto vehicle = static_cast<VehicleObject*>(args.getObject<VehicleObject>(1));
 	auto cvehcile = character->getCurrentVehicle();
-	
+
 	if( cvehcile && cvehcile == vehicle )
 	{
+		// Cancel whatever we're currently trying to do.
+		character->controller->skipActivity();
+		// Now leave the vehicle immediately
 		character->controller->setNextActivity(new Activities::ExitVehicle());
 	}
 }
