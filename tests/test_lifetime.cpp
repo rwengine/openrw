@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <objects/InstanceObject.hpp>
+#include <render/ViewCamera.hpp>
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(LifetimeTests)
@@ -19,7 +20,9 @@ BOOST_AUTO_TEST_CASE(test_cleanup)
 		BOOST_CHECK( search != objects.end() );
 	}
 	
-	Global::get().e->cleanupTraffic(glm::vec3(0.f, 0.f, 0.f));
+	ViewCamera testCamera;
+	testCamera.position = glm::vec3(0.f, 0.f, 0.f);
+	Global::get().e->cleanupTraffic(testCamera);
 	
 	{
 		auto search = objects.find(id);

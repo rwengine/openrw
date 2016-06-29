@@ -24,6 +24,12 @@
 #include <data/CutsceneData.hpp>
 #include <loaders/LoaderCutsceneDAT.hpp>
 
+#include <render/ViewCamera.hpp>
+
+// Behaviour Tuning
+constexpr float kMaxTrafficSpawnRadius = 100.f;
+constexpr float kMaxTrafficCleanupRadius = kMaxTrafficSpawnRadius * 1.25f;
+
 class WorldCollisionDispatcher : public btCollisionDispatcher
 {
 public:
@@ -219,27 +225,38 @@ InstanceObject *GameWorld::createInstance(const uint16_t id, const glm::vec3& po
 	return nullptr;
 }
 
-void GameWorld::createTraffic(const glm::vec3& near)
+void GameWorld::createTraffic(const ViewCamera& viewCamera)
 {
 	TrafficDirector director(&aigraph, this);
 	
-	director.populateNearby( near, 100, 5 );
+	director.populateNearby( viewCamera, kMaxTrafficSpawnRadius, 5 );
 }
 
-void GameWorld::cleanupTraffic(const glm::vec3& focus)
+void GameWorld::cleanupTraffic(const ViewCamera& focus)
 {
-	for ( auto& p : pedestrianPool.objects )
-	{
-		if ( p.second->getLifetime() != GameObject::TrafficLifetime )
-		{
+	for (auto& p : pedestrianPool.objects) {
+		if (p.second->getLifetime() != GameObject::TrafficLifetime) {
 			continue;
 		}
 		
-		if ( glm::distance( focus, p.second->getPosition() ) >= 100.f )
-		{
-			destroyObjectQueued( p.second );
+		if (glm::distance( focus.position, p.second->getPosition() ) >= kMaxTrafficCleanupRadius) {
+			if (! focus.frustum.intersects(p.second->getPosition(), 1.f)) {
+				destroyObjectQueued( p.second );
+			}
 		}
 	}
+	for ( auto& p : vehiclePool.objects ) {
+		if (p.second->getLifetime() != GameObject::TrafficLifetime) {
+			continue;
+		}
+
+		if (glm::distance( focus.position, p.second->getPosition() ) >= kMaxTrafficCleanupRadius) {
+			if (! focus.frustum.intersects(p.second->getPosition(), 1.f)) {
+				destroyObjectQueued( p.second );
+			}
+		}
+	}
+
 	destroyQueuedObjects();
 }
 
@@ -975,5 +992,62 @@ void GameWorld::setPaused(bool pause)
 bool GameWorld::isPaused() const
 {
 	return paused;
+}
+
+VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen)
+{
+	constexpr float kMinClearRadius = 10.f;
+
+	if (gen.remainingSpawns <= 0) {
+		return nullptr;
+	}
+
+	/// @todo take into account maxDelay as well
+	if (gen.lastSpawnTime + gen.minDelay > int(state->basic.timeMS)) {
+		return nullptr;
+	}
+
+	/// @todo verify this logic
+	auto position = gen.position;
+	if (position.z < -90.f) {
+		position = getGroundAtPosition(position);
+	}
+
+	// Ensure there's no existing vehicles near our spawn point
+	for (auto& v : vehiclePool.objects)
+	{
+		if (glm::distance2(position, v.second->getPosition())
+				< kMinClearRadius * kMinClearRadius) {
+			return nullptr;
+		}
+	}
+
+	int id = gen.vehicleID;
+	if (id == -1) {
+		// Random ID found by dice roll
+		id = 134;
+		/// @todo use zone information to decide vehicle id
+	}
+
+	auto vehicle = createVehicle(
+				id,
+				position);
+	vehicle->setHeading(gen.heading);
+	vehicle->setLifetime(GameObject::TrafficLifetime);
+
+	/// @todo apply vehicle colours
+	/// @todo apply locked & alarm thresholds
+
+	// According to http://www.gtamodding.com/wiki/014C the spawn limit
+	// doesn't work.
+#if 0
+	if (gen.remainingSpawns < 101) {
+		gen.remainingSpawns --;
+	}
+#endif
+
+	gen.lastSpawnTime = state->basic.timeMS;
+
+	return vehicle;
 }
 

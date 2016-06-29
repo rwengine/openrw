@@ -462,13 +462,13 @@ void RWGame::tick(float dt)
 				throw;
 			}
 		}
-		
-		if ( state->playerObject )
-		{
+
+		/// @todo this doesn't make sense as the condition
+		if ( state->playerObject ) {
+			nextCam.frustum.update(nextCam.frustum.projection() * nextCam.getView());
 			// Use the current camera position to spawn pedestrians.
-			auto p = nextCam.position;
-			world->cleanupTraffic(p);
-			world->createTraffic(p);
+			world->cleanupTraffic(nextCam);
+			world->createTraffic(nextCam);
 		}
 	}
 	
@@ -719,6 +719,20 @@ void RWGame::renderDebugPaths(float time)
 		debug->drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
 		debug->drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
 		debug->drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
+	}
+
+	// Draw vehicle generators
+	for(size_t v = 0; v < state->vehicleGenerators.size(); ++v) {
+		auto& generator = state->vehicleGenerators[v];
+		btVector3 color(1.f, 0.f, 0.f);
+		btVector3 position(generator.position.x,generator.position.y,generator.position.z);
+		float heading = glm::radians(generator.heading);
+		auto back  = btVector3(0.f,-1.f, 0.f).rotate(btVector3(0.f, 0.f, 1.f), heading);
+		auto right = btVector3(0.15f, -0.15f, 0.f).rotate(btVector3(0.f, 0.f, 1.f), heading);
+		auto left  = btVector3(-0.15f,-0.15f, 0.f).rotate(btVector3(0.f, 0.f, 1.f), heading);
+		debug->drawLine(position, position+back, color);
+		debug->drawLine(position, position+right, color);
+		debug->drawLine(position, position+left, color);
 	}
 
 	debug->flush(renderer);

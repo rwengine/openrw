@@ -1189,6 +1189,24 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 		vehicle->setSecondaryColour(car.colorBG);
 	}
 
+	for (unsigned g = 0; g < carGenerators.size(); ++g) {
+		auto& gen = carGenerators[g];
+		state.vehicleGenerators.emplace_back(
+		    gen.position,
+		    gen.angle,
+		    gen.modelId,
+		    gen.colourFG,
+		    gen.colourBG,
+		    gen.force,
+		    gen.alarmChance,
+		    gen.lockedChance,
+		    gen.minDelay,
+		    gen.maxDelay,
+		    gen.timestamp,
+		    101  /// @todo determine where the remainingSpawns should be
+		);
+	}
+
 	// Load import / export lists
 	state.importExportPortland = garageData.bfImportExportPortland;
 	state.importExportShoreside = garageData.bfImportExportShoreside;
