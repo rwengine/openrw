@@ -60,6 +60,14 @@ else()
 	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=0)
 endif()
 
+if(NOT DEFINED BIN_DIR)
+        set(BIN_DIR "bin" CACHE PATH "BIN_DIR")
+endif()
+
+if(NOT DEFINED DOC_DIR)
+        set(DOC_DIR "share/doc/openrw" CACHE PATH "DOC_DIR")
+endif()
+
 # Find dependancies
 IF(APPLE)
 	set(OPENRW_PLATFORM_LIBS iconv)
@@ -106,7 +114,7 @@ ENDIF()
 # Copy License file to install directory
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
 	install(FILES COPYING
-			DESTINATION share/openrw
+			DESTINATION "${DOC_DIR}"
 			)
 endif()
 # And copy to build directory for CI
