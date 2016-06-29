@@ -289,6 +289,8 @@ void IngameState::tick(float dt)
 		const auto& input = getWorld()->state->input;
 		movement.x = input[GameInputState::GoForward] - input[GameInputState::GoBackwards];
 		movement.y = input[GameInputState::GoLeft] - input[GameInputState::GoRight];
+		/// @todo replace with correct sprint behaviour
+		float speed = input.pressed(GameInputState::Sprint) ? 2.f : 1.f;
 
 		if( player->isInputEnabled() )
 		{
@@ -330,7 +332,7 @@ void IngameState::tick(float dt)
 				{
 					glm::vec3 direction = glm::normalize(movement);
 					movementAngle += atan2(direction.y, direction.x);
-					player->setMoveDirection(glm::vec3(1.f, 0.f, 0.f));
+					player->setMoveDirection(glm::vec3(speed, 0.f, 0.f));
 				}
 				else
 				{

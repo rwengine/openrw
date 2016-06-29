@@ -33,6 +33,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos, const 
 	animations.walk = engine->data->animations["walk_player"];
 	animations.walk_start = engine->data->animations["walk_start"];
 	animations.run  = engine->data->animations["run_player"];
+	animations.sprint  = engine->data->animations["sprint_civi"];
 
 	animations.walk_right = engine->data->animations["walk_player_right"];
 	animations.walk_right_start = engine->data->animations["walk_start_right"];
@@ -178,8 +179,12 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt)
 	else if (movementLength > movementEpsilon)
 	{
 		if (running && !isActionHappening) {
-			// No slow running
-			movementAnimation = animations.run;
+			if (movementLength > 1.f) {
+				movementAnimation = animations.sprint;
+			}
+			else {
+				movementAnimation = animations.run;
+			}
 			animationSpeed = 1.f;
 		}
 		else {
