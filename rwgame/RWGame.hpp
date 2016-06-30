@@ -41,6 +41,7 @@ class RWGame
 	bool showDebugStats;
 	bool showDebugPaths;
 	bool showDebugPhysics;
+	bool showDebugSuspension;
 	int lastDraws; /// Number of draws issued for the last frame.
 
 	float accum;
@@ -139,6 +140,7 @@ private:
 	void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
 	void renderDebugPaths(float time);
 	void renderProfile();
+	void renderSuspension();
 
 	void globalKeyEvent(const SDL_Event& event);
 };

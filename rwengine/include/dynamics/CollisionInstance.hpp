@@ -11,16 +11,17 @@ struct DynamicObjectData;
 struct VehicleHandlingInfo;
 
 /**
- * @brief Utility object for managing bullet objects.
- *
- * Stores handles to a btRigidBody and a set of collision shapes
+ * @brief CollisionInstance stores bullet body information
  */
 class CollisionInstance
 {
 public:
 
 	CollisionInstance()
-		: body(nullptr), vertArray(nullptr), motionState(nullptr), collisionHeight(0.f)
+		: m_body(nullptr)
+		, m_vertArray(nullptr)
+		, m_motionState(nullptr)
+		, m_collisionHeight(0.f)
 	{ }
 
 	~CollisionInstance();
@@ -30,12 +31,19 @@ public:
 						   DynamicObjectData* dynamics = nullptr,
 						   VehicleHandlingInfo* handling = nullptr);
 
-	btRigidBody* body;
-	std::vector<btCollisionShape*> shapes;
-	btTriangleIndexVertexArray* vertArray;
-	btMotionState* motionState;
+	btRigidBody *getBulletBody() const { return m_body; }
 
-	float collisionHeight;
+	float getBoundingHeight() const { return m_collisionHeight; }
+
+	void changeMass(float newMass);
+
+private:
+	btRigidBody* m_body;
+	std::vector<btCollisionShape*> m_shapes;
+	btTriangleIndexVertexArray* m_vertArray;
+	btMotionState* m_motionState;
+
+	float m_collisionHeight;
 
 };
 
