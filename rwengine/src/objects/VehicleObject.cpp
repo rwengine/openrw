@@ -574,8 +574,8 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg)
 										 , dpoint);
 				if( td < geom->geometryBounds.radius * 1.2f ) {
 					setPartState(p, DAM);
-					setPartLocked(p, false);
 				}
+				/// @todo determine when doors etc. should un-latch
 			}
 		}
 	}
