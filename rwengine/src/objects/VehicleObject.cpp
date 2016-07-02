@@ -752,6 +752,11 @@ void VehicleObject::setSecondaryColour(uint8_t color)
 	colourSecondary = engine->data->vehicleColours[color];
 }
 
+bool VehicleObject::isStopped() const
+{
+	return fabsf(physVehicle->getCurrentSpeedKmHour()) < 0.75f;
+}
+
 void *VehicleRaycaster::castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycaster::btVehicleRaycasterResult &result)
 {
 	ClosestNotMeRayResultCallback rayCallback( _vehicle->physBody, from, to );

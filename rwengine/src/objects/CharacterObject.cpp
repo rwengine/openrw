@@ -467,8 +467,11 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 
 bool CharacterObject::isStopped() const
 {
-	RW_UNIMPLEMENTED("Checking if character is stopped");
-	return true;
+	if (currentVehicle != nullptr) {
+		return currentVehicle->isStopped();
+	}
+
+	return controller->getCurrentActivity() == nullptr;
 }
 
 VehicleObject *CharacterObject::getCurrentVehicle() const

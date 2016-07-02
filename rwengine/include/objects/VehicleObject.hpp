@@ -132,6 +132,12 @@ public:
 	void setPrimaryColour(uint8_t color);
 	void setSecondaryColour(uint8_t color);
 
+	/**
+	* @brief isStopped
+	* @return True if the vehicle isn't moving
+	*/
+	bool isStopped() const;
+
 private:
 
 	void registerPart(ModelFrame* mf);
