@@ -11,7 +11,7 @@ GameWindow::GameWindow() :
 }
 
 
-void GameWindow::create(size_t w, size_t h, bool fullscreen)
+void GameWindow::create(const std::string& title, size_t w, size_t h, bool fullscreen)
 {
 	uint32_t style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 	if (fullscreen)
@@ -24,7 +24,7 @@ void GameWindow::create(size_t w, size_t h, bool fullscreen)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-	window = SDL_CreateWindow("RWGame", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, style);
+	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, style);
 	glcontext = SDL_GL_CreateContext(window);
 }
 

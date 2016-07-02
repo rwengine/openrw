@@ -16,7 +16,7 @@ class GameWindow
 public:
 	GameWindow();
 
-	void create(size_t w, size_t h, bool fullscreen);
+	void create(const std::string& title, size_t w, size_t h, bool fullscreen);
 	void close();
 
 	void showCursor();

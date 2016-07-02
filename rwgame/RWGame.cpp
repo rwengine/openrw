@@ -26,6 +26,12 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+#include "GitSHA1.h"
+
+// Use first 8 chars of git hash as the build string
+const std::string kBuildStr(kGitSHA1Hash, 8);
+const std::string kWindowTitle = "RWGame";
+
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
 DebugDraw* debug;
@@ -92,13 +98,14 @@ RWGame::RWGame(int argc, char* argv[])
 		throw std::runtime_error("Failed to initialize SDL2!");
 
 	window = new GameWindow();
-	window->create(w, h, fullscreen);
+	window->create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
 	window->hideCursor();
 
 	work = new WorkContext();
 
 	log.addReciever(&logPrinter);
 	log.info("Game", "Game directory: " + config.getGameDataPath());
+	log.info("Game", "Build: " + kBuildStr);
 	
 	if(! GameData::isValidGameDirectory(config.getGameDataPath()) )
 	{

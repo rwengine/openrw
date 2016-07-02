@@ -1,4 +1,9 @@
-add_executable(rwgame
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
+
+set(RWGAME_SOURCES
+	GitSHA1.h
+	"${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp"
+
 	main.cpp
 
 	RWGame.cpp
@@ -20,6 +25,9 @@ add_executable(rwgame
 	debug/HttpServer.cpp
 	debug/TcpSocket.cpp
 )
+
+add_executable(rwgame
+	${RWGAME_SOURCES})
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}

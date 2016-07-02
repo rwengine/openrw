@@ -100,6 +100,10 @@ include_directories(
 # External-internal dependencies
 add_subdirectory(cmake/external)
 
+# Include git hash in source
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
 #
 # Components
 #
