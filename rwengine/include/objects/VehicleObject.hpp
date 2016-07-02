@@ -145,7 +145,7 @@ public:
 private:
 
 	void registerPart(ModelFrame* mf);
-	void createObjectHinge(btTransform &local, Part* part);
+	void createObjectHinge(Part* part);
 	void destroyObjectHinge(Part* part);
 };
 

@@ -47,6 +47,41 @@ public:
 	}
 };
 
+class VehiclePartMotionState : public btMotionState
+{
+public:
+	VehiclePartMotionState(VehicleObject *object, VehicleObject::Part *part)
+		: m_object(object)
+		, m_part(part)
+	{ }
+
+	virtual void getWorldTransform(btTransform& tform) const
+	{
+		const auto& p = m_part->dummy->getDefaultTranslation();
+		const auto& o = glm::toQuat(m_part->dummy->getDefaultRotation());
+		tform.setOrigin(btVector3(p.x, p.y, p.z));
+		tform.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
+		tform = m_object->collision->getBulletBody()->getWorldTransform() * tform;
+	}
+
+	virtual void setWorldTransform(const btTransform& tform)
+	{
+		auto inv = glm::inverse(m_object->getRotation());
+		const auto& rot = tform.getRotation();
+		auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
+
+		auto skeleton = m_object->skeleton;
+		auto& prev = skeleton->getData(m_part->dummy->getIndex()).a;
+		auto next = prev;
+		next.rotation = r2;
+		skeleton->setData(m_part->dummy->getIndex(), { next, prev, true } );
+	}
+
+private:
+	VehicleObject *m_object;
+	VehicleObject::Part *m_part;
+};
+
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec)
 	: GameObject(engine, pos, rot, model)
 	, steerAngle(0.f)
@@ -133,7 +168,7 @@ VehicleObject::~VehicleObject()
 	
 	for(auto& p : dynamicParts)
 	{
-		setPartLocked(&p.second, true);
+		destroyObjectHinge(&p.second);
 	}
 	
 	delete collision;
@@ -364,18 +399,6 @@ void VehicleObject::tickPhysics(float dt)
 		// Update hinge object rotations
 		for(auto& it : dynamicParts) {
 			if(it.second.body == nullptr) continue;
-			auto inv = glm::inverse(getRotation());
-			auto rot = it.second.body->getWorldTransform().getRotation();
-			//auto pos = it.second.body->getWorldTransform().getOrigin();
-			auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
-			//auto p2 = inv * (glm::vec3(pos.x(), pos.y(), pos.z()) - getPosition());
-			
-			auto& prev = skeleton->getData(it.second.dummy->getIndex()).a;
-			auto next = prev;
-			next.rotation = r2;
-			//next.translation = p2;
-			skeleton->setData(it.second.dummy->getIndex(), { next, prev, true } );
-			
 			if( it.second.moveToAngle )
 			{
 				auto angledelta = it.second.targetAngle - it.second.constraint->getHingeAngle();
@@ -598,7 +621,7 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked)
 {
 	if( part->body == nullptr && locked == false )
 	{
-		createObjectHinge(collision->getBulletBody()->getWorldTransform(), part);
+		createObjectHinge(part);
 	}
 	else if( part->body != nullptr && locked == true )
 	{
@@ -683,7 +706,7 @@ void VehicleObject::registerPart(ModelFrame* mf)
 		});
 }
 
-void VehicleObject::createObjectHinge(btTransform& local, Part *part)
+void VehicleObject::createObjectHinge(Part *part)
 {
 	float sign = glm::sign(part->dummy->getDefaultTranslation().x);
 	btVector3 hingeAxis,
@@ -738,14 +761,13 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 		return;
 	}
 
-	btDefaultMotionState* dms = new btDefaultMotionState();
-	btTransform tr = btTransform::getIdentity();
+	auto ms = new VehiclePartMotionState(this, part);
 
-	auto p = part->dummy->getDefaultTranslation();
-	auto o = glm::toQuat(part->dummy->getDefaultRotation());
+	btTransform tr = btTransform::getIdentity();
+	const auto& p = part->dummy->getDefaultTranslation();
+	const auto& o = glm::toQuat(part->dummy->getDefaultRotation());
 	tr.setOrigin(btVector3(p.x, p.y, p.z));
 	tr.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
-	dms->setWorldTransform(local * tr);
 
 	btCollisionShape* cs = new btBoxShape( boxSize );
 	btTransform t; t.setIdentity();
@@ -754,7 +776,7 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 	btVector3 inertia;
 	cs->calculateLocalInertia(10.f, inertia);
 
-	btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, dms, cs, inertia);
+	btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, ms, cs, inertia);
 	btRigidBody* subObject = new btRigidBody(rginfo);
 	subObject->setUserPointer(this);
 
@@ -765,29 +787,32 @@ void VehicleObject::createObjectHinge(btTransform& local, Part *part)
 				hingeAxis, hingeAxis);
 	hinge->setLimit(hingeMin, hingeMax);
 	hinge->setBreakingImpulseThreshold(250.f);
-	
-	engine->dynamicsWorld->addRigidBody(subObject);
-	engine->dynamicsWorld->addConstraint(hinge, true);
-	
+
 	part->body = subObject;
 	part->constraint = hinge;
+
+	engine->dynamicsWorld->addRigidBody(part->body);
+	engine->dynamicsWorld->addConstraint(part->constraint, true);
 }
 
 void VehicleObject::destroyObjectHinge(Part* part)
 {
-	if( part->body != nullptr ) {
+	if (part->constraint != nullptr) {
 		engine->dynamicsWorld->removeConstraint(part->constraint);
-		engine->dynamicsWorld->removeRigidBody(part->body);
-
-		delete part->body;
 		delete part->constraint;
-		
-		part->body = nullptr;
-		part->constraint = nullptr;
-		
-		// Reset target.
-		part->moveToAngle = false;
 	}
+
+	if (part->body != nullptr ) {
+		engine->dynamicsWorld->removeCollisionObject(part->body);
+		delete part->body->getMotionState();
+		delete part->body;
+	}
+
+	part->body = nullptr;
+	part->constraint = nullptr;
+
+	// Reset target.
+	part->moveToAngle = false;
 }
 
 void VehicleObject::setPrimaryColour(uint8_t color)
