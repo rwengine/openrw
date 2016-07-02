@@ -1,10 +1,10 @@
 #include "RWGame.hpp"
 #include "State.hpp"
-#include "loadingstate.hpp"
+#include "states/LoadingState.hpp"
+#include "states/IngameState.hpp"
+#include "states/MenuState.hpp"
+#include "states/BenchmarkState.hpp"
 #include "DrawUI.hpp"
-#include "ingamestate.hpp"
-#include "menustate.hpp"
-#include "benchmarkstate.hpp"
 
 #include <core/Profiler.hpp>
 

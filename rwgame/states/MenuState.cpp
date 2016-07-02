@@ -1,6 +1,6 @@
-#include "menustate.hpp"
+#include "MenuState.hpp"
 #include "game.hpp"
-#include "ingamestate.hpp"
+#include "IngameState.hpp"
 
 #include "RWGame.hpp"
 #include <engine/SaveGame.hpp>

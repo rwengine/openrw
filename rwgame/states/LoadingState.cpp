@@ -1,4 +1,4 @@
-#include "loadingstate.hpp"
+#include "LoadingState.hpp"
 #include "RWGame.hpp"
 #include <render/OpenGLRenderer.hpp>
 

@@ -1,4 +1,4 @@
-#include "pausestate.hpp"
+#include "PauseState.hpp"
 #include "RWGame.hpp"
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>

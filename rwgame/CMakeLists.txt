@@ -13,12 +13,18 @@ set(RWGAME_SOURCES
 
 	State.cpp
 
-	loadingstate.cpp
-	ingamestate.cpp
-	pausestate.cpp
-	menustate.cpp
-	debugstate.cpp
-	benchmarkstate.cpp
+	states/LoadingState.hpp
+	states/LoadingState.cpp
+	states/IngameState.hpp
+	states/IngameState.cpp
+	states/PauseState.hpp
+	states/PauseState.cpp
+	states/MenuState.hpp
+	states/MenuState.cpp
+	states/DebugState.hpp
+	states/DebugState.cpp
+	states/BenchmarkState.hpp
+	states/BenchmarkState.cpp
 	
 	DrawUI.cpp
 )
@@ -31,6 +37,7 @@ include_directories(SYSTEM
 	${OPENAL_INCLUDE_DIR}
 	)
 include_directories(
+	"${CMAKE_SOURCE_DIR}/rwgame"
 	"${CMAKE_SOURCE_DIR}/rwengine/include"
 	)
 
