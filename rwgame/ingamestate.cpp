@@ -176,6 +176,7 @@ void IngameState::tick(float dt)
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 
 	auto player = game->getPlayer();
+	const auto& input = getWorld()->state->input;
 	if( player && player->isInputEnabled() )
 	{
 		float viewDistance = 4.f;
@@ -255,12 +256,29 @@ void IngameState::tick(float dt)
 		// Non-topdown camera can orbit
 		if( camMode != IngameState::CAMERA_TOPDOWN )
 		{
-			// Determine the "ideal" camera position for the current view angles
-			auto yaw = glm::angleAxis(m_cameraAngles.x, glm::vec3(0.f, 0.f,-1.f));
-			auto pitch = glm::angleAxis(m_cameraAngles.y, glm::vec3(0.f, 1.f, 0.f));
-			auto cameraOffset =
-					yaw * pitch * glm::vec3(0.f, 0.f, viewDistance);
-			cameraPosition = targetPosition + cameraOffset;
+			bool lookleft = input.pressed(GameInputState::LookLeft);
+			bool lookright = input.pressed(GameInputState::LookRight);
+			if ((lookleft || lookright) && vehicle != nullptr) {
+				auto rotation = vehicle->getRotation();
+				if (! lookright) {
+					rotation *= glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.f, 0.f,-1.f));
+				}
+				else if (! lookleft) {
+					rotation *= glm::angleAxis(glm::half_pi<float>(), glm::vec3(0.f, 0.f, 1.f));
+				}
+				cameraPosition = targetPosition + rotation * glm::vec3(0.f, viewDistance, 0.f);
+			}
+			else {
+				// Determine the "ideal" camera position for the current view
+				// angles
+				auto yaw =
+				    glm::angleAxis(m_cameraAngles.x, glm::vec3(0.f, 0.f, -1.f));
+				auto pitch =
+				    glm::angleAxis(m_cameraAngles.y, glm::vec3(0.f, 1.f, 0.f));
+				auto cameraOffset =
+				    yaw * pitch * glm::vec3(0.f, 0.f, viewDistance);
+				cameraPosition = targetPosition + cameraOffset;
+			}
 		}
 		else
 		{
@@ -285,8 +303,6 @@ void IngameState::tick(float dt)
 		angle = glm::quat( glm::vec3(0.f, 0.f, angleYaw) );
 		glm::vec3 movement;
 
-		// Update player input
-		const auto& input = getWorld()->state->input;
 		movement.x = input[GameInputState::GoForward] - input[GameInputState::GoBackwards];
 		movement.y = input[GameInputState::GoLeft] - input[GameInputState::GoRight];
 		/// @todo replace with correct sprint behaviour
