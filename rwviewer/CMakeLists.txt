@@ -23,8 +23,6 @@ add_executable(rwviewer
 	AnimationListModel.cpp
 	AnimationListWidget.cpp)
 
-include_directories(
-	"${CMAKE_SOURCE_DIR}/rwengine/include")
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR})
 

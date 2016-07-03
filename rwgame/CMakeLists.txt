@@ -38,7 +38,6 @@ include_directories(SYSTEM
 	)
 include_directories(
 	"${CMAKE_SOURCE_DIR}/rwgame"
-	"${CMAKE_SOURCE_DIR}/rwengine/include"
 	)
 
 target_link_libraries(rwgame
