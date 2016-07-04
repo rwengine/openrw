@@ -1,3 +1,6 @@
+#include <script/ScriptTypes.hpp>
+#include <script/ScriptMachine.hpp>
+
 /**
 	@brief NOP
 
@@ -16,8 +19,8 @@ void opcode_0000(const ScriptArguments& args) {
 */
 void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 	RW_UNIMPLEMENTED_OPCODE(0x0001);
-	RW_UNUSED(time);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	thread->wakeCounter = time > 0 ? time : -1;
 }
 
 /**
@@ -28,8 +31,13 @@ void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 */
 void opcode_0002(const ScriptArguments& args, const ScriptLabel arg1) {
 	RW_UNIMPLEMENTED_OPCODE(0x0002);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	if (arg1 < 0) {
+		thread->programCounter = thread->baseAddress - arg1;
+	}
+	else {
+		thread->programCounter = arg1;
+	}
 }
 
 /**
@@ -961,9 +969,10 @@ bool opcode_0046(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg1 
 */
 void opcode_004c(const ScriptArguments& args, const ScriptLabel arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x004c);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	if (thread->conditionResult) {
+		thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+	}
 }
 
 /**
@@ -973,9 +982,10 @@ void opcode_004c(const ScriptArguments& args, const ScriptLabel arg1) {
 	@arg arg1 
 */
 void opcode_004d(const ScriptArguments& args, const ScriptLabel arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x004d);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	if (! thread->conditionResult) {
+		thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+	}
 }
 
 /**
@@ -984,8 +994,9 @@ void opcode_004d(const ScriptArguments& args, const ScriptLabel arg1) {
 	opcode 004e
 */
 void opcode_004e(const ScriptArguments& args) {
-	RW_UNIMPLEMENTED_OPCODE(0x004e);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	thread->wakeCounter = -1;
+	thread->finished = true;
 }
 
 /**
@@ -995,9 +1006,18 @@ void opcode_004e(const ScriptArguments& args) {
 	@arg arg1 
 	@arg arg2 
 */
-void opcode_004f(const ScriptArguments& args) {
-	RW_UNIMPLEMENTED_OPCODE(0x004f);
-	RW_UNUSED(args);
+void opcode_004f(const ScriptArguments& args, const ScriptLabel arg1) {
+	args.getVM()->startThread(arg1, false);
+	auto& threads = args.getVM()->getThreads();
+	SCMThread& thread = threads.back();
+	// Copy arguments to locals
+	/// @todo prevent overflow
+	/// @todo don't do pointer casting
+	for (auto i = 1u; i < args.getParameters().size(); ++i) {
+		*reinterpret_cast<ScriptInt*>(thread.locals.data() +
+		                        sizeof(ScriptInt) * (i - 1)) =
+		    args[i].integerValue();
+	}
 }
 
 /**
@@ -1007,9 +1027,9 @@ void opcode_004f(const ScriptArguments& args) {
 	@arg arg1 
 */
 void opcode_0050(const ScriptArguments& args, const ScriptLabel arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x0050);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	thread->calls[thread->stackDepth++] = thread->programCounter;
+	thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
 }
 
 /**
@@ -1018,8 +1038,8 @@ void opcode_0050(const ScriptArguments& args, const ScriptLabel arg1) {
 	opcode 0051
 */
 void opcode_0051(const ScriptArguments& args) {
-	RW_UNIMPLEMENTED_OPCODE(0x0051);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	thread->programCounter = thread->calls[--thread->stackDepth];
 }
 
 /**
@@ -2556,9 +2576,16 @@ void opcode_00c6(const ScriptArguments& args) {
 	@arg arg1 
 */
 void opcode_00d6(const ScriptArguments& args, const ScriptInt arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x00d6);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	if (arg1 <= 7) {
+		args.getThread()->conditionCount = arg1+1;
+		args.getThread()->conditionMask = 0xFF;
+		args.getThread()->conditionAND = true;
+	}
+	else {
+		args.getThread()->conditionCount = arg1-19;
+		args.getThread()->conditionMask = 0x00;
+		args.getThread()->conditionAND = false;
+	}
 }
 
 /**
@@ -2568,9 +2595,7 @@ void opcode_00d6(const ScriptArguments& args, const ScriptInt arg1) {
 	@arg arg1 
 */
 void opcode_00d7(const ScriptArguments& args, const ScriptLabel arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x00d7);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	args.getVM()->startThread(arg1, true);
 }
 
 /**
@@ -2579,8 +2604,19 @@ void opcode_00d7(const ScriptArguments& args, const ScriptLabel arg1) {
 	opcode 00d8
 */
 void opcode_00d8(const ScriptArguments& args) {
-	RW_UNIMPLEMENTED_OPCODE(0x00d8);
-	RW_UNUSED(args);
+	/// @todo verify behaviour
+	for( auto oid : args.getState()->missionObjects )
+	{
+		auto obj = args.getWorld()->vehiclePool.find(oid);
+		if( obj )
+		{
+			args.getWorld()->destroyObjectQueued(obj);
+		}
+	}
+	
+	args.getState()->missionObjects.clear();
+	
+	*args.getState()->scriptOnMissionFlag = 0;
 }
 
 /**
@@ -6363,10 +6399,8 @@ void opcode_01fa(const ScriptArguments& args, ScriptInt& arg1) {
 	@arg arg2 
 */
 void opcode_01fb(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x01fb);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg2 = std::sqrt(arg1);
 }
 
 /**
@@ -6623,16 +6657,13 @@ void opcode_0208(const ScriptArguments& args, const ScriptFloat arg1, const Scri
 	@brief %3d% = random_int_in_ranges %1d% %2d%
 
 	opcode 0209
-	@arg arg1 
-	@arg arg2 
+	@arg min
+	@arg max
 	@arg arg3 
 */
-void opcode_0209(const ScriptArguments& args, const ScriptInt arg1, const ScriptInt arg2, ScriptInt& arg3) {
-	RW_UNIMPLEMENTED_OPCODE(0x0209);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
-	RW_UNUSED(arg3);
+void opcode_0209(const ScriptArguments& args, const ScriptInt min, const ScriptInt max, ScriptInt& arg3) {
 	RW_UNUSED(args);
+	arg3 = std::rand() % (max - min) + min;
 }
 
 /**
@@ -8324,10 +8355,11 @@ bool opcode_02cc(const ScriptArguments& args, const ScriptObject object) {
 	@arg arg2 
 */
 void opcode_02cd(const ScriptArguments& args, const ScriptLabel arg1, const ScriptLabel arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x02cd);
-	RW_UNUSED(arg1);
 	RW_UNUSED(arg2);
-	RW_UNUSED(args);
+	/// @todo determine what arg2 is used for
+	auto label = arg1 < 0 ? args.getThread()->baseAddress - arg1 : arg1;
+	args.getThread()->calls[args.getThread()->stackDepth++] = args.getThread()->programCounter;
+	args.getThread()->programCounter = label;
 }
 
 /**
@@ -11316,9 +11348,8 @@ bool opcode_03a3(const ScriptArguments& args, const ScriptCharacter character) {
 	@arg name Set script name
 */
 void opcode_03a4(const ScriptArguments& args, const ScriptString name) {
-	RW_UNIMPLEMENTED_OPCODE(0x03a4);
-	RW_UNUSED(name);
-	RW_UNUSED(args);
+	auto thread = args.getThread();
+	strncpy(thread->name, name, 8);
 }
 
 /**
@@ -12662,9 +12693,8 @@ void opcode_0415(const ScriptArguments& args, const ScriptVehicle vehicle, const
 	@arg arg1 
 */
 void opcode_0417(const ScriptArguments& args, const ScriptInt arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x0417);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	auto offset = args.getVM()->getFile()->getMissionOffsets()[arg1];
+	args.getVM()->startThread(offset, true);
 }
 
 /**
