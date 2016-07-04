@@ -7,6 +7,8 @@
  */
 struct VehicleGenerator
 {
+	/// Script reference ID
+	size_t generatorID;
 	glm::vec3 position;
 	float heading;
 	/// ID of the vehicle to spawn, or -1 for random.
@@ -32,7 +34,8 @@ struct VehicleGenerator
 	*/
 	int remainingSpawns;
 
-	VehicleGenerator(const glm::vec3& position_,
+	VehicleGenerator(size_t id,
+					 const glm::vec3& position_,
 					 float heading_,
 					 int modelID_,
 					 int colourFG_,
@@ -44,7 +47,8 @@ struct VehicleGenerator
 					 int maxDelay_,
 					 int lastSpawnTime_,
 					 int remainingSpawns_)
-		: position(position_)
+		: generatorID(id)
+		, position(position_)
 		, heading(heading_)
 		, vehicleID(modelID_)
 		, colourFG(colourFG_)
@@ -57,6 +61,11 @@ struct VehicleGenerator
 		, lastSpawnTime(lastSpawnTime_)
 		, remainingSpawns(remainingSpawns_)
 	{}
+
+	int getScriptObjectID() const
+	{
+		return generatorID;
+	}
 };
 
 #endif

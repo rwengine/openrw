@@ -37,6 +37,11 @@ public:
     virtual glm::vec3 getTargetPosition();
 	
 	void jump();
+
+	/**
+	 * returns 0 (only one player supported)
+	 */
+	int getScriptObjectID() const { return 0; }
 };
 
 #endif
