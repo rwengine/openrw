@@ -877,6 +877,7 @@ void GameWorld::loadSpecialCharacter(const unsigned short index, const std::stri
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 	/// @todo a bit more smarter than this
 	state->specialCharacters[index] = lowerName;
+	data->loadDFF(lowerName + ".dff");
 }
 
 void GameWorld::loadSpecialModel(const unsigned short index, const std::string &name)

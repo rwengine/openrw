@@ -146,7 +146,7 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 	int minDelay = args[10].integer;
 	int maxDelay = args[11].integer;
 
-	VehicleGenerator vg{position,
+	VehicleGenerator vg{0,position,
 	                    heading,
 	                    vehicleID,
 	                    colourFG,
@@ -308,7 +308,7 @@ void game_clear_override(const ScriptArguments& args)
 
 void game_link_mission_flag(const ScriptArguments& args)
 {
-	args.getWorld()->state->scriptOnMissionFlag = (unsigned int*)args[0].globalInteger;
+	args.getWorld()->state->scriptOnMissionFlag = args[0].globalInteger;
 }
 
 template <class Tobject>
@@ -432,7 +432,7 @@ void game_create_garage(const ScriptArguments& args)
 	int garageType = args[6].integer;
 	
 	args.getWorld()->state->garages.push_back({
-		min, max, garageType
+		0, min, max, garageType
 	});
 	int garageIndex = args.getWorld()->state->garages.size() - 1;
 	
@@ -803,7 +803,7 @@ void game_create_crusher_crane(const ScriptArguments& args)
 	// NOTE: This instruction also creates or controls a garage
 	/// @todo find out if this creates a garage or if it just controls garage[0]
 	args.getWorld()->state->garages.push_back({
-		min, max, garageType
+		0, min, max, garageType
 	});
 }
 

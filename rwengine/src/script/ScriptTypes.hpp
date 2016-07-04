@@ -83,13 +83,24 @@ struct ScriptObjectType {
 	T* operator = (T* object)
 	{
 		RW_CHECK(m_id != nullptr, "ScriptObjectType has pointer to null memory location");
-		*m_id = object->getScriptID();
+		*m_id = object->getScriptObjectID();
+		m_object = object;
 		return object;
 	}
 
 	T* operator -> () const
 	{
 		RW_CHECK(m_object != nullptr, "Dereferencing ScriptObjectType with null instance");
+		return m_object;
+	}
+
+	T* get() const
+	{
+		return m_object;
+	}
+
+	operator T* () const
+	{
 		return m_object;
 	}
 };

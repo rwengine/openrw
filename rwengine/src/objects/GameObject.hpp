@@ -76,6 +76,8 @@ public:
 	 */
 	void setGameObjectID(GameObjectID id) { objectID = id; }
 
+	int getScriptObjectID() const { return getGameObjectID(); }
+
 	/**
 	 * @brief Enumeration of possible object types.
 	 */

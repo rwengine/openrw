@@ -204,6 +204,11 @@ struct BlipData
 	BlipData()
 	: id(-1), type(Location), target(0), display(Show)
 	{ }
+
+	int getScriptObjectID() const
+	{
+		return id;
+	}
 };
 
 /**
@@ -234,9 +239,25 @@ struct GarageInfo
 		GARAGE_OPENS_FOR_SPECIFIC_CAR = 20,
 		GARAGE_OPENS_ONCE = 21
 	};
+	int id;
 	glm::vec3 min;
 	glm::vec3 max;
 	int type;
+
+	GarageInfo(int id_,
+			   const glm::vec3 min_,
+			   const glm::vec3 max_,
+			   int type_)
+		: id(id_)
+		, min(min_)
+		, max(max_)
+		, type(type_)
+	{ }
+
+	int getScriptObjectID() const
+	{
+		return id;
+	}
 };
 
 /**
@@ -274,7 +295,7 @@ struct GameState
 	/**
 	 * @brief Stores a pointer to script global that stores the on-mission state.
 	 */
-	unsigned int *scriptOnMissionFlag;
+	int32_t* scriptOnMissionFlag;
 	
 	/** Objects created by the current mission */
 	std::vector<GameObjectID> missionObjects;

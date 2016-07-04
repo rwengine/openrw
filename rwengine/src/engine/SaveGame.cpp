@@ -1129,7 +1129,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	// We keep track of the game time as a float for now
 	state.gameTime = state.basic.timeMS / 1000.f;
 
-	state.scriptOnMissionFlag = (unsigned int*)state.script->getGlobals() + (size_t)scriptData.onMissionOffset;
+	state.scriptOnMissionFlag = (int32_t*)(state.script->getGlobals() + (size_t)scriptData.onMissionOffset);
 
 	auto& threads = state.script->getThreads();
 	for(size_t s = 0; s < numScripts; ++s) {
@@ -1172,6 +1172,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	for(size_t g = 0; g < garageData.garageCount; ++g) {
 		auto& garage = garages[g];
 		state.garages.push_back({
+			g,
 			glm::vec3(garage.x1, garage.y1, garage.z1),
 			glm::vec3(garage.x2, garage.y2, garage.z2),
 			garage.type
@@ -1195,6 +1196,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	for (unsigned g = 0; g < carGenerators.size(); ++g) {
 		auto& gen = carGenerators[g];
 		state.vehicleGenerators.emplace_back(
+		    g,
 		    gen.position,
 		    gen.angle,
 		    gen.modelId,
