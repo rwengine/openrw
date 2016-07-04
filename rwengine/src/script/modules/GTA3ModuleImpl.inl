@@ -18,7 +18,6 @@ void opcode_0000(const ScriptArguments& args) {
 	@arg time Time (ms)
 */
 void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
-	RW_UNIMPLEMENTED_OPCODE(0x0001);
 	auto thread = args.getThread();
 	thread->wakeCounter = time > 0 ? time : -1;
 }
@@ -60,10 +59,8 @@ void opcode_0003(const ScriptArguments& args, const ScriptInt time) {
 	@arg arg2 
 */
 void opcode_0004(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0004);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G = arg2;
 }
 
 /**
@@ -74,10 +71,8 @@ void opcode_0004(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 void opcode_0005(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0005);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G = arg2;
 }
 
 /**
@@ -88,10 +83,8 @@ void opcode_0005(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 void opcode_0006(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0006);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L = arg2;
 }
 
 /**
@@ -102,10 +95,8 @@ void opcode_0006(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2 
 */
 void opcode_0007(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0007);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L = arg2;
 }
 
 /**
@@ -116,10 +107,8 @@ void opcode_0007(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2 
 */
 void opcode_0008(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0008);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G += arg2;
 }
 
 /**
@@ -130,10 +119,8 @@ void opcode_0008(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 void opcode_0009(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0009);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G += arg2;
 }
 
 /**
@@ -144,10 +131,8 @@ void opcode_0009(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 void opcode_000a(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000a);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L += arg2;
 }
 
 /**
@@ -158,10 +143,8 @@ void opcode_000a(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2 
 */
 void opcode_000b(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000b);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L += arg2;
 }
 
 /**
@@ -172,10 +155,8 @@ void opcode_000b(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2 
 */
 void opcode_000c(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G -= arg2;
 }
 
 /**
@@ -186,10 +167,8 @@ void opcode_000c(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 void opcode_000d(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000d);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G -= arg2;
 }
 
 /**
@@ -200,10 +179,8 @@ void opcode_000d(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 void opcode_000e(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000e);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L -= arg2;
 }
 
 /**
@@ -214,10 +191,8 @@ void opcode_000e(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2 
 */
 void opcode_000f(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x000f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L -= arg2;
 }
 
 /**
@@ -228,10 +203,8 @@ void opcode_000f(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2 
 */
 void opcode_0010(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0010);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G *= arg2;
 }
 
 /**
@@ -242,10 +215,8 @@ void opcode_0010(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 void opcode_0011(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0011);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G *= arg2;
 }
 
 /**
@@ -256,10 +227,8 @@ void opcode_0011(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 void opcode_0012(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0012);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L *= arg2;
 }
 
 /**
@@ -270,10 +239,8 @@ void opcode_0012(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2 
 */
 void opcode_0013(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0013);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L *= arg2;
 }
 
 /**
@@ -284,10 +251,8 @@ void opcode_0013(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2 
 */
 void opcode_0014(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0014);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G /= arg2;
 }
 
 /**
@@ -298,10 +263,8 @@ void opcode_0014(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 void opcode_0015(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0015);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1G /= arg2;
 }
 
 /**
@@ -312,10 +275,8 @@ void opcode_0015(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 void opcode_0016(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0016);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L /= arg2;
 }
 
 /**
@@ -326,10 +287,8 @@ void opcode_0016(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2 
 */
 void opcode_0017(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0017);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
+	arg1L /= arg2;
 }
 
 /**
@@ -340,11 +299,8 @@ void opcode_0017(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2 
 */
 bool opcode_0018(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0018);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2;
 }
 
 /**
@@ -355,11 +311,8 @@ bool opcode_0018(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 bool opcode_0019(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0019);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2;
 }
 
 /**
@@ -370,11 +323,8 @@ bool opcode_0019(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2G 
 */
 bool opcode_001a(const ScriptArguments& args, const ScriptInt arg1, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x001a);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1 > arg2G;
 }
 
 /**
@@ -385,11 +335,8 @@ bool opcode_001a(const ScriptArguments& args, const ScriptInt arg1, ScriptIntGlo
 	@arg arg2L 
 */
 bool opcode_001b(const ScriptArguments& args, const ScriptInt arg1, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x001b);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1 > arg2L;
 }
 
 /**
@@ -400,11 +347,8 @@ bool opcode_001b(const ScriptArguments& args, const ScriptInt arg1, ScriptIntLoc
 	@arg arg2G 
 */
 bool opcode_001c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x001c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2G;
 }
 
 /**
@@ -415,11 +359,8 @@ bool opcode_001c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2L 
 */
 bool opcode_001d(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x001d);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2L;
 }
 
 /**
@@ -430,11 +371,8 @@ bool opcode_001d(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 bool opcode_001e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x001e);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2L;
 }
 
 /**
@@ -445,11 +383,8 @@ bool opcode_001e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2G 
 */
 bool opcode_001f(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x001f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2G;
 }
 
 /**
@@ -460,11 +395,8 @@ bool opcode_001f(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2 
 */
 bool opcode_0020(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0020);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2;
 }
 
 /**
@@ -475,11 +407,8 @@ bool opcode_0020(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 bool opcode_0021(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0021);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2;
 }
 
 /**
@@ -490,11 +419,8 @@ bool opcode_0021(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2G 
 */
 bool opcode_0022(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0022);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1 > arg2G;
 }
 
 /**
@@ -505,11 +431,8 @@ bool opcode_0022(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloa
 	@arg arg2L 
 */
 bool opcode_0023(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0023);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1 > arg2L;
 }
 
 /**
@@ -520,11 +443,8 @@ bool opcode_0023(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloa
 	@arg arg2G 
 */
 bool opcode_0024(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0024);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2G;
 }
 
 /**
@@ -535,11 +455,8 @@ bool opcode_0024(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 bool opcode_0025(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0025);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2L;
 }
 
 /**
@@ -550,11 +467,8 @@ bool opcode_0025(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 bool opcode_0026(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0026);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G > arg2L;
 }
 
 /**
@@ -565,11 +479,8 @@ bool opcode_0026(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 bool opcode_0027(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0027);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1L > arg2G;
 }
 
 /**
@@ -580,11 +491,8 @@ bool opcode_0027(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2 
 */
 bool opcode_0028(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0028);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2;
 }
 
 /**
@@ -595,11 +503,8 @@ bool opcode_0028(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 bool opcode_0029(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0029);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2;
 }
 
 /**
@@ -610,11 +515,8 @@ bool opcode_0029(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2G 
 */
 bool opcode_002a(const ScriptArguments& args, const ScriptInt arg1, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x002a);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1 >= arg2G;
 }
 
 /**
@@ -625,11 +527,8 @@ bool opcode_002a(const ScriptArguments& args, const ScriptInt arg1, ScriptIntGlo
 	@arg arg2L 
 */
 bool opcode_002b(const ScriptArguments& args, const ScriptInt arg1, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x002b);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1 >= arg2L;
 }
 
 /**
@@ -640,11 +539,8 @@ bool opcode_002b(const ScriptArguments& args, const ScriptInt arg1, ScriptIntLoc
 	@arg arg2G 
 */
 bool opcode_002c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x002c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2G;
 }
 
 /**
@@ -655,11 +551,8 @@ bool opcode_002c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2L 
 */
 bool opcode_002d(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x002d);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2L;
 }
 
 /**
@@ -670,11 +563,8 @@ bool opcode_002d(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 bool opcode_002e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x002e);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2L;
 }
 
 /**
@@ -685,11 +575,8 @@ bool opcode_002e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2G 
 */
 bool opcode_002f(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x002f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2G;
 }
 
 /**
@@ -700,11 +587,8 @@ bool opcode_002f(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2 
 */
 bool opcode_0030(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0030);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2;
 }
 
 /**
@@ -715,11 +599,8 @@ bool opcode_0030(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 bool opcode_0031(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0031);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2;
 }
 
 /**
@@ -730,11 +611,8 @@ bool opcode_0031(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2G 
 */
 bool opcode_0032(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0032);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1 >= arg2G;
 }
 
 /**
@@ -745,11 +623,8 @@ bool opcode_0032(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloa
 	@arg arg2L 
 */
 bool opcode_0033(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0033);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1 >= arg2L;
 }
 
 /**
@@ -760,11 +635,8 @@ bool opcode_0033(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloa
 	@arg arg2G 
 */
 bool opcode_0034(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0034);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2G;
 }
 
 /**
@@ -775,11 +647,8 @@ bool opcode_0034(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 bool opcode_0035(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0035);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2L;
 }
 
 /**
@@ -790,11 +659,8 @@ bool opcode_0035(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 bool opcode_0036(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0036);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G >= arg2L;
 }
 
 /**
@@ -805,11 +671,8 @@ bool opcode_0036(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 bool opcode_0037(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0037);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1L >= arg2G;
 }
 
 /**
@@ -820,11 +683,8 @@ bool opcode_0037(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2 
 */
 bool opcode_0038(const ScriptArguments& args, ScriptIntGlobal arg1G, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0038);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2;
 }
 
 /**
@@ -835,11 +695,8 @@ bool opcode_0038(const ScriptArguments& args, ScriptIntGlobal arg1G, const Scrip
 	@arg arg2 
 */
 bool opcode_0039(const ScriptArguments& args, ScriptIntLocal arg1L, const ScriptInt arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0039);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L == arg2;
 }
 
 /**
@@ -850,11 +707,8 @@ bool opcode_0039(const ScriptArguments& args, ScriptIntLocal arg1L, const Script
 	@arg arg2G 
 */
 bool opcode_003a(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x003a);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2G;
 }
 
 /**
@@ -865,11 +719,8 @@ bool opcode_003a(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2L 
 */
 bool opcode_003b(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x003b);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L == arg2L;
 }
 
 /**
@@ -880,11 +731,8 @@ bool opcode_003b(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 bool opcode_003c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x003c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2L;
 }
 
 /**
@@ -895,11 +743,8 @@ bool opcode_003c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2 
 */
 bool opcode_0042(const ScriptArguments& args, ScriptFloatGlobal arg1G, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0042);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2;
 }
 
 /**
@@ -910,11 +755,8 @@ bool opcode_0042(const ScriptArguments& args, ScriptFloatGlobal arg1G, const Scr
 	@arg arg2 
 */
 bool opcode_0043(const ScriptArguments& args, ScriptFloatLocal arg1L, const ScriptFloat arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0043);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2);
 	RW_UNUSED(args);
-	return false;
+	return arg1L == arg2;
 }
 
 /**
@@ -925,11 +767,8 @@ bool opcode_0043(const ScriptArguments& args, ScriptFloatLocal arg1L, const Scri
 	@arg arg2G 
 */
 bool opcode_0044(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0044);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2G;
 }
 
 /**
@@ -940,11 +779,8 @@ bool opcode_0044(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 bool opcode_0045(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0045);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1L == arg2L;
 }
 
 /**
@@ -955,11 +791,8 @@ bool opcode_0045(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 bool opcode_0046(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0046);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
 	RW_UNUSED(args);
-	return false;
+	return arg1G == arg2L;
 }
 
 /**
@@ -1136,9 +969,7 @@ bool opcode_0057(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 	@arg arg2G 
 */
 void opcode_0058(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0058);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G += arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1150,9 +981,7 @@ void opcode_0058(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2G 
 */
 void opcode_0059(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0059);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G += arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1164,9 +993,7 @@ void opcode_0059(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 void opcode_005a(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x005a);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L += arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1178,9 +1005,7 @@ void opcode_005a(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 void opcode_005b(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x005b);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L += arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1192,9 +1017,7 @@ void opcode_005b(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2G 
 */
 void opcode_005c(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x005c);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L += arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1206,9 +1029,7 @@ void opcode_005c(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2G 
 */
 void opcode_005d(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x005d);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L += arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1220,9 +1041,7 @@ void opcode_005d(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_005e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x005e);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G += arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1234,9 +1053,7 @@ void opcode_005e(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2L 
 */
 void opcode_005f(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x005f);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G += arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1248,9 +1065,7 @@ void opcode_005f(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 void opcode_0060(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0060);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G -= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1262,9 +1077,7 @@ void opcode_0060(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2G 
 */
 void opcode_0061(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0061);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G -= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1276,9 +1089,7 @@ void opcode_0061(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 void opcode_0062(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0062);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L -= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1290,9 +1101,7 @@ void opcode_0062(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 void opcode_0063(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0063);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L -= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1304,9 +1113,7 @@ void opcode_0063(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2G 
 */
 void opcode_0064(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0064);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L -= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1318,9 +1125,7 @@ void opcode_0064(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2G 
 */
 void opcode_0065(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0065);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L -= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1332,9 +1137,7 @@ void opcode_0065(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_0066(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0066);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G -= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1346,9 +1149,7 @@ void opcode_0066(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2L 
 */
 void opcode_0067(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0067);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G -= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1360,9 +1161,7 @@ void opcode_0067(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 void opcode_0068(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0068);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G *= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1374,9 +1173,7 @@ void opcode_0068(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2G 
 */
 void opcode_0069(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0069);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G *= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1388,9 +1185,7 @@ void opcode_0069(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 void opcode_006a(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x006a);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L *= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1402,9 +1197,7 @@ void opcode_006a(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 void opcode_006b(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x006b);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L *= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1416,9 +1209,7 @@ void opcode_006b(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_006c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x006c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G *= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1430,9 +1221,7 @@ void opcode_006c(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2L 
 */
 void opcode_006d(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x006d);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G *= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1444,9 +1233,7 @@ void opcode_006d(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 void opcode_006e(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x006e);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L *= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1458,9 +1245,7 @@ void opcode_006e(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2G 
 */
 void opcode_006f(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x006f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L *= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1472,9 +1257,7 @@ void opcode_006f(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2G 
 */
 void opcode_0070(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0070);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G /= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1486,9 +1269,7 @@ void opcode_0070(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2G 
 */
 void opcode_0071(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0071);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G /= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1500,9 +1281,7 @@ void opcode_0071(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 void opcode_0072(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0072);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L /= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1514,9 +1293,7 @@ void opcode_0072(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2L 
 */
 void opcode_0073(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0073);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L /= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1528,9 +1305,7 @@ void opcode_0073(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_0074(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0074);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G /= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1542,9 +1317,7 @@ void opcode_0074(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2L 
 */
 void opcode_0075(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0075);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G /= arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1556,9 +1329,7 @@ void opcode_0075(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 void opcode_0076(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0076);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L /= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1570,9 +1341,7 @@ void opcode_0076(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlo
 	@arg arg2G 
 */
 void opcode_0077(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0077);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L /= arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1752,9 +1521,7 @@ void opcode_0083(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2G 
 */
 void opcode_0084(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0084);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1766,9 +1533,7 @@ void opcode_0084(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntGl
 	@arg arg2L 
 */
 void opcode_0085(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0085);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1780,9 +1545,7 @@ void opcode_0085(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntLoc
 	@arg arg2G 
 */
 void opcode_0086(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0086);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1794,9 +1557,7 @@ void opcode_0086(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2L 
 */
 void opcode_0087(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0087);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1808,9 +1569,7 @@ void opcode_0087(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_0088(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFloatLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0088);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1822,9 +1581,7 @@ void opcode_0088(const ScriptArguments& args, ScriptFloatGlobal arg1G, ScriptFlo
 	@arg arg2G 
 */
 void opcode_0089(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloatGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0089);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = arg2G;
 	RW_UNUSED(args);
 }
 
@@ -1836,9 +1593,7 @@ void opcode_0089(const ScriptArguments& args, ScriptFloatLocal arg1L, ScriptFloa
 	@arg arg2L 
 */
 void opcode_008a(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLocal arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x008a);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = arg2L;
 	RW_UNUSED(args);
 }
 
@@ -1850,9 +1605,7 @@ void opcode_008a(const ScriptArguments& args, ScriptIntGlobal arg1G, ScriptIntLo
 	@arg arg2G 
 */
 void opcode_008b(const ScriptArguments& args, ScriptIntLocal arg1L, ScriptIntGlobal arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008b);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = arg2G;
 	RW_UNUSED(args);
 }
 
