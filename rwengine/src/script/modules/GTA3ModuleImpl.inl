@@ -2143,14 +2143,14 @@ bool opcode_00b1(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	opcode 00ba
 	@arg gxtEntry GXT entry
 	@arg time Time (ms)
-	@arg arg3 
+	@arg style
 */
-void opcode_00ba(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt arg3) {
-	RW_UNIMPLEMENTED_OPCODE(0x00ba);
-	RW_UNUSED(gxtEntry);
-	RW_UNUSED(time);
-	RW_UNUSED(arg3);
-	RW_UNUSED(args);
+void opcode_00ba(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt style) {
+	const auto& text = script::gxt(args, gxtEntry);
+	args.getWorld()->state->text.addText<ScreenTextType::Big>(
+				ScreenTextEntry::makeBig(
+					gxtEntry, text, style, time
+					));
 }
 
 /**
@@ -2159,14 +2159,15 @@ void opcode_00ba(const ScriptArguments& args, const ScriptString gxtEntry, const
 	opcode 00bb
 	@arg gxtEntry GXT entry
 	@arg time Time (ms)
-	@arg arg3 
+	@arg flags 
 */
-void opcode_00bb(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt arg3) {
-	RW_UNIMPLEMENTED_OPCODE(0x00bb);
-	RW_UNUSED(gxtEntry);
-	RW_UNUSED(time);
-	RW_UNUSED(arg3);
-	RW_UNUSED(args);
+void opcode_00bb(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt flags) {
+	const auto& text = script::gxt(args, gxtEntry);
+	RW_UNUSED(flags);
+	args.getWorld()->state->text.addText<ScreenTextType::HighPriority>(
+				ScreenTextEntry::makeHighPriority(
+					gxtEntry, text, time
+					));
 }
 
 /**
@@ -2178,27 +2179,28 @@ void opcode_00bb(const ScriptArguments& args, const ScriptString gxtEntry, const
 	@arg arg3 
 */
 void opcode_00bc(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt arg3) {
-	RW_UNIMPLEMENTED_OPCODE(0x00bc);
-	RW_UNUSED(gxtEntry);
-	RW_UNUSED(time);
+	const auto& text = script::gxt(args, gxtEntry);
 	RW_UNUSED(arg3);
-	RW_UNUSED(args);
+	RW_UNIMPLEMENTED("Unclear what style should be used");
+	args.getWorld()->state->text.addText<ScreenTextType::HighPriority>(
+				ScreenTextEntry::makeHighPriority(
+					gxtEntry, text, time
+					));
 }
 
 /**
 	@brief print_soon %1g% duration %2d% ms flag %3d%
 
 	opcode 00bd
-	@arg arg1 
-	@arg arg2 
+	@arg gxtEntry
+	@arg time
 	@arg arg3 
 */
-void opcode_00bd(const ScriptArguments& args, const ScriptString arg1, const ScriptInt arg2, const ScriptInt arg3) {
-	RW_UNIMPLEMENTED_OPCODE(0x00bd);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
+void opcode_00bd(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt time, const ScriptInt arg3) {
+	const auto& text = script::gxt(args, gxtEntry);
 	RW_UNUSED(arg3);
-	RW_UNUSED(args);
+	args.getWorld()->state->text.addText<ScreenTextType::BigLowPriority>(
+	    ScreenTextEntry::makeBig(gxtEntry, text, arg3, time));
 }
 
 /**
@@ -2207,8 +2209,7 @@ void opcode_00bd(const ScriptArguments& args, const ScriptString arg1, const Scr
 	opcode 00be
 */
 void opcode_00be(const ScriptArguments& args) {
-	RW_UNIMPLEMENTED_OPCODE(0x00be);
-	RW_UNUSED(args);
+	args.getWorld()->state->text.clear<ScreenTextType::Big>();
 }
 
 /**
