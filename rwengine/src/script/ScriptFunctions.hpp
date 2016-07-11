@@ -65,7 +65,7 @@ inline ScriptVec3 getGround(const ScriptArguments& args, ScriptVec3 p)
 	return p;
 }
 
-inline std::string gxt(const ScriptArguments& args, const ScriptString id)
+inline GameString gxt(const ScriptArguments& args, const ScriptString id)
 {
 	return args.getWorld()->data->texts.text(id);
 }
