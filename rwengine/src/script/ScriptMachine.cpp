@@ -146,12 +146,21 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
         }
 
 #if RW_SCRIPT_DEBUG
-		if (strcmp(t.name, "EIGHT") == 0)
+		static auto sDebugThreadName = getenv("OPENRW_DEBUG_THREAD");
+		if (!sDebugThreadName || strncmp(t.name, sDebugThreadName, 8) == 0)
 		{
-			printf("% 8s  %04x %04x % 25s", t.name, t.programCounter, opcode, code.signature.c_str());
+			printf("%8s %01x %04x %04x %25s", t.name, t.conditionResult, t.programCounter, opcode, code.signature.c_str());
 			for (auto& a : sca.getParameters())
 			{
-				printf(" %08x", a.integerValue());
+				if (a.type == SCMType::TString) {
+					printf(" %1x:%8s", a.type, a.string);
+				}
+				else if (a.type == SCMType::TFloat16) {
+					printf(" %1x:%f", a.type, a.realValue());
+				}
+				else {
+					printf(" %1x:%8x", a.type, a.integerValue());
+				}
 			}
 			printf("\n");
 		}
