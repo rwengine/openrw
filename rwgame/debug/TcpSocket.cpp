@@ -1,6 +1,4 @@
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
 
@@ -65,15 +63,19 @@ size_t TcpSocket::send(const std::string& str)
 
 void TcpSocket::disconnect()
 {
-	close(sock);
+	#ifndef RW_WINDOWS
+	  close(sock);
+	#else
+	  closesocket(sock);
+	#endif
 	sock = -1;
 }
 
 
-std::string TcpSocket::getRemoteAddress() const
+char* TcpSocket::getRemoteAddress() const
 {
 	char buffer[INET_ADDRSTRLEN+1] = { };
-	return inet_ntop(AF_INET, &addr, buffer, INET_ADDRSTRLEN+1);
+	return inet_ntoa(addr.sin_addr);
 }
 
 
