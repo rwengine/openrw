@@ -3,7 +3,12 @@
 
 #include <algorithm>
 #include <fstream>
+#ifndef RW_WINDOWS
 #include <dirent.h>
+#else
+#include <platform/msdirent.h>
+#endif
+
 #include <sys/stat.h>
 #include <sys/types.h>
 

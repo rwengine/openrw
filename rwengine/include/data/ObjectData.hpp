@@ -8,6 +8,9 @@
 #include <glm/glm.hpp>
 
 #include <data/PathData.hpp>
+#ifdef RW_WINDOWS
+#include <rw_mingw.hpp>
+#endif
 
 typedef uint16_t ObjectID;
 
@@ -96,7 +99,7 @@ struct VehicleData : public ObjectInformation
 
 	VehicleData()
 		: ObjectInformation(_class("CARS")) { }
-
+	
 	enum VehicleClass
 	{
 		IGNORE      = 0,

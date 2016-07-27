@@ -36,12 +36,20 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	add_definitions(-DRW_OSX)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	add_definitions(-DRW_FREEBSD)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	add_definitions(-DRW_WINDOWS)
+	set(BULLET_ROOT "$ENV{BULLET_ROOT}")
+	include_directories("$ENV{BULLET_ROOT}/src")
 else ()
 	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
+endif()
+
+if(MINGW)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 endif()
 
 # Make GLM use radians

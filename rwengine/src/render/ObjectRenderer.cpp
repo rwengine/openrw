@@ -14,6 +14,9 @@
 #include <objects/PickupObject.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <items/InventoryItem.hpp>
+#ifdef RW_WINDOWS
+#include <rw_mingw.hpp>
+#endif
 
 constexpr float kDrawDistanceFactor = 1.0f;
 constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;

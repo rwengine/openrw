@@ -20,7 +20,11 @@
 #include <sstream>
 #include <algorithm>
 
+#ifndef RW_WINDOWS
 #include <dirent.h>
+#else
+#include <platform/msdirent.h>
+#endif
 #include <sys/types.h>
 
 /**
@@ -30,7 +34,7 @@
  */
 std::string findPathRealCase(const std::string& base, const std::string& path) 
 {
-#ifndef _WIN32
+#ifndef RW_WINDOWS
 	size_t endslash = path.find("/");
 	bool isDirectory = true;
 	if(endslash == path.npos) {
@@ -65,7 +69,7 @@ std::string findPathRealCase(const std::string& base, const std::string& path)
 	return "";
 #else 
 	// Is anything other than Windows likely to fall here?
-	return path;
+	return base + "/" + path;
 #endif
 }
 
@@ -133,7 +137,9 @@ void GameData::parseDAT(const std::string& path)
 		for(std::string line, cmd; std::getline(datfile, line);)
 		{
 			if(line.size() == 0 || line[0] == '#') continue;
-			line.erase(line.size()-1);
+			#ifndef RW_WINDOWS
+				line.erase(line.size()-1);
+			#endif
 			
 			size_t space = line.find_first_of(' ');
 			if(space != line.npos)

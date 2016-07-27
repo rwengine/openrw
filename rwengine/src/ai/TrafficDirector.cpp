@@ -11,6 +11,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/norm.hpp>
+#ifdef RW_WINDOWS
+#include <rw_mingw.hpp>
+#endif
 
 TrafficDirector::TrafficDirector(AIGraph* g, GameWorld* w)
 : graph( g ), world( w ), pedDensity(1.f), carDensity(1.f),

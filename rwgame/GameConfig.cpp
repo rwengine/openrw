@@ -59,7 +59,7 @@ std::string GameConfig::getDefaultConfigPath()
 		return std::string(home) + "/Library/Preferences/" + kConfigDirectoryName;
 
 #else
-#error Dont know how to find default config path
+	return ".";
 #endif
 
 	// Well now we're stuck.
