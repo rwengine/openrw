@@ -1,4 +1,6 @@
 #include <script/ScriptFunctions.hpp>
+#include <script/ScriptMachine.hpp>
+#include <script/SCMFile.hpp>
 
 static const char* sprite_names[] = {
 	"", // 0
@@ -27,4 +29,14 @@ static const char* sprite_names[] = {
 const char*script::getBlipSprite(ScriptRadarSprite sprite)
 {
 	return sprite_names[sprite];
+}
+
+ScriptModel script::getModel(const ScriptArguments& args, ScriptModel model)
+{
+	if (model < 0) {
+		/// @todo verify that this is how the game uses negative models
+		const auto& m = args.getVM()->getFile()->getModels()[-model];
+		return args.getWorld()->data->findModelObject(m);
+	}
+	return model;
 }

@@ -478,6 +478,11 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type)
 {
 	auto modelInfo = data->findObjectType<ObjectData>(id);
 
+	RW_CHECK(modelInfo != nullptr, "Pickup Object Data is not found");
+	if (modelInfo == nullptr) {
+		return nullptr;
+	}
+
 	data->loadDFF(modelInfo->modelName + ".dff");
 	data->loadTXD(modelInfo->textureName + ".txd");
 
