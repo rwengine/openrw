@@ -9,6 +9,10 @@ add_library(rwengine
     ${RENDERWARE_HEADERS}
 )
 
+if(MINGW)
+	add_definitions(-D _USE_MATH_DEFINES)	
+endif()
+
 target_link_libraries(rwengine
 	rwlib
 	${MAD_LIBRARY}

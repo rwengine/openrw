@@ -23,6 +23,9 @@
 
 #include <data/CutsceneData.hpp>
 #include <loaders/LoaderCutsceneDAT.hpp>
+#ifdef RW_WINDOWS
+#include <rw_mingw.hpp>
+#endif
 
 #include <render/ViewCamera.hpp>
 

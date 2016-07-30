@@ -1,8 +1,13 @@
 #pragma once
 
 #include <string>
+#ifndef RW_WINDOWS
 #include <netinet/in.h>
-
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#else
+#include <ws2tcpip.h>
+#endif
 
 class TcpSocket
 {
@@ -17,7 +22,7 @@ public:
 	size_t send(const std::string& str);
 	void disconnect();
 
-	std::string getRemoteAddress() const;
+	char* getRemoteAddress() const;
 	short getRemotePort() const;
 
 private:
