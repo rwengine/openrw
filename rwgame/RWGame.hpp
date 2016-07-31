@@ -28,11 +28,11 @@ class RWGame
 	GameRenderer* renderer;
     ScriptMachine* script;
 	// Background worker
-	WorkContext work;
+	WorkContext *work;
 	bool debugScript;
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
-	GameWindow window;
+	GameWindow *window;
 	std::chrono::steady_clock clock;
 	std::chrono::steady_clock::time_point last_clock_time;
 
@@ -79,7 +79,7 @@ public:
 
 	GameWindow& getWindow()
 	{
-		return window;
+		return *window;
 	}
 
 	ScriptMachine* getScript() const

@@ -10,7 +10,7 @@ PauseState::PauseState(RWGame* game)
 	m->offset = glm::vec2( 200.f, 200.f );
 	m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
 	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-	m->addEntry(Menu::lambda("Exit", [&] { getWindow().close(); }));
+	m->addEntry(Menu::lambda("Exit", [] { StateManager::get().clear(); }));
 	this->enterMenu(m);
 }
 

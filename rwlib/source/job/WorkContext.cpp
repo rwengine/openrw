@@ -12,20 +12,21 @@ void WorkContext::workNext()
 {
 	WorkJob* j = nullptr;
 
-	_inMutex.lock();
-	if( ! _workQueue.empty() ) {
-		j = _workQueue.front();
-		_workQueue.pop();
+	{
+		std::lock_guard<std::mutex> guard( _inMutex );
+
+		if( ! _workQueue.empty() ) {
+			j = _workQueue.front();
+			_workQueue.pop();
+		}
 	}
-	_inMutex.unlock();
 
 	if( j == nullptr ) return;
 
 	j->work();
-
-	_outMutex.lock();
+	
+	std::lock_guard<std::mutex> guard( _outMutex );
 	_completeQueue.push(j);
-	_outMutex.unlock();
 }
 
 void WorkContext::update()

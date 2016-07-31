@@ -80,6 +80,11 @@ struct StateManager
 	}
 	
 	std::deque<State*> states;
+
+	void clear()
+	{
+		states.clear();
+	}
 	
 	void enter(State* state)
 	{

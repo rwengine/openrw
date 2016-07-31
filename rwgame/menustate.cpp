@@ -20,7 +20,7 @@ void MenuState::enterMainMenu()
 	m->addEntry(Menu::lambda("Load Game", [=] { enterLoadMenu(); }));
 	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true, "test")); }));
 	m->addEntry(Menu::lambda("Options", [] { RW_UNIMPLEMENTED("Options Menu"); }));
-	m->addEntry(Menu::lambda("Exit", [=] { getWindow().close(); }));
+	m->addEntry(Menu::lambda("Exit", [] { StateManager::get().clear(); }));
 	this->enterMenu(m);
 }
 
