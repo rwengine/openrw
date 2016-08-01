@@ -47,6 +47,7 @@ struct AnimationGroup
 	Animation* walk;
 	Animation* walk_start;
 	Animation* run;
+	Animation* sprint;
 
 	Animation* walk_right;
 	Animation* walk_right_start;
