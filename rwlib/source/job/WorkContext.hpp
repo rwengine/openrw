@@ -5,8 +5,11 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <atomic>
+#include <memory>
 #include <functional>
 #include <fstream>
+#include <iostream>
 
 class WorkContext;
 
@@ -16,7 +19,7 @@ class LoadWorker
 
 public:
 
-	bool _running;
+	std::atomic<bool> _running;
 	std::thread _thread;
 	void start();
 
@@ -66,10 +69,10 @@ class GameWorld;
  */
 class WorkContext
 {
+	std::unique_ptr<LoadWorker> _worker;
+
 	std::queue<WorkJob*> _workQueue;
 	std::queue<WorkJob*> _completeQueue;
-
-	LoadWorker _worker;
 
 	std::mutex _inMutex;
 	std::mutex _outMutex;
@@ -77,15 +80,21 @@ class WorkContext
 public:
 
 	WorkContext()
-		: _worker(this) { }
+		: _worker(new LoadWorker(this)) { }
 
 	void queueJob( WorkJob* job )
 	{
-		std::lock_guard<std::mutex> guard(_inMutex);
+		std::lock_guard<std::mutex> guard( _inMutex );
 		_workQueue.push( job );
 	}
 
-	// Called by the worker thread - don't touch;
+	void stop()
+	{
+		// Stop serving the queue.
+		_worker.reset(nullptr);
+	}
+
+	// Called by the worker thread - don't touch
 	void workNext();
 
 	const std::queue<WorkJob*> getWorkQueue() const { return _workQueue; }

@@ -35,6 +35,7 @@ StdOutReciever logPrinter;
 RWGame::RWGame(int argc, char* argv[])
 	: config("openrw.ini")
 	, state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
+	window(nullptr), work(nullptr),
 	debugScript(false), inFocus(true),
 	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
 	accum(0.f), timescale(1.f)
@@ -90,8 +91,11 @@ RWGame::RWGame(int argc, char* argv[])
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		throw std::runtime_error("Failed to initialize SDL2!");
 
-	window.create(w, h, fullscreen);
-	window.hideCursor();
+	window = new GameWindow();
+	window->create(w, h, fullscreen);
+	window->hideCursor();
+
+	work = new WorkContext();
 
 	log.addReciever(&logPrinter);
 	log.info("Game", "Game directory: " + config.getGameDataPath());
@@ -101,7 +105,7 @@ RWGame::RWGame(int argc, char* argv[])
 		throw std::runtime_error("Invalid game directory path: " + config.getGameDataPath());
 	}
 
-	data = new GameData(&log, &work, config.getGameDataPath());
+	data = new GameData(&log, work, config.getGameDataPath());
 
 	// Initalize all the archives.
 	data->loadIMG("/models/gta3");
@@ -168,10 +172,30 @@ RWGame::RWGame(int argc, char* argv[])
 
 RWGame::~RWGame()
 {
+	log.info("Game", "Beginning cleanup");
+
+	log.info("Game", "Stopping work queue");
+	work->stop();
+
+	log.info("Game", "Cleaning up scripts");
 	delete script;
+
+	log.info("Game", "Cleaning up renderer");
 	delete renderer;
+
+	log.info("Game", "Cleaning up world");
 	delete world;
+	
+	log.info("Game", "Cleaning up state");
 	delete state;
+
+	log.info("Game", "Cleaning up window");
+	delete window;
+
+	log.info("Game", "Cleaning up work queue");
+	delete work;
+
+	log.info("Game", "Done cleaning up");
 }
 
 void RWGame::newGame()
@@ -183,7 +207,7 @@ void RWGame::newGame()
 	}
 
 	state = new GameState();
-	world = new GameWorld(&log, &work, data);
+	world = new GameWorld(&log, work, data);
 	world->dynamicsWorld->setDebugDrawer(debug);
 
 	// Associate the new world with the new state and vice versa
@@ -294,8 +318,8 @@ int RWGame::run()
 {
 	last_clock_time = clock.now();
 
-	// Loop until the window is closed or we run out of state.
-	while (window.isOpen() && StateManager::get().states.size()) {
+	// Loop until we run out of states.
+	while (StateManager::get().states.size()) {
 		State* state = StateManager::get().states.back();
 
 		RW_PROFILE_FRAME_BOUNDARY();
@@ -305,7 +329,7 @@ int RWGame::run()
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_QUIT:
-				window.close();
+				StateManager::get().clear();
 				break;
 
 			case SDL_WINDOWEVENT:
@@ -343,13 +367,13 @@ int RWGame::run()
 
 		RW_PROFILE_BEGIN("Update");
 		if ( accum >= GAME_TIMESTEP ) {
-			RW_PROFILE_BEGIN("state");
-			StateManager::get().tick(GAME_TIMESTEP);
-			RW_PROFILE_END();
-
 			if (StateManager::get().states.size() == 0) {
 				break;
 			}
+
+			RW_PROFILE_BEGIN("state");
+			StateManager::get().tick(GAME_TIMESTEP);
+			RW_PROFILE_END();
 
 			RW_PROFILE_BEGIN("engine");
 			tick(GAME_TIMESTEP);
@@ -385,7 +409,7 @@ int RWGame::run()
 
 		renderProfile();
 
-		window.swap();
+		window->swap();
 	}
 
     if( httpserver_thread )
@@ -483,7 +507,7 @@ void RWGame::render(float alpha, float time)
 	
 	getRenderer()->getRenderer()->swap();
 
-	glm::ivec2 windowSize = window.getSize();
+	glm::ivec2 windowSize = window->getSize();
 	renderer->setViewport(windowSize.x, windowSize.y);
 
 	ViewCamera viewCam;
