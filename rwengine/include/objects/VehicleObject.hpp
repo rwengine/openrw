@@ -4,7 +4,13 @@
 #include <objects/GameObject.hpp>
 #include <map>
 #include <objects/VehicleInfo.hpp>
-#include <dynamics/CollisionInstance.hpp>
+
+class CollisionInstance;
+class btVehicleRaycaster;
+class btRaycastVehicle;
+class btRigidBody;
+class btHingeConstraint;
+class btTransform;
 
 /**
  * @class VehicleObject
@@ -27,8 +33,7 @@ public:
 	std::map<size_t, GameObject*> seatOccupants;
 
 	CollisionInstance* collision;
-	btRigidBody* physBody;
-	btVehicleRaycaster* physRaycaster = nullptr;
+	btVehicleRaycaster* physRaycaster;
 	btRaycastVehicle* physVehicle;
 	
 	struct Part
@@ -52,11 +57,7 @@ public:
 	
 	void setPosition(const glm::vec3& pos);
 
-	glm::vec3 getPosition() const;
-
 	void setRotation(const glm::quat &orientation);
-
-	glm::quat getRotation() const;
 
 	Type type() { return Vehicle; }
 
@@ -106,7 +107,10 @@ public:
 	glm::vec3 getSeatEntryPosition(size_t seat) const {
 		auto pos = info->seats[seat].offset;
 		pos -= glm::vec3(glm::sign(pos.x) * -0.81756252f, 0.34800607f, -0.486281008f);
-		return getPosition() + getRotation() * pos;
+		return pos;
+	}
+	glm::vec3 getSeatEntryPositionWorld(size_t seat) const {
+		return getPosition() + getRotation() * getSeatEntryPosition(seat);
 	}
 	
 	Part* getSeatEntryDoor(size_t seat);
@@ -141,23 +145,8 @@ public:
 private:
 
 	void registerPart(ModelFrame* mf);
-	void createObjectHinge(btTransform &local, Part* part);
+	void createObjectHinge(Part* part);
 	void destroyObjectHinge(Part* part);
-};
-
-/**
- * Implements vehicle ray casting behaviour.
- * i.e. ignore the god damn vehicle body when casting rays.
- */
-class VehicleRaycaster : public btVehicleRaycaster
-{
-	btDynamicsWorld* _world;
-	VehicleObject* _vehicle;
-public:
-	VehicleRaycaster(VehicleObject* vehicle, btDynamicsWorld* world)
-		: _world(world), _vehicle(vehicle) {}
-
-	void* castRay(const btVector3 &from, const btVector3 &to, btVehicleRaycasterResult &result);
 };
 
 #endif

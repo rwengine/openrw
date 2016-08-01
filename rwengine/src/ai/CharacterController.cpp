@@ -1,6 +1,7 @@
 #include <ai/CharacterController.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
 
 #include <data/Model.hpp>
 #include <engine/Animator.hpp>
@@ -206,7 +207,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		float nearest = std::numeric_limits<float>::max();
 		for(unsigned int s = 1; s < vehicle->info->seats.size(); ++s)
 		{
-			auto entry = vehicle->getSeatEntryPosition(s);
+			auto entry = vehicle->getSeatEntryPositionWorld(s);
 			float dist = glm::distance(entry, character->getPosition());
 			if( dist < nearest )
 			{
@@ -217,6 +218,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 	}
 	
 	auto entryDoor = vehicle->getSeatEntryDoor(seat);
+	auto entryPos = vehicle->getSeatEntryPositionWorld(seat);
 
 	auto anm_open = character->animations.car_open_lhs;
 	auto anm_enter = character->animations.car_getin_lhs;
@@ -261,8 +263,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 		}
 	}
 	else {
-		glm::vec3 target = vehicle->getSeatEntryPosition(seat);
-		glm::vec3 targetDirection = target - character->getPosition();
+		glm::vec3 targetDirection = entryPos - character->getPosition();
 		targetDirection.z = 0.f;
 
 		float targetDistance = glm::length(targetDirection);
@@ -386,7 +387,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 	if( character->animator->getAnimation(AnimIndexAction) == anm_exit ) {
 		if( character->animator->isCompleted(AnimIndexAction) ) {
-			auto exitpos = vehicle->getSeatEntryPosition(seat);
+			auto exitpos = vehicle->getSeatEntryPositionWorld(seat);
 
 			character->enterVehicle(nullptr, seat);
 			character->setPosition(exitpos);

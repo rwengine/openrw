@@ -301,7 +301,28 @@ void ObjectRenderer::renderInstance(InstanceObject *instance,
 void ObjectRenderer::renderCharacter(CharacterObject *pedestrian,
 									 RenderList& outList)
 {
-	glm::mat4 matrixModel = pedestrian->getTimeAdjustedTransform( m_renderAlpha );
+	glm::mat4 matrixModel;
+
+	if (pedestrian->getCurrentVehicle())
+	{
+		auto vehicle = pedestrian->getCurrentVehicle();
+		auto seat = pedestrian->getCurrentSeat();
+		matrixModel = vehicle->getTimeAdjustedTransform( m_renderAlpha );
+		if (pedestrian->isEnteringOrExitingVehicle())
+		{
+			matrixModel = glm::translate(matrixModel, vehicle->getSeatEntryPosition(seat));
+		}
+		else
+		{
+			if (seat < vehicle->info->seats.size()) {
+				matrixModel = glm::translate(matrixModel, vehicle->info->seats[seat].offset);
+			}
+		}
+	}
+	else
+	{
+		matrixModel = pedestrian->getTimeAdjustedTransform( m_renderAlpha );
+	}
 
 	if(!pedestrian->model->resource) return;
 
