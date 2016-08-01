@@ -61,7 +61,7 @@ public:
 		if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			throw std::runtime_error("Failed to initialize SDL2!");
 
-		window.create(800, 600, false);
+		window.create("Tests", 800, 600, false);
 		window.hideCursor();
 
 #if RW_TEST_WITH_DATA
