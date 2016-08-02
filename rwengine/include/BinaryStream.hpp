@@ -34,7 +34,7 @@ public:
 		sectionHeader_t *next = nullptr;
 	} *rootHeader;
 
-	static std::unique_ptr<BinaryStream> parse(std::string filename);
+	static std::unique_ptr<BinaryStream> parse(const std::string& filename);
 
 	static std::string sectionIdString(uint32_t id);
 };

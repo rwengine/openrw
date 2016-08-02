@@ -1,5 +1,4 @@
 #include <png.h>
-#include <fstream>
 
 #include <core/Logger.hpp>
 #include "GameWindow.hpp"

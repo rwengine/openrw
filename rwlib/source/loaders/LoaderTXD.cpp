@@ -1,7 +1,6 @@
 #include <loaders/LoaderTXD.hpp>
 #include <gl/TextureData.hpp>
 
-#include <fstream>
 #include <iostream>
 #include <algorithm>
 
