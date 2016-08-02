@@ -232,7 +232,7 @@ void RWGame::newGame()
 
 void RWGame::saveGame(const std::string& savename)
 {
-
+	RW_UNUSED(savename);
 }
 
 void RWGame::loadGame(const std::string& savename)
@@ -290,7 +290,7 @@ void RWGame::startScript(const std::string& name)
 				std::stringstream ss;
 				ss << " " << bp.function->description << ".";
 				ss << " Args:";
-				for(int a = 0; a < bp.args->getParameters().size(); a++)
+				for(size_t a = 0; a < bp.args->getParameters().size(); a++)
 				{
 					auto& arg = bp.args->getParameters()[a];
 					ss << " " << arg.integerValue();
@@ -457,7 +457,7 @@ void RWGame::tick(float dt)
 		}
 		
 		// Clean up old VisualFX
-		for( int i = 0; i < world->effects.size(); ++i )
+		for( ssize_t i = 0; i < static_cast<ssize_t>(world->effects.size()); ++i )
 		{
 			VisualFX* effect = world->effects[i];
 			if( effect->getType() == VisualFX::Particle )
@@ -624,7 +624,7 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 		times_index = 0;
 		time_average = 0;
 
-		for (int i = 0; i < average_every_frame; ++i) {
+		for (size_t i = 0; i < average_every_frame; ++i) {
 			time_average += times[i];
 		}
 		time_average /= average_every_frame;
@@ -718,6 +718,8 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 
 void RWGame::renderDebugPaths(float time)
 {
+	RW_UNUSED(time);
+
 	btVector3 roadColour(1.f, 0.f, 0.f);
 	btVector3 pedColour(0.f, 0.f, 1.f);
 	

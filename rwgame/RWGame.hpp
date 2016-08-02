@@ -27,12 +27,12 @@ class RWGame
 	// must be allocated after Logger setup.
 	GameRenderer* renderer;
     ScriptMachine* script;
+	GameWindow *window;
 	// Background worker
 	WorkContext *work;
 	bool debugScript;
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
-	GameWindow *window;
 	std::chrono::steady_clock clock;
 	std::chrono::steady_clock::time_point last_clock_time;
 

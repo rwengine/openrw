@@ -320,8 +320,10 @@ std::string HttpServer::getState() const
     }
 }
 
-std::string HttpServer::dispatch(std::string method, std::string path)
+std::string HttpServer::dispatch(const std::string& method, const std::string& path)
 {
+    RW_UNUSED(method);
+
     std::stringstream ss;
     std::string mime = "text/html";
     if(path == "/debugger.js") {

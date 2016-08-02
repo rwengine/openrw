@@ -19,6 +19,6 @@ private:
     bool paused;
     const SCMBreakpoint* lastBreakpoint;
 
-    std::string dispatch(std::string method, std::string path);
+    std::string dispatch(const std::string& method, const std::string& path);
     std::string getState() const;
 };

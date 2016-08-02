@@ -74,7 +74,6 @@ void TcpSocket::disconnect()
 
 char* TcpSocket::getRemoteAddress() const
 {
-	char buffer[INET_ADDRSTRLEN+1] = { };
 	return inet_ntoa(addr.sin_addr);
 }
 
