@@ -20,31 +20,31 @@ class HttpServer;
 class RWGame
 {
 	Logger log;
-	GameConfig config;
-	GameState* state;
-	GameData* data;
-	GameWorld* world;
+	GameConfig config {"openrw.ini"};
+	GameState* state = nullptr;
+	GameData* data = nullptr;
+	GameWorld* world = nullptr;
 	// must be allocated after Logger setup.
-	GameRenderer* renderer;
-    ScriptMachine* script;
-	GameWindow *window;
+	GameRenderer* renderer = nullptr;
+    ScriptMachine* script = nullptr;
+	GameWindow *window = nullptr;
 	// Background worker
-	WorkContext *work;
-	bool debugScript;
+	WorkContext *work = nullptr;
+	bool debugScript = false;
     HttpServer* httpserver = nullptr;
     std::thread* httpserver_thread = nullptr;
 	std::chrono::steady_clock clock;
 	std::chrono::steady_clock::time_point last_clock_time;
 
-	bool inFocus;
+	bool inFocus = true;
 	ViewCamera lastCam, nextCam;
-	bool showDebugStats;
-	bool showDebugPaths;
-	bool showDebugPhysics;
+	bool showDebugStats = false;
+	bool showDebugPaths = false;
+	bool showDebugPhysics = false;
 	int lastDraws; /// Number of draws issued for the last frame.
 
-	float accum;
-	float timescale;
+	float accum = 0.f;
+	float timescale = 1.f;
 public:
 
 	RWGame(int argc, char* argv[]);

@@ -34,17 +34,11 @@ const std::string kWindowTitle = "RWGame";
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
-DebugDraw* debug;
+DebugDraw* debug = nullptr;
 
 StdOutReciever logPrinter;
 
 RWGame::RWGame(int argc, char* argv[])
-	: config("openrw.ini")
-	, state(nullptr), world(nullptr), renderer(nullptr), script(nullptr),
-	window(nullptr), work(nullptr),
-	debugScript(false), inFocus(true),
-	showDebugStats(false), showDebugPaths(false), showDebugPhysics(false),
-	accum(0.f), timescale(1.f)
 {
 	if (!config.isValid())
 	{
