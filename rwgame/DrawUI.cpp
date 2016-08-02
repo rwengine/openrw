@@ -126,7 +126,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	}
 
 	std::string s;
-	for (int i = 0; i < ui_maxWantedLevel; ++i) {
+	for (size_t i = 0; i < ui_maxWantedLevel; ++i) {
 		s += "]";
 	}
 	ti.text = s;

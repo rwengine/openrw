@@ -26,6 +26,8 @@ void LoadingState::exit()
 
 void LoadingState::tick(float dt)
 {
+	RW_UNUSED(dt);
+
 	// If background work is completed, switch to the next state
 	if( getWorld()->_work->isEmpty() ) {
 		StateManager::get().exec(next);

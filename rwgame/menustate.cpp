@@ -59,7 +59,7 @@ void MenuState::exit()
 
 void MenuState::tick(float dt)
 {
-
+	RW_UNUSED(dt);
 }
 
 void MenuState::handleEvent(const SDL_Event& e)

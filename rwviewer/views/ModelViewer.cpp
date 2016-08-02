@@ -62,7 +62,7 @@ void ModelViewer::showObject(uint16_t object)
 
 void ModelViewer::loadAnimations(const QString& file)
 {
-	std::ifstream dfile(file.toStdString().c_str());
+	std::ifstream dfile(file.toStdString().c_str(), std::ios_base::binary);
 	AnimationList anims;
 
 	if(dfile.is_open())

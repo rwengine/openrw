@@ -28,7 +28,7 @@ void PauseState::exit()
 
 void PauseState::tick(float dt)
 {
-
+	RW_UNUSED(dt);
 }
 
 void PauseState::draw(GameRenderer* r)

@@ -314,6 +314,8 @@ private:
 	// Set state
 	void setBlend(bool enable)
 	{
+		RW_UNUSED(enable);
+
 		/// @todo set blendEnabled, currently not possible because other functions keep trashing the state
 #if 0
 		if (enable && !blendEnabled) {

@@ -101,7 +101,6 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
 void IngameState::startTest()
 {
 	auto playerChar = getWorld()->createPlayer({270.f, -605.f, 40.f});
-	auto player = new PlayerController(playerChar);
 
 	getWorld()->state->playerObject = playerChar->getGameObjectID();
 

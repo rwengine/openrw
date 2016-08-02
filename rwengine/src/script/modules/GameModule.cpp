@@ -166,7 +166,7 @@ void game_create_vehicle_generator(const ScriptArguments& args)
 void game_set_vehicle_generator_count(const ScriptArguments& args)
 {
 	RW_CHECK(args.getWorld()->state->vehicleGenerators.size() > *args[0].globalInteger, "VehicleGenerator out of range");
-	if (args.getWorld()->state->vehicleGenerators.size() > *args[0].globalInteger) {
+	if ((int)args.getWorld()->state->vehicleGenerators.size() > *args[0].globalInteger) {
 		VehicleGenerator& generator = args.getWorld()->state->vehicleGenerators.at(*args[0].globalInteger);
 		generator.remainingSpawns = args[1].integer;
 	}

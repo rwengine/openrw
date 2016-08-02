@@ -235,7 +235,7 @@ bool LoaderCOL::load(char* data, const size_t size)
 
 bool LoaderCOL::load(const std::string& file)
 {
-	std::ifstream dfile(file.c_str());
+	std::ifstream dfile(file.c_str(), std::ios_base::binary);
 	if ( ! dfile.is_open()) {
 		return false;
 	}

@@ -14,6 +14,7 @@ class SoundManager
 {
 public:
 	SoundManager();
+	~SoundManager();
 	
 	bool loadSound(const std::string& name, const std::string& fileName);
 	bool isLoaded(const std::string& name);
@@ -63,8 +64,8 @@ private:
 
 	bool initializeOpenAL();
 
-	ALCcontext* alContext;
-	ALCdevice* alDevice;
+	ALCcontext* alContext = nullptr;
+	ALCdevice* alDevice = nullptr;
 
 	std::map<std::string, Sound> sounds;
 	std::map<std::string, MADStream> musics;

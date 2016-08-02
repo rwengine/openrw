@@ -7,9 +7,9 @@
 namespace RW
 {
 
-std::unique_ptr<BinaryStream> BinaryStream::parse(std::string filename)
+std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string& filename)
 {
-	std::ifstream dfile(filename);
+	std::ifstream dfile(filename, std::ios_base::binary);
 	if ( ! dfile.is_open()) {
 		std::cerr << "Error opening file " << filename << std::endl;
 		return nullptr;
