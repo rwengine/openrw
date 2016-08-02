@@ -7,6 +7,45 @@
 #include <array>
 #include <iostream>
 
+SoundManager::SoundManager()
+{
+	initializeOpenAL();
+}
+
+SoundManager::~SoundManager()
+{
+	// De-initialize OpenAL
+	if(alContext) {
+		alcMakeContextCurrent(NULL);
+		alcDestroyContext(alContext);
+	}
+
+	if(alDevice)
+		alcCloseDevice(alDevice);
+}
+
+bool SoundManager::initializeOpenAL()
+{
+	alDevice = alcOpenDevice(NULL);
+	if ( ! alDevice) {
+		std::cerr << "Could not find OpenAL device!" << std::endl;
+		return false;
+	}
+
+	alContext = alcCreateContext(alDevice, NULL);
+	if ( ! alContext) {
+		std::cerr << "Could not create OpenAL context!" << std::endl;
+		return false;
+	}
+
+	if ( ! alcMakeContextCurrent(alContext)) {
+		std::cerr << "Unable to make OpenAL context current!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 void SoundManager::SoundSource::loadFromFile(const std::string& filename)
 {
 	fileInfo.format = 0;
@@ -46,33 +85,6 @@ bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource)
 		soundSource.fileInfo.samplerate
 	));
 	alCheck(alSourcei(source, AL_BUFFER, buffer));
-
-	return true;
-}
-
-SoundManager::SoundManager()
-{
-	initializeOpenAL();
-}
-
-bool SoundManager::initializeOpenAL()
-{
-	alDevice = alcOpenDevice(NULL);
-	if ( ! alDevice) {
-		std::cerr << "Could not find OpenAL device!" << std::endl;
-		return false;
-	}
-
-	alContext = alcCreateContext(alDevice, NULL);
-	if ( ! alContext) {
-		std::cerr << "Could not create OpenAL context!" << std::endl;
-		return false;
-	}
-
-	if ( ! alcMakeContextCurrent(alContext)) {
-		std::cerr << "Unable to make OpenAL context current!" << std::endl;
-		return false;
-	}
 
 	return true;
 }
