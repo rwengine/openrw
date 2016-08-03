@@ -21,9 +21,6 @@ set(RWGAME_SOURCES
 	benchmarkstate.cpp
 	
 	DrawUI.cpp
-
-	debug/HttpServer.cpp
-	debug/TcpSocket.cpp
 )
 
 add_executable(rwgame
@@ -48,8 +45,7 @@ if(MINGW)
 	add_definitions(-D _USE_MATH_DEFINES)
 	target_link_libraries(rwgame
 	iconv
-	mman
-	ws2_32)
+	mman)
 endif()
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")

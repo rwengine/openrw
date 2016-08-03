@@ -5,7 +5,6 @@
 #include "ingamestate.hpp"
 #include "menustate.hpp"
 #include "benchmarkstate.hpp"
-#include "debug/HttpServer.hpp"
 
 #include <core/Profiler.hpp>
 
@@ -73,10 +72,6 @@ RWGame::RWGame(int argc, char* argv[])
 		if( strcmp( "--test", argv[i] ) == 0 )
 		{
 			test = true;
-		}
-		if( strcmp( "--debug", argv[i] ) == 0 )
-		{
-			debugScript = true;
 		}
         if( strcmp( "--load", argv[i] ) == 0 && i+1 < argc )
         {
@@ -253,28 +248,12 @@ void RWGame::startScript(const std::string& name)
 	if( f ) {
 		if( script ) delete script;
 
-		if ( debugScript ) {
-			if( httpserver ) {
-				delete httpserver;
-			}
-			httpserver_thread = new std::thread([&](){
-                httpserver = new HttpServer(this, world);
-				httpserver->run();
-			});
-		}
-		
 		SCMOpcodes* opcodes = new SCMOpcodes;
 		opcodes->modules.push_back(new VMModule);
 		opcodes->modules.push_back(new GameModule);
 		opcodes->modules.push_back(new ObjectModule);
 
 		script = new ScriptMachine(state, f, opcodes);
-
-        /* If Debug server is available, break on the first opcode executed */
-        if( httpserver ) {
-            //script->interuptNext();
-        }
-		//script->addBreakpoint(SCMBreakpointInfo::breakThreadName("i_save"));
 		
 		// Set up breakpoint handler
 		script->setBreakpointHandler(
@@ -295,7 +274,6 @@ void RWGame::startScript(const std::string& name)
 				}
 				
 				log.info("Script", ss.str());
-                httpserver->handleBreakpoint(bp);
             });
 		state->script = script;
 	}
@@ -412,11 +390,6 @@ int RWGame::run()
 
 		window->swap();
 	}
-
-    if( httpserver_thread )
-    {
-        httpserver_thread->join();
-    }
 
 	return 0;
 }
