@@ -4,7 +4,6 @@ namespace GameShaders {
 
 const char* WaterHQ::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in vec2 position;
 out vec2 TexCoords;
@@ -76,7 +75,6 @@ void main() {
 
 const char* Mask3D::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in vec3 position;
 
@@ -110,7 +108,6 @@ void main() {
 
 const char* Sky::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(std140) uniform SceneData {
 	mat4 projection;
@@ -146,7 +143,6 @@ void main() {
 
 const char* WorldObject::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
@@ -285,7 +281,6 @@ void main()
 
 const char* ScreenSpaceRect::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in vec2 position;
 out vec2 TexCoords;
@@ -317,7 +312,6 @@ void main()
 
 const char* DefaultPostProcess::VertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
 
 layout(location = 0) in vec2 position;
 out vec2 TexCoords;
