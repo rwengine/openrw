@@ -58,8 +58,6 @@ glm::vec4 indexToCoord(int font, int index)
 
 const char* TextVertexShader = R"(
 #version 330
-#extension GL_ARB_explicit_attrib_location : enable
-#extension GL_ARB_uniform_buffer_object : enable
 
 layout(location = 0) in vec2 position;
 layout(location = 3) in vec2 texcoord;
