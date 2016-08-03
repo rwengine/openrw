@@ -15,7 +15,6 @@
 #include <SDL2/SDL.h>
 
 class PlayerController;
-class HttpServer;
 
 class RWGame
 {
@@ -30,9 +29,6 @@ class RWGame
 	GameWindow *window = nullptr;
 	// Background worker
 	WorkContext *work = nullptr;
-	bool debugScript = false;
-    HttpServer* httpserver = nullptr;
-    std::thread* httpserver_thread = nullptr;
 	std::chrono::steady_clock clock;
 	std::chrono::steady_clock::time_point last_clock_time;
 
