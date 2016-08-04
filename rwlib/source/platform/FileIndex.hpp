@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+std::string findPathRealCase(const std::string& base_src, const std::string& path_src);
+
 class FileIndex
 {
 public:

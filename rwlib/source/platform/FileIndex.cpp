@@ -6,6 +6,43 @@
 
 using namespace boost::filesystem;
 
+/**
+ * Finds the 'real' case for a path, to get around the fact that Rockstar's data is usually the wrong case.
+ * @param base The base of the path to start looking from.
+ * @param path the lowercase path.
+ */
+std::string findPathRealCase(const std::string& base_src, const std::string& path_src)
+{
+	path base(base_src);
+	path searchpath(path_src);
+
+	// Iterate over each component of the path
+	for(const path& path_component : searchpath) {
+		std::string cmp_lower = path_component.string();
+		std::transform(cmp_lower.begin(), cmp_lower.end(), cmp_lower.begin(), ::tolower);
+
+		// Search the current base path for a filename matching the component we're searching for
+		bool found = false;
+		for(const directory_entry& entry : directory_iterator(base)) {
+			std::string lowerName = entry.path().filename().string();
+			std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+			if(lowerName == cmp_lower) {
+				// We got a match, so add it to base and continue
+				base /= lowerName;
+				found = true;
+				break;
+			}
+		}
+
+		if(!found) {
+			throw std::runtime_error("Can't find real path case of " + path_src);
+		}
+	}
+
+	return base.string();
+}
+
 void FileIndex::indexTree(const std::string& root)
 {
 	for(const auto& entry : recursive_directory_iterator(root)) {
