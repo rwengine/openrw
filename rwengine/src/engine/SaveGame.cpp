@@ -13,6 +13,8 @@
 #include <cstring>
 #include <iconv.h>
 
+#include <boost/filesystem.hpp>
+
 // Original save game file data structures
 typedef uint16_t BlockWord;
 typedef uint32_t BlockDword;
@@ -1216,11 +1218,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	
 	return true;
 }
-#ifndef RW_WINDOWS
-#include <dirent.h>
-#else
-#include <platform/msdirent.h>
-#endif
+
 bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 {
 	std::FILE* loadFile = std::fopen(file.c_str(), "rb");
@@ -1258,8 +1256,10 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 	return true;
 }
 
-std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
+std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo()
 {
+	using namespace boost::filesystem;
+
 	// TODO consider windows
 	auto homedir = getenv("HOME");
 	if( homedir == nullptr ) {
@@ -1267,29 +1267,24 @@ std::vector< SaveGameInfo > SaveGame::getAllSaveGameInfo()
 		return {};
 	}
 	const char gameDir[] = "GTA3 User Files";
-	std::string gamePath(homedir);
-	gamePath.append("/");
-	gamePath.append(gameDir);
 
-	DIR* dp = opendir(gamePath.c_str());
-	dirent* ep;
-	std::string realName;
-	if ( dp == NULL ) {
+	path gamePath(homedir);
+	gamePath /= gameDir;
+
+	if(!exists(gamePath) || !is_directory(gamePath))
 		return {};
-	}
+
 	std::vector<SaveGameInfo> infos;
-	while( (ep = readdir(dp)) )
-	{
-		if ( ep->d_type == DT_REG ) {
-			realName = ep->d_name;
-			if(realName.find(".b") != realName.npos) {
-				std::string path = gamePath+"/"+realName;
-				infos.emplace_back(SaveGameInfo{path, false, BasicState()});
-				infos.back().valid = getSaveInfo(infos.back().savePath, &infos.back().basicState);
-			}
+	for(const auto& entry : directory_iterator(gamePath)) {
+		path save_path = entry.path();
+
+		if(save_path.extension() == ".b") {
+			std::cout << save_path.string() << std::endl;
+			infos.emplace_back(SaveGameInfo {save_path.string(), false, BasicState()});
+			infos.back().valid = getSaveInfo(infos.back().savePath, &infos.back().basicState);
 		}
 	}
-	closedir(dp);
+
 	return infos;
 }
 
