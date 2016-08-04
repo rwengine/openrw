@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <platform/FileIndex.hpp>
 #include <loaders/LoaderIMG.hpp>
 
@@ -17,19 +18,19 @@ std::string findPathRealCase(const std::string& base_src, const std::string& pat
 	path searchpath(path_src);
 
 	// Iterate over each component of the path
-	for(const path& path_component : searchpath) {
-		std::string cmp_lower = path_component.string();
-		std::transform(cmp_lower.begin(), cmp_lower.end(), cmp_lower.begin(), ::tolower);
+	for(const path& path_component : boost::make_iterator_range(searchpath.begin(), searchpath.end())) {
+		std::string cmpLower = path_component.string();
+		std::transform(cmpLower.begin(), cmpLower.end(), cmpLower.begin(), ::tolower);
 
 		// Search the current base path for a filename matching the component we're searching for
 		bool found = false;
-		for(const directory_entry& entry : directory_iterator(base)) {
-			std::string lowerName = entry.path().filename().string();
+		for(const path& entry : boost::make_iterator_range(directory_iterator(base), {})) {
+			std::string lowerName = entry.filename().string();
 			std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
-			if(lowerName == cmp_lower) {
+			if(lowerName == cmpLower) {
 				// We got a match, so add it to base and continue
-				base /= lowerName;
+				base /= entry.filename();
 				found = true;
 				break;
 			}
@@ -45,13 +46,13 @@ std::string findPathRealCase(const std::string& base_src, const std::string& pat
 
 void FileIndex::indexTree(const std::string& root)
 {
-	for(const auto& entry : recursive_directory_iterator(root)) {
-		std::string directory = entry.path().parent_path().string();
-		std::string realName = entry.path().filename().string();
+	for(const path& entry : boost::make_iterator_range(recursive_directory_iterator(root), {})) {
+		std::string directory = entry.parent_path().string();
+		std::string realName = entry.filename().string();
 		std::string lowerName = realName;
 		std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
-		if(is_regular_file(entry.path())) {
+		if(is_regular_file(entry)) {
 			files[lowerName] = {lowerName, realName, directory, ""};
 		}
 	}
@@ -62,7 +63,7 @@ void FileIndex::indexArchive(const std::string& archive)
 	// Split directory from archive name
 	path archive_path = path(archive);
 	path directory = archive_path.parent_path();
-	path archive_basename = archive_path.stem();
+	path archive_basename = archive_path.filename();
 	path archive_full_path = directory/archive_basename;
 	
 	LoaderIMG img;	

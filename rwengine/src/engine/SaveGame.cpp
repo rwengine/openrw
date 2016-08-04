@@ -14,6 +14,7 @@
 #include <iconv.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 
 // Original save game file data structures
 typedef uint16_t BlockWord;
@@ -1275,9 +1276,7 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo()
 		return {};
 
 	std::vector<SaveGameInfo> infos;
-	for(const auto& entry : directory_iterator(gamePath)) {
-		path save_path = entry.path();
-
+	for(const path& save_path : boost::make_iterator_range(directory_iterator(gamePath), {})) {
 		if(save_path.extension() == ".b") {
 			std::cout << save_path.string() << std::endl;
 			infos.emplace_back(SaveGameInfo {save_path.string(), false, BasicState()});
