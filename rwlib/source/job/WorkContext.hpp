@@ -1,6 +1,4 @@
 #pragma once
-#ifndef _LOADCONTEXT_HPP_
-#define _LOADCONTEXT_HPP_
 
 #include <queue>
 #include <thread>
@@ -8,7 +6,6 @@
 #include <atomic>
 #include <memory>
 #include <functional>
-#include <fstream>
 #include <iostream>
 
 class WorkContext;
@@ -58,9 +55,6 @@ public:
 	virtual void complete() {}
 };
 
-// TODO: refactor everything to remove this.
-class GameWorld;
-
 /**
  * @brief A worker queue that runs work in the background.
  *
@@ -69,13 +63,15 @@ class GameWorld;
  */
 class WorkContext
 {
-	std::unique_ptr<LoadWorker> _worker;
+	std::mutex _inMutex;
+	std::mutex _outMutex;
 
 	std::queue<WorkJob*> _workQueue;
 	std::queue<WorkJob*> _completeQueue;
 
-	std::mutex _inMutex;
-	std::mutex _outMutex;
+	// Construct the worker last, so that it may use the queues
+	// immediately after initialization.
+	std::unique_ptr<LoadWorker> _worker;
 
 public:
 
@@ -97,17 +93,12 @@ public:
 	// Called by the worker thread - don't touch
 	void workNext();
 
-	const std::queue<WorkJob*> getWorkQueue() const { return _workQueue; }
-	const std::queue<WorkJob*> getCompleteQueue() const { return _completeQueue; }
-
 	bool isEmpty() {
 		std::lock_guard<std::mutex> guardIn( _inMutex );
-		std::lock_guard<std::mutex> guardOu( _outMutex );
+		std::lock_guard<std::mutex> guardOut( _outMutex );
 
-		return (getWorkQueue().size() + getCompleteQueue().size()) == 0;
+		return (_workQueue.size() + _completeQueue.size()) == 0;
 	}
 
 	void update();
 };
-
-#endif

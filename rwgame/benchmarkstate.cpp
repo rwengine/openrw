@@ -1,6 +1,7 @@
 #include "benchmarkstate.hpp"
 #include "RWGame.hpp"
 #include <engine/GameState.hpp>
+#include <fstream>
 
 BenchmarkState::BenchmarkState(RWGame* game, const std::string& benchfile)
 	: State(game)
