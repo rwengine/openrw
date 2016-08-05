@@ -10,14 +10,18 @@ addons:
       - libglm-dev
       - libsndfile-dev
       - libopenal-dev
-      - libboost-test-dev
       - libboost-filesystem-dev
+      # Dependencies for BUILD_TESTS
+      - libboost-test-dev
+      # Dependencies for BUILD_VIEWER
+      - qt5-default
+      - libqt5opengl5-dev
 git:
     depth: 3
 script:
     - mkdir build
     - cd build
-    - cmake .. -DBUILD_TESTS=1 -DTESTS_NODATA=1 && make
+    - cmake .. -DBUILD_TESTS=1 -DTESTS_NODATA=1 -DBUILD_VIEWER=1 -DBUILD_SCRIPT_TOOL=1 && make
     - tests/run_tests
 notifications:
     email: false
