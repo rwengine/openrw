@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+std::string findPathRealCase(const std::string& base_src, const std::string& path_src);
+
 class FileIndex
 {
 public:
@@ -19,12 +21,6 @@ public:
 		/// The archive filename (if applicable)
 		std::string archive;
 	};
-
-	/**
-	 * Adds the files contained within the given directory to the
-	 * file index.
-	 */
-	void indexDirectory(const std::string& directory);
 	
 	/**
 	 * Adds the files contained within the given directory tree to the

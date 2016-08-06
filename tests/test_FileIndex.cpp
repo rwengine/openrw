@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(test_index)
 {
 	FileIndex index;
 
-	index.indexDirectory(Global::getGamePath()+"/data");
+	index.indexTree(Global::getGamePath()+"/data");
 	
 	FileIndex::IndexData data;
 	BOOST_CHECK( index.findFile("cullzone.dat", data) );
@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(test_file)
 {
 	FileIndex index;
 
-	index.indexDirectory(Global::getGamePath()+"/data");
+	index.indexTree(Global::getGamePath()+"/data");
 	
 	auto handle = index.openFile("cullzone.dat");
 	BOOST_CHECK( handle != nullptr );

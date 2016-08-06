@@ -1,6 +1,9 @@
 ###########################################################
 ##      RWLIB
 ###########################################################
+
+find_package(Boost COMPONENTS filesystem system REQUIRED)
+
 SET(RWLIB_SOURCES
 
 	# GL stuff is only here temporarily, hoping to move it back to rwengine
@@ -44,11 +47,13 @@ add_library(rwlib
 	)
 
 include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/source")
+	"${CMAKE_CURRENT_SOURCE_DIR}/source"
+	"${Boost_INCLUDE_DIRS}")
 
 target_include_directories(rwlib
 	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 target_link_libraries(rwlib
 	${OPENGL_LIBRARIES}
-	${OPENRW_PLATFORM_LIBS})
+	${OPENRW_PLATFORM_LIBS}
+	${Boost_LIBRARIES})

@@ -1,9 +1,17 @@
 sudo: required
 dist: trusty
 language: cpp
-before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libbullet-dev libsdl2-dev libmad0-dev libglm-dev libsndfile-dev libopenal-dev libboost-test-dev
+addons:
+  apt:
+    packages:
+      - libbullet-dev
+      - libsdl2-dev
+      - libmad0-dev
+      - libglm-dev
+      - libsndfile-dev
+      - libopenal-dev
+      - libboost-test-dev
+      - libboost-filesystem-dev
 git:
     depth: 3
 script:

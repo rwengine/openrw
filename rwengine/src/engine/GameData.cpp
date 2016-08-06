@@ -14,64 +14,12 @@
 #include <loaders/LoaderGXT.hpp>
 #include <loaders/BackgroundLoader.hpp>
 #include <core/Logger.hpp>
+#include <platform/FileIndex.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-
-#ifndef RW_WINDOWS
-#include <dirent.h>
-#else
-#include <platform/msdirent.h>
-#endif
-#include <sys/types.h>
-
-/**
- * Finds the 'real' case for a path, to get around the fact that Rockstar's data is usually the wrong case.
- * @param base The base of the path to start looking from.
- * @param path the lowercase path.
- */
-std::string findPathRealCase(const std::string& base, const std::string& path) 
-{
-#ifndef RW_WINDOWS
-	size_t endslash = path.find("/");
-	bool isDirectory = true;
-	if(endslash == path.npos) {
-		isDirectory = false;
-	}
-	std::string orgFileName = isDirectory ? path.substr(0, endslash) : path;
-	std::transform(orgFileName.begin(), orgFileName.end(), orgFileName.begin(), ::tolower);
-	std::string realName;
-	
-	// Open the current "base" path (i.e. the real path)
-	DIR* dp = opendir(base.c_str());
-	dirent* ep;
-	
-	if( dp != NULL) {
-		while( (ep = readdir(dp)) ) {
-			realName = ep->d_name;
-			std::string lowerRealName = realName;
-			std::transform(lowerRealName.begin(), lowerRealName.end(), lowerRealName.begin(), ::tolower);
-			if( lowerRealName == orgFileName) {
-				closedir(dp);
-				if( isDirectory) {
-					return findPathRealCase(base + "/" + realName, path.substr(endslash+1));
-				}
-				else {
-					return base + "/" + realName;
-				}
-			}
-		}
-		closedir(dp);
-	}
-
-	return "";
-#else 
-	// Is anything other than Windows likely to fall here?
-	return base + "/" + path;
-#endif
-}
 
 // Yet another hack function to fix these paths
 std::string fixPath(std::string path) {
@@ -83,7 +31,6 @@ std::string fixPath(std::string path) {
 	}
 	return path;
 }
-
 
 GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
 : datpath(path), logger(log), workContext(work), engine(nullptr)
