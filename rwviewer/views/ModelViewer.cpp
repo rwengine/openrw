@@ -5,6 +5,7 @@
 #include <engine/Animator.hpp>
 #include <objects/GameObject.hpp>
 #include "ViewerWidget.hpp"
+#include <fstream>
 
 ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent, Qt::WindowFlags f)
 : ViewerInterface(parent, f), viewing(nullptr), skeleton(nullptr)
