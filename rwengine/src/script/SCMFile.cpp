@@ -11,14 +11,14 @@ void SCMFile::loadFile(char *data, unsigned int size)
 
 	_target = static_cast<SCMTarget>(_data[jumpOpSize]);
 	globalSectionOffset = jumpOpSize+1u;
-	modelSectionOffset = read<uint32>(jumpParamSize) + jumpOpSize + 1u;
-	missionSectionOffset = read<uint32>(modelSectionOffset-jumpOpSize-1u+jumpParamSize) + jumpOpSize + 1u;
-	codeSectionOffset = read<uint32>(missionSectionOffset-jumpOpSize-1u+jumpParamSize);
+	modelSectionOffset = read<uint32_t>(jumpParamSize) + jumpOpSize + 1u;
+	missionSectionOffset = read<uint32_t>(modelSectionOffset-jumpOpSize-1u+jumpParamSize) + jumpOpSize + 1u;
+	codeSectionOffset = read<uint32_t>(missionSectionOffset-jumpOpSize-1u+jumpParamSize);
 
-	unsigned int model_count = read<uint32>(modelSectionOffset);
+	unsigned int model_count = read<uint32_t>(modelSectionOffset);
 	models.reserve(model_count);
 
-	int i = modelSectionOffset + sizeof(uint32);
+	int i = modelSectionOffset + sizeof(uint32_t);
 	for(unsigned int m = 0; m < model_count; ++m) {
 		char model_name[24];
 		for(size_t c = 0; c < 24; ++c) {
@@ -28,16 +28,16 @@ void SCMFile::loadFile(char *data, unsigned int size)
 	}
 
 	i = missionSectionOffset;
-	mainSize           = read<uint32>(i);
-	i += sizeof(uint32);
-	missionLargestSize = read<uint32>(i);
-	i += sizeof(uint32);
-	unsigned int missionCount = read<uint32>(i);
+	mainSize           = read<uint32_t>(i);
+	i += sizeof(uint32_t);
+	missionLargestSize = read<uint32_t>(i);
+	i += sizeof(uint32_t);
+	unsigned int missionCount = read<uint32_t>(i);
 	missionOffsets.reserve(missionCount);
-	i += sizeof(uint32);
+	i += sizeof(uint32_t);
 
 	for(unsigned int m = 0; m <	missionCount; ++m) {
-		missionOffsets.push_back(read<uint32>(i));
-		i += sizeof(uint32);
+		missionOffsets.push_back(read<uint32_t>(i));
+		i += sizeof(uint32_t);
 	}
 }
