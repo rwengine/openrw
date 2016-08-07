@@ -13,7 +13,7 @@ void ScriptModule::bind(ScriptFunctionID id, ScriptFunction func, bool condition
 				desc
 			}
 		}
-	);
+				);
 }
 
 bool ScriptModule::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
