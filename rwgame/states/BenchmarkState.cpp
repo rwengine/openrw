@@ -1,4 +1,4 @@
-#include "benchmarkstate.hpp"
+#include "BenchmarkState.hpp"
 #include "RWGame.hpp"
 #include <engine/GameState.hpp>
 #include <fstream>

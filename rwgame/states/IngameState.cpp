@@ -1,7 +1,7 @@
-#include "ingamestate.hpp"
+#include "IngameState.hpp"
 #include "RWGame.hpp"
-#include "pausestate.hpp"
-#include "debugstate.hpp"
+#include "PauseState.hpp"
+#include "DebugState.hpp"
 #include "DrawUI.hpp"
 
 #include <ai/PlayerController.hpp>

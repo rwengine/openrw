@@ -1,4 +1,4 @@
-#include "debugstate.hpp"
+#include "DebugState.hpp"
 #include "RWGame.hpp"
 #include <ai/PlayerController.hpp>
 #include <objects/CharacterObject.hpp>

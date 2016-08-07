@@ -59,7 +59,6 @@ add_executable(run_tests ${TEST_SOURCES})
 include_directories(
 	include
 	"${CMAKE_SOURCE_DIR}/tests"
-	"${CMAKE_SOURCE_DIR}/rwengine/include"
 	"${CMAKE_SOURCE_DIR}/rwgame")
 
 include_directories(SYSTEM
