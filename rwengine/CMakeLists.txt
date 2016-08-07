@@ -128,6 +128,8 @@ set(RWENGINE_SOURCES
 	src/script/ScriptModule.hpp
 	src/script/ScriptTypes.cpp
 	src/script/ScriptTypes.hpp
+	src/script/modules/GTA3Module.cpp
+	src/script/modules/GTA3Module.hpp
 	src/script/modules/GameModule.cpp
 	src/script/modules/GameModule.hpp
 	src/script/modules/ObjectModule.cpp
