@@ -2,7 +2,7 @@
 #ifndef _PICKUPOBJECT_HPP_
 #define _PICKUPOBJECT_HPP_
 #include <objects/GameObject.hpp>
-#include <bullet/btBulletCollisionCommon.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 

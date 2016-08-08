@@ -2,8 +2,8 @@
 #ifndef _CHARACTEROBJECT_HPP_
 #define _CHARACTEROBJECT_HPP_
 #include <objects/GameObject.hpp>
-#include <bullet/BulletDynamics/Character/btKinematicCharacterController.h>
-#include <bullet/btBulletCollisionCommon.h>
+#include <BulletDynamics/Character/btKinematicCharacterController.h>
+#include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/glm.hpp>
 #include <array>

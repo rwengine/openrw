@@ -1,5 +1,5 @@
 #pragma once
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 /**
  * Implements raycast callback that ignores a specified btCollisionObject
