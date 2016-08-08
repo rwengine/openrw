@@ -9752,7 +9752,7 @@ void opcode_034c(const ScriptArguments& args) {
 	@arg angle1 Angle
 	@arg arg4 Boolean true/false
 */
-void opcode_034d(const ScriptArguments& args, const ScriptObject object, const ScriptFloat angle0, const ScriptFloat angle1, const ScriptBoolean arg4) {
+bool opcode_034d(const ScriptArguments& args, const ScriptObject object, const ScriptFloat angle0, const ScriptFloat angle1, const ScriptBoolean arg4) {
 	RW_UNUSED(angle0);
 	RW_UNUSED(arg4);
 	if( object )
@@ -9761,6 +9761,7 @@ void opcode_034d(const ScriptArguments& args, const ScriptObject object, const S
 		object->setHeading(angle1);
 	}
 	RW_UNUSED(args);
+	return true;
 }
 
 /**
