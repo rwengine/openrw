@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>

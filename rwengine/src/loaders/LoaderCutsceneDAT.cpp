@@ -1,5 +1,6 @@
 #include <loaders/LoaderCutsceneDAT.hpp>
 #include <sstream>
+#include <algorithm>
 
 void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file)
 {

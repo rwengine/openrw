@@ -1,5 +1,6 @@
 #include <loaders/WeatherLoader.hpp>
 
+#include <cctype>
 #include <iostream>
 #include <sstream>
 #include <fstream>

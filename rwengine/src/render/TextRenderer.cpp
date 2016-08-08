@@ -3,6 +3,7 @@
 #include <engine/GameWorld.hpp>
 
 #include <algorithm>
+#include <cctype>
 
 /// @todo This is very rough
 int charToIndex(char g)
