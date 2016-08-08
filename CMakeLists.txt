@@ -41,8 +41,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	set(OPENRW_PLATFORM_LIBS iconv)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_definitions(-DRW_WINDOWS)
-	set(BULLET_ROOT "$ENV{BULLET_ROOT}")
-	include_directories("$ENV{BULLET_ROOT}/src")
 else ()
 	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()
@@ -99,6 +97,7 @@ include_directories(
 	${SDL2_INCLUDE_DIR}
 	${GLM_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIR}
+	${BULLET_INCLUDE_DIRS}
 )
 
 # External-internal dependencies
