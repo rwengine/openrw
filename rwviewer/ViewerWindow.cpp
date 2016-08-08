@@ -169,7 +169,6 @@ void ViewerWindow::loadGame(const QString &path)
 
 		// Initalize all the archives.
 		gameWorld->data->loadIMG("/models/gta3");
-		gameWorld->data->loadIMG("/models/txd");
 		gameWorld->data->loadIMG("/anim/cuts");
 
 		loadedData(gameWorld);
