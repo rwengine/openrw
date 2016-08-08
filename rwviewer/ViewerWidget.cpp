@@ -54,7 +54,7 @@ std::vector<WidgetVertex> widgetVerts = {
 void ViewerWidget::initializeGL()
 {
 	QGLWidget::initializeGL();
-	timer.setInterval(16);
+	timer.setInterval(25);
 	connect(&timer, SIGNAL(timeout()), SLOT(updateGL()));
 	timer.start();
 
