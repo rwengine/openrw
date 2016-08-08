@@ -15,8 +15,8 @@
 #include <objects/VehicleObject.hpp>
 
 
-ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-	: QGLWidget(parent, shareWidget, f)
+ViewerWidget::ViewerWidget(QGLFormat g, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
+	: QGLWidget(g, parent, shareWidget, f)
 	, gworld(nullptr)
 	, activeModel(nullptr)
 	, selectedFrame(nullptr)

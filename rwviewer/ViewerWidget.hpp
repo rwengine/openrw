@@ -52,7 +52,7 @@ class ViewerWidget : public QGLWidget
 	void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
 public:
 
-	ViewerWidget(QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
+	ViewerWidget(QGLFormat g, QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
 
 	virtual void initializeGL();
 	

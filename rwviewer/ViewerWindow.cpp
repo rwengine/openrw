@@ -46,7 +46,12 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
 	//----------------------- View Mode setup
-	viewerWidget = new ViewerWidget;
+
+	QGLFormat glFormat;
+	glFormat.setVersion( 3, 3 );
+	glFormat.setProfile( QGLFormat::CoreProfile );
+
+	viewerWidget = new ViewerWidget(glFormat);
 	viewerWidget->context()->makeCurrent();
 	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
 
