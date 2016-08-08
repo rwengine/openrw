@@ -1,7 +1,6 @@
 #ifndef DEBUGSTATE_HPP
 #define DEBUGSTATE_HPP
 
-#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class DebugState : public State
