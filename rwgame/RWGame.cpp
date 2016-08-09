@@ -25,6 +25,8 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "GitSHA1.h"
 
 // Use first 8 chars of git hash as the build string
@@ -53,15 +55,15 @@ RWGame::RWGame(int argc, char* argv[])
 
 	for( int i = 1; i < argc; ++i )
 	{
-		if( strcasecmp( "-w", argv[i] ) == 0 && i+1 < argc )
+		if( boost::iequals( "-w", argv[i] ) && i+1 < argc )
 		{
 			w = std::atoi(argv[i+1]);
 		}
-		if( strcasecmp( "-h", argv[i] ) == 0 && i+1 < argc )
+		if( boost::iequals( "-h", argv[i] ) && i+1 < argc )
 		{
 			h = std::atoi(argv[i+1]);
 		}
-		if( strcasecmp( "-f", argv[i] ) == 0 )
+		if( boost::iequals( "-f", argv[i] ))
 		{
 			fullscreen = true;
 		}

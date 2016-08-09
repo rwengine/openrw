@@ -1,3 +1,5 @@
+find_package(Boost REQUIRED)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
 set(RWGAME_SOURCES
