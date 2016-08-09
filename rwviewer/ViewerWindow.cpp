@@ -46,7 +46,12 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
 	connect(ex, SIGNAL(triggered()), QApplication::instance(), SLOT(closeAllWindows()));
 
 	//----------------------- View Mode setup
-	viewerWidget = new ViewerWidget;
+
+	QGLFormat glFormat;
+	glFormat.setVersion( 3, 3 );
+	glFormat.setProfile( QGLFormat::CoreProfile );
+
+	viewerWidget = new ViewerWidget(glFormat);
 	viewerWidget->context()->makeCurrent();
 	connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget, SLOT(dataLoaded(GameWorld*)));
 
@@ -164,7 +169,6 @@ void ViewerWindow::loadGame(const QString &path)
 
 		// Initalize all the archives.
 		gameWorld->data->loadIMG("/models/gta3");
-		gameWorld->data->loadIMG("/models/txd");
 		gameWorld->data->loadIMG("/anim/cuts");
 
 		loadedData(gameWorld);

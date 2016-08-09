@@ -15,8 +15,8 @@
 #include <objects/VehicleObject.hpp>
 
 
-ViewerWidget::ViewerWidget(QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-	: QGLWidget(parent, shareWidget, f)
+ViewerWidget::ViewerWidget(QGLFormat g, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
+	: QGLWidget(g, parent, shareWidget, f)
 	, gworld(nullptr)
 	, activeModel(nullptr)
 	, selectedFrame(nullptr)
@@ -54,7 +54,7 @@ std::vector<WidgetVertex> widgetVerts = {
 void ViewerWidget::initializeGL()
 {
 	QGLWidget::initializeGL();
-	timer.setInterval(16);
+	timer.setInterval(25);
 	connect(&timer, SIGNAL(timeout()), SLOT(updateGL()));
 	timer.start();
 
