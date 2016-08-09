@@ -68,8 +68,10 @@ template <class Tobj, class Tvec>
 bool objectInArea(const ScriptArguments& args, const Tobj& object, const Tvec& min, const Tvec& max, bool marker)
 {
 	if (marker) {
-		RW_UNUSED(args);
-		RW_UNIMPLEMENTED("Area check marker");
+		auto center = (min+max);
+		auto radius = (max-min);
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(center.x, center.y, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground, glm::vec3(radius.x, radius.y, 5.f));
 	}
 	return objectInBounds(object, glm::min(min, max), glm::max(min, max));
 }
@@ -94,19 +96,19 @@ template <class Tobj, class Tvec>
 inline bool objectInRadius(const ScriptArguments& args, const Tobj& object, const Tvec& center, const Tvec& radius, bool marker)
 {
 	if (marker) {
-		RW_UNUSED(args);
-		RW_UNIMPLEMENTED("Area check marker");
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(center.x, center.y, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground, glm::vec3(radius.x, radius.y, 5.f));
 	}
 	return objectInSphere(object, center, radius);
 }
 template <class Tvec>
 inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object, GameObject* near, const Tvec& radius, bool marker)
 {
-	if (marker) {
-		RW_UNUSED(args);
-		RW_UNIMPLEMENTED("Area check marker");
-	}
 	Tvec center (near->getPosition());
+	if (marker) {
+		auto ground = args.getWorld()->getGroundAtPosition(glm::vec3(center.x, center.y, 100.f));
+		args.getWorld()->drawAreaIndicator(AreaIndicatorInfo::Cylinder, ground, glm::vec3(radius.x, radius.y, 5.f));
+	}
 	return objectInSphere(object, center, radius);
 }
 
