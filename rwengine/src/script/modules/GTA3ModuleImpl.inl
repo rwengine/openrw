@@ -2555,9 +2555,6 @@ bool opcode_00e5(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00e6(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord, ScriptVec2 radius, const ScriptBoolean arg6) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (! character->isStopped()) {
 		return false;
 	}
@@ -2598,9 +2595,6 @@ bool opcode_00e7(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00e8(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord, ScriptVec2 radius, const ScriptInt arg6) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (! character->isStopped()) {
 		return false;
 	}
@@ -2621,9 +2615,6 @@ bool opcode_00e8(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00e9(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptInt arg5) {
 	auto ply = player->getCharacter();
-	if (ply != nullptr) {
-		return false;
-	}
 	return script::objectInRadiusNear(args, ply, character, radius, arg5);
 }
 
@@ -2659,9 +2650,6 @@ bool opcode_00ea(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00eb(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptInt arg5) {
 	auto ply = player->getCharacter();
-	if (ply != nullptr) {
-		return false;
-	}
 	if (ply->getCurrentVehicle() == nullptr) {
 		return false;
 	}
@@ -2868,9 +2856,6 @@ bool opcode_00f5(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00f6(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (character->getCurrentVehicle() != nullptr) {
 		return false;
 	}
@@ -2888,9 +2873,6 @@ bool opcode_00f6(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00f7(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (character->getCurrentVehicle() == nullptr) {
 		return false;
 	}
@@ -2908,9 +2890,6 @@ bool opcode_00f7(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00f8(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (! character->isStopped()) {
 		return false;
 	}
@@ -2932,9 +2911,6 @@ bool opcode_00f8(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00f9(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto character = player->getCharacter();
-	if (character != nullptr) {
-		return false;
-	}
 	if (! character->isStopped()) {
 		return false;
 	}
@@ -3088,9 +3064,6 @@ bool opcode_00ff(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg arg8 Boolean true/false
 */
 bool opcode_0100(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord, ScriptVec3 radius, const ScriptBoolean arg8) {
-	if (character != nullptr) {
-		return false;
-	}
 	if (character->getCurrentVehicle() == nullptr) {
 		return false;
 	}
