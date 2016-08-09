@@ -424,7 +424,7 @@ void RWGame::tick(float dt)
 		}
 		
 		// Clean up old VisualFX
-		for( ssize_t i = 0; i < static_cast<ssize_t>(world->effects.size()); ++i )
+		for( int i = 0; i < static_cast<int>(world->effects.size()); ++i )
 		{
 			VisualFX* effect = world->effects[i];
 			if( effect->getType() == VisualFX::Particle )

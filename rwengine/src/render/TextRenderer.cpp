@@ -113,7 +113,7 @@ TextRenderer::TextInfo::TextInfo()
 }
 
 TextRenderer::TextRenderer(GameRenderer* renderer)
-: fonts({}), renderer(renderer)
+: renderer(renderer)
 {
 	textShader = renderer->getRenderer()->createShader(
 		TextVertexShader, TextFragmentShader );
