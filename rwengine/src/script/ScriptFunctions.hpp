@@ -191,6 +191,14 @@ inline BlipData createObjectBlipSprite(const ScriptArguments& args, GameObject* 
 
 ScriptModel getModel(const ScriptArguments& args, ScriptModel model);
 
+inline void objectPostCreate(const ScriptArguments& args, GameObject* object)
+{
+	if (args.getThread()->isMission) {
+		/// @todo verify if the mission object list should be kept on a per-thread basis?
+		args.getState()->missionObjects.push_back(object);
+	}
+}
+
 }
 
 #endif

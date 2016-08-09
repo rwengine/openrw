@@ -298,7 +298,7 @@ struct GameState
 	int32_t* scriptOnMissionFlag;
 	
 	/** Objects created by the current mission */
-	std::vector<GameObjectID> missionObjects;
+	std::vector<GameObject*> missionObjects;
 	
 	bool overrideNextStart;
 	glm::vec4 nextRestartLocation;

@@ -1807,6 +1807,7 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
 
 	coord = script::getGround(args, coord);
 	character = args.getWorld()->createPedestrian(model, coord + script::kSpawnOffset);
+	script::objectPostCreate(args, character);
 
 	/// @todo track object mission status
 }
@@ -1965,7 +1966,7 @@ bool opcode_00a4(const ScriptArguments& args, const ScriptCharacter character, S
 void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptVec3 coord, ScriptVehicle& vehicle) {
 	coord = script::getGround(args, coord);
 	vehicle = args.getWorld()->createVehicle(model, coord + script::kSpawnOffset);
-	/// @todo handle object mission status
+	script::objectPostCreate(args, vehicle);
 }
 
 /**
@@ -2344,16 +2345,12 @@ void opcode_00d7(const ScriptArguments& args, const ScriptLabel arg1) {
 */
 void opcode_00d8(const ScriptArguments& args) {
 	/// @todo verify behaviour
-	for( auto oid : args.getState()->missionObjects )
-	{
-		auto obj = args.getWorld()->vehiclePool.find(oid);
-		if( obj )
-		{
-			args.getWorld()->destroyObjectQueued(obj);
-		}
+	auto& missionObjects = args.getState()->missionObjects;
+	for (auto object : missionObjects) {
+		args.getWorld()->destroyObjectQueued(object);
 	}
 	
-	args.getState()->missionObjects.clear();
+	missionObjects.clear();
 	
 	*args.getState()->scriptOnMissionFlag = 0;
 }
@@ -3538,6 +3535,7 @@ void opcode_0129(const ScriptArguments& args, const ScriptVehicle vehicle, const
 
 	character =
 	    args.getWorld()->createPedestrian(model, vehicle->getPosition());
+	script::objectPostCreate(args, character);
 
 	character->setCurrentVehicle(vehicle, 0);
 	vehicle->setOccupant(0, character);
@@ -5453,6 +5451,7 @@ void opcode_01c8(const ScriptArguments& args, const ScriptVehicle vehicle, const
 	RW_UNUSED(pedType);
 
 	character = args.getWorld()->createPedestrian(model, vehicle->getPosition());
+	script::objectPostCreate(args, character);
 
 	int pickedseat = arg4;
 	if (pickedseat <= -1) {

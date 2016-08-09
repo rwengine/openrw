@@ -584,6 +584,12 @@ void GameWorld::destroyObject(GameObject* object)
 	auto& pool = getTypeObjectPool(object);
 	pool.remove(object);
 
+	// Remove from mission objects
+	if (state) {
+		auto& mO = state->missionObjects;
+		mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
+	}
+
 	auto it = std::find(allObjects.begin(), allObjects.end(), object);
 	RW_CHECK(it != allObjects.end(), "destroying object not in allObjects");
 	if (it != allObjects.end()) {
