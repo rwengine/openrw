@@ -16,7 +16,6 @@ void LoadingState::enter()
 	}
 
 	game->newGame();
-	getWindow().hideCursor();
 }
 
 void LoadingState::exit()

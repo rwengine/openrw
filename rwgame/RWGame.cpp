@@ -90,7 +90,6 @@ RWGame::RWGame(int argc, char* argv[])
 
 	window = new GameWindow();
 	window->create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
-	window->hideCursor();
 
 	work = new WorkContext();
 
