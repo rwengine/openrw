@@ -25,7 +25,6 @@ set(RWENGINE_SOURCES
 	src/audio/SoundManager.hpp
 	src/audio/alCheck.cpp
 	src/audio/alCheck.hpp
-	src/core/FileArchive.hpp
 	src/core/Logger.cpp
 	src/core/Logger.hpp
 	src/core/Profiler.cpp
