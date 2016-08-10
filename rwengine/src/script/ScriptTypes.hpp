@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _SCRIPTTYPES_HPP_
-#define _SCRIPTTYPES_HPP_
+#ifndef RWENGINE_SCRIPTTYPES_HPP
+#define RWENGINE_SCRIPTTYPES_HPP
 #include <rw/defines.hpp>
 
 #include <cstdint>

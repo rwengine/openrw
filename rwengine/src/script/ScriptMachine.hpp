@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _SCRIPTMACHINE_HPP_
-#define _SCRIPTMACHINE_HPP_
+#ifndef RWENGINE_SCRIPTMACHINE_HPP
+#define RWENGINE_SCRIPTMACHINE_HPP
 #include <rw/defines.hpp>
 #include <script/ScriptTypes.hpp>
 #include <sstream>
