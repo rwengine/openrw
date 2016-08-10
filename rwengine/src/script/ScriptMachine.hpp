@@ -136,59 +136,6 @@ struct SCMThread
 	std::array<pc_t, SCM_STACK_DEPTH> calls;
 };
 
-#include <cstring>
-/**
- * Stores information about where breakpoints should be triggered.
- * 
- * breakpointFlags stores the state to be checked against.
- */
-struct SCMBreakpointInfo
-{
-	enum /* Breakpoint Flags */ {
-		BP_ProgramCounter = 1,
-		BP_ThreadName = 2
-	};
-	uint8_t breakpointFlags;
-	SCMThread::pc_t programCounter;
-	char threadName[17];
-
-	bool operator == (const SCMBreakpointInfo& rhs) const
-	{
-		if (breakpointFlags != rhs.breakpointFlags) return false;
-		if ((breakpointFlags & BP_ProgramCounter) != 0)
-		{
-			if (programCounter != rhs.programCounter) return false;
-		}
-		if ((breakpointFlags & BP_ThreadName) != 0)
-		{
-			if (strncmp(threadName, rhs.threadName, 17) != 0) return false;
-		}
-		return true;
-	}
-
-	static SCMBreakpointInfo breakThreadName(char threadName[17])
-	{
-		SCMBreakpointInfo i;
-		i.breakpointFlags = BP_ThreadName;
-		std::strncpy(i.threadName, threadName, 17);
-		return i;
-	}
-};
-
-/**
- * Information about breakpoints that have been hit
- */
-struct SCMBreakpoint
-{
-	SCMThread::pc_t pc;
-	SCMThread* thread;
-	ScriptMachine* vm;
-	ScriptFunctionMeta* function;
-	ScriptArguments* args;
-	/** The breakpoint entry that triggered this breakpoint */
-	SCMBreakpointInfo* info;
-};
-
 /**
  * Implements the actual fetch-execute mechanism for the game script virtual machine.
  * 
@@ -205,9 +152,6 @@ struct SCMBreakpoint
  * Within ScriptMachine, each thread's program counter is used to execute an instruction
  * by consuming the correct number of arguments, allowing the next instruction to be found,
  * and then dispatching a call to the opcode's function.
- *
- * Breakpoints can be set which will call the breakpoint hander, where it is possible
- * to halt execution by refusing to return until the handler is ready to continue.
  */
 class ScriptMachine
 {
@@ -227,32 +171,6 @@ public:
 	std::vector<SCMByte>& getGlobalData() { return globalData; }
 
 	GameState* getState() const { return state; }
-	
-	typedef std::function<void (const SCMBreakpoint&)> BreakpointHandler;
-
-	/**
-	 * Set the breakpoint handler callback.
-	 *
-	 * When the VM reaches an instruction marked as a brekapoint
-	 * by addBreakpoint, the handler will be called with information
-	 * about the state of the VM and the active thread.
-	 */
-	void setBreakpointHandler(const BreakpointHandler& handler);
-
-	/**
-	 * Adds a breakpoint
-	 */
-	void addBreakpoint(const SCMBreakpointInfo& bpi);
-
-	/**
-	 * Removes a breakpoint.
-	 */
-	void removeBreakpoint(const SCMBreakpointInfo& bpi);
-
-    /**
-     * Interupt VM execution at the start of the next instruction
-     */
-    void interuptNext();
 
 	/**
 	 * @brief executes threads until they are all in waiting state.
@@ -263,18 +181,12 @@ private:
 	SCMFile* _file;
 	SCMOpcodes* _ops;
 	GameState* state;
-    bool interupt;
 
 	std::list<SCMThread> _activeThreads;
 
 	void executeThread(SCMThread& t, int msPassed);
 
-	SCMBreakpointInfo* findBreakpoint(SCMThread& t, SCMThread::pc_t pc);
-
 	std::vector<SCMByte> globalData;
-
-	BreakpointHandler bpHandler;
-	std::vector<SCMBreakpointInfo> breakpoints;
 };
 
 #endif

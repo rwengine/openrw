@@ -27,19 +27,12 @@ bool SCMOpcodes::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out)
 	return false;
 }
 
-void ScriptMachine::interuptNext()
-{
-    interupt = true;
-}
-
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
 	if( t.wakeCounter > 0 ) {
 		t.wakeCounter = std::max( t.wakeCounter - msPassed, 0 );
 	}
 	if( t.wakeCounter > 0 ) return;
-	
-	bool hasDebugging = !! bpHandler;
 	
     while( t.wakeCounter == 0 ) {
         auto pc = t.programCounter;
@@ -128,22 +121,6 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 
         ScriptArguments sca(&parameters, &t, this);
 
-        if( hasDebugging )
-        {
-			auto activeBreakpoint = findBreakpoint(t, pc);
-			if( activeBreakpoint || interupt )
-			{
-                interupt = false;
-                SCMBreakpoint bp;
-                bp.pc = t.programCounter;
-                bp.thread = &t;
-                bp.vm = this;
-                bp.function = &code;
-                bp.args = &sca;
-                bpHandler(bp);
-            }
-        }
-
 #if RW_SCRIPT_DEBUG
 		static auto sDebugThreadName = getenv("OPENRW_DEBUG_THREAD");
 		if (!sDebugThreadName || strncmp(t.name, sDebugThreadName, 8) == 0)
@@ -213,7 +190,7 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 }
 
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile *file, SCMOpcodes *ops)
-    : _file(file), _ops(ops), state(_state), interupt(false)
+    : _file(file), _ops(ops), state(_state)
 {
 	auto globals = _file->getGlobalsSize();
 	globalData.resize(globals);
@@ -266,50 +243,4 @@ void ScriptMachine::execute(float dt)
         }
 	}
 }
-
-SCMBreakpointInfo* ScriptMachine::findBreakpoint(SCMThread& t, SCMThread::pc_t pc)
-{
-	for(std::vector<SCMBreakpointInfo>::iterator bp = breakpoints.begin(); bp != breakpoints.end(); ++bp)
-	{
-		if( (bp->breakpointFlags & SCMBreakpointInfo::BP_ProgramCounter) == SCMBreakpointInfo::BP_ProgramCounter )
-		{
-			if( bp->programCounter != pc )
-			{
-				continue;
-			}
-		}
-		if( (bp->breakpointFlags & SCMBreakpointInfo::BP_ThreadName) == SCMBreakpointInfo::BP_ThreadName )
-		{
-			if( std::strcmp(bp->threadName, t.name) != 0 )
-			{
-				continue;
-			}
-		}
-		return &(*bp);
-	}
-	return nullptr;
-}
-
-void ScriptMachine::setBreakpointHandler(const ScriptMachine::BreakpointHandler& handler)
-{
-	bpHandler = handler;
-}
-
-void ScriptMachine::addBreakpoint(const SCMBreakpointInfo& bpi)
-{
-	breakpoints.push_back(bpi);
-}
-
-void ScriptMachine::removeBreakpoint(const SCMBreakpointInfo& bpi)
-{
-	for (size_t i = 0; i < breakpoints.size(); ++i)
-	{
-		if (bpi == breakpoints[i])
-		{
-			breakpoints.erase(breakpoints.begin() + i);
-			return;
-		}
-	}
-}
-
 
