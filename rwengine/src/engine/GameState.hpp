@@ -243,8 +243,9 @@ struct GarageInfo
  * Gameplay state object that holds persistent state, and references runtime
  * world state.
  */
-struct GameState
+class GameState
 {
+public:
 	/**
 	  Basic Game State
 	 */

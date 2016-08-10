@@ -21,7 +21,7 @@ class ModelFrame;
 class GameWorld;
 class GameObject;
 
-class AreaIndicatorInfo;
+struct AreaIndicatorInfo;
 
 /// @todo migrate to some other way of rendering each object type.
 class CharacterObject;
