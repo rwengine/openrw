@@ -126,8 +126,7 @@ RWGame::RWGame(int argc, char* argv[])
 
 	data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
-	/// @TODO language choices.
-	data->loadGXT("american.gxt");
+	data->loadGXT(config.getGameLanguage() + ".gxt");
 	
 	getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater, 128*128);
 	

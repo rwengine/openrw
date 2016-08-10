@@ -24,6 +24,7 @@ public:
 	bool isValid();
 
 	const std::string& getGameDataPath() const { return m_gamePath; }
+	const std::string& getGameLanguage() const { return m_gameLanguage; }
 	bool getInputInvertY() const { return m_inputInvertY; }
 
 private:
@@ -39,6 +40,9 @@ private:
 
 	/// Path to the game data
 	std::string m_gamePath;
+
+	/// Language for game
+	std::string m_gameLanguage = "american";
 
 	/// Invert the y axis for camera control.
 	bool m_inputInvertY;
