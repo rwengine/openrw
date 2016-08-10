@@ -71,44 +71,6 @@ struct UnknownType : SCMException
 	}
 };
 
-struct UnimplementedOpcode : SCMException
-{
-	SCMOpcode opcode;
-	SCMParams parameters;
-
-	UnimplementedOpcode(SCMOpcode opcode, SCMParams parameters)
-		: opcode(opcode), parameters(parameters) {}
-
-	std::string what() const {
-		std::stringstream ss;
-		ss << "Unimplemented opcode " <<
-			  std::setfill('0') << std::hex << opcode <<
-			  " called with parameters:\n";
-		int i = 0;
-		for(const SCMOpcodeParameter& p : parameters) {
-			ss << (i++) << " " << p.type << " ";
-			switch (p.type) {
-			case TInt8:
-			case TInt16:
-			case TInt32:
-				ss << p.integer;
-				break;
-			case TFloat16:
-				ss << p.real;
-				break;
-			case TGlobal:
-				ss << "Global: " << p.globalPtr;
-				break;
-			default:
-				ss << "Unprintable";
-				break;
-			}
-			ss << "\n";
-		}
-		return ss.str();
-	}
-};
-
 static SCMMicrocodeTable knownOps;
 
 struct SCMThread
