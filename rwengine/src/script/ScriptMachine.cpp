@@ -32,7 +32,6 @@ void ScriptMachine::interuptNext()
     interupt = true;
 }
 
-#include <iostream>
 void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 {
 	if( t.wakeCounter > 0 ) {
