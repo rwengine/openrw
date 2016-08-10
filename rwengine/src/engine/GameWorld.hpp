@@ -165,6 +165,12 @@ public:
 	 */
 	int getMinute();
 
+	/**
+	 * Modifies the game time and handles the circular nature of clock numbers
+	 * Supports negative numbers
+	 */
+	void offsetGameTime(int minutes);
+
 	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 
 	float getGameTime() const;
