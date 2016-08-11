@@ -144,7 +144,6 @@ inline std::string gxt(const ScriptArguments& args, const ScriptString id)
 inline BlipData createObjectBlip(const ScriptArguments& args, GameObject* object)
 {
 	BlipData data;
-	args.getState()->addRadarBlip(data);
 	switch(object->type()) {
 	case GameObject::Vehicle:
 		data.type = BlipData::Vehicle;
@@ -162,6 +161,7 @@ inline BlipData createObjectBlip(const ScriptArguments& args, GameObject* object
 	}
 	data.target = object->getScriptObjectID();
 	data.texture = "";
+	args.getState()->addRadarBlip(data);
 	return data;
 }
 
