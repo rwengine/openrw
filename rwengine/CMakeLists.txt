@@ -122,18 +122,16 @@ set(RWENGINE_SOURCES
 	src/script/SCMFile.hpp
 	src/script/ScriptDisassembly.cpp
 	src/script/ScriptDisassembly.hpp
+	src/script/ScriptFunctions.cpp
+	src/script/ScriptFunctions.hpp
 	src/script/ScriptMachine.cpp
 	src/script/ScriptMachine.hpp
 	src/script/ScriptModule.cpp
 	src/script/ScriptModule.hpp
 	src/script/ScriptTypes.cpp
 	src/script/ScriptTypes.hpp
-	src/script/modules/GameModule.cpp
-	src/script/modules/GameModule.hpp
-	src/script/modules/ObjectModule.cpp
-	src/script/modules/ObjectModule.hpp
-	src/script/modules/VMModule.cpp
-	src/script/modules/VMModule.hpp
+	src/script/modules/GTA3Module.cpp
+	src/script/modules/GTA3Module.hpp
 )
 
 add_library(rwengine
