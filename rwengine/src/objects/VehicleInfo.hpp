@@ -92,8 +92,25 @@ struct VehicleInfo {
 
 	/** Value for caching wheel information */
 	std::vector<WheelInfo> wheels;
-	/** Value for caching seat information */
-	std::vector<SeatInfo> seats;
+	/** Struct for caching seat information */
+	struct {
+		std::vector<SeatInfo> front;
+		std::vector<SeatInfo> back;
+
+		SeatInfo operator[](size_t index) const {
+			// Try front seats first
+			if (index < front.size()) {
+				return front[index];
+			}
+			index -= front.size();
+
+			// Get back seat
+			return back[index];
+		}
+		size_t size() const {
+			return front.size() + back.size();
+		}
+	} seats;
 };
 
 typedef std::shared_ptr<VehicleInfo> VehicleInfoHandle;
