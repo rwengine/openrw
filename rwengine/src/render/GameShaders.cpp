@@ -213,15 +213,6 @@ layout(std140) uniform ObjectData {
 	float visibility;
 };
 
-// Ordered dithering matrix used to implement thresholded
-// screen-door transparency to fade objects without blending
-// https://en.wikipedia.org/wiki/Ordered_dithering
-mat4 filterMatrix = mat4(
-		1.0/17.0, 9.0/17.0, 3.0/17.0, 11.0/17.0,
-		13.0/17.0, 5.0/17.0, 15.0/17.0, 7.0/17.0,
-		4.0/17.0, 12.0/17.0, 2.0/17.0, 10.0/17.0,
-		16.0/17.0, 8.0/17.0, 14.0/17.0, 6.0/17.0
-	);
 float alphaThreshold = (1.0/255.0);
 
 void main()
@@ -231,7 +222,6 @@ void main()
 	diffuse.rgb += ambient.rgb*ambientfac;
 	diffuse *= colour;
 	diffuse *= texture(tex, TexCoords);
-	if(visibility <= filterMatrix[int(gl_FragCoord.x)%4][int(gl_FragCoord.y)%4]) discard;
 	if(diffuse.a <= alphaThreshold) discard;
 	float fog = 1.0 - clamp( (fogEnd-WorldSpace.w)/(fogEnd-fogStart), 0.0, 1.0 );
 	fragOut = vec4(mix(diffuse.rgb, fogColor.rgb, fog), diffuse.a);
