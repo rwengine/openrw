@@ -1,8 +1,22 @@
+## Who can contribute?
+OpenRW is a community driven project, we are open to contributions from anyone
+who cares to submit a pull request. Members of the community can provide their
+input on reviewing open pull requests to make sure the changes work for them.
+Once a pull request has been vetted, a member with the appropriate rights will
+accept it into the code base.
+
+GitHub moderation privileges may be granted to active contributors who display a
+good ability to moderate in their issues and pull requests.
+
+## See what's happening
+Make sure to drop into the IRC channel #openrw on chat.freenode.net for discussion
+about features in development.
+
 ## How to contribute
 If you can write source code to implement missing features or fix bugs, changes
-can be submitted for review via github's pull requests system.
+can be submitted for review via GitHub's pull requests system.
 
-If you aren't able to contibute source code, we are also happy to see improved
+If you aren't able to contribute source code, we are also happy to see improved
 documentation of the expected behaviour on sites like the gtamodding wiki.
 Improving this documentation makes it easier to implement the correct behaviour.
 
@@ -27,7 +41,8 @@ If you are submitting a pull request for OpenRW:
 * Changes to support non-GTA titles.
 
 ## Evaluating pull requests
-
-When a pull request is submitted, at least two members of the organisation should have reviewed the changes before merging.
+Pull requests should be reviewed by as many people as possible for merging.
+Ideally at least two active contributors should review the changes before it is
+accepted, including the person who will accept the pull request.
 
 
