@@ -219,12 +219,13 @@ bool Activities::EnterVehicle::update(CharacterObject *character, CharacterContr
 	
 	auto entryDoor = vehicle->getSeatEntryDoor(seat);
 	auto entryPos = vehicle->getSeatEntryPositionWorld(seat);
+	auto entryPosLocal = vehicle->getSeatEntryPosition(seat);
 
 	auto anm_open = character->animations.car_open_lhs;
 	auto anm_enter = character->animations.car_getin_lhs;
 	auto anm_pullout = character->animations.car_pullout_lhs;
 
-	if( entryDoor->dummy->getDefaultTranslation().x > 0.f )
+	if ( entryPosLocal.x > 0.f )
 	{
 		anm_open = character->animations.car_open_rhs;
 		anm_enter = character->animations.car_getin_rhs;
@@ -334,15 +335,16 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 			auto vehicle = character->getCurrentVehicle();
 			auto seat = character->getCurrentSeat();
 			auto door = vehicle->getSeatEntryDoor(seat);
+			auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
+			auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
 			character->rotation = vehicle->getRotation();
 
 			// Exit the vehicle immediatley
-			auto exitpos = vehicle->getSeatEntryPosition(seat);
 			character->enterVehicle(nullptr, seat);
-			character->setPosition(exitpos);
+			character->setPosition(exitPos);
 
-			if (door->dummy->getDefaultTranslation().x > 0.f) {
+			if (exitPosLocal.x > 0.f) {
 				character->playActivityAnimation(anm_jacked_rhs, false, true);
 			}
 			else {
@@ -358,10 +360,12 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 	auto vehicle = character->getCurrentVehicle();
 	auto seat = character->getCurrentSeat();
 	auto door = vehicle->getSeatEntryDoor(seat);
+	auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
+	auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
 	auto anm_exit = character->animations.car_getout_lhs;
 
-	if( door->dummy->getDefaultTranslation().x > 0.f )
+	if( exitPosLocal.x > 0.f )
 	{
 		anm_exit = character->animations.car_getout_rhs;
 	}
@@ -387,10 +391,9 @@ bool Activities::ExitVehicle::update(CharacterObject *character, CharacterContro
 
 	if( character->animator->getAnimation(AnimIndexAction) == anm_exit ) {
 		if( character->animator->isCompleted(AnimIndexAction) ) {
-			auto exitpos = vehicle->getSeatEntryPositionWorld(seat);
 
 			character->enterVehicle(nullptr, seat);
-			character->setPosition(exitpos);
+			character->setPosition(exitPos);
 
 			if (isDriver)
 			{
