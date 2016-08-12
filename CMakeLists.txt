@@ -16,7 +16,6 @@ set(RW_VERBOSE_DEBUG_MESSAGES 1 CACHE BOOL "Print verbose debugging messages")
 # Optional components
 option(BUILD_TESTS "Build test suite")
 option(BUILD_VIEWER "Build GUI data viewer")
-option(BUILD_SCRIPT_TOOL "Build script decompiler tool")
 
 # Compile-time Options & Features
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
@@ -115,9 +114,6 @@ add_subdirectory(rwlib)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 
-IF(${BUILD_SCRIPT_TOOL})
-	add_subdirectory(scripttool)
-ENDIF()
 IF(${BUILD_VIEWER})
 	add_subdirectory(rwviewer)
 ENDIF()

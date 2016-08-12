@@ -255,26 +255,6 @@ void RWGame::startScript(const std::string& name)
 
 		script = new ScriptMachine(state, f, opcodes);
 		
-		// Set up breakpoint handler
-		script->setBreakpointHandler(
-			[&](const SCMBreakpoint& bp)
-			{
-                log.info("Script", "Breakpoint hit!");
-				std::stringstream ss;
-				ss << " " << bp.function->description << ".";
-				ss << " Args:";
-				for(size_t a = 0; a < bp.args->getParameters().size(); a++)
-				{
-					auto& arg = bp.args->getParameters()[a];
-					ss << " " << arg.integerValue();
-					if( a != bp.args->getParameters().size()-1 )
-					{
-						ss << ",";
-					}
-				}
-				
-				log.info("Script", ss.str());
-            });
 		state->script = script;
 	}
 	else {

@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _SCMFILE_HPP_
-#define _SCMFILE_HPP_
+#ifndef RWENGINE_SCMFILE_HPP
+#define RWENGINE_SCMFILE_HPP
 #include <vector>
 #include <string>
 #include <script/ScriptTypes.hpp>
@@ -10,10 +9,6 @@
  */
 class SCMFile {
 public:
-
-	typedef std::uint32_t uint32;
-	typedef std::uint16_t u16;
-	typedef std::uint8_t  u8;
 
 	enum SCMTarget {
 		NoTarget = 0,
@@ -41,17 +36,17 @@ public:
 		return *(T*)(_data+offset);
 	}
 
-	uint32 getMainSize() const { return mainSize; }
-	uint32 getLargestMissionSize() const { return missionLargestSize; }
+	uint32_t getMainSize() const { return mainSize; }
+	uint32_t getLargestMissionSize() const { return missionLargestSize; }
 
 	const std::vector<std::string>& getModels() const { return models; }
 
 	const std::vector<unsigned int>& getMissionOffsets() const { return missionOffsets; }
 
-	std::uint32_t getGlobalSection() const { return globalSectionOffset; }
-	std::uint32_t getModelSection() const { return modelSectionOffset; }
-	std::uint32_t getMissionSection() const { return missionSectionOffset; }
-	std::uint32_t getCodeSection() const { return codeSectionOffset; }
+	uint32_t getGlobalSection() const { return globalSectionOffset; }
+	uint32_t getModelSection() const { return modelSectionOffset; }
+	uint32_t getMissionSection() const { return missionSectionOffset; }
+	uint32_t getCodeSection() const { return codeSectionOffset; }
 
 	unsigned int getGlobalsSize() const { return modelSectionOffset - globalSectionOffset; }
 
@@ -65,13 +60,13 @@ private:
 
 	std::vector<unsigned int> missionOffsets;
 
-	uint32 mainSize;
-	uint32 missionLargestSize;
+	uint32_t mainSize;
+	uint32_t missionLargestSize;
 
-	uint32 globalSectionOffset;
-	uint32 modelSectionOffset;
-	uint32 missionSectionOffset;
-	uint32 codeSectionOffset;
+	uint32_t globalSectionOffset;
+	uint32_t modelSectionOffset;
+	uint32_t missionSectionOffset;
+	uint32_t codeSectionOffset;
 };
 
 #endif
