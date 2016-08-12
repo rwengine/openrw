@@ -1,7 +1,6 @@
 #ifndef INGAMESTATE_HPP
 #define INGAMESTATE_HPP
 
-#include <SDL2/SDL_events.h>
 #include "State.hpp"
 
 class PlayerController;

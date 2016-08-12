@@ -25,6 +25,8 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "GitSHA1.h"
 
 // Use first 8 chars of git hash as the build string
@@ -53,15 +55,15 @@ RWGame::RWGame(int argc, char* argv[])
 
 	for( int i = 1; i < argc; ++i )
 	{
-		if( strcasecmp( "-w", argv[i] ) == 0 && i+1 < argc )
+		if( boost::iequals( "-w", argv[i] ) && i+1 < argc )
 		{
 			w = std::atoi(argv[i+1]);
 		}
-		if( strcasecmp( "-h", argv[i] ) == 0 && i+1 < argc )
+		if( boost::iequals( "-h", argv[i] ) && i+1 < argc )
 		{
 			h = std::atoi(argv[i+1]);
 		}
-		if( strcasecmp( "-f", argv[i] ) == 0 )
+		if( boost::iequals( "-f", argv[i] ))
 		{
 			fullscreen = true;
 		}
@@ -88,7 +90,6 @@ RWGame::RWGame(int argc, char* argv[])
 
 	window = new GameWindow();
 	window->create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
-	window->hideCursor();
 
 	work = new WorkContext();
 
@@ -124,8 +125,7 @@ RWGame::RWGame(int argc, char* argv[])
 
 	data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
-	/// @TODO language choices.
-	data->loadGXT("english.gxt");
+	data->loadGXT(config.getGameLanguage() + ".gxt");
 	
 	getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater, 128*128);
 	
@@ -424,7 +424,7 @@ void RWGame::tick(float dt)
 		}
 		
 		// Clean up old VisualFX
-		for( ssize_t i = 0; i < static_cast<ssize_t>(world->effects.size()); ++i )
+		for( int i = 0; i < static_cast<int>(world->effects.size()); ++i )
 		{
 			VisualFX* effect = world->effects[i];
 			if( effect->getType() == VisualFX::Particle )

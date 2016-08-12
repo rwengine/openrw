@@ -116,6 +116,9 @@ bool game_is_button_pressed(const ScriptArguments& args)
 
 void game_set_dead_or_arrested(const ScriptArguments& args)
 {
+	if (args.getWorld()->state->scriptOnMissionFlag == nullptr) {
+		return;
+	}
 	*args.getWorld()->state->scriptOnMissionFlag = args[0].integer;
 }
 

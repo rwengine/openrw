@@ -1,10 +1,12 @@
 #include <loaders/LoaderIDE.hpp>
 
+#include <algorithm>
+#include <cctype>
 #include <fstream>
-#include <string>
+#include <functional>
 #include <map>
 #include <sstream>
-#include <algorithm>
+#include <string>
 
 bool LoaderIDE::load(const std::string &filename)
 {

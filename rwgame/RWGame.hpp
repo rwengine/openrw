@@ -12,7 +12,7 @@
 #include "GameConfig.hpp"
 #include "GameWindow.hpp"
 
-#include <SDL2/SDL.h>
+#include "SDL.h"
 
 class PlayerController;
 

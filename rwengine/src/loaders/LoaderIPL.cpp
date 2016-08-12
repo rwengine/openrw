@@ -1,9 +1,11 @@
 #include <loaders/LoaderIPL.hpp>
 
-#include <fstream>
-#include <string>
-#include <sstream>
 #include <algorithm>
+#include <cctype>
+#include <fstream>
+#include <functional>
+#include <sstream>
+#include <string>
 
 enum SectionTypes
 {

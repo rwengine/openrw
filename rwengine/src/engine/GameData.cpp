@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 
 // Yet another hack function to fix these paths
 std::string fixPath(std::string path) {
@@ -159,17 +160,15 @@ bool GameData::loadObjects(const std::string& name)
 	return false;
 }
 
-#include <strings.h>
 uint16_t GameData::findModelObject(const std::string model)
 {
-	// Dear C++ Why do I have to resort to strcasecmp this isn't C.
 	auto defit = std::find_if(objectTypes.begin(), objectTypes.end(),
 							  [&](const decltype(objectTypes)::value_type& d)
 							  {
 								  if(d.second->class_type == ObjectInformation::_class("OBJS"))
 								  {
 									  auto dat = static_cast<ObjectData*>(d.second.get());
-									  return strcasecmp(dat->modelName.c_str(), model.c_str()) == 0;
+									  return boost::iequals(dat->modelName, model);
 								  }
 								  return false;
 							  });

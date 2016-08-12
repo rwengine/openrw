@@ -147,7 +147,7 @@ bool GameWorld::placeItems(const std::string& name)
 		for(auto& p: instancePool.objects) {
 			auto object = p.second;
 			InstanceObject* instance = static_cast<InstanceObject*>(object);
-			if( !instance->object->LOD ) {
+			if( !instance->object->LOD && instance->object->modelName.length() > 3) {
 				auto lodInstit = modelInstances.find("LOD" + instance->object->modelName.substr(3));
 				if( lodInstit != modelInstances.end() ) {
 					instance->LODinstance = lodInstit->second;

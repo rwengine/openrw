@@ -1,4 +1,5 @@
 #include "loaders/LoaderCOL.hpp"
+#include <algorithm>
 #include <string>
 #include <fstream>
 

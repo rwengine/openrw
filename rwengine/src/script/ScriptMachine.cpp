@@ -207,12 +207,12 @@ void ScriptMachine::executeThread(SCMThread &t, int msPassed)
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile *file, SCMOpcodes *ops)
     : _file(file), _ops(ops), state(_state), interupt(false)
 {
-	auto globals = _file->getGlobalsSize();
-	globalData.resize(globals);
-	for(size_t i = 0; i < globals; ++i)
-	{
-		globalData[i] = 0;
-	}
+  // Copy globals
+	auto size = _file->getGlobalsSize();
+	globalData.resize(size);
+  auto offset = _file->getGlobalSection();
+	std::copy(_file->data()+offset, _file->data()+offset+size,
+	          globalData.begin());
 }
 
 ScriptMachine::~ScriptMachine()

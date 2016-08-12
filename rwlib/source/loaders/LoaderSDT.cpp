@@ -1,6 +1,7 @@
 #include <loaders/LoaderSDT.hpp>
 
 #include <cstring>
+#include <string>
 
 LoaderSDT::LoaderSDT()
 : m_version(GTAIIIVC)

@@ -5,7 +5,8 @@
 #include <render/ViewCamera.hpp>
 #include "MenuSystem.hpp"
 #include <glm/gtc/quaternion.hpp>
-#include <SDL2/SDL.h>
+#include "SDL.h"
+#include "SDL_events.h"
 #include "GameWindow.hpp"
 
 class RWGame;

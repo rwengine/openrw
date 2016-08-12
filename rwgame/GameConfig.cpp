@@ -79,6 +79,11 @@ int GameConfig::handler(void* user,
 	{
 		self->m_gamePath = value;
 	}
+	else if (MATCH("game", "language"))
+	{
+		// @todo Don't allow path seperators and relative directories
+		self->m_gameLanguage = value;
+	}
 	else if (MATCH("input", "invert_y"))
 	{
 		self->m_inputInvertY = atoi(value) > 0;

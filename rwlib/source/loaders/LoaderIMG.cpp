@@ -1,6 +1,6 @@
 #include <loaders/LoaderIMG.hpp>
 
-#include <cstring>
+#include <boost/algorithm/string/predicate.hpp>
 
 LoaderIMG::LoaderIMG()
 : m_version(GTAIIIVC)
@@ -50,7 +50,7 @@ bool LoaderIMG::findAssetInfo(const std::string& assetname, LoaderIMGFile& out)
 {
 	for(size_t i = 0; i < m_assets.size(); ++i)
 	{
-		if(strcasecmp(m_assets[i].name, assetname.c_str()) == 0)
+		if(boost::iequals(m_assets[i].name, assetname))
 		{
 			out = m_assets[i];
 			return true;

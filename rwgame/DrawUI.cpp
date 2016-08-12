@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "DrawUI.hpp"
 #include <render/GameRenderer.hpp>
 #include <ai/PlayerController.hpp>

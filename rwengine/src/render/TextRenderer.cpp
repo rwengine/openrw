@@ -3,6 +3,7 @@
 #include <engine/GameWorld.hpp>
 
 #include <algorithm>
+#include <cctype>
 
 /// @todo This is very rough
 int charToIndex(char g)
@@ -112,7 +113,7 @@ TextRenderer::TextInfo::TextInfo()
 }
 
 TextRenderer::TextRenderer(GameRenderer* renderer)
-: fonts({}), renderer(renderer)
+: renderer(renderer)
 {
 	textShader = renderer->getRenderer()->createShader(
 		TextVertexShader, TextFragmentShader );

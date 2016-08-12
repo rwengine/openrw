@@ -2,7 +2,7 @@
 #ifndef _COLLISIONINSTANCE_HPP_
 #define _COLLISIONINSTANCE_HPP_
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 #include <vector>
 #include <string>
 

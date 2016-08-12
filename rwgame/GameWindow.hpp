@@ -2,7 +2,7 @@
 #define GAMEWINDOW_HPP
 
 #include <string>
-#include <SDL2/SDL.h>
+#include "SDL.h"
 #include <glm/vec2.hpp>
 
 #include <render/GameRenderer.hpp>
