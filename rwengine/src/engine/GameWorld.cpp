@@ -382,12 +382,24 @@ VehicleObject *GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 						auto frameTrans = f->getMatrix();
 						info->second->wheels.push_back({glm::vec3(frameTrans[3])});
 					}
-					if(name.size() > 3 && name.substr(0, 3) == "ped" && name.substr(name.size()-4) == "seat") {
+					if(name == "ped_frontseat") {
 						auto p = f->getDefaultTranslation();
-						p.x = p.x * -1.f;
-						info->second->seats.push_back({p});
-						p.x = p.x * -1.f;
-						info->second->seats.push_back({p});
+						// Left seat
+						p.x = -p.x;
+						info->second->seats.front.push_back({p});
+						// Right seat
+						p.x = -p.x;
+						info->second->seats.front.push_back({p});
+					}
+					if(name == "ped_backseat") {
+						// @todo how does this work for the barracks, ambulance or coach?
+						auto p = f->getDefaultTranslation();
+						// Left seat
+						p.x = -p.x;
+						info->second->seats.back.push_back({p});
+						// Right seat
+						p.x = -p.x;
+						info->second->seats.back.push_back({p});
 					}
 				}
 			}

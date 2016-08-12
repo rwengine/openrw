@@ -533,7 +533,7 @@ bool VehicleObject::isOccupantDriver(size_t seat) const
 
 VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat)
 {
-	auto pos = info->seats.at(seat).offset + glm::vec3(0.f, 0.5f, 0.f);
+	auto pos = info->seats[seat].offset + glm::vec3(0.f, 0.5f, 0.f);
 	Part* nearestDoor = nullptr;
 	float d = std::numeric_limits<float>::max();
 	for(auto& p : dynamicParts)
