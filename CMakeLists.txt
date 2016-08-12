@@ -36,6 +36,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	add_definitions(-DRW_OSX)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 	add_definitions(-DRW_FREEBSD)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+	add_definitions(-DRW_OPENBSD)
+	set(OPENRW_PLATFORM_LIBS iconv)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_definitions(-DRW_WINDOWS)
 	set(BULLET_ROOT "$ENV{BULLET_ROOT}")
@@ -95,6 +98,7 @@ find_package(SDL2 REQUIRED)
 include_directories(
 	${SDL2_INCLUDE_DIR}
 	${GLM_INCLUDE_DIRS}
+	${OPENGL_INCLUDE_DIR}
 )
 
 # External-internal dependencies

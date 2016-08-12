@@ -43,7 +43,7 @@ bool GameConfig::isValid()
 
 std::string GameConfig::getDefaultConfigPath()
 {
-#if defined(RW_LINUX) || defined(RW_FREEBSD)
+#if defined(RW_LINUX) || defined(RW_FREEBSD) || defined(RW_OPENBSD)
 	char* config_home = getenv("XDG_CONFIG_HOME");
 	if (config_home != nullptr) {
 		return std::string(config_home) + "/" + kConfigDirectoryName;
