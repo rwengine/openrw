@@ -437,8 +437,11 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat)
 
 bool CharacterObject::isEnteringOrExitingVehicle() const
 {
-	return animator->getAnimation(AnimIndexAction) == animations.car_getout_lhs ||
-			animator->getAnimation(AnimIndexAction) == animations.car_getin_lhs;
+	auto a = animator->getAnimation(AnimIndexAction);
+	return a == animations.car_getout_lhs ||
+	       a == animations.car_getin_lhs ||
+	       a == animations.car_getout_rhs ||
+	       a == animations.car_getin_rhs;
 }
 
 bool CharacterObject::isStopped() const
