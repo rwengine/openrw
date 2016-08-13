@@ -35,7 +35,11 @@ void LoaderGXT::load(GameTexts &texts, FileHandle &file)
 
 		char* strbase = tdata+offset;
 
+#if defined(RW_NETBSD)
+		iconv(icv, (const char**)&strbase, &bytes, &uwot, &outSize);
+#else
 		iconv(icv, &strbase, &bytes, &uwot, &outSize);
+#endif
 
 		u8buff[len] = '\0';
 

@@ -539,7 +539,11 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	auto icv = iconv_open("UTF-8", "UTF-16");
 	char* saveName = (char*)state.basic.saveName;
 
+#if defined(RW_NETBSD)
+	iconv(icv, (const char**)&saveName, &bytes, &outCur, &outSize);
+#else
 	iconv(icv, &saveName, &bytes, &outCur, &outSize);
+#endif
 	strcpy(state.basic.saveName, outBuff);
 
 	BlockDword scriptBlockSize;
@@ -1251,7 +1255,11 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 	char* saveName = (char*)basicState->saveName;
 
 	// Convert to UTF-8 and copy back to the return struct
+#if defined(RW_NETBSD)
+	iconv(icv, (const char**)&saveName, &bytes, &outCur, &outSize);
+#else
 	iconv(icv, &saveName, &bytes, &outCur, &outSize);
+#endif
 	strcpy(basicState->saveName, outBuff);
 
 	return true;
@@ -1286,4 +1294,3 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo()
 
 	return infos;
 }
-
