@@ -6,11 +6,14 @@
 PauseState::PauseState(RWGame* game)
 	: State(game)
 {
-	Menu *m = new Menu(2);
+	auto data = game->getGameData();
+	auto& t = data->texts;
+
+	Menu *m = new Menu;
 	m->offset = glm::vec2( 200.f, 200.f );
-	m->addEntry(Menu::lambda("Continue", [] { StateManager::get().exit(); }));
-	m->addEntry(Menu::lambda("Options", [] { std::cout << "Options" << std::endl; }));
-	m->addEntry(Menu::lambda("Exit", [] { StateManager::get().clear(); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kResumeGameId), [] { StateManager::get().exit(); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kOptionsId), [] { std::cout << "Options" << std::endl; }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kQuitGameId), [] { StateManager::get().clear(); }));
 	this->enterMenu(m);
 }
 

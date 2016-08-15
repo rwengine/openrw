@@ -14,26 +14,29 @@ MenuState::MenuState(RWGame* game)
 
 void MenuState::enterMainMenu()
 {
-	Menu *m = new Menu(2);
+	auto data = game->getGameData();
+	auto& t = data->texts;
+
+	Menu *m = new Menu;
 	m->offset = glm::vec2(200.f, 200.f);
-	m->addEntry(Menu::lambda("Start", [=] { StateManager::get().enter(new IngameState(game)); }));
-	m->addEntry(Menu::lambda("Load Game", [=] { enterLoadMenu(); }));
-	m->addEntry(Menu::lambda("Test", [=] { StateManager::get().enter(new IngameState(game, true, "test")); }));
-	m->addEntry(Menu::lambda("Options", [] { RW_UNIMPLEMENTED("Options Menu"); }));
-	m->addEntry(Menu::lambda("Exit", [] { StateManager::get().clear(); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kStartGameId), [=] { StateManager::get().enter(new IngameState(game)); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kLoadGameId),  [=] { enterLoadMenu(); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kDebugId),     [=] { StateManager::get().enter(new IngameState(game, true, "test")); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kOptionsId),   [] { RW_UNIMPLEMENTED("Options Menu"); }));
+	m->addEntry(Menu::lambda(t.text(MenuDefaults::kQuitGameId),   [] { StateManager::get().clear(); }));
 	this->enterMenu(m);
 }
 
 void MenuState::enterLoadMenu()
 {
-	Menu *m = new Menu(2);
+	Menu *m = new Menu;
 	m->offset = glm::vec2(20.f, 30.f);
-	m->addEntry(Menu::lambda("Back", [=] { enterMainMenu(); }));
+	m->addEntry(Menu::lambda("BACK", [=] { enterMainMenu(); }));
 	auto saves = SaveGame::getAllSaveGameInfo();
 	for(SaveGameInfo& save : saves) {
 		if (save.valid) {
 			std::stringstream ss;
-			ss << save.basicState.saveTime.year << "/" << save.basicState.saveTime.month << "/" << save.basicState.saveTime.day
+			ss << save.basicState.saveTime.year << " " << save.basicState.saveTime.month << " " << save.basicState.saveTime.day
 			   << " " << save.basicState.saveTime.hour << ":" << save.basicState.saveTime.minute << "    ";
 			auto name = GameStringUtil::fromString(ss.str());
 			name += save.basicState.saveName;
@@ -43,7 +46,7 @@ void MenuState::enterLoadMenu()
 			}, 20.f));
 		}
 		else {
-			m->addEntry(Menu::lambda("Corrupt", [=] { }));
+			m->addEntry(Menu::lambda("CORRUPT", [=] { }));
 		}
 	}
 	this->enterMenu(m);
