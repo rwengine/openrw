@@ -32,7 +32,7 @@ public:
 		/// Font index @see TextRenderer::setFontTexture
 		int font;
 		/// Message to be displayed (including markup)
-		std::string text;
+		GameString text;
 		/// On screen position
 		glm::vec2 screenPosition;
 		/// font size

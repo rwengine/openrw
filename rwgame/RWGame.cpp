@@ -627,7 +627,7 @@ void RWGame::renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime
 	}
 	
 	TextRenderer::TextInfo ti;
-	ti.text = ss.str();
+	ti.text = GameStringUtil::fromString(ss.str());
 	ti.font = 2;
 	ti.screenPosition = glm::vec2( 10.f, 10.f );
 	ti.size = 15.f;

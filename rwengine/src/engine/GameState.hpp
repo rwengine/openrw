@@ -162,7 +162,7 @@ struct GameStats
 struct TextDisplayData
 {
 	// This is set by the final display text command.
-	std::string text;
+	GameString text;
 	glm::vec2 position;
 
 	glm::vec4 colourFG;

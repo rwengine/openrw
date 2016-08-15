@@ -42,6 +42,18 @@ struct print_log_value<std::nullptr_t> {
 };
 }} BOOST_NS_MAGIC_CLOSING
 
+namespace boost { namespace test_tools { BOOST_NS_MAGIC
+template<>
+struct print_log_value<GameString> {
+	void operator()( std::ostream& s , GameString const& v )
+	{
+		for (GameString::size_type i = 0u; i<v.size(); ++i) {
+			s << (char)v[i];
+		}
+	}
+};
+}} BOOST_NS_MAGIC_CLOSING
+
 #undef BOOST_NS_MAGIC
 #undef BOOST_NS_MAGIC_CLOSING
 

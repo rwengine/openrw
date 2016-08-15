@@ -32,7 +32,7 @@ public:
 			TextRenderer::TextInfo ti;
 			ti.font = font;
 			ti.screenPosition = basis;
-			ti.text = name;
+			ti.text = GameStringUtil::fromString(name);
 			ti.size = getHeight();
 			if( ! active )
 			{

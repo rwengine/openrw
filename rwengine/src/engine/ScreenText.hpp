@@ -1,7 +1,7 @@
 #ifndef RWENGINE_SCREENTEXT_HPP
 #define RWENGINE_SCREENTEXT_HPP
 #include <rw/types.hpp>
-#include <string>
+#include <data/GameTexts.hpp>
 #include <vector>
 #include <array>
 #include <algorithm>
@@ -33,7 +33,7 @@ constexpr unsigned int ScreenTypeTextCount = static_cast<unsigned int>(ScreenTex
 struct ScreenTextEntry
 {
 	/// After processing numbers
-	std::string text;
+	GameString text;
 	/// in the virtual 640x480 screen space
 	glm::vec2 position;
 	/// Font number
@@ -53,19 +53,19 @@ struct ScreenTextEntry
 	/// Wrap width
 	int wrapX;
 	/// ID used to reference the text.
-	std::string id;
+	GameStringKey id;
 
-	static ScreenTextEntry makeBig(const std::string& id,
-							const std::string& str,
+	static ScreenTextEntry makeBig(const GameStringKey& id,
+							const GameString& str,
 							int style,
 							int durationMS);
 
-	static ScreenTextEntry makeHighPriority(const std::string& id,
-							const std::string& str,
+	static ScreenTextEntry makeHighPriority(const GameStringKey& id,
+							const GameString& str,
 							int durationMS);
 
-	static ScreenTextEntry makeHelp(const std::string& id,
-									const std::string& str);
+	static ScreenTextEntry makeHelp(const GameStringKey& id,
+									const GameString& str);
 };
 
 /**
@@ -141,12 +141,13 @@ public:
 	}
 
 	template<class...Args>
-	static std::string format(std::string format, Args&&...args)
+	static GameString format(GameString format, Args&&...args)
 	{
-		const std::array<std::string, sizeof...(args)> vals = { args... };
+		static auto kReplacementMarker = GameStringUtil::fromString("~1~");
+		const std::array<GameString, sizeof...(args)> vals = { args... };
 		size_t x = 0, val = 0;
 		// We're only looking for numerical replacement markers
-		while ((x = format.find("~1~")) != std::string::npos && val < vals.size())
+		while ((x = format.find(kReplacementMarker)) != GameString::npos && val < vals.size())
 		{
 			format = format.substr(0, x) + vals[val++] + format.substr(x + 3);
 		}

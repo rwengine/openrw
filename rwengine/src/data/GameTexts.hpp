@@ -3,21 +3,47 @@
 #include <string>
 #include <unordered_map>
 
+/**
+ * Each GXT char is just a 16-bit index into the font map.
+ */
+using GameStringChar = uint16_t;
+/**
+ * The game stores strings as 16-bit indexes into the font
+ * texture, which is something simllar to ASCII.
+ */
+using GameString = std::basic_string<GameStringChar>;
+/**
+ * GXT keys are just 8 single byte chars.
+ * Keys are small so should be subject to SSO
+ */
+using GameStringKey = std::string;
+
+namespace GameStringUtil
+{
+/**
+ * @brief fromString Converts a string to a GameString
+ *
+ * Encoding of GameStrings depends on the font, only simple ASCII chars will map well
+ */
+GameString fromString(const std::string& str);
+}
+
 class GameTexts
 {
-	std::unordered_map<std::string, std::string> _textDB;
+	using StringTable = std::unordered_map<GameStringKey, GameString>;
+	StringTable m_strings;
 public:
 
-	void addText(const std::string& id, const std::string& text) {
-		_textDB.insert({ id, text });
+	void addText(const GameStringKey& id, GameString&& text) {
+		m_strings.emplace(id, text);
 	}
 
-	std::string text(const std::string& id) {
-		auto a = _textDB.find(id);
-		if( a != _textDB.end() ) {
+	GameString text(const GameStringKey& id) {
+		auto a = m_strings.find(id);
+		if( a != m_strings.end() ) {
 			return a->second;
 		}
-		return id;
+		return GameStringUtil::fromString("MISSING: " + id);
 	}
 
 };

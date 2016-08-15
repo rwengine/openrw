@@ -5,8 +5,7 @@
 #include <algorithm>
 #include <cctype>
 
-/// @todo This is very rough
-int charToIndex(char g)
+int charToIndex(uint16_t g)
 {
 	// Correct for the default font maps
 	/// @todo confirm for JA / RU font maps
@@ -171,7 +170,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti, bool forceColour
 	
 	for (size_t i = 0; i < text.length(); ++i)
 	{
-		char c = text[i];
+		char16_t c = text[i];
 
 		// Handle any markup changes.
 		if( c == '~' && text.length() > i + 1 )
