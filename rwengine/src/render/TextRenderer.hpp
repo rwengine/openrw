@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RWENGINE_TEXTRENDERER_HPP
+#define RWENGINE_TEXTRENDERER_HPP
 #include <engine/GameData.hpp>
 #include "OpenGLRenderer.hpp"
 
@@ -73,3 +74,4 @@ private:
 	GeometryBuffer gb;
 	DrawBuffer db;
 };
+#endif

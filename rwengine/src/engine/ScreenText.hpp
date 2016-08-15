@@ -1,5 +1,5 @@
-#ifndef _RWENGINE_SCREENTEXT_HPP_
-#define _RWENGINE_SCREENTEXT_HPP_
+#ifndef RWENGINE_SCREENTEXT_HPP
+#define RWENGINE_SCREENTEXT_HPP
 #include <rw/types.hpp>
 #include <string>
 #include <vector>

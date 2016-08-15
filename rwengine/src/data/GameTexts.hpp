@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _GAMETEXTS_HPP_
-#define _GAMETEXTS_HPP_
+#ifndef RWENGINE_GAMETEXTS_HPP
+#define RWENGINE_GAMETEXTS_HPP
 #include <string>
 #include <unordered_map>
 
