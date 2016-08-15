@@ -101,7 +101,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 
 	{
 		std::stringstream ss;
-		ss << "@" << std::setw(3) << std::setfill('0')
+		ss << "{" << std::setw(3) << std::setfill('0')
 		   << (int)player->getCharacter()->getCurrentState().health;
 		ti.text = ss.str();
 	}
