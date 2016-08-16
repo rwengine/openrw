@@ -1,6 +1,3 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include <render/GameRenderer.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Animator.hpp>
@@ -26,7 +23,7 @@
 #include <core/Logger.hpp>
 
 #include <deque>
-#include <cmath>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -163,9 +160,9 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     for( size_t r = 0, i = 0; r < rows; ++r) {
         for( size_t s = 0; s < segments; ++s) {
 			skydomeVerts[i++].position = glm::vec3(
-                        cos(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
-                        sin(2.f * M_PI * s * S) * cos(M_PI_2 * r * R),
-                        sin(M_PI_2 * r * R)
+                        cos(2.f * glm::pi<float>() * s * S) * cos(glm::half_pi<float>() * r * R),
+                        sin(2.f * glm::pi<float>() * s * S) * cos(glm::half_pi<float>() * r * R),
+                        sin(glm::half_pi<float>() * r * R)
                         );
 		}
 	}
