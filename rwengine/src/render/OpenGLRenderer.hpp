@@ -247,33 +247,33 @@ public:
 
 	OpenGLRenderer();
 
-	std::string getIDString() const;
+	std::string getIDString() const override;
 
-	ShaderProgram* createShader(const std::string &vert, const std::string &frag);
-	void setProgramBlockBinding(ShaderProgram* p, const std::string &name, GLint point);
-	void setUniformTexture(ShaderProgram* p, const std::string &name, GLint tex);
-	void setUniform(ShaderProgram* p, const std::string& name, const glm::mat4& m);
-	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec4& m);
-	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec3& m);
-	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec2& m);
-	void setUniform(ShaderProgram* p, const std::string& name, float f);
-	void useProgram(ShaderProgram* p);
+	ShaderProgram* createShader(const std::string &vert, const std::string &frag) override;
+	void setProgramBlockBinding(ShaderProgram* p, const std::string &name, GLint point) override;
+	void setUniformTexture(ShaderProgram* p, const std::string &name, GLint tex) override;
+	void setUniform(ShaderProgram* p, const std::string& name, const glm::mat4& m) override;
+	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec4& m) override;
+	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec3& m) override;
+	void setUniform(ShaderProgram* p, const std::string& name, const glm::vec2& m) override;
+	void setUniform(ShaderProgram* p, const std::string& name, float f) override;
+	void useProgram(ShaderProgram* p) override;
 
-	void clear(const glm::vec4 &colour, bool clearColour, bool clearDepth);
+	void clear(const glm::vec4 &colour, bool clearColour, bool clearDepth) override;
 
-	void setSceneParameters(const SceneUniformData &data);
+	void setSceneParameters(const SceneUniformData &data) override;
 
 	void setDrawState(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
 
-	void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
-	void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p);
+	void draw(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) override;
+	void drawArrays(const glm::mat4& model, DrawBuffer* draw, const DrawParameters& p) override;
 
 	void drawBatched(const RenderList& list) override;
 
-	void invalidate();
+	void invalidate() override;
 
-	virtual void pushDebugGroup(const std::string& title);
-	virtual const ProfileInfo& popDebugGroup();
+	virtual void pushDebugGroup(const std::string& title) override;
+	virtual const ProfileInfo& popDebugGroup() override;
 
 private:
 	DrawBuffer* currentDbuff;

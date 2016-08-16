@@ -6,7 +6,7 @@
 #include <objects/VehicleInfo.hpp>
 
 class CollisionInstance;
-class btVehicleRaycaster;
+struct btVehicleRaycaster;
 class btRaycastVehicle;
 class btRigidBody;
 class btHingeConstraint;
