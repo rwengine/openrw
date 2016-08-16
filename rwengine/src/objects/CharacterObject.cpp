@@ -101,11 +101,11 @@ void CharacterObject::createActor(const glm::vec2& size)
 		physObject->setCollisionShape(physShape);
 		physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 		physCharacter = new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
-		physCharacter->setFallSpeed(20.f);
+		physCharacter->setFallSpeed(120.f);
 		physCharacter->setUseGhostSweepTest(true);
 		physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 1.f), 1.f);
 		physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
-		physCharacter->setJumpSpeed(5.f);
+		physCharacter->setJumpSpeed(4.f);
 
 		engine->dynamicsWorld->addCollisionObject(physObject, btBroadphaseProxy::KinematicFilter,
 												  btBroadphaseProxy::StaticFilter|btBroadphaseProxy::SensorTrigger);
@@ -491,7 +491,7 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg)
 
 void CharacterObject::jump()
 {
-	if( physCharacter ) {
+	if( physCharacter && !jumped ) {
 		physCharacter->jump();
 		jumped = true;
 		animator->playAnimation(AnimIndexMovement, animations.jump_start, 1.f, false);
