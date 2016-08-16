@@ -1,7 +1,7 @@
 #include <engine/GameState.hpp>
 
 BasicState::BasicState()
-	: saveName { "" }
+	: saveName { 0 }
 	, saveTime { 0, 0, 0, 0, 0, 0, 0, 0 }
 	, islandNumber { 0 }
 	, cameraPosition { }

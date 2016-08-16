@@ -34,8 +34,10 @@ void MenuState::enterLoadMenu()
 		if (save.valid) {
 			std::stringstream ss;
 			ss << save.basicState.saveTime.year << "/" << save.basicState.saveTime.month << "/" << save.basicState.saveTime.day
-			   << " " << save.basicState.saveTime.hour << ":" << save.basicState.saveTime.minute << "    " << save.basicState.saveName;
-			m->addEntry(Menu::lambda(ss.str(), [=] {
+			   << " " << save.basicState.saveTime.hour << ":" << save.basicState.saveTime.minute << "    ";
+			auto name = GameStringUtil::fromString(ss.str());
+			name += save.basicState.saveName;
+			m->addEntry(Menu::lambda(name, [=] {
 				StateManager::get().enter(new IngameState(game, false));
 				game->loadGame(save.savePath);
 			}, 20.f));

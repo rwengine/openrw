@@ -33,8 +33,7 @@ struct SystemTime
 /** Block 0 State */
 struct BasicState
 {
-	/// /!\ This is wchar_t[24] in the original format /!\ we convert on load for convenience
-	char saveName[48];
+	GameStringChar saveName[24];
 	SystemTime saveTime;
 	uint32_t unknown;
 	uint16_t islandNumber;
