@@ -11,7 +11,7 @@
 #include <ai/PlayerController.hpp>
 #include <items/WeaponItem.hpp>
 #include <cstring>
-#include <iconv.h>
+#include <data/RWUnicode.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -529,22 +529,8 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	READ_VALUE(state.basic)
 
 	// Convert utf-16 to utf-8
-	size_t bytes = 0;
-	for(;; bytes++ ) {
-		if(state.basic.saveName[bytes-1] == 0 && state.basic.saveName[bytes] == 0) break;
-	}
-	size_t outSize = 24;
-	char outBuff[48];
-	char* outCur = outBuff;
-	auto icv = iconv_open("UTF-8", "UTF-16");
-	char* saveName = (char*)state.basic.saveName;
-
-#if defined(RW_NETBSD)
-	iconv(icv, (const char**)&saveName, &bytes, &outCur, &outSize);
-#else
-	iconv(icv, &saveName, &bytes, &outCur, &outSize);
-#endif
-	strcpy(state.basic.saveName, outBuff);
+	auto saveName = RW::UnicodeConverter::utf16_to_utf8((char16_t*)state.basic.saveName, 24);
+	strcpy(state.basic.saveName, saveName.c_str());
 
 	BlockDword scriptBlockSize;
 
@@ -1244,23 +1230,9 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState *basicState)
 	
 	std::fclose(loadFile);
 
-	size_t bytes = 0;
-	for(;; bytes++ ) {
-		if(basicState->saveName[bytes-1] == 0 && basicState->saveName[bytes] == 0) break;
-	}
-	size_t outSize = 24;
-	char outBuff[48];
-	char* outCur = outBuff;
-	auto icv = iconv_open("UTF-8", "UTF-16");
-	char* saveName = (char*)basicState->saveName;
-
 	// Convert to UTF-8 and copy back to the return struct
-#if defined(RW_NETBSD)
-	iconv(icv, (const char**)&saveName, &bytes, &outCur, &outSize);
-#else
-	iconv(icv, &saveName, &bytes, &outCur, &outSize);
-#endif
-	strcpy(basicState->saveName, outBuff);
+	auto saveName = RW::UnicodeConverter::utf16_to_utf8((char16_t*)basicState->saveName, 24);
+	strcpy(basicState->saveName, saveName.c_str());
 
 	return true;
 }
