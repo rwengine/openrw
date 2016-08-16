@@ -52,7 +52,6 @@ target_link_libraries(rwgame
 if(MINGW)
 	add_definitions(-D _USE_MATH_DEFINES)
 	target_link_libraries(rwgame
-	iconv
 	mman)
 endif()
 

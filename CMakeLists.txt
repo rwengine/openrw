@@ -39,7 +39,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
 	add_definitions(-DRW_NETBSD)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
 	add_definitions(-DRW_OPENBSD)
-	set(OPENRW_PLATFORM_LIBS iconv)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_definitions(-DRW_WINDOWS)
 else ()
@@ -82,10 +81,6 @@ if(NOT DEFINED DOC_DIR)
 endif()
 
 # Find dependancies
-IF(APPLE)
-	set(OPENRW_PLATFORM_LIBS iconv)
-ENDIF()
-
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
