@@ -1,1 +1,7 @@
-DisableFormat: true
+BasedOnStyle: Google
+IndentWidth: 2
+AccessModifierOffset: -2
+UseTab: Never
+TabWidth: 4
+BreakBeforeBraces: Linux
+ColumnLimit: 100
