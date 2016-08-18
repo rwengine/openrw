@@ -21,39 +21,39 @@ class Animation;
 
 class ModelViewer : public ViewerInterface
 {
-	Q_OBJECT
+  Q_OBJECT
 
-	Model* viewing;
-	Skeleton* skeleton;
+  Model* viewing;
+  Skeleton* skeleton;
 
-	QSplitter* mainSplit;
-	QVBoxLayout* mainLayout;
-	ViewerWidget* viewerWidget;
+  QSplitter* mainSplit;
+  QVBoxLayout* mainLayout;
+  ViewerWidget* viewerWidget;
 
-	ModelFramesWidget* frames;
+  ModelFramesWidget* frames;
 
-	AnimationList loadedAnimations;
-	AnimationListWidget *animationWidget;
+  AnimationList loadedAnimations;
+  AnimationListWidget* animationWidget;
+
 public:
+  ModelViewer(ViewerWidget* viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
 
-	ModelViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
-
-	void setViewerWidget( ViewerWidget* widget ) override;
+  void setViewerWidget(ViewerWidget* widget) override;
 
 public slots:
 
-	/**
-	 * Display a raw model
-	 */
-	void showModel(Model* model);
+  /**
+   * Display a raw model
+   */
+  void showModel(Model* model);
 
-	/**
-	 * Display a game object's model
-	 */
-	void showObject(uint16_t object);
+  /**
+   * Display a game object's model
+   */
+  void showObject(uint16_t object);
 
-	void loadAnimations(const QString& file);
-	void playAnimation(Animation* anim);
+  void loadAnimations(const QString& file);
+  void playAnimation(Animation* anim);
 };
 
 #endif
