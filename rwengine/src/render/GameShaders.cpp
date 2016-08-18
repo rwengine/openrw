@@ -1,7 +1,7 @@
 #include <render/GameShaders.hpp>
 
-namespace GameShaders {
-
+namespace GameShaders
+{
 const char* WaterHQ::VertexShader = R"(
 #version 330
 
@@ -268,7 +268,6 @@ void main()
 	outColour = c * tint;
 })";
 
-
 const char* ScreenSpaceRect::VertexShader = R"(
 #version 330
 
@@ -325,5 +324,4 @@ void main()
 	vec4 c = texture(colour, TexCoords);
 	outColour = c;
 })";
-
 }

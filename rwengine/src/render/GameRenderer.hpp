@@ -44,153 +44,151 @@ class Renderer;
  */
 class GameRenderer
 {
-	/** Game data to use for rendering */
-	GameData* data;
+  /** Game data to use for rendering */
+  GameData* data;
 
-	/** Logger to output messages */
-	Logger* logger;
+  /** Logger to output messages */
+  Logger* logger;
 
-	/** The low-level drawing interface to use */
-	Renderer* renderer;
-	
-	/** Stores data for deferring transparent objects */
-	struct RQueueEntry {
-		Model* model;
-		size_t g;
-		size_t sg;
-		glm::mat4 matrix;
-		Renderer::DrawParameters dp;
-		GameObject* object;
-	};
-	
-	/**
-	 * @brief renders a model's frame.
-	 * @param m
-	 * @param f
-	 * @param matrix
-	 * @param object
-	 * @param queueTransparent abort the draw if the frame contains transparent materials
-	 * @return True if the frame was drawn, false if it should be queued
-	 */
-	bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object, float opacity, bool queueTransparent = true);
+  /** The low-level drawing interface to use */
+  Renderer* renderer;
 
-	// Temporary variables used during rendering
-	float _renderAlpha;
-	GameWorld* _renderWorld;
+  /** Stores data for deferring transparent objects */
+  struct RQueueEntry {
+    Model* model;
+    size_t g;
+    size_t sg;
+    glm::mat4 matrix;
+    Renderer::DrawParameters dp;
+    GameObject* object;
+  };
 
-	/** Internal non-descript VAOs */
-	GLuint vao, debugVAO;
+  /**
+   * @brief renders a model's frame.
+   * @param m
+   * @param f
+   * @param matrix
+   * @param object
+   * @param queueTransparent abort the draw if the frame contains transparent materials
+   * @return True if the frame was drawn, false if it should be queued
+   */
+  bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix, GameObject* object,
+                   float opacity, bool queueTransparent = true);
 
-	/** Camera values passed to renderWorld() */
-	ViewCamera _camera;
-	ViewCamera cullingCamera;
-	bool cullOverride;
-	
-	GLuint framebufferName;
-	GLuint fbTextures[2];
-	GLuint fbRenderBuffers[1];
-	Renderer::ShaderProgram* postProg;
+  // Temporary variables used during rendering
+  float _renderAlpha;
+  GameWorld* _renderWorld;
 
-	/// Texture used to replace textures missing from the data
-	GLuint m_missingTexture;
+  /** Internal non-descript VAOs */
+  GLuint vao, debugVAO;
+
+  /** Camera values passed to renderWorld() */
+  ViewCamera _camera;
+  ViewCamera cullingCamera;
+  bool cullOverride;
+
+  GLuint framebufferName;
+  GLuint fbTextures[2];
+  GLuint fbRenderBuffers[1];
+  Renderer::ShaderProgram* postProg;
+
+  /// Texture used to replace textures missing from the data
+  GLuint m_missingTexture;
 
 public:
-	
-	GameRenderer(Logger* log, GameData* data);
-	~GameRenderer();
-	
-	/** Number of culling events */
-	size_t culled;
+  GameRenderer(Logger* log, GameData* data);
+  ~GameRenderer();
 
-	/** @todo Clean up all these shader program and location variables */
-	Renderer::ShaderProgram* worldProg;
-	Renderer::ShaderProgram* skyProg;
-	Renderer::ShaderProgram* particleProg;
+  /** Number of culling events */
+  size_t culled;
 
-	GLuint ssRectProgram;
-	GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
+  /** @todo Clean up all these shader program and location variables */
+  Renderer::ShaderProgram* worldProg;
+  Renderer::ShaderProgram* skyProg;
+  Renderer::ShaderProgram* particleProg;
 
-	GLuint skydomeVBO, skydomeIBO, debugVBO;
-    GLuint debugTex;
+  GLuint ssRectProgram;
+  GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
 
-	DrawBuffer skyDbuff;
-	GeometryBuffer skyGbuff;
-	
-	DrawBuffer cylinderBuffer;
-	GeometryBuffer cylinderGeometry;
+  GLuint skydomeVBO, skydomeIBO, debugVBO;
+  GLuint debugTex;
 
-	GameData* getData() const { return data; }
+  DrawBuffer skyDbuff;
+  GeometryBuffer skyGbuff;
 
-	GLuint getMissingTexture() const { return m_missingTexture; }
+  DrawBuffer cylinderBuffer;
+  GeometryBuffer cylinderGeometry;
 
-    /**
-	 * Renders the world using the parameters of the passed Camera.
-	 * Note: The camera's near and far planes are overriden by weather effects.
-	 *
-	 *  - draws all objects (instances, vehicles etc.)
-	 *  - draws particles
-	 *  - draws water surfaces
-	 *  - draws the skybox
-     */
-	void renderWorld(GameWorld* world, const ViewCamera &camera, float alpha);
-	
-	/**
-	 * Renders the effects (Particles, Lighttrails etc)
-	 */
-	void renderEffects(GameWorld* world);
+  GameData* getData() const { return data; }
 
-	/**
-	 * @brief Draws the current on screen text.
-	 */
-	void drawOnScreenText();
+  GLuint getMissingTexture() const { return m_missingTexture; }
 
-	/**
-	 * @brief Draws a texture on the screen
-	 */
-	void drawTexture(TextureData* texture, glm::vec4 extents);
-	void drawColour(const glm::vec4& colour, glm::vec4 extents);
+  /**
+   * Renders the world using the parameters of the passed Camera.
+   * Note: The camera's near and far planes are overriden by weather effects.
+   *
+   *  - draws all objects (instances, vehicles etc.)
+   *  - draws particles
+   *  - draws water surfaces
+   *  - draws the skybox
+   */
+  void renderWorld(GameWorld* world, const ViewCamera& camera, float alpha);
 
-	/** 
-	 * Renders a model (who'd have thought)
-	 */
-	void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr);
+  /**
+   * Renders the effects (Particles, Lighttrails etc)
+   */
+  void renderEffects(GameWorld* world);
 
-	void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, float opacity, GameObject* = nullptr);
-	
-	/** Renders the area indicator */
-	void renderAreaIndicator(const AreaIndicatorInfo* info);
+  /**
+   * @brief Draws the current on screen text.
+   */
+  void drawOnScreenText();
 
-	/** method for rendering AI debug information */
-	void renderPaths();
+  /**
+   * @brief Draws a texture on the screen
+   */
+  void drawTexture(TextureData* texture, glm::vec4 extents);
+  void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
-	/** Increases cinematic value */
-	void renderLetterbox();
+  /**
+   * Renders a model (who'd have thought)
+   */
+  void renderModel(Model*, const glm::mat4& modelMatrix, GameObject* = nullptr);
 
-	void setupRender();
-	void renderPostProcess();
+  void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix, float opacity,
+                      GameObject* = nullptr);
 
-	Renderer* getRenderer()
-	{
-		return renderer;
-	}
-	
-	void setViewport(int w, int h);
+  /** Renders the area indicator */
+  void renderAreaIndicator(const AreaIndicatorInfo* info);
 
-	void setCullOverride(bool override, const ViewCamera& cullCamera)
-	{
-		cullingCamera = cullCamera;
-		cullOverride = override;
-	}
-	
-	MapRenderer map;
-	WaterRenderer water;
-	TextRenderer text;
+  /** method for rendering AI debug information */
+  void renderPaths();
 
-	// Profiling data
-	Renderer::ProfileInfo profObjects;
-	Renderer::ProfileInfo profSky;
-	Renderer::ProfileInfo profWater;
-	Renderer::ProfileInfo profEffects;
+  /** Increases cinematic value */
+  void renderLetterbox();
+
+  void setupRender();
+  void renderPostProcess();
+
+  Renderer* getRenderer() { return renderer; }
+
+  void setViewport(int w, int h);
+
+  void setCullOverride(bool override, const ViewCamera& cullCamera)
+  {
+    cullingCamera = cullCamera;
+    cullOverride = override;
+  }
+
+  MapRenderer map;
+  WaterRenderer water;
+  TextRenderer text;
+
+  // Profiling data
+  Renderer::ProfileInfo profObjects;
+  Renderer::ProfileInfo profSky;
+  Renderer::ProfileInfo profWater;
+  Renderer::ProfileInfo profEffects;
 };
 
 #endif

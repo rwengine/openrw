@@ -6,108 +6,91 @@
 
 #include <iostream>
 
-DebugDraw::DebugDraw()
-: shaderProgram(nullptr)
+DebugDraw::DebugDraw() : shaderProgram(nullptr)
 {
-	lineBuff = new GeometryBuffer;
-	dbuff = new DrawBuffer;
-	dbuff->setFaceType(GL_LINES);
-	
-    glGenTextures(1, &texture);
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	int img = 0xFFFFFFFF;
-	glTexImage2D(
-		GL_TEXTURE_2D, 0, GL_RGBA, 1, 1,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, &img
-	);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
-    maxlines = 0;
+  lineBuff = new GeometryBuffer;
+  dbuff = new DrawBuffer;
+  dbuff->setFaceType(GL_LINES);
+
+  glGenTextures(1, &texture);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  int img = 0xFFFFFFFF;
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &img);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  maxlines = 0;
 }
 
 DebugDraw::~DebugDraw()
 {
-	delete dbuff;
-	delete lineBuff;
+  delete dbuff;
+  delete lineBuff;
 }
 
 void DebugDraw::drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color)
 {
-	btVector3 c = color * 255;
-	lines.push_back({
-		glm::vec3(from.getX(), from.getY(), from.getZ()),
-		glm::vec3(0.f),
-		glm::vec2(0.f),
-		glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)
-	});
-	lines.push_back({
-		glm::vec3(to.getX(), to.getY(), to.getZ()),
-		glm::vec3(0.f),
-		glm::vec2(0.f),
-		glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)
-	});
+  btVector3 c = color * 255;
+  lines.push_back({glm::vec3(from.getX(), from.getY(), from.getZ()), glm::vec3(0.f), glm::vec2(0.f),
+                   glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)});
+  lines.push_back({glm::vec3(to.getX(), to.getY(), to.getZ()), glm::vec3(0.f), glm::vec2(0.f),
+                   glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)});
 }
 
-void DebugDraw::drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
+void DebugDraw::drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB,
+                                 btScalar distance, int lifeTime, const btVector3 &color)
 {
-	RW_UNUSED(pointOnB);
-	RW_UNUSED(normalOnB);
-	RW_UNUSED(distance);
-	RW_UNUSED(lifeTime);
-	RW_UNUSED(color);
+  RW_UNUSED(pointOnB);
+  RW_UNUSED(normalOnB);
+  RW_UNUSED(distance);
+  RW_UNUSED(lifeTime);
+  RW_UNUSED(color);
 }
 
-void DebugDraw::flush(GameRenderer* renderer)
+void DebugDraw::flush(GameRenderer *renderer)
 {
-	if(lines.size() == 0) {
-		return;
-	}
-	
-	renderer->getRenderer()->useProgram(shaderProgram);
-	
-	lineBuff->uploadVertices(lines);
-	dbuff->addGeometry(lineBuff);
+  if (lines.size() == 0) {
+    return;
+  }
 
-	Renderer::DrawParameters dp;
-	dp.textures = {texture};
-	dp.ambient = 1.f;
-	dp.colour = glm::u8vec4(255, 255, 255, 255);
-	dp.start = 0;
-	dp.count = lines.size();
-	dp.diffuse = 1.f;
-	
-	renderer->getRenderer()->drawArrays(glm::mat4(1.f), dbuff, dp);
-	
-	renderer->getRenderer()->invalidate();
-	
-	glUseProgram(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray( 0 );
+  renderer->getRenderer()->useProgram(shaderProgram);
 
-	lines.clear();
+  lineBuff->uploadVertices(lines);
+  dbuff->addGeometry(lineBuff);
+
+  Renderer::DrawParameters dp;
+  dp.textures = {texture};
+  dp.ambient = 1.f;
+  dp.colour = glm::u8vec4(255, 255, 255, 255);
+  dp.start = 0;
+  dp.count = lines.size();
+  dp.diffuse = 1.f;
+
+  renderer->getRenderer()->drawArrays(glm::mat4(1.f), dbuff, dp);
+
+  renderer->getRenderer()->invalidate();
+
+  glUseProgram(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  lines.clear();
 }
 
 void DebugDraw::reportErrorWarning(const char *warningString)
 {
-	std::cerr << warningString << std::endl;
+  std::cerr << warningString << std::endl;
 }
 
 void DebugDraw::draw3dText(const btVector3 &location, const char *textString)
 {
-	RW_UNUSED(location);
-	std::cout << textString << std::endl;
+  RW_UNUSED(location);
+  std::cout << textString << std::endl;
 }
 
-void DebugDraw::setDebugMode(int debugMode)
-{
-	this->debugMode = debugMode;
-}
+void DebugDraw::setDebugMode(int debugMode) { this->debugMode = debugMode; }
 
-int DebugDraw::getDebugMode() const
-{
-	return debugMode;
-}
+int DebugDraw::getDebugMode() const { return debugMode; }
