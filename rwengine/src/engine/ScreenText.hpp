@@ -7,21 +7,20 @@
 #include <algorithm>
 #include <utility>
 
-enum class ScreenTextType
-{
-	/// Big text will be rendered according to the proscribed style.
-	/// Adding a 2nd big text will cause the first to terminate.
-	Big = 0,
-	/// See Big, will wait for any Big text to finish.
-	BigLowPriority = 1,
-	/// Will be cleared by the clear help opcode
-	Help = 2,
-	/// Automatically cleared after each tick, for generic text.
-	Immediate = 3,
-	/// High priority cutscene text
-	HighPriority = 4,
-	///
-	_Count = 5
+enum class ScreenTextType {
+  /// Big text will be rendered according to the proscribed style.
+  /// Adding a 2nd big text will cause the first to terminate.
+  Big = 0,
+  /// See Big, will wait for any Big text to finish.
+  BigLowPriority = 1,
+  /// Will be cleared by the clear help opcode
+  Help = 2,
+  /// Automatically cleared after each tick, for generic text.
+  Immediate = 3,
+  /// High priority cutscene text
+  HighPriority = 4,
+  ///
+  _Count = 5
 };
 constexpr unsigned int ScreenTypeTextCount = static_cast<unsigned int>(ScreenTextType::_Count);
 
@@ -30,42 +29,37 @@ constexpr unsigned int ScreenTypeTextCount = static_cast<unsigned int>(ScreenTex
  *
  * Text string and fading information.
  */
-struct ScreenTextEntry
-{
-	/// After processing numbers
-	std::string text;
-	/// in the virtual 640x480 screen space
-	glm::vec2 position;
-	/// Font number
-	int font;
-	/// Font size
-	int size;
-	/// Background colour (or, if a == 0, shadow offset)
-	glm::u8vec4 colourBG;
-	/// Foreground colour
-	glm::u8vec3 colourFG;
-	/// Alignment (left = 0, center = 1, right = 2)
-	unsigned char alignment;
-	/// Onscreen duration
-	int durationMS;
-	/// The amount of time onscreen so far
-	int displayedMS;
-	/// Wrap width
-	int wrapX;
-	/// ID used to reference the text.
-	std::string id;
+struct ScreenTextEntry {
+  /// After processing numbers
+  std::string text;
+  /// in the virtual 640x480 screen space
+  glm::vec2 position;
+  /// Font number
+  int font;
+  /// Font size
+  int size;
+  /// Background colour (or, if a == 0, shadow offset)
+  glm::u8vec4 colourBG;
+  /// Foreground colour
+  glm::u8vec3 colourFG;
+  /// Alignment (left = 0, center = 1, right = 2)
+  unsigned char alignment;
+  /// Onscreen duration
+  int durationMS;
+  /// The amount of time onscreen so far
+  int displayedMS;
+  /// Wrap width
+  int wrapX;
+  /// ID used to reference the text.
+  std::string id;
 
-	static ScreenTextEntry makeBig(const std::string& id,
-							const std::string& str,
-							int style,
-							int durationMS);
+  static ScreenTextEntry makeBig(const std::string& id, const std::string& str, int style,
+                                 int durationMS);
 
-	static ScreenTextEntry makeHighPriority(const std::string& id,
-							const std::string& str,
-							int durationMS);
+  static ScreenTextEntry makeHighPriority(const std::string& id, const std::string& str,
+                                          int durationMS);
 
-	static ScreenTextEntry makeHelp(const std::string& id,
-									const std::string& str);
+  static ScreenTextEntry makeHelp(const std::string& id, const std::string& str);
 };
 
 /**
@@ -90,71 +84,63 @@ struct ScreenTextEntry
  */
 class ScreenText
 {
-	using EntryList =
-		std::vector<ScreenTextEntry>;
-	using EntryQueues =
-		std::array<EntryList, ScreenTypeTextCount>;
+  using EntryList = std::vector<ScreenTextEntry>;
+  using EntryQueues = std::array<EntryList, ScreenTypeTextCount>;
+
 public:
+  ///
+  /// \brief tick Apply display and fading rules to the text
+  /// \param dt
+  ///
+  void tick(float dt);
 
-	///
-	/// \brief tick Apply display and fading rules to the text
-	/// \param dt
-	///
-	void tick(float dt);
+  template <ScreenTextType Q, class... Args>
+  void addText(Args&&... args)
+  {
+    static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
+    m_textQueues[static_cast<size_t>(Q)].emplace_back(std::forward<Args...>(args...));
+  }
 
-	template <ScreenTextType Q, class... Args>
-	void addText(Args&&...args)
-	{
-		static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
-		m_textQueues[static_cast<size_t>(Q)].emplace_back(std::forward<Args...>(args...));
-	}
+  template <ScreenTextType Q>
+  const EntryList& getText() const
+  {
+    static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
+    return m_textQueues[static_cast<size_t>(Q)];
+  }
 
-	template <ScreenTextType Q>
-	const EntryList& getText() const
-	{
-		static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
-		return m_textQueues[static_cast<size_t>(Q)];
-	}
+  template <ScreenTextType Q>
+  void clear()
+  {
+    static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
+    m_textQueues[static_cast<size_t>(Q)].clear();
+  }
 
-	template <ScreenTextType Q>
-	void clear()
-	{
-		static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
-		m_textQueues[static_cast<size_t>(Q)].clear();
-	}
+  template <ScreenTextType Q>
+  void remove(const std::string& id)
+  {
+    static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
+    auto& list = m_textQueues[static_cast<size_t>(Q)];
+    list.erase(std::remove_if(list.begin(), list.end(), [&id](const ScreenTextEntry& e) {
+      return e.id == id;
+    }), list.end());
+  }
 
-	template <ScreenTextType Q>
-	void remove(const std::string& id)
-	{
-		static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount, "Queue out of range");
-		auto& list = m_textQueues[static_cast<size_t>(Q)];
-		list.erase(
-					std::remove_if(list.begin(), list.end(),
-					   [&id](const ScreenTextEntry& e){ return e.id == id; }),
-					list.end()
-				);
-	}
+  const EntryQueues& getAllText() const { return m_textQueues; }
 
-	const EntryQueues& getAllText() const
-	{
-		return m_textQueues;
-	}
-
-	template<class...Args>
-	static std::string format(std::string format, Args&&...args)
-	{
-		const std::array<std::string, sizeof...(args)> vals = { args... };
-		size_t x = 0, val = 0;
-		// We're only looking for numerical replacement markers
-		while ((x = format.find("~1~")) != std::string::npos && val < vals.size())
-		{
-			format = format.substr(0, x) + vals[val++] + format.substr(x + 3);
-		}
-		return format;
-	}
+  template <class... Args>
+  static std::string format(std::string format, Args&&... args)
+  {
+    const std::array<std::string, sizeof...(args)> vals = {args...};
+    size_t x = 0, val = 0;
+    // We're only looking for numerical replacement markers
+    while ((x = format.find("~1~")) != std::string::npos && val < vals.size()) {
+      format = format.substr(0, x) + vals[val++] + format.substr(x + 3);
+    }
+    return format;
+  }
 
 private:
-	EntryQueues m_textQueues;
+  EntryQueues m_textQueues;
 };
 
 #endif

@@ -47,18 +47,13 @@ struct VehicleGenerator;
  * Information about "Goal" locations so they can be rendered
  * (this doesn't really belong here).
  */
-struct AreaIndicatorInfo
-{
-	enum AreaIndicatorType
-	{
-		Cylinder
-	};
-	
-	AreaIndicatorType type;
-	glm::vec3 position;
-	glm::vec3 radius;
-};
+struct AreaIndicatorInfo {
+  enum AreaIndicatorType { Cylinder };
 
+  AreaIndicatorType type;
+  glm::vec3 position;
+  glm::vec3 radius;
+};
 
 /**
  * @brief Handles all data relating to object instances and other "worldly" state.
@@ -66,286 +61,289 @@ struct AreaIndicatorInfo
 class GameWorld
 {
 public:
+  GameWorld(Logger* log, WorkContext* work, GameData* dat);
 
-	GameWorld(Logger* log, WorkContext* work, GameData* dat);
+  ~GameWorld();
 
-	~GameWorld();
+  Logger* logger;
 
-	Logger* logger;
+  /**
+   * Loads an IPL into the game.
+   * @param name The name of the IPL as it appears in the games' gta.dat
+   */
+  bool placeItems(const std::string& name);
 
-	/**
-	 * Loads an IPL into the game.
-	 * @param name The name of the IPL as it appears in the games' gta.dat
-	 */
-	bool placeItems(const std::string& name);
+  /**
+   * @brief createTraffic spawn transitory peds and vehicles
+   * @param viewCamera The camera to create traffic near
+   *
+   * The position and frustum of the passed in camera is used to determine
+   * the radius where traffic can be spawned, and the frustum is used to avoid
+   * spawning traffic in view of the player.
+   */
+  void createTraffic(const ViewCamera& viewCamera);
 
-	/**
-	 * @brief createTraffic spawn transitory peds and vehicles
-	 * @param viewCamera The camera to create traffic near
-	 *
-	 * The position and frustum of the passed in camera is used to determine
-	 * the radius where traffic can be spawned, and the frustum is used to avoid
-	 * spawning traffic in view of the player.
-	 */
-	void createTraffic(const ViewCamera& viewCamera);
+  /**
+   * @brief cleanupTraffic Cleans up traffic too far away from the given camera
+   * @param viewCamera
+   */
+  void cleanupTraffic(const ViewCamera& viewCamera);
 
-	/**
-	 * @brief cleanupTraffic Cleans up traffic too far away from the given camera
-	 * @param viewCamera
-	 */
-	void cleanupTraffic(const ViewCamera& viewCamera);
+  /**
+   * Creates an instance
+   */
+  InstanceObject* createInstance(const uint16_t id, const glm::vec3& pos,
+                                 const glm::quat& rot = glm::quat());
 
-	/**
-	 * Creates an instance
-	 */
-	InstanceObject *createInstance(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
+  /**
+   * @brief Creates an InstanceObject for use in the current Cutscene.
+   */
+  CutsceneObject* createCutsceneObject(const uint16_t id, const glm::vec3& pos,
+                                       const glm::quat& rot = glm::quat());
 
-	/**
-	 * @brief Creates an InstanceObject for use in the current Cutscene.
-	 */
-	CutsceneObject *createCutsceneObject(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat());
-	
-	/**
-	 * Creates a vehicle
-	 */
-	VehicleObject *createVehicle(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+  /**
+   * Creates a vehicle
+   */
+  VehicleObject* createVehicle(const uint16_t id, const glm::vec3& pos,
+                               const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
-	/**
-	 * Creates a pedestrian.
-	 */
-	CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+  /**
+   * Creates a pedestrian.
+   */
+  CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos,
+                                    const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
 
-	/**
-	 * Creates a player
-	 */
-	CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(), GameObjectID gid = 0);
+  /**
+   * Creates a player
+   */
+  CharacterObject* createPlayer(const glm::vec3& pos, const glm::quat& rot = glm::quat(),
+                                GameObjectID gid = 0);
 
-	/**
-	 * Creates a pickup
-	 */
-	PickupObject* createPickup(const glm::vec3& pos, int id, int type);
+  /**
+   * Creates a pickup
+   */
+  PickupObject* createPickup(const glm::vec3& pos, int id, int type);
 
-	/**
-	 * Destroys an existing Object
-	 */
-	void destroyObject(GameObject* object);
+  /**
+   * Destroys an existing Object
+   */
+  void destroyObject(GameObject* object);
 
-	/**
-	 * @brief Put an object on the deletion queue.
-	 */
-	void destroyObjectQueued(GameObject* object);
+  /**
+   * @brief Put an object on the deletion queue.
+   */
+  void destroyObjectQueued(GameObject* object);
 
-	/**
-	 * @brief Destroys all objects on the destruction queue.
-	 */
-	void destroyQueuedObjects();
+  /**
+   * @brief Destroys all objects on the destruction queue.
+   */
+  void destroyQueuedObjects();
 
-	/**
-	 * Performs a weapon scan against things in the world
-	 */
-	void doWeaponScan(const WeaponScan &scan );
+  /**
+   * Performs a weapon scan against things in the world
+   */
+  void doWeaponScan(const WeaponScan& scan);
 
-	/**
-	 * Allocates a new VisualFX of the given type
-	 */
-	VisualFX* createEffect(VisualFX::EffectType type);
-	
-	/**
-	 * Immediately destoys the given effect
-	 */
-	void destroyEffect(VisualFX* effect);
+  /**
+   * Allocates a new VisualFX of the given type
+   */
+  VisualFX* createEffect(VisualFX::EffectType type);
 
-	/**
-	 * Returns the current hour
-	 */
-	int getHour();
-	
-	/**
-	 * Returns the current minute
-	 */
-	int getMinute();
+  /**
+   * Immediately destoys the given effect
+   */
+  void destroyEffect(VisualFX* effect);
 
-	glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
+  /**
+   * Returns the current hour
+   */
+  int getHour();
 
-	float getGameTime() const;
+  /**
+   * Returns the current minute
+   */
+  int getMinute();
 
-	/**
-	 * @brief getInventoryItem
-	 * @param weaponId The Weapon ID (inventory slot) of the weapon to fetch
-	 * @return Instance of the weapon
-	 */
-	InventoryItem* getInventoryItem(uint16_t weaponId) const;
+  glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 
-	/**
-	 * Game data
-	 */
-	GameData* data;
+  float getGameTime() const;
 
-	/**
-	 * Gameplay state
-	 */
-	GameState* state;
-	
-	/**
-	 * State of playing sounds
-	 */
-	SoundManager sound;
+  /**
+   * @brief getInventoryItem
+   * @param weaponId The Weapon ID (inventory slot) of the weapon to fetch
+   * @return Instance of the weapon
+   */
+  InventoryItem* getInventoryItem(uint16_t weaponId) const;
 
-	/**
-	 * Chase state
-	 */
-	ChaseCoordinator chase;
+  /**
+   * Game data
+   */
+  GameData* data;
 
-	/**
-	 * Each object type is allocated from a pool. This object helps manage
-	 * the individual pools.
-	 */
-	struct ObjectPool
-	{
-		std::map<GameObjectID, GameObject*> objects;
-		
-		/**
-		 * Allocates the game object a GameObjectID and inserts it into
-		 * the pool
-		 */
-		void insert(GameObject* object);
+  /**
+   * Gameplay state
+   */
+  GameState* state;
 
-		/**
-		 * Removes a game object from this pool
-		 */
-		void remove(GameObject* object);
+  /**
+   * State of playing sounds
+   */
+  SoundManager sound;
 
-		/**
-		 * Finds a game object if it exists in this pool
-		 */
-		GameObject* find(GameObjectID id) const;
-	};
+  /**
+   * Chase state
+   */
+  ChaseCoordinator chase;
 
-	/**
-	 * Stores all game objects
-	 */
-	std::vector<GameObject*> allObjects;
+  /**
+   * Each object type is allocated from a pool. This object helps manage
+   * the individual pools.
+   */
+  struct ObjectPool {
+    std::map<GameObjectID, GameObject*> objects;
 
-	ObjectPool pedestrianPool;
-	ObjectPool instancePool;
-	ObjectPool vehiclePool;
-	ObjectPool pickupPool;
-	ObjectPool cutscenePool;
-	ObjectPool projectilePool;
+    /**
+     * Allocates the game object a GameObjectID and inserts it into
+     * the pool
+     */
+    void insert(GameObject* object);
 
-	ObjectPool& getTypeObjectPool(GameObject* object);
+    /**
+     * Removes a game object from this pool
+     */
+    void remove(GameObject* object);
 
-	std::vector<PlayerController*> players;
+    /**
+     * Finds a game object if it exists in this pool
+     */
+    GameObject* find(GameObjectID id) const;
+  };
 
-	/**
-	 * @brief getBlipTarget
-	 * @param blip
-	 * @return The targetted object of the given blip
-	 */
-	GameObject *getBlipTarget(const BlipData &blip) const;
+  /**
+   * Stores all game objects
+   */
+  std::vector<GameObject*> allObjects;
 
-	/**
-	 * Map of Model Names to Instances
-	 */
-	std::map<std::string, InstanceObject*> modelInstances;
+  ObjectPool pedestrianPool;
+  ObjectPool instancePool;
+  ObjectPool vehiclePool;
+  ObjectPool pickupPool;
+  ObjectPool cutscenePool;
+  ObjectPool projectilePool;
 
-	/**
-	 * AI Graph
-	 */
-	AIGraph aigraph;
-	
-	/**
-	 * Visual Effects
-	 * @todo Consider using lighter handing mechanism
-	 */
-	std::vector<VisualFX*> effects;
+  ObjectPool& getTypeObjectPool(GameObject* object);
 
-	/**
-	 * Randomness Engine
-	 */
-	std::default_random_engine randomEngine;
-	
-	/**
-	 * Bullet 
-	 */
-	btDefaultCollisionConfiguration* collisionConfig;
-	btCollisionDispatcher* collisionDispatcher;
-	btBroadphaseInterface* broadphase;
-	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld* dynamicsWorld;
+  std::vector<PlayerController*> players;
 
-	/**
-	 * @brief physicsNearCallback
-	 * Used to implement uprooting and other physics oddities.
-	 */
-	static bool ContactProcessedCallback(btManifoldPoint& mp, void* body0, void* body1);
+  /**
+   * @brief getBlipTarget
+   * @param blip
+   * @return The targetted object of the given blip
+   */
+  GameObject* getBlipTarget(const BlipData& blip) const;
 
-	/**
-	 * @brief PhysicsTickCallback updates object each physics tick.
-	 * @param physWorld
-	 * @param timeStep
-	 */
-	static void PhysicsTickCallback(btDynamicsWorld* physWorld, btScalar timeStep);
+  /**
+   * Map of Model Names to Instances
+   */
+  std::map<std::string, InstanceObject*> modelInstances;
 
-	/**
-	 * Work related
-	 */
-	WorkContext* _work;
+  /**
+   * AI Graph
+   */
+  AIGraph aigraph;
 
-	/**
-	 * @brief Loads and starts the named cutscene.
-	 * @param name
-	 */
-	void loadCutscene(const std::string& name);
-	void startCutscene();
-	void clearCutscene();
-	bool isCutsceneDone();
+  /**
+   * Visual Effects
+   * @todo Consider using lighter handing mechanism
+   */
+  std::vector<VisualFX*> effects;
 
-	std::string cutsceneAudio;
-	bool cutsceneAudioLoaded;
-	std::string missionAudio;
+  /**
+   * Randomness Engine
+   */
+  std::default_random_engine randomEngine;
 
-	/**
-	 * @brief loads a model into a special character slot.
-	 */
-	void loadSpecialCharacter(const unsigned short index, const std::string& name);
-	void loadSpecialModel(const unsigned short index, const std::string& name);
-	
-	void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
-	void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
-	
-	void drawAreaIndicator(AreaIndicatorInfo::AreaIndicatorType type, glm::vec3 position, glm::vec3 radius);
-	
-	const std::vector<AreaIndicatorInfo>& getAreaIndicators() const { return areaIndicators; }
-	
-	void clearTickData();
-	
-	void setPaused(bool pause);
-	bool isPaused() const;
+  /**
+   * Bullet
+   */
+  btDefaultCollisionConfiguration* collisionConfig;
+  btCollisionDispatcher* collisionDispatcher;
+  btBroadphaseInterface* broadphase;
+  btSequentialImpulseConstraintSolver* solver;
+  btDiscreteDynamicsWorld* dynamicsWorld;
 
-	/**
-	 * Attempt to spawn a vehicle at a vehicle generator
-	 */
-	VehicleObject* tryToSpawnVehicle(VehicleGenerator& gen);
+  /**
+   * @brief physicsNearCallback
+   * Used to implement uprooting and other physics oddities.
+   */
+  static bool ContactProcessedCallback(btManifoldPoint& mp, void* body0, void* body1);
+
+  /**
+   * @brief PhysicsTickCallback updates object each physics tick.
+   * @param physWorld
+   * @param timeStep
+   */
+  static void PhysicsTickCallback(btDynamicsWorld* physWorld, btScalar timeStep);
+
+  /**
+   * Work related
+   */
+  WorkContext* _work;
+
+  /**
+   * @brief Loads and starts the named cutscene.
+   * @param name
+   */
+  void loadCutscene(const std::string& name);
+  void startCutscene();
+  void clearCutscene();
+  bool isCutsceneDone();
+
+  std::string cutsceneAudio;
+  bool cutsceneAudioLoaded;
+  std::string missionAudio;
+
+  /**
+   * @brief loads a model into a special character slot.
+   */
+  void loadSpecialCharacter(const unsigned short index, const std::string& name);
+  void loadSpecialModel(const unsigned short index, const std::string& name);
+
+  void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
+  void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min, const glm::vec3& max);
+
+  void drawAreaIndicator(AreaIndicatorInfo::AreaIndicatorType type, glm::vec3 position,
+                         glm::vec3 radius);
+
+  const std::vector<AreaIndicatorInfo>& getAreaIndicators() const { return areaIndicators; }
+
+  void clearTickData();
+
+  void setPaused(bool pause);
+  bool isPaused() const;
+
+  /**
+   * Attempt to spawn a vehicle at a vehicle generator
+   */
+  VehicleObject* tryToSpawnVehicle(VehicleGenerator& gen);
 
 private:
+  /**
+   * @brief Used by objects to delete themselves during updates.
+   */
+  std::set<GameObject*> deletionQueue;
 
-	/**
-	 * @brief Used by objects to delete themselves during updates.
-	 */
-	std::set<GameObject*> deletionQueue;
+  std::vector<AreaIndicatorInfo> areaIndicators;
 
-	std::vector<AreaIndicatorInfo> areaIndicators;
+  /**
+   * Inventory Item instances
+   */
+  std::vector<InventoryItem*> inventoryItems;
 
-	/**
-	 * Inventory Item instances
-	 */
-	std::vector<InventoryItem*> inventoryItems;
-	
-	/**
-	 * Flag for pausing the simulation
-	 */
-	bool paused;
+  /**
+   * Flag for pausing the simulation
+   */
+  bool paused;
 };
 
 #endif

@@ -25,87 +25,81 @@ class Skeleton;
  */
 class Animator
 {
-	/**
-	 * @brief Stores data required to animate a model frame
-	 */
-	struct BoneInstanceData
-	{
-		unsigned int frameIndex;
-	};
+  /**
+   * @brief Stores data required to animate a model frame
+   */
+  struct BoneInstanceData {
+    unsigned int frameIndex;
+  };
 
-	/**
-	 * @brief The AnimationState struct stores information about playing animations
-	 */
-	struct AnimationState
-	{
-		Animation* animation;
-		/// Timestamp of the last frame
-		float time;
-		/// Speed multiplier
-		float speed;
-		/// Automatically restart
-		bool repeat;
-		std::map<AnimationBone*, BoneInstanceData> boneInstances;
-	};
+  /**
+   * @brief The AnimationState struct stores information about playing animations
+   */
+  struct AnimationState {
+    Animation* animation;
+    /// Timestamp of the last frame
+    float time;
+    /// Speed multiplier
+    float speed;
+    /// Automatically restart
+    bool repeat;
+    std::map<AnimationBone*, BoneInstanceData> boneInstances;
+  };
 
-	/**
-	 * @brief model The model being animated.
-	 */
-	Model* model;
-	
-	/**
-	 * @brief Skeleton instance.
-	 */
-	Skeleton* skeleton;
+  /**
+   * @brief model The model being animated.
+   */
+  Model* model;
 
-	/**
-	 * @brief Currently playing animations
-	 */
-	std::vector<AnimationState> animations;
+  /**
+   * @brief Skeleton instance.
+   */
+  Skeleton* skeleton;
+
+  /**
+   * @brief Currently playing animations
+   */
+  std::vector<AnimationState> animations;
 
 public:
+  Animator(Model* model, Skeleton* skeleton);
 
-	Animator(Model* model, Skeleton* skeleton);
+  Animation* getAnimation(unsigned int slot)
+  {
+    if (slot < animations.size()) {
+      return animations[slot].animation;
+    }
+    return nullptr;
+  }
 
-	Animation* getAnimation(unsigned int slot)
-	{
-		if (slot < animations.size())
-		{
-			return animations[slot].animation;
-		}
-		return nullptr;
-	}
+  void playAnimation(unsigned int slot, Animation* anim, float speed, bool repeat)
+  {
+    if (slot >= animations.size()) {
+      animations.resize(slot + 1);
+    }
+    animations[slot] = {anim, 0.f, speed, repeat, {}};
+  }
 
-	void playAnimation(unsigned int slot, Animation* anim, float speed, bool repeat)
-	{
-		if (slot >= animations.size())
-		{
-			animations.resize(slot+1);
-		}
-		animations[slot] = { anim, 0.f, speed, repeat, {} };
-	}
+  void setAnimationSpeed(unsigned int slot, float speed)
+  {
+    RW_CHECK(slot < animations.size(), "Slot out of range");
+    if (slot < animations.size()) {
+      animations[slot].speed = speed;
+    }
+  }
 
-	void setAnimationSpeed(unsigned int slot, float speed)
-	{
-		RW_CHECK(slot < animations.size(), "Slot out of range");
-		if (slot < animations.size())
-		{
-			animations[slot].speed = speed;
-		}
-	}
+  /**
+   * @brief tick Update animation paramters for server-side data.
+   * @param dt
+   */
+  void tick(float dt);
 
-	/**
-	 * @brief tick Update animation paramters for server-side data.
-	 * @param dt
-	 */
-	void tick(float dt);
-
-	/**
-	 * Returns true if the animation has finished playing.
-	 */
-	bool isCompleted(unsigned int slot) const;
-	float getAnimationTime(unsigned int slot) const;
-	void setAnimationTime(unsigned int slot, float time);
+  /**
+   * Returns true if the animation has finished playing.
+   */
+  bool isCompleted(unsigned int slot) const;
+  float getAnimationTime(unsigned int slot) const;
+  void setAnimationTime(unsigned int slot, float time);
 };
 
 #endif
