@@ -2,8 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+  RWGame game(argc, argv);
 
-	RWGame game( argc, argv );
-
-	return game.run();
+  return game.run();
 }
