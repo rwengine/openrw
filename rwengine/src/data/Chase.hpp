@@ -9,17 +9,16 @@
 
 class GameObject;
 
-struct ChaseKeyframe
-{
-	glm::vec3 velocity;
-	int steeringAngle;
-	int acceleratorPower;
-	int brakePower;
-	bool handbrake;
-	glm::vec3 position;
-	glm::quat rotation;
+struct ChaseKeyframe {
+  glm::vec3 velocity;
+  int steeringAngle;
+  int acceleratorPower;
+  int brakePower;
+  bool handbrake;
+  glm::vec3 position;
+  glm::quat rotation;
 
-	static bool load(const std::string& filePath, std::vector<ChaseKeyframe>& frames);
+  static bool load(const std::string& filePath, std::vector<ChaseKeyframe>& frames);
 };
 
 /**
@@ -31,27 +30,25 @@ struct ChaseKeyframe
 class ChaseCoordinator
 {
 public:
+  ChaseCoordinator() : chaseTime(-1.f) {}
 
-	ChaseCoordinator()
-		: chaseTime(-1.f)
-	{ }
+  bool addChaseVehicle(GameObject* vehicle, int index, const std::string& pathFile);
+  GameObject* getChaseVehicle(int index);
+  void removeChaseVehicle(int index);
 
-	bool addChaseVehicle(GameObject* vehicle, int index, const std::string& pathFile);
-	GameObject* getChaseVehicle(int index);
-	void removeChaseVehicle(int index);
+  void start();
+  void update(float dt);
 
-	void start();
-	void update(float dt);
+  void cleanup();
 
-	void cleanup();
 private:
-	float chaseTime;
-	struct ChaseObject {
-		std::vector<ChaseKeyframe> keyframes;
-		GameObject* object;
-	};
+  float chaseTime;
+  struct ChaseObject {
+    std::vector<ChaseKeyframe> keyframes;
+    GameObject* object;
+  };
 
-	std::map<int, ChaseObject> chaseVehicles;
+  std::map<int, ChaseObject> chaseVehicles;
 };
 
 #endif
