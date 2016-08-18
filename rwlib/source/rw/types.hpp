@@ -27,9 +27,8 @@
  */
 #define WORLD_GRID_SIZE (4000l)
 #define WORLD_CELL_SIZE (100l)
-#define WORLD_GRID_WIDTH (WORLD_GRID_SIZE/WORLD_CELL_SIZE)
-#define WORLD_GRID_CELLS (WORLD_GRID_WIDTH*WORLD_GRID_WIDTH)
-
+#define WORLD_GRID_WIDTH (WORLD_GRID_SIZE / WORLD_CELL_SIZE)
+#define WORLD_GRID_CELLS (WORLD_GRID_WIDTH * WORLD_GRID_WIDTH)
 
 struct Animation;
 
@@ -37,27 +36,22 @@ typedef std::map<std::string, Animation*> AnimationSet;
 
 namespace RWTypes
 {
-
 /**
  * @struct RGB
  *  Stores 8 bit RGB data
  */
-struct RGB
-{
-	uint8_t r, g, b;
+struct RGB {
+  uint8_t r, g, b;
 
-    operator glm::vec3() {
-        return glm::vec3(r, g, b)/255.f;
-    }
+  operator glm::vec3() { return glm::vec3(r, g, b) / 255.f; }
 };
 
 /**
  * @struct RGBA
  *  Stores 8 bit RGBA data
  */
-struct RGBA
-{
-	uint8_t r, g, b, a;
+struct RGBA {
+  uint8_t r, g, b, a;
 };
 }
 
