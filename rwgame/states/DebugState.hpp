@@ -5,37 +5,37 @@
 
 class DebugState : public State
 {
-	ViewCamera _debugCam;
-	glm::vec3 _movement;
-	glm::vec2 _debugLook;
-	bool _freeLook;
-	bool _sonicMode;
-	bool _invertedY;
+  ViewCamera _debugCam;
+  glm::vec3 _movement;
+  glm::vec2 _debugLook;
+  bool _freeLook;
+  bool _sonicMode;
+  bool _invertedY;
 
-	Menu* createDebugMenu();
-	Menu* createMapMenu();
-	Menu* createVehicleMenu();
-	Menu* createAIMenu();
-	Menu* createWeaponMenu();
+  Menu* createDebugMenu();
+  Menu* createMapMenu();
+  Menu* createVehicleMenu();
+  Menu* createAIMenu();
+  Menu* createWeaponMenu();
 
 public:
-	DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
+  DebugState(RWGame* game, const glm::vec3& vp = {}, const glm::quat& vd = {});
 
-	virtual void enter();
-	virtual void exit();
+  virtual void enter();
+  virtual void exit();
 
-	virtual void tick(float dt);
-	virtual void draw(GameRenderer* r);
+  virtual void tick(float dt);
+  virtual void draw(GameRenderer* r);
 
-	virtual void handleEvent(const SDL_Event& event);
+  virtual void handleEvent(const SDL_Event& event);
 
-	void printCameraDetails();
+  void printCameraDetails();
 
-	void spawnVehicle(unsigned int id);
-	void spawnFollower(unsigned int id);
-	void giveItem(InventoryItem* item);
+  void spawnVehicle(unsigned int id);
+  void spawnFollower(unsigned int id);
+  void giveItem(InventoryItem* item);
 
-	const ViewCamera& getCamera();
+  const ViewCamera& getCamera();
 };
 
-#endif // DEBUGSTATE_HPP
+#endif  // DEBUGSTATE_HPP
