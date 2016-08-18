@@ -16,122 +16,117 @@ class VehicleObject;
 class CharacterController
 {
 public:
+  /**
+   * @brief The Activity struct interface
+   */
+  struct Activity {
+    virtual ~Activity() {}
 
-	/**
-	 * @brief The Activity struct interface
-	 */
-	struct Activity {
+    virtual std::string name() const = 0;
 
-		virtual ~Activity() {}
+    /**
+     * @brief canSkip
+     * @return true if the activity can be skipped.
+     */
+    virtual bool canSkip(CharacterObject*, CharacterController*) const { return false; }
 
-		virtual std::string name() const = 0;
+    virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
+  };
 
-		/**
-		 * @brief canSkip
-		 * @return true if the activity can be skipped.
-		 */
-		virtual bool canSkip(CharacterObject*, CharacterController*) const { return false; }
-
-		virtual bool update(CharacterObject* character, CharacterController* controller) = 0;
-	};
-	
-	/**
-	 * Available AI goals.
-	 */
-	enum Goal
-	{
-		/**
-		 * No goal, will idle or execute external Activities.
-		 */
-		None,
-		/**
-		 * Keep close to leader character
-		 */
-		FollowLeader,
-		/**
-		 * Wander randomly around the map
-		 */
-		TrafficWander
-	};
+  /**
+   * Available AI goals.
+   */
+  enum Goal {
+    /**
+     * No goal, will idle or execute external Activities.
+     */
+    None,
+    /**
+     * Keep close to leader character
+     */
+    FollowLeader,
+    /**
+     * Wander randomly around the map
+     */
+    TrafficWander
+  };
 
 protected:
-	
-	/**
-	 * The character being controlled.
-	 */
-	CharacterObject* character;
+  /**
+   * The character being controlled.
+   */
+  CharacterObject* character;
 
-	Activity* _currentActivity;
-	Activity* _nextActivity;
+  Activity* _currentActivity;
+  Activity* _nextActivity;
 
-	bool updateActivity();
-	void setActivity(Activity* activity);
+  bool updateActivity();
+  void setActivity(Activity* activity);
 
-	float m_closeDoorTimer;
-	
-	// Goal related variables
-	Goal currentGoal;
-	CharacterObject* leader;
-	AIGraphNode* targetNode;
+  float m_closeDoorTimer;
+
+  // Goal related variables
+  Goal currentGoal;
+  CharacterObject* leader;
+  AIGraphNode* targetNode;
 
 public:
-	
-	CharacterController(CharacterObject* character);
+  CharacterController(CharacterObject* character);
 
-	virtual ~CharacterController() { }
+  virtual ~CharacterController() {}
 
-	Activity* getCurrentActivity() const { return _currentActivity; }
+  Activity* getCurrentActivity() const { return _currentActivity; }
 
-	Activity* getNextActivity() const { return _nextActivity; }
+  Activity* getNextActivity() const { return _nextActivity; }
 
-	/**
-	 * @brief skipActivity Cancel the current activity immediatley, if possible.
-	 */
-	void skipActivity();
+  /**
+   * @brief skipActivity Cancel the current activity immediatley, if possible.
+   */
+  void skipActivity();
 
-	/**
-	 * @brief setNextActivity Sets the next Activity with a parameter.
-	 * @param activity
-	 * @param position
-	 */
-	void setNextActivity( Activity* activity );
+  /**
+   * @brief setNextActivity Sets the next Activity with a parameter.
+   * @param activity
+   * @param position
+   */
+  void setNextActivity(Activity* activity);
 
-	/**
-	 * @brief IsCurrentActivity
-	 * @param activity Name of activity to check for
-	 * @return if the given activity is the current activity
-	 */
-	bool isCurrentActivity(const std::string& activity) const;
-	
-	/**
-	 * @brief update Updates the controller.
-	 * @param dt
-	 */
-	virtual void update(float dt);
+  /**
+   * @brief IsCurrentActivity
+   * @param activity Name of activity to check for
+   * @return if the given activity is the current activity
+   */
+  bool isCurrentActivity(const std::string& activity) const;
 
-	virtual glm::vec3 getTargetPosition() = 0;
+  /**
+   * @brief update Updates the controller.
+   * @param dt
+   */
+  virtual void update(float dt);
 
-	/**
-	 * @brief
-	 * @return Returns the Character Object
-	 */
-	CharacterObject* getCharacter() const;
+  virtual glm::vec3 getTargetPosition() = 0;
 
-	void setMoveDirection(const glm::vec3& movement);
-	void setLookDirection(const glm::vec2& look);
+  /**
+   * @brief
+   * @return Returns the Character Object
+   */
+  CharacterObject* getCharacter() const;
 
-	void setRunning(bool run);
-	
-	void setGoal(Goal goal) { currentGoal = goal; }
-	Goal getGoal() const { return currentGoal; }
-	
-	void setTargetCharacter(CharacterObject* c) { leader = c; }
-	CharacterObject* getTargetCharacter() const { return leader; }
+  void setMoveDirection(const glm::vec3& movement);
+  void setLookDirection(const glm::vec2& look);
+
+  void setRunning(bool run);
+
+  void setGoal(Goal goal) { currentGoal = goal; }
+  Goal getGoal() const { return currentGoal; }
+
+  void setTargetCharacter(CharacterObject* c) { leader = c; }
+  CharacterObject* getTargetCharacter() const { return leader; }
 };
 
-#define DECL_ACTIVITY( activity_name ) \
-	static constexpr auto ActivityName = #activity_name; \
-	std::string name() const { return ActivityName; }
+#define DECL_ACTIVITY(activity_name)                   \
+  static constexpr auto ActivityName = #activity_name; \
+  std::string name() const { return ActivityName; }
 
 // TODO: Refactor this with an ugly macro to reduce code dup.
 class WeaponItem;
@@ -141,75 +136,72 @@ class WeaponItem;
  *
  * @todo Move into ControllerActivities.hpp or equivelant
  */
-namespace Activities {
-	struct GoTo : public CharacterController::Activity {
-		DECL_ACTIVITY( GoTo )
+namespace Activities
+{
+struct GoTo : public CharacterController::Activity {
+  DECL_ACTIVITY(GoTo)
 
-		glm::vec3 target;
-		bool sprint;
+  glm::vec3 target;
+  bool sprint;
 
-		GoTo( const glm::vec3& target, bool _sprint = false )
-			: target( target ), sprint(_sprint) {}
+  GoTo(const glm::vec3& target, bool _sprint = false) : target(target), sprint(_sprint) {}
 
-		bool update(CharacterObject* character, CharacterController* controller);
+  bool update(CharacterObject* character, CharacterController* controller);
 
-		bool canSkip(CharacterObject *, CharacterController *) const { return true; }
-	};
-	
-	struct Jump : public CharacterController::Activity
-	{
-		DECL_ACTIVITY( Jump )
-		
-		bool jumped;
-		
-		Jump() : jumped(false) {}
-		
-		bool update(CharacterObject* character, CharacterController* controller);
-	};
+  bool canSkip(CharacterObject*, CharacterController*) const { return true; }
+};
 
-	struct EnterVehicle : public CharacterController::Activity {
-		DECL_ACTIVITY( EnterVehicle )
+struct Jump : public CharacterController::Activity {
+  DECL_ACTIVITY(Jump)
 
-		VehicleObject* vehicle;
-		int seat;
-		
-		enum {
-			ANY_SEAT = -1 // Magic number for any seat but the driver's.
-		};
+  bool jumped;
 
-		bool entering;
+  Jump() : jumped(false) {}
 
-		EnterVehicle( VehicleObject* vehicle, int seat = 0 )
-			: vehicle( vehicle ), seat( seat ), entering(false) {}
+  bool update(CharacterObject* character, CharacterController* controller);
+};
 
-		bool canSkip(CharacterObject* character, CharacterController*) const override;
+struct EnterVehicle : public CharacterController::Activity {
+  DECL_ACTIVITY(EnterVehicle)
 
-		bool update(CharacterObject *character, CharacterController *controller);
-	};
+  VehicleObject* vehicle;
+  int seat;
 
-	struct ExitVehicle : public CharacterController::Activity {
-		DECL_ACTIVITY( ExitVehicle )
+  enum {
+    ANY_SEAT = -1  // Magic number for any seat but the driver's.
+  };
 
-		const bool jacked;
+  bool entering;
 
-		ExitVehicle(bool jacked_ = false)
-			: jacked(jacked_)
-			{}
+  EnterVehicle(VehicleObject* vehicle, int seat = 0) : vehicle(vehicle), seat(seat), entering(false)
+  {
+  }
 
-		bool update(CharacterObject *character, CharacterController *controller);
-	};
+  bool canSkip(CharacterObject* character, CharacterController*) const override;
 
-	struct ShootWeapon : public CharacterController::Activity {
-		DECL_ACTIVITY( ShootWeapon )
+  bool update(CharacterObject* character, CharacterController* controller);
+};
 
-		WeaponItem* _item;
-		bool _fired;
+struct ExitVehicle : public CharacterController::Activity {
+  DECL_ACTIVITY(ExitVehicle)
 
-		ShootWeapon( WeaponItem* item )
-			: _item(item), _fired(false) {}
+  const bool jacked;
 
-		bool update(CharacterObject *character, CharacterController *controller);
-	};
+  ExitVehicle(bool jacked_ = false) : jacked(jacked_) {}
+
+  bool update(CharacterObject* character, CharacterController* controller);
+};
+
+struct ShootWeapon : public CharacterController::Activity {
+  DECL_ACTIVITY(ShootWeapon)
+
+  WeaponItem* _item;
+  bool _fired;
+
+  ShootWeapon(WeaponItem* item) : _item(item), _fired(false) {}
+
+  bool update(CharacterObject* character, CharacterController* controller);
+};
 }
 
 #endif

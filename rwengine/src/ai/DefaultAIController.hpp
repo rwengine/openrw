@@ -7,15 +7,14 @@
 struct AIGraphNode;
 class DefaultAIController : public CharacterController
 {
-	glm::vec3 gotoPos;
-public:
-	
-	DefaultAIController(CharacterObject* character)
-	 : CharacterController(character) {}
+  glm::vec3 gotoPos;
 
-	glm::vec3 getTargetPosition();
-	
-    virtual void update(float dt);
+public:
+  DefaultAIController(CharacterObject* character) : CharacterController(character) {}
+
+  glm::vec3 getTargetPosition();
+
+  virtual void update(float dt);
 };
 
 #endif
