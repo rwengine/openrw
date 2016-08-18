@@ -12,12 +12,12 @@ class InventoryItem;
  */
 class ItemPickup : public PickupObject
 {
-	InventoryItem* item;
+  InventoryItem* item;
+
 public:
+  ItemPickup(GameWorld* world, const glm::vec3& position, PickupType type, InventoryItem* item);
 
-	ItemPickup(GameWorld* world, const glm::vec3& position, PickupType type, InventoryItem* item);
-
-	bool onCharacterTouch(CharacterObject* character);
+  bool onCharacterTouch(CharacterObject* character);
 };
 
 #endif
