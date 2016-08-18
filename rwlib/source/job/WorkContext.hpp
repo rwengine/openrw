@@ -12,23 +12,23 @@ class WorkContext;
 
 class LoadWorker
 {
-	WorkContext* _context;
+  WorkContext* _context;
 
 public:
+  std::atomic<bool> _running;
+  std::thread _thread;
+  void start();
 
-	std::atomic<bool> _running;
-	std::thread _thread;
-	void start();
+  LoadWorker(WorkContext* context)
+      : _context(context), _running(true), _thread(std::bind(&LoadWorker::start, this))
+  {
+  }
 
-	LoadWorker( WorkContext* context )
-		: _context( context ), _running(true),
-	_thread( std::bind(&LoadWorker::start, this) ) { }
-
-	~LoadWorker( )
-	{
-		_running = false;
-		_thread.join();
-	}
+  ~LoadWorker()
+  {
+    _running = false;
+    _thread.join();
+  }
 };
 
 /**
@@ -36,23 +36,21 @@ public:
  */
 class WorkJob
 {
-	WorkContext* _context;
+  WorkContext* _context;
 
 public:
+  WorkJob(WorkContext* context) : _context(context) {}
 
-	WorkJob(WorkContext* context)
-		: _context(context) {}
+  virtual ~WorkJob() {}
 
-	virtual ~WorkJob() {}
+  /**
+   * @brief getContext
+   * @return The loading context for this Loader
+   */
+  WorkContext* getContext() const { return _context; }
 
-	/**
-	 * @brief getContext
-	 * @return The loading context for this Loader
-	 */
-	WorkContext* getContext() const { return _context; }
-
-	virtual void work() = 0;
-	virtual void complete() {}
+  virtual void work() = 0;
+  virtual void complete() {}
 };
 
 /**
@@ -63,42 +61,41 @@ public:
  */
 class WorkContext
 {
-	std::mutex _inMutex;
-	std::mutex _outMutex;
+  std::mutex _inMutex;
+  std::mutex _outMutex;
 
-	std::queue<WorkJob*> _workQueue;
-	std::queue<WorkJob*> _completeQueue;
+  std::queue<WorkJob*> _workQueue;
+  std::queue<WorkJob*> _completeQueue;
 
-	// Construct the worker last, so that it may use the queues
-	// immediately after initialization.
-	std::unique_ptr<LoadWorker> _worker;
+  // Construct the worker last, so that it may use the queues
+  // immediately after initialization.
+  std::unique_ptr<LoadWorker> _worker;
 
 public:
+  WorkContext() : _worker(new LoadWorker(this)) {}
 
-	WorkContext()
-		: _worker(new LoadWorker(this)) { }
+  void queueJob(WorkJob* job)
+  {
+    std::lock_guard<std::mutex> guard(_inMutex);
+    _workQueue.push(job);
+  }
 
-	void queueJob( WorkJob* job )
-	{
-		std::lock_guard<std::mutex> guard( _inMutex );
-		_workQueue.push( job );
-	}
+  void stop()
+  {
+    // Stop serving the queue.
+    _worker.reset(nullptr);
+  }
 
-	void stop()
-	{
-		// Stop serving the queue.
-		_worker.reset(nullptr);
-	}
+  // Called by the worker thread - don't touch
+  void workNext();
 
-	// Called by the worker thread - don't touch
-	void workNext();
+  bool isEmpty()
+  {
+    std::lock_guard<std::mutex> guardIn(_inMutex);
+    std::lock_guard<std::mutex> guardOut(_outMutex);
 
-	bool isEmpty() {
-		std::lock_guard<std::mutex> guardIn( _inMutex );
-		std::lock_guard<std::mutex> guardOut( _outMutex );
+    return (_workQueue.size() + _completeQueue.size()) == 0;
+  }
 
-		return (_workQueue.size() + _completeQueue.size()) == 0;
-	}
-
-	void update();
+  void update();
 };

@@ -6,16 +6,16 @@
 class PauseState : public State
 {
 public:
-	PauseState(RWGame* game);
+  PauseState(RWGame* game);
 
-	virtual void enter();
-	virtual void exit();
+  virtual void enter();
+  virtual void exit();
 
-	virtual void tick(float dt);
-	
-    virtual void draw(GameRenderer* r);
+  virtual void tick(float dt);
 
-	virtual void handleEvent(const SDL_Event& event);
+  virtual void draw(GameRenderer* r);
+
+  virtual void handleEvent(const SDL_Event& event);
 };
 
-#endif // PAUSESTATE_HPP
+#endif  // PAUSESTATE_HPP

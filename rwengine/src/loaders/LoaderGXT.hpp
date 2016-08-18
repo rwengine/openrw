@@ -7,7 +7,7 @@
 class LoaderGXT
 {
 public:
-	void load( GameTexts& texts, FileHandle& file );
+  void load(GameTexts& texts, FileHandle& file);
 };
 
 #endif

@@ -19,24 +19,25 @@ class FileIndex;
 class TextureLoader
 {
 public:
-	bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
+  bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
 };
 
 // TODO: refactor this interface to be more like ModelLoader so they can be rolled into one.
 class LoadTextureArchiveJob : public WorkJob
 {
 private:
-	TextureArchive& archive;
-	FileIndex* fileIndex;
-	std::string _file;
-	FileHandle data;
+  TextureArchive& archive;
+  FileIndex* fileIndex;
+  std::string _file;
+  FileHandle data;
+
 public:
+  LoadTextureArchiveJob(WorkContext* context, FileIndex* index, TextureArchive& inTextures,
+                        const std::string& file);
 
-	LoadTextureArchiveJob(WorkContext* context, FileIndex* index, TextureArchive& inTextures, const std::string& file);
+  void work();
 
-	void work();
-
-	void complete();
+  void complete();
 };
 
 #endif

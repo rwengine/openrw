@@ -25,177 +25,163 @@ class GameWorld;
  */
 class GameObject
 {
-	glm::vec3 _lastPosition;
-	glm::quat _lastRotation;
-	GameObjectID objectID;
+  glm::vec3 _lastPosition;
+  glm::quat _lastRotation;
+  GameObjectID objectID;
+
 public:
-    glm::vec3 position;
-    glm::quat rotation;
+  glm::vec3 position;
+  glm::quat rotation;
 
-	/// Reference to Model data
-	ModelRef model;
-	
-    GameWorld* engine;
+  /// Reference to Model data
+  ModelRef model;
 
-	Animator* animator; /// Object's animator.
-	Skeleton* skeleton;
+  GameWorld* engine;
 
-	bool inWater;
+  Animator* animator;  /// Object's animator.
+  Skeleton* skeleton;
 
-	/**
-	 * @brief stores the height of water at the last tick
-	 */
-	float _lastHeight;
-	
-	/**
-	 * Should object be rendered?
-	 */
-	bool visible;
+  bool inWater;
 
-	GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
-		: _lastPosition(pos)
-		, _lastRotation(rot)
-		, objectID(0)
-		, position(pos)
-		, rotation(rot)
-		, model(model)
-		, engine(engine)
-		, animator(nullptr)
-		, skeleton(nullptr)
-		, inWater(false)
-		, _lastHeight(std::numeric_limits<float>::max())
-		, visible(true)
-		, lifetime(GameObject::UnknownLifetime)
-	{}
-		
-	virtual ~GameObject();
+  /**
+   * @brief stores the height of water at the last tick
+   */
+  float _lastHeight;
 
-	GameObjectID getGameObjectID() const { return objectID; }
-	/**
-	 * Do not call this, use GameWorld::insertObject
-	 */
-	void setGameObjectID(GameObjectID id) { objectID = id; }
+  /**
+   * Should object be rendered?
+   */
+  bool visible;
 
-	/**
-	 * @brief Enumeration of possible object types.
-	 */
-    enum Type
-    {
-		Instance,
-		Character,
-		Vehicle,
-		Pickup,
-		Projectile,
-		Cutscene,
-		Unknown
-    };
+  GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, ModelRef model)
+      : _lastPosition(pos),
+        _lastRotation(rot),
+        objectID(0),
+        position(pos),
+        rotation(rot),
+        model(model),
+        engine(engine),
+        animator(nullptr),
+        skeleton(nullptr),
+        inWater(false),
+        _lastHeight(std::numeric_limits<float>::max()),
+        visible(true),
+        lifetime(GameObject::UnknownLifetime)
+  {
+  }
 
-	/**
-	 * @brief determines what type of object this is.
-	 * @return one of Type
-	 */
-	virtual Type type() { return Unknown; }
-	
-	virtual void setPosition(const glm::vec3& pos);
+  virtual ~GameObject();
 
-	const glm::vec3& getPosition() const { return position; }
-	const glm::vec3& getLastPosition() const { return _lastPosition; }
+  GameObjectID getGameObjectID() const { return objectID; }
+  /**
+   * Do not call this, use GameWorld::insertObject
+   */
+  void setGameObjectID(GameObjectID id) { objectID = id; }
 
-	const glm::quat& getRotation() const { return rotation; }
-	virtual void setRotation(const glm::quat &orientation);
+  /**
+   * @brief Enumeration of possible object types.
+   */
+  enum Type { Instance, Character, Vehicle, Pickup, Projectile, Cutscene, Unknown };
 
-	float getHeading() const;
-	/**
-	 * @brief setHeading Rotates the object to face heading, in degrees.
-	 */
-	void setHeading(float heading);
+  /**
+   * @brief determines what type of object this is.
+   * @return one of Type
+   */
+  virtual Type type() { return Unknown; }
 
-	struct DamageInfo
-	{
-		enum DamageType
-		{
-			Explosion,
-			Burning,
-			Bullet,
-			Physics
-		};
-		
-		/**
-		 * World position of damage
-		 */
-		glm::vec3 damageLocation;
-		
-		/**
-		 * World position of the source (used for direction)
-		 */
-		glm::vec3 damageSource;
-		
-		/**
-		 * Magnitude of destruction
-		 */
-		float hitpoints;
-		
-		/**
-		 * Type of the damage
-		 */
-		DamageType type;
+  virtual void setPosition(const glm::vec3& pos);
 
-		/**
-		 * Physics impulse.
-		 */
-		float impulse;
-	};
-	
-	virtual bool takeDamage(const DamageInfo& /*damage*/) { return false; }
+  const glm::vec3& getPosition() const { return position; }
+  const glm::vec3& getLastPosition() const { return _lastPosition; }
 
-	virtual bool isAnimationFixed() const { return true; }
+  const glm::quat& getRotation() const { return rotation; }
+  virtual void setRotation(const glm::quat& orientation);
 
-	virtual bool isInWater() const { return inWater; }
+  float getHeading() const;
+  /**
+   * @brief setHeading Rotates the object to face heading, in degrees.
+   */
+  void setHeading(float heading);
 
-	virtual void tick(float dt) = 0;
+  struct DamageInfo {
+    enum DamageType { Explosion, Burning, Bullet, Physics };
 
-	/**
-	 * @brief Function used to modify the last transform
-	 * @param newPos
-	 */
-	void _updateLastTransform()
-	{
-		_lastPosition = getPosition();
-		_lastRotation = getRotation();
-	}
+    /**
+     * World position of damage
+     */
+    glm::vec3 damageLocation;
 
-	glm::mat4 getTimeAdjustedTransform(float alpha) const {
-		glm::mat4 t;
-		t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
-		t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
-		return t;
-	}
-	
-	enum ObjectLifetime
-	{
-		/// lifetime has not been set
-		UnknownLifetime,
-		/// Generic background pedestrians
-		TrafficLifetime,
-		/// Part of a mission
-		MissionLifetime,
-		/// Is owned by the player (or is the player)
-		PlayerLifetime
-	};
-	
-	void setLifetime(ObjectLifetime ol) { lifetime = ol; }
-	ObjectLifetime getLifetime() const { return lifetime; }
+    /**
+     * World position of the source (used for direction)
+     */
+    glm::vec3 damageSource;
 
-	void updateTransform(const glm::vec3& pos, const glm::quat& rot)
-	{
-		_lastPosition = position;
-		_lastRotation = rotation;
-		position = pos;
-		rotation = rot;
-	}
+    /**
+     * Magnitude of destruction
+     */
+    float hitpoints;
+
+    /**
+     * Type of the damage
+     */
+    DamageType type;
+
+    /**
+     * Physics impulse.
+     */
+    float impulse;
+  };
+
+  virtual bool takeDamage(const DamageInfo& /*damage*/) { return false; }
+
+  virtual bool isAnimationFixed() const { return true; }
+
+  virtual bool isInWater() const { return inWater; }
+
+  virtual void tick(float dt) = 0;
+
+  /**
+   * @brief Function used to modify the last transform
+   * @param newPos
+   */
+  void _updateLastTransform()
+  {
+    _lastPosition = getPosition();
+    _lastRotation = getRotation();
+  }
+
+  glm::mat4 getTimeAdjustedTransform(float alpha) const
+  {
+    glm::mat4 t;
+    t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
+    t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
+    return t;
+  }
+
+  enum ObjectLifetime {
+    /// lifetime has not been set
+    UnknownLifetime,
+    /// Generic background pedestrians
+    TrafficLifetime,
+    /// Part of a mission
+    MissionLifetime,
+    /// Is owned by the player (or is the player)
+    PlayerLifetime
+  };
+
+  void setLifetime(ObjectLifetime ol) { lifetime = ol; }
+  ObjectLifetime getLifetime() const { return lifetime; }
+
+  void updateTransform(const glm::vec3& pos, const glm::quat& rot)
+  {
+    _lastPosition = position;
+    _lastRotation = rotation;
+    position = pos;
+    rotation = rot;
+  }
 
 private:
-	ObjectLifetime lifetime;
+  ObjectLifetime lifetime;
 };
 
-#endif // __GAMEOBJECTS_HPP__
+#endif  // __GAMEOBJECTS_HPP__

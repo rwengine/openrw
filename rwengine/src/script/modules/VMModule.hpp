@@ -5,7 +5,7 @@
 class VMModule : public ScriptModule
 {
 public:
-    VMModule();
+  VMModule();
 };
 
 #endif

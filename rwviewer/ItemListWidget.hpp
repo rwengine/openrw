@@ -9,26 +9,26 @@
 
 class ItemListWidget : public QDockWidget
 {
-	Q_OBJECT
+  Q_OBJECT
 
-	QSortFilterProxyModel* filter;
-	ItemListModel* model;
-	QTableView* table;
-	QLineEdit* searchbox;
-	
+  QSortFilterProxyModel* filter;
+  ItemListModel* model;
+  QTableView* table;
+  QLineEdit* searchbox;
+
 public:
-	ItemListWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+  ItemListWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 signals:
-	void selectedItemChanged(const qint16 id);
+  void selectedItemChanged(const qint16 id);
 
 public slots:
 
-	void worldLoaded(GameWorld* world);
+  void worldLoaded(GameWorld* world);
 
-	void selectedIndexChanged(const QModelIndex& current);
+  void selectedIndexChanged(const QModelIndex& current);
 
-	void setFilter(const QString& f);
+  void setFilter(const QString& f);
 };
 
 #endif

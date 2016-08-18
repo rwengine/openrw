@@ -7,7 +7,7 @@
 class LoaderCutsceneDAT
 {
 public:
-	void load(CutsceneTracks& tracks, FileHandle file);
+  void load(CutsceneTracks& tracks, FileHandle file);
 };
 
 #endif

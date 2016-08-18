@@ -14,25 +14,26 @@
  */
 class WeaponItem : public InventoryItem
 {
-	std::shared_ptr<WeaponData> _wepData;
+  std::shared_ptr<WeaponData> _wepData;
 
-	void fireHitscan(CharacterObject* owner);
-	void fireProjectile(CharacterObject* owner);
+  void fireHitscan(CharacterObject* owner);
+  void fireProjectile(CharacterObject* owner);
+
 public:
-	WeaponItem(int itemID, std::shared_ptr<WeaponData> data)
-		: InventoryItem(itemID, data->inventorySlot, data->modelID)
-		, _wepData(data)
-	{}
+  WeaponItem(int itemID, std::shared_ptr<WeaponData> data)
+      : InventoryItem(itemID, data->inventorySlot, data->modelID), _wepData(data)
+  {
+  }
 
-	void primary(CharacterObject* owner);
+  void primary(CharacterObject* owner);
 
-	void secondary(CharacterObject* owner);
+  void secondary(CharacterObject* owner);
 
-	void fire(CharacterObject* owner);
+  void fire(CharacterObject* owner);
 
-	bool isFiring(CharacterObject* owner);
+  bool isFiring(CharacterObject* owner);
 
-	std::shared_ptr<WeaponData>& getWeaponData() { return _wepData; }
+  std::shared_ptr<WeaponData>& getWeaponData() { return _wepData; }
 };
 
 #endif
