@@ -5,7 +5,7 @@
 class ObjectModule : public ScriptModule
 {
 public:
-    ObjectModule();
+  ObjectModule();
 };
 
 #endif

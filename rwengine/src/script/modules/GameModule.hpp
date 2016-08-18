@@ -5,8 +5,7 @@
 class GameModule : public ScriptModule
 {
 public:
-    GameModule();
+  GameModule();
 };
-
 
 #endif
