@@ -1,1 +1,11 @@
-DisableFormat: true
+BasedOnStyle: Google
+UseTab: Never
+TabWidth: 4
+IndentWidth: 4
+AccessModifierOffset: -4
+ColumnLimit: 80
+# Makes maintaining initalizer lists a little easier
+BreakConstructorInitializersBeforeComma: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+# Single line methods can be harder to read
+AllowShortFunctionsOnASingleLine: false
