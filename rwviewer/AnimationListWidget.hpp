@@ -9,27 +9,26 @@
 
 class AnimationListWidget : public QDockWidget
 {
-	Q_OBJECT
+  Q_OBJECT
 
-	QSortFilterProxyModel* filter;
-	AnimationListModel* model;
-	QListView* table;
-	QLineEdit* searchbox;
-	
+  QSortFilterProxyModel* filter;
+  AnimationListModel* model;
+  QListView* table;
+  QLineEdit* searchbox;
+
 public:
+  AnimationListWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
-	AnimationListWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+  void setAnimations(const AnimationList& anims);
 
-	void setAnimations(const AnimationList& anims);
-	
 signals:
 
-	void selectedAnimationChanged(Animation* anim);
+  void selectedAnimationChanged(Animation* anim);
 
 public slots:
-	void selectedIndexChanged(const QModelIndex& current);
+  void selectedIndexChanged(const QModelIndex& current);
 
-	void setFilter(const QString& f);
+  void setFilter(const QString& f);
 };
 
 #endif
