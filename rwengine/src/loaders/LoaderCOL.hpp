@@ -13,13 +13,13 @@
 class LoaderCOL
 {
 public:
-	/// Load the COL data into memory
-	bool load(const std::string& file);
-	
-	/// Load the COL data from a file already in memory
-	bool load(char* data, const size_t size);
-	
-	std::vector<std::unique_ptr<CollisionModel>> instances;
+  /// Load the COL data into memory
+  bool load(const std::string& file);
+
+  /// Load the COL data from a file already in memory
+  bool load(char* data, const size_t size);
+
+  std::vector<std::unique_ptr<CollisionModel>> instances;
 };
 
 #endif
