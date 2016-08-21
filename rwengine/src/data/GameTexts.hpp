@@ -28,6 +28,19 @@ namespace GameStringUtil
 GameString fromString(const std::string& str);
 }
 
+/**
+ * Since the encoding of symbols is arbitrary, these constants should be used in
+ * hard-coded strings containing symbols outside of the ASCII-subset supported by
+ * all fonts
+ */
+namespace GameSymbols
+{
+	static constexpr GameStringChar Money  = '$';
+	static constexpr GameStringChar Heart  = '{';
+	static constexpr GameStringChar Armour = '[';
+	static constexpr GameStringChar Star   = ']';
+}
+
 class GameTexts
 {
 	using StringTable = std::unordered_map<GameStringKey, GameString>;
