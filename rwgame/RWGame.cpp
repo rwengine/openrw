@@ -777,10 +777,10 @@ void RWGame::globalKeyEvent(const SDL_Event& event)
 {
 	switch (event.key.keysym.sym) {
 	case SDLK_LEFTBRACKET:
-		state->basic.gameMinute -= 30.f;
+		world->offsetGameTime(-30);
 		break;
 	case SDLK_RIGHTBRACKET:
-		state->basic.gameMinute += 30.f;
+		world->offsetGameTime(30);
 		break;
 	case SDLK_9:
 		timescale *= 0.5f;

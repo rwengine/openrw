@@ -678,6 +678,26 @@ int GameWorld::getMinute()
 	return state->basic.gameMinute;
 }
 
+void GameWorld::offsetGameTime(int minutes)
+{
+	int gameMinute = state->basic.gameMinute;
+	int gameHour   = state->basic.gameHour;
+
+	gameMinute += minutes;
+	bool backwards = gameMinute < 0;
+
+	gameHour   += gameMinute / 60 - (backwards ? 1 : 0);
+
+	// Black mathgic? No. If the value is negative we want to wrap it around
+	// to the other side, e.g. minute -7 should be 53.
+	// The equivalent would be doing "while (gameMinute < 0) { gameMinute += 60 }"
+	gameMinute = (gameMinute % 60 + 60) % 60;
+	gameHour   = (gameHour   % 24 + 24) % 24;
+
+	state->basic.gameMinute = gameMinute;
+	state->basic.gameHour   = gameHour;
+}
+
 glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3 &pos) const
 {
 	btVector3 rayFrom(pos.x, pos.y, 100.f);
