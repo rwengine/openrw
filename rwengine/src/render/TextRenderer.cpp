@@ -5,45 +5,11 @@
 #include <algorithm>
 #include <cctype>
 
-/// @todo This is very rough
-int charToIndex(char g)
+int charToIndex(uint16_t g)
 {
-	if( g >= '0' && g <= '9' )
-	{
-		return 16 + (g - '0');
-	}
-	else if( g >= 'A' && g <= 'Z' )
-	{
-		return 33 + (g - 'A');
-	}
-	else if( g >= 'a' && g <= 'z' )
-	{
-		return 65 + (g - 'a');
-	}
-	switch(g)
-	{
-		default: return 0;
-		case '!': return 1;
-		case '"': return 2;
-		case '#': return 3;
-		case '$': return 4;
-		case '%': return 5;
-		case '&': return 6;
-		case '\'': return 7;
-		case '(': return 8;
-		case ')': return 9;
-		case '*': return 10;
-		case '+': return 11;
-		case ',': return 12;
-		case '-': return 13;
-		case '.': return 14;
-		case '/': return 15;
-		case ':': return 26;
-		case '[': return 59;
-		case ']': return 61;
-		// This is a guess.
-		case '@': return 91;
-	}
+	// Correct for the default font maps
+	/// @todo confirm for JA / RU font maps
+	return g - 32;
 }
 
 glm::vec4 indexToCoord(int font, int index)
@@ -204,7 +170,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti, bool forceColour
 	
 	for (size_t i = 0; i < text.length(); ++i)
 	{
-		char c = text[i];
+		char16_t c = text[i];
 
 		// Handle any markup changes.
 		if( c == '~' && text.length() > i + 1 )

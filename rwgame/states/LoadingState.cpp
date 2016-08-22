@@ -50,9 +50,10 @@ void LoadingState::handleEvent(const SDL_Event& e)
 
 void LoadingState::draw(GameRenderer* r)
 {
+	static auto kLoadingString = GameStringUtil::fromString("Loading...");
 	// Display some manner of loading screen.
 	TextRenderer::TextInfo ti;
-	ti.text = "Loading...";
+	ti.text = kLoadingString;
 	auto size = r->getRenderer()->getViewport();
 	ti.size = 25.f;
 	ti.screenPosition = glm::vec2( 50.f, size.y - ti.size - 50.f );

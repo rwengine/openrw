@@ -26,7 +26,7 @@ void ScreenText::tick(float dt)
 	}
 }
 
-ScreenTextEntry ScreenTextEntry::makeBig(const std::string& id, const std::string& str, int style, int durationMS)
+ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id, const GameString& str, int style, int durationMS)
 {
 	switch(style) {
 
@@ -142,7 +142,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const std::string& id, const std::strin
 	}
 
 	return {
-		"Error, style " + std::to_string(style),
+		GameStringUtil::fromString("Error, style " + std::to_string(style)),
 		{320.f, 400.f},
 		2,
 		50,
@@ -156,7 +156,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const std::string& id, const std::strin
 	};
 }
 
-ScreenTextEntry ScreenTextEntry::makeHighPriority(const std::string& id, const std::string& str, int durationMS)
+ScreenTextEntry ScreenTextEntry::makeHighPriority(const GameStringKey& id, const GameString& str, int durationMS)
 {
 	// Color: ?
 	// Font: Arial
@@ -179,7 +179,7 @@ ScreenTextEntry ScreenTextEntry::makeHighPriority(const std::string& id, const s
 	};
 }
 
-ScreenTextEntry ScreenTextEntry::makeHelp(const std::string& id, const std::string& str)
+ScreenTextEntry ScreenTextEntry::makeHelp(const GameStringKey& id, const GameString& str)
 {
 	return {
 		str,

@@ -7,22 +7,38 @@
 #include <functional>
 #include <algorithm>
 
+/**
+ * Default values for menus that should match the look and feel of the original
+ */
+namespace MenuDefaults
+{
+constexpr int kFont = 1;
+
+constexpr const char* kStartGameId = "FET_SAN";
+constexpr const char* kResumeGameId = "FEM_RES";
+constexpr const char* kLoadGameId = "FET_LG";
+constexpr const char* kDebugId = "FEM_DBG";
+constexpr const char* kOptionsId = "FET_OPT";
+constexpr const char* kQuitGameId = "FET_QG";
+}
+
 class Menu
 {
 	int font;
 public:
 	
-	Menu(int font)
+	Menu(int font = MenuDefaults::kFont)
 	 : font(font), activeEntry(-1) {}
 	
 	struct MenuEntry
 	{
-		std::string name;
+		GameString text;
 		float _size;
 		
-		MenuEntry(const std::string& n, float size = 30.f) : name(n), _size(size)
+		MenuEntry(const GameString& n, float size = 30.f)
+		    : text(n)
+		    , _size(size)
 		{
-			std::transform(name.begin(), name.end(), name.begin(), toupper);
 		}
 		
 		float getHeight() { return _size; }
@@ -32,7 +48,7 @@ public:
 			TextRenderer::TextInfo ti;
 			ti.font = font;
 			ti.screenPosition = basis;
-			ti.text = name;
+			ti.text = text;
 			ti.size = getHeight();
 			if( ! active )
 			{
@@ -53,10 +69,11 @@ public:
 	{
 		std::function<void(void)> callback;
 
-		Entry(const std::string& title,
+		Entry(const GameString& title,
 		      std::function<void(void)> cb,
 		      float size)
-		    : MenuEntry(title, size), callback(cb)
+		    : MenuEntry(title, size)
+		    , callback(cb)
 		{
 		}
 
@@ -68,9 +85,14 @@ public:
 		}
 	};
 
-	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 30.f)
+	static std::shared_ptr<MenuEntry> lambda(const GameString& n, std::function<void (void)>  callback, float size = 30.f)
 	{
 		return std::shared_ptr<MenuEntry>(new Entry(n, callback, size));
+	}
+
+	static std::shared_ptr<MenuEntry> lambda(const std::string& n, std::function<void (void)>  callback, float size = 30.f)
+	{
+		return lambda(GameStringUtil::fromString(n), callback, size);
 	}
 	
 	std::vector<std::shared_ptr<MenuEntry>> entries;

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RWENGINE_TEXTRENDERER_HPP
+#define RWENGINE_TEXTRENDERER_HPP
 #include <engine/GameData.hpp>
 #include "OpenGLRenderer.hpp"
 
@@ -31,7 +32,7 @@ public:
 		/// Font index @see TextRenderer::setFontTexture
 		int font;
 		/// Message to be displayed (including markup)
-		std::string text;
+		GameString text;
 		/// On screen position
 		glm::vec2 screenPosition;
 		/// font size
@@ -73,3 +74,4 @@ private:
 	GeometryBuffer gb;
 	DrawBuffer db;
 };
+#endif

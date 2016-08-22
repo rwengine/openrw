@@ -29,21 +29,21 @@
 
 // Helper function to format script numbers to strings
 // for use in the text printing opcodes.
-std::string formatValue(const SCMOpcodeParameter& p)
+GameString formatValue(const SCMOpcodeParameter& p)
 {
 	switch (p.type) {
 	case TFloat16:
-		return std::to_string(p.real);
+		return GameStringUtil::fromString(std::to_string(p.real));
 	default:
-		return std::to_string(p.integerValue());
+		return GameStringUtil::fromString(std::to_string(p.integerValue()));
 	}
-	return "";
+	return {0};
 }
 
 void game_print_big(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getWorld()->data->texts.text(id);
+	auto str = args.getWorld()->data->texts.text(id);
 	unsigned short time = args[1].integer;
 	unsigned short style = args[2].integer;
 	args.getWorld()->state->text.addText<ScreenTextType::Big>(
@@ -55,7 +55,7 @@ void game_print_big(const ScriptArguments& args)
 void game_print_now(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getWorld()->data->texts.text(id);
+	auto str = args.getWorld()->data->texts.text(id);
 	int time = args[1].integer;
 	int flags = args[2].integer;
 	RW_UNUSED(flags);
@@ -390,7 +390,7 @@ void game_get_runtime(const ScriptArguments& args)
 void game_print_big_with_number(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str =
+	auto str =
 			ScreenText::format(
 				args.getWorld()->data->texts.text(id),
 				formatValue(args[1]));
@@ -873,8 +873,8 @@ bool game_has_respray_happened(const ScriptArguments& args)
 void game_display_text(const ScriptArguments& args)
 {
 	glm::vec2 pos(args[0].real, args[1].real);
-	std::string str(args[2].string);
-	str = args.getWorld()->data->texts.text(str);
+	std::string id(args[2].string);
+	auto str = args.getWorld()->data->texts.text(id);
 	args.getWorld()->state->nextText.text = str;
 	args.getWorld()->state->nextText.position = pos;
 	args.getWorld()->state->texts.push_back(args.getWorld()->state->nextText);
@@ -946,7 +946,7 @@ void game_print_big_with_2_numbers(const ScriptArguments& args)
 	int time = args[3].integerValue();
 	unsigned short style = args[4].integerValue();
 
-	std::string str = ScreenText::format(world->data->texts.text(id),
+	auto str = ScreenText::format(world->data->texts.text(id),
 	                                     formatValue(args[1]),
 	                                     formatValue(args[2]));
 
@@ -1113,7 +1113,7 @@ void game_get_found_hidden_packages(const ScriptArguments& args)
 void game_display_help(const ScriptArguments& args)
 {
 	std::string id(args[0].string);
-	std::string str = args.getWorld()->data->texts.text(id);
+	auto str = args.getWorld()->data->texts.text(id);
 
 	args.getWorld()->state->text.addText<ScreenTextType::Big>(
 				ScreenTextEntry::makeHelp(

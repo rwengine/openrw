@@ -76,7 +76,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 		   << std::setw(0) << ":"
 		   << std::setw(2) << world->getMinute();
 
-		ti.text = ss.str();
+		ti.text = GameStringUtil::fromString(ss.str());
 	}
 	ti.baseColour = ui_shadowColour;
 	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
@@ -88,7 +88,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 
 	infoTextY += ui_textHeight;
 
-	ti.text = "$" + std::to_string(world->state->playerInfo.money);
+	ti.text = GameSymbols::Money + GameStringUtil::fromString(std::to_string(world->state->playerInfo.money));
 	ti.baseColour = ui_shadowColour;
 	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
 	render->text.renderText(ti);
@@ -101,9 +101,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 
 	{
 		std::stringstream ss;
-		ss << "@" << std::setw(3) << std::setfill('0')
+		ss << std::setw(3) << std::setfill('0')
 		   << (int)player->getCharacter()->getCurrentState().health;
-		ti.text = ss.str();
+		ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str());
 	}
 	ti.baseColour = ui_shadowColour;
 	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
@@ -116,9 +116,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 	if (player->getCharacter()->getCurrentState().armour > 0)
 	{
 		std::stringstream ss;
-		ss << "[" << std::setw(3) << std::setfill('0')
+		ss << std::setw(3) << std::setfill('0')
 		   << (int)player->getCharacter()->getCurrentState().armour;
-		ti.text = ss.str();
+		ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str());
 		ti.baseColour = ui_shadowColour;
 		ti.screenPosition = glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY+1.f);
 		render->text.renderText(ti);
@@ -128,9 +128,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 		render->text.renderText(ti);
 	}
 
-	std::string s;
+	GameString s;
 	for (size_t i = 0; i < ui_maxWantedLevel; ++i) {
-		s += "]";
+		s += GameSymbols::Star;
 	}
 	ti.text = s;
 	ti.baseColour = ui_shadowColour;
@@ -183,8 +183,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 		if (wep->getWeaponData()->fireType != WeaponData::MELEE) {
 			const CharacterState& cs = player->getCharacter()->getCurrentState();
 			const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
-			ti.text = std::to_string(slotInfo.bulletsClip) + "-"
-					+ std::to_string(slotInfo.bulletsTotal);
+			ti.text = GameStringUtil::fromString(
+			            std::to_string(slotInfo.bulletsClip) + "-"
+			          + std::to_string(slotInfo.bulletsTotal));
 
 			ti.baseColour = ui_shadowColour;
 			ti.font = 2;
