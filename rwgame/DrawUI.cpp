@@ -1,6 +1,3 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "DrawUI.hpp"
 #include <render/GameRenderer.hpp>
 #include <ai/PlayerController.hpp>
@@ -8,6 +5,7 @@
 #include <engine/GameState.hpp>
 #include <items/WeaponItem.hpp>
 
+#include <glm/gtc/constants.hpp>
 #include <iomanip>
 
 constexpr size_t ui_textSize = 25;
@@ -34,7 +32,7 @@ void drawMap(ViewCamera& currentView,  PlayerController* player, GameWorld* worl
 	
 	glm::quat camRot = currentView.rotation;
 	
-	map.rotation = glm::roll(camRot) - M_PI/2.f;
+	map.rotation = glm::roll(camRot) - glm::half_pi<float>();
 	map.worldSize = ui_worldSizeMin;
 	map.worldSize = ui_worldSizeMax;
 	if( player )

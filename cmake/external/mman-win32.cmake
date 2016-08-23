@@ -1,28 +1,18 @@
+###### External Project: mman-win32
 include(ExternalProject)
-SET(MMAN_W32_DIR ${PROJECT_SOURCE_DIR}/external/mman-win32)
 
-SET(MMAN_W32_SOURCES
-	${MMAN_W32_DIR}/mman.c)
-file(GLOB MMAN_W32_HEADERS
-	${MMAN_W32_DIR}/mman.h)
+SET(MMAN_WIN32_PREFIX_DIR ${PROJECT_SOURCE_DIR}/external/mman-win32)
 
+SET(MMAN_WIN32_SOURCES
+	${MMAN_WIN32_PREFIX_DIR}/mman.c)
 add_library(mman
-	${MMAN_W32_SOURCES})
-find_path(MINGWW64_ROOT NAMES include/sys/time.h PATH_SUFFIXES i686-w64-mingw32 mingw mingw32 )
-if (MINGWW64_ROOT)
-  message(STATUS "MINGWW64_ROOT found - ${MINGWW64_ROOT}")
-else()
-  message(FATAL_ERROR "MINGWW64_ROOT not found")
-endif()
+	${MMAN_WIN32_SOURCES})
 
-target_include_directories(mman INTERFACE SYSTEM ${MMAN_W32_DIR})
-set_target_properties( mman
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${MINGWW64_ROOT}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${MINGWW64_ROOT}/lib"    
-)
+# The source folder for mman has mman.h, however, we require sys/mman.h
+# To get this, we copy it to the build directory.. This gives us a virtual sys/ folder.
 add_custom_command(
-      TARGET mman
-      COMMAND ${CMAKE_COMMAND} -E copy "${MMAN_W32_HEADERS}" "${MINGWW64_ROOT}/include/sys"
-	  COMMENT "Installing headers for libmman-win32..."
+	TARGET mman
+	COMMAND ${CMAKE_COMMAND} -E copy "${MMAN_WIN32_PREFIX_DIR}/mman.h" "${CMAKE_CURRENT_BINARY_DIR}/include/sys/mman.h"
 )
+
+target_include_directories(mman INTERFACE SYSTEM ${CMAKE_CURRENT_BINARY_DIR}/include)

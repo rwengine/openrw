@@ -141,7 +141,8 @@ add_library(rwengine
 )
 
 if(MINGW)
-	add_definitions(-D _USE_MATH_DEFINES)	
+	target_link_libraries(rwengine
+	mman)
 endif()
 
 target_link_libraries(rwengine

@@ -16,6 +16,7 @@
 #include <script/ScriptMachine.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 
+#include <glm/gtc/constants.hpp>
 #include <unordered_map>
 
 constexpr float kAutoLookTime = 2.f;
@@ -343,7 +344,7 @@ void IngameState::tick(float dt)
 				}
 
 				float length = glm::length(movement);
-				float movementAngle = angleYaw - M_PI/2.f;
+				float movementAngle = angleYaw - glm::half_pi<float>();
 				if (length > 0.1f)
 				{
 					glm::vec3 direction = glm::normalize(movement);
