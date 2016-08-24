@@ -22,7 +22,17 @@ void GameWindow::create(const std::string& title, size_t w, size_t h, bool fulls
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, style);
+	if (window == nullptr) {
+		// Window creation failure is fatal
+		std::string sdlErrorStr = SDL_GetError();
+		throw std::runtime_error("SDL_CreateWindow failed: " + sdlErrorStr);
+	}
 	glcontext = SDL_GL_CreateContext(window);
+	if (glcontext == nullptr) {
+		// context creation failure is fatal
+		std::string sdlErrorStr = SDL_GetError();
+		throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
+	}
 }
 
 
