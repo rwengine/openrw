@@ -10,7 +10,7 @@ GameWindow::GameWindow() :
 
 void GameWindow::create(const std::string& title, size_t w, size_t h, bool fullscreen)
 {
-	uint32_t style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+	Uint32 style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
 	if (fullscreen)
 		style |= SDL_WINDOW_FULLSCREEN;
 
@@ -33,6 +33,8 @@ void GameWindow::create(const std::string& title, size_t w, size_t h, bool fulls
 		std::string sdlErrorStr = SDL_GetError();
 		throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
 	}
+
+	SDL_ShowWindow(window);
 }
 
 
