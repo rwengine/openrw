@@ -34,11 +34,7 @@ typedef unsigned int SCMAddress;
 
 using ScriptInt = int32_t;
 using ScriptLabel = int32_t;
-using ScriptIntGlobal = int32_t&;
-using ScriptIntLocal = int32_t&;
 using ScriptFloat = float;
-using ScriptFloatGlobal = float&;
-using ScriptFloatLocal = float&;
 using ScriptBoolean = int32_t;
 
 using ScriptVec2 = glm::vec2;
