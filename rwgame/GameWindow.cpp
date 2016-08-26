@@ -50,16 +50,12 @@ void GameWindow::close()
 void GameWindow::showCursor()
 {
 	SDL_SetRelativeMouseMode(SDL_FALSE);
-	SDL_ShowCursor(SDL_ENABLE);
-	SDL_SetWindowGrab(window, SDL_FALSE);
 }
 
 
 void GameWindow::hideCursor()
 {
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetWindowGrab(window, SDL_TRUE);
 }
 
 
