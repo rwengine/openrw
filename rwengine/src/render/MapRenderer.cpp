@@ -176,6 +176,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	
 	for(auto& blip : world->state->radarBlips)
 	{
+		auto dm = blip.second.display;
+		if( dm == BlipData::Hide || dm == BlipData::MarkerOnly ) {
+			continue;
+		}
+
 		glm::vec2 blippos( blip.second.coord );
 		if( blip.second.target > 0 )
 		{
