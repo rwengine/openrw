@@ -2,14 +2,65 @@
 #define RWENGINE_FILEINDEX_HPP
 #include "FileHandle.hpp"
 
+#include <boost/filesystem.hpp>
+#include <boost/functional/hash.hpp>
 #include <string>
 #include <map>
+#include <unordered_map>
 
-std::string findPathRealCase(const std::string& base_src, const std::string& path_src);
+namespace fs = boost::filesystem;
+
+namespace std
+{
+	template<> struct hash<fs::path>
+	{
+		size_t operator()(const fs::path& p) const
+		{
+			return fs::hash_value(p);
+		}
+	};
+}
 
 class FileIndex
 {
+private:
+	/**
+	 * Mapping type (lower case name) => (on disk name)
+	 */
+	using FileSystemMap = std::unordered_map<fs::path, fs::path>;
+
+	fs::path gamedatapath_;
+	FileSystemMap filesystemfiles_;
+
 public:
+
+	/**
+	 * @brief indexDirectory finds the true case for each file in the tree
+	 * @param base_path
+	 *
+	 * This is used to build the mapping of lower-case file paths to the
+	 * true case on the file system for platforms where this is an issue.
+	 *
+	 */
+	void indexGameDirectory(const fs::path& base_path);
+
+	/**
+	 * @brief findFilePath finds disk path for a game data file
+	 * @param path
+	 * @return The file path as it exists on disk
+	 */
+	fs::path findFilePath(std::string path)
+	{
+		auto backslash = std::string::npos;
+		while ((backslash = path.find("\\")) != std::string::npos) {
+			path.replace(backslash, 1, "/");
+		}
+		auto realpath = gamedatapath_ / path;
+		std::string name = realpath.native();
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+		return filesystemfiles_[name];
+	}
 
 	struct IndexData
 	{

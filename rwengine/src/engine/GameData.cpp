@@ -49,6 +49,7 @@ GameData::~GameData()
 
 void GameData::load()
 {
+	index.indexGameDirectory(datpath);
 	index.indexTree(datpath);
 	
 	parseDAT(datpath+"/data/default.dat");
@@ -109,9 +110,9 @@ void GameData::parseDAT(const std::string& path)
 				}
 				else if(cmd == "IPL")
 				{
-					std::string fixedpath = fixPath(line.substr(space+1));
-					fixedpath = findPathRealCase(datpath, fixedpath);
-					loadIPL(fixedpath);
+					auto path = line.substr(space+1);
+					auto systempath = index.findFilePath(path);
+					loadIPL(systempath.native());
 				}
 				else if(cmd == "TEXDICTION") 
 				{
@@ -182,10 +183,9 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 	LoaderCOL col;
 	
-	std::string realPath = fixPath(name);
-	realPath = findPathRealCase(datpath, realPath);
+	auto systempath = index.findFilePath(name).native();
 	
-	if(col.load(realPath)) {
+	if(col.load(systempath)) {
 		for( size_t i = 0; i < col.instances.size(); ++i ) {
 			collisions[col.instances[i]->name] = std::move(col.instances[i]);
 		}
@@ -434,13 +434,13 @@ void GameData::loadWeaponDAT(const std::string &name)
 
 bool GameData::loadAudioStream(const std::string &name)
 {
-	auto filePath = findPathRealCase(datpath + "/audio/", name);
+	auto systempath = index.findFilePath("audio/" + name).native();
 	
 	if (engine->cutsceneAudio.length() > 0) {
 		engine->sound.stopMusic(engine->cutsceneAudio);
 	}
 
-	if (engine->sound.loadMusic(name, filePath)) {
+	if (engine->sound.loadMusic(name, systempath)) {
 		engine->cutsceneAudio = name;
 		return true;
 	}
@@ -450,18 +450,18 @@ bool GameData::loadAudioStream(const std::string &name)
 
 bool GameData::loadAudioClip(const std::string& name, const std::string& fileName)
 {
-	auto filePath = findPathRealCase(datpath + "/audio/", fileName);
-	
-	if (fileName.find(".mp3") != fileName.npos)
+	auto systempath = index.findFilePath("audio/" + fileName).native();
+
+	if (systempath.find(".mp3") != std::string::npos)
 	{
 		logger->error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
 
-	bool loaded = engine->sound.loadSound(name, filePath);
+	bool loaded = engine->sound.loadSound(name, systempath);
 
 	if ( ! loaded) {
-		logger->error("Data", "Error loading audio clip "+ filePath);
+		logger->error("Data", "Error loading audio clip "+ systempath);
 		return false;
 	}
 

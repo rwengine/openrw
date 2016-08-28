@@ -5,6 +5,33 @@
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 
 #if RW_TEST_WITH_DATA
+BOOST_AUTO_TEST_CASE(test_directory_paths)
+{
+	FileIndex index;
+
+	index.indexGameDirectory(Global::getGamePath());
+
+	{
+		std::string upperpath { "DATA/CULLZONE.DAT" };
+		auto truepath = index.findFilePath(upperpath);
+		BOOST_ASSERT(! truepath.empty());
+		BOOST_CHECK(upperpath != truepath);
+		fs::path expected {Global::getGamePath()};
+		expected /= "data/CULLZONE.DAT";
+		BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+	}
+	{
+		std::string upperpath { "DATA/MAPS/COMNBTM/COMNBTM.IPL" };
+		auto truepath = index.findFilePath(upperpath);
+		BOOST_ASSERT(! truepath.empty());
+		BOOST_CHECK(upperpath != truepath);
+		fs::path expected {Global::getGamePath()};
+		expected /= "data/maps/comnbtm/comNbtm.ipl";
+		BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+	}
+}
+
+
 BOOST_AUTO_TEST_CASE(test_index)
 {
 	FileIndex index;
