@@ -42,13 +42,13 @@ MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
 : data(_data), renderer(renderer)
 {
 	rectGeom.uploadVertices<VertexP2>({
-		{-.5f,  .5f},
-		{ .5f,  .5f},
 		{-.5f, -.5f},
-		{ .5f, -.5f}
+		{ .5f, -.5f},
+		{ .5f,  .5f},
+		{-.5f,  .5f}
 	});
 	rect.addGeometry(&rectGeom);
-	rect.setFaceType(GL_TRIANGLE_STRIP);
+	rect.setFaceType(GL_TRIANGLE_FAN);
 
 	std::vector<VertexP2> circleVerts;
 	circleVerts.push_back({0.f, 0.f});
@@ -142,7 +142,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		
 		renderer->setUniform(rectProg, "model", tilemodel);
 		
-		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+		glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
 	}
 
 	// From here on out we will work in screenspace
@@ -159,7 +159,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		model = glm::scale(model, glm::vec3(mi.screenSize*1.07));
 		renderer->setUniform(rectProg, "model", model);
 		glBindTexture(GL_TEXTURE_2D, radarDisc->getName());
-		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+		glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 	}
 
@@ -236,5 +236,5 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const 
 	
 	glBindTexture(GL_TEXTURE_2D, tex);
 
-	glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
 }
