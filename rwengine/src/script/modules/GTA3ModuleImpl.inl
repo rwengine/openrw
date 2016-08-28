@@ -4428,6 +4428,8 @@ void opcode_018a(const ScriptArguments& args, ScriptVec3 coord, ScriptBlip& blip
 	// Coordinate blips are not visible
 	data.display = BlipData::RadarOnly;
 	data.texture = "";
+	data.colour = 5;
+	data.size = 3;
 	args.getState()->addRadarBlip(data);
 	blip = &data;
 }
