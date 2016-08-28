@@ -46,5 +46,6 @@ private:
 	Renderer::ShaderProgram* rectProg;
 	
   void prepareBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, glm::vec4 colour, float size, float heading);
-  void drawBlip(const glm::vec2& map, const glm::mat4& view, const MapInfo& mi, const std::string& texture, glm::vec4 colour, float size, float heading = 0.0f);
+  void drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, glm::vec4 colour, float size, float heading = 0.0f);
+  void drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, glm::vec4 colour, float size);
 };

@@ -199,7 +199,48 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 			}
 		}
 		
-		drawBlip(blippos, view, mi, blip.texture, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f);
+		const auto& texture = blip.texture;
+		if (!texture.empty()) {
+			drawBlip(blippos, view, mi, texture, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f);
+		} else {
+			// Colours from http://www.gtamodding.com/wiki/0165 (colors not specific to that opcode!)
+			uint32_t rgbaValue;
+			switch(blip.colour) {
+			case 0: // RED
+				rgbaValue = blip.dimmed ? 0x7F0000FF : 0x712B49FF;
+				break;
+			case 1: // GREEN
+				rgbaValue = blip.dimmed ? 0x007F00FF : 0x5FA06AFF;
+				break;
+			case 2: // BLUE
+				rgbaValue = blip.dimmed ? 0x00007FFF : 0x80A7F3FF;
+				break;
+			case 3: // WHITE
+				rgbaValue = blip.dimmed ? 0x7F7F7FFF : 0xE1E1E1FF;
+				break;
+			case 4: // YELLOW
+				rgbaValue = blip.dimmed ? 0x7F7F00FF : 0xFFFF00FF;
+				break;
+			case 5: // PURPLE
+				rgbaValue = blip.dimmed ? 0x7F007FFF : 0xFF00FFFF;
+				break;
+			case 6: // CYAN
+				rgbaValue = blip.dimmed ? 0x007F7FFF : 0x00FFFFFF;
+				break;
+			default: // Extended mode (Dimming ignored)
+				rgbaValue = blip.colour;
+				break;
+			}
+
+			glm::vec4 colour(
+				(rgbaValue >> 24) / 255.0f,
+				((rgbaValue >> 16) & 0xFF) / 255.0f,
+				((rgbaValue >> 8) & 0xFF) / 255.0f,
+				1.0f // Note: Alpha is not controlled by blip
+			);
+
+			drawBlip(blippos, view, mi, colour, blip.size * 2.0f);
+		}
 	}
 
 	glBindVertexArray( 0 );
@@ -247,4 +288,11 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const 
 	prepareBlip(coord, view, mi, texture, colour, size, heading);
 	glBindVertexArray( rect.getVAOName() );
 	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+}
+
+void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, glm::vec4 colour, float size) {
+  drawBlip(coord, view, mi, "", colour, size);
+  // Draw outline
+	renderer->setUniform(rectProg, "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  glDrawArrays( GL_LINE_LOOP, 0, 4 );
 }
