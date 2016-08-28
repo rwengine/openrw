@@ -162,6 +162,17 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 	}
+
+	// Draw the player blip
+	auto player = world->pedestrianPool.find(world->state->playerObject);
+	if( player )
+	{
+		glm::vec2 plyblip(player->getPosition());
+		float hdg = glm::roll(player->getRotation());
+		drawBlip(plyblip, view, mi, "radar_centre", mi.rotation - hdg);
+	}
+
+	drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi, "radar_north", 0.f, 24.f);
 	
 	for(auto& blip : world->state->radarBlips)
 	{
@@ -177,17 +188,6 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 		
 		drawBlip(blippos, view, mi, blip.second.texture);
 	}
-	
-	// Draw the player blip
-	auto player = world->pedestrianPool.find(world->state->playerObject);
-	if( player )
-	{
-		glm::vec2 plyblip(player->getPosition());
-		float hdg = glm::roll(player->getRotation());
-		drawBlip(plyblip, view, mi, "radar_centre", mi.rotation - hdg);
-	}
-
-	drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi, "radar_north", 0.f, 24.f);
 
 	glBindVertexArray( 0 );
 	glBindTexture(GL_TEXTURE_2D, 0);
