@@ -4446,6 +4446,9 @@ void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const Scrip
 	default:
 		blip->display = BlipData::Hide;
 		break;
+	case 1:
+		blip->display = BlipData::MarkerOnly;
+		break;
 	case 2:
 		blip->display = BlipData::RadarOnly;
 		break;
