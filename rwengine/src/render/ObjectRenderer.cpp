@@ -198,17 +198,14 @@ void ObjectRenderer::renderInstance(InstanceObject *instance,
 
 
 	// Handles times provided by TOBJ data
-	if (instance->object->timeOn != 0 || instance->object->timeOff != 0)
+	const auto currentHour = m_world->getHour();
+	if (instance->object->timeOff < instance->object->timeOn)
 	{
-		const auto currentHour = m_world->getHour();
-		if (instance->object->timeOff < instance->object->timeOn)
-		{
-			if ( currentHour >= instance->object->timeOff && currentHour < instance->object->timeOn )
-				return;
-		} else {
-			if ( currentHour >= instance->object->timeOff || currentHour < instance->object->timeOn )
-				return;
-		}
+		if ( currentHour >= instance->object->timeOff && currentHour < instance->object->timeOn )
+			return;
+	} else {
+		if ( currentHour >= instance->object->timeOff || currentHour < instance->object->timeOn )
+			return;
 	}
 
 	auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
