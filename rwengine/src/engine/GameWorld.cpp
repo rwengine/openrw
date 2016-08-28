@@ -586,6 +586,8 @@ GameObject*GameWorld::getBlipTarget(const BlipData& blip) const
 			return pedestrianPool.find(blip.target);
 		case BlipData::Pickup:
 			return pickupPool.find(blip.target);
+		case BlipData::Instance:
+			return instancePool.find(blip.target);
 		default:
 			return nullptr;
 	}

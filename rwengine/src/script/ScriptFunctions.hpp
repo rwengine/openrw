@@ -159,6 +159,9 @@ inline BlipData& createObjectBlip(const ScriptArguments& args, GameObject* objec
 	case GameObject::Pickup:
 		data.type = BlipData::Pickup;
 		break;
+	case GameObject::Instance:
+		data.type = BlipData::Instance;
+		break;
 	default:
 		data.type = BlipData::Location;
 		RW_ERROR("Unhandled blip type");
@@ -185,6 +188,9 @@ inline BlipData createObjectBlipSprite(const ScriptArguments& args, GameObject* 
 		break;
 	case GameObject::Pickup:
 		data.type = BlipData::Pickup;
+		break;
+	case GameObject::Instance:
+		data.type = BlipData::Instance;
 		break;
 	default:
 		data.type = BlipData::Location;

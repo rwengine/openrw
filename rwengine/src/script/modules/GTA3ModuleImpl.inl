@@ -4396,10 +4396,8 @@ void opcode_0187(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg blip Blip
 */
 void opcode_0188(const ScriptArguments& args, const ScriptObject object, ScriptBlip& blip) {
-	RW_UNIMPLEMENTED_OPCODE(0x0188);
-	RW_UNUSED(object);
-	RW_UNUSED(blip);
-	RW_UNUSED(args);
+	auto& data = script::createObjectBlip(args, object);
+	blip = &data;
 }
 
 /**

@@ -181,6 +181,7 @@ struct BlipData
 		Vehicle = 1,
 		Pickup = 2,
 		Character = 3,
+		Instance = 4,
 	};
 	BlipType type;
 	GameObjectID target;
