@@ -174,24 +174,26 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 
 	drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi, "radar_north", 0.f, 24.f);
 	
-	for(auto& blip : world->state->radarBlips)
+	for(auto& radarBlip : world->state->radarBlips)
 	{
-		auto dm = blip.second.display;
+		const auto& blip = radarBlip.second;
+
+		auto dm = blip.display;
 		if( dm == BlipData::Hide || dm == BlipData::MarkerOnly ) {
 			continue;
 		}
 
-		glm::vec2 blippos( blip.second.coord );
-		if( blip.second.target > 0 )
+		glm::vec2 blippos( blip.coord );
+		if( blip.target > 0 )
 		{
-			GameObject* object = world->getBlipTarget(blip.second);
+			GameObject* object = world->getBlipTarget(blip);
 			if( object )
 			{
 				blippos = glm::vec2( object->getPosition() );
 			}
 		}
 		
-		drawBlip(blippos, view, mi, blip.second.texture);
+		drawBlip(blippos, view, mi, blip.texture);
 	}
 
 	glBindVertexArray( 0 );
