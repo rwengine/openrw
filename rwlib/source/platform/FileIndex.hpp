@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RWENGINE_FILEINDEX_HPP
+#define RWENGINE_FILEINDEX_HPP
 #include "FileHandle.hpp"
 
 #include <string>
@@ -50,3 +51,5 @@ public:
 private:
 	std::map<std::string, IndexData> files;
 };
+
+#endif
