@@ -169,10 +169,16 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	{
 		glm::vec2 plyblip(player->getPosition());
 		float hdg = glm::roll(player->getRotation());
-		drawBlip(plyblip, view, mi, "radar_centre", mi.rotation - hdg);
+		drawBlip(
+			plyblip, view, mi,
+			"radar_centre", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f, mi.rotation - hdg
+		);
 	}
 
-	drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi, "radar_north", 0.f, 24.f);
+	drawBlip(
+		mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi,
+		"radar_north", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 24.f
+	);
 	
 	for(auto& radarBlip : world->state->radarBlips)
 	{
@@ -193,7 +199,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 			}
 		}
 		
-		drawBlip(blippos, view, mi, blip.texture);
+		drawBlip(blippos, view, mi, blip.texture, glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f);
 	}
 
 	glBindVertexArray( 0 );
@@ -205,7 +211,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi)
 	renderer->popDebugGroup();
 }
 
-void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, float heading, float size)
+void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, glm::vec4 colour, float size, float heading)
 {
 	glm::vec2 adjustedCoord = coord;
 	if (mi.clipToSize)
@@ -229,14 +235,16 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const 
 	{
 		auto sprite= data->findTexture(texture);
 		tex = sprite->getName();
-		renderer->setUniform(rectProg, "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
 	}
-	else
-	{
-		renderer->setUniform(rectProg, "colour", glm::vec4(1.0f, 1.0f, 1.0f, 1.f));
-	}
+	renderer->setUniform(rectProg, "colour", colour);
 	
 	glBindTexture(GL_TEXTURE_2D, tex);
 
+	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
+}
+
+void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view, const MapInfo& mi, const std::string& texture, glm::vec4 colour, float size, float heading) {
+	prepareBlip(coord, view, mi, texture, colour, size, heading);
+	glBindVertexArray( rect.getVAOName() );
 	glDrawArrays( GL_TRIANGLE_FAN, 0, 4 );
 }
