@@ -145,7 +145,7 @@ public:
 	/**
 	 * Loads weapon.dat
 	 */
-	void loadWeaponDAT(const std::string& name);
+	void loadWeaponDAT(const std::string& path);
 
 	bool loadAudioStream(const std::string& name);
 	bool loadAudioClip(const std::string& name, const std::string& fileName);

@@ -51,9 +51,13 @@ void GameData::load()
 {
 	index.indexGameDirectory(datpath);
 	index.indexTree(datpath);
-	
-	parseDAT(datpath+"/data/default.dat");
-	parseDAT(datpath+"/data/gta3.dat");
+
+	// Initalize all the archives.
+	loadIMG("models/gta3.img");
+	loadIMG("anim/cuts.img");
+
+	parseDAT("data/default.dat");
+	parseDAT("data/gta3.dat");
 	
 	loadDFF("wheels.dff");
 	loadDFF("weapons.dff");
@@ -63,20 +67,20 @@ void GameData::load()
 	loadTXD("hud.txd");
 	loadTXD("fonts.txd");
 	
-	loadCarcols(datpath+"/data/carcols.dat");
-	loadWeather(datpath+"/data/timecyc.dat");
-	loadHandling(datpath+"/data/handling.cfg");
-	loadWaterpro(datpath+"/data/waterpro.dat");
-	loadWater(datpath+"/data/water.dat");
-	loadWeaponDAT(datpath+"/data/weapon.dat");
+	loadCarcols("data/carcols.dat");
+	loadWeather("data/timecyc.dat");
+	loadHandling("data/handling.cfg");
+	loadWaterpro("data/waterpro.dat");
+	loadWeaponDAT("data/weapon.dat");
 
 	loadIFP("ped.ifp");
 }
 
 void GameData::parseDAT(const std::string& path)
 {
-	std::ifstream datfile(path.c_str());
-	
+	auto datpath = index.findFilePath(path);
+	std::ifstream datfile(datpath.c_str());
+
 	if(!datfile.is_open()) 
 	{
 		logger->error("Data", "Failed to open game file " + path);
@@ -111,20 +115,16 @@ void GameData::parseDAT(const std::string& path)
 				else if(cmd == "IPL")
 				{
 					auto path = line.substr(space+1);
-					auto systempath = index.findFilePath(path);
-					loadIPL(systempath.native());
+					auto systempath = index.findFilePath(path).native();
+					loadIPL(systempath);
 				}
-				else if(cmd == "TEXDICTION") 
+				else if(cmd == "TEXDICTION")
 				{
-					std::string texpath = line.substr(space+1);
-					for( size_t t = 0; t < texpath.size(); ++t) {
-						texpath[t] = tolower(texpath[t]);
-						if(texpath[t] == '\\') {
-							texpath[t] = '/';
-						}
-					}
-					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
-					loadTXD(texname);
+					auto path = line.substr(space+1);
+					/// @todo improve TXD handling
+					auto name = index.findFilePath(path).filename().native();
+					std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+					loadTXD(name);
 				}
 			}
 		}
@@ -194,7 +194,8 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 void GameData::loadIMG(const std::string& name)
 {
-	index.indexArchive(datpath + name);
+	auto syspath = index.findFilePath(name).native();
+	index.indexArchive(syspath);
 }
 
 void GameData::loadIPL(const std::string& name)
@@ -232,7 +233,8 @@ enum ColSection {
 
 void GameData::loadCarcols(const std::string& path)
 {
-	std::ifstream fstream(path.c_str());
+	auto syspath = index.findFilePath(path);
+	std::ifstream fstream(syspath.c_str());
 	
 	std::string line;
 	ColSection currentSection = Unknown;
@@ -283,14 +285,16 @@ void GameData::loadCarcols(const std::string& path)
 
 void GameData::loadWeather(const std::string &path)
 {
-	weatherLoader.load(path);
+	auto syspath = index.findFilePath(path).native();
+	weatherLoader.load(syspath);
 }
 
 void GameData::loadHandling(const std::string& path)
 {
 	GenericDATLoader l;
+	auto syspath = index.findFilePath(path).native();
 
-	l.loadHandling(path, vehicleInfo);
+	l.loadHandling(syspath, vehicleInfo);
 }
 
 SCMFile *GameData::loadSCM(const std::string &name)
@@ -313,7 +317,8 @@ void GameData::loadGXT(const std::string &name)
 
 void GameData::loadWaterpro(const std::string& path)
 {
-	std::ifstream ifstr(path.c_str(), std::ios_base::binary);
+	auto syspath = index.findFilePath(path);
+	std::ifstream ifstr(syspath.c_str(), std::ios_base::binary);
 	
 	if(ifstr.is_open()) {
 		uint32_t numlevels;
@@ -425,11 +430,12 @@ void GameData::loadDynamicObjects(const std::string& name)
 	l.loadDynamicObjects(name, dynamicObjectData);
 }
 
-void GameData::loadWeaponDAT(const std::string &name)
+void GameData::loadWeaponDAT(const std::string &path)
 {
 	GenericDATLoader l;
+	auto syspath = index.findFilePath(path).native();
 
-	l.loadWeapons(name, weaponData);
+	l.loadWeapons(syspath, weaponData);
 }
 
 bool GameData::loadAudioStream(const std::string &name)

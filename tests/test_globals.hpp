@@ -79,8 +79,6 @@ public:
 #if RW_TEST_WITH_DATA
 		d = new GameData(&log, &work, getGamePath());
 
-		d->loadIMG("/models/gta3");
-		d->loadIMG("/anim/cuts");
 		d->load();
 
 		e = new GameWorld(&log, &work, d);

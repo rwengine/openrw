@@ -103,11 +103,6 @@ RWGame::RWGame(int argc, char* argv[])
 
 	data = new GameData(&log, work, config.getGameDataPath());
 
-	// Initalize all the archives.
-	data->loadIMG("/models/gta3");
-	//engine->data.loadIMG("/models/txd");
-	data->loadIMG("/anim/cuts");
-	
 	data->load();
 	
 	// Initialize renderer
