@@ -193,16 +193,22 @@ struct BlipData
 	enum DisplayMode
 	{
 		Hide = 0,
-		RadarOnly = 1,
-		Show = 2
+		MarkerOnly = 1,
+		RadarOnly = 2,
+		ShowBoth = 3
 	};
 	
 	/* Should the blip be displayed? */
 	DisplayMode display;
 	
 	BlipData()
-	: id(-1), type(Location), target(0), display(Show)
+	: id(-1), type(Location), target(0), display(ShowBoth)
 	{ }
+
+	int getScriptObjectID() const
+	{
+		return id;
+	}
 };
 
 /**
@@ -233,9 +239,25 @@ struct GarageInfo
 		GARAGE_OPENS_FOR_SPECIFIC_CAR = 20,
 		GARAGE_OPENS_ONCE = 21
 	};
+	int id;
 	glm::vec3 min;
 	glm::vec3 max;
 	int type;
+
+	GarageInfo(int id_,
+			   const glm::vec3 min_,
+			   const glm::vec3 max_,
+			   int type_)
+		: id(id_)
+		, min(min_)
+		, max(max_)
+		, type(type_)
+	{ }
+
+	int getScriptObjectID() const
+	{
+		return id;
+	}
 };
 
 /**
@@ -274,10 +296,10 @@ public:
 	/**
 	 * @brief Stores a pointer to script global that stores the on-mission state.
 	 */
-	unsigned int *scriptOnMissionFlag;
+	int32_t* scriptOnMissionFlag;
 	
 	/** Objects created by the current mission */
-	std::vector<GameObjectID> missionObjects;
+	std::vector<GameObject*> missionObjects;
 	
 	bool overrideNextStart;
 	glm::vec4 nextRestartLocation;

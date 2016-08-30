@@ -375,7 +375,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera &camera, float
 		auto arrowFrame = arrowModel->resource->findFrame( "arrow" );
 		for( auto& blip : world->state->radarBlips )
 		{
-			if( blip.second.display == BlipData::Show )
+			auto dm = blip.second.display;
+			if( dm == BlipData::ShowBoth || dm == BlipData::MarkerOnly )
 			{
 				glm::mat4 model;
 

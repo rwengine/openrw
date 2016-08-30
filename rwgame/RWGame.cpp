@@ -16,9 +16,7 @@
 #include <render/DebugDraw.hpp>
 
 #include <script/ScriptMachine.hpp>
-#include <script/modules/VMModule.hpp>
-#include <script/modules/GameModule.hpp>
-#include <script/modules/ObjectModule.hpp>
+#include <script/modules/GTA3Module.hpp>
 
 #include <data/CutsceneData.hpp>
 #include <ai/PlayerController.hpp>
@@ -249,9 +247,7 @@ void RWGame::startScript(const std::string& name)
 		if( script ) delete script;
 
 		SCMOpcodes* opcodes = new SCMOpcodes;
-		opcodes->modules.push_back(new VMModule);
-		opcodes->modules.push_back(new GameModule);
-		opcodes->modules.push_back(new ObjectModule);
+		opcodes->modules.push_back(new GTA3Module);
 
 		script = new ScriptMachine(state, f, opcodes);
 		

@@ -490,6 +490,11 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type)
 {
 	auto modelInfo = data->findObjectType<ObjectData>(id);
 
+	RW_CHECK(modelInfo != nullptr, "Pickup Object Data is not found");
+	if (modelInfo == nullptr) {
+		return nullptr;
+	}
+
 	data->loadDFF(modelInfo->modelName + ".dff");
 	data->loadTXD(modelInfo->textureName + ".txd");
 
@@ -590,6 +595,12 @@ void GameWorld::destroyObject(GameObject* object)
 {
 	auto& pool = getTypeObjectPool(object);
 	pool.remove(object);
+
+	// Remove from mission objects
+	if (state) {
+		auto& mO = state->missionObjects;
+		mO.erase(std::remove(mO.begin(), mO.end(), object), mO.end());
+	}
 
 	auto it = std::find(allObjects.begin(), allObjects.end(), object);
 	RW_CHECK(it != allObjects.end(), "destroying object not in allObjects");
@@ -909,6 +920,7 @@ void GameWorld::loadSpecialCharacter(const unsigned short index, const std::stri
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 	/// @todo a bit more smarter than this
 	state->specialCharacters[index] = lowerName;
+	data->loadDFF(lowerName + ".dff");
 }
 
 void GameWorld::loadSpecialModel(const unsigned short index, const std::string &name)
