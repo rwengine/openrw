@@ -52,8 +52,8 @@ void GameData::load()
 	index.indexGameDirectory(datpath);
 	index.indexTree(datpath);
 
-	// Initalize all the archives.
 	loadIMG("models/gta3.img");
+	/// @todo cuts.img files should be loaded differently to gta3.img
 	loadIMG("anim/cuts.img");
 
 	parseDAT("data/default.dat");
@@ -101,8 +101,7 @@ void GameData::parseDAT(const std::string& path)
 				if(cmd == "IDE")
 				{
 					auto path = line.substr(space+1);
-					auto systempath = index.findFilePath(path).native();
-					loadIDE(systempath);
+					loadIDE(path);
 				}
 				else if(cmd == "SPLASH")
 				{
@@ -111,14 +110,13 @@ void GameData::parseDAT(const std::string& path)
 				else if(cmd == "COLFILE")
 				{
 					int zone  = atoi(line.substr(space+1,1).c_str());
-					std::string file = line.substr(space+3);
-					loadCOL(zone, file);
+					auto path = line.substr(space+3);
+					loadCOL(zone, path);
 				}
 				else if(cmd == "IPL")
 				{
 					auto path = line.substr(space+1);
-					auto systempath = index.findFilePath(path).native();
-					loadIPL(systempath);
+					loadIPL(path);
 				}
 				else if(cmd == "TEXDICTION")
 				{
@@ -135,9 +133,10 @@ void GameData::parseDAT(const std::string& path)
 
 void GameData::loadIDE(const std::string& path)
 {
+	auto systempath = index.findFilePath(path).native();
 	LoaderIDE idel;
 
-	if(idel.load(path)) {
+	if(idel.load(systempath)) {
 		objectTypes.insert(idel.objects.begin(), idel.objects.end());
 	}
 	else {
@@ -182,9 +181,10 @@ void GameData::loadIMG(const std::string& name)
 	index.indexArchive(syspath);
 }
 
-void GameData::loadIPL(const std::string& name)
+void GameData::loadIPL(const std::string& path)
 {
-	iplLocations.insert({name, name});
+	auto systempath = index.findFilePath(path).native();
+	iplLocations.insert({path, systempath});
 }
 
 bool GameData::loadZone(const std::string& path)
@@ -281,9 +281,9 @@ void GameData::loadHandling(const std::string& path)
 	l.loadHandling(syspath, vehicleInfo);
 }
 
-SCMFile *GameData::loadSCM(const std::string &name)
+SCMFile *GameData::loadSCM(const std::string &path)
 {
-	auto scm_h = openFile(name);
+	auto scm_h = index.openFilePath(path);
 	SCMFile* scm = new SCMFile;
 	scm->loadFile(scm_h->data, scm_h->length);
 	scm_h.reset();
@@ -292,11 +292,11 @@ SCMFile *GameData::loadSCM(const std::string &name)
 
 void GameData::loadGXT(const std::string &name)
 {
-	auto d = openFile(name);
+	auto file = index.openFilePath(name);
 
 	LoaderGXT loader;
 
-	loader.load( texts, d );
+	loader.load( texts, file );
 }
 
 void GameData::loadWaterpro(const std::string& path)

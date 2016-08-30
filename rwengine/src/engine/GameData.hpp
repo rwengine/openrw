@@ -87,7 +87,7 @@ public:
 	 */
 	void loadIMG(const std::string& name);
 	
-	void loadIPL(const std::string& name);
+	void loadIPL(const std::string& path);
 	
 	/**
 	 * Loads the Zones from a zon/IPL file
@@ -100,7 +100,7 @@ public:
 
 	void loadHandling(const std::string& path);
 
-	SCMFile* loadSCM(const std::string& name);
+	SCMFile* loadSCM(const std::string& path);
 
 	void loadGXT(const std::string& name);
 	
