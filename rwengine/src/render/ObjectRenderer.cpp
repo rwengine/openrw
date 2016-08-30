@@ -191,8 +191,12 @@ void ObjectRenderer::renderItem(InventoryItem *item,
 void ObjectRenderer::renderInstance(InstanceObject *instance,
 									RenderList& outList)
 {
-	if(!instance->model->resource)
-	{
+	if(!instance->model->resource) {
+		return;
+	}
+
+	// Only draw visible objects
+	if(!instance->getVisible()) {
 		return;
 	}
 

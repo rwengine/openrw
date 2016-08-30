@@ -11,6 +11,8 @@
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 /**
 	@brief NOP
 
@@ -10045,15 +10047,36 @@ void opcode_0362(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord Coordinates
 	@arg radius Radius
 	@arg model Model ID
-	@arg arg6 Boolean true/false
+	@arg visible Boolean true/false
 */
-void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptModel model, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x0363);
-	RW_UNUSED(coord);
-	RW_UNUSED(radius);
-	RW_UNUSED(model);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
+void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptModel model, const ScriptBoolean visible) {
+	auto& models = args.getVM()->getFile()->getModels();
+	auto& modelName = models[-model];
+
+	// Attempt to find the closest object
+	InstanceObject* closestObject = nullptr;
+	float closestDistance = radius;
+	for(auto& i : args.getWorld()->instancePool.objects) {
+		InstanceObject* object = static_cast<InstanceObject*>(i.second);
+
+		// Check if this instance has the correct model id, early out if it isn't
+		if (!boost::iequals(object->object->modelName, modelName)) {
+			continue;
+		}
+
+		// Calculate distance and check if this is the new closest object
+		// @todo will this somehow respect the objects centre of mass / bounding box or something?
+		float distance = glm::length(object->position - coord);
+		if (distance <= closestDistance) {
+			closestObject = object;
+			closestDistance = distance;
+		}
+	}
+
+	// If an object was found, set its visibility
+	if (closestObject) {
+	closestObject->setVisible(visible);
+	}
 }
 
 /**
