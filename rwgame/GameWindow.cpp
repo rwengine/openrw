@@ -10,7 +10,7 @@ GameWindow::GameWindow() :
 
 void GameWindow::create(const std::string& title, size_t w, size_t h, bool fullscreen)
 {
-	uint32_t style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+	Uint32 style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
 	if (fullscreen)
 		style |= SDL_WINDOW_FULLSCREEN;
 
@@ -22,7 +22,19 @@ void GameWindow::create(const std::string& title, size_t w, size_t h, bool fulls
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, style);
+	if (window == nullptr) {
+		// Window creation failure is fatal
+		std::string sdlErrorStr = SDL_GetError();
+		throw std::runtime_error("SDL_CreateWindow failed: " + sdlErrorStr);
+	}
 	glcontext = SDL_GL_CreateContext(window);
+	if (glcontext == nullptr) {
+		// context creation failure is fatal
+		std::string sdlErrorStr = SDL_GetError();
+		throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
+	}
+
+	SDL_ShowWindow(window);
 }
 
 
@@ -38,16 +50,12 @@ void GameWindow::close()
 void GameWindow::showCursor()
 {
 	SDL_SetRelativeMouseMode(SDL_FALSE);
-	SDL_ShowCursor(SDL_ENABLE);
-	SDL_SetWindowGrab(window, SDL_FALSE);
 }
 
 
 void GameWindow::hideCursor()
 {
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_ShowCursor(SDL_DISABLE);
-	SDL_SetWindowGrab(window, SDL_TRUE);
 }
 
 
