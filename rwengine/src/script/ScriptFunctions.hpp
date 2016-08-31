@@ -108,9 +108,9 @@ inline bool objectInRadius(const ScriptArguments& args, const Tobj& object, cons
 	return preconditions && objectInSphere(object, center, radius);
 }
 template <class Tvec>
-inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object, GameObject* near, const Tvec& radius, bool marker, bool preconditions = true)
+inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object, GameObject* obj_near, const Tvec& radius, bool marker, bool preconditions = true)
 {
-	Tvec center (near->getPosition());
+	Tvec center (obj_near->getPosition());
 	if (marker) {
 		drawAreaIndicator(args, center, radius);
 	}
