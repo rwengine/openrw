@@ -62,6 +62,13 @@ public:
 		return filesystemfiles_[name];
 	}
 
+	/**
+	 * @brief openFilePath opens a file on the disk
+	 * @param file_path
+	 * @return A handle for the file on the disk
+	 */
+	FileHandle openFilePath(const std::string& file_path);
+
 	struct IndexData
 	{
 		/// Lowercase identifying filename

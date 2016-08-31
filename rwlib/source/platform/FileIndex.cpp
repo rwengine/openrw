@@ -20,6 +20,22 @@ void FileIndex::indexGameDirectory(const fs::path& base_path)
 	}
 }
 
+FileHandle FileIndex::openFilePath(const std::string &file_path)
+{
+	auto datapath = findFilePath(file_path);
+	std::ifstream dfile(datapath.c_str(), std::ios_base::binary | std::ios_base::ate);
+	if ( ! dfile.is_open()) {
+		throw std::runtime_error("Unable to open file: " + file_path);
+	}
+
+	auto length = dfile.tellg();
+	dfile.seekg(0);
+	auto data = new char[length];
+	dfile.read(data, length);
+
+	return std::make_shared<FileContentsInfo> ( data, length );
+}
+
 void FileIndex::indexTree(const std::string& root)
 {
 	for(const path& entry : boost::make_iterator_range(recursive_directory_iterator(root), {})) {
