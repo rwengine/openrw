@@ -81,7 +81,8 @@ bool LoaderIDE::load(const std::string &filename)
 					objs->timeOff = atoi(buff.c_str());
 				}
 				else {
-					objs->timeOff = objs->timeOn = 0;
+					objs->timeOn = 0;
+					objs->timeOff = 24;
 				}
 
 				// Put stuff in our struct

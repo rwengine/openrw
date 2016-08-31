@@ -196,6 +196,18 @@ void ObjectRenderer::renderInstance(InstanceObject *instance,
 		return;
 	}
 
+
+	// Handles times provided by TOBJ data
+	const auto currentHour = m_world->getHour();
+	if (instance->object->timeOff < instance->object->timeOn)
+	{
+		if ( currentHour >= instance->object->timeOff && currentHour < instance->object->timeOn )
+			return;
+	} else {
+		if ( currentHour >= instance->object->timeOff || currentHour < instance->object->timeOn )
+			return;
+	}
+
 	auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
 
 	float mindist = glm::length(instance->getPosition()-m_camera.position)
