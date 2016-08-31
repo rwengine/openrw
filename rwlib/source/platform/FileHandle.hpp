@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RWENGINE_FILEHANDLE_HPP
+#define RWENGINE_FILEHANDLE_HPP
 
 #include <memory>
 
@@ -16,3 +17,5 @@ struct FileContentsInfo
 };
 
 typedef std::shared_ptr<FileContentsInfo> FileHandle;
+
+#endif
