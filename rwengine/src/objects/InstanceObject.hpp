@@ -13,6 +13,7 @@ class CollisionInstance;
 class InstanceObject : public GameObject
 {
 	float health;
+	bool visible = true;
 public:
 	glm::vec3 scale;
 	CollisionInstance* body;
@@ -36,6 +37,11 @@ public:
 	virtual bool takeDamage(const DamageInfo& damage);
 
 	void setSolid(bool solid);
+
+	void setVisible(bool visible) {
+		this->visible = visible;
+	}
+	float getVisible() const { return visible; }
 
 	float getHealth() const { return health; }
 };
