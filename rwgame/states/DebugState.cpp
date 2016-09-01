@@ -382,7 +382,6 @@ void DebugState::handleEvent(const SDL_Event& event)
 	switch(event.type) {
 	case SDL_KEYDOWN:
 		switch(event.key.keysym.sym) {
-		default: break;
 		case SDLK_ESCAPE:
 			StateManager::get().exit();
 			break;
@@ -408,10 +407,7 @@ void DebugState::handleEvent(const SDL_Event& event)
 		case SDLK_p:
 			printCameraDetails();
 			break;
-		}
-
-		switch (event.key.keysym.mod) {
-		case KMOD_LSHIFT:
+		case SDLK_LSHIFT:
 			_sonicMode = true;
 			break;
 		default: break;
@@ -429,10 +425,7 @@ void DebugState::handleEvent(const SDL_Event& event)
 		case SDLK_d:
 			_movement.y = 0.f;
 			break;
-		}
-
-		switch (event.key.keysym.mod) {
-		case KMOD_LSHIFT:
+		case SDLK_LSHIFT:
 			_sonicMode = false;
 			break;
 		default: break;
