@@ -304,8 +304,7 @@ Menu*DebugState::createWeaponMenu()
 
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game)
-	, _freeLook( false )
-	, _sonicMode( false )
+	, _invertedY(game->getConfig().getInputInvertY())
 {
 	this->enterMenu(createDebugMenu());
 

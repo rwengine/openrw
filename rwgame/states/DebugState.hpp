@@ -8,8 +8,8 @@ class DebugState : public State
 	ViewCamera _debugCam;
 	glm::vec3 _movement;
 	glm::vec2 _debugLook;
-	bool _freeLook;
-	bool _sonicMode;
+	bool _freeLook = false;
+	bool _sonicMode = false;
 	bool _invertedY;
 
 	Menu* createDebugMenu();
