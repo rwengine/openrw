@@ -24,6 +24,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/program_options.hpp>
 #include <functional>
 
 #include "GitSHA1.h"
@@ -49,39 +50,60 @@ RWGame::RWGame(int argc, char* argv[])
 	bool fullscreen = false;
 	bool newgame = false;
 	bool test = false;
-    std::string startSave;
+	std::string startSave;
 	std::string benchFile;
 
-	for( int i = 1; i < argc; ++i )
+	// Define and parse command line options
+	namespace po = boost::program_options;
+	po::options_description desc("Available options");
+	desc.add_options()
+		("help",                                   "Show this help message")
+		("width,w",      po::value<size_t>(),      "Game resolution width in pixel")
+		("height,h",     po::value<size_t>(),      "Game resolution height in pixel")
+		("fullscreen,f",                           "Enable fullscreen mode")
+		("newgame,n",                              "Directly start a new game")
+		("test,t",                                 "To be used with -n, starts in a test location instead")
+		("load,l",       po::value<std::string>(), "Load save file")
+		("benchmark,b",  po::value<std::string>(), "Run benchmark and store results in file")
+	;
+
+	po::variables_map vm;
+	po::store(po::parse_command_line(argc, argv, desc), vm);
+	po::notify(vm);
+
+	if( vm.count("help") )
 	{
-		if( boost::iequals( "-w", argv[i] ) && i+1 < argc )
-		{
-			w = std::atoi(argv[i+1]);
-		}
-		if( boost::iequals( "-h", argv[i] ) && i+1 < argc )
-		{
-			h = std::atoi(argv[i+1]);
-		}
-		if( boost::iequals( "-f", argv[i] ))
-		{
-			fullscreen = true;
-		}
-		if( strcmp( "--newgame", argv[i] ) == 0 )
-		{
-			newgame = true;
-		}
-		if( strcmp( "--test", argv[i] ) == 0 )
-		{
-			test = true;
-		}
-        if( strcmp( "--load", argv[i] ) == 0 && i+1 < argc )
-        {
-            startSave = argv[i+1];
-        }
-		if( strcmp( "--benchmark", argv[i]) == 0 && i+1 < argc )
-		{
-			benchFile = argv[i+1];
-		}
+		// TODO: This is a hack
+		std::cout << desc << std::endl;
+		throw std::runtime_error("Terminate");
+	}
+	if( vm.count("width") )
+	{
+		w = vm["width"].as<size_t>();
+	}
+	if( vm.count("height") )
+	{
+		h = vm["height"].as<size_t>();
+	}
+	if( vm.count("fullscreen") )
+	{
+		fullscreen = true;
+	}
+	if( vm.count("newgame") )
+	{
+		newgame = true;
+	}
+	if( vm.count("test") )
+	{
+		test = true;
+	}
+	if( vm.count("load") )
+	{
+		startSave = vm["load"].as<std::string>();
+	}
+	if( vm.count("benchmark") )
+	{
+		benchFile = vm["benchmark"].as<std::string>();
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -151,10 +173,10 @@ RWGame::RWGame(int argc, char* argv[])
 			loading->setNextState(new IngameState(this,true));
 		}
 	}
-    else if( ! startSave.empty() )
-    {
-        loading->setNextState(new IngameState(this,true, startSave));
-    }
+	else if( ! startSave.empty() )
+	{
+		loading->setNextState(new IngameState(this,true, startSave));
+	}
 	else
 	{
 		loading->setNextState(new MenuState(this));
@@ -231,7 +253,7 @@ void RWGame::loadGame(const std::string& savename)
 	delete state->script;
 	state = nullptr;
 
-    log.info("Game", "Loading game " + savename);
+	log.info("Game", "Loading game " + savename);
 
 	newGame();
 
@@ -642,7 +664,7 @@ void RWGame::render(float alpha, float time)
 									  cutscene->tracks.duration);
 		cutsceneTime += GAME_TIMESTEP * alpha;
 		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
-				targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
+		targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
 		float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
 		viewCam.frustum.fov = glm::radians(zoom);
 		float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
