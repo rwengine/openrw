@@ -86,7 +86,12 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world, GameRenderer* re
 
 	infoTextY += ui_textHeight;
 
-	ti.text = GameSymbols::Money + GameStringUtil::fromString(std::to_string(world->state->playerInfo.money));
+	{
+		std::stringstream ss;
+		ss << std::setw(8) << std::setfill('0') << world->state->playerInfo.displayedMoney;
+
+		ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str());
+	}
 	ti.baseColour = ui_shadowColour;
 	ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY+1.f);
 	render->text.renderText(ti);

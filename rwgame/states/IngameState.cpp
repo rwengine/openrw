@@ -174,10 +174,39 @@ void IngameState::exit()
 
 void IngameState::tick(float dt)
 {
+	auto world = getWorld();
 	autolookTimer = std::max(autolookTimer - dt, 0.f);
 
+	// Update displayed money value
+	// @todo the game uses another algorithm which is non-linear
+	{
+		float moneyFrequency = 1.0f / 30.0f;
+		moneyTimer += dt;
+		while (moneyTimer >= moneyFrequency) {
+			int32_t difference = world->state->playerInfo.money - world->state->playerInfo.displayedMoney;
+
+			// Generates 0, 1 (difference < 100), 12 (difference < 1000), 123 (difference < 10000), .. etc.
+			// Negative input will result in negative output
+			auto GetIncrement = [](int32_t difference) -> int32_t {
+				// @todo is this correct for difference >= 1000000000 ?
+				int32_t r = 1;
+				int32_t i = 2;
+				if (difference == 0) { return 0; }
+				while (std::abs(difference) >= 100) {
+					difference /= 10;
+					r = r * 10 + i;
+					i++;
+				}
+				return (difference < 0) ? -r : r;
+			};
+			world->state->playerInfo.displayedMoney += GetIncrement(difference);
+
+			moneyTimer -= moneyFrequency;
+		}
+	}
+
 	auto player = game->getPlayer();
-	const auto& input = getWorld()->state->input;
+	const auto& input = world->state->input;
 	if( player && player->isInputEnabled() )
 	{
 		float viewDistance = 4.f;
@@ -199,7 +228,7 @@ void IngameState::tick(float dt)
 			viewDistance = 4.f;
 		}
 		
-		auto target = getWorld()->pedestrianPool.find(getWorld()->state->cameraTarget);
+		auto target = world->pedestrianPool.find(world->state->cameraTarget);
 
 		if( target == nullptr )
 		{
@@ -374,7 +403,7 @@ void IngameState::tick(float dt)
 		auto from = btVector3(rayStart.x, rayStart.y, rayStart.z);
 		ClosestNotMeRayResultCallback ray(physTarget, from, to);
 
-		getWorld()->dynamicsWorld->rayTest(from, to, ray);
+		world->dynamicsWorld->rayTest(from, to, ray);
 		if( ray.hasHit() && ray.m_closestHitFraction < 1.f )
 		{
 			cameraPosition = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
