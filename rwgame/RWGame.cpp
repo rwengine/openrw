@@ -62,7 +62,7 @@ RWGame::RWGame(int argc, char* argv[])
 		("height,h",     po::value<size_t>(),      "Game resolution height in pixel")
 		("fullscreen,f",                           "Enable fullscreen mode")
 		("newgame,n",                              "Directly start a new game")
-		("test,t",                                 "To be used with -n, starts in a test location instead")
+		("test,t",                                 "Starts a new game in a test location")
 		("load,l",       po::value<std::string>(), "Load save file")
 		("benchmark,b",  po::value<std::string>(), "Run benchmark and store results in file")
 	;
@@ -162,20 +162,17 @@ RWGame::RWGame(int argc, char* argv[])
 	{
 		loading->setNextState(new BenchmarkState(this, benchFile));
 	}
+	else if( test)
+	{
+		loading->setNextState(new IngameState(this, true, "test"));
+	}
 	else if( newgame )
 	{
-		if( test )
-		{
-			loading->setNextState(new IngameState(this,true, "test"));
-		}
-		else
-		{
-			loading->setNextState(new IngameState(this,true));
-		}
+		loading->setNextState(new IngameState(this, true));
 	}
 	else if( ! startSave.empty() )
 	{
-		loading->setNextState(new IngameState(this,true, startSave));
+		loading->setNextState(new IngameState(this, true, startSave));
 	}
 	else
 	{
