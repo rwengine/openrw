@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
 			SDL_Log("Failed to show message box\n");
 		}
 
+		SDL_Quit();
+
 		return -1;
 	}
 }

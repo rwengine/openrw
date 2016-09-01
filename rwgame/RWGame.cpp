@@ -189,6 +189,8 @@ RWGame::~RWGame()
 	log.info("Game", "Cleaning up work queue");
 	delete work;
 
+	SDL_Quit();
+
 	log.info("Game", "Done cleaning up");
 }
 
