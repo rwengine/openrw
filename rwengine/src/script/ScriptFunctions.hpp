@@ -152,12 +152,19 @@ inline BlipData& createObjectBlip(const ScriptArguments& args, GameObject* objec
 	switch(object->type()) {
 	case GameObject::Vehicle:
 		data.type = BlipData::Vehicle;
+		data.colour = 0; // @todo 4 in Vice City
 		break;
 	case GameObject::Character:
 		data.type = BlipData::Character;
+		data.colour = 1; // @todo 4 in Vice City
 		break;
 	case GameObject::Pickup:
 		data.type = BlipData::Pickup;
+		data.colour = 6; // @todo 4 in Vice City
+		break;
+	case GameObject::Instance:
+		data.type = BlipData::Instance;
+		data.colour = 6; // @todo 4 in Vice City
 		break;
 	default:
 		data.type = BlipData::Location;
@@ -165,7 +172,9 @@ inline BlipData& createObjectBlip(const ScriptArguments& args, GameObject* objec
 		break;
 	}
 	data.target = object->getScriptObjectID();
+	data.display = BlipData::ShowBoth;
 	data.texture = "";
+	data.size = 3;
 	auto blip = args.getState()->addRadarBlip(data);
 	return args.getState()->radarBlips[blip];
 }
@@ -185,6 +194,9 @@ inline BlipData createObjectBlipSprite(const ScriptArguments& args, GameObject* 
 		break;
 	case GameObject::Pickup:
 		data.type = BlipData::Pickup;
+		break;
+	case GameObject::Instance:
+		data.type = BlipData::Instance;
 		break;
 	default:
 		data.type = BlipData::Location;

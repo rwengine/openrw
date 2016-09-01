@@ -181,15 +181,19 @@ struct BlipData
 		Vehicle = 1,
 		Pickup = 2,
 		Character = 3,
+		Instance = 4,
 	};
 	BlipType type;
 	GameObjectID target;
 	// If target is null then use coord
 	glm::vec3 coord;
 	
-	/* Texture for use in the radar */
-	std::string texture;
-	
+	std::string texture; // Texture for use in the radar
+	uint32_t colour = 0; // Color value (index or RGBA)
+	bool dimmed = false; // Color dimming if not in RGBA mode
+
+	uint16_t size = 3; // Only used if texture is empty
+
 	enum DisplayMode
 	{
 		Hide = 0,
