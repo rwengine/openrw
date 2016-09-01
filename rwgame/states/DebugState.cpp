@@ -304,8 +304,7 @@ Menu*DebugState::createWeaponMenu()
 
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
 	: State(game)
-	, _freeLook( false )
-	, _sonicMode( false )
+	, _invertedY(game->getConfig().getInputInvertY())
 {
 	this->enterMenu(createDebugMenu());
 
@@ -357,7 +356,7 @@ void DebugState::tick(float dt)
 		_debugCam.rotation = glm::angleAxis(_debugLook.x, glm::vec3(0.f, 0.f, 1.f))
 			* glm::angleAxis(_debugLook.y, glm::vec3(0.f, 1.f, 0.f));
 
-		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 1000.f : 100.f);
+		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 500.f : 50.f);
 	}
 }
 
@@ -383,7 +382,6 @@ void DebugState::handleEvent(const SDL_Event& event)
 	switch(event.type) {
 	case SDL_KEYDOWN:
 		switch(event.key.keysym.sym) {
-		default: break;
 		case SDLK_ESCAPE:
 			StateManager::get().exit();
 			break;
@@ -409,10 +407,7 @@ void DebugState::handleEvent(const SDL_Event& event)
 		case SDLK_p:
 			printCameraDetails();
 			break;
-		}
-
-		switch (event.key.keysym.mod) {
-		case KMOD_LSHIFT:
+		case SDLK_LSHIFT:
 			_sonicMode = true;
 			break;
 		default: break;
@@ -430,10 +425,7 @@ void DebugState::handleEvent(const SDL_Event& event)
 		case SDLK_d:
 			_movement.y = 0.f;
 			break;
-		}
-
-		switch (event.key.keysym.mod) {
-		case KMOD_LSHIFT:
+		case SDLK_LSHIFT:
 			_sonicMode = false;
 			break;
 		default: break;
