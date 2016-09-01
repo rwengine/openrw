@@ -50,6 +50,7 @@ RWGame::RWGame(int argc, char* argv[])
 	bool fullscreen = false;
 	bool newgame = false;
 	bool test = false;
+	bool help = false;
 	std::string startSave;
 	std::string benchFile;
 
@@ -64,18 +65,25 @@ RWGame::RWGame(int argc, char* argv[])
 		("newgame,n",                              "Directly start a new game")
 		("test,t",                                 "Starts a new game in a test location")
 		("load,l",       po::value<std::string>(), "Load save file")
-		("benchmark,b",  po::value<std::string>(), "Run benchmark and store results in file")
+		("benchmark,b",  po::value<std::string>(), "Run benchmark from file")
 	;
 
 	po::variables_map vm;
-	po::store(po::parse_command_line(argc, argv, desc), vm);
-	po::notify(vm);
-
-	if( vm.count("help") )
+	try
 	{
-		// TODO: This is a hack
-		std::cout << desc << std::endl;
-		throw std::runtime_error("Terminate");
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	}
+	catch (po::error& ex)
+	{
+		help = true;
+		std::cout << "Error parsing arguments: " << ex.what() << std::endl;
+	}
+
+	if( help || vm.count("help") )
+	{
+		std::cout << desc;
+		throw std::invalid_argument("");
 	}
 	if( vm.count("width") )
 	{
@@ -178,7 +186,7 @@ RWGame::RWGame(int argc, char* argv[])
 	{
 		loading->setNextState(new MenuState(this));
 	}
-	
+
 	StateManager::get().enter(loading);
 
 	log.info("Game", "Started");
