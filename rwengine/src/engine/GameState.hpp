@@ -69,17 +69,17 @@ struct BasicState
 	BasicState ();
 };
 
-/** Block 15 player info */
+/** Block 16 player info */
 struct PlayerInfo
 {
-	uint16_t money;
+	uint32_t money;
 	uint8_t unknown1;
-	uint16_t unknown2;
-	uint8_t unknown3;
+	uint32_t unknown2;
+	uint16_t unknown3;
 	float unknown4;
-	uint16_t displayedMoney;
-	uint16_t hiddenPackagesCollected;
-	uint16_t hiddenPackageCount;
+	uint32_t displayedMoney;
+	uint32_t hiddenPackagesCollected;
+	uint32_t hiddenPackageCount;
 	uint8_t neverTired;
 	uint8_t fastReload;
 	uint8_t thaneOfLibertyCity;
@@ -92,26 +92,26 @@ struct PlayerInfo
 /** Block 17 */
 struct GameStats
 {
-	uint16_t playerKills;
-	uint16_t otherKills;
-	uint16_t carsExploded;
-	uint16_t shotsHit;
-	uint16_t pedTypesKilled[23];
-	uint16_t helicoptersDestroyed;
-	uint16_t playerProgress;
-	uint16_t explosiveKgsUsed;
-	uint16_t bulletsFired;
-	uint16_t bulletsHit;
-	uint16_t carsCrushed;
-	uint16_t headshots;
-	uint16_t timesBusted;
-	uint16_t timesHospital;
-	uint16_t daysPassed;
-	uint16_t mmRainfall;
-	uint16_t insaneJumpMaxDistance;
-	uint16_t insaneJumpMaxHeight;
-	uint16_t insaneJumpMaxFlips;
-	uint16_t insangeJumpMaxRotation;
+	uint32_t playerKills;
+	uint32_t otherKills;
+	uint32_t carsExploded;
+	uint32_t shotsHit;
+	uint32_t pedTypesKilled[23];
+	uint32_t helicoptersDestroyed;
+	uint32_t playerProgress;
+	uint32_t explosiveKgsUsed;
+	uint32_t bulletsFired;
+	uint32_t bulletsHit;
+	uint32_t carsCrushed;
+	uint32_t headshots;
+	uint32_t timesBusted;
+	uint32_t timesHospital;
+	uint32_t daysPassed;
+	uint32_t mmRainfall;
+	uint32_t insaneJumpMaxDistance;
+	uint32_t insaneJumpMaxHeight;
+	uint32_t insaneJumpMaxFlips;
+	uint32_t insangeJumpMaxRotation;
 	/*
 	 * 0 none completed
 	 * 1 insane stunt
@@ -123,36 +123,36 @@ struct GameStats
 	 * 7 quadruple
 	 * 8 perfect quadruple
 	 */
-	uint16_t bestStunt;
-	uint16_t uniqueStuntsFound;
-	uint16_t uniqueStuntsTotal;
-	uint16_t missionAttempts;
-	uint16_t missionsPassed;
-	uint16_t passengersDroppedOff;
-	uint16_t taxiRevenue;
-	uint16_t portlandPassed;
-	uint16_t stauntonPassed;
-	uint16_t shoresidePassed;
-	uint16_t bestTurismoTime;
+	uint32_t bestStunt;
+	uint32_t uniqueStuntsFound;
+	uint32_t uniqueStuntsTotal;
+	uint32_t missionAttempts;
+	uint32_t missionsPassed;
+	uint32_t passengersDroppedOff;
+	uint32_t taxiRevenue;
+	uint32_t portlandPassed;
+	uint32_t stauntonPassed;
+	uint32_t shoresidePassed;
+	uint32_t bestTurismoTime;
 	float distanceWalked;
 	float distanceDriven;
-	uint16_t patriotPlaygroundTime;
-	uint16_t aRideInTheParkTime;
-	uint16_t grippedTime;
-	uint16_t multistoryMayhemTime;
-	uint16_t peopleSaved;
-	uint16_t criminalsKilled;
-	uint16_t highestParamedicLevel;
-	uint16_t firesExtinguished;
-	uint16_t longestDodoFlight;
-	uint16_t bombDefusalTime;
-	uint16_t rampagesPassed;
-	uint16_t totalRampages;
-	uint16_t totalMissions;
-	uint16_t fastestTime[16]; // not used
-	uint16_t highestScore[16];
-	uint16_t peopleKilledSinceCheckpoint; // ?
-	uint16_t peopleKilledSinceLastBustedOrWasted;
+	uint32_t patriotPlaygroundTime;
+	uint32_t aRideInTheParkTime;
+	uint32_t grippedTime;
+	uint32_t multistoryMayhemTime;
+	uint32_t peopleSaved;
+	uint32_t criminalsKilled;
+	uint32_t highestParamedicLevel;
+	uint32_t firesExtinguished;
+	uint32_t longestDodoFlight;
+	uint32_t bombDefusalTime;
+	uint32_t rampagesPassed;
+	uint32_t totalRampages;
+	uint32_t totalMissions;
+	uint32_t fastestTime[16]; // not used
+	uint32_t highestScore[16];
+	uint32_t peopleKilledSinceCheckpoint; // ?
+	uint32_t peopleKilledSinceLastBustedOrWasted;
 	char lastMissionGXT[8];
 
 	GameStats ();
