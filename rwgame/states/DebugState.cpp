@@ -356,7 +356,7 @@ void DebugState::tick(float dt)
 		_debugCam.rotation = glm::angleAxis(_debugLook.x, glm::vec3(0.f, 0.f, 1.f))
 			* glm::angleAxis(_debugLook.y, glm::vec3(0.f, 1.f, 0.f));
 
-		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 1000.f : 100.f);
+		_debugCam.position += _debugCam.rotation * _movement * dt * (_sonicMode ? 500.f : 50.f);
 	}
 }
 
