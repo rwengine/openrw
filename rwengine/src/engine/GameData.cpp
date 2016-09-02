@@ -22,17 +22,6 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 
-// Yet another hack function to fix these paths
-std::string fixPath(std::string path) {
-	for( size_t t = 0; t < path.size(); ++t) {
-		path[t] = tolower(path[t]);
-		if(path[t] == '\\') {
-			path[t] = '/';
-		}
-	}
-	return path;
-}
-
 GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
 : datpath(path), logger(log), workContext(work), engine(nullptr)
 {
