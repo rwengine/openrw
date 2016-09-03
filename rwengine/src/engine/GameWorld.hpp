@@ -23,7 +23,7 @@ class VehicleObject;
 class PickupObject;
 
 class ViewCamera;
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <render/VisualFX.hpp>
 
 struct BlipData;

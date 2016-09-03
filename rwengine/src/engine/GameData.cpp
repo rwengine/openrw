@@ -1,5 +1,5 @@
 #include <data/Model.hpp>
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>

@@ -36,8 +36,8 @@ set(RWENGINE_SOURCES
 	src/data/GameTexts.cpp
 	src/data/GameTexts.hpp
 	src/data/InstanceData.hpp
-	src/data/ObjectData.cpp
-	src/data/ObjectData.hpp
+	src/data/ModelData.cpp
+	src/data/ModelData.hpp
 	src/data/PathData.hpp
 	src/data/Skeleton.cpp
 	src/data/Skeleton.hpp

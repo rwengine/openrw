@@ -11,7 +11,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <ai/CharacterController.hpp>
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <items/InventoryItem.hpp>
 
 #include <data/CutsceneData.hpp>

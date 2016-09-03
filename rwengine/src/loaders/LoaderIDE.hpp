@@ -2,7 +2,7 @@
 #ifndef _LOADERIDE_HPP_
 #define _LOADERIDE_HPP_
 
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <data/PathData.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
