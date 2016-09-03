@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _LOADERIDE_HPP_
-#define _LOADERIDE_HPP_
+#ifndef RWENGINE_LOADERIDE_HPP
+#define RWENGINE_LOADERIDE_HPP
 
 #include <data/ModelData.hpp>
 #include <data/PathData.hpp>
