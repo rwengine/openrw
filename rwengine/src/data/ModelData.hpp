@@ -1,6 +1,5 @@
-#pragma once
-#ifndef __GLT_OBJECTDATA_HPP__
-#define __GLT_OBJECTDATA_HPP__
+#ifndef RWENGINE_MODELDATA_HPP
+#define RWENGINE_MODELDATA_HPP
 #include <stdint.h>
 #include <glm/glm.hpp>
 #include <memory>
