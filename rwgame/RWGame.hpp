@@ -39,6 +39,8 @@ class RWGame
 	bool showDebugPhysics = false;
 	int lastDraws; /// Number of draws issued for the last frame.
 
+	std::string cheatInputWindow = std::string(32, ' ');
+
 	float accum = 0.f;
 	float timescale = 1.f;
 public:
@@ -135,6 +137,8 @@ private:
 	void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
 	void renderDebugPaths(float time);
 	void renderProfile();
+
+	void handleCheatInput(char symbol);
 
 	void globalKeyEvent(const SDL_Event& event);
 };
