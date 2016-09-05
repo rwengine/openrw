@@ -1,9 +1,9 @@
-#pragma once
-#ifndef __GLT_COLLISIONMODEL_HPP__
-#define __GLT_COLLISIONMODEL_HPP__
+#ifndef RWENGINE_COLLISIONMODEL_HPP
+#define RWENGINE_COLLISIONMODEL_HPP
 #include <glm/glm.hpp>
 #include <string>
 #include <cstdint>
+#include <vector>
 
 /**
  * @class CollisionModel 
