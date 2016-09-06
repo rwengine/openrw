@@ -24,6 +24,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/program_options.hpp>
 #include <functional>
 
 #include "GitSHA1.h"
@@ -49,39 +50,68 @@ RWGame::RWGame(int argc, char* argv[])
 	bool fullscreen = false;
 	bool newgame = false;
 	bool test = false;
-    std::string startSave;
+	bool help = false;
+	std::string startSave;
 	std::string benchFile;
 
-	for( int i = 1; i < argc; ++i )
+	// Define and parse command line options
+	namespace po = boost::program_options;
+	po::options_description desc("Available options");
+	desc.add_options()
+		("help",                                   "Show this help message")
+		("width,w",      po::value<size_t>(),      "Game resolution width in pixel")
+		("height,h",     po::value<size_t>(),      "Game resolution height in pixel")
+		("fullscreen,f",                           "Enable fullscreen mode")
+		("newgame,n",                              "Directly start a new game")
+		("test,t",                                 "Starts a new game in a test location")
+		("load,l",       po::value<std::string>(), "Load save file")
+		("benchmark,b",  po::value<std::string>(), "Run benchmark from file")
+	;
+
+	po::variables_map vm;
+	try
 	{
-		if( boost::iequals( "-w", argv[i] ) && i+1 < argc )
-		{
-			w = std::atoi(argv[i+1]);
-		}
-		if( boost::iequals( "-h", argv[i] ) && i+1 < argc )
-		{
-			h = std::atoi(argv[i+1]);
-		}
-		if( boost::iequals( "-f", argv[i] ))
-		{
-			fullscreen = true;
-		}
-		if( strcmp( "--newgame", argv[i] ) == 0 )
-		{
-			newgame = true;
-		}
-		if( strcmp( "--test", argv[i] ) == 0 )
-		{
-			test = true;
-		}
-        if( strcmp( "--load", argv[i] ) == 0 && i+1 < argc )
-        {
-            startSave = argv[i+1];
-        }
-		if( strcmp( "--benchmark", argv[i]) == 0 && i+1 < argc )
-		{
-			benchFile = argv[i+1];
-		}
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	}
+	catch (po::error& ex)
+	{
+		help = true;
+		std::cout << "Error parsing arguments: " << ex.what() << std::endl;
+	}
+
+	if( help || vm.count("help") )
+	{
+		std::cout << desc;
+		throw std::invalid_argument("");
+	}
+	if( vm.count("width") )
+	{
+		w = vm["width"].as<size_t>();
+	}
+	if( vm.count("height") )
+	{
+		h = vm["height"].as<size_t>();
+	}
+	if( vm.count("fullscreen") )
+	{
+		fullscreen = true;
+	}
+	if( vm.count("newgame") )
+	{
+		newgame = true;
+	}
+	if( vm.count("test") )
+	{
+		test = true;
+	}
+	if( vm.count("load") )
+	{
+		startSave = vm["load"].as<std::string>();
+	}
+	if( vm.count("benchmark") )
+	{
+		benchFile = vm["benchmark"].as<std::string>();
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -140,26 +170,23 @@ RWGame::RWGame(int argc, char* argv[])
 	{
 		loading->setNextState(new BenchmarkState(this, benchFile));
 	}
+	else if( test)
+	{
+		loading->setNextState(new IngameState(this, true, "test"));
+	}
 	else if( newgame )
 	{
-		if( test )
-		{
-			loading->setNextState(new IngameState(this,true, "test"));
-		}
-		else
-		{
-			loading->setNextState(new IngameState(this,true));
-		}
+		loading->setNextState(new IngameState(this, true));
 	}
-    else if( ! startSave.empty() )
-    {
-        loading->setNextState(new IngameState(this,true, startSave));
-    }
+	else if( ! startSave.empty() )
+	{
+		loading->setNextState(new IngameState(this, true, startSave));
+	}
 	else
 	{
 		loading->setNextState(new MenuState(this));
 	}
-	
+
 	StateManager::get().enter(loading);
 
 	log.info("Game", "Started");
@@ -231,7 +258,7 @@ void RWGame::loadGame(const std::string& savename)
 	delete state->script;
 	state = nullptr;
 
-    log.info("Game", "Loading game " + savename);
+	log.info("Game", "Loading game " + savename);
 
 	newGame();
 
@@ -642,7 +669,7 @@ void RWGame::render(float alpha, float time)
 									  cutscene->tracks.duration);
 		cutsceneTime += GAME_TIMESTEP * alpha;
 		glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
-				targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
+		targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
 		float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
 		viewCam.frustum.fov = glm::radians(zoom);
 		float tilt = cutscene->tracks.getRotationAt(cutsceneTime);

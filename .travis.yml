@@ -11,6 +11,7 @@ addons:
       - libsndfile-dev
       - libopenal-dev
       - libboost-filesystem-dev
+      - libboost-program-options-dev
       # Dependencies for BUILD_TESTS
       - libboost-test-dev
       # Dependencies for BUILD_VIEWER
