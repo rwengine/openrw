@@ -113,9 +113,9 @@ public:
 	void load();
 	
 	/**
-	 * Loads a GTA3.dat file with the name path
+	 * Loads model, placement, models and textures from a level file
 	 */
-	void parseDAT(const std::string& path);
+	void loadLevelFile(const std::string& path);
 	
 	/**
 	 * Attempts to load a TXD, or does nothing if it has already been loaded

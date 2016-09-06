@@ -45,8 +45,8 @@ void GameData::load()
 	/// @todo cuts.img files should be loaded differently to gta3.img
 	loadIMG("anim/cuts.img");
 
-	parseDAT("data/default.dat");
-	parseDAT("data/gta3.dat");
+	loadLevelFile("data/default.dat");
+	loadLevelFile("data/gta3.dat");
 	
 	loadDFF("wheels.dff");
 	loadDFF("weapons.dff");
@@ -65,7 +65,7 @@ void GameData::load()
 	loadIFP("ped.ifp");
 }
 
-void GameData::parseDAT(const std::string& path)
+void GameData::loadLevelFile(const std::string& path)
 {
 	auto datpath = index.findFilePath(path);
 	std::ifstream datfile(datpath.c_str());
