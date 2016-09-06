@@ -73,14 +73,9 @@ public:
 	}
 	
 	/**
-	 * Stores the given IDE file in the list of item definitions to load.
+	 * Loads items defined in the given IDE
 	 */
-	void addIDE(const std::string& name);
-
-	/**
-	 * Loads the object definitions from the given IDE file
-	 */
-	bool loadObjects(const std::string& name);
+	void loadIDE(const std::string& path);
 
 	/**
 	 * Handles the parsing of a COL file.
@@ -167,10 +162,9 @@ public:
 	std::map<std::string, bool> loadedFiles;
 	
 	/**
-	 * Maps the paths in GTA3.dat to the real paths
+	 * IPL file locations
 	 */
 	std::map<std::string, std::string> iplLocations;
-	std::map<std::string, std::string> ideLocations;
 
 	/**
 	 * Map of loaded archives

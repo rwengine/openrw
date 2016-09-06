@@ -85,12 +85,6 @@ public:
 		s = new GameState;
 		e->state = s;
 
-		for(std::map<std::string, std::string>::iterator it = e->data->ideLocations.begin();
-			it != e->data->ideLocations.end();
-			++it) {
-			d->loadObjects(it->second);
-		}
-
 		e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
 
 		while( ! e->_work->isEmpty() ) {

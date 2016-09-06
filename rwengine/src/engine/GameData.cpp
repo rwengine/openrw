@@ -93,14 +93,16 @@ void GameData::parseDAT(const std::string& path)
 			#ifndef RW_WINDOWS
 				line.erase(line.size()-1);
 			#endif
-			
+
 			size_t space = line.find_first_of(' ');
 			if(space != line.npos)
 			{
 				cmd = line.substr(0, space);
 				if(cmd == "IDE")
 				{
-					addIDE(line.substr(space+1));
+					auto path = line.substr(space+1);
+					auto systempath = index.findFilePath(path).native();
+					loadIDE(systempath);
 				}
 				else if(cmd == "SPLASH")
 				{
@@ -131,34 +133,16 @@ void GameData::parseDAT(const std::string& path)
 	}
 }
 
-void GameData::addIDE(const std::string& name)
+void GameData::loadIDE(const std::string& path)
 {
-	std::string lowername = name;
-	for(size_t t = 0; t < lowername.size(); ++t)
-	{
-		lowername[t] = tolower(lowername[t]);
-		if(lowername[t] == '\\') {
-			lowername[t] = '/';
-		}
-	}
-	
-	ideLocations.insert({lowername, datpath+"/"+lowername});
-}
-
-bool GameData::loadObjects(const std::string& name)
-{
-	std::string path = name;
-	
 	LoaderIDE idel;
-	
+
 	if(idel.load(path)) {
 		objectTypes.insert(idel.objects.begin(), idel.objects.end());
 	}
 	else {
 		logger->error("Data", "Failed to load IDE " + path);
 	}
-	
-	return false;
 }
 
 uint16_t GameData::findModelObject(const std::string model)

@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(test_object_data)
 
 	gd.load();
 
-	gd.loadObjects(Global::getGamePath() + "/data/maps/generic.ide");
+	gd.loadIDE(Global::getGamePath() + "/data/maps/generic.ide");
 
 	{
 		auto def = gd.findObjectType<ObjectData>(1100);
