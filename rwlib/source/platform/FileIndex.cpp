@@ -76,18 +76,6 @@ void FileIndex::indexArchive(const std::string& archive)
 	}
 }
 
-bool FileIndex::findFile(const std::string& filename, FileIndex::IndexData& filedata)
-{
-	auto iterator = files.find(filename);
-	if( iterator == files.end() ) {
-		return false;
-	}
-	
-	filedata = iterator->second;
-	
-	return true;
-}
-
 FileHandle FileIndex::openFile(const std::string& filename)
 {
 	auto iterator = files.find( filename );

@@ -31,20 +31,6 @@ BOOST_AUTO_TEST_CASE(test_directory_paths)
 	}
 }
 
-
-BOOST_AUTO_TEST_CASE(test_index)
-{
-	FileIndex index;
-
-	index.indexTree(Global::getGamePath()+"/data");
-	
-	FileIndex::IndexData data;
-	BOOST_CHECK( index.findFile("cullzone.dat", data) );
-	BOOST_CHECK_EQUAL( data.filename, "cullzone.dat" );
-	BOOST_CHECK_EQUAL( data.originalName, "CULLZONE.DAT" );
-	BOOST_CHECK( data.archive.empty() );
-}
-
 BOOST_AUTO_TEST_CASE(test_file)
 {
 	FileIndex index;
@@ -53,19 +39,6 @@ BOOST_AUTO_TEST_CASE(test_file)
 	
 	auto handle = index.openFile("cullzone.dat");
 	BOOST_CHECK( handle != nullptr );
-}
-
-BOOST_AUTO_TEST_CASE(test_index_archive)
-{
-	FileIndex index;
-
-	index.indexArchive(Global::getGamePath()+"/models/gta3.img");
-	
-	FileIndex::IndexData data;
-	BOOST_CHECK( index.findFile("landstal.dff", data) );
-	BOOST_CHECK_EQUAL( data.filename, "landstal.dff" );
-	BOOST_CHECK_EQUAL( data.originalName, "landstal.dff" );
-	BOOST_CHECK_EQUAL( data.archive, "gta3.img" );
 }
 
 BOOST_AUTO_TEST_CASE(test_file_archive)
