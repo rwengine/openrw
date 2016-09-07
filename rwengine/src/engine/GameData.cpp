@@ -73,48 +73,47 @@ void GameData::loadLevelFile(const std::string& path)
 	if(!datfile.is_open()) 
 	{
 		logger->error("Data", "Failed to open game file " + path);
+		return;
 	}
-	else
-	{
-		for(std::string line, cmd; std::getline(datfile, line);)
-		{
-			if(line.size() == 0 || line[0] == '#') continue;
-			#ifndef RW_WINDOWS
-				line.erase(line.size()-1);
-			#endif
 
-			size_t space = line.find_first_of(' ');
-			if(space != line.npos)
+	for(std::string line, cmd; std::getline(datfile, line);)
+	{
+		if(line.size() == 0 || line[0] == '#') continue;
+		#ifndef RW_WINDOWS
+			line.erase(line.size()-1);
+		#endif
+
+		size_t space = line.find_first_of(' ');
+		if(space != line.npos)
+		{
+			cmd = line.substr(0, space);
+			if(cmd == "IDE")
 			{
-				cmd = line.substr(0, space);
-				if(cmd == "IDE")
-				{
-					auto path = line.substr(space+1);
-					loadIDE(path);
-				}
-				else if(cmd == "SPLASH")
-				{
-					splash = line.substr(space+1);
-				}
-				else if(cmd == "COLFILE")
-				{
-					int zone  = atoi(line.substr(space+1,1).c_str());
-					auto path = line.substr(space+3);
-					loadCOL(zone, path);
-				}
-				else if(cmd == "IPL")
-				{
-					auto path = line.substr(space+1);
-					loadIPL(path);
-				}
-				else if(cmd == "TEXDICTION")
-				{
-					auto path = line.substr(space+1);
-					/// @todo improve TXD handling
-					auto name = index.findFilePath(path).filename().native();
-					std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-					loadTXD(name);
-				}
+				auto path = line.substr(space+1);
+				loadIDE(path);
+			}
+			else if(cmd == "SPLASH")
+			{
+				splash = line.substr(space+1);
+			}
+			else if(cmd == "COLFILE")
+			{
+				int zone  = atoi(line.substr(space+1,1).c_str());
+				auto path = line.substr(space+3);
+				loadCOL(zone, path);
+			}
+			else if(cmd == "IPL")
+			{
+				auto path = line.substr(space+1);
+				loadIPL(path);
+			}
+			else if(cmd == "TEXDICTION")
+			{
+				auto path = line.substr(space+1);
+				/// @todo improve TXD handling
+				auto name = index.findFilePath(path).filename().native();
+				std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+				loadTXD(name);
 			}
 		}
 	}
