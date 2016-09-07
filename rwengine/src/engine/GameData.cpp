@@ -383,7 +383,7 @@ void GameData::loadDFF(const std::string& name, bool async)
 
 void GameData::loadIFP(const std::string &name)
 {
-	auto f = openFile(name);
+	auto f = index.openFile(name);
 
 	if(f)
 	{
@@ -456,16 +456,6 @@ void GameData::loadSplash(const std::string &name)
 	loadTXD(lower + ".txd", false);
 
 	engine->state->currentSplash = lower;
-}
-
-FileHandle GameData::openFile(const std::string &name)
-{
-	auto file = index.openFile(name);
-	if( file == nullptr )
-	{
-		logger->error("Data", "Unable to open file: " + name);
-	}
-	return file;
 }
 
 int GameData::getWaterIndexAt(const glm::vec3 &ws) const

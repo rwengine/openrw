@@ -147,8 +147,6 @@ public:
 
 	void loadSplash(const std::string& name);
 
-	FileHandle openFile(const std::string& name);
-
 	TextureData::Handle findTexture( const std::string& name, const std::string& alpha = "" )
 	{
 		return textures[{name, alpha}];

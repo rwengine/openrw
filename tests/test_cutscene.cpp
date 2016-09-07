@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_SUITE(CutsceneTests)
 BOOST_AUTO_TEST_CASE(test_load)
 {
 	{
-		auto d = Global::get().e->data->openFile("intro.dat");
+		auto d = Global::get().e->data->index.openFile("intro.dat");
 
 		CutsceneTracks tracks;
 
