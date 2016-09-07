@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 BOOST_AUTO_TEST_CASE(test_load_dff)
 {
 	{
-		auto d = Global::get().e->data->openFile("landstal.dff");
+		auto d = Global::get().e->data->index.openFile("landstal.dff");
 
 		LoaderDFF loader;
 

@@ -8,7 +8,7 @@ BOOST_AUTO_TEST_SUITE(RWBStreamTests)
 BOOST_AUTO_TEST_CASE(iterate_stream_test)
 {
 	{
-		auto d = Global::get().e->data->openFile("landstal.dff");
+		auto d = Global::get().e->data->index.openFile("landstal.dff");
 		
 		RWBStream stream(d->data, d->length);
 	

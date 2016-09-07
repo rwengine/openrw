@@ -22,17 +22,6 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 
-// Yet another hack function to fix these paths
-std::string fixPath(std::string path) {
-	for( size_t t = 0; t < path.size(); ++t) {
-		path[t] = tolower(path[t]);
-		if(path[t] == '\\') {
-			path[t] = '/';
-		}
-	}
-	return path;
-}
-
 GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
 : datpath(path), logger(log), workContext(work), engine(nullptr)
 {
@@ -49,10 +38,15 @@ GameData::~GameData()
 
 void GameData::load()
 {
+	index.indexGameDirectory(datpath);
 	index.indexTree(datpath);
-	
-	parseDAT(datpath+"/data/default.dat");
-	parseDAT(datpath+"/data/gta3.dat");
+
+	loadIMG("models/gta3.img");
+	/// @todo cuts.img files should be loaded differently to gta3.img
+	loadIMG("anim/cuts.img");
+
+	loadLevelFile("data/default.dat");
+	loadLevelFile("data/gta3.dat");
 	
 	loadDFF("wheels.dff");
 	loadDFF("weapons.dff");
@@ -62,102 +56,80 @@ void GameData::load()
 	loadTXD("hud.txd");
 	loadTXD("fonts.txd");
 	
-	loadCarcols(datpath+"/data/carcols.dat");
-	loadWeather(datpath+"/data/timecyc.dat");
-	loadHandling(datpath+"/data/handling.cfg");
-	loadWaterpro(datpath+"/data/waterpro.dat");
-	loadWater(datpath+"/data/water.dat");
-	loadWeaponDAT(datpath+"/data/weapon.dat");
+	loadCarcols("data/carcols.dat");
+	loadWeather("data/timecyc.dat");
+	loadHandling("data/handling.cfg");
+	loadWaterpro("data/waterpro.dat");
+	loadWeaponDAT("data/weapon.dat");
 
 	loadIFP("ped.ifp");
 }
 
-void GameData::parseDAT(const std::string& path)
+void GameData::loadLevelFile(const std::string& path)
 {
-	std::ifstream datfile(path.c_str());
-	
+	auto datpath = index.findFilePath(path);
+	std::ifstream datfile(datpath.c_str());
+
 	if(!datfile.is_open()) 
 	{
 		logger->error("Data", "Failed to open game file " + path);
+		return;
 	}
-	else
+
+	for(std::string line, cmd; std::getline(datfile, line);)
 	{
-		for(std::string line, cmd; std::getline(datfile, line);)
+		if(line.size() == 0 || line[0] == '#') continue;
+		#ifndef RW_WINDOWS
+			line.erase(line.size()-1);
+		#endif
+
+		size_t space = line.find_first_of(' ');
+		if(space != line.npos)
 		{
-			if(line.size() == 0 || line[0] == '#') continue;
-			#ifndef RW_WINDOWS
-				line.erase(line.size()-1);
-			#endif
-			
-			size_t space = line.find_first_of(' ');
-			if(space != line.npos)
+			cmd = line.substr(0, space);
+			if(cmd == "IDE")
 			{
-				cmd = line.substr(0, space);
-				if(cmd == "IDE")
-				{
-					addIDE(line.substr(space+1));
-				}
-				else if(cmd == "SPLASH")
-				{
-					splash = line.substr(space+1);
-				}
-				else if(cmd == "COLFILE")
-				{
-					int zone  = atoi(line.substr(space+1,1).c_str());
-					std::string file = line.substr(space+3);
-					loadCOL(zone, file);
-				}
-				else if(cmd == "IPL")
-				{
-					std::string fixedpath = fixPath(line.substr(space+1));
-					fixedpath = findPathRealCase(datpath, fixedpath);
-					loadIPL(fixedpath);
-				}
-				else if(cmd == "TEXDICTION") 
-				{
-					std::string texpath = line.substr(space+1);
-					for( size_t t = 0; t < texpath.size(); ++t) {
-						texpath[t] = tolower(texpath[t]);
-						if(texpath[t] == '\\') {
-							texpath[t] = '/';
-						}
-					}
-					std::string texname = texpath.substr(texpath.find_last_of("/")+1);
-					loadTXD(texname);
-				}
+				auto path = line.substr(space+1);
+				loadIDE(path);
+			}
+			else if(cmd == "SPLASH")
+			{
+				splash = line.substr(space+1);
+			}
+			else if(cmd == "COLFILE")
+			{
+				int zone  = atoi(line.substr(space+1,1).c_str());
+				auto path = line.substr(space+3);
+				loadCOL(zone, path);
+			}
+			else if(cmd == "IPL")
+			{
+				auto path = line.substr(space+1);
+				loadIPL(path);
+			}
+			else if(cmd == "TEXDICTION")
+			{
+				auto path = line.substr(space+1);
+				/// @todo improve TXD handling
+				auto name = index.findFilePath(path).filename().native();
+				std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+				loadTXD(name);
 			}
 		}
 	}
 }
 
-void GameData::addIDE(const std::string& name)
+void GameData::loadIDE(const std::string& path)
 {
-	std::string lowername = name;
-	for(size_t t = 0; t < lowername.size(); ++t)
-	{
-		lowername[t] = tolower(lowername[t]);
-		if(lowername[t] == '\\') {
-			lowername[t] = '/';
-		}
-	}
-	
-	ideLocations.insert({lowername, datpath+"/"+lowername});
-}
-
-bool GameData::loadObjects(const std::string& name)
-{
-	std::string path = name;
-	
+	auto systempath = index.findFilePath(path).native();
 	LoaderIDE idel;
-	
-	if(idel.load(path)) {
+
+	if(idel.load(systempath)) {
 		objectTypes.insert(idel.objects.begin(), idel.objects.end());
 	}
 	else {
 		logger->error("Data", "Failed to load IDE " + path);
 	}
-	
-	return false;
 }
 
 uint16_t GameData::findModelObject(const std::string model)
@@ -182,10 +154,9 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 	LoaderCOL col;
 	
-	std::string realPath = fixPath(name);
-	realPath = findPathRealCase(datpath, realPath);
+	auto systempath = index.findFilePath(name).native();
 	
-	if(col.load(realPath)) {
+	if(col.load(systempath)) {
 		for( size_t i = 0; i < col.instances.size(); ++i ) {
 			collisions[col.instances[i]->name] = std::move(col.instances[i]);
 		}
@@ -194,12 +165,14 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 void GameData::loadIMG(const std::string& name)
 {
-	index.indexArchive(datpath + name);
+	auto syspath = index.findFilePath(name).native();
+	index.indexArchive(syspath);
 }
 
-void GameData::loadIPL(const std::string& name)
+void GameData::loadIPL(const std::string& path)
 {
-	iplLocations.insert({name, name});
+	auto systempath = index.findFilePath(path).native();
+	iplLocations.insert({path, systempath});
 }
 
 bool GameData::loadZone(const std::string& path)
@@ -232,7 +205,8 @@ enum ColSection {
 
 void GameData::loadCarcols(const std::string& path)
 {
-	std::ifstream fstream(path.c_str());
+	auto syspath = index.findFilePath(path);
+	std::ifstream fstream(syspath.c_str());
 	
 	std::string line;
 	ColSection currentSection = Unknown;
@@ -283,19 +257,21 @@ void GameData::loadCarcols(const std::string& path)
 
 void GameData::loadWeather(const std::string &path)
 {
-	weatherLoader.load(path);
+	auto syspath = index.findFilePath(path).native();
+	weatherLoader.load(syspath);
 }
 
 void GameData::loadHandling(const std::string& path)
 {
 	GenericDATLoader l;
+	auto syspath = index.findFilePath(path).native();
 
-	l.loadHandling(path, vehicleInfo);
+	l.loadHandling(syspath, vehicleInfo);
 }
 
-SCMFile *GameData::loadSCM(const std::string &name)
+SCMFile *GameData::loadSCM(const std::string &path)
 {
-	auto scm_h = openFile(name);
+	auto scm_h = index.openFilePath(path);
 	SCMFile* scm = new SCMFile;
 	scm->loadFile(scm_h->data, scm_h->length);
 	scm_h.reset();
@@ -304,16 +280,17 @@ SCMFile *GameData::loadSCM(const std::string &name)
 
 void GameData::loadGXT(const std::string &name)
 {
-	auto d = openFile(name);
+	auto file = index.openFilePath(name);
 
 	LoaderGXT loader;
 
-	loader.load( texts, d );
+	loader.load( texts, file );
 }
 
 void GameData::loadWaterpro(const std::string& path)
 {
-	std::ifstream ifstr(path.c_str(), std::ios_base::binary);
+	auto syspath = index.findFilePath(path);
+	std::ifstream ifstr(syspath.c_str(), std::ios_base::binary);
 	
 	if(ifstr.is_open()) {
 		uint32_t numlevels;
@@ -406,7 +383,7 @@ void GameData::loadDFF(const std::string& name, bool async)
 
 void GameData::loadIFP(const std::string &name)
 {
-	auto f = openFile(name);
+	auto f = index.openFile(name);
 
 	if(f)
 	{
@@ -425,22 +402,23 @@ void GameData::loadDynamicObjects(const std::string& name)
 	l.loadDynamicObjects(name, dynamicObjectData);
 }
 
-void GameData::loadWeaponDAT(const std::string &name)
+void GameData::loadWeaponDAT(const std::string &path)
 {
 	GenericDATLoader l;
+	auto syspath = index.findFilePath(path).native();
 
-	l.loadWeapons(name, weaponData);
+	l.loadWeapons(syspath, weaponData);
 }
 
 bool GameData::loadAudioStream(const std::string &name)
 {
-	auto filePath = findPathRealCase(datpath + "/audio/", name);
+	auto systempath = index.findFilePath("audio/" + name).native();
 	
 	if (engine->cutsceneAudio.length() > 0) {
 		engine->sound.stopMusic(engine->cutsceneAudio);
 	}
 
-	if (engine->sound.loadMusic(name, filePath)) {
+	if (engine->sound.loadMusic(name, systempath)) {
 		engine->cutsceneAudio = name;
 		return true;
 	}
@@ -450,18 +428,18 @@ bool GameData::loadAudioStream(const std::string &name)
 
 bool GameData::loadAudioClip(const std::string& name, const std::string& fileName)
 {
-	auto filePath = findPathRealCase(datpath + "/audio/", fileName);
-	
-	if (fileName.find(".mp3") != fileName.npos)
+	auto systempath = index.findFilePath("audio/" + fileName).native();
+
+	if (systempath.find(".mp3") != std::string::npos)
 	{
 		logger->error("Data", "MP3 Audio unsupported outside cutscenes");
 		return false;
 	}
 
-	bool loaded = engine->sound.loadSound(name, filePath);
+	bool loaded = engine->sound.loadSound(name, systempath);
 
 	if ( ! loaded) {
-		logger->error("Data", "Error loading audio clip "+ filePath);
+		logger->error("Data", "Error loading audio clip "+ systempath);
 		return false;
 	}
 
@@ -478,16 +456,6 @@ void GameData::loadSplash(const std::string &name)
 	loadTXD(lower + ".txd", false);
 
 	engine->state->currentSplash = lower;
-}
-
-FileHandle GameData::openFile(const std::string &name)
-{
-	auto file = index.openFile(name);
-	if( file == nullptr )
-	{
-		logger->error("Data", "Unable to open file: " + name);
-	}
-	return file;
 }
 
 int GameData::getWaterIndexAt(const glm::vec3 &ws) const

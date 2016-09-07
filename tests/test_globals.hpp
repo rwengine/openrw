@@ -79,19 +79,11 @@ public:
 #if RW_TEST_WITH_DATA
 		d = new GameData(&log, &work, getGamePath());
 
-		d->loadIMG("/models/gta3");
-		d->loadIMG("/anim/cuts");
 		d->load();
 
 		e = new GameWorld(&log, &work, d);
 		s = new GameState;
 		e->state = s;
-
-		for(std::map<std::string, std::string>::iterator it = e->data->ideLocations.begin();
-			it != e->data->ideLocations.end();
-			++it) {
-			d->loadObjects(it->second);
-		}
 
 		e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
 

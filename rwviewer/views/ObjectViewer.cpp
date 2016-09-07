@@ -51,13 +51,6 @@ void ObjectViewer::setViewerWidget(ViewerWidget* widget)
 
 void ObjectViewer::worldChanged()
 {
-	// Loade all of the IDEs.
-	for(std::map<std::string, std::string>::iterator it = world()->data->ideLocations.begin();
-		it != world()->data->ideLocations.end();
-		++it) {
-		world()->data->loadObjects(it->second);
-	}
-
 	if( objectList->model() )
 	{
 		delete objectList->model();

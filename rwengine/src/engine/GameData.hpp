@@ -73,14 +73,9 @@ public:
 	}
 	
 	/**
-	 * Stores the given IDE file in the list of item definitions to load.
+	 * Loads items defined in the given IDE
 	 */
-	void addIDE(const std::string& name);
-
-	/**
-	 * Loads the object definitions from the given IDE file
-	 */
-	bool loadObjects(const std::string& name);
+	void loadIDE(const std::string& path);
 
 	/**
 	 * Handles the parsing of a COL file.
@@ -92,7 +87,7 @@ public:
 	 */
 	void loadIMG(const std::string& name);
 	
-	void loadIPL(const std::string& name);
+	void loadIPL(const std::string& path);
 	
 	/**
 	 * Loads the Zones from a zon/IPL file
@@ -105,7 +100,7 @@ public:
 
 	void loadHandling(const std::string& path);
 
-	SCMFile* loadSCM(const std::string& name);
+	SCMFile* loadSCM(const std::string& path);
 
 	void loadGXT(const std::string& name);
 	
@@ -118,9 +113,9 @@ public:
 	void load();
 	
 	/**
-	 * Loads a GTA3.dat file with the name path
+	 * Loads model, placement, models and textures from a level file
 	 */
-	void parseDAT(const std::string& path);
+	void loadLevelFile(const std::string& path);
 	
 	/**
 	 * Attempts to load a TXD, or does nothing if it has already been loaded
@@ -145,14 +140,12 @@ public:
 	/**
 	 * Loads weapon.dat
 	 */
-	void loadWeaponDAT(const std::string& name);
+	void loadWeaponDAT(const std::string& path);
 
 	bool loadAudioStream(const std::string& name);
 	bool loadAudioClip(const std::string& name, const std::string& fileName);
 
 	void loadSplash(const std::string& name);
-
-	FileHandle openFile(const std::string& name);
 
 	TextureData::Handle findTexture( const std::string& name, const std::string& alpha = "" )
 	{
@@ -167,10 +160,9 @@ public:
 	std::map<std::string, bool> loadedFiles;
 	
 	/**
-	 * Maps the paths in GTA3.dat to the real paths
+	 * IPL file locations
 	 */
 	std::map<std::string, std::string> iplLocations;
-	std::map<std::string, std::string> ideLocations;
 
 	/**
 	 * Map of loaded archives

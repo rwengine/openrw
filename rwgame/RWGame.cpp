@@ -133,11 +133,6 @@ RWGame::RWGame(int argc, char* argv[])
 
 	data = new GameData(&log, work, config.getGameDataPath());
 
-	// Initalize all the archives.
-	data->loadIMG("/models/gta3");
-	//engine->data.loadIMG("/models/txd");
-	data->loadIMG("/anim/cuts");
-	
 	data->load();
 	
 	// Initialize renderer
@@ -154,7 +149,7 @@ RWGame::RWGame(int argc, char* argv[])
 
 	data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
-	data->loadGXT(config.getGameLanguage() + ".gxt");
+	data->loadGXT("text/" + config.getGameLanguage() + ".gxt");
 	
 	getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater, 128*128);
 	
@@ -262,7 +257,7 @@ void RWGame::loadGame(const std::string& savename)
 
 	newGame();
 
-	startScript("main.scm");
+	startScript("data/main.scm");
 
 	if(! SaveGame::loadGame(*state, savename) )
 	{

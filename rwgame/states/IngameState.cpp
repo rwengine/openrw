@@ -138,7 +138,7 @@ void IngameState::startTest()
 
 void IngameState::startGame()
 {
-	game->startScript("main.scm");
+	game->startScript("data/main.scm");
 	game->getScript()->startThread(0);
 	getWorld()->sound.playBackground( getWorld()->data->getDataPath() + "/audio/City.wav" );
 }

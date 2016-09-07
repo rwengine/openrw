@@ -5,17 +5,30 @@
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 
 #if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_index)
+BOOST_AUTO_TEST_CASE(test_directory_paths)
 {
 	FileIndex index;
 
-	index.indexTree(Global::getGamePath()+"/data");
-	
-	FileIndex::IndexData data;
-	BOOST_CHECK( index.findFile("cullzone.dat", data) );
-	BOOST_CHECK_EQUAL( data.filename, "cullzone.dat" );
-	BOOST_CHECK_EQUAL( data.originalName, "CULLZONE.DAT" );
-	BOOST_CHECK( data.archive.empty() );
+	index.indexGameDirectory(Global::getGamePath());
+
+	{
+		std::string upperpath { "DATA/CULLZONE.DAT" };
+		auto truepath = index.findFilePath(upperpath);
+		BOOST_ASSERT(! truepath.empty());
+		BOOST_CHECK(upperpath != truepath);
+		fs::path expected {Global::getGamePath()};
+		expected /= "data/CULLZONE.DAT";
+		BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+	}
+	{
+		std::string upperpath { "DATA/MAPS/COMNBTM/COMNBTM.IPL" };
+		auto truepath = index.findFilePath(upperpath);
+		BOOST_ASSERT(! truepath.empty());
+		BOOST_CHECK(upperpath != truepath);
+		fs::path expected {Global::getGamePath()};
+		expected /= "data/maps/comnbtm/comNbtm.ipl";
+		BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_file)
@@ -26,19 +39,6 @@ BOOST_AUTO_TEST_CASE(test_file)
 	
 	auto handle = index.openFile("cullzone.dat");
 	BOOST_CHECK( handle != nullptr );
-}
-
-BOOST_AUTO_TEST_CASE(test_index_archive)
-{
-	FileIndex index;
-
-	index.indexArchive(Global::getGamePath()+"/models/gta3.img");
-	
-	FileIndex::IndexData data;
-	BOOST_CHECK( index.findFile("landstal.dff", data) );
-	BOOST_CHECK_EQUAL( data.filename, "landstal.dff" );
-	BOOST_CHECK_EQUAL( data.originalName, "landstal.dff" );
-	BOOST_CHECK_EQUAL( data.archive, "gta3.img" );
 }
 
 BOOST_AUTO_TEST_CASE(test_file_archive)

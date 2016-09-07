@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_SUITE(TextTests)
 BOOST_AUTO_TEST_CASE(load_test)
 {
 	{
-		auto d = Global::get().e->data->openFile("english.gxt");
+		auto d = Global::get().e->data->index.openFilePath("text/english.gxt");
 
 		GameTexts texts;
 

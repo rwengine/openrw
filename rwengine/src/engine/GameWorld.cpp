@@ -844,7 +844,7 @@ void GameWorld::loadCutscene(const std::string &name)
 	std::string lowerName(name);
 	std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
-	auto datfile = data->openFile(lowerName + ".dat");
+	auto datfile = data->index.openFile(lowerName + ".dat");
 
 	CutsceneData* cutscene = new CutsceneData;
 
