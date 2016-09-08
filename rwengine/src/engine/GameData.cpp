@@ -290,7 +290,7 @@ void GameData::loadGXT(const std::string &name)
 void GameData::loadWaterpro(const std::string& path)
 {
 	auto syspath = index.findFilePath(path);
-	std::ifstream ifstr((const char*)syspath.c_str(), std::ios_base::binary);
+	std::ifstream ifstr(syspath.string(), std::ios_base::binary);
 	
 	if(ifstr.is_open()) {
 		uint32_t numlevels;

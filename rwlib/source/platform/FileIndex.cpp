@@ -23,7 +23,7 @@ void FileIndex::indexGameDirectory(const fs::path& base_path)
 FileHandle FileIndex::openFilePath(const std::string &file_path)
 {
 	auto datapath = findFilePath(file_path);
-	std::ifstream dfile((const char*)datapath.c_str(), std::ios_base::binary | std::ios_base::ate);
+	std::ifstream dfile(datapath.string(), std::ios_base::binary | std::ios_base::ate);
 	if ( ! dfile.is_open()) {
 		throw std::runtime_error("Unable to open file: " + file_path);
 	}
