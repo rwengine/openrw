@@ -12,7 +12,7 @@ void FileIndex::indexGameDirectory(const fs::path& base_path)
 
 	for(const path& entry : boost::make_iterator_range(recursive_directory_iterator(base_path), {})) {
 		if(is_regular_file(entry)) {
-			std::string name = entry.native();
+			std::string name = entry.string();
 			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 			filesystemfiles_[name] = entry;
@@ -23,7 +23,7 @@ void FileIndex::indexGameDirectory(const fs::path& base_path)
 FileHandle FileIndex::openFilePath(const std::string &file_path)
 {
 	auto datapath = findFilePath(file_path);
-	std::ifstream dfile(datapath.c_str(), std::ios_base::binary | std::ios_base::ate);
+	std::ifstream dfile((const char*)datapath.c_str(), std::ios_base::binary | std::ios_base::ate);
 	if ( ! dfile.is_open()) {
 		throw std::runtime_error("Unable to open file: " + file_path);
 	}

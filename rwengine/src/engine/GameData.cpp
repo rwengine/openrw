@@ -68,7 +68,7 @@ void GameData::load()
 void GameData::loadLevelFile(const std::string& path)
 {
 	auto datpath = index.findFilePath(path);
-	std::ifstream datfile(datpath.c_str());
+	std::ifstream datfile(datpath.string());
 
 	if(!datfile.is_open()) 
 	{
@@ -111,7 +111,7 @@ void GameData::loadLevelFile(const std::string& path)
 			{
 				auto path = line.substr(space+1);
 				/// @todo improve TXD handling
-				auto name = index.findFilePath(path).filename().native();
+				auto name = index.findFilePath(path).filename().string();
 				std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 				loadTXD(name);
 			}
@@ -121,7 +121,7 @@ void GameData::loadLevelFile(const std::string& path)
 
 void GameData::loadIDE(const std::string& path)
 {
-	auto systempath = index.findFilePath(path).native();
+	auto systempath = index.findFilePath(path).string();
 	LoaderIDE idel;
 
 	if(idel.load(systempath)) {
@@ -154,7 +154,7 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 	LoaderCOL col;
 	
-	auto systempath = index.findFilePath(name).native();
+	auto systempath = index.findFilePath(name).string();
 	
 	if(col.load(systempath)) {
 		for( size_t i = 0; i < col.instances.size(); ++i ) {
@@ -165,13 +165,13 @@ void GameData::loadCOL(const size_t zone, const std::string& name)
 
 void GameData::loadIMG(const std::string& name)
 {
-	auto syspath = index.findFilePath(name).native();
+	auto syspath = index.findFilePath(name).string();
 	index.indexArchive(syspath);
 }
 
 void GameData::loadIPL(const std::string& path)
 {
-	auto systempath = index.findFilePath(path).native();
+	auto systempath = index.findFilePath(path).string();
 	iplLocations.insert({path, systempath});
 }
 
@@ -206,7 +206,7 @@ enum ColSection {
 void GameData::loadCarcols(const std::string& path)
 {
 	auto syspath = index.findFilePath(path);
-	std::ifstream fstream(syspath.c_str());
+	std::ifstream fstream(syspath.string());
 	
 	std::string line;
 	ColSection currentSection = Unknown;
@@ -257,14 +257,14 @@ void GameData::loadCarcols(const std::string& path)
 
 void GameData::loadWeather(const std::string &path)
 {
-	auto syspath = index.findFilePath(path).native();
+	auto syspath = index.findFilePath(path).string();
 	weatherLoader.load(syspath);
 }
 
 void GameData::loadHandling(const std::string& path)
 {
 	GenericDATLoader l;
-	auto syspath = index.findFilePath(path).native();
+	auto syspath = index.findFilePath(path).string();
 
 	l.loadHandling(syspath, vehicleInfo);
 }
@@ -290,7 +290,7 @@ void GameData::loadGXT(const std::string &name)
 void GameData::loadWaterpro(const std::string& path)
 {
 	auto syspath = index.findFilePath(path);
-	std::ifstream ifstr(syspath.c_str(), std::ios_base::binary);
+	std::ifstream ifstr((const char*)syspath.c_str(), std::ios_base::binary);
 	
 	if(ifstr.is_open()) {
 		uint32_t numlevels;
@@ -405,14 +405,14 @@ void GameData::loadDynamicObjects(const std::string& name)
 void GameData::loadWeaponDAT(const std::string &path)
 {
 	GenericDATLoader l;
-	auto syspath = index.findFilePath(path).native();
+	auto syspath = index.findFilePath(path).string();
 
 	l.loadWeapons(syspath, weaponData);
 }
 
 bool GameData::loadAudioStream(const std::string &name)
 {
-	auto systempath = index.findFilePath("audio/" + name).native();
+	auto systempath = index.findFilePath("audio/" + name).string();
 	
 	if (engine->cutsceneAudio.length() > 0) {
 		engine->sound.stopMusic(engine->cutsceneAudio);
@@ -428,7 +428,7 @@ bool GameData::loadAudioStream(const std::string &name)
 
 bool GameData::loadAudioClip(const std::string& name, const std::string& fileName)
 {
-	auto systempath = index.findFilePath("audio/" + fileName).native();
+	auto systempath = index.findFilePath("audio/" + fileName).string();
 
 	if (systempath.find(".mp3") != std::string::npos)
 	{

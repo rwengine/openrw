@@ -56,7 +56,7 @@ public:
 			path.replace(backslash, 1, "/");
 		}
 		auto realpath = gamedatapath_ / path;
-		std::string name = realpath.native();
+		std::string name = realpath.string();
 		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 		return filesystemfiles_[name];

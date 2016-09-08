@@ -36,7 +36,7 @@ public:
 	ChunkID getNextChunk()
 	{
 		// Check that there's any data left
-		if( (unsigned)(_dataCur - _data) >= _size ) return 0;
+		if((_dataCur - _data) >= _size ) return 0;
 
 		// _nextChunk is initally = to _data, making this a non-op
 		_dataCur = _nextChunk;

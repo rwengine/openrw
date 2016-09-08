@@ -1157,7 +1157,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file)
 	for(size_t g = 0; g < garageData.garageCount; ++g) {
 		auto& garage = garages[g];
 		state.garages.push_back({
-			g,
+			(int)g,
 			glm::vec3(garage.x1, garage.y1, garage.z1),
 			glm::vec3(garage.x2, garage.y2, garage.z2),
 			garage.type
