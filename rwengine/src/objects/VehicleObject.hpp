@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _VEHICLEOBJECT_HPP_
 #define _VEHICLEOBJECT_HPP_
-#include <objects/GameObject.hpp>
 #include <map>
+#include <objects/GameObject.hpp>
 #include <objects/VehicleInfo.hpp>
 
 class CollisionInstance;
@@ -16,137 +16,136 @@ class btTransform;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject : public GameObject
-{
+class VehicleObject : public GameObject {
 private:
-	float steerAngle;
-	float throttle;
-	float brake;
-	bool handbrake;
+    float steerAngle;
+    float throttle;
+    float brake;
+    bool handbrake;
+
 public:
+    VehicleDataHandle vehicle;
+    VehicleInfoHandle info;
+    glm::u8vec3 colourPrimary;
+    glm::u8vec3 colourSecondary;
 
-	VehicleDataHandle vehicle;
-	VehicleInfoHandle info;
-	glm::u8vec3 colourPrimary;
-	glm::u8vec3 colourSecondary;
-	
-	std::map<size_t, GameObject*> seatOccupants;
+    std::map<size_t, GameObject*> seatOccupants;
 
-	CollisionInstance* collision;
-	btVehicleRaycaster* physRaycaster;
-	btRaycastVehicle* physVehicle;
-	
-	struct Part
-	{
-		ModelFrame* dummy;
-		ModelFrame* normal;
-		ModelFrame* damaged;
-		btRigidBody* body;
-		btHingeConstraint* constraint;
-		bool moveToAngle;
-		float targetAngle;
-		float openAngle;
-		float closedAngle;
-	};
-	
-	std::map<std::string, Part> dynamicParts;
+    CollisionInstance* collision;
+    btVehicleRaycaster* physRaycaster;
+    btRaycastVehicle* physVehicle;
 
-	VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model, VehicleDataHandle data, VehicleInfoHandle info, const glm::u8vec3& prim, const glm::u8vec3& sec);
-	
-	virtual ~VehicleObject();
-	
-	void setPosition(const glm::vec3& pos);
+    struct Part {
+        ModelFrame* dummy;
+        ModelFrame* normal;
+        ModelFrame* damaged;
+        btRigidBody* body;
+        btHingeConstraint* constraint;
+        bool moveToAngle;
+        float targetAngle;
+        float openAngle;
+        float closedAngle;
+    };
 
-	void setRotation(const glm::quat &orientation);
+    std::map<std::string, Part> dynamicParts;
 
-	Type type() { return Vehicle; }
+    VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
+                  const ModelRef& model, VehicleDataHandle data,
+                  VehicleInfoHandle info, const glm::u8vec3& prim,
+                  const glm::u8vec3& sec);
 
-	void setSteeringAngle(float);
+    virtual ~VehicleObject();
 
-	float getSteeringAngle() const;
+    void setPosition(const glm::vec3& pos);
 
-	void setThrottle(float);
+    void setRotation(const glm::quat& orientation);
 
-	float getThrottle() const;
+    Type type() {
+        return Vehicle;
+    }
 
-	void setBraking(float);
+    void setSteeringAngle(float);
 
-	float getBraking() const;
+    float getSteeringAngle() const;
 
-	void setHandbraking(bool);
+    void setThrottle(float);
 
-	bool getHandbraking() const;
+    float getThrottle() const;
 
-	void tick(float dt);
+    void setBraking(float);
 
-	void tickPhysics(float dt);
-	
-	bool isFlipped() const;
+    float getBraking() const;
 
-	float getVelocity() const;
-	
-	void ejectAll();
-	
-	GameObject* getOccupant(size_t seat);
-	
-	void setOccupant(size_t seat, GameObject* occupant);
+    void setHandbraking(bool);
 
-	/**
-	 * @brief canOccupantExit
-	 * @return true if the vehicle is currently exitable
-	 */
-	bool canOccupantExit() const;
+    bool getHandbraking() const;
 
-	/**
-	 * @brief isOccupantDriver
-	 * @param seat
-	 * @return True if the given seat is the driver's seat.
-	 */
-	bool isOccupantDriver(size_t seat) const;
+    void tick(float dt);
 
-	glm::vec3 getSeatEntryPosition(size_t seat) const {
-		auto pos = info->seats[seat].offset;
-		pos -= glm::vec3(glm::sign(pos.x) * -0.81756252f, 0.34800607f, -0.486281008f);
-		return pos;
-	}
-	glm::vec3 getSeatEntryPositionWorld(size_t seat) const {
-		return getPosition() + getRotation() * getSeatEntryPosition(seat);
-	}
-	
-	Part* getSeatEntryDoor(size_t seat);
-	
+    void tickPhysics(float dt);
+
+    bool isFlipped() const;
+
+    float getVelocity() const;
+
+    void ejectAll();
+
+    GameObject* getOccupant(size_t seat);
+
+    void setOccupant(size_t seat, GameObject* occupant);
+
+    /**
+     * @brief canOccupantExit
+     * @return true if the vehicle is currently exitable
+     */
+    bool canOccupantExit() const;
+
+    /**
+     * @brief isOccupantDriver
+     * @param seat
+     * @return True if the given seat is the driver's seat.
+     */
+    bool isOccupantDriver(size_t seat) const;
+
+    glm::vec3 getSeatEntryPosition(size_t seat) const {
+        auto pos = info->seats[seat].offset;
+        pos -= glm::vec3(glm::sign(pos.x) * -0.81756252f, 0.34800607f,
+                         -0.486281008f);
+        return pos;
+    }
+    glm::vec3 getSeatEntryPositionWorld(size_t seat) const {
+        return getPosition() + getRotation() * getSeatEntryPosition(seat);
+    }
+
+    Part* getSeatEntryDoor(size_t seat);
+
     virtual bool takeDamage(const DamageInfo& damage);
 
-	enum FrameState {
-		OK,
-		DAM,
-		BROKEN
-	};
+    enum FrameState { OK, DAM, BROKEN };
 
-	void setPartState(Part* part, FrameState state);
+    void setPartState(Part* part, FrameState state);
 
-	void setPartLocked(Part* part, bool locked);
-	
-	void setPartTarget(Part* part, bool enable, float target);
+    void setPartLocked(Part* part, bool locked);
 
-	Part* getPart(const std::string& name);
+    void setPartTarget(Part* part, bool enable, float target);
 
-	void applyWaterFloat(const glm::vec3& relPt);
+    Part* getPart(const std::string& name);
 
-	void setPrimaryColour(uint8_t color);
-	void setSecondaryColour(uint8_t color);
+    void applyWaterFloat(const glm::vec3& relPt);
 
-	/**
-	* @brief isStopped
-	* @return True if the vehicle isn't moving
-	*/
-	bool isStopped() const;
+    void setPrimaryColour(uint8_t color);
+    void setSecondaryColour(uint8_t color);
+
+    /**
+    * @brief isStopped
+    * @return True if the vehicle isn't moving
+    */
+    bool isStopped() const;
 
 private:
-
-	void registerPart(ModelFrame* mf);
-	void createObjectHinge(Part* part);
-	void destroyObjectHinge(Part* part);
+    void registerPart(ModelFrame* mf);
+    void createObjectHinge(Part* part);
+    void destroyObjectHinge(Part* part);
 };
 
 #endif

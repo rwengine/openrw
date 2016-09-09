@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _ITEMPICKUP_HPP_
 #define _ITEMPICKUP_HPP_
-#include <objects/PickupObject.hpp>
 #include <glm/glm.hpp>
+#include <objects/PickupObject.hpp>
 
 class InventoryItem;
 
@@ -10,14 +10,14 @@ class InventoryItem;
  * @brief The ItemPickup class
  * Inserts an item into a characters inventory on pickup.
  */
-class ItemPickup : public PickupObject
-{
-	InventoryItem* item;
+class ItemPickup : public PickupObject {
+    InventoryItem* item;
+
 public:
+    ItemPickup(GameWorld* world, const glm::vec3& position, PickupType type,
+               InventoryItem* item);
 
-	ItemPickup(GameWorld* world, const glm::vec3& position, PickupType type, InventoryItem* item);
-
-	bool onCharacterTouch(CharacterObject* character);
+    bool onCharacterTouch(CharacterObject* character);
 };
 
 #endif
