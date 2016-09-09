@@ -4,39 +4,40 @@
 
 #include <loaders/RWBinaryStream.hpp>
 
-#include <job/WorkContext.hpp>
-#include <platform/FileHandle.hpp>
 #include <functional>
-#include <string>
+#include <job/WorkContext.hpp>
 #include <map>
+#include <platform/FileHandle.hpp>
+#include <string>
 
 // This might suffice
 #include <gl/TextureData.hpp>
-typedef std::map<std::pair<std::string, std::string>, TextureData::Handle> TextureArchive;
+typedef std::map<std::pair<std::string, std::string>, TextureData::Handle>
+    TextureArchive;
 
 class FileIndex;
 
-class TextureLoader
-{
+class TextureLoader {
 public:
-	bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
+    bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
 };
 
-// TODO: refactor this interface to be more like ModelLoader so they can be rolled into one.
-class LoadTextureArchiveJob : public WorkJob
-{
+// TODO: refactor this interface to be more like ModelLoader so they can be
+// rolled into one.
+class LoadTextureArchiveJob : public WorkJob {
 private:
-	TextureArchive& archive;
-	FileIndex* fileIndex;
-	std::string _file;
-	FileHandle data;
+    TextureArchive& archive;
+    FileIndex* fileIndex;
+    std::string _file;
+    FileHandle data;
+
 public:
+    LoadTextureArchiveJob(WorkContext* context, FileIndex* index,
+                          TextureArchive& inTextures, const std::string& file);
 
-	LoadTextureArchiveJob(WorkContext* context, FileIndex* index, TextureArchive& inTextures, const std::string& file);
+    void work();
 
-	void work();
-
-	void complete();
+    void complete();
 };
 
 #endif
