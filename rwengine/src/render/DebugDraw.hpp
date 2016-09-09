@@ -1,37 +1,39 @@
 #pragma once
 
 #include <LinearMath/btIDebugDraw.h>
-#include <render/GameRenderer.hpp>
 #include <data/Model.hpp>
+#include <render/GameRenderer.hpp>
 
-class DebugDraw : public btIDebugDraw
-{
+class DebugDraw : public btIDebugDraw {
 public:
-	DebugDraw();
-	~DebugDraw();
+    DebugDraw();
+    ~DebugDraw();
 
-	void drawLine(const btVector3 &from, const btVector3 &to, const btVector3 &color);
-	void drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color);
-	void reportErrorWarning(const char *warningString);
-	void draw3dText(const btVector3 &location, const char *textString);
-	void setDebugMode(int debugMode);
-	int getDebugMode() const;
+    void drawLine(const btVector3 &from, const btVector3 &to,
+                  const btVector3 &color);
+    void drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB,
+                          btScalar distance, int lifeTime,
+                          const btVector3 &color);
+    void reportErrorWarning(const char *warningString);
+    void draw3dText(const btVector3 &location, const char *textString);
+    void setDebugMode(int debugMode);
+    int getDebugMode() const;
 
-    void flush(GameRenderer* renderer);
+    void flush(GameRenderer *renderer);
 
-	void setShaderProgram(Renderer::ShaderProgram* shaderProgram) {
-		this->shaderProgram = shaderProgram;
-	}
+    void setShaderProgram(Renderer::ShaderProgram *shaderProgram) {
+        this->shaderProgram = shaderProgram;
+    }
 
 protected:
-	int debugMode;
+    int debugMode;
 
-	std::vector<Model::GeometryVertex> lines;
-	size_t maxlines;
-	GeometryBuffer* lineBuff;
-	DrawBuffer* dbuff;
+    std::vector<Model::GeometryVertex> lines;
+    size_t maxlines;
+    GeometryBuffer *lineBuff;
+    DrawBuffer *dbuff;
 
-	Renderer::ShaderProgram* shaderProgram;
+    Renderer::ShaderProgram *shaderProgram;
 
-	GLuint texture;
+    GLuint texture;
 };
