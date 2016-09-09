@@ -3,45 +3,46 @@
 #define _PLAYERCONTROLLER_HPP_
 #include <ai/CharacterController.hpp>
 
-class PlayerController : public CharacterController
-{
-	glm::quat cameraRotation;
-	
-	glm::vec3 direction;
+class PlayerController : public CharacterController {
+    glm::quat cameraRotation;
 
-	glm::quat lastRotation;
+    glm::vec3 direction;
 
-	bool _enabled;
-	
+    glm::quat lastRotation;
+
+    bool _enabled;
+
 public:
-	
-	PlayerController(CharacterObject* character);
+    PlayerController(CharacterObject* character);
 
-	/**
-	 * @brief Enables and disables player input.
-	 * @todo actually implement input being disabled.
-	 */
-	void setInputEnabled(bool enabled);
-	bool isInputEnabled() const;
-	
-	void updateCameraDirection(const glm::quat& rot);
-	
-	void updateMovementDirection(const glm::vec3& pos, const glm::vec3& rawdirection);
-	
-	void exitVehicle();
-	
-	void enterNearestVehicle();
-	
+    /**
+     * @brief Enables and disables player input.
+     * @todo actually implement input being disabled.
+     */
+    void setInputEnabled(bool enabled);
+    bool isInputEnabled() const;
+
+    void updateCameraDirection(const glm::quat& rot);
+
+    void updateMovementDirection(const glm::vec3& pos,
+                                 const glm::vec3& rawdirection);
+
+    void exitVehicle();
+
+    void enterNearestVehicle();
+
     virtual void update(float dt);
-	
-    virtual glm::vec3 getTargetPosition();
-	
-	void jump();
 
-	/**
-	 * returns 0 (only one player supported)
-	 */
-	int getScriptObjectID() const { return 0; }
+    virtual glm::vec3 getTargetPosition();
+
+    void jump();
+
+    /**
+     * returns 0 (only one player supported)
+     */
+    int getScriptObjectID() const {
+        return 0;
+    }
 };
 
 #endif
