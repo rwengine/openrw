@@ -6,35 +6,33 @@
 BOOST_AUTO_TEST_SUITE(ItemTests)
 
 #if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_character_inventory)
-{
-	{
-		auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
-		BOOST_REQUIRE( character != nullptr );
+BOOST_AUTO_TEST_CASE(test_character_inventory) {
+    {
+        auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
+        BOOST_REQUIRE(character != nullptr);
 
-		auto item = Global::get().e->getInventoryItem(4);
-		auto fist = Global::get().e->getInventoryItem(0);
+        auto item = Global::get().e->getInventoryItem(4);
+        auto fist = Global::get().e->getInventoryItem(0);
 
-		BOOST_REQUIRE(item != nullptr);
-		BOOST_REQUIRE(fist != nullptr );
-		BOOST_CHECK_NE( fist, item );
+        BOOST_REQUIRE(item != nullptr);
+        BOOST_REQUIRE(fist != nullptr);
+        BOOST_CHECK_NE(fist, item);
 
-		character->addToInventory(item);
+        character->addToInventory(item);
 
-		BOOST_CHECK_EQUAL( character->getActiveItem(), fist );
+        BOOST_CHECK_EQUAL(character->getActiveItem(), fist);
 
-		character->setActiveItem( item->getInventorySlot() );
+        character->setActiveItem(item->getInventorySlot());
 
-		BOOST_CHECK_EQUAL( character->getActiveItem(), item );
+        BOOST_CHECK_EQUAL(character->getActiveItem(), item);
 
-		character->removeFromInventory( item->getInventorySlot() );
+        character->removeFromInventory(item->getInventorySlot());
 
-		BOOST_CHECK_EQUAL( character->getActiveItem(), fist );
+        BOOST_CHECK_EQUAL(character->getActiveItem(), fist);
 
-		Global::get().e->destroyObject(character);
-	}
+        Global::get().e->destroyObject(character);
+    }
 }
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
-
