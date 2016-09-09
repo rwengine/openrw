@@ -6,33 +6,31 @@
 
 #include <QWidget>
 
-class ViewerInterface : public QWidget
-{
-	Q_OBJECT
+class ViewerInterface : public QWidget {
+    Q_OBJECT
 public:
-	ViewerInterface(QWidget* parent = 0, Qt::WindowFlags f = 0)
-		: QWidget(parent, f)
-		, m_world(nullptr)
-	{
+    ViewerInterface(QWidget* parent = 0, Qt::WindowFlags f = 0)
+        : QWidget(parent, f), m_world(nullptr) {
+    }
 
-	}
+    virtual void setViewerWidget(ViewerWidget* widget) = 0;
 
-	virtual void setViewerWidget( ViewerWidget* widget ) = 0;
-
-	GameWorld* world() { return m_world; }
+    GameWorld* world() {
+        return m_world;
+    }
 
 protected:
-	virtual void worldChanged() { }
+    virtual void worldChanged() {
+    }
 
 public slots:
-	void showData(GameWorld* world)
-	{
-		m_world = world;
-		worldChanged();
-	}
+    void showData(GameWorld* world) {
+        m_world = world;
+        worldChanged();
+    }
 
 private:
-	GameWorld* m_world;
+    GameWorld* m_world;
 };
 
 #endif
