@@ -3,34 +3,34 @@
 
 #include "State.hpp"
 
-class BenchmarkState : public State
-{
-	struct TrackPoint {
-		float time;
-		glm::vec3 position;
-		glm::quat angle;
-	};
-	std::vector<TrackPoint> track;
+class BenchmarkState : public State {
+    struct TrackPoint {
+        float time;
+        glm::vec3 position;
+        glm::quat angle;
+    };
+    std::vector<TrackPoint> track;
 
-	ViewCamera trackCam;
+    ViewCamera trackCam;
 
-	std::string benchfile;
+    std::string benchfile;
 
-	float benchmarkTime;
-	float duration;
-	uint32_t frameCounter;
+    float benchmarkTime;
+    float duration;
+    uint32_t frameCounter;
+
 public:
-	BenchmarkState(RWGame* game, const std::string& benchfile);
+    BenchmarkState(RWGame* game, const std::string& benchfile);
 
-	virtual void enter();
-	virtual void exit();
+    virtual void enter();
+    virtual void exit();
 
-	virtual void tick(float dt);
-	virtual void draw(GameRenderer* r);
+    virtual void tick(float dt);
+    virtual void draw(GameRenderer* r);
 
-	virtual void handleEvent(const SDL_Event& event);
+    virtual void handleEvent(const SDL_Event& event);
 
-	const ViewCamera& getCamera();
+    const ViewCamera& getCamera();
 };
 
 #endif

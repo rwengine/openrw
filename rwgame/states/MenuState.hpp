@@ -3,20 +3,19 @@
 
 #include "State.hpp"
 
-class MenuState : public State
-{
+class MenuState : public State {
 public:
-	MenuState(RWGame* game);
+    MenuState(RWGame* game);
 
-	virtual void enter();
-	virtual void exit();
+    virtual void enter();
+    virtual void exit();
 
-	virtual void tick(float dt);
+    virtual void tick(float dt);
 
-	virtual void enterMainMenu();
-	virtual void enterLoadMenu();
+    virtual void enterMainMenu();
+    virtual void enterLoadMenu();
 
-	virtual void handleEvent(const SDL_Event& event);
+    virtual void handleEvent(const SDL_Event& event);
 };
 
-#endif // MENUSTATE_HPP
+#endif  // MENUSTATE_HPP
