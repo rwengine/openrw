@@ -18,47 +18,45 @@ using GameString = std::basic_string<GameStringChar>;
  */
 using GameStringKey = std::string;
 
-namespace GameStringUtil
-{
+namespace GameStringUtil {
 /**
  * @brief fromString Converts a string to a GameString
  *
- * Encoding of GameStrings depends on the font, only simple ASCII chars will map well
+ * Encoding of GameStrings depends on the font, only simple ASCII chars will map
+ * well
  */
 GameString fromString(const std::string& str);
 }
 
 /**
  * Since the encoding of symbols is arbitrary, these constants should be used in
- * hard-coded strings containing symbols outside of the ASCII-subset supported by
+ * hard-coded strings containing symbols outside of the ASCII-subset supported
+ * by
  * all fonts
  */
-namespace GameSymbols
-{
-	static constexpr GameStringChar Money  = '$';
-	static constexpr GameStringChar Heart  = '{';
-	static constexpr GameStringChar Armour = '[';
-	static constexpr GameStringChar Star   = ']';
+namespace GameSymbols {
+static constexpr GameStringChar Money = '$';
+static constexpr GameStringChar Heart = '{';
+static constexpr GameStringChar Armour = '[';
+static constexpr GameStringChar Star = ']';
 }
 
-class GameTexts
-{
-	using StringTable = std::unordered_map<GameStringKey, GameString>;
-	StringTable m_strings;
+class GameTexts {
+    using StringTable = std::unordered_map<GameStringKey, GameString>;
+    StringTable m_strings;
+
 public:
+    void addText(const GameStringKey& id, GameString&& text) {
+        m_strings.emplace(id, text);
+    }
 
-	void addText(const GameStringKey& id, GameString&& text) {
-		m_strings.emplace(id, text);
-	}
-
-	GameString text(const GameStringKey& id) {
-		auto a = m_strings.find(id);
-		if( a != m_strings.end() ) {
-			return a->second;
-		}
-		return GameStringUtil::fromString("MISSING: " + id);
-	}
-
+    GameString text(const GameStringKey& id) {
+        auto a = m_strings.find(id);
+        if (a != m_strings.end()) {
+            return a->second;
+        }
+        return GameStringUtil::fromString("MISSING: " + id);
+    }
 };
 
 #endif
