@@ -2,39 +2,33 @@
 #ifndef _LOADERDFF_IFP_
 #define _LOADERDFF_IFP_
 
-#include <string>
-#include <vector>
-#include <map>
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <map>
+#include <string>
+#include <vector>
 
-struct AnimationKeyframe
-{
+struct AnimationKeyframe {
     glm::quat rotation;
     glm::vec3 position;
     glm::vec3 scale;
     float starttime;
-	int id;
+    int id;
 };
 
-struct AnimationBone
-{
+struct AnimationBone {
     std::string name;
     int32_t previous;
     int32_t next;
     float duration;
 
-    enum Data {
-        R00,
-        RT0,
-        RTS
-    };
+    enum Data { R00, RT0, RTS };
 
     Data type;
     std::vector<AnimationKeyframe> frames;
 
     AnimationKeyframe getInterpolatedKeyframe(float time);
-	AnimationKeyframe getKeyframe(float time);
+    AnimationKeyframe getKeyframe(float time);
 };
 
 /**
@@ -42,28 +36,28 @@ struct AnimationBone
  *
  * @todo break out into Animation.hpp
  */
-struct Animation
-{
+struct Animation {
     std::string name;
-	std::map<std::string, AnimationBone*> bones;
-	
-	float duration;
+    std::map<std::string, AnimationBone*> bones;
+
+    float duration;
 };
 
-class LoaderIFP
-{
-    template<class T> T* read(char* data, size_t* ofs) {
-        size_t b = *ofs; *ofs += sizeof(T);
+class LoaderIFP {
+    template <class T>
+    T* read(char* data, size_t* ofs) {
+        size_t b = *ofs;
+        *ofs += sizeof(T);
         return reinterpret_cast<T*>(data + b);
     }
-    template<class T> T* peek(char* data, size_t* ofs) {
+    template <class T>
+    T* peek(char* data, size_t* ofs) {
         return reinterpret_cast<T*>(data + *ofs);
     }
 
     std::string readString(char* data, size_t* ofs);
 
 public:
-
     struct BASE {
         char magic[4];
         uint32_t size;
@@ -109,12 +103,11 @@ public:
 
     struct Anim {
         std::string name;
-
     };
 
     std::map<std::string, Animation*> animations;
 
-    bool loadFromMemory(char *data);
+    bool loadFromMemory(char* data);
 };
 
 #endif
