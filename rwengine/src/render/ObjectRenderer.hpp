@@ -35,6 +35,12 @@ public:
      */
     void buildRenderList(GameObject* object, RenderList& outList);
 
+    bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
+                     GameObject* object, float opacity, RenderList& outList);
+
+    void renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix,
+                        float opacity, GameObject* object, RenderList& outList);
+
 private:
     GameWorld* m_world;
     const ViewCamera& m_camera;
@@ -47,12 +53,6 @@ private:
     void renderPickup(PickupObject* pickup, RenderList& outList);
     void renderCutsceneObject(CutsceneObject* cutscene, RenderList& outList);
     void renderProjectile(ProjectileObject* projectile, RenderList& outList);
-
-    bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
-                     GameObject* object, float opacity, RenderList& outList);
-
-    void renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix,
-                        float opacity, GameObject* object, RenderList& outList);
 };
 
 #endif

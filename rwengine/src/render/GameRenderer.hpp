@@ -117,9 +117,6 @@ public:
     DrawBuffer skyDbuff;
     GeometryBuffer skyGbuff;
 
-    DrawBuffer cylinderBuffer;
-    GeometryBuffer cylinderGeometry;
-
     GameData* getData() const {
         return data;
     }
@@ -163,9 +160,6 @@ public:
 
     void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix,
                         float opacity, GameObject* = nullptr);
-
-    /** Renders the area indicator */
-    void renderAreaIndicator(const AreaIndicatorInfo* info);
 
     /** method for rendering AI debug information */
     void renderPaths();
