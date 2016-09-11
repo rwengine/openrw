@@ -83,6 +83,16 @@ BOOST_AUTO_TEST_CASE(test_handling_data_loader) {
     BOOST_CHECK_EQUAL(handling.driveType, VehicleHandlingInfo::All);
     BOOST_CHECK_EQUAL(handling.engineType, VehicleHandlingInfo::Petrol);
 }
+
+BOOST_AUTO_TEST_CASE(test_model_files_loaded) {
+    auto& d = Global::get().d;
+
+    // The weapon models should be associated by the MODELFILE entries
+    auto ak47 = d->findModelInfo<SimpleModelInfo>(171);
+
+    BOOST_CHECK_EQUAL(ak47->name, "ak47");
+    BOOST_CHECK_NE(ak47->getAtomic(0), nullptr);
+}
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()

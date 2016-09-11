@@ -99,6 +99,9 @@ void GameData::loadLevelFile(const std::string& path) {
                 std::transform(name.begin(), name.end(), name.begin(),
                                ::tolower);
                 loadTXD(name);
+            } else if (cmd == "MODELFILE") {
+                auto path = line.substr(space + 1);
+                loadModelFile(path);
             }
         }
     }
@@ -330,6 +333,42 @@ void GameData::loadDFF(const std::string& name, bool async) {
         job->work();
         job->complete();
         delete job;
+    }
+}
+
+void GameData::loadModelFile(const std::string& name) {
+    LoaderDFF l;
+    auto file = index.openFilePath(name);
+    if (!file) {
+        logger->log("Data", Logger::Error, "Failed to load model file " + name);
+        return;
+    }
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->log("Data", Logger::Error, "Error loading model file " + name);
+        return;
+    }
+
+    // Associate the frames with models.
+    for (auto& frame : m->frames) {
+        /// @todo this is useful elsewhere, please move elsewhere
+        std::string name = frame->getName();
+        auto lodpos = name.rfind("_l");
+        int lod = 0;
+        if (lodpos != std::string::npos) {
+            lod = std::atoi(name.substr(lodpos + 1).c_str());
+            name = name.substr(0, lodpos);
+        }
+        for (auto& model : modelinfo) {
+            auto info = model.second.get();
+            if (info->type() != ModelDataType::SimpleInfo) {
+                continue;
+            }
+            if (boost::iequals(info->name, name)) {
+                auto simple = static_cast<SimpleModelInfo*>(info);
+                simple->setAtomic(m, lod, frame);
+            }
+        }
     }
 }
 

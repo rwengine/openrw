@@ -124,6 +124,11 @@ public:
     void loadDFF(const std::string& name, bool async = false);
 
     /**
+     * Loads a DFF and associates its atomics with models.
+     */
+    void loadModelFile(const std::string& name);
+
+    /**
      * Loads an IFP file containing animations
      */
     void loadIFP(const std::string& name);
