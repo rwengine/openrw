@@ -119,11 +119,6 @@ public:
     void loadTXD(const std::string& name, bool async = false);
 
     /**
-     * Attempts to load a DFF or does nothing if is already loaded
-     */
-    void loadDFF(const std::string& name, bool async = false);
-
-    /**
      * Converts combined {name}_l{LOD} into name and lod.
      */
     static void getNameAndLod(std::string& name, int& lod);
@@ -228,11 +223,6 @@ public:
      * Weather Loader
      */
     WeatherLoader weatherLoader;
-
-    /**
-     * Loaded models
-     */
-    std::map<std::string, ResourceHandle<Model>::Ref> models;
 
     /**
      * Loaded textures (Textures are ID by name and alpha pairs)

@@ -27,11 +27,7 @@ GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
 }
 
 GameData::~GameData() {
-    for (auto& m : models) {
-        if (m.second->resource) {
-            delete m.second->resource;
-        }
-    }
+    /// @todo don't leak models
 }
 
 void GameData::load() {
@@ -45,9 +41,6 @@ void GameData::load() {
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
 
-    loadDFF("wheels.dff");
-    loadDFF("weapons.dff");
-    loadDFF("arrow.dff");
     loadTXD("particle.txd");
     loadTXD("icons.txd");
     loadTXD("hud.txd");
@@ -310,29 +303,6 @@ void GameData::loadTXD(const std::string& name, bool async) {
         j->work();
         j->complete();
         delete j;
-    }
-}
-
-void GameData::loadDFF(const std::string& name, bool async) {
-    auto realname = name.substr(0, name.size() - 4);
-    if (models.find(realname) != models.end()) {
-        return;
-    }
-
-    // Before starting the job make sure the file isn't loaded again.
-    loadedFiles.insert({name, true});
-
-    models[realname] = ModelRef(new ResourceHandle<Model>(realname));
-
-    auto job = new BackgroundLoaderJob<Model, LoaderDFF>{
-        workContext, &this->index, name, models[realname]};
-
-    if (async) {
-        workContext->queueJob(job);
-    } else {
-        job->work();
-        job->complete();
-        delete job;
     }
 }
 

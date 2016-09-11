@@ -155,26 +155,6 @@ bool ObjectRenderer::renderFrame(Model* m, ModelFrame* f,
     return true;
 }
 
-void ObjectRenderer::renderItem(InventoryItem* item,
-                                const glm::mat4& modelMatrix,
-                                RenderList& outList) {
-    // srhand
-    if (item->getModelID() == -1) {
-        return;  // No model for this item
-    }
-
-    auto odata = m_world->data->modelinfo[item->getModelID()].get();
-    auto weapons = m_world->data->models["weapons"];
-    if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->name + "_l0");
-        auto matrix = glm::inverse(itemModel->getTransform());
-        if (itemModel) {
-            renderFrame(weapons->resource, itemModel, modelMatrix * matrix,
-                        nullptr, 1.f, outList);
-        }
-    }
-}
-
 void ObjectRenderer::renderInstance(InstanceObject* instance,
                                     RenderList& outList) {
     if (!instance->getModel()) {
@@ -229,8 +209,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                 auto lodmodelinfo =
                     instance->LODinstance->getModelInfo<SimpleModelInfo>();
                 float LODrange = lodmodelinfo->getLodDistance(0);
-                if (mindist <= LODrange &&
-                    instance->LODinstance->getModel()) {
+                if (mindist <= LODrange && instance->LODinstance->getModel()) {
                     // The model matrix needs to be for the LOD instead
                     matrixModel =
                         instance->LODinstance->getTimeAdjustedTransform(
@@ -320,10 +299,16 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
 
     auto root = pedestrian->getModel()->frames[0];
 
-    renderFrame(pedestrian->getModel(), root->getChildren()[0],
-                matrixModel, pedestrian, 1.f, outList);
+    renderFrame(pedestrian->getModel(), root->getChildren()[0], matrixModel,
+                pedestrian, 1.f, outList);
 
     if (pedestrian->getActiveItem()) {
+        auto item = pedestrian->getActiveItem();
+
+        if (item->getModelID() == -1) {
+            return;  // No model for this item
+        }
+
         auto handFrame = pedestrian->getModel()->findFrame("srhand");
         glm::mat4 localMatrix;
         if (handFrame) {
@@ -334,32 +319,13 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
                 handFrame = handFrame->getParent();
             }
         }
-        renderItem(pedestrian->getActiveItem(), matrixModel * localMatrix,
-                   outList);
-    }
-}
 
-void ObjectRenderer::renderWheel(VehicleObject* vehicle, Model* model,
-                                 const glm::mat4& matrix,
-                                 const std::string& name, RenderList& outList) {
-    for (const ModelFrame* f : model->frames) {
-        const std::string& fname = f->getName();
-        if (fname != name) {
-            continue;
-        }
-
-        auto firstLod = f->getChildren()[0];
-
-        for (auto& g : firstLod->getGeometries()) {
-            RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-            if (!m_camera.frustum.intersects(
-                    bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
-                continue;
-            }
-
-            renderGeometry(model, g, matrix, 1.f, vehicle, outList);
-        }
-        break;
+        // Assume items are all simple
+        auto simple =
+            m_world->data->findModelInfo<SimpleModelInfo>(item->getModelID());
+        auto geometry = simple->getAtomic(0)->getGeometries().at(0);
+        renderGeometry(simple->getModel(), geometry, matrixModel * localMatrix,
+                       1.f, nullptr, outList);
     }
 }
 
@@ -377,49 +343,48 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                 matrixModel, vehicle, 1.f, outList);
 
     auto modelinfo = vehicle->getVehicle();
+
     // Draw wheels n' stuff
+    auto woi =
+        m_world->data->findModelInfo<SimpleModelInfo>(modelinfo->wheelmodel_);
+    if (!woi || !woi->isLoaded()) {
+        return;
+    }
+    auto wheelgeom = woi->getAtomic(0)->getGeometries().at(0);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-        auto woi = m_world->data->findModelInfo<SimpleModelInfo>(
-            modelinfo->wheelmodel_);
-        if (woi) {
-            Model* wheelModel = m_world->data->models["wheels"]->resource;
-            auto& wi = vehicle->physVehicle->getWheelInfo(w);
-            if (wheelModel) {
-                // Construct our own matrix so we can use the local transform
-                vehicle->physVehicle->updateWheelTransform(w, false);
-                /// @todo migrate this into Vehicle physics tick so we can
-                /// interpolate old -> new
+        auto& wi = vehicle->physVehicle->getWheelInfo(w);
+        // Construct our own matrix so we can use the local transform
+        vehicle->physVehicle->updateWheelTransform(w, false);
+        /// @todo migrate this into Vehicle physics tick so we can
+        /// interpolate old -> new
 
-                glm::mat4 wheelM(matrixModel);
+        glm::mat4 wheelM(matrixModel);
 
-                auto up = -wi.m_wheelDirectionCS;
-                auto right = wi.m_wheelAxleCS;
-                auto fwd = up.cross(right);
-                btQuaternion steerQ(up, wi.m_steering);
-                btQuaternion rollQ(right, -wi.m_rotation);
+        auto up = -wi.m_wheelDirectionCS;
+        auto right = wi.m_wheelAxleCS;
+        auto fwd = up.cross(right);
+        btQuaternion steerQ(up, wi.m_steering);
+        btQuaternion rollQ(right, -wi.m_rotation);
 
-                btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1],
-                                  up[1], right[2], fwd[2], up[2]);
+        btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1], up[1],
+                          right[2], fwd[2], up[2]);
 
-                btTransform t;
-                t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
-                t.setOrigin(wi.m_chassisConnectionPointCS +
-                            wi.m_wheelDirectionCS *
-                                wi.m_raycastInfo.m_suspensionLength);
+        btTransform t;
+        t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
+        t.setOrigin(wi.m_chassisConnectionPointCS +
+                    wi.m_wheelDirectionCS *
+                        wi.m_raycastInfo.m_suspensionLength);
 
-                t.getOpenGLMatrix(glm::value_ptr(wheelM));
-                wheelM = matrixModel * wheelM;
+        t.getOpenGLMatrix(glm::value_ptr(wheelM));
+        wheelM = matrixModel * wheelM;
 
-                wheelM =
-                    glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
-                if (wi.m_chassisConnectionPointCS.x() < 0.f) {
-                    wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
-                }
-
-                renderWheel(vehicle, wheelModel, wheelM, woi->name,
-                            outList);
-            }
+        wheelM = glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
+        if (wi.m_chassisConnectionPointCS.x() < 0.f) {
+            wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
         }
+
+        renderGeometry(woi->getModel(), wheelgeom, wheelM, 1.f, nullptr,
+                       outList);
     }
 }
 
@@ -432,34 +397,16 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 
     auto odata = pickup->getModelInfo<SimpleModelInfo>();
 
-    Model* model = nullptr;
-    ModelFrame* itemModel = nullptr;
-
-    /// @todo Better determination of is this object a weapon.
-    if (odata->id() >= 170 && odata->id() <= 184) {
-        auto weapons = m_world->data->models["weapons"];
-        if (weapons && weapons->resource && odata) {
-            model = weapons->resource;
-            itemModel = weapons->resource->findFrame(odata->name + "_l0");
-            RW_CHECK(itemModel, "Weapon Frame not present int weapon model");
-            if (!itemModel) {
-                return;
-            }
-        }
-    } else {
-        auto handle = m_world->data->models[odata->name];
-        RW_CHECK(handle && handle->resource, "Pickup has no model");
-        if (handle && handle->resource) {
-            model = handle->resource;
-            itemModel = model->frames[model->rootFrameIdx];
-        }
+    auto model = odata->getModel();
+    auto itemModel = odata->getAtomic(0);
+    auto geom = 0;
+    if (!itemModel->getGeometries().empty()) {
+        geom = itemModel->getGeometries()[0];
+    } else if (!itemModel->getChildren().empty()) {
+        geom = itemModel->getChildren()[0]->getGeometries()[0];
     }
 
-    if (itemModel) {
-        auto matrix = glm::inverse(itemModel->getTransform());
-        renderFrame(model, itemModel, modelMatrix * matrix, pickup, 1.f,
-                    outList);
-    }
+    renderGeometry(model, geom, modelMatrix, 1.f, pickup, outList);
 }
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
@@ -511,19 +458,12 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
 
     auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
         projectile->getProjectileInfo().weapon->modelID);
-    auto weapons = m_world->data->models["weapons"];
 
-    RW_CHECK(weapons, "Weapons model not loaded");
+    auto model = odata->getModel();
+    auto modelframe = odata->getAtomic(0);
+    auto geom = modelframe->getGeometries().at(0);
 
-    if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->name + "_l0");
-        auto matrix = glm::inverse(itemModel->getTransform());
-        RW_CHECK(itemModel, "Weapon frame not in model");
-        if (itemModel) {
-            renderFrame(weapons->resource, itemModel, modelMatrix * matrix,
-                        projectile, 1.f, outList);
-        }
-    }
+    renderGeometry(model, geom, modelMatrix, 1.f, projectile, outList);
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {

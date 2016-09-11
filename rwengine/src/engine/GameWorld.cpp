@@ -369,7 +369,8 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
         return nullptr;
     }
 
-    if (!pt->isLoaded()) {
+    auto isSpecial = pt->name.compare(0, 7, "special") == 0;
+    if (!pt->isLoaded() || isSpecial) {
         data->loadModel(id);
     }
 
@@ -812,6 +813,7 @@ void GameWorld::loadSpecialCharacter(const unsigned short index,
     std::string lowerName(name);
     std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
                    ::tolower);
+    // Need to replace any existing loaded model
     /// @todo a bit more smarter than this
     state->specialCharacters[index] = lowerName;
 }

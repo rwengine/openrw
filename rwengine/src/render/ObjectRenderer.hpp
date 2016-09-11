@@ -48,12 +48,6 @@ private:
     void renderCutsceneObject(CutsceneObject* cutscene, RenderList& outList);
     void renderProjectile(ProjectileObject* projectile, RenderList& outList);
 
-    void renderItem(InventoryItem* item, const glm::mat4& modelMatrix,
-                    RenderList& outList);
-    void renderWheel(VehicleObject* vehicle, Model* model,
-                     const glm::mat4& matrix, const std::string& name,
-                     RenderList& outList);
-
     bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
                      GameObject* object, float opacity, RenderList& outList);
 
