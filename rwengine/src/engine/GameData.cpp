@@ -11,7 +11,6 @@
 #include <script/SCMFile.hpp>
 
 #include <core/Logger.hpp>
-#include <loaders/BackgroundLoader.hpp>
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include <platform/FileIndex.hpp>

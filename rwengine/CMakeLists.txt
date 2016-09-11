@@ -61,7 +61,6 @@ set(RWENGINE_SOURCES
 	src/items/InventoryItem.hpp
 	src/items/WeaponItem.cpp
 	src/items/WeaponItem.hpp
-	src/loaders/BackgroundLoader.hpp
 	src/loaders/DataLoader.cpp
 	src/loaders/DataLoader.hpp
 	src/loaders/GenericDATLoader.cpp
