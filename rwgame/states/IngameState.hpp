@@ -31,7 +31,7 @@ class IngameState : public State {
     /// Free look in vehicles.
     bool m_vehicleFreeLook;
 
-    float moneyTimer;  // Timer used to updated displayed money value
+    float moneyTimer = 0.f;  // Timer used to updated displayed money value
 public:
     /**
      * @brief IngameState
