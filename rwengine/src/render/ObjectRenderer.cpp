@@ -51,9 +51,9 @@ void ObjectRenderer::renderGeometry(Model* model, size_t g,
         dp.visibility = 1.f;
 
         if (object && object->type() == GameObject::Instance) {
-            auto instance = static_cast<InstanceObject*>(object);
+            auto modelinfo = object->getModelInfo<SimpleModelInfo>();
             dp.depthWrite =
-                !(instance->object->flags & ObjectData::NO_ZBUFFER_WRITE);
+                !(modelinfo->flags & SimpleModelInfo::NO_ZBUFFER_WRITE);
         }
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
@@ -163,11 +163,10 @@ void ObjectRenderer::renderItem(InventoryItem* item,
         return;  // No model for this item
     }
 
-    std::shared_ptr<ObjectData> odata =
-        m_world->data->findObjectType<ObjectData>(item->getModelID());
+    auto odata = m_world->data->modelinfo[item->getModelID()].get();
     auto weapons = m_world->data->models["weapons"];
     if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
+        auto itemModel = weapons->resource->findFrame(odata->name + "_l0");
         auto matrix = glm::inverse(itemModel->getTransform());
         if (itemModel) {
             renderFrame(weapons->resource, itemModel, modelMatrix * matrix,
@@ -187,15 +186,17 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
         return;
     }
 
+    auto modelinfo = instance->getModelInfo<SimpleModelInfo>();
+
     // Handles times provided by TOBJ data
     const auto currentHour = m_world->getHour();
-    if (instance->object->timeOff < instance->object->timeOn) {
-        if (currentHour >= instance->object->timeOff &&
-            currentHour < instance->object->timeOn)
+    if (modelinfo->timeOff < modelinfo->timeOn) {
+        if (currentHour >= modelinfo->timeOff &&
+            currentHour < modelinfo->timeOn)
             return;
     } else {
-        if (currentHour >= instance->object->timeOff ||
-            currentHour < instance->object->timeOn)
+        if (currentHour >= modelinfo->timeOff ||
+            currentHour < modelinfo->timeOn)
             return;
     }
 
@@ -216,17 +217,20 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     float opacity = 0.f;
     constexpr float fadeRange = 50.f;
 
-    if (instance->object->numClumps == 1) {
+    /// @todo replace this block with the correct logic
+    if (modelinfo->getNumAtomics() == 1) {
         // Is closest point greater than the *object* draw distance
-        float objectRange = instance->object->drawDistance[0];
+        float objectRange = modelinfo->getLodDistance(0);
         float overlap = (mindist - objectRange);
         if (mindist > objectRange) {
             // Check for LOD instances
             if (instance->LODinstance) {
                 // Is the closest point greater than the *LOD* draw distance
-                float LODrange = instance->LODinstance->object->drawDistance[0];
-                if (mindist > LODrange) {
-                } else if (instance->LODinstance->model->resource) {
+                auto lodmodelinfo =
+                    instance->LODinstance->getModelInfo<SimpleModelInfo>();
+                float LODrange = lodmodelinfo->getLodDistance(0);
+                if (mindist <= LODrange &&
+                    instance->LODinstance->model->resource) {
                     // The model matrix needs to be for the LOD instead
                     matrixModel =
                         instance->LODinstance->getTimeAdjustedTransform(
@@ -249,7 +253,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
             }
         }
         // Otherwise, if we aren't marked as a LOD model, we can render
-        else if (!instance->object->LOD) {
+        else if (!modelinfo->LOD) {
             model = instance->model->resource;
         }
     } else {
@@ -260,9 +264,9 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
 
         matrixModel *= root->getTransform();
 
-        for (int i = 0; i < instance->object->numClumps - 1; ++i) {
-            auto ind = (instance->object->numClumps - 1) - i;
-            float lodDistance = instance->object->drawDistance[i];
+        for (int i = 0; i < modelinfo->getNumAtomics() - 1; ++i) {
+            auto ind = (modelinfo->getNumAtomics() - 1) - i;
+            float lodDistance = modelinfo->getLodDistance(i);
             if (mindist > lodDistance) {
                 fadingFrame = root->getChildren()[ind];
                 fadingModel = objectModel;
@@ -372,10 +376,11 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
     renderFrame(vehicle->model->resource, vehicle->model->resource->frames[0],
                 matrixModel, vehicle, 1.f, outList);
 
+    auto modelinfo = vehicle->getVehicle();
     // Draw wheels n' stuff
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-        auto woi = m_world->data->findObjectType<ObjectData>(
-            vehicle->vehicle->wheelModelID);
+        auto woi = m_world->data->findModelInfo<SimpleModelInfo>(
+            modelinfo->wheelmodel_);
         if (woi) {
             Model* wheelModel = m_world->data->models["wheels"]->resource;
             auto& wi = vehicle->physVehicle->getWheelInfo(w);
@@ -406,12 +411,12 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                 wheelM = matrixModel * wheelM;
 
                 wheelM =
-                    glm::scale(wheelM, glm::vec3(vehicle->vehicle->wheelScale));
+                    glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
                 if (wi.m_chassisConnectionPointCS.x() < 0.f) {
                     wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
                 }
 
-                renderWheel(vehicle, wheelModel, wheelM, woi->modelName,
+                renderWheel(vehicle, wheelModel, wheelM, woi->name,
                             outList);
             }
         }
@@ -425,25 +430,24 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime(),
                               glm::vec3(0.f, 0.f, 1.f));
 
-    auto odata =
-        m_world->data->findObjectType<ObjectData>(pickup->getModelID());
+    auto odata = pickup->getModelInfo<SimpleModelInfo>();
 
     Model* model = nullptr;
     ModelFrame* itemModel = nullptr;
 
     /// @todo Better determination of is this object a weapon.
-    if (odata->ID >= 170 && odata->ID <= 184) {
+    if (odata->id() >= 170 && odata->id() <= 184) {
         auto weapons = m_world->data->models["weapons"];
         if (weapons && weapons->resource && odata) {
             model = weapons->resource;
-            itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
+            itemModel = weapons->resource->findFrame(odata->name + "_l0");
             RW_CHECK(itemModel, "Weapon Frame not present int weapon model");
             if (!itemModel) {
                 return;
             }
         }
     } else {
-        auto handle = m_world->data->models[odata->modelName];
+        auto handle = m_world->data->models[odata->name];
         RW_CHECK(handle && handle->resource, "Pickup has no model");
         if (handle && handle->resource) {
             model = handle->resource;
@@ -505,14 +509,14 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
                                       RenderList& outList) {
     glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(m_renderAlpha);
 
-    auto odata = m_world->data->findObjectType<ObjectData>(
+    auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
         projectile->getProjectileInfo().weapon->modelID);
     auto weapons = m_world->data->models["weapons"];
 
     RW_CHECK(weapons, "Weapons model not loaded");
 
     if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
+        auto itemModel = weapons->resource->findFrame(odata->name + "_l0");
         auto matrix = glm::inverse(itemModel->getTransform());
         RW_CHECK(itemModel, "Weapon frame not in model");
         if (itemModel) {

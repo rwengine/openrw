@@ -8,22 +8,25 @@
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const ModelRef& model,
                                const glm::vec3& scale,
-                               std::shared_ptr<ObjectData> obj,
+                               BaseModelInfo *modelinfo,
                                InstanceObject* lod,
                                std::shared_ptr<DynamicObjectData> dyn)
-    : GameObject(engine, pos, rot, model)
+    : GameObject(engine, pos, rot, modelinfo, model)
     , health(100.f)
     , scale(scale)
     , body(nullptr)
-    , object(obj)
     , LODinstance(lod)
     , dynamics(dyn)
     , _enablePhysics(false) {
-    if (obj) {
-        changeModel(obj);
+    if (modelinfo) {
+        changeModel(modelinfo);
 
-        for (auto& path : obj->paths) {
-            engine->aigraph.createPathNodes(position, rot, path);
+        /// @todo store path information properly
+        if (modelinfo->type() == ModelDataType::SimpleInfo) {
+            auto simpledata = static_cast<SimpleModelInfo*>(modelinfo);
+            for (auto& path : simpledata->paths) {
+                engine->aigraph.createPathNodes(position, rot, path);
+            }
         }
     }
 }
@@ -120,18 +123,18 @@ void InstanceObject::tick(float dt) {
     if (animator) animator->tick(dt);
 }
 
-void InstanceObject::changeModel(std::shared_ptr<ObjectData> incoming) {
+void InstanceObject::changeModel(BaseModelInfo *incoming) {
     if (body) {
         delete body;
         body = nullptr;
     }
 
-    object = incoming;
+    /// @todo store the new object
 
     if (incoming) {
         auto bod = new CollisionInstance;
 
-        if (bod->createPhysicsBody(this, object->modelName, dynamics.get())) {
+        if (bod->createPhysicsBody(this, incoming->name, dynamics.get())) {
             bod->getBulletBody()->setActivationState(ISLAND_SLEEPING);
             body = bod;
         }

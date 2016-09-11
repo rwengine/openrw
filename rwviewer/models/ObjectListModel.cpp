@@ -5,18 +5,12 @@ ObjectListModel::ObjectListModel(GameData *dat, QObject *parent)
 }
 
 int ObjectListModel::rowCount(const QModelIndex &parent) const {
-    return _gameData->objectTypes.size();
+    return _gameData->modelinfo.size();
 }
 
 int ObjectListModel::columnCount(const QModelIndex &parent) const {
     return 3;
 }
-
-static std::map<ObjectInformation::ObjectClass, QString> gDataType = {
-    {ObjectInformation::_class("OBJS"), "Object"},
-    {ObjectInformation::_class("CARS"), "Vehicle"},
-    {ObjectInformation::_class("PEDS"), "Pedestrian"},
-    {ObjectInformation::_class("HIER"), "Cutscene"}};
 
 QVariant ObjectListModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole) {
@@ -25,23 +19,12 @@ QVariant ObjectListModel::data(const QModelIndex &index, int role) const {
         if (index.column() == 0) {
             return id;
         } else if (index.column() == 1) {
-            auto object = _gameData->objectTypes[id];
-            if (gDataType[object->class_type].isEmpty()) {
-                return QString("Unknown");
-            }
-            return gDataType[object->class_type];
+            auto object = _gameData->modelinfo[id].get();
+            return QString::fromStdString(
+                BaseModelInfo::getTypeName(object->type()));
         } else if (index.column() == 2) {
-            auto object = _gameData->objectTypes[id];
-            if (object->class_type == ObjectData::class_id) {
-                auto v = std::static_pointer_cast<ObjectData>(object);
-                return QString::fromStdString(v->modelName);
-            } else if (object->class_type == VehicleData::class_id) {
-                auto v = std::static_pointer_cast<VehicleData>(object);
-                return QString::fromStdString(v->modelName);
-            } else if (object->class_type == CharacterData::class_id) {
-                auto v = std::static_pointer_cast<CharacterData>(object);
-                return QString::fromStdString(v->modelName);
-            }
+            auto object = _gameData->modelinfo[id].get();
+            return QString::fromStdString(object->name);
         }
     }
     return QVariant::Invalid;
@@ -64,9 +47,9 @@ QVariant ObjectListModel::headerData(int section, Qt::Orientation orientation,
 
 QModelIndex ObjectListModel::index(int row, int column,
                                    const QModelIndex &parent) const {
-    auto it = _gameData->objectTypes.begin();
+    auto it = _gameData->modelinfo.begin();
     for (int i = 0; i < row; i++) it++;
-    auto id = it->second->ID;
+    auto id = it->second->id();
 
     return hasIndex(row, column, parent) ? createIndex(row, column, id)
                                          : QModelIndex();

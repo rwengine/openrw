@@ -140,10 +140,10 @@ bool GameWorld::placeItems(const std::string& name) {
         for (auto& p : instancePool.objects) {
             auto object = p.second;
             InstanceObject* instance = static_cast<InstanceObject*>(object);
-            if (!instance->object->LOD &&
-                instance->object->modelName.length() > 3) {
-                auto lodInstit = modelInstances.find(
-                    "LOD" + instance->object->modelName.substr(3));
+            auto modelinfo = instance->getModelInfo<SimpleModelInfo>();
+            if (!modelinfo->LOD && modelinfo->name.length() > 3) {
+                auto lodInstit =
+                    modelInstances.find("LOD" + modelinfo->name.substr(3));
                 if (lodInstit != modelInstances.end()) {
                     instance->LODinstance = lodInstit->second;
                 }
@@ -162,10 +162,10 @@ bool GameWorld::placeItems(const std::string& name) {
 InstanceObject* GameWorld::createInstance(const uint16_t id,
                                           const glm::vec3& pos,
                                           const glm::quat& rot) {
-    auto oi = data->findObjectType<ObjectData>(id);
+    auto oi = data->findModelInfo<SimpleModelInfo>(id);
     if (oi) {
-        std::string modelname = oi->modelName;
-        std::string texturename = oi->textureName;
+        std::string modelname = oi->name;
+        std::string texturename = oi->textureslot;
 
         std::transform(std::begin(modelname), std::end(modelname),
                        std::begin(modelname), tolower);
@@ -173,7 +173,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                        std::begin(texturename), tolower);
 
         // Ensure the relevant data is loaded.
-        if (!oi->modelName.empty()) {
+        if (!modelname.empty()) {
             if (modelname != "null") {
                 data->loadDFF(modelname + ".dff", false);
             }
@@ -185,7 +185,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
         ModelRef m = data->models[modelname];
 
         // Check for dynamic data.
-        auto dyit = data->dynamicObjectData.find(oi->modelName);
+        auto dyit = data->dynamicObjectData.find(oi->name);
         std::shared_ptr<DynamicObjectData> dydata;
         if (dyit != data->dynamicObjectData.end()) {
             dydata = dyit->second;
@@ -202,7 +202,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
         instancePool.insert(instance);
         allObjects.push_back(instance);
 
-        modelInstances.insert({oi->modelName, instance});
+        modelInstances.insert({oi->name, instance});
 
         return instance;
     }
@@ -250,34 +250,33 @@ void GameWorld::cleanupTraffic(const ViewCamera& focus) {
 CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
                                                 const glm::vec3& pos,
                                                 const glm::quat& rot) {
+    auto modelinfo = data->modelinfo[id].get();
     std::string modelname;
     std::string texturename;
 
-    auto type = data->objectTypes.find(id);
-    if (type != data->objectTypes.end()) {
-        if (type->second->class_type == ObjectInformation::_class("HIER")) {
-            modelname = state->specialModels[id];
-            texturename = state->specialModels[id];
-        } else {
-            if (type->second->class_type == ObjectInformation::_class("OBJS")) {
-                auto v = static_cast<ObjectData*>(type->second.get());
-                modelname = v->modelName;
-                texturename = v->textureName;
-            } else if (type->second->class_type ==
-                       ObjectInformation::_class("PEDS")) {
-                auto v = static_cast<CharacterData*>(type->second.get());
-                modelname = v->modelName;
-                texturename = v->textureName;
+    if (modelinfo) {
+        modelname = modelinfo->name;
+        texturename = modelinfo->textureslot;
 
-                static std::string specialPrefix("special");
+        /// @todo Store loaded models directly
+        switch (modelinfo->type()) {
+            case ModelDataType::ClumpInfo:
+                // Re-direct the hier objects to the special object ids
+                modelname = state->specialModels[id];
+                texturename = state->specialModels[id];
+                break;
+            case ModelDataType::PedInfo:
+                static const std::string specialPrefix("special");
                 if (!modelname.compare(0, specialPrefix.size(),
                                        specialPrefix)) {
                     auto sid = modelname.substr(specialPrefix.size());
                     unsigned short specialID = std::atoi(sid.c_str());
                     modelname = state->specialCharacters[specialID];
                     texturename = state->specialCharacters[specialID];
+                    break;
                 }
-            }
+            default:
+                break;
         }
     }
 
@@ -305,7 +304,7 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
 
     ModelRef m = data->models[modelname];
 
-    auto instance = new CutsceneObject(this, pos, rot, m);
+    auto instance = new CutsceneObject(this, pos, rot, m, modelinfo);
 
     cutscenePool.insert(instance);
     allObjects.push_back(instance);
@@ -316,21 +315,21 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
 VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
                                         const glm::quat& rot,
                                         GameObjectID gid) {
-    auto vti = data->findObjectType<VehicleData>(id);
+    auto vti = data->findModelInfo<VehicleModelInfo>(id);
     if (vti) {
         logger->info("World", "Creating Vehicle ID " + std::to_string(id) +
-                                  " (" + vti->gameName + ")");
+                                  " (" + vti->vehiclename_ + ")");
 
-        if (!vti->modelName.empty()) {
-            data->loadDFF(vti->modelName + ".dff");
+        if (!vti->name.empty()) {
+            data->loadDFF(vti->name + ".dff");
         }
-        if (!vti->textureName.empty()) {
-            data->loadTXD(vti->textureName + ".txd");
+        if (!vti->textureslot.empty()) {
+            data->loadTXD(vti->textureslot + ".txd");
         }
 
         glm::u8vec3 prim(255), sec(128);
         auto palit = data->vehiclePalettes.find(
-            vti->modelName);  // modelname is conveniently lowercase (usually)
+            vti->name);  // modelname is conveniently lowercase (usually)
         if (palit != data->vehiclePalettes.end() && palit->second.size() > 0) {
             std::uniform_int_distribution<int> uniform(
                 0, palit->second.size() - 1);
@@ -339,19 +338,12 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
             sec = data->vehicleColours[palit->second[set].second];
         } else {
             logger->warning("World",
-                            "No colour palette for vehicle " + vti->modelName);
+                            "No colour palette for vehicle " + vti->name);
         }
 
-        auto wi = data->findObjectType<ObjectData>(vti->wheelModelID);
-        if (wi) {
-            if (!wi->textureName.empty()) {
-                data->loadTXD(wi->textureName + ".txd");
-            }
-        }
-
-        ModelRef& m = data->models[vti->modelName];
+        ModelRef& m = data->models[vti->name];
         auto model = m->resource;
-        auto info = data->vehicleInfo.find(vti->handlingID);
+        auto info = data->vehicleInfo.find(vti->handling_);
         if (model && info != data->vehicleInfo.end()) {
             if (info->second->wheels.size() == 0 &&
                 info->second->seats.size() == 0) {
@@ -403,13 +395,13 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
                                              const glm::vec3& pos,
                                              const glm::quat& rot,
                                              GameObjectID gid) {
-    auto pt = data->findObjectType<CharacterData>(id);
+    auto pt = data->findModelInfo<PedModelInfo>(id);
     if (pt) {
-        std::string modelname = pt->modelName;
-        std::string texturename = pt->textureName;
+        std::string modelname = pt->name;
+        std::string texturename = pt->textureslot;
 
         // Ensure the relevant data is loaded.
-        if (!pt->modelName.empty()) {
+        if (!modelname.empty()) {
             // Some model names have special meanings.
             /// @todo Should CharacterObjects handle this?
             static std::string specialPrefix("special");
@@ -446,7 +438,7 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
                                          const glm::quat& rot,
                                          GameObjectID gid) {
     // Player object ID is hardcoded to 0.
-    auto pt = data->findObjectType<CharacterData>(0);
+    auto pt = data->findModelInfo<PedModelInfo>(0);
     if (pt) {
         // Model name is also hardcoded.
         std::string modelname = "player";
@@ -472,15 +464,15 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
 }
 
 PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
-    auto modelInfo = data->findObjectType<ObjectData>(id);
+    auto modelInfo = data->modelinfo[id].get();
 
     RW_CHECK(modelInfo != nullptr, "Pickup Object Data is not found");
     if (modelInfo == nullptr) {
         return nullptr;
     }
 
-    data->loadDFF(modelInfo->modelName + ".dff");
-    data->loadTXD(modelInfo->textureName + ".txd");
+    data->loadDFF(modelInfo->name + ".dff");
+    data->loadTXD(modelInfo->textureslot + ".txd");
 
     PickupObject* pickup = nullptr;
     auto pickuptype = (PickupObject::PickupType)type;
@@ -492,10 +484,10 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 
     // If nothing, create a generic pickup instead of an item pickup
     if (it != inventoryItems.end()) {
-        pickup = new ItemPickup(this, pos, pickuptype, *it);
+        pickup = new ItemPickup(this, pos, modelInfo, pickuptype, *it);
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
-        pickup = new PickupObject(this, pos, id, pickuptype);
+        pickup = new PickupObject(this, pos, modelInfo, pickuptype);
     }
 
     pickupPool.insert(pickup);

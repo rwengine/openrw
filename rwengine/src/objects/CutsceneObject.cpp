@@ -3,8 +3,11 @@
 #include <objects/CutsceneObject.hpp>
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
-                               const glm::quat &rot, const ModelRef &model)
-    : GameObject(engine, pos, rot, model), _parent(nullptr), _bone(nullptr) {
+                               const glm::quat &rot,
+                               const ModelRef &model, BaseModelInfo *modelinfo)
+    : GameObject(engine, pos, rot, modelinfo, model)
+    , _parent(nullptr)
+    , _bone(nullptr) {
     skeleton = new Skeleton;
     animator = new Animator(model->resource, skeleton);
 }

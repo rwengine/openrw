@@ -177,16 +177,21 @@ void ViewerWidget::showObject(qint16 item) {
 
     if (dummyObject) gworld->destroyObject(dummyObject);
 
-    auto def = world()->data->objectTypes[item];
+    auto def = world()->data->modelinfo[item].get();
 
     if (def) {
-        if (def->class_type == ObjectData::class_id) {
-            dummyObject = gworld->createInstance(item, {});
-        } else if (def->class_type == CharacterData::class_id) {
-            dummyObject = gworld->createPedestrian(item, {});
-        } else if (def->class_type == VehicleData::class_id) {
-            dummyObject = gworld->createVehicle(item, {});
+        switch (def->type()) {
+            default:
+                dummyObject = gworld->createInstance(item, {});
+                break;
+            case ModelDataType::PedInfo:
+                dummyObject = gworld->createPedestrian(item, {});
+                break;
+            case ModelDataType::VehicleInfo:
+                dummyObject = gworld->createVehicle(item, {});
+                break;
         }
+
         RW_CHECK(dummyObject != nullptr, "Dummy Object is null");
         if (dummyObject != nullptr) {
             activeModel = dummyObject->model->resource;

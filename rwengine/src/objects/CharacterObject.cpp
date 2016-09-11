@@ -15,8 +15,8 @@ const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
                                  const glm::quat& rot, const ModelRef& model,
-                                 std::shared_ptr<CharacterData> data)
-    : GameObject(engine, pos, rot, model)
+                                 BaseModelInfo *modelinfo)
+    : GameObject(engine, pos, rot, modelinfo, model)
     , currentState({})
     , currentVehicle(nullptr)
     , currentSeat(0)
@@ -24,7 +24,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
     , motionBlockedByActivity(false)
-    , ped(data)
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)

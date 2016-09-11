@@ -109,23 +109,19 @@ void GameData::loadIDE(const std::string& path) {
     LoaderIDE idel;
 
     if (idel.load(systempath)) {
-        objectTypes.insert(idel.objects.begin(), idel.objects.end());
+        std::move(idel.objects.begin(), idel.objects.end(),
+                  std::inserter(modelinfo, modelinfo.end()));
     } else {
         logger->error("Data", "Failed to load IDE " + path);
     }
 }
 
 uint16_t GameData::findModelObject(const std::string model) {
-    auto defit = std::find_if(
-        objectTypes.begin(), objectTypes.end(),
-        [&](const decltype(objectTypes)::value_type& d) {
-            if (d.second->class_type == ObjectInformation::_class("OBJS")) {
-                auto dat = static_cast<ObjectData*>(d.second.get());
-                return boost::iequals(dat->modelName, model);
-            }
-            return false;
-        });
-    if (defit != objectTypes.end()) return defit->first;
+    auto defit = std::find_if(modelinfo.begin(), modelinfo.end(),
+                              [&](const decltype(modelinfo)::value_type& d) {
+                                  return boost::iequals(d.second->name, model);
+                              });
+    if (defit != modelinfo.end()) return defit->first;
     return -1;
 }
 

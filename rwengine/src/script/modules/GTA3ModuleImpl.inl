@@ -3546,12 +3546,8 @@ void opcode_0136(const ScriptArguments& args, const ScriptInt arg1, const Script
 	@arg model Model ID
 */
 bool opcode_0137(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptModelID model) {
-	auto data = args.getWorld()->data->findObjectType<VehicleData>(model);
-	RW_CHECK(data, "non-vehicle model ID");
-	if (data) {
-		return vehicle->model->name == data->modelName;
-	}
-	return false;
+	RW_UNUSED(args);
+	return vehicle->getVehicle()->id() == model;
 }
 
 /**
@@ -8156,7 +8152,11 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 bool opcode_02de(const ScriptArguments& args, const ScriptPlayer player) {
 	RW_UNUSED(args);
 	auto vehicle = player->getCharacter()->getCurrentVehicle();
-	return (vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI);
+	if (!vehicle) {
+		return false;
+	}
+	auto type = vehicle->getVehicle()->vehicleclass_;
+	return (type & VehicleModelInfo::TAXI) == VehicleModelInfo::TAXI;
 }
 
 /**
@@ -10063,7 +10063,8 @@ void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 		InstanceObject* object = static_cast<InstanceObject*>(i.second);
 
 		// Check if this instance has the correct model id, early out if it isn't
-		if (!boost::iequals(object->object->modelName, modelName)) {
+		auto modelinfo = object->getModelInfo<BaseModelInfo>();
+		if (!boost::iequals(modelinfo->name, modelName)) {
 			continue;
 		}
 
@@ -11343,7 +11344,7 @@ void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 
 	auto newobjectid = args.getWorld()->data->findModelObject(newmodel);
-	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
+	auto nobj = args.getWorld()->data->findModelInfo<SimpleModelInfo>(newobjectid);
 
 	/// @todo Objects need to adopt the new object ID, not just the model.
 	for(auto p : args.getWorld()->instancePool.objects) {

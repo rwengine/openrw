@@ -37,14 +37,10 @@ public:
     static float respawnTime(PickupType type);
     static uint32_t behaviourFlags(PickupType type);
 
-    PickupObject(GameWorld* world, const glm::vec3& position, int modelID,
+    PickupObject(GameWorld* world, const glm::vec3& position, BaseModelInfo *modelinfo,
                  PickupType type);
 
     ~PickupObject();
-
-    int getModelID() const {
-        return m_model;
-    }
 
     Type type() {
         return Pickup;
@@ -76,7 +72,6 @@ private:
     bool m_enabled;
     float m_enableTimer;
     bool m_collected;
-    int m_model;
     VisualFX* m_corona;
 
     PickupType m_type;

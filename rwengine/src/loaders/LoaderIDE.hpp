@@ -27,13 +27,7 @@ public:
     /**
      * @brief objects loaded during the call to load()
      */
-    std::map<ObjectID, ObjectInformationPtr> objects;
-
-    /*std::vector<std::shared_ptr<ObjectData>> OBJSs;
-    std::vector<std::shared_ptr<VehicleData>> CARSs;
-    std::vector<std::shared_ptr<CharacterData>> PEDSs;
-    std::vector<std::shared_ptr<CutsceneObjectData>> HIERs;
-    std::vector<std::shared_ptr<PathData>> PATHs;*/
+    std::map<ModelID, std::unique_ptr<BaseModelInfo>> objects;
 };
 
 #endif

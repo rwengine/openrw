@@ -12,16 +12,16 @@ BOOST_AUTO_TEST_CASE(test_object_data) {
     gd.load();
 
     {
-        auto def = gd.findObjectType<ObjectData>(1100);
+        auto def = gd.findModelInfo<SimpleModelInfo>(1100);
 
         BOOST_REQUIRE(def);
 
-        BOOST_ASSERT(def->class_type == ObjectInformation::_class("OBJS"));
+        BOOST_ASSERT(def->type() == ModelDataType::SimpleInfo);
 
-        BOOST_CHECK_EQUAL(def->modelName, "rd_Corner1");
-        BOOST_CHECK_EQUAL(def->textureName, "generic");
-        BOOST_CHECK_EQUAL(def->numClumps, 1);
-        BOOST_CHECK_EQUAL(def->drawDistance[0], 220);
+        BOOST_CHECK_EQUAL(def->name, "rd_Corner1");
+        BOOST_CHECK_EQUAL(def->textureslot, "generic");
+        BOOST_CHECK_EQUAL(def->getNumAtomics(), 1);
+        BOOST_CHECK_EQUAL(def->getLodDistance(0), 220);
         BOOST_CHECK_EQUAL(def->flags, 0);
     }
 }

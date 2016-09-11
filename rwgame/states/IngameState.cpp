@@ -116,16 +116,15 @@ void IngameState::startTest() {
     auto carRot = glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     // auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
     int i = 0;
-    for (auto& vi : getWorld()->data->objectTypes) {
+    for (auto& vi : getWorld()->data->modelinfo) {
         switch (vi.first) {
             case 140:
                 continue;
             case 141:
                 continue;
         }
-        if (vi.second->class_type == ObjectInformation::_class("CARS")) {
+        if (vi.second->type() == ModelDataType::VehicleInfo) {
             if (i++ > 20) break;
-            auto vehicle = std::static_pointer_cast<VehicleData>(vi.second);
 
             auto& sp = carPos;
             auto& sr = carRot;

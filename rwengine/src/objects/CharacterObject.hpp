@@ -125,8 +125,6 @@ private:
 public:
     static const float DefaultJumpSpeed;
 
-    std::shared_ptr<CharacterData> ped;
-
     btKinematicCharacterController* physCharacter;
     btPairCachingGhostObject* physObject;
     btCapsuleShapeZ* physShape;
@@ -143,13 +141,14 @@ public:
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
                     const glm::quat& rot, const ModelRef& model,
-                    std::shared_ptr<CharacterData> data);
+                    BaseModelInfo* modelinfo);
 
     ~CharacterObject();
 
     Type type() {
         return Character;
     }
+
 
     void tick(float dt);
 

@@ -60,30 +60,14 @@ void ObjectViewer::worldChanged() {
             SLOT(showItem(QModelIndex)));
 }
 
-static std::map<ObjectInformation::ObjectClass, QString> gDataType = {
-    {ObjectInformation::_class("OBJS"), "Object"},
-    {ObjectInformation::_class("CARS"), "Vehicle"},
-    {ObjectInformation::_class("PEDS"), "Pedestrian"},
-    {ObjectInformation::_class("HIER"), "Cutscene"}};
-
 void ObjectViewer::showItem(qint16 item) {
-    auto def = world()->data->objectTypes[item];
+    auto def = world()->data->modelinfo[item].get();
 
     if (def) {
-        previewID->setText(QString::number(def->ID));
-        previewClass->setText(gDataType[def->class_type]);
-
-        if (def->class_type == ObjectData::class_id) {
-            auto v = std::static_pointer_cast<ObjectData>(def);
-            previewModel->setText(QString::fromStdString(v->modelName));
-        } else if (def->class_type == VehicleData::class_id) {
-            auto v = std::static_pointer_cast<VehicleData>(def);
-            previewModel->setText(QString::fromStdString(v->modelName));
-        } else if (def->class_type == CharacterData::class_id) {
-            auto v = std::static_pointer_cast<CharacterData>(def);
-            previewModel->setText(QString::fromStdString(v->modelName));
-        }
-
+        previewID->setText(QString::number(def->id()));
+        previewClass->setText(
+            QString::fromStdString(BaseModelInfo::getTypeName(def->type())));
+        previewModel->setText(QString::fromStdString(def->name));
         previewWidget->showObject(item);
     }
 }

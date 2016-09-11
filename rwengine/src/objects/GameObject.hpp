@@ -28,6 +28,8 @@ class GameObject {
     glm::quat _lastRotation;
     GameObjectID objectID;
 
+    BaseModelInfo* modelinfo_;
+
 public:
     glm::vec3 position;
     glm::quat rotation;
@@ -53,10 +55,11 @@ public:
     bool visible;
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
-               ModelRef model)
+               BaseModelInfo* modelinfo, ModelRef model)
         : _lastPosition(pos)
         , _lastRotation(rot)
         , objectID(0)
+        , modelinfo_(modelinfo)
         , position(pos)
         , rotation(rot)
         , model(model)
@@ -67,6 +70,9 @@ public:
         , _lastHeight(std::numeric_limits<float>::max())
         , visible(true)
         , lifetime(GameObject::UnknownLifetime) {
+        if (modelinfo_) {
+            modelinfo_->addReference();
+        }
     }
 
     virtual ~GameObject();
@@ -83,6 +89,11 @@ public:
 
     int getScriptObjectID() const {
         return getGameObjectID();
+    }
+
+    template <class T>
+    T* getModelInfo() const {
+        return static_cast<T*>(modelinfo_);
     }
 
     /**

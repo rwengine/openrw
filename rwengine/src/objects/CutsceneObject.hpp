@@ -12,7 +12,7 @@ class CutsceneObject : public GameObject {
 
 public:
     CutsceneObject(GameWorld* engine, const glm::vec3& pos,
-                   const glm::quat& rot, const ModelRef& model);
+                   const glm::quat& rot, const ModelRef& model, BaseModelInfo *modelinfo);
     ~CutsceneObject();
 
     Type type() {

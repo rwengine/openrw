@@ -24,7 +24,6 @@ private:
     bool handbrake;
 
 public:
-    VehicleDataHandle vehicle;
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
     glm::u8vec3 colourSecondary;
@@ -50,7 +49,7 @@ public:
     std::map<std::string, Part> dynamicParts;
 
     VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
-                  const ModelRef& model, VehicleDataHandle data,
+                  const ModelRef& model, BaseModelInfo* modelinfo,
                   VehicleInfoHandle info, const glm::u8vec3& prim,
                   const glm::u8vec3& sec);
 
@@ -59,6 +58,10 @@ public:
     void setPosition(const glm::vec3& pos);
 
     void setRotation(const glm::quat& orientation);
+
+    VehicleModelInfo* getVehicle() const {
+        return getModelInfo<VehicleModelInfo>();
+    }
 
     Type type() {
         return Vehicle;

@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
         BOOST_REQUIRE(item != nullptr);
 
         ItemPickup* p = new ItemPickup(Global::get().e, {30.f, 0.f, 0.f},
-                                       PickupObject::OnStreet, item);
+                                       nullptr, PickupObject::OnStreet, item);
 
         Global::get().e->allObjects.push_back(p);
 
