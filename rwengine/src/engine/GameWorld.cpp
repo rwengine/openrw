@@ -164,6 +164,12 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                                           const glm::quat& rot) {
     auto oi = data->findModelInfo<SimpleModelInfo>(id);
     if (oi) {
+        // Request loading of the model if it isn't loaded already.
+        /// @todo implment streaming properly
+        if (!oi->isLoaded()) {
+            data->loadModel(oi->id());
+        }
+
         std::string modelname = oi->name;
         std::string texturename = oi->textureslot;
 
@@ -255,6 +261,11 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     std::string texturename;
 
     if (modelinfo) {
+        /// @todo track if the current cutscene model is loaded
+        if (true || !modelinfo->isLoaded()) {
+            data->loadModel(id);
+        }
+
         modelname = modelinfo->name;
         texturename = modelinfo->textureslot;
 
@@ -319,6 +330,10 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     if (vti) {
         logger->info("World", "Creating Vehicle ID " + std::to_string(id) +
                                   " (" + vti->vehiclename_ + ")");
+
+        if (!vti->isLoaded()) {
+            data->loadModel(id);
+        }
 
         if (!vti->name.empty()) {
             data->loadDFF(vti->name + ".dff");
@@ -397,6 +412,10 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
                                              GameObjectID gid) {
     auto pt = data->findModelInfo<PedModelInfo>(id);
     if (pt) {
+        if (!pt->isLoaded()) {
+            data->loadModel(id);
+        }
+
         std::string modelname = pt->name;
         std::string texturename = pt->textureslot;
 
@@ -469,6 +488,10 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     RW_CHECK(modelInfo != nullptr, "Pickup Object Data is not found");
     if (modelInfo == nullptr) {
         return nullptr;
+    }
+
+    if (! modelInfo->isLoaded()) {
+        data->loadModel(id);
     }
 
     data->loadDFF(modelInfo->name + ".dff");

@@ -124,9 +124,19 @@ public:
     void loadDFF(const std::string& name, bool async = false);
 
     /**
+     * Converts combined {name}_l{LOD} into name and lod.
+     */
+    static void getNameAndLod(std::string& name, int& lod);
+
+    /**
      * Loads a DFF and associates its atomics with models.
      */
     void loadModelFile(const std::string& name);
+
+    /**
+     * Loads and associates a model's data
+     */
+    void loadModel(ModelID model);
 
     /**
      * Loads an IFP file containing animations

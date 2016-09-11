@@ -336,13 +336,21 @@ void GameData::loadDFF(const std::string& name, bool async) {
     }
 }
 
+void GameData::getNameAndLod(std::string& name, int& lod) {
+    auto lodpos = name.rfind("_l");
+    if (lodpos != std::string::npos) {
+        lod = std::atoi(name.substr(lodpos + 1).c_str());
+        name = name.substr(0, lodpos);
+    }
+}
+
 void GameData::loadModelFile(const std::string& name) {
-    LoaderDFF l;
     auto file = index.openFilePath(name);
     if (!file) {
         logger->log("Data", Logger::Error, "Failed to load model file " + name);
         return;
     }
+    LoaderDFF l;
     auto m = l.loadFromMemory(file);
     if (!m) {
         logger->log("Data", Logger::Error, "Error loading model file " + name);
@@ -353,12 +361,8 @@ void GameData::loadModelFile(const std::string& name) {
     for (auto& frame : m->frames) {
         /// @todo this is useful elsewhere, please move elsewhere
         std::string name = frame->getName();
-        auto lodpos = name.rfind("_l");
         int lod = 0;
-        if (lodpos != std::string::npos) {
-            lod = std::atoi(name.substr(lodpos + 1).c_str());
-            name = name.substr(0, lodpos);
-        }
+        getNameAndLod(name, lod);
         for (auto& model : modelinfo) {
             auto info = model.second.get();
             if (info->type() != ModelDataType::SimpleInfo) {
@@ -369,6 +373,62 @@ void GameData::loadModelFile(const std::string& name) {
                 simple->setAtomic(m, lod, frame);
             }
         }
+    }
+}
+
+void GameData::loadModel(ModelID model) {
+    auto info = modelinfo[model].get();
+    /// @todo replace openFile with API for loading from CDIMAGE archives
+    auto name = info->name;
+
+    // Re-direct special models
+    switch (info->type()) {
+        case ModelDataType::ClumpInfo:
+            // Re-direct the hier objects to the special object ids
+            name = engine->state->specialModels[info->id()];
+            break;
+        case ModelDataType::PedInfo:
+            static const std::string specialPrefix("special");
+            if (!name.compare(0, specialPrefix.size(), specialPrefix)) {
+                auto sid = name.substr(specialPrefix.size());
+                unsigned short specialID = std::atoi(sid.c_str());
+                name = engine->state->specialCharacters[specialID];
+                break;
+            }
+        default:
+            break;
+    }
+
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    auto file = index.openFile(name + ".dff");
+    if (!file) {
+        logger->error("Data", "Failed to load model for " +
+                                  std::to_string(model) + " [" + name + "]");
+        return;
+    }
+    LoaderDFF l;
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->error("Data",
+                      "Error loading model file for " + std::to_string(model));
+        return;
+    }
+    /// @todo handle timeinfo models correctly.
+    auto isSimple = info->type() == ModelDataType::SimpleInfo;
+    if (isSimple) {
+        auto simple = static_cast<SimpleModelInfo*>(info);
+        // Associate atomics
+        for (auto& frame : m->frames) {
+            auto name = frame->getName();
+            int lod = 0;
+            getNameAndLod(name, lod);
+            simple->setAtomic(m, lod, frame);
+        }
+    } else {
+        // Associate clumps
+        auto clump = static_cast<ClumpModelInfo*>(info);
+        clump->setModel(m);
+        /// @todo how is LOD handled for clump objects?
     }
 }
 

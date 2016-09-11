@@ -148,6 +148,10 @@ public:
         return numatomics_;
     }
 
+    bool isLoaded() const override {
+        return model_ != nullptr;
+    }
+
     enum {
         /// Cull model if player doesn't look at it. Ignored in GTA 3.
         NORMAL_CULL = 1,
@@ -211,6 +215,10 @@ public:
 
     Model* getModel() const {
         return model_;
+    }
+
+    bool isLoaded() const override {
+        return model_ != nullptr;
     }
 
 private:

@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/GenericDATLoader.hpp>
+#include <objects/PickupObject.hpp>
+#include <objects/InstanceObject.hpp>
 #include "test_globals.hpp"
 
 // Tests against loading various data files
@@ -92,6 +94,32 @@ BOOST_AUTO_TEST_CASE(test_model_files_loaded) {
 
     BOOST_CHECK_EQUAL(ak47->name, "ak47");
     BOOST_CHECK_NE(ak47->getAtomic(0), nullptr);
+}
+
+BOOST_AUTO_TEST_CASE(test_model_archive_loaded) {
+    auto& d = Global::get().d;
+    auto& e = Global::get().e;
+
+    /// @todo Implement streaming
+    // Currently, instanciating an entity will load the model
+    {
+        auto crim = d->findModelInfo<PedModelInfo>(24);
+        auto pickup = e->createPickup({}, 24, PickupObject::InShop);
+
+        BOOST_REQUIRE(crim->type() == ModelDataType::PedInfo);
+        BOOST_CHECK_NE(crim->getModel(), nullptr);
+
+        e->destroyObject(pickup);
+    }
+    {
+        auto info = d->findModelInfo<SimpleModelInfo>(2202);
+        auto inst = e->createInstance(2202, {});
+
+        BOOST_REQUIRE(info->type() == ModelDataType::SimpleInfo);
+        BOOST_CHECK_NE(info->getAtomic(0), nullptr);
+
+        e->destroyObject(inst);
+    }
 }
 #endif
 
