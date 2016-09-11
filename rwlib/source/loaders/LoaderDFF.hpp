@@ -4,7 +4,6 @@
 
 #include <loaders/RWBinaryStream.hpp>
 
-#include <data/ResourceHandle.hpp>
 #include <platform/FileHandle.hpp>
 #include <string>
 #include <vector>

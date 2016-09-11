@@ -33,7 +33,6 @@ set(TEST_SOURCES
 	"test_object_data.cpp"
 	"test_pickup.cpp"
 	"test_renderer.cpp"
-	"test_Resource.cpp"
 	"test_rwbstream.cpp"
 	"test_SaveGame.cpp"
 	"test_scriptmachine.cpp"
