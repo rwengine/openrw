@@ -9,7 +9,7 @@
 #include <objects/ProjectileObject.hpp>
 
 void WeaponItem::fireHitscan(CharacterObject* owner) {
-    auto handFrame = owner->model->resource->findFrame("srhand");
+    auto handFrame = owner->getModel()->findFrame("srhand");
     glm::mat4 handMatrix;
     if (handFrame) {
         while (handFrame->getParent()) {

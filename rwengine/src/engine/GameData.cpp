@@ -344,6 +344,21 @@ void GameData::getNameAndLod(std::string& name, int& lod) {
     }
 }
 
+Model* GameData::loadClump(const std::string& name) {
+    auto file = index.openFile(name);
+    if (!file) {
+        logger->error("Data", "Failed to load model " + name);
+        return nullptr;
+    }
+    LoaderDFF l;
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->error("Data", "Error loading model file " + name);
+        return nullptr;
+    }
+    return m;
+}
+
 void GameData::loadModelFile(const std::string& name) {
     auto file = index.openFilePath(name);
     if (!file) {
@@ -386,6 +401,8 @@ void GameData::loadModel(ModelID model) {
         case ModelDataType::ClumpInfo:
             // Re-direct the hier objects to the special object ids
             name = engine->state->specialModels[info->id()];
+            /// @todo remove this from here
+            loadTXD(name + ".txd");
             break;
         case ModelDataType::PedInfo:
             static const std::string specialPrefix("special");
@@ -393,6 +410,8 @@ void GameData::loadModel(ModelID model) {
                 auto sid = name.substr(specialPrefix.size());
                 unsigned short specialID = std::atoi(sid.c_str());
                 name = engine->state->specialCharacters[specialID];
+                /// @todo remove this from here
+                loadTXD(name + ".txd");
                 break;
             }
         default:

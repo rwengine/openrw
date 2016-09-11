@@ -22,9 +22,9 @@ public:
     bool _enablePhysics;
 
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
-                   const glm::quat& rot, const ModelRef& model,
-                   const glm::vec3& scale, BaseModelInfo* modelinfo,
-                   InstanceObject* lod, std::shared_ptr<DynamicObjectData> dyn);
+                   const glm::quat& rot, const glm::vec3& scale,
+                   BaseModelInfo* modelinfo, InstanceObject* lod,
+                   std::shared_ptr<DynamicObjectData> dyn);
     ~InstanceObject();
 
     Type type() {

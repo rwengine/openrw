@@ -6,12 +6,10 @@
 #include <objects/InstanceObject.hpp>
 
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
-                               const glm::quat& rot, const ModelRef& model,
-                               const glm::vec3& scale,
-                               BaseModelInfo *modelinfo,
-                               InstanceObject* lod,
+                               const glm::quat& rot, const glm::vec3& scale,
+                               BaseModelInfo* modelinfo, InstanceObject* lod,
                                std::shared_ptr<DynamicObjectData> dyn)
-    : GameObject(engine, pos, rot, modelinfo, model)
+    : GameObject(engine, pos, rot, modelinfo)
     , health(100.f)
     , scale(scale)
     , body(nullptr)
@@ -123,15 +121,21 @@ void InstanceObject::tick(float dt) {
     if (animator) animator->tick(dt);
 }
 
-void InstanceObject::changeModel(BaseModelInfo *incoming) {
+void InstanceObject::changeModel(BaseModelInfo* incoming) {
     if (body) {
         delete body;
         body = nullptr;
     }
 
-    /// @todo store the new object
-
     if (incoming) {
+        if (!incoming->isLoaded()) {
+            engine->data->loadModel(incoming->id());
+        }
+
+        changeModelInfo(incoming);
+        /// @todo this should only be temporary
+        setModel(getModelInfo<SimpleModelInfo>()->getModel());
+
         auto bod = new CollisionInstance;
 
         if (bod->createPhysicsBody(this, incoming->name, dynamics.get())) {

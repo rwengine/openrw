@@ -129,6 +129,11 @@ public:
     static void getNameAndLod(std::string& name, int& lod);
 
     /**
+     * Loads an archived model and returns it directly
+     */
+    Model* loadClump(const std::string& name);
+
+    /**
      * Loads a DFF and associates its atomics with models.
      */
     void loadModelFile(const std::string& name);

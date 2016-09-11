@@ -30,12 +30,19 @@ class GameObject {
 
     BaseModelInfo* modelinfo_;
 
+    /**
+     * Model used for rendering
+     */
+    Model* model_;
+
+protected:
+    void changeModelInfo(BaseModelInfo* next) {
+        modelinfo_ = next;
+    }
+
 public:
     glm::vec3 position;
     glm::quat rotation;
-
-    /// Reference to Model data
-    ModelRef model;
 
     GameWorld* engine;
 
@@ -55,14 +62,14 @@ public:
     bool visible;
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
-               BaseModelInfo* modelinfo, ModelRef model)
+               BaseModelInfo* modelinfo)
         : _lastPosition(pos)
         , _lastRotation(rot)
         , objectID(0)
         , modelinfo_(modelinfo)
+        , model_(nullptr)
         , position(pos)
         , rotation(rot)
-        , model(model)
         , engine(engine)
         , animator(nullptr)
         , skeleton(nullptr)
@@ -94,6 +101,20 @@ public:
     template <class T>
     T* getModelInfo() const {
         return static_cast<T*>(modelinfo_);
+    }
+
+    /**
+     * @return The model used in rendering
+     */
+    Model* getModel() const {
+        return model_;
+    }
+
+    /**
+     * Changes the current model, used for re-dressing chars
+     */
+    void setModel(Model* model) {
+        model_ = model;
     }
 
     /**

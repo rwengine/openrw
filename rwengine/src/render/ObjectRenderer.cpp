@@ -177,7 +177,7 @@ void ObjectRenderer::renderItem(InventoryItem* item,
 
 void ObjectRenderer::renderInstance(InstanceObject* instance,
                                     RenderList& outList) {
-    if (!instance->model->resource) {
+    if (!instance->getModel()) {
         return;
     }
 
@@ -203,7 +203,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
 
     float mindist = glm::length(instance->getPosition() - m_camera.position) -
-                    instance->model->resource->getBoundingRadius();
+                    instance->getModel()->getBoundingRadius();
     mindist *= 1.f / kDrawDistanceFactor;
 
     Model* model = nullptr;
@@ -230,7 +230,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     instance->LODinstance->getModelInfo<SimpleModelInfo>();
                 float LODrange = lodmodelinfo->getLodDistance(0);
                 if (mindist <= LODrange &&
-                    instance->LODinstance->model->resource) {
+                    instance->LODinstance->getModel()) {
                     // The model matrix needs to be for the LOD instead
                     matrixModel =
                         instance->LODinstance->getTimeAdjustedTransform(
@@ -238,27 +238,27 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     // If the object is only just out of range, keep
                     // rendering it and screen-door the LOD.
                     if (overlap < fadeRange) {
-                        model = instance->LODinstance->model->resource;
-                        fadingModel = instance->model->resource;
+                        model = instance->LODinstance->getModel();
+                        fadingModel = instance->getModel();
                         opacity = 1.f - (overlap / fadeRange);
                     } else {
-                        model = instance->LODinstance->model->resource;
+                        model = instance->LODinstance->getModel();
                     }
                 }
             }
             // We don't have a LOD object, so fade out gracefully.
             else if (overlap < fadeRange) {
-                fadingModel = instance->model->resource;
+                fadingModel = instance->getModel();
                 opacity = 1.f - (overlap / fadeRange);
             }
         }
         // Otherwise, if we aren't marked as a LOD model, we can render
         else if (!modelinfo->LOD) {
-            model = instance->model->resource;
+            model = instance->getModel();
         }
     } else {
-        auto root = instance->model->resource->frames[0];
-        auto objectModel = instance->model->resource;
+        auto root = instance->getModel()->frames[0];
+        auto objectModel = instance->getModel();
         fadingFrame = nullptr;
         fadingModel = nullptr;
 
@@ -316,15 +316,15 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         matrixModel = pedestrian->getTimeAdjustedTransform(m_renderAlpha);
     }
 
-    if (!pedestrian->model->resource) return;
+    if (!pedestrian->getModel()) return;
 
-    auto root = pedestrian->model->resource->frames[0];
+    auto root = pedestrian->getModel()->frames[0];
 
-    renderFrame(pedestrian->model->resource, root->getChildren()[0],
+    renderFrame(pedestrian->getModel(), root->getChildren()[0],
                 matrixModel, pedestrian, 1.f, outList);
 
     if (pedestrian->getActiveItem()) {
-        auto handFrame = pedestrian->model->resource->findFrame("srhand");
+        auto handFrame = pedestrian->getModel()->findFrame("srhand");
         glm::mat4 localMatrix;
         if (handFrame) {
             while (handFrame->getParent()) {
@@ -365,15 +365,15 @@ void ObjectRenderer::renderWheel(VehicleObject* vehicle, Model* model,
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                                    RenderList& outList) {
-    RW_CHECK(vehicle->model, "Vehicle model is null");
+    RW_CHECK(vehicle->getModel(), "Vehicle model is null");
 
-    if (!vehicle->model) {
+    if (!vehicle->getModel()) {
         return;
     }
 
     glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform(m_renderAlpha);
 
-    renderFrame(vehicle->model->resource, vehicle->model->resource->frames[0],
+    renderFrame(vehicle->getModel(), vehicle->getModel()->frames[0],
                 matrixModel, vehicle, 1.f, outList);
 
     auto modelinfo = vehicle->getVehicle();
@@ -466,7 +466,7 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
                                           RenderList& outList) {
     if (!m_world->state->currentCutscene) return;
 
-    if (!cutscene->model->resource) {
+    if (!cutscene->getModel()) {
         return;
     }
 
@@ -492,7 +492,7 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
         matrixModel = glm::translate(matrixModel, cutsceneOffset);
     }
 
-    auto model = cutscene->model->resource;
+    auto model = cutscene->getModel();
     if (cutscene->getParentActor()) {
         glm::mat4 align;
         /// @todo figure out where this 90 degree offset is coming from.

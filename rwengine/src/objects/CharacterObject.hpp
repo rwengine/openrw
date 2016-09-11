@@ -140,15 +140,13 @@ public:
      * @param ped PEDS_t struct to use.
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                    const glm::quat& rot, const ModelRef& model,
-                    BaseModelInfo* modelinfo);
+                    const glm::quat& rot, BaseModelInfo* modelinfo);
 
     ~CharacterObject();
 
     Type type() {
         return Character;
     }
-
 
     void tick(float dt);
 

@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         VehicleObject* vehicle = Global::get().e->createVehicle(
             90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
         BOOST_REQUIRE(vehicle != nullptr);
-        BOOST_REQUIRE(vehicle->model != nullptr);
+        BOOST_REQUIRE(vehicle->getModel() != nullptr);
 
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
 

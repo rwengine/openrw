@@ -194,7 +194,7 @@ void ViewerWidget::showObject(qint16 item) {
 
         RW_CHECK(dummyObject != nullptr, "Dummy Object is null");
         if (dummyObject != nullptr) {
-            activeModel = dummyObject->model->resource;
+            activeModel = dummyObject->getModel();
         }
     }
 }

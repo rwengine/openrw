@@ -126,6 +126,11 @@ public:
         atomics_[n] = atomic;
     }
 
+    /// @todo remove this
+    Model* getModel() const {
+        return model_;
+    }
+
     ModelFrame* getAtomic(int n) const {
         return atomics_[n];
     }

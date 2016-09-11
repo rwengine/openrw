@@ -60,7 +60,7 @@ uint32_t PickupObject::behaviourFlags(PickupType type) {
 
 PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
                            BaseModelInfo* modelinfo, PickupType type)
-    : GameObject(world, position, glm::quat(), modelinfo, nullptr)
+    : GameObject(world, position, glm::quat(), modelinfo)
     , m_ghost(nullptr)
     , m_shape(nullptr)
     , m_enabled(false)

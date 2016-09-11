@@ -83,10 +83,10 @@ private:
 };
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
-                             const glm::quat& rot, const ModelRef& model,
-                             BaseModelInfo *modelinfo, VehicleInfoHandle info,
-                             const glm::u8vec3& prim, const glm::u8vec3& sec)
-    : GameObject(engine, pos, rot, modelinfo, model)
+                             const glm::quat& rot, BaseModelInfo* modelinfo,
+                             VehicleInfoHandle info, const glm::u8vec3& prim,
+                             const glm::u8vec3& sec)
+    : GameObject(engine, pos, rot, modelinfo)
     , steerAngle(0.f)
     , throttle(0.f)
     , brake(0.f)
@@ -152,7 +152,9 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
         // Hide all LOD and damage frames.
         skeleton = new Skeleton;
 
-        for (ModelFrame* frame : model->resource->frames) {
+        setModel(getVehicle()->getModel());
+
+        for (ModelFrame* frame : getModel()->frames) {
             auto& name = frame->getName();
             bool isDam = name.find("_dam") != name.npos;
             bool isLod = name.find("lo") != name.npos;
@@ -554,7 +556,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
             if (skeleton->getData(p->normal->getIndex()).enabled) {
                 auto& geom =
-                    model->resource->geometries[p->normal->getGeometries()[0]];
+                    getModel()->geometries[p->normal->getGeometries()[0]];
                 auto pp =
                     p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
                 float td = glm::distance(
@@ -678,7 +680,7 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     if (okframe->getGeometries().size() == 0) return;
 
-    auto& geom = model->resource->geometries[okframe->getGeometries()[0]];
+    auto& geom = getModel()->geometries[okframe->getGeometries()[0]];
     auto gbounds = geom->geometryBounds;
 
     if (fn.find("door") != fn.npos) {

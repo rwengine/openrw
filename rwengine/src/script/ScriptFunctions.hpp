@@ -35,8 +35,7 @@ inline bool isInModel(const ScriptArguments& args, CharacterObject* character,
     if (data) {
         auto vehicle = getCharacterVehicle(character);
         if (vehicle) {
-            return vehicle->model ? vehicle->model->name == data->name
-                                  : false;
+            return vehicle->getVehicle()->id() == model;
         }
     }
     return false;
