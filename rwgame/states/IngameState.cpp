@@ -114,25 +114,11 @@ void IngameState::startTest() {
 
     auto carPos = glm::vec3(286.f, -591.f, 37.f);
     auto carRot = glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-    // auto boatPos = glm::vec3( -1000.f, -1040.f, 5.f );
-    int i = 0;
-    for (auto& vi : getWorld()->data->modelinfo) {
-        switch (vi.first) {
-            case 140:
-                continue;
-            case 141:
-                continue;
-        }
-        if (vi.second->type() == ModelDataType::VehicleInfo) {
-            if (i++ > 20) break;
-
-            auto& sp = carPos;
-            auto& sr = carRot;
-            auto v = getWorld()->createVehicle(vi.first, sp, sr);
-
-            sp +=
-                sr * glm::vec3(2.f + v->info->handling.dimensions.x, 0.f, 0.f);
-        }
+    // Landstalker, Stinger, Linerunner, Trash, Bobcat
+    const std::vector<int> kTestVehicles = {90, 92, 93, 98, 111};
+    for (auto id : kTestVehicles) {
+        getWorld()->createVehicle(id, carPos, carRot);
+        carPos += carRot * glm::vec3(5.f, 0.f, 0.f);
     }
 }
 
