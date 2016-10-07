@@ -74,6 +74,8 @@ public:
     /// @todo replace with proper streaming implementation
     virtual bool isLoaded() const = 0;
 
+    virtual void unload() = 0;
+
     static std::string getTypeName(ModelDataType type) {
         switch (type) {
             case ModelDataType::SimpleInfo:
@@ -157,6 +159,11 @@ public:
         return model_ != nullptr;
     }
 
+    void unload() override {
+        delete model_;
+        model_ = nullptr;
+    }
+
     enum {
         /// Cull model if player doesn't look at it. Ignored in GTA 3.
         NORMAL_CULL = 1,
@@ -224,6 +231,11 @@ public:
 
     bool isLoaded() const override {
         return model_ != nullptr;
+    }
+
+    void unload() override {
+        delete model_;
+        model_ = nullptr;
     }
 
 private:

@@ -257,8 +257,7 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     auto clumpmodel = static_cast<ClumpModelInfo*>(modelinfo);
     std::string texturename;
 
-    /// @todo track if the current cutscene model is loaded
-    if (true || !modelinfo->isLoaded()) {
+    if (!clumpmodel->isLoaded()) {
         data->loadModel(id);
     }
     auto model = clumpmodel->getModel();
@@ -810,20 +809,32 @@ bool GameWorld::isCutsceneDone() {
 
 void GameWorld::loadSpecialCharacter(const unsigned short index,
                                      const std::string& name) {
+    constexpr uint16_t kFirstSpecialActor = 26;
+    logger->info("Data", "Loading special actor " + name + " to " +
+                             std::to_string(index));
+    auto modelid = kFirstSpecialActor + index - 1;
+    auto model = data->findModelInfo<PedModelInfo>(modelid);
+    if (model && model->isLoaded()) {
+        model->unload();
+    }
     std::string lowerName(name);
     std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
                    ::tolower);
-    // Need to replace any existing loaded model
-    /// @todo a bit more smarter than this
     state->specialCharacters[index] = lowerName;
 }
 
 void GameWorld::loadSpecialModel(const unsigned short index,
                                  const std::string& name) {
+    logger->info("Data", "Loading cutscene object " + name + " to " +
+                             std::to_string(index));
+    // Tell the HIER model to discard the currently loaded model
+    auto model = data->findModelInfo<ClumpModelInfo>(index);
+    if (model && model->isLoaded()) {
+        model->unload();
+    }
     std::string lowerName(name);
     std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
                    ::tolower);
-    /// @todo a bit more smarter than this
     state->specialModels[index] = lowerName;
 }
 
