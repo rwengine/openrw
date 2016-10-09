@@ -296,7 +296,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     // This is sequential at the moment, it should be easy to make it
     // run in parallel with a good threading system.
     RenderList renderList;
-    // Naive optimisation, assume 10% hitrate
+    // Naive optimisation, assume 50% hitrate
     renderList.reserve(world->allObjects.size() * 0.5f);
 
     RW_PROFILE_BEGIN("Build");
@@ -311,9 +311,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     // Area indicators
-    /// @todo this shouldn't be static here
-    /// @todo what are zonecyla / zonecylb for?
-    static auto sphereModel = world->data->loadClump("zonecyla.dff");
+    auto sphereModel = getSpecialModel(ZoneCylinderA);
     for (auto& i : world->getAreaIndicators()) {
         glm::mat4 m(1.f);
         m = glm::translate(m, i.position);
@@ -324,9 +322,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
         objectRenderer.renderFrame(sphereModel, sphereModel->frames[0], m,
                                    nullptr, 1.f, renderList);
     }
+
     // Render arrows above anything that isn't radar only (or hidden)
-    /// @todo this shouldn't be static here
-    static auto arrowModel = world->data->loadClump("arrow.dff");
+    auto arrowModel = getSpecialModel(Arrow);
     for (auto& blip : world->state->radarBlips) {
         auto dm = blip.second.display;
         if (dm == BlipData::Hide || dm == BlipData::RadarOnly) {

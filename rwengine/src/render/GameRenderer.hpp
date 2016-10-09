@@ -190,6 +190,31 @@ public:
     Renderer::ProfileInfo profSky;
     Renderer::ProfileInfo profWater;
     Renderer::ProfileInfo profEffects;
+
+    enum SpecialModel {
+        /// @todo what is the difference between A and B
+        ZoneCylinderA,
+        ZoneCylinderB,
+        Arrow,
+        SpecialModelCount
+    };
+
+    /**
+     * @brief setSpecialModel Set model to use for each SpecialModel
+     *
+     * GameRenderer will take ownership of the Model* pointer
+     */
+    void setSpecialModel(SpecialModel usage, Model* model) {
+        specialmodels_[usage].reset(model);
+    }
+
+private:
+    /// Hard-coded models to use for each of the special models
+    std::unique_ptr<Model>
+        specialmodels_[SpecialModel::SpecialModelCount];
+    Model* getSpecialModel(SpecialModel usage) const {
+        return specialmodels_[usage].get();
+    }
 };
 
 #endif
