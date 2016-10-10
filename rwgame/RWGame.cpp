@@ -33,6 +33,11 @@
 const std::string kBuildStr(kGitSHA1Hash, 8);
 const std::string kWindowTitle = "RWGame";
 
+std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
+    {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
+    {GameRenderer::ZoneCylinderB, "zonecylb.dff"},
+    {GameRenderer::Arrow, "arrow.dff"}};
+
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
 DebugDraw* debug = nullptr;
@@ -123,6 +128,11 @@ RWGame::RWGame(int argc, char* argv[]) {
 
     // Initialize renderer
     renderer = new GameRenderer(&log, data);
+
+    for (const auto& p : kSpecialModels) {
+        auto model = data->loadClump(p.second);
+        renderer->setSpecialModel(p.first, model);
+    }
 
     // Set up text renderer
     renderer->text.setFontTexture(0, "pager");

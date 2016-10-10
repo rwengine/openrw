@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <data/ResourceHandle.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 #include <gl/TextureData.hpp>
@@ -179,7 +178,5 @@ public:
 private:
     float boundingRadius;
 };
-
-typedef ResourceHandle<Model>::Ref ModelRef;
 
 #endif

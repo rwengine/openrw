@@ -3546,12 +3546,8 @@ void opcode_0136(const ScriptArguments& args, const ScriptInt arg1, const Script
 	@arg model Model ID
 */
 bool opcode_0137(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptModelID model) {
-	auto data = args.getWorld()->data->findObjectType<VehicleData>(model);
-	RW_CHECK(data, "non-vehicle model ID");
-	if (data) {
-		return vehicle->model->name == data->modelName;
-	}
-	return false;
+	RW_UNUSED(args);
+	return vehicle->getVehicle()->id() == model;
 }
 
 /**
@@ -6840,12 +6836,18 @@ void opcode_023c(const ScriptArguments& args, const ScriptInt arg1, const Script
 	@arg arg1 
 */
 bool opcode_023d(const ScriptArguments& args, const ScriptInt arg1) {
+	/// @todo re-implement this when streaming is added
+	return true;
+	RW_UNUSED(args);
+	RW_UNUSED(arg1);
+#if 0
 	auto model = args.getState()->specialCharacters[arg1];
 	auto modelfind = args.getWorld()->data->models.find(model);
 	if( modelfind != args.getWorld()->data->models.end() && modelfind->second->resource != nullptr ) {
 		return true;
 	}
 	return false;
+#endif
 }
 
 /**
@@ -8156,7 +8158,11 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 bool opcode_02de(const ScriptArguments& args, const ScriptPlayer player) {
 	RW_UNUSED(args);
 	auto vehicle = player->getCharacter()->getCurrentVehicle();
-	return (vehicle && (vehicle->vehicle->classType & VehicleData::TAXI) == VehicleData::TAXI);
+	if (!vehicle) {
+		return false;
+	}
+	auto type = vehicle->getVehicle()->vehicleclass_;
+	return (type & VehicleModelInfo::TAXI) == VehicleModelInfo::TAXI;
 }
 
 /**
@@ -8455,7 +8461,7 @@ void opcode_02f4(const ScriptArguments& args, const ScriptObject object0, const 
 	auto actor = args.getObject<CutsceneObject>(0);
 	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
-	auto headframe = actor->model->resource->findFrame("shead");
+	auto headframe = actor->getModel()->findFrame("shead");
 	actor->skeleton->setEnabled(headframe, false);
 	object->setParentActor(actor, headframe);
 
@@ -10063,7 +10069,8 @@ void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 		InstanceObject* object = static_cast<InstanceObject*>(i.second);
 
 		// Check if this instance has the correct model id, early out if it isn't
-		if (!boost::iequals(object->object->modelName, modelName)) {
+		auto modelinfo = object->getModelInfo<BaseModelInfo>();
+		if (!boost::iequals(modelinfo->name, modelName)) {
 			continue;
 		}
 
@@ -11343,19 +11350,16 @@ void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 
 	auto newobjectid = args.getWorld()->data->findModelObject(newmodel);
-	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
+	auto nobj = args.getWorld()->data->findModelInfo<SimpleModelInfo>(newobjectid);
 
-	/// @todo Objects need to adopt the new object ID, not just the model.
 	for(auto p : args.getWorld()->instancePool.objects) {
 		auto o = p.second;
-		if( !o->model ) continue;
-		if( o->model->name != oldmodel ) continue;
+		if( !o->getModel() ) continue;
+		if( o->getModelInfo<BaseModelInfo>()->name != oldmodel ) continue;
 		float d = glm::distance(coord, o->getPosition());
 		if( d < radius ) {
-			args.getWorld()->data->loadDFF(newmodel + ".dff", false);
 			InstanceObject* inst = static_cast<InstanceObject*>(o);
 			inst->changeModel(nobj);
-			inst->model = args.getWorld()->data->models[newmodel];
 		}
 	}
 }

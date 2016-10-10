@@ -51,9 +51,9 @@ void ObjectRenderer::renderGeometry(Model* model, size_t g,
         dp.visibility = 1.f;
 
         if (object && object->type() == GameObject::Instance) {
-            auto instance = static_cast<InstanceObject*>(object);
+            auto modelinfo = object->getModelInfo<SimpleModelInfo>();
             dp.depthWrite =
-                !(instance->object->flags & ObjectData::NO_ZBUFFER_WRITE);
+                !(modelinfo->flags & SimpleModelInfo::NO_ZBUFFER_WRITE);
         }
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
@@ -155,30 +155,9 @@ bool ObjectRenderer::renderFrame(Model* m, ModelFrame* f,
     return true;
 }
 
-void ObjectRenderer::renderItem(InventoryItem* item,
-                                const glm::mat4& modelMatrix,
-                                RenderList& outList) {
-    // srhand
-    if (item->getModelID() == -1) {
-        return;  // No model for this item
-    }
-
-    std::shared_ptr<ObjectData> odata =
-        m_world->data->findObjectType<ObjectData>(item->getModelID());
-    auto weapons = m_world->data->models["weapons"];
-    if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-        auto matrix = glm::inverse(itemModel->getTransform());
-        if (itemModel) {
-            renderFrame(weapons->resource, itemModel, modelMatrix * matrix,
-                        nullptr, 1.f, outList);
-        }
-    }
-}
-
 void ObjectRenderer::renderInstance(InstanceObject* instance,
                                     RenderList& outList) {
-    if (!instance->model->resource) {
+    if (!instance->getModel()) {
         return;
     }
 
@@ -187,22 +166,24 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
         return;
     }
 
+    auto modelinfo = instance->getModelInfo<SimpleModelInfo>();
+
     // Handles times provided by TOBJ data
     const auto currentHour = m_world->getHour();
-    if (instance->object->timeOff < instance->object->timeOn) {
-        if (currentHour >= instance->object->timeOff &&
-            currentHour < instance->object->timeOn)
+    if (modelinfo->timeOff < modelinfo->timeOn) {
+        if (currentHour >= modelinfo->timeOff &&
+            currentHour < modelinfo->timeOn)
             return;
     } else {
-        if (currentHour >= instance->object->timeOff ||
-            currentHour < instance->object->timeOn)
+        if (currentHour >= modelinfo->timeOff ||
+            currentHour < modelinfo->timeOn)
             return;
     }
 
     auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
 
     float mindist = glm::length(instance->getPosition() - m_camera.position) -
-                    instance->model->resource->getBoundingRadius();
+                    instance->getModel()->getBoundingRadius();
     mindist *= 1.f / kDrawDistanceFactor;
 
     Model* model = nullptr;
@@ -216,17 +197,19 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     float opacity = 0.f;
     constexpr float fadeRange = 50.f;
 
-    if (instance->object->numClumps == 1) {
+    /// @todo replace this block with the correct logic
+    if (modelinfo->getNumAtomics() == 1) {
         // Is closest point greater than the *object* draw distance
-        float objectRange = instance->object->drawDistance[0];
+        float objectRange = modelinfo->getLodDistance(0);
         float overlap = (mindist - objectRange);
         if (mindist > objectRange) {
             // Check for LOD instances
             if (instance->LODinstance) {
                 // Is the closest point greater than the *LOD* draw distance
-                float LODrange = instance->LODinstance->object->drawDistance[0];
-                if (mindist > LODrange) {
-                } else if (instance->LODinstance->model->resource) {
+                auto lodmodelinfo =
+                    instance->LODinstance->getModelInfo<SimpleModelInfo>();
+                float LODrange = lodmodelinfo->getLodDistance(0);
+                if (mindist <= LODrange && instance->LODinstance->getModel()) {
                     // The model matrix needs to be for the LOD instead
                     matrixModel =
                         instance->LODinstance->getTimeAdjustedTransform(
@@ -234,35 +217,35 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     // If the object is only just out of range, keep
                     // rendering it and screen-door the LOD.
                     if (overlap < fadeRange) {
-                        model = instance->LODinstance->model->resource;
-                        fadingModel = instance->model->resource;
+                        model = instance->LODinstance->getModel();
+                        fadingModel = instance->getModel();
                         opacity = 1.f - (overlap / fadeRange);
                     } else {
-                        model = instance->LODinstance->model->resource;
+                        model = instance->LODinstance->getModel();
                     }
                 }
             }
             // We don't have a LOD object, so fade out gracefully.
             else if (overlap < fadeRange) {
-                fadingModel = instance->model->resource;
+                fadingModel = instance->getModel();
                 opacity = 1.f - (overlap / fadeRange);
             }
         }
         // Otherwise, if we aren't marked as a LOD model, we can render
-        else if (!instance->object->LOD) {
-            model = instance->model->resource;
+        else if (!modelinfo->LOD) {
+            model = instance->getModel();
         }
     } else {
-        auto root = instance->model->resource->frames[0];
-        auto objectModel = instance->model->resource;
+        auto root = instance->getModel()->frames[0];
+        auto objectModel = instance->getModel();
         fadingFrame = nullptr;
         fadingModel = nullptr;
 
         matrixModel *= root->getTransform();
 
-        for (int i = 0; i < instance->object->numClumps - 1; ++i) {
-            auto ind = (instance->object->numClumps - 1) - i;
-            float lodDistance = instance->object->drawDistance[i];
+        for (int i = 0; i < modelinfo->getNumAtomics() - 1; ++i) {
+            auto ind = (modelinfo->getNumAtomics() - 1) - i;
+            float lodDistance = modelinfo->getLodDistance(i);
             if (mindist > lodDistance) {
                 fadingFrame = root->getChildren()[ind];
                 fadingModel = objectModel;
@@ -312,15 +295,21 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         matrixModel = pedestrian->getTimeAdjustedTransform(m_renderAlpha);
     }
 
-    if (!pedestrian->model->resource) return;
+    if (!pedestrian->getModel()) return;
 
-    auto root = pedestrian->model->resource->frames[0];
+    auto root = pedestrian->getModel()->frames[0];
 
-    renderFrame(pedestrian->model->resource, root->getChildren()[0],
-                matrixModel, pedestrian, 1.f, outList);
+    renderFrame(pedestrian->getModel(), root->getChildren()[0], matrixModel,
+                pedestrian, 1.f, outList);
 
     if (pedestrian->getActiveItem()) {
-        auto handFrame = pedestrian->model->resource->findFrame("srhand");
+        auto item = pedestrian->getActiveItem();
+
+        if (item->getModelID() == -1) {
+            return;  // No model for this item
+        }
+
+        auto handFrame = pedestrian->getModel()->findFrame("srhand");
         glm::mat4 localMatrix;
         if (handFrame) {
             while (handFrame->getParent()) {
@@ -330,91 +319,72 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
                 handFrame = handFrame->getParent();
             }
         }
-        renderItem(pedestrian->getActiveItem(), matrixModel * localMatrix,
-                   outList);
-    }
-}
 
-void ObjectRenderer::renderWheel(VehicleObject* vehicle, Model* model,
-                                 const glm::mat4& matrix,
-                                 const std::string& name, RenderList& outList) {
-    for (const ModelFrame* f : model->frames) {
-        const std::string& fname = f->getName();
-        if (fname != name) {
-            continue;
-        }
-
-        auto firstLod = f->getChildren()[0];
-
-        for (auto& g : firstLod->getGeometries()) {
-            RW::BSGeometryBounds& bounds = model->geometries[g]->geometryBounds;
-            if (!m_camera.frustum.intersects(
-                    bounds.center + glm::vec3(matrix[3]), bounds.radius)) {
-                continue;
-            }
-
-            renderGeometry(model, g, matrix, 1.f, vehicle, outList);
-        }
-        break;
+        // Assume items are all simple
+        auto simple =
+            m_world->data->findModelInfo<SimpleModelInfo>(item->getModelID());
+        auto geometry = simple->getAtomic(0)->getGeometries().at(0);
+        renderGeometry(simple->getModel(), geometry, matrixModel * localMatrix,
+                       1.f, nullptr, outList);
     }
 }
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                                    RenderList& outList) {
-    RW_CHECK(vehicle->model, "Vehicle model is null");
+    RW_CHECK(vehicle->getModel(), "Vehicle model is null");
 
-    if (!vehicle->model) {
+    if (!vehicle->getModel()) {
         return;
     }
 
     glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform(m_renderAlpha);
 
-    renderFrame(vehicle->model->resource, vehicle->model->resource->frames[0],
+    renderFrame(vehicle->getModel(), vehicle->getModel()->frames[0],
                 matrixModel, vehicle, 1.f, outList);
 
+    auto modelinfo = vehicle->getVehicle();
+
     // Draw wheels n' stuff
+    auto woi =
+        m_world->data->findModelInfo<SimpleModelInfo>(modelinfo->wheelmodel_);
+    if (!woi || !woi->isLoaded()) {
+        return;
+    }
+    auto wheelgeom = woi->getAtomic(0)->getGeometries().at(0);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-        auto woi = m_world->data->findObjectType<ObjectData>(
-            vehicle->vehicle->wheelModelID);
-        if (woi) {
-            Model* wheelModel = m_world->data->models["wheels"]->resource;
-            auto& wi = vehicle->physVehicle->getWheelInfo(w);
-            if (wheelModel) {
-                // Construct our own matrix so we can use the local transform
-                vehicle->physVehicle->updateWheelTransform(w, false);
-                /// @todo migrate this into Vehicle physics tick so we can
-                /// interpolate old -> new
+        auto& wi = vehicle->physVehicle->getWheelInfo(w);
+        // Construct our own matrix so we can use the local transform
+        vehicle->physVehicle->updateWheelTransform(w, false);
+        /// @todo migrate this into Vehicle physics tick so we can
+        /// interpolate old -> new
 
-                glm::mat4 wheelM(matrixModel);
+        glm::mat4 wheelM(matrixModel);
 
-                auto up = -wi.m_wheelDirectionCS;
-                auto right = wi.m_wheelAxleCS;
-                auto fwd = up.cross(right);
-                btQuaternion steerQ(up, wi.m_steering);
-                btQuaternion rollQ(right, -wi.m_rotation);
+        auto up = -wi.m_wheelDirectionCS;
+        auto right = wi.m_wheelAxleCS;
+        auto fwd = up.cross(right);
+        btQuaternion steerQ(up, wi.m_steering);
+        btQuaternion rollQ(right, -wi.m_rotation);
 
-                btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1],
-                                  up[1], right[2], fwd[2], up[2]);
+        btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1], up[1],
+                          right[2], fwd[2], up[2]);
 
-                btTransform t;
-                t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
-                t.setOrigin(wi.m_chassisConnectionPointCS +
-                            wi.m_wheelDirectionCS *
-                                wi.m_raycastInfo.m_suspensionLength);
+        btTransform t;
+        t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
+        t.setOrigin(wi.m_chassisConnectionPointCS +
+                    wi.m_wheelDirectionCS *
+                        wi.m_raycastInfo.m_suspensionLength);
 
-                t.getOpenGLMatrix(glm::value_ptr(wheelM));
-                wheelM = matrixModel * wheelM;
+        t.getOpenGLMatrix(glm::value_ptr(wheelM));
+        wheelM = matrixModel * wheelM;
 
-                wheelM =
-                    glm::scale(wheelM, glm::vec3(vehicle->vehicle->wheelScale));
-                if (wi.m_chassisConnectionPointCS.x() < 0.f) {
-                    wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
-                }
-
-                renderWheel(vehicle, wheelModel, wheelM, woi->modelName,
-                            outList);
-            }
+        wheelM = glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
+        if (wi.m_chassisConnectionPointCS.x() < 0.f) {
+            wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
         }
+
+        renderGeometry(woi->getModel(), wheelgeom, wheelM, 1.f, nullptr,
+                       outList);
     }
 }
 
@@ -425,44 +395,25 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime(),
                               glm::vec3(0.f, 0.f, 1.f));
 
-    auto odata =
-        m_world->data->findObjectType<ObjectData>(pickup->getModelID());
+    auto odata = pickup->getModelInfo<SimpleModelInfo>();
 
-    Model* model = nullptr;
-    ModelFrame* itemModel = nullptr;
-
-    /// @todo Better determination of is this object a weapon.
-    if (odata->ID >= 170 && odata->ID <= 184) {
-        auto weapons = m_world->data->models["weapons"];
-        if (weapons && weapons->resource && odata) {
-            model = weapons->resource;
-            itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-            RW_CHECK(itemModel, "Weapon Frame not present int weapon model");
-            if (!itemModel) {
-                return;
-            }
-        }
-    } else {
-        auto handle = m_world->data->models[odata->modelName];
-        RW_CHECK(handle && handle->resource, "Pickup has no model");
-        if (handle && handle->resource) {
-            model = handle->resource;
-            itemModel = model->frames[model->rootFrameIdx];
-        }
+    auto model = odata->getModel();
+    auto itemModel = odata->getAtomic(0);
+    auto geom = 0;
+    if (!itemModel->getGeometries().empty()) {
+        geom = itemModel->getGeometries()[0];
+    } else if (!itemModel->getChildren().empty()) {
+        geom = itemModel->getChildren()[0]->getGeometries()[0];
     }
 
-    if (itemModel) {
-        auto matrix = glm::inverse(itemModel->getTransform());
-        renderFrame(model, itemModel, modelMatrix * matrix, pickup, 1.f,
-                    outList);
-    }
+    renderGeometry(model, geom, modelMatrix, 1.f, pickup, outList);
 }
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
                                           RenderList& outList) {
     if (!m_world->state->currentCutscene) return;
 
-    if (!cutscene->model->resource) {
+    if (!cutscene->getModel()) {
         return;
     }
 
@@ -488,7 +439,7 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
         matrixModel = glm::translate(matrixModel, cutsceneOffset);
     }
 
-    auto model = cutscene->model->resource;
+    auto model = cutscene->getModel();
     if (cutscene->getParentActor()) {
         glm::mat4 align;
         /// @todo figure out where this 90 degree offset is coming from.
@@ -505,21 +456,14 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
                                       RenderList& outList) {
     glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(m_renderAlpha);
 
-    auto odata = m_world->data->findObjectType<ObjectData>(
+    auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
         projectile->getProjectileInfo().weapon->modelID);
-    auto weapons = m_world->data->models["weapons"];
 
-    RW_CHECK(weapons, "Weapons model not loaded");
+    auto model = odata->getModel();
+    auto modelframe = odata->getAtomic(0);
+    auto geom = modelframe->getGeometries().at(0);
 
-    if (weapons && weapons->resource) {
-        auto itemModel = weapons->resource->findFrame(odata->modelName + "_l0");
-        auto matrix = glm::inverse(itemModel->getTransform());
-        RW_CHECK(itemModel, "Weapon frame not in model");
-        if (itemModel) {
-            renderFrame(weapons->resource, itemModel, modelMatrix * matrix,
-                        projectile, 1.f, outList);
-        }
-    }
+    renderGeometry(model, geom, modelMatrix, 1.f, projectile, outList);
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {

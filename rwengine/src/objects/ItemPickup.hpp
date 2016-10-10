@@ -14,7 +14,7 @@ class ItemPickup : public PickupObject {
     InventoryItem* item;
 
 public:
-    ItemPickup(GameWorld* world, const glm::vec3& position, PickupType type,
+    ItemPickup(GameWorld* world, const glm::vec3& position, BaseModelInfo *modelinfo, PickupType type,
                InventoryItem* item);
 
     bool onCharacterTouch(CharacterObject* character);

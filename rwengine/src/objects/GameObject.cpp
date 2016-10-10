@@ -12,6 +12,10 @@ GameObject::~GameObject() {
     if (skeleton) {
         delete skeleton;
     }
+
+    if (modelinfo_) {
+        modelinfo_->removeReference();
+    }
 }
 
 void GameObject::setPosition(const glm::vec3& pos) {

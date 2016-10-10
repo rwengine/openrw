@@ -201,7 +201,8 @@ Menu* DebugState::createMapMenu() {
             for (auto& i : gw->instancePool.objects) {
                 auto obj = static_cast<InstanceObject*>(i.second);
                 if (std::find(garageDoorModels.begin(), garageDoorModels.end(),
-                              obj->model->name) != garageDoorModels.end()) {
+                              obj->getModelInfo<BaseModelInfo>()->name) !=
+                    garageDoorModels.end()) {
                     obj->setSolid(false);
                 }
             }

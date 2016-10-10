@@ -48,34 +48,35 @@ bool LoaderIDE::load(const std::string &filename) {
                        line.end());
 
             std::stringstream strstream(line);
+            std::string buff;
 
             switch (section) {
                 default:
                     break;
                 case OBJS:
                 case TOBJ: {  // Supports Type 1, 2 and 3
-                    std::shared_ptr<ObjectData> objs(new ObjectData);
+                    auto objs =
+                        std::unique_ptr<SimpleModelInfo>(new SimpleModelInfo);
 
-                    std::string id, numClumps, flags, modelName, textureName;
+                    getline(strstream, buff, ',');
+                    objs->setModelID(atoi(buff.c_str()));
 
-                    // Read the content of the line
-                    getline(strstream, id, ',');
-                    getline(strstream, modelName, ',');
-                    getline(strstream, textureName, ',');
-                    getline(strstream, numClumps, ',');
+                    getline(strstream, objs->name, ',');
+                    getline(strstream, objs->textureslot, ',');
 
-                    objs->numClumps = atoi(numClumps.c_str());
-                    for (size_t i = 0; i < objs->numClumps; i++) {
-                        std::string drawDistance;
-                        getline(strstream, drawDistance, ',');
-                        objs->drawDistance[i] = atoi(drawDistance.c_str());
+                    getline(strstream, buff, ',');
+                    objs->setNumAtomics(atoi(buff.c_str()));
+
+                    for (int i = 0; i < objs->getNumAtomics(); i++) {
+                        getline(strstream, buff, ',');
+                        objs->setLodDistance(i, atof(buff.c_str()));
                     }
 
-                    getline(strstream, flags, ',');
+                    getline(strstream, buff, ',');
+                    objs->flags = atoi(buff.c_str());
 
                     // Keep reading TOBJ data
                     if (section == LoaderIDE::TOBJ) {
-                        std::string buff;
                         getline(strstream, buff, ',');
                         objs->timeOn = atoi(buff.c_str());
                         getline(strstream, buff, ',');
@@ -85,104 +86,82 @@ bool LoaderIDE::load(const std::string &filename) {
                         objs->timeOff = 24;
                     }
 
-                    // Put stuff in our struct
-                    objs->ID = atoi(id.c_str());
-                    objs->flags = atoi(flags.c_str());
-                    objs->modelName = modelName;
-                    objs->textureName = textureName;
-                    objs->LOD = false;
-
-                    if (modelName.find("LOD", 0, 3) != modelName.npos &&
-                        modelName != "LODistancoast01") {
+                    /// @todo Figure out how LOD stuff is intended to work
+                    if (objs->name.find("LOD", 0, 3) != std::string::npos &&
+                        objs->name != "LODistancoast01") {
                         objs->LOD = true;
                     }
 
-                    objects.insert({objs->ID, objs});
+                    objects.emplace(objs->id(), std::move(objs));
                     break;
                 }
                 case CARS: {
-                    std::shared_ptr<VehicleData> cars(new VehicleData);
+                    auto cars =
+                        std::unique_ptr<VehicleModelInfo>(new VehicleModelInfo);
 
-                    std::string id, type, classType, frequency, lvl, comprules,
-                        wheelModelID, wheelScale;
+                    getline(strstream, buff, ',');
+                    cars->setModelID(std::atoi(buff.c_str()));
 
-                    getline(strstream, id, ',');
-                    getline(strstream, cars->modelName, ',');
-                    getline(strstream, cars->textureName, ',');
-                    getline(strstream, type, ',');
-                    getline(strstream, cars->handlingID, ',');
-                    getline(strstream, cars->gameName, ',');
-                    getline(strstream, classType, ',');
-                    getline(strstream, frequency, ',');
-                    getline(strstream, lvl, ',');
-                    getline(strstream, comprules, ',');
-                    getline(strstream, wheelModelID, ',');
-                    getline(strstream, wheelScale, ',');
+                    getline(strstream, cars->name, ',');
+                    getline(strstream, cars->textureslot, ',');
 
-                    cars->ID = atoi(id.c_str());
-                    cars->frequency = atoi(frequency.c_str());
-                    cars->lvl = atoi(lvl.c_str());
-                    cars->comprules = atoi(comprules.c_str());
+                    getline(strstream, buff, ',');
+                    cars->vehicletype_ =
+                        VehicleModelInfo::findVehicleType(buff);
 
-                    if (type == "car") {
-                        cars->type = VehicleData::CAR;
-                        cars->wheelModelID = atoi(wheelModelID.c_str());
-                        cars->wheelScale = atof(wheelScale.c_str());
-                    } else if (type == "boat") {
-                        cars->type = VehicleData::BOAT;
-                    } else if (type == "train") {
-                        cars->type = VehicleData::TRAIN;
-                        cars->modelLOD = atoi(wheelModelID.c_str());
-                    } else if (type == "plane") {
-                        cars->type = VehicleData::PLANE;
-                    } else if (type == "heli") {
-                        cars->type = VehicleData::HELI;
-                    }
+                    getline(strstream, cars->handling_, ',');
+                    getline(strstream, cars->vehiclename_, ',');
+                    getline(strstream, buff, ',');
+                    cars->vehicleclass_ =
+                        VehicleModelInfo::findVehicleClass(buff);
 
-                    const std::map<VehicleData::VehicleClass, std::string>
-                        classTypes{
-                            {VehicleData::IGNORE, "ignore"},
-                            {VehicleData::NORMAL, "normal"},
-                            {VehicleData::POORFAMILY, "poorfamily"},
-                            {VehicleData::RICHFAMILY, "richfamily"},
-                            {VehicleData::EXECUTIVE, "executive"},
-                            {VehicleData::WORKER, "worker"},
-                            {VehicleData::BIG, "big"},
-                            {VehicleData::TAXI, "taxi"},
-                            {VehicleData::MOPED, "moped"},
-                            {VehicleData::MOTORBIKE, "motorbike"},
-                            {VehicleData::LEISUREBOAT, "leisureboat"},
-                            {VehicleData::WORKERBOAT, "workerboat"},
-                            {VehicleData::BICYCLE, "bicycle"},
-                            {VehicleData::ONFOOT, "onfoot"},
-                        };
-                    for (auto &a : classTypes) {
-                        if (classType == a.second) {
-                            cars->classType = a.first;
+                    getline(strstream, buff, ',');
+                    cars->frequency_ = std::atoi(buff.c_str());
+
+                    getline(strstream, buff, ',');
+                    cars->level_ = std::atoi(buff.c_str());
+
+                    getline(strstream, buff, ',');
+                    cars->componentrules_ = std::atoi(buff.c_str());
+
+                    switch (cars->vehicletype_) {
+                        case VehicleModelInfo::CAR:
+                            getline(strstream, buff, ',');
+                            cars->wheelmodel_ = std::atoi(buff.c_str());
+                            getline(strstream, buff, ',');
+                            cars->wheelscale_ = std::atof(buff.c_str());
                             break;
-                        }
+                        case VehicleModelInfo::PLANE:
+                            /// @todo load LOD
+                            getline(strstream, buff, ',');
+                            // cars->planeLOD_ = std::atoi(buff.c_str());
+                            break;
+                        default:
+                            break;
                     }
 
-                    objects.insert({cars->ID, cars});
+                    objects.emplace(cars->id(), std::move(cars));
                     break;
                 }
                 case PEDS: {
-                    std::shared_ptr<CharacterData> peds(new CharacterData);
+                    auto peds = std::unique_ptr<PedModelInfo>(new PedModelInfo);
 
-                    std::string id, driveMask;
+                    getline(strstream, buff, ',');
+                    peds->setModelID(std::atoi(buff.c_str()));
 
-                    getline(strstream, id, ',');
-                    getline(strstream, peds->modelName, ',');
-                    getline(strstream, peds->textureName, ',');
-                    getline(strstream, peds->type, ',');
-                    getline(strstream, peds->behaviour, ',');
-                    getline(strstream, peds->animGroup, ',');
-                    getline(strstream, driveMask, ',');
+                    getline(strstream, peds->name, ',');
+                    getline(strstream, peds->textureslot, ',');
 
-                    peds->ID = atoi(id.c_str());
-                    peds->driveMask = atoi(driveMask.c_str());
+                    getline(strstream, buff, ',');
+                    peds->pedtype_ = PedModelInfo::findPedType(buff);
 
-                    objects.insert({peds->ID, peds});
+                    getline(strstream, peds->behaviour_, ',');
+                    getline(strstream, peds->animgroup_, ',');
+
+                    getline(strstream, buff, ',');
+                    peds->carsmask_ = std::atoi(buff.c_str());
+
+                    objects.emplace(peds->id(), std::move(peds));
                     break;
                 }
                 case PATH: {
@@ -253,25 +232,22 @@ bool LoaderIDE::load(const std::string &filename) {
                     }
 
                     auto &object = objects[path.ID];
-                    auto instance =
-                        std::dynamic_pointer_cast<ObjectData>(object);
-                    instance->paths.push_back(path);
+                    auto simple = dynamic_cast<SimpleModelInfo*>(object.get());
+                    simple->paths.push_back(path);
 
                     break;
                 }
                 case HIER: {
-                    std::shared_ptr<CutsceneObjectData> cut(
-                        new CutsceneObjectData);
+                    auto hier =
+                        std::unique_ptr<ClumpModelInfo>(new ClumpModelInfo);
 
-                    std::string id;
+                    getline(strstream, buff, ',');
+                    hier->setModelID(std::atoi(buff.c_str()));
 
-                    getline(strstream, id, ',');
-                    getline(strstream, cut->modelName, ',');
-                    getline(strstream, cut->textureName, ',');
+                    getline(strstream, hier->name, ',');
+                    getline(strstream, hier->textureslot, ',');
 
-                    cut->ID = atoi(id.c_str());
-
-                    objects.insert({cut->ID, cut});
+                    objects.emplace(hier->id(), std::move(hier));
                     break;
                 }
             }

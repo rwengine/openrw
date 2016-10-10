@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy) {
         BOOST_REQUIRE(vehicle != nullptr);
 
         BOOST_REQUIRE(vehicle->info != nullptr);
-        BOOST_REQUIRE(vehicle->vehicle != nullptr);
+        BOOST_REQUIRE(vehicle->getVehicle() != nullptr);
 
         // Relies on tile 0,0 being watered...
 

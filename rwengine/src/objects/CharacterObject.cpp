@@ -14,9 +14,9 @@ static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                                 const glm::quat& rot, const ModelRef& model,
-                                 std::shared_ptr<CharacterData> data)
-    : GameObject(engine, pos, rot, model)
+                                 const glm::quat& rot,
+                                 BaseModelInfo *modelinfo)
+    : GameObject(engine, pos, rot, modelinfo)
     , currentState({})
     , currentVehicle(nullptr)
     , currentSeat(0)
@@ -24,7 +24,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
     , motionBlockedByActivity(false)
-    , ped(data)
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)
@@ -66,9 +65,11 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     animations.kd_front = engine->data->animations["kd_front"];
     animations.ko_shot_front = engine->data->animations["ko_shot_front"];
 
-    if (model) {
+    auto info = getModelInfo<PedModelInfo>();
+    if (info->getModel()) {
+        setModel(info->getModel());
         skeleton = new Skeleton;
-        animator = new Animator(model->resource, skeleton);
+        animator = new Animator(getModel(), skeleton);
 
         createActor();
     }
@@ -87,7 +88,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
     }
 
     // Don't create anything without a valid model.
-    if (model) {
+    if (getModel()) {
         btTransform tf;
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));
@@ -205,8 +206,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // If we have to, interrogate the movement animation
     if (movementAnimation != animations.idle) {
-        if (!model->resource->frames[0]->getChildren().empty()) {
-            ModelFrame* root = model->resource->frames[0]->getChildren()[0];
+        if (!getModel()->frames[0]->getChildren().empty()) {
+            ModelFrame* root = getModel()->frames[0]->getChildren()[0];
             auto it = movementAnimation->bones.find(root->getName());
             if (it != movementAnimation->bones.end()) {
                 AnimationBone* rootBone = it->second;
@@ -266,22 +267,20 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
     std::transform(modelName.begin(), modelName.end(), modelName.begin(),
                    ::tolower);
 
-    engine->data->loadDFF(modelName + ".dff");
-    engine->data->loadTXD(modelName + ".txd");
+    /// @todo don't model leak here
 
-    auto& models = engine->data->models;
-    auto mfind = models.find(modelName);
-    if (mfind != models.end()) {
-        model = mfind->second;
-    }
+    engine->data->loadTXD(modelName + ".txd");
+    auto newmodel = engine->data->loadClump(modelName + ".dff");
 
     if (skeleton) {
         delete animator;
         delete skeleton;
     }
 
+    setModel(newmodel);
+
     skeleton = new Skeleton;
-    animator = new Animator(model->resource, skeleton);
+    animator = new Animator(getModel(), skeleton);
 }
 
 void CharacterObject::updateCharacter(float dt) {

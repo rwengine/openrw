@@ -125,8 +125,6 @@ private:
 public:
     static const float DefaultJumpSpeed;
 
-    std::shared_ptr<CharacterData> ped;
-
     btKinematicCharacterController* physCharacter;
     btPairCachingGhostObject* physObject;
     btCapsuleShapeZ* physShape;
@@ -142,8 +140,7 @@ public:
      * @param ped PEDS_t struct to use.
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                    const glm::quat& rot, const ModelRef& model,
-                    std::shared_ptr<CharacterData> data);
+                    const glm::quat& rot, BaseModelInfo* modelinfo);
 
     ~CharacterObject();
 

@@ -179,7 +179,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     RW_UNUSED(controller);
 
     // Boats don't have any kind of entry animation unless you're onboard.
-    if (vehicle->vehicle->type == VehicleData::BOAT) {
+    if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
         character->enterVehicle(vehicle, seat);
         return true;
     }
@@ -344,7 +344,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         anm_exit = character->animations.car_getout_rhs;
     }
 
-    if (vehicle->vehicle->type == VehicleData::BOAT) {
+    if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
         auto ppos = character->getPosition();
         character->enterVehicle(nullptr, seat);
         character->setPosition(ppos);

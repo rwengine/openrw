@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-struct VehicleData;
-
 /**
  * @brief Stores data loaded from handling.cfg
  */

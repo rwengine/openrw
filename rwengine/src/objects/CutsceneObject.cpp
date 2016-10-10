@@ -3,10 +3,19 @@
 #include <objects/CutsceneObject.hpp>
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
-                               const glm::quat &rot, const ModelRef &model)
-    : GameObject(engine, pos, rot, model), _parent(nullptr), _bone(nullptr) {
+                               const glm::quat &rot, Model *model,
+                               BaseModelInfo *modelinfo)
+    : GameObject(engine, pos, rot, modelinfo)
+    , _parent(nullptr)
+    , _bone(nullptr) {
+    if (model) {
+        setModel(model);
+    }
+    else {
+        setModel(getModelInfo<ClumpModelInfo>()->getModel());
+    }
     skeleton = new Skeleton;
-    animator = new Animator(model->resource, skeleton);
+    animator = new Animator(getModel(), skeleton);
 }
 
 CutsceneObject::~CutsceneObject() {

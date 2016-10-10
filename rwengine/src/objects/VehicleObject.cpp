@@ -83,15 +83,14 @@ private:
 };
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
-                             const glm::quat& rot, const ModelRef& model,
-                             VehicleDataHandle data, VehicleInfoHandle info,
-                             const glm::u8vec3& prim, const glm::u8vec3& sec)
-    : GameObject(engine, pos, rot, model)
+                             const glm::quat& rot, BaseModelInfo* modelinfo,
+                             VehicleInfoHandle info, const glm::u8vec3& prim,
+                             const glm::u8vec3& sec)
+    : GameObject(engine, pos, rot, modelinfo)
     , steerAngle(0.f)
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
-    , vehicle(data)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
@@ -99,7 +98,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , physRaycaster(nullptr)
     , physVehicle(nullptr) {
     collision = new CollisionInstance;
-    if (collision->createPhysicsBody(this, data->modelName, nullptr,
+    if (collision->createPhysicsBody(this, modelinfo->name, nullptr,
                                      &info->handling)) {
         physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
         btRaycastVehicle::btVehicleTuning tuning;
@@ -127,7 +126,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
             bool front = connection.y() > 0;
             btWheelInfo& wi = physVehicle->addWheel(
                 connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f),
-                restLength, data->wheelScale / 2.f, tuning, front);
+                restLength, getVehicle()->wheelscale_ / 2.f, tuning, front);
             wi.m_suspensionRestLength1 = restLength;
             wi.m_raycastInfo.m_suspensionLength = 0.f;
 
@@ -153,7 +152,9 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
         // Hide all LOD and damage frames.
         skeleton = new Skeleton;
 
-        for (ModelFrame* frame : model->resource->frames) {
+        setModel(getVehicle()->getModel());
+
+        for (ModelFrame* frame : getModel()->frames) {
             auto& name = frame->getName();
             bool isDam = name.find("_dam") != name.npos;
             bool isLod = name.find("lo") != name.npos;
@@ -282,7 +283,7 @@ void VehicleObject::tickPhysics(float dt) {
             seat.second->updateTransform(passPosition, getRotation());
         }
 
-        if (vehicle->type == VehicleData::BOAT) {
+        if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
             if (isInWater()) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 float steer =
@@ -356,6 +357,7 @@ void VehicleObject::tickPhysics(float dt) {
             }
         }
 
+        auto isBoat = getVehicle()->vehicletype_ == VehicleModelInfo::BOAT;
         if (inWater) {
             // Ensure that vehicles don't fall asleep at the top of a wave.
             if (!collision->getBulletBody()->isActive()) {
@@ -367,13 +369,11 @@ void VehicleObject::tickPhysics(float dt) {
             float oZ = 0.f;
             oZ = -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
 
-            if (vehicle->type != VehicleData::BOAT) {
+            if (isBoat) {
+                oZ = 0.f;
+            } else {
                 // Damper motion
                 collision->getBulletBody()->setDamping(0.95f, 0.9f);
-            }
-
-            if (vehicle->type == VehicleData::BOAT) {
-                oZ = 0.f;
             }
 
             // Boats, Buoyancy offset is affected by the orientation of the
@@ -399,7 +399,7 @@ void VehicleObject::tickPhysics(float dt) {
             applyWaterFloat(vRt);
             applyWaterFloat(vLeft);
         } else {
-            if (vehicle->type == VehicleData::BOAT) {
+            if (isBoat) {
                 collision->getBulletBody()->setDamping(0.1f, 0.8f);
             } else {
                 collision->getBulletBody()->setDamping(0.05f, 0.0f);
@@ -556,7 +556,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
             if (skeleton->getData(p->normal->getIndex()).enabled) {
                 auto& geom =
-                    model->resource->geometries[p->normal->getGeometries()[0]];
+                    getModel()->geometries[p->normal->getGeometries()[0]];
                 auto pp =
                     p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
                 float td = glm::distance(
@@ -680,7 +680,7 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     if (okframe->getGeometries().size() == 0) return;
 
-    auto& geom = model->resource->geometries[okframe->getGeometries()[0]];
+    auto& geom = getModel()->geometries[okframe->getGeometries()[0]];
     auto gbounds = geom->geometryBounds;
 
     if (fn.find("door") != fn.npos) {
