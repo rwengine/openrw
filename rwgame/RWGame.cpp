@@ -765,15 +765,11 @@ void RWGame::renderDebugStats(float time) {
     }
 
     std::stringstream ss;
-    ss << "Frametime: " << time_ms << " (FPS " << (1.f / time) << ")\n";
-    ss << "Average (per " << average_every_frame
-       << " frames); Frametime: " << time_average << " (FPS "
-       << (1000.f / time_average) << ")\n";
-    ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
-    ss << " Texture binds: " << renderer->getRenderer()->getTextureCount()
-       << "\n";
-    ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount()
-       << "\n";
+    ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
+       << "Frame: " << time_ms << "ms\n"
+       << "Draws/Textures/Buffers: " << lastDraws << "/"
+       << renderer->getRenderer()->getTextureCount() << "/"
+       << renderer->getRenderer()->getBufferCount() << "\n";
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
