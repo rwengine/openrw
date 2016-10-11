@@ -138,7 +138,7 @@ private:
     void tick(float dt);
     void render(float alpha, float dt);
 
-    void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
+    void renderDebugStats(float time);
     void renderDebugPaths(float time);
     void renderProfile();
 

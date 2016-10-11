@@ -719,12 +719,12 @@ void RWGame::render(float alpha, float time) {
     renderer->renderWorld(world, viewCam, alpha);
     RW_PROFILE_END();
 
-    auto rendertime = renderer->getRenderer()->popDebugGroup();
+    renderer->getRenderer()->popDebugGroup();
 
     RW_PROFILE_BEGIN("debug");
     switch (debugview_) {
         case DebugViewMode::General:
-            renderDebugStats(time, rendertime);
+            renderDebugStats(time);
             break;
         case DebugViewMode::Physics:
             if (world) {
@@ -746,8 +746,7 @@ void RWGame::render(float alpha, float time) {
     drawOnScreenText(world, renderer);
 }
 
-void RWGame::renderDebugStats(float time,
-                              Renderer::ProfileInfo& worldRenderTime) {
+void RWGame::renderDebugStats(float time) {
     // Turn time into milliseconds
     float time_ms = time * 1000.f;
     constexpr size_t average_every_frame = 15;
@@ -765,13 +764,6 @@ void RWGame::renderDebugStats(float time,
         time_average /= average_every_frame;
     }
 
-    std::map<std::string, Renderer::ProfileInfo*> profGroups{
-        {"Objects", &renderer->profObjects},
-        {"Effects", &renderer->profEffects},
-        {"Sky", &renderer->profSky},
-        {"Water", &renderer->profWater},
-    };
-
     std::stringstream ss;
     ss << "Frametime: " << time_ms << " (FPS " << (1.f / time) << ")\n";
     ss << "Average (per " << average_every_frame
@@ -782,42 +774,6 @@ void RWGame::renderDebugStats(float time,
        << "\n";
     ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount()
        << "\n";
-    ss << " World time: " << (worldRenderTime.duration / 1000000) << "ms\n";
-    for (auto& perf : profGroups) {
-        ss << "  " << perf.first << ": " << perf.second->draws << " draws "
-           << perf.second->primitives << " prims "
-           << (perf.second->duration / 1000000) << "ms\n";
-    }
-
-    // Count the number of interesting objects.
-    int peds = 0, cars = 0;
-    for (auto& object : world->allObjects) {
-        switch (object->type()) {
-            case GameObject::Character:
-                peds++;
-                break;
-            case GameObject::Vehicle:
-                cars++;
-                break;
-            default:
-                break;
-        }
-    }
-
-    ss << "P " << peds << " V " << cars << "\n";
-
-    if (state->playerObject) {
-        ss << "Player (" << state->playerObject << ")\n";
-        auto object = world->pedestrianPool.find(state->playerObject);
-        auto player = static_cast<CharacterObject*>(object)->controller;
-        ss << "Player Activity: ";
-        if (player->getCurrentActivity()) {
-            ss << player->getCurrentActivity()->name();
-        } else {
-            ss << "Idle";
-        }
-        ss << std::endl;
-    }
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
