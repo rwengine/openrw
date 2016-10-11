@@ -33,9 +33,16 @@ class RWGame {
 
     bool inFocus = true;
     ViewCamera lastCam, nextCam;
-    bool showDebugStats = false;
-    bool showDebugPaths = false;
-    bool showDebugPhysics = false;
+
+    enum class DebugViewMode {
+        Disabled,
+        General,
+        Physics,
+        Navigation,
+        Objects
+    };
+
+    DebugViewMode debugview_ = DebugViewMode::Disabled;
     int lastDraws;  /// Number of draws issued for the last frame.
 
     std::string cheatInputWindow = std::string(32, ' ');

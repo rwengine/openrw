@@ -722,19 +722,24 @@ void RWGame::render(float alpha, float time) {
     auto rendertime = renderer->getRenderer()->popDebugGroup();
 
     RW_PROFILE_BEGIN("debug");
-    if (showDebugPaths) {
-        renderDebugPaths(time);
-    }
-
-    if (showDebugStats) {
-        renderDebugStats(time, rendertime);
-    }
-
-    if (showDebugPhysics) {
-        if (world) {
-            world->dynamicsWorld->debugDrawWorld();
-            debug->flush(renderer);
-        }
+    switch (debugview_) {
+        case DebugViewMode::General:
+            renderDebugStats(time, rendertime);
+            break;
+        case DebugViewMode::Physics:
+            if (world) {
+                world->dynamicsWorld->debugDrawWorld();
+                debug->flush(renderer);
+            }
+            break;
+        case DebugViewMode::Navigation:
+            renderDebugPaths(time);
+            break;
+        case DebugViewMode::Objects:
+            /// @todo
+            break;
+        default:
+            break;
     }
     RW_PROFILE_END();
 
@@ -960,6 +965,10 @@ void RWGame::renderProfile() {
 }
 
 void RWGame::globalKeyEvent(const SDL_Event& event) {
+    const auto toggle_debug = [&](DebugViewMode m) {
+        debugview_ = debugview_ == m ? DebugViewMode::Disabled : m;
+    };
+
     switch (event.key.keysym.sym) {
         case SDLK_LEFTBRACKET:
             world->offsetGameTime(-30);
@@ -974,13 +983,16 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
             timescale *= 2.0f;
             break;
         case SDLK_F1:
-            showDebugStats = !showDebugStats;
+            toggle_debug(DebugViewMode::General);
             break;
         case SDLK_F2:
-            showDebugPaths = !showDebugPaths;
+            toggle_debug(DebugViewMode::Navigation);
             break;
         case SDLK_F3:
-            showDebugPhysics = !showDebugPhysics;
+            toggle_debug(DebugViewMode::Physics);
+            break;
+        case SDLK_F4:
+            toggle_debug(DebugViewMode::Objects);
             break;
         default:
             break;
