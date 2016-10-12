@@ -736,7 +736,7 @@ void RWGame::render(float alpha, float time) {
             renderDebugPaths(time);
             break;
         case DebugViewMode::Objects:
-            /// @todo
+            renderDebugObjects(time);
             break;
         default:
             break;
@@ -867,6 +867,25 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     debug->flush(renderer);
+}
+
+void RWGame::renderDebugObjects(float time) {
+    RW_UNUSED(time);
+
+    std::stringstream ss;
+
+    ss << "Models: " << data->modelinfo.size() << "\n"
+       << "Dynamic Objects:\n"
+       << " Vehicles: " << world->vehiclePool.objects.size() << "\n"
+       << " Peds: " << world->pedestrianPool.objects.size() << "\n";
+
+    TextRenderer::TextInfo ti;
+    ti.text = GameStringUtil::fromString(ss.str());
+    ti.font = 2;
+    ti.screenPosition = glm::vec2(10.f, 10.f);
+    ti.size = 15.f;
+    ti.baseColour = glm::u8vec3(255);
+    renderer->text.renderText(ti);
 }
 
 void RWGame::renderProfile() {
