@@ -140,7 +140,7 @@ private:
 
     void renderDebugStats(float time);
     void renderDebugPaths(float time);
-    void renderDebugObjects(float time);
+    void renderDebugObjects(float time, ViewCamera& camera);
     void renderProfile();
 
     void handleCheatInput(char symbol);

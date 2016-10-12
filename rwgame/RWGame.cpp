@@ -736,7 +736,7 @@ void RWGame::render(float alpha, float time) {
             renderDebugPaths(time);
             break;
         case DebugViewMode::Objects:
-            renderDebugObjects(time);
+            renderDebugObjects(time, viewCam);
             break;
         default:
             break;
@@ -869,7 +869,7 @@ void RWGame::renderDebugPaths(float time) {
     debug->flush(renderer);
 }
 
-void RWGame::renderDebugObjects(float time) {
+void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     RW_UNUSED(time);
 
     std::stringstream ss;
@@ -886,6 +886,55 @@ void RWGame::renderDebugObjects(float time) {
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
     renderer->text.renderText(ti);
+
+    // Render worldspace overlay for nearby objects
+    constexpr float kNearbyDistance = 25.f;
+    const auto& view = camera.position;
+    const auto& model = camera.getView();
+    const auto& proj = camera.frustum.projection();
+    const auto& size = getWindow().getSize();
+    glm::vec4 viewport(0.f, 0.f, size.x, size.y);
+    auto isnearby = [&](GameObject* o) {
+        return glm::distance2(o->getPosition(), view) <
+               kNearbyDistance * kNearbyDistance;
+    };
+    auto showdata = [&](GameObject* o, std::stringstream& ss) {
+        auto screen = glm::project(o->getPosition(), model, proj, viewport);
+        if (screen.z >= 1.f) {
+            return;
+        }
+        ti.text = GameStringUtil::fromString(ss.str());
+        screen.y = viewport.w - screen.y;
+        ti.screenPosition = glm::vec2(screen);
+        ti.size = 10.f;
+        renderer->text.renderText(ti);
+    };
+
+    for (auto& p : world->vehiclePool.objects) {
+        if (!isnearby(p.second)) continue;
+        auto v = static_cast<VehicleObject*>(p.second);
+
+        std::stringstream ss;
+        ss << v->getVehicle()->vehiclename_ << "\n"
+           << (v->isFlipped() ? "Flipped" : "Upright") << "\n"
+           << (v->isStopped() ? "Stopped" : "Moving") << "\n"
+           << v->getVelocity() << "m/s\n";
+
+        showdata(v, ss);
+    }
+    for (auto& p : world->pedestrianPool.objects) {
+        if (!isnearby(p.second)) continue;
+        auto c = static_cast<CharacterObject*>(p.second);
+        const auto& state = c->getCurrentState();
+        auto act = c->controller->getCurrentActivity();
+
+        std::stringstream ss;
+        ss << "Health: " << state.health << " (" << state.armour << ")\n"
+           << (c->isAlive() ? "Alive" : "Dead") << "\n"
+           << "Activity: " << (act ? act->name() : "Idle") << "\n";
+
+        showdata(c, ss);
+    }
 }
 
 void RWGame::renderProfile() {
