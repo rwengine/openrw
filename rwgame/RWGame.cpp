@@ -719,30 +719,34 @@ void RWGame::render(float alpha, float time) {
     renderer->renderWorld(world, viewCam, alpha);
     RW_PROFILE_END();
 
-    auto rendertime = renderer->getRenderer()->popDebugGroup();
+    renderer->getRenderer()->popDebugGroup();
 
     RW_PROFILE_BEGIN("debug");
-    if (showDebugPaths) {
-        renderDebugPaths(time);
-    }
-
-    if (showDebugStats) {
-        renderDebugStats(time, rendertime);
-    }
-
-    if (showDebugPhysics) {
-        if (world) {
-            world->dynamicsWorld->debugDrawWorld();
-            debug->flush(renderer);
-        }
+    switch (debugview_) {
+        case DebugViewMode::General:
+            renderDebugStats(time);
+            break;
+        case DebugViewMode::Physics:
+            if (world) {
+                world->dynamicsWorld->debugDrawWorld();
+                debug->flush(renderer);
+            }
+            break;
+        case DebugViewMode::Navigation:
+            renderDebugPaths(time);
+            break;
+        case DebugViewMode::Objects:
+            renderDebugObjects(time, viewCam);
+            break;
+        default:
+            break;
     }
     RW_PROFILE_END();
 
     drawOnScreenText(world, renderer);
 }
 
-void RWGame::renderDebugStats(float time,
-                              Renderer::ProfileInfo& worldRenderTime) {
+void RWGame::renderDebugStats(float time) {
     // Turn time into milliseconds
     float time_ms = time * 1000.f;
     constexpr size_t average_every_frame = 15;
@@ -760,59 +764,12 @@ void RWGame::renderDebugStats(float time,
         time_average /= average_every_frame;
     }
 
-    std::map<std::string, Renderer::ProfileInfo*> profGroups{
-        {"Objects", &renderer->profObjects},
-        {"Effects", &renderer->profEffects},
-        {"Sky", &renderer->profSky},
-        {"Water", &renderer->profWater},
-    };
-
     std::stringstream ss;
-    ss << "Frametime: " << time_ms << " (FPS " << (1.f / time) << ")\n";
-    ss << "Average (per " << average_every_frame
-       << " frames); Frametime: " << time_average << " (FPS "
-       << (1000.f / time_average) << ")\n";
-    ss << "Draws: " << lastDraws << " (" << renderer->culled << " Culls)\n";
-    ss << " Texture binds: " << renderer->getRenderer()->getTextureCount()
-       << "\n";
-    ss << " Buffer binds: " << renderer->getRenderer()->getBufferCount()
-       << "\n";
-    ss << " World time: " << (worldRenderTime.duration / 1000000) << "ms\n";
-    for (auto& perf : profGroups) {
-        ss << "  " << perf.first << ": " << perf.second->draws << " draws "
-           << perf.second->primitives << " prims "
-           << (perf.second->duration / 1000000) << "ms\n";
-    }
-
-    // Count the number of interesting objects.
-    int peds = 0, cars = 0;
-    for (auto& object : world->allObjects) {
-        switch (object->type()) {
-            case GameObject::Character:
-                peds++;
-                break;
-            case GameObject::Vehicle:
-                cars++;
-                break;
-            default:
-                break;
-        }
-    }
-
-    ss << "P " << peds << " V " << cars << "\n";
-
-    if (state->playerObject) {
-        ss << "Player (" << state->playerObject << ")\n";
-        auto object = world->pedestrianPool.find(state->playerObject);
-        auto player = static_cast<CharacterObject*>(object)->controller;
-        ss << "Player Activity: ";
-        if (player->getCurrentActivity()) {
-            ss << player->getCurrentActivity()->name();
-        } else {
-            ss << "Idle";
-        }
-        ss << std::endl;
-    }
+    ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
+       << "Frame: " << time_ms << "ms\n"
+       << "Draws/Textures/Buffers: " << lastDraws << "/"
+       << renderer->getRenderer()->getTextureCount() << "/"
+       << renderer->getRenderer()->getBufferCount() << "\n";
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
@@ -912,6 +869,74 @@ void RWGame::renderDebugPaths(float time) {
     debug->flush(renderer);
 }
 
+void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
+    RW_UNUSED(time);
+
+    std::stringstream ss;
+
+    ss << "Models: " << data->modelinfo.size() << "\n"
+       << "Dynamic Objects:\n"
+       << " Vehicles: " << world->vehiclePool.objects.size() << "\n"
+       << " Peds: " << world->pedestrianPool.objects.size() << "\n";
+
+    TextRenderer::TextInfo ti;
+    ti.text = GameStringUtil::fromString(ss.str());
+    ti.font = 2;
+    ti.screenPosition = glm::vec2(10.f, 10.f);
+    ti.size = 15.f;
+    ti.baseColour = glm::u8vec3(255);
+    renderer->text.renderText(ti);
+
+    // Render worldspace overlay for nearby objects
+    constexpr float kNearbyDistance = 25.f;
+    const auto& view = camera.position;
+    const auto& model = camera.getView();
+    const auto& proj = camera.frustum.projection();
+    const auto& size = getWindow().getSize();
+    glm::vec4 viewport(0.f, 0.f, size.x, size.y);
+    auto isnearby = [&](GameObject* o) {
+        return glm::distance2(o->getPosition(), view) <
+               kNearbyDistance * kNearbyDistance;
+    };
+    auto showdata = [&](GameObject* o, std::stringstream& ss) {
+        auto screen = glm::project(o->getPosition(), model, proj, viewport);
+        if (screen.z >= 1.f) {
+            return;
+        }
+        ti.text = GameStringUtil::fromString(ss.str());
+        screen.y = viewport.w - screen.y;
+        ti.screenPosition = glm::vec2(screen);
+        ti.size = 10.f;
+        renderer->text.renderText(ti);
+    };
+
+    for (auto& p : world->vehiclePool.objects) {
+        if (!isnearby(p.second)) continue;
+        auto v = static_cast<VehicleObject*>(p.second);
+
+        std::stringstream ss;
+        ss << v->getVehicle()->vehiclename_ << "\n"
+           << (v->isFlipped() ? "Flipped" : "Upright") << "\n"
+           << (v->isStopped() ? "Stopped" : "Moving") << "\n"
+           << v->getVelocity() << "m/s\n";
+
+        showdata(v, ss);
+    }
+    for (auto& p : world->pedestrianPool.objects) {
+        if (!isnearby(p.second)) continue;
+        auto c = static_cast<CharacterObject*>(p.second);
+        const auto& state = c->getCurrentState();
+        auto act = c->controller->getCurrentActivity();
+
+        std::stringstream ss;
+        ss << "Health: " << state.health << " (" << state.armour << ")\n"
+           << (c->isAlive() ? "Alive" : "Dead") << "\n"
+           << "Activity: " << (act ? act->name() : "Idle") << "\n";
+
+        showdata(c, ss);
+    }
+}
+
 void RWGame::renderProfile() {
 #if RW_PROFILER
     auto& frame = perf::Profiler::get().getFrame();
@@ -960,6 +985,10 @@ void RWGame::renderProfile() {
 }
 
 void RWGame::globalKeyEvent(const SDL_Event& event) {
+    const auto toggle_debug = [&](DebugViewMode m) {
+        debugview_ = debugview_ == m ? DebugViewMode::Disabled : m;
+    };
+
     switch (event.key.keysym.sym) {
         case SDLK_LEFTBRACKET:
             world->offsetGameTime(-30);
@@ -974,13 +1003,16 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
             timescale *= 2.0f;
             break;
         case SDLK_F1:
-            showDebugStats = !showDebugStats;
+            toggle_debug(DebugViewMode::General);
             break;
         case SDLK_F2:
-            showDebugPaths = !showDebugPaths;
+            toggle_debug(DebugViewMode::Navigation);
             break;
         case SDLK_F3:
-            showDebugPhysics = !showDebugPhysics;
+            toggle_debug(DebugViewMode::Physics);
+            break;
+        case SDLK_F4:
+            toggle_debug(DebugViewMode::Objects);
             break;
         default:
             break;
