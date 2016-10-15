@@ -2,7 +2,6 @@
 #define _RWGAME_HPP_
 
 #include <chrono>
-#include <core/Logger.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
@@ -15,9 +14,10 @@
 #include "SDL.h"
 
 class PlayerController;
+class Logger;
 
 class RWGame {
-    Logger log;
+    Logger& log;
     GameConfig config{"openrw.ini"};
     GameState* state = nullptr;
     GameData* data = nullptr;
@@ -51,7 +51,7 @@ class RWGame {
     float timescale = 1.f;
 
 public:
-    RWGame(int argc, char* argv[]);
+    RWGame(Logger& log, int argc, char* argv[]);
     ~RWGame();
 
     int run();

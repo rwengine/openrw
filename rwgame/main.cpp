@@ -2,9 +2,15 @@
 #include "RWGame.hpp"
 #include "SDL.h"
 
+#include <core/Logger.hpp>
+
 int main(int argc, char* argv[]) {
+    // Initialise Logging before anything else happens
+    StdOutReciever logstdout;
+    Logger logger({ &logstdout });
+
     try {
-        RWGame game(argc, argv);
+        RWGame game(logger, argc, argv);
 
         return game.run();
     } catch (std::invalid_argument& ex) {
@@ -20,7 +26,7 @@ int main(int argc, char* argv[]) {
 
         const char* kErrorTitle = "Fatal Error";
 
-        std::cerr << kErrorTitle << "\n" << ex.what() << std::endl;
+        logger.error("exception", ex.what());
 
         if (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, kErrorTitle,
                                      ex.what(), NULL) < 0) {

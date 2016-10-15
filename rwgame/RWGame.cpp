@@ -7,6 +7,7 @@
 #include "states/MenuState.hpp"
 
 #include <core/Profiler.hpp>
+#include <core/Logger.hpp>
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -42,9 +43,7 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 
 DebugDraw* debug = nullptr;
 
-StdOutReciever logPrinter;
-
-RWGame::RWGame(int argc, char* argv[]) {
+RWGame::RWGame(Logger& log, int argc, char* argv[]) : log(log) {
     if (!config.isValid()) {
         throw std::runtime_error("Invalid configuration file at: " +
                                  config.getConfigFile());
@@ -113,7 +112,6 @@ RWGame::RWGame(int argc, char* argv[]) {
 
     work = new WorkContext();
 
-    log.addReciever(&logPrinter);
     log.info("Game", "Game directory: " + config.getGameDataPath());
     log.info("Game", "Build: " + kBuildStr);
 
