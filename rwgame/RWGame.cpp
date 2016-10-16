@@ -12,8 +12,6 @@
 #include <engine/GameWorld.hpp>
 #include <engine/SaveGame.hpp>
 #include <objects/GameObject.hpp>
-#include <render/DebugDraw.hpp>
-#include <render/GameRenderer.hpp>
 
 #include <script/ScriptMachine.hpp>
 #include <script/modules/GTA3Module.hpp>
@@ -33,10 +31,11 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
-DebugDraw* debug = nullptr;
-
 RWGame::RWGame(Logger& log, int argc, char* argv[])
-    : GameBase(log, argc, argv) {
+    : GameBase(log, argc, argv)
+    , data(&log, &work, config.getGameDataPath())
+    , renderer(&log, &data) {
+
     bool newgame = options.count("newgame");
     bool test = options.count("test");
     std::string startSave(
@@ -45,8 +44,6 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                               ? options["benchmark"].as<std::string>()
                               : "");
 
-    work = new WorkContext();
-
     log.info("Game", "Game directory: " + config.getGameDataPath());
 
     if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
@@ -54,40 +51,34 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                                  config.getGameDataPath());
     }
 
-    data = new GameData(&log, work, config.getGameDataPath());
-
-    data->load();
-
-    // Initialize renderer
-    renderer = new GameRenderer(&log, data);
+    data.load();
 
     for (const auto& p : kSpecialModels) {
-        auto model = data->loadClump(p.second);
-        renderer->setSpecialModel(p.first, model);
+        auto model = data.loadClump(p.second);
+        renderer.setSpecialModel(p.first, model);
     }
 
     // Set up text renderer
-    renderer->text.setFontTexture(0, "pager");
-    renderer->text.setFontTexture(1, "font1");
-    renderer->text.setFontTexture(2, "font2");
+    renderer.text.setFontTexture(0, "pager");
+    renderer.text.setFontTexture(1, "font1");
+    renderer.text.setFontTexture(2, "font2");
 
-    debug = new DebugDraw;
-    debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe |
-                        btIDebugDraw::DBG_DrawConstraints |
-                        btIDebugDraw::DBG_DrawConstraintLimits);
-    debug->setShaderProgram(renderer->worldProg);
+    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
+                       btIDebugDraw::DBG_DrawConstraints |
+                       btIDebugDraw::DBG_DrawConstraintLimits);
+    debug.setShaderProgram(renderer.worldProg);
 
-    data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
+    data.loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
-    data->loadGXT("text/" + config.getGameLanguage() + ".gxt");
+    data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
-    getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater,
+    getRenderer().water.setWaterTable(data.waterHeights, 48, data.realWater,
                                        128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
         std::string num = (m < 10 ? "0" : "");
         std::string name = "radar" + num + std::to_string(m);
-        data->loadTXD(name + ".txd");
+        data.loadTXD(name + ".txd");
     }
 
     auto loading = new LoadingState(this);
@@ -112,22 +103,16 @@ RWGame::~RWGame() {
     log.info("Game", "Beginning cleanup");
 
     log.info("Game", "Stopping work queue");
-    work->stop();
+    work.stop();
 
     log.info("Game", "Cleaning up scripts");
     delete script;
-
-    log.info("Game", "Cleaning up renderer");
-    delete renderer;
 
     log.info("Game", "Cleaning up world");
     delete world;
 
     log.info("Game", "Cleaning up state");
     delete state;
-
-    log.info("Game", "Cleaning up work queue");
-    delete work;
 }
 
 void RWGame::newGame() {
@@ -137,8 +122,8 @@ void RWGame::newGame() {
     }
 
     state = new GameState();
-    world = new GameWorld(&log, work, data);
-    world->dynamicsWorld->setDebugDrawer(debug);
+    world = new GameWorld(&log, &work, &data);
+    world->dynamicsWorld->setDebugDrawer(&debug);
 
     // Associate the new world with the new state and vice versa
     state->world = world;
@@ -481,7 +466,7 @@ int RWGame::run() {
 
         RW_PROFILE_BEGIN("state");
         if (StateManager::get().states.size() > 0) {
-            StateManager::get().draw(renderer);
+            StateManager::get().draw(&renderer);
         }
         RW_PROFILE_END();
         RW_PROFILE_END();
@@ -572,12 +557,12 @@ void RWGame::tick(float dt) {
 }
 
 void RWGame::render(float alpha, float time) {
-    lastDraws = getRenderer()->getRenderer()->getDrawCount();
+    lastDraws = getRenderer().getRenderer()->getDrawCount();
 
-    getRenderer()->getRenderer()->swap();
+    getRenderer().getRenderer()->swap();
 
     glm::ivec2 windowSize = getWindow().getSize();
-    renderer->setViewport(windowSize.x, windowSize.y);
+    renderer.setViewport(windowSize.x, windowSize.y);
 
     ViewCamera viewCam;
     viewCam.frustum.fov = glm::radians(90.f);
@@ -638,13 +623,13 @@ void RWGame::render(float alpha, float time) {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    renderer->getRenderer()->pushDebugGroup("World");
+    renderer.getRenderer()->pushDebugGroup("World");
 
     RW_PROFILE_BEGIN("world");
-    renderer->renderWorld(world, viewCam, alpha);
+    renderer.renderWorld(world, viewCam, alpha);
     RW_PROFILE_END();
 
-    renderer->getRenderer()->popDebugGroup();
+    renderer.getRenderer()->popDebugGroup();
 
     RW_PROFILE_BEGIN("debug");
     switch (debugview_) {
@@ -654,7 +639,7 @@ void RWGame::render(float alpha, float time) {
         case DebugViewMode::Physics:
             if (world) {
                 world->dynamicsWorld->debugDrawWorld();
-                debug->flush(renderer);
+                debug.flush(&renderer);
             }
             break;
         case DebugViewMode::Navigation:
@@ -668,7 +653,7 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    drawOnScreenText(world, renderer);
+    drawOnScreenText(world, &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
@@ -693,8 +678,8 @@ void RWGame::renderDebugStats(float time) {
     ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
        << "Frame: " << time_ms << "ms\n"
        << "Draws/Textures/Buffers: " << lastDraws << "/"
-       << renderer->getRenderer()->getTextureCount() << "/"
-       << renderer->getRenderer()->getBufferCount() << "\n";
+       << renderer.getRenderer()->getTextureCount() << "/"
+       << renderer.getRenderer()->getBufferCount() << "\n";
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
@@ -702,7 +687,7 @@ void RWGame::renderDebugStats(float time) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer->text.renderText(ti);
+    renderer.text.renderText(ti);
 
     /*while( engine->log.size() > 0 && engine->log.front().time + 10.f <
     engine->gameTime ) {
@@ -744,16 +729,16 @@ void RWGame::renderDebugPaths(float time) {
     for (AIGraphNode* n : world->aigraph.nodes) {
         btVector3 p(n->position.x, n->position.y, n->position.z);
         auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
-        debug->drawLine(p - btVector3(0.f, 0.f, 1.f),
-                        p + btVector3(0.f, 0.f, 1.f), col);
-        debug->drawLine(p - btVector3(1.f, 0.f, 0.f),
-                        p + btVector3(1.f, 0.f, 0.f), col);
-        debug->drawLine(p - btVector3(0.f, 1.f, 0.f),
-                        p + btVector3(0.f, 1.f, 0.f), col);
+        debug.drawLine(p - btVector3(0.f, 0.f, 1.f),
+                       p + btVector3(0.f, 0.f, 1.f), col);
+        debug.drawLine(p - btVector3(1.f, 0.f, 0.f),
+                       p + btVector3(1.f, 0.f, 0.f), col);
+        debug.drawLine(p - btVector3(0.f, 1.f, 0.f),
+                       p + btVector3(0.f, 1.f, 0.f), col);
 
         for (AIGraphNode* c : n->connections) {
             btVector3 f(c->position.x, c->position.y, c->position.z);
-            debug->drawLine(p, f, col);
+            debug.drawLine(p, f, col);
         }
     }
 
@@ -764,13 +749,13 @@ void RWGame::renderDebugPaths(float time) {
         btVector3 maxColor(0.f, 1.f, 0.f);
         btVector3 min(garage.min.x, garage.min.y, garage.min.z);
         btVector3 max(garage.max.x, garage.max.y, garage.max.z);
-        debug->drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
-        debug->drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
-        debug->drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);
+        debug.drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
+        debug.drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
+        debug.drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);
 
-        debug->drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
-        debug->drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
-        debug->drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
+        debug.drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
+        debug.drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
+        debug.drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
     }
 
     // Draw vehicle generators
@@ -786,12 +771,12 @@ void RWGame::renderDebugPaths(float time) {
                          .rotate(btVector3(0.f, 0.f, 1.f), heading);
         auto left = btVector3(-0.15f, -0.15f, 0.f)
                         .rotate(btVector3(0.f, 0.f, 1.f), heading);
-        debug->drawLine(position, position + back, color);
-        debug->drawLine(position, position + right, color);
-        debug->drawLine(position, position + left, color);
+        debug.drawLine(position, position + back, color);
+        debug.drawLine(position, position + right, color);
+        debug.drawLine(position, position + left, color);
     }
 
-    debug->flush(renderer);
+    debug.flush(&renderer);
 }
 
 void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
@@ -799,7 +784,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
 
     std::stringstream ss;
 
-    ss << "Models: " << data->modelinfo.size() << "\n"
+    ss << "Models: " << data.modelinfo.size() << "\n"
        << "Dynamic Objects:\n"
        << " Vehicles: " << world->vehiclePool.objects.size() << "\n"
        << " Peds: " << world->pedestrianPool.objects.size() << "\n";
@@ -810,7 +795,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer->text.renderText(ti);
+    renderer.text.renderText(ti);
 
     // Render worldspace overlay for nearby objects
     constexpr float kNearbyDistance = 25.f;
@@ -832,7 +817,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         screen.y = viewport.w - screen.y;
         ti.screenPosition = glm::vec2(screen);
         ti.size = 10.f;
-        renderer->text.renderText(ti);
+        renderer.text.renderText(ti);
     };
 
     for (auto& p : world->vehiclePool.objects) {

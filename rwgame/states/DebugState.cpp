@@ -115,7 +115,7 @@ Menu* DebugState::createDebugMenu() {
                              kDebugEntryHeight));
     m->addEntry(Menu::lambda(
         "Cull Here",
-        [=] { game->getRenderer()->setCullOverride(true, _debugCam); },
+        [=] { game->getRenderer().setCullOverride(true, _debugCam); },
         kDebugEntryHeight));
 
     // Optional block if the player is in a vehicle

@@ -5,6 +5,7 @@
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/GameRenderer.hpp>
+#include <render/DebugDraw.hpp>
 #include <script/ScriptMachine.hpp>
 #include "game.hpp"
 
@@ -13,14 +14,14 @@
 class PlayerController;
 
 class RWGame : public GameBase {
+    WorkContext work;
+    GameData data;
+    GameRenderer renderer;
+    DebugDraw debug;
+
     GameState* state = nullptr;
-    GameData* data = nullptr;
     GameWorld* world = nullptr;
-    // must be allocated after Logger setup.
-    GameRenderer* renderer = nullptr;
     ScriptMachine* script = nullptr;
-    // Background worker
-    WorkContext* work = nullptr;
     std::chrono::steady_clock clock;
     std::chrono::steady_clock::time_point last_clock_time;
 
@@ -62,11 +63,11 @@ public:
         return world;
     }
 
-    GameData* getGameData() const {
+    const GameData& getGameData() const {
         return data;
     }
 
-    GameRenderer* getRenderer() const {
+    GameRenderer& getRenderer() {
         return renderer;
     }
 

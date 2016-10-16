@@ -4,8 +4,7 @@
 #include "RWGame.hpp"
 
 PauseState::PauseState(RWGame* game) : State(game) {
-    auto data = game->getGameData();
-    auto& t = data->texts;
+    auto& t = game->getGameData().texts;
 
     Menu* m = new Menu;
     m->offset = glm::vec2(200.f, 200.f);
@@ -42,7 +41,7 @@ void PauseState::draw(GameRenderer* r) {
     map.screenPosition = glm::vec2(vp.x / 2, vp.y / 2);
     map.screenSize = std::max(vp.x, vp.y);
 
-    game->getRenderer()->map.draw(getWorld(), map);
+    game->getRenderer().map.draw(getWorld(), map);
 
     State::draw(r);
 }

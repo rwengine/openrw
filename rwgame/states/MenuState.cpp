@@ -11,8 +11,7 @@ MenuState::MenuState(RWGame* game) : State(game) {
 }
 
 void MenuState::enterMainMenu() {
-    auto data = game->getGameData();
-    auto& t = data->texts;
+    auto& t = game->getGameData().texts;
 
     Menu* m = new Menu;
     m->offset = glm::vec2(200.f, 200.f);
