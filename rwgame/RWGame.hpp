@@ -1,5 +1,5 @@
-#ifndef _RWGAME_HPP_
-#define _RWGAME_HPP_
+#ifndef RWGAME_RWGAME_HPP
+#define RWGAME_RWGAME_HPP
 
 #include <chrono>
 #include <engine/GameData.hpp>
