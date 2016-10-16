@@ -8,24 +8,17 @@
 #include <script/ScriptMachine.hpp>
 #include "game.hpp"
 
-#include "GameConfig.hpp"
-#include "GameWindow.hpp"
-
-#include "SDL.h"
+#include "GameBase.hpp"
 
 class PlayerController;
-class Logger;
 
-class RWGame {
-    Logger& log;
-    GameConfig config{"openrw.ini"};
+class RWGame : public GameBase {
     GameState* state = nullptr;
     GameData* data = nullptr;
     GameWorld* world = nullptr;
     // must be allocated after Logger setup.
     GameRenderer* renderer = nullptr;
     ScriptMachine* script = nullptr;
-    GameWindow* window = nullptr;
     // Background worker
     WorkContext* work = nullptr;
     std::chrono::steady_clock clock;
@@ -77,16 +70,8 @@ public:
         return renderer;
     }
 
-    GameWindow& getWindow() {
-        return *window;
-    }
-
     ScriptMachine* getScript() const {
         return script;
-    }
-
-    const GameConfig& getConfig() const {
-        return config;
     }
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,

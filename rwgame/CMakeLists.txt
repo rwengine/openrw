@@ -8,6 +8,8 @@ set(RWGAME_SOURCES
 
 	main.cpp
 
+	GameBase.hpp
+	GameBase.cpp
 	RWGame.cpp
 
 	GameConfig.cpp

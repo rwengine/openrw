@@ -15,7 +15,5 @@ bool hitWorldRay(const glm::vec3& start, const glm::vec3& direction,
                  GameObject** object = nullptr);
 
 #define GAME_TIMESTEP (1.f / 30.f)
-#define GAME_WINDOW_WIDTH 800
-#define GAME_WINDOW_HEIGHT 600
 
 #endif  // GAME_HPP

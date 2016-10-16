@@ -7,7 +7,6 @@
 #include "states/MenuState.hpp"
 
 #include <core/Profiler.hpp>
-#include <core/Logger.hpp>
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -25,14 +24,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/program_options.hpp>
 #include <functional>
-
-#include "GitSHA1.h"
-
-// Use first 8 chars of git hash as the build string
-const std::string kBuildStr(kGitSHA1Hash, 8);
-const std::string kWindowTitle = "RWGame";
 
 std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
@@ -43,77 +35,19 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 
 DebugDraw* debug = nullptr;
 
-RWGame::RWGame(Logger& log, int argc, char* argv[]) : log(log) {
-    if (!config.isValid()) {
-        throw std::runtime_error("Invalid configuration file at: " +
-                                 config.getConfigFile());
-    }
-
-    size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
-    bool fullscreen = false;
-    bool newgame = false;
-    bool test = false;
-    bool help = false;
-    std::string startSave;
-    std::string benchFile;
-
-    // Define and parse command line options
-    namespace po = boost::program_options;
-    po::options_description desc("Available options");
-    desc.add_options()("help", "Show this help message")(
-        "width,w", po::value<size_t>(), "Game resolution width in pixel")(
-        "height,h", po::value<size_t>(), "Game resolution height in pixel")(
-        "fullscreen,f", "Enable fullscreen mode")("newgame,n",
-                                                  "Directly start a new game")(
-        "test,t", "Starts a new game in a test location")(
-        "load,l", po::value<std::string>(), "Load save file")(
-        "benchmark,b", po::value<std::string>(), "Run benchmark from file");
-
-    po::variables_map vm;
-    try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-        po::notify(vm);
-    } catch (po::error& ex) {
-        help = true;
-        std::cout << "Error parsing arguments: " << ex.what() << std::endl;
-    }
-
-    if (help || vm.count("help")) {
-        std::cout << desc;
-        throw std::invalid_argument("");
-    }
-    if (vm.count("width")) {
-        w = vm["width"].as<size_t>();
-    }
-    if (vm.count("height")) {
-        h = vm["height"].as<size_t>();
-    }
-    if (vm.count("fullscreen")) {
-        fullscreen = true;
-    }
-    if (vm.count("newgame")) {
-        newgame = true;
-    }
-    if (vm.count("test")) {
-        test = true;
-    }
-    if (vm.count("load")) {
-        startSave = vm["load"].as<std::string>();
-    }
-    if (vm.count("benchmark")) {
-        benchFile = vm["benchmark"].as<std::string>();
-    }
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        throw std::runtime_error("Failed to initialize SDL2!");
-
-    window = new GameWindow();
-    window->create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
+RWGame::RWGame(Logger& log, int argc, char* argv[])
+    : GameBase(log, argc, argv) {
+    bool newgame = options.count("newgame");
+    bool test = options.count("test");
+    std::string startSave(
+        options.count("load") ? options["load"].as<std::string>() : "");
+    std::string benchFile(options.count("benchmark")
+                              ? options["benchmark"].as<std::string>()
+                              : "");
 
     work = new WorkContext();
 
     log.info("Game", "Game directory: " + config.getGameDataPath());
-    log.info("Game", "Build: " + kBuildStr);
 
     if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
         throw std::runtime_error("Invalid game directory path: " +
@@ -192,15 +126,8 @@ RWGame::~RWGame() {
     log.info("Game", "Cleaning up state");
     delete state;
 
-    log.info("Game", "Cleaning up window");
-    delete window;
-
     log.info("Game", "Cleaning up work queue");
     delete work;
-
-    SDL_Quit();
-
-    log.info("Game", "Done cleaning up");
 }
 
 void RWGame::newGame() {
@@ -561,7 +488,7 @@ int RWGame::run() {
 
         renderProfile();
 
-        window->swap();
+        getWindow().swap();
     }
 
     return 0;
@@ -649,7 +576,7 @@ void RWGame::render(float alpha, float time) {
 
     getRenderer()->getRenderer()->swap();
 
-    glm::ivec2 windowSize = window->getSize();
+    glm::ivec2 windowSize = getWindow().getSize();
     renderer->setViewport(windowSize.x, windowSize.y);
 
     ViewCamera viewCam;
