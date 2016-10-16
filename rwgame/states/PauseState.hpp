@@ -1,7 +1,7 @@
 #ifndef PAUSESTATE_HPP
 #define PAUSESTATE_HPP
 
-#include "State.hpp"
+#include "StateManager.hpp"
 
 class PauseState : public State {
 public:

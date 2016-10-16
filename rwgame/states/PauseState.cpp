@@ -1,6 +1,4 @@
 #include "PauseState.hpp"
-#include <ai/PlayerController.hpp>
-#include <objects/CharacterObject.hpp>
 #include "RWGame.hpp"
 
 PauseState::PauseState(RWGame* game) : State(game) {
@@ -9,7 +7,7 @@ PauseState::PauseState(RWGame* game) : State(game) {
     Menu* m = new Menu;
     m->offset = glm::vec2(200.f, 200.f);
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kResumeGameId),
-                             [] { StateManager::get().exit(); }));
+                             [&] { done(); }));
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kOptionsId),
                              [] { std::cout << "Options" << std::endl; }));
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kQuitGameId),
@@ -51,7 +49,7 @@ void PauseState::handleEvent(const SDL_Event& e) {
         case SDL_KEYDOWN:
             switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().exit();
+                    done();
                     break;
                 default:
                     break;

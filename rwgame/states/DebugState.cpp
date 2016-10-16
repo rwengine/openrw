@@ -363,7 +363,7 @@ void DebugState::handleEvent(const SDL_Event& event) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().exit();
+                    done();
                     break;
                 case SDLK_w:
                     _movement.x = 1.f;

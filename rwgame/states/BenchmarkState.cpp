@@ -77,7 +77,7 @@ void BenchmarkState::tick(float dt) {
             a = p;
         }
         if (benchmarkTime > duration) {
-            StateManager::get().exit();
+            done();
         }
         if (b.time != a.time) {
             float alpha = (benchmarkTime - a.time) / (b.time - a.time);

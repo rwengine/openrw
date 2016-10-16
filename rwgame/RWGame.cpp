@@ -35,7 +35,6 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     : GameBase(log, argc, argv)
     , data(&log, &work, config.getGameDataPath())
     , renderer(&log, &data) {
-
     bool newgame = options.count("newgame");
     bool test = options.count("test");
     std::string startSave(
@@ -73,7 +72,7 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
     getRenderer().water.setWaterTable(data.waterHeights, 48, data.realWater,
-                                       128 * 128);
+                                      128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
         std::string num = (m < 10 ? "0" : "");
@@ -81,20 +80,19 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
         data.loadTXD(name + ".txd");
     }
 
-    auto loading = new LoadingState(this);
-    if (!benchFile.empty()) {
-        loading->setNextState(new BenchmarkState(this, benchFile));
-    } else if (test) {
-        loading->setNextState(new IngameState(this, true, "test"));
-    } else if (newgame) {
-        loading->setNextState(new IngameState(this, true));
-    } else if (!startSave.empty()) {
-        loading->setNextState(new IngameState(this, true, startSave));
-    } else {
-        loading->setNextState(new MenuState(this));
-    }
-
-    StateManager::get().enter(loading);
+    StateManager::get().enter<LoadingState>(this, [=]() {
+        if (!benchFile.empty()) {
+            StateManager::get().enter<BenchmarkState>(this, benchFile);
+        } else if (test) {
+            StateManager::get().enter<IngameState>(this, true, "test");
+        } else if (newgame) {
+            StateManager::get().enter<IngameState>(this, true);
+        } else if (!startSave.empty()) {
+            StateManager::get().enter<IngameState>(this, true, startSave);
+        } else {
+            StateManager::get().enter<MenuState>(this);
+        }
+    });
 
     log.info("Game", "Started");
 }
@@ -384,8 +382,9 @@ int RWGame::run() {
     last_clock_time = clock.now();
 
     // Loop until we run out of states.
-    while (StateManager::get().states.size()) {
-        State* state = StateManager::get().states.back();
+    bool running = true;
+    while (!StateManager::get().states.empty() && running) {
+        State* state = StateManager::get().states.back().get();
 
         RW_PROFILE_FRAME_BOUNDARY();
 
@@ -394,7 +393,7 @@ int RWGame::run() {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    StateManager::get().clear();
+                    running = false;
                     break;
 
                 case SDL_WINDOWEVENT:
@@ -474,7 +473,12 @@ int RWGame::run() {
         renderProfile();
 
         getWindow().swap();
+
+        // Make sure the topmost state is the correct state
+        StateManager::get().updateStack();
     }
+
+    StateManager::get().clear();
 
     return 0;
 }
@@ -483,7 +487,7 @@ void RWGame::tick(float dt) {
     // Process the Engine's background work.
     world->_work->update();
 
-    State* currState = StateManager::get().states.back();
+    State* currState = StateManager::get().states.back().get();
 
     world->chase.update(dt);
 

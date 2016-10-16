@@ -1,8 +1,8 @@
 #include "LoadingState.hpp"
-#include <render/OpenGLRenderer.hpp>
 #include "RWGame.hpp"
 
-LoadingState::LoadingState(RWGame* game) : State(game), next(nullptr) {
+LoadingState::LoadingState(RWGame* game, std::function<void(void)> callback)
+    : State(game), complete(callback) {
 }
 
 void LoadingState::enter() {
@@ -15,18 +15,16 @@ void LoadingState::exit() {
 void LoadingState::tick(float dt) {
     RW_UNUSED(dt);
 
-    // If background work is completed, switch to the next state
+    // If background work is completed, do callback
     if (getWorld()->_work->isEmpty()) {
-        StateManager::get().exec(next);
+        // If we ever get back to this state it should be completed
+        done();
+        complete();
     }
 }
 
 bool LoadingState::shouldWorldUpdate() {
     return false;
-}
-
-void LoadingState::setNextState(State* nextState) {
-    next = nextState;
 }
 
 void LoadingState::handleEvent(const SDL_Event& e) {

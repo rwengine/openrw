@@ -15,6 +15,8 @@ set(RWGAME_SOURCES
 	GameConfig.cpp
 	GameWindow.cpp
 
+	StateManager.hpp
+	StateManager.cpp
 	State.cpp
 
 	states/LoadingState.hpp

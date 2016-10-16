@@ -1,8 +1,5 @@
-#ifndef _GAME_STATE_HPP_
-#define _GAME_STATE_HPP_
-#include <functional>
-#include <glm/gtc/quaternion.hpp>
-#include <queue>
+#ifndef RWGAME_STATE_HPP
+#define RWGAME_STATE_HPP
 #include <render/ViewCamera.hpp>
 #include "GameWindow.hpp"
 #include "MenuSystem.hpp"
@@ -11,8 +8,10 @@
 
 class RWGame;
 class GameWorld;
+class StateManager;
 
-struct State {
+class State {
+public:
     // Helper for global menu behaviour
     Menu* currentMenu;
     Menu* nextMenu;
@@ -66,46 +65,15 @@ struct State {
 
     GameWorld* getWorld();
     GameWindow& getWindow();
-};
 
-struct StateManager {
-    static StateManager& get() {
-        static StateManager m;
-        return m;
+    bool hasExited() const {
+        return hasexited_;
     }
 
-    std::deque<State*> states;
-
-    void clear() {
-        states.clear();
-    }
-
-    void enter(State* state) {
-        states.push_back(state);
-        state->enter();
-    }
-
-    void exec(State* state) {
-        exit();
-        enter(state);
-    }
-
-    void tick(float dt) {
-        states.back()->tick(dt);
-    }
-
-    void draw(GameRenderer* r) {
-        states.back()->draw(r);
-    }
-
-    void exit() {
-        // TODO: Resole states being leaked.
-        states.back()->exit();
-        states.pop_back();
-        if (states.size() > 0) {
-            states.back()->enter();
-        }
-    }
+private:
+    bool hasexited_ = false;
+protected:
+    void done() { hasexited_ = true; }
 };
 
 #endif

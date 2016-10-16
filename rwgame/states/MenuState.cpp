@@ -16,12 +16,12 @@ void MenuState::enterMainMenu() {
     Menu* m = new Menu;
     m->offset = glm::vec2(200.f, 200.f);
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kStartGameId), [=] {
-        StateManager::get().enter(new IngameState(game));
+        StateManager::get().enter<IngameState>(game);
     }));
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kLoadGameId),
                              [=] { enterLoadMenu(); }));
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kDebugId), [=] {
-        StateManager::get().enter(new IngameState(game, true, "test"));
+        StateManager::get().enter<IngameState>(game, true, "test");
     }));
     m->addEntry(Menu::lambda(t.text(MenuDefaults::kOptionsId),
                              [] { RW_UNIMPLEMENTED("Options Menu"); }));
@@ -45,13 +45,11 @@ void MenuState::enterLoadMenu() {
                << save.basicState.saveTime.minute << "    ";
             auto name = GameStringUtil::fromString(ss.str());
             name += save.basicState.saveName;
-            m->addEntry(Menu::lambda(name,
-                                     [=] {
-                                         StateManager::get().enter(
-                                             new IngameState(game, false));
-                                         game->loadGame(save.savePath);
-                                     },
-                                     20.f));
+            auto loadsave = [=] {
+                StateManager::get().enter<IngameState>(game, false);
+                game->loadGame(save.savePath);
+            };
+            m->addEntry(Menu::lambda(name, loadsave, 20.f));
         } else {
             m->addEntry(Menu::lambda("CORRUPT", [=] {}));
         }
@@ -75,7 +73,7 @@ void MenuState::handleEvent(const SDL_Event& e) {
         case SDL_KEYUP:
             switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().exit();
+                    done();
                 default:
                     break;
             }
