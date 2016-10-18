@@ -19,6 +19,9 @@ set(RWGAME_SOURCES
 	StateManager.cpp
 	State.cpp
 
+	MenuSystem.hpp
+	MenuSystem.cpp
+
 	states/LoadingState.hpp
 	states/LoadingState.cpp
 	states/IngameState.hpp

@@ -12,13 +12,12 @@ class StateManager;
 
 class State {
 public:
-    // Helper for global menu behaviour
-    Menu* currentMenu;
-    Menu* nextMenu;
+    std::shared_ptr<Menu> menu;
+    std::shared_ptr<Menu> nextMenu;
 
     RWGame* game;
 
-    State(RWGame* game) : currentMenu(nullptr), nextMenu(nullptr), game(game) {
+    State(RWGame* game) : game(game) {
     }
 
     virtual void enter() = 0;
@@ -33,24 +32,18 @@ public:
     }
 
     virtual ~State() {
-        if (getCurrentMenu()) {
-            delete getCurrentMenu();
-        }
     }
 
-    void enterMenu(Menu* menu) {
+    void enterMenu(const std::shared_ptr<Menu>& menu) {
         nextMenu = menu;
     }
 
     Menu* getCurrentMenu() {
         if (nextMenu) {
-            if (currentMenu) {
-                delete currentMenu;
-            }
-            currentMenu = nextMenu;
+            menu = nextMenu;
             nextMenu = nullptr;
         }
-        return currentMenu;
+        return menu.get();
     }
 
     virtual void handleEvent(const SDL_Event& e);
@@ -72,8 +65,11 @@ public:
 
 private:
     bool hasexited_ = false;
+
 protected:
-    void done() { hasexited_ = true; }
+    void done() {
+        hasexited_ = true;
+    }
 };
 
 #endif
