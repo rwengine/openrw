@@ -33,35 +33,30 @@ public:
      */
     class MenuEntry {
         GameString text;
-        float size;
         std::function<void(void)> callback;
 
     public:
         MenuEntry(const std::string& n, std::function<void(void)> cb)
-            : text(GameStringUtil::fromString(n)), size(30.f), callback(cb) {
+            : text(GameStringUtil::fromString(n)), callback(cb) {
         }
-        MenuEntry(const GameString& n, std::function<void(void)> cb,
-                  float size = 30.f)
-            : text(n), size(size), callback(cb) {
-        }
-
-        float getHeight() const {
-            return size;
+        MenuEntry(const GameString& n, std::function<void(void)> cb)
+            : text(n), callback(cb) {
         }
 
-        void draw(int font, bool active, GameRenderer* r, glm::vec2& basis) {
+        void draw(int font, float size, bool active, GameRenderer* r,
+                  glm::vec2& basis) {
             TextRenderer::TextInfo ti;
             ti.font = font;
             ti.screenPosition = basis;
             ti.text = text;
-            ti.size = getHeight();
+            ti.size = size;
             if (!active) {
                 ti.baseColour = glm::u8vec3(255);
             } else {
                 ti.baseColour = glm::u8vec3(255, 255, 0);
             }
             r->text.renderText(ti);
-            basis.y += getHeight();
+            basis.y += size;
         }
 
         void activate(float clickX, float clickY) {
@@ -71,8 +66,9 @@ public:
         }
     };
 
-    Menu(std::vector<MenuEntry> initial, int font = MenuDefaults::kFont)
-        : activeEntry(-1), font(font), entries(std::move(initial)) {
+    Menu(std::vector<MenuEntry> initial, int font = MenuDefaults::kFont,
+         float size = 30.f)
+        : activeEntry(-1), font(font), size(size), entries(std::move(initial)) {
     }
 
     /**
@@ -80,17 +76,18 @@ public:
      * @return a shared pointer to the menu with the items
      */
     static std::shared_ptr<Menu> create(std::vector<MenuEntry> items,
-                                        int font = MenuDefaults::kFont) {
-        return std::make_shared<Menu>(std::move(items), font);
+                                        int font = MenuDefaults::kFont,
+                                        float size = 30.f) {
+        return std::make_shared<Menu>(std::move(items), font, size);
     }
 
     Menu& lambda(const GameString& n, std::function<void()> callback) {
-        entries.emplace_back(n, callback, 30.f);
+        entries.emplace_back(n, callback);
         return *this;
     }
 
     Menu& lambda(const std::string& n, std::function<void(void)> callback) {
-        entries.emplace_back(GameStringUtil::fromString(n), callback, 30.f);
+        entries.emplace_back(GameStringUtil::fromString(n), callback);
         return *this;
     }
 
@@ -108,18 +105,18 @@ public:
             if (activeEntry >= 0 && i == (unsigned)activeEntry) {
                 active = true;
             }
-            entries[i].draw(font, active, r, basis);
+            entries[i].draw(font, size, active, r, basis);
         }
     }
 
     void hover(const float x, const float y) {
         glm::vec2 c(x - offset.x, y - offset.y);
         for (size_t i = 0; i < entries.size(); ++i) {
-            if (c.y > 0.f && c.y < entries[i].getHeight()) {
+            if (c.y > 0.f && c.y < size) {
                 activeEntry = i;
                 return;
             } else {
-                c.y -= entries[i].getHeight();
+                c.y -= size;
             }
         }
     }
@@ -127,11 +124,11 @@ public:
     void click(const float x, const float y) {
         glm::vec2 c(x - offset.x, y - offset.y);
         for (auto it = entries.begin(); it != entries.end(); ++it) {
-            if (c.y > 0.f && c.y < (*it).getHeight()) {
+            if (c.y > 0.f && c.y < size) {
                 (*it).activate(c.x, c.y);
                 return;
             } else {
-                c.y -= (*it).getHeight();
+                c.y -= size;
             }
         }
     }
@@ -158,6 +155,7 @@ public:
 
 private:
     int font;
+    float size;
     std::vector<MenuEntry> entries;
 };
 

@@ -55,7 +55,7 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
          {"Full Armour", [=] { player->getCurrentState().armour = 100.f; }},
          {"Cull Here",
           [=] { game->getRenderer().setCullOverride(true, _debugCam); }}},
-        kDebugFont);
+        kDebugFont, kDebugEntryHeight);
 
     menu->offset = kDebugMenuOffset;
 
@@ -134,7 +134,7 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
                   }
               }
           }}},
-        kDebugFont);
+        kDebugFont, kDebugEntryHeight);
 
     menu->offset = kDebugMenuOffset;
     return menu;
@@ -142,7 +142,7 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
 
 std::shared_ptr<Menu> DebugState::createVehicleMenu() {
     auto menu = Menu::create({{"Back", [=] { enterMenu(createDebugMenu()); }}},
-                             kDebugFont);
+                             kDebugFont, kDebugEntryHeight);
 
     const std::map<std::string, int> kVehicleTypes = {
         {"Landstalker", 90}, {"Taxi", 110},      {"Firetruck", 97},
@@ -161,8 +161,9 @@ std::shared_ptr<Menu> DebugState::createVehicleMenu() {
 }
 
 std::shared_ptr<Menu> DebugState::createAIMenu() {
-    auto menu = Menu::create(
-        {{"Back", [=] { this->enterMenu(createDebugMenu()); }}}, kDebugFont);
+    auto menu =
+        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
+                     kDebugFont, kDebugEntryHeight);
 
     const std::map<std::string, int> kPedTypes = {
         {"Triad", 12}, {"Cop", 1},     {"SWAT", 2},
@@ -189,8 +190,9 @@ std::shared_ptr<Menu> DebugState::createAIMenu() {
 }
 
 std::shared_ptr<Menu> DebugState::createWeaponMenu() {
-    auto menu = Menu::create(
-        {{"Back", [=] { this->enterMenu(createDebugMenu()); }}}, kDebugFont);
+    auto menu =
+        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
+                     kDebugFont, kDebugEntryHeight);
 
     for (int i = 1; i < kMaxInventorySlots; ++i) {
         auto& name = getWorld()->data->weaponData[i]->name;

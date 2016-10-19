@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(menu_test_click) {
 
     BOOST_CHECK(!clickered);
 
-    float h = test.getEntries().at(0).getHeight();
+    float h = 30.f;
 
     test.click(0.f, h + 1.f);
 
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(menu_test_click_offset) {
 
     BOOST_CHECK(!clickered);
 
-    float h = test.getEntries().at(0).getHeight();
+    float h = 30.f;
 
     test.click(201.f, 200.f + h + 1.f);
 
@@ -79,10 +79,10 @@ BOOST_AUTO_TEST_CASE(menu_test_hover_index) {
     Menu test({{"Test1", [&] { clickindex = 0; }},
                {"Test2", [&] { clickindex = 1; }}});
 
-    test.hover(0.f, test.getEntries()[0].getHeight() - 0.1f);
+    test.hover(0.f, 30.f - 0.1f);
     BOOST_CHECK(test.activeEntry == 0);
 
-    test.hover(0.f, test.getEntries()[0].getHeight() + 0.1f);
+    test.hover(0.f, 30.f + 0.1f);
     BOOST_CHECK(test.activeEntry == 1);
 }
 
