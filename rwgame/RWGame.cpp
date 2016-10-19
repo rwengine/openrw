@@ -8,8 +8,6 @@
 
 #include <core/Profiler.hpp>
 
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
 #include <engine/SaveGame.hpp>
 #include <objects/GameObject.hpp>
 
@@ -108,24 +106,22 @@ RWGame::~RWGame() {
 
     log.info("Game", "Cleaning up world");
     delete world;
-
-    log.info("Game", "Cleaning up state");
-    delete state;
 }
 
 void RWGame::newGame() {
-    if (state != nullptr) {
+    if (world != nullptr) {
         log.error("Game", "Cannot start a new game: game is already running.");
         return;
     }
 
-    state = new GameState();
+    // Get a fresh state
+    state = GameState();
     world = new GameWorld(&log, &work, &data);
     world->dynamicsWorld->setDebugDrawer(&debug);
 
     // Associate the new world with the new state and vice versa
-    state->world = world;
-    world->state = state;
+    state.world = world;
+    world->state = &state;
 
     for (std::map<std::string, std::string>::iterator it =
              world->data->iplLocations.begin();
@@ -140,9 +136,9 @@ void RWGame::saveGame(const std::string& savename) {
 }
 
 void RWGame::loadGame(const std::string& savename) {
-    delete state->world;
-    delete state->script;
-    state = nullptr;
+    delete world;
+    delete state.script;
+    world = nullptr;
 
     log.info("Game", "Loading game " + savename);
 
@@ -150,7 +146,7 @@ void RWGame::loadGame(const std::string& savename) {
 
     startScript("data/main.scm");
 
-    if (!SaveGame::loadGame(*state, savename)) {
+    if (!SaveGame::loadGame(state, savename)) {
         log.error("Game", "Failed to load game");
     }
 }
@@ -163,16 +159,16 @@ void RWGame::startScript(const std::string& name) {
         SCMOpcodes* opcodes = new SCMOpcodes;
         opcodes->modules.push_back(new GTA3Module);
 
-        script = new ScriptMachine(state, f, opcodes);
+        script = new ScriptMachine(&state, f, opcodes);
 
-        state->script = script;
+        state.script = script;
     } else {
         log.error("Game", "Failed to load SCM: " + name);
     }
 }
 
 PlayerController* RWGame::getPlayer() {
-    auto object = world->pedestrianPool.find(state->playerObject);
+    auto object = world->pedestrianPool.find(state.playerObject);
     if (object) {
         auto controller = static_cast<CharacterObject*>(object)->controller;
         return static_cast<PlayerController*>(controller);
@@ -203,8 +199,7 @@ void RWGame::handleCheatInput(char symbol) {
 
     // Player related cheats
     {
-        auto player = static_cast<CharacterObject*>(
-            world->pedestrianPool.find(state->playerObject));
+        auto player = getPlayer()->getCharacter();
 
 #ifdef RW_GAME_GTA3_GERMAN  // Germans got their own cheat
         std::string health_cheat = "GESUNDHEIT";
@@ -235,7 +230,7 @@ void RWGame::handleCheatInput(char symbol) {
         });
 
         checkForCheat("IFIWEREARICHMAN", [&] {
-            world->state->playerInfo.money += 250000;
+            state.playerInfo.money += 250000;
             // @todo ShowHelpMessage("CHEAT6"); // III: Inputting money cheat.
         });
 
@@ -496,16 +491,16 @@ void RWGame::tick(float dt) {
         // Clear out any per-tick state.
         world->clearTickData();
 
-        state->gameTime += dt;
+        state.gameTime += dt;
 
         clockAccumulator += dt;
         while (clockAccumulator >= 1.f) {
-            world->state->basic.gameMinute++;
-            while (state->basic.gameMinute >= 60) {
-                state->basic.gameMinute = 0;
-                state->basic.gameHour++;
-                while (state->basic.gameHour >= 24) {
-                    state->basic.gameHour = 0;
+            state.basic.gameMinute++;
+            while (state.basic.gameMinute >= 60) {
+                state.basic.gameMinute = 0;
+                state.basic.gameHour++;
+                while (state.basic.gameHour >= 24) {
+                    state.basic.gameHour = 0;
                 }
             }
             clockAccumulator -= 1.f;
@@ -531,7 +526,7 @@ void RWGame::tick(float dt) {
 
         world->destroyQueuedObjects();
 
-        state->text.tick(dt);
+        state.text.tick(dt);
 
         world->dynamicsWorld->stepSimulation(dt, 2, dt);
 
@@ -546,7 +541,7 @@ void RWGame::tick(float dt) {
         }
 
         /// @todo this doesn't make sense as the condition
-        if (state->playerObject) {
+        if (state.playerObject) {
             nextCam.frustum.update(nextCam.frustum.projection() *
                                    nextCam.getView());
             // Use the current camera position to spawn pedestrians.
@@ -570,10 +565,10 @@ void RWGame::render(float alpha, float time) {
 
     ViewCamera viewCam;
     viewCam.frustum.fov = glm::radians(90.f);
-    if (state->currentCutscene != nullptr && state->cutsceneStartTime >= 0.f) {
-        auto cutscene = state->currentCutscene;
+    if (state.currentCutscene != nullptr && state.cutsceneStartTime >= 0.f) {
+        auto cutscene = state.currentCutscene;
         float cutsceneTime =
-            std::min(world->getGameTime() - state->cutsceneStartTime,
+            std::min(world->getGameTime() - state.cutsceneStartTime,
                      cutscene->tracks.duration);
         cutsceneTime += GAME_TIMESTEP * alpha;
         glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
@@ -607,9 +602,9 @@ void RWGame::render(float alpha, float time) {
 
         viewCam.position = cameraPos;
         viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
-    } else if (state->cameraFixed) {
-        viewCam.position = state->cameraPosition;
-        viewCam.rotation = state->cameraRotation;
+    } else if (state.cameraFixed) {
+        viewCam.position = state.cameraPosition;
+        viewCam.rotation = state.cameraRotation;
     } else {
         // There's no cutscene playing - use the camera returned by the State.
         viewCam.position = glm::mix(lastCam.position, nextCam.position, alpha);
@@ -620,7 +615,7 @@ void RWGame::render(float alpha, float time) {
     viewCam.frustum.aspectRatio =
         windowSize.x / static_cast<float>(windowSize.y);
 
-    if (state->isCinematic) {
+    if (state.isCinematic) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
 
@@ -747,8 +742,8 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw Garage bounds
-    for (size_t g = 0; g < state->garages.size(); ++g) {
-        auto& garage = state->garages[g];
+    for (size_t g = 0; g < state.garages.size(); ++g) {
+        auto& garage = state.garages[g];
         btVector3 minColor(1.f, 0.f, 0.f);
         btVector3 maxColor(0.f, 1.f, 0.f);
         btVector3 min(garage.min.x, garage.min.y, garage.min.z);
@@ -763,8 +758,8 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw vehicle generators
-    for (size_t v = 0; v < state->vehicleGenerators.size(); ++v) {
-        auto& generator = state->vehicleGenerators[v];
+    for (size_t v = 0; v < state.vehicleGenerators.size(); ++v) {
+        auto& generator = state.vehicleGenerators[v];
         btVector3 color(1.f, 0.f, 0.f);
         btVector3 position(generator.position.x, generator.position.y,
                            generator.position.z);

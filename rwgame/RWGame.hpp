@@ -3,9 +3,10 @@
 
 #include <chrono>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
 #include <render/DebugDraw.hpp>
+#include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
 #include "game.hpp"
 
@@ -18,8 +19,8 @@ class RWGame : public GameBase {
     GameData data;
     GameRenderer renderer;
     DebugDraw debug;
+    GameState state;
 
-    GameState* state = nullptr;
     GameWorld* world = nullptr;
     ScriptMachine* script = nullptr;
     std::chrono::steady_clock clock;
@@ -55,8 +56,8 @@ public:
      */
     void newGame();
 
-    GameState* getState() const {
-        return state;
+    GameState* getState() {
+        return &state;
     }
 
     GameWorld* getWorld() const {
