@@ -58,9 +58,8 @@ set(RWENGINE_SOURCES
 	src/engine/SaveGame.hpp
 	src/engine/ScreenText.cpp
 	src/engine/ScreenText.hpp
-	src/items/InventoryItem.hpp
-	src/items/WeaponItem.cpp
-	src/items/WeaponItem.hpp
+	src/items/Weapon.cpp
+	src/items/Weapon.hpp
 	src/loaders/DataLoader.cpp
 	src/loaders/DataLoader.hpp
 	src/loaders/GenericDATLoader.cpp

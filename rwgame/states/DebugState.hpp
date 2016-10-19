@@ -33,7 +33,7 @@ public:
 
     void spawnVehicle(unsigned int id);
     void spawnFollower(unsigned int id);
-    void giveItem(InventoryItem* item);
+    void giveItem(int slot);
 
     const ViewCamera& getCamera();
 };

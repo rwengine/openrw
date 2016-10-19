@@ -4,7 +4,6 @@
 #include <engine/GameState.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include <items/InventoryItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
@@ -279,11 +278,10 @@ Menu* DebugState::createWeaponMenu() {
                              [=] { this->enterMenu(createDebugMenu()); },
                              kDebugEntryHeight));
 
-    for (int i = 1; i < maxInventorySlots; ++i) {
-        auto item = getWorld()->getInventoryItem(i);
+    for (int i = 1; i < kMaxInventorySlots; ++i) {
         auto& name = getWorld()->data->weaponData[i]->name;
         m->addEntry(
-            Menu::lambda(name, [=] { giveItem(item); }, kDebugEntryHeight));
+            Menu::lambda(name, [=] { giveItem(i); }, kDebugEntryHeight));
     }
 
     return m;
@@ -475,17 +473,14 @@ void DebugState::spawnFollower(unsigned int id) {
     }
 }
 
-void DebugState::giveItem(InventoryItem* item) {
+void DebugState::giveItem(int slot) {
     CharacterObject* player = nullptr;
     if (game->getPlayer()) {
         player = game->getPlayer()->getCharacter();
     }
 
     if (player) {
-        player->addToInventory(item);
-        auto& wep = player->getCurrentState().weapons[item->getInventorySlot()];
-        wep.bulletsTotal = 100;
-        wep.bulletsClip = 0;
+        player->addToInventory(slot, 100);
     }
 }
 

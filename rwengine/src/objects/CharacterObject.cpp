@@ -3,7 +3,6 @@
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include <items/InventoryItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
@@ -14,8 +13,7 @@ static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                                 const glm::quat& rot,
-                                 BaseModelInfo *modelinfo)
+                                 const glm::quat& rot, BaseModelInfo* modelinfo)
     : GameObject(engine, pos, rot, modelinfo)
     , currentState({})
     , currentVehicle(nullptr)
@@ -521,12 +519,11 @@ void CharacterObject::activityFinished() {
     motionBlockedByActivity = false;
 }
 
-void CharacterObject::addToInventory(InventoryItem* item) {
-    RW_CHECK(item->getInventorySlot() < maxInventorySlots,
-             "Inventory Slot greater than maxInventorySlots");
-    if (item->getInventorySlot() < maxInventorySlots) {
-        currentState.weapons[item->getInventorySlot()].weaponId =
-            item->getItemID();
+void CharacterObject::addToInventory(int slot, int ammo) {
+    RW_CHECK(slot < kMaxInventorySlots, "Slot greater than kMaxInventorySlots");
+    if (slot < kMaxInventorySlots) {
+        currentState.weapons[slot].weaponId = slot;
+        currentState.weapons[slot].bulletsTotal += ammo;
     }
 }
 
@@ -534,19 +531,16 @@ void CharacterObject::setActiveItem(int slot) {
     currentState.currentWeapon = slot;
 }
 
-InventoryItem* CharacterObject::getActiveItem() {
-    if (currentVehicle) return nullptr;
-    auto weaponId = currentState.weapons[currentState.currentWeapon].weaponId;
-    return engine->getInventoryItem(weaponId);
-}
-
 void CharacterObject::removeFromInventory(int slot) {
     currentState.weapons[slot].weaponId = 0;
+    if (currentState.currentWeapon == slot) {
+        currentState.currentWeapon = 0;
+    }
 }
 
 void CharacterObject::cycleInventory(bool up) {
     if (up) {
-        for (int j = currentState.currentWeapon + 1; j < maxInventorySlots;
+        for (int j = currentState.currentWeapon + 1; j < kMaxInventorySlots;
              ++j) {
             if (currentState.weapons[j].weaponId != 0) {
                 currentState.currentWeapon = j;
@@ -565,7 +559,7 @@ void CharacterObject::cycleInventory(bool up) {
         }
 
         // Nothing? set the highest
-        for (int j = maxInventorySlots - 1; j >= 0; --j) {
+        for (int j = kMaxInventorySlots - 1; j >= 0; --j) {
             if (currentState.weapons[j].weaponId != 0 || j == 0) {
                 currentState.currentWeapon = j;
                 return;
@@ -575,17 +569,21 @@ void CharacterObject::cycleInventory(bool up) {
 }
 
 void CharacterObject::useItem(bool active, bool primary) {
-    if (getActiveItem()) {
+    /// @todo verify if this is the correct logic
+    auto item = getActiveItem();
+    if (currentState.weapons[item].weaponId == unsigned(item)) {
         if (primary) {
-            if (active)
-                currentState.primaryStartTime = engine->getGameTime() * 1000.f;
-            else
-                currentState.primaryEndTime = engine->getGameTime() * 1000.f;
+            if (!currentState.primaryActive && active) {
+                // If we've just started, activate
+                controller->setNextActivity(new Activities::UseItem(item));
+            }
+            else if (currentState.primaryActive && !active) {
+                // UseItem will cancel itself upon !primaryActive
+            }
             currentState.primaryActive = active;
-            getActiveItem()->primary(this);
         } else {
             currentState.secondaryActive = active;
-            getActiveItem()->secondary(this);
+            /// @todo handle scopes and sights
         }
     }
 }
