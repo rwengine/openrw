@@ -154,7 +154,7 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
 
 void CollisionInstance::changeMass(float newMass) {
     GameObject* object = static_cast<GameObject*>(m_body->getUserPointer());
-    auto dynamicsWorld = object->engine->dynamicsWorld;
+    auto& dynamicsWorld = object->engine->dynamicsWorld;
     dynamicsWorld->removeRigidBody(m_body);
     btVector3 inert;
     m_body->getCollisionShape()->calculateLocalInertia(newMass, inert);

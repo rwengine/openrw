@@ -21,7 +21,7 @@ class RWGame : public GameBase {
     DebugDraw debug;
     GameState state;
 
-    GameWorld* world = nullptr;
+    std::unique_ptr<GameWorld> world;
     ScriptMachine* script = nullptr;
     std::chrono::steady_clock clock;
     std::chrono::steady_clock::time_point last_clock_time;
@@ -60,8 +60,8 @@ public:
         return &state;
     }
 
-    GameWorld* getWorld() const {
-        return world;
+    GameWorld* getWorld() {
+        return world.get();
     }
 
     const GameData& getGameData() const {

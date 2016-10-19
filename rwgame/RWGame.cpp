@@ -103,31 +103,23 @@ RWGame::~RWGame() {
 
     log.info("Game", "Cleaning up scripts");
     delete script;
-
-    log.info("Game", "Cleaning up world");
-    delete world;
 }
 
 void RWGame::newGame() {
-    if (world != nullptr) {
-        log.error("Game", "Cannot start a new game: game is already running.");
-        return;
-    }
-
     // Get a fresh state
     state = GameState();
-    world = new GameWorld(&log, &work, &data);
+
+    // Destroy the current world and start over
+    world = std::make_unique<GameWorld>(&log, &work, &data);
     world->dynamicsWorld->setDebugDrawer(&debug);
 
     // Associate the new world with the new state and vice versa
-    state.world = world;
+    state.world = world.get();
     world->state = &state;
 
-    for (std::map<std::string, std::string>::iterator it =
-             world->data->iplLocations.begin();
-         it != world->data->iplLocations.end(); ++it) {
-        world->data->loadZone(it->second);
-        world->placeItems(it->second);
+    for (auto ipl : world->data->iplLocations) {
+        world->data->loadZone(ipl.second);
+        world->placeItems(ipl.second);
     }
 }
 
@@ -136,9 +128,7 @@ void RWGame::saveGame(const std::string& savename) {
 }
 
 void RWGame::loadGame(const std::string& savename) {
-    delete world;
     delete state.script;
-    world = nullptr;
 
     log.info("Game", "Loading game " + savename);
 
@@ -152,7 +142,7 @@ void RWGame::loadGame(const std::string& savename) {
 }
 
 void RWGame::startScript(const std::string& name) {
-    SCMFile* f = world->data->loadSCM(name);
+    SCMFile* f = data.loadSCM(name);
     if (f) {
         if (script) delete script;
 
@@ -480,7 +470,7 @@ int RWGame::run() {
 
 void RWGame::tick(float dt) {
     // Process the Engine's background work.
-    world->_work->update();
+    work.update();
 
     State* currState = StateManager::get().states.back().get();
 
@@ -625,7 +615,7 @@ void RWGame::render(float alpha, float time) {
     renderer.getRenderer()->pushDebugGroup("World");
 
     RW_PROFILE_BEGIN("world");
-    renderer.renderWorld(world, viewCam, alpha);
+    renderer.renderWorld(world.get(), viewCam, alpha);
     RW_PROFILE_END();
 
     renderer.getRenderer()->popDebugGroup();
@@ -636,10 +626,8 @@ void RWGame::render(float alpha, float time) {
             renderDebugStats(time);
             break;
         case DebugViewMode::Physics:
-            if (world) {
-                world->dynamicsWorld->debugDrawWorld();
-                debug.flush(&renderer);
-            }
+            world->dynamicsWorld->debugDrawWorld();
+            debug.flush(&renderer);
             break;
         case DebugViewMode::Navigation:
             renderDebugPaths(time);
@@ -652,7 +640,7 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    drawOnScreenText(world, &renderer);
+    drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
