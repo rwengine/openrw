@@ -27,7 +27,6 @@ class ViewCamera;
 #include <render/VisualFX.hpp>
 
 struct BlipData;
-class InventoryItem;
 struct WeaponScan;
 struct VehicleGenerator;
 
@@ -178,13 +177,6 @@ public:
     glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 
     float getGameTime() const;
-
-    /**
-     * @brief getInventoryItem
-     * @param weaponId The Weapon ID (inventory slot) of the weapon to fetch
-     * @return Instance of the weapon
-     */
-    InventoryItem* getInventoryItem(uint16_t weaponId) const;
 
     /**
      * Game data
@@ -352,11 +344,6 @@ private:
     std::set<GameObject*> deletionQueue;
 
     std::vector<AreaIndicatorInfo> areaIndicators;
-
-    /**
-     * Inventory Item instances
-     */
-    std::vector<InventoryItem*> inventoryItems;
 
     /**
      * Flag for pausing the simulation

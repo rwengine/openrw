@@ -7,7 +7,6 @@
 #include <render/ObjectRenderer.hpp>
 
 // Objects that we know how to turn into renderlist entries
-#include <items/InventoryItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <objects/InstanceObject.hpp>
@@ -302,31 +301,30 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
     renderFrame(pedestrian->getModel(), root->getChildren()[0], matrixModel,
                 pedestrian, 1.f, outList);
 
-    if (pedestrian->getActiveItem()) {
-        auto item = pedestrian->getActiveItem();
+    auto item = pedestrian->getActiveItem();
+    const auto& weapon = pedestrian->engine->data->weaponData[item];
 
-        if (item->getModelID() == -1) {
-            return;  // No model for this item
-        }
-
-        auto handFrame = pedestrian->getModel()->findFrame("srhand");
-        glm::mat4 localMatrix;
-        if (handFrame) {
-            while (handFrame->getParent()) {
-                localMatrix =
-                    pedestrian->skeleton->getMatrix(handFrame->getIndex()) *
-                    localMatrix;
-                handFrame = handFrame->getParent();
-            }
-        }
-
-        // Assume items are all simple
-        auto simple =
-            m_world->data->findModelInfo<SimpleModelInfo>(item->getModelID());
-        auto geometry = simple->getAtomic(0)->getGeometries().at(0);
-        renderGeometry(simple->getModel(), geometry, matrixModel * localMatrix,
-                       1.f, nullptr, outList);
+    if (weapon->modelID == -1) {
+        return;  // No model for this item
     }
+
+    auto handFrame = pedestrian->getModel()->findFrame("srhand");
+    glm::mat4 localMatrix;
+    if (handFrame) {
+        while (handFrame->getParent()) {
+            localMatrix =
+                pedestrian->skeleton->getMatrix(handFrame->getIndex()) *
+                localMatrix;
+            handFrame = handFrame->getParent();
+        }
+    }
+
+    // Assume items are all simple
+    auto simple =
+        m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
+    auto geometry = simple->getAtomic(0)->getGeometries().at(0);
+    renderGeometry(simple->getModel(), geometry, matrixModel * localMatrix, 1.f,
+                   nullptr, outList);
 }
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,

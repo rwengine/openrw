@@ -1,8 +1,8 @@
 #include "DrawUI.hpp"
 #include <ai/PlayerController.hpp>
 #include <engine/GameState.hpp>
-#include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
+#include <data/WeaponData.hpp>
 #include <render/GameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>
@@ -152,16 +152,14 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 	render->text.renderText(ti);
 #endif
 
-    InventoryItem* current = player->getCharacter()->getActiveItem();
+    auto item = player->getCharacter()->getActiveItem();
+    auto weapon = world->data->weaponData[item];
     std::string itemTextureName = "fist";
-    if (current) {
-        uint16_t model = current->getModelID();
-        if (model > 0) {
-            auto weaponData =
-                world->data->findModelInfo<SimpleModelInfo>(model);
-            if (weaponData != nullptr) {
-                itemTextureName = weaponData->name;
-            }
+    if (weapon && weapon->modelID > 0) {
+        auto model =
+            world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
+        if (model != nullptr) {
+            itemTextureName = model->name;
         }
     }
     // Urgh
@@ -179,25 +177,20 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
             glm::vec4(iconX, iconY, ui_weaponSize, ui_weaponSize));
     }
 
-    if (current) {
-        WeaponItem* wep = static_cast<WeaponItem*>(current);
-        if (wep->getWeaponData()->fireType != WeaponData::MELEE) {
-            const CharacterState& cs =
-                player->getCharacter()->getCurrentState();
-            const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
-            ti.text = GameStringUtil::fromString(
-                std::to_string(slotInfo.bulletsClip) + "-" +
-                std::to_string(slotInfo.bulletsTotal));
+    if (weapon->fireType != WeaponData::MELEE) {
+        const CharacterState& cs = player->getCharacter()->getCurrentState();
+        const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
+        ti.text = GameStringUtil::fromString(
+            std::to_string(slotInfo.bulletsClip) + "-" +
+            std::to_string(slotInfo.bulletsTotal));
 
-            ti.baseColour = ui_shadowColour;
-            ti.font = 2;
-            ti.size = ui_ammoSize;
-            ti.align = TextRenderer::TextInfo::Center;
-            ti.screenPosition =
-                glm::vec2(iconX + ui_weaponSize / 2.f,
-                          iconY + ui_weaponSize - ui_ammoHeight);
-            render->text.renderText(ti);
-        }
+        ti.baseColour = ui_shadowColour;
+        ti.font = 2;
+        ti.size = ui_ammoSize;
+        ti.align = TextRenderer::TextInfo::Center;
+        ti.screenPosition = glm::vec2(iconX + ui_weaponSize / 2.f,
+                                      iconY + ui_weaponSize - ui_ammoHeight);
+        render->text.renderText(ti);
     }
 }
 

@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile) {
         auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
 
-        auto wepdata = Global::get().e->data->weaponData[5];
+        auto wepdata = Global::get().e->data->weaponData[5].get();
 
         auto projectile = new ProjectileObject(
             Global::get().e, {26.f, 1.f, 10.f},
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile) {
         auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
 
-        auto wepdata = Global::get().e->data->weaponData[6];
+        auto wepdata = Global::get().e->data->weaponData[6].get();
 
         auto projectile = new ProjectileObject(
             Global::get().e, {26.f, 1.f, 10.f},
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(TestProjectile) {
         auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
 
-        auto wepdata = Global::get().e->data->weaponData[7];
+        auto wepdata = Global::get().e->data->weaponData[7].get();
 
         auto projectile = new ProjectileObject(
             Global::get().e, {26.f, 1.f, 10.f},

@@ -4,7 +4,6 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/SaveGame.hpp>
-#include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/GameObject.hpp>
 #include <objects/InstanceObject.hpp>

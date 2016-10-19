@@ -6,11 +6,11 @@
 
 #include <ai/PlayerController.hpp>
 #include <data/Model.hpp>
+#include <data/WeaponData.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
-#include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ItemPickup.hpp>
 #include <objects/VehicleObject.hpp>
@@ -105,9 +105,9 @@ void IngameState::startTest() {
     getWorld()->state->playerObject = playerChar->getGameObjectID();
 
     glm::vec3 itemspawn(276.5f, -609.f, 36.5f);
-    for (int i = 1; i < maxInventorySlots; ++i) {
-        auto item = getWorld()->getInventoryItem(i);
-        getWorld()->createPickup(itemspawn, item->getModelID(),
+    for (int i = 1; i < getWorld()->data->weaponData.size(); ++i) {
+        auto& item = getWorld()->data->weaponData[i];
+        getWorld()->createPickup(itemspawn, item->modelID,
                                  PickupObject::OnStreet);
         itemspawn.x += 2.5f;
     }

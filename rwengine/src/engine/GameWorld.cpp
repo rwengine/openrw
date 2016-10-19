@@ -9,7 +9,6 @@
 #include <ai/TrafficDirector.hpp>
 #include <data/Model.hpp>
 #include <data/WeaponData.hpp>
-#include <items/WeaponItem.hpp>
 #include <job/WorkContext.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
@@ -99,11 +98,6 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
         new btGhostPairCallback());
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
-
-    // Populate inventory items
-    for (auto& w : data->weaponData) {
-        inventoryItems.push_back(new WeaponItem(inventoryItems.size(), w));
-    }
 }
 
 GameWorld::~GameWorld() {
@@ -433,14 +427,13 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     PickupObject* pickup = nullptr;
     auto pickuptype = (PickupObject::PickupType)type;
 
-    // Attempt to find an InventoryItem associated with this model
     auto it = std::find_if(
-        inventoryItems.begin(), inventoryItems.end(),
-        [=](InventoryItem* itm) { return itm->getModelID() == id; });
+        data->weaponData.begin(), data->weaponData.end(),
+        [=](const std::shared_ptr<WeaponData>& x) { return x->modelID == id; });
 
     // If nothing, create a generic pickup instead of an item pickup
-    if (it != inventoryItems.end()) {
-        pickup = new ItemPickup(this, pos, modelInfo, pickuptype, *it);
+    if (it != data->weaponData.end()) {
+        pickup = new ItemPickup(this, pos, modelInfo, pickuptype, it->get());
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
         pickup = new PickupObject(this, pos, modelInfo, pickuptype);
@@ -638,14 +631,6 @@ glm::vec3 GameWorld::getGroundAtPosition(const glm::vec3& pos) const {
 
 float GameWorld::getGameTime() const {
     return state->gameTime;
-}
-
-InventoryItem* GameWorld::getInventoryItem(uint16_t weaponId) const {
-    RW_CHECK(weaponId < inventoryItems.size(), "InventoryItem ID out of range");
-    if (weaponId >= inventoryItems.size()) {
-        return nullptr;
-    }
-    return inventoryItems[weaponId];
 }
 
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {

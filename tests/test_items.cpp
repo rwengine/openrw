@@ -1,5 +1,4 @@
 #include <boost/test/unit_test.hpp>
-#include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include "test_globals.hpp"
 
@@ -11,24 +10,17 @@ BOOST_AUTO_TEST_CASE(test_character_inventory) {
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
 
-        auto item = Global::get().e->getInventoryItem(4);
-        auto fist = Global::get().e->getInventoryItem(0);
+        character->addToInventory(1, 10);
 
-        BOOST_REQUIRE(item != nullptr);
-        BOOST_REQUIRE(fist != nullptr);
-        BOOST_CHECK_NE(fist, item);
+        BOOST_CHECK_EQUAL(character->getActiveItem(), 0);
 
-        character->addToInventory(item);
+        character->setActiveItem(1);
 
-        BOOST_CHECK_EQUAL(character->getActiveItem(), fist);
+        BOOST_CHECK_EQUAL(character->getActiveItem(), 1);
 
-        character->setActiveItem(item->getInventorySlot());
+        character->removeFromInventory(1);
 
-        BOOST_CHECK_EQUAL(character->getActiveItem(), item);
-
-        character->removeFromInventory(item->getInventorySlot());
-
-        BOOST_CHECK_EQUAL(character->getActiveItem(), fist);
+        BOOST_CHECK_EQUAL(character->getActiveItem(), 0);
 
         Global::get().e->destroyObject(character);
     }

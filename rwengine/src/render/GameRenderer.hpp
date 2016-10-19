@@ -32,7 +32,6 @@ class ProjectileObject;
 class CutsceneObject;
 
 class Animator;
-class InventoryItem;
 
 class Renderer;
 

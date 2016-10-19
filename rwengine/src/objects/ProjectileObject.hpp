@@ -25,7 +25,7 @@ public:
         /** Time to dentonation or removal */
         float time;
 
-        std::shared_ptr<WeaponData> weapon;
+        WeaponData* weapon;
     };
 
 private:

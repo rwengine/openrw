@@ -148,7 +148,6 @@ public:
     }
 
 // TODO: Refactor this with an ugly macro to reduce code dup.
-class WeaponItem;
 
 /**
  * @brief Activities for CharacterController behaviour
@@ -217,13 +216,14 @@ struct ExitVehicle : public CharacterController::Activity {
     bool update(CharacterObject* character, CharacterController* controller);
 };
 
-struct ShootWeapon : public CharacterController::Activity {
-    DECL_ACTIVITY(ShootWeapon)
+struct UseItem : public CharacterController::Activity {
+    DECL_ACTIVITY(UseItem)
 
-    WeaponItem* _item;
-    bool _fired;
+    int itemslot;
+    bool fired = false;
+    float power = 0.f;
 
-    ShootWeapon(WeaponItem* item) : _item(item), _fired(false) {
+    UseItem(int slot) : itemslot(slot) {
     }
 
     bool update(CharacterObject* character, CharacterController* controller);
