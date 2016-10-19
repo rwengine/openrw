@@ -219,35 +219,6 @@ void DebugState::exit() {
 }
 
 void DebugState::tick(float dt) {
-    /*if(debugObject) {
-        auto p = debugObject->getPosition();
-        ss << "Position: " << p.x << " " << p.y << " " << p.z << std::endl;
-        ss << "Health: " << debugObject->mHealth << std::endl;
-        if(debugObject->model) {
-            auto m = debugObject->model;
-            ss << "Textures: " << std::endl;
-            for(auto it = m->geometries.begin(); it != m->geometries.end();
-                ++it )
-            {
-                auto g = *it;
-                for(auto itt = g->materials.begin(); itt != g->materials.end();
-                    ++itt)
-                {
-                    for(auto tit = itt->textures.begin(); tit !=
-    itt->textures.end();
-                        ++tit)
-                    {
-                        ss << " " << tit->name << std::endl;
-                    }
-                }
-            }
-        }
-        if(debugObject->type() == GameObject::Vehicle) {
-            GTAVehicle* vehicle = static_cast<GTAVehicle*>(debugObject);
-            ss << "ID: " << vehicle->info->handling.ID << std::endl;
-        }
-    }*/
-
     if (_freeLook) {
         _debugCam.rotation =
             glm::angleAxis(_debugLook.x, glm::vec3(0.f, 0.f, 1.f)) *
