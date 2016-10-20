@@ -11,8 +11,7 @@
 #include <engine/SaveGame.hpp>
 #include <objects/GameObject.hpp>
 
-#include <script/ScriptMachine.hpp>
-#include <script/modules/GTA3Module.hpp>
+#include <script/SCMFile.hpp>
 
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
@@ -100,9 +99,6 @@ RWGame::~RWGame() {
 
     log.info("Game", "Stopping work queue");
     work.stop();
-
-    log.info("Game", "Cleaning up scripts");
-    delete script;
 }
 
 void RWGame::newGame() {
@@ -142,16 +138,11 @@ void RWGame::loadGame(const std::string& savename) {
 }
 
 void RWGame::startScript(const std::string& name) {
-    SCMFile* f = data.loadSCM(name);
-    if (f) {
-        if (script) delete script;
+    script.reset(data.loadSCM(name));
+    if (script) {
+        vm = std::make_unique<ScriptMachine>(&state, script.get(), &opcodes);
 
-        SCMOpcodes* opcodes = new SCMOpcodes;
-        opcodes->modules.push_back(new GTA3Module);
-
-        script = new ScriptMachine(&state, f, opcodes);
-
-        state.script = script;
+        state.script = vm.get();
     } else {
         log.error("Game", "Failed to load SCM: " + name);
     }
@@ -520,9 +511,9 @@ void RWGame::tick(float dt) {
 
         world->dynamicsWorld->stepSimulation(dt, 2, dt);
 
-        if (script) {
+        if (vm) {
             try {
-                script->execute(dt);
+                vm->execute(dt);
             } catch (SCMException& ex) {
                 std::cerr << ex.what() << std::endl;
                 log.error("Script", ex.what());

@@ -27,7 +27,7 @@ public:
         uint8_t flags;
     };
 
-    ScriptDisassembly(SCMOpcodes* codes, SCMFile* scm);
+    ScriptDisassembly(ScriptModule* codes, SCMFile* scm);
 
     /**
      * Execute the disassembly routine.
@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    SCMOpcodes* codes;
+    ScriptModule* codes;
     SCMFile* scm;
 
     std::map<SCMAddress, InstructionInfo> instructions;

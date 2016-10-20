@@ -8,6 +8,7 @@
 #include <render/DebugDraw.hpp>
 #include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
+#include <script/modules/GTA3Module.hpp>
 #include "game.hpp"
 
 #include "GameBase.hpp"
@@ -22,7 +23,11 @@ class RWGame : public GameBase {
     GameState state;
 
     std::unique_ptr<GameWorld> world;
-    ScriptMachine* script = nullptr;
+
+    GTA3Module opcodes;
+    std::unique_ptr<ScriptMachine> vm;
+    std::unique_ptr<SCMFile> script;
+
     std::chrono::steady_clock clock;
     std::chrono::steady_clock::time_point last_clock_time;
 
@@ -72,8 +77,8 @@ public:
         return renderer;
     }
 
-    ScriptMachine* getScript() const {
-        return script;
+    ScriptMachine *getScriptVM() const {
+        return vm.get();
     }
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
