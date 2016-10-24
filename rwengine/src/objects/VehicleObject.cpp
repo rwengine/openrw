@@ -100,7 +100,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     collision = new CollisionInstance;
     if (collision->createPhysicsBody(this, modelinfo->name, nullptr,
                                      &info->handling)) {
-        physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
+        physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld.get());
         btRaycastVehicle::btVehicleTuning tuning;
 
         float travel = fabs(info->handling.suspensionUpperLimit -

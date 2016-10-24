@@ -87,12 +87,15 @@ GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
     : logger(log), data(dat), randomEngine(rand()), _work(work), paused(false) {
     data->engine = this;
 
-    collisionConfig = new btDefaultCollisionConfiguration;
-    collisionDispatcher = new WorldCollisionDispatcher(collisionConfig);
-    broadphase = new btDbvtBroadphase();
-    solver = new btSequentialImpulseConstraintSolver;
-    dynamicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase,
-                                                solver, collisionConfig);
+    collisionConfig = std::make_unique<btDefaultCollisionConfiguration>();
+    collisionDispatcher =
+        std::make_unique<WorldCollisionDispatcher>(collisionConfig.get());
+    broadphase = std::make_unique<btDbvtBroadphase>();
+    solver = std::make_unique<btSequentialImpulseConstraintSolver>();
+    dynamicsWorld = std::make_unique<btDiscreteDynamicsWorld>(
+        collisionDispatcher.get(), broadphase.get(), solver.get(),
+        collisionConfig.get());
+
     dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
     broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(
         new btGhostPairCallback());
@@ -104,14 +107,6 @@ GameWorld::~GameWorld() {
     for (auto& p : allObjects) {
         delete p;
     }
-
-    delete dynamicsWorld;
-    delete solver;
-    delete broadphase;
-    delete collisionDispatcher;
-    delete collisionConfig;
-
-    /// @todo delete other things.
 }
 
 bool GameWorld::placeItems(const std::string& name) {

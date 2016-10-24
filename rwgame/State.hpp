@@ -1,8 +1,5 @@
-#ifndef _GAME_STATE_HPP_
-#define _GAME_STATE_HPP_
-#include <functional>
-#include <glm/gtc/quaternion.hpp>
-#include <queue>
+#ifndef RWGAME_STATE_HPP
+#define RWGAME_STATE_HPP
 #include <render/ViewCamera.hpp>
 #include "GameWindow.hpp"
 #include "MenuSystem.hpp"
@@ -11,15 +8,16 @@
 
 class RWGame;
 class GameWorld;
+class StateManager;
 
-struct State {
-    // Helper for global menu behaviour
-    Menu* currentMenu;
-    Menu* nextMenu;
+class State {
+public:
+    std::shared_ptr<Menu> menu;
+    std::shared_ptr<Menu> nextMenu;
 
     RWGame* game;
 
-    State(RWGame* game) : currentMenu(nullptr), nextMenu(nullptr), game(game) {
+    State(RWGame* game) : game(game) {
     }
 
     virtual void enter() = 0;
@@ -34,24 +32,18 @@ struct State {
     }
 
     virtual ~State() {
-        if (getCurrentMenu()) {
-            delete getCurrentMenu();
-        }
     }
 
-    void enterMenu(Menu* menu) {
+    void enterMenu(const std::shared_ptr<Menu>& menu) {
         nextMenu = menu;
     }
 
     Menu* getCurrentMenu() {
         if (nextMenu) {
-            if (currentMenu) {
-                delete currentMenu;
-            }
-            currentMenu = nextMenu;
+            menu = nextMenu;
             nextMenu = nullptr;
         }
-        return currentMenu;
+        return menu.get();
     }
 
     virtual void handleEvent(const SDL_Event& e);
@@ -66,45 +58,17 @@ struct State {
 
     GameWorld* getWorld();
     GameWindow& getWindow();
-};
 
-struct StateManager {
-    static StateManager& get() {
-        static StateManager m;
-        return m;
+    bool hasExited() const {
+        return hasexited_;
     }
 
-    std::deque<State*> states;
+private:
+    bool hasexited_ = false;
 
-    void clear() {
-        states.clear();
-    }
-
-    void enter(State* state) {
-        states.push_back(state);
-        state->enter();
-    }
-
-    void exec(State* state) {
-        exit();
-        enter(state);
-    }
-
-    void tick(float dt) {
-        states.back()->tick(dt);
-    }
-
-    void draw(GameRenderer* r) {
-        states.back()->draw(r);
-    }
-
-    void exit() {
-        // TODO: Resole states being leaked.
-        states.back()->exit();
-        states.pop_back();
-        if (states.size() > 0) {
-            states.back()->enter();
-        }
+protected:
+    void done() {
+        hasexited_ = true;
     }
 };
 

@@ -124,7 +124,7 @@ void IngameState::startTest() {
 
 void IngameState::startGame() {
     game->startScript("data/main.scm");
-    game->getScript()->startThread(0);
+    game->getScriptVM()->startThread(0);
     getWorld()->sound.playBackground(getWorld()->data->getDataPath() +
                                      "/audio/City.wav");
 }
@@ -412,11 +412,11 @@ void IngameState::handleEvent(const SDL_Event& event) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().enter(new PauseState(game));
+                    StateManager::get().enter<PauseState>(game);
                     break;
                 case SDLK_m:
-                    StateManager::get().enter(
-                        new DebugState(game, _look.position, _look.rotation));
+                    StateManager::get().enter<DebugState>(game, _look.position,
+                                                          _look.rotation);
                     break;
                 case SDLK_SPACE:
                     if (getWorld()->state->currentCutscene) {

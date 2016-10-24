@@ -50,7 +50,7 @@ public:
         m_strings.emplace(id, text);
     }
 
-    GameString text(const GameStringKey& id) {
+    GameString text(const GameStringKey& id) const {
         auto a = m_strings.find(id);
         if (a != m_strings.end()) {
             return a->second;

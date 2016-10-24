@@ -1,9 +1,14 @@
 sudo: required
 dist: trusty
-language: cpp
+language: generic
+env:
+  - CXX=g++-5 CC=gcc-5
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
+      - g++-5
       - libbullet-dev
       - libsdl2-dev
       - libmad0-dev

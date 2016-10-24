@@ -1,8 +1,9 @@
 #include <script/SCMFile.hpp>
 #include <script/ScriptDisassembly.hpp>
 #include <script/ScriptMachine.hpp>
+#include <script/ScriptModule.hpp>
 
-ScriptDisassembly::ScriptDisassembly(SCMOpcodes* _codes, SCMFile* _scm)
+ScriptDisassembly::ScriptDisassembly(ScriptModule* _codes, SCMFile* _scm)
     : codes(_codes), scm(_scm) {
 }
 

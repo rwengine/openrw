@@ -11,11 +11,11 @@ class DebugState : public State {
     bool _sonicMode = false;
     bool _invertedY;
 
-    Menu* createDebugMenu();
-    Menu* createMapMenu();
-    Menu* createVehicleMenu();
-    Menu* createAIMenu();
-    Menu* createWeaponMenu();
+    std::shared_ptr<Menu> createDebugMenu();
+    std::shared_ptr<Menu> createMapMenu();
+    std::shared_ptr<Menu> createVehicleMenu();
+    std::shared_ptr<Menu> createAIMenu();
+    std::shared_ptr<Menu> createWeaponMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},

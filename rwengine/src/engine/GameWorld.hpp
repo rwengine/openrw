@@ -269,11 +269,11 @@ public:
     /**
      * Bullet
      */
-    btDefaultCollisionConfiguration* collisionConfig;
-    btCollisionDispatcher* collisionDispatcher;
-    btBroadphaseInterface* broadphase;
-    btSequentialImpulseConstraintSolver* solver;
-    btDiscreteDynamicsWorld* dynamicsWorld;
+    std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig;
+    std::unique_ptr<btCollisionDispatcher> collisionDispatcher;
+    std::unique_ptr<btDbvtBroadphase> broadphase;
+    std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
+    std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
 
     /**
      * @brief physicsNearCallback

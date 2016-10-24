@@ -8,15 +8,10 @@
 
 #include <core/Profiler.hpp>
 
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
 #include <engine/SaveGame.hpp>
 #include <objects/GameObject.hpp>
-#include <render/DebugDraw.hpp>
-#include <render/GameRenderer.hpp>
 
-#include <script/ScriptMachine.hpp>
-#include <script/modules/GTA3Module.hpp>
+#include <script/SCMFile.hpp>
 
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
@@ -24,14 +19,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/program_options.hpp>
 #include <functional>
-
-#include "GitSHA1.h"
-
-// Use first 8 chars of git hash as the build string
-const std::string kBuildStr(kGitSHA1Hash, 8);
-const std::string kWindowTitle = "RWGame";
 
 std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
@@ -40,138 +28,68 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
-DebugDraw* debug = nullptr;
+RWGame::RWGame(Logger& log, int argc, char* argv[])
+    : GameBase(log, argc, argv)
+    , data(&log, &work, config.getGameDataPath())
+    , renderer(&log, &data) {
+    bool newgame = options.count("newgame");
+    bool test = options.count("test");
+    std::string startSave(
+        options.count("load") ? options["load"].as<std::string>() : "");
+    std::string benchFile(options.count("benchmark")
+                              ? options["benchmark"].as<std::string>()
+                              : "");
 
-StdOutReciever logPrinter;
-
-RWGame::RWGame(int argc, char* argv[]) {
-    if (!config.isValid()) {
-        throw std::runtime_error("Invalid configuration file at: " +
-                                 config.getConfigFile());
-    }
-
-    size_t w = GAME_WINDOW_WIDTH, h = GAME_WINDOW_HEIGHT;
-    bool fullscreen = false;
-    bool newgame = false;
-    bool test = false;
-    bool help = false;
-    std::string startSave;
-    std::string benchFile;
-
-    // Define and parse command line options
-    namespace po = boost::program_options;
-    po::options_description desc("Available options");
-    desc.add_options()("help", "Show this help message")(
-        "width,w", po::value<size_t>(), "Game resolution width in pixel")(
-        "height,h", po::value<size_t>(), "Game resolution height in pixel")(
-        "fullscreen,f", "Enable fullscreen mode")("newgame,n",
-                                                  "Directly start a new game")(
-        "test,t", "Starts a new game in a test location")(
-        "load,l", po::value<std::string>(), "Load save file")(
-        "benchmark,b", po::value<std::string>(), "Run benchmark from file");
-
-    po::variables_map vm;
-    try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
-        po::notify(vm);
-    } catch (po::error& ex) {
-        help = true;
-        std::cout << "Error parsing arguments: " << ex.what() << std::endl;
-    }
-
-    if (help || vm.count("help")) {
-        std::cout << desc;
-        throw std::invalid_argument("");
-    }
-    if (vm.count("width")) {
-        w = vm["width"].as<size_t>();
-    }
-    if (vm.count("height")) {
-        h = vm["height"].as<size_t>();
-    }
-    if (vm.count("fullscreen")) {
-        fullscreen = true;
-    }
-    if (vm.count("newgame")) {
-        newgame = true;
-    }
-    if (vm.count("test")) {
-        test = true;
-    }
-    if (vm.count("load")) {
-        startSave = vm["load"].as<std::string>();
-    }
-    if (vm.count("benchmark")) {
-        benchFile = vm["benchmark"].as<std::string>();
-    }
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        throw std::runtime_error("Failed to initialize SDL2!");
-
-    window = new GameWindow();
-    window->create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
-
-    work = new WorkContext();
-
-    log.addReciever(&logPrinter);
     log.info("Game", "Game directory: " + config.getGameDataPath());
-    log.info("Game", "Build: " + kBuildStr);
 
     if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
         throw std::runtime_error("Invalid game directory path: " +
                                  config.getGameDataPath());
     }
 
-    data = new GameData(&log, work, config.getGameDataPath());
-
-    data->load();
-
-    // Initialize renderer
-    renderer = new GameRenderer(&log, data);
+    data.load();
 
     for (const auto& p : kSpecialModels) {
-        auto model = data->loadClump(p.second);
-        renderer->setSpecialModel(p.first, model);
+        auto model = data.loadClump(p.second);
+        renderer.setSpecialModel(p.first, model);
     }
 
     // Set up text renderer
-    renderer->text.setFontTexture(0, "pager");
-    renderer->text.setFontTexture(1, "font1");
-    renderer->text.setFontTexture(2, "font2");
+    renderer.text.setFontTexture(0, "pager");
+    renderer.text.setFontTexture(1, "font1");
+    renderer.text.setFontTexture(2, "font2");
 
-    debug = new DebugDraw;
-    debug->setDebugMode(btIDebugDraw::DBG_DrawWireframe |
-                        btIDebugDraw::DBG_DrawConstraints |
-                        btIDebugDraw::DBG_DrawConstraintLimits);
-    debug->setShaderProgram(renderer->worldProg);
+    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
+                       btIDebugDraw::DBG_DrawConstraints |
+                       btIDebugDraw::DBG_DrawConstraintLimits);
+    debug.setShaderProgram(renderer.worldProg);
 
-    data->loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
+    data.loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
-    data->loadGXT("text/" + config.getGameLanguage() + ".gxt");
+    data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
-    getRenderer()->water.setWaterTable(data->waterHeights, 48, data->realWater,
-                                       128 * 128);
+    getRenderer().water.setWaterTable(data.waterHeights, 48, data.realWater,
+                                      128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
         std::string num = (m < 10 ? "0" : "");
         std::string name = "radar" + num + std::to_string(m);
-        data->loadTXD(name + ".txd");
+        data.loadTXD(name + ".txd");
     }
 
-    auto loading = new LoadingState(this);
-    if (!benchFile.empty()) {
-        loading->setNextState(new BenchmarkState(this, benchFile));
-    } else if (test) {
-        loading->setNextState(new IngameState(this, true, "test"));
-    } else if (newgame) {
-        loading->setNextState(new IngameState(this, true));
-    } else if (!startSave.empty()) {
-        loading->setNextState(new IngameState(this, true, startSave));
-    } else {
-        loading->setNextState(new MenuState(this));
-    }
-
-    StateManager::get().enter(loading);
+    StateManager::get().enter<LoadingState>(this, [=]() {
+        if (!benchFile.empty()) {
+            StateManager::get().enter<BenchmarkState>(this, benchFile);
+        } else if (test) {
+            StateManager::get().enter<IngameState>(this, true, "test");
+        } else if (newgame) {
+            StateManager::get().enter<IngameState>(this, true);
+        } else if (!startSave.empty()) {
+            StateManager::get().enter<IngameState>(this, true, startSave);
+        } else {
+            StateManager::get().enter<MenuState>(this);
+        }
+    });
 
     log.info("Game", "Started");
 }
@@ -180,50 +98,24 @@ RWGame::~RWGame() {
     log.info("Game", "Beginning cleanup");
 
     log.info("Game", "Stopping work queue");
-    work->stop();
-
-    log.info("Game", "Cleaning up scripts");
-    delete script;
-
-    log.info("Game", "Cleaning up renderer");
-    delete renderer;
-
-    log.info("Game", "Cleaning up world");
-    delete world;
-
-    log.info("Game", "Cleaning up state");
-    delete state;
-
-    log.info("Game", "Cleaning up window");
-    delete window;
-
-    log.info("Game", "Cleaning up work queue");
-    delete work;
-
-    SDL_Quit();
-
-    log.info("Game", "Done cleaning up");
+    work.stop();
 }
 
 void RWGame::newGame() {
-    if (state != nullptr) {
-        log.error("Game", "Cannot start a new game: game is already running.");
-        return;
-    }
+    // Get a fresh state
+    state = GameState();
 
-    state = new GameState();
-    world = new GameWorld(&log, work, data);
-    world->dynamicsWorld->setDebugDrawer(debug);
+    // Destroy the current world and start over
+    world = std::make_unique<GameWorld>(&log, &work, &data);
+    world->dynamicsWorld->setDebugDrawer(&debug);
 
     // Associate the new world with the new state and vice versa
-    state->world = world;
-    world->state = state;
+    state.world = world.get();
+    world->state = &state;
 
-    for (std::map<std::string, std::string>::iterator it =
-             world->data->iplLocations.begin();
-         it != world->data->iplLocations.end(); ++it) {
-        world->data->loadZone(it->second);
-        world->placeItems(it->second);
+    for (auto ipl : world->data->iplLocations) {
+        world->data->loadZone(ipl.second);
+        world->placeItems(ipl.second);
     }
 }
 
@@ -232,9 +124,7 @@ void RWGame::saveGame(const std::string& savename) {
 }
 
 void RWGame::loadGame(const std::string& savename) {
-    delete state->world;
-    delete state->script;
-    state = nullptr;
+    delete state.script;
 
     log.info("Game", "Loading game " + savename);
 
@@ -242,29 +132,24 @@ void RWGame::loadGame(const std::string& savename) {
 
     startScript("data/main.scm");
 
-    if (!SaveGame::loadGame(*state, savename)) {
+    if (!SaveGame::loadGame(state, savename)) {
         log.error("Game", "Failed to load game");
     }
 }
 
 void RWGame::startScript(const std::string& name) {
-    SCMFile* f = world->data->loadSCM(name);
-    if (f) {
-        if (script) delete script;
+    script.reset(data.loadSCM(name));
+    if (script) {
+        vm = std::make_unique<ScriptMachine>(&state, script.get(), &opcodes);
 
-        SCMOpcodes* opcodes = new SCMOpcodes;
-        opcodes->modules.push_back(new GTA3Module);
-
-        script = new ScriptMachine(state, f, opcodes);
-
-        state->script = script;
+        state.script = vm.get();
     } else {
         log.error("Game", "Failed to load SCM: " + name);
     }
 }
 
 PlayerController* RWGame::getPlayer() {
-    auto object = world->pedestrianPool.find(state->playerObject);
+    auto object = world->pedestrianPool.find(state.playerObject);
     if (object) {
         auto controller = static_cast<CharacterObject*>(object)->controller;
         return static_cast<PlayerController*>(controller);
@@ -295,8 +180,7 @@ void RWGame::handleCheatInput(char symbol) {
 
     // Player related cheats
     {
-        auto player = static_cast<CharacterObject*>(
-            world->pedestrianPool.find(state->playerObject));
+        auto player = getPlayer()->getCharacter();
 
 #ifdef RW_GAME_GTA3_GERMAN  // Germans got their own cheat
         std::string health_cheat = "GESUNDHEIT";
@@ -327,7 +211,7 @@ void RWGame::handleCheatInput(char symbol) {
         });
 
         checkForCheat("IFIWEREARICHMAN", [&] {
-            world->state->playerInfo.money += 250000;
+            state.playerInfo.money += 250000;
             // @todo ShowHelpMessage("CHEAT6"); // III: Inputting money cheat.
         });
 
@@ -474,8 +358,9 @@ int RWGame::run() {
     last_clock_time = clock.now();
 
     // Loop until we run out of states.
-    while (StateManager::get().states.size()) {
-        State* state = StateManager::get().states.back();
+    bool running = true;
+    while (!StateManager::get().states.empty() && running) {
+        State* state = StateManager::get().states.back().get();
 
         RW_PROFILE_FRAME_BOUNDARY();
 
@@ -484,7 +369,7 @@ int RWGame::run() {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    StateManager::get().clear();
+                    running = false;
                     break;
 
                 case SDL_WINDOWEVENT:
@@ -556,24 +441,29 @@ int RWGame::run() {
 
         RW_PROFILE_BEGIN("state");
         if (StateManager::get().states.size() > 0) {
-            StateManager::get().draw(renderer);
+            StateManager::get().draw(&renderer);
         }
         RW_PROFILE_END();
         RW_PROFILE_END();
 
         renderProfile();
 
-        window->swap();
+        getWindow().swap();
+
+        // Make sure the topmost state is the correct state
+        StateManager::get().updateStack();
     }
+
+    StateManager::get().clear();
 
     return 0;
 }
 
 void RWGame::tick(float dt) {
     // Process the Engine's background work.
-    world->_work->update();
+    work.update();
 
-    State* currState = StateManager::get().states.back();
+    State* currState = StateManager::get().states.back().get();
 
     world->chase.update(dt);
 
@@ -582,16 +472,16 @@ void RWGame::tick(float dt) {
         // Clear out any per-tick state.
         world->clearTickData();
 
-        state->gameTime += dt;
+        state.gameTime += dt;
 
         clockAccumulator += dt;
         while (clockAccumulator >= 1.f) {
-            world->state->basic.gameMinute++;
-            while (state->basic.gameMinute >= 60) {
-                state->basic.gameMinute = 0;
-                state->basic.gameHour++;
-                while (state->basic.gameHour >= 24) {
-                    state->basic.gameHour = 0;
+            state.basic.gameMinute++;
+            while (state.basic.gameMinute >= 60) {
+                state.basic.gameMinute = 0;
+                state.basic.gameHour++;
+                while (state.basic.gameHour >= 24) {
+                    state.basic.gameHour = 0;
                 }
             }
             clockAccumulator -= 1.f;
@@ -617,13 +507,13 @@ void RWGame::tick(float dt) {
 
         world->destroyQueuedObjects();
 
-        state->text.tick(dt);
+        state.text.tick(dt);
 
         world->dynamicsWorld->stepSimulation(dt, 2, dt);
 
-        if (script) {
+        if (vm) {
             try {
-                script->execute(dt);
+                vm->execute(dt);
             } catch (SCMException& ex) {
                 std::cerr << ex.what() << std::endl;
                 log.error("Script", ex.what());
@@ -632,7 +522,7 @@ void RWGame::tick(float dt) {
         }
 
         /// @todo this doesn't make sense as the condition
-        if (state->playerObject) {
+        if (state.playerObject) {
             nextCam.frustum.update(nextCam.frustum.projection() *
                                    nextCam.getView());
             // Use the current camera position to spawn pedestrians.
@@ -647,19 +537,19 @@ void RWGame::tick(float dt) {
 }
 
 void RWGame::render(float alpha, float time) {
-    lastDraws = getRenderer()->getRenderer()->getDrawCount();
+    lastDraws = getRenderer().getRenderer()->getDrawCount();
 
-    getRenderer()->getRenderer()->swap();
+    getRenderer().getRenderer()->swap();
 
-    glm::ivec2 windowSize = window->getSize();
-    renderer->setViewport(windowSize.x, windowSize.y);
+    glm::ivec2 windowSize = getWindow().getSize();
+    renderer.setViewport(windowSize.x, windowSize.y);
 
     ViewCamera viewCam;
     viewCam.frustum.fov = glm::radians(90.f);
-    if (state->currentCutscene != nullptr && state->cutsceneStartTime >= 0.f) {
-        auto cutscene = state->currentCutscene;
+    if (state.currentCutscene != nullptr && state.cutsceneStartTime >= 0.f) {
+        auto cutscene = state.currentCutscene;
         float cutsceneTime =
-            std::min(world->getGameTime() - state->cutsceneStartTime,
+            std::min(world->getGameTime() - state.cutsceneStartTime,
                      cutscene->tracks.duration);
         cutsceneTime += GAME_TIMESTEP * alpha;
         glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
@@ -693,9 +583,9 @@ void RWGame::render(float alpha, float time) {
 
         viewCam.position = cameraPos;
         viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
-    } else if (state->cameraFixed) {
-        viewCam.position = state->cameraPosition;
-        viewCam.rotation = state->cameraRotation;
+    } else if (state.cameraFixed) {
+        viewCam.position = state.cameraPosition;
+        viewCam.rotation = state.cameraRotation;
     } else {
         // There's no cutscene playing - use the camera returned by the State.
         viewCam.position = glm::mix(lastCam.position, nextCam.position, alpha);
@@ -706,20 +596,20 @@ void RWGame::render(float alpha, float time) {
     viewCam.frustum.aspectRatio =
         windowSize.x / static_cast<float>(windowSize.y);
 
-    if (state->isCinematic) {
+    if (state.isCinematic) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
 
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    renderer->getRenderer()->pushDebugGroup("World");
+    renderer.getRenderer()->pushDebugGroup("World");
 
     RW_PROFILE_BEGIN("world");
-    renderer->renderWorld(world, viewCam, alpha);
+    renderer.renderWorld(world.get(), viewCam, alpha);
     RW_PROFILE_END();
 
-    renderer->getRenderer()->popDebugGroup();
+    renderer.getRenderer()->popDebugGroup();
 
     RW_PROFILE_BEGIN("debug");
     switch (debugview_) {
@@ -727,10 +617,8 @@ void RWGame::render(float alpha, float time) {
             renderDebugStats(time);
             break;
         case DebugViewMode::Physics:
-            if (world) {
-                world->dynamicsWorld->debugDrawWorld();
-                debug->flush(renderer);
-            }
+            world->dynamicsWorld->debugDrawWorld();
+            debug.flush(&renderer);
             break;
         case DebugViewMode::Navigation:
             renderDebugPaths(time);
@@ -743,7 +631,7 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    drawOnScreenText(world, renderer);
+    drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
@@ -768,8 +656,8 @@ void RWGame::renderDebugStats(float time) {
     ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
        << "Frame: " << time_ms << "ms\n"
        << "Draws/Textures/Buffers: " << lastDraws << "/"
-       << renderer->getRenderer()->getTextureCount() << "/"
-       << renderer->getRenderer()->getBufferCount() << "\n";
+       << renderer.getRenderer()->getTextureCount() << "/"
+       << renderer.getRenderer()->getBufferCount() << "\n";
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
@@ -777,7 +665,7 @@ void RWGame::renderDebugStats(float time) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer->text.renderText(ti);
+    renderer.text.renderText(ti);
 
     /*while( engine->log.size() > 0 && engine->log.front().time + 10.f <
     engine->gameTime ) {
@@ -819,38 +707,38 @@ void RWGame::renderDebugPaths(float time) {
     for (AIGraphNode* n : world->aigraph.nodes) {
         btVector3 p(n->position.x, n->position.y, n->position.z);
         auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
-        debug->drawLine(p - btVector3(0.f, 0.f, 1.f),
-                        p + btVector3(0.f, 0.f, 1.f), col);
-        debug->drawLine(p - btVector3(1.f, 0.f, 0.f),
-                        p + btVector3(1.f, 0.f, 0.f), col);
-        debug->drawLine(p - btVector3(0.f, 1.f, 0.f),
-                        p + btVector3(0.f, 1.f, 0.f), col);
+        debug.drawLine(p - btVector3(0.f, 0.f, 1.f),
+                       p + btVector3(0.f, 0.f, 1.f), col);
+        debug.drawLine(p - btVector3(1.f, 0.f, 0.f),
+                       p + btVector3(1.f, 0.f, 0.f), col);
+        debug.drawLine(p - btVector3(0.f, 1.f, 0.f),
+                       p + btVector3(0.f, 1.f, 0.f), col);
 
         for (AIGraphNode* c : n->connections) {
             btVector3 f(c->position.x, c->position.y, c->position.z);
-            debug->drawLine(p, f, col);
+            debug.drawLine(p, f, col);
         }
     }
 
     // Draw Garage bounds
-    for (size_t g = 0; g < state->garages.size(); ++g) {
-        auto& garage = state->garages[g];
+    for (size_t g = 0; g < state.garages.size(); ++g) {
+        auto& garage = state.garages[g];
         btVector3 minColor(1.f, 0.f, 0.f);
         btVector3 maxColor(0.f, 1.f, 0.f);
         btVector3 min(garage.min.x, garage.min.y, garage.min.z);
         btVector3 max(garage.max.x, garage.max.y, garage.max.z);
-        debug->drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
-        debug->drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
-        debug->drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);
+        debug.drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
+        debug.drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
+        debug.drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);
 
-        debug->drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
-        debug->drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
-        debug->drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
+        debug.drawLine(max, max - btVector3(0.5f, 0.f, 0.f), maxColor);
+        debug.drawLine(max, max - btVector3(0.f, 0.5f, 0.f), maxColor);
+        debug.drawLine(max, max - btVector3(0.f, 0.f, 0.5f), maxColor);
     }
 
     // Draw vehicle generators
-    for (size_t v = 0; v < state->vehicleGenerators.size(); ++v) {
-        auto& generator = state->vehicleGenerators[v];
+    for (size_t v = 0; v < state.vehicleGenerators.size(); ++v) {
+        auto& generator = state.vehicleGenerators[v];
         btVector3 color(1.f, 0.f, 0.f);
         btVector3 position(generator.position.x, generator.position.y,
                            generator.position.z);
@@ -861,12 +749,12 @@ void RWGame::renderDebugPaths(float time) {
                          .rotate(btVector3(0.f, 0.f, 1.f), heading);
         auto left = btVector3(-0.15f, -0.15f, 0.f)
                         .rotate(btVector3(0.f, 0.f, 1.f), heading);
-        debug->drawLine(position, position + back, color);
-        debug->drawLine(position, position + right, color);
-        debug->drawLine(position, position + left, color);
+        debug.drawLine(position, position + back, color);
+        debug.drawLine(position, position + right, color);
+        debug.drawLine(position, position + left, color);
     }
 
-    debug->flush(renderer);
+    debug.flush(&renderer);
 }
 
 void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
@@ -874,7 +762,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
 
     std::stringstream ss;
 
-    ss << "Models: " << data->modelinfo.size() << "\n"
+    ss << "Models: " << data.modelinfo.size() << "\n"
        << "Dynamic Objects:\n"
        << " Vehicles: " << world->vehiclePool.objects.size() << "\n"
        << " Peds: " << world->pedestrianPool.objects.size() << "\n";
@@ -885,7 +773,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer->text.renderText(ti);
+    renderer.text.renderText(ti);
 
     // Render worldspace overlay for nearby objects
     constexpr float kNearbyDistance = 25.f;
@@ -907,7 +795,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         screen.y = viewport.w - screen.y;
         ti.screenPosition = glm::vec2(screen);
         ti.size = 10.f;
-        renderer->text.renderText(ti);
+        renderer.text.renderText(ti);
     };
 
     for (auto& p : world->vehiclePool.objects) {

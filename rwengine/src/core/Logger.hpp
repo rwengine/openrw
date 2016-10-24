@@ -35,6 +35,10 @@ public:
         virtual void messageRecieved(const LogMessage&) = 0;
     };
 
+    Logger(std::initializer_list<MessageReciever*> initial = {})
+        : recievers(initial) {
+    }
+
     void addReciever(MessageReciever* out);
     void removeReciever(MessageReciever* out);
 

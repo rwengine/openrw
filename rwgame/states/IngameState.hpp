@@ -1,7 +1,7 @@
 #ifndef INGAMESTATE_HPP
 #define INGAMESTATE_HPP
 
-#include "State.hpp"
+#include "StateManager.hpp"
 
 class PlayerController;
 
