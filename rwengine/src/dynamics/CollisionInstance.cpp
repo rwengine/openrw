@@ -69,6 +69,9 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
         float colMin = std::numeric_limits<float>::max(),
               colMax = std::numeric_limits<float>::lowest();
 
+        btTransform tbase, t;
+        tbase.setIdentity();
+
         // Boxes
         for (size_t i = 0; i < physInst.boxes.size(); ++i) {
             auto& box = physInst.boxes[i];
@@ -76,10 +79,8 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
             auto mid = (box.min + box.max) / 2.f;
             btCollisionShape* bshape =
                 new btBoxShape(btVector3(size.x, size.y, size.z));
-            btTransform t;
-            t.setIdentity();
             t.setOrigin(btVector3(mid.x, mid.y, mid.z));
-            cmpShape->addChildShape(t, bshape);
+            cmpShape->addChildShape(tbase * t, bshape);
 
             colMin = std::min(colMin, mid.z - size.z);
             colMax = std::max(colMax, mid.z + size.z);
@@ -91,11 +92,9 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
         for (size_t i = 0; i < physInst.spheres.size(); ++i) {
             auto& sphere = physInst.spheres[i];
             btCollisionShape* sshape = new btSphereShape(sphere.radius);
-            btTransform t;
-            t.setIdentity();
             t.setOrigin(
                 btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
-            cmpShape->addChildShape(t, sshape);
+            cmpShape->addChildShape(tbase * t, sshape);
 
             colMin = std::min(colMin, sphere.center.z - sphere.radius);
             colMax = std::max(colMax, sphere.center.z + sphere.radius);
@@ -103,17 +102,15 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
             m_shapes.push_back(sshape);
         }
 
-        if (physInst.vertices.size() > 0 && physInst.indices.size() >= 3) {
+        if (physInst.vertices.size() > 0 && physInst.faces.size() > 0) {
             m_vertArray = new btTriangleIndexVertexArray(
-                physInst.indices.size() / 3, (int*)physInst.indices.data(),
-                sizeof(uint32_t) * 3, physInst.vertices.size(),
-                &(physInst.vertices[0].x), sizeof(glm::vec3));
+                physInst.faces.size(), (int*)physInst.faces.data(),
+                sizeof(CollisionModel::Triangle), physInst.vertices.size(),
+                (float*)physInst.vertices.data(), sizeof(glm::vec3));
             btBvhTriangleMeshShape* trishape =
                 new btBvhTriangleMeshShape(m_vertArray, false);
             trishape->setMargin(0.05f);
-            btTransform t;
-            t.setIdentity();
-            cmpShape->addChildShape(t, trishape);
+            cmpShape->addChildShape(tbase, trishape);
 
             m_shapes.push_back(trishape);
         }

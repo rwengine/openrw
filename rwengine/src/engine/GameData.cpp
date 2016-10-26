@@ -128,8 +128,8 @@ void GameData::loadCOL(const size_t zone, const std::string& name) {
     auto systempath = index.findFilePath(name).string();
 
     if (col.load(systempath)) {
-        for (size_t i = 0; i < col.instances.size(); ++i) {
-            collisions[col.instances[i]->name] = std::move(col.instances[i]);
+        for (size_t i = 0; i < col.collisions.size(); ++i) {
+            collisions[col.collisions[i]->name] = std::move(col.collisions[i]);
         }
     }
 }

@@ -1,5 +1,5 @@
-#ifndef _LOADERCOL_H_
-#define _LOADERCOL_H_
+#ifndef RWENGINE_LOADERCOL_HPP
+#define RWENGINE_LOADERCOL_HPP
 #include <data/CollisionModel.hpp>
 #include <glm/glm.hpp>
 #include <memory>
@@ -15,10 +15,7 @@ public:
     /// Load the COL data into memory
     bool load(const std::string& file);
 
-    /// Load the COL data from a file already in memory
-    bool load(char* data, const size_t size);
-
-    std::vector<std::unique_ptr<CollisionModel>> instances;
+    std::vector<std::unique_ptr<CollisionModel>> collisions;
 };
 
 #endif
