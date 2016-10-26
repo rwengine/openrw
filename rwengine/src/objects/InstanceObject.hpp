@@ -16,7 +16,7 @@ class InstanceObject : public GameObject {
 
 public:
     glm::vec3 scale;
-    CollisionInstance* body;
+    std::unique_ptr<CollisionInstance> body;
     InstanceObject* LODinstance;
     std::shared_ptr<DynamicObjectData> dynamics;
     bool _enablePhysics;

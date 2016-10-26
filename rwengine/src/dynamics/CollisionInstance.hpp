@@ -1,8 +1,7 @@
-#pragma once
-#ifndef _COLLISIONINSTANCE_HPP_
-#define _COLLISIONINSTANCE_HPP_
-
+#ifndef RWENGINE_COLLISIONINSTANCE_HPP
+#define RWENGINE_COLLISIONINSTANCE_HPP
 #include <btBulletDynamicsCommon.h>
+#include <data/CollisionModel.hpp>
 #include <string>
 #include <vector>
 
@@ -24,7 +23,7 @@ public:
 
     ~CollisionInstance();
 
-    bool createPhysicsBody(GameObject* object, const std::string& modelName,
+    bool createPhysicsBody(GameObject* object, CollisionModel* collision,
                            DynamicObjectData* dynamics = nullptr,
                            VehicleHandlingInfo* handling = nullptr);
 

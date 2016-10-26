@@ -4,7 +4,6 @@
 
 class Logger;
 
-#include <data/CollisionModel.hpp>
 #include <data/GameTexts.hpp>
 #include <data/ZoneData.hpp>
 #include <loaders/LoaderDFF.hpp>
@@ -238,11 +237,6 @@ public:
      * Loaded Animations
      */
     AnimationSet animations;
-
-    /**
-     * CollisionModel data.
-     */
-    std::map<std::string, std::unique_ptr<CollisionModel>> collisions;
 
     /**
      * DynamicObjectData

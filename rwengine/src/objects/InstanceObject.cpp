@@ -30,9 +30,6 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
 }
 
 InstanceObject::~InstanceObject() {
-    if (body) {
-        delete body;
-    }
 }
 
 void InstanceObject::tick(float dt) {
@@ -123,8 +120,7 @@ void InstanceObject::tick(float dt) {
 
 void InstanceObject::changeModel(BaseModelInfo* incoming) {
     if (body) {
-        delete body;
-        body = nullptr;
+        body.reset();
     }
 
     if (incoming) {
@@ -135,12 +131,12 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
         changeModelInfo(incoming);
         /// @todo this should only be temporary
         setModel(getModelInfo<SimpleModelInfo>()->getModel());
+        auto collision = getModelInfo<SimpleModelInfo>()->getCollision();
 
-        auto bod = new CollisionInstance;
-
-        if (bod->createPhysicsBody(this, incoming->name, dynamics.get())) {
-            bod->getBulletBody()->setActivationState(ISLAND_SLEEPING);
-            body = bod;
+        if (collision) {
+            body.reset(new CollisionInstance);
+            body->createPhysicsBody(this, collision, dynamics.get());
+            body->getBulletBody()->setActivationState(ISLAND_SLEEPING);
         }
     }
 }
