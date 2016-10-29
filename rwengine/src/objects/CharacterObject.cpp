@@ -7,6 +7,12 @@
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
 
+// Required for BT_BULLET_VERSION
+#include "LinearMath/btScalar.h"
+#ifndef BT_BULLET_VERSION
+#warning Unable to find BT_BULLET_VERSION
+#endif
+
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
@@ -97,13 +103,23 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physShape = new btCapsuleShapeZ(size.x, size.y);
         physObject->setCollisionShape(physShape);
         physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+#if BT_BULLET_VERSION < 284
         physCharacter =
             new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
+#else
+        physCharacter =
+            new btKinematicCharacterController(physObject, physShape, 0.30f,
+                btVector3(0.f, 0.f, 1.f));
+#endif
         physCharacter->setFallSpeed(20.f);
         physCharacter->setUseGhostSweepTest(true);
         physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 1.f),
                                                   1.f);
+#if BT_BULLET_VERSION < 284
         physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
+#else
+        physCharacter->setGravity(engine->dynamicsWorld->getGravity());
+#endif
         physCharacter->setJumpSpeed(5.f);
 
         engine->dynamicsWorld->addCollisionObject(
@@ -347,11 +363,18 @@ void CharacterObject::updateCharacter(float dt) {
                 auto& wt = physObject->getWorldTransform();
                 wt.setOrigin(bpos);
                 physObject->setWorldTransform(wt);
-
+#if BT_BULLET_VERSION < 284
                 physCharacter->setGravity(0.f);
+#else
+                physCharacter->setGravity(btVector3(0.f, 0.f, 0.f));
+#endif
                 inWater = true;
             } else {
+#if BT_BULLET_VERSION < 284
                 physCharacter->setGravity(9.81f);
+#else
+                physCharacter->setGravity(btVector3(0.f, 0.f, -9.81f));
+#endif
                 inWater = false;
             }
         }
