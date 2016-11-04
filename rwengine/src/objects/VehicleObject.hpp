@@ -30,7 +30,7 @@ public:
 
     std::map<size_t, GameObject*> seatOccupants;
 
-    CollisionInstance* collision;
+    std::unique_ptr<CollisionInstance> collision;
     btVehicleRaycaster* physRaycaster;
     btRaycastVehicle* physVehicle;
 

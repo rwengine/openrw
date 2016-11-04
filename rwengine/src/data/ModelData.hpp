@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <data/CollisionModel.hpp>
 #include <data/Model.hpp>
 #include <data/PathData.hpp>
 #include <rw/defines.hpp>
@@ -71,6 +72,14 @@ public:
         return refcount_;
     }
 
+    void setCollisionModel(std::unique_ptr<CollisionModel>& col) {
+        collision = std::move(col);
+    }
+
+    CollisionModel* getCollision() const {
+        return collision.get();
+    }
+
     /// @todo replace with proper streaming implementation
     virtual bool isLoaded() const = 0;
 
@@ -96,6 +105,7 @@ private:
     ModelID modelid_ = 0;
     ModelDataType type_;
     int refcount_ = 0;
+    std::unique_ptr<CollisionModel> collision;
 };
 
 /**

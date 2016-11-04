@@ -128,8 +128,16 @@ void GameData::loadCOL(const size_t zone, const std::string& name) {
     auto systempath = index.findFilePath(name).string();
 
     if (col.load(systempath)) {
-        for (size_t i = 0; i < col.instances.size(); ++i) {
-            collisions[col.instances[i]->name] = std::move(col.instances[i]);
+        // Associate loaded collisions with models
+        for (auto& c : col.collisions) {
+            // Find by name
+            auto id = findModelObject(c->name);
+            auto model = modelinfo.find(id);
+            if (model == modelinfo.end()) {
+                logger->error("Data", "no model for collsion " + c->name);
+                continue;
+            }
+            model->second->setCollisionModel(c);
         }
     }
 }
