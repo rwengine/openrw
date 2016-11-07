@@ -103,7 +103,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physShape = new btCapsuleShapeZ(size.x, size.y);
         physObject->setCollisionShape(physShape);
         physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
-#if BT_BULLET_VERSION < 284
+#if BT_BULLET_VERSION < 285
         physCharacter =
             new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
 #else
@@ -115,7 +115,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physCharacter->setUseGhostSweepTest(true);
         physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 1.f),
                                                   1.f);
-#if BT_BULLET_VERSION < 284
+#if BT_BULLET_VERSION < 285
         physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
 #else
         physCharacter->setGravity(engine->dynamicsWorld->getGravity());
@@ -363,14 +363,14 @@ void CharacterObject::updateCharacter(float dt) {
                 auto& wt = physObject->getWorldTransform();
                 wt.setOrigin(bpos);
                 physObject->setWorldTransform(wt);
-#if BT_BULLET_VERSION < 284
+#if BT_BULLET_VERSION < 285
                 physCharacter->setGravity(0.f);
 #else
                 physCharacter->setGravity(btVector3(0.f, 0.f, 0.f));
 #endif
                 inWater = true;
             } else {
-#if BT_BULLET_VERSION < 284
+#if BT_BULLET_VERSION < 285
                 physCharacter->setGravity(9.81f);
 #else
                 physCharacter->setGravity(btVector3(0.f, 0.f, -9.81f));
