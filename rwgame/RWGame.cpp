@@ -420,6 +420,8 @@ int RWGame::run() {
             tick(GAME_TIMESTEP);
             RW_PROFILE_END();
 
+            getState()->swapInputState();
+
             accum -= GAME_TIMESTEP;
 
             // Throw away time if the accumulator reaches too high.

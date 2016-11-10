@@ -2459,7 +2459,7 @@ bool opcode_00e1(const ScriptArguments& args, const ScriptPad player, const Scri
 	// Hack: not implemented correctly.
 	if (player == 0) {
 		if (buttonID == 19) { // Look behind / sub mission
-			return args.getState()->input.pressed(GameInputState::Submission);
+			return args.getState()->input[0].pressed(GameInputState::Submission);
 		}
 	}
 	return false;

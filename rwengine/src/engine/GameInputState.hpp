@@ -55,14 +55,17 @@ struct GameInputState {
      *
      * For buttons, this will result in either 0 or 1.
      */
-    float currentLevels[_MaxControls] = {};
+    float levels[_MaxControls] = {};
 
     float operator[](Control c) const {
-        return currentLevels[c];
+        return levels[c];
     }
 
+    /**
+     * @return if cotrol is held down
+     */
     bool pressed(Control c) const {
-        return currentLevels[c] > kButtonOnThreshold;
+        return levels[c] > kButtonOnThreshold;
     }
 };
 

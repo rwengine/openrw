@@ -186,7 +186,18 @@ void IngameState::tick(float dt) {
     }
 
     auto player = game->getPlayer();
-    const auto& input = world->state->input;
+
+    auto input = [&](GameInputState::Control c) {
+        return world->state->input[0][c];
+    };
+    auto pressed = [&](GameInputState::Control c) {
+        return world->state->input[0].pressed(c) &&
+               !world->state->input[1].pressed(c);
+    };
+    auto held = [&](GameInputState::Control c) {
+        return world->state->input[0].pressed(c);
+    };
+
     if (player && player->isInputEnabled()) {
         float viewDistance = 4.f;
         switch (camMode) {
@@ -274,8 +285,8 @@ void IngameState::tick(float dt) {
 
         // Non-topdown camera can orbit
         if (camMode != IngameState::CAMERA_TOPDOWN) {
-            bool lookleft = input.pressed(GameInputState::LookLeft);
-            bool lookright = input.pressed(GameInputState::LookRight);
+            bool lookleft = held(GameInputState::LookLeft);
+            bool lookright = held(GameInputState::LookRight);
             if ((lookleft || lookright) && vehicle != nullptr) {
                 auto rotation = vehicle->getRotation();
                 if (!lookright) {
@@ -319,17 +330,17 @@ void IngameState::tick(float dt) {
         angle = glm::quat(glm::vec3(0.f, 0.f, angleYaw));
         glm::vec3 movement;
 
-        movement.x = input[GameInputState::GoForward] -
-                     input[GameInputState::GoBackwards];
+        movement.x = input(GameInputState::GoForward) -
+                     input(GameInputState::GoBackwards);
         movement.y =
-            input[GameInputState::GoLeft] - input[GameInputState::GoRight];
+            input(GameInputState::GoLeft) - input(GameInputState::GoRight);
         /// @todo replace with correct sprint behaviour
-        float speed = input.pressed(GameInputState::Sprint) ? 2.f : 1.f;
+        float speed = held(GameInputState::Sprint) ? 2.f : 1.f;
 
         if (player->isInputEnabled()) {
-            player->setRunning(!input.pressed(GameInputState::Walk));
+            player->setRunning(!held(GameInputState::Walk));
             /// @todo find the correct behaviour for entering & exiting
-            if (input.pressed(GameInputState::EnterExitVehicle)) {
+            if (pressed(GameInputState::EnterExitVehicle)) {
                 /// @todo move me
                 if (player->getCharacter()->getCurrentVehicle()) {
                     player->exitVehicle();
@@ -347,11 +358,10 @@ void IngameState::tick(float dt) {
 
             if (player->getCharacter()->getCurrentVehicle()) {
                 auto vehicle = player->getCharacter()->getCurrentVehicle();
-                vehicle->setHandbraking(
-                    input.pressed(GameInputState::Handbrake));
+                vehicle->setHandbraking(held(GameInputState::Handbrake));
                 player->setMoveDirection(movement);
             } else {
-                if (input.pressed(GameInputState::Jump)) {
+                if (pressed(GameInputState::Jump)) {
                     player->jump();
                 }
 
@@ -495,7 +505,7 @@ void IngameState::updateInputState(const SDL_Event& event) {
         case SDL_KEYUP: {
             auto sym = event.key.keysym.sym;
             auto level = event.type == SDL_KEYDOWN ? 1.f : 0.f;
-            auto& levels = getWorld()->state->input.currentLevels;
+            auto& levels = getWorld()->state->input[0].levels;
 
             auto range = kDefaultControls.equal_range(sym);
             for (auto it = range.first; it != range.second; ++it) {
