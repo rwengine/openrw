@@ -187,18 +187,22 @@ void IngameState::tick(float dt) {
 
     auto player = game->getPlayer();
 
+    // Force all input to 0 if player input is disabled
+    /// @todo verify 0ing input is the correct behaviour
+    const auto inputEnabled = player->isInputEnabled();
+
     auto input = [&](GameInputState::Control c) {
-        return world->state->input[0][c];
+        return inputEnabled ? world->state->input[0][c] : 0.f;
     };
     auto pressed = [&](GameInputState::Control c) {
-        return world->state->input[0].pressed(c) &&
+        return inputEnabled && world->state->input[0].pressed(c) &&
                !world->state->input[1].pressed(c);
     };
     auto held = [&](GameInputState::Control c) {
-        return world->state->input[0].pressed(c);
+        return inputEnabled && world->state->input[0].pressed(c);
     };
 
-    if (player && player->isInputEnabled()) {
+    if (player) {
         float viewDistance = 4.f;
         switch (camMode) {
             case IngameState::CAMERA_CLOSE:
@@ -337,47 +341,43 @@ void IngameState::tick(float dt) {
         /// @todo replace with correct sprint behaviour
         float speed = held(GameInputState::Sprint) ? 2.f : 1.f;
 
-        if (player->isInputEnabled()) {
-            player->setRunning(!held(GameInputState::Walk));
-            /// @todo find the correct behaviour for entering & exiting
-            if (pressed(GameInputState::EnterExitVehicle)) {
-                /// @todo move me
-                if (player->getCharacter()->getCurrentVehicle()) {
-                    player->exitVehicle();
-                } else if (!player->isCurrentActivity(
-                               Activities::EnterVehicle::ActivityName)) {
-                    player->enterNearestVehicle();
-                }
-            } else if (glm::length2(movement) > 0.001f) {
-                if (player->isCurrentActivity(
-                        Activities::EnterVehicle::ActivityName)) {
-                    // Give up entering a vehicle if we're alreadying doing so
-                    player->skipActivity();
-                }
-            }
-
+        player->setRunning(!held(GameInputState::Walk));
+        /// @todo find the correct behaviour for entering & exiting
+        if (pressed(GameInputState::EnterExitVehicle)) {
+            /// @todo move me
             if (player->getCharacter()->getCurrentVehicle()) {
-                auto vehicle = player->getCharacter()->getCurrentVehicle();
-                vehicle->setHandbraking(held(GameInputState::Handbrake));
-                player->setMoveDirection(movement);
-            } else {
-                if (pressed(GameInputState::Jump)) {
-                    player->jump();
-                }
-
-                float length = glm::length(movement);
-                float movementAngle = angleYaw - glm::half_pi<float>();
-                if (length > 0.1f) {
-                    glm::vec3 direction = glm::normalize(movement);
-                    movementAngle += atan2(direction.y, direction.x);
-                    player->setMoveDirection(glm::vec3(speed, 0.f, 0.f));
-                } else {
-                    player->setMoveDirection(glm::vec3(0.f));
-                }
-                player->setLookDirection({movementAngle, 0.f});
+                player->exitVehicle();
+            } else if (!player->isCurrentActivity(
+                           Activities::EnterVehicle::ActivityName)) {
+                player->enterNearestVehicle();
             }
+        } else if (glm::length2(movement) > 0.001f) {
+            if (player->isCurrentActivity(
+                    Activities::EnterVehicle::ActivityName)) {
+                // Give up entering a vehicle if we're alreadying doing so
+                player->skipActivity();
+            }
+        }
+
+        if (player->getCharacter()->getCurrentVehicle()) {
+            auto vehicle = player->getCharacter()->getCurrentVehicle();
+            vehicle->setHandbraking(held(GameInputState::Handbrake));
+            player->setMoveDirection(movement);
         } else {
-            player->setMoveDirection(glm::vec3(0.f));
+            if (pressed(GameInputState::Jump)) {
+                player->jump();
+            }
+
+            float length = glm::length(movement);
+            float movementAngle = angleYaw - glm::half_pi<float>();
+            if (length > 0.1f) {
+                glm::vec3 direction = glm::normalize(movement);
+                movementAngle += atan2(direction.y, direction.x);
+                player->setMoveDirection(glm::vec3(speed, 0.f, 0.f));
+            } else {
+                player->setMoveDirection(glm::vec3(0.f));
+            }
+            player->setLookDirection({movementAngle, 0.f});
         }
 
         float len2d = glm::length(glm::vec2(lookdir));
