@@ -22,6 +22,9 @@ set(RWGAME_SOURCES
 	MenuSystem.hpp
 	MenuSystem.cpp
 
+	GameInput.hpp
+	GameInput.cpp
+
 	states/LoadingState.hpp
 	states/LoadingState.cpp
 	states/IngameState.hpp
