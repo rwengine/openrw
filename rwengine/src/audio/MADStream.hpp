@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _MADSTREAM_HPP_
 #define _MADSTREAM_HPP_
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
 #include <fcntl.h>
 #include <mad.h>
 #include <stdint.h>
