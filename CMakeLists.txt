@@ -94,6 +94,7 @@ include_directories(
 	${GLM_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIR}
 	${BULLET_INCLUDE_DIRS}
+	${OPENAL_INCLUDE_DIR}
 )
 
 # External-internal dependencies
