@@ -10,9 +10,7 @@ struct GameInputState {
         /* On Foot */
         FireWeapon = 0,
         NextWeapon,
-        NextTarget = NextWeapon,
         LastWeapon,
-        LastTarget = LastWeapon,
         GoForward,
         GoBackwards,
         GoLeft,
@@ -29,11 +27,8 @@ struct GameInputState {
         LookBehind,
 
         /* In Vehicle */
-        VehicleFireWeapon = FireWeapon,
         VehicleAccelerate,
         VehicleBrake,
-        VehicleLeft = GoLeft,
-        VehicleRight = GoRight,
         VehicleDown,
         VehicleUp,
         ChangeRadio,
@@ -47,7 +42,13 @@ struct GameInputState {
         VehicleAimUp,
         VehicleAimDown,
 
-        _MaxControls
+        _MaxControls,
+
+        NextTarget = NextWeapon,
+        LastTarget = LastWeapon,
+        VehicleLeft = GoLeft,
+        VehicleRight = GoRight,
+        VehicleFireWeapon = FireWeapon,
     };
 
     /**
