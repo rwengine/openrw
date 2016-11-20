@@ -1,5 +1,6 @@
 #include "RWGame.hpp"
 #include "DrawUI.hpp"
+#include "GameInput.hpp"
 #include "State.hpp"
 #include "states/BenchmarkState.hpp"
 #include "states/IngameState.hpp"
@@ -394,6 +395,8 @@ int RWGame::run() {
                     break;
             }
 
+            GameInput::updateGameInputState(&getState()->input[0], event);
+
             RW_PROFILE_BEGIN("State");
             state->handleEvent(event);
             RW_PROFILE_END()
@@ -419,6 +422,8 @@ int RWGame::run() {
             RW_PROFILE_BEGIN("engine");
             tick(GAME_TIMESTEP);
             RW_PROFILE_END();
+
+            getState()->swapInputState();
 
             accum -= GAME_TIMESTEP;
 

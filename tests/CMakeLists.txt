@@ -25,6 +25,7 @@ set(TEST_SOURCES
 	"test_GameWorld.cpp"
 	"test_globals.hpp"
 	"test_items.cpp"
+	"test_Input.cpp"
 	"test_lifetime.cpp"
 	"test_loaderdff.cpp"
 	"test_Logger.cpp"
@@ -49,6 +50,7 @@ set(TEST_SOURCES
 	# Hack in rwgame sources until there's a per-target test suite
 	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
 	"${CMAKE_SOURCE_DIR}/rwgame/GameWindow.cpp"
+	"${CMAKE_SOURCE_DIR}/rwgame/GameInput.cpp"
 	)
 
 ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)

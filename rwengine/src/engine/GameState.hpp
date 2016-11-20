@@ -337,9 +337,9 @@ public:
     std::bitset<32> importExportUnused;
 
     /**
-     * State of the game input
+     * State of the game input for the last 2 frames
      */
-    GameInputState input;
+    GameInputState input[2];
 
     /**
      * World to use for this state, this isn't saved, just used at runtime
@@ -362,6 +362,13 @@ public:
      * Removes a blip
      */
     void removeBlip(int blip);
+
+    /**
+     * Swaps input state
+     */
+    void swapInputState() {
+        input[1] = input[0];
+    }
 };
 
 #endif
