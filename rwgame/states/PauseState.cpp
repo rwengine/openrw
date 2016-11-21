@@ -1,21 +1,17 @@
 #include "PauseState.hpp"
-#include <ai/PlayerController.hpp>
-#include <objects/CharacterObject.hpp>
 #include "RWGame.hpp"
 
 PauseState::PauseState(RWGame* game) : State(game) {
-    auto data = game->getGameData();
-    auto& t = data->texts;
+    auto& t = game->getGameData().texts;
 
-    Menu* m = new Menu;
-    m->offset = glm::vec2(200.f, 200.f);
-    m->addEntry(Menu::lambda(t.text(MenuDefaults::kResumeGameId),
-                             [] { StateManager::get().exit(); }));
-    m->addEntry(Menu::lambda(t.text(MenuDefaults::kOptionsId),
-                             [] { std::cout << "Options" << std::endl; }));
-    m->addEntry(Menu::lambda(t.text(MenuDefaults::kQuitGameId),
-                             [] { StateManager::get().clear(); }));
-    this->enterMenu(m);
+    auto menu = Menu::create(
+        {{t.text(MenuDefaults::kResumeGameId), [&] { done(); }},
+         {t.text(MenuDefaults::kOptionsId),
+          [] { std::cout << "Options" << std::endl; }},
+         {t.text(MenuDefaults::kQuitGameId),
+          [] { StateManager::get().clear(); }}});
+    menu->offset = glm::vec2(200.f, 200.f);
+    enterMenu(menu);
 }
 
 void PauseState::enter() {
@@ -42,7 +38,7 @@ void PauseState::draw(GameRenderer* r) {
     map.screenPosition = glm::vec2(vp.x / 2, vp.y / 2);
     map.screenSize = std::max(vp.x, vp.y);
 
-    game->getRenderer()->map.draw(getWorld(), map);
+    game->getRenderer().map.draw(getWorld(), map);
 
     State::draw(r);
 }
@@ -52,7 +48,7 @@ void PauseState::handleEvent(const SDL_Event& e) {
         case SDL_KEYDOWN:
             switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().exit();
+                    done();
                     break;
                 default:
                     break;

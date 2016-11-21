@@ -10,9 +10,7 @@ struct GameInputState {
         /* On Foot */
         FireWeapon = 0,
         NextWeapon,
-        NextTarget = NextWeapon,
         LastWeapon,
-        LastTarget = LastWeapon,
         GoForward,
         GoBackwards,
         GoLeft,
@@ -29,11 +27,8 @@ struct GameInputState {
         LookBehind,
 
         /* In Vehicle */
-        VehicleFireWeapon = FireWeapon,
         VehicleAccelerate,
         VehicleBrake,
-        VehicleLeft = GoLeft,
-        VehicleRight = GoRight,
         VehicleDown,
         VehicleUp,
         ChangeRadio,
@@ -47,7 +42,13 @@ struct GameInputState {
         VehicleAimUp,
         VehicleAimDown,
 
-        _MaxControls
+        _MaxControls,
+
+        NextTarget = NextWeapon,
+        LastTarget = LastWeapon,
+        VehicleLeft = GoLeft,
+        VehicleRight = GoRight,
+        VehicleFireWeapon = FireWeapon,
     };
 
     /**
@@ -55,14 +56,17 @@ struct GameInputState {
      *
      * For buttons, this will result in either 0 or 1.
      */
-    float currentLevels[_MaxControls] = {};
+    float levels[_MaxControls] = {};
 
     float operator[](Control c) const {
-        return currentLevels[c];
+        return levels[c];
     }
 
+    /**
+     * @return if cotrol is held down
+     */
     bool pressed(Control c) const {
-        return currentLevels[c] > kButtonOnThreshold;
+        return levels[c] > kButtonOnThreshold;
     }
 };
 

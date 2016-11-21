@@ -8,12 +8,22 @@ set(RWGAME_SOURCES
 
 	main.cpp
 
+	GameBase.hpp
+	GameBase.cpp
 	RWGame.cpp
 
 	GameConfig.cpp
 	GameWindow.cpp
 
+	StateManager.hpp
+	StateManager.cpp
 	State.cpp
+
+	MenuSystem.hpp
+	MenuSystem.cpp
+
+	GameInput.hpp
+	GameInput.cpp
 
 	states/LoadingState.hpp
 	states/LoadingState.cpp

@@ -83,89 +83,88 @@ private:
 };
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
-                             const glm::quat& rot, const ModelRef& model,
-                             VehicleDataHandle data, VehicleInfoHandle info,
-                             const glm::u8vec3& prim, const glm::u8vec3& sec)
-    : GameObject(engine, pos, rot, model)
+                             const glm::quat& rot, BaseModelInfo* modelinfo,
+                             VehicleInfoHandle info, const glm::u8vec3& prim,
+                             const glm::u8vec3& sec)
+    : GameObject(engine, pos, rot, modelinfo)
     , steerAngle(0.f)
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
-    , vehicle(data)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
-    , collision(nullptr)
+    , collision(new CollisionInstance)
     , physRaycaster(nullptr)
     , physVehicle(nullptr) {
-    collision = new CollisionInstance;
-    if (collision->createPhysicsBody(this, data->modelName, nullptr,
-                                     &info->handling)) {
-        physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld);
-        btRaycastVehicle::btVehicleTuning tuning;
+    collision->createPhysicsBody(this, modelinfo->getCollision(), nullptr,
+                                 &info->handling);
+    physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld.get());
+    btRaycastVehicle::btVehicleTuning tuning;
 
-        float travel = fabs(info->handling.suspensionUpperLimit -
-                            info->handling.suspensionLowerLimit);
-        tuning.m_frictionSlip = 3.f;
-        tuning.m_maxSuspensionTravelCm = travel * 100.f;
+    float travel = fabs(info->handling.suspensionUpperLimit -
+                        info->handling.suspensionLowerLimit);
+    tuning.m_frictionSlip = 3.f;
+    tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
-        physVehicle = new btRaycastVehicle(tuning, collision->getBulletBody(),
-                                           physRaycaster);
-        physVehicle->setCoordinateSystem(0, 2, 1);
-        // physBody->setActivationState(DISABLE_DEACTIVATION);
-        engine->dynamicsWorld->addAction(physVehicle);
+    physVehicle =
+        new btRaycastVehicle(tuning, collision->getBulletBody(), physRaycaster);
+    physVehicle->setCoordinateSystem(0, 2, 1);
+    // physBody->setActivationState(DISABLE_DEACTIVATION);
+    engine->dynamicsWorld->addAction(physVehicle);
 
-        float kC = 0.5f;
-        float kR = 0.6f;
+    float kC = 0.5f;
+    float kR = 0.6f;
 
-        for (size_t w = 0; w < info->wheels.size(); ++w) {
-            auto restLength = travel;
-            auto heightOffset = info->handling.suspensionUpperLimit;
-            btVector3 connection(info->wheels[w].position.x,
-                                 info->wheels[w].position.y,
-                                 info->wheels[w].position.z + heightOffset);
-            bool front = connection.y() > 0;
-            btWheelInfo& wi = physVehicle->addWheel(
-                connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f),
-                restLength, data->wheelScale / 2.f, tuning, front);
-            wi.m_suspensionRestLength1 = restLength;
-            wi.m_raycastInfo.m_suspensionLength = 0.f;
+    for (size_t w = 0; w < info->wheels.size(); ++w) {
+        auto restLength = travel;
+        auto heightOffset = info->handling.suspensionUpperLimit;
+        btVector3 connection(info->wheels[w].position.x,
+                             info->wheels[w].position.y,
+                             info->wheels[w].position.z + heightOffset);
+        bool front = connection.y() > 0;
+        btWheelInfo& wi = physVehicle->addWheel(
+            connection, btVector3(0.f, 0.f, -1.f), btVector3(1.f, 0.f, 0.f),
+            restLength, getVehicle()->wheelscale_ / 2.f, tuning, front);
+        wi.m_suspensionRestLength1 = restLength;
+        wi.m_raycastInfo.m_suspensionLength = 0.f;
 
-            wi.m_maxSuspensionForce = info->handling.mass * 9.f;
-            wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
+        wi.m_maxSuspensionForce = info->handling.mass * 9.f;
+        wi.m_suspensionStiffness = (info->handling.suspensionForce * 50.f);
 
-            // float dampEffect = (info->handling.suspensionDamping) / travel;
-            // wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation =
-            // dampEffect;
+        // float dampEffect = (info->handling.suspensionDamping) / travel;
+        // wi.m_wheelsDampingCompression = wi.m_wheelsDampingRelaxation =
+        // dampEffect;
 
-            wi.m_wheelsDampingCompression =
-                kC * 2.f * btSqrt(wi.m_suspensionStiffness);
-            wi.m_wheelsDampingRelaxation =
-                kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-            wi.m_rollInfluence = 0.30f;
-            float halfFriction = tuning.m_frictionSlip * 0.5f;
-            wi.m_frictionSlip =
-                halfFriction +
-                halfFriction * (front ? info->handling.tractionBias
-                                      : 1.f - info->handling.tractionBias);
+        wi.m_wheelsDampingCompression =
+            kC * 2.f * btSqrt(wi.m_suspensionStiffness);
+        wi.m_wheelsDampingRelaxation =
+            kR * 2.f * btSqrt(wi.m_suspensionStiffness);
+        wi.m_rollInfluence = 0.30f;
+        float halfFriction = tuning.m_frictionSlip * 0.5f;
+        wi.m_frictionSlip =
+            halfFriction +
+            halfFriction * (front ? info->handling.tractionBias
+                                  : 1.f - info->handling.tractionBias);
+    }
+
+    // Hide all LOD and damage frames.
+    skeleton = new Skeleton;
+
+    setModel(getVehicle()->getModel());
+
+    for (ModelFrame* frame : getModel()->frames) {
+        auto& name = frame->getName();
+        bool isDam = name.find("_dam") != name.npos;
+        bool isLod = name.find("lo") != name.npos;
+        bool isDum = name.find("_dummy") != name.npos;
+        /*bool isOk = name.find("_ok") != name.npos;*/
+        if (isDam || isLod || isDum) {
+            skeleton->setEnabled(frame, false);
         }
 
-        // Hide all LOD and damage frames.
-        skeleton = new Skeleton;
-
-        for (ModelFrame* frame : model->resource->frames) {
-            auto& name = frame->getName();
-            bool isDam = name.find("_dam") != name.npos;
-            bool isLod = name.find("lo") != name.npos;
-            bool isDum = name.find("_dummy") != name.npos;
-            /*bool isOk = name.find("_ok") != name.npos;*/
-            if (isDam || isLod || isDum) {
-                skeleton->setEnabled(frame, false);
-            }
-
-            if (isDum) {
-                registerPart(frame);
-            }
+        if (isDum) {
+            registerPart(frame);
         }
     }
 }
@@ -178,8 +177,6 @@ VehicleObject::~VehicleObject() {
     for (auto& p : dynamicParts) {
         destroyObjectHinge(&p.second);
     }
-
-    delete collision;
 
     delete physVehicle;
     delete physRaycaster;
@@ -282,7 +279,7 @@ void VehicleObject::tickPhysics(float dt) {
             seat.second->updateTransform(passPosition, getRotation());
         }
 
-        if (vehicle->type == VehicleData::BOAT) {
+        if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
             if (isInWater()) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 float steer =
@@ -356,6 +353,7 @@ void VehicleObject::tickPhysics(float dt) {
             }
         }
 
+        auto isBoat = getVehicle()->vehicletype_ == VehicleModelInfo::BOAT;
         if (inWater) {
             // Ensure that vehicles don't fall asleep at the top of a wave.
             if (!collision->getBulletBody()->isActive()) {
@@ -367,13 +365,11 @@ void VehicleObject::tickPhysics(float dt) {
             float oZ = 0.f;
             oZ = -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
 
-            if (vehicle->type != VehicleData::BOAT) {
+            if (isBoat) {
+                oZ = 0.f;
+            } else {
                 // Damper motion
                 collision->getBulletBody()->setDamping(0.95f, 0.9f);
-            }
-
-            if (vehicle->type == VehicleData::BOAT) {
-                oZ = 0.f;
             }
 
             // Boats, Buoyancy offset is affected by the orientation of the
@@ -399,7 +395,7 @@ void VehicleObject::tickPhysics(float dt) {
             applyWaterFloat(vRt);
             applyWaterFloat(vLeft);
         } else {
-            if (vehicle->type == VehicleData::BOAT) {
+            if (isBoat) {
                 collision->getBulletBody()->setDamping(0.1f, 0.8f);
             } else {
                 collision->getBulletBody()->setDamping(0.05f, 0.0f);
@@ -556,7 +552,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
             if (skeleton->getData(p->normal->getIndex()).enabled) {
                 auto& geom =
-                    model->resource->geometries[p->normal->getGeometries()[0]];
+                    getModel()->geometries[p->normal->getGeometries()[0]];
                 auto pp =
                     p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
                 float td = glm::distance(
@@ -680,7 +676,7 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     if (okframe->getGeometries().size() == 0) return;
 
-    auto& geom = model->resource->geometries[okframe->getGeometries()[0]];
+    auto& geom = getModel()->geometries[okframe->getGeometries()[0]];
     auto gbounds = geom->geometryBounds;
 
     if (fn.find("door") != fn.npos) {

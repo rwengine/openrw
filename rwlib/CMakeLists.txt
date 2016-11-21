@@ -23,7 +23,6 @@ SET(RWLIB_SOURCES
 	"source/platform/FileIndex.hpp"
 	"source/platform/FileIndex.cpp"
 
-	"source/data/ResourceHandle.hpp"
 	"source/data/Model.hpp"
 	"source/data/Model.cpp"
 

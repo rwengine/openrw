@@ -23,11 +23,10 @@ class VehicleObject;
 class PickupObject;
 
 class ViewCamera;
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <render/VisualFX.hpp>
 
 struct BlipData;
-class InventoryItem;
 struct WeaponScan;
 struct VehicleGenerator;
 
@@ -180,13 +179,6 @@ public:
     float getGameTime() const;
 
     /**
-     * @brief getInventoryItem
-     * @param weaponId The Weapon ID (inventory slot) of the weapon to fetch
-     * @return Instance of the weapon
-     */
-    InventoryItem* getInventoryItem(uint16_t weaponId) const;
-
-    /**
      * Game data
      */
     GameData* data;
@@ -277,11 +269,11 @@ public:
     /**
      * Bullet
      */
-    btDefaultCollisionConfiguration* collisionConfig;
-    btCollisionDispatcher* collisionDispatcher;
-    btBroadphaseInterface* broadphase;
-    btSequentialImpulseConstraintSolver* solver;
-    btDiscreteDynamicsWorld* dynamicsWorld;
+    std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig;
+    std::unique_ptr<btCollisionDispatcher> collisionDispatcher;
+    std::unique_ptr<btDbvtBroadphase> broadphase;
+    std::unique_ptr<btSequentialImpulseConstraintSolver> solver;
+    std::unique_ptr<btDiscreteDynamicsWorld> dynamicsWorld;
 
     /**
      * @brief physicsNearCallback
@@ -352,11 +344,6 @@ private:
     std::set<GameObject*> deletionQueue;
 
     std::vector<AreaIndicatorInfo> areaIndicators;
-
-    /**
-     * Inventory Item instances
-     */
-    std::vector<InventoryItem*> inventoryItems;
 
     /**
      * Flag for pausing the simulation

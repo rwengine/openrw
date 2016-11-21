@@ -3,10 +3,15 @@
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include <items/InventoryItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
+
+// Required for BT_BULLET_VERSION
+#include "LinearMath/btScalar.h"
+#ifndef BT_BULLET_VERSION
+#warning Unable to find BT_BULLET_VERSION
+#endif
 
 // TODO: make this not hardcoded
 static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
@@ -14,9 +19,8 @@ static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                                 const glm::quat& rot, const ModelRef& model,
-                                 std::shared_ptr<CharacterData> data)
-    : GameObject(engine, pos, rot, model)
+                                 const glm::quat& rot, BaseModelInfo* modelinfo)
+    : GameObject(engine, pos, rot, modelinfo)
     , currentState({})
     , currentVehicle(nullptr)
     , currentSeat(0)
@@ -24,7 +28,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
     , motionBlockedByActivity(false)
-    , ped(data)
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)
@@ -66,9 +69,11 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     animations.kd_front = engine->data->animations["kd_front"];
     animations.ko_shot_front = engine->data->animations["ko_shot_front"];
 
-    if (model) {
+    auto info = getModelInfo<PedModelInfo>();
+    if (info->getModel()) {
+        setModel(info->getModel());
         skeleton = new Skeleton;
-        animator = new Animator(model->resource, skeleton);
+        animator = new Animator(getModel(), skeleton);
 
         createActor();
     }
@@ -87,7 +92,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
     }
 
     // Don't create anything without a valid model.
-    if (model) {
+    if (getModel()) {
         btTransform tf;
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));
@@ -98,13 +103,23 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physShape = new btCapsuleShapeZ(size.x, size.y);
         physObject->setCollisionShape(physShape);
         physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
+#if BT_BULLET_VERSION < 285
         physCharacter =
             new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
+#else
+        physCharacter =
+            new btKinematicCharacterController(physObject, physShape, 0.30f,
+                btVector3(0.f, 0.f, 1.f));
+#endif
         physCharacter->setFallSpeed(20.f);
         physCharacter->setUseGhostSweepTest(true);
         physCharacter->setVelocityForTimeInterval(btVector3(1.f, 1.f, 1.f),
                                                   1.f);
+#if BT_BULLET_VERSION < 285
         physCharacter->setGravity(engine->dynamicsWorld->getGravity().length());
+#else
+        physCharacter->setGravity(engine->dynamicsWorld->getGravity());
+#endif
         physCharacter->setJumpSpeed(5.f);
 
         engine->dynamicsWorld->addCollisionObject(
@@ -205,8 +220,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // If we have to, interrogate the movement animation
     if (movementAnimation != animations.idle) {
-        if (!model->resource->frames[0]->getChildren().empty()) {
-            ModelFrame* root = model->resource->frames[0]->getChildren()[0];
+        if (!getModel()->frames[0]->getChildren().empty()) {
+            ModelFrame* root = getModel()->frames[0]->getChildren()[0];
             auto it = movementAnimation->bones.find(root->getName());
             if (it != movementAnimation->bones.end()) {
                 AnimationBone* rootBone = it->second;
@@ -266,22 +281,20 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
     std::transform(modelName.begin(), modelName.end(), modelName.begin(),
                    ::tolower);
 
-    engine->data->loadDFF(modelName + ".dff");
-    engine->data->loadTXD(modelName + ".txd");
+    /// @todo don't model leak here
 
-    auto& models = engine->data->models;
-    auto mfind = models.find(modelName);
-    if (mfind != models.end()) {
-        model = mfind->second;
-    }
+    engine->data->loadTXD(modelName + ".txd");
+    auto newmodel = engine->data->loadClump(modelName + ".dff");
 
     if (skeleton) {
         delete animator;
         delete skeleton;
     }
 
+    setModel(newmodel);
+
     skeleton = new Skeleton;
-    animator = new Animator(model->resource, skeleton);
+    animator = new Animator(getModel(), skeleton);
 }
 
 void CharacterObject::updateCharacter(float dt) {
@@ -350,11 +363,18 @@ void CharacterObject::updateCharacter(float dt) {
                 auto& wt = physObject->getWorldTransform();
                 wt.setOrigin(bpos);
                 physObject->setWorldTransform(wt);
-
+#if BT_BULLET_VERSION < 285
                 physCharacter->setGravity(0.f);
+#else
+                physCharacter->setGravity(btVector3(0.f, 0.f, 0.f));
+#endif
                 inWater = true;
             } else {
+#if BT_BULLET_VERSION < 285
                 physCharacter->setGravity(9.81f);
+#else
+                physCharacter->setGravity(btVector3(0.f, 0.f, -9.81f));
+#endif
                 inWater = false;
             }
         }
@@ -522,12 +542,11 @@ void CharacterObject::activityFinished() {
     motionBlockedByActivity = false;
 }
 
-void CharacterObject::addToInventory(InventoryItem* item) {
-    RW_CHECK(item->getInventorySlot() < maxInventorySlots,
-             "Inventory Slot greater than maxInventorySlots");
-    if (item->getInventorySlot() < maxInventorySlots) {
-        currentState.weapons[item->getInventorySlot()].weaponId =
-            item->getItemID();
+void CharacterObject::addToInventory(int slot, int ammo) {
+    RW_CHECK(slot < kMaxInventorySlots, "Slot greater than kMaxInventorySlots");
+    if (slot < kMaxInventorySlots) {
+        currentState.weapons[slot].weaponId = slot;
+        currentState.weapons[slot].bulletsTotal += ammo;
     }
 }
 
@@ -535,19 +554,16 @@ void CharacterObject::setActiveItem(int slot) {
     currentState.currentWeapon = slot;
 }
 
-InventoryItem* CharacterObject::getActiveItem() {
-    if (currentVehicle) return nullptr;
-    auto weaponId = currentState.weapons[currentState.currentWeapon].weaponId;
-    return engine->getInventoryItem(weaponId);
-}
-
 void CharacterObject::removeFromInventory(int slot) {
     currentState.weapons[slot].weaponId = 0;
+    if (currentState.currentWeapon == slot) {
+        currentState.currentWeapon = 0;
+    }
 }
 
 void CharacterObject::cycleInventory(bool up) {
     if (up) {
-        for (int j = currentState.currentWeapon + 1; j < maxInventorySlots;
+        for (int j = currentState.currentWeapon + 1; j < kMaxInventorySlots;
              ++j) {
             if (currentState.weapons[j].weaponId != 0) {
                 currentState.currentWeapon = j;
@@ -566,7 +582,7 @@ void CharacterObject::cycleInventory(bool up) {
         }
 
         // Nothing? set the highest
-        for (int j = maxInventorySlots - 1; j >= 0; --j) {
+        for (int j = kMaxInventorySlots - 1; j >= 0; --j) {
             if (currentState.weapons[j].weaponId != 0 || j == 0) {
                 currentState.currentWeapon = j;
                 return;
@@ -576,17 +592,21 @@ void CharacterObject::cycleInventory(bool up) {
 }
 
 void CharacterObject::useItem(bool active, bool primary) {
-    if (getActiveItem()) {
+    /// @todo verify if this is the correct logic
+    auto item = getActiveItem();
+    if (currentState.weapons[item].weaponId == unsigned(item)) {
         if (primary) {
-            if (active)
-                currentState.primaryStartTime = engine->getGameTime() * 1000.f;
-            else
-                currentState.primaryEndTime = engine->getGameTime() * 1000.f;
+            if (!currentState.primaryActive && active) {
+                // If we've just started, activate
+                controller->setNextActivity(new Activities::UseItem(item));
+            }
+            else if (currentState.primaryActive && !active) {
+                // UseItem will cancel itself upon !primaryActive
+            }
             currentState.primaryActive = active;
-            getActiveItem()->primary(this);
         } else {
             currentState.secondaryActive = active;
-            getActiveItem()->secondary(this);
+            /// @todo handle scopes and sights
         }
     }
 }

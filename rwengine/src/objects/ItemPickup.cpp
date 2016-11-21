@@ -1,21 +1,20 @@
+#include <data/WeaponData.hpp>
+#include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include <items/WeaponItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ItemPickup.hpp>
 #include <rw/defines.hpp>
 
 ItemPickup::ItemPickup(GameWorld *world, const glm::vec3 &position,
-                       PickupType type, InventoryItem *item)
-    : PickupObject(world, position, item->getModelID(), type), item(item) {
-    RW_CHECK(item != nullptr, "Pickup created with null item");
+                       BaseModelInfo *modelinfo, PickupType type,
+                       WeaponData *item)
+    : PickupObject(world, position, modelinfo, type), item(item) {
 }
 
 bool ItemPickup::onCharacterTouch(CharacterObject *character) {
-    character->addToInventory(item);
-    auto &wep = character->getCurrentState().weapons[item->getInventorySlot()];
-    auto totalRounds = 0, clipRounds = 0;
+    auto totalRounds = 0;
 
-    switch (item->getModelID()) {
+    switch (item->modelID) {
         case 173: /* Pistol */
             totalRounds = 45;
             break;
@@ -49,8 +48,7 @@ bool ItemPickup::onCharacterTouch(CharacterObject *character) {
         totalRounds /= 5;
     }
 
-    wep.bulletsTotal = totalRounds;
-    wep.bulletsClip = clipRounds;
+    character->addToInventory(item->inventorySlot, totalRounds);
 
     return true;
 }

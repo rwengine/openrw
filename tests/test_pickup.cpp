@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
-#include <items/InventoryItem.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ItemPickup.hpp>
 #include <objects/PickupObject.hpp>
@@ -65,16 +64,16 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
             Global::get().e->createPedestrian(1, {30.1f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
 
-        auto item = Global::get().e->getInventoryItem(3);
-        BOOST_REQUIRE(item != nullptr);
+        auto pistol = Global::get().d->weaponData[1].get();
+        auto model = Global::get().d->modelinfo[pistol->modelID].get();
 
-        ItemPickup* p = new ItemPickup(Global::get().e, {30.f, 0.f, 0.f},
-                                       PickupObject::OnStreet, item);
+        ItemPickup* p = new ItemPickup(Global::get().e, {30.f, 0.f, 0.f}, model,
+                                       PickupObject::OnStreet, pistol);
 
         Global::get().e->allObjects.push_back(p);
 
         // Check the characters inventory is empty.
-        for (int i = 0; i < maxInventorySlots; ++i) {
+        for (int i = 0; i < kMaxInventorySlots; ++i) {
             BOOST_CHECK(character->getCurrentState().weapons[i].weaponId == 0);
         }
 
@@ -84,8 +83,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
         auto& inventory = character->getCurrentState().weapons;
         BOOST_CHECK(std::any_of(std::begin(inventory), std::end(inventory),
                                 [&](const CharacterWeaponSlot& i) {
-                                    return i.weaponId ==
-                                           item->getInventorySlot();
+                                    return i.weaponId == pistol->inventorySlot;
                                 }));
 
         Global::get().e->destroyObject(p);

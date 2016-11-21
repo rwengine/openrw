@@ -1,5 +1,5 @@
 #include <data/Model.hpp>
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
@@ -11,7 +11,6 @@
 #include <script/SCMFile.hpp>
 
 #include <core/Logger.hpp>
-#include <loaders/BackgroundLoader.hpp>
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include <platform/FileIndex.hpp>
@@ -27,11 +26,7 @@ GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
 }
 
 GameData::~GameData() {
-    for (auto& m : models) {
-        if (m.second->resource) {
-            delete m.second->resource;
-        }
-    }
+    /// @todo don't leak models
 }
 
 void GameData::load() {
@@ -45,9 +40,6 @@ void GameData::load() {
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
 
-    loadDFF("wheels.dff");
-    loadDFF("weapons.dff");
-    loadDFF("arrow.dff");
     loadTXD("particle.txd");
     loadTXD("icons.txd");
     loadTXD("hud.txd");
@@ -99,6 +91,9 @@ void GameData::loadLevelFile(const std::string& path) {
                 std::transform(name.begin(), name.end(), name.begin(),
                                ::tolower);
                 loadTXD(name);
+            } else if (cmd == "MODELFILE") {
+                auto path = line.substr(space + 1);
+                loadModelFile(path);
             }
         }
     }
@@ -109,23 +104,19 @@ void GameData::loadIDE(const std::string& path) {
     LoaderIDE idel;
 
     if (idel.load(systempath)) {
-        objectTypes.insert(idel.objects.begin(), idel.objects.end());
+        std::move(idel.objects.begin(), idel.objects.end(),
+                  std::inserter(modelinfo, modelinfo.end()));
     } else {
         logger->error("Data", "Failed to load IDE " + path);
     }
 }
 
 uint16_t GameData::findModelObject(const std::string model) {
-    auto defit = std::find_if(
-        objectTypes.begin(), objectTypes.end(),
-        [&](const decltype(objectTypes)::value_type& d) {
-            if (d.second->class_type == ObjectInformation::_class("OBJS")) {
-                auto dat = static_cast<ObjectData*>(d.second.get());
-                return boost::iequals(dat->modelName, model);
-            }
-            return false;
-        });
-    if (defit != objectTypes.end()) return defit->first;
+    auto defit = std::find_if(modelinfo.begin(), modelinfo.end(),
+                              [&](const decltype(modelinfo)::value_type& d) {
+                                  return boost::iequals(d.second->name, model);
+                              });
+    if (defit != modelinfo.end()) return defit->first;
     return -1;
 }
 
@@ -137,8 +128,16 @@ void GameData::loadCOL(const size_t zone, const std::string& name) {
     auto systempath = index.findFilePath(name).string();
 
     if (col.load(systempath)) {
-        for (size_t i = 0; i < col.instances.size(); ++i) {
-            collisions[col.instances[i]->name] = std::move(col.instances[i]);
+        // Associate loaded collisions with models
+        for (auto& c : col.collisions) {
+            // Find by name
+            auto id = findModelObject(c->name);
+            auto model = modelinfo.find(id);
+            if (model == modelinfo.end()) {
+                logger->error("Data", "no model for collsion " + c->name);
+                continue;
+            }
+            model->second->setCollisionModel(c);
         }
     }
 }
@@ -314,26 +313,118 @@ void GameData::loadTXD(const std::string& name, bool async) {
     }
 }
 
-void GameData::loadDFF(const std::string& name, bool async) {
-    auto realname = name.substr(0, name.size() - 4);
-    if (models.find(realname) != models.end()) {
+void GameData::getNameAndLod(std::string& name, int& lod) {
+    auto lodpos = name.rfind("_l");
+    if (lodpos != std::string::npos) {
+        lod = std::atoi(name.substr(lodpos + 1).c_str());
+        name = name.substr(0, lodpos);
+    }
+}
+
+Model* GameData::loadClump(const std::string& name) {
+    auto file = index.openFile(name);
+    if (!file) {
+        logger->error("Data", "Failed to load model " + name);
+        return nullptr;
+    }
+    LoaderDFF l;
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->error("Data", "Error loading model file " + name);
+        return nullptr;
+    }
+    return m;
+}
+
+void GameData::loadModelFile(const std::string& name) {
+    auto file = index.openFilePath(name);
+    if (!file) {
+        logger->log("Data", Logger::Error, "Failed to load model file " + name);
+        return;
+    }
+    LoaderDFF l;
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->log("Data", Logger::Error, "Error loading model file " + name);
         return;
     }
 
-    // Before starting the job make sure the file isn't loaded again.
-    loadedFiles.insert({name, true});
+    // Associate the frames with models.
+    for (auto& frame : m->frames) {
+        /// @todo this is useful elsewhere, please move elsewhere
+        std::string name = frame->getName();
+        int lod = 0;
+        getNameAndLod(name, lod);
+        for (auto& model : modelinfo) {
+            auto info = model.second.get();
+            if (info->type() != ModelDataType::SimpleInfo) {
+                continue;
+            }
+            if (boost::iequals(info->name, name)) {
+                auto simple = static_cast<SimpleModelInfo*>(info);
+                simple->setAtomic(m, lod, frame);
+            }
+        }
+    }
+}
 
-    models[realname] = ModelRef(new ResourceHandle<Model>(realname));
+void GameData::loadModel(ModelID model) {
+    auto info = modelinfo[model].get();
+    /// @todo replace openFile with API for loading from CDIMAGE archives
+    auto name = info->name;
 
-    auto job = new BackgroundLoaderJob<Model, LoaderDFF>{
-        workContext, &this->index, name, models[realname]};
+    // Re-direct special models
+    switch (info->type()) {
+        case ModelDataType::ClumpInfo:
+            // Re-direct the hier objects to the special object ids
+            name = engine->state->specialModels[info->id()];
+            /// @todo remove this from here
+            loadTXD(name + ".txd");
+            break;
+        case ModelDataType::PedInfo:
+            static const std::string specialPrefix("special");
+            if (!name.compare(0, specialPrefix.size(), specialPrefix)) {
+                auto sid = name.substr(specialPrefix.size());
+                unsigned short specialID = std::atoi(sid.c_str());
+                name = engine->state->specialCharacters[specialID];
+                /// @todo remove this from here
+                loadTXD(name + ".txd");
+                break;
+            }
+        default:
+            break;
+    }
 
-    if (async) {
-        workContext->queueJob(job);
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    auto file = index.openFile(name + ".dff");
+    if (!file) {
+        logger->error("Data", "Failed to load model for " +
+                                  std::to_string(model) + " [" + name + "]");
+        return;
+    }
+    LoaderDFF l;
+    auto m = l.loadFromMemory(file);
+    if (!m) {
+        logger->error("Data",
+                      "Error loading model file for " + std::to_string(model));
+        return;
+    }
+    /// @todo handle timeinfo models correctly.
+    auto isSimple = info->type() == ModelDataType::SimpleInfo;
+    if (isSimple) {
+        auto simple = static_cast<SimpleModelInfo*>(info);
+        // Associate atomics
+        for (auto& frame : m->frames) {
+            auto name = frame->getName();
+            int lod = 0;
+            getNameAndLod(name, lod);
+            simple->setAtomic(m, lod, frame);
+        }
     } else {
-        job->work();
-        job->complete();
-        delete job;
+        // Associate clumps
+        auto clump = static_cast<ClumpModelInfo*>(info);
+        clump->setModel(m);
+        /// @todo how is LOD handled for clump objects?
     }
 }
 

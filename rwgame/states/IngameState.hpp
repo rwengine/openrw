@@ -1,7 +1,7 @@
 #ifndef INGAMESTATE_HPP
 #define INGAMESTATE_HPP
 
-#include "State.hpp"
+#include "StateManager.hpp"
 
 class PlayerController;
 
@@ -53,7 +53,6 @@ public:
 
     virtual void handleEvent(const SDL_Event& event);
     virtual void handlePlayerInput(const SDL_Event& event);
-    void updateInputState(const SDL_Event& event);
 
     virtual bool shouldWorldUpdate();
 

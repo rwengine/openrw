@@ -4,7 +4,6 @@
 
 class Logger;
 
-#include <data/CollisionModel.hpp>
 #include <data/GameTexts.hpp>
 #include <data/ZoneData.hpp>
 #include <loaders/LoaderDFF.hpp>
@@ -119,9 +118,24 @@ public:
     void loadTXD(const std::string& name, bool async = false);
 
     /**
-     * Attempts to load a DFF or does nothing if is already loaded
+     * Converts combined {name}_l{LOD} into name and lod.
      */
-    void loadDFF(const std::string& name, bool async = false);
+    static void getNameAndLod(std::string& name, int& lod);
+
+    /**
+     * Loads an archived model and returns it directly
+     */
+    Model* loadClump(const std::string& name);
+
+    /**
+     * Loads a DFF and associates its atomics with models.
+     */
+    void loadModelFile(const std::string& name);
+
+    /**
+     * Loads and associates a model's data
+     */
+    void loadModel(ModelID model);
 
     /**
      * Loads an IFP file containing animations
@@ -170,20 +184,15 @@ public:
      */
     std::map<std::string, ZoneData> zones;
 
-    /**
-     * Object Definitions
-     */
-    std::map<ObjectID, ObjectInformationPtr> objectTypes;
+    std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>> modelinfo;
 
     uint16_t findModelObject(const std::string model);
 
     template <class T>
-    std::shared_ptr<T> findObjectType(ObjectID id) {
-        auto f = objectTypes.find(id);
-        /// @TODO don't instanciate an object here just to read .type
-        T tmp;
-        if (f != objectTypes.end() && f->second->class_type == tmp.class_type) {
-            return std::static_pointer_cast<T>(f->second);
+    T* findModelInfo(ModelID id) {
+        auto f = modelinfo.find(id);
+        if (f != modelinfo.end() && f->second->type() == T::kType) {
+            return static_cast<T*>(f->second.get());
         }
         return nullptr;
     }
@@ -215,11 +224,6 @@ public:
     WeatherLoader weatherLoader;
 
     /**
-     * Loaded models
-     */
-    std::map<std::string, ResourceHandle<Model>::Ref> models;
-
-    /**
      * Loaded textures (Textures are ID by name and alpha pairs)
      */
     std::map<std::pair<std::string, std::string>, TextureData::Handle> textures;
@@ -233,11 +237,6 @@ public:
      * Loaded Animations
      */
     AnimationSet animations;
-
-    /**
-     * CollisionModel data.
-     */
-    std::map<std::string, std::unique_ptr<CollisionModel>> collisions;
 
     /**
      * DynamicObjectData

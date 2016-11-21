@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 
-#include <data/ObjectData.hpp>
+#include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>
 #include <objects/VehicleInfo.hpp>
 

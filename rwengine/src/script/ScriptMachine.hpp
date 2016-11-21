@@ -120,15 +120,11 @@ struct SCMThread {
  */
 class ScriptMachine {
 public:
-    ScriptMachine(GameState* state, SCMFile* file, SCMOpcodes* ops);
-    ~ScriptMachine();
+    ScriptMachine(GameState* state, SCMFile* file, ScriptModule* ops);
+    ~ScriptMachine() { }
 
     SCMFile* getFile() const {
-        return _file;
-    }
-
-    SCMOpcodes* getOpcodes() const {
-        return _ops;
+        return file;
     }
 
     void startThread(SCMThread::pc_t start, bool mission = false);
@@ -152,8 +148,8 @@ public:
     void execute(float dt);
 
 private:
-    SCMFile* _file;
-    SCMOpcodes* _ops;
+    SCMFile* file;
+    ScriptModule* module;
     GameState* state;
 
     std::list<SCMThread> _activeThreads;

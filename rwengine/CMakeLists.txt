@@ -36,8 +36,8 @@ set(RWENGINE_SOURCES
 	src/data/GameTexts.cpp
 	src/data/GameTexts.hpp
 	src/data/InstanceData.hpp
-	src/data/ObjectData.cpp
-	src/data/ObjectData.hpp
+	src/data/ModelData.cpp
+	src/data/ModelData.hpp
 	src/data/PathData.hpp
 	src/data/Skeleton.cpp
 	src/data/Skeleton.hpp
@@ -58,10 +58,8 @@ set(RWENGINE_SOURCES
 	src/engine/SaveGame.hpp
 	src/engine/ScreenText.cpp
 	src/engine/ScreenText.hpp
-	src/items/InventoryItem.hpp
-	src/items/WeaponItem.cpp
-	src/items/WeaponItem.hpp
-	src/loaders/BackgroundLoader.hpp
+	src/items/Weapon.cpp
+	src/items/Weapon.hpp
 	src/loaders/DataLoader.cpp
 	src/loaders/DataLoader.hpp
 	src/loaders/GenericDATLoader.cpp

@@ -376,12 +376,4 @@ struct SCMMicrocode {
 
 typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
 
-struct SCMOpcodes {
-    std::vector<ScriptModule*> modules;
-
-    ~SCMOpcodes();
-
-    bool findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out);
-};
-
 #endif

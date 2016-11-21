@@ -2,7 +2,7 @@
 #include <engine/GameData.hpp>
 
 qint16 ItemListModel::getIDOf(unsigned int row) const {
-    if (row < world()->data->objectTypes.size()) {
+    if (row < world()->data->modelinfo.size()) {
         return row;
     }
 
@@ -14,7 +14,7 @@ ItemListModel::ItemListModel(GameWorld *world, QObject *parent)
 }
 
 int ItemListModel::rowCount(const QModelIndex &parent) const {
-    return _world->data->objectTypes.size();
+    return _world->data->modelinfo.size();
 }
 
 int ItemListModel::columnCount(const QModelIndex &parent) const {

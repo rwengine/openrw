@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <objects/GameObject.hpp>
 
-constexpr int maxInventorySlots = 13;
+constexpr int kMaxInventorySlots = 13;
 
 // Animation slots used for character animation blending
 constexpr unsigned int AnimIndexMovement = 0;
@@ -26,18 +26,15 @@ struct CharacterState {
     float rotation;
     float health = 100.f;
     float armour = 0.f;
-    std::array<CharacterWeaponSlot, maxInventorySlots> weapons;
+    std::array<CharacterWeaponSlot, kMaxInventorySlots> weapons;
     uint16_t currentWeapon = 0;
     uint32_t lastFireTimeMS = 0;
     bool primaryActive = false;
     bool secondaryActive = false;
-    uint32_t primaryStartTime = 0;
-    uint32_t primaryEndTime = 0;
 };
 
 class VehicleObject;
 class GameWorld;
-class InventoryItem;
 
 struct AnimationGroup {
     Animation* idle;
@@ -125,8 +122,6 @@ private:
 public:
     static const float DefaultJumpSpeed;
 
-    std::shared_ptr<CharacterData> ped;
-
     btKinematicCharacterController* physCharacter;
     btPairCachingGhostObject* physObject;
     btCapsuleShapeZ* physShape;
@@ -142,8 +137,7 @@ public:
      * @param ped PEDS_t struct to use.
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                    const glm::quat& rot, const ModelRef& model,
-                    std::shared_ptr<CharacterData> data);
+                    const glm::quat& rot, BaseModelInfo* modelinfo);
 
     ~CharacterObject();
 
@@ -237,9 +231,21 @@ public:
      */
     void activityFinished();
 
-    void addToInventory(InventoryItem* item);
+    /**
+     * @brief addToInventory Adds ammo to the specified item slot
+     * @param slot The slot to add ammo for
+     * @param ammo The quanity of ammunition to add
+     *
+     * Will give the weapon (set the ID) if it is not possessed
+     */
+    void addToInventory(int slot, int ammo);
+
     void setActiveItem(int slot);
-    InventoryItem* getActiveItem();
+    int getActiveItem() const { return currentState.currentWeapon; }
+
+    /**
+     * @brief removeFromInventory Removes item at slot from inventory
+     */
     void removeFromInventory(int slot);
 
     /**

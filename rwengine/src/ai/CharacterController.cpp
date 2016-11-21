@@ -1,11 +1,12 @@
 #include <btBulletDynamicsCommon.h>
 #include <ai/CharacterController.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/VehicleObject.hpp>
-
 #include <data/Model.hpp>
 #include <engine/Animator.hpp>
-#include <items/WeaponItem.hpp>
+#include <engine/GameData.hpp>
+#include <engine/GameWorld.hpp>
+#include <items/Weapon.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
 
 constexpr float kCloseDoorIdleTime = 2.f;
@@ -179,7 +180,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     RW_UNUSED(controller);
 
     // Boats don't have any kind of entry animation unless you're onboard.
-    if (vehicle->vehicle->type == VehicleData::BOAT) {
+    if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
         character->enterVehicle(vehicle, seat);
         return true;
     }
@@ -344,7 +345,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         anm_exit = character->animations.car_getout_rhs;
     }
 
-    if (vehicle->vehicle->type == VehicleData::BOAT) {
+    if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
         auto ppos = character->getPosition();
         character->enterVehicle(nullptr, seat);
         character->setPosition(ppos);
@@ -384,14 +385,20 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     return false;
 }
 
-#include <data/Model.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-bool Activities::ShootWeapon::update(CharacterObject *character,
-                                     CharacterController *controller) {
+bool Activities::UseItem::update(CharacterObject *character,
+                                 CharacterController *controller) {
     RW_UNUSED(controller);
 
-    auto &wepdata = _item->getWeaponData();
+    if (itemslot >= kMaxInventorySlots) {
+        return true;
+    }
+
+    auto world = character->engine;
+    const auto &weapon = world->data->weaponData.at(itemslot);
+    auto &state = character->getCurrentState().weapons[itemslot];
+    auto animator = character->animator;
+    auto shootanim = world->data->animations[weapon->animation1];
+    auto throwanim = world->data->animations[weapon->animation2];
 
     // Instant hit weapons loop their anim
     // Thrown projectiles have lob / throw.
@@ -400,85 +407,73 @@ bool Activities::ShootWeapon::update(CharacterObject *character,
     character->setRotation(
         glm::angleAxis(character->getLook().x, glm::vec3{0.f, 0.f, 1.f}));
 
-    RW_CHECK(wepdata->inventorySlot < maxInventorySlots,
-             "Inventory slot out of bounds");
-    auto &itemState =
-        character->getCurrentState().weapons[wepdata->inventorySlot];
-    if (itemState.bulletsClip == 0 && itemState.bulletsTotal > 0) {
-        itemState.bulletsClip +=
-            std::min(int(itemState.bulletsTotal), wepdata->clipSize);
-        itemState.bulletsTotal -= itemState.bulletsClip;
+    if (state.bulletsClip == 0 && state.bulletsTotal > 0) {
+        state.bulletsClip +=
+            std::min(int(state.bulletsTotal), weapon->clipSize);
+        state.bulletsTotal -= state.bulletsClip;
     }
-    bool hasammo = itemState.bulletsClip > 0;
+    bool hasammo = state.bulletsClip > 0;
 
-    if (wepdata->fireType == WeaponData::INSTANT_HIT) {
-        if (_item->isFiring(character) && hasammo) {
-            auto shootanim =
-                character->engine->data->animations[wepdata->animation1];
-            if (shootanim) {
-                if (character->animator->getAnimation(AnimIndexAction) !=
-                    shootanim) {
-                    character->playActivityAnimation(shootanim, false, false);
-                }
-
-                auto loopstart = wepdata->animLoopStart / 100.f;
-                auto loopend = wepdata->animLoopEnd / 100.f;
-                auto firetime = wepdata->animFirePoint / 100.f;
-
-                auto currID =
-                    character->animator->getAnimationTime(AnimIndexAction);
-
-                if (currID >= firetime && !_fired) {
-                    itemState.bulletsClip--;
-                    _item->fire(character);
-                    _fired = true;
-                }
-                if (currID > loopend) {
-                    character->animator->setAnimationTime(AnimIndexAction,
-                                                          loopstart);
-                    _fired = false;
-                }
+    if (weapon->fireType == WeaponData::INSTANT_HIT) {
+        if (!character->getCurrentState().primaryActive) {
+            // Character is no longer firing
+            return true;
+        }
+        if (hasammo && shootanim) {
+            if (animator->getAnimation(AnimIndexAction) != shootanim) {
+                character->playActivityAnimation(shootanim, false, false);
             }
-        } else {
-            if (character->animator->isCompleted(AnimIndexAction)) {
-                return true;
+
+            auto loopstart = weapon->animLoopStart / 100.f;
+            auto loopend = weapon->animLoopEnd / 100.f;
+            auto firetime = weapon->animFirePoint / 100.f;
+
+            auto currenttime = animator->getAnimationTime(AnimIndexAction);
+
+            if (currenttime >= firetime && !fired) {
+                state.bulletsClip--;
+                Weapon::fireHitscan(weapon.get(), character);
+                fired = true;
             }
+            if (currenttime > loopend) {
+                animator->setAnimationTime(AnimIndexAction, loopstart);
+                fired = false;
+            }
+        } else if (animator->isCompleted(AnimIndexAction)) {
+            // Should we exit this state when out of ammo?
+            return true;
         }
     }
     /// @todo Use Thrown flag instead of project (RPG isn't thrown eg.)
-    else if (wepdata->fireType == WeaponData::PROJECTILE && hasammo) {
-        auto shootanim =
-            character->engine->data->animations[wepdata->animation1];
-        auto throwanim =
-            character->engine->data->animations[wepdata->animation2];
-
-        if (character->animator->getAnimation(AnimIndexAction) == shootanim) {
-            if (character->animator->isCompleted(AnimIndexAction)) {
+    else if (weapon->fireType == WeaponData::PROJECTILE && hasammo) {
+        if (animator->getAnimation(AnimIndexAction) == shootanim) {
+            if (character->getCurrentState().primaryActive) {
+                power = animator->getAnimationTime(AnimIndexAction) / 0.5f;
+            }
+            if (animator->isCompleted(AnimIndexAction)) {
                 character->playActivityAnimation(throwanim, false, false);
             }
-        } else if (character->animator->getAnimation(AnimIndexAction) ==
-                   throwanim) {
-            auto firetime = wepdata->animCrouchFirePoint / 100.f;
-            auto currID =
-                character->animator->getAnimationTime(AnimIndexAction);
+        } else if (animator->getAnimation(AnimIndexAction) == throwanim) {
+            auto firetime = weapon->animCrouchFirePoint / 100.f;
+            auto currID = animator->getAnimationTime(AnimIndexAction);
 
-            if (currID >= firetime && !_fired) {
-                itemState.bulletsClip--;
-                _item->fire(character);
-                _fired = true;
+            if (currID >= firetime && !fired) {
+                state.bulletsClip--;
+                Weapon::fireProjectile(weapon.get(), character, power);
+                fired = true;
             }
-            if (character->animator->isCompleted(AnimIndexAction)) {
+            if (animator->isCompleted(AnimIndexAction)) {
                 return true;
             }
         } else {
-            character->playActivityAnimation(throwanim, false, true);
+            character->playActivityAnimation(shootanim, false, true);
         }
-    } else if (wepdata->fireType == WeaponData::MELEE) {
-        RW_CHECK(wepdata->fireType != WeaponData::MELEE,
+    } else if (weapon->fireType == WeaponData::MELEE) {
+        RW_CHECK(weapon->fireType != WeaponData::MELEE,
                  "Melee attacks not implemented");
         return true;
     } else {
-        RW_ERROR("Unrecognized fireType: " << wepdata->fireType);
+        RW_ERROR("Unrecognized fireType: " << weapon->fireType);
         return true;
     }
 

@@ -11,8 +11,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <ai/CharacterController.hpp>
-#include <data/ObjectData.hpp>
-#include <items/InventoryItem.hpp>
+#include <data/ModelData.hpp>
 
 #include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
@@ -210,40 +209,6 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     ssRectSize = glGetUniformLocation(ssRectProgram, "size");
     ssRectOffset = glGetUniformLocation(ssRectProgram, "offset");
 
-    const static int cylsegments = 16;
-    std::vector<Model::GeometryVertex> cylverts;
-    for (int s = 0; s < cylsegments; ++s) {
-        float theta = (2.f * glm::pi<float>() / cylsegments) * (s + 0);
-        float gamma = (2.f * glm::pi<float>() / cylsegments) * (s + 1);
-        glm::vec2 p0(glm::sin(theta), glm::cos(theta));
-        glm::vec2 p1(glm::sin(gamma), glm::cos(gamma));
-
-        p0 *= 0.5f;
-        p1 *= 0.5f;
-
-        cylverts.push_back({glm::vec3(p0, 2.f), glm::vec3(),
-                            glm::vec2(0.45f, 0.6f),
-                            glm::u8vec4(255, 255, 255, 50)});
-        cylverts.push_back({glm::vec3(p0, -1.f), glm::vec3(),
-                            glm::vec2(0.45f, 0.4f),
-                            glm::u8vec4(255, 255, 255, 150)});
-        cylverts.push_back({glm::vec3(p1, 2.f), glm::vec3(),
-                            glm::vec2(0.55f, 0.6f),
-                            glm::u8vec4(255, 255, 255, 50)});
-
-        cylverts.push_back({glm::vec3(p0, -1.f), glm::vec3(),
-                            glm::vec2(0.45f, 0.4f),
-                            glm::u8vec4(255, 255, 255, 150)});
-        cylverts.push_back({glm::vec3(p1, -1.f), glm::vec3(),
-                            glm::vec2(0.55f, 0.4f),
-                            glm::u8vec4(255, 255, 255, 150)});
-        cylverts.push_back({glm::vec3(p1, 2.f), glm::vec3(),
-                            glm::vec2(0.55f, 0.6f),
-                            glm::u8vec4(255, 255, 255, 50)});
-    }
-    cylinderGeometry.uploadVertices<Model::GeometryVertex>(cylverts);
-    cylinderBuffer.addGeometry(&cylinderGeometry);
-    cylinderBuffer.setFaceType(GL_TRIANGLES);
 }
 
 GameRenderer::~GameRenderer() {
@@ -330,7 +295,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     // This is sequential at the moment, it should be easy to make it
     // run in parallel with a good threading system.
     RenderList renderList;
-    // Naive optimisation, assume 10% hitrate
+    // Naive optimisation, assume 50% hitrate
     renderList.reserve(world->allObjects.size() * 0.5f);
 
     RW_PROFILE_BEGIN("Build");
@@ -343,6 +308,48 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     for (auto object : world->allObjects) {
         objectRenderer.buildRenderList(object, renderList);
     }
+
+    // Area indicators
+    auto sphereModel = getSpecialModel(ZoneCylinderA);
+    for (auto& i : world->getAreaIndicators()) {
+        glm::mat4 m(1.f);
+        m = glm::translate(m, i.position);
+        m = glm::scale(
+            m, glm::vec3(i.radius +
+                         0.15f * glm::sin(_renderWorld->getGameTime() * 5.f)));
+
+        objectRenderer.renderFrame(sphereModel, sphereModel->frames[0], m,
+                                   nullptr, 1.f, renderList);
+    }
+
+    // Render arrows above anything that isn't radar only (or hidden)
+    auto arrowModel = getSpecialModel(Arrow);
+    for (auto& blip : world->state->radarBlips) {
+        auto dm = blip.second.display;
+        if (dm == BlipData::Hide || dm == BlipData::RadarOnly) {
+            continue;
+        }
+
+        glm::mat4 model;
+
+        if (blip.second.target > 0) {
+            auto object = world->getBlipTarget(blip.second);
+            if (object) {
+                model = object->getTimeAdjustedTransform(_renderAlpha);
+            }
+        } else {
+            model = glm::translate(model, blip.second.coord);
+        }
+
+        float a = world->getGameTime() * glm::pi<float>();
+        model = glm::translate(model,
+                               glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
+        model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
+        model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+        objectRenderer.renderFrame(arrowModel, arrowModel->frames[0], model,
+                                   nullptr, 1.f, renderList);
+    }
+
     RW_PROFILE_END();
 
     renderer->pushDebugGroup("Objects");
@@ -365,59 +372,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     profObjects = renderer->popDebugGroup();
 
     RW_PROFILE_END();
-
-    // Render arrows above anything that isn't radar only (or hidden)
-    ModelRef& arrowModel = world->data->models["arrow"];
-    if (arrowModel && arrowModel->resource) {
-        auto arrowTex = world->data->textures[{"copblue", ""}];
-        auto arrowFrame = arrowModel->resource->findFrame("arrow");
-        for (auto& blip : world->state->radarBlips) {
-            auto dm = blip.second.display;
-            if (dm == BlipData::Hide || dm == BlipData::RadarOnly) {
-                continue;
-            }
-
-            glm::mat4 model;
-
-            if (blip.second.target > 0) {
-                auto object = world->getBlipTarget(blip.second);
-                if (object) {
-                    model = object->getTimeAdjustedTransform(_renderAlpha);
-                }
-            } else {
-                model = glm::translate(model, blip.second.coord);
-            }
-
-            float a = world->getGameTime() * glm::pi<float>();
-            model = glm::translate(
-                model, glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
-            model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
-            model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-
-            Renderer::DrawParameters dp;
-            dp.textures = {arrowTex->getName()};
-            dp.ambient = 1.f;
-            dp.colour = glm::u8vec4(255, 255, 255, 255);
-
-            auto geom = arrowModel->resource
-                            ->geometries[arrowFrame->getGeometries()[0]];
-            Model::SubGeometry& sg = geom->subgeom[0];
-
-            dp.start = sg.start;
-            dp.count = sg.numIndices;
-            dp.diffuse = 1.f;
-
-            renderer->draw(model, &geom->dbuff, dp);
-        }
-    }
-
-    // Draw goal indicators
-    glDepthMask(GL_FALSE);
-    renderer->useProgram(particleProg);
-    for (auto& i : world->getAreaIndicators()) {
-        renderAreaIndicator(&i);
-    }
-    glDepthMask(GL_TRUE);
 
     renderer->pushDebugGroup("Water");
 
@@ -579,33 +533,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g,
         }
 
         renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
-    }
-}
-
-#define GOAL_RINGS 3
-void GameRenderer::renderAreaIndicator(const AreaIndicatorInfo* info) {
-    glm::mat4 m(1.f);
-    m = glm::translate(m, info->position);
-    glm::vec3 scale =
-        info->radius + 0.15f * glm::sin(_renderWorld->getGameTime() * 5.f);
-
-    Renderer::DrawParameters dp;
-    dp.textures = {data->findTexture("cloud1")->getName()};
-    dp.ambient = 1.f;
-    dp.colour = glm::u8vec4(50, 100, 255, 128);
-    dp.start = 0;
-    dp.count = cylinderGeometry.getCount();
-    dp.diffuse = 1.f;
-
-    for (int i = 0; i < GOAL_RINGS; i++) {
-        glm::mat4 mt = m;
-        glm::vec3 final = scale * glm::pow(0.9f, i + 1.0f);
-        mt = glm::scale(mt, glm::vec3(final.x, final.y, 1.0f + i * 0.1f));
-        int reverse = (i % 2 ? 1 : -1);
-        mt = glm::rotate(mt, reverse * _renderWorld->getGameTime() * 0.5f,
-                         glm::vec3(0.f, 0.f, 1.f));
-
-        renderer->drawArrays(mt, &cylinderBuffer, dp);
     }
 }
 

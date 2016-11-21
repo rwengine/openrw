@@ -14,10 +14,11 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle) {
     BOOST_REQUIRE(vehicle != nullptr);
 
     BOOST_REQUIRE(vehicle->info != nullptr);
-    BOOST_REQUIRE(vehicle->vehicle != nullptr);
+    BOOST_REQUIRE(vehicle->getVehicle() != nullptr);
 
     // Hardcoded values for the moment
-    BOOST_CHECK_EQUAL(vehicle->vehicle->type, VehicleData::CAR);
+    BOOST_CHECK_EQUAL(vehicle->getVehicle()->vehicletype_,
+                      VehicleModelInfo::CAR);
 
     BOOST_CHECK_EQUAL(vehicle->info->wheels.size(), 4);
 
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_CASE(vehicle_parts) {
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
     BOOST_REQUIRE(vehicle != nullptr);
-    BOOST_REQUIRE(vehicle->model != nullptr);
+    BOOST_REQUIRE(vehicle->getModel() != nullptr);
 
     VehicleObject::Part* part = vehicle->getPart("bonnet_dummy");
 
@@ -51,7 +52,7 @@ BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat());
 
     BOOST_REQUIRE(vehicle != nullptr);
-    BOOST_REQUIRE(vehicle->model != nullptr);
+    BOOST_REQUIRE(vehicle->getModel() != nullptr);
 
     VehicleObject::Part* bonnetpart = vehicle->getPart("bonnet_dummy");
     auto skel = vehicle->skeleton;
@@ -76,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_door_position) {
     BOOST_REQUIRE(vehicle != nullptr);
 
     BOOST_REQUIRE(vehicle->info != nullptr);
-    BOOST_REQUIRE(vehicle->vehicle != nullptr);
+    BOOST_REQUIRE(vehicle->getVehicle() != nullptr);
 
     BOOST_CHECK(vehicle->getSeatEntryPositionWorld(0).x > 5.f);
 

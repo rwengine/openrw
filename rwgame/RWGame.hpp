@@ -1,41 +1,48 @@
-#ifndef _RWGAME_HPP_
-#define _RWGAME_HPP_
+#ifndef RWGAME_RWGAME_HPP
+#define RWGAME_RWGAME_HPP
 
 #include <chrono>
-#include <core/Logger.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
+#include <render/DebugDraw.hpp>
 #include <render/GameRenderer.hpp>
 #include <script/ScriptMachine.hpp>
+#include <script/modules/GTA3Module.hpp>
 #include "game.hpp"
 
-#include "GameConfig.hpp"
-#include "GameWindow.hpp"
-
-#include "SDL.h"
+#include "GameBase.hpp"
 
 class PlayerController;
 
-class RWGame {
-    Logger log;
-    GameConfig config{"openrw.ini"};
-    GameState* state = nullptr;
-    GameData* data = nullptr;
-    GameWorld* world = nullptr;
-    // must be allocated after Logger setup.
-    GameRenderer* renderer = nullptr;
-    ScriptMachine* script = nullptr;
-    GameWindow* window = nullptr;
-    // Background worker
-    WorkContext* work = nullptr;
+class RWGame : public GameBase {
+    WorkContext work;
+    GameData data;
+    GameRenderer renderer;
+    DebugDraw debug;
+    GameState state;
+
+    std::unique_ptr<GameWorld> world;
+
+    GTA3Module opcodes;
+    std::unique_ptr<ScriptMachine> vm;
+    std::unique_ptr<SCMFile> script;
+
     std::chrono::steady_clock clock;
     std::chrono::steady_clock::time_point last_clock_time;
 
     bool inFocus = true;
     ViewCamera lastCam, nextCam;
-    bool showDebugStats = false;
-    bool showDebugPaths = false;
-    bool showDebugPhysics = false;
+
+    enum class DebugViewMode {
+        Disabled,
+        General,
+        Physics,
+        Navigation,
+        Objects
+    };
+
+    DebugViewMode debugview_ = DebugViewMode::Disabled;
     int lastDraws;  /// Number of draws issued for the last frame.
 
     std::string cheatInputWindow = std::string(32, ' ');
@@ -44,7 +51,7 @@ class RWGame {
     float timescale = 1.f;
 
 public:
-    RWGame(int argc, char* argv[]);
+    RWGame(Logger& log, int argc, char* argv[]);
     ~RWGame();
 
     int run();
@@ -54,32 +61,24 @@ public:
      */
     void newGame();
 
-    GameState* getState() const {
-        return state;
+    GameState* getState() {
+        return &state;
     }
 
-    GameWorld* getWorld() const {
-        return world;
+    GameWorld* getWorld() {
+        return world.get();
     }
 
-    GameData* getGameData() const {
+    const GameData& getGameData() const {
         return data;
     }
 
-    GameRenderer* getRenderer() const {
+    GameRenderer& getRenderer() {
         return renderer;
     }
 
-    GameWindow& getWindow() {
-        return *window;
-    }
-
-    ScriptMachine* getScript() const {
-        return script;
-    }
-
-    const GameConfig& getConfig() const {
-        return config;
+    ScriptMachine *getScriptVM() const {
+        return vm.get();
     }
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
@@ -131,8 +130,9 @@ private:
     void tick(float dt);
     void render(float alpha, float dt);
 
-    void renderDebugStats(float time, Renderer::ProfileInfo& worldRenderTime);
+    void renderDebugStats(float time);
     void renderDebugPaths(float time);
+    void renderDebugObjects(float time, ViewCamera& camera);
     void renderProfile();
 
     void handleCheatInput(char symbol);
