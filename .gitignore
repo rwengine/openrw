@@ -1,7 +1,35 @@
+# Ignore certain files #
+
+# CMake - General Files #
+
+cmake/
+cmakefiles/
+*.cmake
+CMakeCache.txt
+
+# CMake - MSYS Makefiles - Files #
+
+Makefile
+install_manifest.txt
+
+# CMake - Visual Studio 14 2015 - Files #
+
+*.suo
+*.sln
+*.vcxproj*
+*.VC*
+
+*.a
+
+# Build #
+
+*.exe
+
+# Other #
+
 build/
 documentation/
 *.kdev4
 *~
 *swp
 *.user*
-
