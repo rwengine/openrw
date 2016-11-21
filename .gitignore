@@ -29,6 +29,7 @@ install_manifest.txt
 
 build/
 documentation/
+rwgame/GitSHA1.cpp
 *.kdev4
 *~
 *swp
