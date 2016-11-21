@@ -1,31 +1,26 @@
 #ifndef _VIEWCAMERA_HPP_
 #define _VIEWCAMERA_HPP_
-#include "ViewFrustum.hpp"
 #include <glm/gtc/quaternion.hpp>
+#include "ViewFrustum.hpp"
 
-class ViewCamera
-{
+class ViewCamera {
 public:
-	
-	ViewFrustum frustum;
-	
-	glm::vec3 position;
-	glm::quat rotation;
+    ViewFrustum frustum;
 
-	ViewCamera(const glm::vec3& pos = {}, const glm::quat& rot = {})
-		: frustum({0.1f, 5000.f, glm::radians(45.f), 1.f}),
-		  position(pos), rotation(rot)
-	{
-		
-	}
+    glm::vec3 position;
+    glm::quat rotation;
 
-	glm::mat4 getView()
-	{
-		auto up = rotation * glm::vec3(0.f, 0.f, 1.f);
-		return glm::lookAt(position,
-						   position + rotation * glm::vec3(1.f, 0.f, 0.f),
-						   up);
-	}
+    ViewCamera(const glm::vec3& pos = {}, const glm::quat& rot = {})
+        : frustum({0.1f, 5000.f, glm::radians(45.f), 1.f})
+        , position(pos)
+        , rotation(rot) {
+    }
+
+    glm::mat4 getView() {
+        auto up = rotation * glm::vec3(0.f, 0.f, 1.f);
+        return glm::lookAt(position,
+                           position + rotation * glm::vec3(1.f, 0.f, 0.f), up);
+    }
 };
 
 #endif

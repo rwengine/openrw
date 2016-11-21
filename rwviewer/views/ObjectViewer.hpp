@@ -6,54 +6,54 @@
 
 #include "ViewerInterface.hpp"
 
-#include <QTableView>
-#include <QLabel>
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QTableView>
 
 class ViewerWidget;
 class Model;
 
-class ObjectViewer : public ViewerInterface
-{
-	Q_OBJECT
+class ObjectViewer : public ViewerInterface {
+    Q_OBJECT
 
-	QTableView* objectList;
+    QTableView* objectList;
 
-	QHBoxLayout* mainLayout;
-	QGridLayout* infoLayout;
-	ViewerWidget* previewWidget;
-	QLabel* previewID;
-	QLabel* previewModel;
-	QLabel* previewClass;
+    QHBoxLayout* mainLayout;
+    QGridLayout* infoLayout;
+    ViewerWidget* previewWidget;
+    QLabel* previewID;
+    QLabel* previewModel;
+    QLabel* previewClass;
 
-	QMenu* objectMenu;
-	QModelIndex contextMenuIndex;
+    QMenu* objectMenu;
+    QModelIndex contextMenuIndex;
+
 public:
+    ObjectViewer(ViewerWidget* viewer = 0, QWidget* parent = 0,
+                 Qt::WindowFlags f = 0);
 
-	ObjectViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
-
-	void setViewerWidget( ViewerWidget* widget );
+    void setViewerWidget(ViewerWidget* widget);
 
 protected:
-	void worldChanged() override;
+    void worldChanged() override;
 
 signals:
 
-	void modelChanged(Model* model);
+    void modelChanged(Model* model);
 
-	void showObjectModel(uint16_t object);
+    void showObjectModel(uint16_t object);
 
 public slots:
 
-	void showItem(qint16 item);
+    void showItem(qint16 item);
 
 private slots:
 
-	void showItem(QModelIndex model);
+    void showItem(QModelIndex model);
 
-	void onCustomContextMenu(const QPoint &);
-	void menuViewModel();
+    void onCustomContextMenu(const QPoint&);
+    void menuViewModel();
 };
 
 #endif

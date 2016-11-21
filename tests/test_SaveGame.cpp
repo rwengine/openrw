@@ -4,7 +4,7 @@
 #include <script/ScriptMachine.hpp>
 #include <test_globals.hpp>
 
-#if 0 // Disabled until we make a start on saving the game
+#if 0  // Disabled until we make a start on saving the game
 BOOST_AUTO_TEST_SUITE(SaveGameTests)
 
 BOOST_AUTO_TEST_CASE(test_write_state)

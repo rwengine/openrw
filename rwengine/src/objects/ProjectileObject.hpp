@@ -1,66 +1,67 @@
 #pragma once
 #ifndef _PROJECTILEOBJECT_HPP_
 #define _PROJECTILEOBJECT_HPP_
-#include <objects/GameObject.hpp>
-#include <data/WeaponData.hpp>
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
+#include <data/WeaponData.hpp>
+#include <objects/GameObject.hpp>
 
 /**
  * @brief Implements weapon projectile (e.g. molotovs, RPGs etc.)
  */
-class ProjectileObject : public GameObject
-{
+class ProjectileObject : public GameObject {
 public:
+    enum ProjectileType {
+        Grenade,
+        Molotov,
+        RPG,
+    };
 
-	enum ProjectileType {
-		Grenade,
-		Molotov,
-		RPG,
-	};
+    struct ProjectileInfo {
+        ProjectileType type;
+        glm::vec3 direction;
+        float velocity;
 
-	struct ProjectileInfo {
-		ProjectileType type;
-		glm::vec3 direction;
-		float velocity;
+        /** Time to dentonation or removal */
+        float time;
 
-		/** Time to dentonation or removal */
-		float time;
-
-		std::shared_ptr<WeaponData> weapon;
-	};
+        std::shared_ptr<WeaponData> weapon;
+    };
 
 private:
+    ProjectileInfo _info;
 
-	ProjectileInfo _info;
+    btSphereShape* _shape;
 
-	btSphereShape* _shape;
+    btRigidBody* _body;
 
-	btRigidBody* _body;
+    /** Used for RPGs and Molotov collision detection */
+    btPairCachingGhostObject* _ghostBody;
 
-	/** Used for RPGs and Molotov collision detection */
-	btPairCachingGhostObject* _ghostBody;
+    bool _exploded;
 
-	bool _exploded;
-
-	void checkPhysicsContact();
-	void explode();
-	void cleanup();
+    void checkPhysicsContact();
+    void explode();
+    void cleanup();
 
 public:
+    /**
+     * @brief ProjectileObject constructor
+     */
+    ProjectileObject(GameWorld* world, const glm::vec3& position,
+                     const ProjectileInfo& info);
 
-	/**
-	 * @brief ProjectileObject constructor
-	 */
-	ProjectileObject(GameWorld* world, const glm::vec3& position, const ProjectileInfo& info);
+    ~ProjectileObject();
 
-	~ProjectileObject();
+    void tick(float dt);
 
-	void tick(float dt);
+    Type type() {
+        return Projectile;
+    }
 
-	Type type() { return Projectile; }
-
-	const ProjectileInfo& getProjectileInfo() const { return _info; }
+    const ProjectileInfo& getProjectileInfo() const {
+        return _info;
+    }
 };
 
 #endif

@@ -2,10 +2,9 @@
 #define RWENGINE_GTA3MODULE_HPP
 #include <script/ScriptModule.hpp>
 
-class GTA3Module : public ScriptModule
-{
+class GTA3Module : public ScriptModule {
 public:
-	GTA3Module();
+    GTA3Module();
 };
 
 #endif

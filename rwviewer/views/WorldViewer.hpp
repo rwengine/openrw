@@ -5,29 +5,30 @@
 
 #include "ViewerInterface.hpp"
 
-#include <QTreeView>
 #include <QLabel>
-#include <QVBoxLayout>
-#include <QSplitter>
 #include <QLayout>
+#include <QSplitter>
+#include <QTreeView>
+#include <QVBoxLayout>
 
-class WorldViewer : public ViewerInterface
-{
-	Q_OBJECT
+class WorldViewer : public ViewerInterface {
+    Q_OBJECT
 
-	QVBoxLayout* mainLayout;
-	ViewerWidget* viewerWidget;
+    QVBoxLayout* mainLayout;
+    ViewerWidget* viewerWidget;
+
 public:
-	WorldViewer(ViewerWidget *viewer = 0, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    WorldViewer(ViewerWidget* viewer = 0, QWidget* parent = 0,
+                Qt::WindowFlags f = 0);
 
-	void setViewerWidget( ViewerWidget* widget ) override;
+    void setViewerWidget(ViewerWidget* widget) override;
 
 signals:
-	void placementsLoaded(const QString& file);
+    void placementsLoaded(const QString& file);
 
 public slots:
-	void loadPlacements(const QString& file);
-	void loadPlacements();
+    void loadPlacements(const QString& file);
+    void loadPlacements();
 };
 
 #endif

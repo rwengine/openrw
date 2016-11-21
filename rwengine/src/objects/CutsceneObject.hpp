@@ -6,31 +6,30 @@
 /**
  * @brief Object type used for cutscene animations.
  */
-class CutsceneObject : public GameObject
-{
-	GameObject* _parent;
-	ModelFrame* _bone;
+class CutsceneObject : public GameObject {
+    GameObject* _parent;
+    ModelFrame* _bone;
 
 public:
+    CutsceneObject(GameWorld* engine, const glm::vec3& pos,
+                   const glm::quat& rot, const ModelRef& model);
+    ~CutsceneObject();
 
-	CutsceneObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot, const ModelRef& model);
-	~CutsceneObject();
+    Type type() {
+        return Cutscene;
+    }
 
-	Type type() { return Cutscene; }
+    void tick(float dt);
 
-	void tick(float dt);
+    void setParentActor(GameObject* parent, ModelFrame* bone);
 
-	void setParentActor(GameObject* parent, ModelFrame* bone);
+    GameObject* getParentActor() const {
+        return _parent;
+    }
 
-	GameObject* getParentActor() const
-	{
-		return _parent;
-	}
-
-	ModelFrame* getParentFrame() const
-	{
-		return _bone;
-	}
+    ModelFrame* getParentFrame() const {
+        return _bone;
+    }
 };
 
 #endif

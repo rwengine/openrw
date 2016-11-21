@@ -7,7 +7,7 @@
 
 struct DynamicObjectData;
 typedef std::shared_ptr<DynamicObjectData> DynamicObjectDataPtr;
-typedef std::map<std::string,DynamicObjectDataPtr> DynamicObjectDataPtrs;
+typedef std::map<std::string, DynamicObjectDataPtr> DynamicObjectDataPtrs;
 
 struct WeaponData;
 typedef std::shared_ptr<WeaponData> WeaponDataPtr;
@@ -17,15 +17,14 @@ struct VehicleInfo;
 typedef std::shared_ptr<VehicleInfo> VehicleInfoPtr;
 typedef std::map<std::string, VehicleInfoPtr> VehicleInfoPtrs;
 
-class GenericDATLoader
-{
+class GenericDATLoader {
 public:
+    void loadDynamicObjects(const std::string& name,
+                            DynamicObjectDataPtrs& data);
 
-	void loadDynamicObjects(const std::string& name, DynamicObjectDataPtrs& data);
+    void loadWeapons(const std::string& name, WeaponDataPtrs& weaponData);
 
-	void loadWeapons(const std::string& name, WeaponDataPtrs& weaponData);
-
-	void loadHandling(const std::string& name, VehicleInfoPtrs& vehicleData);
+    void loadHandling(const std::string& name, VehicleInfoPtrs& vehicleData);
 };
 
 #endif

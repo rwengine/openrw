@@ -7,27 +7,27 @@
 BOOST_AUTO_TEST_SUITE(LifetimeTests)
 
 #if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_cleanup)
-{
-	GameObject* f = Global::get().e->createInstance(1337, glm::vec3(0.f, 0.f, 1000.f));
-	auto id = f->getGameObjectID();
-	auto& objects = Global::get().e->instancePool.objects;
+BOOST_AUTO_TEST_CASE(test_cleanup) {
+    GameObject* f =
+        Global::get().e->createInstance(1337, glm::vec3(0.f, 0.f, 1000.f));
+    auto id = f->getGameObjectID();
+    auto& objects = Global::get().e->instancePool.objects;
 
-	f->setLifetime(GameObject::TrafficLifetime);
-	
-	{
-		auto search = objects.find(id);
-		BOOST_CHECK( search != objects.end() );
-	}
-	
-	ViewCamera testCamera;
-	testCamera.position = glm::vec3(0.f, 0.f, 0.f);
-	Global::get().e->cleanupTraffic(testCamera);
-	
-	{
-		auto search = objects.find(id);
-		BOOST_CHECK( search != objects.end() );
-	}
+    f->setLifetime(GameObject::TrafficLifetime);
+
+    {
+        auto search = objects.find(id);
+        BOOST_CHECK(search != objects.end());
+    }
+
+    ViewCamera testCamera;
+    testCamera.position = glm::vec3(0.f, 0.f, 0.f);
+    Global::get().e->cleanupTraffic(testCamera);
+
+    {
+        auto search = objects.find(id);
+        BOOST_CHECK(search != objects.end());
+    }
 }
 #endif
 

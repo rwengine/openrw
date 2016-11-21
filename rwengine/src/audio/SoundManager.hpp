@@ -1,8 +1,8 @@
 #pragma once
 
-#include <sndfile.h>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <sndfile.h>
 
 #include <map>
 #include <string>
@@ -10,64 +10,63 @@
 
 class MADStream;
 
-class SoundManager
-{
+class SoundManager {
 public:
-	SoundManager();
-	~SoundManager();
-	
-	bool loadSound(const std::string& name, const std::string& fileName);
-	bool isLoaded(const std::string& name);
-	void playSound(const std::string& name);
-	void pauseSound(const std::string& name);
-	bool isPlaying(const std::string& name);
-	
-	bool playBackground(const std::string& fileName);
+    SoundManager();
+    ~SoundManager();
 
-	bool loadMusic(const std::string& name, const std::string& fileName);
-	void playMusic(const std::string& name);
-	void stopMusic(const std::string& name);
-	
-	void pause(bool p);
-	
+    bool loadSound(const std::string& name, const std::string& fileName);
+    bool isLoaded(const std::string& name);
+    void playSound(const std::string& name);
+    void pauseSound(const std::string& name);
+    bool isPlaying(const std::string& name);
+
+    bool playBackground(const std::string& fileName);
+
+    bool loadMusic(const std::string& name, const std::string& fileName);
+    void playMusic(const std::string& name);
+    void stopMusic(const std::string& name);
+
+    void pause(bool p);
+
 private:
+    class SoundSource {
+        friend class SoundManager;
+        friend class SoundBuffer;
 
-	class SoundSource
-	{
-		friend class SoundManager;
-		friend class SoundBuffer;
-	public:
-		void loadFromFile(const std::string& filename);
-	private:
-		SF_INFO fileInfo;
-		SNDFILE* file;
-		std::vector<uint16_t> data;
-	};
+    public:
+        void loadFromFile(const std::string& filename);
 
-	class SoundBuffer
-	{
-		friend class SoundManager;
-	public:
-		SoundBuffer();
-		bool bufferData(SoundSource& soundSource);
-	private:
-		ALuint source;
-		ALuint buffer;
-	};
+    private:
+        SF_INFO fileInfo;
+        SNDFILE* file;
+        std::vector<uint16_t> data;
+    };
 
-	struct Sound
-	{
-		SoundSource source;
-		SoundBuffer buffer;
-		bool isLoaded = false;
-	};
+    class SoundBuffer {
+        friend class SoundManager;
 
-	bool initializeOpenAL();
+    public:
+        SoundBuffer();
+        bool bufferData(SoundSource& soundSource);
 
-	ALCcontext* alContext = nullptr;
-	ALCdevice* alDevice = nullptr;
+    private:
+        ALuint source;
+        ALuint buffer;
+    };
 
-	std::map<std::string, Sound> sounds;
-	std::map<std::string, MADStream> musics;
-	std::string backgroundNoise;
+    struct Sound {
+        SoundSource source;
+        SoundBuffer buffer;
+        bool isLoaded = false;
+    };
+
+    bool initializeOpenAL();
+
+    ALCcontext* alContext = nullptr;
+    ALCdevice* alDevice = nullptr;
+
+    std::map<std::string, Sound> sounds;
+    std::map<std::string, MADStream> musics;
+    std::string backgroundNoise;
 };
