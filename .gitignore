@@ -2,10 +2,13 @@
 
 # CMake - General Files #
 
-cmake/
-cmakefiles/
-*.cmake
 CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
 
 # CMake - MSYS Makefiles - Files #
 
