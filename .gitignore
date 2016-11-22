@@ -37,3 +37,7 @@ rwgame/GitSHA1.cpp
 *~
 *swp
 *.user*
+
+# MacOS - Filesystem #
+
+*.DS_Store
