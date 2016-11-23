@@ -1,6 +1,6 @@
 # OpenRW
 
-[![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
+[![Build Status](https://travis-ci.org/PerikiyoXD/openrw.svg?branch=master)](https://travis-ci.org/PerikiyoXD/openrw)
 
 OpenRW is a cross-platform, open source re-implementation of Rockstar Games'
 Grand Theft Auto III, a classic 3D action game first published in 2001.
