@@ -125,22 +125,22 @@ void IngameState::tick(float dt) {
 
     auto player = game->getPlayer();
 
-    // Force all input to 0 if player input is disabled
-    /// @todo verify 0ing input is the correct behaviour
-    const auto inputEnabled = player->isInputEnabled();
-
-    auto input = [&](GameInputState::Control c) {
-        return inputEnabled ? world->state->input[0][c] : 0.f;
-    };
-    auto pressed = [&](GameInputState::Control c) {
-        return inputEnabled && world->state->input[0].pressed(c) &&
-               !world->state->input[1].pressed(c);
-    };
-    auto held = [&](GameInputState::Control c) {
-        return inputEnabled && world->state->input[0].pressed(c);
-    };
-
     if (player) {
+        // Force all input to 0 if player input is disabled
+        /// @todo verify 0ing input is the correct behaviour
+        const auto inputEnabled = player->isInputEnabled();
+
+        auto input = [&](GameInputState::Control c) {
+            return inputEnabled ? world->state->input[0][c] : 0.f;
+        };
+        auto pressed = [&](GameInputState::Control c) {
+            return inputEnabled && world->state->input[0].pressed(c) &&
+                   !world->state->input[1].pressed(c);
+        };
+        auto held = [&](GameInputState::Control c) {
+            return inputEnabled && world->state->input[0].pressed(c);
+        };
+
         float viewDistance = 4.f;
         switch (camMode) {
             case IngameState::CAMERA_CLOSE:
