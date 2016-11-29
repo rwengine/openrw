@@ -319,7 +319,9 @@ void CharacterObject::updateCharacter(float dt) {
         glm::vec3 walkDir = updateMovementAnimation(dt);
 
         if (canTurn()) {
-            rotation = glm::angleAxis(m_look.x, glm::vec3{0.f, 0.f, 1.f});
+            // Rotation is based on look angles and movement
+            float yaw = m_look.x + std::atan2(movement.z, movement.x);
+            rotation = glm::quat(glm::vec3(0.f, 0.f, yaw));
         }
 
         walkDir = rotation * walkDir;

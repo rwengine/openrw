@@ -32,6 +32,7 @@ class IngameState : public State {
     bool m_vehicleFreeLook;
 
     float moneyTimer = 0.f;  // Timer used to updated displayed money value
+
 public:
     /**
      * @brief IngameState
@@ -56,7 +57,10 @@ public:
 
     virtual bool shouldWorldUpdate();
 
-    const ViewCamera& getCamera();
+    const ViewCamera& getCamera(float alpha);
+private:
+    GameObject* getCameraTarget() const;
+    float getViewDistance() const;
 };
 
 #endif  // INGAMESTATE_HPP

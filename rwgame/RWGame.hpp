@@ -31,7 +31,7 @@ class RWGame : public GameBase {
     std::chrono::steady_clock::time_point last_clock_time;
 
     bool inFocus = true;
-    ViewCamera lastCam, nextCam;
+    ViewCamera currentCam;
 
     enum class DebugViewMode {
         Disabled,
@@ -82,7 +82,7 @@ public:
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
                      GameObject** object = nullptr) {
-        auto vc = nextCam;
+        auto vc = currentCam;
         glm::vec3 from(vc.position.x, vc.position.y, vc.position.z);
         glm::vec3 tmp = vc.rotation * glm::vec3(1000.f, 0.f, 0.f);
 

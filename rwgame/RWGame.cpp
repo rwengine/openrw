@@ -522,23 +522,24 @@ void RWGame::tick(float dt) {
 
         /// @todo this doesn't make sense as the condition
         if (state.playerObject) {
-            nextCam.frustum.update(nextCam.frustum.projection() *
-                                   nextCam.getView());
+            currentCam.frustum.update(currentCam.frustum.projection() *
+                                   currentCam.getView());
             // Use the current camera position to spawn pedestrians.
-            world->cleanupTraffic(nextCam);
-            world->createTraffic(nextCam);
+            world->cleanupTraffic(currentCam);
+            world->createTraffic(currentCam);
         }
     }
-
-    // render() needs two cameras to smoothly interpolate between ticks.
-    lastCam = nextCam;
-    nextCam = currState->getCamera();
 }
 
 void RWGame::render(float alpha, float time) {
     lastDraws = getRenderer().getRenderer()->getDrawCount();
 
     getRenderer().getRenderer()->swap();
+
+    // Update the camera
+    if (!StateManager::get().states.empty()) {
+        currentCam = StateManager::get().states.back()->getCamera(alpha);
+    }
 
     glm::ivec2 windowSize = getWindow().getSize();
     renderer.setViewport(windowSize.x, windowSize.y);
@@ -587,9 +588,7 @@ void RWGame::render(float alpha, float time) {
         viewCam.rotation = state.cameraRotation;
     } else {
         // There's no cutscene playing - use the camera returned by the State.
-        viewCam.position = glm::mix(lastCam.position, nextCam.position, alpha);
-        viewCam.rotation =
-            glm::slerp(lastCam.rotation, nextCam.rotation, alpha);
+        viewCam = currentCam;
     }
 
     viewCam.frustum.aspectRatio =

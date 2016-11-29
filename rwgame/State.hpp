@@ -48,7 +48,7 @@ public:
 
     virtual void handleEvent(const SDL_Event& e);
 
-    virtual const ViewCamera& getCamera();
+    virtual const ViewCamera& getCamera(float alpha);
 
     /**
      * Returns false if the game world should not should
@@ -56,7 +56,7 @@ public:
      */
     virtual bool shouldWorldUpdate();
 
-    GameWorld* getWorld();
+    GameWorld* getWorld() const;
     GameWindow& getWindow();
 
     bool hasExited() const {
