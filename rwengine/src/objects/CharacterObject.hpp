@@ -215,6 +215,12 @@ public:
         return m_look;
     }
 
+    glm::vec3 getLookDirection() const {
+        float theta = m_look.y - glm::half_pi<float>();
+        return glm::vec3(sin(-m_look.x) * cos(theta),
+                         cos(-m_look.x) * cos(theta), sin(theta));
+    }
+
     /**
      * @brief playActivityAnimation Plays an animation for an activity.
      * @param animation The animation to play

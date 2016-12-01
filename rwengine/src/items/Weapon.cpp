@@ -14,14 +14,13 @@ void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
         }
     }
 
-    auto farTarget =
-        owner->getPosition() +
-        owner->getRotation() * glm::vec3(0.f, weapon->hitRange, 0.f);
-    auto handPos = glm::vec3(handMatrix * glm::vec4(0.f, 0.f, 0.f, 1.f));
+    const auto& raydirection = owner->getLookDirection();
+    const auto rayend = owner->getPosition() + raydirection * weapon->hitRange;
+    auto handPos = glm::vec3(handMatrix[3]);
     auto fireOrigin = owner->getPosition() + owner->getRotation() * handPos;
+    float dmg = weapon->damage;
 
-    owner->engine->doWeaponScan(
-        WeaponScan(weapon->damage, fireOrigin, farTarget, weapon));
+    owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon});
 }
 
 void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
