@@ -196,6 +196,11 @@ public:
         return running;
     }
 
+    bool isStrafing() const {
+        /// @todo implement strafing
+        return false;
+    }
+
     /**
      * Resets the Actor to the nearest AI Graph node
      * (taking into account the current vehicle)

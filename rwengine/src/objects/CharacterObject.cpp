@@ -319,8 +319,11 @@ void CharacterObject::updateCharacter(float dt) {
         glm::vec3 walkDir = updateMovementAnimation(dt);
 
         if (canTurn()) {
-            // Rotation is based on look angles and movement
-            float yaw = m_look.x + std::atan2(movement.z, movement.x);
+            float yaw = m_look.x;
+            // When strafing we need to detach look direction from movement
+            if (!isStrafing()) {
+                yaw += std::atan2(movement.z, movement.x);
+            }
             rotation = glm::quat(glm::vec3(0.f, 0.f, yaw));
         }
 
