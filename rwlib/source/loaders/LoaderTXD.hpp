@@ -5,7 +5,6 @@
 #include <loaders/RWBinaryStream.hpp>
 
 #include <functional>
-#include <job/WorkContext.hpp>
 #include <map>
 #include <platform/FileHandle.hpp>
 #include <string>
@@ -20,24 +19,6 @@ class FileIndex;
 class TextureLoader {
 public:
     bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
-};
-
-// TODO: refactor this interface to be more like ModelLoader so they can be
-// rolled into one.
-class LoadTextureArchiveJob : public WorkJob {
-private:
-    TextureArchive& archive;
-    FileIndex* fileIndex;
-    std::string _file;
-    FileHandle data;
-
-public:
-    LoadTextureArchiveJob(WorkContext* context, FileIndex* index,
-                          TextureArchive& inTextures, const std::string& file);
-
-    void work();
-
-    void complete();
 };
 
 #endif

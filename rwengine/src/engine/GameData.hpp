@@ -18,6 +18,7 @@ class Logger;
 #include <audio/MADStream.hpp>
 #include <gl/TextureData.hpp>
 #include <platform/FileIndex.hpp>
+#include <job/WorkContext.hpp>
 
 #include <memory>
 
@@ -115,7 +116,7 @@ public:
     /**
      * Attempts to load a TXD, or does nothing if it has already been loaded
      */
-    void loadTXD(const std::string& name, bool async = false);
+    void loadTXD(const std::string& name);
 
     /**
      * Converts combined {name}_l{LOD} into name and lod.

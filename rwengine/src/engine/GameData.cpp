@@ -295,21 +295,23 @@ void GameData::loadWater(const std::string& path) {
     }
 }
 
-void GameData::loadTXD(const std::string& name, bool async) {
+void GameData::loadTXD(const std::string& name) {
     if (loadedFiles.find(name) != loadedFiles.end()) {
         return;
     }
 
     loadedFiles[name] = true;
 
-    auto j = new LoadTextureArchiveJob(workContext, &index, textures, name);
+    /// @todo refactor loadTXD to use correct file locations
+    auto file = index.openFile(name);
+    if (!file) {
+        logger->error("Data", "Failed to open txd: " + name);
+        return;
+    }
 
-    if (async) {
-        workContext->queueJob(j);
-    } else {
-        j->work();
-        j->complete();
-        delete j;
+    TextureLoader l;
+    if (!l.loadFromMemory(file, textures)) {
+        logger->error("Data", "Error loading txd: " + name);
     }
 }
 
@@ -493,7 +495,7 @@ void GameData::loadSplash(const std::string& name) {
     std::string lower(name);
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    loadTXD(lower + ".txd", false);
+    loadTXD(lower + ".txd");
 
     engine->state->currentSplash = lower;
 }

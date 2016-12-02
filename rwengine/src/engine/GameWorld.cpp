@@ -168,7 +168,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                        std::begin(texturename), tolower);
 
         if (!texturename.empty()) {
-            data->loadTXD(texturename + ".txd", true);
+            data->loadTXD(texturename + ".txd");
         }
 
         // Check for dynamic data.
@@ -261,7 +261,7 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     }
 
     if (!texturename.empty()) {
-        data->loadTXD(texturename + ".txd", true);
+        data->loadTXD(texturename + ".txd");
     }
 
     auto instance = new CutsceneObject(this, pos, rot, model, modelinfo);
