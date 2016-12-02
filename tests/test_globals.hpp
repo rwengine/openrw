@@ -74,7 +74,6 @@ public:
     GameWorld* e;
     GameState* s;
     Logger log;
-    WorkContext work;
 #endif
 
     Global() {
@@ -85,19 +84,15 @@ public:
         window.hideCursor();
 
 #if RW_TEST_WITH_DATA
-        d = new GameData(&log, &work, getGamePath());
+        d = new GameData(&log, getGamePath());
 
         d->load();
 
-        e = new GameWorld(&log, &work, d);
+        e = new GameWorld(&log, d);
         s = new GameState;
         e->state = s;
 
         e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
-
-        while (!e->_work->isEmpty()) {
-            std::this_thread::yield();
-        }
 #endif
     }
 

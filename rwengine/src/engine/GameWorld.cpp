@@ -9,7 +9,6 @@
 #include <ai/TrafficDirector.hpp>
 #include <data/Model.hpp>
 #include <data/WeaponData.hpp>
-#include <job/WorkContext.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
 
@@ -83,8 +82,8 @@ public:
     }
 };
 
-GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
-    : logger(log), data(dat), randomEngine(rand()), _work(work), paused(false) {
+GameWorld::GameWorld(Logger* log, GameData* dat)
+    : logger(log), data(dat), randomEngine(rand()), paused(false) {
     data->engine = this;
 
     collisionConfig = std::make_unique<btDefaultCollisionConfiguration>();
@@ -168,7 +167,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                        std::begin(texturename), tolower);
 
         if (!texturename.empty()) {
-            data->loadTXD(texturename + ".txd", true);
+            data->loadTXD(texturename + ".txd");
         }
 
         // Check for dynamic data.
@@ -261,7 +260,7 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     }
 
     if (!texturename.empty()) {
-        data->loadTXD(texturename + ".txd", true);
+        data->loadTXD(texturename + ".txd");
     }
 
     auto instance = new CutsceneObject(this, pos, rot, model, modelinfo);

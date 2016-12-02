@@ -35,9 +35,6 @@ SET(RWLIB_SOURCES
 	"source/loaders/LoaderSDT.cpp"
 	"source/loaders/LoaderTXD.hpp"
 	"source/loaders/LoaderTXD.cpp"
-
-	"source/job/WorkContext.hpp"
-	"source/job/WorkContext.cpp"
 	)
 
 add_library(rwlib

@@ -60,8 +60,6 @@ set(RWENGINE_SOURCES
 	src/engine/ScreenText.hpp
 	src/items/Weapon.cpp
 	src/items/Weapon.hpp
-	src/loaders/DataLoader.cpp
-	src/loaders/DataLoader.hpp
 	src/loaders/GenericDATLoader.cpp
 	src/loaders/GenericDATLoader.hpp
 	src/loaders/LoaderCOL.cpp

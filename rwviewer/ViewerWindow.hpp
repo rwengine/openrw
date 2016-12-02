@@ -22,7 +22,6 @@ class ViewerWindow : public QMainWindow {
     enum ViewMode { Object = 0, Model = 1, World = 2, _Count };
 
     Logger engineLog;
-    WorkContext work;
 
     GameData* gameData;
     GameWorld* gameWorld;

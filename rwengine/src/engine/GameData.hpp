@@ -41,14 +41,12 @@ private:
     std::string splash;
 
     Logger* logger;
-    WorkContext* workContext;
-
 public:
     /**
      * ctor
      * @param path Path to the root of the game data.
      */
-    GameData(Logger* log, WorkContext* work, const std::string& path = "");
+    GameData(Logger* log, const std::string& path = "");
     ~GameData();
 
     GameWorld* engine;
@@ -115,7 +113,7 @@ public:
     /**
      * Attempts to load a TXD, or does nothing if it has already been loaded
      */
-    void loadTXD(const std::string& name, bool async = false);
+    void loadTXD(const std::string& name);
 
     /**
      * Converts combined {name}_l{LOD} into name and lod.

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 GLuint gErrorTextureData[] = {0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF};
 GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
@@ -189,26 +190,4 @@ bool TextureLoader::loadFromMemory(FileHandle file,
     }
 
     return true;
-}
-
-// TODO Move the Job system out of the loading code
-#include <platform/FileIndex.hpp>
-
-LoadTextureArchiveJob::LoadTextureArchiveJob(WorkContext* context,
-                                             FileIndex* index,
-                                             TextureArchive& inTextures,
-                                             const std::string& file)
-    : WorkJob(context), archive(inTextures), fileIndex(index), _file(file) {
-}
-
-void LoadTextureArchiveJob::work() {
-    data = fileIndex->openFile(_file);
-}
-
-void LoadTextureArchiveJob::complete() {
-    // TODO error status
-    if (data) {
-        TextureLoader loader;
-        loader.loadFromMemory(data, archive);
-    }
 }

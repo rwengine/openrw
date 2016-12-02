@@ -86,8 +86,6 @@ void ViewerWidget::paintGL() {
         dummyObject->skeleton->interpolate(1.f);
     }
 
-    gworld->_work->update();
-
     r.getRenderer()->invalidate();
 
     glEnable(GL_DEPTH_TEST);

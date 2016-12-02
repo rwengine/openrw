@@ -44,7 +44,6 @@ set(TEST_SOURCES
 	"test_vehicle.cpp"
 	"test_VisualFX.cpp"
 	"test_weapon.cpp"
-	"test_worker.cpp"
 	"test_world.cpp"
 
 	# Hack in rwgame sources until there's a per-target test suite
