@@ -9,7 +9,6 @@
 #include <ai/TrafficDirector.hpp>
 #include <data/Model.hpp>
 #include <data/WeaponData.hpp>
-#include <job/WorkContext.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
 
@@ -83,8 +82,8 @@ public:
     }
 };
 
-GameWorld::GameWorld(Logger* log, WorkContext* work, GameData* dat)
-    : logger(log), data(dat), randomEngine(rand()), _work(work), paused(false) {
+GameWorld::GameWorld(Logger* log, GameData* dat)
+    : logger(log), data(dat), randomEngine(rand()), paused(false) {
     data->engine = this;
 
     collisionConfig = std::make_unique<btDefaultCollisionConfiguration>();

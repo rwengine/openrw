@@ -13,7 +13,6 @@ class GameState;
 #include <audio/SoundManager.hpp>
 
 class CutsceneObject;
-class WorkContext;
 #include <objects/ObjectTypes.hpp>
 
 class GameObject;
@@ -60,7 +59,7 @@ struct AreaIndicatorInfo {
  */
 class GameWorld {
 public:
-    GameWorld(Logger* log, WorkContext* work, GameData* dat);
+    GameWorld(Logger* log, GameData* dat);
 
     ~GameWorld();
 
@@ -289,11 +288,6 @@ public:
      */
     static void PhysicsTickCallback(btDynamicsWorld* physWorld,
                                     btScalar timeStep);
-
-    /**
-     * Work related
-     */
-    WorkContext* _work;
 
     /**
      * @brief Loads and starts the named cutscene.

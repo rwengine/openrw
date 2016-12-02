@@ -15,12 +15,8 @@ void LoadingState::exit() {
 void LoadingState::tick(float dt) {
     RW_UNUSED(dt);
 
-    // If background work is completed, do callback
-    if (getWorld()->_work->isEmpty()) {
-        // If we ever get back to this state it should be completed
-        done();
-        complete();
-    }
+    done();
+    complete();
 }
 
 bool LoadingState::shouldWorldUpdate() {

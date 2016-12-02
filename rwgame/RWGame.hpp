@@ -16,7 +16,6 @@
 class PlayerController;
 
 class RWGame : public GameBase {
-    WorkContext work;
     GameData data;
     GameRenderer renderer;
     DebugDraw debug;

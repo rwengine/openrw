@@ -31,7 +31,7 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 
 RWGame::RWGame(Logger& log, int argc, char* argv[])
     : GameBase(log, argc, argv)
-    , data(&log, &work, config.getGameDataPath())
+    , data(&log, config.getGameDataPath())
     , renderer(&log, &data) {
     bool newgame = options.count("newgame");
     bool test = options.count("test");
@@ -97,9 +97,6 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
 
 RWGame::~RWGame() {
     log.info("Game", "Beginning cleanup");
-
-    log.info("Game", "Stopping work queue");
-    work.stop();
 }
 
 void RWGame::newGame() {
@@ -107,7 +104,7 @@ void RWGame::newGame() {
     state = GameState();
 
     // Destroy the current world and start over
-    world = std::make_unique<GameWorld>(&log, &work, &data);
+    world = std::make_unique<GameWorld>(&log, &data);
     world->dynamicsWorld->setDebugDrawer(&debug);
 
     // Associate the new world with the new state and vice versa
@@ -465,9 +462,6 @@ int RWGame::run() {
 }
 
 void RWGame::tick(float dt) {
-    // Process the Engine's background work.
-    work.update();
-
     State* currState = StateManager::get().states.back().get();
 
     world->chase.update(dt);

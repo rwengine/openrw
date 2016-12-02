@@ -18,7 +18,6 @@ class Logger;
 #include <audio/MADStream.hpp>
 #include <gl/TextureData.hpp>
 #include <platform/FileIndex.hpp>
-#include <job/WorkContext.hpp>
 
 #include <memory>
 
@@ -42,14 +41,12 @@ private:
     std::string splash;
 
     Logger* logger;
-    WorkContext* workContext;
-
 public:
     /**
      * ctor
      * @param path Path to the root of the game data.
      */
-    GameData(Logger* log, WorkContext* work, const std::string& path = "");
+    GameData(Logger* log, const std::string& path = "");
     ~GameData();
 
     GameWorld* engine;

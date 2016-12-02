@@ -21,8 +21,8 @@
 #include <iostream>
 #include <sstream>
 
-GameData::GameData(Logger* log, WorkContext* work, const std::string& path)
-    : datpath(path), logger(log), workContext(work), engine(nullptr) {
+GameData::GameData(Logger* log, const std::string& path)
+    : datpath(path), logger(log), engine(nullptr) {
 }
 
 GameData::~GameData() {

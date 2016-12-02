@@ -161,9 +161,9 @@ void ViewerWindow::loadGame(const QString& path) {
     QDir gameDir(path);
 
     if (gameDir.exists() && path.size() > 0) {
-        gameData = new GameData(&engineLog, &work,
-                                gameDir.absolutePath().toStdString());
-        gameWorld = new GameWorld(&engineLog, &work, gameData);
+        gameData =
+            new GameData(&engineLog, gameDir.absolutePath().toStdString());
+        gameWorld = new GameWorld(&engineLog, gameData);
         renderer = new GameRenderer(&engineLog, gameData);
         gameWorld->state = new GameState;
         viewerWidget->setRenderer(renderer);
