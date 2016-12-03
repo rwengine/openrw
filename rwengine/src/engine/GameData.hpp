@@ -39,6 +39,7 @@ class GameData {
 private:
     std::string datpath;
     std::string splash;
+    std::string currenttextureslot;
 
     Logger* logger;
 public:
@@ -111,9 +112,15 @@ public:
     void loadLevelFile(const std::string& path);
 
     /**
-     * Attempts to load a TXD, or does nothing if it has already been loaded
+     * Loads the txt slot if it is not already loaded and sets
+     * the current TXD slot
      */
     void loadTXD(const std::string& name);
+
+    /**
+     * Loads a named texture archive from the game data
+     */
+    TextureArchive loadTextureArchive(const std::string& name);
 
     /**
      * Converts combined {name}_l{LOD} into name and lod.
@@ -155,9 +162,17 @@ public:
 
     void loadSplash(const std::string& name);
 
-    TextureData::Handle findTexture(const std::string& name,
-                                    const std::string& alpha = "") {
-        return textures[{name, alpha}];
+    TextureData::Handle findSlotTexture(const std::string& slot,
+                                        const std::string& texture) const {
+        auto slotit = textureslots.find(slot);
+        if (slotit == textureslots.end()) {
+            return nullptr;
+        }
+        auto textureit = slotit->second.find(texture);
+        if (textureit == slotit->second.end()) {
+            return nullptr;
+        }
+        return textureit->second;
     }
 
     FileIndex index;
@@ -222,9 +237,9 @@ public:
     WeatherLoader weatherLoader;
 
     /**
-     * Loaded textures (Textures are ID by name and alpha pairs)
+     * Texture slots, containing loaded textures.
      */
-    std::map<std::pair<std::string, std::string>, TextureData::Handle> textures;
+    std::map<std::string, TextureArchive> textureslots;
 
     /**
      * Texture atlases.

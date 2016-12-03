@@ -37,13 +37,13 @@ void GameData::load() {
     /// @todo cuts.img files should be loaded differently to gta3.img
     loadIMG("anim/cuts.img");
 
-    loadLevelFile("data/default.dat");
-    loadLevelFile("data/gta3.dat");
-
-    loadTXD("particle.txd");
-    loadTXD("icons.txd");
-    loadTXD("hud.txd");
-    loadTXD("fonts.txd");
+    textureslots["particle"] = loadTextureArchive("particle.txd");
+    textureslots["icons"] = loadTextureArchive("icons.txd");
+    textureslots["hud"] = loadTextureArchive("hud.txd");
+    textureslots["fonts"] = loadTextureArchive("fonts.txd");
+    textureslots["generic"] = loadTextureArchive("generic.txd");
+    auto misc = loadTextureArchive("misc.txd");
+    textureslots["generic"].insert(misc.begin(), misc.end());
 
     loadCarcols("data/carcols.dat");
     loadWeather("data/timecyc.dat");
@@ -52,6 +52,9 @@ void GameData::load() {
     loadWeaponDAT("data/weapon.dat");
 
     loadIFP("ped.ifp");
+
+    loadLevelFile("data/default.dat");
+    loadLevelFile("data/gta3.dat");
 }
 
 void GameData::loadLevelFile(const std::string& path) {
@@ -62,6 +65,9 @@ void GameData::loadLevelFile(const std::string& path) {
         logger->error("Data", "Failed to open game file " + path);
         return;
     }
+
+    // Reset texture slot
+    currenttextureslot = "generic";
 
     for (std::string line, cmd; std::getline(datfile, line);) {
         if (line.size() == 0 || line[0] == '#') continue;
@@ -296,23 +302,41 @@ void GameData::loadWater(const std::string& path) {
 }
 
 void GameData::loadTXD(const std::string& name) {
-    if (loadedFiles.find(name) != loadedFiles.end()) {
+    auto slot = name;
+    auto ext = name.find(".txd");
+    if (ext != std::string::npos) {
+        slot = name.substr(0, ext);
+    }
+
+    // Set the current texture slot
+    currenttextureslot = slot;
+
+    // Check if this texture slot is loaded already
+    auto slotit = textureslots.find(slot);
+    if (slotit != textureslots.end()) {
         return;
     }
 
-    loadedFiles[name] = true;
+    textureslots[slot] = std::move(loadTextureArchive(name));
+}
 
+TextureArchive GameData::loadTextureArchive(const std::string& name) {
     /// @todo refactor loadTXD to use correct file locations
     auto file = index.openFile(name);
     if (!file) {
         logger->error("Data", "Failed to open txd: " + name);
-        return;
+        return {};
     }
+
+    TextureArchive textures;
 
     TextureLoader l;
     if (!l.loadFromMemory(file, textures)) {
         logger->error("Data", "Error loading txd: " + name);
+        return {};
     }
+
+    return textures;
 }
 
 void GameData::getNameAndLod(std::string& name, int& lod) {
@@ -330,6 +354,11 @@ Model* GameData::loadClump(const std::string& name) {
         return nullptr;
     }
     LoaderDFF l;
+    l.setTextureLookupCallback(
+        [&](const std::string& texture, const std::string&) {
+            // Lookup the texture in the current texture slot
+            return findSlotTexture(currenttextureslot, texture);
+        });
     auto m = l.loadFromMemory(file);
     if (!m) {
         logger->error("Data", "Error loading model file " + name);
@@ -345,6 +374,12 @@ void GameData::loadModelFile(const std::string& name) {
         return;
     }
     LoaderDFF l;
+    l.setTextureLookupCallback(
+        [&](const std::string& texture, const std::string&) {
+            // Lookup the texture in the current texture slot
+            return findSlotTexture(currenttextureslot, texture);
+        });
+
     auto m = l.loadFromMemory(file);
     if (!m) {
         logger->log("Data", Logger::Error, "Error loading model file " + name);
@@ -374,14 +409,14 @@ void GameData::loadModel(ModelID model) {
     auto info = modelinfo[model].get();
     /// @todo replace openFile with API for loading from CDIMAGE archives
     auto name = info->name;
+    auto slotname = info->textureslot;
 
     // Re-direct special models
     switch (info->type()) {
         case ModelDataType::ClumpInfo:
             // Re-direct the hier objects to the special object ids
             name = engine->state->specialModels[info->id()];
-            /// @todo remove this from here
-            loadTXD(name + ".txd");
+            slotname = name;
             break;
         case ModelDataType::PedInfo:
             static const std::string specialPrefix("special");
@@ -389,8 +424,7 @@ void GameData::loadModel(ModelID model) {
                 auto sid = name.substr(specialPrefix.size());
                 unsigned short specialID = std::atoi(sid.c_str());
                 name = engine->state->specialCharacters[specialID];
-                /// @todo remove this from here
-                loadTXD(name + ".txd");
+                slotname = name;
                 break;
             }
         default:
@@ -398,6 +432,12 @@ void GameData::loadModel(ModelID model) {
     }
 
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    std::transform(slotname.begin(), slotname.end(), slotname.begin(),
+                   ::tolower);
+
+    /// @todo remove this from here
+    loadTXD(slotname + ".txd");
+
     auto file = index.openFile(name + ".dff");
     if (!file) {
         logger->error("Data", "Failed to load model for " +
@@ -405,6 +445,11 @@ void GameData::loadModel(ModelID model) {
         return;
     }
     LoaderDFF l;
+    l.setTextureLookupCallback(
+        [&](const std::string& texture, const std::string&) {
+            // Lookup the texture in the current texture slot
+            return findSlotTexture(currenttextureslot, texture);
+        });
     auto m = l.loadFromMemory(file);
     if (!m) {
         logger->error("Data",

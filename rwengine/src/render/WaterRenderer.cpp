@@ -98,7 +98,7 @@ void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex) {
 void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     auto r = renderer->getRenderer();
 
-    auto waterTex = world->data->findTexture("water_old");
+    auto waterTex = world->data->findSlotTexture("particle", "water_old");
     RW_CHECK(waterTex != nullptr, "Water texture is null");
     if (waterTex == nullptr) {
         // Can't render water if we don't have a texture.

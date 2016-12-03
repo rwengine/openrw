@@ -404,7 +404,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     GLuint splashTexName = 0;
     auto fc = world->state->fadeColour;
     if ((fc.r + fc.g + fc.b) == 0 && world->state->currentSplash.size() > 0) {
-        auto splash = world->data->findTexture(world->state->currentSplash);
+        auto splash = world->data->findSlotTexture("generic", world->state->currentSplash);
         if (splash) {
             splashTexName = splash->getName();
         }
@@ -494,16 +494,6 @@ void GameRenderer::renderGeometry(Model* model, size_t g,
 
             if (mat.textures.size() > 0) {
                 auto tex = mat.textures[0].texture;
-                if (!tex) {
-                    auto& tC = mat.textures[0].name;
-                    auto& tA = mat.textures[0].alphaName;
-                    tex = data->findTexture(tC, tA);
-                    if (!tex) {
-                        // logger->warning("Renderer", "Missing texture: " + tC
-                        // + " " + tA);
-                    }
-                    mat.textures[0].texture = tex;
-                }
                 if (tex) {
                     dp.textures = {tex->getName()};
                 }
