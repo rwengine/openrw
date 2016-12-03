@@ -42,6 +42,7 @@ private:
     std::string currenttextureslot;
 
     Logger* logger;
+    LoaderDFF dffLoader;
 public:
     /**
      * ctor

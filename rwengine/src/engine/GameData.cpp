@@ -5,7 +5,6 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <loaders/LoaderCOL.hpp>
-#include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
 #include <script/SCMFile.hpp>
@@ -23,6 +22,10 @@
 
 GameData::GameData(Logger* log, const std::string& path)
     : datpath(path), logger(log), engine(nullptr) {
+    dffLoader.setTextureLookupCallback(
+        [&](const std::string& texture, const std::string&) {
+            return findSlotTexture(currenttextureslot, texture);
+        });
 }
 
 GameData::~GameData() {
@@ -353,13 +356,7 @@ Model* GameData::loadClump(const std::string& name) {
         logger->error("Data", "Failed to load model " + name);
         return nullptr;
     }
-    LoaderDFF l;
-    l.setTextureLookupCallback(
-        [&](const std::string& texture, const std::string&) {
-            // Lookup the texture in the current texture slot
-            return findSlotTexture(currenttextureslot, texture);
-        });
-    auto m = l.loadFromMemory(file);
+    auto m = dffLoader.loadFromMemory(file);
     if (!m) {
         logger->error("Data", "Error loading model file " + name);
         return nullptr;
@@ -373,14 +370,7 @@ void GameData::loadModelFile(const std::string& name) {
         logger->log("Data", Logger::Error, "Failed to load model file " + name);
         return;
     }
-    LoaderDFF l;
-    l.setTextureLookupCallback(
-        [&](const std::string& texture, const std::string&) {
-            // Lookup the texture in the current texture slot
-            return findSlotTexture(currenttextureslot, texture);
-        });
-
-    auto m = l.loadFromMemory(file);
+    auto m = dffLoader.loadFromMemory(file);
     if (!m) {
         logger->log("Data", Logger::Error, "Error loading model file " + name);
         return;
@@ -444,13 +434,7 @@ void GameData::loadModel(ModelID model) {
                                   std::to_string(model) + " [" + name + "]");
         return;
     }
-    LoaderDFF l;
-    l.setTextureLookupCallback(
-        [&](const std::string& texture, const std::string&) {
-            // Lookup the texture in the current texture slot
-            return findSlotTexture(currenttextureslot, texture);
-        });
-    auto m = l.loadFromMemory(file);
+    auto m = dffLoader.loadFromMemory(file);
     if (!m) {
         logger->error("Data",
                       "Error loading model file for " + std::to_string(model));
