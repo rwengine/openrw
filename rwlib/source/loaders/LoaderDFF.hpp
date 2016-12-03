@@ -2,14 +2,14 @@
 #ifndef _LOADERDFF_HPP_
 #define _LOADERDFF_HPP_
 
+#include <gl/TextureData.hpp>
 #include <loaders/RWBinaryStream.hpp>
-
 #include <platform/FileHandle.hpp>
+
+#include <functional>
 #include <string>
-#include <vector>
 
 class Model;
-class GameData;
 
 class DFFLoaderException {
     std::string _message;
@@ -48,7 +48,16 @@ class LoaderDFF {
     void readAtomic(Model* model, const RWBStream& stream);
 
 public:
+    using TextureLookupCallback = std::function<TextureData::Handle(
+        const std::string&, const std::string&)>;
+
     Model* loadFromMemory(FileHandle file);
+
+    void setTextureLookupCallback(TextureLookupCallback tlc) {
+        texturelookup = tlc;
+    }
+private:
+    TextureLookupCallback texturelookup;
 };
 
 #endif
