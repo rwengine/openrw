@@ -24,6 +24,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , currentState({})
     , currentVehicle(nullptr)
     , currentSeat(0)
+    , m_look(0.f, glm::half_pi<float>())
     , running(false)
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
@@ -273,6 +274,12 @@ void CharacterObject::tick(float dt) {
     if (getPosition().z < -100.f) {
         resetToAINode();
     }
+}
+
+void CharacterObject::setRotation(const glm::quat &orientation)
+{
+    m_look.x = glm::roll(orientation);
+    rotation = orientation;
 }
 
 #include <algorithm>

@@ -154,6 +154,8 @@ public:
         return currentState;
     }
 
+    void setRotation(const glm::quat& orientation) override;
+
     /**
      * @brief Loads the model and texture for a character skin.
      */
