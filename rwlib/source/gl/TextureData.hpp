@@ -1,6 +1,7 @@
 #pragma once
 #include <gl/gl_core_3_3.h>
 #include <glm/glm.hpp>
+#include <map>
 
 #include <memory>
 
@@ -37,3 +38,4 @@ private:
     glm::ivec2 size;
     bool hasAlpha;
 };
+using TextureArchive = std::map<std::string, TextureData::Handle>;

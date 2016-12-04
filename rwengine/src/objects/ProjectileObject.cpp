@@ -71,7 +71,7 @@ void ProjectileObject::explode() {
                            0.f});
         }
 
-        auto tex = engine->data->findTexture("explo02");
+        auto tex = engine->data->findSlotTexture("particle", "explo02");
 
         auto explosion = engine->createEffect(VisualFX::Particle);
         explosion->particle.size = glm::vec2(exp_size);

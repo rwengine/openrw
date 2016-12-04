@@ -341,8 +341,10 @@ void LoaderDFF::readTexture(Model *model, const RWBStream &stream) {
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower);
 
+    TextureData::Handle textureinst =
+        texturelookup ? texturelookup(name, alpha) : nullptr;
     model->geometries.back()->materials.back().textures.push_back(
-        {name, alpha, nullptr});
+        {name, alpha, textureinst});
 }
 
 void LoaderDFF::readGeometryExtension(Model *model, const RWBStream &stream) {

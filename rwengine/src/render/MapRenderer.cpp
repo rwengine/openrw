@@ -115,7 +115,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
         std::string num = (m < 10 ? "0" : "");
         std::string name = "radar" + num + std::to_string(m);
-        auto texture = world->data->textures[{name, ""}];
+        auto texture = world->data->findSlotTexture(name, name);
 
         glBindTexture(GL_TEXTURE_2D, texture->getName());
 
@@ -140,7 +140,8 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glDisable(GL_STENCIL_TEST);
         // We only need the outer ring if we're clipping.
         glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ZERO);
-        TextureData::Handle radarDisc = data->findTexture("radardisc");
+        TextureData::Handle radarDisc =
+            data->findSlotTexture("hud", "radardisc");
 
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
@@ -257,7 +258,7 @@ void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view,
 
     GLuint tex = 0;
     if (!texture.empty()) {
-        auto sprite = data->findTexture(texture);
+        auto sprite = data->findSlotTexture("hud", texture);
         tex = sprite->getName();
     }
     renderer->setUniform(rectProg, "colour", colour);

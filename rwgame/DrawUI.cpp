@@ -168,7 +168,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     }
 
     TextureData::Handle itemTexture =
-        render->getData()->findTexture(itemTextureName);
+        render->getData()->findSlotTexture("hud", itemTextureName);
     RW_CHECK(itemTexture != nullptr, "Item has 0 texture");
     if (itemTexture != nullptr) {
         RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");

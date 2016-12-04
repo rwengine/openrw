@@ -11,8 +11,6 @@
 
 // This might suffice
 #include <gl/TextureData.hpp>
-typedef std::map<std::pair<std::string, std::string>, TextureData::Handle>
-    TextureArchive;
 
 class FileIndex;
 

@@ -158,18 +158,6 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
             data->loadModel(oi->id());
         }
 
-        std::string modelname = oi->name;
-        std::string texturename = oi->textureslot;
-
-        std::transform(std::begin(modelname), std::end(modelname),
-                       std::begin(modelname), tolower);
-        std::transform(std::begin(texturename), std::end(texturename),
-                       std::begin(texturename), tolower);
-
-        if (!texturename.empty()) {
-            data->loadTXD(texturename + ".txd");
-        }
-
         // Check for dynamic data.
         auto dyit = data->dynamicObjectData.find(oi->name);
         std::shared_ptr<DynamicObjectData> dydata;
@@ -177,7 +165,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
             dydata = dyit->second;
         }
 
-        if (modelname.empty()) {
+        if (oi->name.empty()) {
             logger->warning(
                 "World", "Instance with missing model: " + std::to_string(id));
         }
@@ -243,24 +231,17 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     }
 
     auto clumpmodel = static_cast<ClumpModelInfo*>(modelinfo);
-    std::string texturename;
 
     if (!clumpmodel->isLoaded()) {
         data->loadModel(id);
     }
     auto model = clumpmodel->getModel();
 
-    texturename = modelinfo->textureslot;
-
     if (id == 0) {
         auto playerobj = pedestrianPool.find(state->playerObject);
         if (playerobj) {
             model = playerobj->getModel();
         }
-    }
-
-    if (!texturename.empty()) {
-        data->loadTXD(texturename + ".txd");
     }
 
     auto instance = new CutsceneObject(this, pos, rot, model, modelinfo);
@@ -283,10 +264,6 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
     if (!vti->isLoaded()) {
         data->loadModel(id);
-    }
-
-    if (!vti->textureslot.empty()) {
-        data->loadTXD(vti->textureslot + ".txd");
     }
 
     glm::u8vec3 prim(255), sec(128);
@@ -361,12 +338,6 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
         data->loadModel(id);
     }
 
-    std::string texturename = pt->textureslot;
-
-    if (!texturename.empty()) {
-        data->loadTXD(texturename + ".txd");
-    }
-
     auto ped = new CharacterObject(this, pos, rot, pt);
     ped->setGameObjectID(gid);
     new DefaultAIController(ped);
@@ -388,12 +359,11 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
     std::string modelname = "player";
     std::string texturename = "player";
 
+    data->loadTXD(texturename + ".txd");
     if (!pt->isLoaded()) {
         auto model = data->loadClump(modelname + ".dff");
         pt->setModel(model);
     }
-
-    data->loadTXD(texturename + ".txd");
 
     auto ped = new CharacterObject(this, pos, rot, pt);
     ped->setGameObjectID(gid);
@@ -415,8 +385,6 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     if (!modelInfo->isLoaded()) {
         data->loadModel(id);
     }
-
-    data->loadTXD(modelInfo->textureslot + ".txd");
 
     PickupObject* pickup = nullptr;
     auto pickuptype = (PickupObject::PickupType)type;

@@ -61,17 +61,6 @@ void ObjectRenderer::renderGeometry(Model* model, size_t g,
 
             if (mat.textures.size() > 0) {
                 auto tex = mat.textures[0].texture;
-                if (!tex) {
-                    auto& tC = mat.textures[0].name;
-                    auto& tA = mat.textures[0].alphaName;
-                    tex = m_world->data->findTexture(tC, tA);
-                    if (!tex) {
-                        // logger->warning("Renderer", "Missing texture: " + tC
-                        // + " " + tA);
-                        dp.textures = {m_errorTexture};
-                    }
-                    mat.textures[0].texture = tex;
-                }
                 if (tex) {
                     if (tex->isTransparent()) {
                         isTransparent = true;

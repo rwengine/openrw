@@ -182,11 +182,7 @@ bool TextureLoader::loadFromMemory(FileHandle file,
 
         auto texture = createTexture(texNative, rootSection);
 
-        inTextures[{name, alpha}] = texture;
-
-        if (!alpha.empty()) {
-            inTextures[{name, ""}] = texture;
-        }
+        inTextures[name] = texture;
     }
 
     return true;
