@@ -5,6 +5,7 @@
 #include "RWGame.hpp"
 
 #include <ai/PlayerController.hpp>
+#include <data/CutsceneData.hpp>
 #include <data/Model.hpp>
 #include <data/WeaponData.hpp>
 #include <dynamics/CollisionInstance.hpp>
@@ -36,7 +37,6 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
     , m_cameraAngles{0.f, glm::half_pi<float>()}
     , m_invertedY(game->getConfig().getInputInvertY())
     , m_vehicleFreeLook(true) {
-    _look.frustum.fov = kInGameFOV;
 }
 
 void IngameState::startTest() {
@@ -329,8 +329,57 @@ bool IngameState::shouldWorldUpdate() {
 }
 
 const ViewCamera& IngameState::getCamera(float alpha) {
+    auto state = game->getState();
     auto player = game->getPlayer();
     auto world = getWorld();
+
+    if (state->currentCutscene && state->cutsceneStartTime >= 0.f) {
+        auto cutscene = state->currentCutscene;
+        float cutsceneTime =
+            std::min(world->getGameTime() - state->cutsceneStartTime,
+                     cutscene->tracks.duration);
+        cutsceneTime += GAME_TIMESTEP * alpha;
+        glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
+                  targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
+        float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
+        _look.frustum.fov = glm::radians(zoom);
+        float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
+
+        auto direction = glm::normalize(targetPos - cameraPos);
+        auto right =
+            glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
+        auto up = glm::normalize(glm::cross(direction, right));
+
+        glm::mat3 m;
+        m[0][0] = direction.x;
+        m[0][1] = right.x;
+        m[0][2] = up.x;
+
+        m[1][0] = direction.y;
+        m[1][1] = right.y;
+        m[1][2] = up.y;
+
+        m[2][0] = direction.z;
+        m[2][1] = right.z;
+        m[2][2] = up.z;
+
+        auto qtilt = glm::angleAxis(glm::radians(tilt), direction);
+
+        cameraPos += cutscene->meta.sceneOffset;
+        targetPos += cutscene->meta.sceneOffset;
+
+        _look.position = cameraPos;
+        _look.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
+        return _look;
+    }
+
+    if (state->cameraFixed) {
+        _look.position = state->cameraPosition;
+        _look.rotation = state->cameraRotation;
+        return _look;
+    }
+
+    _look.frustum.fov = kInGameFOV;
 
     if (!player) {
         return _look;
