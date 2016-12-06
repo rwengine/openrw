@@ -22,7 +22,7 @@
 constexpr float kAutoLookTime = 2.f;
 constexpr float kAutolookMinVelocity = 0.2f;
 const float kInGameFOV = glm::half_pi<float>();
-const float kMaxRotationRate = glm::half_pi<float>();
+const float kMaxRotationRate = glm::quarter_pi<float>();
 const float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
 const float kVehicleCameraPitch =
     glm::half_pi<float>() - glm::quarter_pi<float>() * 0.25f;
@@ -34,7 +34,6 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
     , newgame(newgame)
     , autolookTimer(0.f)
     , camMode(IngameState::CAMERA_NORMAL)
-    , m_cameraAngles{0.f, glm::half_pi<float>()}
     , m_invertedY(game->getConfig().getInputInvertY())
     , m_vehicleFreeLook(true) {
 }
@@ -154,42 +153,45 @@ void IngameState::tick(float dt) {
         targetPosition += glm::vec3(0.f, 0.f, 1.f);
         lookTargetPosition += glm::vec3(0.f, 0.f, 0.5f);
 
+        auto look = player->getCharacter()->getLook();
+        look += cameradelta_;
+        cameradelta_ = glm::vec2();
+        look.y = glm::clamp(look.y, kCameraPitchLimit,
+                            glm::pi<float>() - kCameraPitchLimit);
+
         auto vehicle =
             (target->type() == GameObject::Character)
                 ? static_cast<CharacterObject*>(target)->getCurrentVehicle()
                 : nullptr;
         if (vehicle) {
-            // Rotate the camera to the ideal angle if the player isn't moving
-            // it
             float velocity = vehicle->getVelocity();
-            if (autolookTimer <= 0.f &&
-                glm::abs(velocity) > kAutolookMinVelocity) {
-                auto idealYaw = glm::roll(vehicle->getRotation());
-                const auto idealPitch = kVehicleCameraPitch;
+
+            if (glm::abs(velocity) > kAutolookMinVelocity &&
+                autolookTimer <= 0.f) {
+                glm::vec2 ideal(glm::roll(vehicle->getRotation()),
+                                kVehicleCameraPitch);
                 if (velocity < 0.f) {
-                    idealYaw = glm::mod(idealYaw - glm::pi<float>(),
-                                        glm::pi<float>() * 2.f);
+                    ideal.x = glm::mod(ideal.x - glm::pi<float>(),
+                                       glm::pi<float>() * 2.f);
                 }
-                float currentYaw =
-                    glm::mod(m_cameraAngles.x, glm::pi<float>() * 2);
-                float currentPitch = m_cameraAngles.y;
-                float deltaYaw = idealYaw - currentYaw;
-                float deltaPitch = idealPitch - currentPitch;
-                if (glm::abs(deltaYaw) > glm::pi<float>()) {
-                    deltaYaw -= glm::sign(deltaYaw) * glm::pi<float>() * 2.f;
+                glm::vec2 current(glm::mod(look.x, glm::pi<float>() * 2),
+                                  look.y);
+                auto delta = ideal - current;
+                if (glm::abs(delta.x) > glm::pi<float>()) {
+                    delta.x -= glm::sign(delta.x) * glm::pi<float>() * 2.f;
                 }
-                m_cameraAngles.x +=
-                    glm::sign(deltaYaw) *
-                    std::min(kMaxRotationRate * dt, glm::abs(deltaYaw));
-                m_cameraAngles.y +=
-                    glm::sign(deltaPitch) *
-                    std::min(kMaxRotationRate * dt, glm::abs(deltaPitch));
+                look += glm::clamp(delta, -kMaxRotationRate * dt,
+                                   kMaxRotationRate * dt);
+            }
+
+            if (!m_vehicleFreeLook) {
+                look.y = kVehicleCameraPitch;
             }
         }
 
         glm::vec3 movement;
         movement.x = input(GameInputState::GoForward) -
-                     input(GameInputState::GoBackwards);
+                     input(GameInputState::GoBackwards),
         movement.y =
             input(GameInputState::GoLeft) - input(GameInputState::GoRight);
         /// @todo replace with correct sprint behaviour
@@ -229,8 +231,8 @@ void IngameState::tick(float dt) {
             } else {
                 player->setMoveDirection(glm::vec3(0.f));
             }
-            player->setLookDirection(m_cameraAngles);
         }
+        player->setLookDirection(look);
     }
 }
 
@@ -308,15 +310,11 @@ void IngameState::handlePlayerInput(const SDL_Event& event) {
                 glm::vec2 mouseMove(
                     event.motion.xrel / static_cast<float>(screenSize.x),
                     event.motion.yrel / static_cast<float>(screenSize.y));
-
                 autolookTimer = kAutoLookTime;
-                if (!m_invertedY) {
+                if (m_invertedY) {
                     mouseMove.y = -mouseMove.y;
                 }
-                m_cameraAngles += glm::vec2(-mouseMove.x, mouseMove.y);
-                m_cameraAngles.y =
-                    glm::clamp(m_cameraAngles.y, kCameraPitchLimit,
-                               glm::pi<float>() - kCameraPitchLimit);
+                cameradelta_ -= mouseMove;
             }
             break;
         default:
@@ -414,10 +412,6 @@ const ViewCamera& IngameState::getCamera(float alpha) {
         lookTargetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);
         targetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);
         physTarget = vehicle->collision->getBulletBody();
-
-        if (!m_vehicleFreeLook) {
-            m_cameraAngles.y = kVehicleCameraPitch;
-        }
     }
 
     // Handle top-down camera
@@ -438,10 +432,11 @@ const ViewCamera& IngameState::getCamera(float alpha) {
         cameraPosition =
             targetPosition + rotation * glm::vec3(0.f, viewDistance, 0.f);
     } else {
+        auto look = player->getCharacter()->getLook();
         // Determine the "ideal" camera position for the current view angles
-        auto yaw = glm::angleAxis(m_cameraAngles.x - glm::half_pi<float>(),
+        auto yaw = glm::angleAxis(look.x - glm::half_pi<float>(),
                                   glm::vec3(0.f, 0.f, 1.f));
-        auto pitch = glm::angleAxis(m_cameraAngles.y, glm::vec3(0.f, 1.f, 0.f));
+        auto pitch = glm::angleAxis(look.y, glm::vec3(0.f, 1.f, 0.f));
         auto cameraOffset = yaw * pitch * glm::vec3(0.f, 0.f, viewDistance);
         cameraPosition = targetPosition + cameraOffset;
     }

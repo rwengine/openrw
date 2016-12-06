@@ -24,8 +24,8 @@ class IngameState : public State {
     float autolookTimer;
     CameraMode camMode;
 
-    /// Current camera yaw and pitch
-    glm::vec2 m_cameraAngles;
+    /// Player camera input since the last update
+    glm::vec2 cameradelta_;
     /// Invert Y axis movement
     bool m_invertedY;
     /// Free look in vehicles.
