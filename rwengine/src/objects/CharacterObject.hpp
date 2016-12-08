@@ -154,6 +154,8 @@ public:
         return currentState;
     }
 
+    void setRotation(const glm::quat& orientation) override;
+
     /**
      * @brief Loads the model and texture for a character skin.
      */
@@ -196,6 +198,11 @@ public:
         return running;
     }
 
+    bool isStrafing() const {
+        /// @todo implement strafing
+        return false;
+    }
+
     /**
      * Resets the Actor to the nearest AI Graph node
      * (taking into account the current vehicle)
@@ -213,6 +220,12 @@ public:
     }
     const glm::vec2& getLook() const {
         return m_look;
+    }
+
+    glm::vec3 getLookDirection() const {
+        float theta = m_look.y - glm::half_pi<float>();
+        return glm::vec3(sin(-m_look.x) * cos(theta),
+                         cos(-m_look.x) * cos(theta), sin(theta));
     }
 
     /**

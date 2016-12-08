@@ -37,7 +37,7 @@ void State::handleEvent(const SDL_Event& e) {
     }
 }
 
-const ViewCamera& State::getCamera() {
+const ViewCamera& State::getCamera(float alpha) {
     return defaultView;
 }
 
@@ -45,7 +45,7 @@ bool State::shouldWorldUpdate() {
     return false;
 }
 
-GameWorld* State::getWorld() {
+GameWorld* State::getWorld() const {
     return game->getWorld();
 }
 

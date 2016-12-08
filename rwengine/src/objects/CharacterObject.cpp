@@ -24,6 +24,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , currentState({})
     , currentVehicle(nullptr)
     , currentSeat(0)
+    , m_look(0.f, glm::half_pi<float>())
     , running(false)
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
@@ -275,6 +276,12 @@ void CharacterObject::tick(float dt) {
     }
 }
 
+void CharacterObject::setRotation(const glm::quat &orientation)
+{
+    m_look.x = glm::roll(orientation);
+    rotation = orientation;
+}
+
 #include <algorithm>
 void CharacterObject::changeCharacterModel(const std::string& name) {
     auto modelName = std::string(name);
@@ -319,7 +326,12 @@ void CharacterObject::updateCharacter(float dt) {
         glm::vec3 walkDir = updateMovementAnimation(dt);
 
         if (canTurn()) {
-            rotation = glm::angleAxis(m_look.x, glm::vec3{0.f, 0.f, 1.f});
+            float yaw = m_look.x;
+            // When strafing we need to detach look direction from movement
+            if (!isStrafing()) {
+                yaw += std::atan2(movement.z, movement.x);
+            }
+            rotation = glm::quat(glm::vec3(0.f, 0.f, yaw));
         }
 
         walkDir = rotation * walkDir;

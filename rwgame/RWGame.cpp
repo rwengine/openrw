@@ -15,7 +15,6 @@
 #include <script/SCMFile.hpp>
 
 #include <ai/PlayerController.hpp>
-#include <data/CutsceneData.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
@@ -522,17 +521,13 @@ void RWGame::tick(float dt) {
 
         /// @todo this doesn't make sense as the condition
         if (state.playerObject) {
-            nextCam.frustum.update(nextCam.frustum.projection() *
-                                   nextCam.getView());
+            currentCam.frustum.update(currentCam.frustum.projection() *
+                                   currentCam.getView());
             // Use the current camera position to spawn pedestrians.
-            world->cleanupTraffic(nextCam);
-            world->createTraffic(nextCam);
+            world->cleanupTraffic(currentCam);
+            world->createTraffic(currentCam);
         }
     }
-
-    // render() needs two cameras to smoothly interpolate between ticks.
-    lastCam = nextCam;
-    nextCam = currState->getCamera();
 }
 
 void RWGame::render(float alpha, float time) {
@@ -540,57 +535,15 @@ void RWGame::render(float alpha, float time) {
 
     getRenderer().getRenderer()->swap();
 
+    // Update the camera
+    if (!StateManager::get().states.empty()) {
+        currentCam = StateManager::get().states.back()->getCamera(alpha);
+    }
+
     glm::ivec2 windowSize = getWindow().getSize();
     renderer.setViewport(windowSize.x, windowSize.y);
 
-    ViewCamera viewCam;
-    viewCam.frustum.fov = glm::radians(90.f);
-    if (state.currentCutscene != nullptr && state.cutsceneStartTime >= 0.f) {
-        auto cutscene = state.currentCutscene;
-        float cutsceneTime =
-            std::min(world->getGameTime() - state.cutsceneStartTime,
-                     cutscene->tracks.duration);
-        cutsceneTime += GAME_TIMESTEP * alpha;
-        glm::vec3 cameraPos = cutscene->tracks.getPositionAt(cutsceneTime),
-                  targetPos = cutscene->tracks.getTargetAt(cutsceneTime);
-        float zoom = cutscene->tracks.getZoomAt(cutsceneTime);
-        viewCam.frustum.fov = glm::radians(zoom);
-        float tilt = cutscene->tracks.getRotationAt(cutsceneTime);
-
-        auto direction = glm::normalize(targetPos - cameraPos);
-        auto right =
-            glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
-        auto up = glm::normalize(glm::cross(direction, right));
-
-        glm::mat3 m;
-        m[0][0] = direction.x;
-        m[0][1] = right.x;
-        m[0][2] = up.x;
-
-        m[1][0] = direction.y;
-        m[1][1] = right.y;
-        m[1][2] = up.y;
-
-        m[2][0] = direction.z;
-        m[2][1] = right.z;
-        m[2][2] = up.z;
-
-        auto qtilt = glm::angleAxis(glm::radians(tilt), direction);
-
-        cameraPos += cutscene->meta.sceneOffset;
-        targetPos += cutscene->meta.sceneOffset;
-
-        viewCam.position = cameraPos;
-        viewCam.rotation = glm::inverse(glm::quat_cast(m)) * qtilt;
-    } else if (state.cameraFixed) {
-        viewCam.position = state.cameraPosition;
-        viewCam.rotation = state.cameraRotation;
-    } else {
-        // There's no cutscene playing - use the camera returned by the State.
-        viewCam.position = glm::mix(lastCam.position, nextCam.position, alpha);
-        viewCam.rotation =
-            glm::slerp(lastCam.rotation, nextCam.rotation, alpha);
-    }
+    ViewCamera viewCam = currentCam;
 
     viewCam.frustum.aspectRatio =
         windowSize.x / static_cast<float>(windowSize.y);
