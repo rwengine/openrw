@@ -129,6 +129,7 @@ bool ObjectRenderer::renderFrame(Model* m, ModelFrame* f,
 
                 glm::vec3 boundpos = bounds.center + glm::vec3(localmatrix[3]);
                 if (!m_camera.frustum.intersects(boundpos, bounds.radius)) {
+                    culled++;
                     continue;
                 }
             }

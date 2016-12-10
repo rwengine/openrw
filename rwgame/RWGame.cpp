@@ -607,7 +607,8 @@ void RWGame::renderDebugStats(float time) {
     std::stringstream ss;
     ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
        << "Frame: " << time_ms << "ms\n"
-       << "Draws/Textures/Buffers: " << lastDraws << "/"
+       << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
+       << renderer.getCulledCount() << "/"
        << renderer.getRenderer()->getTextureCount() << "/"
        << renderer.getRenderer()->getBufferCount() << "\n";
 

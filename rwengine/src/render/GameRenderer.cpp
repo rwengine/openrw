@@ -351,7 +351,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     RW_PROFILE_END();
-
+    culled += objectRenderer.culled;
     renderer->pushDebugGroup("Objects");
     renderer->pushDebugGroup("RenderList");
 

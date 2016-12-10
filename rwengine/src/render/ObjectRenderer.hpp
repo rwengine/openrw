@@ -25,7 +25,8 @@ public:
         : m_world(world)
         , m_camera(camera)
         , m_renderAlpha(renderAlpha)
-        , m_errorTexture(errorTexture) {
+        , m_errorTexture(errorTexture)
+        , culled(0) {
     }
 
     /**
@@ -33,6 +34,7 @@ public:
      *
      * Exports rendering instructions for an object
      */
+    size_t culled;
     void buildRenderList(GameObject* object, RenderList& outList);
 
     bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
