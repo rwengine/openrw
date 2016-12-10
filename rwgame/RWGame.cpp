@@ -794,7 +794,7 @@ void RWGame::renderProfile() {
         }
     }
 
-    float xscale = renderer->getRenderer()->getViewport().x / upperlimit;
+    float xscale = renderer.getRenderer()->getViewport().x / upperlimit;
     TextRenderer::TextInfo ti;
     ti.align = TextRenderer::TextInfo::Left;
     ti.font = 2;
@@ -806,21 +806,21 @@ void RWGame::renderProfile() {
         for (auto& event : entry.childProfiles) {
             auto duration = event.end - event.start;
             float y = 60.f + (depth * (lineHeight + 5.f));
-            renderer->drawColour(
+            renderer.drawColour(
                 perf_colours[(std::hash<std::string>()(entry.label) * (g++)) %
                              perf_colours.size()],
                 {xscale * event.start, y, xscale * duration, lineHeight});
             ti.screenPosition.x = xscale * (event.start);
             ti.screenPosition.y = y + 2.f;
-            ti.text = event.label + " " + std::to_string(duration) + " us ";
-            renderer->text.renderText(ti);
+            ti.text = GameStringUtil::fromString(event.label + " " + std::to_string(duration) + " us ");
+            renderer.text.renderText(ti);
             renderEntry(event, depth + 1);
         }
     };
     renderEntry(frame, 0);
     ti.screenPosition = glm::vec2(xscale * (16000), 40.f);
-    ti.text = ".16 ms";
-    renderer->text.renderText(ti);
+    ti.text = GameStringUtil::fromString(".16 ms");
+    renderer.text.renderText(ti);
 #endif
 }
 
