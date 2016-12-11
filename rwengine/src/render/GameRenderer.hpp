@@ -86,6 +86,9 @@ class GameRenderer {
     ViewCamera _camera;
     ViewCamera cullingCamera;
     bool cullOverride;
+    
+    /** Number of culling events */
+    size_t culled;
 
     GLuint framebufferName;
     GLuint fbTextures[2];
@@ -98,9 +101,6 @@ class GameRenderer {
 public:
     GameRenderer(Logger* log, GameData* data);
     ~GameRenderer();
-
-    /** Number of culling events */
-    size_t culled;
 
     /** @todo Clean up all these shader program and location variables */
     Renderer::ShaderProgram* worldProg;
@@ -122,6 +122,10 @@ public:
 
     GLuint getMissingTexture() const {
         return m_missingTexture;
+    }
+    
+    size_t getCulledCount() {
+        return culled;
     }
 
     /**
