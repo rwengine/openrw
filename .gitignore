@@ -1,25 +1,18 @@
-# Ignore certain files #
+# .gitignore file #
 
-# CMake - General Files #
 
-cmake/
-cmakefiles/
-*.cmake
-CMakeCache.txt
 
-# CMake - MSYS Makefiles - Files #
+# Ignore Build folder #
 
-Makefile
-install_manifest.txt
+build/
 
-# CMake - Visual Studio 14 2015 - Files #
+# Ignore Doxygen documentation #
 
-*.suo
-*.sln
-*.vcxproj*
-*.VC*
+documentation/
 
-*.a
+# macOS specific files #
+
+*.DS_Store
 
 # Visual Studio Code files #
 
@@ -33,11 +26,8 @@ install_manifest.txt
 
 GitSHA1.cpp 
 
-# Other #
+# Temporary files #
 
-build/
-documentation/
-*.kdev4
 *~
-*swp
-*.user*
+
+# EOF #
