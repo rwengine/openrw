@@ -41,7 +41,7 @@ public:
      * @brief The DrawParameters struct stores drawing state
      *
      * The state for texture units, blending and material properties
-     * are recieved for drawing through this structure.
+     * are received for drawing through this structure.
      *
      * Since not all draws use the same shaders, material properties
      * should be controlled via a different mechanism.
