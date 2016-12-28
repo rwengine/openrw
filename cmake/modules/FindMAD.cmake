@@ -30,6 +30,8 @@ if (MAD_INCLUDE_DIR AND MAD_LIBRARY)
 	set (MAD_FOUND TRUE)
 endif ()
 
-if (MAD_FOUND AND NOT MAD_FIND_QUIETLY)
-	message(STATUS "Found MAD in ${MAD_INCLUDE_DIR}")
-endif()
+include(FindPackageHandleStandardArgs)
+
+find_package_handle_standard_args(MAD
+	REQUIRED_VARS MAD_LIBRARY MAD_INCLUDE_DIR)
+
