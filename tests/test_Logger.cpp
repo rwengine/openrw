@@ -2,7 +2,7 @@
 #include <core/Logger.hpp>
 #include <test_globals.hpp>
 
-class CallbackReceiver : public Logger::MessageReciever {
+class CallbackReceiver : public Logger::MessageReceiver {
 public:
     std::function<void(const Logger::LogMessage&)> func;
 
@@ -10,22 +10,22 @@ public:
         : func(func) {
     }
 
-    virtual void messageRecieved(const Logger::LogMessage& message) {
+    virtual void messageReceived(const Logger::LogMessage& message) {
         func(message);
     }
 };
 
 BOOST_AUTO_TEST_SUITE(LoggerTests)
 
-BOOST_AUTO_TEST_CASE(test_reciever) {
+BOOST_AUTO_TEST_CASE(test_receiver) {
     Logger log;
 
     Logger::LogMessage lastMessage("", Logger::Error, "");
 
-    CallbackReceiver reciever(
+    CallbackReceiver receiver(
         [&](const Logger::LogMessage& m) { lastMessage = m; });
 
-    log.addReciever(&reciever);
+    log.addReceiver(&receiver);
 
     log.info("Tests", "Test");
 

@@ -6,7 +6,7 @@
 /**
  * Handles and stores messages from different components
  *
- * Dispatches recieved messages to logger outputs.
+ * Dispatches received messages to logger outputs.
  */
 class Logger {
 public:
@@ -29,18 +29,18 @@ public:
     /**
      * Interface for handling logged messages.
      *
-     * The Logger class will not clean up allocated MessageRecievers.
+     * The Logger class will not clean up allocated MessageReceivers.
      */
-    struct MessageReciever {
-        virtual void messageRecieved(const LogMessage&) = 0;
+    struct MessageReceiver {
+        virtual void messageReceived(const LogMessage&) = 0;
     };
 
-    Logger(std::initializer_list<MessageReciever*> initial = {})
-        : recievers(initial) {
+    Logger(std::initializer_list<MessageReceiver*> initial = {})
+        : receivers(initial) {
     }
 
-    void addReciever(MessageReciever* out);
-    void removeReciever(MessageReciever* out);
+    void addReceiver(MessageReceiver* out);
+    void removeReceiver(MessageReceiver* out);
 
     void log(const std::string& component, Logger::MessageSeverity severity,
              const std::string& message);
@@ -51,9 +51,9 @@ public:
     void error(const std::string& component, const std::string& message);
 
 private:
-    std::vector<MessageReciever*> recievers;
+    std::vector<MessageReceiver*> receivers;
 };
 
-class StdOutReciever : public Logger::MessageReciever {
-    virtual void messageRecieved(const Logger::LogMessage&);
+class StdOutReceiver : public Logger::MessageReceiver {
+    virtual void messageReceived(const Logger::LogMessage&);
 };

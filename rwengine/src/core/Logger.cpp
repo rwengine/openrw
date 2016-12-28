@@ -8,18 +8,18 @@ void Logger::log(const std::string& component, Logger::MessageSeverity severity,
                  const std::string& message) {
     LogMessage m{component, severity, message};
 
-    for (MessageReciever* r : recievers) {
-        r->messageRecieved(m);
+    for (MessageReceiver* r : receivers) {
+        r->messageReceived(m);
     }
 }
 
-void Logger::addReciever(Logger::MessageReciever* out) {
-    recievers.push_back(out);
+void Logger::addReceiver(Logger::MessageReceiver* out) {
+    receivers.push_back(out);
 }
 
-void Logger::removeReciever(Logger::MessageReciever* out) {
-    recievers.erase(std::remove(recievers.begin(), recievers.end(), out),
-                    recievers.end());
+void Logger::removeReceiver(Logger::MessageReceiver* out) {
+    receivers.erase(std::remove(receivers.begin(), receivers.end(), out),
+                    receivers.end());
 }
 
 void Logger::error(const std::string& component, const std::string& message) {
@@ -43,7 +43,7 @@ std::map<Logger::MessageSeverity, char> severityStr{{Logger::Error, 'E'},
                                                     {Logger::Info, 'I'},
                                                     {Logger::Verbose, 'V'}};
 
-void StdOutReciever::messageRecieved(const Logger::LogMessage& message) {
+void StdOutReceiver::messageReceived(const Logger::LogMessage& message) {
     std::cout << severityStr[message.severity] << " [" << message.component
               << "] " << message.message << std::endl;
 }

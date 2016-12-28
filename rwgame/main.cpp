@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[]) {
     // Initialise Logging before anything else happens
-    StdOutReciever logstdout;
+    StdOutReceiver logstdout;
     Logger logger({ &logstdout });
 
     try {
