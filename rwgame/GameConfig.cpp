@@ -3,7 +3,9 @@
 #include <cstring>
 #include <rw/defines.hpp>
 
-#include <ini.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+namespace pt = boost::property_tree;
 
 const std::string kConfigDirectoryName("OpenRW");
 
@@ -20,11 +22,7 @@ GameConfig::GameConfig(const std::string& configName,
     // Look up the path to use
     auto configFile = getConfigFile();
 
-    if (ini_parse(configFile.c_str(), handler, this) < 0) {
-        m_valid = false;
-    } else {
-        m_valid = true;
-    }
+    m_valid = readConfig(configFile);
 }
 
 std::string GameConfig::getConfigFile() {
@@ -62,25 +60,80 @@ std::string GameConfig::getDefaultConfigPath() {
     return ".";
 }
 
-int GameConfig::handler(void* user, const char* section, const char* name,
-                        const char* value) {
-    auto self = static_cast<GameConfig*>(user);
-#define MATCH(_s, _n) (strcmp(_s, section) == 0 && strcmp(_n, name) == 0)
+std::string stripComments(const std::string &str)
+{
+    auto s = std::string(str, 0, str.find_first_of(";#"));
+    return s.erase(s.find_last_not_of(" \n\r\t")+1);
+}
 
-    if (MATCH("game", "path")) {
-        self->m_gamePath = value;
-    } else if (MATCH("game", "language")) {
-        // @todo Don't allow path seperators and relative directories
-        self->m_gameLanguage = value;
-    } else if (MATCH("input", "invert_y")) {
-        self->m_inputInvertY = atoi(value) > 0;
-    } else {
-        RW_MESSAGE("Unhandled config entry [" << section << "] " << name
-                                              << " = " << value);
-        return 0;
+struct StringTranslator {
+    typedef std::string internal_type;
+    typedef std::string external_type;
+    boost::optional<external_type> get_value(const internal_type &str) {
+        return boost::optional<external_type>(stripComments(str));
+    }
+    boost::optional<internal_type> put_value(const external_type &str) {
+        return boost::optional<internal_type>(str);
+    }
+};
+
+struct BoolTranslator {
+    typedef std::string internal_type;
+    typedef bool        external_type;
+    boost::optional<external_type> get_value(const internal_type &str) {
+        return boost::optional<external_type>(std::stoi(stripComments(str)) != 0);
+    }
+    boost::optional<internal_type> put_value(const external_type &b) {
+        return boost::optional<internal_type>(b ? "1" : "0");
+    }
+};
+
+bool GameConfig::readConfig(const std::string &path) {
+    pt::ptree config, defaultConfig;
+    bool success = true;
+
+    auto read_config = [&](const std::string &key, auto &target,
+                          const auto &defaultValue, auto &translator,
+                          bool optional=true) {
+        typedef typename std::remove_reference<decltype(target)>::type targetType;
+        defaultConfig.put(key, defaultValue, translator);
+        try {
+            target = config.get<targetType>(key, translator);
+        } catch (pt::ptree_bad_path &e) {
+            if (optional) {
+              target = defaultValue;
+            } else {
+              success = false;
+              RW_MESSAGE(e.what());
+            }
+        }
+    };
+
+    try {
+        pt::read_ini(path, config);
+    } catch (pt::ini_parser_error &e) {
+        success = false;
+        RW_MESSAGE(e.what());
     }
 
-    return 1;
+    auto deft = StringTranslator();
+    auto boolt = BoolTranslator();
 
-#undef MATCH
+    // @todo Don't allow path seperators and relative directories
+    read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3", deft, false);
+    read_config("game.language", this->m_gameLanguage, "american", deft);
+
+    read_config("input.invert_y", this->m_inputInvertY, false, boolt);
+
+    if (!success) {
+        std::stringstream strstream;
+        pt::write_ini(strstream, defaultConfig);
+
+        RW_MESSAGE("Failed to parse configuration file (" + path + ").");
+        RW_MESSAGE("Create one looking like this at \"" + path + "\":");
+        RW_MESSAGE(strstream.str());
+    }
+
+    return success;
 }
+
