@@ -66,7 +66,6 @@ include_directories(SYSTEM
 
 target_link_libraries(run_tests
 	rwengine
-	inih
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}
 	${SDL2_LIBRARY}

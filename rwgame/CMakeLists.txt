@@ -54,7 +54,6 @@ include_directories(
 
 target_link_libraries(rwgame
 	rwengine
-	inih
 	${Boost_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}

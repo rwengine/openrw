@@ -35,7 +35,8 @@ public:
 
 private:
     static std::string getDefaultConfigPath();
-    static int handler(void*, const char*, const char*, const char*);
+
+    bool readConfig(const std::string &path);
 
     /* Config State */
     std::string m_configName;
