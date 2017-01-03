@@ -479,7 +479,7 @@ void GameRenderer::renderGeometry(Clump* model, size_t g,
                                   const glm::mat4& modelMatrix, float opacity,
                                   GameObject* object) {
     for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        Clump::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
+        SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
         Renderer::DrawParameters dp;
 
@@ -489,7 +489,7 @@ void GameRenderer::renderGeometry(Clump* model, size_t g,
         dp.textures = {0};
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
-            Clump::Material& mat =
+            Geometry::Material& mat =
                 model->geometries[g]->materials[subgeom.material];
 
             if (mat.textures.size() > 0) {

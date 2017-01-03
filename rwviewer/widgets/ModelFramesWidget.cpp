@@ -14,8 +14,8 @@ void ModelFramesWidget::updateInfoBox(Clump* model, ModelFrame* f) {
         for (size_t gi : f->getGeometries()) {
             auto& g = model->geometries[gi];
             // for(Model::SubGeometry& sg : g->subgeom)
-            for (Clump::Material& m : g->materials) {
-                for (Clump::Texture& t : m.textures) {
+            for (Geometry::Material& m : g->materials) {
+                for (Geometry::Texture& t : m.textures) {
                     geomString += QString("\n %1 (%2)")
                                       .arg(t.name.c_str())
                                       .arg(t.alphaName.c_str());

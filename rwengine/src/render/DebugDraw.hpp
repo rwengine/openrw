@@ -28,7 +28,7 @@ public:
 protected:
     int debugMode;
 
-    std::vector<Clump::GeometryVertex> lines;
+    std::vector<GeometryVertex> lines;
     size_t maxlines;
     GeometryBuffer *lineBuff;
     DrawBuffer *dbuff;

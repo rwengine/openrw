@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         BOOST_REQUIRE(m->atomics.size() > 0);
 
-        for (Clump::Atomic& a : m->atomics) {
+        for (auto& a : m->atomics) {
             BOOST_CHECK(a.frame < m->frames.size());
             BOOST_CHECK(a.geometry < m->geometries.size());
         }

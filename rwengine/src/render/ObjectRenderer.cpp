@@ -37,7 +37,7 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                                     const glm::mat4& modelMatrix, float opacity,
                                     GameObject* object, RenderList& outList) {
     for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        Clump::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
+        SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
         bool isTransparent = false;
 
@@ -56,7 +56,7 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
         }
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
-            Clump::Material& mat =
+            Geometry::Material& mat =
                 model->geometries[g]->materials[subgeom.material];
 
             if (mat.textures.size() > 0) {

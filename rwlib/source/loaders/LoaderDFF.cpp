@@ -137,7 +137,7 @@ void LoaderDFF::readGeometry(Clump *model, const RWBStream &stream) {
         throw DFFLoaderException("Geometry missing struct chunk");
     }
 
-    std::shared_ptr<Clump::Geometry> geom(new Clump::Geometry);
+    std::shared_ptr<Geometry> geom(new Geometry);
 
     char *headerPtr = geomStream.getCursor();
 
@@ -156,7 +156,7 @@ void LoaderDFF::readGeometry(Clump *model, const RWBStream &stream) {
     /*unsigned int numFrames = *(std::uint32_t*)headerPtr;*/
     headerPtr += sizeof(std::uint32_t);
 
-    std::vector<Clump::GeometryVertex> verts;
+    std::vector<GeometryVertex> verts;
     verts.resize(numVerts);
 
     if (geomStream.getChunkVersion() < 0x1003FFFF) {
@@ -235,7 +235,7 @@ void LoaderDFF::readGeometry(Clump *model, const RWBStream &stream) {
     }
 
     geom->dbuff.setFaceType(
-        geom->facetype == Clump::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP);
+        geom->facetype == Geometry::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP);
     geom->gbuff.uploadVertices(verts);
     geom->dbuff.addGeometry(&geom->gbuff);
 
@@ -244,7 +244,7 @@ void LoaderDFF::readGeometry(Clump *model, const RWBStream &stream) {
 
     size_t icount = std::accumulate(
         geom->subgeom.begin(), geom->subgeom.end(), 0u,
-        [](size_t a, const Clump::SubGeometry &b) { return a + b.numIndices; });
+        [](size_t a, const SubGeometry &b) { return a + b.numIndices; });
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0,
                  GL_STATIC_DRAW);
     for (auto &sg : geom->subgeom) {
@@ -287,7 +287,7 @@ void LoaderDFF::readMaterial(Clump *model, const RWBStream &stream) {
 
     char *matData = materialStream.getCursor();
 
-    Clump::Material material;
+    Geometry::Material material;
 
     // Unkown
     matData += sizeof(std::uint32_t);
@@ -366,7 +366,7 @@ void LoaderDFF::readBinMeshPLG(Clump *model, const RWBStream &stream) {
     auto data = stream.getCursor();
 
     model->geometries.back()->facetype =
-        static_cast<Clump::FaceType>(*(std::uint32_t *)data);
+        static_cast<Geometry::FaceType>(*(std::uint32_t *)data);
     data += sizeof(std::uint32_t);
 
     unsigned int numSplits = *(std::uint32_t *)data;
@@ -380,7 +380,7 @@ void LoaderDFF::readBinMeshPLG(Clump *model, const RWBStream &stream) {
     size_t start = 0;
 
     for (size_t s = 0; s < numSplits; ++s) {
-        Clump::SubGeometry sg;
+        SubGeometry sg;
         sg.numIndices = *(std::uint32_t *)data;
         data += sizeof(std::uint32_t);
         sg.material = *(std::uint32_t *)data;
@@ -405,7 +405,7 @@ void LoaderDFF::readAtomic(Clump *model, const RWBStream &stream) {
         throw DFFLoaderException("Atomic missing struct chunk");
     }
 
-    Clump::Atomic atom;
+    Atomic atom;
     auto data = atomicStream.getCursor();
     atom.frame = *(std::uint32_t *)data;
     data += sizeof(std::uint32_t);

@@ -76,13 +76,37 @@ public:
 };
 
 /**
- * A clump is a collection of Frames and Atomics
+ * Subgeometry
  */
-class Clump {
-public:
-    enum FaceType { Triangles = 0, TriangleStrip = 1 };
 
-    std::uint32_t numAtomics;
+struct SubGeometry {
+    GLuint start = 0;
+    size_t material = 0;
+    std::vector<uint32_t> indices;
+    size_t numIndices = 0;
+};
+
+struct GeometryVertex {
+    glm::vec3 position; /* 0 */
+    glm::vec3 normal;   /* 24 */
+    glm::vec2 texcoord; /* 48 */
+    glm::u8vec4 colour; /* 64 */
+
+    /** @see GeometryBuffer */
+    static const AttributeList vertex_attributes() {
+        return {{ATRS_Position, 3, sizeof(GeometryVertex), 0ul},
+                {ATRS_Normal, 3, sizeof(GeometryVertex), sizeof(float) * 3},
+                {ATRS_TexCoord, 2, sizeof(GeometryVertex), sizeof(float) * 6},
+                {ATRS_Colour, 4, sizeof(GeometryVertex), sizeof(float) * 8,
+                 GL_UNSIGNED_BYTE}};
+    }
+};
+
+/**
+ * Geometry
+ */
+struct Geometry {
+    enum FaceType { Triangles = 0, TriangleStrip = 1 };
 
     struct Texture {
         std::string name;
@@ -102,58 +126,44 @@ public:
         float ambientIntensity;
     };
 
-    struct SubGeometry {
-        GLuint start = 0;
-        size_t material;
-        std::vector<uint32_t> indices;
-        size_t numIndices;
-    };
+    DrawBuffer dbuff;
+    GeometryBuffer gbuff;
 
-    struct GeometryVertex {
-        glm::vec3 position; /* 0 */
-        glm::vec3 normal;   /* 24 */
-        glm::vec2 texcoord; /* 48 */
-        glm::u8vec4 colour; /* 64 */
+    GLuint EBO;
 
-        /** @see GeometryBuffer */
-        static const AttributeList vertex_attributes() {
-            return {
-                {ATRS_Position, 3, sizeof(GeometryVertex), 0ul},
-                {ATRS_Normal, 3, sizeof(GeometryVertex), sizeof(float) * 3},
-                {ATRS_TexCoord, 2, sizeof(GeometryVertex), sizeof(float) * 6},
-                {ATRS_Colour, 4, sizeof(GeometryVertex), sizeof(float) * 8,
-                 GL_UNSIGNED_BYTE}};
-        }
-    };
+    RW::BSGeometryBounds geometryBounds;
 
-    struct Geometry {
-        DrawBuffer dbuff;
-        GeometryBuffer gbuff;
+    uint32_t clumpNum;
 
-        GLuint EBO;
+    FaceType facetype;
 
-        RW::BSGeometryBounds geometryBounds;
+    uint32_t flags;
 
-        uint32_t clumpNum;
+    std::vector<Material> materials;
+    std::vector<SubGeometry> subgeom;
 
-        FaceType facetype;
+    Geometry();
+    ~Geometry();
+};
 
-        uint32_t flags;
+/**
+ * @brief The Atomic struct
+ */
+struct Atomic {
+    uint32_t frame;
+    uint32_t geometry;
+};
 
-        std::vector<Material> materials;
-        std::vector<SubGeometry> subgeom;
+/**
+ * A clump is a collection of Frames and Atomics
+ */
+class Clump {
+public:
+    std::uint32_t numAtomics;
 
-        Geometry();
-        ~Geometry();
-    };
-
-    struct Atomic {
-        uint32_t frame;
-        uint32_t geometry;
-    };
-
+    // This should be gone
     std::vector<ModelFrame*> frames;
-    /** @TODO clean up this mess a little */
+    // This should be gone
     std::vector<std::shared_ptr<Geometry>> geometries;
     std::vector<Atomic> atomics;
 

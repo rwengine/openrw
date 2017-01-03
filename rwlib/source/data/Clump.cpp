@@ -3,10 +3,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Clump::Geometry::Geometry() : flags(0) {
+Geometry::Geometry() : flags(0) {
 }
 
-Clump::Geometry::~Geometry() {
+Geometry::~Geometry() {
 }
 
 ModelFrame::ModelFrame(unsigned int index, ModelFrame* parent, glm::mat3 dR,
