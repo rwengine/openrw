@@ -7,7 +7,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <ai/DefaultAIController.hpp>
 #include <ai/TrafficDirector.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>

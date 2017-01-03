@@ -16,7 +16,7 @@ class Logger;
 #include "TextRenderer.hpp"
 #include "WaterRenderer.hpp"
 
-class Model;
+class Clump;
 class ModelFrame;
 class GameWorld;
 class GameObject;
@@ -53,7 +53,7 @@ class GameRenderer {
 
     /** Stores data for deferring transparent objects */
     struct RQueueEntry {
-        Model* model;
+        Clump* model;
         size_t g;
         size_t sg;
         glm::mat4 matrix;
@@ -71,7 +71,7 @@ class GameRenderer {
      * materials
      * @return True if the frame was drawn, false if it should be queued
      */
-    bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
+    bool renderFrame(Clump* m, ModelFrame* f, const glm::mat4& matrix,
                      GameObject* object, float opacity,
                      bool queueTransparent = true);
 
@@ -158,10 +158,10 @@ public:
     /**
      * Renders a model (who'd have thought)
      */
-    void renderModel(Model*, const glm::mat4& modelMatrix,
+    void renderModel(Clump*, const glm::mat4& modelMatrix,
                      GameObject* = nullptr);
 
-    void renderGeometry(Model*, size_t geom, const glm::mat4& modelMatrix,
+    void renderGeometry(Clump*, size_t geom, const glm::mat4& modelMatrix,
                         float opacity, GameObject* = nullptr);
 
     /** method for rendering AI debug information */
@@ -207,15 +207,15 @@ public:
      *
      * GameRenderer will take ownership of the Model* pointer
      */
-    void setSpecialModel(SpecialModel usage, Model* model) {
+    void setSpecialModel(SpecialModel usage, Clump* model) {
         specialmodels_[usage].reset(model);
     }
 
 private:
     /// Hard-coded models to use for each of the special models
-    std::unique_ptr<Model>
+    std::unique_ptr<Clump>
         specialmodels_[SpecialModel::SpecialModelCount];
-    Model* getSpecialModel(SpecialModel usage) const {
+    Clump* getSpecialModel(SpecialModel usage) const {
         return specialmodels_[usage].get();
     }
 };

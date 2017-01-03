@@ -9,7 +9,7 @@
 #include <functional>
 #include <string>
 
-class Model;
+class Clump;
 
 class DFFLoaderException {
     std::string _message;
@@ -29,29 +29,29 @@ class LoaderDFF {
      * @param model
      * @param stream
      */
-    void readFrameList(Model* model, const RWBStream& stream);
+    void readFrameList(Clump* model, const RWBStream& stream);
 
-    void readGeometryList(Model* model, const RWBStream& stream);
+    void readGeometryList(Clump* model, const RWBStream& stream);
 
-    void readGeometry(Model* model, const RWBStream& stream);
+    void readGeometry(Clump* model, const RWBStream& stream);
 
-    void readMaterialList(Model* model, const RWBStream& stream);
+    void readMaterialList(Clump* model, const RWBStream& stream);
 
-    void readMaterial(Model* model, const RWBStream& stream);
+    void readMaterial(Clump* model, const RWBStream& stream);
 
-    void readTexture(Model* model, const RWBStream& stream);
+    void readTexture(Clump* model, const RWBStream& stream);
 
-    void readGeometryExtension(Model* model, const RWBStream& stream);
+    void readGeometryExtension(Clump* model, const RWBStream& stream);
 
-    void readBinMeshPLG(Model* model, const RWBStream& stream);
+    void readBinMeshPLG(Clump* model, const RWBStream& stream);
 
-    void readAtomic(Model* model, const RWBStream& stream);
+    void readAtomic(Clump* model, const RWBStream& stream);
 
 public:
     using TextureLookupCallback = std::function<TextureData::Handle(
         const std::string&, const std::string&)>;
 
-    Model* loadFromMemory(FileHandle file);
+    Clump* loadFromMemory(FileHandle file);
 
     void setTextureLookupCallback(TextureLookupCallback tlc) {
         texturelookup = tlc;

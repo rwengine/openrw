@@ -1,8 +1,8 @@
 #include "ModelFramesWidget.hpp"
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void ModelFramesWidget::updateInfoBox(Model* model, ModelFrame* f) {
+void ModelFramesWidget::updateInfoBox(Clump* model, ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
@@ -14,8 +14,8 @@ void ModelFramesWidget::updateInfoBox(Model* model, ModelFrame* f) {
         for (size_t gi : f->getGeometries()) {
             auto& g = model->geometries[gi];
             // for(Model::SubGeometry& sg : g->subgeom)
-            for (Model::Material& m : g->materials) {
-                for (Model::Texture& t : m.textures) {
+            for (Clump::Material& m : g->materials) {
+                for (Clump::Texture& t : m.textures) {
                     geomString += QString("\n %1 (%2)")
                                       .arg(t.name.c_str())
                                       .arg(t.alphaName.c_str());
@@ -46,7 +46,7 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
     setLayout(_layout);
 }
 
-void ModelFramesWidget::setModel(Model* model, Skeleton* skeleton) {
+void ModelFramesWidget::setModel(Clump* model, Skeleton* skeleton) {
     if (framemodel) {
         delete framemodel;
         framemodel = nullptr;

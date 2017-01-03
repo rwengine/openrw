@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtx/string_cast.hpp>

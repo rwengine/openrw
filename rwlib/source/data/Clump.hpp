@@ -76,10 +76,9 @@ public:
 };
 
 /**
- * Model stores all the data contained within a DFF, as well as data required
- * to render them.
+ * A clump is a collection of Frames and Atomics
  */
-class Model {
+class Clump {
 public:
     enum FaceType { Triangles = 0, TriangleStrip = 1 };
 
@@ -167,7 +166,7 @@ public:
         return fit != frames.end() ? *fit : nullptr;
     }
 
-    ~Model();
+    ~Clump();
 
     void recalculateMetrics();
 

@@ -1,8 +1,8 @@
 #include "DFFFramesTreeModel.hpp"
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 
-DFFFramesTreeModel::DFFFramesTreeModel(Model* m, Skeleton* skel,
+DFFFramesTreeModel::DFFFramesTreeModel(Clump* m, Skeleton* skel,
                                        QObject* parent)
     : QAbstractItemModel(parent), model(m), skeleton(skel) {
 }

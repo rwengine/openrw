@@ -1,4 +1,4 @@
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -475,11 +475,11 @@ void GameRenderer::renderPostProcess() {
     renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
 }
 
-void GameRenderer::renderGeometry(Model* model, size_t g,
+void GameRenderer::renderGeometry(Clump* model, size_t g,
                                   const glm::mat4& modelMatrix, float opacity,
                                   GameObject* object) {
     for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
+        Clump::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
         Renderer::DrawParameters dp;
 
@@ -489,7 +489,7 @@ void GameRenderer::renderGeometry(Model* model, size_t g,
         dp.textures = {0};
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
-            Model::Material& mat =
+            Clump::Material& mat =
                 model->geometries[g]->materials[subgeom.material];
 
             if (mat.textures.size() > 0) {
@@ -656,7 +656,7 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     renderer->invalidate();
 }
 
-bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
+bool GameRenderer::renderFrame(Clump* m, ModelFrame* f, const glm::mat4& matrix,
                                GameObject* object, float opacity,
                                bool queueTransparent) {
     auto localmatrix = matrix;
@@ -693,7 +693,7 @@ bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
     return true;
 }
 
-void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix,
+void GameRenderer::renderModel(Clump* model, const glm::mat4& modelMatrix,
                                GameObject* object) {
     renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object,
                 1.f);

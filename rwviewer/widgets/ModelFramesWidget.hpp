@@ -13,7 +13,7 @@ class ModelFrame;
 class ModelFramesWidget : public QWidget {
     Q_OBJECT
 
-    Model* gmodel;
+    Clump* gmodel;
     DFFFramesTreeModel* framemodel;
     QTreeView* tree;
     QVBoxLayout* _layout;
@@ -21,7 +21,7 @@ class ModelFramesWidget : public QWidget {
 
 private slots:
 
-    void updateInfoBox(Model* model, ModelFrame* f);
+    void updateInfoBox(Clump* model, ModelFrame* f);
 
     void selectedModelChanged(const QModelIndex&, const QModelIndex&);
 
@@ -30,7 +30,7 @@ public:
 
 public slots:
 
-    void setModel(Model* model, Skeleton* skeleton);
+    void setModel(Clump* model, Skeleton* skeleton);
 
 signals:
 

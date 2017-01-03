@@ -2,7 +2,7 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <algorithm>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -103,7 +103,7 @@ void ViewerWidget::paintGL() {
     vc.frustum.fov = viewFov;
     vc.frustum.aspectRatio = width() / (height() * 1.f);
 
-    Model* model = activeModel;
+    Clump* model = activeModel;
     if (model != _lastModel) {
         _lastModel = model;
         emit modelChanged(_lastModel);
@@ -197,7 +197,7 @@ void ViewerWidget::showObject(qint16 item) {
     }
 }
 
-void ViewerWidget::showModel(Model* model) {
+void ViewerWidget::showModel(Clump* model) {
     if (dummyObject) gworld->destroyObject(dummyObject);
     dummyObject = nullptr;
     activeModel = model;
@@ -259,7 +259,7 @@ void ViewerWidget::keyReleaseEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Shift) moveFast = false;
 }
 
-Model* ViewerWidget::currentModel() const {
+Clump* ViewerWidget::currentModel() const {
     return activeModel;
 }
 

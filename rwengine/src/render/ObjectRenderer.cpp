@@ -1,5 +1,5 @@
 #include <data/CutsceneData.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
@@ -33,11 +33,11 @@ RenderKey createKey(bool transparent, float normalizedDepth,
            uint8_t(0xFF & (textures.size() > 0 ? textures[0] : 0)) << 0;
 }
 
-void ObjectRenderer::renderGeometry(Model* model, size_t g,
+void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                                     const glm::mat4& modelMatrix, float opacity,
                                     GameObject* object, RenderList& outList) {
     for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
+        Clump::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
 
         bool isTransparent = false;
 
@@ -56,7 +56,7 @@ void ObjectRenderer::renderGeometry(Model* model, size_t g,
         }
 
         if (model->geometries[g]->materials.size() > subgeom.material) {
-            Model::Material& mat =
+            Clump::Material& mat =
                 model->geometries[g]->materials[subgeom.material];
 
             if (mat.textures.size() > 0) {
@@ -107,7 +107,7 @@ void ObjectRenderer::renderGeometry(Model* model, size_t g,
             &model->geometries[g]->dbuff, dp);
     }
 }
-bool ObjectRenderer::renderFrame(Model* m, ModelFrame* f,
+bool ObjectRenderer::renderFrame(Clump* m, ModelFrame* f,
                                  const glm::mat4& matrix, GameObject* object,
                                  float opacity, RenderList& outList) {
     auto localmatrix = matrix;
@@ -175,12 +175,12 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     instance->getModel()->getBoundingRadius();
     mindist *= 1.f / kDrawDistanceFactor;
 
-    Model* model = nullptr;
+    Clump* model = nullptr;
     ModelFrame* frame = nullptr;
 
     // These are used to gracefully fade out things that are just out of view
     // distance.
-    Model* fadingModel = nullptr;
+    Clump* fadingModel = nullptr;
     ModelFrame* fadingFrame = nullptr;
     auto fadingMatrix = matrixModel;
     float opacity = 0.f;

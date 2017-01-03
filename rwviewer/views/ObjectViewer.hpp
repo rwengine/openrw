@@ -12,7 +12,7 @@
 #include <QTableView>
 
 class ViewerWidget;
-class Model;
+class Clump;
 
 class ObjectViewer : public ViewerInterface {
     Q_OBJECT
@@ -40,7 +40,7 @@ protected:
 
 signals:
 
-    void modelChanged(Model* model);
+    void modelChanged(Clump* model);
 
     void showObjectModel(uint16_t object);
 

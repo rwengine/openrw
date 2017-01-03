@@ -1,7 +1,7 @@
 #pragma once
 
 #include <LinearMath/btIDebugDraw.h>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <render/GameRenderer.hpp>
 
 class DebugDraw : public btIDebugDraw {
@@ -28,7 +28,7 @@ public:
 protected:
     int debugMode;
 
-    std::vector<Model::GeometryVertex> lines;
+    std::vector<Clump::GeometryVertex> lines;
     size_t maxlines;
     GeometryBuffer *lineBuff;
     DrawBuffer *dbuff;

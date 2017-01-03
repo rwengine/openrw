@@ -1,4 +1,4 @@
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <loaders/LoaderDFF.hpp>
 
 #include <algorithm>
@@ -40,7 +40,7 @@ struct RWBSFrame {
     uint32_t matrixflags;  // Not used
 };
 
-void LoaderDFF::readFrameList(Model *model, const RWBStream &stream) {
+void LoaderDFF::readFrameList(Clump *model, const RWBStream &stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -102,7 +102,7 @@ void LoaderDFF::readFrameList(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readGeometryList(Model *model, const RWBStream &stream) {
+void LoaderDFF::readGeometryList(Clump *model, const RWBStream &stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -129,7 +129,7 @@ void LoaderDFF::readGeometryList(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
+void LoaderDFF::readGeometry(Clump *model, const RWBStream &stream) {
     auto geomStream = stream.getInnerStream();
 
     auto geomStructID = geomStream.getNextChunk();
@@ -137,7 +137,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
         throw DFFLoaderException("Geometry missing struct chunk");
     }
 
-    std::shared_ptr<Model::Geometry> geom(new Model::Geometry);
+    std::shared_ptr<Clump::Geometry> geom(new Clump::Geometry);
 
     char *headerPtr = geomStream.getCursor();
 
@@ -156,7 +156,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
     /*unsigned int numFrames = *(std::uint32_t*)headerPtr;*/
     headerPtr += sizeof(std::uint32_t);
 
-    std::vector<Model::GeometryVertex> verts;
+    std::vector<Clump::GeometryVertex> verts;
     verts.resize(numVerts);
 
     if (geomStream.getChunkVersion() < 0x1003FFFF) {
@@ -235,7 +235,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
     }
 
     geom->dbuff.setFaceType(
-        geom->facetype == Model::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP);
+        geom->facetype == Clump::Triangles ? GL_TRIANGLES : GL_TRIANGLE_STRIP);
     geom->gbuff.uploadVertices(verts);
     geom->dbuff.addGeometry(&geom->gbuff);
 
@@ -244,7 +244,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
 
     size_t icount = std::accumulate(
         geom->subgeom.begin(), geom->subgeom.end(), 0u,
-        [](size_t a, const Model::SubGeometry &b) { return a + b.numIndices; });
+        [](size_t a, const Clump::SubGeometry &b) { return a + b.numIndices; });
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0,
                  GL_STATIC_DRAW);
     for (auto &sg : geom->subgeom) {
@@ -253,7 +253,7 @@ void LoaderDFF::readGeometry(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readMaterialList(Model *model, const RWBStream &stream) {
+void LoaderDFF::readMaterialList(Clump *model, const RWBStream &stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -277,7 +277,7 @@ void LoaderDFF::readMaterialList(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readMaterial(Model *model, const RWBStream &stream) {
+void LoaderDFF::readMaterial(Clump *model, const RWBStream &stream) {
     auto materialStream = stream.getInnerStream();
 
     auto matStructID = materialStream.getNextChunk();
@@ -287,7 +287,7 @@ void LoaderDFF::readMaterial(Model *model, const RWBStream &stream) {
 
     char *matData = materialStream.getCursor();
 
-    Model::Material material;
+    Clump::Material material;
 
     // Unkown
     matData += sizeof(std::uint32_t);
@@ -320,7 +320,7 @@ void LoaderDFF::readMaterial(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readTexture(Model *model, const RWBStream &stream) {
+void LoaderDFF::readTexture(Clump *model, const RWBStream &stream) {
     auto texStream = stream.getInnerStream();
 
     auto texStructID = texStream.getNextChunk();
@@ -347,7 +347,7 @@ void LoaderDFF::readTexture(Model *model, const RWBStream &stream) {
         {name, alpha, textureinst});
 }
 
-void LoaderDFF::readGeometryExtension(Model *model, const RWBStream &stream) {
+void LoaderDFF::readGeometryExtension(Clump *model, const RWBStream &stream) {
     auto extStream = stream.getInnerStream();
 
     RWBStream::ChunkID chunkID;
@@ -362,11 +362,11 @@ void LoaderDFF::readGeometryExtension(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readBinMeshPLG(Model *model, const RWBStream &stream) {
+void LoaderDFF::readBinMeshPLG(Clump *model, const RWBStream &stream) {
     auto data = stream.getCursor();
 
     model->geometries.back()->facetype =
-        static_cast<Model::FaceType>(*(std::uint32_t *)data);
+        static_cast<Clump::FaceType>(*(std::uint32_t *)data);
     data += sizeof(std::uint32_t);
 
     unsigned int numSplits = *(std::uint32_t *)data;
@@ -380,7 +380,7 @@ void LoaderDFF::readBinMeshPLG(Model *model, const RWBStream &stream) {
     size_t start = 0;
 
     for (size_t s = 0; s < numSplits; ++s) {
-        Model::SubGeometry sg;
+        Clump::SubGeometry sg;
         sg.numIndices = *(std::uint32_t *)data;
         data += sizeof(std::uint32_t);
         sg.material = *(std::uint32_t *)data;
@@ -397,7 +397,7 @@ void LoaderDFF::readBinMeshPLG(Model *model, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readAtomic(Model *model, const RWBStream &stream) {
+void LoaderDFF::readAtomic(Clump *model, const RWBStream &stream) {
     auto atomicStream = stream.getInnerStream();
 
     auto atomicStructID = atomicStream.getNextChunk();
@@ -405,7 +405,7 @@ void LoaderDFF::readAtomic(Model *model, const RWBStream &stream) {
         throw DFFLoaderException("Atomic missing struct chunk");
     }
 
-    Model::Atomic atom;
+    Clump::Atomic atom;
     auto data = atomicStream.getCursor();
     atom.frame = *(std::uint32_t *)data;
     data += sizeof(std::uint32_t);
@@ -416,8 +416,8 @@ void LoaderDFF::readAtomic(Model *model, const RWBStream &stream) {
     /// @todo are any atomic extensions important?
 }
 
-Model *LoaderDFF::loadFromMemory(FileHandle file) {
-    auto model = new Model;
+Clump *LoaderDFF::loadFromMemory(FileHandle file) {
+    auto model = new Clump;
 
     RWBStream rootStream(file->data, file->length);
 

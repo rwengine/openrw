@@ -37,10 +37,10 @@ public:
     size_t culled;
     void buildRenderList(GameObject* object, RenderList& outList);
 
-    bool renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
+    bool renderFrame(Clump* m, ModelFrame* f, const glm::mat4& matrix,
                      GameObject* object, float opacity, RenderList& outList);
 
-    void renderGeometry(Model* model, size_t g, const glm::mat4& modelMatrix,
+    void renderGeometry(Clump* model, size_t g, const glm::mat4& modelMatrix,
                         float opacity, GameObject* object, RenderList& outList);
 
 private:

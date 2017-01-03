@@ -14,7 +14,7 @@
 #include <QVBoxLayout>
 
 class ViewerWidget;
-class Model;
+class Clump;
 class Skeleton;
 class ModelFramesWidget;
 class Animation;
@@ -22,7 +22,7 @@ class Animation;
 class ModelViewer : public ViewerInterface {
     Q_OBJECT
 
-    Model* viewing;
+    Clump* viewing;
     Skeleton* skeleton;
 
     QSplitter* mainSplit;
@@ -45,7 +45,7 @@ public slots:
     /**
      * Display a raw model
      */
-    void showModel(Model* model);
+    void showModel(Clump* model);
 
     /**
      * Display a game object's model

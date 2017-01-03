@@ -1,12 +1,12 @@
-#include "data/Model.hpp"
+#include "data/Clump.hpp"
 #include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Model::Geometry::Geometry() : flags(0) {
+Clump::Geometry::Geometry() : flags(0) {
 }
 
-Model::Geometry::~Geometry() {
+Clump::Geometry::~Geometry() {
 }
 
 ModelFrame::ModelFrame(unsigned int index, ModelFrame* parent, glm::mat3 dR,
@@ -30,13 +30,13 @@ void ModelFrame::addGeometry(size_t idx) {
     geometries.push_back(idx);
 }
 
-Model::~Model() {
+Clump::~Clump() {
     for (auto mf : frames) {
         delete mf;
     }
 }
 
-void Model::recalculateMetrics() {
+void Clump::recalculateMetrics() {
     boundingRadius = std::numeric_limits<float>::min();
     for (size_t g = 0; g < geometries.size(); g++) {
         RW::BSGeometryBounds& bounds = geometries[g]->geometryBounds;

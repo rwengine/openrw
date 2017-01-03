@@ -3,7 +3,7 @@
 #include <objects/CutsceneObject.hpp>
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
-                               const glm::quat &rot, Model *model,
+                               const glm::quat &rot, Clump *model,
                                BaseModelInfo *modelinfo)
     : GameObject(engine, pos, rot, modelinfo)
     , _parent(nullptr)

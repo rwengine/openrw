@@ -1,6 +1,6 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <data/CollisionModel.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>

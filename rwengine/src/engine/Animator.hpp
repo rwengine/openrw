@@ -8,7 +8,7 @@
 #include <map>
 #include <rw/defines.hpp>
 
-class Model;
+class Clump;
 class ModelFrame;
 
 class Skeleton;
@@ -49,7 +49,7 @@ class Animator {
     /**
      * @brief model The model being animated.
      */
-    Model* model;
+    Clump* model;
 
     /**
      * @brief Skeleton instance.
@@ -62,7 +62,7 @@ class Animator {
     std::vector<AnimationState> animations;
 
 public:
-    Animator(Model* model, Skeleton* skeleton);
+    Animator(Clump* model, Skeleton* skeleton);
 
     Animation* getAnimation(unsigned int slot) {
         if (slot < animations.size()) {

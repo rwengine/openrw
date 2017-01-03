@@ -1,4 +1,4 @@
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
@@ -363,7 +363,7 @@ void GameData::getNameAndLod(std::string& name, int& lod) {
     }
 }
 
-Model* GameData::loadClump(const std::string& name) {
+Clump* GameData::loadClump(const std::string& name) {
     auto file = index.openFile(name);
     if (!file) {
         logger->error("Data", "Failed to load model " + name);

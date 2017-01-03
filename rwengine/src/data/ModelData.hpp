@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <data/CollisionModel.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/PathData.hpp>
 #include <rw/defines.hpp>
 #ifdef RW_WINDOWS
@@ -133,13 +133,13 @@ public:
     }
 
     /// @todo change with librw
-    void setAtomic(Model* model, int n, ModelFrame* atomic) {
+    void setAtomic(Clump* model, int n, ModelFrame* atomic) {
         model_ = model;
         atomics_[n] = atomic;
     }
 
     /// @todo remove this
-    Model* getModel() const {
+    Clump* getModel() const {
         return model_;
     }
 
@@ -204,7 +204,7 @@ public:
     };
 
 private:
-    Model* model_ = nullptr;
+    Clump* model_ = nullptr;
     ModelFrame* atomics_[3] = {};
     float loddistances_[3] = {};
     uint8_t numatomics_ = 0;
@@ -231,11 +231,11 @@ public:
     ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) {
     }
 
-    void setModel(Model* model) {
+    void setModel(Clump* model) {
         model_ = model;
     }
 
-    Model* getModel() const {
+    Clump* getModel() const {
         return model_;
     }
 
@@ -249,7 +249,7 @@ public:
     }
 
 private:
-    Model* model_ = nullptr;
+    Clump* model_ = nullptr;
 };
 
 /**

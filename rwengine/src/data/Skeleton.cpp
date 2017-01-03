@@ -1,4 +1,4 @@
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/Skeleton.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

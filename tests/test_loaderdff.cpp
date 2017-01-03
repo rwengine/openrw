@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         LoaderDFF loader;
 
-        Model* m = loader.loadFromMemory(d);
+        Clump* m = loader.loadFromMemory(d);
 
         BOOST_REQUIRE(m != nullptr);
 
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         BOOST_REQUIRE(m->atomics.size() > 0);
 
-        for (Model::Atomic& a : m->atomics) {
+        for (Clump::Atomic& a : m->atomics) {
             BOOST_CHECK(a.frame < m->frames.size());
             BOOST_CHECK(a.geometry < m->geometries.size());
         }

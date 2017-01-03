@@ -6,7 +6,7 @@
 
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/WeaponData.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>

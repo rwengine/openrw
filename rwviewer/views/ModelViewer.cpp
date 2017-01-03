@@ -40,7 +40,7 @@ void ModelViewer::setViewerWidget(ViewerWidget* widget) {
     showModel(viewing);
 }
 
-void ModelViewer::showModel(Model* model) {
+void ModelViewer::showModel(Clump* model) {
     viewing = model;
     if (skeleton) {
         delete skeleton;
