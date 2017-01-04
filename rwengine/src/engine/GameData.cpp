@@ -390,9 +390,9 @@ void GameData::loadModelFile(const std::string& name) {
     }
 
     // Associate the frames with models.
-    for (auto& frame : m->frames) {
+    for (const auto& atomic : m->getAtomics()) {
         /// @todo this is useful elsewhere, please move elsewhere
-        std::string name = frame->getName();
+        std::string name = atomic->getFrame()->getName();
         int lod = 0;
         getNameAndLod(name, lod);
         for (auto& model : modelinfo) {
@@ -402,7 +402,9 @@ void GameData::loadModelFile(const std::string& name) {
             }
             if (boost::iequals(info->name, name)) {
                 auto simple = static_cast<SimpleModelInfo*>(info);
-                simple->setAtomic(m, lod, frame);
+                simple->setAtomic(m, lod, atomic);
+                auto identity = std::make_shared<ModelFrame>();
+                atomic->setFrame(identity);
             }
         }
     }
@@ -458,11 +460,13 @@ void GameData::loadModel(ModelID model) {
     if (isSimple) {
         auto simple = static_cast<SimpleModelInfo*>(info);
         // Associate atomics
-        for (auto& frame : m->frames) {
-            auto name = frame->getName();
+        for (auto& atomic : m->getAtomics()) {
+            auto name = atomic->getFrame()->getName();
             int lod = 0;
             getNameAndLod(name, lod);
-            simple->setAtomic(m, lod, frame);
+            simple->setAtomic(m, lod, atomic);
+            auto identity = std::make_shared<ModelFrame>();
+            atomic->setFrame(identity);
         }
     } else {
         // Associate clumps

@@ -1,5 +1,5 @@
-#include <data/CutsceneData.hpp>
 #include <data/Clump.hpp>
+#include <data/CutsceneData.hpp>
 #include <data/Skeleton.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
@@ -33,12 +33,10 @@ RenderKey createKey(bool transparent, float normalizedDepth,
            uint8_t(0xFF & (textures.size() > 0 ? textures[0] : 0)) << 0;
 }
 
-void ObjectRenderer::renderGeometry(Clump* model, size_t g,
-                                    const glm::mat4& modelMatrix, float opacity,
+void ObjectRenderer::renderGeometry(Geometry* geom,
+                                    const glm::mat4& modelMatrix,
                                     GameObject* object, RenderList& outList) {
-    for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
-
+    for (SubGeometry& subgeom : geom->subgeom) {
         bool isTransparent = false;
 
         Renderer::DrawParameters dp;
@@ -55,9 +53,8 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                 !(modelinfo->flags & SimpleModelInfo::NO_ZBUFFER_WRITE);
         }
 
-        if (model->geometries[g]->materials.size() > subgeom.material) {
-            Geometry::Material& mat =
-                model->geometries[g]->materials[subgeom.material];
+        if (geom->materials.size() > subgeom.material) {
+            Geometry::Material& mat = geom->materials[subgeom.material];
 
             if (mat.textures.size() > 0) {
                 auto tex = mat.textures[0].texture;
@@ -69,8 +66,7 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                 }
             }
 
-            if ((model->geometries[g]->flags &
-                 RW::BSGeometry::ModuleMaterialColor) ==
+            if ((geom->flags & RW::BSGeometry::ModuleMaterialColor) ==
                 RW::BSGeometry::ModuleMaterialColor) {
                 dp.colour = mat.colour;
 
@@ -86,7 +82,7 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                 }
             }
 
-            dp.visibility = opacity;
+            dp.visibility = 1.f;
 
             if (dp.colour.a < 255) {
                 isTransparent = true;
@@ -104,44 +100,40 @@ void ObjectRenderer::renderGeometry(Clump* model, size_t g,
                       (m_camera.frustum.far - m_camera.frustum.near);
         outList.emplace_back(
             createKey(isTransparent, depth * depth, dp.textures), modelMatrix,
-            &model->geometries[g]->dbuff, dp);
+            &geom->dbuff, dp);
     }
 }
-bool ObjectRenderer::renderFrame(Clump* m, ModelFrame* f,
-                                 const glm::mat4& matrix, GameObject* object,
-                                 float opacity, RenderList& outList) {
-    auto localmatrix = matrix;
-    bool vis = true;
 
-    if (object && object->skeleton) {
-        // Skeleton is loaded with the correct matrix via Animator.
-        localmatrix *= object->skeleton->getMatrix(f);
+void ObjectRenderer::renderAtomic(Atomic* atomic,
+                                  const glm::mat4& worldtransform,
+                                  GameObject* object, RenderList& render) {
+    RW_CHECK(atomic->getGeometry(), "Can't render an atomic without geometry");
+    RW_CHECK(atomic->getFrame(), "Can't render an atomic without a frame");
 
-        vis = object->skeleton->getData(f->getIndex()).enabled;
-    } else {
-        localmatrix *= f->getTransform();
+    const auto& geometry = atomic->getGeometry();
+    const auto& frame = atomic->getFrame();
+
+    RW::BSGeometryBounds& bounds = geometry->geometryBounds;
+
+    glm::vec3 boundpos = bounds.center + glm::vec3(worldtransform[3]);
+    if (!m_camera.frustum.intersects(boundpos, bounds.radius)) {
+        culled++;
+        return;
     }
 
-    if (vis) {
-        for (size_t g : f->getGeometries()) {
-            if (!object || !object->animator) {
-                RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
+    renderGeometry(geometry.get(), worldtransform, object, render);
+}
 
-                glm::vec3 boundpos = bounds.center + glm::vec3(localmatrix[3]);
-                if (!m_camera.frustum.intersects(boundpos, bounds.radius)) {
-                    culled++;
-                    continue;
-                }
-            }
-
-            renderGeometry(m, g, localmatrix, opacity, object, outList);
+void ObjectRenderer::renderClump(Clump* model, const glm::mat4& worldtransform,
+                                 GameObject* object, RenderList& render) {
+    for (const auto& atomic : model->getAtomics()) {
+        const auto flags = atomic->getFlags();
+        if ((flags & Atomic::ATOMIC_RENDER) == 0) {
+            continue;
         }
-    }
 
-    for (ModelFrame* c : f->getChildren()) {
-        renderFrame(m, c, localmatrix, object, opacity, outList);
+        renderAtomic(atomic.get(), worldtransform, object, render);
     }
-    return true;
 }
 
 void ObjectRenderer::renderInstance(InstanceObject* instance,
@@ -175,13 +167,12 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     instance->getModel()->getBoundingRadius();
     mindist *= 1.f / kDrawDistanceFactor;
 
-    Clump* model = nullptr;
-    ModelFrame* frame = nullptr;
+    Atomic* atomic = nullptr;
 
-    // These are used to gracefully fade out things that are just out of view
+    // These are used to gracefully fade out things that are just out of
+    // view
     // distance.
-    Clump* fadingModel = nullptr;
-    ModelFrame* fadingFrame = nullptr;
+    Atomic* fadingAtomic = nullptr;
     auto fadingMatrix = matrixModel;
     float opacity = 0.f;
     constexpr float fadeRange = 50.f;
@@ -203,32 +194,27 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
                     matrixModel =
                         instance->LODinstance->getTimeAdjustedTransform(
                             m_renderAlpha);
+                    atomic = lodmodelinfo->getAtomic(0);
                     // If the object is only just out of range, keep
                     // rendering it and screen-door the LOD.
                     if (overlap < fadeRange) {
-                        model = instance->LODinstance->getModel();
-                        fadingModel = instance->getModel();
+                        fadingAtomic = modelinfo->getAtomic(0);
                         opacity = 1.f - (overlap / fadeRange);
-                    } else {
-                        model = instance->LODinstance->getModel();
                     }
                 }
             }
             // We don't have a LOD object, so fade out gracefully.
             else if (overlap < fadeRange) {
-                fadingModel = instance->getModel();
+                fadingAtomic = modelinfo->getAtomic(0);
                 opacity = 1.f - (overlap / fadeRange);
             }
         }
         // Otherwise, if we aren't marked as a LOD model, we can render
         else if (!modelinfo->LOD) {
-            model = instance->getModel();
+            atomic = modelinfo->getAtomic(0);
         }
     } else {
-        auto root = instance->getModel()->frames[0];
-        auto objectModel = instance->getModel();
-        fadingFrame = nullptr;
-        fadingModel = nullptr;
+        auto root = instance->getModel()->getFrame();
 
         matrixModel *= root->getTransform();
 
@@ -236,30 +222,20 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
             auto ind = (modelinfo->getNumAtomics() - 1) - i;
             float lodDistance = modelinfo->getLodDistance(i);
             if (mindist > lodDistance) {
-                fadingFrame = root->getChildren()[ind];
-                fadingModel = objectModel;
+                fadingAtomic = modelinfo->getAtomic(ind);
                 opacity = 1.f - ((mindist - lodDistance) / fadeRange);
             } else {
-                model = objectModel;
-                frame = root->getChildren()[ind];
+                fadingAtomic = modelinfo->getAtomic(ind);
             }
         }
     }
 
-    if (model) {
-        frame = frame ? frame : model->frames[0];
-        renderFrame(model, frame,
-                    matrixModel * glm::inverse(frame->getTransform()), instance,
-                    1.f, outList);
+    if (atomic) {
+        renderAtomic(atomic, matrixModel, instance, outList);
     }
-    if (fadingModel) {
-        if (opacity >= 0.01f) {
-            fadingFrame = fadingFrame ? fadingFrame : fadingModel->frames[0];
-            renderFrame(
-                fadingModel, fadingFrame,
-                fadingMatrix * glm::inverse(fadingFrame->getTransform()),
-                instance, opacity, outList);
-        }
+    if (fadingAtomic && opacity >= 0.01f) {
+        // @todo pass opacity
+        renderAtomic(fadingAtomic, fadingMatrix, instance, outList);
     }
 }
 
@@ -286,10 +262,7 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
 
     if (!pedestrian->getModel()) return;
 
-    auto root = pedestrian->getModel()->frames[0];
-
-    renderFrame(pedestrian->getModel(), root->getChildren()[0], matrixModel,
-                pedestrian, 1.f, outList);
+    renderClump(pedestrian->getModel(), matrixModel, nullptr, outList);
 
     auto item = pedestrian->getActiveItem();
     const auto& weapon = pedestrian->engine->data->weaponData[item];
@@ -312,9 +285,8 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
     // Assume items are all simple
     auto simple =
         m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
-    auto geometry = simple->getAtomic(0)->getGeometries().at(0);
-    renderGeometry(simple->getModel(), geometry, matrixModel * localMatrix, 1.f,
-                   nullptr, outList);
+    auto itematomic = simple->getAtomic(0);
+    renderAtomic(itematomic, matrixModel * localMatrix, nullptr, outList);
 }
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
@@ -327,8 +299,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 
     glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform(m_renderAlpha);
 
-    renderFrame(vehicle->getModel(), vehicle->getModel()->frames[0],
-                matrixModel, vehicle, 1.f, outList);
+    renderClump(vehicle->getModel(), matrixModel, vehicle, outList);
 
     auto modelinfo = vehicle->getVehicle();
 
@@ -338,7 +309,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
     if (!woi || !woi->isLoaded()) {
         return;
     }
-    auto wheelgeom = woi->getAtomic(0)->getGeometries().at(0);
+
+    auto wheelatomic = woi->getAtomic(0);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
         auto& wi = vehicle->physVehicle->getWheelInfo(w);
         // Construct our own matrix so we can use the local transform
@@ -371,8 +343,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
             wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));
         }
 
-        renderGeometry(woi->getModel(), wheelgeom, wheelM, 1.f, nullptr,
-                       outList);
+        renderAtomic(wheelatomic, wheelM, nullptr, outList);
     }
 }
 
@@ -385,16 +356,9 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 
     auto odata = pickup->getModelInfo<SimpleModelInfo>();
 
-    auto model = odata->getModel();
-    auto itemModel = odata->getAtomic(0);
-    auto geom = 0;
-    if (!itemModel->getGeometries().empty()) {
-        geom = itemModel->getGeometries()[0];
-    } else if (!itemModel->getChildren().empty()) {
-        geom = itemModel->getChildren()[0]->getGeometries()[0];
-    }
+    auto atomic = odata->getAtomic(0);
 
-    renderGeometry(model, geom, modelMatrix, 1.f, pickup, outList);
+    renderAtomic(atomic, modelMatrix, nullptr, outList);
 }
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
@@ -413,7 +377,8 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
         matrixModel = glm::translate(matrixModel, cutsceneOffset);
         // matrixModel =
         // cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
-        // matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f, 1.f));
+        // matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f,
+        // 1.f));
         glm::mat4 localMatrix;
         auto boneframe = cutscene->getParentFrame();
         while (boneframe) {
@@ -432,11 +397,9 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
         glm::mat4 align;
         /// @todo figure out where this 90 degree offset is coming from.
         align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
-        renderFrame(model, model->frames[0], matrixModel * align, cutscene, 1.f,
-                    outList);
+        renderClump(model, matrixModel * align, nullptr, outList);
     } else {
-        renderFrame(model, model->frames[0], matrixModel, cutscene, 1.f,
-                    outList);
+        renderClump(model, matrixModel, nullptr, outList);
     }
 }
 
@@ -447,11 +410,8 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
     auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
         projectile->getProjectileInfo().weapon->modelID);
 
-    auto model = odata->getModel();
-    auto modelframe = odata->getAtomic(0);
-    auto geom = modelframe->getGeometries().at(0);
-
-    renderGeometry(model, geom, modelMatrix, 1.f, projectile, outList);
+    auto atomic = odata->getAtomic(0);
+    renderAtomic(atomic, modelMatrix, nullptr, outList);
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {

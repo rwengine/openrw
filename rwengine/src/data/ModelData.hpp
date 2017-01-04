@@ -133,8 +133,9 @@ public:
     }
 
     /// @todo change with librw
-    void setAtomic(Clump* model, int n, ModelFrame* atomic) {
+    void setAtomic(Clump* model, int n, AtomicPtr atomic) {
         model_ = model;
+        /// @todo disassociated the Atomic from Clump
         atomics_[n] = atomic;
     }
 
@@ -143,8 +144,8 @@ public:
         return model_;
     }
 
-    ModelFrame* getAtomic(int n) const {
-        return atomics_[n];
+    Atomic* getAtomic(int n) const {
+        return atomics_[n].get();
     }
 
     void setLodDistance(int n, float d) {
@@ -205,7 +206,7 @@ public:
 
 private:
     Clump* model_ = nullptr;
-    ModelFrame* atomics_[3] = {};
+    std::array<AtomicPtr, 3> atomics_;
     float loddistances_[3] = {};
     uint8_t numatomics_ = 0;
     uint8_t alpha_ = 0;  /// @todo ask aap why

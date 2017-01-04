@@ -37,11 +37,25 @@ public:
     size_t culled;
     void buildRenderList(GameObject* object, RenderList& outList);
 
-    bool renderFrame(Clump* m, ModelFrame* f, const glm::mat4& matrix,
-                     GameObject* object, float opacity, RenderList& outList);
+    void renderGeometry(Geometry* geom, const glm::mat4& modelMatrix,
+                        GameObject* object, RenderList& outList);
 
-    void renderGeometry(Clump* model, size_t g, const glm::mat4& modelMatrix,
-                        float opacity, GameObject* object, RenderList& outList);
+    /**
+     * @brief renderAtomic renders an atomic with the given worldtransform
+     * @param model
+     * @param atomic
+     * @param worldtransform
+     * @param object
+     */
+    void renderAtomic(Atomic* atomic, const glm::mat4& worldtransform, GameObject* object, RenderList& render);
+
+    /**
+     * @brief renderClump Renders all visible atomics in the clump
+     * @param model
+     * @param worldtransform
+     * @param render
+     */
+    void renderClump(Clump* model, const glm::mat4& worldtransform, GameObject* object, RenderList& render);
 
 private:
     GameWorld* m_world;

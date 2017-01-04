@@ -318,8 +318,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
             m, glm::vec3(i.radius +
                          0.15f * glm::sin(_renderWorld->getGameTime() * 5.f)));
 
-        objectRenderer.renderFrame(sphereModel, sphereModel->frames[0], m,
-                                   nullptr, 1.f, renderList);
+        objectRenderer.renderClump(sphereModel, m, nullptr, renderList);
     }
 
     // Render arrows above anything that isn't radar only (or hidden)
@@ -346,8 +345,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
                                glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
         model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        objectRenderer.renderFrame(arrowModel, arrowModel->frames[0], model,
-                                   nullptr, 1.f, renderList);
+        objectRenderer.renderClump(arrowModel, model, nullptr, renderList);
     }
 
     RW_PROFILE_END();

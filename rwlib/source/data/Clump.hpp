@@ -187,10 +187,15 @@ struct Geometry {
 class Atomic {
     ModelFramePtr frame_;
     GeometryPtr geometry_;
+    uint32_t flags_;
 
 public:
+    enum {
+        // If this is set, the atomic will be rendered
+        ATOMIC_RENDER = 0x04
+    };
 
-    void setFrame(ModelFramePtr& frame) {
+    void setFrame(ModelFramePtr frame) {
         frame_ = frame;
     }
 
@@ -204,6 +209,23 @@ public:
 
     const GeometryPtr& getGeometry() const {
         return geometry_;
+    }
+
+    void setFlags(uint32_t flags) {
+        flags_ = flags;
+    }
+
+    uint32_t getFlags() const {
+        return flags_;
+    }
+
+    void setFlag(uint32_t flag, bool set) {
+        if (set) {
+            flags_ |= flag;
+        }
+        else {
+            flags_ &= ~flag;
+        }
     }
 };
 

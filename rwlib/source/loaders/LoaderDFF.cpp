@@ -418,6 +418,8 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     auto frame = *(std::uint32_t *)data;
     data += sizeof(std::uint32_t);
     auto geometry = *(std::uint32_t *)data;
+    data += sizeof(std::uint32_t);
+    auto flags = *(std::uint32_t *) data;
 
     // Verify the atomic's particulars
     RW_CHECK(frame < framelist.size(), "atomic frame " << frame
@@ -432,6 +434,7 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     if (frame < framelist.size()) {
         atomic->setFrame(framelist[frame]);
     }
+    atomic->setFlags(flags);
 
     return atomic;
 }
