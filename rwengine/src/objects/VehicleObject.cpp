@@ -1,6 +1,6 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
-#include <data/CollisionModel.hpp>
 #include <data/Clump.hpp>
+#include <data/CollisionModel.hpp>
 #include <data/Skeleton.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
@@ -153,18 +153,13 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
 
     setModel(getVehicle()->getModel());
 
-    for (ModelFrame* frame : getModel()->frames) {
+    // Create meta-data for dummy parts
+    auto chassisframe = getModel()->findFrame("chassis_dummy");
+    for (auto& frame : chassisframe->getChildren()) {
         auto& name = frame->getName();
-        bool isDam = name.find("_dam") != name.npos;
-        bool isLod = name.find("lo") != name.npos;
         bool isDum = name.find("_dummy") != name.npos;
-        /*bool isOk = name.find("_ok") != name.npos;*/
-        if (isDam || isLod || isDum) {
-            skeleton->setEnabled(frame, false);
-        }
-
         if (isDum) {
-            registerPart(frame);
+            registerPart(frame.get());
         }
     }
 }
@@ -551,13 +546,11 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
             if (p->normal == nullptr) continue;
 
             if (skeleton->getData(p->normal->getIndex()).enabled) {
-                auto& geom =
-                    getModel()->geometries[p->normal->getGeometries()[0]];
-                auto pp =
-                    p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
-                float td = glm::distance(
-                    glm::vec3(pp) + geom->geometryBounds.center, dpoint);
-                if (td < geom->geometryBounds.radius * 1.2f) {
+                /// @todo correct logic
+                float damageradius = 0.1f;
+                auto center = glm::vec3(p->normal->getMatrix()[3]);
+                float td = glm::distance(center, dpoint);
+                if (td < damageradius * 1.2f) {
                     setPartState(p, DAM);
                 }
                 /// @todo determine when doors etc. should un-latch
@@ -638,20 +631,13 @@ VehicleObject::Part* VehicleObject::getPart(const std::string& name) {
     return nullptr;
 }
 
-ModelFrame* findStateFrame(ModelFrame* f, const std::string& state) {
-    auto it = std::find_if(
-        f->getChildren().begin(), f->getChildren().end(), [&](ModelFrame* c) {
-            return c->getName().find(state) != std::string::npos;
-        });
-    if (it != f->getChildren().end()) {
-        return *it;
-    }
-    return nullptr;
-}
-
 void VehicleObject::registerPart(ModelFrame* mf) {
-    auto normal = findStateFrame(mf, "_ok");
-    auto damage = findStateFrame(mf, "_dam");
+    auto dummynameend = mf->getName().find("_dummy");
+    RW_CHECK(dummynameend != std::string::npos,
+             "Can't create part from non-dummy");
+    auto dummyname = mf->getName().substr(0, dummynameend);
+    auto normal = mf->findDescendant(dummyname + "_hi_ok");
+    auto damage = mf->findDescendant(dummyname + "_hi_dam");
 
     if (normal == nullptr && damage == nullptr) {
         // Not actually a useful part, just a dummy.
@@ -672,20 +658,12 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     auto& fn = part->dummy->getName();
 
-    ModelFrame* okframe = part->normal;
-
-    if (okframe->getGeometries().size() == 0) return;
-
-    auto& geom = getModel()->geometries[okframe->getGeometries()[0]];
-    auto gbounds = geom->geometryBounds;
-
     if (fn.find("door") != fn.npos) {
         hingeAxis = {0.f, 0.f, 1.f};
         // hingePosition = {0.f, 0.2f, 0.f};
         boxSize = {0.15f, 0.5f, 0.6f};
         // boxOffset = {0.f,-0.2f, gbounds.center.z/2.f};
-        auto tf = gbounds.center;
-        boxOffset = btVector3(tf.x, tf.y, tf.z);
+        boxOffset = btVector3(0.f, -0.25f, 0.f);
         hingePosition = -boxOffset;
 
         if (sign < 0.f) {
