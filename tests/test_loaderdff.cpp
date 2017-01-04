@@ -15,22 +15,13 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         BOOST_REQUIRE(m != nullptr);
 
-        BOOST_REQUIRE_EQUAL(m->frames.size(), 40);
+        BOOST_REQUIRE(m->getFrame());
 
-        BOOST_REQUIRE_EQUAL(m->geometries.size(), 16);
+        BOOST_REQUIRE(!m->getAtomics().empty());
+        const auto& atomic = m->getAtomics()[0];
 
-        BOOST_REQUIRE_EQUAL(m->geometries[0]->subgeom.size(), 5);
-
-        for (auto& g : m->geometries) {
-            BOOST_CHECK_GT(g->geometryBounds.radius, 0.f);
-        }
-
-        BOOST_REQUIRE(m->atomics.size() > 0);
-
-        for (auto& a : m->atomics) {
-            BOOST_CHECK(a.frame < m->frames.size());
-            BOOST_CHECK(a.geometry < m->geometries.size());
-        }
+        BOOST_REQUIRE(atomic->getGeometry());
+        BOOST_REQUIRE(atomic->getFrame());
 
         delete m;
     }

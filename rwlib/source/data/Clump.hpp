@@ -12,26 +12,43 @@
 #include <gl/TextureData.hpp>
 #include <loaders/RWBinaryStream.hpp>
 
+// Forward Declerations
+class ModelFrame;
+struct Geometry;
+class Atomic;
+class Clump;
+
+// Pointer types
+using ModelFramePtr = std::shared_ptr<ModelFrame>;
+using GeometryPtr = std::shared_ptr<Geometry>;
+using AtomicPtr = std::shared_ptr<Atomic>;
+using AtomicList = std::vector<AtomicPtr>;
+using ClumpPtr = std::shared_ptr<Clump>;
+
 /**
- * ModelFrame stores the hierarchy of a model's geometry as well as default
- * transformations.
+ * ModelFrame stores transformation hierarchy
  */
 class ModelFrame {
     unsigned int index;
     glm::mat3 defaultRotation;
     glm::vec3 defaultTranslation;
     glm::mat4 matrix;
-    ModelFrame* parentFrame;
+    glm::mat4 worldtransform_;
+    ModelFrame* parent_;
     std::string name;
-    std::vector<size_t> geometries;
-    std::vector<ModelFrame*> childs;
+    std::vector<ModelFramePtr> children_;
 
 public:
-    ModelFrame(unsigned int index, ModelFrame* parent, glm::mat3 dR,
-               glm::vec3 dT);
+    ModelFrame(unsigned int index = 0, glm::mat3 dR = glm::mat3(),
+               glm::vec3 dT = glm::vec3());
 
     void reset();
-    void setTransform(const glm::mat4& m);
+
+    void setTransform(const glm::mat4& m) {
+        matrix = m;
+        updateHierarchyTransform();
+    }
+
     const glm::mat4& getTransform() const {
         return matrix;
     }
@@ -39,8 +56,6 @@ public:
     void setName(const std::string& fname) {
         name = fname;
     }
-
-    void addGeometry(size_t idx);
 
     unsigned int getIndex() const {
         return index;
@@ -54,25 +69,45 @@ public:
         return defaultRotation;
     }
 
-    glm::mat4 getMatrix() const {
-        return (parentFrame ? parentFrame->getMatrix() : glm::mat4()) * matrix;
+    void setTranslation(const glm::vec3& t) {
+        matrix[3] = glm::vec4(t, matrix[3][3]);
+        updateHierarchyTransform();
+    }
+
+    void setRotation(const glm::mat3& r) {
+        for (unsigned int i = 0; i < 3; i++) {
+            matrix[i] = glm::vec4(r[i], matrix[i][3]);
+        }
+        updateHierarchyTransform();
+    }
+
+    /**
+     * Updates the cached matrix
+     */
+    void updateHierarchyTransform();
+
+    /**
+     * @return the cached world transformation for this Frame
+     */
+    const glm::mat4& getWorldTransform() const {
+        return worldtransform_;
     }
 
     ModelFrame* getParent() const {
-        return parentFrame;
+        return parent_;
     }
 
-    const std::vector<ModelFrame*>& getChildren() const {
-        return childs;
+    void addChild(ModelFramePtr& child);
+
+    const std::vector<ModelFramePtr>& getChildren() const {
+        return children_;
     }
 
     const std::string& getName() const {
         return name;
     }
 
-    const std::vector<size_t>& getGeometries() const {
-        return geometries;
-    }
+    ModelFrame* findDescendant(const std::string& name) const;
 };
 
 /**
@@ -149,9 +184,27 @@ struct Geometry {
 /**
  * @brief The Atomic struct
  */
-struct Atomic {
-    uint32_t frame;
-    uint32_t geometry;
+class Atomic {
+    ModelFramePtr frame_;
+    GeometryPtr geometry_;
+
+public:
+
+    void setFrame(ModelFramePtr& frame) {
+        frame_ = frame;
+    }
+
+    const ModelFramePtr& getFrame() const {
+        return frame_;
+    }
+
+    void setGeometry(GeometryPtr& geom) {
+        geometry_ = geom;
+    }
+
+    const GeometryPtr& getGeometry() const {
+        return geometry_;
+    }
 };
 
 /**
@@ -159,22 +212,12 @@ struct Atomic {
  */
 class Clump {
 public:
-    std::uint32_t numAtomics;
-
-    // This should be gone
-    std::vector<ModelFrame*> frames;
-    // This should be gone
-    std::vector<std::shared_ptr<Geometry>> geometries;
-    std::vector<Atomic> atomics;
-
-    int32_t rootFrameIdx;
-
-    ModelFrame* findFrame(const std::string& name) const {
-        auto fit =
-            std::find_if(frames.begin(), frames.end(),
-                         [&](ModelFrame* f) { return f->getName() == name; });
-        return fit != frames.end() ? *fit : nullptr;
-    }
+    /**
+     * @brief findFrame Locates frame with name anywhere in the hierarchy
+     * @param name
+     * @return
+     */
+    ModelFrame* findFrame(const std::string& name) const;
 
     ~Clump();
 
@@ -184,8 +227,26 @@ public:
         return boundingRadius;
     }
 
+    void addAtomic(AtomicPtr& atomic) {
+        atomics_.push_back(atomic);
+    }
+
+    const AtomicList& getAtomics() const {
+        return atomics_;
+    }
+
+    void setFrame(ModelFramePtr& root) {
+        rootframe_ = root;
+    }
+
+    const ModelFramePtr& getFrame() const {
+        return rootframe_;
+    }
+
 private:
     float boundingRadius;
+    AtomicList atomics_;
+    ModelFramePtr rootframe_;
 };
 
 #endif
