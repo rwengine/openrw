@@ -97,7 +97,7 @@ public:
         return parent_;
     }
 
-    void addChild(ModelFramePtr& child);
+    void addChild(ModelFramePtr child);
 
     const std::vector<ModelFramePtr>& getChildren() const {
         return children_;
@@ -108,6 +108,8 @@ public:
     }
 
     ModelFrame* findDescendant(const std::string& name) const;
+
+    ModelFramePtr cloneHierarchy() const;
 };
 
 /**
@@ -203,7 +205,7 @@ public:
         return frame_;
     }
 
-    void setGeometry(GeometryPtr& geom) {
+    void setGeometry(GeometryPtr geom) {
         geometry_ = geom;
     }
 
@@ -227,6 +229,8 @@ public:
             flags_ &= ~flag;
         }
     }
+
+    AtomicPtr clone() const;
 };
 
 /**
@@ -264,6 +268,11 @@ public:
     const ModelFramePtr& getFrame() const {
         return rootframe_;
     }
+
+    /**
+     * @return A Copy of the frames and atomics in this clump
+     */
+    Clump* clone() const;
 
 private:
     float boundingRadius;

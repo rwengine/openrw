@@ -1,5 +1,6 @@
 #include "data/Clump.hpp"
 #include <iostream>
+#include <queue>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -35,7 +36,7 @@ void ModelFrame::updateHierarchyTransform() {
     }
 }
 
-void ModelFrame::addChild(ModelFramePtr& child) {
+void ModelFrame::addChild(ModelFramePtr child) {
     // Make sure the child is an orphan
     if (child->getParent()) {
         auto& other_children = child->getParent()->children_;
@@ -62,6 +63,26 @@ ModelFrame* ModelFrame::findDescendant(const std::string& name) const {
     return nullptr;
 }
 
+ModelFramePtr ModelFrame::cloneHierarchy() const {
+    auto self = std::make_shared<ModelFrame>(getIndex(), getDefaultRotation(),
+                                             getDefaultTranslation());
+    self->setName(getName());
+    for (const auto& child : getChildren()) {
+        auto childclone = child->cloneHierarchy();
+        self->addChild(childclone);
+    }
+
+    return self;
+}
+
+AtomicPtr Atomic::clone() const {
+    auto newatomic = std::make_shared<Atomic>();
+    newatomic->setGeometry(getGeometry());
+    newatomic->setFrame(getFrame());
+    newatomic->setFlags(getFlags());
+    return newatomic;
+}
+
 ModelFrame* Clump::findFrame(const std::string& name) const {
     if (rootframe_->getName() == name) {
         return rootframe_.get();
@@ -84,4 +105,41 @@ void Clump::recalculateMetrics() {
         boundingRadius = std::max(boundingRadius,
                                   glm::length(bounds.center) + bounds.radius);
     }
+}
+
+Clump* Clump::clone() const {
+    // Clone frame hierarchy
+    auto newroot = rootframe_->cloneHierarchy();
+    auto clump = new Clump;
+    clump->setFrame(newroot);
+
+    // This isn't the most optimal implementation, but this code is likely
+    // to be replaced soon.
+    auto find_new_frame = [&](const ModelFramePtr& old) -> ModelFramePtr {
+        std::queue<ModelFramePtr> open;
+        open.push(newroot);
+        while (!open.empty()) {
+            auto frame = open.front();
+            open.pop();
+            if (frame->getIndex() == old->getIndex()) {
+                return frame;
+            }
+            for (const auto& child : frame->getChildren()) {
+                open.push(child);
+            }
+        }
+        return nullptr;
+    };
+
+    // Generate new atomics
+    for (const auto& atomic : getAtomics()) {
+        auto newatomic = atomic->clone();
+        // Replace the original frame with the cloned frame
+        if (atomic->getFrame()) {
+            newatomic->setFrame(find_new_frame(atomic->getFrame()));
+        }
+        clump->addAtomic(newatomic);
+    }
+
+    return clump;
 }
