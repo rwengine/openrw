@@ -8,13 +8,19 @@ BOOST_AUTO_TEST_CASE(test_loading) {
     // Write out a temporary file
     std::ofstream test_config("/tmp/openrw_test.ini");
     test_config << "[game]\n"
-                << "path=/dev/test" << std::endl;
+                << "\tpath=\t/dev/test\n"
+                << " language = american ;Comment\n"
+                << ";lineComment\n"
+                << "nonexistingkey=somevalue"
+                << std::endl;
 
     GameConfig config("openrw_test.ini", "/tmp");
 
     BOOST_CHECK(config.isValid());
 
     BOOST_CHECK_EQUAL(config.getGameDataPath(), "/dev/test");
+    BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()
