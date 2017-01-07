@@ -23,6 +23,7 @@ constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
 constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
 constexpr float kPedestrianDrawDistanceFactor = kDrawDistanceFactor;
 #endif
+constexpr float kMagicLODDistance = 330.f;
 
 RenderKey createKey(bool transparent, float normalizedDepth,
                     Renderer::Textures& textures) {
@@ -132,13 +133,15 @@ void ObjectRenderer::renderClump(Clump* model, const glm::mat4& worldtransform,
             continue;
         }
 
-        renderAtomic(atomic.get(), worldtransform, object, render);
+        const auto& framematrix = atomic->getFrame()->getMatrix();
+        renderAtomic(atomic.get(), worldtransform * framematrix, object, render);
     }
 }
 
 void ObjectRenderer::renderInstance(InstanceObject* instance,
                                     RenderList& outList) {
-    if (!instance->getModel()) {
+    const auto& atomic = instance->getAtomic();
+    if (!atomic) {
         return;
     }
 
@@ -161,82 +164,32 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
             return;
     }
 
-    auto matrixModel = instance->getTimeAdjustedTransform(m_renderAlpha);
+    float mindist = glm::length(instance->getPosition() - m_camera.position);
 
-    float mindist = glm::length(instance->getPosition() - m_camera.position) -
-                    instance->getModel()->getBoundingRadius();
-    mindist *= 1.f / kDrawDistanceFactor;
+    if (mindist < kMagicLODDistance && modelinfo->LOD) {
+        // @todo this should check if it might be best to render anyway
+        return;
+    }
 
-    Atomic* atomic = nullptr;
-
-    // These are used to gracefully fade out things that are just out of
-    // view
-    // distance.
-    Atomic* fadingAtomic = nullptr;
-    auto fadingMatrix = matrixModel;
-    float opacity = 0.f;
-    constexpr float fadeRange = 50.f;
-
-    /// @todo replace this block with the correct logic
-    if (modelinfo->getNumAtomics() == 1) {
-        // Is closest point greater than the *object* draw distance
-        float objectRange = modelinfo->getLodDistance(0);
-        float overlap = (mindist - objectRange);
-        if (mindist > objectRange) {
-            // Check for LOD instances
-            if (instance->LODinstance) {
-                // Is the closest point greater than the *LOD* draw distance
-                auto lodmodelinfo =
-                    instance->LODinstance->getModelInfo<SimpleModelInfo>();
-                float LODrange = lodmodelinfo->getLodDistance(0);
-                if (mindist <= LODrange && instance->LODinstance->getModel()) {
-                    // The model matrix needs to be for the LOD instead
-                    matrixModel =
-                        instance->LODinstance->getTimeAdjustedTransform(
-                            m_renderAlpha);
-                    atomic = lodmodelinfo->getAtomic(0);
-                    // If the object is only just out of range, keep
-                    // rendering it and screen-door the LOD.
-                    if (overlap < fadeRange) {
-                        fadingAtomic = modelinfo->getAtomic(0);
-                        opacity = 1.f - (overlap / fadeRange);
-                    }
-                }
-            }
-            // We don't have a LOD object, so fade out gracefully.
-            else if (overlap < fadeRange) {
-                fadingAtomic = modelinfo->getAtomic(0);
-                opacity = 1.f - (overlap / fadeRange);
-            }
-        }
-        // Otherwise, if we aren't marked as a LOD model, we can render
-        else if (!modelinfo->LOD) {
-            atomic = modelinfo->getAtomic(0);
-        }
-    } else {
-        auto root = instance->getModel()->getFrame();
-
-        matrixModel *= root->getTransform();
-
-        for (int i = 0; i < modelinfo->getNumAtomics() - 1; ++i) {
-            auto ind = (modelinfo->getNumAtomics() - 1) - i;
-            float lodDistance = modelinfo->getLodDistance(i);
-            if (mindist > lodDistance) {
-                fadingAtomic = modelinfo->getAtomic(ind);
-                opacity = 1.f - ((mindist - lodDistance) / fadeRange);
-            } else {
-                fadingAtomic = modelinfo->getAtomic(ind);
-            }
+    Atomic* distanceatomic = nullptr;
+    for (int i = 0; i < modelinfo->getNumAtomics(); i++) {
+        auto atomicdistance = modelinfo->getLodDistance(i);
+        if (mindist < atomicdistance * kDrawDistanceFactor) {
+            distanceatomic = modelinfo->getAtomic(i);
         }
     }
 
-    if (atomic) {
-        renderAtomic(atomic, matrixModel, instance, outList);
+    if (! distanceatomic) {
+        return;
     }
-    if (fadingAtomic && opacity >= 0.01f) {
-        // @todo pass opacity
-        renderAtomic(fadingAtomic, fadingMatrix, instance, outList);
+
+    if (atomic->getGeometry() != distanceatomic->getGeometry()) {
+        atomic->setGeometry(distanceatomic->getGeometry());
     }
+
+    const auto& frame = atomic->getFrame()->getTransform();
+    // Render the atomic the instance thinks it should be
+    renderAtomic(atomic.get(), frame, instance, outList);
 }
 
 void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,

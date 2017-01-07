@@ -235,7 +235,7 @@ public:
         return lifetime;
     }
 
-    void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
+    virtual void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
         _lastPosition = position;
         _lastRotation = rotation;
         position = pos;
