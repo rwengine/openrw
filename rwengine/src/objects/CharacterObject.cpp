@@ -219,7 +219,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     }
 
     // If we have to, interrogate the movement animation
-    const auto& modelroot = getModel()->getFrame();
+    const auto& modelroot = getClump()->getFrame();
     if (movementAnimation != animations.idle &&
         !modelroot->getChildren().empty()) {
         const auto& root = modelroot->getChildren()[0];
@@ -250,6 +250,11 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
                 rootBone->getInterpolatedKeyframe(animTime + step).position;
             glm::vec3 d = (b - a);
             animTranslate.y += d.y;
+
+            // Kludge: Drop y component of root bone
+            auto t = glm::vec3(root->getTransform()[3]);
+            t.y = 0.f;
+            root->setTranslation(t);
         }
     }
 
