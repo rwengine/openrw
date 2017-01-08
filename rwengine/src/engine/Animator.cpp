@@ -3,9 +3,9 @@
 #include <engine/Animator.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <loaders/LoaderDFF.hpp>
+#include <queue>
 
-Animator::Animator(Clump* model, Skeleton* skeleton)
-    : model(model), skeleton(skeleton) {
+Animator::Animator(Clump* model) : model(model) {
 }
 
 void Animator::tick(float dt) {
@@ -18,21 +18,21 @@ void Animator::tick(float dt) {
         glm::quat rotation;
     };
 
+#if 0
     // Blend all active animations together
-    std::map<unsigned int, BoneTransform> blendFrames;
+    std::map<ModelFrame*, BoneTransform> blendFrames;
+#endif
 
     for (AnimationState& state : animations) {
-        RW_CHECK(state.animation != nullptr,
-                 "AnimationState with no animation");
         if (state.animation == nullptr) continue;
 
-        if (state.boneInstances.size() == 0) {
-            for (unsigned int f = 0; f < model->frames.size(); ++f) {
-                auto bit =
-                    state.animation->bones.find(model->frames[f]->getName());
-                if (bit != state.animation->bones.end()) {
-                    state.boneInstances.insert({bit->second, {f}});
+        if (state.boneInstances.empty()) {
+            for (const auto& bone : state.animation->bones) {
+                auto frame = model->findFrame(bone.first);
+                if (!frame) {
+                    continue;
                 }
+                state.boneInstances.insert({bone.second, frame});
             }
         }
 
@@ -72,23 +72,20 @@ void Animator::tick(float dt) {
 				blendFrames[b.second.frameIndex] = xform;
 			}
 #else
-            blendFrames[b.second.frameIndex] = xform;
+            b.second->setTranslation(b.second->getDefaultTranslation() +
+                                     xform.translation);
+            b.second->setRotation(glm::mat3_cast(xform.rotation));
 #endif
         }
     }
 
+#if 0
     for (auto& p : blendFrames) {
-        auto& data = skeleton->getData(p.first);
-        Skeleton::FrameData fd;
-        fd.b = data.a;
-        fd.enabled = data.enabled;
-
-        fd.a.translation = model->frames[p.first]->getDefaultTranslation() +
-                           p.second.translation;
-        fd.a.rotation = p.second.rotation;
-
-        skeleton->setData(p.first, fd);
+        p.first->setTranslation(p.first->getDefaultTranslation() +
+                                p.second.translation);
+        p.first->setRotation(glm::mat3_cast(p.second.rotation));
     }
+#endif
 }
 
 bool Animator::isCompleted(unsigned int slot) const {

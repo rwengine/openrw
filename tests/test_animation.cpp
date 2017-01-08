@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
          * frame #s. */
         auto test_model = Global::get().d->loadClump("player.dff");
 
-        Animator animator(test_model, &skeleton);
+        Animator animator(test_model);
 
         animation.duration = 1.f;
         animation.bones["player"] = new AnimationBone{
@@ -35,17 +35,15 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
 
         animator.tick(0.0f);
 
-        BOOST_CHECK(skeleton.getData(0).a.translation ==
-                    glm::vec3(0.f, 0.f, 0.f));
-        BOOST_CHECK(skeleton.getData(0).b.translation ==
+        const auto& root = test_model->findFrame("player");
+
+        BOOST_CHECK(glm::vec3(root->getTransform()[3]) ==
                     glm::vec3(0.f, 0.f, 0.f));
 
         animator.tick(1.0f);
 
-        BOOST_CHECK(skeleton.getData(0).a.translation ==
+        BOOST_CHECK(glm::vec3(root->getTransform()[3]) ==
                     glm::vec3(0.f, 1.f, 0.f));
-        BOOST_CHECK(skeleton.getData(0).b.translation ==
-                    glm::vec3(0.f, 0.f, 0.f));
     }
 }
 #endif

@@ -74,8 +74,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     setClump(ClumpPtr(info->getModel()->clone()));
     if (info->getModel()) {
         setModel(info->getModel());
-        skeleton = new Skeleton;
-        animator = new Animator(getModel(), skeleton);
+        animator = new Animator(getClump().get());
 
         createActor();
     }
@@ -251,10 +250,6 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
                 rootBone->getInterpolatedKeyframe(animTime + step).position;
             glm::vec3 d = (b - a);
             animTranslate.y += d.y;
-
-            Skeleton::FrameData fd = skeleton->getData(root->getIndex());
-            fd.a.translation.y = 0.f;
-            skeleton->setData(root->getIndex(), fd);
         }
     }
 
@@ -278,6 +273,7 @@ void CharacterObject::tick(float dt) {
 void CharacterObject::setRotation(const glm::quat& orientation) {
     m_look.x = glm::roll(orientation);
     rotation = orientation;
+    getClump()->getFrame()->setRotation(glm::mat3_cast(rotation));
 }
 
 #include <algorithm>
@@ -291,15 +287,13 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
     engine->data->loadTXD(modelName + ".txd");
     auto newmodel = engine->data->loadClump(modelName + ".dff");
 
-    if (skeleton) {
+    if (animator) {
         delete animator;
-        delete skeleton;
     }
 
     setModel(newmodel);
 
-    skeleton = new Skeleton;
-    animator = new Animator(getModel(), skeleton);
+    animator = new Animator(getClump().get());
 }
 
 void CharacterObject::updateCharacter(float dt) {

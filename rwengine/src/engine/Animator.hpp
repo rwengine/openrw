@@ -11,8 +11,6 @@
 class Clump;
 class ModelFrame;
 
-class Skeleton;
-
 /**
  * @brief calculates animation frame matrices, as well as procedural frame
  * animation.
@@ -25,13 +23,6 @@ class Skeleton;
  */
 class Animator {
     /**
-     * @brief Stores data required to animate a model frame
-     */
-    struct BoneInstanceData {
-        unsigned int frameIndex;
-    };
-
-    /**
      * @brief The AnimationState struct stores information about playing
      * animations
      */
@@ -43,7 +34,7 @@ class Animator {
         float speed;
         /// Automatically restart
         bool repeat;
-        std::map<AnimationBone*, BoneInstanceData> boneInstances;
+        std::map<AnimationBone*, ModelFrame*> boneInstances;
     };
 
     /**
@@ -52,17 +43,12 @@ class Animator {
     Clump* model;
 
     /**
-     * @brief Skeleton instance.
-     */
-    Skeleton* skeleton;
-
-    /**
      * @brief Currently playing animations
      */
     std::vector<AnimationState> animations;
 
 public:
-    Animator(Clump* model, Skeleton* skeleton);
+    Animator(Clump* model);
 
     Animation* getAnimation(unsigned int slot) {
         if (slot < animations.size()) {
