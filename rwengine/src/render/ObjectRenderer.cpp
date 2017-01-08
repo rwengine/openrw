@@ -194,28 +194,27 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
 
 void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
                                      RenderList& outList) {
-    glm::mat4 matrixModel;
+    const auto& clump = pedestrian->getClump();
 
     if (pedestrian->getCurrentVehicle()) {
         auto vehicle = pedestrian->getCurrentVehicle();
+        const auto& vehicleclump = vehicle->getClump();
         auto seat = pedestrian->getCurrentSeat();
-        matrixModel = vehicle->getTimeAdjustedTransform(m_renderAlpha);
+        auto matrixModel = vehicleclump->getFrame()->getWorldTransform();
         if (pedestrian->isEnteringOrExitingVehicle()) {
             matrixModel = glm::translate(matrixModel,
                                          vehicle->getSeatEntryPosition(seat));
+            clump->getFrame()->setTransform(matrixModel);
         } else {
             if (seat < vehicle->info->seats.size()) {
                 matrixModel = glm::translate(matrixModel,
                                              vehicle->info->seats[seat].offset);
+                clump->getFrame()->setTransform(matrixModel);
             }
         }
-    } else {
-        matrixModel = pedestrian->getTimeAdjustedTransform(m_renderAlpha);
     }
 
-    if (!pedestrian->getModel()) return;
-
-    renderClump(pedestrian->getModel(), matrixModel, nullptr, outList);
+    renderClump(pedestrian->getClump().get(), glm::mat4(), nullptr, outList);
 
     auto item = pedestrian->getActiveItem();
     const auto& weapon = pedestrian->engine->data->weaponData[item];
@@ -224,22 +223,13 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         return;  // No model for this item
     }
 
-    auto handFrame = pedestrian->getModel()->findFrame("srhand");
-    glm::mat4 localMatrix;
+    auto handFrame = pedestrian->getClump()->findFrame("srhand");
     if (handFrame) {
-        while (handFrame->getParent()) {
-            localMatrix =
-                pedestrian->skeleton->getMatrix(handFrame->getIndex()) *
-                localMatrix;
-            handFrame = handFrame->getParent();
-        }
-    }
-
-    // Assume items are all simple
-    auto simple =
+        auto simple =
         m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
-    auto itematomic = simple->getAtomic(0);
-    renderAtomic(itematomic, matrixModel * localMatrix, nullptr, outList);
+        auto itematomic = simple->getAtomic(0);
+        renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr, outList);
+    }
 }
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
@@ -367,10 +357,6 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {
-    if (object->skeleton) {
-        object->skeleton->interpolate(m_renderAlpha);
-    }
-
     // Right now specialized on each object type
     switch (object->type()) {
         case GameObject::Instance:

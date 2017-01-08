@@ -71,6 +71,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     animations.ko_shot_front = engine->data->animations["ko_shot_front"];
 
     auto info = getModelInfo<PedModelInfo>();
+    setClump(ClumpPtr(info->getModel()->clone()));
     if (info->getModel()) {
         setModel(info->getModel());
         skeleton = new Skeleton;
@@ -108,9 +109,8 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physCharacter =
             new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
 #else
-        physCharacter =
-            new btKinematicCharacterController(physObject, physShape, 0.30f,
-                btVector3(0.f, 0.f, 1.f));
+        physCharacter = new btKinematicCharacterController(
+            physObject, physShape, 0.30f, btVector3(0.f, 0.f, 1.f));
 #endif
         physCharacter->setFallSpeed(20.f);
         physCharacter->setUseGhostSweepTest(true);
@@ -220,42 +220,41 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     }
 
     // If we have to, interrogate the movement animation
-    if (movementAnimation != animations.idle) {
-        if (!getModel()->frames[0]->getChildren().empty()) {
-            ModelFrame* root = getModel()->frames[0]->getChildren()[0];
-            auto it = movementAnimation->bones.find(root->getName());
-            if (it != movementAnimation->bones.end()) {
-                AnimationBone* rootBone = it->second;
-                float step = dt;
-                const float duration =
-                    animator->getAnimation(AnimIndexMovement)->duration;
-                float animTime = fmod(
-                    animator->getAnimationTime(AnimIndexMovement), duration);
+    const auto& modelroot = getModel()->getFrame();
+    if (movementAnimation != animations.idle &&
+        !modelroot->getChildren().empty()) {
+        const auto& root = modelroot->getChildren()[0];
+        auto it = movementAnimation->bones.find(root->getName());
+        if (it != movementAnimation->bones.end()) {
+            AnimationBone* rootBone = it->second;
+            float step = dt;
+            const float duration =
+                animator->getAnimation(AnimIndexMovement)->duration;
+            float animTime =
+                fmod(animator->getAnimationTime(AnimIndexMovement), duration);
 
-                // Handle any remaining transformation before the end of the
-                // keyframes
-                if ((animTime + step) > duration) {
-                    glm::vec3 a =
-                        rootBone->getInterpolatedKeyframe(animTime).position;
-                    glm::vec3 b =
-                        rootBone->getInterpolatedKeyframe(duration).position;
-                    glm::vec3 d = (b - a);
-                    animTranslate.y += d.y;
-                    step -= (duration - animTime);
-                    animTime = 0.f;
-                }
-
+            // Handle any remaining transformation before the end of the
+            // keyframes
+            if ((animTime + step) > duration) {
                 glm::vec3 a =
                     rootBone->getInterpolatedKeyframe(animTime).position;
                 glm::vec3 b =
-                    rootBone->getInterpolatedKeyframe(animTime + step).position;
+                    rootBone->getInterpolatedKeyframe(duration).position;
                 glm::vec3 d = (b - a);
                 animTranslate.y += d.y;
-
-                Skeleton::FrameData fd = skeleton->getData(root->getIndex());
-                fd.a.translation.y = 0.f;
-                skeleton->setData(root->getIndex(), fd);
+                step -= (duration - animTime);
+                animTime = 0.f;
             }
+
+            glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
+            glm::vec3 b =
+                rootBone->getInterpolatedKeyframe(animTime + step).position;
+            glm::vec3 d = (b - a);
+            animTranslate.y += d.y;
+
+            Skeleton::FrameData fd = skeleton->getData(root->getIndex());
+            fd.a.translation.y = 0.f;
+            skeleton->setData(root->getIndex(), fd);
         }
     }
 
@@ -276,8 +275,7 @@ void CharacterObject::tick(float dt) {
     }
 }
 
-void CharacterObject::setRotation(const glm::quat &orientation)
-{
+void CharacterObject::setRotation(const glm::quat& orientation) {
     m_look.x = glm::roll(orientation);
     rotation = orientation;
 }
@@ -332,6 +330,7 @@ void CharacterObject::updateCharacter(float dt) {
                 yaw += std::atan2(movement.z, movement.x);
             }
             rotation = glm::quat(glm::vec3(0.f, 0.f, yaw));
+            getClump()->getFrame()->setRotation(glm::mat3_cast(rotation));
         }
 
         walkDir = rotation * walkDir;
@@ -352,6 +351,7 @@ void CharacterObject::updateCharacter(float dt) {
         auto Pos =
             physCharacter->getGhostObject()->getWorldTransform().getOrigin();
         position = glm::vec3(Pos.x(), Pos.y(), Pos.z());
+        getClump()->getFrame()->setTranslation(position);
 
         // Handle above waist height water.
         auto wi = engine->data->getWaterIndexAt(getPosition());
@@ -407,6 +407,7 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
         physCharacter->warp(bpos);
     }
     position = pos;
+    getClump()->getFrame()->setTranslation(pos);
 }
 
 bool CharacterObject::isAlive() const {
@@ -611,8 +612,7 @@ void CharacterObject::useItem(bool active, bool primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
                 controller->setNextActivity(new Activities::UseItem(item));
-            }
-            else if (currentState.primaryActive && !active) {
+            } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }
             currentState.primaryActive = active;
