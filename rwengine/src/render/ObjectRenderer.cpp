@@ -18,11 +18,13 @@
 
 constexpr float kDrawDistanceFactor = 1.0f;
 constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
-#if 0  // There's no distance based culling for these types of objects yet
 constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
+#if 0  // There's no distance based culling for these types of objects yet
 constexpr float kPedestrianDrawDistanceFactor = kDrawDistanceFactor;
 #endif
 constexpr float kMagicLODDistance = 330.f;
+constexpr float kVehicleLODDistance = 70.f;
+constexpr float kVehicleDrawDistance = 280.f;
 
 RenderKey createKey(bool transparent, float normalizedDepth,
                     Renderer::Textures& textures) {
@@ -233,52 +235,58 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                                    RenderList& outList) {
-    RW_CHECK(vehicle->getClump(), "Vehicle clump is null");
-    if (!vehicle->getClump()) {
+    const auto& clump = vehicle->getClump();
+    RW_CHECK(clump, "Vehicle clump is null");
+    if (!clump) {
         return;
     }
 
-    const auto& clump = vehicle->getClump();
+    float mindist = glm::length(vehicle->getPosition() - m_camera.position);
+    if (mindist < kVehicleLODDistance * kVehicleDrawDistanceFactor) {
+        // Swich visibility to the high LOD
+        vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
+        vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
+    }
+    else if (mindist < kVehicleDrawDistance * kVehicleDrawDistanceFactor) {
+        // Switch to low
+        vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
+        vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
+    }
+    else {
+        culled++;
+        return;
+    }
+
 
     renderClump(clump.get(), glm::mat4(), vehicle, outList);
 
     auto modelinfo = vehicle->getVehicle();
-
-    // Draw wheels n' stuff
     auto woi =
         m_world->data->findModelInfo<SimpleModelInfo>(modelinfo->wheelmodel_);
-    if (!woi || !woi->isLoaded()) {
+    if (!woi || !woi->isLoaded() || !woi->getDistanceAtomic(mindist)) {
         return;
     }
 
-    auto wheelatomic = woi->getAtomic(0);
+    auto wheelatomic = woi->getDistanceAtomic(mindist);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
         auto& wi = vehicle->physVehicle->getWheelInfo(w);
         // Construct our own matrix so we can use the local transform
         vehicle->physVehicle->updateWheelTransform(w, false);
-        /// @todo migrate this into Vehicle physics tick so we can
-        /// interpolate old -> new
-
-        glm::mat4 wheelM;
 
         auto up = -wi.m_wheelDirectionCS;
         auto right = wi.m_wheelAxleCS;
         auto fwd = up.cross(right);
         btQuaternion steerQ(up, wi.m_steering);
         btQuaternion rollQ(right, -wi.m_rotation);
-
         btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1], up[1],
                           right[2], fwd[2], up[2]);
-
-        btTransform t;
-        t.setBasis(btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis);
-        t.setOrigin(wi.m_chassisConnectionPointCS +
-                    wi.m_wheelDirectionCS *
-                        wi.m_raycastInfo.m_suspensionLength);
-
+        btTransform t(
+            btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis,
+            wi.m_chassisConnectionPointCS +
+                wi.m_wheelDirectionCS * wi.m_raycastInfo.m_suspensionLength);
+        glm::mat4 wheelM;
         t.getOpenGLMatrix(glm::value_ptr(wheelM));
         wheelM = clump->getFrame()->getWorldTransform() * wheelM;
-
         wheelM = glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
         if (wi.m_chassisConnectionPointCS.x() < 0.f) {
             wheelM = glm::scale(wheelM, glm::vec3(-1.f, 1.f, 1.f));

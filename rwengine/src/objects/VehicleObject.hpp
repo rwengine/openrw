@@ -23,6 +23,8 @@ private:
     float brake;
     bool handbrake;
 
+    Atomic* chassishigh_ = nullptr;
+    Atomic* chassislow_ = nullptr;
 public:
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
@@ -63,6 +65,9 @@ public:
     VehicleModelInfo* getVehicle() const {
         return getModelInfo<VehicleModelInfo>();
     }
+
+    Atomic* getHighLOD() const { return chassishigh_; }
+    Atomic* getLowLOD() const { return chassislow_; }
 
     Type type() {
         return Vehicle;

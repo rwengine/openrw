@@ -146,6 +146,17 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     setModel(getVehicle()->getModel());
     setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
 
+    // Locate the Atomics for the chassis_hi and chassis_vlo frames
+    for (const auto& atomic : getClump()->getAtomics()) {
+        auto frame = atomic->getFrame().get();
+        if (frame->getName() == "chassis_vlo") {
+            chassislow_ = atomic.get();
+        }
+        if (frame->getName() == "chassis_hi") {
+            chassishigh_ = atomic.get();
+        }
+    }
+
     // Create meta-data for dummy parts
     auto chassisframe = getClump()->findFrame("chassis_dummy");
     RW_CHECK(chassisframe, "Vehicle has no chassis_dummy");
