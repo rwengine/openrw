@@ -6,23 +6,10 @@ void ModelFramesWidget::updateInfoBox(Clump* model, ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
-        auto labText = QString("Name: %1\nTranslation: %2\nTextures:%3")
+        auto labText = QString("Name: %1\nTranslation: %2")
                            .arg(QString::fromStdString(f->getName()))
                            .arg(QString::fromStdString(
                                glm::to_string(f->getDefaultTranslation())));
-        QString geomString;
-        for (size_t gi : f->getGeometries()) {
-            auto& g = model->geometries[gi];
-            // for(Model::SubGeometry& sg : g->subgeom)
-            for (Geometry::Material& m : g->materials) {
-                for (Geometry::Texture& t : m.textures) {
-                    geomString += QString("\n %1 (%2)")
-                                      .arg(t.name.c_str())
-                                      .arg(t.alphaName.c_str());
-                }
-            }
-        }
-        labText = labText.arg(geomString);
         _frameLabel->setText(labText);
     }
 }

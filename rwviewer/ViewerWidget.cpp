@@ -6,13 +6,13 @@
 #include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <objects/GameObject.hpp>
-#include <render/GameRenderer.hpp>
-#include <render/OpenGLRenderer.hpp>
-
 #include <objects/CharacterObject.hpp>
+#include <objects/GameObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <render/GameRenderer.hpp>
+#include <render/ObjectRenderer.hpp>
+#include <render/OpenGLRenderer.hpp>
 
 ViewerWidget::ViewerWidget(QGLFormat g, QWidget* parent,
                            const QGLWidget* shareWidget, Qt::WindowFlags f)
@@ -113,10 +113,15 @@ void ViewerWidget::paintGL() {
                   cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
 
     if (model) {
+        model->getFrame()->updateHierarchyTransform();
+
+        // Ensure camera is still accurate
+        vc.position = eye * viewDistance;
         glm::mat4 proj = vc.frustum.projection();
-        glm::mat4 view =
-            glm::lookAt(eye * viewDistance, glm::vec3(0.f, 0.f, 0.f),
-                        glm::vec3(0.f, 0.f, 1.f));
+        glm::mat4 view = glm::lookAt(vc.position, glm::vec3(0.f, 0.f, 0.f),
+                                     glm::vec3(0.f, 0.f, 1.f));
+        vc.rotation = -glm::quat_cast(view);
+        vc.frustum.update(proj * view);
 
         r.getRenderer()->setSceneParameters(
             {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
@@ -126,9 +131,12 @@ void ViewerWidget::paintGL() {
 
         r.setupRender();
 
-        r.renderModel(model, m, dummyObject);
+        ObjectRenderer renderer(world(), vc, 1.f, 0);
+        RenderList renders;
+        renderer.renderClump(model, glm::mat4(), nullptr, renders);
+        r.getRenderer()->drawBatched(renders);
 
-        drawFrameWidget(model->frames[model->rootFrameIdx]);
+        drawFrameWidget(model->getFrame().get());
         r.renderPostProcess();
     } else if (world()->allObjects.size() > 0) {
         vc.frustum.fov = glm::radians(90.f);
@@ -143,26 +151,24 @@ void ViewerWidget::paintGL() {
 
 void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
     auto thisM = m * f->getTransform();
-    if (f->getGeometries().size() == 0) {
-        Renderer::DrawParameters dp;
-        dp.count = _frameWidgetGeom->getCount();
-        dp.start = 0;
-        dp.ambient = 1.f;
-        dp.diffuse = 1.f;
-        if (f == selectedFrame) {
-            dp.colour = {255, 255, 0, 255};
-            // Sorry!
-            glLineWidth(10.f);
-        } else {
-            dp.colour = {255, 255, 255, 255};
-            glLineWidth(1.f);
-        }
-        dp.textures = {whiteTex};
-        renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
+    Renderer::DrawParameters dp;
+    dp.count = _frameWidgetGeom->getCount();
+    dp.start = 0;
+    dp.ambient = 1.f;
+    dp.diffuse = 1.f;
+    if (f == selectedFrame) {
+        dp.colour = {255, 255, 0, 255};
+        // Sorry!
+        glLineWidth(10.f);
+    } else {
+        dp.colour = {255, 255, 255, 255};
+        glLineWidth(1.f);
     }
+    dp.textures = {whiteTex};
+    renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
 
     for (auto c : f->getChildren()) {
-        drawFrameWidget(c, thisM);
+        drawFrameWidget(c.get(), thisM);
     }
 }
 

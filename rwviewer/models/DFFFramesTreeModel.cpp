@@ -27,10 +27,10 @@ int DFFFramesTreeModel::rowCount(const QModelIndex& parent) const {
 QModelIndex DFFFramesTreeModel::index(int row, int column,
                                       const QModelIndex& parent) const {
     if (parent.row() == -1 && parent.column() == -1) {
-        return createIndex(row, column, model->frames[model->rootFrameIdx]);
+        return createIndex(row, column, model->getFrame().get());
     }
     ModelFrame* f = static_cast<ModelFrame*>(parent.internalPointer());
-    ModelFrame* p = f->getChildren()[row];
+    ModelFrame* p = f->getChildren()[row].get();
     return createIndex(row, column, p);
 }
 
@@ -40,7 +40,7 @@ QModelIndex DFFFramesTreeModel::parent(const QModelIndex& child) const {
         auto cp = c->getParent();
         if (cp->getParent()) {
             for (size_t i = 0; i < cp->getParent()->getChildren().size(); ++i) {
-                if (cp->getParent()->getChildren()[i] == c->getParent()) {
+                if (cp->getParent()->getChildren()[i].get() == c->getParent()) {
                     return createIndex(i, 0, c->getParent());
                 }
             }

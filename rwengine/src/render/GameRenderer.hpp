@@ -51,30 +51,6 @@ class GameRenderer {
     /** The low-level drawing interface to use */
     Renderer* renderer;
 
-    /** Stores data for deferring transparent objects */
-    struct RQueueEntry {
-        Clump* model;
-        size_t g;
-        size_t sg;
-        glm::mat4 matrix;
-        Renderer::DrawParameters dp;
-        GameObject* object;
-    };
-
-    /**
-     * @brief renders a model's frame.
-     * @param m
-     * @param f
-     * @param matrix
-     * @param object
-     * @param queueTransparent abort the draw if the frame contains transparent
-     * materials
-     * @return True if the frame was drawn, false if it should be queued
-     */
-    bool renderFrame(Clump* m, ModelFrame* f, const glm::mat4& matrix,
-                     GameObject* object, float opacity,
-                     bool queueTransparent = true);
-
     // Temporary variables used during rendering
     float _renderAlpha;
     GameWorld* _renderWorld;
@@ -154,15 +130,6 @@ public:
      */
     void drawTexture(TextureData* texture, glm::vec4 extents);
     void drawColour(const glm::vec4& colour, glm::vec4 extents);
-
-    /**
-     * Renders a model (who'd have thought)
-     */
-    void renderModel(Clump*, const glm::mat4& modelMatrix,
-                     GameObject* = nullptr);
-
-    void renderGeometry(Clump*, size_t geom, const glm::mat4& modelMatrix,
-                        float opacity, GameObject* = nullptr);
 
     /** method for rendering AI debug information */
     void renderPaths();
