@@ -116,14 +116,15 @@ void ObjectRenderer::renderAtomic(Atomic* atomic,
 
     RW::BSGeometryBounds& bounds = geometry->geometryBounds;
 
-    glm::vec3 boundpos =
-        bounds.center + glm::vec3(frame->getWorldTransform()[3]);
+    auto transform = worldtransform * frame->getWorldTransform();
+
+    glm::vec3 boundpos = bounds.center + glm::vec3(transform[3]);
     if (!m_camera.frustum.intersects(boundpos, bounds.radius)) {
         culled++;
         return;
     }
 
-    renderGeometry(geometry.get(), frame->getWorldTransform(), object, render);
+    renderGeometry(geometry.get(), transform, object, render);
 }
 
 void ObjectRenderer::renderClump(Clump* model, const glm::mat4& worldtransform,
@@ -187,9 +188,8 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
         atomic->setGeometry(distanceatomic->getGeometry());
     }
 
-    const auto& frame = atomic->getFrame()->getTransform();
     // Render the atomic the instance thinks it should be
-    renderAtomic(atomic.get(), frame, instance, outList);
+    renderAtomic(atomic.get(), glm::mat4(), instance, outList);
 }
 
 void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
@@ -226,7 +226,7 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
     auto handFrame = pedestrian->getClump()->findFrame("srhand");
     if (handFrame) {
         auto simple =
-        m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
+            m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
         auto itematomic = simple->getAtomic(0);
         renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr, outList);
     }
@@ -306,43 +306,21 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
                                           RenderList& outList) {
     if (!m_world->state->currentCutscene) return;
+    const auto& clump = cutscene->getClump();
 
-    if (!cutscene->getModel()) {
-        return;
-    }
-
-    glm::mat4 matrixModel;
     auto cutsceneOffset = m_world->state->currentCutscene->meta.sceneOffset +
                           glm::vec3(0.f, 0.f, 1.f);
+    glm::mat4 cutscenespace;
 
+    cutscenespace = glm::translate(cutscenespace, cutsceneOffset);
     if (cutscene->getParentActor()) {
-        matrixModel = glm::translate(matrixModel, cutsceneOffset);
-        // matrixModel =
-        // cutscene->getParentActor()->getTimeAdjustedTransform(_renderAlpha);
-        // matrixModel = glm::translate(matrixModel, glm::vec3(0.f, 0.f,
-        // 1.f));
-        glm::mat4 localMatrix;
-        auto boneframe = cutscene->getParentFrame();
-        while (boneframe) {
-            localMatrix = cutscene->getParentActor()->skeleton->getMatrix(
-                              boneframe->getIndex()) *
-                          localMatrix;
-            boneframe = boneframe->getParent();
-        }
-        matrixModel = matrixModel * localMatrix;
-    } else {
-        matrixModel = glm::translate(matrixModel, cutsceneOffset);
+        auto parent = cutscene->getParentFrame();
+        cutscenespace *= parent->getWorldTransform();
+        cutscenespace =
+            glm::rotate(cutscenespace, glm::half_pi<float>(), {0.f, 1.f, 0.f});
     }
 
-    auto model = cutscene->getModel();
-    if (cutscene->getParentActor()) {
-        glm::mat4 align;
-        /// @todo figure out where this 90 degree offset is coming from.
-        align = glm::rotate(align, glm::half_pi<float>(), {0.f, 1.f, 0.f});
-        renderClump(model, matrixModel * align, nullptr, outList);
-    } else {
-        renderClump(model, matrixModel, nullptr, outList);
-    }
+    renderClump(clump.get(), cutscenespace, nullptr, outList);
 }
 
 void ObjectRenderer::renderProjectile(ProjectileObject* projectile,

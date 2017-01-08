@@ -6,7 +6,7 @@
 /**
  * @brief Object type used for cutscene animations.
  */
-class CutsceneObject : public GameObject {
+class CutsceneObject : public GameObject, public ClumpObject {
     GameObject* _parent;
     ModelFrame* _bone;
 
