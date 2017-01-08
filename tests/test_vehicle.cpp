@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <data/Clump.hpp>
-#include <data/Skeleton.hpp>
 #include <objects/VehicleObject.hpp>
 #include "test_globals.hpp"
 

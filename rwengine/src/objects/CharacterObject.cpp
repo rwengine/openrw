@@ -1,5 +1,4 @@
 #include <ai/CharacterController.hpp>
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>

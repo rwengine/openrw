@@ -1,7 +1,6 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <data/Clump.hpp>
 #include <data/CollisionModel.hpp>
-#include <data/Skeleton.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 #include <engine/Animator.hpp>

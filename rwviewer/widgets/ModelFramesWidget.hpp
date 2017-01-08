@@ -30,7 +30,7 @@ public:
 
 public slots:
 
-    void setModel(Clump* model, Skeleton* skeleton);
+    void setModel(Clump* model);
 
 signals:
 

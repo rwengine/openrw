@@ -1,4 +1,3 @@
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <objects/CutsceneObject.hpp>
 

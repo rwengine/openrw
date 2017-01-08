@@ -1,5 +1,4 @@
 #include <data/Clump.hpp>
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <loaders/LoaderDFF.hpp>

@@ -38,7 +38,6 @@ set(TEST_SOURCES
 	"test_rwbstream.cpp"
 	"test_SaveGame.cpp"
 	"test_scriptmachine.cpp"
-	"test_skeleton.cpp"
 	"test_state.cpp"
 	"test_text.cpp"
 	"test_trafficdirector.cpp"

@@ -1,4 +1,3 @@
-#include <data/Skeleton.hpp>
 #include <engine/GameWorld.hpp>
 #include <items/Weapon.hpp>
 #include <objects/ProjectileObject.hpp>

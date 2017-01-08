@@ -1,6 +1,5 @@
 #include <data/Clump.hpp>
 #include <data/CutsceneData.hpp>
-#include <data/Skeleton.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <glm/gtc/type_ptr.hpp>

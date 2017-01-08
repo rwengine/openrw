@@ -14,7 +14,6 @@
 #include <data/ModelData.hpp>
 
 #include <data/CutsceneData.hpp>
-#include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <render/ObjectRenderer.hpp>
 

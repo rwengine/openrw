@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <data/Clump.hpp>
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include "test_globals.hpp"
@@ -10,7 +9,6 @@ BOOST_AUTO_TEST_SUITE(AnimationTests)
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_matrix) {
     {
-        Skeleton skeleton;
         Animation animation;
 
         /** Models are currently needed to relate animation bones <=> model

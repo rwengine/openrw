@@ -3,7 +3,6 @@
 #include <QMouseEvent>
 #include <algorithm>
 #include <data/Clump.hpp>
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <objects/CharacterObject.hpp>
@@ -81,9 +80,8 @@ void ViewerWidget::paintGL() {
 
     r.setViewport(width(), height());
 
-    if (dummyObject && dummyObject->animator && dummyObject->skeleton) {
+    if (dummyObject && dummyObject->animator) {
         dummyObject->animator->tick(1.f / 60.f);
-        dummyObject->skeleton->interpolate(1.f);
     }
 
     r.getRenderer()->invalidate();

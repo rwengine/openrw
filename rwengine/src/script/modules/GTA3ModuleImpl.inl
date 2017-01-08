@@ -6,7 +6,6 @@
 #include <engine/GameState.hpp>
 #include <engine/GameData.hpp>
 #include <engine/Animator.hpp>
-#include <data/Skeleton.hpp>
 #include <core/Logger.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>

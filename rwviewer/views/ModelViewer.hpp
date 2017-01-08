@@ -15,7 +15,6 @@
 
 class ViewerWidget;
 class Clump;
-class Skeleton;
 class ModelFramesWidget;
 class Animation;
 
@@ -23,7 +22,6 @@ class ModelViewer : public ViewerInterface {
     Q_OBJECT
 
     Clump* viewing;
-    Skeleton* skeleton;
 
     QSplitter* mainSplit;
     QVBoxLayout* mainLayout;

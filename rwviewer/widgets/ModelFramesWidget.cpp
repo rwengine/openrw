@@ -33,7 +33,7 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
     setLayout(_layout);
 }
 
-void ModelFramesWidget::setModel(Clump* model, Skeleton* skeleton) {
+void ModelFramesWidget::setModel(Clump* model) {
     if (framemodel) {
         delete framemodel;
         framemodel = nullptr;
@@ -41,7 +41,7 @@ void ModelFramesWidget::setModel(Clump* model, Skeleton* skeleton) {
     }
     gmodel = model;
     if (model != nullptr) {
-        framemodel = new DFFFramesTreeModel(model, skeleton, this);
+        framemodel = new DFFFramesTreeModel(model, this);
         tree->setModel(framemodel);
         tree->setDisabled(false);
         connect(tree->selectionModel(),

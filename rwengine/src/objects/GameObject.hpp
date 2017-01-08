@@ -11,7 +11,6 @@
 #include <objects/ObjectTypes.hpp>
 #include <rw/types.hpp>
 
-class Skeleton;
 class CharacterController;
 class Animator;
 class GameWorld;
@@ -46,7 +45,6 @@ public:
     GameWorld* engine;
 
     Animator* animator;  /// Object's animator.
-    Skeleton* skeleton;
 
     bool inWater;
 
@@ -71,7 +69,6 @@ public:
         , rotation(rot)
         , engine(engine)
         , animator(nullptr)
-        , skeleton(nullptr)
         , inWater(false)
         , _lastHeight(std::numeric_limits<float>::max())
         , visible(true)

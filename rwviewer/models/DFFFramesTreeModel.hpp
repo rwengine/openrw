@@ -5,14 +5,12 @@
 #include <rw/types.hpp>
 
 class Clump;
-class Skeleton;
 
 class DFFFramesTreeModel : public QAbstractItemModel {
     Clump* model;
-    Skeleton* skeleton;
 
 public:
-    explicit DFFFramesTreeModel(Clump* m, Skeleton* skel, QObject* parent = 0);
+    explicit DFFFramesTreeModel(Clump* m, QObject* parent = 0);
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
