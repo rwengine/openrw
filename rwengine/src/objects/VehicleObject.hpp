@@ -36,8 +36,8 @@ public:
 
     struct Part {
         ModelFrame* dummy;
-        ModelFrame* normal;
-        ModelFrame* damaged;
+        Atomic* normal;
+        Atomic* damaged;
         btRigidBody* body;
         btHingeConstraint* constraint;
         bool moveToAngle;

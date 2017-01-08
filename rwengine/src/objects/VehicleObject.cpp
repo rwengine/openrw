@@ -70,11 +70,7 @@ public:
         const auto& rot = tform.getRotation();
         auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 
-        auto skeleton = m_object->skeleton;
-        auto& prev = skeleton->getData(m_part->dummy->getIndex()).a;
-        auto next = prev;
-        next.rotation = r2;
-        skeleton->setData(m_part->dummy->getIndex(), {next, prev, true});
+        m_part->dummy->setRotation(glm::mat3_cast(r2));
     }
 
 private:
@@ -147,9 +143,6 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
             halfFriction * (front ? info->handling.tractionBias
                                   : 1.f - info->handling.tractionBias);
     }
-
-    // Hide all LOD and damage frames.
-    skeleton = new Skeleton;
 
     setModel(getVehicle()->getModel());
     setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
@@ -557,16 +550,14 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
             if (p->normal == nullptr) continue;
 
-            if (skeleton->getData(p->normal->getIndex()).enabled) {
-                /// @todo correct logic
-                float damageradius = 0.1f;
-                auto center = glm::vec3(p->normal->getWorldTransform()[3]);
-                float td = glm::distance(center, dpoint);
-                if (td < damageradius * 1.2f) {
-                    setPartState(p, DAM);
-                }
-                /// @todo determine when doors etc. should un-latch
+            /// @todo correct logic
+            float damageradius = 0.1f;
+            auto center = glm::vec3(p->dummy->getWorldTransform()[3]);
+            float td = glm::distance(center, dpoint);
+            if (td < damageradius * 1.2f) {
+                setPartState(p, DAM);
             }
+            /// @todo determine when doors etc. should un-latch
         }
     }
 
@@ -576,11 +567,11 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 void VehicleObject::setPartState(VehicleObject::Part* part,
                                  VehicleObject::FrameState state) {
     if (state == VehicleObject::OK) {
-        if (part->normal) skeleton->setEnabled(part->normal, true);
-        if (part->damaged) skeleton->setEnabled(part->damaged, false);
+        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
+        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
     } else if (state == VehicleObject::DAM) {
-        if (part->normal) skeleton->setEnabled(part->normal, false);
-        if (part->damaged) skeleton->setEnabled(part->damaged, true);
+        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
+        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
     }
 }
 
@@ -611,10 +602,7 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) {
         destroyObjectHinge(part);
 
         // Restore default bone transform
-        auto dt = part->dummy->getDefaultTranslation();
-        auto dr = glm::quat_cast(part->dummy->getDefaultRotation());
-        Skeleton::FrameTransform tf{dt, dr};
-        skeleton->setData(part->dummy->getIndex(), {tf, tf, true});
+        part->dummy->reset();
     }
 }
 
@@ -648,10 +636,10 @@ void VehicleObject::registerPart(ModelFrame* mf) {
     RW_CHECK(dummynameend != std::string::npos,
              "Can't create part from non-dummy");
     auto dummyname = mf->getName().substr(0, dummynameend);
-    auto normal = mf->findDescendant(dummyname + "_hi_ok");
-    auto damage = mf->findDescendant(dummyname + "_hi_dam");
+    auto normalframe = mf->findDescendant(dummyname + "_hi_ok");
+    auto damageframe = mf->findDescendant(dummyname + "_hi_dam");
 
-    if (normal == nullptr && damage == nullptr) {
+    if (normalframe == nullptr && damageframe == nullptr) {
         // Not actually a useful part, just a dummy.
         return;
     }

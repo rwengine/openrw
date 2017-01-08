@@ -41,8 +41,11 @@ BOOST_AUTO_TEST_CASE(vehicle_parts) {
     BOOST_REQUIRE(part->normal != nullptr);
     BOOST_REQUIRE(part->damaged != nullptr);
 
-    BOOST_CHECK_EQUAL(part->normal->getName(), "bonnet_hi_ok");
-    BOOST_CHECK_EQUAL(part->damaged->getName(), "bonnet_hi_dam");
+    BOOST_REQUIRE(part->normal->getFrame());
+    BOOST_REQUIRE(part->damaged->getFrame());
+
+    BOOST_CHECK_EQUAL(part->normal->getFrame()->getName(), "bonnet_hi_ok");
+    BOOST_CHECK_EQUAL(part->damaged->getFrame()->getName(), "bonnet_hi_dam");
 
     Global::get().e->destroyObject(vehicle);
 }
@@ -55,17 +58,16 @@ BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
     BOOST_REQUIRE(vehicle->getModel() != nullptr);
 
     VehicleObject::Part* bonnetpart = vehicle->getPart("bonnet_dummy");
-    auto skel = vehicle->skeleton;
 
     vehicle->setPartState(bonnetpart, VehicleObject::DAM);
 
-    BOOST_CHECK(!skel->getData(bonnetpart->normal->getIndex()).enabled);
-    BOOST_CHECK(skel->getData(bonnetpart->damaged->getIndex()).enabled);
+    BOOST_CHECK((bonnetpart->normal->getFlags() & Atomic::ATOMIC_RENDER) == 0);
+    BOOST_CHECK((bonnetpart->damaged->getFlags() & Atomic::ATOMIC_RENDER) != 0);
 
     vehicle->setPartState(bonnetpart, VehicleObject::OK);
 
-    BOOST_CHECK(skel->getData(bonnetpart->normal->getIndex()).enabled);
-    BOOST_CHECK(!skel->getData(bonnetpart->damaged->getIndex()).enabled);
+    BOOST_CHECK((bonnetpart->normal->getFlags() & Atomic::ATOMIC_RENDER) != 0);
+    BOOST_CHECK((bonnetpart->damaged->getFlags() & Atomic::ATOMIC_RENDER) == 0);
 
     Global::get().e->destroyObject(vehicle);
 }
