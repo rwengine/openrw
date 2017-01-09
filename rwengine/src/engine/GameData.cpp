@@ -365,7 +365,7 @@ TextureArchive GameData::loadTextureArchive(const std::string& name) {
 void GameData::getNameAndLod(std::string& name, int& lod) {
     auto lodpos = name.rfind("_l");
     if (lodpos != std::string::npos) {
-        lod = std::atoi(name.substr(lodpos + 1).c_str());
+        lod = std::atoi(name.substr(lodpos + 2).c_str());
         name = name.substr(0, lodpos);
     }
 }
