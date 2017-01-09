@@ -115,6 +115,13 @@ void GameData::loadLevelFile(const std::string& path) {
             }
         }
     }
+
+    for (const auto& model : modelinfo) {
+        if (model.second->type() == ModelDataType::SimpleInfo) {
+            auto simple = static_cast<SimpleModelInfo*>(model.second.get());
+            simple->setupBigBuilding(modelinfo);
+        }
+    }
 }
 
 void GameData::loadIDE(const std::string& path) {

@@ -7,19 +7,23 @@
 
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,
-                               BaseModelInfo* modelinfo, InstanceObject* lod,
+                               BaseModelInfo* modelinfo,
                                std::shared_ptr<DynamicObjectData> dyn)
     : GameObject(engine, pos, rot, modelinfo)
     , health(100.f)
     , scale(scale)
     , body(nullptr)
-    , LODinstance(lod)
     , dynamics(dyn)
     , _enablePhysics(false) {
     if (modelinfo) {
         changeModel(modelinfo);
         setPosition(pos);
         setRotation(rot);
+
+        // Disable the main island LOD
+        if (modelinfo->name.find("IslandLOD") != std::string::npos) {
+            setVisible(false);
+        }
 
         /// @todo store path information properly
         if (modelinfo->type() == ModelDataType::SimpleInfo) {

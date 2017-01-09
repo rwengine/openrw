@@ -82,6 +82,8 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         objs->setLodDistance(i, atof(buff.c_str()));
                     }
 
+                    objs->determineFurthest();
+
                     getline(strstream, buff, ',');
                     objs->flags = atoi(buff.c_str());
 
@@ -94,12 +96,6 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     } else {
                         objs->timeOn = 0;
                         objs->timeOff = 24;
-                    }
-
-                    /// @todo Figure out how LOD stuff is intended to work
-                    if (objs->name.find("LOD", 0, 3) != std::string::npos &&
-                        objs->name != "LODistancoast01") {
-                        objs->LOD = true;
                     }
 
                     objects.emplace(objs->id(), std::move(objs));

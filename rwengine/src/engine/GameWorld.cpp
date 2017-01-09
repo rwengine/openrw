@@ -124,20 +124,6 @@ bool GameWorld::placeItems(const std::string& name) {
             }
         }
 
-        // Attempt to Associate LODs.
-        for (auto& p : instancePool.objects) {
-            auto object = p.second;
-            InstanceObject* instance = static_cast<InstanceObject*>(object);
-            auto modelinfo = instance->getModelInfo<SimpleModelInfo>();
-            if (!modelinfo->LOD && modelinfo->name.length() > 3) {
-                auto lodInstit =
-                    modelInstances.find("LOD" + modelinfo->name.substr(3));
-                if (lodInstit != modelInstances.end()) {
-                    instance->LODinstance = lodInstit->second;
-                }
-            }
-        }
-
         return true;
     } else {
         logger->error("Data", "Failed to load IPL " + path);
@@ -170,8 +156,8 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                 "World", "Instance with missing model: " + std::to_string(id));
         }
 
-        auto instance = new InstanceObject(
-            this, pos, rot, glm::vec3(1.f, 1.f, 1.f), oi, nullptr, dydata);
+        auto instance =
+            new InstanceObject(this, pos, rot, glm::vec3(1.f), oi, dydata);
 
         instancePool.insert(instance);
         allObjects.push_back(instance);

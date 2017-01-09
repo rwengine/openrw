@@ -168,19 +168,23 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
 
     float mindist = glm::length(instance->getPosition() - m_camera.position);
 
-    if (mindist < kMagicLODDistance && modelinfo->LOD) {
-        // @todo this should check if it might be best to render anyway
+    if (mindist > modelinfo->getLargestLodDistance()) {
+        culled++;
         return;
     }
 
-    Atomic* distanceatomic = nullptr;
-    for (int i = 0; i < modelinfo->getNumAtomics(); i++) {
-        auto atomicdistance = modelinfo->getLodDistance(i);
-        if (mindist < atomicdistance * kDrawDistanceFactor) {
-            distanceatomic = modelinfo->getAtomic(i);
+    if (modelinfo->isBigBuilding() &&
+        mindist < modelinfo->getNearLodDistance() &&
+        mindist < kMagicLODDistance) {
+        auto related = modelinfo->related();
+        if (!related || related->isLoaded()) {
+            culled++;
+            return;
         }
     }
 
+    Atomic* distanceatomic =
+        modelinfo->getDistanceAtomic(mindist / kDrawDistanceFactor);
     if (!distanceatomic) {
         return;
     }

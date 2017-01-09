@@ -22,13 +22,12 @@ class InstanceObject : public GameObject {
 public:
     glm::vec3 scale;
     std::unique_ptr<CollisionInstance> body;
-    InstanceObject* LODinstance;
     std::shared_ptr<DynamicObjectData> dynamics;
     bool _enablePhysics;
 
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
-                   BaseModelInfo* modelinfo, InstanceObject* lod,
+                   BaseModelInfo* modelinfo,
                    std::shared_ptr<DynamicObjectData> dyn);
     ~InstanceObject();
 
@@ -44,7 +43,7 @@ public:
 
     void changeModel(BaseModelInfo* incoming);
 
-    virtual void setPosition(const glm::vec3 &pos);
+    virtual void setPosition(const glm::vec3& pos);
     virtual void setRotation(const glm::quat& r);
 
     virtual bool takeDamage(const DamageInfo& damage);
