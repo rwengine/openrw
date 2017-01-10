@@ -152,9 +152,11 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     skeleton = new Skeleton;
 
     setModel(getVehicle()->getModel());
+    setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
 
     // Create meta-data for dummy parts
-    auto chassisframe = getModel()->findFrame("chassis_dummy");
+    auto chassisframe = getClump()->findFrame("chassis_dummy");
+    RW_CHECK(chassisframe, "Vehicle has no chassis_dummy");
     for (auto& frame : chassisframe->getChildren()) {
         auto& name = frame->getName();
         bool isDum = name.find("_dummy") != name.npos;
@@ -179,6 +181,7 @@ VehicleObject::~VehicleObject() {
 
 void VehicleObject::setPosition(const glm::vec3& pos) {
     GameObject::setPosition(pos);
+    getClump()->getFrame()->setTranslation(pos);
     if (collision->getBulletBody()) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
         for (auto& part : dynamicParts) {
@@ -196,6 +199,7 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
 }
 
 void VehicleObject::setRotation(const glm::quat& orientation) {
+    getClump()->getFrame()->setRotation(glm::mat3_cast(orientation));
     if (collision->getBulletBody()) {
         auto t = collision->getBulletBody()->getWorldTransform();
         t.setRotation(btQuaternion(orientation.x, orientation.y, orientation.z,
@@ -203,6 +207,14 @@ void VehicleObject::setRotation(const glm::quat& orientation) {
         collision->getBulletBody()->setWorldTransform(t);
     }
     GameObject::setRotation(orientation);
+}
+
+void VehicleObject::updateTransform(const glm::vec3& pos,
+                                    const glm::quat& rot) {
+    position = pos;
+    rotation = rot;
+    getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
+    getClump()->getFrame()->setTranslation(pos);
 }
 
 #include <glm/gtc/type_ptr.hpp>
@@ -548,7 +560,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
             if (skeleton->getData(p->normal->getIndex()).enabled) {
                 /// @todo correct logic
                 float damageradius = 0.1f;
-                auto center = glm::vec3(p->normal->getMatrix()[3]);
+                auto center = glm::vec3(p->normal->getWorldTransform()[3]);
                 float td = glm::distance(center, dpoint);
                 if (td < damageradius * 1.2f) {
                     setPartState(p, DAM);
@@ -642,6 +654,18 @@ void VehicleObject::registerPart(ModelFrame* mf) {
     if (normal == nullptr && damage == nullptr) {
         // Not actually a useful part, just a dummy.
         return;
+    }
+
+    // Find the Atomics for the part
+    Atomic *normal = nullptr, *damage = nullptr;
+    for (const auto& atomic : getClump()->getAtomics()) {
+        if (atomic->getFrame().get() == normalframe) {
+            normal = atomic.get();
+        }
+        if (atomic->getFrame().get() == damageframe) {
+            damage = atomic.get();
+            damage->setFlag(Atomic::ATOMIC_RENDER, false);
+        }
     }
 
     dynamicParts.insert(

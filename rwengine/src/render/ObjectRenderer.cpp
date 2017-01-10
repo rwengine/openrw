@@ -116,13 +116,14 @@ void ObjectRenderer::renderAtomic(Atomic* atomic,
 
     RW::BSGeometryBounds& bounds = geometry->geometryBounds;
 
-    glm::vec3 boundpos = bounds.center + glm::vec3(worldtransform[3]);
+    glm::vec3 boundpos =
+        bounds.center + glm::vec3(frame->getWorldTransform()[3]);
     if (!m_camera.frustum.intersects(boundpos, bounds.radius)) {
         culled++;
         return;
     }
 
-    renderGeometry(geometry.get(), worldtransform, object, render);
+    renderGeometry(geometry.get(), frame->getWorldTransform(), object, render);
 }
 
 void ObjectRenderer::renderClump(Clump* model, const glm::mat4& worldtransform,
@@ -133,8 +134,7 @@ void ObjectRenderer::renderClump(Clump* model, const glm::mat4& worldtransform,
             continue;
         }
 
-        const auto& framematrix = atomic->getFrame()->getMatrix();
-        renderAtomic(atomic.get(), worldtransform * framematrix, object, render);
+        renderAtomic(atomic.get(), worldtransform, object, render);
     }
 }
 
@@ -179,7 +179,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
         }
     }
 
-    if (! distanceatomic) {
+    if (!distanceatomic) {
         return;
     }
 
@@ -244,15 +244,14 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
 
 void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                                    RenderList& outList) {
-    RW_CHECK(vehicle->getModel(), "Vehicle model is null");
-
-    if (!vehicle->getModel()) {
+    RW_CHECK(vehicle->getClump(), "Vehicle clump is null");
+    if (!vehicle->getClump()) {
         return;
     }
 
-    glm::mat4 matrixModel = vehicle->getTimeAdjustedTransform(m_renderAlpha);
+    const auto& clump = vehicle->getClump();
 
-    renderClump(vehicle->getModel(), matrixModel, vehicle, outList);
+    renderClump(clump.get(), glm::mat4(), vehicle, outList);
 
     auto modelinfo = vehicle->getVehicle();
 
@@ -271,7 +270,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
         /// @todo migrate this into Vehicle physics tick so we can
         /// interpolate old -> new
 
-        glm::mat4 wheelM(matrixModel);
+        glm::mat4 wheelM;
 
         auto up = -wi.m_wheelDirectionCS;
         auto right = wi.m_wheelAxleCS;
@@ -289,7 +288,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
                         wi.m_raycastInfo.m_suspensionLength);
 
         t.getOpenGLMatrix(glm::value_ptr(wheelM));
-        wheelM = matrixModel * wheelM;
+        wheelM = clump->getFrame()->getWorldTransform() * wheelM;
 
         wheelM = glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
         if (wi.m_chassisConnectionPointCS.x() < 0.f) {

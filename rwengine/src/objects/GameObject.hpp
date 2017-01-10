@@ -13,7 +13,6 @@
 
 class Skeleton;
 class CharacterController;
-class ModelFrame;
 class Animator;
 class GameWorld;
 
@@ -244,6 +243,20 @@ public:
 
 private:
     ObjectLifetime lifetime;
+};
+
+class ClumpObject {
+    ClumpPtr clump_;
+
+protected:
+    void setClump(ClumpPtr ptr) {
+        clump_ = ptr;
+    }
+
+public:
+    const ClumpPtr& getClump() const {
+        return clump_;
+    }
 };
 
 #endif  // __GAMEOBJECTS_HPP__

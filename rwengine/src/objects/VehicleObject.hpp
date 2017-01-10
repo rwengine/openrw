@@ -16,7 +16,7 @@ class btTransform;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject : public GameObject {
+class VehicleObject : public GameObject, public ClumpObject {
 private:
     float steerAngle;
     float throttle;
@@ -57,6 +57,8 @@ public:
     void setPosition(const glm::vec3& pos);
 
     void setRotation(const glm::quat& orientation);
+
+    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
 
     VehicleModelInfo* getVehicle() const {
         return getModelInfo<VehicleModelInfo>();

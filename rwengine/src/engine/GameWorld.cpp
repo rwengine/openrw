@@ -287,7 +287,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
             const std::string& name = frame->getName();
 
             if (name.size() > 5 && name.substr(0, 5) == "wheel") {
-                auto frameTrans = frame->getMatrix();
+                const auto& frameTrans = frame->getWorldTransform();
                 info->second->wheels.push_back({glm::vec3(frameTrans[3])});
             }
 
