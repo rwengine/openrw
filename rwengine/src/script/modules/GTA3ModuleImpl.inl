@@ -10339,8 +10339,13 @@ void opcode_0372(const ScriptArguments& args, const ScriptCharacter character, c
 	opcode 0373
 */
 void opcode_0373(const ScriptArguments& args) {
+	// @todo verify unlocking player
+	// This restores control at the end of "Drive Misty for me"
+	auto player = args.getWorld()->players.at(0);
+	player->setInputEnabled(true);
+	args.getWorld()->state->cameraTarget = 0;
+	args.getWorld()->state->cameraFixed = false;
 	RW_UNIMPLEMENTED_OPCODE(0x0373);
-	RW_UNUSED(args);
 }
 
 /**
