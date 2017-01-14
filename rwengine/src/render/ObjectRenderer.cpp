@@ -16,7 +16,7 @@
 #include <rw_mingw.hpp>
 #endif
 
-constexpr float kDrawDistanceFactor = 1.0f;
+constexpr float kDrawDistanceFactor = 1.5f;
 constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
 constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
 #if 0  // There's no distance based culling for these types of objects yet
@@ -166,7 +166,8 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
             return;
     }
 
-    float mindist = glm::length(instance->getPosition() - m_camera.position);
+    float mindist = glm::length(instance->getPosition() - m_camera.position) /
+                    kDrawDistanceFactor;
 
     if (mindist > modelinfo->getLargestLodDistance()) {
         culled++;
@@ -233,7 +234,8 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         auto simple =
             m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
         auto itematomic = simple->getAtomic(0);
-        renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr, outList);
+        renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr,
+                     outList);
     }
 }
 
@@ -245,22 +247,19 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
         return;
     }
 
-    float mindist = glm::length(vehicle->getPosition() - m_camera.position);
-    if (mindist < kVehicleLODDistance * kVehicleDrawDistanceFactor) {
+    float mindist = glm::length(vehicle->getPosition() - m_camera.position) / kVehicleDrawDistanceFactor;
+    if (mindist < kVehicleLODDistance) {
         // Swich visibility to the high LOD
         vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
         vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
-    }
-    else if (mindist < kVehicleDrawDistance * kVehicleDrawDistanceFactor) {
+    } else if (mindist < kVehicleDrawDistance) {
         // Switch to low
         vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
         vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
-    }
-    else {
+    } else {
         culled++;
         return;
     }
-
 
     renderClump(clump.get(), glm::mat4(), vehicle, outList);
 
