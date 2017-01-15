@@ -15,13 +15,19 @@ public:
     /**
      * @brief getFilePath Returns the system file path for the configuration
      */
-    std::string getConfigFile();
+    std::string getConfigFile() const;
 
     /**
      * @brief isValid
      * @return True if the loaded configuration is valid
      */
-    bool isValid();
+    bool isValid() const;
+
+    /**
+     * @brief getConfigString Returns the content of the default INI configuration.
+     * @return INI string
+     */
+    std::string getDefaultINIString();
 
     const std::string& getGameDataPath() const {
         return m_gamePath;
@@ -36,7 +42,27 @@ public:
 private:
     static std::string getDefaultConfigPath();
 
-    bool readConfig(const std::string &path);
+    enum ParseType {
+        DEFAULT,
+        CONFIG,
+        FILE,
+        STRING
+    };
+
+    /**
+     * @brief parseConfig Load data from source and write it to destination.
+     * @param srcType Can be DEFAULT | CONFIG | FILE | STRING
+     * @param source don't care if srcType == (DEFAULT | CONFIG),
+     *               path of INI file if srcType == FILE
+     *               INI string if srcType == STRING
+     * @param destType Can be CONFIG | FILE | STRING (DEFAULT is invalid)
+     * @param destination don't care if srcType == CONFIG
+     *                    path of INI file if destType == FILE
+     *                    INI string if srcType == STRING
+     * @return True if the parsing succeeded
+     */
+    bool parseConfig(ParseType srcType, const std::string &source,
+        ParseType destType, std::string &destination);
 
     /* Config State */
     std::string m_configName;
