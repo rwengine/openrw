@@ -5,6 +5,7 @@
 class Logger;
 
 #include <data/GameTexts.hpp>
+#include <data/PedData.hpp>
 #include <data/ZoneData.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
@@ -159,6 +160,11 @@ public:
      */
     void loadWeaponDAT(const std::string& path);
 
+    /**
+     * Loads pedestrian stats from e.g. pedstats.dat
+     */
+    void loadPedStats(const std::string& path);
+
     bool loadAudioStream(const std::string& name);
     bool loadAudioClip(const std::string& name, const std::string& fileName);
 
@@ -271,6 +277,11 @@ public:
     std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 
     std::vector<std::shared_ptr<WeaponData>> weaponData;
+
+    /**
+     * Pedstrian type stats
+     */
+    std::vector<PedStats> pedstats;
 
     /**
      * @struct WaterArea

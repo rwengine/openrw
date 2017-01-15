@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(test_object_data) {
     {
         LoaderIDE l;
 
-        l.load(Global::get().getGamePath() + "/data/maps/generic.ide");
+        l.load(Global::get().getGamePath() + "/data/maps/generic.ide", {});
 
         BOOST_ASSERT(l.objects.find(1100) != l.objects.end());
 
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(test_object_data) {
     {
         LoaderIDE l;
 
-        l.load(Global::get().getGamePath() + "/data/default.ide");
+        l.load(Global::get().getGamePath() + "/data/default.ide", {});
 
         BOOST_ASSERT(l.objects.find(90) != l.objects.end());
 

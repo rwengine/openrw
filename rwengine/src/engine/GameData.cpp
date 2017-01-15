@@ -53,6 +53,7 @@ void GameData::load() {
     loadHandling("data/handling.cfg");
     loadWaterpro("data/waterpro.dat");
     loadWeaponDAT("data/weapon.dat");
+    loadPedStats("data/pedstats.dat");
 
     loadIFP("ped.ifp");
 
@@ -116,7 +117,7 @@ void GameData::loadIDE(const std::string& path) {
     auto systempath = index.findFilePath(path).string();
     LoaderIDE idel;
 
-    if (idel.load(systempath)) {
+    if (idel.load(systempath, pedstats)) {
         std::move(idel.objects.begin(), idel.objects.end(),
                   std::inserter(modelinfo, modelinfo.end()));
     } else {
@@ -490,6 +491,37 @@ void GameData::loadWeaponDAT(const std::string& path) {
     auto syspath = index.findFilePath(path).string();
 
     l.loadWeapons(syspath, weaponData);
+}
+
+void GameData::loadPedStats(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    for (int i = 0; std::getline(fs, line);) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        // The name should be ignored, but we will use it anyway
+        PedStats stats;
+        stats.id_ = i++;
+        std::stringstream ss(line);
+        ss >> stats.name_;
+        ss >> stats.fleedistance_;
+        ss >> stats.rotaterate_;
+        ss >> stats.fear_;
+        ss >> stats.temper_;
+        ss >> stats.lawful_;
+        ss >> stats.sexy_;
+        ss >> stats.attackstrength_;
+        ss >> stats.defendweakness_;
+        ss >> stats.flags_;
+
+        pedstats.push_back(stats);
+    }
 }
 
 bool GameData::loadAudioStream(const std::string& name) {

@@ -39,6 +39,8 @@ set(RWENGINE_SOURCES
 	src/data/ModelData.cpp
 	src/data/ModelData.hpp
 	src/data/PathData.hpp
+	src/data/PedData.cpp
+	src/data/PedData.hpp
 	src/data/Skeleton.cpp
 	src/data/Skeleton.hpp
 	src/data/WeaponData.hpp
