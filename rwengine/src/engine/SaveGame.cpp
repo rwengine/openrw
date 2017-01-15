@@ -459,14 +459,14 @@ struct Block18Data {
 };
 
 struct Block19PedType {
-    BlockDword unknown1;
+    BlockDword bitstring_;
     float unknown2;
     float unknown3;
     float unknown4;
     float unknown5;
     float unknown6;
-    BlockDword unknown7;
-    BlockDword unknown8;
+    BlockDword threatflags_;
+    BlockDword avoidflags_;
 };
 struct Block19Data {
     Block19PedType types[23];
@@ -1190,11 +1190,16 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block19Data pedTypeData;
     READ_VALUE(pedTypeData);
 
-#if RW_DEBUG && 0  // Nor this
+#if RW_DEBUG
     for (int i = 0; i < 23; ++i) {
-        if (pedTypeData.types[i].unknown1 & (0x1 << i) != 0) continue;
-        std::cout << pedTypeData.types[i].unknown1 << " "
-                  << pedTypeData.types[i].unknown7 << std::endl;
+        printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", pedTypeData.types[i].bitstring_,
+               pedTypeData.types[i].unknown2,
+               pedTypeData.types[i].unknown3,
+               pedTypeData.types[i].unknown4,
+               pedTypeData.types[i].unknown5,
+               pedTypeData.types[i].unknown6,
+               pedTypeData.types[i].threatflags_,
+               pedTypeData.types[i].avoidflags_);
     }
 #endif
 
