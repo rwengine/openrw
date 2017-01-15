@@ -4,6 +4,7 @@
 
 BOOST_AUTO_TEST_SUITE(ConfigTests)
 
+
 BOOST_AUTO_TEST_CASE(test_loading) {
     // Write out a temporary file
     std::ofstream test_config("/tmp/openrw_test.ini");
@@ -20,6 +21,7 @@ BOOST_AUTO_TEST_CASE(test_loading) {
 
     BOOST_CHECK_EQUAL(config.getGameDataPath(), "/dev/test");
     BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
+    BOOST_CHECK_EQUAL(config.getInputInvertY(), false);
 }
 
 

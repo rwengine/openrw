@@ -13,6 +13,10 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
     log.info("Game", "Build: " + kBuildStr);
 
     if (!config.isValid()) {
+        log.error("Config", "Invalid INI file at \""
+            + config.getConfigFile() + "\".\n"
+            + "Adapt the following default INI to your configuration.\n"
+            + config.getDefaultINIString());
         throw std::runtime_error("Invalid configuration file at: " +
                                  config.getConfigFile());
     }

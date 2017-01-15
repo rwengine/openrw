@@ -22,14 +22,15 @@ GameConfig::GameConfig(const std::string& configName,
     // Look up the path to use
     auto configFile = getConfigFile();
 
-    m_valid = readConfig(configFile);
+    std::string dummy;
+    m_valid = parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
 }
 
-std::string GameConfig::getConfigFile() {
+std::string GameConfig::getConfigFile() const {
     return m_configPath + "/" + m_configName;
 }
 
-bool GameConfig::isValid() {
+bool GameConfig::isValid() const {
     return m_valid;
 }
 
@@ -60,8 +61,7 @@ std::string GameConfig::getDefaultConfigPath() {
     return ".";
 }
 
-std::string stripComments(const std::string &str)
-{
+std::string stripComments(const std::string &str) {
     auto s = std::string(str, 0, str.find_first_of(";#"));
     return s.erase(s.find_last_not_of(" \n\r\t")+1);
 }
@@ -88,50 +88,139 @@ struct BoolTranslator {
     }
 };
 
-bool GameConfig::readConfig(const std::string &path) {
-    pt::ptree config, defaultConfig;
+struct IntTranslator {
+    typedef std::string internal_type;
+    typedef int         external_type;
+    boost::optional<external_type> get_value(const internal_type &str) {
+        return boost::optional<external_type>(std::stoi(stripComments(str)));
+    }
+    boost::optional<internal_type> put_value(const external_type &i) {
+        return boost::optional<internal_type>(std::to_string(i));
+    }
+};
+
+std::string GameConfig::getDefaultINIString() {
+    std::string result;
+    parseConfig(ParseType::DEFAULT, "", ParseType::STRING, result);
+    return result;
+}
+
+bool GameConfig::parseConfig(
+    GameConfig::ParseType srcType, const std::string &source,
+    ParseType destType, std::string &destination)
+{
     bool success = true;
+    pt::ptree srcTree;
+
+    if ((srcType == ParseType::STRING) || (srcType == ParseType::FILE)) {
+        std::istream *istream = nullptr;
+        switch (srcType) {
+            case ParseType::STRING:
+                istream = new std::istringstream(source);
+                break;
+            case ParseType::FILE:
+                istream = new std::ifstream(source);
+                break;
+            default:
+                //Cannot reach here
+                success = false;
+                break;
+        }
+        if (istream != nullptr) {
+            try {
+                pt::read_ini(*istream, srcTree);
+            } catch (pt::ini_parser_error &e) {
+                success = false;
+                RW_MESSAGE(e.what());
+            }
+        } else {
+            success = false;
+            RW_MESSAGE("Unable to create stream from source.");
+        }
+        delete istream;
+    }
 
     auto read_config = [&](const std::string &key, auto &target,
                           const auto &defaultValue, auto &translator,
                           bool optional=true) {
-        typedef typename std::remove_reference<decltype(target)>::type targetType;
-        defaultConfig.put(key, defaultValue, translator);
-        try {
-            target = config.get<targetType>(key, translator);
-        } catch (pt::ptree_bad_path &e) {
-            if (optional) {
-              target = defaultValue;
-            } else {
-              success = false;
-              RW_MESSAGE(e.what());
-            }
+        typedef typename std::remove_reference<decltype(target)>::type config_t;
+
+        config_t sourceValue;
+
+        switch (srcType) {
+            case ParseType::DEFAULT:
+                sourceValue = defaultValue;
+                break;
+            case ParseType::CONFIG:
+                sourceValue = target;
+                break;
+            case ParseType::FILE:
+            case ParseType::STRING:
+                try {
+                    sourceValue = srcTree.get<config_t>(key, translator);
+                } catch (pt::ptree_bad_path &e) {
+                    if (optional) {
+                        sourceValue = defaultValue;
+                    } else {
+                      success = false;
+                      RW_MESSAGE(e.what());
+                    }
+                }
+                break;
+        }
+        srcTree.put(key, sourceValue, translator);
+
+        switch (destType) {
+            case ParseType::DEFAULT:
+                RW_ERROR("Target cannot be DEFAULT.");
+                success = false;
+                break;
+            case ParseType::CONFIG:
+                //Don't care if success == false
+                target = sourceValue;
+                break;
+            case ParseType::FILE:
+            case ParseType::STRING:
+                break;
         }
     };
-
-    try {
-        pt::read_ini(path, config);
-    } catch (pt::ini_parser_error &e) {
-        success = false;
-        RW_MESSAGE(e.what());
-    }
 
     auto deft = StringTranslator();
     auto boolt = BoolTranslator();
 
-    // @todo Don't allow path seperators and relative directories
+    //Add new configuration parameters here.
+
+    // @todo Don't allow path separators and relative directories
     read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3", deft, false);
     read_config("game.language", this->m_gameLanguage, "american", deft);
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 
-    if (!success) {
-        std::stringstream strstream;
-        pt::write_ini(strstream, defaultConfig);
-
-        RW_MESSAGE("Failed to parse configuration file (" + path + ").");
-        RW_MESSAGE("Create one looking like this at \"" + path + "\":");
-        RW_MESSAGE(strstream.str());
+    if ((destType == ParseType::STRING) || (destType == ParseType::FILE)) {
+        std::ostringstream ostream;
+        try {
+            pt::write_ini(ostream, srcTree);
+        } catch (pt::ini_parser_error &e) {
+            success = false;
+            RW_MESSAGE(e.what());
+        }
+        switch (destType) {
+            case ParseType::STRING:
+                destination = ostream.str();
+                break;
+            case ParseType::FILE:
+            {
+                std::ofstream ofs(destination);
+                ofs << ostream.str();
+                ofs.close();
+                success &= !ofs.fail();
+                break;
+            }
+            default:
+                //Cannot reach here
+                success = false;
+                break;
+        }
     }
 
     return success;
