@@ -525,7 +525,10 @@ void RWGame::tick(float dt) {
                                    currentCam.getView());
             // Use the current camera position to spawn pedestrians.
             world->cleanupTraffic(currentCam);
-            world->createTraffic(currentCam);
+            // Only create new traffic outside cutscenes
+            if (!state.currentCutscene) {
+                world->createTraffic(currentCam);
+            }
         }
     }
 }
