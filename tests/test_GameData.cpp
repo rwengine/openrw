@@ -79,6 +79,23 @@ BOOST_AUTO_TEST_CASE(test_ped_relations) {
                           PedRelationship::THREAT_COP_CAR |
                           PedRelationship::THREAT_EXPLOSION);
 }
+
+BOOST_AUTO_TEST_CASE(test_ped_groups) {
+    GameData gd(&Global::get().log, Global::getGamePath());
+    gd.load();
+
+    BOOST_REQUIRE(gd.pedgroups.size() > 2);
+
+    const auto& def = gd.pedgroups[0];
+    const auto& red = gd.pedgroups[1];
+
+    BOOST_REQUIRE_GE(def.size(), 8);
+    BOOST_CHECK_EQUAL(def[0], 30);
+
+    BOOST_REQUIRE_GE(red.size(), 8);
+    BOOST_CHECK_EQUAL(red[0], 34);
+
+}
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()

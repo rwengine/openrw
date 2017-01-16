@@ -170,6 +170,11 @@ public:
      */
     void loadPedRelations(const std::string& path);
 
+    /**
+     * Loads pedestrian groups e.g. pedgrp.dat for zone info
+     */
+    void loadPedGroups(const std::string& path);
+
     bool loadAudioStream(const std::string& name);
     bool loadAudioClip(const std::string& name, const std::string& fileName);
 
@@ -292,6 +297,11 @@ public:
      * Pedestrian relationships
      */
     std::array<PedRelationship, PedModelInfo::_NUM_PEDTYPE> pedrels;
+
+    /**
+     * Pedestrian groups
+     */
+    PedGroupList pedgroups;
 
     /**
      * @struct WaterArea

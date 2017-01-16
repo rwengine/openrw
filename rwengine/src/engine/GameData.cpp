@@ -64,6 +64,9 @@ void GameData::load() {
 
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
+
+    // Load ped groups after IDEs so they can resolve
+    loadPedGroups("data/pedgrp.dat");
 }
 
 void GameData::loadLevelFile(const std::string& path) {
@@ -565,6 +568,40 @@ void GameData::loadPedRelations(const std::string& path) {
             ss >> shp.c_;
             ss >> shp.d_;
             ss >> shp.e_;
+        }
+    }
+}
+
+void GameData::loadPedGroups(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    while (std::getline(fs, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        std::stringstream ss(line);
+        PedGroup group;
+        while (ss >> line) {
+            if (line.empty() || line[0] == '#') {
+                break;
+            }
+            if (line.back() == ',') {
+                line.resize(line.size()-1);
+            }
+            auto model = findModelObject(line);
+            if (int16_t(model) == -1) {
+                logger->error("Data", "Invalid model in ped group " + line);
+                continue;
+            }
+            group.push_back(model);
+        }
+        if (!group.empty()) {
+            pedgroups.emplace_back(std::move(group));
         }
     }
 }

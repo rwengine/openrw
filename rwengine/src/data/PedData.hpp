@@ -67,4 +67,7 @@ public:
     static uint32_t threatFromName(const std::string& name);
 };
 
+using PedGroup = std::vector<uint16_t>;
+using PedGroupList = std::vector<PedGroup>;
+
 #endif
