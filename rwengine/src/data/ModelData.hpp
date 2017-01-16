@@ -346,7 +346,7 @@ public:
         PLAYER1 = 0,
         PLAYER2,
         PLAYER3,
-        PLAYER_4,
+        PLAYER4,
         CIVMALE,
         CIVFEMALE,
         COP,
@@ -365,6 +365,7 @@ public:
         _UNNAMED,
         PROSTITUTE,
         SPECIAL,
+        _NUM_PEDTYPE
     };
 
     PedType pedtype_ = PLAYER1;
@@ -380,7 +381,7 @@ public:
             {"PLAYER1", PLAYER1},
             {"PLAYER2", PLAYER2},
             {"PLAYER3", PLAYER3},
-            {"PLAYER_4", PLAYER_4},
+            {"PLAYER4", PLAYER4},
             {"CIVMALE", CIVMALE},
             {"CIVFEMALE", CIVFEMALE},
             {"COP", COP},

@@ -165,6 +165,11 @@ public:
      */
     void loadPedStats(const std::string& path);
 
+    /**
+     * Loads pedestrian relations e.g. peds.dat
+     */
+    void loadPedRelations(const std::string& path);
+
     bool loadAudioStream(const std::string& name);
     bool loadAudioClip(const std::string& name, const std::string& fileName);
 
@@ -282,6 +287,11 @@ public:
      * Pedstrian type stats
      */
     std::vector<PedStats> pedstats;
+
+    /**
+     * Pedestrian relationships
+     */
+    std::array<PedRelationship, PedModelInfo::_NUM_PEDTYPE> pedrels;
 
     /**
      * @struct WaterArea

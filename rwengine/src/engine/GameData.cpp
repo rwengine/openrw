@@ -54,6 +54,7 @@ void GameData::load() {
     loadWaterpro("data/waterpro.dat");
     loadWeaponDAT("data/weapon.dat");
     loadPedStats("data/pedstats.dat");
+    loadPedRelations("data/ped.dat");
 
     loadIFP("ped.ifp");
 
@@ -521,6 +522,50 @@ void GameData::loadPedStats(const std::string& path) {
         ss >> stats.flags_;
 
         pedstats.push_back(stats);
+    }
+}
+
+void GameData::loadPedRelations(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    for (int index = 0; std::getline(fs, line);) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        std::stringstream ss(line);
+        if (isspace(line[0])) {
+            // Add this flags to the last index
+            ss >> line;
+            if (line == "Avoid") {
+                while (!ss.eof()) {
+                    ss >> line;
+                    auto flag = PedRelationship::threatFromName(line);
+                    pedrels[index].avoidflags_ |= flag;
+                }
+            }
+            if (line == "Threat") {
+                while (!ss.eof()) {
+                    ss >> line;
+                    auto flag = PedRelationship::threatFromName(line);
+                    pedrels[index].threatflags_ |= flag;
+                }
+            }
+        } else {
+            ss >> line;
+            index = PedModelInfo::findPedType(line);
+            PedRelationship& shp = pedrels[index];
+            shp.id_ = PedRelationship::threatFromName(line);
+            ss >> shp.a_;
+            ss >> shp.b_;
+            ss >> shp.c_;
+            ss >> shp.d_;
+            ss >> shp.e_;
+        }
     }
 }
 

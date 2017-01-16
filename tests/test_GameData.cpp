@@ -60,6 +60,25 @@ BOOST_AUTO_TEST_CASE(test_ped_stat_info) {
     BOOST_CHECK_EQUAL(cop->statindex_, stat_cop.id_);
 }
 
+BOOST_AUTO_TEST_CASE(test_ped_relations) {
+    GameData gd(&Global::get().log, Global::getGamePath());
+    gd.load();
+
+    auto& rel_cop = gd.pedrels[PedModelInfo::COP];
+    auto& rel_crim = gd.pedrels[PedModelInfo::CRIMINAL];
+
+    BOOST_CHECK_EQUAL(rel_cop.id_, PedRelationship::THREAT_COP);
+    BOOST_CHECK_EQUAL(rel_cop.threatflags_,
+                      PedRelationship::THREAT_GUN |
+                          PedRelationship::THREAT_EXPLOSION |
+                          PedRelationship::THREAT_DEADPEDS);
+    BOOST_CHECK_EQUAL(rel_crim.id_, PedRelationship::THREAT_CRIMINAL);
+    BOOST_CHECK_EQUAL(rel_crim.threatflags_,
+                      PedRelationship::THREAT_GUN |
+                          PedRelationship::THREAT_COP |
+                          PedRelationship::THREAT_COP_CAR |
+                          PedRelationship::THREAT_EXPLOSION);
+}
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
