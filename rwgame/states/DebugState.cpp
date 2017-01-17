@@ -232,7 +232,9 @@ void DebugState::tick(float dt) {
 void DebugState::draw(GameRenderer* r) {
     // Draw useful information like camera position.
     std::stringstream ss;
-    ss << "Camera Position: " << glm::to_string(_debugCam.position);
+    ss << "Camera Position: " << glm::to_string(_debugCam.position) << "\n";
+    auto zone = getWorld()->data->findZoneAt(_debugCam.position);
+    ss << (zone ? zone->name : "No Zone") << "\n";
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());

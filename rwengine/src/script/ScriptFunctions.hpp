@@ -108,11 +108,11 @@ inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object,
 
 template <class Tobj>
 inline bool objectInZone(const ScriptArguments& args, Tobj object,
-                         const ScriptString zone) {
-    auto zfind = args.getWorld()->data->zones.find(zone);
-    if (zfind != args.getWorld()->data->zones.end()) {
-        auto& min = zfind->second.min;
-        auto& max = zfind->second.max;
+                         const ScriptString name) {
+    auto zone = args.getWorld()->data->findZone(name);
+    if (zone) {
+        auto& min = zone->min;
+        auto& max = zone->max;
         return objectInBounds(object, min, max);
     }
     return false;
