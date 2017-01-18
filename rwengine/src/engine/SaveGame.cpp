@@ -371,9 +371,11 @@ struct Block11Zone {
 };
 struct Block11ZoneInfo {
     BlockWord density;
-    // This will likely be the gang
-    // car and ped densities +more
-    uint8_t unknown1[56];
+    BlockWord unknown1[16];
+    BlockWord peddensity;
+    BlockWord copdensity;
+    BlockWord gangpeddensity[9];
+    BlockWord pedgroup;
 };
 struct Block11AudioZone {
     BlockWord zoneId;
@@ -890,6 +892,10 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         Block11ZoneInfo& info = zoneData.dayNightInfo[z];
         READ_VALUE(info.density)
         READ_VALUE(info.unknown1)
+        READ_VALUE(info.peddensity)
+        READ_VALUE(info.copdensity)
+        READ_VALUE(info.gangpeddensity)
+        READ_VALUE(info.pedgroup);
     }
     READ_VALUE(zoneData.numNavZones);
     READ_VALUE(zoneData.numZoneInfos);
@@ -919,12 +925,64 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     for (int z = 0; z < zoneData.numNavZones; ++z) {
         Block11Zone& zone = zoneData.navZones[z];
         std::cout << " " << zone.name << std::endl;
+        auto& dayinfo = zoneData.dayNightInfo[zone.dayZoneInfo];
+        std::cout << "  DAY " << dayinfo.density << " " << dayinfo.peddensity
+                  << " " << dayinfo.copdensity << " "
+                  << " [";
+        for (BlockDword gang : dayinfo.gangpeddensity) {
+            std::cout << " " << gang;
+        }
+        std::cout << "] " << dayinfo.pedgroup << std::endl;
+        for (BlockDword dw : dayinfo.unknown1) {
+            std::cout << " " << dw;
+        }
+        std::cout << std::endl;
+
+        auto& nightinfo = zoneData.dayNightInfo[zone.nightZoneInfo];
+        std::cout << "  NIGHT " << nightinfo.density << " "
+                  << nightinfo.peddensity << " " << nightinfo.copdensity << " "
+                  << " [";
+        for (BlockDword gang : nightinfo.gangpeddensity) {
+            std::cout << " " << gang;
+        }
+        std::cout << "] " << nightinfo.pedgroup << std::endl;
+        for (BlockDword dw : nightinfo.unknown1) {
+            std::cout << " " << dw;
+        }
+        std::cout << std::endl;
     }
     for (int z = 0; z < zoneData.numMapZones; ++z) {
         Block11Zone& zone = zoneData.mapZones[z];
         std::cout << " " << zone.name << std::endl;
     }
 #endif
+
+    // Clear existing zone data
+    auto& gamezones = state.world->data->gamezones;
+    gamezones.clear();
+    for (int z = 0; z < zoneData.numNavZones; ++z) {
+        Block11Zone& zone = zoneData.navZones[z];
+        Block11ZoneInfo& day = zoneData.dayNightInfo[zone.dayZoneInfo];
+        Block11ZoneInfo& night = zoneData.dayNightInfo[zone.nightZoneInfo];
+        ZoneData zd;
+        zd.name = zone.name;
+        zd.type = zone.type;
+        zd.min = zone.coordA;
+        zd.max = zone.coordB;
+        zd.island = zone.level;
+        // @toodo restore gang density
+        zd.pedGroupDay = day.pedgroup;
+        zd.pedGroupNight = night.pedgroup;
+        gamezones.push_back(zd);
+    }
+    // Re-build zone hierarchy
+    for (ZoneData& zone : gamezones) {
+        if (&zone == &gamezones[0]) {
+            continue;
+        }
+
+        gamezones[0].insertZone(zone);
+    }
 
     // Block 12
     BlockSize gangBlockSize;
