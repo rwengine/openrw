@@ -463,8 +463,8 @@ struct Block19PedType {
     float unknown2;
     float unknown3;
     float unknown4;
-    float unknown5;
-    float unknown6;
+    float fleedistance;
+    float headingchangerate;
     BlockDword threatflags_;
     BlockDword avoidflags_;
 };
@@ -1196,8 +1196,8 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
                pedTypeData.types[i].unknown2,
                pedTypeData.types[i].unknown3,
                pedTypeData.types[i].unknown4,
-               pedTypeData.types[i].unknown5,
-               pedTypeData.types[i].unknown6,
+               pedTypeData.types[i].fleedistance,
+               pedTypeData.types[i].headingchangerate,
                pedTypeData.types[i].threatflags_,
                pedTypeData.types[i].avoidflags_);
     }
