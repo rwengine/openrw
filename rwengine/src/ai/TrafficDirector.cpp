@@ -2,6 +2,7 @@
 #include <ai/AIGraphNode.hpp>
 #include <ai/CharacterController.hpp>
 #include <core/Logger.hpp>
+#include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
@@ -127,11 +128,19 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
     }
 
     /// Hardcoded cop Pedestrian
-    std::vector<uint16_t> validPeds = {1};
-    validPeds.insert(validPeds.end(), {20, 11, 19, 5});
+    std::vector<uint16_t> peds = {1};
+    // Determine which zone the viewpoint is in
+    auto zone = world->data->findZoneAt(camera.position);
+    bool day = (world->state->basic.gameHour >= 8 &&
+                world->state->basic.gameHour <= 19);
+    int groupid = zone ? (day ? zone->pedGroupDay : zone->pedGroupNight) : 0;
+    const auto& group = world->data->pedgroups.at(groupid);
+    peds.insert(peds.end(), group.cbegin(), group.cend());
+
     std::random_device rd;
     std::default_random_engine re(rd());
-    std::uniform_int_distribution<> d(0, validPeds.size() - 1);
+    std::uniform_int_distribution<> d(0, peds.size() - 1);
+    const glm::vec3 kSpawnOffset{0.f, 0.f, 1.f};
 
     int counter = availablePeds;
     // maxSpawn can be -1 for "as many as possible"
@@ -151,8 +160,8 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
         }
 
         // Spawn a pedestrian from the available pool
-        auto ped = world->createPedestrian(
-            validPeds[d(re)], spawn->position + glm::vec3(0.f, 0.f, 1.f));
+        auto ped = world->createPedestrian(peds[d(re)],
+                                           spawn->position + kSpawnOffset);
         ped->setLifetime(GameObject::TrafficLifetime);
         ped->controller->setGoal(CharacterController::TrafficWander);
         created.push_back(ped);
