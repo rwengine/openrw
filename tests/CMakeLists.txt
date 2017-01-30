@@ -28,6 +28,7 @@ set(TEST_SOURCES
 	"test_Input.cpp"
 	"test_lifetime.cpp"
 	"test_loaderdff.cpp"
+	"test_LoaderIPL.cpp"
 	"test_Logger.cpp"
 	"test_menu.cpp"
 	"test_object.cpp"
@@ -45,6 +46,7 @@ set(TEST_SOURCES
 	"test_VisualFX.cpp"
 	"test_weapon.cpp"
 	"test_world.cpp"
+	"test_ZoneData.cpp"
 
 	# Hack in rwgame sources until there's a per-target test suite
 	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"

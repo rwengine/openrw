@@ -56,6 +56,10 @@ void GameData::load() {
 
     loadIFP("ped.ifp");
 
+    // Clear existing zones
+    gamezones = ZoneDataList{
+        {"CITYZON", 0, {-4000.f, -4000.f, -500.f}, {4000.f, 4000.f, 500.f}, 0}};
+
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
 }
@@ -164,20 +168,24 @@ void GameData::loadIPL(const std::string& path) {
 bool GameData::loadZone(const std::string& path) {
     LoaderIPL ipll;
 
-    if (ipll.load(path)) {
-        if (ipll.zones.size() > 0) {
-            for (auto& z : ipll.zones) {
-                zones.insert({z.name, z});
-            }
-            logger->info("Data", "Loaded " + std::to_string(ipll.zones.size()) +
-                                     " zones from " + path);
-            return true;
-        }
-    } else {
+    // Load the zones
+    if (!ipll.load(path)) {
         logger->error("Data", "Failed to load zones from " + path);
+        return false;
     }
 
-    return false;
+    gamezones.insert(gamezones.end(), ipll.zones.begin(), ipll.zones.end());
+
+    // Build zone hierarchy
+    for (ZoneData& zone : gamezones) {
+        zone.children_.clear();
+        if (&zone == &gamezones.front()) {
+            continue;
+        }
+        gamezones[0].insertZone(zone);
+    }
+
+    return true;
 }
 
 enum ColSection {

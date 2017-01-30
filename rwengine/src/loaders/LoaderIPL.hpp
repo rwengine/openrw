@@ -20,7 +20,7 @@ public:
     std::vector<std::shared_ptr<InstanceData>> m_instances;
 
     /// List of Zones
-    std::vector<ZoneData> zones;
+    ZoneDataList zones;
 };
 
 #endif  // LoaderIPL_h__

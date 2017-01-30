@@ -3694,12 +3694,11 @@ void opcode_0152(const ScriptArguments& args, const ScriptString arg1, const Scr
 	RW_UNUSED(arg15);
 	RW_UNUSED(arg16);
 	RW_UNUSED(arg17);
-	auto& zones = args.getWorld()->data->zones;
-	auto it = zones.find(arg1);
-	if (it != zones.end()) {
-		auto density = (it->second.gangCarDensityNight);
-		if (arg1) {
-			density = it->second.gangCarDensityDay;
+	auto zone = args.getWorld()->data->findZone(arg1);
+	if (zone) {
+		auto density = (zone->gangCarDensityNight);
+		if (arg2) {
+			density = zone->gangCarDensityDay;
 		}
 		auto count = args.getParameters().size();
 		for (auto g = 0u; g < count - 2; ++g) {
@@ -3824,12 +3823,11 @@ void opcode_015c(const ScriptArguments& args, const ScriptString areaName, const
 	RW_UNUSED(arg9);
 	RW_UNUSED(arg10);
 	RW_UNUSED(arg11);
-	auto& zones = args.getWorld()->data->zones;
-	auto it = zones.find(areaName);
-	if (it != zones.end()) {
-		auto density = (it->second.gangCarDensityNight);
+	auto zone = args.getWorld()->data->findZone(areaName);
+	if (zone) {
+		auto density = (zone->gangCarDensityNight);
 		if (arg2) {
-			density = it->second.gangCarDensityDay;
+			density = zone->gangCarDensityDay;
 		}
 		auto count = args.getParameters().size();
 		for (auto g = 0u; g < count - 2; ++g) {
@@ -8101,13 +8099,12 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 	RW_UNIMPLEMENTED_OPCODE(0x02dd);
 	RW_UNUSED(areaName);
 	RW_UNUSED(character);
-	const auto& zones = args.getWorld()->data->zones;
 
 	std::string zname(args[0].string);
 
 	// Only try to find a character if this is a known zone
-	auto zfind = zones.find(zname);
-	if(zfind != zones.end()) {
+	auto zone = args.getWorld()->data->findZone(areaName);
+	if(zone) {
 
 		// Create a list of candidate characters by iterating and checking if the char is in this zone
 		std::vector<std::pair<GameObjectID, GameObject*>> candidates;
@@ -8122,8 +8119,8 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 
 			// Check if character is in this zone
 			auto cp = character->getPosition();
-			auto& min = zfind->second.min;
-			auto& max = zfind->second.max;
+			auto& min = zone->min;
+			auto& max = zone->max;
 			if (cp.x > min.x && cp.y > min.y && cp.z > min.z &&
 			    cp.x < max.x && cp.y < max.y && cp.z < max.z) {
 				candidates.push_back(p);
@@ -9246,17 +9243,17 @@ void opcode_0324(const ScriptArguments& args, const ScriptString arg1, const Scr
 	RW_UNUSED(arg1);
 	RW_UNUSED(arg2);
 	RW_UNUSED(arg3);
-	auto it = args.getWorld()->data->zones.find(args[0].string);
-	if( it != args.getWorld()->data->zones.end() )
+	auto zone = args.getWorld()->data->findZone(arg1);
+	if (zone)
 	{
 		auto day = args[1].integer == 1;
 		if( day )
 		{
-			it->second.pedGroupDay = args[2].integer;
+			zone->pedGroupDay = args[2].integer;
 		}
 		else
 		{
-			it->second.pedGroupNight = args[2].integer;
+			zone->pedGroupNight = args[2].integer;
 		}
 	}
 }

@@ -43,6 +43,7 @@ private:
 
     Logger* logger;
     LoaderDFF dffLoader;
+
 public:
     /**
      * ctor
@@ -193,10 +194,22 @@ public:
      */
     std::map<std::string, LoaderIMG> archives;
 
-    /**
-     * Map Zones
-     */
-    std::map<std::string, ZoneData> zones;
+    ZoneDataList gamezones;
+
+    ZoneDataList mapzones;
+
+    ZoneData* findZone(const std::string& name) {
+        auto it =
+            std::find_if(gamezones.begin(), gamezones.end(),
+                         [&](const ZoneData& a) { return a.name == name; });
+        return it != gamezones.end() ? &(*it) : nullptr;
+    }
+
+    ZoneData* findZoneAt(const glm::vec3& pos) {
+        RW_CHECK(!gamezones.empty(), "No game zones loaded");
+        ZoneData* zone = gamezones[0].findLeafAtPoint(pos);
+        return zone;
+    }
 
     std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>> modelinfo;
 
