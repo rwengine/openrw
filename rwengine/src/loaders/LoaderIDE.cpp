@@ -8,10 +8,20 @@
 #include <sstream>
 #include <string>
 
-bool LoaderIDE::load(const std::string &filename) {
+bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
     std::ifstream str(filename);
 
     if (!str.is_open()) return false;
+
+    auto find_stat_id = [&](const std::string &name) {
+        auto it =
+            std::find_if(stats.begin(), stats.end(),
+                         [&](const PedStats &a) { return a.name_ == name; });
+        if (it == stats.end()) {
+            return -1;
+        }
+        return it->id_;
+    };
 
     SectionTypes section = NONE;
     while (!str.eof()) {
@@ -155,7 +165,9 @@ bool LoaderIDE::load(const std::string &filename) {
                     getline(strstream, buff, ',');
                     peds->pedtype_ = PedModelInfo::findPedType(buff);
 
-                    getline(strstream, peds->behaviour_, ',');
+                    std::string behaviour;
+                    getline(strstream, behaviour, ',');
+                    peds->statindex_ = find_stat_id(behaviour);
                     getline(strstream, peds->animgroup_, ',');
 
                     getline(strstream, buff, ',');
@@ -232,7 +244,7 @@ bool LoaderIDE::load(const std::string &filename) {
                     }
 
                     auto &object = objects[path.ID];
-                    auto simple = dynamic_cast<SimpleModelInfo*>(object.get());
+                    auto simple = dynamic_cast<SimpleModelInfo *>(object.get());
                     simple->paths.push_back(path);
 
                     break;

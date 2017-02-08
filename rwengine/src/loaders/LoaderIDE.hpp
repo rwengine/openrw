@@ -3,6 +3,7 @@
 
 #include <data/ModelData.hpp>
 #include <data/PathData.hpp>
+#include <data/PedData.hpp>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <map>
@@ -22,7 +23,7 @@ public:
     };
 
     // Load the IDE data into memory
-    bool load(const std::string& filename);
+    bool load(const std::string& filename, const PedStatsList& stats);
 
     /**
      * @brief objects loaded during the call to load()

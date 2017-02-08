@@ -53,6 +53,8 @@ void GameData::load() {
     loadHandling("data/handling.cfg");
     loadWaterpro("data/waterpro.dat");
     loadWeaponDAT("data/weapon.dat");
+    loadPedStats("data/pedstats.dat");
+    loadPedRelations("data/ped.dat");
 
     loadIFP("ped.ifp");
 
@@ -62,6 +64,9 @@ void GameData::load() {
 
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
+
+    // Load ped groups after IDEs so they can resolve
+    loadPedGroups("data/pedgrp.dat");
 }
 
 void GameData::loadLevelFile(const std::string& path) {
@@ -116,7 +121,7 @@ void GameData::loadIDE(const std::string& path) {
     auto systempath = index.findFilePath(path).string();
     LoaderIDE idel;
 
-    if (idel.load(systempath)) {
+    if (idel.load(systempath, pedstats)) {
         std::move(idel.objects.begin(), idel.objects.end(),
                   std::inserter(modelinfo, modelinfo.end()));
     } else {
@@ -490,6 +495,115 @@ void GameData::loadWeaponDAT(const std::string& path) {
     auto syspath = index.findFilePath(path).string();
 
     l.loadWeapons(syspath, weaponData);
+}
+
+void GameData::loadPedStats(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    for (int i = 0; std::getline(fs, line);) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        // The name should be ignored, but we will use it anyway
+        PedStats stats;
+        stats.id_ = i++;
+        std::stringstream ss(line);
+        ss >> stats.name_;
+        ss >> stats.fleedistance_;
+        ss >> stats.rotaterate_;
+        ss >> stats.fear_;
+        ss >> stats.temper_;
+        ss >> stats.lawful_;
+        ss >> stats.sexy_;
+        ss >> stats.attackstrength_;
+        ss >> stats.defendweakness_;
+        ss >> stats.flags_;
+
+        pedstats.push_back(stats);
+    }
+}
+
+void GameData::loadPedRelations(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    for (int index = 0; std::getline(fs, line);) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        std::stringstream ss(line);
+        if (isspace(line[0])) {
+            // Add this flags to the last index
+            ss >> line;
+            if (line == "Avoid") {
+                while (!ss.eof()) {
+                    ss >> line;
+                    auto flag = PedRelationship::threatFromName(line);
+                    pedrels[index].avoidflags_ |= flag;
+                }
+            }
+            if (line == "Threat") {
+                while (!ss.eof()) {
+                    ss >> line;
+                    auto flag = PedRelationship::threatFromName(line);
+                    pedrels[index].threatflags_ |= flag;
+                }
+            }
+        } else {
+            ss >> line;
+            index = PedModelInfo::findPedType(line);
+            PedRelationship& shp = pedrels[index];
+            shp.id_ = PedRelationship::threatFromName(line);
+            ss >> shp.a_;
+            ss >> shp.b_;
+            ss >> shp.c_;
+            ss >> shp.d_;
+            ss >> shp.e_;
+        }
+    }
+}
+
+void GameData::loadPedGroups(const std::string& path) {
+    auto syspath = index.findFilePath(path).string();
+    std::ifstream fs(syspath.c_str());
+    if (!fs.is_open()) {
+        throw std::runtime_error("Failed to open " + path);
+    }
+
+    std::string line;
+    while (std::getline(fs, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+        std::stringstream ss(line);
+        PedGroup group;
+        while (ss >> line) {
+            if (line.empty() || line[0] == '#') {
+                break;
+            }
+            if (line.back() == ',') {
+                line.resize(line.size()-1);
+            }
+            auto model = findModelObject(line);
+            if (int16_t(model) == -1) {
+                logger->error("Data", "Invalid model in ped group " + line);
+                continue;
+            }
+            group.push_back(model);
+        }
+        if (!group.empty()) {
+            pedgroups.emplace_back(std::move(group));
+        }
+    }
 }
 
 bool GameData::loadAudioStream(const std::string& name) {

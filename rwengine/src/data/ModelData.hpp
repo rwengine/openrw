@@ -346,7 +346,7 @@ public:
         PLAYER1 = 0,
         PLAYER2,
         PLAYER3,
-        PLAYER_4,
+        PLAYER4,
         CIVMALE,
         CIVFEMALE,
         COP,
@@ -365,11 +365,11 @@ public:
         _UNNAMED,
         PROSTITUTE,
         SPECIAL,
+        _NUM_PEDTYPE
     };
 
     PedType pedtype_ = PLAYER1;
-    /// @todo this should be an index
-    std::string behaviour_;
+    int statindex_ = 0;
     /// @todo this should be an index
     std::string animgroup_;
     /// The mask of vehicle classes this ped can drive
@@ -381,7 +381,7 @@ public:
             {"PLAYER1", PLAYER1},
             {"PLAYER2", PLAYER2},
             {"PLAYER3", PLAYER3},
-            {"PLAYER_4", PLAYER_4},
+            {"PLAYER4", PLAYER4},
             {"CIVMALE", CIVMALE},
             {"CIVFEMALE", CIVFEMALE},
             {"COP", COP},
@@ -397,7 +397,6 @@ public:
             {"EMERGENCY", EMERGENCY},
             {"FIREMAN", FIREMAN},
             {"CRIMINAL", CRIMINAL},
-            {"_UNNAMED", _UNNAMED},
             {"PROSTITUTE", PROSTITUTE},
             {"SPECIAL", SPECIAL},
         };
