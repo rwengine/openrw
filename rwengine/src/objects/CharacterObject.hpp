@@ -98,7 +98,7 @@ struct AnimationGroup {
  * @brief The CharacterObject struct
  * Implements Character object behaviours.
  */
-class CharacterObject : public GameObject {
+class CharacterObject : public GameObject, public ClumpObject {
 private:
     CharacterState currentState;
 

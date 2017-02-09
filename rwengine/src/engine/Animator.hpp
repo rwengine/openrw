@@ -8,10 +8,8 @@
 #include <map>
 #include <rw/defines.hpp>
 
-class Model;
+class Clump;
 class ModelFrame;
-
-class Skeleton;
 
 /**
  * @brief calculates animation frame matrices, as well as procedural frame
@@ -25,13 +23,6 @@ class Skeleton;
  */
 class Animator {
     /**
-     * @brief Stores data required to animate a model frame
-     */
-    struct BoneInstanceData {
-        unsigned int frameIndex;
-    };
-
-    /**
      * @brief The AnimationState struct stores information about playing
      * animations
      */
@@ -43,18 +34,13 @@ class Animator {
         float speed;
         /// Automatically restart
         bool repeat;
-        std::map<AnimationBone*, BoneInstanceData> boneInstances;
+        std::map<AnimationBone*, ModelFrame*> boneInstances;
     };
 
     /**
      * @brief model The model being animated.
      */
-    Model* model;
-
-    /**
-     * @brief Skeleton instance.
-     */
-    Skeleton* skeleton;
+    Clump* model;
 
     /**
      * @brief Currently playing animations
@@ -62,7 +48,7 @@ class Animator {
     std::vector<AnimationState> animations;
 
 public:
-    Animator(Model* model, Skeleton* skeleton);
+    Animator(Clump* model);
 
     Animation* getAnimation(unsigned int slot) {
         if (slot < animations.size()) {

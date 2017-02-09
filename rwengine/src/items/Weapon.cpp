@@ -1,23 +1,14 @@
-#include <data/Skeleton.hpp>
 #include <engine/GameWorld.hpp>
 #include <items/Weapon.hpp>
 #include <objects/ProjectileObject.hpp>
 
 void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
-    auto handFrame = owner->getModel()->findFrame("srhand");
-    glm::mat4 handMatrix;
-    if (handFrame) {
-        while (handFrame->getParent()) {
-            handMatrix =
-                owner->skeleton->getMatrix(handFrame->getIndex()) * handMatrix;
-            handFrame = handFrame->getParent();
-        }
-    }
+    auto handFrame = owner->getClump()->findFrame("srhand");
+    glm::mat4 handMatrix = handFrame->getWorldTransform();
 
     const auto& raydirection = owner->getLookDirection();
     const auto rayend = owner->getPosition() + raydirection * weapon->hitRange;
-    auto handPos = glm::vec3(handMatrix[3]);
-    auto fireOrigin = owner->getPosition() + owner->getRotation() * handPos;
+    auto fireOrigin = glm::vec3(handMatrix[3]);
     float dmg = weapon->damage;
 
     owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon});

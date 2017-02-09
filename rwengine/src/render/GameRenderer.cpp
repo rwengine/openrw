@@ -1,4 +1,4 @@
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -14,7 +14,6 @@
 #include <data/ModelData.hpp>
 
 #include <data/CutsceneData.hpp>
-#include <data/Skeleton.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <render/ObjectRenderer.hpp>
 
@@ -318,8 +317,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
             m, glm::vec3(i.radius +
                          0.15f * glm::sin(_renderWorld->getGameTime() * 5.f)));
 
-        objectRenderer.renderFrame(sphereModel, sphereModel->frames[0], m,
-                                   nullptr, 1.f, renderList);
+        objectRenderer.renderClump(sphereModel, m, nullptr, renderList);
     }
 
     // Render arrows above anything that isn't radar only (or hidden)
@@ -346,8 +344,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
                                glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
         model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        objectRenderer.renderFrame(arrowModel, arrowModel->frames[0], model,
-                                   nullptr, 1.f, renderList);
+        objectRenderer.renderClump(arrowModel, model, nullptr, renderList);
     }
 
     RW_PROFILE_END();
@@ -473,57 +470,6 @@ void GameRenderer::renderPostProcess() {
     wdp.textures = {fbTextures[0]};
 
     renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
-}
-
-void GameRenderer::renderGeometry(Model* model, size_t g,
-                                  const glm::mat4& modelMatrix, float opacity,
-                                  GameObject* object) {
-    for (size_t sg = 0; sg < model->geometries[g]->subgeom.size(); ++sg) {
-        Model::SubGeometry& subgeom = model->geometries[g]->subgeom[sg];
-
-        Renderer::DrawParameters dp;
-
-        dp.colour = {255, 255, 255, 255};
-        dp.count = subgeom.numIndices;
-        dp.start = subgeom.start;
-        dp.textures = {0};
-
-        if (model->geometries[g]->materials.size() > subgeom.material) {
-            Model::Material& mat =
-                model->geometries[g]->materials[subgeom.material];
-
-            if (mat.textures.size() > 0) {
-                auto tex = mat.textures[0].texture;
-                if (tex) {
-                    dp.textures = {tex->getName()};
-                }
-            }
-
-            if ((model->geometries[g]->flags &
-                 RW::BSGeometry::ModuleMaterialColor) ==
-                RW::BSGeometry::ModuleMaterialColor) {
-                dp.colour = mat.colour;
-
-                if (object && object->type() == GameObject::Vehicle) {
-                    auto vehicle = static_cast<VehicleObject*>(object);
-                    if (dp.colour.r == 60 && dp.colour.g == 255 &&
-                        dp.colour.b == 0) {
-                        dp.colour = glm::u8vec4(vehicle->colourPrimary, 255);
-                    } else if (dp.colour.r == 255 && dp.colour.g == 0 &&
-                               dp.colour.b == 175) {
-                        dp.colour = glm::u8vec4(vehicle->colourSecondary, 255);
-                    }
-                }
-            }
-
-            dp.colour.a *= opacity;
-
-            dp.diffuse = mat.diffuseIntensity;
-            dp.ambient = mat.ambientIntensity;
-        }
-
-        renderer->draw(modelMatrix, &model->geometries[g]->dbuff, dp);
-    }
 }
 
 void GameRenderer::renderEffects(GameWorld* world) {
@@ -654,49 +600,6 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
 
     // Ooops
     renderer->invalidate();
-}
-
-bool GameRenderer::renderFrame(Model* m, ModelFrame* f, const glm::mat4& matrix,
-                               GameObject* object, float opacity,
-                               bool queueTransparent) {
-    auto localmatrix = matrix;
-    bool vis = true;
-
-    if (object && object->skeleton) {
-        // Skeleton is loaded with the correct matrix via Animator.
-        localmatrix *= object->skeleton->getMatrix(f);
-
-        vis = object->skeleton->getData(f->getIndex()).enabled;
-    } else {
-        localmatrix *= f->getTransform();
-    }
-
-    if (vis) {
-        for (size_t g : f->getGeometries()) {
-            if (!object || !object->animator) {
-                RW::BSGeometryBounds& bounds = m->geometries[g]->geometryBounds;
-
-                glm::vec3 boundpos = bounds.center + glm::vec3(localmatrix[3]);
-                if (!_camera.frustum.intersects(boundpos, bounds.radius)) {
-                    culled++;
-                    continue;
-                }
-            }
-
-            renderGeometry(m, g, localmatrix, opacity, object);
-        }
-    }
-
-    for (ModelFrame* c : f->getChildren()) {
-        renderFrame(m, c, localmatrix, object, queueTransparent);
-    }
-    return true;
-}
-
-void GameRenderer::renderModel(Model* model, const glm::mat4& modelMatrix,
-                               GameObject* object) {
-    renderFrame(model, model->frames[model->rootFrameIdx], modelMatrix, object,
-                1.f);
 }
 
 void GameRenderer::renderPaths() {

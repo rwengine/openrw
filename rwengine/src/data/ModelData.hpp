@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <data/CollisionModel.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/PathData.hpp>
 #include <rw/defines.hpp>
 #ifdef RW_WINDOWS
@@ -108,6 +108,9 @@ private:
     std::unique_ptr<CollisionModel> collision;
 };
 
+using ModelInfoTable =
+    std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>>;
+
 /**
  * Model data for simple types
  *
@@ -121,8 +124,6 @@ public:
     int timeOn = 0;
     int timeOff = 24;
     int flags;
-    /// @todo Remove this?
-    bool LOD = false;
     /// Information loaded from PATH sections
     /// @todo remove this from here too :)
     std::vector<PathData> paths;
@@ -133,18 +134,19 @@ public:
     }
 
     /// @todo change with librw
-    void setAtomic(Model* model, int n, ModelFrame* atomic) {
+    void setAtomic(Clump* model, int n, AtomicPtr atomic) {
         model_ = model;
+        /// @todo disassociated the Atomic from Clump
         atomics_[n] = atomic;
     }
 
     /// @todo remove this
-    Model* getModel() const {
+    Clump* getModel() const {
         return model_;
     }
 
-    ModelFrame* getAtomic(int n) const {
-        return atomics_[n];
+    Atomic* getAtomic(int n) const {
+        return atomics_[n].get();
     }
 
     void setLodDistance(int n, float d) {
@@ -155,6 +157,15 @@ public:
     float getLodDistance(int n) {
         RW_CHECK(n < 3, "Lod Index out of range");
         return loddistances_[n];
+    }
+
+    Atomic* getDistanceAtomic(float d) {
+        for (auto i = 0; i < getNumAtomics(); ++i) {
+            if (d < loddistances_[i]) {
+                return atomics_[i].get();
+            }
+        }
+        return nullptr;
     }
 
     void setNumAtomics(int num) {
@@ -203,12 +214,49 @@ public:
         NO_ZBUFFER_WRITE = 1 << 6,
     };
 
+    // Set up data for big building objects
+    void setupBigBuilding(const ModelInfoTable& models);
+    bool isBigBuilding() const {
+        return isbigbuilding_;
+    }
+
+    void findRelatedModel(const ModelInfoTable& models);
+
+    float getLargestLodDistance() const {
+        return furthest_ != 0 ? loddistances_[furthest_ - 1]
+                              : loddistances_[numatomics_ - 1];
+    }
+
+    float getNearLodDistance() const {
+        return loddistances_[2];
+    }
+
+    void determineFurthest() {
+        furthest_ = 0;
+        if (numatomics_ == 2) {
+            furthest_ = loddistances_[0] >= loddistances_[1] ? 1 : 0;
+        }
+        if (numatomics_ == 3) {
+            furthest_ = loddistances_[0] >= loddistances_[1]
+                            ? 1
+                            : loddistances_[1] >= loddistances_[2] ? 2 : 0;
+        }
+    }
+
+    SimpleModelInfo* related() const {
+        return related_;
+    }
+
 private:
-    Model* model_ = nullptr;
-    ModelFrame* atomics_[3] = {};
+    Clump* model_ = nullptr;
+    std::array<AtomicPtr, 3> atomics_;
     float loddistances_[3] = {};
     uint8_t numatomics_ = 0;
     uint8_t alpha_ = 0;  /// @todo ask aap why
+    bool isbigbuilding_ = 0;
+    uint8_t furthest_ = 0;
+
+    SimpleModelInfo* related_ = nullptr;
 };
 
 /**
@@ -231,11 +279,11 @@ public:
     ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) {
     }
 
-    void setModel(Model* model) {
+    void setModel(Clump* model) {
         model_ = model;
     }
 
-    Model* getModel() const {
+    Clump* getModel() const {
         return model_;
     }
 
@@ -249,7 +297,7 @@ public:
     }
 
 private:
-    Model* model_ = nullptr;
+    Clump* model_ = nullptr;
 };
 
 /**

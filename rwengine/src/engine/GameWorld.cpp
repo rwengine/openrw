@@ -7,7 +7,7 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <ai/DefaultAIController.hpp>
 #include <ai/TrafficDirector.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
@@ -124,20 +124,6 @@ bool GameWorld::placeItems(const std::string& name) {
             }
         }
 
-        // Attempt to Associate LODs.
-        for (auto& p : instancePool.objects) {
-            auto object = p.second;
-            InstanceObject* instance = static_cast<InstanceObject*>(object);
-            auto modelinfo = instance->getModelInfo<SimpleModelInfo>();
-            if (!modelinfo->LOD && modelinfo->name.length() > 3) {
-                auto lodInstit =
-                    modelInstances.find("LOD" + modelinfo->name.substr(3));
-                if (lodInstit != modelInstances.end()) {
-                    instance->LODinstance = lodInstit->second;
-                }
-            }
-        }
-
         return true;
     } else {
         logger->error("Data", "Failed to load IPL " + path);
@@ -170,8 +156,8 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                 "World", "Instance with missing model: " + std::to_string(id));
         }
 
-        auto instance = new InstanceObject(
-            this, pos, rot, glm::vec3(1.f, 1.f, 1.f), oi, nullptr, dydata);
+        auto instance =
+            new InstanceObject(this, pos, rot, glm::vec3(1.f), oi, dydata);
 
         instancePool.insert(instance);
         allObjects.push_back(instance);
@@ -280,18 +266,23 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
 
     auto model = vti->getModel();
     auto info = data->vehicleInfo.find(vti->handling_);
-    if (model && info != data->vehicleInfo.end()) {
-        if (info->second->wheels.size() == 0 &&
-            info->second->seats.size() == 0) {
-            for (const ModelFrame* f : model->frames) {
-                const std::string& name = f->getName();
+    if (model && info != data->vehicleInfo.end() &&
+        info->second->wheels.size() == 0 && info->second->seats.size() == 0) {
+        auto root = model->getFrame();
+        for (const auto& frame : root->getChildren()) {
+            const std::string& name = frame->getName();
 
-                if (name.size() > 5 && name.substr(0, 5) == "wheel") {
-                    auto frameTrans = f->getMatrix();
-                    info->second->wheels.push_back({glm::vec3(frameTrans[3])});
-                }
-                if (name == "ped_frontseat") {
-                    auto p = f->getDefaultTranslation();
+            if (name.size() > 5 && name.substr(0, 5) == "wheel") {
+                const auto& frameTrans = frame->getWorldTransform();
+                info->second->wheels.push_back({glm::vec3(frameTrans[3])});
+            }
+
+            if (name == "chassis_dummy") {
+                // These are nested within chassis_dummy
+                auto frontseat = frame->findDescendant("ped_frontseat");
+                auto backseat = frame->findDescendant("ped_backseat");
+                if (frontseat) {
+                    auto p = frontseat->getDefaultTranslation();
                     // Left seat
                     p.x = -p.x;
                     info->second->seats.front.push_back({p});
@@ -299,10 +290,10 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
                     p.x = -p.x;
                     info->second->seats.front.push_back({p});
                 }
-                if (name == "ped_backseat") {
+                if (backseat) {
                     // @todo how does this work for the barracks, ambulance
                     // or coach?
-                    auto p = f->getDefaultTranslation();
+                    auto p = backseat->getDefaultTranslation();
                     // Left seat
                     p.x = -p.x;
                     info->second->seats.back.push_back({p});

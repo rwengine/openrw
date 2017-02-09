@@ -1,28 +1,15 @@
 #include "ModelFramesWidget.hpp"
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void ModelFramesWidget::updateInfoBox(Model* model, ModelFrame* f) {
+void ModelFramesWidget::updateInfoBox(Clump* model, ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
-        auto labText = QString("Name: %1\nTranslation: %2\nTextures:%3")
+        auto labText = QString("Name: %1\nTranslation: %2")
                            .arg(QString::fromStdString(f->getName()))
                            .arg(QString::fromStdString(
                                glm::to_string(f->getDefaultTranslation())));
-        QString geomString;
-        for (size_t gi : f->getGeometries()) {
-            auto& g = model->geometries[gi];
-            // for(Model::SubGeometry& sg : g->subgeom)
-            for (Model::Material& m : g->materials) {
-                for (Model::Texture& t : m.textures) {
-                    geomString += QString("\n %1 (%2)")
-                                      .arg(t.name.c_str())
-                                      .arg(t.alphaName.c_str());
-                }
-            }
-        }
-        labText = labText.arg(geomString);
         _frameLabel->setText(labText);
     }
 }
@@ -46,7 +33,7 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
     setLayout(_layout);
 }
 
-void ModelFramesWidget::setModel(Model* model, Skeleton* skeleton) {
+void ModelFramesWidget::setModel(Clump* model) {
     if (framemodel) {
         delete framemodel;
         framemodel = nullptr;
@@ -54,7 +41,7 @@ void ModelFramesWidget::setModel(Model* model, Skeleton* skeleton) {
     }
     gmodel = model;
     if (model != nullptr) {
-        framemodel = new DFFFramesTreeModel(model, skeleton, this);
+        framemodel = new DFFFramesTreeModel(model, this);
         tree->setModel(framemodel);
         tree->setDisabled(false);
         connect(tree->selectionModel(),

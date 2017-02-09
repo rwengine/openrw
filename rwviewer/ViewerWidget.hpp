@@ -2,7 +2,7 @@
 #ifndef _VIEWERWIDGET_HPP_
 #define _VIEWERWIDGET_HPP_
 #include <QTimer>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <gl/DrawBuffer.hpp>
@@ -16,7 +16,7 @@
 #include <QGLWidget>
 
 class GameRenderer;
-class Model;
+class Clump;
 class ViewerWidget : public QGLWidget {
     Q_OBJECT
 
@@ -27,12 +27,12 @@ class ViewerWidget : public QGLWidget {
     QTimer timer;
     GameWorld* gworld;
 
-    Model* activeModel;
+    Clump* activeModel;
     ModelFrame* selectedFrame;
     GameObject* dummyObject;
     quint16 currentObjectID;
 
-    Model* _lastModel;
+    Clump* _lastModel;
     Animation* canimation;
 
     float viewDistance;
@@ -60,7 +60,7 @@ public:
 
     virtual void paintGL();
 
-    Model* currentModel() const;
+    Clump* currentModel() const;
     GameObject* currentObject() const;
 
     GameWorld* world();
@@ -68,7 +68,7 @@ public:
 public slots:
 
     void showObject(qint16 item);
-    void showModel(Model* model);
+    void showModel(Clump* model);
     void selectFrame(ModelFrame* frame);
 
     void exportModel();
@@ -81,7 +81,7 @@ signals:
 
     void fileOpened(const QString& file);
 
-    void modelChanged(Model* model);
+    void modelChanged(Clump* model);
 
 protected:
     void keyPressEvent(QKeyEvent*) override;

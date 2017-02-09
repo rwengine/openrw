@@ -1,6 +1,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <ai/CharacterController.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>

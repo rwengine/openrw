@@ -6,7 +6,6 @@
 #include <engine/GameState.hpp>
 #include <engine/GameData.hpp>
 #include <engine/Animator.hpp>
-#include <data/Skeleton.hpp>
 #include <core/Logger.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
@@ -8455,11 +8454,15 @@ void opcode_02f4(const ScriptArguments& args, const ScriptObject object0, const 
 	RW_UNUSED(model);
 	RW_UNUSED(object1);
 	auto id = args[1].integer;
-	auto actor = args.getObject<CutsceneObject>(0);
+	auto actor = static_cast<CutsceneObject*>(args.getObject<CutsceneObject>(0));
 	CutsceneObject* object = args.getWorld()->createCutsceneObject(id, args.getWorld()->state->currentCutscene->meta.sceneOffset );
 
-	auto headframe = actor->getModel()->findFrame("shead");
-	actor->skeleton->setEnabled(headframe, false);
+	auto headframe = actor->getClump()->findFrame("shead");
+	for (const auto& atomic : actor->getClump()->getAtomics()) {
+		if (atomic->getFrame().get() == headframe) {
+		    atomic->setFlag(Atomic::ATOMIC_RENDER, false);
+		}
+	}
 	object->setParentActor(actor, headframe);
 
 	*args[2].globalInteger = object->getGameObjectID();

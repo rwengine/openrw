@@ -2,7 +2,7 @@
 #ifndef _GAMEOBJECT_HPP_
 #define _GAMEOBJECT_HPP_
 
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <loaders/LoaderIDE.hpp>
@@ -11,9 +11,7 @@
 #include <objects/ObjectTypes.hpp>
 #include <rw/types.hpp>
 
-class Skeleton;
 class CharacterController;
-class ModelFrame;
 class Animator;
 class GameWorld;
 
@@ -33,7 +31,7 @@ class GameObject {
     /**
      * Model used for rendering
      */
-    Model* model_;
+    Clump* model_;
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
@@ -47,7 +45,6 @@ public:
     GameWorld* engine;
 
     Animator* animator;  /// Object's animator.
-    Skeleton* skeleton;
 
     bool inWater;
 
@@ -72,7 +69,6 @@ public:
         , rotation(rot)
         , engine(engine)
         , animator(nullptr)
-        , skeleton(nullptr)
         , inWater(false)
         , _lastHeight(std::numeric_limits<float>::max())
         , visible(true)
@@ -106,14 +102,14 @@ public:
     /**
      * @return The model used in rendering
      */
-    Model* getModel() const {
+    Clump* getModel() const {
         return model_;
     }
 
     /**
      * Changes the current model, used for re-dressing chars
      */
-    void setModel(Model* model) {
+    void setModel(Clump* model) {
         model_ = model;
     }
 
@@ -235,7 +231,7 @@ public:
         return lifetime;
     }
 
-    void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
+    virtual void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
         _lastPosition = position;
         _lastRotation = rotation;
         position = pos;
@@ -244,6 +240,20 @@ public:
 
 private:
     ObjectLifetime lifetime;
+};
+
+class ClumpObject {
+    ClumpPtr clump_;
+
+protected:
+    void setClump(ClumpPtr ptr) {
+        clump_ = ptr;
+    }
+
+public:
+    const ClumpPtr& getClump() const {
+        return clump_;
+    }
 };
 
 #endif  // __GAMEOBJECTS_HPP__

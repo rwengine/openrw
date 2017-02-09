@@ -1,7 +1,6 @@
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#include <data/Clump.hpp>
 #include <data/CollisionModel.hpp>
-#include <data/Model.hpp>
-#include <data/Skeleton.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 #include <engine/Animator.hpp>
@@ -70,11 +69,7 @@ public:
         const auto& rot = tform.getRotation();
         auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());
 
-        auto skeleton = m_object->skeleton;
-        auto& prev = skeleton->getData(m_part->dummy->getIndex()).a;
-        auto next = prev;
-        next.rotation = r2;
-        skeleton->setData(m_part->dummy->getIndex(), {next, prev, true});
+        m_part->dummy->setRotation(glm::mat3_cast(r2));
     }
 
 private:
@@ -148,23 +143,28 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
                                   : 1.f - info->handling.tractionBias);
     }
 
-    // Hide all LOD and damage frames.
-    skeleton = new Skeleton;
-
     setModel(getVehicle()->getModel());
+    setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
 
-    for (ModelFrame* frame : getModel()->frames) {
-        auto& name = frame->getName();
-        bool isDam = name.find("_dam") != name.npos;
-        bool isLod = name.find("lo") != name.npos;
-        bool isDum = name.find("_dummy") != name.npos;
-        /*bool isOk = name.find("_ok") != name.npos;*/
-        if (isDam || isLod || isDum) {
-            skeleton->setEnabled(frame, false);
+    // Locate the Atomics for the chassis_hi and chassis_vlo frames
+    for (const auto& atomic : getClump()->getAtomics()) {
+        auto frame = atomic->getFrame().get();
+        if (frame->getName() == "chassis_vlo") {
+            chassislow_ = atomic.get();
         }
+        if (frame->getName() == "chassis_hi") {
+            chassishigh_ = atomic.get();
+        }
+    }
 
+    // Create meta-data for dummy parts
+    auto chassisframe = getClump()->findFrame("chassis_dummy");
+    RW_CHECK(chassisframe, "Vehicle has no chassis_dummy");
+    for (auto& frame : chassisframe->getChildren()) {
+        auto& name = frame->getName();
+        bool isDum = name.find("_dummy") != name.npos;
         if (isDum) {
-            registerPart(frame);
+            registerPart(frame.get());
         }
     }
 }
@@ -184,6 +184,7 @@ VehicleObject::~VehicleObject() {
 
 void VehicleObject::setPosition(const glm::vec3& pos) {
     GameObject::setPosition(pos);
+    getClump()->getFrame()->setTranslation(pos);
     if (collision->getBulletBody()) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
         for (auto& part : dynamicParts) {
@@ -201,6 +202,7 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
 }
 
 void VehicleObject::setRotation(const glm::quat& orientation) {
+    getClump()->getFrame()->setRotation(glm::mat3_cast(orientation));
     if (collision->getBulletBody()) {
         auto t = collision->getBulletBody()->getWorldTransform();
         t.setRotation(btQuaternion(orientation.x, orientation.y, orientation.z,
@@ -208,6 +210,14 @@ void VehicleObject::setRotation(const glm::quat& orientation) {
         collision->getBulletBody()->setWorldTransform(t);
     }
     GameObject::setRotation(orientation);
+}
+
+void VehicleObject::updateTransform(const glm::vec3& pos,
+                                    const glm::quat& rot) {
+    position = pos;
+    rotation = rot;
+    getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
+    getClump()->getFrame()->setTranslation(pos);
 }
 
 #include <glm/gtc/type_ptr.hpp>
@@ -550,18 +560,14 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
             if (p->normal == nullptr) continue;
 
-            if (skeleton->getData(p->normal->getIndex()).enabled) {
-                auto& geom =
-                    getModel()->geometries[p->normal->getGeometries()[0]];
-                auto pp =
-                    p->normal->getMatrix() * glm::vec4(0.f, 0.f, 0.f, 1.f);
-                float td = glm::distance(
-                    glm::vec3(pp) + geom->geometryBounds.center, dpoint);
-                if (td < geom->geometryBounds.radius * 1.2f) {
-                    setPartState(p, DAM);
-                }
-                /// @todo determine when doors etc. should un-latch
+            /// @todo correct logic
+            float damageradius = 0.1f;
+            auto center = glm::vec3(p->dummy->getWorldTransform()[3]);
+            float td = glm::distance(center, dpoint);
+            if (td < damageradius * 1.2f) {
+                setPartState(p, DAM);
             }
+            /// @todo determine when doors etc. should un-latch
         }
     }
 
@@ -571,11 +577,11 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 void VehicleObject::setPartState(VehicleObject::Part* part,
                                  VehicleObject::FrameState state) {
     if (state == VehicleObject::OK) {
-        if (part->normal) skeleton->setEnabled(part->normal, true);
-        if (part->damaged) skeleton->setEnabled(part->damaged, false);
+        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
+        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
     } else if (state == VehicleObject::DAM) {
-        if (part->normal) skeleton->setEnabled(part->normal, false);
-        if (part->damaged) skeleton->setEnabled(part->damaged, true);
+        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
+        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
     }
 }
 
@@ -606,10 +612,7 @@ void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) {
         destroyObjectHinge(part);
 
         // Restore default bone transform
-        auto dt = part->dummy->getDefaultTranslation();
-        auto dr = glm::quat_cast(part->dummy->getDefaultRotation());
-        Skeleton::FrameTransform tf{dt, dr};
-        skeleton->setData(part->dummy->getIndex(), {tf, tf, true});
+        part->dummy->reset();
     }
 }
 
@@ -638,24 +641,29 @@ VehicleObject::Part* VehicleObject::getPart(const std::string& name) {
     return nullptr;
 }
 
-ModelFrame* findStateFrame(ModelFrame* f, const std::string& state) {
-    auto it = std::find_if(
-        f->getChildren().begin(), f->getChildren().end(), [&](ModelFrame* c) {
-            return c->getName().find(state) != std::string::npos;
-        });
-    if (it != f->getChildren().end()) {
-        return *it;
-    }
-    return nullptr;
-}
-
 void VehicleObject::registerPart(ModelFrame* mf) {
-    auto normal = findStateFrame(mf, "_ok");
-    auto damage = findStateFrame(mf, "_dam");
+    auto dummynameend = mf->getName().find("_dummy");
+    RW_CHECK(dummynameend != std::string::npos,
+             "Can't create part from non-dummy");
+    auto dummyname = mf->getName().substr(0, dummynameend);
+    auto normalframe = mf->findDescendant(dummyname + "_hi_ok");
+    auto damageframe = mf->findDescendant(dummyname + "_hi_dam");
 
-    if (normal == nullptr && damage == nullptr) {
+    if (normalframe == nullptr && damageframe == nullptr) {
         // Not actually a useful part, just a dummy.
         return;
+    }
+
+    // Find the Atomics for the part
+    Atomic *normal = nullptr, *damage = nullptr;
+    for (const auto& atomic : getClump()->getAtomics()) {
+        if (atomic->getFrame().get() == normalframe) {
+            normal = atomic.get();
+        }
+        if (atomic->getFrame().get() == damageframe) {
+            damage = atomic.get();
+            damage->setFlag(Atomic::ATOMIC_RENDER, false);
+        }
     }
 
     dynamicParts.insert(
@@ -672,20 +680,12 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     auto& fn = part->dummy->getName();
 
-    ModelFrame* okframe = part->normal;
-
-    if (okframe->getGeometries().size() == 0) return;
-
-    auto& geom = getModel()->geometries[okframe->getGeometries()[0]];
-    auto gbounds = geom->geometryBounds;
-
     if (fn.find("door") != fn.npos) {
         hingeAxis = {0.f, 0.f, 1.f};
         // hingePosition = {0.f, 0.2f, 0.f};
         boxSize = {0.15f, 0.5f, 0.6f};
         // boxOffset = {0.f,-0.2f, gbounds.center.z/2.f};
-        auto tf = gbounds.center;
-        boxOffset = btVector3(tf.x, tf.y, tf.z);
+        boxOffset = btVector3(0.f, -0.25f, 0.f);
         hingePosition = -boxOffset;
 
         if (sign < 0.f) {

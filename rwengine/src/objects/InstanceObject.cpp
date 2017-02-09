@@ -7,17 +7,23 @@
 
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,
-                               BaseModelInfo* modelinfo, InstanceObject* lod,
+                               BaseModelInfo* modelinfo,
                                std::shared_ptr<DynamicObjectData> dyn)
     : GameObject(engine, pos, rot, modelinfo)
     , health(100.f)
     , scale(scale)
     , body(nullptr)
-    , LODinstance(lod)
     , dynamics(dyn)
     , _enablePhysics(false) {
     if (modelinfo) {
         changeModel(modelinfo);
+        setPosition(pos);
+        setRotation(rot);
+
+        // Disable the main island LOD
+        if (modelinfo->name.find("IslandLOD") != std::string::npos) {
+            setVisible(false);
+        }
 
         /// @todo store path information properly
         if (modelinfo->type() == ModelDataType::SimpleInfo) {
@@ -133,6 +139,17 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
         setModel(getModelInfo<SimpleModelInfo>()->getModel());
         auto collision = getModelInfo<SimpleModelInfo>()->getCollision();
 
+        auto modelatomic = getModelInfo<SimpleModelInfo>()->getAtomic(0);
+        if (modelatomic) {
+            auto previousatomic = atomic_;
+            atomic_ = modelatomic->clone();
+            if (previousatomic) {
+                atomic_->setFrame(previousatomic->getFrame());
+            } else {
+                atomic_->setFrame(std::make_shared<ModelFrame>());
+            }
+        }
+
         if (collision) {
             body.reset(new CollisionInstance);
             body->createPhysicsBody(this, collision, dynamics.get());
@@ -141,10 +158,24 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
     }
 }
 
+void InstanceObject::setPosition(const glm::vec3& pos) {
+    if (body) {
+        auto& wtr = body->getBulletBody()->getWorldTransform();
+        wtr.setOrigin(btVector3(pos.x, pos.y, pos.z));
+    }
+    if (atomic_) {
+        atomic_->getFrame()->setTranslation(pos);
+    }
+    GameObject::setPosition(pos);
+}
+
 void InstanceObject::setRotation(const glm::quat& r) {
     if (body) {
         auto& wtr = body->getBulletBody()->getWorldTransform();
         wtr.setRotation(btQuaternion(r.x, r.y, r.z, r.w));
+    }
+    if (atomic_) {
+        atomic_->getFrame()->setRotation(glm::mat3_cast(r));
     }
     GameObject::setRotation(r);
 }
@@ -180,4 +211,12 @@ void InstanceObject::setSolid(bool solid) {
         flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
     }
     body->getBulletBody()->setCollisionFlags(flags);
+}
+
+void InstanceObject::updateTransform(const glm::vec3& pos,
+                                     const glm::quat& rot) {
+    position = pos;
+    rotation = rot;
+    getAtomic()->getFrame()->setRotation(glm::mat3_cast(rot));
+    getAtomic()->getFrame()->setTranslation(pos);
 }

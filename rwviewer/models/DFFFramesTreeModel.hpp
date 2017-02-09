@@ -4,15 +4,13 @@
 #include <QAbstractItemModel>
 #include <rw/types.hpp>
 
-class Model;
-class Skeleton;
+class Clump;
 
 class DFFFramesTreeModel : public QAbstractItemModel {
-    Model* model;
-    Skeleton* skeleton;
+    Clump* model;
 
 public:
-    explicit DFFFramesTreeModel(Model* m, Skeleton* skel, QObject* parent = 0);
+    explicit DFFFramesTreeModel(Clump* m, QObject* parent = 0);
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 

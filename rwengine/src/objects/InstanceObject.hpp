@@ -14,16 +14,20 @@ class InstanceObject : public GameObject {
     float health;
     bool visible = true;
 
+    /**
+     * The Atomic instance for this object
+     */
+    AtomicPtr atomic_;
+
 public:
     glm::vec3 scale;
     std::unique_ptr<CollisionInstance> body;
-    InstanceObject* LODinstance;
     std::shared_ptr<DynamicObjectData> dynamics;
     bool _enablePhysics;
 
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
-                   BaseModelInfo* modelinfo, InstanceObject* lod,
+                   BaseModelInfo* modelinfo,
                    std::shared_ptr<DynamicObjectData> dyn);
     ~InstanceObject();
 
@@ -31,10 +35,15 @@ public:
         return Instance;
     }
 
+    const AtomicPtr& getAtomic() const {
+        return atomic_;
+    }
+
     void tick(float dt);
 
     void changeModel(BaseModelInfo* incoming);
 
+    virtual void setPosition(const glm::vec3& pos);
     virtual void setRotation(const glm::quat& r);
 
     virtual bool takeDamage(const DamageInfo& damage);
@@ -51,6 +60,8 @@ public:
     float getHealth() const {
         return health;
     }
+
+    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
 };
 
 #endif

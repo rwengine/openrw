@@ -6,13 +6,13 @@
 /**
  * @brief Object type used for cutscene animations.
  */
-class CutsceneObject : public GameObject {
+class CutsceneObject : public GameObject, public ClumpObject {
     GameObject* _parent;
     ModelFrame* _bone;
 
 public:
     CutsceneObject(GameWorld* engine, const glm::vec3& pos,
-                   const glm::quat& rot, Model* model,
+                   const glm::quat& rot, Clump* model,
                    BaseModelInfo* modelinfo);
     ~CutsceneObject();
 

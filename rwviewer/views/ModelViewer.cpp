@@ -1,6 +1,5 @@
 #include "ModelViewer.hpp"
 #include <QDebug>
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <fstream>
 #include <objects/GameObject.hpp>
@@ -9,7 +8,7 @@
 
 ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent,
                          Qt::WindowFlags f)
-    : ViewerInterface(parent, f), viewing(nullptr), skeleton(nullptr) {
+    : ViewerInterface(parent, f), viewing(nullptr) {
     mainSplit = new QSplitter;
     mainLayout = new QVBoxLayout;
 
@@ -40,21 +39,16 @@ void ModelViewer::setViewerWidget(ViewerWidget* widget) {
     showModel(viewing);
 }
 
-void ModelViewer::showModel(Model* model) {
+void ModelViewer::showModel(Clump* model) {
     viewing = model;
-    if (skeleton) {
-        delete skeleton;
-    }
-    skeleton = new Skeleton();
     viewerWidget->showModel(model);
-    frames->setModel(model, nullptr);
+    frames->setModel(model);
 }
 
 void ModelViewer::showObject(uint16_t object) {
     viewerWidget->showObject(object);
     viewing = viewerWidget->currentModel();
-    skeleton = viewerWidget->currentObject()->skeleton;
-    frames->setModel(viewing, skeleton);
+    frames->setModel(viewing);
 }
 
 void ModelViewer::loadAnimations(const QString& file) {

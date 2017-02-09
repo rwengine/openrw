@@ -23,8 +23,8 @@ SET(RWLIB_SOURCES
 	"source/platform/FileIndex.hpp"
 	"source/platform/FileIndex.cpp"
 
-	"source/data/Model.hpp"
-	"source/data/Model.cpp"
+    "source/data/Clump.hpp"
+    "source/data/Clump.cpp"
 
 	"source/loaders/LoaderIMG.hpp"
 	"source/loaders/LoaderIMG.cpp"

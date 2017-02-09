@@ -41,8 +41,6 @@ set(RWENGINE_SOURCES
 	src/data/PathData.hpp
 	src/data/PedData.cpp
 	src/data/PedData.hpp
-	src/data/Skeleton.cpp
-	src/data/Skeleton.hpp
 	src/data/WeaponData.hpp
 	src/data/ZoneData.hpp
 	src/dynamics/CollisionInstance.cpp

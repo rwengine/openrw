@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <data/Model.hpp>
+#include <data/Clump.hpp>
 #include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
@@ -11,31 +11,62 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         LoaderDFF loader;
 
-        Model* m = loader.loadFromMemory(d);
+        Clump* m = loader.loadFromMemory(d);
 
         BOOST_REQUIRE(m != nullptr);
 
-        BOOST_REQUIRE_EQUAL(m->frames.size(), 40);
+        BOOST_REQUIRE(m->getFrame());
 
-        BOOST_REQUIRE_EQUAL(m->geometries.size(), 16);
+        BOOST_REQUIRE(!m->getAtomics().empty());
+        const auto& atomic = m->getAtomics()[0];
 
-        BOOST_REQUIRE_EQUAL(m->geometries[0]->subgeom.size(), 5);
-
-        for (auto& g : m->geometries) {
-            BOOST_CHECK_GT(g->geometryBounds.radius, 0.f);
-        }
-
-        BOOST_REQUIRE(m->atomics.size() > 0);
-
-        for (Model::Atomic& a : m->atomics) {
-            BOOST_CHECK(a.frame < m->frames.size());
-            BOOST_CHECK(a.geometry < m->geometries.size());
-        }
+        BOOST_REQUIRE(atomic->getGeometry());
+        BOOST_REQUIRE(atomic->getFrame());
 
         delete m;
     }
 }
 
 #endif
+
+BOOST_AUTO_TEST_CASE(test_clump_clone) {
+    {
+        auto frame1 = std::make_shared<ModelFrame>(0);
+        frame1->setName("Frame1");
+        auto frame2 = std::make_shared<ModelFrame>(1);
+        frame2->setName("Frame2");
+
+        frame1->addChild(frame2);
+
+        auto geometry = std::make_shared<Geometry>();
+
+        auto atomic = std::make_shared<Atomic>();
+        atomic->setFrame(frame2);
+        atomic->setGeometry(geometry);
+
+        auto clump = std::make_shared<Clump>();
+        clump->addAtomic(atomic);
+        clump->setFrame(frame1);
+
+        // Now clone and verify that:
+        //  The hierarchy has the same data but different objects
+        //  The atomics have the same data but different objects
+        // Suspected correct behaviour:
+        //  The geometry is the same for each atomic
+
+        auto newclump = std::shared_ptr<Clump>(clump->clone());
+        BOOST_REQUIRE(newclump);
+
+        BOOST_CHECK_NE(newclump, clump);
+
+        BOOST_REQUIRE(newclump->getFrame());
+        BOOST_CHECK_NE(newclump->getFrame(), clump->getFrame());
+        BOOST_CHECK_EQUAL(newclump->getFrame()->getChildren().size(), 1);
+
+        BOOST_CHECK_EQUAL(newclump->getAtomics().size(), 1);
+
+        BOOST_CHECK_EQUAL(frame1->getName(), newclump->getFrame()->getName());
+    }
+}
 
 BOOST_AUTO_TEST_SUITE_END()

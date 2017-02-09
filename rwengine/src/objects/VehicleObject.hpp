@@ -16,13 +16,15 @@ class btTransform;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject : public GameObject {
+class VehicleObject : public GameObject, public ClumpObject {
 private:
     float steerAngle;
     float throttle;
     float brake;
     bool handbrake;
 
+    Atomic* chassishigh_ = nullptr;
+    Atomic* chassislow_ = nullptr;
 public:
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
@@ -36,8 +38,8 @@ public:
 
     struct Part {
         ModelFrame* dummy;
-        ModelFrame* normal;
-        ModelFrame* damaged;
+        Atomic* normal;
+        Atomic* damaged;
         btRigidBody* body;
         btHingeConstraint* constraint;
         bool moveToAngle;
@@ -58,9 +60,14 @@ public:
 
     void setRotation(const glm::quat& orientation);
 
+    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
+
     VehicleModelInfo* getVehicle() const {
         return getModelInfo<VehicleModelInfo>();
     }
+
+    Atomic* getHighLOD() const { return chassishigh_; }
+    Atomic* getLowLOD() const { return chassislow_; }
 
     Type type() {
         return Vehicle;

@@ -1,4 +1,3 @@
-#include <data/Skeleton.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <loaders/LoaderDFF.hpp>
@@ -8,9 +7,6 @@
 GameObject::~GameObject() {
     if (animator) {
         delete animator;
-    }
-    if (skeleton) {
-        delete skeleton;
     }
 
     if (modelinfo_) {
