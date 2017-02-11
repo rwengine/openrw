@@ -29,6 +29,8 @@ set(RWENGINE_SOURCES
 	src/core/Logger.hpp
 	src/core/Profiler.cpp
 	src/core/Profiler.hpp
+	src/data/AnimGroup.cpp
+	src/data/AnimGroup.hpp
 	src/data/Chase.cpp
 	src/data/Chase.hpp
 	src/data/CollisionModel.hpp

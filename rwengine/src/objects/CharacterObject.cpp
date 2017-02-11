@@ -32,42 +32,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , physObject(nullptr)
     , physShape(nullptr)
     , controller(nullptr) {
-    // TODO move AnimationGroup creation somewhere else.
-    animations.idle = engine->data->animations["idle_stance"];
-    animations.walk = engine->data->animations["walk_player"];
-    animations.walk_start = engine->data->animations["walk_start"];
-    animations.run = engine->data->animations["run_player"];
-    animations.sprint = engine->data->animations["sprint_civi"];
-
-    animations.walk_right = engine->data->animations["walk_player_right"];
-    animations.walk_right_start = engine->data->animations["walk_start_right"];
-    animations.walk_left = engine->data->animations["walk_player_left"];
-    animations.walk_left_start = engine->data->animations["walk_start_left"];
-
-    animations.walk_back = engine->data->animations["walk_player_back"];
-    animations.walk_back_start = engine->data->animations["walk_start_back"];
-
-    animations.jump_start = engine->data->animations["jump_launch"];
-    animations.jump_glide = engine->data->animations["jump_glide"];
-    animations.jump_land = engine->data->animations["jump_land"];
-
-    animations.car_sit = engine->data->animations["car_sit"];
-    animations.car_sit_low = engine->data->animations["car_lsit"];
-
-    animations.car_open_lhs = engine->data->animations["car_open_lhs"];
-    animations.car_getin_lhs = engine->data->animations["car_getin_lhs"];
-    animations.car_getout_lhs = engine->data->animations["car_getout_lhs"];
-    animations.car_pullout_lhs = engine->data->animations["car_pullout_lhs"];
-    animations.car_jacked_lhs = engine->data->animations["car_jackedlhs"];
-
-    animations.car_open_rhs = engine->data->animations["car_open_rhs"];
-    animations.car_getin_rhs = engine->data->animations["car_getin_rhs"];
-    animations.car_getout_rhs = engine->data->animations["car_getout_rhs"];
-    animations.car_pullout_rhs = engine->data->animations["car_pullout_rhs"];
-    animations.car_jacked_rhs = engine->data->animations["car_jackedrhs"];
-
-    animations.kd_front = engine->data->animations["kd_front"];
-    animations.ko_shot_front = engine->data->animations["ko_shot_front"];
+    animations = engine->data->pedAnimGroups["player"].get();
 
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));
@@ -151,11 +116,11 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // Things are simpler if we're in a vehicle
     if (getCurrentVehicle()) {
-        animator->playAnimation(0, animations.car_sit, 1.f, true);
+        animator->playAnimation(0, animations->car_sit, 1.f, true);
         return glm::vec3();
     }
 
-    Animation* movementAnimation = animations.idle;
+    Animation* movementAnimation = animations->idle;
     Animation* currentAnim = animator->getAnimation(AnimIndexMovement);
     bool isActionHappening =
         (animator->getAnimation(AnimIndexAction) != nullptr);
@@ -165,46 +130,46 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     float movementLength = glm::length(movement);
     if (!isAlive()) {
-        movementAnimation = animations.ko_shot_front;
+        movementAnimation = animations->ko_shot_front;
         repeat = false;
     } else if (jumped) {
         repeat = false;
-        if (currentAnim == animations.jump_start &&
+        if (currentAnim == animations->jump_start &&
             animator->isCompleted(AnimIndexMovement)) {
-            movementAnimation = animations.jump_start;
+            movementAnimation = animations->jump_start;
         }
         if (isOnGround()) {
-            if (currentAnim != animations.jump_land ||
+            if (currentAnim != animations->jump_land ||
                 !animator->isCompleted(AnimIndexMovement)) {
-                movementAnimation = animations.jump_land;
+                movementAnimation = animations->jump_land;
             } else {
                 // We are done jumping
                 jumped = false;
             }
         } else {
-            movementAnimation = animations.jump_glide;
+            movementAnimation = animations->jump_glide;
         }
     } else if (movementLength > movementEpsilon) {
         if (running && !isActionHappening) {
             if (movementLength > 1.f) {
-                movementAnimation = animations.sprint;
+                movementAnimation = animations->sprint;
             } else {
-                movementAnimation = animations.run;
+                movementAnimation = animations->run;
             }
             animationSpeed = 1.f;
         } else {
             animationSpeed = 1.f / movementLength;
             // Determine if we need to play the walk start animation
-            if (currentAnim != animations.walk) {
-                if (currentAnim != animations.walk_start ||
+            if (currentAnim != animations->walk) {
+                if (currentAnim != animations->walk_start ||
                     !animator->isCompleted(AnimIndexMovement)) {
-                    movementAnimation = animations.walk_start;
+                    movementAnimation = animations->walk_start;
                 } else {
-                    movementAnimation = animations.walk;
+                    movementAnimation = animations->walk;
                 }
             } else {
                 // Keep walkin
-                movementAnimation = animations.walk;
+                movementAnimation = animations->walk;
             }
         }
     }
@@ -219,7 +184,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // If we have to, interrogate the movement animation
     const auto& modelroot = getClump()->getFrame();
-    if (movementAnimation != animations.idle &&
+    if (movementAnimation != animations->idle &&
         !modelroot->getChildren().empty()) {
         const auto& root = modelroot->getChildren()[0];
         auto it = movementAnimation->bones.find(root->getName());
@@ -439,8 +404,8 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat) {
 
 bool CharacterObject::isEnteringOrExitingVehicle() const {
     auto a = animator->getAnimation(AnimIndexAction);
-    return a == animations.car_getout_lhs || a == animations.car_getin_lhs ||
-           a == animations.car_getout_rhs || a == animations.car_getin_rhs;
+    return a == animations->car_getout_lhs || a == animations->car_getin_lhs ||
+           a == animations->car_getout_rhs || a == animations->car_getin_rhs;
 }
 
 bool CharacterObject::isStopped() const {
@@ -487,7 +452,7 @@ void CharacterObject::jump() {
     if (physCharacter) {
         physCharacter->jump();
         jumped = true;
-        animator->playAnimation(AnimIndexMovement, animations.jump_start, 1.f,
+        animator->playAnimation(AnimIndexMovement, animations->jump_start, 1.f,
                                 false);
     }
 }

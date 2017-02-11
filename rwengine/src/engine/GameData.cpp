@@ -58,6 +58,9 @@ void GameData::load() {
 
     loadIFP("ped.ifp");
 
+    /// @todo load real data
+    pedAnimGroups["player"] = std::make_unique<AnimGroup>(animations, "player");
+
     // Clear existing zones
     gamezones = ZoneDataList{
         {"CITYZON", 0, {-4000.f, -4000.f, -500.f}, {4000.f, 4000.f, 500.f}, 0}};
