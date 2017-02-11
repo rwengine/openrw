@@ -7,6 +7,7 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <objects/GameObject.hpp>
+#include <data/AnimGroup.hpp>
 
 constexpr int kMaxInventorySlots = 13;
 
@@ -35,64 +36,6 @@ struct CharacterState {
 
 class VehicleObject;
 class GameWorld;
-
-struct AnimationGroup {
-    Animation* idle;
-    Animation* walk;
-    Animation* walk_start;
-    Animation* run;
-    Animation* sprint;
-
-    Animation* walk_right;
-    Animation* walk_right_start;
-    Animation* walk_left;
-    Animation* walk_left_start;
-
-    Animation* walk_back;
-    Animation* walk_back_start;
-
-    Animation* jump_start;
-    Animation* jump_glide;
-    Animation* jump_land;
-
-    Animation* car_sit;
-    Animation* car_sit_low;
-
-    Animation* car_open_lhs;
-    Animation* car_getin_lhs;
-    Animation* car_getout_lhs;
-    Animation* car_jacked_lhs;
-    Animation* car_pullout_lhs;
-
-    Animation* car_open_rhs;
-    Animation* car_getin_rhs;
-    Animation* car_getout_rhs;
-    Animation* car_jacked_rhs;
-    Animation* car_pullout_rhs;
-
-    Animation* kd_front;
-    Animation* ko_shot_front;
-
-    AnimationGroup()
-        : idle(nullptr)
-        , walk(nullptr)
-        , walk_start(nullptr)
-        , run(nullptr)
-        , jump_start(nullptr)
-        , jump_glide(nullptr)
-        , jump_land(nullptr)
-        , car_sit(nullptr)
-        , car_sit_low(nullptr)
-        , car_open_lhs(nullptr)
-        , car_getin_lhs(nullptr)
-        , car_getout_lhs(nullptr)
-        , car_open_rhs(nullptr)
-        , car_getin_rhs(nullptr)
-        , car_getout_rhs(nullptr)
-        , kd_front(nullptr)
-        , ko_shot_front(nullptr) {
-    }
-};
 
 /**
  * @brief The CharacterObject struct
@@ -128,7 +71,7 @@ public:
 
     CharacterController* controller;
 
-    AnimationGroup animations;
+    AnimGroup* animations;
 
     /**
      * @param pos

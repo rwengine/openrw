@@ -7,6 +7,7 @@ class Logger;
 #include <data/GameTexts.hpp>
 #include <data/PedData.hpp>
 #include <data/ZoneData.hpp>
+#include <data/AnimGroup.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIFP.hpp>
@@ -280,6 +281,11 @@ public:
      * Loaded Animations
      */
     AnimationSet animations;
+
+    /**
+     * Pedestrian Animation Groups
+     */
+    AnimGroups pedAnimGroups;
 
     /**
      * DynamicObjectData

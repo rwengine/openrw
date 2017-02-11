@@ -202,14 +202,14 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     auto entryPos = vehicle->getSeatEntryPositionWorld(seat);
     auto entryPosLocal = vehicle->getSeatEntryPosition(seat);
 
-    auto anm_open = character->animations.car_open_lhs;
-    auto anm_enter = character->animations.car_getin_lhs;
-    auto anm_pullout = character->animations.car_pullout_lhs;
+    auto anm_open = character->animations->car_open_lhs;
+    auto anm_enter = character->animations->car_getin_lhs;
+    auto anm_pullout = character->animations->car_pullout_lhs;
 
     if (entryPosLocal.x > 0.f) {
-        anm_open = character->animations.car_open_rhs;
-        anm_enter = character->animations.car_getin_rhs;
-        anm_pullout = character->animations.car_pullout_rhs;
+        anm_open = character->animations->car_open_rhs;
+        anm_enter = character->animations->car_getin_rhs;
+        anm_pullout = character->animations->car_pullout_rhs;
     }
 
     // If there's someone in this seat already, we may have to ask them to
@@ -298,8 +298,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     RW_UNUSED(controller);
 
     if (jacked) {
-        auto anm_jacked_lhs = character->animations.car_jacked_lhs;
-        auto anm_jacked_rhs = character->animations.car_jacked_lhs;
+        auto anm_jacked_lhs = character->animations->car_jacked_lhs;
+        auto anm_jacked_rhs = character->animations->car_jacked_lhs;
         auto anm_current = character->animator->getAnimation(AnimIndexAction);
 
         if (anm_current == anm_jacked_lhs || anm_current == anm_jacked_rhs) {
@@ -339,10 +339,10 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
     auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
-    auto anm_exit = character->animations.car_getout_lhs;
+    auto anm_exit = character->animations->car_getout_lhs;
 
     if (exitPosLocal.x > 0.f) {
-        anm_exit = character->animations.car_getout_rhs;
+        anm_exit = character->animations->car_getout_rhs;
     }
 
     if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
