@@ -6,48 +6,227 @@
 
 struct Animation;
 
+/**
+ * The logical animations
+ */
+enum class AnimCycle {
+    Walk = 0,
+    Run,
+    Sprint,
+    Idle,
+    WalkStart,
+    RunStop,
+    RunStopR,
+    IdleCam,
+    IdleHbhb,
+    IdleTired,
+    IdleArmed,
+    IdleChat,
+    IdleTaxi,
+    KnockOutShotFront0,
+    KnockOutShotFront1,
+    KnockOutShotFront2,
+    KnockOutShotFront3,
+    KnockOutShotFace,
+    KnockOutShotStomach,
+    KnockOutShotArmL,
+    KnockOutShotArmR,
+    KnockOutShotLegL,
+    KnockOutShotLegR,
+    KnockDownLeft,
+    KnockDownRight,
+    KnockOutSkidFront,
+    KnockOutSpinR,
+    KnockOutSkidBack,
+    KnkockOutSpinL,
+    ShotPartial0,
+    ShotLeftP,
+    ShotPartial1,
+    ShotRightP,
+    HitFront,
+    HitLeft,
+    HitBack,
+    HitRight,
+    FloorHit,
+    HitBodyBlow,
+    HitChest,
+    HitHead,
+    HitWalk,
+    HitWall,
+    FloorHitF,
+    HitBehind,
+    PunchR,
+    KickFloor,
+    WeaponBatH,
+    WeaponBatV,
+    WeaponHgunBody,
+    WeaponAKBody,
+    WeaponPump,
+    WeaponSniper,
+    WeaponThrow,
+    WeaponThrowu,
+    WeaponStartThrow,
+    WeaponBomber,
+    WeaponHgunReload,
+    WeaponAKReload,
+    FPSPunch,
+    FPSBat,
+    FPSUzi,
+    FPSPump,
+    FPSAK,
+    FPSM16,
+    FPSRocket,
+    FightIdle0,
+    FightIdle1,
+    FightSh_F,
+    FightBodyBlow,
+    FightHead,
+    FightKick,
+    FightKnee,
+    FightLHook,
+    FightPunch,
+    FightRoundhouse,
+    FightLongKick,
+    FightPPunch,
+    CarJackedRHS,
+    CarLowJackedRHS,
+    CarJackedLHS,
+    CarLowJackedLHS,
+    CarQuickJack,
+    CarQuickJacked,
+    CarAlignLHS,
+    CarAlignHighLHS,
+    CarOpenLHS,
+    CarDoorLockedLHS,
+    CarPullOutLHS,
+    CarLowPullOutLHS,
+    CarGetInLHS,
+    CarLowGetInLHS,
+    CarCloseDoorLHS,
+    CarLowCloseDoorLHS,
+    CarRollDoor,
+    CarLowRollDoor,
+    CarGetOutLHS,
+    CarLowGetOutLHS,
+    CarCloseLHS,
+    CarAlignRHS,
+    CarAlignHighRHS,
+    CarOpenRHS,
+    CarDoorLockedRHS,
+    CarPullOutRHS,
+    CarLowPullOutRHS,
+    CarGetInRHS,
+    CarLowGetInRHS,
+    CarCloseDoorRHS,
+    CarLowCloseDoorRHS,
+    CarShuffleRHS,
+    CarLowShuffleRHS,
+    CarSit,
+    CarLowSit,
+    CarSitPassenger,
+    CarLowSitPassenger,
+    DriveLeft,
+    DriveRight,
+    LowDriveLeft,
+    LowDriveRight,
+    DriveByLeft,
+    DriveByRight,
+    CarLB,  // ?
+    DriveBoat,
+    CarGetOutRHS,
+    CarLowGetOutRHS,
+    CarCloseRHS,
+    CarHookerTalk,
+    CoachOpenLHS,
+    CoachOpenRHS,
+    CoachGetInLHS,
+    CoachGetInRHS,
+    CoachGetOutLHS,
+    TrainGetIn,
+    TrainGetOut,
+    CarCrawlOutLHS,
+    CarCrawlOutRHS,
+    VanOpenLHS,
+    VanGetInLHS,
+    VanCloseLHS,
+    VanGetOutLHS,
+    VanOpenRHS,
+    VanGetInRHS,
+    VanCloseRHS,
+    VanGetOutRHS,
+    GetUp0,
+    GetUp1,
+    GetUp2,
+    GetUpFront,
+    JumpLaunch,
+    JumpGlide,
+    JumpLand,
+    FallFall,
+    FallGlide,
+    FallLand,
+    FallCollapse,
+    EVStep,
+    EVDive,
+    XpressScratch,
+    RoadCross,
+    Turn180,
+    ArrestGun,
+    Drown,
+    CPR,
+    DuckDown,
+    DuckLow,
+    RBlockCShoot,
+    WeaponThrowu1,
+    HandsUp,
+    HandsCower,
+    FuckYou,
+    PhoneIn,
+    PhoneOut,
+    PhoneTalk,
+    _CycleCount
+};
+
+struct AnimCycleInfo {
+    enum Flags { Repeat = 0x02, Movement = 0x40, Movement_X = 0x1000 };
+
+    AnimCycle id = AnimCycle::Idle;
+    /// The name from animgrp.dat or hard-coded
+    std::string name;
+    /// Flags
+    uint32_t flags;
+    /// The actual animation
+    Animation* anim = nullptr;
+
+    AnimCycleInfo(const std::string& name = "", uint32_t flags = 0)
+        : name(name), flags(flags) {
+    }
+};
+
 struct AnimGroup {
+    std::string name_;
+
     /* Animations */
-    Animation* idle;
-    Animation* walk;
-    Animation* walk_start;
-    Animation* run;
-    Animation* sprint;
+    AnimCycleInfo animations_[static_cast<uint32_t>(AnimCycle::_CycleCount)];
 
-    Animation* walk_right;
-    Animation* walk_right_start;
-    Animation* walk_left;
-    Animation* walk_left_start;
+    Animation* animation(AnimCycle cycle) const {
+        return animations_[static_cast<uint32_t>(cycle)].anim;
+    }
 
-    Animation* walk_back;
-    Animation* walk_back_start;
+    uint32_t flags(AnimCycle cycle) const {
+        return animations_[static_cast<uint32_t>(cycle)].flags;
+    }
 
-    Animation* jump_start;
-    Animation* jump_glide;
-    Animation* jump_land;
+    static AnimGroup getBuiltInAnimGroup(AnimationSet&,
+                                         const std::string& name);
 
-    Animation* car_sit;
-    Animation* car_sit_low;
+    static uint32_t getAnimationFlags(const std::string& animation);
 
-    Animation* car_open_lhs;
-    Animation* car_getin_lhs;
-    Animation* car_getout_lhs;
-    Animation* car_pullout_lhs;
-    Animation* car_jacked_lhs;
-
-    Animation* car_open_rhs;
-    Animation* car_getin_rhs;
-    Animation* car_getout_rhs;
-    Animation* car_pullout_rhs;
-    Animation* car_jacked_rhs;
-
-    Animation* kd_front;
-    Animation* ko_shot_front;
-
-    AnimGroup(AnimationSet& animations, const std::string&);
-
-    static Animation* find(AnimationSet&, const std::string& group,
-                           const std::string& anim);
+    AnimGroup(const std::string& name,
+              const std::initializer_list<AnimCycleInfo>& cycles = {})
+        : name_(name) {
+        std::copy(std::begin(cycles), std::end(cycles),
+                  std::begin(animations_));
+    }
 };
 
 using AnimGroups = std::unordered_map<std::string, std::unique_ptr<AnimGroup>>;

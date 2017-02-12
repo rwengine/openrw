@@ -202,15 +202,19 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     auto entryPos = vehicle->getSeatEntryPositionWorld(seat);
     auto entryPosLocal = vehicle->getSeatEntryPosition(seat);
 
-    auto anm_open = character->animations->car_open_lhs;
-    auto anm_enter = character->animations->car_getin_lhs;
-    auto anm_pullout = character->animations->car_pullout_lhs;
+    auto cycle_open = AnimCycle::CarOpenLHS;
+    auto cycle_enter = AnimCycle::CarGetInLHS;
+    auto cycle_pullout = AnimCycle::CarPullOutLHS;
 
     if (entryPosLocal.x > 0.f) {
-        anm_open = character->animations->car_open_rhs;
-        anm_enter = character->animations->car_getin_rhs;
-        anm_pullout = character->animations->car_pullout_rhs;
+        cycle_open = AnimCycle::CarOpenRHS;
+        cycle_enter = AnimCycle::CarGetInRHS;
+        cycle_pullout = AnimCycle::CarPullOutRHS;
     }
+
+    auto anm_open = character->animations->animation(cycle_open);
+    auto anm_enter = character->animations->animation(cycle_enter);
+    auto anm_pullout = character->animations->animation(cycle_pullout);
 
     // If there's someone in this seat already, we may have to ask them to
     // leave.
@@ -298,8 +302,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     RW_UNUSED(controller);
 
     if (jacked) {
-        auto anm_jacked_lhs = character->animations->car_jacked_lhs;
-        auto anm_jacked_rhs = character->animations->car_jacked_lhs;
+        auto anm_jacked_lhs = character->animations->animation(AnimCycle::CarJackedLHS);
+        auto anm_jacked_rhs = character->animations->animation(AnimCycle::CarJackedRHS);
         auto anm_current = character->animator->getAnimation(AnimIndexAction);
 
         if (anm_current == anm_jacked_lhs || anm_current == anm_jacked_rhs) {
@@ -312,6 +316,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
             auto vehicle = character->getCurrentVehicle();
             auto seat = character->getCurrentSeat();
             auto door = vehicle->getSeatEntryDoor(seat);
+            RW_UNUSED(door);
             auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
             auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
@@ -339,10 +344,10 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
     auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
-    auto anm_exit = character->animations->car_getout_lhs;
+    auto anm_exit = character->animations->animation(AnimCycle::CarGetOutLHS);
 
     if (exitPosLocal.x > 0.f) {
-        anm_exit = character->animations->car_getout_rhs;
+        anm_exit = character->animations->animation(AnimCycle::CarGetOutRHS);
     }
 
     if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
