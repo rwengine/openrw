@@ -38,12 +38,13 @@ void Logger::verbose(const std::string& component, const std::string& message) {
     log(component, Logger::Verbose, message);
 }
 
-std::map<Logger::MessageSeverity, char> severityStr{{Logger::Error, 'E'},
-                                                    {Logger::Warning, 'W'},
-                                                    {Logger::Info, 'I'},
-                                                    {Logger::Verbose, 'V'}};
+std::map<Logger::MessageSeverity, std::string> severityStr{
+    {Logger::Error,     "\x1b[30;1m[Erro"},
+    {Logger::Warning,   "\x1b[33;1m[Warn"},
+    {Logger::Info,      "\x1b[36;1m[Info"},
+    {Logger::Verbose,   "\x1b[37;1m[Verb"}};
 
 void StdOutReciever::messageRecieved(const Logger::LogMessage& message) {
-    std::cout << severityStr[message.severity] << " [" << message.component
-              << "] " << message.message << std::endl;
+    std::cout << severityStr[message.severity] << "->" << message.component
+              << "]\x1b[0m " << message.message << std::endl;
 }
