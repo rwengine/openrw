@@ -139,8 +139,9 @@ BOOST_AUTO_TEST_CASE(test_death) {
 
         character->tick(0.16f);
 
-        BOOST_CHECK_EQUAL(character->animator->getAnimation(0),
-                          character->animations->ko_shot_front);
+        BOOST_CHECK_EQUAL(
+            character->animator->getAnimation(0),
+            character->animations->animation(AnimCycle::KnockOutShotFront0));
 
         Global::get().e->destroyObject(character);
         delete controller;

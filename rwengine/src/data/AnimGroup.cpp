@@ -1,39 +1,393 @@
 #include "AnimGroup.hpp"
+#include <algorithm>
+#include <vector>
 
-AnimGroup::AnimGroup(AnimationSet &animations, const std::string &name)
-    : idle(find(animations, name, "idle_stance"))
-    , walk(find(animations, name, "walk_player"))
-    , walk_start(find(animations, name, "walk_start"))
-    , run(find(animations, name, "run_player"))
-    , sprint(find(animations, name, "sprint_civi"))
-    , walk_right(find(animations, name, "walk_player_right"))
-    , walk_right_start(find(animations, name, "walk_start_right"))
-    , walk_left(find(animations, name, "walk_player_left"))
-    , walk_left_start(find(animations, name, "walk_start_left"))
-    , walk_back(find(animations, name, "walk_player_back"))
-    , walk_back_start(find(animations, name, "walk_start_back"))
-    , jump_start(find(animations, name, "jump_launch"))
-    , jump_glide(find(animations, name, "jump_glide"))
-    , jump_land(find(animations, name, "jump_land"))
-    , car_sit(find(animations, name, "car_sit"))
-    , car_sit_low(find(animations, name, "car_lsit"))
-    , car_open_lhs(find(animations, name, "car_open_lhs"))
-    , car_getin_lhs(find(animations, name, "car_getin_lhs"))
-    , car_getout_lhs(find(animations, name, "car_getout_lhs"))
-    , car_pullout_lhs(find(animations, name, "car_pullout_lhs"))
-    , car_jacked_lhs(find(animations, name, "car_jackedlhs"))
-    , car_open_rhs(find(animations, name, "car_open_rhs"))
-    , car_getin_rhs(find(animations, name, "car_getin_rhs"))
-    , car_getout_rhs(find(animations, name, "car_getout_rhs"))
-    , car_pullout_rhs(find(animations, name, "car_pullout_rhs"))
-    , car_jacked_rhs(find(animations, name, "car_jackedrhs"))
-    , kd_front(find(animations, name, "kd_front"))
-    , ko_shot_front(find(animations, name, "ko_shot_front")) {
-}
+// The default animations for every cycle
+const std::vector<AnimGroup> kBuiltInAnimGroups{
+    {"man",
+     {
+         {"walk_civi", 0xe2},
+         {"run_civi", 0xe2},
+         {"sprint_panic", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start", 0x40},
+         {"run_stop", 0x44},
+         {"run_stopr", 0x44},
+         {"idle_cam", 0x12},
+         {"idle_hbhb", 0x12},
+         {"idle_tired", 0x2},
+         {"idle_armed", 0x12},
+         {"idle_chat", 0x12},
+         {"idle_taxi", 0x18},
+         {"ko_shot_front", 0x850},
+         {"ko_shot_front", 0x850},
+         {"ko_shot_front", 0x850},
+         {"ko_shot_front", 0x850},
+         {"ko_shot_face", 0x850},
+         {"ko_shot_stom", 0x50},
+         {"ko_shot_arml", 0x810},
+         {"ko_shot_armr", 0x810},
+         {"ko_shot_legl", 0x50},
+         {"ko_shot_legr", 0x50},
+         {"kd_left", 0x810},
+         {"kd_right", 0x810},
+         {"ko_skid_front", 0x10},
+         {"ko_spin_r", 0x10},
+         {"ko_skid_back", 0x810},
+         {"ko_spin_l", 0x10},
+         {"shot_partial", 0x218},
+         {"shot_leftp", 0x218},
+         {"shot_partial", 0x218},
+         {"shot_rightp", 0x218},
+         {"hit_front", 0x58},
+         {"hit_l", 0x18},
+         {"hit_back", 0x58},
+         {"hit_r", 0x18},
+         {"floor_hit", 0x14},
+         {"hit_bodyblow", 0x58},
+         {"hit_chest", 0x58},
+         {"hit_head", 0x58},
+         {"hit_walk", 0x58},
+         {"hit_wall", 0x58},
+         {"floor_hit_f", 0x814},
+         {"hit_behind", 0x18},
+         {"punchr", 0x18},
+         {"kick_floor", 0x18},
+         {"weapon_bat_h", 0x18},
+         {"weapon_bat_v", 0x18},
+         {"weapon_hgun_body", 0x218},
+         {"weapon_ak_body", 0x18},
+         {"weapon_pump", 0x18},
+         {"weapon_sniper", 0x18},
+         {"weapon_throw", 0x18},
+         {"weapon_throwu", 0x18},
+         {"weapon_start_throw", 0x18},
+         {"bomber", 0x218},
+         {"weapon_hgun_rload", 0x218},
+         {"weapon_ak_rload", 0x218},
+         {"fps_punch", 0x18},
+         {"fps_bat", 0x18},
+         {"fps_uzi", 0x18},
+         {"fps_pump", 0x18},
+         {"fps_ak", 0x18},
+         {"fps_m16", 0x18},
+         {"fps_rocket", 0x18},
+         {"fightidle", 0x2},
+         {"fight2idle", 0x18},
+         {"fightsh_f", 0x58},
+         {"fightbodyblow", 0x18},
+         {"fighthead", 0x18},
+         {"fightkick", 0x18},
+         {"fightknee", 0x18},
+         {"fightlhook", 0x18},
+         {"fightpunch", 0x18},
+         {"fightrndhse", 0x58},
+         {"fightlngkck", 0x58},
+         {"fightppunch", 0x214},
+         {"car_jackedrhs", 0x14},
+         {"car_ljackedrhs", 0x14},
+         {"car_jackedlhs", 0x14},
+         {"car_ljackedlhs", 0x14},
+         {"car_qjack", 0x18},
+         {"car_qjacked", 0x14},
+         {"car_align_lhs", 0x18},
+         {"car_alignhi_lhs", 0x18},
+         {"car_open_lhs", 0x18},
+         {"car_doorlocked_lhs", 0x18},
+         {"car_pullout_lhs", 0x18},
+         {"car_pulloutl_lhs", 0x18},
+         {"car_getin_lhs", 0x18},
+         {"car_getinl_lhs", 0x18},
+         {"car_closedoor_lhs", 0x18},
+         {"car_closedoorl_lhs", 0x18},
+         {"car_rolldoor", 0x18},
+         {"car_rolldoorlo", 0x18},
+         {"car_getout_lhs", 0x18},
+         {"car_getoutl_lhs", 0x18},
+         {"car_close_lhs", 0x18},
+         {"car_align_rhs", 0x18},
+         {"car_alignhi_rhs", 0x18},
+         {"car_open_rhs", 0x18},
+         {"car_doorlocked_rhs", 0x18},
+         {"car_pullout_rhs", 0x18},
+         {"car_pulloutl_rhs", 0x18},
+         {"car_getin_rhs", 0x18},
+         {"car_getinl_rhs", 0x18},
+         {"car_closedoor_rhs", 0x18},
+         {"car_closedoorl_rhs", 0x18},
+         {"car_shuffle_rhs", 0x18},
+         {"car_lshuffle_rhs", 0x18},
+         {"car_sit", 0x4},
+         {"car_lsit", 0x4},
+         {"car_sitp", 0x4},
+         {"car_sitplo", 0x4},
+         {"drive_l", 0x14},
+         {"drive_r", 0x14},
+         {"drive_lo_l", 0x14},
+         {"drive_lo_r", 0x14},
+         {"driveby_l", 0x14},
+         {"driveby_r", 0x14},
+         {"car_lb", 0x14},
+         {"drive_boat", 0x4},
+         {"car_getout_rhs", 0x18},
+         {"car_getoutl_rhs", 0x18},
+         {"car_close_rhs", 0x18},
+         {"car_hookertalk", 0x12},
+         {"coach_opnl", 0x18},
+         {"coach_opnr", 0x18},
+         {"coach_inl", 0x18},
+         {"coach_inr", 0x18},
+         {"coach_outl", 0x18},
+         {"train_getin", 0x10},
+         {"train_getout", 0x18},
+         {"car_crawloutrhs", 0x18},
+         {"car_crawloutrhs", 0x18},
+         {"van_openl", 0x18},
+         {"van_getinl", 0x18},
+         {"van_closel", 0x18},
+         {"van_getoutl", 0x18},
+         {"van_open", 0x18},
+         {"van_getin", 0x18},
+         {"van_close", 0x18},
+         {"van_getout", 0x18},
+         {"getup", 0x58},
+         {"getup", 0x58},
+         {"getup", 0x58},
+         {"getup_front", 0x58},
+         {"jump_launch", 0x18},
+         {"jump_glide", 0x14},
+         {"jump_land", 0x58},
+         {"fall_fall", 0x16},
+         {"fall_glide", 0x14},
+         {"fall_land", 0x58},
+         {"fall_collapse", 0x58},
+         {"ev_step", 0x58},
+         {"ev_dive", 0x850},
+         {"xpressscratch", 0x118},
+         {"roadcross", 0x12},
+         {"turn_180", 0x18},
+         {"arrestgun", 0x50},
+         {"drown", 0x10},
+         {"cpr", 0x18},
+         {"duck_down", 0x14},
+         {"duck_low", 0x14},
+         {"rblock_cshoot", 0x14},
+         {"weapon_throwu", 0x18},
+         {"handsup", 0x50},
+         {"handscower", 0x58},
+         {"fucku", 0x21c},
+         {"phone_in", 0x10},
+         {"phone_out", 0x18},
+         {"phone_talk", 0x16},
+     }},
+    {"player",
+     {
+         {"walk_player", 0xe2},
+         {"run_player", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start", 0x40},
+     }},
+    {"playerrocket",
+     {
+         {"walk_rocket", 0xe2},
+         {"run_rocket", 0xe2},
+         {"run_rocket", 0xe2},
+         {"idle_rocket", 0x2},
+         {"walk_start_rocket", 0x40},
+     }},
+    {"player1armed",
+     {
+         {"walk_player", 0xe2},
+         {"run_1armed", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start", 0x40},
+     }},
+    {"player2armed",
+     {
+         {"walk_player", 0xe2},
+         {"run_armed", 0xe2},
+         {"run_armed", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start", 0x40},
+     }},
+    {"playerbbbat",
+     {
+         {"walk_player", 0xe2},
+         {"run_player", 0xe2},
+         {"run_player", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start", 0x40},
+     }},
+    {"shuffle",
+     {
+         {"walk_shuffle", 0xe2},
+         {"run_civi", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"oldman",
+     {
+         {"walk_old", 0xe2},
+         {"run_civi", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"gang1",
+     {
+         {"walk_gang1", 0xe2},
+         {"run_gang1", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"gang2",
+     {
+         {"walk_gang2", 0xe2},
+         {"run_gang1", 0xe2},
+         {"sprint_civi", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"fatman",
+     {
+         {"walk_fat", 0xe2},
+         {"run_civi", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"oldfatman",
+     {
+         {"walk_fatold", 0xe2},
+         {"run_fatold", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"woman",
+     {
+         {"woman_walknorm", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"shopping",
+     {
+         {"woman_walkshop", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"busywoman",
+     {
+         {"woman_walkbusy", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"sexywoman",
+     {
+         {"woman_walksexy", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"oldwoman",
+     {
+         {"woman_walkold", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"fatwoman",
+     {
+         {"walk_fat", 0xe2},
+         {"woman_run", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_idlestance", 0x2},
+     }},
+    {"panicchunky",
+     {
+         {"run_fatold", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"woman_runpanic", 0xe2},
+         {"idle_stance", 0x2},
+     }},
+    {"playerback",
+     {
+         {"walk_player_back", 0xe2},
+         {"run_player_back", 0xe2},
+         {"run_player_back", 0xe2},
+         {"idle_stance", 0x2},
+         {"walk_start_back", 0x40},
+     }},
+    {"playerleft",
+     {
+         {"walk_player_left", 0x10e2},
+         {"run_left", 0x10e2},
+         {"run_left", 0x10e2},
+         {"idle_stance", 0x2},
+         {"walk_start_left", 0x1040},
+     }},
+    {"playerright",
+     {
+         {"walk_player_right", 0x10e2},
+         {"run_right", 0x10e2},
+         {"run_right", 0x10e2},
+         {"idle_stance", 0x2},
+         {"walk_start_right", 0x1040},
+     }},
+    {"rocketback",
+     {
+         {"walk_rocket_back", 0xe2},
+         {"run_rocket_back", 0xe2},
+         {"run_rocket_back", 0xe2},
+         {"idle_rocket", 0x2},
+         {"walkst_rocket_back", 0x40},
+     }},
+    {"rocketleft",
+     {
+         {"walk_rocket_left", 0x10e2},
+         {"run_rocket_left", 0x10e2},
+         {"run_rocket_left", 0x10e2},
+         {"idle_rocket", 0x2},
+         {"walkst_rocket_left", 0x1040},
+     }},
+    {"rocketright",
+     {
+         {"walk_rocket_right", 0x10e2},
+         {"run_rocket_right", 0x10e2},
+         {"run_rocket_right", 0x10e2},
+         {"idle_rocket", 0x2},
+         {"walkst_rocket_right", 0x1040},
+     }}};
 
-Animation *AnimGroup::find(AnimationSet &animations, const std::string &group,
-                           const std::string &anim) {
-    // @todo actually find the correct animation
-    RW_UNUSED(group);
-    return animations[anim];
+AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
+                                         const std::string &name) {
+    auto findgroup = [&]() {
+        auto it =
+            std::find_if(kBuiltInAnimGroups.begin(), kBuiltInAnimGroups.end(),
+                         [&](const AnimGroup &g) { return g.name_ == name; });
+        if (it != kBuiltInAnimGroups.end()) {
+            return *it;
+        } else {
+            RW_MESSAGE("No such animation group: " + name +
+                       ". Returning first animation group");
+            return kBuiltInAnimGroups[0];
+        }
+    };
+
+    auto group = AnimGroup(findgroup());
+
+    uint32_t id = 0;
+    for (auto &a : group.animations_) {
+        // Copy from the first animgroup if this entry is empty
+        /// @todo check if this is realy how we should do this
+        if (a.name.empty()) {
+            a = kBuiltInAnimGroups[0].animations_[id];
+        }
+
+        a.id = static_cast<AnimCycle>(id++);
+        a.anim = animations[a.name];
+    }
+
+    return group;
 }

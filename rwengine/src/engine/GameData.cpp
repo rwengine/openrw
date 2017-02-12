@@ -59,7 +59,8 @@ void GameData::load() {
     loadIFP("ped.ifp");
 
     /// @todo load real data
-    pedAnimGroups["player"] = std::make_unique<AnimGroup>(animations, "player");
+    pedAnimGroups["player"] = std::make_unique<AnimGroup>(
+        AnimGroup::getBuiltInAnimGroup(animations, "player"));
 
     // Clear existing zones
     gamezones = ZoneDataList{
@@ -605,7 +606,7 @@ void GameData::loadPedGroups(const std::string& path) {
                 break;
             }
             if (line.back() == ',') {
-                line.resize(line.size()-1);
+                line.resize(line.size() - 1);
             }
             auto model = findModelObject(line);
             if (int16_t(model) == -1) {
