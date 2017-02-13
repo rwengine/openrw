@@ -82,8 +82,36 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
     m_corona->particle.position = getPosition();
     m_corona->particle.direction = glm::vec3(0.f, 0.f, 1.f);
     m_corona->particle.orientation = VisualFX::ParticleData::Camera;
-    m_corona->particle.colour = glm::vec4(1.0f, 0.3f, 0.3f, 0.3f);
-    m_corona->particle.texture = engine->data->findSlotTexture("particle", "coronacircle");
+    m_corona->particle.texture = engine->data->findSlotTexture("particle", "coronaringa");
+
+    if (modelinfo->name == "colt45")
+        m_corona->particle.colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
+    else if (modelinfo->name == "uzi")
+        m_corona->particle.colour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
+    else if (modelinfo->name == "shotgun")
+        m_corona->particle.colour = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    else if (modelinfo->name == "ak47")
+        m_corona->particle.colour = glm::vec4(1.f, 0.f, 1.f, 1.f);
+    else if (modelinfo->name == "m16")
+        m_corona->particle.colour = glm::vec4(0.f, 1.f, 1.f, 1.f);
+    else if (modelinfo->name == "sniper")
+        m_corona->particle.colour = glm::vec4(1.f, 0.5f, 0.f, 1.f);
+    else if (modelinfo->name == "rocket")
+        m_corona->particle.colour = glm::vec4(0.f, 1.f, 0.5f, 1.f);
+    else if (modelinfo->name == "flame")
+        m_corona->particle.colour = glm::vec4(0.5f, 0.f, 1.f, 1.f);
+    else if (modelinfo->name == "molotov")
+        m_corona->particle.colour = glm::vec4(0.5f, 1.f, 0.f, 1.f);
+    else if (modelinfo->name == "grenade")
+        m_corona->particle.colour = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    else if (modelinfo->name == "health" || modelinfo->name == "bonus")
+        m_corona->particle.colour = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    else if (modelinfo->name == "bodyarmour" || modelinfo->name == "bribe")
+        m_corona->particle.colour = glm::vec4(0.5f, 1.f, 0.5f, 1.f);
+    else if (modelinfo->name == "info" || modelinfo->name == "killfrenzy")
+        m_corona->particle.colour = glm::vec4(0.f, 0.f, 1.f, 1.f);
+    else
+        m_corona->particle.colour = glm::vec4(1.f, 0.f, 0.f, 1.f); // bat, detonator, adrenaline
 
     auto flags = behaviourFlags(m_type);
     RW_UNUSED(flags);
