@@ -104,7 +104,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     infoTextY += ui_textHeight;
 
     if (player->getCharacter()->getCurrentState().health > ui_lowHealth
-        || (int)(world->getGameTime() * 4.f) % 2) {
+        || fmod(world->getGameTime(), 0.5) >= .25) { // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().health;
