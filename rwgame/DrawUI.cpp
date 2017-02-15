@@ -17,6 +17,7 @@ constexpr size_t ui_ammoSize = 14;
 constexpr size_t ui_ammoHeight = 16;
 constexpr size_t ui_armourOffset = ui_textSize * 3;
 constexpr size_t ui_maxWantedLevel = 6;
+constexpr size_t ui_lowHealth = 9;
 const glm::u8vec3 ui_timeColour(196, 165, 119);
 const glm::u8vec3 ui_moneyColour(89, 113, 147);
 const glm::u8vec3 ui_healthColour(187, 102, 47);
@@ -102,19 +103,20 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
     infoTextY += ui_textHeight;
 
-    {
+    if (player->getCharacter()->getCurrentState().health > ui_lowHealth
+        || fmod(world->getGameTime(), 0.5) >= .25) { // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().health;
         ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str());
-    }
-    ti.baseColour = ui_shadowColour;
-    ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
-    render->text.renderText(ti);
+        ti.baseColour = ui_shadowColour;
+        ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
+        render->text.renderText(ti);
 
-    ti.baseColour = ui_healthColour;
-    ti.screenPosition = glm::vec2(infoTextX, infoTextY);
-    render->text.renderText(ti);
+        ti.baseColour = ui_healthColour;
+        ti.screenPosition = glm::vec2(infoTextX, infoTextY);
+        render->text.renderText(ti);
+    }
 
     if (player->getCharacter()->getCurrentState().armour > 0) {
         std::stringstream ss;
