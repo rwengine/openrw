@@ -3,6 +3,23 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/PickupObject.hpp>
 
+uint32_t colours[14] = {
+    0xff0000, // bat, detonator, adrenaline
+    0x00ff00, // pistol
+    0x8080ff, // uzi
+    0xffff00, // shotgun
+    0xff00ff, // ak47
+    0x00ffff, // m16
+    0xff8000, // sniper
+    0x00ff80, // rocket
+    0x8000ff, // flame
+    0x80ff00, // molotov
+    0xffffff, // grenade
+    0x80ff80, // bodyarmour, bribe
+    0x0000ff, // info, killfrenzy
+    0xffff00  // health, bonus
+};
+
 bool PickupObject::doesRespawn(PickupType type) {
     switch (type) {
         case Once:
@@ -78,40 +95,39 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
     m_ghost->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT |
                                btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
+    m_colourId = 0;
+    if (modelinfo->name == "colt45")
+        m_colourId = 1;
+    else if (modelinfo->name == "uzi")
+        m_colourId = 2;
+    else if (modelinfo->name == "shotgun")
+        m_colourId = 3;
+    else if (modelinfo->name == "ak47")
+        m_colourId = 4;
+    else if (modelinfo->name == "m16")
+        m_colourId = 5;
+    else if (modelinfo->name == "sniper")
+        m_colourId = 6;
+    else if (modelinfo->name == "rocket")
+        m_colourId = 7;
+    else if (modelinfo->name == "flame")
+        m_colourId = 8;
+    else if (modelinfo->name == "molotov")
+        m_colourId = 9;
+    else if (modelinfo->name == "grenade")
+        m_colourId = 10;
+    else if (modelinfo->name == "bodyarmour" || modelinfo->name == "bribe")
+        m_colourId = 11;
+    else if (modelinfo->name == "info" || modelinfo->name == "killfrenzy")
+        m_colourId = 12;
+    else if (modelinfo->name == "health" || modelinfo->name == "bonus")
+        m_colourId = 13;
+
     m_corona = world->createEffect(VisualFX::Particle);
     m_corona->particle.position = getPosition();
     m_corona->particle.direction = glm::vec3(0.f, 0.f, 1.f);
     m_corona->particle.orientation = VisualFX::ParticleData::Camera;
     m_corona->particle.texture = engine->data->findSlotTexture("particle", "coronaringa");
-
-    if (modelinfo->name == "colt45")
-        m_corona->particle.colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
-    else if (modelinfo->name == "uzi")
-        m_corona->particle.colour = glm::vec4(0.5f, 0.5f, 1.f, 1.f);
-    else if (modelinfo->name == "shotgun")
-        m_corona->particle.colour = glm::vec4(1.f, 1.f, 0.f, 1.f);
-    else if (modelinfo->name == "ak47")
-        m_corona->particle.colour = glm::vec4(1.f, 0.f, 1.f, 1.f);
-    else if (modelinfo->name == "m16")
-        m_corona->particle.colour = glm::vec4(0.f, 1.f, 1.f, 1.f);
-    else if (modelinfo->name == "sniper")
-        m_corona->particle.colour = glm::vec4(1.f, 0.5f, 0.f, 1.f);
-    else if (modelinfo->name == "rocket")
-        m_corona->particle.colour = glm::vec4(0.f, 1.f, 0.5f, 1.f);
-    else if (modelinfo->name == "flame")
-        m_corona->particle.colour = glm::vec4(0.5f, 0.f, 1.f, 1.f);
-    else if (modelinfo->name == "molotov")
-        m_corona->particle.colour = glm::vec4(0.5f, 1.f, 0.f, 1.f);
-    else if (modelinfo->name == "grenade")
-        m_corona->particle.colour = glm::vec4(1.f, 1.f, 1.f, 1.f);
-    else if (modelinfo->name == "health" || modelinfo->name == "bonus")
-        m_corona->particle.colour = glm::vec4(1.f, 1.f, 0.f, 1.f);
-    else if (modelinfo->name == "bodyarmour" || modelinfo->name == "bribe")
-        m_corona->particle.colour = glm::vec4(0.5f, 1.f, 0.5f, 1.f);
-    else if (modelinfo->name == "info" || modelinfo->name == "killfrenzy")
-        m_corona->particle.colour = glm::vec4(0.f, 0.f, 1.f, 1.f);
-    else
-        m_corona->particle.colour = glm::vec4(1.f, 0.f, 0.f, 1.f); // bat, detonator, adrenaline
 
     auto flags = behaviourFlags(m_type);
     RW_UNUSED(flags);
@@ -142,6 +158,17 @@ void PickupObject::tick(float dt) {
             }
         }
     }
+
+    float time = engine->getGameTime();
+    float colourValue = 0.5f * (sin(time * 3.0664064f) * 0.3f + 0.3f);
+    uint32_t *colour = &colours[m_colourId];
+    float red = (*colour >> 16) & 0xFF;
+    float green = (*colour >> 8) & 0xFF;
+    float blue = *colour & 0xFF;
+    m_corona->particle.colour = glm::vec4(red / 255.f,
+                                          green / 255.f,
+                                          blue / 255.f,
+                                          1.f) * colourValue;
 
     if (m_enabled) {
         // Sort out interactions with things that may or may not be players.

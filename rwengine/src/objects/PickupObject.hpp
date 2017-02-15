@@ -73,6 +73,7 @@ private:
     float m_enableTimer;
     bool m_collected;
     VisualFX* m_corona;
+    short m_colourId;
 
     PickupType m_type;
 };
