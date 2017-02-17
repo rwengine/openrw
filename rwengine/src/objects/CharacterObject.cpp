@@ -586,7 +586,8 @@ void CharacterObject::cycleInventory(bool up) {
         currentState.currentWeapon = 0;
     } else {
         for (int j = currentState.currentWeapon - 1; j >= 0; --j) {
-            if (currentState.weapons[j].weaponId != 0) {
+            bool isFist = j == 0;
+            if (currentState.weapons[j].weaponId != 0 || isFist) {
                 currentState.currentWeapon = j;
                 return;
             }
@@ -594,7 +595,8 @@ void CharacterObject::cycleInventory(bool up) {
 
         // Nothing? set the highest
         for (int j = kMaxInventorySlots - 1; j >= 0; --j) {
-            if (currentState.weapons[j].weaponId != 0 || j == 0) {
+            bool isFist = j == 0;
+            if (currentState.weapons[j].weaponId != 0 || isFist) {
                 currentState.currentWeapon = j;
                 return;
             }
