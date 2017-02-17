@@ -184,9 +184,20 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     if (weapon->fireType != WeaponData::MELEE) {
         const CharacterState& cs = player->getCharacter()->getCurrentState();
         const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
-        ti.text = GameStringUtil::fromString(
-            std::to_string(slotInfo.bulletsClip) + "-" +
-            std::to_string(slotInfo.bulletsTotal));
+
+        bool isProjectile = weapon->fireType == WeaponData::PROJECTILE;
+        bool isShotgun = weapon->modelID == 176;
+        bool isSniper = weapon->modelID == 177;
+        bool noClip = isProjectile || isShotgun || isSniper;
+
+        if (noClip) {
+            ti.text = GameStringUtil::fromString(
+                std::to_string(slotInfo.bulletsTotal));
+        } else {
+            ti.text = GameStringUtil::fromString(
+                std::to_string(slotInfo.bulletsClip) + "-" +
+                std::to_string(slotInfo.bulletsTotal));
+        }
 
         ti.baseColour = ui_shadowColour;
         ti.font = 2;
