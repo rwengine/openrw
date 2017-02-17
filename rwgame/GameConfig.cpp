@@ -99,6 +99,12 @@ struct IntTranslator {
     }
 };
 
+bool GameConfig::saveConfig() {
+    auto filename = getConfigFile();
+    return parseConfig(ParseType::CONFIG, "",
+        ParseType::FILE, filename);
+}
+
 std::string GameConfig::getDefaultINIString() {
     std::string result;
     parseConfig(ParseType::DEFAULT, "", ParseType::STRING, result);
