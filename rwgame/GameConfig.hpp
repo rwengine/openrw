@@ -18,6 +18,11 @@ public:
     std::string getConfigFile() const;
 
     /**
+     * @brief writeConfig Save the game configuration
+     */
+    bool saveConfig();
+
+    /**
      * @brief isValid
      * @return True if the loaded configuration is valid
      */
