@@ -167,6 +167,8 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     // Urgh
     if (itemTextureName == "colt45") {
         itemTextureName = "pistol";
+    } else if (itemTextureName == "bomb") {
+        itemTextureName = "detonator";
     }
 
     TextureData::Handle itemTexture =
