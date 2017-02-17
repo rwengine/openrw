@@ -109,37 +109,32 @@ bool GameConfig::parseConfig(
     GameConfig::ParseType srcType, const std::string &source,
     ParseType destType, std::string &destination)
 {
-    bool success = true;
     pt::ptree srcTree;
 
     if ((srcType == ParseType::STRING) || (srcType == ParseType::FILE)) {
-        std::istream *istream = nullptr;
-        switch (srcType) {
-            case ParseType::STRING:
-                istream = new std::istringstream(source);
-                break;
-            case ParseType::FILE:
-                istream = new std::ifstream(source);
-                break;
-            default:
-                //Cannot reach here
-                success = false;
-                break;
-        }
-        if (istream != nullptr) {
-            try {
-                pt::read_ini(*istream, srcTree);
-            } catch (pt::ini_parser_error &e) {
-                success = false;
-                RW_MESSAGE(e.what());
+        try {
+            switch (srcType) {
+                case ParseType::STRING:
+                    pt::read_ini(source, srcTree);
+                    break;
+                case ParseType::FILE:
+                {
+                    std::ifstream ifs(source);
+                    pt::read_ini(ifs, srcTree);
+                    break;
+                }
+                default:
+                    //Cannot reach here
+                    return false;
             }
-        } else {
-            success = false;
-            RW_MESSAGE("Unable to create stream from source.");
+        } catch (pt::ini_parser_error &e) {
+            RW_MESSAGE(e.what());
+            return false;
         }
-        delete istream;
     }
 
+    bool success = true;
+    
     auto read_config = [&](const std::string &key, auto &target,
                           const auto &defaultValue, auto &translator,
                           bool optional=true) {
@@ -196,6 +191,9 @@ bool GameConfig::parseConfig(
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 
+    if (!success)
+        return success;
+    
     if ((destType == ParseType::STRING) || (destType == ParseType::FILE)) {
         std::ostringstream ostream;
         try {
