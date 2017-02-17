@@ -168,6 +168,19 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
     BOOST_CHECK(!config.isValid());
 }
 
+BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
+    // Test wrong data type
+    auto cfg = getValidConfig();
+    cfg["input"]["invert_y"]="d";
+
+    TempFile tempFile;
+    tempFile.write(cfg);
+
+    GameConfig config(tempFile.filename(), tempFile.dirname());
+
+    BOOST_CHECK(!config.isValid());
+}
+
 BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     // Test reading empty configuration file
 
