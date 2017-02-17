@@ -147,6 +147,21 @@ BOOST_AUTO_TEST_CASE(test_death) {
         delete controller;
     }
 }
+
+BOOST_AUTO_TEST_CASE(test_cycle_animating) {
+    {
+        auto character =
+            Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
+
+        BOOST_REQUIRE(character != nullptr);
+
+        // Set the character cycle
+        character->playCycle(AnimCycle::ArrestGun);
+
+        BOOST_CHECK_EQUAL(static_cast<uint32_t>(character->getCurrentCycle()),
+                          static_cast<uint32_t>(AnimCycle::ArrestGun));
+    }
+}
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
