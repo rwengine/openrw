@@ -183,7 +183,8 @@ bool GameConfig::parseConfig(
     auto deft = StringTranslator();
     auto boolt = BoolTranslator();
 
-    //Add new configuration parameters here.
+    // Add new configuration parameters here.
+    // Additionally, add them to the unit test.
 
     // @todo Don't allow path separators and relative directories
     read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3", deft, false);
