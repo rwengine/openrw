@@ -70,10 +70,10 @@ struct StringTranslator {
     typedef std::string internal_type;
     typedef std::string external_type;
     boost::optional<external_type> get_value(const internal_type &str) {
-        return boost::optional<external_type>(stripComments(str));
+        return stripComments(str);
     }
     boost::optional<internal_type> put_value(const external_type &str) {
-        return boost::optional<internal_type>(str);
+        return str;
     }
 };
 
@@ -81,10 +81,15 @@ struct BoolTranslator {
     typedef std::string internal_type;
     typedef bool        external_type;
     boost::optional<external_type> get_value(const internal_type &str) {
-        return boost::optional<external_type>(std::stoi(stripComments(str)) != 0);
+        boost::optional<external_type> res;
+        try {
+            res = std::stoi(stripComments(str)) != 0;
+        } catch (std::invalid_argument &e) {
+        }
+        return res;
     }
     boost::optional<internal_type> put_value(const external_type &b) {
-        return boost::optional<internal_type>(b ? "1" : "0");
+        return internal_type(b ? "1" : "0");
     }
 };
 
@@ -92,7 +97,12 @@ struct IntTranslator {
     typedef std::string internal_type;
     typedef int         external_type;
     boost::optional<external_type> get_value(const internal_type &str) {
-        return boost::optional<external_type>(std::stoi(stripComments(str)));
+        boost::optional<external_type> res;
+        try {
+            res = std::stoi(stripComments(str));
+        } catch (std::invalid_argument &e) {
+        }
+        return res;
     }
     boost::optional<internal_type> put_value(const external_type &i) {
         return boost::optional<internal_type>(std::to_string(i));
@@ -125,10 +135,16 @@ bool GameConfig::parseConfig(
             pt::read_ini(ifs, srcTree);
         }
     } catch (pt::ini_parser_error &e) {
+        // Catches illegal input files (nonsensical input, duplicate keys)
         RW_MESSAGE(e.what());
         return false;
     }
 
+    if (destType == ParseType::DEFAULT) {
+        RW_ERROR("Target cannot be DEFAULT.");
+        return false;
+    }
+    
     bool success = true;
     
     auto read_config = [&](const std::string &key, auto &target,
@@ -150,13 +166,19 @@ bool GameConfig::parseConfig(
                 try {
                     sourceValue = srcTree.get<config_t>(key, translator);
                 } catch (pt::ptree_bad_path &e) {
-                    if (optional) {
-                        sourceValue = defaultValue;
-                    } else {
+                    // Catches missing key-value pairs: fail when required
+                    if (!optional) {
                       success = false;
                       RW_MESSAGE(e.what());
                       return;
                     }
+                    sourceValue = defaultValue;
+                } catch (pt::ptree_bad_data &e) {
+                    // Catches illegal value data: always fail
+                    success = false;
+                    RW_MESSAGE("invalid data");
+                    RW_MESSAGE(e.what());
+                    return;
                 }
                 break;
         }
@@ -164,7 +186,7 @@ bool GameConfig::parseConfig(
 
         switch (destType) {
             case ParseType::DEFAULT:
-                RW_ERROR("Target cannot be DEFAULT.");
+                // Target cannot be DEFAULT (case already handled)
                 success = false;
                 break;
             case ParseType::CONFIG:
@@ -191,32 +213,18 @@ bool GameConfig::parseConfig(
 
     if (!success)
         return success;
-    
-    if ((destType == ParseType::STRING) || (destType == ParseType::FILE)) {
-        std::ostringstream ostream;
-        try {
+
+    try {
+        if (destType == ParseType::STRING) {
+            std::ostringstream ostream;
             pt::write_ini(ostream, srcTree);
-        } catch (pt::ini_parser_error &e) {
-            success = false;
-            RW_MESSAGE(e.what());
+            destination = ostream.str();
+        } else if (destType == ParseType::FILE) {
+            pt::write_ini(destination, srcTree);
         }
-        switch (destType) {
-            case ParseType::STRING:
-                destination = ostream.str();
-                break;
-            case ParseType::FILE:
-            {
-                std::ofstream ofs(destination);
-                ofs << ostream.str();
-                ofs.close();
-                success &= !ofs.fail();
-                break;
-            }
-            default:
-                //Cannot reach here
-                success = false;
-                break;
-        }
+    } catch (pt::ini_parser_error &e) {
+        success = false;
+        RW_MESSAGE(e.what());
     }
 
     return success;
