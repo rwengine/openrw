@@ -212,10 +212,6 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
         cycle_pullout = AnimCycle::CarPullOutRHS;
     }
 
-    auto anm_open = character->animations->animation(cycle_open);
-    auto anm_enter = character->animations->animation(cycle_enter);
-    auto anm_pullout = character->animations->animation(cycle_pullout);
-
     // If there's someone in this seat already, we may have to ask them to
     // leave.
     auto currentOccupant =
@@ -224,7 +220,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     bool tryToEnter = false;
 
     if (entering) {
-        if (character->animator->getAnimation(AnimIndexAction) == anm_open) {
+        if (character->getCurrentCycle() == cycle_open) {
             if (character->animator->isCompleted(AnimIndexAction)) {
                 tryToEnter = true;
             } else if (entryDoor &&
@@ -235,13 +231,11 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
                 // character->setPosition(vehicle->getSeatEntryPosition(seat));
                 character->rotation = vehicle->getRotation();
             }
-        } else if (character->animator->getAnimation(AnimIndexAction) ==
-                   anm_pullout) {
+        } else if (character->getCurrentCycle() == cycle_pullout) {
             if (character->animator->isCompleted(AnimIndexAction)) {
                 tryToEnter = true;
             }
-        } else if (character->animator->getAnimation(AnimIndexAction) ==
-                   anm_enter) {
+        } else if (character->getCurrentCycle() == cycle_enter) {
             if (character->animator->isCompleted(AnimIndexAction)) {
                 // VehicleGetIn is over, finish activity
                 return true;
@@ -267,7 +261,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
                  glm::abs(entryDoor->constraint->getHingeAngle()) >= 0.6f)) {
                 tryToEnter = true;
             } else {
-                character->playActivityAnimation(anm_open, false, true);
+                character->playCycle(cycle_open);
             }
         } else if (targetDistance > kGiveUpDistance) {
             return true;
@@ -286,11 +280,11 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
         if (currentOccupant != nullptr && currentOccupant != character) {
             // Play the pullout animation and tell the other character to get
             // out.
-            character->playActivityAnimation(anm_pullout, false, true);
+            character->playCycle(cycle_pullout);
             currentOccupant->controller->setNextActivity(
                 new Activities::ExitVehicle(true));
         } else {
-            character->playActivityAnimation(anm_enter, false, true);
+            character->playCycle(cycle_enter);
             character->enterVehicle(vehicle, seat);
         }
     }
@@ -302,11 +296,11 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     RW_UNUSED(controller);
 
     if (jacked) {
-        auto anm_jacked_lhs = character->animations->animation(AnimCycle::CarJackedLHS);
-        auto anm_jacked_rhs = character->animations->animation(AnimCycle::CarJackedRHS);
-        auto anm_current = character->animator->getAnimation(AnimIndexAction);
+        const auto jacked_lhs = AnimCycle::CarJackedLHS;
+        const auto jacked_rhs = AnimCycle::CarJackedRHS;
+        const auto cycle_current = character->getCurrentCycle();
 
-        if (anm_current == anm_jacked_lhs || anm_current == anm_jacked_rhs) {
+        if (cycle_current == jacked_lhs || cycle_current == jacked_rhs) {
             if (character->animator->isCompleted(AnimIndexAction)) {
                 return true;
             }
@@ -327,9 +321,9 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
             character->setPosition(exitPos);
 
             if (exitPosLocal.x > 0.f) {
-                character->playActivityAnimation(anm_jacked_rhs, false, true);
+                character->playCycle(jacked_rhs);
             } else {
-                character->playActivityAnimation(anm_jacked_lhs, false, true);
+                character->playCycle(jacked_lhs);
             }
             // No need to open the door, it should already be open.
         }
@@ -344,10 +338,10 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
     auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
 
-    auto anm_exit = character->animations->animation(AnimCycle::CarGetOutLHS);
+    auto cycle_exit = AnimCycle::CarGetOutLHS;
 
     if (exitPosLocal.x > 0.f) {
-        anm_exit = character->animations->animation(AnimCycle::CarGetOutRHS);
+        cycle_exit = AnimCycle::CarGetOutRHS;
     }
 
     if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
@@ -367,7 +361,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         }
     }
 
-    if (character->animator->getAnimation(AnimIndexAction) == anm_exit) {
+    if (character->getCurrentCycle() == cycle_exit) {
         if (character->animator->isCompleted(AnimIndexAction)) {
             character->enterVehicle(nullptr, seat);
             character->setPosition(exitPos);
@@ -381,7 +375,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
             return true;
         }
     } else {
-        character->playActivityAnimation(anm_exit, false, true);
+        character->playCycle(cycle_exit);
         if (door) {
             vehicle->setPartTarget(door, true, door->openAngle);
         }
@@ -398,12 +392,24 @@ bool Activities::UseItem::update(CharacterObject *character,
         return true;
     }
 
+    // Finds the cycle associated with an anim from the AnimGroup
+    /// @todo doesn't need to happen every update..
+    auto find_cycle = [&](const std::string &name) {
+        if (name == "null") {
+            return AnimCycle::Idle;
+        }
+        for (auto &i : character->animations->animations_) {
+            if (i.name == name) return i.id;
+        }
+        return AnimCycle::Idle;
+    };
+
     auto world = character->engine;
     const auto &weapon = world->data->weaponData.at(itemslot);
     auto &state = character->getCurrentState().weapons[itemslot];
     auto animator = character->animator;
-    auto shootanim = world->data->animations[weapon->animation1];
-    auto throwanim = world->data->animations[weapon->animation2];
+    auto shootcycle = find_cycle(weapon->animation1);
+    auto throwcycle = find_cycle(weapon->animation2);
 
     // Instant hit weapons loop their anim
     // Thrown projectiles have lob / throw.
@@ -424,9 +430,9 @@ bool Activities::UseItem::update(CharacterObject *character,
             // Character is no longer firing
             return true;
         }
-        if (hasammo && shootanim) {
-            if (animator->getAnimation(AnimIndexAction) != shootanim) {
-                character->playActivityAnimation(shootanim, false, false);
+        if (hasammo) {
+            if (character->getCurrentCycle() != shootcycle) {
+                character->playCycle(shootcycle);
             }
 
             auto loopstart = weapon->animLoopStart / 100.f;
@@ -451,14 +457,14 @@ bool Activities::UseItem::update(CharacterObject *character,
     }
     /// @todo Use Thrown flag instead of project (RPG isn't thrown eg.)
     else if (weapon->fireType == WeaponData::PROJECTILE && hasammo) {
-        if (animator->getAnimation(AnimIndexAction) == shootanim) {
+        if (character->getCurrentCycle() == shootcycle) {
             if (character->getCurrentState().primaryActive) {
                 power = animator->getAnimationTime(AnimIndexAction) / 0.5f;
             }
             if (animator->isCompleted(AnimIndexAction)) {
-                character->playActivityAnimation(throwanim, false, false);
+                character->playCycle(throwcycle);
             }
-        } else if (animator->getAnimation(AnimIndexAction) == throwanim) {
+        } else if (character->getCurrentCycle() == throwcycle) {
             auto firetime = weapon->animCrouchFirePoint / 100.f;
             auto currID = animator->getAnimationTime(AnimIndexAction);
 
@@ -471,7 +477,7 @@ bool Activities::UseItem::update(CharacterObject *character,
                 return true;
             }
         } else {
-            character->playActivityAnimation(shootanim, false, true);
+            character->playCycle(shootcycle);
         }
     } else if (weapon->fireType == WeaponData::MELEE) {
         RW_CHECK(weapon->fireType != WeaponData::MELEE,
