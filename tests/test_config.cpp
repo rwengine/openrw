@@ -9,10 +9,6 @@
 namespace fs = boost::filesystem;
 
 typedef std::map<std::string, std::map<std::string, std::string>> simpleConfig_t;
-     
-fs::path getRandomFilePath() {
-    return fs::unique_path(fs::temp_directory_path() /= "openrw_test_%%%%%%%%%%%%%%%%");
-}
 
 simpleConfig_t getValidConfig() {
     simpleConfig_t result;
@@ -23,7 +19,7 @@ simpleConfig_t getValidConfig() {
     return result;
 }
 
-std::ostream &writeConfig(std::ostream &os, const simpleConfig_t &config) {
+std::ostream &operator<<(std::ostream &os, const simpleConfig_t &config) {
     for (auto &section : config) {
         os << "[" << section.first << "]" << "\n";
         for (auto &keyValue : section.second) {
@@ -33,19 +29,56 @@ std::ostream &writeConfig(std::ostream &os, const simpleConfig_t &config) {
     return os;
 }
 
+class TempFile {
+    // A TempFile file will be removed on destruction
+public:
+    TempFile() : m_path(getRandomFilePath()) {
+    }
+    ~TempFile() {
+        this->remove();
+    }
+    void remove() {
+        fs::remove(this->m_path);
+    }
+    void touch() {
+        std::ofstream ofs(this->path());
+        ofs.close();
+    }
+    bool exists() {
+        return fs::exists(this->m_path);
+    }
+    std::string path() {
+        return this->m_path.string();
+    }
+    std::string filename() {
+        return this->m_path.filename().string();
+    }
+    std::string dirname() {
+        return this->m_path.parent_path().string();
+    }
+    template<typename T>
+    void write(T t) {
+        std::ofstream ofs(this->path());
+        ofs << t;
+        ofs.close();
+    }
+private:
+    static fs::path getRandomFilePath() {
+        return fs::unique_path(fs::temp_directory_path() / "openrw_test_%%%%%%%%%%%%%%%%");
+    }
+    fs::path m_path;
+};
+
 BOOST_AUTO_TEST_SUITE(ConfigTests)
 
 BOOST_AUTO_TEST_CASE(test_config_valid) {
     // Test reading a valid configuration file
     auto cfg = getValidConfig();
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.write(cfg);
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
 
@@ -59,14 +92,11 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
     auto cfg = getValidConfig();
     cfg["game"]["path"] = "Liberty City";
     cfg["input"]["invert_y"] = "0";
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.write(cfg);
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
 
@@ -78,41 +108,49 @@ BOOST_AUTO_TEST_CASE(test_config_save) {
     // Test saving a configuration file
     auto cfg = getValidConfig();
     cfg["game"]["path"] = "Liberty City";
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.write(cfg);
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
     
-    fs::remove(configPath);
-    
-    BOOST_CHECK(!fs::exists(configPath));
+    tempFile.remove();
+    BOOST_CHECK(!tempFile.exists());
+
     BOOST_CHECK(config.saveConfig());
-    BOOST_CHECK(fs::exists(configPath));
-    
-    GameConfig config2(configPath.filename().string(),
-            configPath.parent_path().string());
-    
+    BOOST_CHECK(tempFile.exists());
+
+    GameConfig config2(tempFile.filename(), tempFile.dirname());
+
     BOOST_CHECK_EQUAL(config2.getGameDataPath(), "Liberty City");
+}
+
+BOOST_AUTO_TEST_CASE(test_config_valid_default) {
+    // Test whether the default INI string is valid
+    TempFile tempFile;
+    BOOST_CHECK(!tempFile.exists());
+    
+    GameConfig config(tempFile.filename(), tempFile.dirname());
+    BOOST_CHECK(!config.isValid());
+
+    auto defaultINI = config.getDefaultINIString();
+    tempFile.write(defaultINI);
+
+    config = GameConfig(tempFile.filename(), tempFile.dirname());
+    BOOST_CHECK(config.isValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_duplicate) {
     // Test duplicate keys in invalid configuration file
     auto cfg = getValidConfig();
     cfg["input"]["invert_y    "] = "0";
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.write(cfg);
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
 }
@@ -121,39 +159,33 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
     // Test missing required keys in invalid configuration file
     auto cfg = getValidConfig();
     cfg["game"].erase("path");
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.write(cfg);
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     // Test reading empty configuration file
-    simpleConfig_t cfg;
-    auto configPath = getRandomFilePath();
 
-    std::ofstream ofs(configPath.string());
-    writeConfig(ofs, cfg);
-    ofs.close();
+    TempFile tempFile;
+    tempFile.touch();
+    BOOST_CHECK(tempFile.exists());
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
     // Test reading non-existing configuration file
-    auto configPath = getRandomFilePath();
+    TempFile tempFile;
 
-    GameConfig config(configPath.filename().string(),
-            configPath.parent_path().string());
+    BOOST_CHECK(!tempFile.exists());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
 }
