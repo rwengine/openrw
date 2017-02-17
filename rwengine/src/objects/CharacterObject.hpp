@@ -5,9 +5,9 @@
 #include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletCollisionCommon.h>
 #include <array>
+#include <data/AnimGroup.hpp>
 #include <glm/glm.hpp>
 #include <objects/GameObject.hpp>
-#include <data/AnimGroup.hpp>
 
 constexpr int kMaxInventorySlots = 13;
 
@@ -61,6 +61,8 @@ private:
     bool motionBlockedByActivity;
 
     glm::vec3 updateMovementAnimation(float dt);
+
+    AnimCycle cycle_;
 
 public:
     static const float DefaultJumpSpeed;
@@ -188,6 +190,25 @@ public:
     void activityFinished();
 
     /**
+     * Play the animation from the ped's animation group
+     *
+     * Flags on the cycle in the anim group will control repeating etc.
+     */
+    void playCycle(AnimCycle cycle);
+
+    /**
+     * Play the given animation, with the flags of the given cycle
+     *
+     * This sets the same state as playCycle, but provides an alternate
+     * animation to play.
+     */
+    void playCycleAnimOverride(AnimCycle cycle, Animation* anim);
+
+    AnimCycle getCurrentCycle() const {
+        return cycle_;
+    }
+
+    /**
      * @brief addToInventory Adds ammo to the specified item slot
      * @param slot The slot to add ammo for
      * @param ammo The quanity of ammunition to add
@@ -197,7 +218,9 @@ public:
     void addToInventory(int slot, int ammo);
 
     void setActiveItem(int slot);
-    int getActiveItem() const { return currentState.currentWeapon; }
+    int getActiveItem() const {
+        return currentState.currentWeapon;
+    }
 
     /**
      * @brief removeFromInventory Removes item at slot from inventory

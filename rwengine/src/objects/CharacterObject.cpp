@@ -28,6 +28,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , jumped(false)
     , jumpSpeed(DefaultJumpSpeed)
     , motionBlockedByActivity(false)
+    , cycle_(AnimCycle::Idle)
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)
@@ -523,6 +524,23 @@ void CharacterObject::playActivityAnimation(Animation* animation, bool repeat,
 void CharacterObject::activityFinished() {
     animator->playAnimation(AnimIndexAction, nullptr, 1.f, false);
     motionBlockedByActivity = false;
+}
+
+void CharacterObject::playCycle(AnimCycle cycle) {
+    auto animation = animations->animation(cycle);
+    auto flags = animations->flags(cycle);
+
+    cycle_ = cycle;
+    animator->playAnimation(AnimIndexAction, animation, 1.f,
+                            flags & AnimCycleInfo::Repeat);
+}
+
+void CharacterObject::playCycleAnimOverride(AnimCycle cycle, Animation* anim) {
+    auto flags = animations->flags(cycle);
+
+    cycle_ = cycle;
+    animator->playAnimation(AnimIndexAction, anim, 1.f,
+                            flags & AnimCycleInfo::Repeat);
 }
 
 void CharacterObject::addToInventory(int slot, int ammo) {
