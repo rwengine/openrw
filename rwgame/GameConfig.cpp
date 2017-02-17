@@ -155,6 +155,7 @@ bool GameConfig::parseConfig(
                     } else {
                       success = false;
                       RW_MESSAGE(e.what());
+                      return;
                     }
                 }
                 break;
