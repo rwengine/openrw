@@ -117,26 +117,16 @@ bool GameConfig::parseConfig(
 {
     pt::ptree srcTree;
 
-    if ((srcType == ParseType::STRING) || (srcType == ParseType::FILE)) {
-        try {
-            switch (srcType) {
-                case ParseType::STRING:
-                    pt::read_ini(source, srcTree);
-                    break;
-                case ParseType::FILE:
-                {
-                    std::ifstream ifs(source);
-                    pt::read_ini(ifs, srcTree);
-                    break;
-                }
-                default:
-                    //Cannot reach here
-                    return false;
-            }
-        } catch (pt::ini_parser_error &e) {
-            RW_MESSAGE(e.what());
-            return false;
+    try {
+        if (srcType == ParseType::STRING) {
+            pt::read_ini(source, srcTree);
+        } else if (srcType == ParseType::FILE) {
+            std::ifstream ifs(source);
+            pt::read_ini(ifs, srcTree);
         }
+    } catch (pt::ini_parser_error &e) {
+        RW_MESSAGE(e.what());
+        return false;
     }
 
     bool success = true;
