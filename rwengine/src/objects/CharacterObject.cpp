@@ -235,6 +235,11 @@ void CharacterObject::tick(float dt) {
         controller->update(dt);
     }
 
+    // Reset back to idle cycle when not in an activity
+    if (controller->getCurrentActivity() == nullptr) {
+        cycle_ = AnimCycle::Idle;
+    }
+
     animator->tick(dt);
     updateCharacter(dt);
 
