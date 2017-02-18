@@ -288,6 +288,13 @@ public:
     AnimGroups pedAnimGroups;
 
     /**
+     * Finds or loads the named animation group
+     *
+     * if the group can't be found, a default is returned.
+     */
+    AnimGroup* getAnimGroup(const std::string& group);
+
+    /**
      * DynamicObjectData
      */
     std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;

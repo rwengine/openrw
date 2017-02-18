@@ -149,6 +149,17 @@ uint16_t GameData::findModelObject(const std::string model) {
     return -1;
 }
 
+AnimGroup* GameData::getAnimGroup(const std::string& group) {
+    auto it = pedAnimGroups.find(group);
+    if (it != pedAnimGroups.end()) {
+        return it->second.get();
+    }
+
+    pedAnimGroups[group] = std::make_unique<AnimGroup>(
+        AnimGroup::getBuiltInAnimGroup(animations, group));
+    return pedAnimGroups[group].get();
+}
+
 void GameData::loadCOL(const size_t zone, const std::string& name) {
     RW_UNUSED(zone);
 
