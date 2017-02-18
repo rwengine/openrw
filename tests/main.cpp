@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE gtfw
+#define BOOST_TEST_MODULE openrw
 #include <boost/test/included/unit_test.hpp>
 #include "test_globals.hpp"
 
