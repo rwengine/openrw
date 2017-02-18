@@ -134,7 +134,8 @@ GameConfig::ParseResult GameConfig::parseConfig(
 
     try {
         if (srcType == ParseType::STRING) {
-            pt::read_ini(source, srcTree);
+            std::istringstream iss(source);
+            pt::read_ini(iss, srcTree);
         } else if (srcType == ParseType::FILE) {
             pt::read_ini(source, srcTree);
         }
