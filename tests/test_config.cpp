@@ -12,6 +12,8 @@ typedef std::map<std::string, std::map<std::string, std::string>> simpleConfig_t
 
 simpleConfig_t getValidConfig() {
     simpleConfig_t result;
+    // Some values and subkeys are surrounded by whitespace
+    // to test the robustness of the INI parser.
     // Don't change game.path and input.invert_y keys. Tests depend on them.
     result["game"]["path"] = "\t/dev/test  \t \r\n";
     result["game"]["\tlanguage\t "] = "      american ;american english french german italian spanish.";
@@ -41,7 +43,7 @@ public:
         fs::remove(this->m_path);
     }
     void touch() {
-        std::ofstream ofs(this->path());
+        std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
         ofs.close();
     }
     bool exists() {
@@ -58,7 +60,9 @@ public:
     }
     template<typename T>
     void write(T t) {
-        std::ofstream ofs(this->path());
+        // Append argument at the end of the file.
+        // File is open/closes repeatedly. Not optimal.
+        std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
         ofs << t;
         ofs.close();
     }
@@ -70,6 +74,29 @@ private:
 };
 
 BOOST_AUTO_TEST_SUITE(ConfigTests)
+
+BOOST_AUTO_TEST_CASE(test_TempFile) {
+    // Check the behavior of TempFile
+    TempFile tempFile;
+    BOOST_CHECK_EQUAL(tempFile.exists(), false);
+    tempFile.touch();
+    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    tempFile.remove();
+    BOOST_CHECK_EQUAL(tempFile.exists(), false);
+
+    tempFile.touch();
+    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    tempFile.remove();
+
+    tempFile.write("abc");
+    tempFile.write("def");
+    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    tempFile.touch();
+    std::ifstream ifs(tempFile.path());
+    std::string line;
+    std::getline(ifs, line);
+    BOOST_CHECK_EQUAL(line, "abcdef");
+}
 
 BOOST_AUTO_TEST_CASE(test_config_valid) {
     // Test reading a valid configuration file
