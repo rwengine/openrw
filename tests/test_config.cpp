@@ -58,13 +58,27 @@ public:
     std::string dirname() {
         return this->m_path.parent_path().string();
     }
+    void change_perms_readonly() {
+        fs::permissions(this->m_path, fs::perms::owner_read
+            | fs::perms::group_read | fs::perms::others_read);
+    }
     template<typename T>
-    void write(T t) {
+    bool append(T t) {
         // Append argument at the end of the file.
         // File is open/closes repeatedly. Not optimal.
         std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
         ofs << t;
         ofs.close();
+        return ofs.good();
+    }
+    template<typename T>
+    bool write(T t) {
+        // Write the argument to the file, discarding all contents.
+        // File is open/closes repeatedly. Not optimal.
+        std::ofstream ofs(this->path(), std::ios::out | std::ios::trunc);
+        ofs << t;
+        ofs.close();
+        return ofs.good();
     }
 private:
     static fs::path getRandomFilePath() {
@@ -88,14 +102,18 @@ BOOST_AUTO_TEST_CASE(test_TempFile) {
     BOOST_CHECK_EQUAL(tempFile.exists(), true);
     tempFile.remove();
 
-    tempFile.write("abc");
-    tempFile.write("def");
+    BOOST_CHECK_EQUAL(tempFile.append("abc"), true);
+    BOOST_CHECK_EQUAL(tempFile.append("def"), true);
     BOOST_CHECK_EQUAL(tempFile.exists(), true);
     tempFile.touch();
     std::ifstream ifs(tempFile.path());
     std::string line;
     std::getline(ifs, line);
     BOOST_CHECK_EQUAL(line, "abcdef");
+
+    tempFile.change_perms_readonly();
+    BOOST_CHECK_EQUAL(tempFile.write("abc"), false);
+    BOOST_CHECK_EQUAL(tempFile.append("def"), false);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid) {
@@ -103,11 +121,14 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
     auto cfg = getValidConfig();
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
+    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::GOOD);
+    BOOST_CHECK_EQUAL(config.getParseResult().getKeysRequiredMissing().size(), 0);
+    BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
     BOOST_CHECK_EQUAL(config.getGameDataPath(), "/dev/test");
     BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
@@ -121,11 +142,14 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
     cfg["input"]["invert_y"] = "0";
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
+    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::GOOD);
+    BOOST_CHECK_EQUAL(config.getParseResult().getKeysRequiredMissing().size(), 0);
+    BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
     BOOST_CHECK_EQUAL(config.getInputInvertY(), false);
     BOOST_CHECK_EQUAL(config.getGameDataPath(), "Liberty City");
@@ -137,33 +161,49 @@ BOOST_AUTO_TEST_CASE(test_config_save) {
     cfg["game"]["path"] = "Liberty City";
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
-    
+
     tempFile.remove();
     BOOST_CHECK(!tempFile.exists());
 
-    BOOST_CHECK(config.saveConfig());
+    auto writeResult = config.saveConfig();
+    BOOST_CHECK(writeResult.isValid());
     BOOST_CHECK(tempFile.exists());
 
     GameConfig config2(tempFile.filename(), tempFile.dirname());
-
     BOOST_CHECK_EQUAL(config2.getGameDataPath(), "Liberty City");
+}
+
+BOOST_AUTO_TEST_CASE(test_config_save_readonly) {
+    // Test whether saving to a readonly INI file fails
+    auto cfg = getValidConfig();
+
+    TempFile tempFile;
+    tempFile.append(cfg);
+    tempFile.change_perms_readonly();
+
+    GameConfig config(tempFile.filename(), tempFile.dirname());
+    BOOST_CHECK_EQUAL(config.isValid(), true);
+
+    auto writeResult = config.saveConfig();
+    BOOST_CHECK(!writeResult.isValid());
+    BOOST_CHECK_EQUAL(writeResult.type(), GameConfig::ParseResult::INVALIDOUTPUTFILE);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid_default) {
     // Test whether the default INI string is valid
     TempFile tempFile;
     BOOST_CHECK(!tempFile.exists());
-    
+
     GameConfig config(tempFile.filename(), tempFile.dirname());
     BOOST_CHECK(!config.isValid());
 
     auto defaultINI = config.getDefaultINIString();
-    tempFile.write(defaultINI);
+    tempFile.append(defaultINI);
 
     config = GameConfig(tempFile.filename(), tempFile.dirname());
     BOOST_CHECK(config.isValid());
@@ -175,11 +215,13 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_duplicate) {
     cfg["input"]["invert_y    "] = "0";
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDINPUTFILE);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
@@ -188,11 +230,19 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
     cfg["game"].erase("path");
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
+
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+
+    BOOST_CHECK_EQUAL(parseResult.getKeysRequiredMissing().size(), 1);
+    BOOST_CHECK_EQUAL(parseResult.getKeysInvalidData().size(), 0);
+
+    BOOST_CHECK_EQUAL(parseResult.getKeysRequiredMissing()[0], "game.path");
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
@@ -201,16 +251,24 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
     cfg["input"]["invert_y"]="d";
 
     TempFile tempFile;
-    tempFile.write(cfg);
+    tempFile.append(cfg);
 
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
+
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+
+    BOOST_CHECK_EQUAL(parseResult.getKeysRequiredMissing().size(), 0);
+    BOOST_CHECK_EQUAL(parseResult.getKeysInvalidData().size(), 1);
+
+    BOOST_CHECK_EQUAL(parseResult.getKeysInvalidData()[0], "input.invert_y");
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     // Test reading empty configuration file
-
+    // An empty file has a valid data structure, but has missing keys and is thus invalid.
     TempFile tempFile;
     tempFile.touch();
     BOOST_CHECK(tempFile.exists());
@@ -218,6 +276,10 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
+
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+    BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
@@ -228,6 +290,9 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(!config.isValid());
+
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDINPUTFILE);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
