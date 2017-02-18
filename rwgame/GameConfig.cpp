@@ -105,7 +105,7 @@ struct IntTranslator {
         return res;
     }
     boost::optional<internal_type> put_value(const external_type &i) {
-        return boost::optional<internal_type>(std::to_string(i));
+        return std::to_string(i);
     }
 };
 
@@ -190,7 +190,7 @@ bool GameConfig::parseConfig(
                 success = false;
                 break;
             case ParseType::CONFIG:
-                //Don't care if success == false
+                // Don't care if success == false
                 target = sourceValue;
                 break;
             case ParseType::FILE:
@@ -229,4 +229,3 @@ bool GameConfig::parseConfig(
 
     return success;
 }
-
