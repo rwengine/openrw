@@ -13,7 +13,7 @@ GameConfig::GameConfig(const std::string& configName,
                        const std::string& configPath)
     : m_configName(configName)
     , m_configPath(configPath)
-    , m_valid(false)
+    , m_parseResult()
     , m_inputInvertY(false) {
     if (m_configPath.empty()) {
         m_configPath = getDefaultConfigPath();
@@ -23,7 +23,7 @@ GameConfig::GameConfig(const std::string& configName,
     auto configFile = getConfigFile();
 
     std::string dummy;
-    m_valid = parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
+    m_parseResult = parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
 }
 
 std::string GameConfig::getConfigFile() const {
@@ -31,7 +31,11 @@ std::string GameConfig::getConfigFile() const {
 }
 
 bool GameConfig::isValid() const {
-    return m_valid;
+    return m_parseResult.isValid();
+}
+
+const GameConfig::ParseResult &GameConfig::getParseResult() const {
+    return m_parseResult;
 }
 
 std::string GameConfig::getDefaultConfigPath() {
@@ -109,7 +113,7 @@ struct IntTranslator {
     }
 };
 
-bool GameConfig::saveConfig() {
+GameConfig::ParseResult GameConfig::saveConfig() {
     auto filename = getConfigFile();
     return parseConfig(ParseType::CONFIG, "",
         ParseType::FILE, filename);
@@ -121,32 +125,32 @@ std::string GameConfig::getDefaultINIString() {
     return result;
 }
 
-bool GameConfig::parseConfig(
+GameConfig::ParseResult GameConfig::parseConfig(
     GameConfig::ParseType srcType, const std::string &source,
     ParseType destType, std::string &destination)
 {
     pt::ptree srcTree;
+    ParseResult parseResult;
 
     try {
         if (srcType == ParseType::STRING) {
             pt::read_ini(source, srcTree);
         } else if (srcType == ParseType::FILE) {
-            std::ifstream ifs(source);
-            pt::read_ini(ifs, srcTree);
+            pt::read_ini(source, srcTree);
         }
     } catch (pt::ini_parser_error &e) {
         // Catches illegal input files (nonsensical input, duplicate keys)
+        parseResult.failInputFile(e.filename(), e.line(), e.message());
         RW_MESSAGE(e.what());
-        return false;
+        return parseResult;
     }
 
     if (destType == ParseType::DEFAULT) {
+        parseResult.failArgument();
         RW_ERROR("Target cannot be DEFAULT.");
-        return false;
+        return parseResult;
     }
-    
-    bool success = true;
-    
+
     auto read_config = [&](const std::string &key, auto &target,
                           const auto &defaultValue, auto &translator,
                           bool optional=true) {
@@ -168,15 +172,14 @@ bool GameConfig::parseConfig(
                 } catch (pt::ptree_bad_path &e) {
                     // Catches missing key-value pairs: fail when required
                     if (!optional) {
-                      success = false;
-                      RW_MESSAGE(e.what());
-                      return;
+                        parseResult.failRequiredMissing(key);
+                        RW_MESSAGE(e.what());
+                        return;
                     }
                     sourceValue = defaultValue;
                 } catch (pt::ptree_bad_data &e) {
                     // Catches illegal value data: always fail
-                    success = false;
-                    RW_MESSAGE("invalid data");
+                    parseResult.failInvalidData(key);
                     RW_MESSAGE(e.what());
                     return;
                 }
@@ -187,7 +190,7 @@ bool GameConfig::parseConfig(
         switch (destType) {
             case ParseType::DEFAULT:
                 // Target cannot be DEFAULT (case already handled)
-                success = false;
+                parseResult.failArgument();
                 break;
             case ParseType::CONFIG:
                 // Don't care if success == false
@@ -211,8 +214,8 @@ bool GameConfig::parseConfig(
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 
-    if (!success)
-        return success;
+    if (!parseResult.isValid())
+        return parseResult;
 
     try {
         if (destType == ParseType::STRING) {
@@ -223,9 +226,64 @@ bool GameConfig::parseConfig(
             pt::write_ini(destination, srcTree);
         }
     } catch (pt::ini_parser_error &e) {
-        success = false;
+        parseResult.failOutputFile(e.filename(), e.line(), e.message());
         RW_MESSAGE(e.what());
     }
 
-    return success;
+    return parseResult;
 }
+
+GameConfig::ParseResult::ParseResult()
+    : m_result(ErrorType::GOOD)
+    , m_filename()
+    , m_line(0)
+    , m_message()
+    , m_keys_requiredMissing()
+    , m_keys_invalidData() {
+}
+
+GameConfig::ParseResult::ErrorType GameConfig::ParseResult::type() const {
+    return this->m_result;
+}
+
+bool GameConfig::ParseResult::isValid() const {
+    return this->type() == ErrorType::GOOD;
+}
+
+void GameConfig::ParseResult::failInputFile(const std::string &filename, size_t line,
+        const std::string &message) {
+    this->m_result = ParseResult::ErrorType::INVALIDINPUTFILE;
+    this->m_filename = filename;
+    this->m_line = line;
+    this->m_message = message;
+}
+
+void GameConfig::ParseResult::failArgument() {
+    this->m_result = ParseResult::ErrorType::INVALIDARGUMENT;
+}
+
+void GameConfig::ParseResult::failRequiredMissing(const std::string &key) {
+    this->m_result = ParseResult::ErrorType::INVALIDCONTENT;
+    this->m_keys_requiredMissing.push_back(key);
+}
+
+void GameConfig::ParseResult::failInvalidData(const std::string &key) {
+    this->m_result = ParseResult::ErrorType::INVALIDCONTENT;
+    this->m_keys_invalidData.push_back(key);
+}
+
+void GameConfig::ParseResult::failOutputFile(const std::string &filename, size_t line, const std::string &message) {
+    this->m_result = ParseResult::ErrorType::INVALIDOUTPUTFILE;
+    this->m_filename = filename;
+    this->m_line = line;
+    this->m_message = message;
+}
+
+const std::vector<std::string> &GameConfig::ParseResult::getKeysRequiredMissing() const {
+    return this->m_keys_requiredMissing;
+}
+
+const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData() const {
+    return this->m_keys_invalidData;
+}
+
