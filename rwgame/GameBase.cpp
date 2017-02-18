@@ -17,8 +17,7 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
             + config.getConfigFile() + "\".\n"
             + "Adapt the following default INI to your configuration.\n"
             + config.getDefaultINIString());
-        throw std::runtime_error("Invalid configuration file at: " +
-                                 config.getConfigFile());
+        throw std::runtime_error(config.getParseResult().what());
     }
 
     size_t w = kWindowWidth, h = kWindowHeight;
@@ -28,11 +27,12 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
     // Define and parse command line options
     namespace po = boost::program_options;
     po::options_description desc("Available options");
-    desc.add_options()("help", "Show this help message")(
+    desc.add_options()(
+        "help", "Show this help message")(
         "width,w", po::value<size_t>(), "Game resolution width in pixel")(
         "height,h", po::value<size_t>(), "Game resolution height in pixel")(
-        "fullscreen,f", "Enable fullscreen mode")("newgame,n",
-                                                  "Directly start a new game")(
+        "fullscreen,f", "Enable fullscreen mode")(
+        "newgame,n", "Directly start a new game")(
         "test,t", "Starts a new game in a test location")(
         "load,l", po::value<std::string>(), "Load save file")(
         "benchmark,b", po::value<std::string>(), "Run benchmark from file");
