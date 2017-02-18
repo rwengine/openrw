@@ -33,7 +33,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , physObject(nullptr)
     , physShape(nullptr)
     , controller(nullptr) {
-    animations = engine->data->pedAnimGroups["player"].get();
 
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));
@@ -43,6 +42,8 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
 
         createActor();
     }
+
+    animations = engine->data->getAnimGroup(info->animgroup_);
 }
 
 CharacterObject::~CharacterObject() {
