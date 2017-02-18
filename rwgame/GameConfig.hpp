@@ -4,6 +4,19 @@
 #include <vector>
 
 class GameConfig {
+private:
+    enum ParseType {
+        DEFAULT,
+        CONFIG,
+        FILE,
+        STRING
+    };
+
+    /**
+     * @brief extractFilenameParseTypeData Get a human readable filename string
+     * @return file path or a description of the data type
+     */
+    static std::string extractFilenameParseTypeData(ParseType type, const std::string &data);
 public:
     class ParseResult {
     public:
@@ -19,11 +32,23 @@ public:
             /// INVALIDOUTPUTFILE: There was some error while writing to a file or string
             INVALIDOUTPUTFILE
         };
+    private:
         /**
          * @brief ParseResult Holds the issues occurred while parsing of a config file.
+         * @param srcType Type of the source
+         * @param source The source of the parser
+         * @param destType Type of the destination
+         * @param destination The destination
          */
+        ParseResult(ParseType srcType, const std::string &source,
+            ParseType destType, const std::string &destination);
 
+        /**
+         * @brief ParseResult Create empty ParseResult
+         */
         ParseResult();
+
+    public:
         /**
          * @brief type Get the type of error
          * @return Type of error or GOOD if there was no error
@@ -43,14 +68,15 @@ public:
         const std::vector<std::string> &getKeysInvalidData() const;
         /**
          * @brief failInputFile Fail because the input file was invalid
-         * @param filename Filename of the invalid file
          * @param line Line number where the error is located
          * @param message Description of the error
          */
-        void failInputFile(const std::string &filename, size_t line, const std::string &message);
+        void failInputFile(size_t line, const std::string &message);
 
         /**
          * @brief failArgument Fail because an argument was invalid
+         * @param srcType type of the source
+         * @param destType type of the destination
          */
         void failArgument();
 
@@ -68,23 +94,31 @@ public:
 
         /**
          * @brief failOutputFile Fail because an error occurred while while writing to the output
-         * @param filename Filename of the invalid file
          * @param line Line number where the error is located
          * @param message Description of the error
          */
-        void failOutputFile(const std::string &filename, size_t line, const std::string &message);
+        void failOutputFile(size_t line, const std::string &message);
 
         /**
          * @brief isValid
          * @return True if the loaded configuration is valid
          */
         bool isValid() const;
+
+        /**
+         * @brief what Get a string representing the error
+         * @return String with the error description
+         */
+        std::string what() const;
     private:
         /// Type of the failure
         ErrorType m_result;
 
-        /// Filename of the invalid input or output file
-        std::string m_filename;
+        /// Filename of the input file
+        std::string m_inputfilename;
+
+        /// Filename of the output file
+        std::string m_outputfilename;
 
         /// Line number where the failure occurred (on invalid input or output file)
         size_t m_line;
@@ -97,6 +131,8 @@ public:
 
         /// All keys that contain invalid data
         std::vector<std::string> m_keys_invalidData;
+
+        friend class GameConfig;
     };
 
     /**
@@ -147,13 +183,6 @@ public:
 
 private:
     static std::string getDefaultConfigPath();
-
-    enum ParseType {
-        DEFAULT,
-        CONFIG,
-        FILE,
-        STRING
-    };
 
     /**
      * @brief parseConfig Load data from source and write it to destination.

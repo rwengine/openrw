@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
-    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::GOOD);
+    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::ErrorType::GOOD);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysRequiredMissing().size(), 0);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
     GameConfig config(tempFile.filename(), tempFile.dirname());
 
     BOOST_CHECK(config.isValid());
-    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::GOOD);
+    BOOST_CHECK_EQUAL(config.getParseResult().type(), GameConfig::ParseResult::ErrorType::GOOD);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysRequiredMissing().size(), 0);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_config_save_readonly) {
 
     auto writeResult = config.saveConfig();
     BOOST_CHECK(!writeResult.isValid());
-    BOOST_CHECK_EQUAL(writeResult.type(), GameConfig::ParseResult::INVALIDOUTPUTFILE);
+    BOOST_CHECK_EQUAL(writeResult.type(), GameConfig::ParseResult::ErrorType::INVALIDOUTPUTFILE);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid_default) {
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_duplicate) {
 
     BOOST_CHECK(!config.isValid());
     const auto &parseResult = config.getParseResult();
-    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDINPUTFILE);
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
     BOOST_CHECK(!config.isValid());
 
     const auto &parseResult = config.getParseResult();
-    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
 
     BOOST_CHECK_EQUAL(parseResult.getKeysRequiredMissing().size(), 1);
     BOOST_CHECK_EQUAL(parseResult.getKeysInvalidData().size(), 0);
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
     BOOST_CHECK(!config.isValid());
 
     const auto &parseResult = config.getParseResult();
-    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
 
     BOOST_CHECK_EQUAL(parseResult.getKeysRequiredMissing().size(), 0);
     BOOST_CHECK_EQUAL(parseResult.getKeysInvalidData().size(), 1);
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     BOOST_CHECK(!config.isValid());
 
     const auto &parseResult = config.getParseResult();
-    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDCONTENT);
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
     BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1);
 }
 
@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
     BOOST_CHECK(!config.isValid());
 
     const auto &parseResult = config.getParseResult();
-    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::INVALIDINPUTFILE);
+    BOOST_CHECK_EQUAL(parseResult.type(), GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

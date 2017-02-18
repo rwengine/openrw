@@ -130,7 +130,7 @@ GameConfig::ParseResult GameConfig::parseConfig(
     ParseType destType, std::string &destination)
 {
     pt::ptree srcTree;
-    ParseResult parseResult;
+    ParseResult parseResult(srcType, source, destType, destination);
 
     try {
         if (srcType == ParseType::STRING) {
@@ -140,7 +140,7 @@ GameConfig::ParseResult GameConfig::parseConfig(
         }
     } catch (pt::ini_parser_error &e) {
         // Catches illegal input files (nonsensical input, duplicate keys)
-        parseResult.failInputFile(e.filename(), e.line(), e.message());
+        parseResult.failInputFile(e.line(), e.message());
         RW_MESSAGE(e.what());
         return parseResult;
     }
@@ -226,16 +226,44 @@ GameConfig::ParseResult GameConfig::parseConfig(
             pt::write_ini(destination, srcTree);
         }
     } catch (pt::ini_parser_error &e) {
-        parseResult.failOutputFile(e.filename(), e.line(), e.message());
+        parseResult.failOutputFile(e.line(), e.message());
         RW_MESSAGE(e.what());
     }
 
     return parseResult;
 }
 
+std::string GameConfig::extractFilenameParseTypeData(ParseType type, const std::string &data)
+{
+    switch (type) {
+        case ParseType::CONFIG:
+            return "<configuration>";
+        case ParseType::FILE:
+            return data;
+        case ParseType::STRING:
+            return "<string>";
+        case ParseType::DEFAULT:
+        default:
+            return "<default>";
+    }
+}
+
+GameConfig::ParseResult::ParseResult(
+            GameConfig::ParseType srcType, const std::string &source,
+            GameConfig::ParseType destType, const std::string &destination)
+    : m_result(ErrorType::GOOD)
+    , m_inputfilename(GameConfig::extractFilenameParseTypeData(srcType, source))
+    , m_outputfilename(GameConfig::extractFilenameParseTypeData(destType, destination))
+    , m_line(0)
+    , m_message()
+    , m_keys_requiredMissing()
+    , m_keys_invalidData() {
+}
+
 GameConfig::ParseResult::ParseResult()
     : m_result(ErrorType::GOOD)
-    , m_filename()
+    , m_inputfilename()
+    , m_outputfilename()
     , m_line(0)
     , m_message()
     , m_keys_requiredMissing()
@@ -250,10 +278,9 @@ bool GameConfig::ParseResult::isValid() const {
     return this->type() == ErrorType::GOOD;
 }
 
-void GameConfig::ParseResult::failInputFile(const std::string &filename, size_t line,
+void GameConfig::ParseResult::failInputFile(size_t line,
         const std::string &message) {
     this->m_result = ParseResult::ErrorType::INVALIDINPUTFILE;
-    this->m_filename = filename;
     this->m_line = line;
     this->m_message = message;
 }
@@ -272,9 +299,9 @@ void GameConfig::ParseResult::failInvalidData(const std::string &key) {
     this->m_keys_invalidData.push_back(key);
 }
 
-void GameConfig::ParseResult::failOutputFile(const std::string &filename, size_t line, const std::string &message) {
+void GameConfig::ParseResult::failOutputFile(size_t line,
+        const std::string &message) {
     this->m_result = ParseResult::ErrorType::INVALIDOUTPUTFILE;
-    this->m_filename = filename;
     this->m_line = line;
     this->m_message = message;
 }
@@ -287,3 +314,48 @@ const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData() co
     return this->m_keys_invalidData;
 }
 
+std::string GameConfig::ParseResult::what() const {
+    switch (this->m_result) {
+        case ErrorType::GOOD:
+            return "Good";
+        case ErrorType::INVALIDARGUMENT:
+            return "Invalid argument: destination cannot be the default config";
+        case ErrorType::INVALIDINPUTFILE:
+        {
+            std::ostringstream oss;
+            oss << "Error while reading \"" 
+                << this->m_inputfilename << "\":" << this->m_line << ":\n"
+                << this->m_message;
+            return oss.str();
+        }
+        case ErrorType::INVALIDOUTPUTFILE:
+        {
+            std::ostringstream oss;
+            oss << "Error while writing \"" 
+                << this->m_inputfilename << "\":" << this->m_line << ":\n"
+                << this->m_message;
+            return oss.str();
+        }
+        case ErrorType::INVALIDCONTENT:
+        {
+            std::ostringstream oss;
+            oss << "Error while parsing \"" 
+                << this->m_inputfilename << "\".";
+            if (this->m_keys_requiredMissing.size()) {
+                oss << "\nRequired keys that are missing:";
+                for (auto &key : this->m_keys_requiredMissing) {
+                    oss << "\n - " << key;
+                }
+            }
+            if (this->m_keys_invalidData.size()) {
+                oss << "\nKeys that contain invalid data:";
+                for (auto &key : this->m_keys_invalidData) {
+                    oss << "\n - " << key;
+                }
+            }
+            return oss.str();
+        }
+        default:
+            return "Unknown error";
+    }
+}
