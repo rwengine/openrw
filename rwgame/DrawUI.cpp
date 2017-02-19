@@ -185,18 +185,27 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         const CharacterState& cs = player->getCharacter()->getCurrentState();
         const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
 
-        bool isProjectile = weapon->fireType == WeaponData::PROJECTILE;
-        bool isShotgun = weapon->modelID == 176;
-        bool isSniper = weapon->modelID == 177;
-        bool noClip = isProjectile || isShotgun || isSniper;
+        // In weapon.dat clip size of 0 or 1000+ indicates no reload
+        // Clip size of 1 is being visually omitted as well
+        bool noClip = weapon->clipSize < 2 || weapon->clipSize > 999;
+
+        uint32_t displayBulletsTotal = slotInfo.bulletsTotal;
 
         if (noClip) {
+            // The clip is actually there, but it holds just one shot/charge
+            displayBulletsTotal += slotInfo.bulletsClip;
+
             ti.text = GameStringUtil::fromString(
-                std::to_string(slotInfo.bulletsTotal));
+                std::to_string(displayBulletsTotal));
         } else {
+            // Limit the maximal displayed length for the total bullet count
+            if (slotInfo.bulletsTotal > 9999) {
+                displayBulletsTotal = 9999;
+            }
+
             ti.text = GameStringUtil::fromString(
-                std::to_string(slotInfo.bulletsClip) + "-" +
-                std::to_string(slotInfo.bulletsTotal));
+                std::to_string(displayBulletsTotal) + "-" +
+                std::to_string(slotInfo.bulletsClip));
         }
 
         ti.baseColour = ui_shadowColour;
