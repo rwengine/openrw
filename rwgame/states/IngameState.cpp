@@ -302,7 +302,8 @@ void IngameState::handlePlayerInput(const SDL_Event& event) {
             }
             break;
         case SDL_MOUSEWHEEL:
-            if (player->getCharacter()->getCurrentVehicle() == nullptr) {
+            if (player->getCharacter()->getCurrentVehicle() == nullptr &&
+                player->getCharacter()->isAlive()) {
                 player->getCharacter()->cycleInventory(event.wheel.y > 0);
             }
             break;
