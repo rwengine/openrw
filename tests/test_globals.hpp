@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <GameConfig.hpp>
 #include <GameWindow.hpp>
+#include <boost/test/unit_test.hpp>
 #include <core/Logger.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
