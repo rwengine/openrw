@@ -1,6 +1,5 @@
 #include <boost/test/unit_test.hpp>
 #include <core/Logger.hpp>
-#include <test_globals.hpp>
 
 class CallbackReceiver : public Logger::MessageReceiver {
 public:

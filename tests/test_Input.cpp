@@ -1,6 +1,5 @@
+#include <GameInput.hpp>
 #include <boost/test/unit_test.hpp>
-#include "GameInput.hpp"
-#include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(InputTests)
 

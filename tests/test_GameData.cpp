@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <engine/GameData.hpp>
-#include <test_globals.hpp>
+#include "test_globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(GameDataTests)
 
@@ -94,7 +94,6 @@ BOOST_AUTO_TEST_CASE(test_ped_groups) {
 
     BOOST_REQUIRE_GE(red.size(), 8);
     BOOST_CHECK_EQUAL(red[0], 34);
-
 }
 #endif
 
