@@ -113,6 +113,8 @@ public:
 
     virtual void setPosition(const glm::vec3& pos);
 
+    bool isPlayer() const;
+
     bool isAlive() const;
     bool takeDamage(const DamageInfo& damage) override;
 

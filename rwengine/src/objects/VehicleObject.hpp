@@ -2,6 +2,7 @@
 #ifndef _VEHICLEOBJECT_HPP_
 #define _VEHICLEOBJECT_HPP_
 #include <map>
+#include <objects/CharacterObject.hpp>
 #include <objects/GameObject.hpp>
 #include <objects/VehicleInfo.hpp>
 
@@ -29,6 +30,7 @@ public:
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
     glm::u8vec3 colourSecondary;
+    bool mHasSpecial;
 
     std::map<size_t, GameObject*> seatOccupants;
 
@@ -150,6 +152,14 @@ public:
     * @return True if the vehicle isn't moving
     */
     bool isStopped() const;
+
+    /**
+    * @brief collectSpecial
+    * @return True if mHasSpecial was true opon calling
+    */
+    bool collectSpecial();
+
+    void grantOccupantRewards(CharacterObject* character);
 
 private:
     void registerPart(ModelFrame* mf);

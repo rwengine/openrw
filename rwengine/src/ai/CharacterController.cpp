@@ -237,6 +237,9 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
             }
         } else if (character->getCurrentCycle() == cycle_enter) {
             if (character->animator->isCompleted(AnimIndexAction)) {
+                /// @todo move to a more suitable place
+                vehicle->grantOccupantRewards(character);
+
                 // VehicleGetIn is over, finish activity
                 return true;
             }
