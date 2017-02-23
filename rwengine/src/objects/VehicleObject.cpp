@@ -86,6 +86,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
+    , mHasSpecial(true)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
@@ -773,4 +774,37 @@ void VehicleObject::setSecondaryColour(uint8_t color) {
 
 bool VehicleObject::isStopped() const {
     return fabsf(physVehicle->getCurrentSpeedKmHour()) < 0.75f;
+}
+
+bool VehicleObject::collectSpecial() {
+    bool hadSpecial = mHasSpecial;
+
+    mHasSpecial = false;
+
+    return hadSpecial;
+}
+
+void VehicleObject::grantOccupantRewards(CharacterObject* character) {
+    if (character->isPlayer() && collectSpecial()) {
+        if (getVehicle()->vehiclename_ == "TAXI"
+            || getVehicle()->vehiclename_ == "CABBIE"
+            || getVehicle()->vehiclename_ == "BORGNINE") {
+            // Earn $25 from taxi cabs
+            /// @todo implement this
+        } else if (getVehicle()->vehiclename_ == "POLICAR") {
+            // Police cruisers give 5 shotgun cartridges
+            character->addToInventory(4, 5);
+        } else if (getVehicle()->vehiclename_ == "ENFORCR") {
+            // Obtain 100 armour if it's an Enforcer
+            character->getCurrentState().armour = 100.f;
+        } else if (getVehicle()->vehiclename_ == "AMBULAN") {
+            // Receive up to 20 HPs from ambulances
+            float health = character->getCurrentState().health;
+            float fullHealth = 100.f;
+            if (health < fullHealth) {
+                character->getCurrentState().health =
+                    (health >= 80.f) ? fullHealth : health + 20.f;
+            }
+        }
+    }
 }

@@ -384,6 +384,10 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
     getClump()->getFrame()->setTranslation(pos);
 }
 
+bool CharacterObject::isPlayer() const {
+    return true; /// @todo implement detection via playerObject
+}
+
 bool CharacterObject::isAlive() const {
     return currentState.health > 0.f;
 }
