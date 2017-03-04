@@ -275,11 +275,12 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
         auto& wi = vehicle->physVehicle->getWheelInfo(w);
         // Construct our own matrix so we can use the local transform
         vehicle->physVehicle->updateWheelTransform(w, false);
+        bool isRhino = (vehicle->getVehicle()->vehiclename_ == "RHINO");
 
         auto up = -wi.m_wheelDirectionCS;
         auto right = wi.m_wheelAxleCS;
         auto fwd = up.cross(right);
-        btQuaternion steerQ(up, wi.m_steering);
+        btQuaternion steerQ(up, (isRhino) ? 0.f : wi.m_steering);
         btQuaternion rollQ(right, -wi.m_rotation);
         btMatrix3x3 basis(right[0], fwd[0], up[0], right[1], fwd[1], up[1],
                           right[2], fwd[2], up[2]);
