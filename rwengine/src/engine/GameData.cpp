@@ -445,7 +445,7 @@ void GameData::loadModel(ModelID model) {
             name = engine->state->specialModels[info->id()];
             slotname = name;
             break;
-        case ModelDataType::PedInfo:
+        case ModelDataType::PedInfo: {
             static const std::string specialPrefix("special");
             if (!name.compare(0, specialPrefix.size(), specialPrefix)) {
                 auto sid = name.substr(specialPrefix.size());
@@ -454,6 +454,7 @@ void GameData::loadModel(ModelID model) {
                 slotname = name;
                 break;
             }
+        }
         default:
             break;
     }
