@@ -4,7 +4,7 @@
 #include "RWGame.hpp"
 
 BenchmarkState::BenchmarkState(RWGame* game, const std::string& benchfile)
-    : State(game), benchfile(benchfile), benchmarkTime(0.f), frameCounter(0) {
+    : State(game), benchfile(benchfile), benchmarkTime(0.f), duration(0.f), frameCounter(0) {
 }
 
 void BenchmarkState::enter() {
