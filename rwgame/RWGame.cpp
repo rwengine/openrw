@@ -31,7 +31,8 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
 RWGame::RWGame(Logger& log, int argc, char* argv[])
     : GameBase(log, argc, argv)
     , data(&log, config.getGameDataPath())
-    , renderer(&log, &data) {
+    , renderer(&log, &data)
+    , lastDraws(0) {
     bool newgame = options.count("newgame");
     bool test = options.count("test");
     std::string startSave(

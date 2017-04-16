@@ -16,6 +16,7 @@
 ViewerWidget::ViewerWidget(QGLFormat g, QWidget* parent,
                            const QGLWidget* shareWidget, Qt::WindowFlags f)
     : QGLWidget(g, parent, shareWidget, f)
+    , renderer(nullptr)
     , gworld(nullptr)
     , activeModel(nullptr)
     , selectedFrame(nullptr)
@@ -76,6 +77,7 @@ void ViewerWidget::paintGL() {
 
     if (world() == nullptr) return;
 
+    RW_CHECK(renderer != nullptr, "GameRenderer is null");
     auto& r = *renderer;
 
     r.setViewport(width(), height());
@@ -163,7 +165,11 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
         glLineWidth(1.f);
     }
     dp.textures = {whiteTex};
-    renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
+    
+    RW_CHECK(renderer != nullptr, "GameRenderer is null");
+    if(renderer != nullptr) {
+        renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
+    }
 
     for (auto c : f->getChildren()) {
         drawFrameWidget(c.get(), thisM);
