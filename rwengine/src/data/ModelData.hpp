@@ -1,6 +1,7 @@
 #ifndef RWENGINE_MODELDATA_HPP
 #define RWENGINE_MODELDATA_HPP
 #include <stdint.h>
+#include <array>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
