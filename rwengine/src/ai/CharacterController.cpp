@@ -157,10 +157,8 @@ bool Activities::Jump::update(CharacterObject *character,
     if (!jumped) {
         character->jump();
         jumped = true;
-    } else {
-        if (character->physCharacter->canJump()) {
-            return true;
-        }
+    } else if (character->physCharacter->canJump()) {
+        return true;
     }
 
     return false;

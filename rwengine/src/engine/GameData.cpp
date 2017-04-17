@@ -702,9 +702,5 @@ bool GameData::isValidGameDirectory(const std::string& path) {
     }
 
     LoaderIMG i;
-    if (!i.load(path + "/models/gta3.img")) {
-        return false;
-    }
-
-    return true;
+    return i.load(path + "/models/gta3.img");
 }

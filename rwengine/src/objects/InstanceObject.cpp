@@ -63,11 +63,7 @@ void InstanceObject::tick(float dt) {
             if (hI < NO_WATER_INDEX) {
                 wH = engine->data->waterHeights[hI];
                 wH += engine->data->getWaveHeightAt(ws);
-                if (vH <= wH) {
-                    inWater = true;
-                } else {
-                    inWater = false;
-                }
+                inWater = vH <= wH;
             } else {
                 inWater = false;
             }

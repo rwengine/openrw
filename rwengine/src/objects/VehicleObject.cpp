@@ -351,7 +351,7 @@ void VehicleObject::tickPhysics(float dt) {
                     if (_lastHeight >= wH) {
                         // we are for real, underwater
                         inWater = true;
-                    } else if (inWater == false) {
+                    } else if (inWater == false) { // @todo This condition is unnecessary
                         // It's just a tunnel or something, we good.
                         inWater = false;
                     }
@@ -373,8 +373,7 @@ void VehicleObject::tickPhysics(float dt) {
 
             float bbZ = info->handling.dimensions.z / 2.f;
 
-            float oZ = 0.f;
-            oZ = -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
+            float oZ = -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
 
             if (isBoat) {
                 oZ = 0.f;
