@@ -1,7 +1,4 @@
 build/
 documentation/
-*.kdev4
+*.DS_Store
 *~
-*swp
-*.user*
-
