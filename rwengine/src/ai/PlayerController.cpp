@@ -32,13 +32,13 @@ void PlayerController::updateMovementDirection(const glm::vec3& dir,
 }
 
 void PlayerController::exitVehicle() {
-    if (character->getCurrentVehicle()) {
+    if (character->isInVehicle()) {
         setNextActivity(new Activities::ExitVehicle());
     }
 }
 
 void PlayerController::enterNearestVehicle() {
-    if (!character->getCurrentVehicle()) {
+    if (!character->isInVehicle()) {
         auto world = character->engine;
         VehicleObject* nearest = nullptr;
         float d = 10.f;

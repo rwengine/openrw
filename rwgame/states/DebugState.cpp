@@ -22,7 +22,7 @@ static void jumpCharacter(RWGame* game, CharacterObject* player,
                       glm::vec3(0.f, 0.f, 1.f);
     }
     if (player) {
-        if (player->getCurrentVehicle()) {
+        if (player->isInVehicle()) {
             player->getCurrentVehicle()->setPosition(newPosition);
         } else {
             player->setPosition(newPosition);

@@ -21,7 +21,7 @@ void DefaultAIController::update(float dt) {
     switch (currentGoal) {
         case FollowLeader: {
             if (!leader) break;
-            if (getCharacter()->getCurrentVehicle()) {
+            if (getCharacter()->isInVehicle()) {
                 if (leader->getCurrentVehicle() !=
                     getCharacter()->getCurrentVehicle()) {
                     skipActivity();
@@ -29,7 +29,7 @@ void DefaultAIController::update(float dt) {
                 }
                 // else we're already in the right spot.
             } else {
-                if (leader->getCurrentVehicle()) {
+                if (leader->isInVehicle()) {
                     setNextActivity(new Activities::EnterVehicle(
                         leader->getCurrentVehicle(), 1));
                 } else {

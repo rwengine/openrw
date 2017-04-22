@@ -201,7 +201,7 @@ void IngameState::tick(float dt) {
         /// @todo find the correct behaviour for entering & exiting
         if (pressed(GameInputState::EnterExitVehicle)) {
             /// @todo move me
-            if (player->getCharacter()->getCurrentVehicle()) {
+            if (player->getCharacter()->isInVehicle()) {
                 player->exitVehicle();
             } else if (!player->isCurrentActivity(
                            Activities::EnterVehicle::ActivityName)) {
@@ -215,7 +215,7 @@ void IngameState::tick(float dt) {
             }
         }
 
-        if (player->getCharacter()->getCurrentVehicle()) {
+        if (player->getCharacter()->isInVehicle()) {
             auto vehicle = player->getCharacter()->getCurrentVehicle();
             vehicle->setHandbraking(held(GameInputState::Handbrake));
             player->setMoveDirection(movement);
@@ -302,7 +302,7 @@ void IngameState::handlePlayerInput(const SDL_Event& event) {
             }
             break;
         case SDL_MOUSEWHEEL:
-            if (player->getCharacter()->getCurrentVehicle() == nullptr &&
+            if (!player->getCharacter()->isInVehicle() &&
                 player->getCharacter()->isAlive()) {
                 player->getCharacter()->cycleInventory(event.wheel.y > 0);
             }

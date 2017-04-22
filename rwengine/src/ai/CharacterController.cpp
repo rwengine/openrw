@@ -61,12 +61,12 @@ bool CharacterController::isCurrentActivity(const std::string &activity) const {
 }
 
 void CharacterController::update(float dt) {
-    if (character->getCurrentVehicle()) {
+    if (character->isInVehicle()) {
         // Nevermind, the player is in a vehicle.
 
         auto &d = character->getMovement();
 
-        if (character->getCurrentSeat() == 0) {
+        if (character->isDriver()) {
             character->getCurrentVehicle()->setSteeringAngle(d.y);
 
             if (std::abs(d.x) > 0.01f) {
@@ -167,7 +167,7 @@ bool Activities::Jump::update(CharacterObject *character,
 bool Activities::EnterVehicle::canSkip(CharacterObject *character,
                                        CharacterController *) const {
     // If we're already inside the vehicle, it can't helped.
-    return character->getCurrentVehicle() == nullptr;
+    return !character->isInVehicle();
 }
 
 bool Activities::EnterVehicle::update(CharacterObject *character,
@@ -306,7 +306,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
                 return true;
             }
         } else {
-            if (character->getCurrentVehicle() == nullptr) return true;
+            if (!character->isInVehicle()) return true;
 
             auto vehicle = character->getCurrentVehicle();
             auto seat = character->getCurrentSeat();
@@ -331,7 +331,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         return false;
     }
 
-    if (character->getCurrentVehicle() == nullptr) return true;
+    if (!character->isInVehicle()) return true;
 
     auto vehicle = character->getCurrentVehicle();
     auto seat = character->getCurrentSeat();
