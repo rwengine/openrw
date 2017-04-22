@@ -296,54 +296,17 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
                                      CharacterController *controller) {
     RW_UNUSED(controller);
 
-    if (jacked) {
-        const auto jacked_lhs = AnimCycle::CarJackedLHS;
-        const auto jacked_rhs = AnimCycle::CarJackedRHS;
-        const auto cycle_current = character->getCurrentCycle();
-
-        if (cycle_current == jacked_lhs || cycle_current == jacked_rhs) {
-            if (character->animator->isCompleted(AnimIndexAction)) {
-                return true;
-            }
-        } else {
-            if (!character->isInVehicle()) return true;
-
-            auto vehicle = character->getCurrentVehicle();
-            auto seat = character->getCurrentSeat();
-            auto door = vehicle->getSeatEntryDoor(seat);
-            RW_UNUSED(door);
-            auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
-            auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
-
-            character->rotation = vehicle->getRotation();
-
-            // Exit the vehicle immediatley
-            character->enterVehicle(nullptr, seat);
-            character->setPosition(exitPos);
-
-            if (exitPosLocal.x > 0.f) {
-                character->playCycle(jacked_rhs);
-            } else {
-                character->playCycle(jacked_lhs);
-            }
-            // No need to open the door, it should already be open.
-        }
-        return false;
-    }
-
     if (!character->isInVehicle()) return true;
 
     auto vehicle = character->getCurrentVehicle();
     auto seat = character->getCurrentSeat();
     auto door = vehicle->getSeatEntryDoor(seat);
+    RW_UNUSED(door);
     auto exitPos = vehicle->getSeatEntryPositionWorld(seat);
     auto exitPosLocal = vehicle->getSeatEntryPosition(seat);
-
-    auto cycle_exit = AnimCycle::CarGetOutLHS;
-
-    if (exitPosLocal.x > 0.f) {
-        cycle_exit = AnimCycle::CarGetOutRHS;
-    }
+    auto cycle_exit = jacked ?
+                      (exitPosLocal.x > 0.f ? AnimCycle::CarJackedRHS : AnimCycle::CarJackedLHS) :
+                      (exitPosLocal.x > 0.f ? AnimCycle::CarGetOutRHS : AnimCycle::CarGetOutLHS);
 
     if (vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
         auto ppos = character->getPosition();
@@ -351,37 +314,26 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         character->setPosition(ppos);
         return true;
     }
-
-    bool isDriver = vehicle->isOccupantDriver(character->getCurrentSeat());
-
-    // If the vehicle is going too fast, slow down
-    if (isDriver) {
-        if (!vehicle->canOccupantExit()) {
-            vehicle->setBraking(1.f);
-            return false;
-        }
-    }
-
-    if (character->getCurrentCycle() == cycle_exit) {
-        if (character->animator->isCompleted(AnimIndexAction)) {
-            character->enterVehicle(nullptr, seat);
-            character->setPosition(exitPos);
-
-            if (isDriver) {
-                // Apply the handbrake
-                vehicle->setHandbraking(true);
-                vehicle->setThrottle(0.f);
-            }
-
-            return true;
-        }
-    } else {
+        // If the vehicle is going too fast, slow down
+    else if (!jacked && character->isDriver() && !vehicle->canOccupantExit()) {
+        vehicle->setBraking(1.f);
+        return false;
+    } else if (character->getCurrentCycle() != cycle_exit) {
         character->playCycle(cycle_exit);
         if (door) {
             vehicle->setPartTarget(door, true, door->openAngle);
         }
-    }
+    } else if (character->animator->isCompleted(AnimIndexAction)) {
+        character->enterVehicle(nullptr, seat);
+        character->setPosition(exitPos);
 
+        if (character->isDriver()) {
+            // Apply the handbrake
+            vehicle->setHandbraking(true);
+            vehicle->setThrottle(0.f);
+        }
+        return true;
+    }
     return false;
 }
 
