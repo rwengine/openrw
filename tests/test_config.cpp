@@ -61,40 +61,96 @@ std::ostream &operator<<(std::ostream &os, const simpleConfig_t &config) {
     return os;
 }
 
-class TempFile {
-    // A TempFile file will be removed on destruction
+class Temp {
+    // An object of type Temp file will be removed on destruction
 public:
-    TempFile() : m_path(getRandomFilePath()) {
+    virtual ~Temp() {
     }
-    ~TempFile() {
+    bool exists() const {
+        return fs::exists(this->m_path);
+    }
+    std::string path() const {
+        return this->m_path.string();
+    }
+    std::string filename() const {
+        return this->m_path.filename().string();
+    }
+    std::string dirname() const {
+        return this->m_path.parent_path().string();
+    }
+    virtual void change_perms_readonly() const = 0;
+    virtual void remove() const = 0;
+    virtual void touch() const = 0;
+
+protected:
+    Temp(const Temp &) = delete;
+    Temp() : m_path(getRandomFilePath()) {
+    }
+    Temp(const fs::path &dirname) : m_path(getRandomFilePath(dirname)) {
+    }
+    const fs::path &get_path_internal() const {
+        return this->m_path;
+    }
+
+private:
+    static fs::path getRandomFilePath(const fs::path &dirname) {
+        return fs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
+    }
+    static fs::path getRandomFilePath() {
+        return getRandomFilePath(fs::temp_directory_path());
+    }
+    fs::path m_path;
+};
+
+class TempFile;
+
+class TempDir : public Temp {
+public:
+    TempDir() : Temp() {
+    }
+    TempDir(const TempDir &dirname) : Temp(dirname.get_path_internal()) {
+    }
+    virtual ~TempDir() {
         this->remove();
     }
-    void remove() {
-        fs::remove(this->m_path);
+    virtual void change_perms_readonly() const override {
+        fs::permissions(this->get_path_internal(),
+                        fs::perms::owner_read | fs::perms::owner_exe |
+                            fs::perms::group_read | fs::perms::group_exe |
+                            fs::perms::others_read | fs::perms::others_exe);
     }
-    void touch() {
+    virtual void remove() const override {
+        fs::remove_all(this->get_path_internal());
+    }
+    void touch() const override {
+        fs::create_directories(this->get_path_internal());
+    }
+    friend class TempFile;
+};
+
+class TempFile : public Temp {
+public:
+    TempFile() : Temp() {
+    }
+    TempFile(const TempDir &dirname) : Temp(dirname.get_path_internal()) {
+    }
+    virtual ~TempFile() {
+        this->remove();
+    }
+    virtual void change_perms_readonly() const override {
+        fs::permissions(this->get_path_internal(), fs::perms::owner_read |
+                                                       fs::perms::group_read |
+                                                       fs::perms::others_read);
+    }
+    virtual void remove() const override {
+        fs::remove_all(this->get_path_internal());
+    }
+    virtual void touch() const override {
         std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
         ofs.close();
     }
-    bool exists() {
-        return fs::exists(this->m_path);
-    }
-    std::string path() {
-        return this->m_path.string();
-    }
-    std::string filename() {
-        return this->m_path.filename().string();
-    }
-    std::string dirname() {
-        return this->m_path.parent_path().string();
-    }
-    void change_perms_readonly() {
-        fs::permissions(this->m_path, fs::perms::owner_read |
-                                          fs::perms::group_read |
-                                          fs::perms::others_read);
-    }
     template <typename T>
-    bool append(T t) {
+    bool append(T t) const {
         // Append argument at the end of the file.
         // File is open/closes repeatedly. Not optimal.
         std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
@@ -103,7 +159,7 @@ public:
         return ofs.good();
     }
     template <typename T>
-    bool write(T t) {
+    bool write(T t) const {
         // Write the argument to the file, discarding all contents.
         // File is open/closes repeatedly. Not optimal.
         std::ofstream ofs(this->path(), std::ios::out | std::ios::trunc);
@@ -111,13 +167,6 @@ public:
         ofs.close();
         return ofs.good();
     }
-
-private:
-    static fs::path getRandomFilePath() {
-        return fs::unique_path(fs::temp_directory_path() /
-                               "openrw_test_%%%%%%%%%%%%%%%%");
-    }
-    fs::path m_path;
 };
 
 BOOST_AUTO_TEST_SUITE(ConfigTests)
@@ -134,6 +183,41 @@ BOOST_AUTO_TEST_CASE(test_stripWhitespace) {
     for (const auto &keyValue : map) {
         BOOST_CHECK_EQUAL(keyValue.second, stripWhitespace(keyValue.first));
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_TempDir) {
+    // Check the behavior of TempFile
+    TempDir tempDir;
+    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+    tempDir.touch();
+    BOOST_CHECK_EQUAL(tempDir.exists(), true);
+    tempDir.remove();
+    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+
+    tempDir.touch();
+    BOOST_CHECK_EQUAL(tempDir.exists(), true);
+
+    TempDir tempChildDir(tempDir);
+    BOOST_CHECK_EQUAL(tempChildDir.exists(), false);
+
+    tempChildDir.touch();
+    BOOST_CHECK_EQUAL(tempChildDir.exists(), true);
+
+    tempDir.remove();
+    BOOST_CHECK_EQUAL(tempChildDir.exists(), false);
+    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+
+    tempChildDir.touch();
+    BOOST_CHECK_EQUAL(tempChildDir.exists(), true);
+
+    std::string path;
+    {
+        TempDir tempLocal;
+        tempLocal.touch();
+        BOOST_CHECK_EQUAL(tempLocal.exists(), true);
+        path = tempLocal.path();
+    }
+    BOOST_CHECK_EQUAL(fs::exists(path), false);
 }
 
 BOOST_AUTO_TEST_CASE(test_TempFile) {
@@ -161,6 +245,15 @@ BOOST_AUTO_TEST_CASE(test_TempFile) {
     tempFile.change_perms_readonly();
     BOOST_CHECK_EQUAL(tempFile.write("abc"), false);
     BOOST_CHECK_EQUAL(tempFile.append("def"), false);
+
+    std::string path;
+    {
+        TempFile tempLocal;
+        tempLocal.touch();
+        BOOST_CHECK_EQUAL(tempLocal.exists(), true);
+        path = tempLocal.path();
+    }
+    BOOST_CHECK_EQUAL(fs::exists(path), false);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid) {
@@ -402,6 +495,22 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
     BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_config_invalid_nodir) {
+    // Test reading non-existing configuration file in non-existing directory
+    TempDir tempDir;
+    TempFile tempFile(tempDir);
+
+    BOOST_CHECK(!tempDir.exists());
+    BOOST_CHECK(!tempFile.exists());
+    GameConfig config(tempFile.filename(), tempFile.dirname());
+
+    BOOST_CHECK(!config.isValid());
+
+    const auto &parseResult = config.getParseResult();
+    BOOST_CHECK_EQUAL(parseResult.type(),
+                      GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
