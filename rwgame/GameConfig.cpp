@@ -221,8 +221,6 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 
-    if (!parseResult.isValid()) return parseResult;
-
     // Build the unknown key/value map from the correct source
     switch (srcType) {
         case ParseType::FILE:
@@ -259,6 +257,8 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
         default:
             break;
     }
+
+    if (!parseResult.isValid()) return parseResult;
 
     try {
         if (destType == ParseType::STRING) {
@@ -363,27 +363,26 @@ const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData()
 }
 
 std::string GameConfig::ParseResult::what() const {
+    std::ostringstream oss;
     switch (this->m_result) {
         case ErrorType::GOOD:
-            return "Good";
+            oss << "Parsing completed without errors.";
+            break;
         case ErrorType::INVALIDARGUMENT:
-            return "Invalid argument: destination cannot be the default config";
-        case ErrorType::INVALIDINPUTFILE: {
-            std::ostringstream oss;
+            oss << "Invalid argument: destination cannot be the default "
+                   "config.";
+            break;
+        case ErrorType::INVALIDINPUTFILE:
             oss << "Error while reading \"" << this->m_inputfilename
                 << "\":" << this->m_line << ":\n"
-                << this->m_message;
-            return oss.str();
-        }
-        case ErrorType::INVALIDOUTPUTFILE: {
-            std::ostringstream oss;
+                << this->m_message << ".";
+            break;
+        case ErrorType::INVALIDOUTPUTFILE:
             oss << "Error while writing \"" << this->m_inputfilename
                 << "\":" << this->m_line << ":\n"
-                << this->m_message;
-            return oss.str();
-        }
-        case ErrorType::INVALIDCONTENT: {
-            std::ostringstream oss;
+                << this->m_message << ".";
+            break;
+        case ErrorType::INVALIDCONTENT:
             oss << "Error while parsing \"" << this->m_inputfilename << "\".";
             if (this->m_keys_requiredMissing.size()) {
                 oss << "\nRequired keys that are missing:";
@@ -397,11 +396,18 @@ std::string GameConfig::ParseResult::what() const {
                     oss << "\n - " << key;
                 }
             }
-            return oss.str();
-        }
+            break;
         default:
-            return "Unknown error";
+            oss << "Unknown error.";
+            break;
     }
+    if (this->m_unknownData.size()) {
+        oss << "\nUnknown configuration keys:";
+        for (const auto &keyvalue : m_unknownData) {
+            oss << "\n - " << keyvalue.first;
+        }
+    }
+    return oss.str();
 }
 
 void GameConfig::ParseResult::addUnknownData(const std::string &key,
