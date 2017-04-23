@@ -202,7 +202,7 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
                                      RenderList& outList) {
     const auto& clump = pedestrian->getClump();
 
-    if (pedestrian->getCurrentVehicle()) {
+    if (pedestrian->isInVehicle()) {
         auto vehicle = pedestrian->getCurrentVehicle();
         const auto& vehicleclump = vehicle->getClump();
         auto seat = pedestrian->getCurrentSeat();

@@ -1,6 +1,8 @@
+#include <ai/activity/EnterVehicle.hpp>
+#include <ai/activity/ExitVehicle.hpp>
+#include <ai/activity/GoTo.hpp>
 #include <ai/DefaultAIController.hpp>
 #include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
 
 glm::vec3 DefaultAIController::getTargetPosition() {
     /*if(targetNode) {
@@ -21,16 +23,16 @@ void DefaultAIController::update(float dt) {
     switch (currentGoal) {
         case FollowLeader: {
             if (!leader) break;
-            if (getCharacter()->getCurrentVehicle()) {
+            if (getCharacter()->isInVehicle()) {
                 if (leader->getCurrentVehicle() !=
                     getCharacter()->getCurrentVehicle()) {
                     skipActivity();
-                    setNextActivity(new Activities::ExitVehicle);
+                    setNextActivity(new ExitVehicle);
                 }
                 // else we're already in the right spot.
             } else {
-                if (leader->getCurrentVehicle()) {
-                    setNextActivity(new Activities::EnterVehicle(
+                if (leader->isInVehicle()) {
+                    setNextActivity(new EnterVehicle(
                         leader->getCurrentVehicle(), 1));
                 } else {
                     glm::vec3 dir =
@@ -42,7 +44,7 @@ void DefaultAIController::update(float dt) {
                                 leader->getPosition() +
                                 (glm::normalize(-dir) * followRadius * 0.7f);
                             skipActivity();
-                            setNextActivity(new Activities::GoTo(gotoPos));
+                            setNextActivity(new GoTo(gotoPos));
                         }
                     }
                 }
@@ -60,9 +62,9 @@ void DefaultAIController::update(float dt) {
                     std::uniform_int_distribution<> d(
                         0, lastTarget->connections.size() - 1);
                     targetNode = lastTarget->connections.at(d(re));
-                    setNextActivity(new Activities::GoTo(targetNode->position));
+                    setNextActivity(new GoTo(targetNode->position));
                 } else if (getCurrentActivity() == nullptr) {
-                    setNextActivity(new Activities::GoTo(targetNode->position));
+                    setNextActivity(new GoTo(targetNode->position));
                 }
             } else {
                 // We need to pick an initial node

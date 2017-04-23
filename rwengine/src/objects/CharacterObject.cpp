@@ -1,3 +1,4 @@
+#include <ai/activity/UseItem.hpp>
 #include <ai/CharacterController.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
@@ -117,7 +118,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     }
 
     // Things are simpler if we're in a vehicle
-    if (getCurrentVehicle()) {
+    if (isInVehicle()) {
         animator->playAnimation(0, animations->animation(AnimCycle::CarSit),
                                 1.f, true);
         return glm::vec3();
@@ -229,6 +230,10 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     }
 
     return animTranslate;
+}
+
+bool CharacterObject::isDriver() const {
+    return isInVehicle() && getCurrentVehicle()->isOccupantDriver(getCurrentSeat());
 }
 
 void CharacterObject::tick(float dt) {
@@ -497,11 +502,10 @@ void CharacterObject::setJumpSpeed(float speed) {
 
 void CharacterObject::resetToAINode() {
     auto nodes = engine->aigraph.nodes;
-    bool vehicleNode = !!getCurrentVehicle();
     AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
     for (auto it = nodes.begin(); it != nodes.end(); ++it) {
-        if (vehicleNode) {
+        if (isInVehicle()) {
             if ((*it)->type == AIGraphNode::Pedestrian) continue;
         } else {
             if ((*it)->type == AIGraphNode::Vehicle) continue;
@@ -515,7 +519,7 @@ void CharacterObject::resetToAINode() {
     }
 
     if (nearest) {
-        if (vehicleNode) {
+        if (isInVehicle()) {
             getCurrentVehicle()->setPosition(nearest->position +
                                              glm::vec3(0.f, 0.f, 2.5f));
         } else {
@@ -611,7 +615,7 @@ void CharacterObject::useItem(bool active, bool primary) {
         if (primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
-                controller->setNextActivity(new Activities::UseItem(item));
+                controller->setNextActivity(new UseItem(item));
             } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }

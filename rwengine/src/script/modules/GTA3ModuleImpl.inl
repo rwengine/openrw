@@ -7,6 +7,9 @@
 #include <engine/GameData.hpp>
 #include <engine/Animator.hpp>
 #include <core/Logger.hpp>
+#include <ai/activity/EnterVehicle.hpp>
+#include <ai/activity/ExitVehicle.hpp>
+#include <ai/activity/GoTo.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
 
@@ -2514,7 +2517,7 @@ bool opcode_00e3(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00e4(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptInt arg6) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() == nullptr;
+	auto condition = !plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, coord0, coord1, arg6, condition);
 }
 
@@ -2529,7 +2532,7 @@ bool opcode_00e4(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00e5(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 center, ScriptVec2 radius, const ScriptInt arg6) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, center, radius, arg6, condition);
 }
 
@@ -2582,7 +2585,7 @@ bool opcode_00e7(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00e8(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord, ScriptVec2 radius, const ScriptInt arg6) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->isStopped() && plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isStopped() && plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, coord, radius, arg6, condition);
 }
 
@@ -2632,7 +2635,7 @@ bool opcode_00ea(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00eb(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptInt arg5) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isInVehicle();
 	return script::objectInRadiusNear(args, plyChar, character, radius, arg5, condition);
 }
 
@@ -2665,7 +2668,7 @@ bool opcode_00ec(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg arg6 
 */
 bool opcode_00ed(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord, ScriptVec2 radius, const ScriptInt arg6) {
-	auto condition = character->getCurrentVehicle() == nullptr;
+	auto condition = !character->isInVehicle();
 	return script::objectInRadius(args, character.get(), coord, radius, arg6, condition);
 }
 
@@ -2834,7 +2837,7 @@ bool opcode_00f5(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00f6(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() == nullptr;
+	auto condition = !plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, coord, radius, arg8, condition);
 }
 
@@ -2849,7 +2852,7 @@ bool opcode_00f6(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00f7(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, coord, radius, arg8, condition);
 }
 
@@ -2883,7 +2886,7 @@ bool opcode_00f8(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00f9(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord, ScriptVec3 radius, const ScriptInt arg8) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->isStopped() && plyChar->getCurrentVehicle() == nullptr;
+	auto condition = plyChar->isStopped() && !plyChar->isInVehicle();
 	return script::objectInRadius(args, plyChar, coord, radius, arg8, condition);
 }
 
@@ -2971,7 +2974,7 @@ bool opcode_00fc(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_00fd(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec3 radius, const ScriptInt arg6) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isInVehicle();
 	return script::objectInRadiusNear(args, plyChar, character, radius, arg6, condition);
 }
 
@@ -3023,7 +3026,7 @@ bool opcode_00ff(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg arg8 Boolean true/false
 */
 bool opcode_0100(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord, ScriptVec3 radius, const ScriptBoolean arg8) {
-	auto condition = character->getCurrentVehicle() != nullptr;
+	auto condition = character->isInVehicle();
 	return script::objectInRadius(args, character.get(), coord, radius, arg8, condition);
 }
 
@@ -4711,7 +4714,7 @@ bool opcode_019b(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_019c(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() == nullptr;
+	auto condition = !plyChar->isInVehicle();
 	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
@@ -4795,7 +4798,7 @@ bool opcode_019f(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_01a0(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
 	auto plyChar = player->getCharacter();
-	auto condition = plyChar->isStopped() && plyChar->getCurrentVehicle() != nullptr;
+	auto condition = plyChar->isStopped() && plyChar->isInVehicle();
 	return script::objectInArea(args, plyChar, coord0, coord1, arg8, condition);
 }
 
@@ -4975,7 +4978,7 @@ bool opcode_01a9(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg arg8 Boolean true/false
 */
 bool opcode_01aa(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	auto condition = character->isStopped() && character->getCurrentVehicle() != nullptr;
+	auto condition = character->isStopped() && character->isInVehicle();
 	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
 
@@ -5524,7 +5527,7 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
 	RW_UNUSED(vehicle);
 	RW_UNUSED(args);
 	character->controller->skipActivity();
-	character->controller->setNextActivity(new Activities::ExitVehicle);
+	character->controller->setNextActivity(new ExitVehicle);
 }
 
 /**
@@ -5537,7 +5540,7 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
 	RW_UNUSED(args);
 	character->controller->skipActivity();
-	character->controller->setNextActivity(new Activities::EnterVehicle(vehicle,Activities::EnterVehicle::ANY_SEAT));
+	character->controller->setNextActivity(new EnterVehicle(vehicle,EnterVehicle::ANY_SEAT));
 }
 
 /**
@@ -5549,7 +5552,7 @@ void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, c
 */
 void opcode_01d5(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
 	RW_UNUSED(args);
-	character->controller->setNextActivity(new Activities::EnterVehicle(vehicle));
+	character->controller->setNextActivity(new EnterVehicle(vehicle));
 }
 
 /**
@@ -6130,7 +6133,7 @@ bool opcode_0203(const ScriptArguments& args, const ScriptCharacter character, c
 	@arg arg5 Boolean true/false
 */
 bool opcode_0204(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle, ScriptVec2 radius, const ScriptBoolean arg5) {
-	auto condition = character->getCurrentVehicle() != nullptr;
+	auto condition = character->isInVehicle();
 	return script::objectInRadiusNear(args, character, vehicle, radius, arg5, condition);
 }
 
@@ -6326,13 +6329,13 @@ void opcode_0211(const ScriptArguments& args, const ScriptCharacter character, S
 	/// @todo verify that this is how the game treats this
 	auto target = script::getGround(args, glm::vec3(coord, -100.f));
 	character->controller->skipActivity();
-	if( character->getCurrentVehicle() )
+	if( character->isInVehicle() )
 	{
 		// Since we just cleared the Activities, this will become current immediatley.
-		character->controller->setNextActivity(new Activities::ExitVehicle);
+		character->controller->setNextActivity(new ExitVehicle);
 	}
 	
-	character->controller->setNextActivity(new Activities::GoTo(target));
+	character->controller->setNextActivity(new GoTo(target));
 }
 
 /**
@@ -6784,7 +6787,7 @@ void opcode_0237(const ScriptArguments& args, const ScriptGang gangID, const Scr
 */
 void opcode_0239(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord) {
 	auto target = script::getGround(args, glm::vec3(coord, -100.f));
-	character->controller->setNextActivity(new Activities::GoTo(target, true));
+	character->controller->setNextActivity(new GoTo(target, true));
 }
 
 /**
@@ -7099,10 +7102,9 @@ void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 	auto player = static_cast<CharacterObject*>(object);
 
 	/// @todo Implment a proper force exit vehicle path
-	auto cv = player->getCurrentVehicle();
-	if ( cv != nullptr )
+	if ( player->isInVehicle() )
 	{
-		cv->setOccupant( player->getCurrentSeat(), nullptr );
+		player->getCurrentVehicle()->setOccupant( player->getCurrentSeat(), nullptr );
 		player->setCurrentVehicle(nullptr, 0);
 	}
 
@@ -8153,10 +8155,11 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 */
 bool opcode_02de(const ScriptArguments& args, const ScriptPlayer player) {
 	RW_UNUSED(args);
-	auto vehicle = player->getCharacter()->getCurrentVehicle();
-	if (!vehicle) {
+	
+	if (!player->getCharacter()->isInVehicle()) {
 		return false;
 	}
+	auto vehicle = player->getCharacter()->getCurrentVehicle();
 	auto type = vehicle->getVehicle()->vehicleclass_;
 	return (type & VehicleModelInfo::TAXI) == VehicleModelInfo::TAXI;
 }
@@ -13043,7 +13046,7 @@ bool opcode_0442(const ScriptArguments& args, const ScriptPlayer player, const S
 	@arg player Player
 */
 bool opcode_0443(const ScriptArguments& args, const ScriptPlayer player) {
-	return player->getCharacter()->getCurrentVehicle() != nullptr;
+	return player->getCharacter()->isInVehicle();
 	RW_UNUSED(args);
 }
 

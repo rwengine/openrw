@@ -145,6 +145,12 @@ public:
         return running;
     }
 
+    bool isInVehicle() const {
+        return getCurrentVehicle() != nullptr;
+    }
+
+    bool isDriver() const;
+
     bool isStrafing() const {
         /// @todo implement strafing
         return false;
