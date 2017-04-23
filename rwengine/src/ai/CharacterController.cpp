@@ -38,8 +38,10 @@ void CharacterController::skipActivity() {
     // vehicle
     // or jumping.
     if (getCurrentActivity() != nullptr &&
-        getCurrentActivity()->canSkip(character, this))
+        getCurrentActivity()->canSkip(character, this)) {
+        character->activityFinished();
         setActivity(nullptr);
+    }
 }
 
 void CharacterController::setNextActivity(
