@@ -1,3 +1,6 @@
+#include <ai/activity/EnterVehicle.hpp>
+#include <ai/activity/ExitVehicle.hpp>
+#include <ai/activity/Jump.hpp>
 #include <ai/PlayerController.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameWorld.hpp>
@@ -33,7 +36,7 @@ void PlayerController::updateMovementDirection(const glm::vec3& dir,
 
 void PlayerController::exitVehicle() {
     if (character->isInVehicle()) {
-        setNextActivity(new Activities::ExitVehicle());
+        setNextActivity(new ExitVehicle());
     }
 }
 
@@ -54,7 +57,7 @@ void PlayerController::enterNearestVehicle() {
         }
 
         if (nearest) {
-            setNextActivity(new Activities::EnterVehicle(nearest, 0));
+            setNextActivity(new EnterVehicle(nearest, 0));
         }
     }
 }
@@ -69,6 +72,6 @@ glm::vec3 PlayerController::getTargetPosition() {
 
 void PlayerController::jump() {
     if (!character->isInWater()) {
-        setNextActivity(new Activities::Jump());
+        setNextActivity(new Jump());
     }
 }

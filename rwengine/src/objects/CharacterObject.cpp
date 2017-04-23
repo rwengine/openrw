@@ -1,3 +1,4 @@
+#include <ai/activity/UseItem.hpp>
 #include <ai/CharacterController.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
@@ -614,7 +615,7 @@ void CharacterObject::useItem(bool active, bool primary) {
         if (primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
-                controller->setNextActivity(new Activities::UseItem(item));
+                controller->setNextActivity(new UseItem(item));
             } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }

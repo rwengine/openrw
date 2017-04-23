@@ -19,6 +19,18 @@ set(RWENGINE_SOURCES
 	src/ai/PlayerController.hpp
 	src/ai/TrafficDirector.cpp
 	src/ai/TrafficDirector.hpp
+	src/ai/activity/Activity.cpp
+	src/ai/activity/Activity.hpp
+	src/ai/activity/EnterVehicle.cpp
+	src/ai/activity/EnterVehicle.hpp
+	src/ai/activity/ExitVehicle.cpp
+	src/ai/activity/ExitVehicle.hpp
+	src/ai/activity/GoTo.cpp
+	src/ai/activity/GoTo.hpp
+	src/ai/activity/Jump.cpp
+	src/ai/activity/Jump.hpp
+	src/ai/activity/UseItem.cpp
+	src/ai/activity/UseItem.hpp
 	src/audio/MADStream.cpp
 	src/audio/MADStream.hpp
 	src/audio/SoundManager.cpp

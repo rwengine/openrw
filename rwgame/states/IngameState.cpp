@@ -4,6 +4,7 @@
 #include "PauseState.hpp"
 #include "RWGame.hpp"
 
+#include <ai/activity/EnterVehicle.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
 #include <data/Clump.hpp>
@@ -204,12 +205,12 @@ void IngameState::tick(float dt) {
             if (player->getCharacter()->isInVehicle()) {
                 player->exitVehicle();
             } else if (!player->isCurrentActivity(
-                           Activities::EnterVehicle::ActivityName)) {
+                           EnterVehicle::ActivityName)) {
                 player->enterNearestVehicle();
             }
         } else if (glm::length2(movement) > 0.001f) {
             if (player->isCurrentActivity(
-                    Activities::EnterVehicle::ActivityName)) {
+                    EnterVehicle::ActivityName)) {
                 // Give up entering a vehicle if we're alreadying doing so
                 player->skipActivity();
             }
