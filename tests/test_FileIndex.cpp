@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_directory_paths) {
         BOOST_CHECK(upperpath != truepath);
         fs::path expected{Global::getGamePath()};
         expected /= "data/CULLZONE.DAT";
-        BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+        BOOST_CHECK_EQUAL(truepath.string(), expected.string());
     }
     {
         std::string upperpath{"DATA/MAPS/COMNBTM/COMNBTM.IPL"};
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(test_directory_paths) {
         BOOST_CHECK(upperpath != truepath);
         fs::path expected{Global::getGamePath()};
         expected /= "data/maps/comnbtm/comNbtm.ipl";
-        BOOST_CHECK_EQUAL(truepath.native(), expected.native());
+        BOOST_CHECK_EQUAL(truepath.string(), expected.string());
     }
 }
 
