@@ -90,11 +90,11 @@ endif()
 
 if(TEST_COVERAGE)
     if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        message("Test Coverage enabled. Setting CMAKE_BUILD_TYPE to Debug.")
+        message("TEST_COVERAGE enabled. Setting CMAKE_BUILD_TYPE to Debug.")
         set(CMAKE_BUILD_TYPE "Debug")
     endif()
     if(NOT BUILD_TESTS)
-        message("TestCoverage enabled. Enabling BUILD_TESTS.")
+        message("TEST_COVERAGE enabled. Enabling BUILD_TESTS.")
         set(BUILD_TESTS "ON")
     endif()
     target_compile_options(rw_interface
