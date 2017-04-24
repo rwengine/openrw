@@ -1,5 +1,5 @@
-#ifndef _TESTGLOBABLS_HPP_
-#define _TESTGLOBABLS_HPP_
+#ifndef _TESTGLOBALS_HPP_
+#define _TESTGLOBALS_HPP_
 
 #include <SDL2/SDL.h>
 #include <GameWindow.hpp>
@@ -31,10 +31,11 @@ struct print_log_value<glm::vec3> {
         s << glm::to_string(v);
     }
 };
-}
-}
 BOOST_NS_MAGIC_CLOSING
+}
+}
 
+#if BOOST_VERSION < 106400
 namespace boost {
 namespace test_tools {
 BOOST_NS_MAGIC
@@ -44,9 +45,10 @@ struct print_log_value<std::nullptr_t> {
         s << "nullptr";
     }
 };
-}
-}
 BOOST_NS_MAGIC_CLOSING
+}
+}
+#endif
 
 namespace boost {
 namespace test_tools {
@@ -59,9 +61,9 @@ struct print_log_value<GameString> {
         }
     }
 };
-}
-}
 BOOST_NS_MAGIC_CLOSING
+}
+}
 
 #undef BOOST_NS_MAGIC
 #undef BOOST_NS_MAGIC_CLOSING
