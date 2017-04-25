@@ -9,6 +9,7 @@
 
 class GameWindow {
     SDL_Window* window;
+    SDL_Surface* icon;
     SDL_GLContext glcontext;
 
 public:
