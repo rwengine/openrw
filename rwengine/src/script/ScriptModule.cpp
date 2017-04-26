@@ -1,12 +1,6 @@
 #include <script/ScriptMachine.hpp>
 #include <script/ScriptModule.hpp>
 
-void ScriptModule::bind(ScriptFunctionID id, ScriptFunction func,
-                        bool conditional, int args, const std::string& name,
-                        const std::string& desc) {
-    functions.insert({id, {func, args, conditional, name, desc}});
-}
-
 bool ScriptModule::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out) {
     auto it = functions.find(id);
     if (it == functions.end()) {
