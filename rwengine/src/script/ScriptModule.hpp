@@ -156,16 +156,13 @@ public:
         return name;
     }
 
-    void bind(ScriptFunctionID id, ScriptFunction func, bool conditional,
-              int args, const std::string& name, const std::string& desc);
-
     template <class Tfunc>
     void bind(ScriptFunctionID id, int argc, Tfunc function) {
         functions.insert({id,
                           {[=](const ScriptArguments& args) {
                                script_bind::do_unpacked_call(function, args);
                            },
-                           argc, false, "opcode", ""}});
+                           argc, "opcode", ""}});
     }
 
     bool findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out);

@@ -359,7 +359,6 @@ typedef uint16_t ScriptFunctionID;
 struct ScriptFunctionMeta {
     ScriptFunction function;
     int arguments;
-    bool conditional;
     /** API name for this function */
     const std::string signature;
     /** Human friendly description */
