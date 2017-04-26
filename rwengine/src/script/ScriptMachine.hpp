@@ -70,8 +70,6 @@ struct UnknownType : SCMException {
     }
 };
 
-static SCMMicrocodeTable knownOps;
-
 struct SCMThread {
     typedef SCMAddress pc_t;
 
