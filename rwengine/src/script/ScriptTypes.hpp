@@ -366,14 +366,4 @@ struct ScriptFunctionMeta {
     const std::string description;
 };
 
-struct SCMMicrocode {
-    std::string name;
-    int parameters;
-    std::function<void(ScriptMachine*, SCMThread*,
-                       std::vector<SCMOpcodeParameter>*)>
-        func;
-};
-
-typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
-
 #endif
