@@ -31,7 +31,7 @@ void opcode_0000(const ScriptArguments& args) {
 void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 	RW_CHECK(time >= 0, "negative wait time is not supported");
 	auto thread = args.getThread();
-	// Scripts use wait 0 to yeild
+	// Scripts use wait 0 to yield
 	thread->wakeCounter = time > 0 ? time : -1;
 }
 
