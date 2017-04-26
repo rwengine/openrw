@@ -28,17 +28,24 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
 
     // Define and parse command line options
     namespace po = boost::program_options;
-    po::options_description desc("Available options");
-    desc.add_options()(
-        "help", "Show this help message")(
-        "config,c", po::value<rwfs::path>(), "Path of configuration file")(
-        "width,w", po::value<size_t>(), "Game resolution width in pixel")(
-        "height,h", po::value<size_t>(), "Game resolution height in pixel")(
-        "fullscreen,f", "Enable fullscreen mode")(
-        "newgame,n", "Directly start a new game")(
+    po::options_description desc_window("Window options");
+    desc_window.add_options()(
+        "width,w", po::value<size_t>()->value_name("WIDTH"), "Game resolution width in pixel")(
+        "height,h", po::value<size_t>()->value_name("HEIGHT"), "Game resolution height in pixel")(
+        "fullscreen,f", "Enable fullscreen mode");
+    po::options_description desc_game("Game options");
+    desc_game.add_options()(
+        "newgame,n", "Start a new game")(
+        "load,l", po::value<std::string>()->value_name("PATH"), "Load save file");
+    po::options_description desc_devel("Developer options");
+    desc_devel.add_options()(
         "test,t", "Starts a new game in a test location")(
-        "load,l", po::value<std::string>(), "Load save file")(
-        "benchmark,b", po::value<std::string>(), "Run benchmark from file");
+        "benchmark,b", po::value<std::string>()->value_name("PATH"), "Run benchmark from file");
+    po::options_description desc("Generic options");
+    desc.add_options()(
+        "config,c", po::value<rwfs::path>()->value_name("PATH"), "Path of configuration file")(
+        "help", "Show this help message");
+    desc.add(desc_window).add(desc_game).add(desc_devel);
 
     po::variables_map &vm = options;
     try {
