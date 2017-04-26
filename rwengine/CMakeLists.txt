@@ -127,8 +127,6 @@ set(RWENGINE_SOURCES
 
     src/script/SCMFile.cpp
     src/script/SCMFile.hpp
-    src/script/ScriptDisassembly.cpp
-    src/script/ScriptDisassembly.hpp
     src/script/ScriptFunctions.cpp
     src/script/ScriptFunctions.hpp
     src/script/ScriptMachine.cpp
