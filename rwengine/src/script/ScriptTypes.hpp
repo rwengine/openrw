@@ -182,13 +182,6 @@ struct SCMTypeInfo {
     uint8_t size;
 };
 
-typedef std::map<SCMType, SCMTypeInfo> SCMTypeInfoTable;
-
-static SCMTypeInfoTable typeData = {
-    {TInt8, {1}},  {TInt16, {2}},   {TInt32, {4}},       {TGlobal, {2}},
-    {TLocal, {2}}, {TFloat16, {2}}, {EndOfArgList, {0}},
-};
-
 struct SCMOpcodeParameter {
     SCMType type;
     union {
