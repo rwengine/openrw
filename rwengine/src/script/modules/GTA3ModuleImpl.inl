@@ -8278,7 +8278,7 @@ void opcode_02e6(const ScriptArguments& args, const ScriptObject object, const S
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		cutscene->animator->playAnimation(0, anim, 1.f, false);
+		cutscene->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
@@ -8485,7 +8485,7 @@ void opcode_02f5(const ScriptArguments& args, const ScriptObject object, const S
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		head->animator->playAnimation(0, anim, 1.f, false);
+		head->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);

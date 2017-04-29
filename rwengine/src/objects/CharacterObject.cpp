@@ -118,7 +118,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // Things are simpler if we're in a vehicle
     if (getCurrentVehicle()) {
-        animator->playAnimation(0, animations->animation(AnimCycle::CarSit),
+        animator->playAnimation(AnimIndexMovement, animations->animation(AnimCycle::CarSit),
                                 1.f, true);
         return glm::vec3();
     }
