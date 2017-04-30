@@ -43,7 +43,7 @@ void CharacterController::skipActivity() {
         getCurrentActivity()->canSkip(character, this)) {
         character->activityFinished();
         setActivity(nullptr);
-        }
+    }
 }
 
 void CharacterController::setNextActivity(
