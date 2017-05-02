@@ -6,11 +6,11 @@ class PlayerController;
 class Logger;
 
 class GameData;
-class GameState;
 
 #include <ai/AIGraph.hpp>
 #include <ai/AIGraphNode.hpp>
 #include <audio/SoundManager.hpp>
+#include <engine/GameState.hpp>
 
 class CutsceneObject;
 #include <objects/ObjectTypes.hpp>
