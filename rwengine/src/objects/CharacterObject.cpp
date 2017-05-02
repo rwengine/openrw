@@ -385,7 +385,7 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
 }
 
 bool CharacterObject::isPlayer() const {
-    return true; /// @todo implement detection via playerObject
+    return engine->state->playerObject == getGameObjectID();
 }
 
 bool CharacterObject::isAlive() const {
