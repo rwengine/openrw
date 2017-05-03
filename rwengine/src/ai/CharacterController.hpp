@@ -143,7 +143,7 @@ public:
 
 #define DECL_ACTIVITY(activity_name)                     \
     static constexpr auto ActivityName = #activity_name; \
-    std::string name() const {                           \
+    std::string name() const override {                  \
         return ActivityName;                             \
     }
 
@@ -165,9 +165,9 @@ struct GoTo : public CharacterController::Activity {
         : target(target), sprint(_sprint) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller) override;
 
-    bool canSkip(CharacterObject*, CharacterController*) const {
+    bool canSkip(CharacterObject*, CharacterController*) const override {
         return true;
     }
 };
@@ -180,7 +180,7 @@ struct Jump : public CharacterController::Activity {
     Jump() : jumped(false) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
 struct EnterVehicle : public CharacterController::Activity {
@@ -202,7 +202,7 @@ struct EnterVehicle : public CharacterController::Activity {
     bool canSkip(CharacterObject* character,
                  CharacterController*) const override;
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
 struct ExitVehicle : public CharacterController::Activity {
@@ -213,7 +213,7 @@ struct ExitVehicle : public CharacterController::Activity {
     ExitVehicle(bool jacked_ = false) : jacked(jacked_) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller) override;
 };
 
 struct UseItem : public CharacterController::Activity {
@@ -226,7 +226,7 @@ struct UseItem : public CharacterController::Activity {
     UseItem(int slot) : itemslot(slot) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller) override;
 };
 }
 

@@ -53,9 +53,9 @@ public:
 
     ~ProjectileObject();
 
-    void tick(float dt);
+    void tick(float dt) override;
 
-    Type type() {
+    Type type() const override {
         return Projectile;
     }
 

@@ -42,11 +42,11 @@ public:
 
     ~PickupObject();
 
-    Type type() {
+    Type type() const override {
         return Pickup;
     }
 
-    void tick(float dt);
+    void tick(float dt) override;
 
     virtual bool onCharacterTouch(CharacterObject* character) {
         RW_UNUSED(character);

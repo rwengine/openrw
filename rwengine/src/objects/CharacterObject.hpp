@@ -86,11 +86,11 @@ public:
 
     ~CharacterObject();
 
-    Type type() {
+    Type type() const override {
         return Character;
     }
 
-    void tick(float dt);
+    void tick(float dt) override;
 
     const CharacterState& getCurrentState() const {
         return currentState;
@@ -111,7 +111,7 @@ public:
      */
     void updateCharacter(float dt);
 
-    virtual void setPosition(const glm::vec3& pos);
+    virtual void setPosition(const glm::vec3& pos) override;
 
     bool isPlayer() const;
 
