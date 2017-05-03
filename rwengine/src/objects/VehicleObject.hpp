@@ -58,9 +58,9 @@ public:
 
     virtual ~VehicleObject();
 
-    void setPosition(const glm::vec3& pos);
+    void setPosition(const glm::vec3& pos) override;
 
-    void setRotation(const glm::quat& orientation);
+    void setRotation(const glm::quat& orientation) override;
 
     void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
 
@@ -71,7 +71,7 @@ public:
     Atomic* getHighLOD() const { return chassishigh_; }
     Atomic* getLowLOD() const { return chassislow_; }
 
-    Type type() {
+    Type type() const override {
         return Vehicle;
     }
 
@@ -91,7 +91,7 @@ public:
 
     bool getHandbraking() const;
 
-    void tick(float dt);
+    void tick(float dt) override;
 
     void tickPhysics(float dt);
 
@@ -130,7 +130,7 @@ public:
 
     Part* getSeatEntryDoor(size_t seat);
 
-    virtual bool takeDamage(const DamageInfo& damage);
+    virtual bool takeDamage(const DamageInfo& damage) override;
 
     enum FrameState { OK, DAM, BROKEN };
 

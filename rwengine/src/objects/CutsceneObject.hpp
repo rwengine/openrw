@@ -16,11 +16,11 @@ public:
                    BaseModelInfo* modelinfo);
     ~CutsceneObject();
 
-    Type type() {
+    Type type() const override {
         return Cutscene;
     }
 
-    void tick(float dt);
+    void tick(float dt) override;
 
     void setParentActor(GameObject* parent, ModelFrame* bone);
 

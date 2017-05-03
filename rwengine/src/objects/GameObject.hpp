@@ -130,7 +130,7 @@ public:
      * @brief determines what type of object this is.
      * @return one of Type
      */
-    virtual Type type() {
+    virtual Type type() const {
         return Unknown;
     }
 
@@ -183,7 +183,7 @@ public:
         float impulse;
     };
 
-    virtual bool takeDamage(const DamageInfo& /*damage*/) {
+    virtual bool takeDamage(const DamageInfo& damage) {
         return false;
     }
 

@@ -31,7 +31,7 @@ public:
                    std::shared_ptr<DynamicObjectData> dyn);
     ~InstanceObject();
 
-    Type type() {
+    Type type() const override {
         return Instance;
     }
 
@@ -39,14 +39,14 @@ public:
         return atomic_;
     }
 
-    void tick(float dt);
+    void tick(float dt) override;
 
     void changeModel(BaseModelInfo* incoming);
 
-    virtual void setPosition(const glm::vec3& pos);
-    virtual void setRotation(const glm::quat& r);
+    virtual void setPosition(const glm::vec3& pos) override;
+    virtual void setRotation(const glm::quat& r) override;
 
-    virtual bool takeDamage(const DamageInfo& damage);
+    virtual bool takeDamage(const DamageInfo& damage) override;
 
     void setSolid(bool solid);
 
