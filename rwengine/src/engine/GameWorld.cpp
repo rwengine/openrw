@@ -49,7 +49,7 @@ public:
         bool valA = a && a->type() == GameObject::Instance;
         bool valB = b && b->type() == GameObject::Instance;
 
-        if (!(valA && valB) && (valB || valA)) {
+        if (valA ^ valB) {
             // Figure out which is the dynamic instance.
             InstanceObject* dynInst = nullptr;
             const btRigidBody *instBody = nullptr, *otherBody = nullptr;
