@@ -10,7 +10,7 @@
 #include <objects/VehicleObject.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
-#define DEGREES_TO_RADIANS 0.01745329
+#define DEGREES_TO_RADIANS 0.01745329f
 constexpr float kVehicleMaxExitVelocity = 0.15f;
 
 /**
