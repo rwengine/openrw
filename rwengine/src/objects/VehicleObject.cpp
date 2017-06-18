@@ -10,6 +10,7 @@
 #include <objects/VehicleObject.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
+#define DEGREES_TO_RADIANS 0.01745329f
 constexpr float kVehicleMaxExitVelocity = 0.15f;
 
 /**
@@ -264,7 +265,7 @@ void VehicleObject::tickPhysics(float dt) {
             if (wi.m_bIsFrontWheel) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 physVehicle->setSteeringValue(
-                    std::min(info->handling.steeringLock * (3.141f / 180.f),
+                    std::min(info->handling.steeringLock * DEGREES_TO_RADIANS,
                              std::abs(steerAngle)) *
                         sign,
                     w);
@@ -294,7 +295,7 @@ void VehicleObject::tickPhysics(float dt) {
             if (isInWater()) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 float steer =
-                    std::min(info->handling.steeringLock * (3.141f / 180.f),
+                    std::min(info->handling.steeringLock * DEGREES_TO_RADIANS,
                              std::abs(steerAngle)) *
                     sign;
                 auto orient = collision->getBulletBody()->getOrientation();
