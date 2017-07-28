@@ -23,7 +23,8 @@ void GameObject::setRotation(const glm::quat& orientation) {
 }
 
 float GameObject::getHeading() const {
-    return glm::degrees(glm::roll(getRotation()));
+    auto headingInRadians = glm::roll(getRotation());
+    return glm::degrees(headingInRadians);
 }
 
 void GameObject::setHeading(float heading) {
