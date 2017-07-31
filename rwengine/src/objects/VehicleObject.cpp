@@ -86,10 +86,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
-    , mHasSpecial(true)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
+    , mHasSpecial(true)
     , collision(new CollisionInstance)
     , physRaycaster(nullptr)
     , physVehicle(nullptr) {
