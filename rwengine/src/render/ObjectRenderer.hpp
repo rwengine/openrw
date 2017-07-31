@@ -22,11 +22,11 @@ class ObjectRenderer {
 public:
     ObjectRenderer(GameWorld* world, const ViewCamera& camera,
                    float renderAlpha, GLuint errorTexture)
-        : m_world(world)
+        : culled(0)
+        , m_world(world)
         , m_camera(camera)
         , m_renderAlpha(renderAlpha)
-        , m_errorTexture(errorTexture)
-        , culled(0) {
+        , m_errorTexture(errorTexture) {
     }
 
     /**
