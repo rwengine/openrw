@@ -56,6 +56,9 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     glAttachShader(prog, fragmentShader);
     glLinkProgram(prog);
 
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
     GLint status;
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
 
@@ -78,9 +81,6 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     if (status != GL_TRUE) {
         exit(1);
     }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     return prog;
 }
