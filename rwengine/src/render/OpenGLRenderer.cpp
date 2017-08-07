@@ -51,7 +51,9 @@ GLuint compileShader(GLenum type, const char* source) {
 GLuint compileProgram(const char* vertex, const char* fragment) {
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertex);
     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragment);
+
     GLuint prog = glCreateProgram();
+
     glAttachShader(prog, vertexShader);
     glAttachShader(prog, fragmentShader);
     glLinkProgram(prog);
