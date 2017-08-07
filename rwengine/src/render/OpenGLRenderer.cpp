@@ -58,6 +58,9 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     glAttachShader(prog, fragmentShader);
     glLinkProgram(prog);
 
+    glDetachShader(prog, vertexShader);
+    glDetachShader(prog, fragmentShader);
+
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
