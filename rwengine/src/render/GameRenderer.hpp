@@ -49,7 +49,7 @@ class GameRenderer {
     Logger* logger;
 
     /** The low-level drawing interface to use */
-    Renderer* renderer;
+    std::shared_ptr<Renderer> renderer;
 
     // Temporary variables used during rendering
     float _renderAlpha;
@@ -140,7 +140,7 @@ public:
     void setupRender();
     void renderPostProcess();
 
-    Renderer* getRenderer() {
+    std::shared_ptr<Renderer> getRenderer() {
         return renderer;
     }
 

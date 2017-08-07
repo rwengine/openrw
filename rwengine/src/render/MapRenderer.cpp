@@ -37,7 +37,7 @@ void main()
 	outColour = vec4(colour.rgb + c.rgb, colour.a * c.a);
 })";
 
-MapRenderer::MapRenderer(Renderer* renderer, GameData* _data)
+MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
     : data(_data), renderer(renderer) {
     rectGeom.uploadVertices<VertexP2>(
         {{-.5f, -.5f}, {.5f, -.5f}, {.5f, .5f}, {-.5f, .5f}});
