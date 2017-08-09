@@ -212,6 +212,7 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 
 GameRenderer::~GameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
+    glDeleteProgram(ssRectProgram);
 }
 
 float mix(uint8_t a, uint8_t b, float num) {
