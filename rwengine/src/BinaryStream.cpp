@@ -20,7 +20,7 @@ std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string &filename) {
     dfile.read(data, length);
     // std::cout << "File is " << length << " bytes" << std::endl << std::endl;
 
-    auto BS = std::unique_ptr<BinaryStream>(new BinaryStream);
+    auto BS = std::make_unique<BinaryStream>();
 
     // Set file's ACTUAL length
     auto header = reinterpret_cast<nativeSectionHeader_t *>(data);
