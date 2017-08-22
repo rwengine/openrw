@@ -11791,7 +11791,7 @@ bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const S
 	@arg gxtEntry GXT entry
 */
 void opcode_03d5(const ScriptArguments& args, const ScriptString gxtEntry) {
-	args.getWorld()->state->text.remove<ScreenTextType::Big>(gxtEntry);
+	args.getWorld()->state->text.remove<ScreenTextType::HighPriority>(gxtEntry);
 }
 
 /**
