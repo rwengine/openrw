@@ -64,7 +64,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));
 
-        physObject = new btPairCachingGhostObject;
+        physObject = new btPairCachingGhostObject();
         physObject->setUserPointer(this);
         physObject->setWorldTransform(tf);
         physShape = new btCapsuleShapeZ(size.x, size.y);
