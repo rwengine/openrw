@@ -77,6 +77,7 @@ public:
     std::string dirname() const {
         return this->m_path.parent_path().string();
     }
+    virtual void change_perms_normal() const = 0;
     virtual void change_perms_readonly() const = 0;
     virtual void remove() const = 0;
     virtual void touch() const = 0;
@@ -109,6 +110,12 @@ public:
     virtual ~TempDir() {
         this->remove();
     }
+    virtual void change_perms_normal() const override {
+        rwfs::permissions(this->path(),
+            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exe |
+            rwfs::perms::group_read | rwfs::perms::group_exe |
+            rwfs::perms::others_read | rwfs::perms::others_exe);
+    }
     virtual void change_perms_readonly() const override {
         rwfs::permissions(this->path(),
                         rwfs::perms::owner_read | rwfs::perms::owner_exe |
@@ -116,7 +123,9 @@ public:
                         rwfs::perms::others_read | rwfs::perms::others_exe);
     }
     virtual void remove() const override {
-        rwfs::remove_all(this->path());
+        // Remove may fail if this directory contains a read-only entry. Ignore.
+        rwfs::error_code ec;
+        rwfs::remove_all(this->path(), ec);
     }
     void touch() const override {
         rwfs::create_directories(this->path());
@@ -133,13 +142,20 @@ public:
     virtual ~TempFile() {
         this->remove();
     }
+    virtual void change_perms_normal() const override {
+        rwfs::permissions(this->path(),
+            rwfs::perms::owner_read | rwfs::perms::owner_write |
+            rwfs::perms::group_read |
+            rwfs::perms::others_read);
+    }
     virtual void change_perms_readonly() const override {
         rwfs::permissions(this->path(), rwfs::perms::owner_read |
                                                         rwfs::perms::group_read |
                                                         rwfs::perms::others_read);
     }
     virtual void remove() const override {
-        rwfs::remove_all(this->path());
+        rwfs::error_code ec;
+        rwfs::remove_all(this->path(), ec);
     }
     virtual void touch() const override {
         std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
