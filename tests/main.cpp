@@ -1,5 +1,5 @@
 #define BOOST_TEST_MODULE openrw
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include "test_Globals.hpp"
 
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& v) {
