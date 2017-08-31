@@ -92,7 +92,7 @@ void ViewerWidget::paintGL() {
 
     glm::mat4 m(1.f);
 
-    r.getRenderer()->useProgram(r.worldProg);
+    r.getRenderer()->useProgram(r.worldProg.get());
 
     ViewCamera vc;
 

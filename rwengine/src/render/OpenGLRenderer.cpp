@@ -182,9 +182,9 @@ std::string OpenGLRenderer::getIDString() const {
     return ss.str();
 }
 
-Renderer::ShaderProgram* OpenGLRenderer::createShader(const std::string& vert,
+std::unique_ptr<Renderer::ShaderProgram> OpenGLRenderer::createShader(const std::string& vert,
                                                       const std::string& frag) {
-    return new OpenGLShaderProgram(compileProgram(vert.c_str(), frag.c_str()));
+    return std::make_unique<OpenGLShaderProgram>(compileProgram(vert.c_str(), frag.c_str()));
 }
 
 void OpenGLRenderer::setProgramBlockBinding(Renderer::ShaderProgram* p,

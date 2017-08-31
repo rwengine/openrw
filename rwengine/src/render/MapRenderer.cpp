@@ -57,14 +57,14 @@ MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
 
     rectProg = renderer->createShader(MapVertexShader, MapFragmentShader);
 
-    renderer->setUniform(rectProg, "colour", glm::vec4(1.f));
+    renderer->setUniform(rectProg.get(), "colour", glm::vec4(1.f));
 }
 
 #define GAME_MAP_SIZE 4000
 
 void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     renderer->pushDebugGroup("Map");
-    renderer->useProgram(rectProg);
+    renderer->useProgram(rectProg.get());
 
     Renderer::DrawParameters dp { };
     dp.start = 0;
@@ -80,15 +80,15 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
 
     auto proj = renderer->get2DProjection();
     glm::mat4 view, model;
-    renderer->setUniform(rectProg, "proj", proj);
-    renderer->setUniform(rectProg, "model", glm::mat4());
-    renderer->setUniform(rectProg, "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
+    renderer->setUniform(rectProg.get(), "proj", proj);
+    renderer->setUniform(rectProg.get(), "model", glm::mat4());
+    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
 
     if (mi.clipToSize) {
         glm::mat4 circleView = glm::scale(view, glm::vec3(mi.screenSize));
-        renderer->setUniform(rectProg, "view", circleView);
+        renderer->setUniform(rectProg.get(), "view", circleView);
         dp.count = 182;
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -104,7 +104,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     view = glm::rotate(view, mi.rotation, glm::vec3(0.f, 0.f, 1.f));
     view = glm::translate(
         view, glm::vec3(glm::vec2(-1.f, 1.f) * mi.worldCenter, 0.f));
-    renderer->setUniform(rectProg, "view", view);
+    renderer->setUniform(rectProg.get(), "view", view);
 
     // radar00 = -x, +y
     // incrementing in X, then Y
@@ -129,13 +129,13 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         tilemodel = glm::translate(tilemodel, glm::vec3(tc, 0.f));
         tilemodel = glm::scale(tilemodel, glm::vec3(tileSize, 1.f));
 
-        renderer->setUniform(rectProg, "model", tilemodel);
+        renderer->setUniform(rectProg.get(), "model", tilemodel);
 
         renderer->drawArrays(glm::mat4(), &rect, dp);
     }
 
     // From here on out we will work in screenspace
-    renderer->setUniform(rectProg, "view", glm::mat4());
+    renderer->setUniform(rectProg.get(), "view", glm::mat4());
 
     if (mi.clipToSize) {
         glDisable(GL_STENCIL_TEST);
@@ -148,7 +148,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
         model = glm::scale(model, glm::vec3(mi.screenSize * 1.07f));
-        renderer->setUniform(rectProg, "model", model);
+        renderer->setUniform(rectProg.get(), "model", model);
         renderer->drawArrays(glm::mat4(), &rect, dp);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
@@ -251,14 +251,14 @@ void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view,
     model = glm::translate(model, viewPos);
     model = glm::scale(model, glm::vec3(size));
     model = glm::rotate(model, heading, glm::vec3(0.f, 0.f, 1.f));
-    renderer->setUniform(rectProg, "model", model);
+    renderer->setUniform(rectProg.get(), "model", model);
 
     GLuint tex = 0;
     if (!texture.empty()) {
         auto sprite = data->findSlotTexture("hud", texture);
         tex = sprite->getName();
     }
-    renderer->setUniform(rectProg, "colour", colour);
+    renderer->setUniform(rectProg.get(), "colour", colour);
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -277,6 +277,6 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view,
                            const MapInfo& mi, glm::vec4 colour, float size) {
     drawBlip(coord, view, mi, "", colour, size);
     // Draw outline
-    renderer->setUniform(rectProg, "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }

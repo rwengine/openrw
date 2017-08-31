@@ -15,10 +15,10 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
     maskProg = renderer->getRenderer()->createShader(
         GameShaders::Mask3D::VertexShader, GameShaders::Mask3D::FragmentShader);
 
-    renderer->getRenderer()->setProgramBlockBinding(waterProg, "SceneData", 1);
-    renderer->getRenderer()->setProgramBlockBinding(maskProg, "SceneData", 1);
+    renderer->getRenderer()->setProgramBlockBinding(waterProg.get(), "SceneData", 1);
+    renderer->getRenderer()->setProgramBlockBinding(maskProg.get(), "SceneData", 1);
 
-    renderer->getRenderer()->setUniformTexture(waterProg, "data", 1);
+    renderer->getRenderer()->setUniformTexture(waterProg.get(), "data", 1);
 
     // Generate grid mesh
     int gridres = 60;
@@ -121,7 +121,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     glDrawBuffers(1, buffers);
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    r->useProgram(maskProg);
+    r->useProgram(maskProg.get());
 
     r->drawArrays(m, &maskDraw, wdp);
 
@@ -129,17 +129,17 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     glStencilMask(0x00);
     glEnable(GL_DEPTH_TEST);
 
-    r->useProgram(waterProg);
+    r->useProgram(waterProg.get());
 
     buffers[0] = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, buffers);
 
-    r->setUniform(waterProg, "time", world->getGameTime());
-    r->setUniform(waterProg, "waveParams",
+    r->setUniform(waterProg.get(), "time", world->getGameTime());
+    r->setUniform(waterProg.get(), "waveParams",
                   glm::vec2(WATER_SCALE, WATER_HEIGHT));
     auto ivp =
         glm::inverse(r->getSceneData().projection * r->getSceneData().view);
-    r->setUniform(waterProg, "inverseVP", ivp);
+    r->setUniform(waterProg.get(), "inverseVP", ivp);
 
     wdp.count = gridGeom.getCount();
     wdp.textures = {waterTex->getName(), dataTexture};

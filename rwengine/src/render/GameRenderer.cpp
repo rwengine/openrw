@@ -81,22 +81,22 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
         renderer->createShader(GameShaders::WorldObject::VertexShader,
                                GameShaders::WorldObject::FragmentShader);
 
-    renderer->setUniformTexture(worldProg, "texture", 0);
-    renderer->setProgramBlockBinding(worldProg, "SceneData", 1);
-    renderer->setProgramBlockBinding(worldProg, "ObjectData", 2);
+    renderer->setUniformTexture(worldProg.get(), "texture", 0);
+    renderer->setProgramBlockBinding(worldProg.get(), "SceneData", 1);
+    renderer->setProgramBlockBinding(worldProg.get(), "ObjectData", 2);
 
     particleProg =
         renderer->createShader(GameShaders::WorldObject::VertexShader,
                                GameShaders::Particle::FragmentShader);
 
-    renderer->setUniformTexture(particleProg, "texture", 0);
-    renderer->setProgramBlockBinding(particleProg, "SceneData", 1);
-    renderer->setProgramBlockBinding(particleProg, "ObjectData", 2);
+    renderer->setUniformTexture(particleProg.get(), "texture", 0);
+    renderer->setProgramBlockBinding(particleProg.get(), "SceneData", 1);
+    renderer->setProgramBlockBinding(particleProg.get(), "ObjectData", 2);
 
     skyProg = renderer->createShader(GameShaders::Sky::VertexShader,
                                      GameShaders::Sky::FragmentShader);
 
-    renderer->setProgramBlockBinding(skyProg, "SceneData", 1);
+    renderer->setProgramBlockBinding(skyProg.get(), "SceneData", 1);
 
     postProg =
         renderer->createShader(GameShaders::DefaultPostProcess::VertexShader,
@@ -284,7 +284,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     culled = 0;
 
-    renderer->useProgram(worldProg);
+    renderer->useProgram(worldProg.get());
 
     //===============================================================
     //	Render List Construction
@@ -385,9 +385,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     dp.start = 0;
     dp.count = skydomeSegments * skydomeRows * 6;
 
-    renderer->useProgram(skyProg);
-    renderer->setUniform(skyProg, "TopColor", glm::vec4(skyTop, 1.f));
-    renderer->setUniform(skyProg, "BottomColor", glm::vec4(skyBottom, 1.f));
+    renderer->useProgram(skyProg.get());
+    renderer->setUniform(skyProg.get(), "TopColor", glm::vec4(skyTop, 1.f));
+    renderer->setUniform(skyProg.get(), "BottomColor", glm::vec4(skyBottom, 1.f));
 
     renderer->draw(glm::mat4(), &skyDbuff, dp);
 
@@ -463,7 +463,7 @@ void GameRenderer::renderPostProcess() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |
             GL_STENCIL_BUFFER_BIT);
 
-    renderer->useProgram(postProg);
+    renderer->useProgram(postProg.get());
 
     Renderer::DrawParameters wdp;
     wdp.start = 0;
@@ -474,7 +474,7 @@ void GameRenderer::renderPostProcess() {
 }
 
 void GameRenderer::renderEffects(GameWorld* world) {
-    renderer->useProgram(particleProg);
+    renderer->useProgram(particleProg.get());
 
     auto cpos = _camera.position;
     auto cfwd = glm::normalize(glm::inverse(_camera.rotation) *
@@ -615,8 +615,8 @@ void GameRenderer::renderPaths() {
     static std::vector<glm::vec3> carlines;
     static std::vector<glm::vec3> pedlines;
 
-    GLint posAttrib = glGetAttribLocation(worldProgram, "position");
-    GLint uniModel = glGetUniformLocation(worldProgram, "model");
+    GLint posAttrib = glGetAttribLocation(worldProg.get(), "position");
+    GLint uniModel = glGetUniformLocation(worldProg.get(), "model");
 
     glBindVertexArray( vao );
 

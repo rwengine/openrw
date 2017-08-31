@@ -68,7 +68,7 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
                        btIDebugDraw::DBG_DrawConstraintLimits);
-    debug.setShaderProgram(renderer.worldProg);
+    debug.setShaderProgram(renderer.worldProg.get());
 
     data.loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
 
