@@ -227,6 +227,9 @@ public:
     public:
         OpenGLShaderProgram(GLuint p) : program(p) {
         }
+        ~OpenGLShaderProgram() {
+            glDeleteProgram(program);
+        }
 
         GLuint getName() const {
             return program;
