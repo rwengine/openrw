@@ -26,6 +26,11 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderB, "zonecylb.dff"},
     {GameRenderer::Arrow, "arrow.dff"}};
 
+namespace {
+  constexpr float kPhysicsTimeStep = 1.0f/30.0f;
+  constexpr float kMaxPhysicsSubSteps = 4;
+}
+
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
 RWGame::RWGame(Logger& log, int argc, char* argv[])
@@ -353,7 +358,9 @@ void RWGame::handleCheatInput(char symbol) {
 }
 
 int RWGame::run() {
-    last_clock_time = clock.now();
+    namespace chrono = std::chrono;
+    auto lastFrame = chrono::steady_clock::now();
+    float accumulatedTime = 0.0f;
 
     // Loop until we run out of states.
     bool running = true;
@@ -400,45 +407,37 @@ int RWGame::run() {
         }
         RW_PROFILE_END();
 
-        auto now = clock.now();
-        float timer =
-            std::chrono::duration<float>(now - last_clock_time).count();
-        last_clock_time = now;
-        accum += timer * timescale;
+        auto now = chrono::steady_clock::now();
+        auto deltaTime = chrono::duration<float>(now - lastFrame).count();
+        lastFrame = now;
+        accumulatedTime += deltaTime;
+
+        if(!world->isPaused()) {
+            world->dynamicsWorld->stepSimulation(deltaTime * timescale, kMaxPhysicsSubSteps, kPhysicsTimeStep);
+        }
 
         RW_PROFILE_BEGIN("Update");
-        if (accum >= GAME_TIMESTEP) {
+        while (accumulatedTime >= GAME_TIMESTEP && !world->isPaused()) {
             if (!StateManager::currentState()) {
                 break;
             }
+            accumulatedTime -= GAME_TIMESTEP;
 
             RW_PROFILE_BEGIN("state");
-            StateManager::get().tick(GAME_TIMESTEP);
+            StateManager::get().tick(GAME_TIMESTEP * timescale);
             RW_PROFILE_END();
 
             RW_PROFILE_BEGIN("engine");
-            tick(GAME_TIMESTEP);
+            tick(GAME_TIMESTEP * timescale);
             RW_PROFILE_END();
 
             getState()->swapInputState();
-
-            accum -= GAME_TIMESTEP;
-
-            // Throw away time if the accumulator reaches too high.
-            if (accum > GAME_TIMESTEP * 5.f) {
-                accum = 0.f;
-            }
         }
         RW_PROFILE_END();
 
-        float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
-        if (!StateManager::currentState()->shouldWorldUpdate()) {
-            alpha = 1.f;
-        }
-
         RW_PROFILE_BEGIN("Render");
         RW_PROFILE_BEGIN("engine");
-        render(alpha, timer);
+        render(1, deltaTime);
         RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("state");
@@ -508,7 +507,6 @@ void RWGame::tick(float dt) {
 
         state.text.tick(dt);
 
-        world->dynamicsWorld->stepSimulation(dt, 2, dt);
 
         if (vm) {
             try {
