@@ -27,9 +27,6 @@ class RWGame : public GameBase {
     std::unique_ptr<ScriptMachine> vm;
     std::unique_ptr<SCMFile> script;
 
-    std::chrono::steady_clock clock;
-    std::chrono::steady_clock::time_point last_clock_time;
-
     bool inFocus = true;
     ViewCamera currentCam;
 
@@ -46,7 +43,6 @@ class RWGame : public GameBase {
 
     std::string cheatInputWindow = std::string(32, ' ');
 
-    float accum = 0.f;
     float timescale = 1.f;
 
 public:
