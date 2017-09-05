@@ -35,13 +35,13 @@ struct CutsceneTracks {
     std::map<float, float> zoom;
     std::map<float, float> rotation;
     std::map<float, glm::vec3> position;
-    std::map<float, glm::vec3>
-        target;  /// Rotation is around the direction to this vector
+    std::map<float, glm::vec3> target;
+    /* Rotation is angle around the target vector */
 
     float duration{0.f};
 
     glm::vec3 getPositionAt(float time) {
-        glm::vec3 p = position.end()->second;
+        glm::vec3 p = position.rbegin()->second;
         for (auto it = position.begin(); it != position.end(); ++it) {
             if (it->first <= time) {
                 auto a = it->second;
@@ -64,7 +64,7 @@ struct CutsceneTracks {
     }
 
     glm::vec3 getTargetAt(float time) {
-        glm::vec3 p = position.end()->second;
+        glm::vec3 p = position.rbegin()->second;
         for (auto it = target.begin(); it != target.end(); ++it) {
             if (it->first <= time) {
                 auto a = it->second;
@@ -87,7 +87,7 @@ struct CutsceneTracks {
     }
 
     float getZoomAt(float time) {
-        float r = zoom.end()->second;
+        float r = zoom.rbegin()->second;
         for (auto it = zoom.begin(); it != zoom.end(); ++it) {
             if (it->first <= time) {
                 auto a = it->second;
@@ -110,7 +110,7 @@ struct CutsceneTracks {
     }
 
     float getRotationAt(float time) {
-        float r = rotation.end()->second;
+        float r = rotation.rbegin()->second;
         for (auto it = rotation.begin(); it != rotation.end(); ++it) {
             if (it->first <= time) {
                 auto a = it->second;
