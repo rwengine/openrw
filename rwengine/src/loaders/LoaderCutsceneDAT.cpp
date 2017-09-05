@@ -14,7 +14,7 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         float t = 0.f;
         float z = 0.f;
         ss >> t;
-        ss.ignore(1, ',');
+        ss.ignore(2, ',');
         ss >> z;
         ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         tracks.zoom[t] = z;
@@ -31,7 +31,7 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         float t = 0.f;
         float r = 0.f;
         ss >> t;
-        ss.ignore(1, ',');
+        ss.ignore(2, ',');
         ss >> r;
         ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         tracks.rotation[t] = r;
@@ -48,7 +48,7 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         float t = 0.f;
         glm::vec3 p;
         ss >> t;
-        ss.ignore(1, ',');
+        ss.ignore(2, ',');
         ss >> p.x;
         ss.ignore(1, ',');
         ss >> p.y;
@@ -69,7 +69,7 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         float t = 0.f;
         glm::vec3 p;
         ss >> t;
-        ss.ignore(1, ',');
+        ss.ignore(2, ',');
         ss >> p.x;
         ss.ignore(1, ',');
         ss >> p.y;
