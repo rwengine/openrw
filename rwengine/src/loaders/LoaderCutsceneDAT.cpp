@@ -1,6 +1,9 @@
-#include <algorithm>
 #include <loaders/LoaderCutsceneDAT.hpp>
+
+#include <algorithm>
 #include <sstream>
+
+#include <rw/defines.hpp>
 
 void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
     std::string dataStr(file->data, file->length);
@@ -79,4 +82,7 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         tracks.target[t] = p;
         tracks.duration = std::max(t, tracks.duration);
     }
+
+    assert(ss.eof() || ss.good());
+    RW_CHECK(ss.eof() || ss.good(), "Loading CutsceneDAT file failed");
 }
