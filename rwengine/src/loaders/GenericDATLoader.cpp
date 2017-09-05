@@ -17,6 +17,7 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
 
         while (std::getline(dfile, lineBuff)) {
             if (lineBuff.at(0) == ';') continue;
+            if (lineBuff.at(0) == '*') continue;
             std::stringstream ss(lineBuff);
 
             DynamicObjectDataPtr dyndata(new DynamicObjectData);
