@@ -855,6 +855,8 @@ void opcode_004f(const ScriptArguments& args, const ScriptLabel arg1) {
 	/// @todo prevent overflow
 	/// @todo don't do pointer casting
 	for (auto i = 1u; i < args.getParameters().size(); ++i) {
+		if (args[i].type == EndOfArgList)
+			break;
 		*reinterpret_cast<ScriptInt*>(thread.locals.data() +
 		                        sizeof(ScriptInt) * (i - 1)) =
 		    args[i].integerValue();
