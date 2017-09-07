@@ -23,8 +23,6 @@ struct CharacterWeaponSlot {
 };
 
 struct CharacterState {
-    glm::vec3 position;
-    float rotation;
     float health = 100.f;
     float armour = 0.f;
     std::array<CharacterWeaponSlot, kMaxInventorySlots> weapons;
