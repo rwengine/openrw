@@ -1,5 +1,6 @@
-#ifndef _RWENGINE_GAMETEXTS_HPP_
-#define _RWENGINE_GAMETEXTS_HPP_
+#ifndef _RWLIB_FONTS_GAMETEXTS_HPP_
+#define _RWLIB_FONTS_GAMETEXTS_HPP_
+
 #include <cstdint>
 #include <string>
 #include <unordered_map>
@@ -7,12 +8,14 @@
 /**
  * Each GXT char is just a 16-bit index into the font map.
  */
-using GameStringChar = uint16_t;
+using GameStringChar = std::uint16_t;
+
 /**
  * The game stores strings as 16-bit indexes into the font
  * texture, which is something simllar to ASCII.
  */
 using GameString = std::basic_string<GameStringChar>;
+
 /**
  * GXT keys are just 8 single byte chars.
  * Keys are small so should be subject to SSO
@@ -32,8 +35,7 @@ GameString fromString(const std::string& str);
 /**
  * Since the encoding of symbols is arbitrary, these constants should be used in
  * hard-coded strings containing symbols outside of the ASCII-subset supported
- * by
- * all fonts
+ * by all fonts
  */
 namespace GameSymbols {
 static constexpr GameStringChar Money = '$';

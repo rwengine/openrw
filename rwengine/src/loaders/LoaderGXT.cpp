@@ -5,9 +5,8 @@
 #include <string>
 #include <utility>
 
+#include <fonts/GameTexts.hpp>
 #include <platform/FileHandle.hpp>
-
-#include "data/GameTexts.hpp"
 
 void LoaderGXT::load(GameTexts &texts, const FileHandle &file) {
     auto data = file->data;

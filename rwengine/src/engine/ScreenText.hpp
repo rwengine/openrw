@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#include <data/GameTexts.hpp>
+#include <fonts/GameTexts.hpp>
 
 enum class ScreenTextType {
     /// Big text will be rendered according to the proscribed style.

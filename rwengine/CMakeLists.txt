@@ -37,8 +37,6 @@ set(RWENGINE_SOURCES
     src/data/Chase.hpp
     src/data/CollisionModel.hpp
     src/data/CutsceneData.hpp
-    src/data/GameTexts.cpp
-    src/data/GameTexts.hpp
     src/data/InstanceData.hpp
     src/data/ModelData.cpp
     src/data/ModelData.hpp

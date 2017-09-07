@@ -11,7 +11,7 @@
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 
-#include <data/GameTexts.hpp>
+#include <fonts/GameTexts.hpp>
 #include <render/OpenGLRenderer.hpp>
 
 #define GAME_FONTS 3

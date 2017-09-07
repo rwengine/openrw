@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <data/GameTexts.hpp>
 #include <engine/ScreenText.hpp>
+#include <fonts/GameTexts.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include "test_Globals.hpp"
 
@@ -20,6 +20,14 @@ BOOST_AUTO_TEST_CASE(load_test) {
         loader.load(texts, d);
 
         BOOST_CHECK_EQUAL(texts.text("1008"), T("BUSTED"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(special_chars) {
+    {
+        auto newline = T("\n");
+        BOOST_CHECK_EQUAL(newline.size(), 1);
+        BOOST_CHECK_EQUAL(newline[0], '\n');
     }
 }
 

@@ -9,15 +9,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <data/GameTexts.hpp>
 #include <data/VehicleGenerator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameInputState.hpp>
-
 #include <engine/GameWorld.hpp>
 #include <engine/ScreenText.hpp>
+#include <fonts/GameTexts.hpp>
 #include <objects/ObjectTypes.hpp>
-
 #include <script/ScriptTypes.hpp>
 
 class GameWorld;
