@@ -86,7 +86,7 @@ void Payphone::tick(float dt) {
 
                 if (!message.empty()) {
                     const auto& text =
-                        ScreenText::format(engine->data->texts.text(message));
+                        ScreenText::format(engine->data->texts.text(message), FONT_ARIAL);
 
                     engine->state->text.clear<ScreenTextType::HighPriority>();
                     engine->state->text.addText<ScreenTextType::HighPriority>(

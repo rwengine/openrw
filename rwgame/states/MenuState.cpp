@@ -40,7 +40,7 @@ void MenuState::enterLoadMenu() {
                << save.basicState.saveTime.day << " "
                << save.basicState.saveTime.hour << ":"
                << save.basicState.saveTime.minute << "    ";
-            auto name = GameStringUtil::fromString(ss.str());
+            auto name = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
             name += save.basicState.saveName;
             auto loadsave = [=] {
                 StateManager::get().enter<IngameState>(game, false);

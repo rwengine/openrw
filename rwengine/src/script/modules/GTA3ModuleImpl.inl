@@ -5376,13 +5376,13 @@ void opcode_01e2(const ScriptArguments& args, const ScriptInt arg1, const Script
 */
 void opcode_01e3(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt arg2, const ScriptInt time, const ScriptInt style) {
     auto str =
-    		ScreenText::format(
-    			script::gxt(args, gxtEntry),
-    			GameStringUtil::fromString(std::to_string(arg2)));
+            ScreenText::format(
+                script::gxt(args, gxtEntry),
+                FONT_PRICEDOWN,
+                GameStringUtil::fromString(std::to_string(arg2), FONT_PRICEDOWN));
     args.getState()->text.addText<ScreenTextType::Big>(
-    			ScreenTextEntry::makeBig(
-    				gxtEntry, str, style, time
-    				));
+                ScreenTextEntry::makeBig(
+                    gxtEntry, str, style, time));
 }
 
 /**
@@ -9763,8 +9763,9 @@ void opcode_036d(const ScriptArguments& args, const ScriptString gxtEntry, const
 
     auto str =
         ScreenText::format(script::gxt(args, gxtEntry),
-                           GameStringUtil::fromString(std::to_string(arg2)),
-                           GameStringUtil::fromString(std::to_string(arg3)));
+                           FONT_PRICEDOWN,
+                           GameStringUtil::fromString(std::to_string(arg2), FONT_PRICEDOWN),
+                           GameStringUtil::fromString(std::to_string(arg3), FONT_PRICEDOWN));
 
     auto textEntry = ScreenTextEntry::makeBig(gxtEntry, str, style, time);
     world->state->text.addText<ScreenTextType::Big>(textEntry);

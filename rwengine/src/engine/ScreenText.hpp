@@ -143,8 +143,8 @@ public:
     }
 
     template <class... Args>
-    static GameString format(GameString format, Args&&... args) {
-        static auto kReplacementMarker = GameStringUtil::fromString("~1~");
+    static GameString format(GameString format, font_t font, Args&&... args) {
+        static auto kReplacementMarker = GameStringUtil::fromString("~1~", font);
         const std::array<GameString, sizeof...(args)> vals = {{args...}};
         size_t x = 0, val = 0;
         // We're only looking for numerical replacement markers

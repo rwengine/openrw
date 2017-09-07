@@ -18,10 +18,10 @@ int charToIndex(uint16_t g) {
     return g - 32;
 }
 
-glm::vec4 indexToCoord(int font, int index) {
+glm::vec4 indexToCoord(font_t font, int index) {
     float x = static_cast<int>(index % 16);
     float y = static_cast<int>(index / 16) + 0.01f;
-    float fontHeight = ((font == 0) ? 16.f : 13.f);
+    float fontHeight = ((font == FONT_PAGER) ? 16.f : 13.f);
     glm::vec2 gsize(1.f / 16.f, 1.f / fontHeight);
     return glm::vec4(x, y, x + 1, y + 0.98f) * glm::vec4(gsize, gsize);
 }
@@ -100,31 +100,25 @@ TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
         glyphData[charToIndex(g)].widthFrac = 0.65f;
     }
 
-    // Assumes contigious a-z character encoding
+    // Assumes contiguous a-z character encoding
     for (char g = 0; g <= ('z' - 'a'); g++) {
-        switch (('a' + g)) {
-            case 'i':
-                glyphData[charToIndex('a' + g)].widthFrac = 0.4f;
-                glyphData[charToIndex('A' + g)].widthFrac = 0.4f;
-                break;
-            case 'l':
-                glyphData[charToIndex('a' + g)].widthFrac = 0.5f;
-                glyphData[charToIndex('A' + g)].widthFrac = 0.5f;
-                break;
-            case 'm':
-                glyphData[charToIndex('a' + g)].widthFrac = 1.0f;
-                glyphData[charToIndex('A' + g)].widthFrac = 1.0f;
-                break;
-            case 'w':
-                glyphData[charToIndex('a' + g)].widthFrac = 1.0f;
-                glyphData[charToIndex('A' + g)].widthFrac = 1.0f;
-                break;
-            default:
-                glyphData[charToIndex('a' + g)].widthFrac = 0.7f;
-                glyphData[charToIndex('A' + g)].widthFrac = 0.7f;
-                break;
-        }
+        glyphData[charToIndex('a' + g)].widthFrac = 0.7f;
+        glyphData[charToIndex('A' + g)].widthFrac = 0.7f;
     }
+    // case 'i':
+    glyphData[charToIndex('i')].widthFrac = 0.4f;
+    glyphData[charToIndex('I')].widthFrac = 0.4f;
+    // case 'l':
+    glyphData[charToIndex('l')].widthFrac = 0.5f;
+    glyphData[charToIndex('L')].widthFrac = 0.5f;
+    // case 'm':
+    glyphData[charToIndex('m')].widthFrac = 1.0f;
+    glyphData[charToIndex('M')].widthFrac = 1.0f;
+    // case 'w':
+    glyphData[charToIndex('w')].widthFrac = 1.0f;
+    glyphData[charToIndex('W')].widthFrac = 1.0f;
+    // case 'accent aigu'
+    glyphData[0x91].widthFrac = 0.6f;
 }
 
 void TextRenderer::setFontTexture(int index, const std::string& texture) {

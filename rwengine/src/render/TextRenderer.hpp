@@ -33,7 +33,7 @@ public:
         enum TextAlignment { Left = 0, Right = 1, Center = 2 };
 
         /// Font index @see TextRenderer::setFontTexture
-        int font{0};
+        font_t font{FONT_PAGER};
         /// Message to be displayed (including markup)
         GameString text;
         /// On screen position

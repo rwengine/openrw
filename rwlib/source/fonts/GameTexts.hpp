@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <sstream>
+#include <string>
 
 /**
  * Each GXT char is just a 16-bit index into the font map.
@@ -12,7 +14,7 @@ using GameStringChar = std::uint16_t;
 
 /**
  * The game stores strings as 16-bit indexes into the font
- * texture, which is something simllar to ASCII.
+ * texture, which is something similar to ASCII.
  */
 using GameString = std::basic_string<GameStringChar>;
 
@@ -22,6 +24,16 @@ using GameString = std::basic_string<GameStringChar>;
  */
 using GameStringKey = std::string;
 
+/**
+ * Index to used font.
+ */
+using font_t = size_t;
+
+static const font_t FONT_PAGER = 0;
+static const font_t FONT_PRICEDOWN = 1;
+static const font_t FONT_ARIAL = 2;
+static const font_t FONTS_COUNT = 3;
+
 namespace GameStringUtil {
 /**
  * @brief fromString Converts a string to a GameString
@@ -29,7 +41,15 @@ namespace GameStringUtil {
  * Encoding of GameStrings depends on the font, only simple ASCII chars will map
  * well
  */
-GameString fromString(const std::string& str);
+GameString fromString(const std::string& str, font_t font);
+
+/**
+ * @brief fromString Converts a string to a GameString
+ *
+ * Encoding of GameStrings depends on the font, only simple ASCII chars will map
+ * well
+ */
+std::string toString(const GameString& str, font_t font);
 }
 
 /**
@@ -58,7 +78,11 @@ public:
         if (a != m_strings.end()) {
             return a->second;
         }
-        return GameStringUtil::fromString("MISSING: " + id);
+        return GameStringUtil::fromString("MISSING: " + id, FONT_ARIAL);
+    }
+
+    const StringTable &getStringTable() const {
+        return m_strings;
     }
 };
 

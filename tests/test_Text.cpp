@@ -4,7 +4,7 @@
 #include <loaders/LoaderGXT.hpp>
 #include "test_Globals.hpp"
 
-#define T(x) GameStringUtil::fromString(x)
+#define T(x) GameStringUtil::fromString(x, FONT_PRICEDOWN)
 
 BOOST_AUTO_TEST_SUITE(TextTests)
 
@@ -22,6 +22,7 @@ BOOST_AUTO_TEST_CASE(load_test) {
         BOOST_CHECK_EQUAL(texts.text("1008"), T("BUSTED"));
     }
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(special_chars) {
     {
@@ -108,16 +109,16 @@ BOOST_AUTO_TEST_CASE(format_test) {
     const auto codeStr2 = T("~1~Hello ~1~ world~1~");
     const auto codeStr3 = T("Hello world~1~");
 
-    auto f1 = ScreenText::format(codeStr1, T("r"));
+    auto f1 = ScreenText::format(codeStr1, FONT_PRICEDOWN, T("r"));
     BOOST_CHECK_EQUAL(f1, T("Hello r world"));
 
-    auto f2 = ScreenText::format(codeStr2, T("k"), T("h"));
+    auto f2 = ScreenText::format(codeStr2, FONT_PRICEDOWN, T("k"), T("h"));
     BOOST_CHECK_EQUAL(f2, T("kHello h world~1~"));
 
-    auto f3 = ScreenText::format(codeStr3, T("x"));
+    auto f3 = ScreenText::format(codeStr3, FONT_PRICEDOWN, T("x"));
     BOOST_CHECK_EQUAL(f3, T("Hello worldx"));
 
-    auto f4 = ScreenText::format(codeStr3, T("x"), T("k"));
+    auto f4 = ScreenText::format(codeStr3, FONT_PRICEDOWN, T("x"), T("k"));
     BOOST_CHECK_EQUAL(f4, T("Hello worldx"));
 }
 
@@ -140,6 +141,5 @@ BOOST_AUTO_TEST_CASE(format_remove) {
 
     BOOST_CHECK_EQUAL(1, st.getText<ScreenTextType::Big>().size());
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
