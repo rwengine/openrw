@@ -3,6 +3,7 @@
 #include "views/ModelViewer.hpp"
 #include "views/ObjectViewer.hpp"
 #include "views/WorldViewer.hpp"
+#include "views/TextViewer.hpp"
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -42,14 +43,17 @@ void ViewerWindow::createMenus() {
     for (int i = 0; i < MaxRecentGames; ++i) {
         QAction* r = file->addAction("");
         recentGames.append(r);
-        connect(r, SIGNAL(triggered()), SLOT(openRecent()));
+        connect(r, &QAction::triggered, this, [r, this]() {
+            QString recentGame = r->data().toString();
+            loadGame(recentGame);
+        });
     }
 
     recentSep = file->addSeparator();
     auto ex = file->addAction("E&xit");
     ex->setShortcut(QKeySequence::Quit);
-    connect(ex, SIGNAL(triggered()), QApplication::instance(),
-            SLOT(closeAllWindows()));
+    connect(ex, &QAction::triggered,
+            QApplication::instance(), &QApplication::closeAllWindows);
 
     mb->addMenu("&Data");
 
@@ -93,6 +97,10 @@ void ViewerWindow::createDefaultViews() {
     auto worldView = new WorldViewer(this);
     views->addTab(worldView, "World");
     connect(this, &ViewerWindow::gameLoaded, worldView, &WorldViewer::showData);
+
+    auto textView = new TextViewer(this);
+    views->addTab(textView, "Texts");
+    connect(this, &ViewerWindow::gameLoaded, textView, &TextViewer::showData);
 
     setCentralWidget(views);
 }
@@ -143,6 +151,10 @@ void ViewerWindow::loadGame(const QString& path) {
 
     gameWorld->data->load();
 
+    renderer->text.setFontTexture(FONT_PAGER, "pager");
+    renderer->text.setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer->text.setFontTexture(FONT_ARIAL, "font2");
+
     gameLoaded(gameWorld.get(), renderer.get());
 
     QSettings settings("OpenRW", "rwviewer");
@@ -153,13 +165,6 @@ void ViewerWindow::loadGame(const QString& path) {
     settings.setValue("recentGames", recent);
 
     updateRecentGames();
-}
-
-void ViewerWindow::openRecent() {
-    QAction* r = qobject_cast<QAction*>(sender());
-    if (r) {
-        loadGame(r->data().toString());
-    }
 }
 
 void ViewerWindow::showObjectModel(uint16_t) {

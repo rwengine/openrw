@@ -2,12 +2,15 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
+#include <engine/GameWorld.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/ObjectRenderer.hpp>
+#include <render/TextRenderer.hpp>
 
 constexpr float kViewFov = glm::radians(90.0f);
 
@@ -32,6 +35,7 @@ ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
 ViewerWidget::ViewerWidget(QOpenGLContext* context, QWindow* parent)
     : QWindow(parent)
     , context(context)
+    , textInfos()
     , selectedFrame(nullptr)
     , viewDistance(1.f)
     , dragging(false)
@@ -127,6 +131,13 @@ void ViewerWidget::drawWorld(GameRenderer& r) {
     r.renderWorld(world(), vc, 0.f);
 }
 
+void ViewerWidget::drawText(GameRenderer& r) {
+    for(auto &textInfo : textInfos) {
+        _renderer->text.renderText(textInfo, false);
+    }
+    r.renderPostProcess();
+}
+
 void ViewerWidget::paintGL() {
     glViewport(0, 0, width() * devicePixelRatio(), height() * devicePixelRatio());
     glClearColor(0.3f, 0.3f, 0.3f, 1.f);
@@ -141,7 +152,6 @@ void ViewerWidget::paintGL() {
 
     glEnable(GL_DEPTH_TEST);
 
-
     r.getRenderer()->invalidate();
     r.setupRender();
 
@@ -154,6 +164,9 @@ void ViewerWidget::paintGL() {
         break;
     case Mode::World:
         drawWorld(r);
+        break;
+    case Mode::Text:
+        drawText(r);
         break;
     }
 }
@@ -228,9 +241,18 @@ void ViewerWidget::showObject(quint16 item) {
     }
 }
 
+void ViewerWidget::clearText() {
+    textInfos.clear();
+}
+
+void ViewerWidget::showText(const TextRenderer::TextInfo &ti) {
+    textInfos.push_back(ti);
+}
+
 void ViewerWidget::showModel(ClumpPtr model) {
     _viewMode = Mode::Model;
     _model = model;
+    textInfos.clear();
 }
 
 void ViewerWidget::selectFrame(ModelFrame* frame) {
@@ -248,7 +270,7 @@ void ViewerWidget::exportModel() {
 	if( it != world()->objectTypes.end() ) {
 		for( auto& archive : world()->data.archives ) {
 			for(size_t i = 0; i < archive.second.getAssetCount(); ++i) {
-				auto& assetI = archive.second.getAssetInfoByIndex(i);
+				auto& assetI = archive.second.getAssetInfoByIndex(i);;
 				std::string q(assetI.name);
 				std::transform(q.begin(), q.end(), q.begin(), ::tolower);
 				if( q.find(it->second->modelName) != q.npos ) {

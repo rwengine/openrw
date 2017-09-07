@@ -49,7 +49,6 @@ signals:
     void gameLoaded(GameWorld*, GameRenderer*);
 
 private slots:
-    void openRecent();
     void showObjectModel(uint16_t object);
 
 private:

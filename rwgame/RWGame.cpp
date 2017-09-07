@@ -68,9 +68,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     }
 
     // Set up text renderer
-    renderer.text.setFontTexture(0, "pager");
-    renderer.text.setFontTexture(1, "font1");
-    renderer.text.setFontTexture(2, "font2");
+    renderer.text.setFontTexture(FONT_PAGER, "pager");
+    renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |

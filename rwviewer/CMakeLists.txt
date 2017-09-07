@@ -6,23 +6,43 @@ find_package(Qt5Widgets REQUIRED)
 
 add_executable(rwviewer WIN32
     main.cpp
+    OpenGLCompat.h
+
+    ViewerWindow.hpp
     ViewerWindow.cpp
 
+    models/ObjectListModel.hpp
     models/ObjectListModel.cpp
+    models/DFFFramesTreeModel.hpp
     models/DFFFramesTreeModel.cpp
+    models/TextModel.hpp
+    models/TextModel.cpp
 
     views/ViewerInterface.hpp
+    views/ObjectViewer.hpp
     views/ObjectViewer.cpp
+    views/ModelViewer.hpp
     views/ModelViewer.cpp
+    views/TextViewer.hpp
+    views/TextViewer.cpp
+    views/WorldViewer.hpp
     views/WorldViewer.cpp
+    views/ViewerInterface.hpp
     views/ViewerInterface.cpp
 
     ViewerWidget.cpp
+    ViewerWidget.hpp
+    ItemListModel.hpp
     ItemListModel.cpp
+    ItemListWidget.hpp
     ItemListWidget.cpp
+    IMGArchiveModel.hpp
     IMGArchiveModel.cpp
+    widgets/ModelFramesWidget.hpp
     widgets/ModelFramesWidget.cpp
+    AnimationListModel.hpp
     AnimationListModel.cpp
+    AnimationListWidget.hpp
     AnimationListWidget.cpp
     )
 
