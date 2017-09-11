@@ -170,7 +170,7 @@ void RWGame::handleCheatInput(char symbol) {
     cheatInputWindow = cheatInputWindow.substr(1) + symbol;
 
     // Helper to check for cheats
-    auto checkForCheat = [this](std::string cheat,
+    auto checkForCheat = [this](const std::string& cheat,
                                 std::function<void()> action) {
         RW_CHECK(cheatInputWindow.length() >= cheat.length(), "Cheat too long");
         size_t offset = cheatInputWindow.length() - cheat.length();
