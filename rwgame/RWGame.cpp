@@ -20,6 +20,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <functional>
+#include <iomanip>
 
 std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
@@ -78,9 +79,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                                       128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
-        std::string num = (m < 10 ? "0" : "");
-        std::string name = "radar" + num + std::to_string(m);
-        data.loadTXD(name + ".txd");
+        std::ostringstream oss;
+        oss << "radar" << std::setw(2) << std::setfill('0') << m << ".txd";
+        data.loadTXD(oss.str());
     }
 
     StateManager::get().enter<LoadingState>(this, [=]() {
