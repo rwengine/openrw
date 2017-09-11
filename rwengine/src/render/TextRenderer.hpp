@@ -30,7 +30,7 @@ public:
      * @todo Can this be merged with the gamestate text entries?
      */
     struct TextInfo {
-        enum TextAlignemnt { Left = 0, Right = 1, Center = 2 };
+        enum TextAlignment { Left = 0, Right = 1, Center = 2 };
 
         /// Font index @see TextRenderer::setFontTexture
         int font{0};
@@ -45,7 +45,7 @@ public:
         /// Background colour
         glm::u8vec4 backgroundColour{};
         /// Horizontal Alignment
-        TextAlignemnt align = Left;
+        TextAlignment align = Left;
         /// Wrap width
         int wrapX{0};
 
