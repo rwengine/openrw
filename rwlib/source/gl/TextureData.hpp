@@ -14,6 +14,10 @@ public:
         : texName(name), size(dims), hasAlpha(alpha) {
     }
 
+    ~TextureData() {
+        glDeleteTextures(1, &texName);
+    }
+
     GLuint getName() const {
         return texName;
     }
