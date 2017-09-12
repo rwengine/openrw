@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 
-#include <cassert>
 #include <cstddef>
+
+#include "rw/defines.hpp"
 
 /**
  * @brief Class for working with RenderWare binary streams.
@@ -339,7 +340,7 @@ public:
 
     BinaryStreamSection getNextChildSection(size_t& internalOffset) {
         size_t realOffset = internalOffset;
-        assert(realOffset < header.size);
+        RW_ASSERT(realOffset < header.size);
         BinaryStreamSection sec(data,
                                 offset + sizeof(BSSectionHeader) + realOffset);
         internalOffset += sec.header.size + sizeof(BSSectionHeader);

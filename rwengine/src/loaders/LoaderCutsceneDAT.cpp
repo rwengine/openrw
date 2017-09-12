@@ -83,6 +83,5 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {
         tracks.duration = std::max(t, tracks.duration);
     }
 
-    assert(ss.eof() || ss.good());
     RW_CHECK(ss.eof() || ss.good(), "Loading CutsceneDAT file failed");
 }
