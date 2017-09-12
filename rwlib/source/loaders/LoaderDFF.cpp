@@ -439,8 +439,8 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     return atomic;
 }
 
-Clump *LoaderDFF::loadFromMemory(FileHandle file) {
-    auto model = new Clump;
+ClumpPtr LoaderDFF::loadFromMemory(FileHandle file) {
+    auto model = std::make_shared<Clump>();
 
     RWBStream rootStream(file->data, file->length);
 

@@ -2,15 +2,14 @@
 #ifndef _DFFFRAMESTREEMODEL_HPP_
 #define _DFFFRAMESTREEMODEL_HPP_
 #include <QAbstractItemModel>
+#include <rw/forward.hpp>
 #include <rw/types.hpp>
 
-class Clump;
-
 class DFFFramesTreeModel : public QAbstractItemModel {
-    Clump* model;
+    ClumpPtr model;
 
 public:
-    explicit DFFFramesTreeModel(Clump* m, QObject* parent = 0);
+    explicit DFFFramesTreeModel(ClumpPtr m, QObject* parent = 0);
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const;
 

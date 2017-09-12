@@ -27,12 +27,12 @@ class ViewerWidget : public QGLWidget {
     QTimer timer;
     GameWorld* gworld;
 
-    Clump* activeModel;
+    ClumpPtr activeModel;
     ModelFrame* selectedFrame;
     GameObject* dummyObject;
     quint16 currentObjectID;
 
-    Clump* _lastModel;
+    ClumpPtr _lastModel;
     Animation* canimation;
 
     float viewDistance;
@@ -60,7 +60,7 @@ public:
 
     virtual void paintGL();
 
-    Clump* currentModel() const;
+    ClumpPtr currentModel() const;
     GameObject* currentObject() const;
 
     GameWorld* world();
@@ -68,7 +68,7 @@ public:
 public slots:
 
     void showObject(qint16 item);
-    void showModel(Clump* model);
+    void showModel(ClumpPtr model);
     void selectFrame(ModelFrame* frame);
 
     void exportModel();
@@ -81,7 +81,7 @@ signals:
 
     void fileOpened(const QString& file);
 
-    void modelChanged(Clump* model);
+    void modelChanged(ClumpPtr model);
 
 protected:
     void keyPressEvent(QKeyEvent*) override;

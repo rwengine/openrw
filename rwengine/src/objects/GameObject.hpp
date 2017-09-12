@@ -31,7 +31,7 @@ class GameObject {
     /**
      * Model used for rendering
      */
-    Clump* model_;
+    ClumpPtr model_;
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
@@ -102,14 +102,14 @@ public:
     /**
      * @return The model used in rendering
      */
-    Clump* getModel() const {
+    ClumpPtr getModel() const {
         return model_;
     }
 
     /**
      * Changes the current model, used for re-dressing chars
      */
-    void setModel(Clump* model) {
+    void setModel(ClumpPtr model) {
         model_ = model;
     }
 

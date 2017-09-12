@@ -8,7 +8,7 @@
 #include <map>
 #include <rw/defines.hpp>
 
-class Clump;
+#include <rw/forward.hpp>
 class ModelFrame;
 
 /**
@@ -40,7 +40,7 @@ class Animator {
     /**
      * @brief model The model being animated.
      */
-    Clump* model;
+    ClumpPtr model;
 
     /**
      * @brief Currently playing animations
@@ -48,7 +48,7 @@ class Animator {
     std::vector<AnimationState> animations;
 
 public:
-    Animator(Clump* model);
+    Animator(ClumpPtr model);
 
     Animation* getAnimation(unsigned int slot) {
         if (slot < animations.size()) {

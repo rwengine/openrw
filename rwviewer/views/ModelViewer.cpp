@@ -39,7 +39,7 @@ void ModelViewer::setViewerWidget(ViewerWidget* widget) {
     showModel(viewing);
 }
 
-void ModelViewer::showModel(Clump* model) {
+void ModelViewer::showModel(ClumpPtr model) {
     viewing = model;
     viewerWidget->showModel(model);
     frames->setModel(model);

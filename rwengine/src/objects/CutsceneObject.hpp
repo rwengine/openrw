@@ -12,7 +12,7 @@ class CutsceneObject : public GameObject, public ClumpObject {
 
 public:
     CutsceneObject(GameWorld* engine, const glm::vec3& pos,
-                   const glm::quat& rot, Clump* model,
+                   const glm::quat& rot, ClumpPtr model,
                    BaseModelInfo* modelinfo);
     ~CutsceneObject();
 

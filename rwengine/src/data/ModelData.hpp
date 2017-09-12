@@ -135,14 +135,14 @@ public:
     }
 
     /// @todo change with librw
-    void setAtomic(Clump* model, int n, AtomicPtr atomic) {
+    void setAtomic(ClumpPtr model, int n, AtomicPtr atomic) {
         model_ = model;
         /// @todo disassociated the Atomic from Clump
         atomics_[n] = atomic;
     }
 
     /// @todo remove this
-    Clump* getModel() const {
+    ClumpPtr getModel() const {
         return model_;
     }
 
@@ -178,11 +178,10 @@ public:
     }
 
     bool isLoaded() const override {
-        return model_ != nullptr;
+        return model_.get() != nullptr;
     }
 
     void unload() override {
-        delete model_;
         model_ = nullptr;
     }
 
@@ -249,7 +248,7 @@ public:
     }
 
 private:
-    Clump* model_ = nullptr;
+    ClumpPtr model_;
     std::array<AtomicPtr, 3> atomics_;
     float loddistances_[3] = {};
     uint8_t numatomics_ = 0;
@@ -280,25 +279,24 @@ public:
     ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) {
     }
 
-    void setModel(Clump* model) {
+    void setModel(ClumpPtr model) {
         model_ = model;
     }
 
-    Clump* getModel() const {
+    ClumpPtr getModel() const {
         return model_;
     }
 
     bool isLoaded() const override {
-        return model_ != nullptr;
+        return model_.get() != nullptr;
     }
 
     void unload() override {
-        delete model_;
         model_ = nullptr;
     }
 
 private:
-    Clump* model_ = nullptr;
+    ClumpPtr model_ = nullptr;
 };
 
 /**

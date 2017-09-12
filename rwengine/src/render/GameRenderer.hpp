@@ -62,7 +62,7 @@ class GameRenderer {
     ViewCamera _camera;
     ViewCamera cullingCamera;
     bool cullOverride;
-    
+
     /** Number of culling events */
     size_t culled;
 
@@ -99,7 +99,7 @@ public:
     GLuint getMissingTexture() const {
         return m_missingTexture;
     }
-    
+
     size_t getCulledCount() {
         return culled;
     }
@@ -174,16 +174,15 @@ public:
      *
      * GameRenderer will take ownership of the Model* pointer
      */
-    void setSpecialModel(SpecialModel usage, Clump* model) {
-        specialmodels_[usage].reset(model);
+    void setSpecialModel(SpecialModel usage, ClumpPtr model) {
+        specialmodels_[usage] = model;
     }
 
 private:
     /// Hard-coded models to use for each of the special models
-    std::unique_ptr<Clump>
-        specialmodels_[SpecialModel::SpecialModelCount];
-    Clump* getSpecialModel(SpecialModel usage) const {
-        return specialmodels_[usage].get();
+    ClumpPtr specialmodels_[SpecialModel::SpecialModelCount];
+    ClumpPtr getSpecialModel(SpecialModel usage) const {
+        return specialmodels_[usage];
     }
 };
 

@@ -1,7 +1,7 @@
 #include "DFFFramesTreeModel.hpp"
 #include <data/Clump.hpp>
 
-DFFFramesTreeModel::DFFFramesTreeModel(Clump* m,
+DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m,
                                        QObject* parent)
     : QAbstractItemModel(parent), model(m) {
 }

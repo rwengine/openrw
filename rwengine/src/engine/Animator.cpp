@@ -4,7 +4,7 @@
 #include <loaders/LoaderDFF.hpp>
 #include <queue>
 
-Animator::Animator(Clump* model) : model(model) {
+Animator::Animator(ClumpPtr model) : model(model) {
 }
 
 void Animator::tick(float dt) {

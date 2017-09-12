@@ -2,7 +2,7 @@
 #include <data/Clump.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void ModelFramesWidget::updateInfoBox(Clump* model, ModelFrame* f) {
+void ModelFramesWidget::updateInfoBox(ClumpPtr model, ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
@@ -33,14 +33,14 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
     setLayout(_layout);
 }
 
-void ModelFramesWidget::setModel(Clump* model) {
+void ModelFramesWidget::setModel(ClumpPtr model) {
     if (framemodel) {
         delete framemodel;
         framemodel = nullptr;
         tree->setModel(nullptr);
     }
     gmodel = model;
-    if (model != nullptr) {
+    if (model.get() != nullptr) {
         framemodel = new DFFFramesTreeModel(model, this);
         tree->setModel(framemodel);
         tree->setDisabled(false);

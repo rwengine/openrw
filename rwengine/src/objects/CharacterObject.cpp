@@ -38,7 +38,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     setClump(ClumpPtr(info->getModel()->clone()));
     if (info->getModel()) {
         setModel(info->getModel());
-        animator = new Animator(getClump().get());
+        animator = new Animator(getClump());
 
         createActor();
     }
@@ -273,7 +273,7 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
 
     setModel(newmodel);
 
-    animator = new Animator(getClump().get());
+    animator = new Animator(getClump());
 }
 
 void CharacterObject::updateCharacter(float dt) {
