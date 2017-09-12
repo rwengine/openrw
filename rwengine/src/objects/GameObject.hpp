@@ -184,6 +184,7 @@ public:
     };
 
     virtual bool takeDamage(const DamageInfo& damage) {
+        RW_UNUSED(damage);
         return false;
     }
 
