@@ -8,7 +8,7 @@ namespace RW {
 
 std::unique_ptr<TextureArchive> TextureArchive::create(
     BinaryStream &binaryStream) {
-    auto textureArchive = std::unique_ptr<TextureArchive>(new TextureArchive);
+    auto textureArchive = std::make_unique<TextureArchive>();
 
     auto section = binaryStream.rootHeader;
 

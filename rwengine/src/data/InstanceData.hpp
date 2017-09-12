@@ -26,6 +26,17 @@ struct InstanceData {
      * Instance rotation
      */
     glm::quat rot;
+    /**
+     * Constructor
+     */
+    InstanceData(int _id, std::string _model, glm::vec3 _pos, glm::vec3 _scale,  glm::quat _rot)
+        : id(_id)
+        , model(_model)
+        , pos(_pos)
+        , scale(_scale)
+        , rot(_rot){
+    }
+
 };
 
 #endif
