@@ -411,7 +411,7 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title) {
         glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &prof.timerStart);
 
         currentDebugDepth++;
-        assert(currentDebugDepth < MAX_DEBUG_DEPTH);
+        RW_ASSERT(currentDebugDepth < MAX_DEBUG_DEPTH);
     }
 #else
     RW_UNUSED(title);
@@ -423,7 +423,7 @@ const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
     if (ogl_ext_KHR_debug) {
         glPopDebugGroup();
         currentDebugDepth--;
-        assert(currentDebugDepth >= 0);
+        RW_ASSERT(currentDebugDepth >= 0);
 
         ProfileInfo& prof = profileInfo[currentDebugDepth];
 

@@ -50,7 +50,6 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             if (ss.peek() == ',') ss.ignore(1);
             ss >> dyndata->cameraAvoid;
 
-            assert(ss.eof() || ss.good());
             RW_CHECK(ss.eof() || ss.good(), "Loading dynamicsObject data file " << name << " failed");
 
             data.insert({dyndata->modelName, dyndata});
@@ -118,7 +117,6 @@ void GenericDATLoader::loadWeapons(const std::string& name,
             ss >> data->modelID;
             ss >> data->flags;
 
-            assert(ss.eof() || ss.good());
             RW_CHECK(ss.eof() || ss.good(), "Loading weapon data file " << name << " failed");
 
             data->inventorySlot = slotNum++;
@@ -174,7 +172,6 @@ void GenericDATLoader::loadHandling(const std::string& name,
             ss >> info.suspensionBias;
             ss >> std::hex >> info.flags;
 
-            assert(ss.eof() || ss.good());
             RW_CHECK(ss.eof() || ss.good(), "Loading handling data file " << name << " failed");
 
             auto mit = vehicleData.find(info.ID);
