@@ -15,16 +15,15 @@ CharacterController::CharacterController(CharacterObject *character)
     : character(character)
     , _currentActivity(nullptr)
     , _nextActivity(nullptr)
-    , m_closeDoorTimer(0.f)
     , currentGoal(None)
     , leader(nullptr)
     , targetNode(nullptr) {
     character->controller = this;
 }
 
-bool CharacterController::updateActivity() {
+bool CharacterController::updateActivity(float dt) {
     if (_currentActivity && character->isAlive()) {
-        return _currentActivity->update(character, this);
+        return _currentActivity->update(character, this, dt);
     }
 
     return false;
@@ -61,42 +60,7 @@ bool CharacterController::isCurrentActivity(const std::string &activity) const {
 }
 
 void CharacterController::update(float dt) {
-    if (character->getCurrentVehicle()) {
-        // Nevermind, the player is in a vehicle.
-
-        auto &d = character->getMovement();
-
-        if (character->getCurrentSeat() == 0) {
-            character->getCurrentVehicle()->setSteeringAngle(d.y);
-
-            if (std::abs(d.x) > 0.01f) {
-                character->getCurrentVehicle()->setHandbraking(false);
-            }
-            character->getCurrentVehicle()->setThrottle(d.x);
-        }
-
-        if (_currentActivity == nullptr) {
-            // If character is idle in vehicle, try to close the door.
-            auto v = character->getCurrentVehicle();
-            auto entryDoor = v->getSeatEntryDoor(character->getCurrentSeat());
-
-            if (entryDoor && entryDoor->constraint) {
-                if (glm::length(d) <= 0.1f) {
-                    if (m_closeDoorTimer >= kCloseDoorIdleTime) {
-                        character->getCurrentVehicle()->setPartTarget(
-                            entryDoor, true, entryDoor->closedAngle);
-                    }
-                    m_closeDoorTimer += dt;
-                } else {
-                    m_closeDoorTimer = 0.f;
-                }
-            }
-        }
-    } else {
-        m_closeDoorTimer = 0.f;
-    }
-
-    if (updateActivity()) {
+    if (updateActivity(dt)) {
         character->activityFinished();
         if (_currentActivity) {
             delete _currentActivity;
@@ -126,7 +90,7 @@ void CharacterController::setRunning(bool run) {
 }
 
 bool Activities::GoTo::update(CharacterObject *character,
-                              CharacterController *controller) {
+                              CharacterController *controller, float dt) {
     /* TODO: Use the ai nodes to navigate to the position */
     auto cpos = character->getPosition();
     glm::vec3 targetDirection = target - cpos;
@@ -150,7 +114,7 @@ bool Activities::GoTo::update(CharacterObject *character,
 }
 
 bool Activities::Jump::update(CharacterObject *character,
-                              CharacterController *controller) {
+                              CharacterController *controller, float dt) {
     RW_UNUSED(controller);
     if (character->physCharacter == nullptr) return true;
 
@@ -171,7 +135,17 @@ bool Activities::EnterVehicle::canSkip(CharacterObject *character,
 }
 
 bool Activities::EnterVehicle::update(CharacterObject *character,
-                                      CharacterController *controller) {
+                                      CharacterController *controller, float dt) {
+    bool result = updateEnterVehicle(character, controller, dt);
+    if(result) {
+        controller->setNextActivity(new Activities::InVehicle(vehicle, seat));
+    }
+
+    return result;
+}
+
+bool Activities::EnterVehicle::updateEnterVehicle(CharacterObject *character,
+                                                  CharacterController *controller, float dt) {
     constexpr float kSprintToEnterDistance = 5.f;
     constexpr float kGiveUpDistance = 100.f;
 
@@ -292,8 +266,44 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     return false;
 }
 
+bool Activities::InVehicle::update(CharacterObject* character,
+                                   CharacterController* controller, float dt) {
+
+    auto &d = character->getMovement();
+
+    if (character->getCurrentSeat() == 0) {
+        character->getCurrentVehicle()->setSteeringAngle(d.y);
+
+        if (std::abs(d.x) > 0.01f) {
+            character->getCurrentVehicle()->setHandbraking(false);
+        }
+        character->getCurrentVehicle()->setThrottle(d.x);
+    }
+
+
+    // If character is idle in vehicle, try to close the door.
+    auto v = character->getCurrentVehicle();
+    auto entryDoor = v->getSeatEntryDoor(character->getCurrentSeat());
+
+    if (entryDoor && entryDoor->constraint) {
+        if (glm::length(d) <= 0.1f) {
+            if (m_closeDoorTimer >= kCloseDoorIdleTime) {
+                character->getCurrentVehicle()->setPartTarget(
+                        entryDoor, true, entryDoor->closedAngle);
+            }
+            m_closeDoorTimer += dt;
+        } else {
+            m_closeDoorTimer = 0.f;
+        }
+    }
+
+    return controller->getNextActivity() != nullptr &&
+           typeid(*controller->getNextActivity()) == typeid(Activities::ExitVehicle);
+
+}
+
 bool Activities::ExitVehicle::update(CharacterObject *character,
-                                     CharacterController *controller) {
+                                     CharacterController *controller, float dt) {
     RW_UNUSED(controller);
 
     if (jacked) {
@@ -386,7 +396,7 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
 }
 
 bool Activities::UseItem::update(CharacterObject *character,
-                                 CharacterController *controller) {
+                                 CharacterController *controller, float dt) {
     RW_UNUSED(controller);
 
     if (itemslot >= kMaxInventorySlots) {

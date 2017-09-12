@@ -34,7 +34,7 @@ public:
         }
 
         virtual bool update(CharacterObject* character,
-                            CharacterController* controller) = 0;
+                            CharacterController* controller, float dt) = 0;
     };
 
     /**
@@ -64,10 +64,8 @@ protected:
     Activity* _currentActivity;
     Activity* _nextActivity;
 
-    bool updateActivity();
+    bool updateActivity(float dt);
     void setActivity(Activity* activity);
-
-    float m_closeDoorTimer;
 
     // Goal related variables
     Goal currentGoal;
@@ -165,7 +163,7 @@ struct GoTo : public CharacterController::Activity {
         : target(target), sprint(_sprint) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
 
     bool canSkip(CharacterObject*, CharacterController*) const {
         return true;
@@ -180,7 +178,7 @@ struct Jump : public CharacterController::Activity {
     Jump() : jumped(false) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
 };
 
 struct EnterVehicle : public CharacterController::Activity {
@@ -202,7 +200,26 @@ struct EnterVehicle : public CharacterController::Activity {
     bool canSkip(CharacterObject* character,
                  CharacterController*) const override;
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
+
+private:
+    bool updateEnterVehicle(CharacterObject* character, CharacterController* controller, float dt);
+};
+
+struct InVehicle : public CharacterController::Activity {
+    DECL_ACTIVITY(InVehicle)
+
+    VehicleObject* vehicle;
+    int seat;
+
+    InVehicle(VehicleObject* vehicle, int seat = 0)
+    : vehicle(vehicle), seat(seat), m_closeDoorTimer(0.f) {
+    }
+
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
+
+private:
+    float m_closeDoorTimer;
 };
 
 struct ExitVehicle : public CharacterController::Activity {
@@ -213,7 +230,7 @@ struct ExitVehicle : public CharacterController::Activity {
     ExitVehicle(bool jacked_ = false) : jacked(jacked_) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
 };
 
 struct UseItem : public CharacterController::Activity {
@@ -226,7 +243,7 @@ struct UseItem : public CharacterController::Activity {
     UseItem(int slot) : itemslot(slot) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller);
+    bool update(CharacterObject* character, CharacterController* controller, float dt);
 };
 }
 
