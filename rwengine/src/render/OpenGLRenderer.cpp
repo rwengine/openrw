@@ -42,7 +42,7 @@ GLuint compileShader(GLenum type, const char* source) {
     }
 
     if (status != GL_TRUE) {
-        exit(1);
+        throw std::runtime_error("Compiling shader failed");
     }
 
     return shader;
@@ -84,7 +84,7 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     }
 
     if (status != GL_TRUE) {
-        exit(1);
+        throw std::runtime_error("Linking shaders failed");
     }
 
     return prog;
