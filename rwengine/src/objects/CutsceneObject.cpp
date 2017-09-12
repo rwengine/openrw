@@ -1,8 +1,8 @@
-#include <engine/Animator.hpp>
 #include <objects/CutsceneObject.hpp>
+#include <engine/Animator.hpp>
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
-                               const glm::quat &rot, Clump *model,
+                               const glm::quat &rot, ClumpPtr model,
                                BaseModelInfo *modelinfo)
     : GameObject(engine, pos, rot, modelinfo)
     , _parent(nullptr)
@@ -14,7 +14,7 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
         setModel(getModelInfo<ClumpModelInfo>()->getModel());
     }
     setClump(ClumpPtr(getModel()->clone()));
-    animator = new Animator(getClump().get());
+    animator = new Animator(getClump());
 }
 
 CutsceneObject::~CutsceneObject() {

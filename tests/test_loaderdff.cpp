@@ -11,9 +11,9 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         LoaderDFF loader;
 
-        Clump* m = loader.loadFromMemory(d);
+        auto m = loader.loadFromMemory(d);
 
-        BOOST_REQUIRE(m != nullptr);
+        BOOST_REQUIRE(m.get() != nullptr);
 
         BOOST_REQUIRE(m->getFrame());
 
@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
         BOOST_REQUIRE(atomic->getGeometry());
         BOOST_REQUIRE(atomic->getFrame());
 
-        delete m;
+        m.reset();
     }
 }
 

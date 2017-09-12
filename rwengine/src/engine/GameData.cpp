@@ -385,7 +385,7 @@ void GameData::getNameAndLod(std::string& name, int& lod) {
     }
 }
 
-Clump* GameData::loadClump(const std::string& name) {
+ClumpPtr GameData::loadClump(const std::string& name) {
     auto file = index.openFile(name);
     if (!file) {
         logger->error("Data", "Failed to load model " + name);

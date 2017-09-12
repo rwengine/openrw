@@ -133,7 +133,7 @@ public:
     /**
      * Loads an archived model and returns it directly
      */
-    Clump* loadClump(const std::string& name);
+    ClumpPtr loadClump(const std::string& name);
 
     /**
      * Loads a DFF and associates its atomics with models.

@@ -103,7 +103,7 @@ void ViewerWidget::paintGL() {
     vc.frustum.fov = viewFov;
     vc.frustum.aspectRatio = width() / (height() * 1.f);
 
-    Clump* model = activeModel;
+    ClumpPtr model = activeModel;
     if (model != _lastModel) {
         _lastModel = model;
         emit modelChanged(_lastModel);
@@ -133,7 +133,7 @@ void ViewerWidget::paintGL() {
 
         ObjectRenderer renderer(world(), vc, 1.f, 0);
         RenderList renders;
-        renderer.renderClump(model, glm::mat4(), nullptr, renders);
+        renderer.renderClump(model.get(), glm::mat4(), nullptr, renders);
         r.getRenderer()->drawBatched(renders);
 
         drawFrameWidget(model->getFrame().get());
@@ -165,7 +165,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
         glLineWidth(1.f);
     }
     dp.textures = {whiteTex};
-    
+
     RW_CHECK(renderer != nullptr, "GameRenderer is null");
     if(renderer != nullptr) {
         renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
@@ -207,7 +207,7 @@ void ViewerWidget::showObject(qint16 item) {
     }
 }
 
-void ViewerWidget::showModel(Clump* model) {
+void ViewerWidget::showModel(ClumpPtr model) {
     if (dummyObject) gworld->destroyObject(dummyObject);
     dummyObject = nullptr;
     activeModel = model;
@@ -269,7 +269,7 @@ void ViewerWidget::keyReleaseEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Shift) moveFast = false;
 }
 
-Clump* ViewerWidget::currentModel() const {
+ClumpPtr ViewerWidget::currentModel() const {
     return activeModel;
 }
 
