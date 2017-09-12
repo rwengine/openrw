@@ -22,6 +22,8 @@ option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
 option(TESTS_NODATA "Build tests for no-data testing")
 
+set(FAILED_CHECK_ACTION "IGNORE" CACHE STRING "What action to perform on a failed RW_CHECK (IGNORE, ABORT or BREAKPOINT) (only in debug mode)")
+
 #
 # Build configuration
 #
@@ -65,6 +67,16 @@ ENDIF()
 IF(${ENABLE_SCRIPT_DEBUG})
 	add_definitions(-DRW_SCRIPT_DEBUG)
 ENDIF()
+
+if(FAILED_CHECK_ACTION STREQUAL "IGNORE")
+    add_definitions(-DRW_FAILED_CHECK_ACTION=0)
+elseif(FAILED_CHECK_ACTION STREQUAL "ABORT")
+    add_definitions(-DRW_FAILED_CHECK_ACTION=1)
+elseif(FAILED_CHECK_ACTION STREQUAL "BREAKPOINT")
+    add_definitions(-DRW_FAILED_CHECK_ACTION=2)
+else()
+    message(FATAL_ERROR "Illegal FAILED_CHECK_ACTION option.")
+endif()
 
 if(${RW_VERBOSE_DEBUG_MESSAGES})
 	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=1)

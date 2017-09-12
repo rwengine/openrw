@@ -64,6 +64,9 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
         throw std::runtime_error("Failed to initialize SDL2!");
 
     window.create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
+
+    SET_RW_ABORT_CB([this]() {window.showCursor();},
+            [this]() {window.hideCursor();});
 }
 
 GameBase::~GameBase() {
