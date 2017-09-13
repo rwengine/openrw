@@ -42,6 +42,7 @@ public:
         ModelFrame* dummy;
         Atomic* normal;
         Atomic* damaged;
+        btCollisionShape *cs;
         btRigidBody* body;
         btHingeConstraint* constraint;
         bool moveToAngle;
