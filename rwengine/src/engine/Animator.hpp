@@ -27,7 +27,7 @@ class Animator {
      * animations
      */
     struct AnimationState {
-        Animation* animation;
+        AnimationPtr animation;
         /// Timestamp of the last frame
         float time;
         /// Speed multiplier
@@ -50,14 +50,14 @@ class Animator {
 public:
     Animator(ClumpPtr model);
 
-    Animation* getAnimation(unsigned int slot) {
+    AnimationPtr getAnimation(unsigned int slot) {
         if (slot < animations.size()) {
             return animations[slot].animation;
         }
         return nullptr;
     }
 
-    void playAnimation(unsigned int slot, Animation* anim, float speed,
+    void playAnimation(unsigned int slot, AnimationPtr anim, float speed,
                        bool repeat) {
         if (slot >= animations.size()) {
             animations.resize(slot + 1);

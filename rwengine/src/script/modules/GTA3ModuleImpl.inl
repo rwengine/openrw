@@ -8115,7 +8115,7 @@ void opcode_02e6(const ScriptArguments& args, const ScriptObject object, const S
 	auto cutscene = args.getObject<CutsceneObject>(0);
 	std::string animName = arg2;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getWorld()->data->animations[animName];
+	auto anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
 		cutscene->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}
@@ -8322,7 +8322,7 @@ void opcode_02f5(const ScriptArguments& args, const ScriptObject object, const S
 	GameObject* head = args.getObject<CutsceneObject>(0);
 	std::string animName = args[1].string;
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-	Animation* anim = args.getWorld()->data->animations[animName];
+	auto anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
 		head->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}

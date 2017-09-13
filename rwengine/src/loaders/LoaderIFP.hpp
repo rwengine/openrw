@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "rw/forward.hpp"
+
 struct AnimationKeyframe {
     glm::quat rotation;
     glm::vec3 position;
@@ -105,7 +107,7 @@ public:
         std::string name;
     };
 
-    std::map<std::string, Animation*> animations;
+    AnimationSet animations;
 
     bool loadFromMemory(char* data);
 };

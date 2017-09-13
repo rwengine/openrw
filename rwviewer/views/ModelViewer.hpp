@@ -51,7 +51,7 @@ public slots:
     void showObject(uint16_t object);
 
     void loadAnimations(const QString& file);
-    void playAnimation(Animation* anim);
+    void playAnimation(AnimationPtr anim);
 };
 
 #endif
