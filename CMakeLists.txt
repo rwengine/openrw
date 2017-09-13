@@ -85,7 +85,6 @@ find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 find_package(GLM REQUIRED)
-find_package(LibSndFile REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
 
