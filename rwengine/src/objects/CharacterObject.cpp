@@ -199,7 +199,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         const auto& root = modelroot->getChildren()[0];
         auto it = movementAnimation->bones.find(root->getName());
         if (it != movementAnimation->bones.end()) {
-            AnimationBone* rootBone = it->second;
+            auto rootBone = it->second;
             float step = dt;
             const float duration =
                 animator->getAnimation(AnimIndexMovement)->duration;
