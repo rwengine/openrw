@@ -98,8 +98,9 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
         collisionConfig.get());
 
     dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
+    _overlappingPairCallback = std::make_unique<btGhostPairCallback>();
     broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(
-        new btGhostPairCallback());
+        _overlappingPairCallback.get());
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
 }
