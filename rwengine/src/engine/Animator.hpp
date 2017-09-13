@@ -34,7 +34,7 @@ class Animator {
         float speed;
         /// Automatically restart
         bool repeat;
-        std::map<AnimationBone*, ModelFrame*> boneInstances;
+        std::map<std::shared_ptr<AnimationBone>, ModelFrame*> boneInstances;
     };
 
     /**
