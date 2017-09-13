@@ -5,8 +5,8 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
-PlayerController::PlayerController(CharacterObject* character)
-    : CharacterController(character)
+PlayerController::PlayerController()
+    : CharacterController()
     , lastRotation(glm::vec3(0.f, 0.f, 0.f))
     , _enabled(true) {
 }

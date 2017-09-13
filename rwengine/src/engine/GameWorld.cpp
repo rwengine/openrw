@@ -331,9 +331,9 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
         data->loadModel(id);
     }
 
-    auto ped = new CharacterObject(this, pos, rot, pt);
+    auto controller = new DefaultAIController();
+    auto ped = new CharacterObject(this, pos, rot, pt, controller);
     ped->setGameObjectID(gid);
-    new DefaultAIController(ped);
     pedestrianPool.insert(ped);
     allObjects.push_back(ped);
     return ped;
@@ -358,10 +358,11 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
         pt->setModel(model);
     }
 
-    auto ped = new CharacterObject(this, pos, rot, pt);
+    auto controller = new PlayerController();
+    auto ped = new CharacterObject(this, pos, rot, pt, controller);
     ped->setGameObjectID(gid);
     ped->setLifetime(GameObject::PlayerLifetime);
-    players.push_back(new PlayerController(ped));
+    players.push_back(controller);
     pedestrianPool.insert(ped);
     allObjects.push_back(ped);
     return ped;

@@ -11,15 +11,14 @@
 
 constexpr float kCloseDoorIdleTime = 2.f;
 
-CharacterController::CharacterController(CharacterObject *character)
-    : character(character)
+CharacterController::CharacterController()
+    : character(nullptr)
     , _currentActivity(nullptr)
     , _nextActivity(nullptr)
     , m_closeDoorTimer(0.f)
     , currentGoal(None)
     , leader(nullptr)
     , targetNode(nullptr) {
-    character->controller = this;
 }
 
 bool CharacterController::updateActivity() {

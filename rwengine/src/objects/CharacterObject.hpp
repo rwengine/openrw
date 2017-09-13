@@ -80,7 +80,8 @@ public:
      * @param ped PEDS_t struct to use.
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                    const glm::quat& rot, BaseModelInfo* modelinfo);
+                    const glm::quat& rot, BaseModelInfo* modelinfo,
+                    CharacterController* controller);
 
     ~CharacterObject();
 
