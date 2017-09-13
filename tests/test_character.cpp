@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(test_create) {
 
         // Check that Idle activities are instantly displaced.
         controller->setNextActivity(
-            new Activities::GoTo(glm::vec3{1000.f, 0.f, 0.f}));
+            std::make_unique<Activities::GoTo>(glm::vec3{1000.f, 0.f, 0.f}));
 
         BOOST_CHECK_EQUAL(controller->getCurrentActivity()->name(), "GoTo");
         BOOST_CHECK_EQUAL(controller->getNextActivity(), nullptr);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         BOOST_REQUIRE(controller != nullptr);
 
         controller->setNextActivity(
-            new Activities::GoTo(glm::vec3{10.f, 10.f, 0.f}));
+            std::make_unique<Activities::GoTo>(glm::vec3{10.f, 10.f, 0.f}));
 
         BOOST_CHECK_EQUAL(controller->getCurrentActivity()->name(), "GoTo");
 
@@ -69,7 +69,8 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         auto controller = character->controller;
         BOOST_REQUIRE(controller != nullptr);
 
-        controller->setNextActivity(new Activities::EnterVehicle(vehicle, 0));
+        controller->setNextActivity(
+            std::make_unique<Activities::EnterVehicle>(vehicle, 0));
 
         for (float t = 0.f; t < 0.5f; t += (1.f / 60.f)) {
             character->tick(1.f / 60.f);
@@ -85,7 +86,8 @@ BOOST_AUTO_TEST_CASE(test_activities) {
 
         BOOST_CHECK_EQUAL(vehicle, character->getCurrentVehicle());
 
-        controller->setNextActivity(new Activities::ExitVehicle());
+        controller->setNextActivity(
+            std::make_unique<Activities::ExitVehicle>());
 
         for (float t = 0.f; t < 9.0f; t += (1.f / 60.f)) {
             character->tick(1.f / 60.f);
@@ -95,7 +97,8 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         BOOST_CHECK_EQUAL(nullptr, character->getCurrentVehicle());
 
         character->setPosition(glm::vec3(5.f, 0.f, 0.f));
-        controller->setNextActivity(new Activities::EnterVehicle(vehicle, 0));
+        controller->setNextActivity(
+            std::make_unique<Activities::EnterVehicle>(vehicle, 0));
 
         for (float t = 0.f; t < 0.5f; t += (1.f / 60.f)) {
             character->tick(1.f / 60.f);

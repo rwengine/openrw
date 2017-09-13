@@ -624,7 +624,8 @@ void CharacterObject::useItem(bool active, bool primary) {
         if (primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
-                controller->setNextActivity(new Activities::UseItem(item));
+                controller->setNextActivity(
+                    std::make_unique<Activities::UseItem>(item));
             } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }

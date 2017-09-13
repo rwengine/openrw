@@ -5365,7 +5365,8 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
 	RW_UNUSED(vehicle);
 	RW_UNUSED(args);
 	character->controller->skipActivity();
-	character->controller->setNextActivity(new Activities::ExitVehicle);
+	character->controller->setNextActivity(
+            std::make_unique<Activities::ExitVehicle>());(new Activities::ExitVehicle);
 }
 
 /**
@@ -5378,7 +5379,9 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
 	RW_UNUSED(args);
 	character->controller->skipActivity();
-	character->controller->setNextActivity(new Activities::EnterVehicle(vehicle,Activities::EnterVehicle::ANY_SEAT));
+	character->controller->setNextActivity(
+            std::make_unique<Activities::EnterVehicle>(
+                vehicle,Activities::EnterVehicle::ANY_SEAT));
 }
 
 /**
@@ -5390,7 +5393,8 @@ void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, c
 */
 void opcode_01d5(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
 	RW_UNUSED(args);
-	character->controller->setNextActivity(new Activities::EnterVehicle(vehicle));
+	character->controller->setNextActivity(
+            std::make_unique<Activities::EnterVehicle>(vehicle));
 }
 
 /**
@@ -6170,10 +6174,12 @@ void opcode_0211(const ScriptArguments& args, const ScriptCharacter character, S
 	if( character->getCurrentVehicle() )
 	{
 		// Since we just cleared the Activities, this will become current immediatley.
-		character->controller->setNextActivity(new Activities::ExitVehicle);
+		character->controller->setNextActivity(
+                    std::make_unique<Activities::ExitVehicle>());
 	}
-	
-	character->controller->setNextActivity(new Activities::GoTo(target));
+
+	character->controller->setNextActivity(
+            std::make_unique<Activities::GoTo>(target));
 }
 
 /**
@@ -6625,7 +6631,8 @@ void opcode_0237(const ScriptArguments& args, const ScriptGang gangID, const Scr
 */
 void opcode_0239(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord) {
 	auto target = script::getGround(args, glm::vec3(coord, -100.f));
-	character->controller->setNextActivity(new Activities::GoTo(target, true));
+	character->controller->setNextActivity(
+            std::make_unique<Activities::GoTo>(target, true));
 }
 
 /**
