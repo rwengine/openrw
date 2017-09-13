@@ -135,8 +135,7 @@ add_library(rwengine
 )
 
 if(MINGW)
-	target_link_libraries(rwengine
-	mman)
+	target_link_libraries(rwengine)
 endif()
 
 target_link_libraries(rwengine

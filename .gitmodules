@@ -1,3 +1,0 @@
-[submodule "external/mman-win32"]
-	path = external/mman-win32
-	url = https://github.com/witwall/mman-win32.git
