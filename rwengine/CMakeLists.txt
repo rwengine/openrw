@@ -19,8 +19,6 @@ set(RWENGINE_SOURCES
 	src/ai/PlayerController.hpp
 	src/ai/TrafficDirector.cpp
 	src/ai/TrafficDirector.hpp
-	src/audio/MADStream.cpp
-	src/audio/MADStream.hpp
 	src/audio/SoundManager.cpp
 	src/audio/SoundManager.hpp
 	src/audio/alCheck.cpp
@@ -143,7 +141,6 @@ endif()
 
 target_link_libraries(rwengine
 	rwlib
-	${MAD_LIBRARY}
 	${LIBSNDFILE_LIBRARY}
 	${FFMPEG_LIBRARIES}
 	${OPENAL_LIBRARY}
@@ -152,7 +149,6 @@ target_link_libraries(rwengine
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
-	${MAD_INCLUDE_DIR}
 	${LIBSNDFILE_INCLUDE_DIR}
 	${FFMPEG_INCLUDE_DIR}
 	${OPENAL_INCLUDE_DIR}

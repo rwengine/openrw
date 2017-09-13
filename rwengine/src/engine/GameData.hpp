@@ -17,7 +17,6 @@ class Logger;
 #include <objects/VehicleInfo.hpp>
 #include <rw/types.hpp>
 
-#include <audio/MADStream.hpp>
 #include <gl/TextureData.hpp>
 #include <platform/FileIndex.hpp>
 

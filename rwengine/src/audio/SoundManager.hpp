@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-class MADStream;
-
 class SoundManager {
 public:
     SoundManager();
