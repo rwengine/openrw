@@ -8,6 +8,12 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 
+// Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+#define av_frame_alloc  avcodec_alloc_frame
+#define av_frame_free   avcodec_free_frame
+#endif
+
 #include <array>
 #include <iostream>
 #include <fstream>
