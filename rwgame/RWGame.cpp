@@ -456,6 +456,8 @@ int RWGame::run() {
         StateManager::get().updateStack();
     }
 
+    window.close();
+
     StateManager::get().clear();
 
     return 0;
