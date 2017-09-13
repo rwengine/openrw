@@ -142,6 +142,7 @@ PickupObject::~PickupObject() {
     if (m_ghost) {
         setEnabled(false);
         engine->destroyEffect(m_corona);
+        delete m_corona;
         delete m_ghost;
         delete m_shape;
     }
