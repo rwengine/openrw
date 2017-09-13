@@ -247,30 +247,15 @@ bool SoundManager::playBackground(const std::string& fileName) {
 
 bool SoundManager::loadMusic(const std::string& name,
                              const std::string& fileName) {
-    MADStream* music = nullptr;
-    auto music_iter = musics.find(name);
-
-    if (music_iter != musics.end()) {
-        music = &music_iter->second;
-    } else {
-        auto emplaced = musics.emplace(std::piecewise_construct,
-                                       std::forward_as_tuple(name),
-                                       std::forward_as_tuple());
-        music = &emplaced.first->second;
-    }
-
-    return music->openFromFile(fileName);
+    return loadSound(name, fileName);
 }
+
 void SoundManager::playMusic(const std::string& name) {
-    auto music = musics.find(name);
-    if (music != musics.end()) {
-        music->second.play();
-    }
+    playSound(name);
 }
 void SoundManager::stopMusic(const std::string& name) {
-    auto music = musics.find(name);
-    if (music != musics.end()) {
-        music->second.stop();
+    if (sounds.find(name) != sounds.end()) {
+        alCheck(alSourceStop(sounds[name].buffer.source));
     }
 }
 
