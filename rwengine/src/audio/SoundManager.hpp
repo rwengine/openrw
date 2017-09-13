@@ -68,6 +68,5 @@ private:
     ALCdevice* alDevice = nullptr;
 
     std::map<std::string, Sound> sounds;
-    std::map<std::string, MADStream> musics;
     std::string backgroundNoise;
 };
