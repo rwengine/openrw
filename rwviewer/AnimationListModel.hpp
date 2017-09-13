@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 #include <loaders/LoaderIFP.hpp>
 
-typedef std::vector<std::pair<std::string, Animation*>> AnimationList;
+typedef std::vector<std::pair<std::string, AnimationPtr>> AnimationList;
 
 class AnimationListModel : public QAbstractListModel {
     Q_OBJECT

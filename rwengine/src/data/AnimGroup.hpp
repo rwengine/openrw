@@ -2,7 +2,9 @@
 #define RWENGINE_DATA_ANIMGROUP_HPP
 #include <memory>
 #include <unordered_map>
-#include "rw/types.hpp"
+
+#include <rw/forward.hpp>
+#include <rw/types.hpp>
 
 struct Animation;
 
@@ -195,7 +197,7 @@ struct AnimCycleInfo {
     /// Flags
     uint32_t flags;
     /// The actual animation
-    Animation* anim = nullptr;
+    AnimationPtr anim = nullptr;
 
     AnimCycleInfo(const std::string& name = "", uint32_t flags = 0)
         : name(name), flags(flags) {
@@ -208,7 +210,7 @@ struct AnimGroup {
     /* Animations */
     AnimCycleInfo animations_[static_cast<uint32_t>(AnimCycle::_CycleCount)];
 
-    Animation* animation(AnimCycle cycle) const {
+    AnimationPtr animation(AnimCycle cycle) const {
         return animations_[static_cast<uint32_t>(cycle)].anim;
     }
 

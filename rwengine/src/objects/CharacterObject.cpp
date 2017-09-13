@@ -123,8 +123,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         return glm::vec3();
     }
 
-    Animation* movementAnimation = animations->animation(AnimCycle::Idle);
-    Animation* currentAnim = animator->getAnimation(AnimIndexMovement);
+    AnimationPtr movementAnimation = animations->animation(AnimCycle::Idle);
+    AnimationPtr currentAnim = animator->getAnimation(AnimIndexMovement);
     bool isActionHappening =
         (animator->getAnimation(AnimIndexAction) != nullptr);
     float animationSpeed = 1.f;
@@ -174,7 +174,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
                     movementAnimation = animations->animation(AnimCycle::Walk);
                 }
             } else {
-                // Keep walkin
+                // Keep walking
                 movementAnimation = animations->animation(AnimCycle::Walk);
             }
         }
@@ -524,7 +524,7 @@ void CharacterObject::resetToAINode() {
     }
 }
 
-void CharacterObject::playActivityAnimation(Animation* animation, bool repeat,
+void CharacterObject::playActivityAnimation(AnimationPtr animation, bool repeat,
                                             bool blocked) {
     RW_CHECK(animator != nullptr, "No Animator");
     animator->playAnimation(AnimIndexAction, animation, 1.f, repeat);
@@ -545,7 +545,7 @@ void CharacterObject::playCycle(AnimCycle cycle) {
                             flags & AnimCycleInfo::Repeat);
 }
 
-void CharacterObject::playCycleAnimOverride(AnimCycle cycle, Animation* anim) {
+void CharacterObject::playCycleAnimOverride(AnimCycle cycle, AnimationPtr anim) {
     auto flags = animations->flags(cycle);
 
     cycle_ = cycle;

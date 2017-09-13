@@ -66,7 +66,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
         /*NAME* n =*/read<NAME>(data, dataI);
         std::string animname = readString(data, dataI);
 
-        Animation* animation = new Animation;
+        auto animation = std::make_shared<Animation>();
         animation->duration = 0.f;
         animation->name = animname;
 
