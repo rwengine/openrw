@@ -1,7 +1,5 @@
-#include <audio/MADStream.hpp>
 #include <audio/SoundManager.hpp>
 
-#include "audio/MADStream.hpp"
 #include "audio/alCheck.hpp"
 
 extern "C" {
