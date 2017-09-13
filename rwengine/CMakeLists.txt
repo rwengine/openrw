@@ -140,7 +140,6 @@ endif()
 
 target_link_libraries(rwengine
 	rwlib
-	${LIBSNDFILE_LIBRARY}
 	${FFMPEG_LIBRARIES}
 	${OPENAL_LIBRARY}
 	${OPENRW_PLATFORM_LIBS}
@@ -148,7 +147,6 @@ target_link_libraries(rwengine
 
 include_directories(SYSTEM
 	${BULLET_INCLUDE_DIR}
-	${LIBSNDFILE_INCLUDE_DIR}
 	${FFMPEG_INCLUDE_DIR}
 	${OPENAL_INCLUDE_DIR}
 	)
