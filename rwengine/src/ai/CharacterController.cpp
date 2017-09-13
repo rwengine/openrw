@@ -29,9 +29,8 @@ bool CharacterController::updateActivity() {
     return false;
 }
 
-void CharacterController::setActivity(CharacterController::Activity *activity) {
-    if (_currentActivity) delete _currentActivity;
-    _currentActivity = activity;
+void CharacterController::setActivity(std::unique_ptr<Activity> activity) {
+    _currentActivity.swap(activity);
 }
 
 void CharacterController::skipActivity() {
@@ -43,14 +42,12 @@ void CharacterController::skipActivity() {
         setActivity(nullptr);
 }
 
-void CharacterController::setNextActivity(
-    CharacterController::Activity *activity) {
+void CharacterController::setNextActivity(std::unique_ptr<Activity> activity) {
     if (_currentActivity == nullptr) {
-        setActivity(activity);
+        setActivity(std::move(activity));
         _nextActivity = nullptr;
     } else {
-        if (_nextActivity) delete _nextActivity;
-        _nextActivity = activity;
+        _nextActivity.swap(activity);
     }
 }
 
@@ -97,13 +94,9 @@ void CharacterController::update(float dt) {
 
     if (updateActivity()) {
         character->activityFinished();
-        if (_currentActivity) {
-            delete _currentActivity;
-            _currentActivity = nullptr;
-        }
+        _currentActivity = nullptr;
         if (_nextActivity) {
-            setActivity(_nextActivity);
-            _nextActivity = nullptr;
+            setActivity(std::move(_nextActivity));
         }
     }
 }
@@ -282,7 +275,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
             // out.
             character->playCycle(cycle_pullout);
             currentOccupant->controller->setNextActivity(
-                new Activities::ExitVehicle(true));
+                std::make_unique<Activities::ExitVehicle>(true));
         } else {
             character->playCycle(cycle_enter);
             character->enterVehicle(vehicle, seat);

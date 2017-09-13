@@ -33,7 +33,7 @@ void PlayerController::updateMovementDirection(const glm::vec3& dir,
 
 void PlayerController::exitVehicle() {
     if (character->getCurrentVehicle()) {
-        setNextActivity(new Activities::ExitVehicle());
+        setNextActivity(std::make_unique<Activities::ExitVehicle>());
     }
 }
 
@@ -54,7 +54,7 @@ void PlayerController::enterNearestVehicle() {
         }
 
         if (nearest) {
-            setNextActivity(new Activities::EnterVehicle(nearest, 0));
+            setNextActivity(std::make_unique<Activities::EnterVehicle>(nearest, 0));
         }
     }
 }
@@ -69,6 +69,6 @@ glm::vec3 PlayerController::getTargetPosition() {
 
 void PlayerController::jump() {
     if (!character->isInWater()) {
-        setNextActivity(new Activities::Jump());
+        setNextActivity(std::make_unique<Activities::Jump>());
     }
 }
