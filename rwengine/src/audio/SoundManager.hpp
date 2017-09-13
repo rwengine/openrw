@@ -2,7 +2,6 @@
 
 #include "al.h"
 #include "alc.h"
-#include <sndfile.h>
 
 #include <map>
 #include <string>
@@ -38,9 +37,10 @@ private:
         void loadFromFile(const std::string& filename);
 
     private:
-        SF_INFO fileInfo;
-        SNDFILE* file;
-        std::vector<uint16_t> data;
+        std::vector<int16_t> data;
+
+        size_t channels;
+        size_t sampleRate;
     };
 
     class SoundBuffer {
@@ -62,6 +62,7 @@ private:
     };
 
     bool initializeOpenAL();
+    bool initializeAVCodec();
 
     ALCcontext* alContext = nullptr;
     ALCdevice* alDevice = nullptr;

@@ -4,11 +4,19 @@
 #include "audio/MADStream.hpp"
 #include "audio/alCheck.hpp"
 
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+}
+
 #include <array>
 #include <iostream>
+#include <fstream>
 
 SoundManager::SoundManager() {
     initializeOpenAL();
+    initializeAVCodec();
 }
 
 SoundManager::~SoundManager() {
@@ -42,23 +50,120 @@ bool SoundManager::initializeOpenAL() {
     return true;
 }
 
+bool SoundManager::initializeAVCodec() {
+    av_register_all();
+
+    return true;
+}
+
 void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
-    fileInfo.format = 0;
-    file = sf_open(filename.c_str(), SFM_READ, &fileInfo);
-
-    if (file) {
-        size_t numRead = 0;
-        std::array<int16_t, 4096> readBuffer;
-
-        while ((numRead = sf_read_short(file, readBuffer.data(),
-                                        readBuffer.size())) != 0) {
-            data.insert(data.end(), readBuffer.begin(),
-                        readBuffer.begin() + numRead);
-        }
-    } else {
-        std::cerr << "Error opening sound file \"" << filename
-                  << "\": " << sf_strerror(file) << std::endl;
+    // Allocate audio frame
+    AVFrame* frame = av_frame_alloc();
+    if (!frame) {
+        std::cerr << "Error allocating the audio frame" << std::endl;
+        return;
     }
+
+    // Allocate formatting context
+    AVFormatContext* formatContext = nullptr;
+    if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
+        av_free(frame);
+        std::cerr << "Error opening audio file (" << filename << ")" << std::endl;
+        return;
+    }
+
+    if (avformat_find_stream_info(formatContext, nullptr) < 0) {
+        av_free(frame);
+        avformat_close_input(&formatContext);
+        std::cerr << "Error finding audio stream info" << std::endl;
+        return;
+    }
+
+    // Find the audio stream
+    AVCodec* codec = nullptr;
+    int streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
+    if (streamIndex < 0) {
+        av_free(frame);
+        avformat_close_input(&formatContext);
+        std::cerr << "Could not find any audio stream in the file " << filename << std::endl;
+        return;
+    }
+
+    AVStream* audioStream = formatContext->streams[streamIndex];
+    AVCodecContext* codecContext = audioStream->codec;
+    codecContext->codec = codec;
+
+    // Open the codec
+    if (avcodec_open2(codecContext, codecContext->codec, NULL) != 0) {
+        av_free(frame);
+        avformat_close_input(&formatContext);
+        std::cerr << "Couldn't open the audio codec context" << std::endl;
+        return;
+    }
+
+    // Expose audio metadata
+    channels = codecContext->channels;
+    sampleRate = codecContext->sample_rate;
+
+    // OpenAL only supports mono or stereo, so error on more than 2 channels
+    if(channels > 2) {
+        std::cerr << "Audio has more than two channels" << std::endl;
+        av_free(frame);
+        avcodec_close(codecContext);
+        avformat_close_input(&formatContext);
+        return;
+    }
+
+    // Right now we only support signed 16-bit audio
+    if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
+        std::cerr << "Audio data isn't in a planar signed 16-bit format" << std::endl;
+        av_free(frame);
+        avcodec_close(codecContext);
+        avformat_close_input(&formatContext);
+        return;
+    }
+
+    // Start reading audio packets
+    AVPacket readingPacket;
+    av_init_packet(&readingPacket);
+
+    while (av_read_frame(formatContext, &readingPacket) == 0) {
+        if (readingPacket.stream_index == audioStream->index) {
+            AVPacket decodingPacket = readingPacket;
+
+            while (decodingPacket.size > 0) {
+                // Decode audio packet
+                int gotFrame = 0;
+                int len = avcodec_decode_audio4(codecContext, frame, &gotFrame, &decodingPacket);
+
+                if (len >= 0 && gotFrame) {
+                    // Write samples to audio buffer
+
+                    for(size_t i = 0; i < static_cast<size_t>(frame->nb_samples); i++) {
+                        // Interleave left/right channels
+                        for(size_t channel = 0; channel < channels; channel++) {
+                            int16_t sample = reinterpret_cast<int16_t *>(frame->data[channel])[i];
+                            data.push_back(sample);
+                        }
+                    }
+
+                    decodingPacket.size -= len;
+                    decodingPacket.data += len;
+                }
+                else {
+                    decodingPacket.size = 0;
+                    decodingPacket.data = nullptr;
+                }
+            }
+        }
+
+        // TODO: Do we need to free the packet?
+    }
+
+    // Cleanup
+    av_free(frame);
+    avcodec_close(codecContext);
+    avformat_close_input(&formatContext);
 }
 
 SoundManager::SoundBuffer::SoundBuffer() {
@@ -74,10 +179,10 @@ SoundManager::SoundBuffer::SoundBuffer() {
 
 bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource) {
     alCheck(alBufferData(
-        buffer, soundSource.fileInfo.channels == 1 ? AL_FORMAT_MONO16
-                                                   : AL_FORMAT_STEREO16,
-        &soundSource.data.front(), soundSource.data.size() * sizeof(uint16_t),
-        soundSource.fileInfo.samplerate));
+        buffer, soundSource.channels == 1 ? AL_FORMAT_MONO16
+                                          : AL_FORMAT_STEREO16,
+        &soundSource.data.front(), soundSource.data.size() * sizeof(int16_t),
+        soundSource.sampleRate));
     alCheck(alSourcei(source, AL_BUFFER, buffer));
 
     return true;
