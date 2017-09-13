@@ -8,6 +8,7 @@ Geometry::Geometry() : flags(0) {
 }
 
 Geometry::~Geometry() {
+    glDeleteBuffers(1, &EBO);
 }
 
 ModelFrame::ModelFrame(unsigned int index, glm::mat3 dR, glm::vec3 dT)
