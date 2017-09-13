@@ -75,7 +75,7 @@ protected:
     AIGraphNode* targetNode;
 
 public:
-    CharacterController(CharacterObject* character);
+    CharacterController();
 
     virtual ~CharacterController() {
     }
@@ -139,6 +139,8 @@ public:
     CharacterObject* getTargetCharacter() const {
         return leader;
     }
+
+    friend class CharacterObject;
 };
 
 #define DECL_ACTIVITY(activity_name)                     \

@@ -17,7 +17,8 @@
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                                 const glm::quat& rot, BaseModelInfo* modelinfo)
+                                 const glm::quat& rot, BaseModelInfo* modelinfo,
+                                 CharacterController* controller)
     : GameObject(engine, pos, rot, modelinfo)
     , currentState({})
     , currentVehicle(nullptr)
@@ -31,7 +32,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)
-    , controller(nullptr) {
+    , controller(controller) {
 
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));
@@ -43,6 +44,8 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     }
 
     animations = engine->data->getAnimGroup(info->animgroup_);
+
+    controller->character = this;
 }
 
 CharacterObject::~CharacterObject() {
@@ -50,6 +53,7 @@ CharacterObject::~CharacterObject() {
     if (currentVehicle) {
         currentVehicle->setOccupant(getCurrentSeat(), nullptr);
     }
+    delete controller;
 }
 
 void CharacterObject::createActor(const glm::vec2& size) {

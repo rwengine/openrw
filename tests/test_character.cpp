@@ -12,10 +12,10 @@ BOOST_AUTO_TEST_CASE(test_create) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
-
         BOOST_REQUIRE(character != nullptr);
 
-        auto controller = new DefaultAIController(character);
+        auto controller = character->controller;
+        BOOST_REQUIRE(controller != nullptr);
 
         // Check the initial activity is Idle.
         BOOST_CHECK_EQUAL(controller->getCurrentActivity(), nullptr);
@@ -36,10 +36,10 @@ BOOST_AUTO_TEST_CASE(test_activities) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {0.f, 0.f, 225.6f});
-
         BOOST_REQUIRE(character != nullptr);
 
-        auto controller = new DefaultAIController(character);
+        auto controller = character->controller;
+        BOOST_REQUIRE(controller != nullptr);
 
         controller->setNextActivity(
             new Activities::GoTo(glm::vec3{10.f, 10.f, 0.f}));
@@ -56,7 +56,6 @@ BOOST_AUTO_TEST_CASE(test_activities) {
             glm::distance(character->getPosition(), {10.f, 10.f, 0.f}), 0.1f);
 
         Global::get().e->destroyObject(character);
-        delete controller;
     }
     {
         VehicleObject* vehicle = Global::get().e->createVehicle(
@@ -65,10 +64,10 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         BOOST_REQUIRE(vehicle->getModel() != nullptr);
 
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
-
         BOOST_REQUIRE(character != nullptr);
 
-        auto controller = new DefaultAIController(character);
+        auto controller = character->controller;
+        BOOST_REQUIRE(controller != nullptr);
 
         controller->setNextActivity(new Activities::EnterVehicle(vehicle, 0));
 
@@ -123,7 +122,6 @@ BOOST_AUTO_TEST_CASE(test_death) {
         auto character =
             Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
         BOOST_REQUIRE(character != nullptr);
-        auto controller = new DefaultAIController(character);
 
         BOOST_CHECK_EQUAL(character->getCurrentState().health, 100.f);
         BOOST_CHECK(character->isAlive());
@@ -144,7 +142,6 @@ BOOST_AUTO_TEST_CASE(test_death) {
             character->animations->animation(AnimCycle::KnockOutShotFront0));
 
         Global::get().e->destroyObject(character);
-        delete controller;
     }
 }
 
