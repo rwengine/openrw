@@ -57,6 +57,12 @@ bool SoundManager::initializeOpenAL() {
 bool SoundManager::initializeAVCodec() {
     av_register_all();
 
+#if RW_DEBUG && RW_VERBOSE_DEBUG_MESSAGES
+        av_log_set_level(AV_LOG_WARNING);
+#else
+        av_log_set_level(AV_LOG_ERROR);
+#endif
+
     return true;
 }
 
