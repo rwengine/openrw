@@ -77,13 +77,13 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     // Allocate formatting context
     AVFormatContext* formatContext = nullptr;
     if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
-        av_free(frame);
+        av_frame_free(&frame);
         std::cerr << "Error opening audio file (" << filename << ")" << std::endl;
         return;
     }
 
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        av_free(frame);
+        av_frame_free(&frame);
         avformat_close_input(&formatContext);
         std::cerr << "Error finding audio stream info" << std::endl;
         return;
@@ -93,7 +93,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     AVCodec* codec = nullptr;
     int streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
     if (streamIndex < 0) {
-        av_free(frame);
+        av_frame_free(&frame);
         avformat_close_input(&formatContext);
         std::cerr << "Could not find any audio stream in the file " << filename << std::endl;
         return;
@@ -105,7 +105,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
 
     // Open the codec
     if (avcodec_open2(codecContext, codecContext->codec, NULL) != 0) {
-        av_free(frame);
+        av_frame_free(&frame);
         avformat_close_input(&formatContext);
         std::cerr << "Couldn't open the audio codec context" << std::endl;
         return;
@@ -118,7 +118,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     // OpenAL only supports mono or stereo, so error on more than 2 channels
     if(channels > 2) {
         std::cerr << "Audio has more than two channels" << std::endl;
-        av_free(frame);
+        av_frame_free(&frame);
         avcodec_close(codecContext);
         avformat_close_input(&formatContext);
         return;
@@ -127,7 +127,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     // Right now we only support signed 16-bit audio
     if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
         std::cerr << "Audio data isn't in a planar signed 16-bit format" << std::endl;
-        av_free(frame);
+        av_frame_free(&frame);
         avcodec_close(codecContext);
         avformat_close_input(&formatContext);
         return;
@@ -166,12 +166,10 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
                 }
             }
         }
-
-        // TODO: Do we need to free the packet?
     }
 
     // Cleanup
-    av_free(frame);
+    av_frame_free(&frame);
     avcodec_close(codecContext);
     avformat_close_input(&formatContext);
 }
