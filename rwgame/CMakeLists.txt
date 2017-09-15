@@ -60,8 +60,7 @@ target_link_libraries(rwgame
 	${SDL2_LIBRARY}
 	)
 if(MINGW)
-	target_link_libraries(rwgame
-	mman)
+	target_link_libraries(rwgame)
 endif()
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
