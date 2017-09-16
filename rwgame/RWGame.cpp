@@ -357,9 +357,7 @@ int RWGame::run() {
 
     // Loop until we run out of states.
     bool running = true;
-    while (!StateManager::get().states.empty() && running) {
-        State* state = StateManager::get().states.back().get();
-
+    while (StateManager::currentState() && running) {
         RW_PROFILE_FRAME_BOUNDARY();
 
         RW_PROFILE_BEGIN("Input");
@@ -395,7 +393,9 @@ int RWGame::run() {
             GameInput::updateGameInputState(&getState()->input[0], event);
 
             RW_PROFILE_BEGIN("State");
-            state->handleEvent(event);
+            if (StateManager::currentState()) {
+                StateManager::currentState()->handleEvent(event);
+            }
             RW_PROFILE_END()
         }
         RW_PROFILE_END();
@@ -408,7 +408,7 @@ int RWGame::run() {
 
         RW_PROFILE_BEGIN("Update");
         if (accum >= GAME_TIMESTEP) {
-            if (StateManager::get().states.size() == 0) {
+            if (!StateManager::currentState()) {
                 break;
             }
 
@@ -432,7 +432,7 @@ int RWGame::run() {
         RW_PROFILE_END();
 
         float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
-        if (!state->shouldWorldUpdate()) {
+        if (!StateManager::currentState()->shouldWorldUpdate()) {
             alpha = 1.f;
         }
 
@@ -442,7 +442,7 @@ int RWGame::run() {
         RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("state");
-        if (StateManager::get().states.size() > 0) {
+        if (StateManager::currentState()) {
             StateManager::get().draw(&renderer);
         }
         RW_PROFILE_END();
