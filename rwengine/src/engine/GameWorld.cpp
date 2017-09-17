@@ -46,15 +46,17 @@ public:
         GameObject* a = static_cast<GameObject*>(obA->getUserPointer());
         GameObject* b = static_cast<GameObject*>(obB->getUserPointer());
 
-        bool valA = a && a->type() == GameObject::Instance;
-        bool valB = b && b->type() == GameObject::Instance;
+        bool aIsInstance = a && a->type() == GameObject::Instance;
+        bool bIsInstance = b && b->type() == GameObject::Instance;
 
-        if (!(valA && valB) && (valB || valA)) {
+        bool exactly_one_gameobject_is_instance = aIsInstance != bIsInstance;
+
+        if (exactly_one_gameobject_is_instance) {
             // Figure out which is the dynamic instance.
             InstanceObject* dynInst = nullptr;
             const btRigidBody *instBody = nullptr, *otherBody = nullptr;
 
-            if (valA) {
+            if (aIsInstance) {
                 dynInst = static_cast<InstanceObject*>(a);
                 instBody = static_cast<const btRigidBody*>(obA);
                 otherBody = static_cast<const btRigidBody*>(obB);
@@ -619,17 +621,19 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
     GameObject* a = static_cast<GameObject*>(obA->getUserPointer());
     GameObject* b = static_cast<GameObject*>(obB->getUserPointer());
 
-    bool valA = a && a->type() == GameObject::Instance;
-    bool valB = b && b->type() == GameObject::Instance;
+    bool aIsInstance = a && a->type() == GameObject::Instance;
+    bool bIsInstance = b && b->type() == GameObject::Instance;
 
-    if (!(valA && valB) && (valB || valA)) {
+    bool exactly_one_gameobject_is_instance = aIsInstance != bIsInstance;
+
+    if (exactly_one_gameobject_is_instance) {
         // Figure out which is the dynamic instance.
         InstanceObject* dynInst = nullptr;
         const btRigidBody *instBody = nullptr, *otherBody = nullptr;
 
         btVector3 src, dmg;
 
-        if (valA) {
+        if (aIsInstance) {
             dynInst = static_cast<InstanceObject*>(a);
             instBody = static_cast<const btRigidBody*>(obA);
             otherBody = static_cast<const btRigidBody*>(obB);
