@@ -49,13 +49,8 @@ void Animator::tick(float dt) {
             auto kf = b.first->getInterpolatedKeyframe(animTime);
 
             BoneTransform xform;
-            if (b.first->type == AnimationBone::R00) {
-                xform.rotation = kf.rotation;
-            } else if (b.first->type == AnimationBone::RT0) {
-                xform.rotation = kf.rotation;
-                xform.translation = kf.position;
-            } else {
-                xform.rotation = kf.rotation;
+            xform.rotation = kf.rotation;
+            if (b.first->type != AnimationBone::R00) {
                 xform.translation = kf.position;
             }
 
