@@ -37,7 +37,7 @@ void State::handleEvent(const SDL_Event& e) {
     }
 }
 
-const ViewCamera& State::getCamera(float alpha) {
+const ViewCamera& State::getCamera(float) {
     return defaultView;
 }
 

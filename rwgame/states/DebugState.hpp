@@ -35,7 +35,7 @@ public:
     void spawnFollower(unsigned int id);
     void giveItem(int slot);
 
-    const ViewCamera& getCamera(float alpha);
+    const ViewCamera& getCamera(float) override;
 };
 
 #endif  // DEBUGSTATE_HPP

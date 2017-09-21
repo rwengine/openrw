@@ -12,9 +12,6 @@
 #warning Unable to find BT_BULLET_VERSION
 #endif
 
-// TODO: make this not hardcoded
-static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
-
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,

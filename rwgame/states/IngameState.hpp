@@ -50,14 +50,14 @@ public:
     virtual void exit() override;
 
     virtual void tick(float dt) override;
-    virtual void draw(GameRenderer* r);
+    virtual void draw(GameRenderer* r) override;
 
     virtual void handleEvent(const SDL_Event& event) override;
     virtual void handlePlayerInput(const SDL_Event& event);
 
     virtual bool shouldWorldUpdate() override;
 
-    const ViewCamera& getCamera(float alpha);
+    const ViewCamera& getCamera(float alpha) override;
 private:
     GameObject* getCameraTarget() const;
     float getViewDistance() const;
