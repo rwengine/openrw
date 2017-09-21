@@ -30,7 +30,7 @@ public:
 
     virtual void handleEvent(const SDL_Event& event) override;
 
-    const ViewCamera& getCamera();
+    const ViewCamera& getCamera(float) override;
 };
 
 #endif

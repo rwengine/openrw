@@ -373,6 +373,6 @@ void DebugState::giveItem(int slot) {
     }
 }
 
-const ViewCamera& DebugState::getCamera(float alpha) {
+const ViewCamera& DebugState::getCamera(float) {
     return _debugCam;
 }

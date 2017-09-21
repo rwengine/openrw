@@ -17,7 +17,6 @@
 #endif
 
 constexpr float kDrawDistanceFactor = 1.5f;
-constexpr float kWorldDrawDistanceFactor = kDrawDistanceFactor;
 constexpr float kVehicleDrawDistanceFactor = kDrawDistanceFactor;
 #if 0  // There's no distance based culling for these types of objects yet
 constexpr float kPedestrianDrawDistanceFactor = kDrawDistanceFactor;
