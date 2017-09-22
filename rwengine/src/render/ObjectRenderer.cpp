@@ -32,7 +32,7 @@ RenderKey createKey(bool transparent, float normalizedDepth,
            uint32_t(0x7FFFFF *
                     (transparent ? 1.f - normalizedDepth : normalizedDepth))
                << 8 |
-           uint8_t(0xFF & (textures.size() > 0 ? textures[0] : 0)) << 0;
+           uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)) << 0;
 }
 
 void ObjectRenderer::renderGeometry(Geometry* geom,
@@ -58,7 +58,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         if (geom->materials.size() > subgeom.material) {
             Geometry::Material& mat = geom->materials[subgeom.material];
 
-            if (mat.textures.size() > 0) {
+            if (!mat.textures.empty()) {
                 auto tex = mat.textures[0].texture;
                 if (tex) {
                     if (tex->isTransparent()) {
@@ -73,7 +73,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
                 dp.colour = mat.colour;
 
                 if (object && object->type() == GameObject::Vehicle) {
-                    auto vehicle = static_cast<VehicleObject*>(object);
+                    auto vehicle = dynamic_cast<VehicleObject*>(object);
                     if (dp.colour.r == 60 && dp.colour.g == 255 &&
                         dp.colour.b == 0) {
                         dp.colour = glm::u8vec4(vehicle->colourPrimary, 255);
@@ -349,24 +349,24 @@ void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {
     // Right now specialized on each object type
     switch (object->type()) {
         case GameObject::Instance:
-            renderInstance(static_cast<InstanceObject*>(object), outList);
+            renderInstance(dynamic_cast<InstanceObject*>(object), outList);
             break;
         case GameObject::Character:
-            renderCharacter(static_cast<CharacterObject*>(object), outList);
+            renderCharacter(dynamic_cast<CharacterObject*>(object), outList);
             break;
             ;
         case GameObject::Vehicle:
-            renderVehicle(static_cast<VehicleObject*>(object), outList);
+            renderVehicle(dynamic_cast<VehicleObject*>(object), outList);
             break;
             ;
         case GameObject::Pickup:
-            renderPickup(static_cast<PickupObject*>(object), outList);
+            renderPickup(dynamic_cast<PickupObject*>(object), outList);
             break;
         case GameObject::Projectile:
-            renderProjectile(static_cast<ProjectileObject*>(object), outList);
+            renderProjectile(dynamic_cast<ProjectileObject*>(object), outList);
             break;
         case GameObject::Cutscene:
-            renderCutsceneObject(static_cast<CutsceneObject*>(object), outList);
+            renderCutsceneObject(dynamic_cast<CutsceneObject*>(object), outList);
             break;
         default:
             break;

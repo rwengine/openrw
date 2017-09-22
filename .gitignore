@@ -1,5 +1,7 @@
 build/
 documentation/
+cmake-build-debug/
+.idea/
 *.kdev4
 *~
 *swp
