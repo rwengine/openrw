@@ -7,7 +7,7 @@
 
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, NULL);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
 
     GLint status;
@@ -21,7 +21,7 @@ GLuint compileShader(GLenum type, const char* source) {
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
         GLchar* buffer = new GLchar[len];
-        glGetShaderInfoLog(shader, len, NULL, buffer);
+        glGetShaderInfoLog(shader, len, nullptr, buffer);
 
         GLint sourceLen;
         glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
@@ -62,7 +62,7 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
         GLchar* buffer = new GLchar[len];
-        glGetProgramInfoLog(prog, len, NULL, buffer);
+        glGetProgramInfoLog(prog, len, nullptr, buffer);
 
         std::cerr << "[OGL] Program InfoLog(" << prog << "):\n"
                   << buffer << std::endl;
@@ -200,7 +200,7 @@ OpenGLRenderer::OpenGLRenderer()
     std::cout << "Max batch size: " << maxObjectEntries << std::endl;
 
     glBindBuffer(GL_UNIFORM_BUFFER, UBOObject);
-    glBufferData(GL_UNIFORM_BUFFER, entryAlignment * maxObjectEntries, NULL,
+    glBufferData(GL_UNIFORM_BUFFER, entryAlignment * maxObjectEntries, nullptr,
                  GL_STREAM_DRAW);
 
     glGenQueries(1, &debugQuery);
@@ -240,7 +240,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::mat4& m) {
     useProgram(p);
 
-    glUniformMatrix4fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniformMatrix4fv(currentProgram->getUniformLocation(name), 1,
                        GL_FALSE, glm::value_ptr(m));
 }
 
@@ -248,7 +248,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec4& m) {
     useProgram(p);
 
-    glUniform4fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform4fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -256,7 +256,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec3& m) {
     useProgram(p);
 
-    glUniform3fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform3fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -264,7 +264,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec2& m) {
     useProgram(p);
 
-    glUniform2fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform2fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -272,7 +272,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, float f) {
     useProgram(p);
 
-    glUniform1fv(currentProgram->getUniformLocation(name.c_str()), 1, &f);
+    glUniform1fv(currentProgram->getUniformLocation(name), 1, &f);
 }
 
 void OpenGLRenderer::clear(const glm::vec4& colour, bool clearColour,
