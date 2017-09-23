@@ -154,14 +154,17 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         // Handle any markup changes.
         if (c == '~' && text.length() > i + 1) {
             switch (text[i + 1]) {
+                case 'b':  // Blue
+                    text.erase(text.begin() + i, text.begin() + i + 3);
+                    colour = glm::vec3(glm::u8vec3(128, 167, 243)) * (1 / 255.f);
+                    break;
                 case 'g':  // Green
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(90, 157, 102)) * (1 / 255.f);
+                    colour = glm::vec3(glm::u8vec3(95, 160, 106)) * (1 / 255.f);
                     break;
                 case 'h':  // White
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour =
-                        glm::vec3(1.f);  /// @todo FIXME! Use proper colour!
+                    colour = glm::vec3(glm::u8vec3(225, 225, 225)) * (1 / 255.f);
                     break;
                 case 'k': {  // Key
                     text.erase(text.begin() + i, text.begin() + i + 3);
@@ -176,23 +179,23 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                 }
                 case 'l':  // Black
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour =
-                        glm::vec3(0.f);  /// @todo FIXME! Use proper colour!
+                    colour = glm::vec3(0.f);
+                    break;
+                case 'p':  // Purple
+                    text.erase(text.begin() + i, text.begin() + i + 3);
+                    colour = glm::vec3(glm::u8vec3(168, 110, 252)) * (1 / 255.f);
                     break;
                 case 'r':  // Red
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(
-                        1.f, 0.0f, 0.0f);  /// @todo FIXME! Use proper colour!
+                    colour = glm::vec3(glm::u8vec3(113, 43, 73)) * (1 / 255.f);
                     break;
                 case 'w':  // Gray
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour =
-                        glm::vec3(0.5f);  /// @todo FIXME! Use proper colour!
+                    colour = glm::vec3(glm::u8vec3(175, 175, 175)) * (1 / 255.f);
                     break;
                 case 'y':  // Yellow
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(
-                        1.0f, 1.0f, 0.0f);  /// @todo FIXME! Use proper colour!
+                    colour = glm::vec3(glm::u8vec3(210, 196, 106)) * (1 / 255.f);
                     break;
             }
 
