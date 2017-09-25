@@ -1712,8 +1712,7 @@ void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg
 	@arg arg1G 
 */
 void opcode_0094(const ScriptArguments& args, ScriptInt& arg1G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0094);
-	RW_UNUSED(arg1G);
+	arg1G = std::abs(arg1G);
 	RW_UNUSED(args);
 }
 
@@ -1724,8 +1723,7 @@ void opcode_0094(const ScriptArguments& args, ScriptInt& arg1G) {
 	@arg arg1L 
 */
 void opcode_0095(const ScriptArguments& args, ScriptInt& arg1L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0095);
-	RW_UNUSED(arg1L);
+	arg1L = std::abs(arg1L);
 	RW_UNUSED(args);
 }
 
@@ -1736,8 +1734,7 @@ void opcode_0095(const ScriptArguments& args, ScriptInt& arg1L) {
 	@arg arg1G 
 */
 void opcode_0096(const ScriptArguments& args, ScriptFloat& arg1G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0096);
-	RW_UNUSED(arg1G);
+	arg1G = std::abs(arg1G);
 	RW_UNUSED(args);
 }
 
@@ -1748,8 +1745,7 @@ void opcode_0096(const ScriptArguments& args, ScriptFloat& arg1G) {
 	@arg arg1L 
 */
 void opcode_0097(const ScriptArguments& args, ScriptFloat& arg1L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0097);
-	RW_UNUSED(arg1L);
+	arg1L = std::abs(arg1L);
 	RW_UNUSED(args);
 }
 
