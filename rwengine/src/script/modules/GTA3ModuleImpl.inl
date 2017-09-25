@@ -1617,9 +1617,7 @@ void opcode_008b(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2G
 	@arg arg2G 
 */
 void opcode_008c(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = static_cast<ScriptInt>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1631,9 +1629,7 @@ void opcode_008c(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg
 	@arg arg2G 
 */
 void opcode_008d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008d);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = static_cast<ScriptFloat>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1645,9 +1641,7 @@ void opcode_008d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg
 	@arg arg2G 
 */
 void opcode_008e(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008e);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = static_cast<ScriptInt>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1659,9 +1653,7 @@ void opcode_008e(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg
 	@arg arg2G 
 */
 void opcode_008f(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = static_cast<ScriptFloat>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1673,9 +1665,7 @@ void opcode_008f(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg
 	@arg arg2L 
 */
 void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0090);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = static_cast<ScriptInt>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1687,9 +1677,7 @@ void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg
 	@arg arg2L 
 */
 void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0091);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = static_cast<ScriptFloat>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1701,9 +1689,7 @@ void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg
 	@arg arg2L 
 */
 void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0092);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = static_cast<ScriptInt>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1715,9 +1701,7 @@ void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg
 	@arg arg2L 
 */
 void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0093);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = static_cast<ScriptFloat>(arg2L);
 	RW_UNUSED(args);
 }
 
