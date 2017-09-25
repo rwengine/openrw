@@ -8500,9 +8500,7 @@ void opcode_02f5(const ScriptArguments& args, const ScriptObject object, const S
 	@arg xOffset X offset
 */
 void opcode_02f6(const ScriptArguments& args, const ScriptFloat angle, ScriptFloat& xOffset) {
-	RW_UNIMPLEMENTED_OPCODE(0x02f6);
-	RW_UNUSED(angle);
-	RW_UNUSED(xOffset);
+	xOffset = glm::sin(glm::radians(angle));
 	RW_UNUSED(args);
 }
 
@@ -8514,9 +8512,7 @@ void opcode_02f6(const ScriptArguments& args, const ScriptFloat angle, ScriptFlo
 	@arg yOffset Y offset
 */
 void opcode_02f7(const ScriptArguments& args, const ScriptFloat angle, ScriptFloat& yOffset) {
-	RW_UNIMPLEMENTED_OPCODE(0x02f7);
-	RW_UNUSED(angle);
-	RW_UNUSED(yOffset);
+	yOffset = glm::cos(glm::radians(angle));
 	RW_UNUSED(args);
 }
 
