@@ -30,7 +30,7 @@ bool CharacterController::updateActivity() {
 }
 
 void CharacterController::setActivity(std::unique_ptr<Activity> activity) {
-    _currentActivity.swap(activity);
+    _currentActivity = std::move(activity);
 }
 
 void CharacterController::skipActivity() {

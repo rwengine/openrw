@@ -79,7 +79,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
             CPAN* cpan = read<CPAN>(data, dataI);
             ANIM* frames = read<ANIM>(data, dataI);
 
-            auto bonedata = std::make_shared<AnimationBone>();
+            auto bonedata = new AnimationBone;
             bonedata->name = frames->name;
             bonedata->frames.reserve(frames->frames);
 

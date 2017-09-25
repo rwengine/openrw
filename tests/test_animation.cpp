@@ -18,8 +18,7 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
         Animator animator(test_model);
 
         animation->duration = 1.f;
-        animation->bones["player"] = std::shared_ptr<AnimationBone>(
-            new AnimationBone {
+        animation->bones["player"] = new AnimationBone{
                 "player",
                 0,
                 0,
@@ -29,8 +28,7 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
                     {glm::quat(), glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0},
                     {glm::quat(), glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1},
                 }
-            }
-        );
+            };
 
         animator.playAnimation(0, animation, 1.f, false);
 

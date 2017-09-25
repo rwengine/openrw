@@ -22,8 +22,6 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         BOOST_REQUIRE(atomic->getGeometry());
         BOOST_REQUIRE(atomic->getFrame());
-
-        m.reset();
     }
 }
 
