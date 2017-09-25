@@ -40,7 +40,13 @@ struct AnimationBone {
  */
 struct Animation {
     std::string name;
-    std::map<std::string, std::shared_ptr<AnimationBone>> bones;
+    std::map<std::string, AnimationBone*> bones;
+
+    ~Animation() {
+        for (auto &bone_pair : bones) {
+            delete bone_pair.second;
+        }
+    }
 
     float duration;
 };
