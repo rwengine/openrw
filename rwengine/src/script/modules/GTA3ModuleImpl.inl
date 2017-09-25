@@ -12677,16 +12677,14 @@ bool opcode_0424(const ScriptArguments& args) {
 }
 
 /**
-	@brief convert_metres_to_feet %2d% store_to %1d%
+	@brief %2d% = meters_to_feet %1d% 
 
 	opcode 0425
 	@arg arg1 
 	@arg arg2 
 */
 void opcode_0425(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0425);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
+	arg2 = arg1 * 3.333333;
 	RW_UNUSED(args);
 }
 
@@ -12773,16 +12771,14 @@ void opcode_042c(const ScriptArguments& args, const ScriptInt arg1) {
 }
 
 /**
-	@brief %2d% = metric_to_imperial %1d%
+	@brief %2d% = round(meters_to_feet(%1d%)) 
 
 	opcode 042d
 	@arg arg1 
 	@arg arg2 
 */
 void opcode_042d(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x042d);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
+	arg2 = static_cast<ScriptInt>(std::floor(static_cast<ScriptFloat>(arg1) * 3.3333334));
 	RW_UNUSED(args);
 }
 
