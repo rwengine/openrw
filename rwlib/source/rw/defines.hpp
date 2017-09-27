@@ -12,8 +12,8 @@ extern std::function<void()> _rw_abort_cb[2];
 #define RW_ASSERT(cond) do { if (!(cond)) RW_ABORT();} while (0)
 
 #if defined(RW_WINDOWS)
-#include <Windows.h>
-#define RW_BREAKPOINT() DebugBreak()
+void WinBreak();
+#define RW_BREAKPOINT() WinBreak()
 #else
 #include <csignal>
 #define RW_BREAKPOINT() do { if(_rw_abort_cb[0]) _rw_abort_cb[0](); ::raise(SIGTRAP); if(_rw_abort_cb[1]) _rw_abort_cb[1](); } while (0)
