@@ -2159,6 +2159,7 @@ void opcode_00bc(const ScriptArguments& args, const ScriptString gxtEntry, const
 	const auto& text = script::gxt(args, gxtEntry);
 	RW_UNUSED(arg3);
 	RW_UNIMPLEMENTED("Unclear what style should be used");
+	args.getWorld()->state->text.clear<ScreenTextType::HighPriority>();
 	args.getWorld()->state->text.addText<ScreenTextType::HighPriority>(
 				ScreenTextEntry::makeHighPriority(
 					gxtEntry, text, time
