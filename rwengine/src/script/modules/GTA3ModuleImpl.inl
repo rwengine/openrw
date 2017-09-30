@@ -2093,14 +2093,8 @@ void opcode_00af(const ScriptArguments& args, const ScriptVehicle vehicle, const
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_00b0(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x00b0);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_00b0(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	return script::objectInArea(args, vehicle, coord0, coord1, arg6);
 }
 
 /**
@@ -2112,14 +2106,8 @@ bool opcode_00b0(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_00b1(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x00b1);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_00b1(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
+	return script::objectInArea(args, vehicle, coord0, coord1, arg8);
 }
 
 /**
