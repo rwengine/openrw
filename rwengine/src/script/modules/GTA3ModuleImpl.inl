@@ -4571,14 +4571,9 @@ void opcode_0196(const ScriptArguments& args, const ScriptCharacter character) {
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_0197(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x0197);
-	RW_UNUSED(player);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_0197(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = player->getCharacter()->getCurrentVehicle() == nullptr;
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4590,14 +4585,9 @@ bool opcode_0197(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_0198(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x0198);
-	RW_UNUSED(player);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_0198(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = player->getCharacter()->getCurrentVehicle() != nullptr;
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4609,7 +4599,7 @@ bool opcode_0198(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_0199(const ScriptArguments& args, const ScriptPlayer player, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
+bool opcode_0199(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
 	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg6);
 }
 
@@ -4618,22 +4608,13 @@ bool opcode_0199(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 
 	opcode 019a
 	@arg player 
-	@arg arg2 
-	@arg arg3 
-	@arg arg4 
-	@arg arg5 
+	@arg coord0 
+	@arg coord1 
 	@arg arg6 
 */
-bool opcode_019a(const ScriptArguments& args, const ScriptPlayer player, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptInt arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x019a);
-	RW_UNUSED(player);
-	RW_UNUSED(arg2);
-	RW_UNUSED(arg3);
-	RW_UNUSED(arg4);
-	RW_UNUSED(arg5);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_019a(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptInt arg6) {
+	auto condition = player->getCharacter()->getCurrentVehicle() == nullptr && player->getCharacter()->isStopped(); 
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4641,22 +4622,13 @@ bool opcode_019a(const ScriptArguments& args, const ScriptPlayer player, const S
 
 	opcode 019b
 	@arg player 
-	@arg arg2 
-	@arg arg3 
-	@arg arg4 
-	@arg arg5 
+	@arg coord0 
+	@arg coord1 
 	@arg arg6 
 */
-bool opcode_019b(const ScriptArguments& args, const ScriptPlayer player, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptInt arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x019b);
-	RW_UNUSED(player);
-	RW_UNUSED(arg2);
-	RW_UNUSED(arg3);
-	RW_UNUSED(arg4);
-	RW_UNUSED(arg5);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_019b(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptInt arg6) {
+	auto condition = player->getCharacter()->getCurrentVehicle() != nullptr && player->getCharacter()->isStopped(); 
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4669,8 +4641,7 @@ bool opcode_019b(const ScriptArguments& args, const ScriptPlayer player, const S
 	@arg arg8 
 */
 bool opcode_019c(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
-	auto plyChar = player->getCharacter();
-	auto condition = plyChar->getCurrentVehicle() == nullptr;
+	auto condition = player->getCharacter()->getCurrentVehicle() == nullptr;
 	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
@@ -4679,26 +4650,13 @@ bool opcode_019c(const ScriptArguments& args, const ScriptPlayer player, const S
 
 	opcode 019d
 	@arg player 
-	@arg arg2 
-	@arg arg3 
-	@arg arg4 
-	@arg arg5 
-	@arg arg6 
-	@arg arg7 
+	@arg coord0 
+	@arg coord1 
 	@arg arg8 
 */
-bool opcode_019d(const ScriptArguments& args, const ScriptPlayer player, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptInt arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x019d);
-	RW_UNUSED(player);
-	RW_UNUSED(arg2);
-	RW_UNUSED(arg3);
-	RW_UNUSED(arg4);
-	RW_UNUSED(arg5);
-	RW_UNUSED(arg6);
-	RW_UNUSED(arg7);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_019d(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
+	auto condition = player->getCharacter()->getCurrentVehicle() != nullptr;
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4711,8 +4669,7 @@ bool opcode_019d(const ScriptArguments& args, const ScriptPlayer player, const S
 	@arg arg8 
 */
 bool opcode_019e(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
-	auto plyChar = player->getCharacter();
-	auto condition = plyChar->isStopped();
+	auto condition = player->getCharacter()->isStopped();
 	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
@@ -4721,26 +4678,13 @@ bool opcode_019e(const ScriptArguments& args, const ScriptPlayer player, const S
 
 	opcode 019f
 	@arg player 
-	@arg arg2 
-	@arg arg3 
-	@arg arg4 
-	@arg arg5 
-	@arg arg6 
-	@arg arg7 
+	@arg coord0
+	@arg coord1
 	@arg arg8 
 */
-bool opcode_019f(const ScriptArguments& args, const ScriptPlayer player, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptInt arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x019f);
-	RW_UNUSED(player);
-	RW_UNUSED(arg2);
-	RW_UNUSED(arg3);
-	RW_UNUSED(arg4);
-	RW_UNUSED(arg5);
-	RW_UNUSED(arg6);
-	RW_UNUSED(arg7);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_019f(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
+	auto condition = player->getCharacter()->getCurrentVehicle() == nullptr && player->getCharacter()->isStopped();
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4753,9 +4697,8 @@ bool opcode_019f(const ScriptArguments& args, const ScriptPlayer player, const S
 	@arg arg8 
 */
 bool opcode_01a0(const ScriptArguments& args, const ScriptPlayer player, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptInt arg8) {
-	auto plyChar = player->getCharacter();
-	auto condition = plyChar->isStopped() && plyChar->getCurrentVehicle() != nullptr;
-	return script::objectInArea(args, plyChar, coord0, coord1, arg8, condition);
+	auto condition = player->getCharacter()->getCurrentVehicle() != nullptr && player->getCharacter()->isStopped();
+	return script::objectInArea(args, player->getCharacter(), coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4767,14 +4710,9 @@ bool opcode_01a0(const ScriptArguments& args, const ScriptPlayer player, const S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01a1(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a1);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a1(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = character->getCurrentVehicle() == nullptr;
+	return script::objectInArea(args, character, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4786,14 +4724,9 @@ bool opcode_01a1(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01a2(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a2);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a2(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = character->getCurrentVehicle() != nullptr;
+	return script::objectInArea(args, character, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4805,14 +4738,9 @@ bool opcode_01a2(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01a3(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a3);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a3(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = character->isStopped();
+	return script::objectInArea(args, character, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4824,14 +4752,9 @@ bool opcode_01a3(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01a4(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a4);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a4(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = character->getCurrentVehicle() == nullptr && character->isStopped();
+	return script::objectInArea(args, character, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4843,14 +4766,9 @@ bool opcode_01a4(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01a5(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a5);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a5(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = character->getCurrentVehicle() != nullptr && character->isStopped();
+	return script::objectInArea(args, character, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4862,14 +4780,9 @@ bool opcode_01a5(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01a6(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a6);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a6(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
+	auto condition = character->getCurrentVehicle() == nullptr;
+	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4881,14 +4794,9 @@ bool opcode_01a6(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01a7(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a7);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a7(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
+	auto condition = character->getCurrentVehicle() != nullptr;
+	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4900,7 +4808,7 @@ bool opcode_01a7(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01a8(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
+bool opcode_01a8(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
 	auto condition = character->isStopped();
 	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
@@ -4914,14 +4822,9 @@ bool opcode_01a8(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01a9(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x01a9);
-	RW_UNUSED(character);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01a9(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
+	auto condition = character->getCurrentVehicle() == nullptr && character->isStopped();
+	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
 
 /**
@@ -4933,8 +4836,8 @@ bool opcode_01a9(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01aa(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
-	auto condition = character->isStopped() && character->getCurrentVehicle() != nullptr;
+bool opcode_01aa(const ScriptArguments& args, const ScriptCharacter character, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
+	auto condition = character->getCurrentVehicle() != nullptr && character->isStopped();
 	return script::objectInArea(args, character, coord0, coord1, arg8, condition);
 }
 
@@ -4947,14 +4850,9 @@ bool opcode_01aa(const ScriptArguments& args, const ScriptCharacter character, S
 	@arg coord1 Coordinates
 	@arg arg6 Boolean true/false
 */
-bool opcode_01ab(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec2 coord0, ScriptVec2 coord1, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01ab);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord0);
-	RW_UNUSED(coord1);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01ab(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec2 coord0, const ScriptVec2 coord1, const ScriptBoolean arg6) {
+	auto condition = vehicle->isStopped();
+	return script::objectInArea(args, vehicle, coord0, coord1, arg6, condition);
 }
 
 /**
@@ -4966,7 +4864,7 @@ bool opcode_01ab(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg coord1 Coordinates
 	@arg arg8 Boolean true/false
 */
-bool opcode_01ac(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptBoolean arg8) {
+bool opcode_01ac(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec3 coord0, const ScriptVec3 coord1, const ScriptBoolean arg8) {
 	auto condition = vehicle->isStopped();
 	return script::objectInArea(args, vehicle, coord0, coord1, arg8, condition);
 }
@@ -4980,7 +4878,7 @@ bool opcode_01ac(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg radius Radius
 	@arg arg6 Boolean true/false
 */
-bool opcode_01ad(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec2 coord, ScriptVec2 radius, const ScriptBoolean arg6) {
+bool opcode_01ad(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec2 coord, const ScriptVec2 radius, const ScriptBoolean arg6) {
 	return script::objectInRadius(args, vehicle, coord, radius, arg6);
 }
 
@@ -4993,14 +4891,9 @@ bool opcode_01ad(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg radius Radius
 	@arg arg6 Boolean true/false
 */
-bool opcode_01ae(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec2 coord, ScriptVec2 radius, const ScriptBoolean arg6) {
-	RW_UNIMPLEMENTED_OPCODE(0x01ae);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord);
-	RW_UNUSED(radius);
-	RW_UNUSED(arg6);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01ae(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec2 coord, const ScriptVec2 radius, const ScriptBoolean arg6) {
+	auto condition = vehicle->isStopped();
+	return script::objectInRadius(args, vehicle, coord, radius, arg6, condition);
 }
 
 /**
@@ -5012,14 +4905,8 @@ bool opcode_01ae(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg radius Radius
 	@arg arg8 Boolean true/false
 */
-bool opcode_01af(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec3 coord, ScriptVec3 radius, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x01af);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord);
-	RW_UNUSED(radius);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01af(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec3 coord, const ScriptVec3 radius, const ScriptBoolean arg8) {
+	return script::objectInRadius(args, vehicle, coord, radius, arg8);
 }
 
 /**
@@ -5031,14 +4918,9 @@ bool opcode_01af(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 	@arg radius Radius
 	@arg arg8 Boolean true/false
 */
-bool opcode_01b0(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec3 coord, ScriptVec3 radius, const ScriptBoolean arg8) {
-	RW_UNIMPLEMENTED_OPCODE(0x01b0);
-	RW_UNUSED(vehicle);
-	RW_UNUSED(coord);
-	RW_UNUSED(radius);
-	RW_UNUSED(arg8);
-	RW_UNUSED(args);
-	return false;
+bool opcode_01b0(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptVec3 coord, const ScriptVec3 radius, const ScriptBoolean arg8) {
+	auto condition = vehicle->isStopped();
+	return script::objectInRadius(args, vehicle, coord, radius, arg8, condition);
 }
 
 /**
