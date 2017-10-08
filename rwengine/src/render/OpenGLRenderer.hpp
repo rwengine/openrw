@@ -288,43 +288,33 @@ public:
     virtual const ProfileInfo& popDebugGroup() override;
 
 private:
-    DrawBuffer* currentDbuff;
+    struct Buffer {
+        GLuint name;
+        GLuint currentEntry;
+
+        GLuint entryCount;
+        GLuint entrySize;
+        GLsizei bufferSize;
+    };
 
     void useDrawBuffer(DrawBuffer* dbuff);
 
-    std::map<GLuint, GLuint> currentTextures;
     void useTexture(GLuint unit, GLuint tex);
 
-    OpenGLShaderProgram* currentProgram;
-
-    GLuint currentUBO;
-    template <class T>
-    void uploadUBO(GLuint buffer, const T& data) {
-        if (currentUBO != buffer) {
-            glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-            currentUBO = buffer;
-        }
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(T), &data, GL_DYNAMIC_DRAW);
-#if RW_PROFILER
-        if (currentDebugDepth > 0) {
-            profileInfo[currentDebugDepth - 1].uploads++;
-        }
-#endif
-    }
-
-    GLuint UBOObject;
-    GLuint maxObjectEntries;
-    GLuint currentObjectEntry;
-    GLuint entryAlignment;
-    GLuint UBOScene;
+    Buffer UBOObject {};
+    Buffer UBOScene {};
 
     // State Cache
-    bool blendEnabled;
-    bool depthWriteEnabled;
+    DrawBuffer* currentDbuff = nullptr;
+    OpenGLShaderProgram* currentProgram = nullptr;
+    bool blendEnabled = false;
+    bool depthWriteEnabled = false;
+    GLuint currentUBO = 0;
+    GLuint currentUnit = 0;
+    std::map<GLuint, GLuint> currentTextures;
 
     // Set state
     void setBlend(bool enable) {
-        RW_UNUSED(enable);
         if (enable && !blendEnabled) {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -342,10 +332,32 @@ private:
         }
     }
 
+    template <class T>
+    void uploadUBO(Buffer& buffer, const T& data) {
+        uploadUBOEntry(buffer, &data, sizeof(T));
+#if RW_PROFILER
+        if (currentDebugDepth > 0) {
+            profileInfo[currentDebugDepth - 1].uploads++;
+        }
+#endif
+    }
+
+    // Buffer Helpers
+    bool createUBO(Buffer& out, GLsizei size, GLsizei entrySize);
+
+    void attachUBO(GLuint buffer) {
+        if (currentUBO != buffer) {
+            glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+            currentUBO = buffer;
+        }
+    }
+
+    void uploadUBOEntry(Buffer& buffer, const void *data, size_t size);
+
     // Debug group profiling timers
     ProfileInfo profileInfo[MAX_DEBUG_DEPTH];
     GLuint debugQuery;
-    int currentDebugDepth;
+    int currentDebugDepth = 0;
 };
 
 /// @todo remove these from here
