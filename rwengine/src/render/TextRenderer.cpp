@@ -132,10 +132,6 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     renderer->getRenderer()->pushDebugGroup("Text");
     renderer->getRenderer()->useProgram(textShader);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glActiveTexture(GL_TEXTURE0);
-
     glm::vec2 coord(0.f, 0.f);
     glm::vec2 alignment = ti.screenPosition;
     // We should track real size not just chars.
@@ -283,6 +279,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     Renderer::DrawParameters dp;
     dp.start = 0;
+    dp.blend = true;
     dp.count = gb.getCount();
     auto ftexture = renderer->getData()->findSlotTexture("fonts", fonts[ti.font]);
     dp.textures = {ftexture->getName()};

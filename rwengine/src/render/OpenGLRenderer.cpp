@@ -397,6 +397,8 @@ void OpenGLRenderer::invalidate() {
     currentProgram = nullptr;
     currentTextures.clear();
     currentUBO = 0;
+    blendEnabled = false;
+    glDisable(GL_BLEND);
 }
 
 void OpenGLRenderer::pushDebugGroup(const std::string& title) {
