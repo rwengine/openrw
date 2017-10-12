@@ -464,10 +464,10 @@ int RWGame::run() {
 void RWGame::tick(float dt) {
     State* currState = StateManager::get().states.back().get();
 
-    world->chase.update(dt);
-
     static float clockAccumulator = 0.f;
     if (currState->shouldWorldUpdate()) {
+        world->chase.update(dt);
+
         // Clear out any per-tick state.
         world->clearTickData();
 
