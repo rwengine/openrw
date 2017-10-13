@@ -400,7 +400,7 @@ void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t siz
         void* dst = glMapBufferRange(GL_UNIFORM_BUFFER, offset,
                                      buffer.entrySize, flags);
         RW_ASSERT(dst != nullptr);
-        mempcpy(dst, data, size);
+        memcpy(dst, data, size);
         glUnmapBuffer(GL_UNIFORM_BUFFER);
         glBindBufferRange(GL_UNIFORM_BUFFER, kUBOIndexDraw, buffer.name, offset, size);
         buffer.currentEntry++;
