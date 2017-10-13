@@ -59,6 +59,7 @@ private:
     bool motionBlockedByActivity;
 
     glm::vec3 updateMovementAnimation(float dt);
+    glm::vec3 currenteMovementStep;
 
     AnimCycle cycle_;
 
@@ -89,6 +90,8 @@ public:
     }
 
     void tick(float dt) override;
+
+    void tickPhysics(float dt);
 
     const CharacterState& getCurrentState() const {
         return currentState;

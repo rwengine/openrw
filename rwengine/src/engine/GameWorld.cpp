@@ -674,8 +674,13 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
     GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
     for (auto& p : world->vehiclePool.objects) {
-        GameObject* object = p.second;
-        static_cast<VehicleObject*>(object)->tickPhysics(timeStep);
+        VehicleObject* object = static_cast<VehicleObject*>(p.second);
+        object->tickPhysics(timeStep);
+    }
+
+    for (auto& p : world->pedestrianPool.objects) {
+        CharacterObject* object = static_cast<CharacterObject*>(p.second);
+        object->tickPhysics(timeStep);
     }
 }
 

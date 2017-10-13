@@ -6,6 +6,8 @@
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
 
+#include <algorithm>
+
 // Required for BT_BULLET_VERSION
 #include "LinearMath/btScalar.h"
 #ifndef BT_BULLET_VERSION
@@ -247,13 +249,20 @@ void CharacterObject::tick(float dt) {
     }
 }
 
+void CharacterObject::tickPhysics(float dt) {
+    if (physCharacter) {
+        auto s = currenteMovementStep * dt;
+        physCharacter->setWalkDirection(
+            btVector3(s.x, s.y, s.z));
+    }
+}
+
 void CharacterObject::setRotation(const glm::quat& orientation) {
     m_look.x = glm::roll(orientation);
     rotation = orientation;
     getClump()->getFrame()->setRotation(glm::mat3_cast(rotation));
 }
 
-#include <algorithm>
 void CharacterObject::changeCharacterModel(const std::string& name) {
     auto modelName = std::string(name);
     std::transform(modelName.begin(), modelName.end(), modelName.begin(),
@@ -313,10 +322,9 @@ void CharacterObject::updateCharacter(float dt) {
         }
 
         if (isAlive()) {
-            physCharacter->setWalkDirection(
-                btVector3(walkDir.x, walkDir.y, walkDir.z));
+            currenteMovementStep = walkDir / dt;
         } else {
-            physCharacter->setWalkDirection(btVector3(0.f, 0.f, 0.f));
+            currenteMovementStep = glm::vec3();
         }
 
         auto Pos =
