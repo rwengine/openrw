@@ -66,6 +66,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     renderer->pushDebugGroup("Map");
     renderer->useProgram(rectProg);
 
+    Renderer::DrawParameters dp { };
+    dp.start = 0;
+    dp.blend = true;
+    dp.depthWrite = false;
+
     // World out the number of units per tile
     glm::vec2 worldSize(GAME_MAP_SIZE);
     const int mapBlockLine = 8;
@@ -82,16 +87,15 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
 
     if (mi.clipToSize) {
-        glBindVertexArray(circle.getVAOName());
-        glBindTexture(GL_TEXTURE_2D, 0);
         glm::mat4 circleView = glm::scale(view, glm::vec3(mi.screenSize));
         renderer->setUniform(rectProg, "view", circleView);
+        dp.count = 182;
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilMask(0xFF);
         glColorMask(0x00, 0x00, 0x00, 0x00);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 182);
+        renderer->drawArrays(glm::mat4(), &circle, dp);
         glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
         glStencilFunc(GL_EQUAL, 1, 0xFF);
     }
@@ -101,10 +105,6 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     view = glm::translate(
         view, glm::vec3(glm::vec2(-1.f, 1.f) * mi.worldCenter, 0.f));
     renderer->setUniform(rectProg, "view", view);
-
-    glBindVertexArray(rect.getVAOName());
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     // radar00 = -x, +y
     // incrementing in X, then Y
@@ -116,8 +116,9 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         std::string num = (m < 10 ? "0" : "");
         std::string name = "radar" + num + std::to_string(m);
         auto texture = world->data->findSlotTexture(name, name);
+        dp.textures = {texture->getName()};
 
-        glBindTexture(GL_TEXTURE_2D, texture->getName());
+        dp.count = 4;
 
         int mX = initX + (m % mapBlockLine);
         int mY = initY + (m / mapBlockLine);
@@ -130,7 +131,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
 
         renderer->setUniform(rectProg, "model", tilemodel);
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        renderer->drawArrays(glm::mat4(), &rect, dp);
     }
 
     // From here on out we will work in screenspace
@@ -142,13 +143,13 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ZERO);
         TextureData::Handle radarDisc =
             data->findSlotTexture("hud", "radardisc");
+        dp.textures = {radarDisc->getName()};
 
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
         model = glm::scale(model, glm::vec3(mi.screenSize * 1.07));
         renderer->setUniform(rectProg, "model", model);
-        glBindTexture(GL_TEXTURE_2D, radarDisc->getName());
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        renderer->drawArrays(glm::mat4(), &rect, dp);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
     }
@@ -225,10 +226,6 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
             drawBlip(blippos, view, mi, colour, blip.size * 2.0f);
         }
     }
-
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
 
     /// @TODO migrate to using the renderer
     renderer->invalidate();

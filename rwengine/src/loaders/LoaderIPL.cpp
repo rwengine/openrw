@@ -68,7 +68,7 @@ bool LoaderIPL::load(const std::string& filename) {
                 getline(strstream, rotZ, ',');
                 getline(strstream, rotW, ',');
 
-                std::shared_ptr<InstanceData> instance(new InstanceData{
+                auto instance = std::make_shared<InstanceData>(
                     atoi(id.c_str()),  // ID
                     model.substr(1, model.size() - 1),
                     glm::vec3(atof(posX.c_str()), atof(posY.c_str()),
@@ -77,7 +77,7 @@ bool LoaderIPL::load(const std::string& filename) {
                               atof(scaleZ.c_str())),
                     glm::normalize(
                         glm::quat(-atof(rotW.c_str()), atof(rotX.c_str()),
-                                  atof(rotY.c_str()), atof(rotZ.c_str())))});
+                                  atof(rotY.c_str()), atof(rotZ.c_str()))));
 
                 m_instances.push_back(instance);
             } else if (section == ZONE) {

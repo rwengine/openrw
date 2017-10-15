@@ -86,10 +86,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
-    , mHasSpecial(true)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
+    , mHasSpecial(true)
     , collision(new CollisionInstance)
     , physRaycaster(nullptr)
     , physVehicle(nullptr) {
@@ -264,7 +264,7 @@ void VehicleObject::tickPhysics(float dt) {
             if (wi.m_bIsFrontWheel) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 physVehicle->setSteeringValue(
-                    std::min(info->handling.steeringLock * (3.141f / 180.f),
+                    std::min(glm::radians(info->handling.steeringLock),
                              std::abs(steerAngle)) *
                         sign,
                     w);
@@ -294,7 +294,7 @@ void VehicleObject::tickPhysics(float dt) {
             if (isInWater()) {
                 float sign = std::signbit(steerAngle) ? -1.f : 1.f;
                 float steer =
-                    std::min(info->handling.steeringLock * (3.141f / 180.f),
+                    std::min(glm::radians(info->handling.steeringLock),
                              std::abs(steerAngle)) *
                     sign;
                 auto orient = collision->getBulletBody()->getOrientation();

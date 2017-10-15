@@ -532,6 +532,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
         dp.colour = glm::u8vec4(particle.colour * 255.f);
         dp.start = 0;
         dp.count = 4;
+        dp.blend = true;
         dp.diffuse = 1.f;
 
         renderer->drawArrays(m, &particleDraw, dp);

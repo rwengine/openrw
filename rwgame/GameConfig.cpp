@@ -1,16 +1,16 @@
 #include "GameConfig.hpp"
-#include <cstdlib>
-#include <cstring>
+#include <algorithm>
+
 #include <rw/defines.hpp>
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 namespace pt = boost::property_tree;
 
 const std::string kConfigDirectoryName("OpenRW");
 
-GameConfig::GameConfig(const std::string& configName,
-                       const std::string& configPath)
+GameConfig::GameConfig(const std::string &configName,
+                       const std::string &configPath)
     : m_configName(configName)
     , m_configPath(configPath)
     , m_parseResult()
@@ -23,7 +23,8 @@ GameConfig::GameConfig(const std::string& configName,
     auto configFile = getConfigFile();
 
     std::string dummy;
-    m_parseResult = parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
+    m_parseResult =
+        parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
 }
 
 std::string GameConfig::getConfigFile() const {
@@ -41,17 +42,17 @@ const GameConfig::ParseResult &GameConfig::getParseResult() const {
 std::string GameConfig::getDefaultConfigPath() {
 #if defined(RW_LINUX) || defined(RW_FREEBSD) || defined(RW_NETBSD) || \
     defined(RW_OPENBSD)
-    char* config_home = getenv("XDG_CONFIG_HOME");
+    char *config_home = getenv("XDG_CONFIG_HOME");
     if (config_home != nullptr) {
         return std::string(config_home) + "/" + kConfigDirectoryName;
     }
-    char* home = getenv("HOME");
+    char *home = getenv("HOME");
     if (home != nullptr) {
         return std::string(home) + "/.config/" + kConfigDirectoryName;
     }
 
 #elif defined(RW_OSX)
-    char* home = getenv("HOME");
+    char *home = getenv("HOME");
     if (home)
         return std::string(home) + "/Library/Preferences/" +
                kConfigDirectoryName;
@@ -67,7 +68,7 @@ std::string GameConfig::getDefaultConfigPath() {
 
 std::string stripComments(const std::string &str) {
     auto s = std::string(str, 0, str.find_first_of(";#"));
-    return s.erase(s.find_last_not_of(" \n\r\t")+1);
+    return s.erase(s.find_last_not_of(" \n\r\t") + 1);
 }
 
 struct StringTranslator {
@@ -83,7 +84,7 @@ struct StringTranslator {
 
 struct BoolTranslator {
     typedef std::string internal_type;
-    typedef bool        external_type;
+    typedef bool external_type;
     boost::optional<external_type> get_value(const internal_type &str) {
         boost::optional<external_type> res;
         try {
@@ -99,7 +100,7 @@ struct BoolTranslator {
 
 struct IntTranslator {
     typedef std::string internal_type;
-    typedef int         external_type;
+    typedef int external_type;
     boost::optional<external_type> get_value(const internal_type &str) {
         boost::optional<external_type> res;
         try {
@@ -115,8 +116,7 @@ struct IntTranslator {
 
 GameConfig::ParseResult GameConfig::saveConfig() {
     auto filename = getConfigFile();
-    return parseConfig(ParseType::CONFIG, "",
-        ParseType::FILE, filename);
+    return parseConfig(ParseType::CONFIG, "", ParseType::FILE, filename);
 }
 
 std::string GameConfig::getDefaultINIString() {
@@ -125,10 +125,11 @@ std::string GameConfig::getDefaultINIString() {
     return result;
 }
 
-GameConfig::ParseResult GameConfig::parseConfig(
-    GameConfig::ParseType srcType, const std::string &source,
-    ParseType destType, std::string &destination)
-{
+GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
+                                                const std::string &source,
+                                                ParseType destType,
+                                                std::string &destination) {
+    // srcTree: holds all key/value pairs
     pt::ptree srcTree;
     ParseResult parseResult(srcType, source, destType, destination);
 
@@ -152,12 +153,16 @@ GameConfig::ParseResult GameConfig::parseConfig(
         return parseResult;
     }
 
+    // knownKeys: holds all known keys
+    std::vector<std::string> knownKeys;
+
     auto read_config = [&](const std::string &key, auto &target,
-                          const auto &defaultValue, auto &translator,
-                          bool optional=true) {
+                           const auto &defaultValue, auto &translator,
+                           bool optional = true) {
         typedef typename std::remove_reference<decltype(target)>::type config_t;
 
         config_t sourceValue;
+        knownKeys.push_back(key);
 
         switch (srcType) {
             case ParseType::DEFAULT:
@@ -210,13 +215,50 @@ GameConfig::ParseResult GameConfig::parseConfig(
     // Additionally, add them to the unit test.
 
     // @todo Don't allow path separators and relative directories
-    read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3", deft, false);
+    read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3",
+                deft, false);
     read_config("game.language", this->m_gameLanguage, "american", deft);
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 
-    if (!parseResult.isValid())
-        return parseResult;
+    // Build the unknown key/value map from the correct source
+    switch (srcType) {
+        case ParseType::FILE:
+        case ParseType::STRING:
+            for (const auto &section : srcTree) {
+                for (const auto &subKey : section.second) {
+                    std::string key = section.first + "." + subKey.first;
+                    if (std::find(knownKeys.begin(), knownKeys.end(), key) ==
+                        knownKeys.end()) {
+                        RW_MESSAGE("Unknown configuration key: " << key);
+                        parseResult.addUnknownData(key, subKey.second.data());
+                    }
+                }
+            }
+            break;
+        case ParseType::CONFIG:
+            parseResult.setUnknownData(m_parseResult.getUnknownData());
+            break;
+        case ParseType::DEFAULT:
+            break;
+    }
+
+    // Store the unknown key/value map to the correct destination
+    switch (destType) {
+        case ParseType::CONFIG:
+            m_parseResult.setUnknownData(parseResult.getUnknownData());
+            break;
+        case ParseType::STRING:
+        case ParseType::FILE:
+            for (const auto &keyvalue : parseResult.getUnknownData()) {
+                srcTree.put(keyvalue.first, keyvalue.second);
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (!parseResult.isValid()) return parseResult;
 
     try {
         if (destType == ParseType::STRING) {
@@ -234,8 +276,8 @@ GameConfig::ParseResult GameConfig::parseConfig(
     return parseResult;
 }
 
-std::string GameConfig::extractFilenameParseTypeData(ParseType type, const std::string &data)
-{
+std::string GameConfig::extractFilenameParseTypeData(ParseType type,
+                                                     const std::string &data) {
     switch (type) {
         case ParseType::CONFIG:
             return "<configuration>";
@@ -249,16 +291,19 @@ std::string GameConfig::extractFilenameParseTypeData(ParseType type, const std::
     }
 }
 
-GameConfig::ParseResult::ParseResult(
-            GameConfig::ParseType srcType, const std::string &source,
-            GameConfig::ParseType destType, const std::string &destination)
+GameConfig::ParseResult::ParseResult(GameConfig::ParseType srcType,
+                                     const std::string &source,
+                                     GameConfig::ParseType destType,
+                                     const std::string &destination)
     : m_result(ErrorType::GOOD)
     , m_inputfilename(GameConfig::extractFilenameParseTypeData(srcType, source))
-    , m_outputfilename(GameConfig::extractFilenameParseTypeData(destType, destination))
+    , m_outputfilename(
+          GameConfig::extractFilenameParseTypeData(destType, destination))
     , m_line(0)
     , m_message()
     , m_keys_requiredMissing()
-    , m_keys_invalidData() {
+    , m_keys_invalidData()
+    , m_unknownData() {
 }
 
 GameConfig::ParseResult::ParseResult()
@@ -280,7 +325,7 @@ bool GameConfig::ParseResult::isValid() const {
 }
 
 void GameConfig::ParseResult::failInputFile(size_t line,
-        const std::string &message) {
+                                            const std::string &message) {
     this->m_result = ParseResult::ErrorType::INVALIDINPUTFILE;
     this->m_line = line;
     this->m_message = message;
@@ -301,47 +346,44 @@ void GameConfig::ParseResult::failInvalidData(const std::string &key) {
 }
 
 void GameConfig::ParseResult::failOutputFile(size_t line,
-        const std::string &message) {
+                                             const std::string &message) {
     this->m_result = ParseResult::ErrorType::INVALIDOUTPUTFILE;
     this->m_line = line;
     this->m_message = message;
 }
 
-const std::vector<std::string> &GameConfig::ParseResult::getKeysRequiredMissing() const {
+const std::vector<std::string>
+    &GameConfig::ParseResult::getKeysRequiredMissing() const {
     return this->m_keys_requiredMissing;
 }
 
-const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData() const {
+const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData()
+    const {
     return this->m_keys_invalidData;
 }
 
 std::string GameConfig::ParseResult::what() const {
+    std::ostringstream oss;
     switch (this->m_result) {
         case ErrorType::GOOD:
-            return "Good";
+            oss << "Parsing completed without errors.";
+            break;
         case ErrorType::INVALIDARGUMENT:
-            return "Invalid argument: destination cannot be the default config";
+            oss << "Invalid argument: destination cannot be the default "
+                   "config.";
+            break;
         case ErrorType::INVALIDINPUTFILE:
-        {
-            std::ostringstream oss;
-            oss << "Error while reading \"" 
-                << this->m_inputfilename << "\":" << this->m_line << ":\n"
-                << this->m_message;
-            return oss.str();
-        }
+            oss << "Error while reading \"" << this->m_inputfilename
+                << "\":" << this->m_line << ":\n"
+                << this->m_message << ".";
+            break;
         case ErrorType::INVALIDOUTPUTFILE:
-        {
-            std::ostringstream oss;
-            oss << "Error while writing \"" 
-                << this->m_inputfilename << "\":" << this->m_line << ":\n"
-                << this->m_message;
-            return oss.str();
-        }
+            oss << "Error while writing \"" << this->m_inputfilename
+                << "\":" << this->m_line << ":\n"
+                << this->m_message << ".";
+            break;
         case ErrorType::INVALIDCONTENT:
-        {
-            std::ostringstream oss;
-            oss << "Error while parsing \"" 
-                << this->m_inputfilename << "\".";
+            oss << "Error while parsing \"" << this->m_inputfilename << "\".";
             if (this->m_keys_requiredMissing.size()) {
                 oss << "\nRequired keys that are missing:";
                 for (auto &key : this->m_keys_requiredMissing) {
@@ -354,9 +396,31 @@ std::string GameConfig::ParseResult::what() const {
                     oss << "\n - " << key;
                 }
             }
-            return oss.str();
-        }
+            break;
         default:
-            return "Unknown error";
+            oss << "Unknown error.";
+            break;
     }
+    if (this->m_unknownData.size()) {
+        oss << "\nUnknown configuration keys:";
+        for (const auto &keyvalue : m_unknownData) {
+            oss << "\n - " << keyvalue.first;
+        }
+    }
+    return oss.str();
+}
+
+void GameConfig::ParseResult::addUnknownData(const std::string &key,
+                                             const std::string &value) {
+    this->m_unknownData[key] = value;
+}
+
+const std::map<std::string, std::string>
+    &GameConfig::ParseResult::getUnknownData() const {
+    return this->m_unknownData;
+}
+
+void GameConfig::ParseResult::setUnknownData(
+    const std::map<std::string, std::string> &unknownData) {
+    this->m_unknownData = unknownData;
 }

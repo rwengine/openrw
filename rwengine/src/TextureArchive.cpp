@@ -1,18 +1,19 @@
 #include <TextureArchive.hpp>
 
-#include <cassert>
 #include <cstring>
 #include <iostream>
+
+#include "rw/defines.hpp"
 
 namespace RW {
 
 std::unique_ptr<TextureArchive> TextureArchive::create(
     BinaryStream &binaryStream) {
-    auto textureArchive = std::unique_ptr<TextureArchive>(new TextureArchive);
+    auto textureArchive = std::make_unique<TextureArchive>();
 
     auto section = binaryStream.rootHeader;
 
-    assert(section->ID == BinaryStream::TEXTURE_DICTIONARY &&
+    RW_ASSERT(section->ID == BinaryStream::TEXTURE_DICTIONARY &&
            "BinaryStream passed to this function must be a TEXTURE DICTIONARY");
 
     // Struct

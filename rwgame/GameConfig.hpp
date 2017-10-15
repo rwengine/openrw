@@ -1,47 +1,50 @@
 #ifndef RWGAME_GAMECONFIG_HPP
 #define RWGAME_GAMECONFIG_HPP
+#include <map>
 #include <string>
 #include <vector>
 
 class GameConfig {
 private:
-    enum ParseType {
-        DEFAULT,
-        CONFIG,
-        FILE,
-        STRING
-    };
+    enum ParseType { DEFAULT, CONFIG, FILE, STRING };
 
     /**
      * @brief extractFilenameParseTypeData Get a human readable filename string
      * @return file path or a description of the data type
      */
-    static std::string extractFilenameParseTypeData(ParseType type, const std::string &data);
+    static std::string extractFilenameParseTypeData(ParseType type,
+                                                    const std::string &data);
+
 public:
     class ParseResult {
     public:
         enum ErrorType {
             /// GOOD: Input file/string was good
             GOOD,
-            /// INVALIDINPUTFILE: There was some error while reading from a file or string or the input was ambiguous (e.g. duplicate keys)
+            /// INVALIDINPUTFILE: There was some error while reading from a file
+            /// or string or the input was ambiguous (e.g. duplicate keys)
             INVALIDINPUTFILE,
             /// INVALIDARGUMENT: The parser received impossible arguments
             INVALIDARGUMENT,
-            /// INVALIDCONTENT: Some required keys were missing or some values were of incorrect type
+            /// INVALIDCONTENT: Some required keys were missing or some values
+            /// were of incorrect type
             INVALIDCONTENT,
-            /// INVALIDOUTPUTFILE: There was some error while writing to a file or string
+            /// INVALIDOUTPUTFILE: There was some error while writing to a file
+            /// or string
             INVALIDOUTPUTFILE
         };
+
     private:
         /**
-         * @brief ParseResult Holds the issues occurred while parsing of a config file.
+         * @brief ParseResult Holds the issues occurred while parsing of a
+         * config file.
          * @param srcType Type of the source
          * @param source The source of the parser
          * @param destType Type of the destination
          * @param destination The destination
          */
         ParseResult(ParseType srcType, const std::string &source,
-            ParseType destType, const std::string &destination);
+                    ParseType destType, const std::string &destination);
 
         /**
          * @brief ParseResult Create empty ParseResult
@@ -93,7 +96,8 @@ public:
         void failInvalidData(const std::string &key);
 
         /**
-         * @brief failOutputFile Fail because an error occurred while while writing to the output
+         * @brief failOutputFile Fail because an error occurred while while
+         * writing to the output
          * @param line Line number where the error is located
          * @param message Description of the error
          */
@@ -110,6 +114,20 @@ public:
          * @return String with the error description
          */
         std::string what() const;
+
+        /**
+         * @brief addUnknownData Add unknown key value pairs
+         * @param key The unknown key
+         * @param value The associated data
+         */
+        void addUnknownData(const std::string &key, const std::string &value);
+
+        /**
+         * @brief addUnknownData Get all the unknown key value pairs
+         * @return Mapping of the unknown keys with associated data
+         */
+        const std::map<std::string, std::string> &getUnknownData() const;
+
     private:
         /// Type of the failure
         ErrorType m_result;
@@ -120,7 +138,8 @@ public:
         /// Filename of the output file
         std::string m_outputfilename;
 
-        /// Line number where the failure occurred (on invalid input or output file)
+        /// Line number where the failure occurred (on invalid input or output
+        /// file)
         size_t m_line;
 
         /// Description of the failure (on invalid input or output file)
@@ -132,6 +151,15 @@ public:
         /// All keys that contain invalid data
         std::vector<std::string> m_keys_invalidData;
 
+        // Mapping of unknown keys and associated data
+        std::map<std::string, std::string> m_unknownData;
+
+        /**
+         * @brief setUnknownData Replace the the unknown key value pairs
+         */
+        void setUnknownData(
+            const std::map<std::string, std::string> &unknownData);
+
         friend class GameConfig;
     };
 
@@ -140,8 +168,8 @@ public:
      * @param configName The configuration filename to load
      * @param configPath Where to look.
      */
-    GameConfig(const std::string& configName,
-               const std::string& configPath = getDefaultConfigPath());
+    GameConfig(const std::string &configName,
+               const std::string &configPath = getDefaultConfigPath());
 
     /**
      * @brief getFilePath Returns the system file path for the configuration
@@ -166,15 +194,16 @@ public:
     const ParseResult &getParseResult() const;
 
     /**
-     * @brief getConfigString Returns the content of the default INI configuration.
+     * @brief getConfigString Returns the content of the default INI
+     * configuration.
      * @return INI string
      */
     std::string getDefaultINIString();
 
-    const std::string& getGameDataPath() const {
+    const std::string &getGameDataPath() const {
         return m_gamePath;
     }
-    const std::string& getGameLanguage() const {
+    const std::string &getGameLanguage() const {
         return m_gameLanguage;
     }
     bool getInputInvertY() const {
@@ -186,6 +215,7 @@ private:
 
     /**
      * @brief parseConfig Load data from source and write it to destination.
+     * Whitespace will be stripped from unknown data.
      * @param srcType Can be DEFAULT | CONFIG | FILE | STRING
      * @param source don't care if srcType == (DEFAULT | CONFIG),
      *               path of INI file if srcType == FILE
@@ -197,7 +227,7 @@ private:
      * @return True if the parsing succeeded
      */
     ParseResult parseConfig(ParseType srcType, const std::string &source,
-        ParseType destType, std::string &destination);
+                            ParseType destType, std::string &destination);
 
     /* Config State */
     std::string m_configName;

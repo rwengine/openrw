@@ -23,8 +23,6 @@ struct CharacterWeaponSlot {
 };
 
 struct CharacterState {
-    glm::vec3 position;
-    float rotation;
     float health = 100.f;
     float armour = 0.f;
     std::array<CharacterWeaponSlot, kMaxInventorySlots> weapons;
@@ -61,6 +59,7 @@ private:
     bool motionBlockedByActivity;
 
     glm::vec3 updateMovementAnimation(float dt);
+    glm::vec3 currenteMovementStep;
 
     AnimCycle cycle_;
 
@@ -86,11 +85,13 @@ public:
 
     ~CharacterObject();
 
-    Type type() {
+    Type type() const override {
         return Character;
     }
 
-    void tick(float dt);
+    void tick(float dt) override;
+
+    void tickPhysics(float dt);
 
     const CharacterState& getCurrentState() const {
         return currentState;
@@ -111,7 +112,7 @@ public:
      */
     void updateCharacter(float dt);
 
-    virtual void setPosition(const glm::vec3& pos);
+    virtual void setPosition(const glm::vec3& pos) override;
 
     bool isPlayer() const;
 

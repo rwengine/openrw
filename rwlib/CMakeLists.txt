@@ -16,6 +16,7 @@ SET(RWLIB_SOURCES
 	"source/gl/TextureData.hpp"
 	"source/gl/TextureData.cpp"
 
+	"source/rw/abort.cpp"
 	"source/rw/types.hpp"
 	"source/rw/defines.hpp"
 

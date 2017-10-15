@@ -39,9 +39,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ### Third Party Licenses
 
-MAD is licensed under the GNU General Public License
+FFmpeg is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later
 
-* http://www.underbit.com/products/mad/
+* https://www.ffmpeg.org/legal.html
 
 Bullet Physics is licensed under the zlib license
 

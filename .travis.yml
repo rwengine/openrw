@@ -11,10 +11,10 @@ addons:
       - g++-5
       - libbullet-dev
       - libsdl2-dev
-      - libmad0-dev
       - libglm-dev
-      - libsndfile-dev
       - libopenal-dev
+      - libavcodec-dev
+      - libavformat-dev
       - libboost-filesystem-dev
       - libboost-program-options-dev
       # Dependencies for BUILD_TESTS

@@ -6,14 +6,13 @@
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
 
+#include <algorithm>
+
 // Required for BT_BULLET_VERSION
 #include "LinearMath/btScalar.h"
 #ifndef BT_BULLET_VERSION
 #warning Unable to find BT_BULLET_VERSION
 #endif
-
-// TODO: make this not hardcoded
-static glm::vec3 enter_offset(0.81756252f, 0.34800607f, -0.486281008f);
 
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
@@ -64,7 +63,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));
 
-        physObject = new btPairCachingGhostObject;
+        physObject = new btPairCachingGhostObject();
         physObject->setUserPointer(this);
         physObject->setWorldTransform(tf);
         physShape = new btCapsuleShapeZ(size.x, size.y);
@@ -118,7 +117,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // Things are simpler if we're in a vehicle
     if (getCurrentVehicle()) {
-        animator->playAnimation(0, animations->animation(AnimCycle::CarSit),
+        animator->playAnimation(AnimIndexMovement, animations->animation(AnimCycle::CarSit),
                                 1.f, true);
         return glm::vec3();
     }
@@ -250,13 +249,20 @@ void CharacterObject::tick(float dt) {
     }
 }
 
+void CharacterObject::tickPhysics(float dt) {
+    if (physCharacter) {
+        auto s = currenteMovementStep * dt;
+        physCharacter->setWalkDirection(
+            btVector3(s.x, s.y, s.z));
+    }
+}
+
 void CharacterObject::setRotation(const glm::quat& orientation) {
     m_look.x = glm::roll(orientation);
     rotation = orientation;
     getClump()->getFrame()->setRotation(glm::mat3_cast(rotation));
 }
 
-#include <algorithm>
 void CharacterObject::changeCharacterModel(const std::string& name) {
     auto modelName = std::string(name);
     std::transform(modelName.begin(), modelName.end(), modelName.begin(),
@@ -316,10 +322,9 @@ void CharacterObject::updateCharacter(float dt) {
         }
 
         if (isAlive()) {
-            physCharacter->setWalkDirection(
-                btVector3(walkDir.x, walkDir.y, walkDir.z));
+            currenteMovementStep = walkDir / dt;
         } else {
-            physCharacter->setWalkDirection(btVector3(0.f, 0.f, 0.f));
+            currenteMovementStep = glm::vec3();
         }
 
         auto Pos =
@@ -385,7 +390,7 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
 }
 
 bool CharacterObject::isPlayer() const {
-    return true; /// @todo implement detection via playerObject
+    return engine->state->playerObject == getGameObjectID();
 }
 
 bool CharacterObject::isAlive() const {

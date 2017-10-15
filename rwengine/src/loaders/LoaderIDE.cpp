@@ -65,8 +65,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     break;
                 case OBJS:
                 case TOBJ: {  // Supports Type 1, 2 and 3
-                    auto objs =
-                        std::unique_ptr<SimpleModelInfo>(new SimpleModelInfo);
+                    auto objs = std::make_unique<SimpleModelInfo>();
 
                     getline(strstream, buff, ',');
                     objs->setModelID(atoi(buff.c_str()));
@@ -102,8 +101,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     break;
                 }
                 case CARS: {
-                    auto cars =
-                        std::unique_ptr<VehicleModelInfo>(new VehicleModelInfo);
+                    auto cars = std::make_unique<VehicleModelInfo>();
 
                     getline(strstream, buff, ',');
                     cars->setModelID(std::atoi(buff.c_str()));
@@ -150,7 +148,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     break;
                 }
                 case PEDS: {
-                    auto peds = std::unique_ptr<PedModelInfo>(new PedModelInfo);
+                    auto peds = std::make_unique<PedModelInfo>();
 
                     getline(strstream, buff, ',');
                     peds->setModelID(std::atoi(buff.c_str()));
@@ -246,8 +244,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     break;
                 }
                 case HIER: {
-                    auto hier =
-                        std::unique_ptr<ClumpModelInfo>(new ClumpModelInfo);
+                    auto hier = std::make_unique<ClumpModelInfo>();
 
                     getline(strstream, buff, ',');
                     hier->setModelID(std::atoi(buff.c_str()));

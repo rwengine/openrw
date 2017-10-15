@@ -12,6 +12,7 @@ find_package(Boost COMPONENTS filesystem unit_test_framework REQUIRED)
 
 set(TEST_SOURCES
 	"main.cpp"
+        "test_globals.cpp"
 	"test_animation.cpp"
 	"test_archive.cpp"
 	"test_buoyancy.cpp"

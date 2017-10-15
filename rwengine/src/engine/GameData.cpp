@@ -355,7 +355,7 @@ void GameData::loadTXD(const std::string& name) {
         return;
     }
 
-    textureslots[slot] = std::move(loadTextureArchive(name));
+    textureslots[slot] = loadTextureArchive(name);
 }
 
 TextureArchive GameData::loadTextureArchive(const std::string& name) {

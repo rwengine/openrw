@@ -5,6 +5,11 @@
 #include <iostream>
 #include <sstream>
 
+namespace {
+constexpr GLuint kUBOIndexScene = 1;
+constexpr GLuint kUBOIndexDraw = 2;
+}
+
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, NULL);
@@ -124,7 +129,10 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff) {
 
 void OpenGLRenderer::useTexture(GLuint unit, GLuint tex) {
     if (currentTextures[unit] != tex) {
-        glActiveTexture(GL_TEXTURE0 + unit);
+        if (currentUnit != unit) {
+            glActiveTexture(GL_TEXTURE0 + unit);
+            currentUnit = unit;
+        }
         glBindTexture(GL_TEXTURE_2D, tex);
         currentTextures[unit] = tex;
         textureCounter++;
@@ -143,67 +151,21 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p) {
     }
 }
 
-#if 0
-template<>
-void OpenGLRenderer::uploadUBO<OpenGLRenderer::ObjectUniformData>(GLuint buffer, const ObjectUniformData& data)
-{
-	if( currentUBO != buffer ) {
-		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-		currentUBO = buffer;
-	}
-	/*glBindBufferRange(GL_UNIFORM_BUFFER,
-					  2,
-					  UBOObject,
-					  entryAlignment * currentObjectEntry,
-					  sizeof(ObjectUniformData));*/
-	glBufferSubData(GL_UNIFORM_BUFFER,
-					0,
-					sizeof(ObjectUniformData), &data);
-#if RW_PROFILER
-	if( currentDebugDepth > 0 )
-	{
-		profileInfo[currentDebugDepth-1].uploads++;
-	}
-#endif
-	currentObjectEntry = (currentObjectEntry+1) % maxObjectEntries;
-}
-#endif
-
-OpenGLRenderer::OpenGLRenderer()
-    : currentDbuff(nullptr)
-    , currentProgram(nullptr)
-    , currentUBO(0)
-    , maxObjectEntries(0)
-    , currentObjectEntry(0)
-    , entryAlignment(0)
-    , blendEnabled(false)
-    , depthWriteEnabled(true)
-    , currentDebugDepth(0) {
+OpenGLRenderer::OpenGLRenderer() {
     // We need to query for some profiling exts.
     ogl_CheckExtensions();
 
-    glGenBuffers(1, &UBOScene);
-    glGenBuffers(1, &UBOObject);
+    glGenQueries(1, &debugQuery);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBOScene);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 2, UBOObject);
+    createUBO(UBOScene, sizeof(SceneUniformData), sizeof(SceneUniformData));
+    glBindBufferBase(GL_UNIFORM_BUFFER, kUBOIndexScene, UBOScene.name);
+
+    GLint MaxUBOSize;
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &MaxUBOSize);
+
+    createUBO(UBOObject, MaxUBOSize, sizeof(ObjectUniformData));
 
     swap();
-
-    GLint maxUBOSize, UBOAlignment;
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUBOSize);
-    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &UBOAlignment);
-    entryAlignment = 128;
-    maxObjectEntries = maxUBOSize / entryAlignment;
-    std::cout << "Max UBO Size: " << maxUBOSize << std::endl;
-    std::cout << "UBO Alignment: " << UBOAlignment << std::endl;
-    std::cout << "Max batch size: " << maxObjectEntries << std::endl;
-
-    glBindBuffer(GL_UNIFORM_BUFFER, UBOObject);
-    glBufferData(GL_UNIFORM_BUFFER, entryAlignment * maxObjectEntries, NULL,
-                 GL_STREAM_DRAW);
-
-    glGenQueries(1, &debugQuery);
 }
 
 std::string OpenGLRenderer::getIDString() const {
@@ -312,11 +274,11 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
     setBlend(p.blend);
     setDepthWrite(p.depthWrite);
 
-    ObjectUniformData oudata{model,
+    ObjectUniformData objectData{model,
                              glm::vec4(p.colour.r / 255.f, p.colour.g / 255.f,
                                        p.colour.b / 255.f, p.colour.a / 255.f),
                              1.f, 1.f, p.visibility};
-    uploadUBO(UBOObject, oudata);
+    uploadUBO(UBOObject, objectData);
 
     drawCounter++;
 #if RW_PROFILER
@@ -397,6 +359,55 @@ void OpenGLRenderer::invalidate() {
     currentProgram = nullptr;
     currentTextures.clear();
     currentUBO = 0;
+    blendEnabled = false;
+    glDisable(GL_BLEND);
+}
+
+bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
+{
+    glGenBuffers(1, &out.name);
+    glBindBuffer(GL_UNIFORM_BUFFER, out.name);
+    glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STREAM_DRAW);
+
+    if (entrySize != size) {
+        GLint UBOAlignment;
+        glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &UBOAlignment);
+        RW_ASSERT(UBOAlignment > 0);
+        entrySize = ((entrySize + (UBOAlignment-1))/UBOAlignment) * UBOAlignment;
+    }
+
+    out.bufferSize = size;
+    out.entrySize = entrySize;
+    out.entryCount = size / entrySize;
+
+    return true;
+}
+
+void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t size)
+{
+    attachUBO(buffer.name);
+    if (buffer.entryCount > 1) {
+        RW_ASSERT(size <= buffer.entrySize);
+        if (buffer.currentEntry >= buffer.entryCount) {
+            // Orphan the buffer, we don't want it anymore
+            glBufferData(GL_UNIFORM_BUFFER, buffer.bufferSize, NULL,
+                         GL_STREAM_DRAW);
+            buffer.currentEntry = 0;
+        }
+        const auto offset = buffer.currentEntry * buffer.entrySize;
+        const auto flags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT
+                           | GL_MAP_UNSYNCHRONIZED_BIT;
+        void* dst = glMapBufferRange(GL_UNIFORM_BUFFER, offset,
+                                     buffer.entrySize, flags);
+        RW_ASSERT(dst != nullptr);
+        memcpy(dst, data, size);
+        glUnmapBuffer(GL_UNIFORM_BUFFER);
+        glBindBufferRange(GL_UNIFORM_BUFFER, kUBOIndexDraw, buffer.name, offset, size);
+        buffer.currentEntry++;
+    }
+    else {
+        glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW);
+    }
 }
 
 void OpenGLRenderer::pushDebugGroup(const std::string& title) {
@@ -411,7 +422,7 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title) {
         glGetQueryObjectui64v(debugQuery, GL_QUERY_RESULT, &prof.timerStart);
 
         currentDebugDepth++;
-        assert(currentDebugDepth < MAX_DEBUG_DEPTH);
+        RW_ASSERT(currentDebugDepth < MAX_DEBUG_DEPTH);
     }
 #else
     RW_UNUSED(title);
@@ -423,7 +434,7 @@ const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
     if (ogl_ext_KHR_debug) {
         glPopDebugGroup();
         currentDebugDepth--;
-        assert(currentDebugDepth >= 0);
+        RW_ASSERT(currentDebugDepth >= 0);
 
         ProfileInfo& prof = profileInfo[currentDebugDepth];
 

@@ -63,6 +63,13 @@ public:
         states.back()->draw(r);
     }
 
+    static State* currentState() {
+        if (StateManager::get().states.empty()) {
+            return nullptr;
+        }
+        return StateManager::get().states.back().get();
+    }
+
 private:
     bool cleared = false;
 };

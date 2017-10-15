@@ -17,6 +17,7 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
 
         while (std::getline(dfile, lineBuff)) {
             if (lineBuff.at(0) == ';') continue;
+            if (lineBuff.at(0) == '*') continue;
             std::stringstream ss(lineBuff);
 
             DynamicObjectDataPtr dyndata(new DynamicObjectData);
@@ -48,6 +49,8 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             dyndata->collResponseFlags = tmp;
             if (ss.peek() == ',') ss.ignore(1);
             ss >> dyndata->cameraAvoid;
+
+            RW_CHECK(ss.eof() || ss.good(), "Loading dynamicsObject data file " << name << " failed");
 
             data.insert({dyndata->modelName, dyndata});
         }
@@ -114,6 +117,8 @@ void GenericDATLoader::loadWeapons(const std::string& name,
             ss >> data->modelID;
             ss >> data->flags;
 
+            RW_CHECK(ss.eof() || ss.good(), "Loading weapon data file " << name << " failed");
+
             data->inventorySlot = slotNum++;
 
             weaponData.push_back(data);
@@ -166,6 +171,8 @@ void GenericDATLoader::loadHandling(const std::string& name,
             ss >> info.suspensionLowerLimit;
             ss >> info.suspensionBias;
             ss >> std::hex >> info.flags;
+
+            RW_CHECK(ss.eof() || ss.good(), "Loading handling data file " << name << " failed");
 
             auto mit = vehicleData.find(info.ID);
             if (mit == vehicleData.end()) {

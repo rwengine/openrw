@@ -97,6 +97,6 @@ void BenchmarkState::handleEvent(const SDL_Event& e) {
     State::handleEvent(e);
 }
 
-const ViewCamera& BenchmarkState::getCamera() {
+const ViewCamera& BenchmarkState::getCamera(float) {
     return trackCam;
 }

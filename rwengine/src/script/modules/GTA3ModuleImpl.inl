@@ -855,6 +855,8 @@ void opcode_004f(const ScriptArguments& args, const ScriptLabel arg1) {
 	/// @todo prevent overflow
 	/// @todo don't do pointer casting
 	for (auto i = 1u; i < args.getParameters().size(); ++i) {
+		if (args[i].type == EndOfArgList)
+			break;
 		*reinterpret_cast<ScriptInt*>(thread.locals.data() +
 		                        sizeof(ScriptInt) * (i - 1)) =
 		    args[i].integerValue();
@@ -1615,9 +1617,7 @@ void opcode_008b(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2G
 	@arg arg2G 
 */
 void opcode_008c(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008c);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = static_cast<ScriptInt>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1629,9 +1629,7 @@ void opcode_008c(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg
 	@arg arg2G 
 */
 void opcode_008d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008d);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2G);
+	arg1G = static_cast<ScriptFloat>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1643,9 +1641,7 @@ void opcode_008d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg
 	@arg arg2G 
 */
 void opcode_008e(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008e);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = static_cast<ScriptInt>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1657,9 +1653,7 @@ void opcode_008e(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg
 	@arg arg2G 
 */
 void opcode_008f(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg2G) {
-	RW_UNIMPLEMENTED_OPCODE(0x008f);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2G);
+	arg1L = static_cast<ScriptFloat>(arg2G);
 	RW_UNUSED(args);
 }
 
@@ -1671,9 +1665,7 @@ void opcode_008f(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg
 	@arg arg2L 
 */
 void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0090);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = static_cast<ScriptInt>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1685,9 +1677,7 @@ void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg
 	@arg arg2L 
 */
 void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0091);
-	RW_UNUSED(arg1G);
-	RW_UNUSED(arg2L);
+	arg1G = static_cast<ScriptFloat>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1699,9 +1689,7 @@ void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg
 	@arg arg2L 
 */
 void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0092);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = static_cast<ScriptInt>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1713,9 +1701,7 @@ void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg
 	@arg arg2L 
 */
 void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg2L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0093);
-	RW_UNUSED(arg1L);
-	RW_UNUSED(arg2L);
+	arg1L = static_cast<ScriptFloat>(arg2L);
 	RW_UNUSED(args);
 }
 
@@ -1726,8 +1712,7 @@ void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg
 	@arg arg1G 
 */
 void opcode_0094(const ScriptArguments& args, ScriptInt& arg1G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0094);
-	RW_UNUSED(arg1G);
+	arg1G = std::abs(arg1G);
 	RW_UNUSED(args);
 }
 
@@ -1738,8 +1723,7 @@ void opcode_0094(const ScriptArguments& args, ScriptInt& arg1G) {
 	@arg arg1L 
 */
 void opcode_0095(const ScriptArguments& args, ScriptInt& arg1L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0095);
-	RW_UNUSED(arg1L);
+	arg1L = std::abs(arg1L);
 	RW_UNUSED(args);
 }
 
@@ -1750,8 +1734,7 @@ void opcode_0095(const ScriptArguments& args, ScriptInt& arg1L) {
 	@arg arg1G 
 */
 void opcode_0096(const ScriptArguments& args, ScriptFloat& arg1G) {
-	RW_UNIMPLEMENTED_OPCODE(0x0096);
-	RW_UNUSED(arg1G);
+	arg1G = std::abs(arg1G);
 	RW_UNUSED(args);
 }
 
@@ -1762,8 +1745,7 @@ void opcode_0096(const ScriptArguments& args, ScriptFloat& arg1G) {
 	@arg arg1L 
 */
 void opcode_0097(const ScriptArguments& args, ScriptFloat& arg1L) {
-	RW_UNIMPLEMENTED_OPCODE(0x0097);
-	RW_UNUSED(arg1L);
+	arg1L = std::abs(arg1L);
 	RW_UNUSED(args);
 }
 
@@ -2177,6 +2159,7 @@ void opcode_00bc(const ScriptArguments& args, const ScriptString gxtEntry, const
 	const auto& text = script::gxt(args, gxtEntry);
 	RW_UNUSED(arg3);
 	RW_UNIMPLEMENTED("Unclear what style should be used");
+	args.getWorld()->state->text.clear<ScreenTextType::HighPriority>();
 	args.getWorld()->state->text.addText<ScreenTextType::HighPriority>(
 				ScreenTextEntry::makeHighPriority(
 					gxtEntry, text, time
@@ -8276,7 +8259,7 @@ void opcode_02e6(const ScriptArguments& args, const ScriptObject object, const S
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		cutscene->animator->playAnimation(0, anim, 1.f, false);
+		cutscene->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
@@ -8483,7 +8466,7 @@ void opcode_02f5(const ScriptArguments& args, const ScriptObject object, const S
 	std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
 	Animation* anim = args.getWorld()->data->animations[animName];
 	if( anim ) {
-		head->animator->playAnimation(0, anim, 1.f, false);
+		head->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
 	}
 	else {
 		args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
@@ -8498,9 +8481,7 @@ void opcode_02f5(const ScriptArguments& args, const ScriptObject object, const S
 	@arg xOffset X offset
 */
 void opcode_02f6(const ScriptArguments& args, const ScriptFloat angle, ScriptFloat& xOffset) {
-	RW_UNIMPLEMENTED_OPCODE(0x02f6);
-	RW_UNUSED(angle);
-	RW_UNUSED(xOffset);
+	xOffset = glm::sin(glm::radians(angle));
 	RW_UNUSED(args);
 }
 
@@ -8512,9 +8493,7 @@ void opcode_02f6(const ScriptArguments& args, const ScriptFloat angle, ScriptFlo
 	@arg yOffset Y offset
 */
 void opcode_02f7(const ScriptArguments& args, const ScriptFloat angle, ScriptFloat& yOffset) {
-	RW_UNIMPLEMENTED_OPCODE(0x02f7);
-	RW_UNUSED(angle);
-	RW_UNUSED(yOffset);
+	yOffset = glm::cos(glm::radians(angle));
 	RW_UNUSED(args);
 }
 
@@ -11791,7 +11770,7 @@ bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const S
 	@arg gxtEntry GXT entry
 */
 void opcode_03d5(const ScriptArguments& args, const ScriptString gxtEntry) {
-	args.getWorld()->state->text.remove<ScreenTextType::Big>(gxtEntry);
+	args.getWorld()->state->text.remove<ScreenTextType::HighPriority>(gxtEntry);
 }
 
 /**
@@ -12695,16 +12674,14 @@ bool opcode_0424(const ScriptArguments& args) {
 }
 
 /**
-	@brief convert_metres_to_feet %2d% store_to %1d%
+	@brief %2d% = meters_to_feet %1d% 
 
 	opcode 0425
 	@arg arg1 
 	@arg arg2 
 */
 void opcode_0425(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x0425);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
+	arg2 = arg1 * 3.333333;
 	RW_UNUSED(args);
 }
 
@@ -12791,16 +12768,14 @@ void opcode_042c(const ScriptArguments& args, const ScriptInt arg1) {
 }
 
 /**
-	@brief %2d% = metric_to_imperial %1d%
+	@brief %2d% = round(meters_to_feet(%1d%)) 
 
 	opcode 042d
 	@arg arg1 
 	@arg arg2 
 */
 void opcode_042d(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2) {
-	RW_UNIMPLEMENTED_OPCODE(0x042d);
-	RW_UNUSED(arg1);
-	RW_UNUSED(arg2);
+	arg2 = static_cast<ScriptInt>(std::floor(static_cast<ScriptFloat>(arg1) * 3.3333334));
 	RW_UNUSED(args);
 }
 
