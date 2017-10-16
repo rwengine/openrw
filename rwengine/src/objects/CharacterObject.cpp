@@ -472,7 +472,7 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
 void CharacterObject::jump() {
     if (physCharacter) {
-        physCharacter->jump();
+        physCharacter->jump(btVector3(0.f, 0.f, 0.f));
         jumped = true;
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
