@@ -472,7 +472,11 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
 void CharacterObject::jump() {
     if (physCharacter) {
+#if BT_BULLET_VERSION < 285
         physCharacter->jump();
+#else
+        physCharacter->jump(btVector3(0.f, 0.f, 0.f));
+#endif
         jumped = true;
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
