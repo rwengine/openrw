@@ -864,6 +864,17 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
         /// @todo use zone information to decide vehicle id
     }
 
+    auto model = data->findModelInfo<VehicleModelInfo>(id);
+    RW_ASSERT(model);
+    if (model) {
+        auto info = data->vehicleInfo.find(model->handling_);
+        if (info != data->vehicleInfo.end()) {
+            const auto& handling = info->second->handling;
+            position.z +=
+                (handling.dimensions.z / 2.f) - handling.centerOfMass.z;
+        }
+    }
+
     auto vehicle = createVehicle(id, position);
     vehicle->setHeading(gen.heading);
     vehicle->setLifetime(GameObject::TrafficLifetime);
