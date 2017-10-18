@@ -68,11 +68,11 @@ DrawBuffer ssRectDraw;
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)
-    , renderer(new OpenGLRenderer)
+    , renderer(std::make_unique<OpenGLRenderer>())
     , _renderAlpha(0.f)
     , _renderWorld(nullptr)
     , cullOverride(false)
-    , map(renderer, _data)
+    , map(renderer.get(), _data)
     , water(this)
     , text(this) {
     logger->info("Renderer", renderer->getIDString());
