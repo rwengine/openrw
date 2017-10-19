@@ -232,6 +232,7 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
     if (handFrame) {
         auto simple =
             m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
+        RW_CHECK(simple, "Failed to read modelinfo using " << weapon->modelID);
         auto itematomic = simple->getAtomic(0);
         renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr,
                      outList);
@@ -308,6 +309,8 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 
     auto odata = pickup->getModelInfo<SimpleModelInfo>();
 
+    RW_CHECK(odata, "Failed to read modelinfo for Pickup");
+
     auto atomic = odata->getAtomic(0);
 
     renderAtomic(atomic, modelMatrix, nullptr, outList);
@@ -339,6 +342,8 @@ void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
 
     auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
         projectile->getProjectileInfo().weapon->modelID);
+
+    RW_CHECK(odata, "Failed to read modelinfo");
 
     auto atomic = odata->getAtomic(0);
     renderAtomic(atomic, modelMatrix, nullptr, outList);
