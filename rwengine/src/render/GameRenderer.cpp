@@ -250,7 +250,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     glm::vec3 ambient = weather.ambientColor;
     glm::vec3 dynamic = weather.directLightColor;
 
-    float theta = (tod / (60.f * 24.f) - 0.5f) * 2 * 3.14159265;
+    float theta = (tod / (60.f * 24.f) - 0.5f) * 2.f * glm::pi<float>();
     glm::vec3 sunDirection{
         sin(theta), 0.0, cos(theta),
     };

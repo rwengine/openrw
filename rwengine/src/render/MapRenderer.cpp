@@ -147,7 +147,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
 
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
-        model = glm::scale(model, glm::vec3(mi.screenSize * 1.07));
+        model = glm::scale(model, glm::vec3(mi.screenSize * 1.07f));
         renderer->setUniform(rectProg, "model", model);
         renderer->drawArrays(glm::mat4(), &rect, dp);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,

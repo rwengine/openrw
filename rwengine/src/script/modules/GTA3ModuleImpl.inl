@@ -12546,7 +12546,7 @@ bool opcode_0424(const ScriptArguments& args) {
 	@arg arg2 
 */
 void opcode_0425(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2) {
-	arg2 = arg1 * 3.333333;
+	arg2 = arg1 * 3.333333f;
 	RW_UNUSED(args);
 }
 
@@ -12640,7 +12640,7 @@ void opcode_042c(const ScriptArguments& args, const ScriptInt arg1) {
 	@arg arg2 
 */
 void opcode_042d(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2) {
-	arg2 = static_cast<ScriptInt>(std::floor(static_cast<ScriptFloat>(arg1) * 3.3333334));
+	arg2 = static_cast<ScriptInt>(std::floor(static_cast<ScriptFloat>(arg1) * 3.3333334f));
 	RW_UNUSED(args);
 }
 
