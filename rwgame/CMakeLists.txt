@@ -48,6 +48,7 @@ add_executable(rwgame
 target_include_directories(rwgame
     SYSTEM
     PRIVATE
+        ${Boost_INCLUDE_DIRS}
         ${BULLET_INCLUDE_DIR}
         ${OPENAL_INCLUDE_DIR}
     )
@@ -60,7 +61,7 @@ target_include_directories(rwgame
 target_link_libraries(rwgame
     PRIVATE
         rwengine
-        ${Boost_LIBRARIES}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${OPENGL_LIBRARIES}
         ${BULLET_LIBRARIES}
         SDL2::SDL2
