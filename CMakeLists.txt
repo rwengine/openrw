@@ -6,11 +6,6 @@ project(OpenRW)
 # Options
 #
 
-# Global Build Configuration
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRW_DEBUG=1")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pthread -Wextra -Wpedantic -Wdouble-promotion")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-
 option(RW_VERBOSE_DEBUG_MESSAGES "Print verbose debugging messages" ON)
 
 # Optional components
@@ -32,57 +27,75 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)
 endif()
 
+add_library(rw_interface INTERFACE)
+add_library(openrw::interface ALIAS rw_interface)
+
+# target_compile_features(rw_interface INTERFACE cxx_std_14) is not supported by CMake 3.2
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+target_compile_options(rw_interface
+    INTERFACE
+        "-Wall"
+        "-Wextra"
+        "-Wdouble-promotion"
+        "-Wpedantic"
+        "-pthread"
+    )
+target_compile_definitions(rw_interface
+    INTERFACE
+        "$<$<CONFIG:Debug>:RW_DEBUG=1>"
+        "GLM_FORCE_RADIANS"
+        "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
+    )
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DRW_LINUX)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_definitions(-DRW_OSX)
+    target_compile_definitions(rw_interface INTERFACE "RW_LINUX")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_compile_definitions(rw_interface INTERFACE "RW_OSX")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-	add_definitions(-DRW_FREEBSD)
+    target_compile_definitions(rw_interface INTERFACE "RW_FREEBSD")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
-	add_definitions(-DRW_NETBSD)
+    target_compile_definitions(rw_interface INTERFACE "RW_NETBSD")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
-	add_definitions(-DRW_OPENBSD)
+    target_compile_definitions(rw_interface INTERFACE "RW_OPENBSD")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	add_definitions(-DRW_WINDOWS)
+    target_compile_definitions(rw_interface INTERFACE "RW_WINDOWS")
 else ()
-	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
+    message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
+    target_compile_options(rw_interface INTERFACE "-Wno-gnu-array-member-paren-init")
 endif()
 
 if(MINGW)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+    target_compile_options(rw_interface INTERFACE "-fpermissive")
 endif()
 
-# Make GLM use radians
-add_definitions(-DGLM_FORCE_RADIANS)
+target_compile_definitions(rw_interface
+    INTERFACE
+        "RENDER_PROFILER=0"
+        "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
+    )
 
-IF(${ENABLE_PROFILING})
-	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=1)
-else()
-	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=0)
-ENDIF()
-
-IF(${ENABLE_SCRIPT_DEBUG})
-	add_definitions(-DRW_SCRIPT_DEBUG)
+IF(ENABLE_SCRIPT_DEBUG)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            "RW_SCRIPT_DEBUG"
+    )
 ENDIF()
 
 if(FAILED_CHECK_ACTION STREQUAL "IGNORE")
-    add_definitions(-DRW_FAILED_CHECK_ACTION=0)
+    target_compile_definitions(rw_interface INTERFACE "RW_FAILED_CHECK_ACTION=0")
 elseif(FAILED_CHECK_ACTION STREQUAL "ABORT")
-    add_definitions(-DRW_FAILED_CHECK_ACTION=1)
+    target_compile_definitions(rw_interface INTERFACE "RW_FAILED_CHECK_ACTION=1")
 elseif(FAILED_CHECK_ACTION STREQUAL "BREAKPOINT")
-    add_definitions(-DRW_FAILED_CHECK_ACTION=2)
+    target_compile_definitions(rw_interface INTERFACE "RW_FAILED_CHECK_ACTION=2")
 else()
     message(FATAL_ERROR "Illegal FAILED_CHECK_ACTION option.")
-endif()
-
-if(${RW_VERBOSE_DEBUG_MESSAGES})
-	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=1)
-else()
-	add_definitions(-DRW_VERBOSE_DEBUG_MESSAGES=0)
 endif()
 
 if(NOT DEFINED BIN_DIR)
@@ -100,14 +113,6 @@ find_package(Bullet REQUIRED)
 find_package(GLM REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
-
-include_directories(
-	${SDL2_INCLUDE_DIR}
-	${GLM_INCLUDE_DIRS}
-	${OPENGL_INCLUDE_DIR}
-	${BULLET_INCLUDE_DIRS}
-	${OPENAL_INCLUDE_DIR}
-)
 
 # External-internal dependencies
 add_subdirectory(cmake/external)

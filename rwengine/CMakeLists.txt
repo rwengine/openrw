@@ -134,24 +134,23 @@ add_library(rwengine
     ${RWENGINE_SOURCES}
 )
 
-if(MINGW)
-	target_link_libraries(rwengine)
-endif()
-
 target_link_libraries(rwengine
+    PUBLIC
 	rwlib
+    PRIVATE
 	${FFMPEG_LIBRARIES}
 	${OPENAL_LIBRARY}
-	${OPENRW_PLATFORM_LIBS}
-	${SDL2_LIBRARY})
+    )
 
-include_directories(SYSTEM
-	${BULLET_INCLUDE_DIR}
-	${FFMPEG_INCLUDE_DIR}
-	${OPENAL_INCLUDE_DIR}
-	)
+target_include_directories(rwengine
+    SYSTEM
+    PUBLIC
+        ${BULLET_INCLUDE_DIR}
+        ${FFMPEG_INCLUDE_DIR}
+        ${OPENAL_INCLUDE_DIR}
+    )
 
-target_include_directories(
-	rwengine
-	PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
-	)
+target_include_directories(rwengine
+    PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    )

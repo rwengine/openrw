@@ -44,14 +44,21 @@ add_library(rwlib
 	${RWLIB_SOURCES}
 	)
 
-include_directories(
+target_include_directories(rwlib
+    PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/source"
-	"${Boost_INCLUDE_DIRS}")
+    )
 
 target_include_directories(rwlib
-	PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/source")
+    SYSTEM
+    PUBLIC
+	"${Boost_INCLUDE_DIRS}"
+    )
 
 target_link_libraries(rwlib
-	${OPENGL_LIBRARIES}
-	${OPENRW_PLATFORM_LIBS}
-	${Boost_LIBRARIES})
+    PUBLIC
+        openrw::interface
+    PRIVATE
+        ${OPENGL_LIBRARIES}
+        ${Boost_LIBRARIES}
+    )

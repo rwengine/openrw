@@ -3,7 +3,7 @@
 
 #include <glm/vec2.hpp>
 #include <string>
-#include "SDL.h"
+#include <SDL.h>
 
 #include <render/GameRenderer.hpp>
 
