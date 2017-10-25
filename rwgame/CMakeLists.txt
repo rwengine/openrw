@@ -50,7 +50,6 @@ target_include_directories(rwgame
     PRIVATE
         ${BULLET_INCLUDE_DIR}
         ${OPENAL_INCLUDE_DIR}
-        ${SDL2_INCLUDE_DIR}
     )
 
 target_include_directories(rwgame
@@ -64,7 +63,7 @@ target_link_libraries(rwgame
         ${Boost_LIBRARIES}
         ${OPENGL_LIBRARIES}
         ${BULLET_LIBRARIES}
-        ${SDL2_LIBRARY}
+        SDL2::SDL2
     )
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
