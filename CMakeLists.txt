@@ -130,10 +130,10 @@ add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 
 if(BUILD_VIEWER)
-	add_subdirectory(rwviewer)
+    add_subdirectory(rwviewer)
 endif()
 if(BUILD_TESTS)
-	add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 #
@@ -142,11 +142,11 @@ endif()
 
 # Copy License file to install directory
 if(CMAKE_SYSTEM_NAME MATCHES "Linux|FreeBSD")
-	install(FILES COPYING
-			DESTINATION "${DOC_DIR}"
-			)
+    install(FILES COPYING
+        DESTINATION "${DOC_DIR}"
+    )
 endif()
 # And copy to build directory for CI
 file(COPY COPYING
-	 DESTINATION .
-	 )
+    DESTINATION .
+    )
