@@ -148,6 +148,7 @@ add_library(rwengine
 target_link_libraries(rwengine
     PUBLIC
         rwlib
+        glm::glm
     PRIVATE
         ${FFMPEG_LIBRARIES}
         ${OPENAL_LIBRARY}
