@@ -50,7 +50,7 @@ target_include_directories(rwlib
 target_include_directories(rwlib
     SYSTEM
     PUBLIC
-        "${Boost_INCLUDE_DIRS}"
+        ${Boost_INCLUDE_DIRS}
     )
 
 target_link_libraries(rwlib
@@ -58,5 +58,6 @@ target_link_libraries(rwlib
         openrw::interface
     PRIVATE
         ${OPENGL_LIBRARIES}
-        ${Boost_LIBRARIES}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
     )

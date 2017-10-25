@@ -2,7 +2,7 @@
 #    Unit Tests
 ##############################################################################
 
-find_package(Boost COMPONENTS filesystem unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS filesystem unit_test_framework system REQUIRED)
 
 set(TEST_SOURCES
     main.cpp
@@ -59,6 +59,7 @@ target_compile_definitions(run_tests
 target_include_directories(run_tests
     SYSTEM
     PRIVATE
+        ${Boost_INCLUDE_DIRS}
         ${BULLET_INCLUDE_DIR}
     )
 
@@ -75,7 +76,9 @@ target_link_libraries(run_tests
         ${BULLET_LIBRARIES}
         SDL2::SDL2
         ${PNG_LIBRARIES}
+        ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
     )
 
 add_test(UnitTests run_tests)
