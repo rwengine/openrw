@@ -23,7 +23,9 @@ add_executable(rwviewer
 	AnimationListModel.cpp
 	AnimationListWidget.cpp)
 
-include_directories(SYSTEM
+target_include_directories(rwviewer
+    SYSTEM
+    PRIVATE
 	${BULLET_INCLUDE_DIR})
 
 target_link_libraries(rwviewer

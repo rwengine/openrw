@@ -37,30 +37,33 @@ set(RWGAME_SOURCES
 	states/DebugState.cpp
 	states/BenchmarkState.hpp
 	states/BenchmarkState.cpp
-	
+
 	DrawUI.cpp
 )
 
 add_executable(rwgame
 	${RWGAME_SOURCES})
 
-include_directories(SYSTEM
-	${BULLET_INCLUDE_DIR}
-	${OPENAL_INCLUDE_DIR}
-	)
-include_directories(
-	"${CMAKE_SOURCE_DIR}/rwgame"
-	)
+target_include_directories(rwgame
+    SYSTEM
+    PRIVATE
+        ${BULLET_INCLUDE_DIR}
+        ${OPENAL_INCLUDE_DIR}
+        ${SDL2_INCLUDE_DIR}
+    )
+
+target_include_directories(rwgame
+    PUBLIC
+        "${CMAKE_SOURCE_DIR}/rwgame"
+    )
 
 target_link_libraries(rwgame
+    PRIVATE
 	rwengine
 	${Boost_LIBRARIES}
 	${OPENGL_LIBRARIES}
 	${BULLET_LIBRARIES}
 	${SDL2_LIBRARY}
-	)
-if(MINGW)
-	target_link_libraries(rwgame)
-endif()
+    )
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
