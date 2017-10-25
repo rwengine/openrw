@@ -63,11 +63,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
     target_compile_definitions(rw_interface INTERFACE "RW_OPENBSD")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions(rw_interface INTERFACE "RW_WINDOWS")
-else ()
+else()
     message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
-endif ()
+endif()
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     target_compile_options(rw_interface INTERFACE "-Wno-gnu-array-member-paren-init")
 endif()
 
@@ -81,12 +81,12 @@ target_compile_definitions(rw_interface
         "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
     )
 
-IF(ENABLE_SCRIPT_DEBUG)
+if(ENABLE_SCRIPT_DEBUG)
     target_compile_definitions(rw_interface
         INTERFACE
             "RW_SCRIPT_DEBUG"
     )
-ENDIF()
+endif()
 
 if(FAILED_CHECK_ACTION STREQUAL "IGNORE")
     target_compile_definitions(rw_interface INTERFACE "RW_FAILED_CHECK_ACTION=0")
@@ -129,19 +129,19 @@ add_subdirectory(rwlib)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 
-IF(${BUILD_VIEWER})
+if(BUILD_VIEWER)
 	add_subdirectory(rwviewer)
-ENDIF()
-IF(${BUILD_TESTS})
+endif()
+if(BUILD_TESTS)
 	add_subdirectory(tests)
-ENDIF()
+endif()
 
 #
 # Finally
 #
 
 # Copy License file to install directory
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
+if(CMAKE_SYSTEM_NAME MATCHES "Linux|FreeBSD")
 	install(FILES COPYING
 			DESTINATION "${DOC_DIR}"
 			)
