@@ -3,46 +3,47 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
 set(RWGAME_SOURCES
-	GitSHA1.h
-	"${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp"
+    GitSHA1.h
+    "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp"
 
-	main.cpp
+    main.cpp
 
-	GameBase.hpp
-	GameBase.cpp
-	RWGame.cpp
+    GameBase.hpp
+    GameBase.cpp
+    RWGame.cpp
 
-	GameConfig.cpp
-	GameWindow.cpp
+    GameConfig.cpp
+    GameWindow.cpp
 
-	StateManager.hpp
-	StateManager.cpp
-	State.cpp
+    StateManager.hpp
+    StateManager.cpp
+    State.cpp
 
-	MenuSystem.hpp
-	MenuSystem.cpp
+    MenuSystem.hpp
+    MenuSystem.cpp
 
-	GameInput.hpp
-	GameInput.cpp
+    GameInput.hpp
+    GameInput.cpp
 
-	states/LoadingState.hpp
-	states/LoadingState.cpp
-	states/IngameState.hpp
-	states/IngameState.cpp
-	states/PauseState.hpp
-	states/PauseState.cpp
-	states/MenuState.hpp
-	states/MenuState.cpp
-	states/DebugState.hpp
-	states/DebugState.cpp
-	states/BenchmarkState.hpp
-	states/BenchmarkState.cpp
+    states/LoadingState.hpp
+    states/LoadingState.cpp
+    states/IngameState.hpp
+    states/IngameState.cpp
+    states/PauseState.hpp
+    states/PauseState.cpp
+    states/MenuState.hpp
+    states/MenuState.cpp
+    states/DebugState.hpp
+    states/DebugState.cpp
+    states/BenchmarkState.hpp
+    states/BenchmarkState.cpp
 
-	DrawUI.cpp
-)
+    DrawUI.cpp
+    )
 
 add_executable(rwgame
-	${RWGAME_SOURCES})
+    ${RWGAME_SOURCES}
+    )
 
 target_include_directories(rwgame
     SYSTEM
@@ -59,11 +60,11 @@ target_include_directories(rwgame
 
 target_link_libraries(rwgame
     PRIVATE
-	rwengine
-	${Boost_LIBRARIES}
-	${OPENGL_LIBRARIES}
-	${BULLET_LIBRARIES}
-	${SDL2_LIBRARY}
+        rwengine
+        ${Boost_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${BULLET_LIBRARIES}
+        ${SDL2_LIBRARY}
     )
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
