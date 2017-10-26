@@ -148,9 +148,9 @@ add_library(rwengine
 target_link_libraries(rwengine
     PUBLIC
         rwlib
+        ffmpeg::ffmpeg
         glm::glm
     PRIVATE
-        ${FFMPEG_LIBRARIES}
         ${OPENAL_LIBRARY}
     )
 
@@ -158,7 +158,6 @@ target_include_directories(rwengine
     SYSTEM
     PUBLIC
         ${BULLET_INCLUDE_DIR}
-        ${FFMPEG_INCLUDE_DIR}
         ${OPENAL_INCLUDE_DIR}
     )
 
