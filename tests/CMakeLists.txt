@@ -72,7 +72,6 @@ target_link_libraries(run_tests
     PRIVATE
         rwengine
         SDL2::SDL2
-        ${PNG_LIBRARIES}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
