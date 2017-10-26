@@ -49,7 +49,6 @@ target_include_directories(rwgame
     SYSTEM
     PRIVATE
         ${Boost_INCLUDE_DIRS}
-        ${OPENAL_INCLUDE_DIR}
     )
 
 target_include_directories(rwgame
