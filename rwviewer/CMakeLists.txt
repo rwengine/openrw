@@ -24,16 +24,11 @@ add_executable(rwviewer
     AnimationListWidget.cpp
     )
 
-target_include_directories(rwviewer
-    SYSTEM
-    PRIVATE
-        ${BULLET_INCLUDE_DIR}
-    )
-
 target_link_libraries(rwviewer
     rwengine
     ${OPENGL_LIBRARIES}
-    ${BULLET_LIBRARIES})
+    )
+
 qt5_use_modules(rwviewer Widgets OpenGL)
 
 install(TARGETS rwviewer RUNTIME DESTINATION "${BIN_DIR}")

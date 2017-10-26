@@ -60,7 +60,6 @@ target_include_directories(run_tests
     SYSTEM
     PRIVATE
         ${Boost_INCLUDE_DIRS}
-        ${BULLET_INCLUDE_DIR}
     )
 
 target_include_directories(run_tests
@@ -73,7 +72,6 @@ target_link_libraries(run_tests
     PRIVATE
         rwengine
         ${OPENGL_LIBRARIES}
-        ${BULLET_LIBRARIES}
         SDL2::SDL2
         ${PNG_LIBRARIES}
         ${Boost_FILESYSTEM_LIBRARY}
