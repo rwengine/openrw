@@ -64,9 +64,6 @@ if(MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 endif()
 
-# Make GLM use radians
-add_definitions(-DGLM_FORCE_RADIANS)
-
 IF(${ENABLE_PROFILING})
 	add_definitions(-DRENDER_PROFILER=0 -DRW_PROFILER=1)
 else()
@@ -105,20 +102,18 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
-find_package(GLM REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
 
 include_directories(
 	${SDL2_INCLUDE_DIR}
-	${GLM_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIR}
 	${BULLET_INCLUDE_DIRS}
 	${OPENAL_INCLUDE_DIR}
 )
 
-# External-internal dependencies
-add_subdirectory(cmake/external)
+# Imported dependencies
+add_subdirectory(external)
 
 # Include git hash in source
 include(GetGitRevisionDescription)

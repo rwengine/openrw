@@ -50,6 +50,7 @@ target_include_directories(rwlib SYSTEM
 
 target_link_libraries(rwlib
   PUBLIC
+  glm::glm
   ${OPENGL_LIBRARIES}
   ${OPENRW_PLATFORM_LIBS}
   ${Boost_LIBRARIES})
