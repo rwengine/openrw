@@ -6,11 +6,6 @@ project(OpenRW)
 # Options
 #
 
-# Global Build Configuration
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRW_DEBUG=1")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -pthread -Wextra -Wpedantic -Wdouble-promotion")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-
 set(RW_VERBOSE_DEBUG_MESSAGES 1 CACHE BOOL "Print verbose debugging messages")
 
 # Optional components
@@ -22,7 +17,17 @@ option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
 option(TESTS_NODATA "Build tests for no-data testing")
 
+#
+# Global Build Configuration
+#
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 set(FAILED_CHECK_ACTION "IGNORE" CACHE STRING "What action to perform on a failed RW_CHECK (IGNORE, ABORT or BREAKPOINT) (only in debug mode)")
+
+if (${CMAKE_BUILD_TYPE} MATCHES Debug)
+  add_definitions(-DRW_DEBUG=1)
+endif()
 
 #
 # Build configuration
@@ -47,12 +52,16 @@ else ()
 	message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif ()
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
+if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU OR ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -Wextra -Wpedantic -Wdouble-promotion")
+endif()
+
+if (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-array-member-paren-init")
 endif()
 
 if(MINGW)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 endif()
 
 # Make GLM use radians
