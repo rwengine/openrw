@@ -16,17 +16,13 @@
 # BSD license.
 #
 
-if (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
-# in cache already
-set(FFMPEG_FOUND TRUE)
-else (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
-find_package(PkgConfig)
+find_package(PkgConfig QUIET)
 if (PKG_CONFIG_FOUND)
-pkg_check_modules(_FFMPEG_AVCODEC libavcodec)
-pkg_check_modules(_FFMPEG_AVFORMAT libavformat)
-pkg_check_modules(_FFMPEG_AVUTIL libavutil)
+pkg_check_modules(_FFMPEG_AVCODEC libavcodec QUIET)
+pkg_check_modules(_FFMPEG_AVFORMAT libavformat QUIET)
+pkg_check_modules(_FFMPEG_AVUTIL libavutil QUIET)
 endif (PKG_CONFIG_FOUND)
 
 find_path(FFMPEG_AVCODEC_INCLUDE_DIR
@@ -54,7 +50,6 @@ if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
 set(FFMPEG_FOUND TRUE)
 endif()
 
-if (FFMPEG_FOUND)
 set(FFMPEG_INCLUDE_DIR ${FFMPEG_AVCODEC_INCLUDE_DIR})
 
 set(FFMPEG_LIBRARIES
@@ -63,18 +58,18 @@ ${FFMPEG_LIBAVFORMAT}
 ${FFMPEG_LIBAVUTIL}
 )
 
-endif (FFMPEG_FOUND)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(FFmpeg DEFAULT_MSG FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIR)
 
-if (FFMPEG_FOUND)
-if (NOT FFMPEG_FIND_QUIETLY)
-message(STATUS "Found FFMPEG or Libav: ${FFMPEG_LIBRARIES}, ${FFMPEG_INCLUDE_DIR}")
-endif (NOT FFMPEG_FIND_QUIETLY)
-else (FFMPEG_FOUND)
-if (FFMPEG_FIND_REQUIRED)
-message(FATAL_ERROR "Could not find libavcodec or libavformat or libavutil")
-endif (FFMPEG_FIND_REQUIRED)
-endif (FFMPEG_FOUND)
-
-endif (FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
-
-
+if(FFMPEG_FOUND)
+  list(GET FFMPEG_LIBRARIES 0 FFMPEG_FIRST_LIBRARY)
+  set(FFMPEG_OTHER_LIBRARIES "${FFMPEG_LIBRARIES}")
+  list(REMOVE_AT FFMPEG_OTHER_LIBRARIES 0)
+  add_library(ffmpeg::ffmpeg UNKNOWN IMPORTED)
+  set_target_properties(ffmpeg::ffmpeg PROPERTIES
+    IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
+    IMPORTED_LOCATION "${FFMPEG_FIRST_LIBRARY}"
+    INTERFACE_LINK_LIBRARIES "${FFMPEG_OTHER_LIBRARIES}"
+    INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIR}"
+    )
+endif()
