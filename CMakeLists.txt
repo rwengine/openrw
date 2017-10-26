@@ -134,6 +134,7 @@ if(BUILD_VIEWER)
 endif()
 if(BUILD_TESTS)
     enable_testing()
+    include(CTest)
     add_subdirectory(tests)
 endif()
 
