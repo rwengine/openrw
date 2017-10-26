@@ -161,7 +161,7 @@ void PickupObject::tick(float dt) {
     }
 
     float time = engine->getGameTime();
-    float colourValue = 0.5f * (sin(time * 3.0664064f) * 0.3f + 0.3f);
+    float colourValue = 0.5f * (std::sin(time * 3.0664064f) * 0.3f + 0.3f);
     uint32_t *colour = &colours[m_colourId];
     float red = (*colour >> 16) & 0xFF;
     float green = (*colour >> 8) & 0xFF;
