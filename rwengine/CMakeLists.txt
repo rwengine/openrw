@@ -151,14 +151,7 @@ target_link_libraries(rwengine
         bullet::bullet
         ffmpeg::ffmpeg
         glm::glm
-    PRIVATE
-        ${OPENAL_LIBRARY}
-    )
-
-target_include_directories(rwengine
-    SYSTEM
-    PUBLIC
-        ${OPENAL_INCLUDE_DIR}
+        OpenAL::OpenAL
     )
 
 target_include_directories(rwengine
