@@ -137,7 +137,8 @@ target_link_libraries(rwengine
   ${FFMPEG_LIBRARIES}
   ${OPENAL_LIBRARY}
   ${OPENRW_PLATFORM_LIBS}
-  ${SDL2_LIBRARY})
+  ${BULLET_LIBRARIES}
+  )
 
 target_include_directories(
   rwengine SYSTEM
