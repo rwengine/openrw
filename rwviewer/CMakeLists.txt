@@ -1,9 +1,10 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Core REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
-add_executable(rwviewer
+add_executable(rwviewer WIN32
     main.cpp
     ViewerWindow.cpp
 
@@ -26,8 +27,10 @@ add_executable(rwviewer
 
 target_link_libraries(rwviewer
     rwengine
+    Qt5::OpenGL
+    Qt5::Widgets
     )
 
-qt5_use_modules(rwviewer Widgets OpenGL)
-
-install(TARGETS rwviewer RUNTIME DESTINATION "${BIN_DIR}")
+install(TARGETS rwviewer
+    RUNTIME DESTINATION "${BIN_DIR}"
+    )
