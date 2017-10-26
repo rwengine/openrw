@@ -2,7 +2,7 @@
 #include <data/WeaponData.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ProjectileObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(WeaponTests)
 

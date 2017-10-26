@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/InstanceObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(ObjectUnitTests)
 

@@ -3,7 +3,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/ItemPickup.hpp>
 #include <objects/PickupObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 class TestPickup : public PickupObject {
 public:

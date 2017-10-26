@@ -2,7 +2,7 @@
 #include <data/GameTexts.hpp>
 #include <engine/ScreenText.hpp>
 #include <loaders/LoaderGXT.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 #define T(x) GameStringUtil::fromString(x)
 

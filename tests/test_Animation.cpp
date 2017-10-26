@@ -2,7 +2,7 @@
 #include <data/Clump.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtx/string_cast.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(AnimationTests)
 

@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <data/Clump.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 

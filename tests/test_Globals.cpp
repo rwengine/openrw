@@ -1,4 +1,4 @@
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 #include <GameConfig.hpp>
 

@@ -2,7 +2,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <objects/InstanceObject.hpp>
 #include <render/ViewCamera.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(LifetimeTests)
 

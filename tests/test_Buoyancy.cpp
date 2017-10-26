@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <objects/VehicleObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(BuoyancyTests)
 
