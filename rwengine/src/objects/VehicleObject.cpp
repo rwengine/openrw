@@ -235,7 +235,7 @@ void VehicleObject::tickPhysics(float dt) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float engineForce = info->handling.acceleration * throttle * velFac;
-        if (fabs(engineForce) >= 0.001f) {
+        if (std::fabs(engineForce) >= 0.001f) {
             collision->getBulletBody()->activate(true);
         }
 

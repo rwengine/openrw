@@ -132,7 +132,7 @@ bool Activities::GoTo::update(CharacterObject *character,
     }
 
     float hdg =
-        atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
+        std::atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
     character->setHeading(glm::degrees(hdg));
 
     controller->setMoveDirection({1.f, 0.f, 0.f});
@@ -263,7 +263,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
                 character->controller->setRunning(true);
             }
             character->setHeading(
-                glm::degrees(atan2(targetDirection.y, targetDirection.x) -
+                glm::degrees(std::atan2(targetDirection.y, targetDirection.x) -
                              glm::half_pi<float>()));
             character->controller->setMoveDirection({1.f, 0.f, 0.f});
         }
