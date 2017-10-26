@@ -57,7 +57,7 @@ target_link_libraries(rwlib
     PUBLIC
         openrw::interface
     PRIVATE
-        ${OPENGL_LIBRARIES}
+        OpenGL::OpenGL
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
     )

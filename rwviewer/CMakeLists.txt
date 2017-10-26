@@ -26,7 +26,6 @@ add_executable(rwviewer
 
 target_link_libraries(rwviewer
     rwengine
-    ${OPENGL_LIBRARIES}
     )
 
 qt5_use_modules(rwviewer Widgets OpenGL)

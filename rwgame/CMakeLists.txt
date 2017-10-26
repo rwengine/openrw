@@ -60,7 +60,6 @@ target_link_libraries(rwgame
     PRIVATE
         rwengine
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${OPENGL_LIBRARIES}
         SDL2::SDL2
     )
 
