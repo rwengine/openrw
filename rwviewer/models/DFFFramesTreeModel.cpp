@@ -6,7 +6,7 @@ DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m,
     : QAbstractItemModel(parent), model(m) {
 }
 
-int DFFFramesTreeModel::columnCount(const QModelIndex& parent) const {
+int DFFFramesTreeModel::columnCount(const QModelIndex&) const {
     return 1;
 }
 
@@ -70,8 +70,6 @@ bool DFFFramesTreeModel::setData(const QModelIndex& index,
         return false;
     }
 
-    ModelFrame* f = static_cast<ModelFrame*>(index.internalPointer());
-
     if (role == Qt::CheckStateRole) {
         if (index.column() == 0) {
             if ((Qt::CheckState)value.toInt() == Qt::Checked) {
@@ -99,7 +97,7 @@ Qt::ItemFlags DFFFramesTreeModel::flags(const QModelIndex& index) const {
     return flags;
 }
 
-QVariant DFFFramesTreeModel::headerData(int section,
+QVariant DFFFramesTreeModel::headerData(int,
                                         Qt::Orientation orientation,
                                         int role) const {
     if (orientation == Qt::Horizontal) {

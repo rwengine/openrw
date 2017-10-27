@@ -2,7 +2,7 @@
 #include <data/Clump.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void ModelFramesWidget::updateInfoBox(ClumpPtr model, ModelFrame* f) {
+void ModelFramesWidget::updateInfoBox(ClumpPtr, ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
