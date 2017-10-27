@@ -1,7 +1,7 @@
 #include <MenuSystem.hpp>
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE(MenuUnitTests)
+BOOST_AUTO_TEST_SUITE(MenuTests)
 
 BOOST_AUTO_TEST_CASE(menu_test_click) {
     bool clickered = false;

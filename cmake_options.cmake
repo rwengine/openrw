@@ -19,3 +19,4 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
+option(SEPERATE_TEST_SUITES "Add each test suite as seperate test")
