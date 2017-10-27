@@ -13,7 +13,7 @@ public:
         : PickupObject(engine, position, 0, OnStreet) {
     }
 
-    bool onCharacterTouch(CharacterObject* character) {
+    bool onCharacterTouch(CharacterObject*) {
         picked_up = true;
         return true;
     }

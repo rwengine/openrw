@@ -13,11 +13,11 @@ ItemListModel::ItemListModel(GameWorld *world, QObject *parent)
     : QAbstractTableModel(parent), _world(world) {
 }
 
-int ItemListModel::rowCount(const QModelIndex &parent) const {
+int ItemListModel::rowCount(const QModelIndex &) const {
     return _world->data->modelinfo.size();
 }
 
-int ItemListModel::columnCount(const QModelIndex &parent) const {
+int ItemListModel::columnCount(const QModelIndex &) const {
     return 2;
 }
 

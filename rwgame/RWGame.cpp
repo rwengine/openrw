@@ -244,9 +244,9 @@ void RWGame::handleCheatInput(char symbol) {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
 #ifdef RW_GAME_GTA3_ANNIVERSARY
-            uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
+            // uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
 #else
-			uint16_t vehicleModel = 122;
+            // uint16_t vehicleModel = 122;
 #endif
             // @todo Spawn rhino
             // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most

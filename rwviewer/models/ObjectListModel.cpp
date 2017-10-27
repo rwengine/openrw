@@ -4,18 +4,18 @@ ObjectListModel::ObjectListModel(GameData *dat, QObject *parent)
     : QAbstractTableModel(parent), _gameData(dat) {
 }
 
-int ObjectListModel::rowCount(const QModelIndex &parent) const {
+int ObjectListModel::rowCount(const QModelIndex &) const {
     return _gameData->modelinfo.size();
 }
 
-int ObjectListModel::columnCount(const QModelIndex &parent) const {
+int ObjectListModel::columnCount(const QModelIndex &) const {
     return 3;
 }
 
 QVariant ObjectListModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole) {
+        if (!index.isValid()) return QVariant::Invalid;
         auto id = index.internalId();
-        if (id == -1) return QVariant::Invalid;
         if (index.column() == 0) {
             return id;
         } else if (index.column() == 1) {
