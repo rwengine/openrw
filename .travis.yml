@@ -25,7 +25,7 @@ addons:
 git:
     depth: 3
 script:
-    - ctest -S cmake/ctest/travis_script.cmake -VV -DSRC_DIR=. -DBIN_DIR=build
+    - ctest -S cmake/ctest/travis_script.ctest -VV -DSRC_DIR=. -DBIN_DIR=build
     - if [ -f FATAL_ERROR ]; then printf "Fatal failure detected.\nExiting with non-zero result code.\n"; exit 1; fi
 notifications:
     email: false
