@@ -15,5 +15,7 @@ set(BIN_DIR "bin" CACHE STRING "Prefix subdirectory to put the binaries in.")
 set(DOC_DIR "share/doc/openrw" CACHE STRING "Prefix subdirectory to put the documentation in.")
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release")
 endif()
+
+option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")

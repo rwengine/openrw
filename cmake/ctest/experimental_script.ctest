@@ -2,16 +2,15 @@ cmake_minimum_required(VERSION 3.2.2)
 
 list(APPEND CMAKE_MODULE_PATH "${CTEST_SCRIPT_DIRECTORY}/../modules")
 
-get_filename_component(SRC_DIR "${CTEST_SCRIPT_DIRECTORY}/../.." ABSOLUTE)
-get_filename_component(BIN_DIR "${SRC_DIR}/build/experimental" ABSOLUTE)
+get_filename_component(CTEST_SOURCE_DIRECTORY "${CTEST_SCRIPT_DIRECTORY}/../.." ABSOLUTE)
+get_filename_component(CTEST_BINARY_DIRECTORY "${CTEST_SOURCE_DIRECTORY}/build/experimental" ABSOLUTE)
 
-set(CTEST_SOURCE_DIRECTORY "${SRC_DIR}")
-set(CTEST_BINARY_DIRECTORY "${BIN_DIR}")
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
-ctest_empty_binary_directory("${BIN_DIR}")
+set(CTEST_COVERAGE_COMMAND "gcov")
 
-set(CMAKE_BINARY_DIR "${BIN_DIR}")
-set(CMAKE_CURRENT_BINARY_DIR "${BIN_DIR}")
+if(EXISTS "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt")
+    ctest_empty_binary_directory("${CTEST_BINARY_DIRECTORY}")
+endif()
 
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
@@ -23,12 +22,12 @@ set(CTEST_BUILD_NAME "experimental_script-${SHORT_COMMIT}")
 ctest_start("Experimental")
 ctest_configure(
     OPTIONS
-        "-DBUILD_VIEWER=1;-DBUILD_TESTS=1"
+        "-DBUILD_VIEWER=1;-DBUILD_TESTS=1;-DTEST_COVERAGE=1;-DRW_VERBOSE_DEBUG_MESSAGES=0"
     )
 ctest_build()
-ctest_test(
-    RETURN_VALUE TEST_RESULT
-    )
+ctest_test()
+ctest_coverage()
+ctest_coverage()
 ctest_submit(
     RETURN_VALUE SUBMIT_RESULT
     )
@@ -39,5 +38,5 @@ message("Build Name: ${CTEST_BUILD_NAME}")
 if(NOT SUBMIT_RESULT EQUAL "0")
     message("Uploading results failed.")
     message("Execute the next command to submit later.")
-    message("make -C \"CTEST_BINARY_DIRECTORY\" ExperimentalSubmit")
+    message("make -C \"${CTEST_BINARY_DIRECTORY}\" ExperimentalSubmit")
 endif()
