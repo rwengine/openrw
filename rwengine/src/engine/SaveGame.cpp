@@ -1251,9 +1251,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     // http://gtaforums.com/topic/758692-gta-iii-save-file-documentation/
     for (size_t g = 0; g < garageData.garageCount; ++g) {
         auto& garage = garages[g];
-        state.garages.push_back(
-            {(int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
-             glm::vec3(garage.x2, garage.y2, garage.z2), garage.type});
+        state.garages.emplace_back(
+             (int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
+             glm::vec3(garage.x2, garage.y2, garage.z2), garage.type);
     }
     for (int c = 0; c < 18; ++c) {
         if (garageData.cars[c].modelId == 0) continue;
