@@ -247,8 +247,8 @@ void GameData::loadCarcols(const std::string& path) {
 
                 if (std::getline(ss, r, ',') && std::getline(ss, g, ',') &&
                     std::getline(ss, b)) {
-                    vehicleColours.push_back(glm::u8vec3(
-                        atoi(r.c_str()), atoi(g.c_str()), atoi(b.c_str())));
+                    vehicleColours.emplace_back(
+                        atoi(r.c_str()), atoi(g.c_str()), atoi(b.c_str()));
                 }
             } else if (currentSection == CAR) {
                 std::string vehicle, p, s;
