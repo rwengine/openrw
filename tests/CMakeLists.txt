@@ -77,4 +77,6 @@ target_link_libraries(run_tests
         ${Boost_SYSTEM_LIBRARY}
     )
 
-add_test(UnitTests run_tests)
+add_test(NAME UnitTests
+    COMMAND "$<TARGET_FILE:run_tests>"
+    )

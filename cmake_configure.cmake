@@ -68,3 +68,25 @@ elseif(FAILED_CHECK_ACTION STREQUAL "BREAKPOINT")
 else()
     message(FATAL_ERROR "Illegal FAILED_CHECK_ACTION option. (was '${FAILED_CHECK_ACTION}')")
 endif()
+
+if(TEST_COVERAGE)
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message("Test Coverage enabled. Setting CMAKE_BUILD_TYPE to Debug.")
+        set(CMAKE_BUILD_TYPE "Debug")
+    endif()
+    if(NOT BUILD_TESTS)
+        message("TestCoverage enabled. Enabling BUILD_TESTS.")
+        set(BUILD_TESTS "ON")
+    endif()
+    target_compile_options(rw_interface
+        INTERFACE
+            "-O0"
+            "-fprofile-arcs"
+            "-ftest-coverage"
+        )
+    set_target_properties(rw_interface
+        PROPERTIES
+            INTERFACE_LINK_LIBRARIES
+                gcov
+    )
+endif()
