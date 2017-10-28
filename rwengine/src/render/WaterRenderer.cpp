@@ -31,19 +31,19 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
             glm::vec2 tMax(b + glm::vec2(x + 1, y + 1) * gridresinv);
 
             // Build geometry
-            grid.push_back(glm::vec2(tMax.x, tMax.y));
-            grid.push_back(glm::vec2(tMax.x, tMin.y));
-            grid.push_back(glm::vec2(tMin.x, tMin.y));
+            grid.emplace_back(tMax.x, tMax.y);
+            grid.emplace_back(tMax.x, tMin.y);
+            grid.emplace_back(tMin.x, tMin.y);
 
-            grid.push_back(glm::vec2(tMin.x, tMin.y));
-            grid.push_back(glm::vec2(tMin.x, tMax.y));
-            grid.push_back(glm::vec2(tMax.x, tMax.y));
+            grid.emplace_back(tMin.x, tMin.y);
+            grid.emplace_back(tMin.x, tMax.y);
+            grid.emplace_back(tMax.x, tMax.y);
         }
     }
 
     gridGeom.uploadVertices(grid.size(), sizeof(glm::vec2) * grid.size(),
                             grid.data());
-    gridGeom.getDataAttributes().push_back({ATRS_Position, 2, 0, 0, GL_FLOAT});
+    gridGeom.getDataAttributes().emplace_back(ATRS_Position, 2, 0, 0, GL_FLOAT);
     gridDraw.addGeometry(&gridGeom);
 }
 
@@ -72,20 +72,20 @@ void WaterRenderer::setWaterTable(float* waterHeights, unsigned int nHeights,
             glm::vec2 tMax(wO + glm::vec2(x + 1, y + 1) * tileSize);
 
             // Build geometry
-            vertexData.push_back(glm::vec3(tMax.x, tMax.y, hMax));
-            vertexData.push_back(glm::vec3(tMax.x, tMin.y, hMax));
-            vertexData.push_back(glm::vec3(tMin.x, tMin.y, hMax));
+            vertexData.emplace_back(tMax.x, tMax.y, hMax);
+            vertexData.emplace_back(tMax.x, tMin.y, hMax);
+            vertexData.emplace_back(tMin.x, tMin.y, hMax);
 
-            vertexData.push_back(glm::vec3(tMin.x, tMin.y, hMax));
-            vertexData.push_back(glm::vec3(tMin.x, tMax.y, hMax));
-            vertexData.push_back(glm::vec3(tMax.x, tMax.y, hMax));
+            vertexData.emplace_back(tMin.x, tMin.y, hMax);
+            vertexData.emplace_back(tMin.x, tMax.y, hMax);
+            vertexData.emplace_back(tMax.x, tMax.y, hMax);
         }
     }
 
     maskGeom.uploadVertices(vertexData.size(),
                             sizeof(glm::vec3) * vertexData.size(),
                             vertexData.data());
-    maskGeom.getDataAttributes().push_back({ATRS_Position, 3, 0, 0, GL_FLOAT});
+    maskGeom.getDataAttributes().emplace_back(ATRS_Position, 3, 0, 0, GL_FLOAT);
     maskDraw.addGeometry(&maskGeom);
 }
 
