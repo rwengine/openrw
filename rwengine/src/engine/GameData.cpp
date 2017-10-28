@@ -258,7 +258,7 @@ void GameData::loadCarcols(const std::string& path) {
                 std::vector<std::pair<size_t, size_t>> colours;
 
                 while (std::getline(ss, p, ',') && std::getline(ss, s, ',')) {
-                    colours.push_back({atoi(p.c_str()), atoi(s.c_str())});
+                    colours.emplace_back(atoi(p.c_str()), atoi(s.c_str()));
                 }
 
                 vehiclePalettes.insert({vehicle, colours});
