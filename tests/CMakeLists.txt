@@ -94,7 +94,7 @@ if(SEPERATE_TEST_SUITES)
             )
         set_tests_properties("${TEST}"
             PROPERTIES
-                TIMEOUT 15
+                TIMEOUT 30
             )
     endforeach()
 else()
@@ -103,6 +103,6 @@ else()
         )
     set_tests_properties(UnitTests
         PROPERTIES
-            TIMEOUT 60
+            TIMEOUT 300
         )
 endif()
