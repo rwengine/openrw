@@ -94,7 +94,7 @@ if(SEPERATE_TEST_SUITES)
             )
         set_tests_properties("${TEST}"
             PROPERTIES
-                TIMEOUT 30
+                TIMEOUT 300
             )
     endforeach()
 else()
