@@ -14,6 +14,22 @@ typedef uint64_t RenderKey;
 
 typedef std::uint32_t RenderIndex;
 
+struct VertexP2 {
+    glm::vec2 position;
+
+    static const AttributeList vertex_attributes() {
+        return {{ATRS_Position, 2, sizeof(VertexP2), 0ul}};
+    }
+
+    VertexP2(float _x, float _y)
+        : position({_x, _y}) {
+    }
+
+    VertexP2() {
+    }
+};
+
+
 struct VertexP3 {
     glm::vec3 position;
 
@@ -22,15 +38,13 @@ struct VertexP3 {
             {ATRS_Position, 3, sizeof(VertexP3), 0ul},
         };
     }
-};
 
-/// @todo normalize this to have the same interface as VertexP3
-struct VertexP2 {
-    static const AttributeList vertex_attributes() {
-        return {{ATRS_Position, 2, sizeof(VertexP2), 0ul}};
+    VertexP3(float _x, float _y, float _z)
+        : position({_x, _y, _z}) {
     }
 
-    float x, y;
+    VertexP3() {
+    }
 };
 
 class Renderer {

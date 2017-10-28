@@ -45,11 +45,11 @@ MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
     rect.setFaceType(GL_TRIANGLE_FAN);
 
     std::vector<VertexP2> circleVerts;
-    circleVerts.push_back({0.f, 0.f});
+    circleVerts.emplace_back(0.f, 0.f);
     for (int v = 0; v < 181; ++v) {
-        circleVerts.push_back(
-            {0.5f * glm::cos(2 * (v / 180.f) * glm::pi<float>()),
-             0.5f * glm::sin(2 * (v / 180.f) * glm::pi<float>())});
+        circleVerts.emplace_back(
+             0.5f * glm::cos(2 * (v / 180.f) * glm::pi<float>()),
+             0.5f * glm::sin(2 * (v / 180.f) * glm::pi<float>()));
     }
     circleGeom.uploadVertices(circleVerts);
     circle.addGeometry(&circleGeom);
