@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
 
-list(APPEND CMAKE_MODULE_PATH "${CTEST_SCRIPT_DIRECTORY}/../modules")
-
 get_filename_component(CTEST_SOURCE_DIRECTORY "${CTEST_SCRIPT_DIRECTORY}/../.." ABSOLUTE)
 get_filename_component(CTEST_BINARY_DIRECTORY "${CTEST_SOURCE_DIRECTORY}/build/experimental" ABSOLUTE)
 
@@ -12,7 +10,10 @@ if(EXISTS "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt")
     ctest_empty_binary_directory("${CTEST_BINARY_DIRECTORY}")
 endif()
 
-include(GetGitRevisionDescription)
+include("${CTEST_SCRIPT_DIRECTORY}/../modules/GetGitRevisionDescription.cmake")
+# get_git_head_revision expects CMAKE_CURRENT_BINARY_DIR to exist.
+set(CMAKE_BINARY_DIR "${CTEST_BINARY_DIRECTORY}")
+set(CMAKE_CURRENT_BINARY_DIR "${CTEST_BINARY_DIRECTORY}")
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 string(SUBSTRING "${GIT_SHA1}" 0 8 SHORT_COMMIT)
 
