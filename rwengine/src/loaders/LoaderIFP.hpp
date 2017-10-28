@@ -14,8 +14,19 @@ struct AnimationKeyframe {
     glm::quat rotation;
     glm::vec3 position;
     glm::vec3 scale;
-    float starttime;
-    int id;
+    float starttime = 0.f;
+    int id = 0;
+
+    AnimationKeyframe(glm::quat _rotation, glm::vec3 _position, glm::vec3 _scale, float _starttime, int _id)
+        : rotation(_rotation)
+        , position(_position)
+        , scale(_scale)
+        , starttime(_starttime)
+        , id(_id) {
+    }
+
+    AnimationKeyframe() {
+    }
 };
 
 struct AnimationBone {

@@ -95,9 +95,9 @@ bool LoaderIFP::loadFromMemory(char* data) {
                 for (int d = 0; d < frames->frames; ++d) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     time = *read<float>(data, dataI);
-                    bonedata->frames.push_back({q, glm::vec3(0.f, 0.f, 0.f),
+                    bonedata->frames.emplace_back(q, glm::vec3(0.f, 0.f, 0.f),
                                                 glm::vec3(1.f, 1.f, 1.f), time,
-                                                d});
+                                                d);
                 }
             } else if (type == "KRT0") {
                 bonedata->type = AnimationBone::RT0;
@@ -105,8 +105,8 @@ bool LoaderIFP::loadFromMemory(char* data) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data, dataI);
-                    bonedata->frames.push_back(
-                        {q, p, glm::vec3(1.f, 1.f, 1.f), time, d});
+                    bonedata->frames.emplace_back(
+                        q, p, glm::vec3(1.f, 1.f, 1.f), time, d);
                 }
             } else if (type == "KRTS") {
                 bonedata->type = AnimationBone::RTS;
@@ -115,7 +115,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     glm::vec3 s = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data, dataI);
-                    bonedata->frames.push_back({q, p, s, time, d});
+                    bonedata->frames.emplace_back(q, p, s, time, d);
                 }
             }
 
