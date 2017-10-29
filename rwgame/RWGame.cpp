@@ -793,7 +793,7 @@ void RWGame::renderProfile() {
         for (int r = 0; r < c; ++r) {
             for (int g = 0; g < c; ++g) {
                 for (int b = 0; b < c; ++b) {
-                    perf_colours.push_back({r / c, g / c, b / c, 1.f});
+                    perf_colours.emplace_back(r / c, g / c, b / c, 1.f);
                 }
             }
         }

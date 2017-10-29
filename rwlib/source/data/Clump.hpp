@@ -126,6 +126,16 @@ struct GeometryVertex {
                 {ATRS_Colour, 4, sizeof(GeometryVertex), sizeof(float) * 8,
                  GL_UNSIGNED_BYTE}};
     }
+
+    GeometryVertex(glm::vec3 _position, glm::vec3 _normal, glm::vec2 _texcoord, glm::u8vec4 _colour)
+        : position(_position)
+        , normal(_normal)
+        , texcoord(_texcoord)
+        , colour(_colour) {
+    }
+
+    GeometryVertex() {
+    }
 };
 
 /**

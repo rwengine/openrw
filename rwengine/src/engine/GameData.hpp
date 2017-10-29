@@ -323,6 +323,14 @@ public:
         float height;
         float xLeft, yBottom;
         float xRight, yTop;
+
+        WaterArea(float _height, float _xLeft, float _yBottom, float _xRight, float _yTop)
+            : height(_height)
+            , xLeft(_xLeft)
+            , yBottom(_yBottom)
+            , xRight(_xRight)
+            , yTop(_yTop) {
+        }
     };
 
     /**

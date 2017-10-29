@@ -58,6 +58,15 @@ struct TextVertex {
     glm::vec2 texcoord;
     glm::vec3 colour;
 
+    TextVertex(glm::vec2 _position, glm::vec2 _texcoord, glm::vec3 _colour)
+        : position(_position)
+        , texcoord(_texcoord)
+        , colour(_colour) {
+    }
+
+    TextVertex() {
+    }
+
     static const AttributeList vertex_attributes() {
         return {
             {ATRS_Position, 2, sizeof(TextVertex), 0ul},
@@ -247,13 +256,13 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         coord.x += ss.x;
         maxWidth = std::max(coord.x, maxWidth);
 
-        geo.push_back({{p.x, p.y + ss.y}, {tex.x, tex.w}, colour});
-        geo.push_back({{p.x + ss.x, p.y + ss.y}, {tex.z, tex.w}, colour});
-        geo.push_back({{p.x, p.y}, {tex.x, tex.y}, colour});
+        geo.emplace_back(glm::vec2{p.x, p.y + ss.y}, glm::vec2{tex.x, tex.w}, colour);
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y}, glm::vec2{tex.z, tex.w}, colour);
+        geo.emplace_back(glm::vec2{p.x, p.y}, glm::vec2{tex.x, tex.y}, colour);
 
-        geo.push_back({{p.x + ss.x, p.y}, {tex.z, tex.y}, colour});
-        geo.push_back({{p.x, p.y}, {tex.x, tex.y}, colour});
-        geo.push_back({{p.x + ss.x, p.y + ss.y}, {tex.z, tex.w}, colour});
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y}, glm::vec2{tex.z, tex.y}, colour);
+        geo.emplace_back(glm::vec2{p.x, p.y}, glm::vec2{tex.x, tex.y}, colour);
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y}, glm::vec2{tex.z, tex.w}, colour);
     }
 
     if (ti.align == TextInfo::Right) {

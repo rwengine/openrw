@@ -32,12 +32,12 @@ DebugDraw::~DebugDraw() {
 void DebugDraw::drawLine(const btVector3 &from, const btVector3 &to,
                          const btVector3 &color) {
     btVector3 c = color * 255;
-    lines.push_back({glm::vec3(from.getX(), from.getY(), from.getZ()),
+    lines.emplace_back(glm::vec3(from.getX(), from.getY(), from.getZ()),
                      glm::vec3(0.f), glm::vec2(0.f),
-                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)});
-    lines.push_back({glm::vec3(to.getX(), to.getY(), to.getZ()), glm::vec3(0.f),
+                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
+    lines.emplace_back(glm::vec3(to.getX(), to.getY(), to.getZ()), glm::vec3(0.f),
                      glm::vec2(0.f),
-                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255)});
+                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
 }
 
 void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
