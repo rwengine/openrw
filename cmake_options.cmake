@@ -11,6 +11,9 @@ option(TESTS_NODATA "Build tests for no-data testing")
 set(FAILED_CHECK_ACTION "IGNORE" CACHE STRING "What action to perform on a failed RW_CHECK (in debug mode)")
 set_property(CACHE FAILED_CHECK_ACTION PROPERTY STRINGS "IGNORE" "ABORT" "BREAKPOINT")
 
+set(FILESYSTEM_LIBRARY "BOOST" CACHE STRING "Which filesystem library to use")
+set_property(CACHE FILESYSTEM_LIBRARY PROPERTY STRINGS "CXX17" "CXXTS" "BOOST")
+
 set(BIN_DIR "bin" CACHE STRING "Prefix subdirectory to put the binaries in.")
 set(DOC_DIR "share/doc/openrw" CACHE STRING "Prefix subdirectory to put the documentation in.")
 

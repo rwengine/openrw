@@ -2,7 +2,7 @@
 ##      RWLIB
 ###########################################################
 
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(Boost REQUIRED)
 
 SET(RWLIB_SOURCES
     # GL stuff is only here temporarily, hoping to move it back to rwengine
@@ -16,6 +16,7 @@ SET(RWLIB_SOURCES
     source/gl/TextureData.cpp
 
     source/rw/abort.cpp
+    source/rw/filesystem.hpp
     source/rw/forward.hpp
     source/rw/types.hpp
     source/rw/defines.hpp
@@ -49,7 +50,7 @@ target_include_directories(rwlib
 
 target_include_directories(rwlib
     SYSTEM
-    PUBLIC
+    PRIVATE
         ${Boost_INCLUDE_DIRS}
     )
 
@@ -58,8 +59,6 @@ target_link_libraries(rwlib
         openrw::interface
     PRIVATE
         OpenGL::OpenGL
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
     )
 
 openrw_target_apply_options(TARGET rwlib)

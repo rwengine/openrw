@@ -38,6 +38,25 @@ else()
     message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif()
 
+if(FILESYSTEM_LIBRARY STREQUAL "CXX17")
+    target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=0")
+elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
+    target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=1")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_link_libraries(rw_interface INTERFACE "stdc++fs")
+    endif()
+elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
+    find_package(Boost COMPONENTS system filesystem REQUIRED)
+    target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
+    target_include_directories(rw_interface INTERFACE ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rw_interface INTERFACE
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        )
+else()
+    message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
+endif()
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
     target_compile_options(rw_interface INTERFACE "-Wno-gnu-array-member-paren-init")
 endif()
