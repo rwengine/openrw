@@ -31,6 +31,8 @@ target_link_libraries(rwviewer
     Qt5::Widgets
     )
 
+openrw_target_apply_options(TARGET rwviewer)
+
 install(TARGETS rwviewer
     RUNTIME DESTINATION "${BIN_DIR}"
     )

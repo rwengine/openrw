@@ -61,3 +61,5 @@ target_link_libraries(rwlib
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
     )
+
+openrw_target_apply_options(TARGET rwlib)

@@ -86,6 +86,8 @@ target_link_libraries(run_tests
         ${Boost_SYSTEM_LIBRARY}
     )
 
+openrw_target_apply_options(TARGET run_tests)
+
 if(SEPERATE_TEST_SUITES)
     foreach(TEST ${TESTS})
         add_test(
