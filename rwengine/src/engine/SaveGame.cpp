@@ -1313,13 +1313,18 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
 std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     using namespace boost::filesystem;
 
-    // TODO consider windows
+#if defined(RW_WINDOWS)
+    auto homedir = getenv("USERPROFILE");
+    const char gameDir[] = "Documents\\GTA3 User Files";
+#else
     auto homedir = getenv("HOME");
+    const char gameDir[] = "GTA3 User Files";
+#endif
+
     if (homedir == nullptr) {
         std::cerr << "Unable to determine home directory" << std::endl;
         return {};
     }
-    const char gameDir[] = "GTA3 User Files";
 
     path gamePath(homedir);
     gamePath /= gameDir;
