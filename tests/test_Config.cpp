@@ -1,6 +1,5 @@
 #include <GameConfig.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>
@@ -9,10 +8,11 @@
 #include <fstream>
 #include <map>
 
-#include "rw/defines.hpp"
+#include <rw/defines.hpp>
+#include <rw/filesystem.hpp>
 
 namespace pt = boost::property_tree;
-namespace fs = boost::filesystem;
+namespace fs = rwfs;
 
 typedef std::map<std::string, std::map<std::string, std::string>>
     simpleConfig_t;
