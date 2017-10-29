@@ -40,7 +40,7 @@ private:
     GeometryBuffer circleGeom;
     DrawBuffer circle;
 
-    Renderer::ShaderProgram* rectProg;
+    std::unique_ptr<Renderer::ShaderProgram> rectProg;
 
     void prepareBlip(const glm::vec2& coord, const glm::mat4& view,
                      const MapInfo& mi, const std::string& texture,

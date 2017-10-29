@@ -60,7 +60,7 @@ private:
     GlyphInfo glyphData[GAME_GLYPHS];
 
     GameRenderer* renderer;
-    Renderer::ShaderProgram* textShader;
+    std::unique_ptr<Renderer::ShaderProgram> textShader;
 
     GeometryBuffer gb;
     DrawBuffer db;

@@ -136,7 +136,7 @@ public:
 
     virtual std::string getIDString() const = 0;
 
-    virtual ShaderProgram* createShader(const std::string& vert,
+    virtual std::unique_ptr<ShaderProgram> createShader(const std::string& vert,
                                         const std::string& frag) = 0;
 
     virtual void useProgram(ShaderProgram* p) = 0;
@@ -241,6 +241,9 @@ public:
     public:
         OpenGLShaderProgram(GLuint p) : program(p) {
         }
+        ~OpenGLShaderProgram() {
+            glDeleteProgram(program);
+        }
 
         GLuint getName() const {
             return program;
@@ -263,7 +266,7 @@ public:
 
     std::string getIDString() const override;
 
-    ShaderProgram* createShader(const std::string& vert,
+    std::unique_ptr<ShaderProgram> createShader(const std::string& vert,
                                 const std::string& frag) override;
     void setProgramBlockBinding(ShaderProgram* p, const std::string& name,
                                 GLint point) override;

@@ -69,7 +69,7 @@ class GameRenderer {
     GLuint framebufferName;
     GLuint fbTextures[2];
     GLuint fbRenderBuffers[1];
-    Renderer::ShaderProgram* postProg;
+    std::unique_ptr<Renderer::ShaderProgram> postProg;
 
     /// Texture used to replace textures missing from the data
     GLuint m_missingTexture;
@@ -79,9 +79,9 @@ public:
     ~GameRenderer();
 
     /** @todo Clean up all these shader program and location variables */
-    Renderer::ShaderProgram* worldProg;
-    Renderer::ShaderProgram* skyProg;
-    Renderer::ShaderProgram* particleProg;
+    std::unique_ptr<Renderer::ShaderProgram> worldProg;
+    std::unique_ptr<Renderer::ShaderProgram> skyProg;
+    std::unique_ptr<Renderer::ShaderProgram> particleProg;
 
     GLuint ssRectProgram;
     GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;

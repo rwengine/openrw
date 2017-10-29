@@ -139,7 +139,7 @@ void TextRenderer::setFontTexture(int index, const std::string& texture) {
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                               bool forceColour) {
     renderer->getRenderer()->pushDebugGroup("Text");
-    renderer->getRenderer()->useProgram(textShader);
+    renderer->getRenderer()->useProgram(textShader.get());
 
     glm::vec2 coord(0.f, 0.f);
     glm::vec2 alignment = ti.screenPosition;
@@ -281,9 +281,9 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     }
 
     renderer->getRenderer()->setUniform(
-        textShader, "proj", renderer->getRenderer()->get2DProjection());
-    renderer->getRenderer()->setUniformTexture(textShader, "fontTexture", 0);
-    renderer->getRenderer()->setUniform(textShader, "alignment", alignment);
+        textShader.get(), "proj", renderer->getRenderer()->get2DProjection());
+    renderer->getRenderer()->setUniformTexture(textShader.get(), "fontTexture", 0);
+    renderer->getRenderer()->setUniform(textShader.get(), "alignment", alignment);
 
     gb.uploadVertices(geo);
     db.addGeometry(&gb);
