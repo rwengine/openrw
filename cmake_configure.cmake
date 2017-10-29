@@ -90,3 +90,18 @@ if(TEST_COVERAGE)
                 gcov
     )
 endif()
+
+include(CMakeParseArguments)
+
+if(CHECK_INCLUDES)
+    find_package(IncludeWhatYouUse REQUIRED)
+endif()
+
+function(openrw_target_apply_options)
+    cmake_parse_arguments("OPENRW_APPLY" "" "TARGET" "" ${ARGN})
+    if(CHECK_INCLUDES)
+        iwyu_check(TARGET "${OPENRW_APPLY_TARGET}"
+            EXTRA_OPTS
+        )
+    endif()
+endfunction()

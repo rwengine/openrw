@@ -158,3 +158,5 @@ target_include_directories(rwengine
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
     )
+
+openrw_target_apply_options(TARGET rwengine)
