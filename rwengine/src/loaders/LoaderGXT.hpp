@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _LOADERGXT_HPP_
 #define _LOADERGXT_HPP_
-#include <data/GameTexts.hpp>
-#include <platform/FileHandle.hpp>
+#include <data/forward.hpp>
+#include <rw/forward.hpp>
 
 class LoaderGXT {
 public:

@@ -1,8 +1,12 @@
-#include <loaders/LoaderCutsceneDAT.hpp>
+#include "loaders/LoaderCutsceneDAT.hpp"
 
 #include <algorithm>
 #include <sstream>
 
+#include <glm/glm.hpp>
+
+#include <data/CutsceneData.hpp>
+#include <platform/FileHandle.hpp>
 #include <rw/defines.hpp>
 
 void LoaderCutsceneDAT::load(CutsceneTracks &tracks, FileHandle file) {

@@ -1,0 +1,14 @@
+# OpenRW's include-what-you-use mapping file
+[
+# c++ standard:
+    { "include": [ "@<bits/shared_ptr\\.h>", "private", "<memory>", "public"] },
+    { "include": [ "@<bits/std_function\\.h>", "private", "<functional>", "public"] },
+    { "include": [ "@<bits/std_abs\\.h>", "private", "<cstdlib>", "public"] },
+# GLM:
+    { "include": [ "@<glm/detail/.*>", "private", "<glm/glm.hpp>", "public"] },
+    { "include": [ "@<glm/gtc/.*>", "private", "<glm/gtc/matrix_transform.hpp>", "public"] },
+# Boost filesystem:
+    { "include": [ "@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public"] },
+# Boost iterator:
+    { "include": [ "@<boost/range/iterator_range_core\\.hpp>", "private", "<boost/range/iterator_range.hpp>", "public"] },
+]

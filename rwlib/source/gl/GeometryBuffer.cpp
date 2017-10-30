@@ -1,4 +1,4 @@
-#include <gl/GeometryBuffer.hpp>
+#include "gl/GeometryBuffer.hpp"
 
 GeometryBuffer::GeometryBuffer() : vbo(0), num(0) {
 }

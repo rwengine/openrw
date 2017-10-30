@@ -1,12 +1,13 @@
-#pragma once
-#ifndef _MODEL_HPP_
-#define _MODEL_HPP_
-#include <algorithm>
-#include <glm/glm.hpp>
-#include <memory>
+#ifndef _LIBRW_CLUMP_HPP_
+#define _LIBRW_CLUMP_HPP_
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
+#include <gl/gl_core_3_3.h>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 #include <gl/TextureData.hpp>

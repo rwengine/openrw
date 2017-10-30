@@ -1,9 +1,16 @@
-#include <gl/TextureData.hpp>
-#include <loaders/LoaderTXD.hpp>
+#include "loaders/LoaderTXD.hpp"
 
 #include <algorithm>
-#include <iostream>
+#include <cctype>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 #include <vector>
+
+#include "gl/gl_core_3_3.h"
+#include "loaders/RWBinaryStream.hpp"
+#include "platform/FileHandle.hpp"
+#include "rw/defines.hpp"
 
 GLuint gErrorTextureData[] = {0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF};
 GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
@@ -11,6 +18,7 @@ GLuint gTextureRed[] = {0xFF0000FF};
 GLuint gTextureGreen[] = {0xFF00FF00};
 GLuint gTextureBlue[] = {0xFFFF0000};
 
+static
 TextureData::Handle getErrorTexture() {
     static GLuint errTexName = 0;
     static TextureData::Handle tex;
@@ -27,6 +35,8 @@ TextureData::Handle getErrorTexture() {
 }
 
 const size_t paletteSize = 1024;
+
+static
 void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
     uint8_t* dataBase = reinterpret_cast<uint8_t*>(
         rootSection.raw() + sizeof(RW::BSSectionHeader) +
@@ -41,12 +51,13 @@ void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
     }
 }
 
+static
 TextureData::Handle createTexture(RW::BSTextureNative& texNative,
                                   RW::BinaryStreamSection& rootSection) {
     // TODO: Exception handling.
     if (texNative.platform != 8) {
-        std::cerr << "Unsupported texture platform " << std::dec
-                  << texNative.platform << std::endl;
+        RW_ERROR("Unsupported texture platform " << std::dec
+                  << texNative.platform);
         return getErrorTexture();
     }
 
@@ -62,8 +73,8 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative,
           RW::BSTextureNative::FORMAT_888);
 
     if (!(isPal8 || isFulc)) {
-        std::cerr << "Unsuported raster format " << std::dec
-                  << texNative.rasterformat << std::endl;
+        RW_ERROR("Unsupported raster format " << std::dec
+                  << texNative.rasterformat);
         return getErrorTexture();
     }
 
