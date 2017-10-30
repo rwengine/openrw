@@ -1,9 +1,12 @@
-#include <TextureArchive.hpp>
+#include "TextureArchive.hpp"
 
+#include <cstddef>
 #include <cstring>
-#include <iostream>
+#include <memory>
 
-#include "rw/defines.hpp"
+#include <rw/defines.hpp>
+
+#include "BinaryStream.hpp"
 
 namespace RW {
 

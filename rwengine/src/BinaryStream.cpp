@@ -1,15 +1,15 @@
-#include <BinaryStream.hpp>
+#include "BinaryStream.hpp"
 
 #include <cstring>
 #include <fstream>
-#include <iostream>
+#include <rw/defines.hpp>
 
 namespace RW {
 
 std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string &filename) {
     std::ifstream dfile(filename, std::ios_base::binary);
     if (!dfile.is_open()) {
-        std::cerr << "Error opening file " << filename << std::endl;
+        RW_ERROR("Error opening file " << filename);
         return nullptr;
     }
 
@@ -18,7 +18,7 @@ std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string &filename) {
     dfile.seekg(0);
     char *data = new char[length];
     dfile.read(data, length);
-    // std::cout << "File is " << length << " bytes" << std::endl << std::endl;
+    // RW_MESSAGE("File is " << length << " bytes");
 
     auto BS = std::make_unique<BinaryStream>();
 
@@ -42,16 +42,15 @@ std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string &filename) {
             prevHeader->next = sec;
 
         if (sectionHeader->ID == 0) {
-            std::cout << "Section ID is ZERO! Abort!" << std::endl;
+            RW_ERROR("Section ID is ZERO! Abort!");
             break;
         }
 
-        std::cout << "Section " << std::hex << sectionHeader->ID << " ("
+        RW_MESSAGE("Section " << std::hex << sectionHeader->ID << " ("
                   << sectionIdString(sectionHeader->ID) << ")"
-                  << " - " << std::dec << sectionHeader->size << " bytes"
-                  << std::endl;
+                  << " - " << std::dec << sectionHeader->size << " bytes");
         /*
-                std::cout << "Offset " << std::hex << offset << std::endl;
+                RW_MESSAGE("Offset " << std::hex << offset);
         */
 
         size_t bytesOfData = 0;
@@ -63,11 +62,9 @@ std::unique_ptr<BinaryStream> BinaryStream::parse(const std::string &filename) {
                        bytesOfData);
                 break;
         }
-        // std::cout << "It has " << std::dec << bytesOfData << " bytes of
-        // data!" << std::endl;
+        // RW_MESSAGE("It has " << std::dec << bytesOfData
+        //            << " bytes of data!");
         offset += sizeof(nativeSectionHeader_t) + bytesOfData;
-
-        // std::cout << std::endl;
 
         prevHeader = sec;
     }
