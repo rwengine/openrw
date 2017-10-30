@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _RWTYPES_HPP_
-#define _RWTYPES_HPP_
+#ifndef _LIBRW_TYPES_HPP_
+#define _LIBRW_TYPES_HPP_
 
 #include <cstdint>
 #include <glm/glm.hpp>

@@ -1,12 +1,20 @@
-#include <data/Clump.hpp>
-#include <loaders/LoaderDFF.hpp>
-#include <rw/defines.hpp>
+#include "loaders/LoaderDFF.hpp"
 
 #include <algorithm>
+#include <cctype>
+#include <cstdint>
 #include <cstring>
-#include <iostream>
+#include <cstdlib>
+#include <memory>
 #include <numeric>
-#include <set>
+
+#include <glm/glm.hpp>
+
+#include "data/Clump.hpp"
+#include "gl/gl_core_3_3.h"
+#include "loaders/RWBinaryStream.hpp"
+#include "platform/FileHandle.hpp"
+#include "rw/defines.hpp"
 
 enum DFFChunks {
     CHUNK_STRUCT = 0x0001,

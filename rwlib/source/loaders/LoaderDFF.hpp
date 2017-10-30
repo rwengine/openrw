@@ -1,14 +1,15 @@
-#pragma once
-#ifndef _LOADERDFF_HPP_
-#define _LOADERDFF_HPP_
+#ifndef _LIBRW_LOADERDFF_HPP_
+#define _LIBRW_LOADERDFF_HPP_
 
 #include <data/Clump.hpp>
 #include <gl/TextureData.hpp>
-#include <loaders/RWBinaryStream.hpp>
-#include <platform/FileHandle.hpp>
+#include <rw/forward.hpp>
 
 #include <functional>
 #include <string>
+#include <vector>
+
+class RWBStream;
 
 class DFFLoaderException {
     std::string _message;

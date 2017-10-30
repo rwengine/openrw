@@ -1,9 +1,11 @@
-#pragma once
+#ifndef _LIBRW_TEXTUREDATA_HPP_
+#define _LIBRW_TEXTUREDATA_HPP_
 #include <gl/gl_core_3_3.h>
 #include <glm/glm.hpp>
 #include <map>
 
 #include <memory>
+#include <string>
 
 /**
  * Stores a handle and metadata about a loaded texture.
@@ -43,3 +45,5 @@ private:
     bool hasAlpha;
 };
 using TextureArchive = std::map<std::string, TextureData::Handle>;
+
+#endif

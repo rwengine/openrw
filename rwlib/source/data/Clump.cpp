@@ -1,5 +1,8 @@
 #include "data/Clump.hpp"
-#include <iostream>
+
+#include <algorithm>
+#include <limits>
+#include <memory>
 #include <queue>
 
 #include <glm/gtc/matrix_transform.hpp>

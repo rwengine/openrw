@@ -116,10 +116,12 @@ if(CHECK_INCLUDES)
 endif()
 
 function(openrw_target_apply_options)
+    set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
     cmake_parse_arguments("OPENRW_APPLY" "" "TARGET" "" ${ARGN})
     if(CHECK_INCLUDES)
         iwyu_check(TARGET "${OPENRW_APPLY_TARGET}"
             EXTRA_OPTS
+                "--mapping_file=${IWYU_MAPPING}"
         )
     endif()
 endfunction()

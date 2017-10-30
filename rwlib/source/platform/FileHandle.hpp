@@ -1,5 +1,5 @@
-#ifndef RWENGINE_FILEHANDLE_HPP
-#define RWENGINE_FILEHANDLE_HPP
+#ifndef _LIBRW_FILEHANDLE_HPP_
+#define _LIBRW_FILEHANDLE_HPP_
 
 #include <memory>
 
@@ -17,7 +17,5 @@ struct FileContentsInfo {
         delete[] data;
     }
 };
-
-using FileHandle = std::shared_ptr<FileContentsInfo>;
 
 #endif

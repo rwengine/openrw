@@ -1,9 +1,9 @@
-#pragma once
-#ifndef _LOADERSDT_HPP_
-#define _LOADERSDT_HPP_
+#ifndef _LIBRW_LOADERSDT_HPP_
+#define _LIBRW_LOADERSDT_HPP_
 
 #include <cstdint>
-#include <iostream>
+#include <cstddef>
+#include <string>
 #include <vector>
 
 /// \brief Points to one file within the archive
@@ -26,7 +26,7 @@ public:
 class LoaderSDT {
 public:
     /// Multiple versions of .SDT files
-    enum Versions {
+    enum Version {
         GTA2,
         GTAIIIVC  ///< GTA III and GTA VC archives -- only this one is
                   ///implemented
@@ -57,8 +57,10 @@ public:
     /// Returns the number of asset files in the archive
     uint32_t getAssetCount() const;
 
+    Version getVersion() const;
+
 private:
-    Versions m_version;     ///< Version of this SDT archive
+    Version m_version;      ///< Version of this SDT archive
     uint32_t m_assetCount;  ///< Number of assets in the current archive
     std::string m_archive;  ///< Path to the archive being used (no extension)
 

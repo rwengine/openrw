@@ -1,8 +1,9 @@
 #pragma once
 #ifndef _LOADERCUTSCENEDAT_HPP_
 #define _LOADERCUTSCENEDAT_HPP_
-#include <data/CutsceneData.hpp>
-#include <platform/FileHandle.hpp>
+
+#include <data/forward.hpp>
+#include <rw/forward.hpp>
 
 class LoaderCutsceneDAT {
 public:

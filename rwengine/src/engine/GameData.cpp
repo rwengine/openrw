@@ -7,8 +7,8 @@
 #include <loaders/LoaderCOL.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>
+#include <platform/FileHandle.hpp>
 #include <script/SCMFile.hpp>
-
 #include <core/Logger.hpp>
 #include <loaders/GenericDATLoader.hpp>
 #include <loaders/LoaderGXT.hpp>

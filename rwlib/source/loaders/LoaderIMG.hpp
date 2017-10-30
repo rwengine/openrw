@@ -1,9 +1,9 @@
-#pragma once
-#ifndef _LOADERIMG_HPP_
-#define _LOADERIMG_HPP_
+#ifndef _LIBRW_LOADERIMG_HPP_
+#define _LIBRW_LOADERIMG_HPP_
 
+#include <cstddef>
 #include <cstdint>
-#include <iostream>
+#include <string>
 #include <vector>
 
 #include <rw/filesystem.hpp>
@@ -23,7 +23,7 @@ public:
 class LoaderIMG {
 public:
     /// Multiple versions of .IMG files
-    enum Versions {
+    enum Version {
         GTAIIIVC,  ///< GTA III and GTA VC archives -- only this one is
                    ///implemented
         GTASA,
@@ -55,8 +55,12 @@ public:
     /// Returns the number of asset files in the archive
     uint32_t getAssetCount() const;
 
+    Version getVersion() const {
+        return m_version;
+    }
+
 private:
-    Versions m_version;     ///< Version of this IMG archive
+    Version m_version;     ///< Version of this IMG archive
     uint32_t m_assetCount;  ///< Number of assets in the current archive
     rwfs::path m_archive;  ///< Path to the archive being used (no extension)
 

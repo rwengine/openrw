@@ -1,4 +1,7 @@
-#include <loaders/LoaderGXT.hpp>
+#include "loaders/LoaderGXT.hpp"
+
+#include <data/GameTexts.hpp>
+#include "platform/FileHandle.hpp"
 
 void LoaderGXT::load(GameTexts &texts, FileHandle &file) {
     auto data = file->data;

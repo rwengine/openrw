@@ -1,18 +1,8 @@
-#pragma once
-#ifndef _TEXTURELOADER_HPP_
-#define _TEXTURELOADER_HPP_
+#ifndef _LIBRW_TEXTURELOADER_HPP_
+#define _LIBRW_TEXTURELOADER_HPP_
 
-#include <loaders/RWBinaryStream.hpp>
-
-#include <functional>
-#include <map>
-#include <platform/FileHandle.hpp>
-#include <string>
-
-// This might suffice
 #include <gl/TextureData.hpp>
-
-class FileIndex;
+#include <rw/forward.hpp>
 
 class TextureLoader {
 public:

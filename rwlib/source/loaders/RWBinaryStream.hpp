@@ -1,5 +1,5 @@
-#ifndef _RWBINARYSTREAM_H_
-#define _RWBINARYSTREAM_H_
+#ifndef _LIBRW_RWBINARYSTREAM_HPP_
+#define _LIBRW_RWBINARYSTREAM_HPP_
 #include <cstdint>
 #include <glm/glm.hpp>
 

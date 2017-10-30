@@ -1,12 +1,14 @@
-#ifndef RWENGINE_FILEINDEX_HPP
-#define RWENGINE_FILEINDEX_HPP
-#include <platform/FileHandle.hpp>
-#include <rw/filesystem.hpp>
+#ifndef _LIBRW_FILEINDEX_HPP_
+#define _LIBRW_FILEINDEX_HPP_
 
+#include <algorithm>
+#include <cctype>
 #include <map>
 #include <string>
 #include <unordered_map>
 
+#include <rw/filesystem.hpp>
+#include <rw/forward.hpp>
 
 class FileIndex {
 private:

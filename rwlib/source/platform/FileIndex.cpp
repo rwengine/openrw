@@ -1,7 +1,14 @@
+#include "platform/FileIndex.hpp"
+
 #include <algorithm>
 #include <fstream>
-#include <loaders/LoaderIMG.hpp>
-#include <platform/FileIndex.hpp>
+#include <memory>
+#include <stdexcept>
+
+#include <boost/range/iterator_range.hpp>
+
+#include "loaders/LoaderIMG.hpp"
+#include "platform/FileHandle.hpp"
 
 void FileIndex::indexGameDirectory(const rwfs::path& base_path) {
     gamedatapath_ = base_path;

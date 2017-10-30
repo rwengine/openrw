@@ -1,6 +1,9 @@
-#include <loaders/LoaderIMG.hpp>
+#include "loaders/LoaderIMG.hpp"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <cstdio>
+
+#include "rw/defines.hpp"
 
 LoaderIMG::LoaderIMG() : m_version(GTAIIIVC), m_assetCount(0) {
 }
@@ -21,7 +24,7 @@ bool LoaderIMG::load(const rwfs::path& filepath) {
         if ((m_assetCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
                                   m_assetCount, fp)) != fileSize / 32) {
             m_assets.resize(m_assetCount);
-            std::cout << "Error reading records in IMG archive" << std::endl;
+            RW_ERROR("Error reading records in IMG archive");
         }
 
         fclose(fp);
@@ -51,7 +54,7 @@ char* LoaderIMG::loadToMemory(const std::string& assetname) {
     bool found = findAssetInfo(assetname, assetInfo);
 
     if (!found) {
-        std::cerr << "Asset '" << assetname << "' not found!" << std::endl;
+        RW_ERROR("Asset '" << assetname << "' not found!");
         return nullptr;
     }
 
@@ -63,7 +66,7 @@ char* LoaderIMG::loadToMemory(const std::string& assetname) {
 
         fseek(fp, assetInfo.offset * 2048, SEEK_SET);
         if (fread(raw_data, 2048, assetInfo.size, fp) != assetInfo.size) {
-            std::cerr << "Error reading asset " << assetInfo.name << std::endl;
+            RW_ERROR("Error reading asset " << assetInfo.name);
         }
 
         fclose(fp);

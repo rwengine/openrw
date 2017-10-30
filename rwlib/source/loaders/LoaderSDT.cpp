@@ -1,7 +1,10 @@
-#include <loaders/LoaderSDT.hpp>
+#include "loaders/LoaderSDT.hpp"
 
 #include <cstring>
+#include <cstdio>
 #include <string>
+
+#include "rw/defines.hpp"
 
 LoaderSDT::LoaderSDT() : m_version(GTAIIIVC), m_assetCount(0) {
 }
@@ -43,7 +46,7 @@ bool LoaderSDT::load(const std::string& filename) {
         if ((m_assetCount = fread(&m_assets[0], sizeof(LoaderSDTFile),
                                   m_assetCount, fp)) != fileSize / 20) {
             m_assets.resize(m_assetCount);
-            std::cout << "Error reading records in SDT archive" << std::endl;
+            RW_ERROR("Error reading records in SDT archive");
         }
 
         fclose(fp);
@@ -68,8 +71,7 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
     bool found = findAssetInfo(index, assetInfo);
 
     if (!found) {
-        std::cerr << "Asset " << std::to_string(index) << " not found!"
-                  << std::endl;
+        RW_ERROR("Asset " << std::to_string(index) << " not found!");
         return nullptr;
     }
 
@@ -105,8 +107,7 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
 
         fseek(fp, assetInfo.offset, SEEK_SET);
         if (fread(sample_data, 1, assetInfo.size, fp) != assetInfo.size) {
-            std::cerr << "Error reading asset " << std::to_string(index)
-                      << std::endl;
+            RW_ERROR("Error reading asset " << std::to_string(index));
         }
 
         fclose(fp);
@@ -147,4 +148,8 @@ const LoaderSDTFile& LoaderSDT::getAssetInfoByIndex(size_t index) const {
 
 uint32_t LoaderSDT::getAssetCount() const {
     return m_assetCount;
+}
+
+LoaderSDT::Version LoaderSDT::getVersion() const {
+    return m_version;
 }
