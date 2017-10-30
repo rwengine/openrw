@@ -1,12 +1,14 @@
-#pragma once
-#ifndef _TEXTUREARCHIVE_HPP_
-#define _TEXTUREARCHIVE_HPP_
+#ifndef _RWENGINE_TEXTUREARCHIVE_HPP_
+#define _RWENGINE_TEXTUREARCHIVE_HPP_
 
-#include <BinaryStream.hpp>
-
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace RW {
+
+class BinaryStream;
 
 class TextureArchive {
 public:

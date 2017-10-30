@@ -1,7 +1,7 @@
-#pragma once
-#ifndef _BINARYSTREAM_HPP_
-#define _BINARYSTREAM_HPP_
+#ifndef _RWENGINE_BINARYSTREAM_HPP_
+#define _RWENGINE_BINARYSTREAM_HPP_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
