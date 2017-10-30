@@ -28,7 +28,6 @@ ctest_configure(
 ctest_build()
 ctest_test()
 ctest_coverage()
-ctest_coverage()
 ctest_submit(
     RETURN_VALUE SUBMIT_RESULT
     )
