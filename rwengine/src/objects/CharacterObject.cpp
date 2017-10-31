@@ -1,13 +1,17 @@
 #include <ai/CharacterController.hpp>
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <rw/defines.hpp>
 
+#include "loaders/LoaderIFP.hpp"
+
 #include <algorithm>
 
+#include <btBulletDynamicsCommon.h>
 // Required for BT_BULLET_VERSION
 #include "LinearMath/btScalar.h"
 #ifndef BT_BULLET_VERSION

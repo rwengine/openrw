@@ -1,4 +1,7 @@
 #include "RWGame.hpp"
+
+#include <glm/gtx/norm.hpp>
+
 #include "DrawUI.hpp"
 #include "GameInput.hpp"
 #include "State.hpp"

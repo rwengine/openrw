@@ -1,17 +1,32 @@
-#include <ai/PlayerController.hpp>
+#include "engine/SaveGame.hpp"
+
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <engine/SaveGame.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/GameObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/VehicleObject.hpp>
-#include <script/SCMFile.hpp>
-#include <script/ScriptMachine.hpp>
+#include <cstdio>
+
+#if RW_DEBUG
+#include <iostream>
+#endif
 
 #include <rw/filesystem.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <rw/defines.hpp>
+
+#include "data/ZoneData.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/GameObject.hpp"
+#include "objects/InstanceObject.hpp"
+#include "objects/VehicleObject.hpp"
+#include "script/SCMFile.hpp"
+#include "script/ScriptMachine.hpp"
+#include "script/ScriptTypes.hpp"
 
 // Original save game file data structures
 typedef uint16_t BlockWord;
@@ -484,23 +499,23 @@ bool readBlock(std::FILE* str, T& out) {
 
 #define READ_VALUE(var)                                                   \
     if (!readBlock(loadFile, var)) {                                      \
-        std::cerr << file << ": Failed to load block " #var << std::endl; \
+        RW_ERROR(file << ": Failed to load block " #var);                 \
         return false;                                                     \
     }
 #define READ_SIZE(var)                                                   \
     if (!readBlock(loadFile, var)) {                                     \
-        std::cerr << file << ": Failed to load size " #var << std::endl; \
+        RW_ERROR(file << ": Failed to load size " #var);                 \
         return false;                                                    \
     }
 #define CHECK_SIG(expected)                                               \
     {                                                                     \
         char signature[4];                                                \
         if (fread(signature, sizeof(char), 4, loadFile) != 4) {           \
-            std::cerr << "Failed to read signature" << std::endl;         \
+            RW_ERROR("Failed to read signature");                         \
             return false;                                                 \
         }                                                                 \
         if (strncmp(signature, expected, 3) != 0) {                       \
-            std::cerr << "Signature " expected " incorrect" << std::endl; \
+            RW_ERROR("Signature " expected " incorrect");                 \
             return false;                                                 \
         }                                                                 \
     }
@@ -512,7 +527,7 @@ bool readBlock(std::FILE* str, T& out) {
 bool SaveGame::loadGame(GameState& state, const std::string& file) {
     std::FILE* loadFile = std::fopen(file.c_str(), "rb");
     if (loadFile == nullptr) {
-        std::cerr << "Failed to open save file" << std::endl;
+        RW_ERROR("Failed to open save file");
         return false;
     }
 
@@ -538,7 +553,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 
     if (fread(state.script->getGlobals(), sizeof(SCMByte), scriptVarCount,
               loadFile) != scriptVarCount) {
-        std::cerr << "Failed to read script memory" << std::endl;
+        RW_ERROR("Failed to read script memory");
         return false;
     }
 

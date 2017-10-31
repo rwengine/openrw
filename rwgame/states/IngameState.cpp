@@ -18,6 +18,7 @@
 #include <script/ScriptMachine.hpp>
 
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/norm.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
 
 constexpr float kAutoLookTime = 2.f;

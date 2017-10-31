@@ -1,24 +1,35 @@
-#include <data/Clump.hpp>
-#include <data/ModelData.hpp>
-#include <data/WeaponData.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <loaders/LoaderCOL.hpp>
-#include <loaders/LoaderIDE.hpp>
-#include <loaders/LoaderIPL.hpp>
-#include <platform/FileHandle.hpp>
-#include <script/SCMFile.hpp>
-#include <core/Logger.hpp>
-#include <loaders/GenericDATLoader.hpp>
-#include <loaders/LoaderGXT.hpp>
-#include <platform/FileIndex.hpp>
+#include "engine/GameData.hpp"
 
 #include <algorithm>
-#include <boost/algorithm/string/predicate.hpp>
+#include <cctype>
+#include <cmath>
+#include <cstdlib>
 #include <fstream>
-#include <iostream>
-#include <sstream>
+#include <iterator>
+#include <stdexcept>
+
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <data/Clump.hpp>
+#include <rw/defines.hpp>
+#include <rw/types.hpp>
+
+#include "core/Logger.hpp"
+//#include "data/WeaponData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "loaders/LoaderCOL.hpp"
+#include "loaders/LoaderDFF.hpp"
+#include "loaders/LoaderIDE.hpp"
+#include "loaders/LoaderIFP.hpp"
+#include "loaders/LoaderIMG.hpp"
+#include "loaders/LoaderIPL.hpp"
+#include "loaders/LoaderTXD.hpp"
+#include "platform/FileHandle.hpp"
+#include "script/SCMFile.hpp"
+#include "loaders/GenericDATLoader.hpp"
+#include "loaders/LoaderGXT.hpp"
+#include "platform/FileIndex.hpp"
 
 GameData::GameData(Logger* log, const rwfs::path& path)
     : datpath(path), logger(log), engine(nullptr) {

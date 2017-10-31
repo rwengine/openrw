@@ -1,21 +1,23 @@
-#pragma once
-#ifndef _GAMESTATE_HPP_
-#define _GAMESTATE_HPP_
+#ifndef _RWENGINE_GAMESTATE_HPP_
+#define _RWENGINE_GAMESTATE_HPP_
 #include <bitset>
+#include <cstdint>
+#include <string>
+#include <map>
+#include <vector>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <data/GameTexts.hpp>
 #include <data/VehicleGenerator.hpp>
 #include <engine/GameInputState.hpp>
 #include <engine/ScreenText.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <map>
 #include <objects/ObjectTypes.hpp>
-#include <string>
-#include <vector>
 
 class GameWorld;
 class GameObject;
 class ScriptMachine;
-class PlayerController;
 struct CutsceneData;
 
 struct SystemTime {

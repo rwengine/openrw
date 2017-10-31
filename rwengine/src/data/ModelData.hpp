@@ -9,12 +9,12 @@
 #include <utility>
 #include <vector>
 
+#include <data/Clump.hpp>
 #include <rw/defines.hpp>
 #include <rw/forward.hpp>
 
-#include "data/CollisionModel.hpp"
-#include "data/Clump.hpp"
-#include "data/PathData.hpp"
+#include <data/CollisionModel.hpp>
+#include <data/PathData.hpp>
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif

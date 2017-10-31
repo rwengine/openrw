@@ -1,3 +1,8 @@
+#include "objects/VehicleObject.hpp"
+
+#include <btBulletDynamicsCommon.h>
+#include <glm/gtx/quaternion.hpp>
+
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <data/Clump.hpp>
 #include <data/CollisionModel.hpp>
@@ -7,7 +12,6 @@
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
-#include <objects/VehicleObject.hpp>
 
 #define PART_CLOSE_VELOCITY 0.25f
 constexpr float kVehicleMaxExitVelocity = 0.15f;

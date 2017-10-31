@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <data/Clump.hpp>
 #include <engine/Animator.hpp>
+#include <loaders/LoaderIFP.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include "test_Globals.hpp"
 

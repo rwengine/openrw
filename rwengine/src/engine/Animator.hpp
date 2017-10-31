@@ -1,14 +1,12 @@
-#pragma once
-#ifndef _ANIMATOR_HPP_
-#define _ANIMATOR_HPP_
-#include <cstdint>
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <loaders/LoaderIFP.hpp>
+#ifndef _RWENGINE_ANIMATOR_HPP_
+#define _RWENGINE_ANIMATOR_HPP_
 #include <map>
-#include <rw/defines.hpp>
+#include <vector>
 
+#include <rw/defines.hpp>
 #include <rw/forward.hpp>
+
+struct AnimationBone;
 class ModelFrame;
 
 /**
