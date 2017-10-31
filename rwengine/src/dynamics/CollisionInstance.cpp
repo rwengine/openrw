@@ -1,8 +1,18 @@
-#include <dynamics/CollisionInstance.hpp>
+#include "dynamics/CollisionInstance.hpp"
 
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/GameObject.hpp>
+#include <algorithm>
+#include <cstddef>
+#include <limits>
+
+#include <btBulletDynamicsCommon.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include "data/CollisionModel.hpp"
+#include "data/ModelData.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/GameObject.hpp"
+#include "objects/VehicleInfo.hpp"
 
 class GameObjectMotionState : public btMotionState {
 public:

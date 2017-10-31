@@ -1,9 +1,12 @@
-#ifndef RWENGINE_COLLISIONINSTANCE_HPP
-#define RWENGINE_COLLISIONINSTANCE_HPP
-#include <btBulletDynamicsCommon.h>
-#include <data/CollisionModel.hpp>
-#include <string>
+#ifndef _RWENGINE_COLLISIONINSTANCE_HPP_
+#define _RWENGINE_COLLISIONINSTANCE_HPP_
 #include <vector>
+
+class btCollisionShape;
+class btMotionState;
+class btRigidBody;
+class btTriangleIndexVertexArray;
+struct CollisionModel;
 
 class GameObject;
 struct DynamicObjectData;
