@@ -1,13 +1,22 @@
-#include <btBulletDynamicsCommon.h>
-#include <ai/CharacterController.hpp>
-#include <data/Clump.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <items/Weapon.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include "ai/CharacterController.hpp"
+
+#include <cmath>
+#include <limits>
+#include <utility>
+
+#include <glm/gtc/constants.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <LinearMath/btScalar.h>
+
 #include <rw/defines.hpp>
+
+#include "engine/Animator.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "items/Weapon.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/VehicleObject.hpp"
 
 constexpr float kCloseDoorIdleTime = 2.f;
 

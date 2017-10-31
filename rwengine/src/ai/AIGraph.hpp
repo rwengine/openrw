@@ -1,13 +1,14 @@
-#pragma once
-#ifndef _AIGRAPH_HPP_
-#define _AIGRAPH_HPP_
+#ifndef _RWENGINE_AIGRAPH_HPP_
+#define _RWENGINE_AIGRAPH_HPP_
 #include <array>
-#include <data/PathData.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <rw/types.hpp>
 #include <vector>
 
+#include <glm/glm.hpp>
+
+#include <rw/types.hpp>
+
 struct AIGraphNode;
+struct PathData;
 
 class AIGraph {
 public:

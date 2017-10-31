@@ -1,13 +1,15 @@
+#include "engine/GameWorld.hpp"
+
+#include <data/Clump.hpp>
+
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
 
 #include <core/Logger.hpp>
 
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <ai/DefaultAIController.hpp>
 #include <ai/TrafficDirector.hpp>
-#include <data/Clump.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/LoaderIDE.hpp>
 #include <loaders/LoaderIPL.hpp>

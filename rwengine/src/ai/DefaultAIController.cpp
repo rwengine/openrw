@@ -1,6 +1,15 @@
-#include <ai/DefaultAIController.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
+#include "ai/DefaultAIController.hpp"
+
+#include <limits>
+#include <memory>
+#include <random>
+
+#include "ai/AIGraph.hpp"
+#include "ai/AIGraphNode.hpp"
+#include "ai/CharacterController.hpp"
+
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
 
 glm::vec3 DefaultAIController::getTargetPosition() {
     /*if(targetNode) {
