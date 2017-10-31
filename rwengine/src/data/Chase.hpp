@@ -1,5 +1,5 @@
-#ifndef _CHASE_HPP_
-#define _CHASE_HPP_
+#ifndef _RWENGINE_CHASE_HPP_
+#define _RWENGINE_CHASE_HPP_
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

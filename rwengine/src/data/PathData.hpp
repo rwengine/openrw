@@ -1,6 +1,5 @@
-#pragma once
-#ifndef __GLT_PATHDATA_HPP__
-#define __GLT_PATHDATA_HPP__
+#ifndef _RWENGINE_PATHDATA_HPP_
+#define _RWENGINE_PATHDATA_HPP_
 #include <stdint.h>
 #include <glm/glm.hpp>
 #include <string>

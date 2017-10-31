@@ -1,5 +1,6 @@
-#ifndef RWENGINE_GAMETEXTS_HPP
-#define RWENGINE_GAMETEXTS_HPP
+#ifndef _RWENGINE_GAMETEXTS_HPP_
+#define _RWENGINE_GAMETEXTS_HPP_
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 

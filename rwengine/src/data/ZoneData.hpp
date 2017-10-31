@@ -1,5 +1,5 @@
-#ifndef RWENGINE_DATA_ZONEDATA_HPP
-#define RWENGINE_DATA_ZONEDATA_HPP
+#ifndef _RWENGINE_ZONEDATA_HPP_
+#define _RWENGINE_ZONEDATA_HPP_
 
 #include <algorithm>
 #include <glm/glm.hpp>
