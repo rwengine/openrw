@@ -1,11 +1,13 @@
-#ifndef _LOADERIPL_HPP_
-#define _LOADERIPL_HPP_
-#include <data/InstanceData.hpp>
+#ifndef _RWENGINE_LOADERIPL_HPP_
+#define _RWENGINE_LOADERIPL_HPP_
+
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <data/ZoneData.hpp>
 
-#include <iostream>
-#include <memory>
-#include <vector>
+struct InstanceData;
 
 /**
     \class LoaderIPL

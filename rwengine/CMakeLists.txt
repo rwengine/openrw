@@ -31,7 +31,6 @@ set(RWENGINE_SOURCES
     src/core/Profiler.cpp
     src/core/Profiler.hpp
 
-    src/data/forward.hpp
     src/data/AnimGroup.cpp
     src/data/AnimGroup.hpp
     src/data/Chase.cpp

@@ -1,8 +1,14 @@
 #include "loaders/LoaderCOL.hpp"
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <stdexcept>
 #include <string>
+
+#include <glm/glm.hpp>
+
+#include "data/CollisionModel.hpp"
 
 constexpr uint32_t kCollMagic = 0x4C4C4F43;
 

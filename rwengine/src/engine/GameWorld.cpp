@@ -18,6 +18,7 @@
 #include "ai/TrafficDirector.hpp"
 
 #include "data/CutsceneData.hpp"
+#include "data/InstanceData.hpp"
 #include "data/WeaponData.hpp"
 
 #include "loaders/LoaderCutsceneDAT.hpp"

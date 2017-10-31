@@ -1,9 +1,9 @@
-#pragma once
-#ifndef _LOADERCUTSCENEDAT_HPP_
-#define _LOADERCUTSCENEDAT_HPP_
+#ifndef _RWENGINE_LOADERCUTSCENEDAT_HPP_
+#define _RWENGINE_LOADERCUTSCENEDAT_HPP_
 
-#include <data/forward.hpp>
 #include <rw/forward.hpp>
+
+struct CutsceneTracks;
 
 class LoaderCutsceneDAT {
 public:

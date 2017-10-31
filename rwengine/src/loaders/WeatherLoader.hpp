@@ -1,12 +1,12 @@
-#pragma once
-#ifndef _WEATHERLOADER_HPP_
-#define _WEATHERLOADER_HPP_
+#ifndef _RWENGINE_WEATHERLOADER_HPP_
+#define _RWENGINE_WEATHERLOADER_HPP_
 
-#include <rw/types.hpp>
-
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <rw/types.hpp>
 
 class WeatherLoader {
 public:

@@ -1,8 +1,12 @@
 #include <loaders/GenericDATLoader.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
+#include <iterator>
 #include <sstream>
+
+#include <rw/defines.hpp>
 
 #include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>

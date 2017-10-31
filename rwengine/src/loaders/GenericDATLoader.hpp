@@ -1,8 +1,9 @@
-#ifndef _GENERICDATLOADER_HPP_
-#define _GENERICDATLOADER_HPP_
+#ifndef _RWENGINE_GENERICDATLOADER_HPP_
+#define _RWENGINE_GENERICDATLOADER_HPP_
 
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 struct DynamicObjectData;

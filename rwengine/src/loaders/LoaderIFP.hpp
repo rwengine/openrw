@@ -1,14 +1,16 @@
-#pragma once
-#ifndef _LOADERDFF_IFP_
-#define _LOADERDFF_IFP_
+#ifndef _RWENGINE_LOADERIFP_HPP_
+#define _RWENGINE_LOADERIFP_HPP_
 
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "rw/forward.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <rw/forward.hpp>
 
 struct AnimationKeyframe {
     glm::quat rotation;

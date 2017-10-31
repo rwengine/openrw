@@ -1,8 +1,8 @@
-#pragma once
-#ifndef _LOADERGXT_HPP_
-#define _LOADERGXT_HPP_
-#include <data/forward.hpp>
+#ifndef _RWENGINE_LOADERGXT_HPP_
+#define _RWENGINE_LOADERGXT_HPP_
 #include <rw/forward.hpp>
+
+class GameTexts;
 
 class LoaderGXT {
 public:

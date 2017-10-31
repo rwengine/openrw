@@ -1,13 +1,12 @@
-#ifndef RWENGINE_LOADERIDE_HPP
-#define RWENGINE_LOADERIDE_HPP
+#ifndef _RWENGINE_LOADERIDE_HPP_
+#define _RWENGINE_LOADERIDE_HPP_
 
-#include <data/ModelData.hpp>
-#include <data/PathData.hpp>
-#include <data/PedData.hpp>
-#include <glm/glm.hpp>
-#include <iostream>
 #include <map>
-#include <objects/VehicleInfo.hpp>
+#include <memory>
+#include <string>
+
+#include <data/PedData.hpp>
+#include <data/ModelData.hpp>
 
 class LoaderIDE {
 public:
