@@ -2,6 +2,9 @@
 #include <platform/FileIndex.hpp>
 #include "test_Globals.hpp"
 
+#include <rw/filesystem.hpp>
+namespace fs = rwfs;
+
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 
 #if RW_TEST_WITH_DATA
