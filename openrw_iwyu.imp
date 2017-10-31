@@ -16,6 +16,13 @@
     { "include": [ "@<boost/range/iterator_range_core\\.hpp>", "private", "<boost/range/iterator_range.hpp>", "public"] },
 # Bullet:
     { "include": [ "@<BulletDynamics/Character/.*>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<BulletDynamics/Dynamics/.*>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<BulletCollision/CollisionShapes/.*>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<BulletCollision/CollisionDispatch/.*>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<LinearMath/btMotionState\\.h>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<LinearMath/btQuaternion\\.h>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<LinearMath/btTransform\\.h>", "public", "<btBulletDynamicsCommon.h>", "public"] },
+    { "include": [ "@<LinearMath/btVector3\\.h>", "public", "<btBulletDynamicsCommon.h>", "public"] },
 # libavcodec / libavutil
     { "include": [ "@<libavcodec/version\\.h>", "public", "<libavcodec/avcodec.h>", "public"] },
     { "include": [ "@<libavutil/version\\.h>", "public", "<libavutil/avutil.h>", "public"] },

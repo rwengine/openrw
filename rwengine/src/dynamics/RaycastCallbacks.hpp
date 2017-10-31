@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _RWENGINE_RAYCASTCALLBACKS_HPP_
+#define _RWENGINE_RAYCASTCALLBACKS_HPP_
+
 #include <btBulletDynamicsCommon.h>
 
 /**
@@ -23,3 +25,5 @@ public:
                                                          normalInWorldSpace);
     }
 };
+
+#endif
