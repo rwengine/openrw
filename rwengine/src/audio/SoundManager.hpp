@@ -1,11 +1,14 @@
-#pragma once
+#ifndef _RWENGINE_SOUNDMANAGER_HPP_
+#define _RWENGINE_SOUNDMANAGER_HPP_
 
-#include "al.h"
-#include "alc.h"
-
+#include <cstddef>
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
+
+#include <al.h>
+#include <alc.h>
 
 class SoundManager {
 public:
@@ -68,3 +71,5 @@ private:
     std::map<std::string, Sound> sounds;
     std::string backgroundNoise;
 };
+
+#endif
