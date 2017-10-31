@@ -25,5 +25,10 @@ if(INCLUDEWHATYOUUSE_FOUND)
                 CXX_INCLUDE_WHAT_YOU_USE
                     "${IWYU_CMD}"
             )
+        get_target_property(TARGET_SOURCES "${IWYU_TARGET}" SOURCES)
+        set_source_files_properties(${TARGET_SOURCES}
+            PROPERTIES
+                OBJECT_DEPENDS "${IWYU_MAPPING}"
+            )
     endfunction()
 endif()
