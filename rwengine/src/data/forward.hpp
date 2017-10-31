@@ -1,5 +1,5 @@
-#ifndef _RWENGINE_FORWARD_HPP_
-#define _RWENGINE_FORWARD_HPP_
+#ifndef _RWENGINE_DATA_FORWARD_HPP_
+#define _RWENGINE_DATA_FORWARD_HPP_
 
 struct CutsceneTracks;
 class GameTexts;

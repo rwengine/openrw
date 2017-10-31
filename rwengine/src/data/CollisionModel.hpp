@@ -1,5 +1,5 @@
-#ifndef RWENGINE_COLLISIONMODEL_HPP
-#define RWENGINE_COLLISIONMODEL_HPP
+#ifndef _RWENGINE_COLLISIONMODEL_HPP_
+#define _RWENGINE_COLLISIONMODEL_HPP_
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef RWENGINE_DATA_PEDDATA_HPP
-#define RWENGINE_DATA_PEDDATA_HPP
+#ifndef _RWENGINE_PEDDATA_HPP_
+#define _RWENGINE_PEDDATA_HPP_
 #include <cstdint>
 #include <string>
 #include <vector>

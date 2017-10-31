@@ -1,12 +1,15 @@
-#ifndef RWENGINE_DATA_ANIMGROUP_HPP
-#define RWENGINE_DATA_ANIMGROUP_HPP
+#ifndef _RWENGINE_DATA_ANIMGROUP_HPP_
+#define _RWENGINE_DATA_ANIMGROUP_HPP_
+
+#include <algorithm>
+#include <cstdint>
+#include <initializer_list>
+#include <iterator>
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 #include <rw/forward.hpp>
-#include <rw/types.hpp>
-
-struct Animation;
 
 /**
  * The logical animations

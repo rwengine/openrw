@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _WEAPONDATA_HPP_
-#define _WEAPONDATA_HPP_
+#ifndef _RWENGINE_WEAPONDATA_HPP_
+#define _RWENGINE_WEAPONDATA_HPP_
 #include <cinttypes>
 #include <glm/glm.hpp>
 #include <string>

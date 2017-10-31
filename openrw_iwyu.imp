@@ -9,6 +9,7 @@
     { "include": [ "@<glm/gtc/quaternion.\\inl>", "private", "<glm/gtc/quaternion.hpp>", "public"] },
     { "include": [ "@<glm/gtc/matrix_transform.\\inl>", "private", "<glm/gtc/matrix_transform.hpp>", "public"] },
     { "include": [ "@<glm/gtx/norm\\.inl>", "private", "<glm/gtx/norm.hpp>", "public"] },
+    { "include": [ "@<glm/gtx/\\.\\./gtc/quaternion\\.hpp>", "public", "<glm/gtc/quaternion.hpp>", "public"] },
 # Boost filesystem:
     { "include": [ "@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public"] },
 # Boost iterator:

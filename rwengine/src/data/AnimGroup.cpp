@@ -1,6 +1,10 @@
-#include "AnimGroup.hpp"
+#include "data/AnimGroup.hpp"
+
 #include <algorithm>
 #include <vector>
+
+#include <rw/defines.hpp>
+#include <rw/forward.hpp>
 
 // The default animations for every cycle
 const std::vector<AnimGroup> kBuiltInAnimGroups{

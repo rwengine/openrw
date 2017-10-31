@@ -1,17 +1,20 @@
-#ifndef RWENGINE_MODELDATA_HPP
-#define RWENGINE_MODELDATA_HPP
-#include <stdint.h>
+#ifndef _RWENGINE_MODELDATA_HPP_
+#define _RWENGINE_MODELDATA_HPP_
+#include <cstdint>
 #include <array>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
-#include <data/CollisionModel.hpp>
-#include <data/Clump.hpp>
-#include <data/PathData.hpp>
 #include <rw/defines.hpp>
+#include <rw/forward.hpp>
+
+#include "data/CollisionModel.hpp"
+#include "data/Clump.hpp"
+#include "data/PathData.hpp"
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif

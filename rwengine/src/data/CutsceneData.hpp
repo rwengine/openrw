@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _CUTSCENEDATA_HPP_
-#define _CUTSCENEDATA_HPP_
+#ifndef _RWENGINE_CUTSCENEDATA_HPP_
+#define _RWENGINE_CUTSCENEDATA_HPP_
 #include <glm/glm.hpp>
 #include <map>
 #include <string>

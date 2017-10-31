@@ -1,9 +1,13 @@
 #include "data/Chase.hpp"
+
 #include <cstdint>
-#include <engine/GameWorld.hpp>
+#include <cstddef>
 #include <fstream>
-#include <objects/GameObject.hpp>
+
 #include <rw/defines.hpp>
+
+#include "engine/GameWorld.hpp"
+#include "objects/GameObject.hpp"
 
 #define KEYFRAMES_PER_SECOND 30
 
