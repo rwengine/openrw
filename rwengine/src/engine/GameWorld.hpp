@@ -1,18 +1,43 @@
-#ifndef _GAMEWORLD_HPP_
-#define _GAMEWORLD_HPP_
+#ifndef _RWENGINE_GAMEWORLD_HPP_
+#define _RWENGINE_GAMEWORLD_HPP_
+
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <random>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <LinearMath/btScalar.h>
+
+#include <ai/AIGraph.hpp>
+#include <ai/AIGraphNode.hpp>
+#include <audio/SoundManager.hpp>
+
+#include <objects/ObjectTypes.hpp>
+#include <render/VisualFX.hpp>
+
+#include <data/Chase.hpp>
+
+class btCollisionDispatcher;
+class btDefaultCollisionConfiguration;
+class btDiscreteDynamicsWorld;
+class btDynamicsWorld;
+class btManifoldPoint;
+class btOverlappingPairCallback;
+class btSequentialImpulseConstraintSolver;
+struct btDbvtBroadphase;
+
+class GameState;
 
 class PlayerController;
 class Logger;
 
 class GameData;
-
-#include <ai/AIGraph.hpp>
-#include <ai/AIGraphNode.hpp>
-#include <audio/SoundManager.hpp>
-#include <engine/GameState.hpp>
-
 class CutsceneObject;
-#include <objects/ObjectTypes.hpp>
 
 class GameObject;
 class CharacterObject;
@@ -21,26 +46,10 @@ class VehicleObject;
 class PickupObject;
 
 class ViewCamera;
-#include <data/ModelData.hpp>
-#include <render/VisualFX.hpp>
 
 struct BlipData;
 struct WeaponScan;
 struct VehicleGenerator;
-
-#include <data/Chase.hpp>
-#include <glm/glm.hpp>
-
-
-#include <data/Clump.hpp>
-
-#include <btBulletCollisionCommon.h>
-#include <btBulletDynamicsCommon.h>
-
-#include <array>
-#include <random>
-#include <set>
-#include <vector>
 
 /**
  * Information about "Goal" locations so they can be rendered

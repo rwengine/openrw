@@ -1,28 +1,35 @@
-#pragma once
-#ifndef _GAMEDATA_HPP_
-#define _GAMEDATA_HPP_
+#ifndef _RWENGINE_GAMEDATA_HPP_
+#define _RWENGINE_GAMEDATA_HPP_
 
-class Logger;
+#include <array>
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <glm/glm.hpp>
+
+#include <platform/FileIndex.hpp>
+#include <rw/defines.hpp>
+#include <rw/forward.hpp>
 
 #include <data/GameTexts.hpp>
+#include <data/ModelData.hpp>
 #include <data/PedData.hpp>
 #include <data/ZoneData.hpp>
 #include <data/AnimGroup.hpp>
 #include <loaders/LoaderDFF.hpp>
-#include <loaders/LoaderIDE.hpp>
-#include <loaders/LoaderIFP.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/LoaderTXD.hpp>
 #include <loaders/WeatherLoader.hpp>
 #include <objects/VehicleInfo.hpp>
-#include <rw/types.hpp>
-
 #include <gl/TextureData.hpp>
-#include <platform/FileIndex.hpp>
 
-#include <memory>
-
-struct DynamicObjectData;
+class Logger;
 struct WeaponData;
 class GameWorld;
 class TextureAtlas;

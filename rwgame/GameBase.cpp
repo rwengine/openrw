@@ -7,6 +7,8 @@
 
 #include "SDL.h"
 
+#include <iostream>
+
 // Use first 8 chars of git hash as the build string
 const std::string kBuildStr(kGitSHA1Hash, 8);
 const std::string kWindowTitle = "RWGame";

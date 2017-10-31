@@ -1,7 +1,10 @@
+#include "objects/PickupObject.hpp"
+
+#include <btBulletDynamicsCommon.h>
+
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
-#include <objects/PickupObject.hpp>
 
 uint32_t colours[14] = {
     0xff0000, // bat, detonator, adrenaline

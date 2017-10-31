@@ -1,8 +1,14 @@
+#include "engine/Animator.hpp"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <data/Clump.hpp>
-#include <engine/Animator.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <loaders/LoaderDFF.hpp>
-#include <queue>
+
+#include "loaders/LoaderIFP.hpp"
+
+#include <algorithm>
+#include <cmath>
 
 Animator::Animator(ClumpPtr model) : model(model) {
 }

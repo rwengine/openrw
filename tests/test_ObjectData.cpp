@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <data/ModelData.hpp>
+#include <loaders/LoaderIDE.hpp>
 #include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(ObjectDataTests)

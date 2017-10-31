@@ -4,6 +4,7 @@
 #include <limits>
 #include <utility>
 
+#include <btBulletDynamicsCommon.h>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
 

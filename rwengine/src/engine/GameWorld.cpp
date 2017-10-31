@@ -1,33 +1,40 @@
 #include "engine/GameWorld.hpp"
 
+//#include <LinearMath/btScalar.h>
+//#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
+
+#include <glm/gtx/norm.hpp>
+
 #include <data/Clump.hpp>
 
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
+#include "core/Logger.hpp"
 
-#include <core/Logger.hpp>
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
 
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <ai/DefaultAIController.hpp>
-#include <ai/TrafficDirector.hpp>
-#include <data/WeaponData.hpp>
-#include <loaders/LoaderIDE.hpp>
-#include <loaders/LoaderIPL.hpp>
+#include "ai/DefaultAIController.hpp"
+#include "ai/PlayerController.hpp"
+#include "ai/TrafficDirector.hpp"
 
-// 3 isn't enough to cause a factory.
-#include <objects/CharacterObject.hpp>
-#include <objects/CutsceneObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/ItemPickup.hpp>
-#include <objects/VehicleObject.hpp>
+#include "data/CutsceneData.hpp"
+#include "data/WeaponData.hpp"
 
-#include <data/CutsceneData.hpp>
-#include <loaders/LoaderCutsceneDAT.hpp>
+#include "loaders/LoaderCutsceneDAT.hpp"
+#include "loaders/LoaderIPL.hpp"
+
+#include "objects/CharacterObject.hpp"
+#include "objects/CutsceneObject.hpp"
+#include "objects/InstanceObject.hpp"
+#include "objects/ItemPickup.hpp"
+#include "objects/VehicleObject.hpp"
+
+#include "render/ViewCamera.hpp"
+
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif
 
-#include <render/ViewCamera.hpp>
 
 // Behaviour Tuning
 constexpr float kMaxTrafficSpawnRadius = 100.f;
@@ -210,8 +217,6 @@ void GameWorld::cleanupTraffic(const ViewCamera& focus) {
     destroyQueuedObjects();
 }
 
-#include <ai/PlayerController.hpp>
-#include <core/Logger.hpp>
 CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
                                                 const glm::vec3& pos,
                                                 const glm::quat& rot) {

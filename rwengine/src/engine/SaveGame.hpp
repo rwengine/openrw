@@ -1,16 +1,10 @@
-#pragma once
-#ifndef _SAVEGAME_HPP_
-#define _SAVEGAME_HPP_
-
-#include <rw/types.hpp>
-
-#include <engine/GameState.hpp>
+#ifndef _RWENGINE_SAVEGAME_HPP_
+#define _RWENGINE_SAVEGAME_HPP_
 
 #include <string>
 #include <vector>
 
-class GameWorld;
-class ScriptMachine;
+#include <engine/GameState.hpp>
 
 struct SaveGameInfo {
     std::string savePath;
