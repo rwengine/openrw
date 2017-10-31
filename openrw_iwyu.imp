@@ -6,9 +6,13 @@
     { "include": [ "@<bits/std_abs\\.h>", "private", "<cstdlib>", "public"] },
 # GLM:
     { "include": [ "@<glm/detail/.*>", "private", "<glm/glm.hpp>", "public"] },
-    { "include": [ "@<glm/gtc/.*>", "private", "<glm/gtc/matrix_transform.hpp>", "public"] },
+    { "include": [ "@<glm/gtc/quaternion.\\inl>", "private", "<glm/gtc/quaternion.hpp>", "public"] },
+    { "include": [ "@<glm/gtc/matrix_transform.\\inl>", "private", "<glm/gtc/matrix_transform.hpp>", "public"] },
+    { "include": [ "@<glm/gtx/norm\\.inl>", "private", "<glm/gtx/norm.hpp>", "public"] },
 # Boost filesystem:
     { "include": [ "@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public"] },
 # Boost iterator:
     { "include": [ "@<boost/range/iterator_range_core\\.hpp>", "private", "<boost/range/iterator_range.hpp>", "public"] },
+# Bullet:
+    { "include": [ "@<BulletDynamics/Character/.*>", "public", "<btBulletDynamicsCommon.h>", "public"] },
 ]

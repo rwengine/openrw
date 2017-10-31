@@ -1,10 +1,8 @@
-#pragma once
-#ifndef _DEFAULTAICONTROLLER_HPP_
-#define _DEFAULTAICONTROLLER_HPP_
+#ifndef _RWENGINE_DEFAULTAICONTROLLER_HPP_
+#define _RWENGINE_DEFAULTAICONTROLLER_HPP_
+#include <glm/glm.hpp>
 #include <ai/CharacterController.hpp>
-#include <random>
 
-struct AIGraphNode;
 class DefaultAIController : public CharacterController {
     glm::vec3 gotoPos;
 

@@ -1,6 +1,8 @@
-#pragma once
-#ifndef _PLAYERCONTROLLER_HPP_
-#define _PLAYERCONTROLLER_HPP_
+#ifndef _RWENGINE_PLAYERCONTROLLER_HPP_
+#define _RWENGINE_PLAYERCONTROLLER_HPP_
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <ai/CharacterController.hpp>
 
 class PlayerController : public CharacterController {

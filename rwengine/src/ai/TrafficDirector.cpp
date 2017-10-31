@@ -1,17 +1,22 @@
 #include "ai/TrafficDirector.hpp"
-#include <ai/AIGraphNode.hpp>
-#include <ai/CharacterController.hpp>
-#include <core/Logger.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/GameObject.hpp>
-#include <objects/VehicleObject.hpp>
-#include <render/ViewCamera.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+
+#include <glm/glm.hpp>
+
+#include "ai/AIGraph.hpp"
+#include "ai/AIGraphNode.hpp"
+#include "ai/CharacterController.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/GameObject.hpp"
+#include "objects/VehicleObject.hpp"
+#include "render/ViewCamera.hpp"
 
 #include <glm/gtx/norm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif

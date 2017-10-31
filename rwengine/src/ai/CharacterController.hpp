@@ -1,8 +1,6 @@
-#pragma once
-#ifndef _CHARACTERCONTROLLER_HPP_
-#define _CHARACTERCONTROLLER_HPP_
+#ifndef _RWENGINE_CHARACTERCONTROLLER_HPP_
+#define _RWENGINE_CHARACTERCONTROLLER_HPP_
 #include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 #include <memory>
 #include <string>

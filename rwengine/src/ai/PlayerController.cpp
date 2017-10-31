@@ -1,9 +1,13 @@
-#include <ai/PlayerController.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameWorld.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include "ai/PlayerController.hpp"
+
+#include <memory>
+
+#include <glm/gtc/quaternion.hpp>
+
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/GameObject.hpp"
+#include "objects/VehicleObject.hpp"
 
 PlayerController::PlayerController()
     : CharacterController()

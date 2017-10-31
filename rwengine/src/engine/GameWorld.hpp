@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _GAMEWORLD_HPP_
 #define _GAMEWORLD_HPP_
 
@@ -31,6 +30,9 @@ struct VehicleGenerator;
 
 #include <data/Chase.hpp>
 #include <glm/glm.hpp>
+
+
+#include <data/Clump.hpp>
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>

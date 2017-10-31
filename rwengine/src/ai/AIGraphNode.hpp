@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _AIGRAPHNODE_HPP_
-#define _AIGRAPHNODE_HPP_
+#ifndef _RWENGINE_AIGRAPHNODE_HPP_
+#define _RWENGINE_AIGRAPHNODE_HPP_
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <vector>

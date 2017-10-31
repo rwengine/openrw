@@ -1,12 +1,11 @@
-#pragma once
+#ifndef _RWENGINE_TRAFFICDIRECTOR_HPP_
+#define _RWENGINE_TRAFFICDIRECTOR_HPP_
 
-#include <data/PathData.hpp>
-#include "AIGraph.hpp"
 #include "AIGraphNode.hpp"
 
-#include <glm/glm.hpp>
 #include <vector>
 
+class AIGraph;
 class GameObject;
 class GameWorld;
 class ViewCamera;
@@ -43,3 +42,5 @@ private:
     int maximumPedestrians;
     int maximumCars;
 };
+
+#endif

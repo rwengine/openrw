@@ -1,8 +1,14 @@
 #include "ai/AIGraph.hpp"
-#include <ai/AIGraphNode.hpp>
+
+#include <cstddef>
+
 #include <glm/gtx/norm.hpp>
-#include <iostream>
-#include <objects/GameObject.hpp>
+
+#include "ai/AIGraphNode.hpp"
+#include "data/PathData.hpp"
+
+#include <rw/defines.hpp>
+#include <rw/types.hpp>
 
 AIGraph::~AIGraph() {
     for (auto n : nodes) {
@@ -62,8 +68,8 @@ void AIGraph::createPathNodes(const glm::vec3& position,
                 if (gridcoord.x < 0 || gridcoord.y < 0 ||
                     gridcoord.x >= WORLD_GRID_WIDTH ||
                     gridcoord.y >= WORLD_GRID_WIDTH) {
-                    std::cout << "Warning: Node outside of grid at coord "
-                              << gridcoord.x << " " << gridcoord.y << std::endl;
+                    RW_MESSAGE("Warning: Node outside of grid at coord "
+                            << gridcoord.x << " " << gridcoord.y);
                 }
                 auto index = (gridcoord.x * WORLD_GRID_WIDTH) + gridcoord.y;
                 gridNodes[index].push_back(ainode);
