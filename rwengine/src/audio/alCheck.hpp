@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RWENGINE_ALCHECK_HPP_
+#define _RWENGINE_ALCHECK_HPP_
 
 #include <string>
 
@@ -12,4 +13,6 @@ void checkALerror(const std::string& file, unsigned int line);
     } while (0)
 #else
 #define alCheck(stmt) stmt
+#endif
+
 #endif

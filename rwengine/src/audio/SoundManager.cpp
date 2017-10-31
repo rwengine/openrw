@@ -1,4 +1,4 @@
-#include <audio/SoundManager.hpp>
+#include "audio/SoundManager.hpp"
 
 #include "audio/alCheck.hpp"
 
@@ -7,16 +7,14 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 }
+//ab
+#include <rw/defines.hpp>
 
 // Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
 #define av_frame_alloc  avcodec_alloc_frame
 #define av_frame_free   avcodec_free_frame
 #endif
-
-#include <array>
-#include <iostream>
-#include <fstream>
 
 SoundManager::SoundManager() {
     initializeOpenAL();
@@ -36,18 +34,18 @@ SoundManager::~SoundManager() {
 bool SoundManager::initializeOpenAL() {
     alDevice = alcOpenDevice(NULL);
     if (!alDevice) {
-        std::cerr << "Could not find OpenAL device!" << std::endl;
+        RW_ERROR("Could not find OpenAL device!");
         return false;
     }
 
     alContext = alcCreateContext(alDevice, NULL);
     if (!alContext) {
-        std::cerr << "Could not create OpenAL context!" << std::endl;
+        RW_ERROR("Could not create OpenAL context!");
         return false;
     }
 
     if (!alcMakeContextCurrent(alContext)) {
-        std::cerr << "Unable to make OpenAL context current!" << std::endl;
+        RW_ERROR("Unable to make OpenAL context current!");
         return false;
     }
 
@@ -70,7 +68,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
-        std::cerr << "Error allocating the audio frame" << std::endl;
+        RW_ERROR("Error allocating the audio frame");
         return;
     }
 
@@ -78,14 +76,14 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     AVFormatContext* formatContext = nullptr;
     if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
         av_frame_free(&frame);
-        std::cerr << "Error opening audio file (" << filename << ")" << std::endl;
+        RW_ERROR("Error opening audio file (" << filename << ")");
         return;
     }
 
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
         av_frame_free(&frame);
         avformat_close_input(&formatContext);
-        std::cerr << "Error finding audio stream info" << std::endl;
+        RW_ERROR("Error finding audio stream info");
         return;
     }
 
@@ -95,7 +93,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     if (streamIndex < 0) {
         av_frame_free(&frame);
         avformat_close_input(&formatContext);
-        std::cerr << "Could not find any audio stream in the file " << filename << std::endl;
+        RW_ERROR("Could not find any audio stream in the file " << filename);
         return;
     }
 
@@ -107,7 +105,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     if (avcodec_open2(codecContext, codecContext->codec, NULL) != 0) {
         av_frame_free(&frame);
         avformat_close_input(&formatContext);
-        std::cerr << "Couldn't open the audio codec context" << std::endl;
+        RW_ERROR("Couldn't open the audio codec context");
         return;
     }
 
@@ -117,7 +115,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
 
     // OpenAL only supports mono or stereo, so error on more than 2 channels
     if(channels > 2) {
-        std::cerr << "Audio has more than two channels" << std::endl;
+        RW_ERROR("Audio has more than two channels");
         av_frame_free(&frame);
         avcodec_close(codecContext);
         avformat_close_input(&formatContext);
@@ -126,7 +124,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
 
     // Right now we only support signed 16-bit audio
     if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
-        std::cerr << "Audio data isn't in a planar signed 16-bit format" << std::endl;
+        RW_ERROR("Audio data isn't in a planar signed 16-bit format");
         av_frame_free(&frame);
         avcodec_close(codecContext);
         avformat_close_input(&formatContext);
