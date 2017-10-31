@@ -12,6 +12,7 @@
 
 #include <rw/defines.hpp>
 
+#include "data/WeaponData.hpp"
 #include "engine/Animator.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"

@@ -1,6 +1,13 @@
-#include <engine/GameWorld.hpp>
-#include <items/Weapon.hpp>
-#include <objects/ProjectileObject.hpp>
+#include "items/Weapon.hpp"
+
+#include <algorithm>
+
+#include <glm/glm.hpp>
+
+#include "data/WeaponData.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/ProjectileObject.hpp"
 
 void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     auto handFrame = owner->getClump()->findFrame("srhand");

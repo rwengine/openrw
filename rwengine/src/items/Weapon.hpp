@@ -1,8 +1,8 @@
-#ifndef RWENGINE_WEAPON_HPP
-#define RWENGINE_WEAPON_HPP
+#ifndef _RWENGINE_WEAPON_HPP_
+#define _RWENGINE_WEAPON_HPP_
 
-#include <data/WeaponData.hpp>
-#include <objects/CharacterObject.hpp>
+class CharacterObject;
+struct WeaponData;
 
 namespace Weapon {
 void fireProjectile(WeaponData* wepon, CharacterObject* character, float force);
