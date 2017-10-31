@@ -1,5 +1,7 @@
-#pragma once
+#ifndef _RWENGINE_LOGGER_HPP_
+#define _RWENGINE_LOGGER_HPP_
 
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -57,3 +59,5 @@ private:
 class StdOutReceiver : public Logger::MessageReceiver {
     void messageReceived(const Logger::LogMessage&) override;
 };
+
+#endif

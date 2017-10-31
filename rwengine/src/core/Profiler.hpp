@@ -3,11 +3,13 @@
 
 #if RW_PROFILER
 #include <chrono>
-#include <rw/defines.hpp>
+#include <cstdint>
 #include <stack>
 #include <string>
 #include <vector>
 #define time_unit std::chrono::microseconds
+
+#include <rw/defines.hpp>
 
 namespace perf {
 
