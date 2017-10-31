@@ -2,10 +2,17 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <sstream>
 #include <string>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include "data/InstanceData.hpp"
+#include "data/ZoneData.hpp"
 
 enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 

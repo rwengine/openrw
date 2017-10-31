@@ -1,7 +1,6 @@
-#ifndef RWENGINE_LOADERCOL_HPP
-#define RWENGINE_LOADERCOL_HPP
+#ifndef _RWENGINE_LOADERCOL_HPP_
+#define _RWENGINE_LOADERCOL_HPP_
 #include <data/CollisionModel.hpp>
-#include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <vector>

@@ -1,12 +1,15 @@
-#include <loaders/LoaderIDE.hpp>
+#include "loaders/LoaderIDE.hpp"
 
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <sstream>
 #include <string>
+
+#include "data/PathData.hpp"
 
 bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
     std::ifstream str(filename);

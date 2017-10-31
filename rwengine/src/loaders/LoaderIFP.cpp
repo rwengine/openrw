@@ -1,6 +1,8 @@
+#include "loaders/LoaderIFP.hpp"
+
 #include <algorithm>
-#include <iostream>
-#include <loaders/LoaderIFP.hpp>
+#include <cctype>
+#include <memory>
 
 bool findKeyframes(float t, AnimationBone* bone, AnimationKeyframe& f1,
                    AnimationKeyframe& f2, float& alpha) {

@@ -2,9 +2,12 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <sstream>
+
+#include <glm/glm.hpp>
 
 bool WeatherLoader::load(const std::string& filename) {
     std::ifstream fstream(filename.c_str());
