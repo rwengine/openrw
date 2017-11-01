@@ -1,5 +1,9 @@
-#include <objects/CutsceneObject.hpp>
-#include <engine/Animator.hpp>
+#include "objects/CutsceneObject.hpp"
+
+#include <data/Clump.hpp>
+
+#include "data/ModelData.hpp"
+#include "engine/Animator.hpp"
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
                                const glm::quat &rot, ClumpPtr model,

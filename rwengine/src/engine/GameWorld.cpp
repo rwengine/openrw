@@ -1,7 +1,6 @@
 #include "engine/GameWorld.hpp"
 
-//#include <LinearMath/btScalar.h>
-//#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
 
 #include <glm/gtx/norm.hpp>

@@ -1,10 +1,14 @@
 #include "objects/PickupObject.hpp"
 
-#include <btBulletDynamicsCommon.h>
+#include <cmath>
 
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <glm/gtc/quaternion.hpp>
+
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
 
 uint32_t colours[14] = {
     0xff0000, // bat, detonator, adrenaline

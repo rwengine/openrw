@@ -1,9 +1,14 @@
-#pragma once
-#ifndef _ITEMPICKUP_HPP_
-#define _ITEMPICKUP_HPP_
-#include <data/WeaponData.hpp>
+#ifndef _RWENGINE_ITEMPICKUP_HPP_
+#define _RWENGINE_ITEMPICKUP_HPP_
+
 #include <glm/glm.hpp>
+
 #include <objects/PickupObject.hpp>
+
+class BaseModelInfo;
+class CharacterObject;
+class GameWorld;
+struct WeaponData;
 
 /**
  * @brief The ItemPickup class

@@ -1,9 +1,17 @@
-#include <data/CollisionModel.hpp>
-#include <dynamics/CollisionInstance.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/InstanceObject.hpp>
+#include "objects/InstanceObject.hpp"
+
+#include <cstdint>
+#include <string>
+
+#include <btBulletDynamicsCommon.h>
+#include <glm/gtc/quaternion.hpp>
+
+#include <rw/types.hpp>
+
+#include "dynamics/CollisionInstance.hpp"
+#include "engine/Animator.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
 
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,

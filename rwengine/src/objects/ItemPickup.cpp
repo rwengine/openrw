@@ -1,9 +1,8 @@
-#include <data/WeaponData.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/ItemPickup.hpp>
-#include <rw/defines.hpp>
+#include "objects/ItemPickup.hpp"
+
+#include "data/WeaponData.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/PickupObject.hpp"
 
 ItemPickup::ItemPickup(GameWorld *world, const glm::vec3 &position,
                        BaseModelInfo *modelinfo, PickupType type,

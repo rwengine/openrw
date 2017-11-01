@@ -21,6 +21,8 @@
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
 
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+
 constexpr float kAutoLookTime = 2.f;
 constexpr float kAutolookMinVelocity = 0.2f;
 const float kInGameFOV = glm::half_pi<float>();

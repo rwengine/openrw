@@ -1,7 +1,13 @@
-#include <data/WeaponData.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/ProjectileObject.hpp>
+#include "objects/ProjectileObject.hpp"
+
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <btBulletDynamicsCommon.h>
+#include <glm/gtc/quaternion.hpp>
+
+#include "data/WeaponData.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "render/VisualFX.hpp"
 
 void ProjectileObject::checkPhysicsContact() {
     btManifoldArray manifoldArray;
