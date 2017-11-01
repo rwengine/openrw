@@ -24,6 +24,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <functional>
 #include <iomanip>
+#include <iostream>
 
 std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, "zonecyla.dff"},

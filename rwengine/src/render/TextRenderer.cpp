@@ -1,9 +1,16 @@
 #include "render/TextRenderer.hpp"
-#include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
 
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
+#include <vector>
+
+#include <gl/gl_core_3_3.h>
+
+#include "engine/GameData.hpp"
+#include "render/GameRenderer.hpp"
 
 int charToIndex(uint16_t g) {
     // Correct for the default font maps

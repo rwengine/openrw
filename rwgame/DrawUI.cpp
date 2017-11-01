@@ -3,6 +3,7 @@
 #include <engine/GameState.hpp>
 #include <objects/CharacterObject.hpp>
 #include <data/WeaponData.hpp>
+#include <engine/GameData.hpp>
 #include <render/GameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>

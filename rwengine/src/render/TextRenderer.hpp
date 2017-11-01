@@ -1,7 +1,16 @@
-#ifndef RWENGINE_TEXTRENDERER_HPP
-#define RWENGINE_TEXTRENDERER_HPP
-#include <engine/GameData.hpp>
-#include "OpenGLRenderer.hpp"
+#ifndef _RWENGINE_TEXTRENDERER_HPP_
+#define _RWENGINE_TEXTRENDERER_HPP_
+
+#include <memory>
+#include <string>
+
+#include <glm/glm.hpp>
+
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
+
+#include <data/GameTexts.hpp>
+#include <render/OpenGLRenderer.hpp>
 
 #define GAME_FONTS 3
 #define GAME_GLYPHS 192

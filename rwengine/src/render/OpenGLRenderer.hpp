@@ -1,11 +1,19 @@
-#pragma once
-#ifndef _OPENGLRENDERER_HPP_
-#define _OPENGLRENDERER_HPP_
+#ifndef _RWENGINE_OPENGLRENDERER_HPP_
+#define _RWENGINE_OPENGLRENDERER_HPP_
 
-#include <gl/DrawBuffer.hpp>
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <glm/glm.hpp>
+
+#include <gl/gl_core_3_3.h>
 #include <gl/GeometryBuffer.hpp>
-#include <glm/vec2.hpp>
-#include <rw/types.hpp>
+
+class DrawBuffer;
 
 typedef uint64_t RenderKey;
 

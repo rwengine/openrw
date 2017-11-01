@@ -1,6 +1,6 @@
-#include <render/VisualFX.hpp>
+#include "render/VisualFX.hpp"
 
-#include <memory>
+#include <new>
 
 VisualFX::LightData::~LightData() {
 }

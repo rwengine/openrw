@@ -1,16 +1,30 @@
 #ifndef _RWENGINE_OBJECTRENDERER_HPP_
 #define _RWENGINE_OBJECTRENDERER_HPP_
 
-#include <engine/GameWorld.hpp>
-#include <gl/DrawBuffer.hpp>
-#include <glm/glm.hpp>
-#include <objects/GameObject.hpp>
-#include <render/OpenGLRenderer.hpp>
-#include <render/ViewCamera.hpp>
-#include <rw/types.hpp>
+#include <cstddef>
 
-class ProjectileObject;
+#include <gl/gl_core_3_3.h>
+
+//#include <engine/GameWorld.hpp>
+//#include <gl/DrawBuffer.hpp>
+#include <glm/glm.hpp>
+//#include <objects/GameObject.hpp>
+#include <render/OpenGLRenderer.hpp>
+//#include <render/ViewCamera.hpp>
+//#include <rw/types.hpp>
+
+class Atomic;
+class CharacterObject;
+class Clump;
+class CutsceneObject;
+class GameObject;
+class GameWorld;
+class InstanceObject;
 class PickupObject;
+class ProjectileObject;
+class VehicleObject;
+class ViewCamera;
+struct Geometry;
 
 /**
  * @brief The ObjectRenderer class handles object -> renderer transformation

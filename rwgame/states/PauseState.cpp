@@ -1,6 +1,8 @@
 #include "PauseState.hpp"
 #include "RWGame.hpp"
 
+#include <iostream>
+
 PauseState::PauseState(RWGame* game) : State(game) {
     auto& t = game->getGameData().texts;
 

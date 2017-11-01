@@ -1,9 +1,13 @@
+#include "render/OpenGLRenderer.hpp"
+
+#include <cstring>
+#include <sstream>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <render/OpenGLRenderer.hpp>
 
-#include <iostream>
-#include <sstream>
+#include <gl/DrawBuffer.hpp>
+#include <rw/defines.hpp>
 
 namespace {
 constexpr GLuint kUBOIndexScene = 1;
@@ -19,7 +23,7 @@ GLuint compileShader(GLenum type, const char* source) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
     if (status != GL_TRUE) {
-        std::cerr << "[OGL] Shader Compilation Failed" << std::endl;
+        RW_ERROR("[OGL] Shader Compilation Failed");
     }
 
     GLint len;
@@ -33,9 +37,9 @@ GLuint compileShader(GLenum type, const char* source) {
         GLchar* sourceBuff = new GLchar[sourceLen];
         glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
 
-        std::cerr << "[OGL] Shader InfoLog(" << shader << "):\n"
+        RW_ERROR("[OGL] Shader InfoLog(" << shader << "):\n"
                   << buffer << "\nSource:\n"
-                  << sourceBuff << std::endl;
+                  << sourceBuff);
 
         delete[] buffer;
         delete[] sourceBuff;
@@ -68,7 +72,7 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
 
     if (status != GL_TRUE) {
-        std::cerr << "[OGL] Program Link Failed" << std::endl;
+        RW_ERROR("[OGL] Program Link Failed");
     }
 
     GLint len;
@@ -77,8 +81,8 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
         GLchar* buffer = new GLchar[len];
         glGetProgramInfoLog(prog, len, NULL, buffer);
 
-        std::cerr << "[OGL] Program InfoLog(" << prog << "):\n"
-                  << buffer << std::endl;
+        RW_ERROR("[OGL] Program InfoLog(" << prog << "):\n"
+                  << buffer);
 
         delete[] buffer;
     }

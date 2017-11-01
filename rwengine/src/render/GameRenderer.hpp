@@ -1,39 +1,27 @@
-#ifndef _GAMERENDERER_HPP_
-#define _GAMERENDERER_HPP_
-#include <rw/defines.hpp>
+#ifndef _RWENGINE_GAMERENDERER_HPP_
+#define _RWENGINE_GAMERENDERER_HPP_
 
-class Logger;
+#include <cstddef>
+#include <memory>
 
+#include <glm/glm.hpp>
+
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
 #include <gl/gl_core_3_3.h>
 
-#include <memory>
-#include <vector>
-
-#include <render/ViewCamera.hpp>
+#include <rw/forward.hpp>
 
 #include <render/OpenGLRenderer.hpp>
-#include "MapRenderer.hpp"
-#include "TextRenderer.hpp"
-#include "WaterRenderer.hpp"
+#include <render/MapRenderer.hpp>
+#include <render/TextRenderer.hpp>
+#include <render/ViewCamera.hpp>
+#include <render/WaterRenderer.hpp>
 
-class Clump;
-class ModelFrame;
+class Logger;
+class GameData;
 class GameWorld;
-class GameObject;
-
-struct AreaIndicatorInfo;
-
-/// @todo migrate to some other way of rendering each object type.
-class CharacterObject;
-class VehicleObject;
-class InstanceObject;
-class PickupObject;
-class ProjectileObject;
-class CutsceneObject;
-
-class Animator;
-
-class Renderer;
+class TextureData;
 
 /**
  * @brief Implements high level drawing logic and low level draw commands

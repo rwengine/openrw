@@ -1,19 +1,27 @@
+#include "render/ObjectRenderer.hpp"
+
+#include <cstdint>
+
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <data/Clump.hpp>
-#include <data/CutsceneData.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <render/ObjectRenderer.hpp>
+
+#include "data/CutsceneData.hpp"
 #include "data/WeaponData.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "render/ViewCamera.hpp"
+
 // Objects that we know how to turn into renderlist entries
-#include <objects/CharacterObject.hpp>
-#include <objects/CutsceneObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/ProjectileObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include "objects/CharacterObject.hpp"
+#include "objects/CutsceneObject.hpp"
+#include "objects/InstanceObject.hpp"
+#include "objects/PickupObject.hpp"
+#include "objects/ProjectileObject.hpp"
+#include "objects/VehicleObject.hpp"
+
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif
