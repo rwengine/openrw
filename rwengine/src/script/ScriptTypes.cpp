@@ -1,11 +1,17 @@
-#include <ai/PlayerController.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
-#include <script/SCMFile.hpp>
-#include <script/ScriptMachine.hpp>
-#include <script/ScriptTypes.hpp>
+#include "script/ScriptTypes.hpp"
+
+#include <cstddef>
+
+#include "ai/PlayerController.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
+#include "objects/InstanceObject.hpp"
+#include "objects/PickupObject.hpp"
+#include "objects/VehicleObject.hpp"
+#include "script/ScriptMachine.hpp"
+#include "script/SCMFile.hpp"
 
 GameState* ScriptArguments::getState() const {
     return getVM()->getState();

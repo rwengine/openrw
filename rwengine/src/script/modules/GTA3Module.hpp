@@ -1,5 +1,5 @@
-#ifndef RWENGINE_GTA3MODULE_HPP
-#define RWENGINE_GTA3MODULE_HPP
+#ifndef _RWENGINE_GTA3MODULE_HPP_
+#define _RWENGINE_GTA3MODULE_HPP_
 #include <script/ScriptModule.hpp>
 
 class GTA3Module : public ScriptModule {

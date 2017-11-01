@@ -1,10 +1,14 @@
-#include <core/Logger.hpp>
+#include "script/ScriptMachine.hpp"
+
+#include <algorithm>
+#include <cstdlib>
 #include <cstring>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <script/SCMFile.hpp>
-#include <script/ScriptMachine.hpp>
-#include <script/ScriptModule.hpp>
+
+#include "core/Logger.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "script/SCMFile.hpp"
+#include "script/ScriptModule.hpp"
 
 void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
     if (t.wakeCounter > 0) {

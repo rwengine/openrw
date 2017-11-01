@@ -1,8 +1,11 @@
-#ifndef RWENGINE_SCMFILE_HPP
-#define RWENGINE_SCMFILE_HPP
-#include <script/ScriptTypes.hpp>
+#ifndef _RWENGINE_SCMFILE_HPP_
+#define _RWENGINE_SCMFILE_HPP_
+
+#include <cstdint>
 #include <string>
 #include <vector>
+
+#include "script/ScriptTypes.hpp"
 
 /**
  * @brief Handles in-memory SCM file data including section offsets.

@@ -1,5 +1,7 @@
-#include <script/ScriptMachine.hpp>
-#include <script/ScriptModule.hpp>
+#include "script/ScriptModule.hpp"
+
+#include "script/ScriptMachine.hpp"
+#include "script/ScriptTypes.hpp"
 
 bool ScriptModule::findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out) {
     auto it = functions.find(id);

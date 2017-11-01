@@ -1,13 +1,8 @@
-#include <engine/GameState.hpp>
-#include <objects/ObjectTypes.hpp>
-#include <script/modules/GTA3Module.hpp>
+#include "script/modules/GTA3Module.hpp"
 
-#include <objects/CharacterObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include "script/ScriptModule.hpp"
+#include "script/ScriptTypes.hpp"
 
-#include <cstdint>
 
 #ifdef RW_DEBUG_OPCODES
 #define RW_UNIMPLEMENTED_OPCODE(opcode) \

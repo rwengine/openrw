@@ -1,4 +1,7 @@
-#include <script/SCMFile.hpp>
+#include "script/SCMFile.hpp"
+
+#include <algorithm>
+#include <cstddef>
 
 void SCMFile::loadFile(char *data, unsigned int size) {
     _data = new SCMByte[size];

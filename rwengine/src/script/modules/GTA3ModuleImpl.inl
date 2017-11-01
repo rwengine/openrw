@@ -7,6 +7,12 @@
 #include <engine/GameData.hpp>
 #include <engine/Animator.hpp>
 #include <core/Logger.hpp>
+#include <objects/CutsceneObject.hpp>
+#include <objects/CharacterObject.hpp>
+#include <objects/InstanceObject.hpp>
+#include <objects/ObjectTypes.hpp>
+#include <objects/PickupObject.hpp>
+#include <objects/VehicleObject.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
 
