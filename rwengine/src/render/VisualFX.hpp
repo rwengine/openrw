@@ -1,7 +1,9 @@
-#pragma once
+#ifndef _RWENGINE_VISUALFX_HPP_
+#define _RWENGINE_VISUALFX_HPP_
+
+#include <glm/glm.hpp>
 
 #include <gl/TextureData.hpp>
-#include <glm/glm.hpp>
 
 /**
  * Represents a scene effect: lighting, particles etc.
@@ -80,3 +82,5 @@ public:
 private:
     EffectType type;
 };
+
+#endif

@@ -3,6 +3,7 @@
 
 #include "StateManager.hpp"
 
+class GameObject;
 class PlayerController;
 
 class IngameState : public State {

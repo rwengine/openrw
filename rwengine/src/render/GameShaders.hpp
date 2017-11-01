@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _GAMESHADERS_HPP_
-#define _GAMESHADERS_HPP_
+#ifndef _RWENGINE_GAMESHADERS_HPP_
+#define _RWENGINE_GAMESHADERS_HPP_
 
 #define SHADER_VF(Name)                    \
     struct Name {                          \

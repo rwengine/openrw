@@ -1,6 +1,16 @@
-#pragma once
+#ifndef _RWENGINE_MAPRENDERER_HPP_
+#define _RWENGINE_MAPRENDERER_HPP_
 
-#include <render/OpenGLRenderer.hpp>
+#include <memory>
+#include <string>
+
+#include <glm/glm.hpp>
+
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
+
+#include "render/OpenGLRenderer.hpp"
+
 class GameData;
 class GameWorld;
 
@@ -51,3 +61,5 @@ private:
     void drawBlip(const glm::vec2& coord, const glm::mat4& view,
                   const MapInfo& mi, glm::vec4 colour, float size);
 };
+
+#endif

@@ -1,7 +1,8 @@
-#ifndef _VIEWCAMERA_HPP_
-#define _VIEWCAMERA_HPP_
+#ifndef _RWENGINE_VIEWCAMERA_HPP_
+#define _RWENGINE_VIEWCAMERA_HPP_
 #include <glm/gtc/quaternion.hpp>
-#include "ViewFrustum.hpp"
+
+#include "render/ViewFrustum.hpp"
 
 class ViewCamera {
 public:

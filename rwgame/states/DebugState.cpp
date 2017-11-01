@@ -8,6 +8,7 @@
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <sstream>
+#include <iostream>
 #include "RWGame.hpp"
 
 constexpr float kDebugEntryHeight = 14.f;

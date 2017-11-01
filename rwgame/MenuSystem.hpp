@@ -2,10 +2,13 @@
 #define _GAME_MENUSYSTEM_HPP_
 #include <algorithm>
 #include <functional>
-#include <glm/glm.hpp>
 #include <memory>
-#include <render/GameRenderer.hpp>
 #include <string>
+
+#include <glm/glm.hpp>
+
+#include <render/GameRenderer.hpp>
+#include <rw/defines.hpp>
 
 /**
  * Default values for menus that should match the look and feel of the original

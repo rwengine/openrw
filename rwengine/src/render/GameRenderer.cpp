@@ -1,31 +1,29 @@
-#include <data/Clump.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
+#include "render/GameRenderer.hpp"
 
-#include <objects/CharacterObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/ProjectileObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <cmath>
+#include <string>
+#include <vector>
 
-#include <ai/CharacterController.hpp>
-#include <data/ModelData.hpp>
-
-#include <data/CutsceneData.hpp>
-#include <objects/CutsceneObject.hpp>
-#include <render/ObjectRenderer.hpp>
-
-#include <core/Logger.hpp>
-#include <render/GameShaders.hpp>
-
-#include <deque>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
-#include <core/Profiler.hpp>
+#include <gl/TextureData.hpp>
+#include <rw/types.hpp>
+
+#include "core/Logger.hpp"
+#include "core/Profiler.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "loaders/WeatherLoader.hpp"
+#include "objects/GameObject.hpp"
+#include "render/ObjectRenderer.hpp"
+#include "render/GameShaders.hpp"
+#include "render/VisualFX.hpp"
 
 const size_t skydomeSegments = 8, skydomeRows = 10;
 constexpr uint32_t kMissingTextureBytes[] = {

@@ -1,9 +1,17 @@
-#include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
-#include <render/GameShaders.hpp>
-#include <render/WaterRenderer.hpp>
+#include "render/WaterRenderer.hpp"
+
+#include <cmath>
 
 #include <glm/glm.hpp>
+
+#include <rw/defines.hpp>
+#include <rw/types.hpp>
+
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "render/GameRenderer.hpp"
+#include "render/GameShaders.hpp"
+#include "render/OpenGLRenderer.hpp"
 
 WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
     maskDraw.setFaceType(GL_TRIANGLES);

@@ -1,10 +1,17 @@
 #include "render/DebugDraw.hpp"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <iostream>
+
+#include <glm/glm.hpp>
+#include <LinearMath/btVector3.h>
+
+#include <data/Clump.hpp>
+#include <gl/DrawBuffer.hpp>
+#include <gl/GeometryBuffer.hpp>
+#include <gl/gl_core_3_3.h>
+#include <rw/defines.hpp>
+
+#include "render/GameRenderer.hpp"
 
 DebugDraw::DebugDraw() : shaderProgram(nullptr) {
     lineBuff = new GeometryBuffer;

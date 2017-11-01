@@ -5,9 +5,7 @@
 #include <cstring>
 #include <cstdio>
 
-#if RW_DEBUG
 #include <iostream>
-#endif
 
 #include <rw/filesystem.hpp>
 

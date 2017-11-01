@@ -1,10 +1,19 @@
-#include <ai/PlayerController.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
-#include <render/GameShaders.hpp>
-#include <render/MapRenderer.hpp>
+#include "render/MapRenderer.hpp"
+
+#include <cstdint>
+#include <cmath>
+#include <vector>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <gl/gl_core_3_3.h>
+#include <gl/TextureData.hpp>
+
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/GameObject.hpp"
 
 const char* MapVertexShader = R"(
 #version 330

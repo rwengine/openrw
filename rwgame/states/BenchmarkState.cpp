@@ -1,7 +1,9 @@
 #include "BenchmarkState.hpp"
 #include <engine/GameState.hpp>
-#include <fstream>
 #include "RWGame.hpp"
+
+#include <fstream>
+#include <iostream>
 
 BenchmarkState::BenchmarkState(RWGame* game, const std::string& benchfile)
     : State(game), benchfile(benchfile), benchmarkTime(0.f), duration(0.f), frameCounter(0) {

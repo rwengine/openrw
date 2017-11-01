@@ -1,11 +1,14 @@
 #include "GameBase.hpp"
 
+//#include <rw/filesystem.hpp>
+
+#include <iostream>
+
+#include <SDL.h>
+
 #include <rw/defines.hpp>
-#include <rw/filesystem.hpp>
 
 #include "GitSHA1.h"
-
-#include "SDL.h"
 
 #include <iostream>
 

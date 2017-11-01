@@ -1,4 +1,4 @@
-#include <render/GameShaders.hpp>
+#include "render/GameShaders.hpp"
 
 namespace GameShaders {
 
@@ -44,17 +44,17 @@ vec3 planeIntercept( vec3 start, vec3 dir, float height )
 void main()
 {
 	TexCoords = position * vec2(0.5,0.5) + vec2(0.5);
-	
+
 	mat4 vp = projection * view;
 	mat4 projector = inverseVP;
-	
+
 	mat3 rot = mat3(view);
 	vec3 ray = vec3(-position.x, -position.y, projection[0][0] ) * rot;
-	
+
 	float plane = texture( data, TexCoords ).r;
-	
+
 	vec3 ws = planeIntercept( campos.xyz, ray, plane );
-	
+
 	ws.z = ws.z + (-1.0+(sin(time + (ws.x + ws.y) * waveParams.x)) * waveParams.y);
 	TexCoords = ws.xy / 5.0;
 	gl_Position = vp * vec4(ws, 1.0);

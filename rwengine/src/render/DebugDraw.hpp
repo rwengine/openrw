@@ -1,8 +1,21 @@
-#pragma once
+#ifndef _RWENGINE_DEBUGDRAW_HPP_
+#define _RWENGINE_DEBUGDRAW_HPP_
+
+#include <cstddef>
+#include <vector>
 
 #include <LinearMath/btIDebugDraw.h>
+#include <LinearMath/btScalar.h>
+
 #include <data/Clump.hpp>
-#include <render/GameRenderer.hpp>
+#include <gl/gl_core_3_3.h>
+
+#include "render/OpenGLRenderer.hpp"
+
+class btVector3;
+class DrawBuffer;
+class GameRenderer;
+class GeometryBuffer;
 
 class DebugDraw : public btIDebugDraw {
 public:
@@ -38,3 +51,5 @@ protected:
 
     GLuint texture;
 };
+
+#endif

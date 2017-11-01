@@ -1,7 +1,9 @@
-#ifndef _VIEWFRUSTUM_HPP_
-#define _VIEWFRUSTUM_HPP_
+#ifndef _RWENGINE_VIEWFRUSTUM_HPP_
+#define _RWENGINE_VIEWFRUSTUM_HPP_
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #ifdef RW_WINDOWS
 #include <rw_mingw.hpp>
 #endif
