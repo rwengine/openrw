@@ -1,9 +1,5 @@
-#ifndef RWENGINE_SCRIPTTYPES_HPP
-#define RWENGINE_SCRIPTTYPES_HPP
-#include <objects/ObjectTypes.hpp>
-#include <rw/defines.hpp>
-
-#include <glm/glm.hpp>
+#ifndef _RWENGINE_SCRIPTTYPES_HPP_
+#define _RWENGINE_SCRIPTTYPES_HPP_
 
 #include <cstdint>
 #include <functional>
@@ -11,17 +7,20 @@
 #include <string>
 #include <vector>
 
-// Include the concrete types
-#include <objects/CharacterObject.hpp>
-#include <objects/CutsceneObject.hpp>
-#include <objects/InstanceObject.hpp>
-#include <objects/PickupObject.hpp>
-#include <objects/VehicleObject.hpp>
+#include <glm/glm.hpp>
+
+#include <rw/defines.hpp>
+
+class CharacterObject;
+class CutsceneObject;
+class GameObject;
+class InstanceObject;
+class PickupObject;
+class VehicleObject;
 class PlayerController;
 class ScriptMachine;
 class ScriptModule;
 struct SCMThread;
-
 class GameState;
 class GameWorld;
 

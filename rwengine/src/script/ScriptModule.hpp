@@ -1,5 +1,9 @@
-#ifndef _SCRIPTMODULE_HPP_
-#define _SCRIPTMODULE_HPP_
+#ifndef _RWENGINE_SCRIPTMODULE_HPP_
+#define _RWENGINE_SCRIPTMODULE_HPP_
+
+#include <cstddef>
+#include <map>
+
 #include <script/ScriptTypes.hpp>
 #include "ScriptMachine.hpp"
 

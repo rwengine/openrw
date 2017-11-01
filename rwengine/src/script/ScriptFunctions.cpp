@@ -1,6 +1,8 @@
-#include <script/SCMFile.hpp>
-#include <script/ScriptFunctions.hpp>
-#include <script/ScriptMachine.hpp>
+#include "script/ScriptMachine.hpp"
+
+#include "engine/GameWorld.hpp"
+#include "script/SCMFile.hpp"
+#include "script/ScriptFunctions.hpp"
 
 static const char* sprite_names[] = {
     "",  // 0

@@ -1,29 +1,29 @@
-#ifndef RWENGINE_SCRIPTMACHINE_HPP
-#define RWENGINE_SCRIPTMACHINE_HPP
+#ifndef _RWENGINE_SCRIPTMACHINE_HPP_
+#define _RWENGINE_SCRIPTMACHINE_HPP_
+
 #include <array>
+#include <cstdint>
 #include <iomanip>
 #include <list>
-#include <rw/defines.hpp>
-#include <script/ScriptTypes.hpp>
-#include <set>
 #include <sstream>
-#include <stack>
 #include <string>
 #include <vector>
+
+#include <script/ScriptTypes.hpp>
+
+class GameState;
+class SCMFile;
 
 #define SCM_NEGATE_CONDITIONAL_MASK 0x8000
 #define SCM_CONDITIONAL_MASK_PASSED 0xFF
 #define SCM_THREAD_LOCAL_SIZE 256
 
-/* Maxium size value that can be stored in each memory address.
+/* Maximum size value that can be stored in each memory address.
  * Changing this will break saves.
  */
 #define SCM_VARIABLE_SIZE 4
 #define SCM_STACK_DEPTH 4
 
-class GameState;
-
-class SCMFile;
 
 struct SCMException {
     virtual ~SCMException() {
