@@ -1,10 +1,13 @@
-#pragma once
-#ifndef _VEHICLE_INFO_HPP_
-#define _VEHICLE_INFO_HPP_
-#include <glm/glm.hpp>
+#ifndef _RWENGINE_VEHICLEINFO_HPP_
+#define _RWENGINE_VEHICLEINFO_HPP_
+
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <glm/glm.hpp>
 
 /**
  * @brief Stores data loaded from handling.cfg

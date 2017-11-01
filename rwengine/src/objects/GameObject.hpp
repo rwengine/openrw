@@ -1,17 +1,18 @@
-#pragma once
-#ifndef _GAMEOBJECT_HPP_
-#define _GAMEOBJECT_HPP_
+#ifndef _RWENGINE_GAMEOBJECT_HPP_
+#define _RWENGINE_GAMEOBJECT_HPP_
 
-#include <data/Clump.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <limits>
+
+#include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <loaders/LoaderIDE.hpp>
-#include <loaders/LoaderIPL.hpp>
-#include <memory>
-#include <objects/ObjectTypes.hpp>
-#include <rw/types.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-class CharacterController;
+#include <rw/defines.hpp>
+#include <rw/forward.hpp>
+
+#include <data/ModelData.hpp>
+#include <objects/ObjectTypes.hpp>
+
 class Animator;
 class GameWorld;
 

@@ -1,13 +1,20 @@
-#pragma once
-#ifndef _PICKUPOBJECT_HPP_
-#define _PICKUPOBJECT_HPP_
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <btBulletCollisionCommon.h>
+#ifndef _RWENGINE_PICKUPOBJECT_HPP_
+#define _RWENGINE_PICKUPOBJECT_HPP_
+
+#include <cstdint>
 #include <glm/glm.hpp>
+
+#include <rw/defines.hpp>
+
 #include <objects/GameObject.hpp>
 
-class VisualFX;
+class btPairCachingGhostObject;
+class btSphereShape;
+
+class BaseModelInfo;
+class GameWorld;
 class CharacterObject;
+class VisualFX;
 
 /**
  * @brief The PickupObject class

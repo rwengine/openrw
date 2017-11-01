@@ -1,8 +1,8 @@
-#include <engine/Animator.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <loaders/LoaderDFF.hpp>
-#include <loaders/LoaderIFP.hpp>
-#include <objects/GameObject.hpp>
+#include "objects/GameObject.hpp"
+
+#include <glm/gtc/constants.hpp>
+
+#include "engine/Animator.hpp"
 
 GameObject::~GameObject() {
     if (animator) {

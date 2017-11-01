@@ -1,10 +1,16 @@
-#pragma once
-#ifndef _OBJECTINSTANCE_HPP_
-#define _OBJECTINSTANCE_HPP_
-#include <btBulletDynamicsCommon.h>
+#ifndef _RWENGINE_INSTANCEOBJECT_HPP_
+#define _RWENGINE_INSTANCEOBJECT_HPP_
+#include <memory>
+
+#include <glm/glm.hpp>
+
+#include <rw/forward.hpp>
+
 #include <objects/GameObject.hpp>
 
+class BaseModelInfo;
 class CollisionInstance;
+class GameWorld;
 
 /**
  * @struct InstanceObject

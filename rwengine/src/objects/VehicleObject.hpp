@@ -1,17 +1,30 @@
-#pragma once
-#ifndef _VEHICLEOBJECT_HPP_
-#define _VEHICLEOBJECT_HPP_
+#ifndef _RWENGINE_VEHICLEOBJECT_HPP_
+#define _RWENGINE_VEHICLEOBJECT_HPP_
+
+#include <cstddef>
+#include <cstdint>
 #include <map>
-#include <objects/CharacterObject.hpp>
+#include <memory>
+#include <string>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <data/ModelData.hpp>
 #include <objects/GameObject.hpp>
 #include <objects/VehicleInfo.hpp>
 
+class Atomic;
+class CharacterObject;
 class CollisionInstance;
+class GameWorld;
+class ModelFrame;
+
+class btCollisionShape;
 struct btVehicleRaycaster;
 class btRaycastVehicle;
 class btRigidBody;
 class btHingeConstraint;
-class btTransform;
 
 /**
  * @class VehicleObject

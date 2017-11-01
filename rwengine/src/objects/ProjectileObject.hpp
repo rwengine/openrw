@@ -1,10 +1,15 @@
-#pragma once
-#ifndef _PROJECTILEOBJECT_HPP_
-#define _PROJECTILEOBJECT_HPP_
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <btBulletDynamicsCommon.h>
-#include <data/WeaponData.hpp>
+#ifndef _RWENGINE_PROJECTILEOBJECT_HPP_
+#define _RWENGINE_PROJECTILEOBJECT_HPP_
+
+#include <glm/glm.hpp>
+
 #include <objects/GameObject.hpp>
+
+class GameWorld;
+class btPairCachingGhostObject;
+class btRigidBody;
+class btSphereShape;
+struct WeaponData;
 
 /**
  * @brief Implements weapon projectile (e.g. molotovs, RPGs etc.)

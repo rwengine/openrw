@@ -12,6 +12,7 @@
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
 #include "objects/GameObject.hpp"
 #include "objects/VehicleObject.hpp"
 #include "render/ViewCamera.hpp"

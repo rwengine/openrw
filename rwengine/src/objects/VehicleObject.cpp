@@ -1,17 +1,22 @@
 #include "objects/VehicleObject.hpp"
 
+#include <algorithm>
+#include <limits>
+#include <cmath>
+#include <cstdlib>
+
 #include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <glm/gtx/quaternion.hpp>
 
-#include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <data/Clump.hpp>
-#include <data/CollisionModel.hpp>
-#include <dynamics/CollisionInstance.hpp>
-#include <dynamics/RaycastCallbacks.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
+#include <rw/types.hpp>
+
+#include "dynamics/CollisionInstance.hpp"
+#include "dynamics/RaycastCallbacks.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "objects/CharacterObject.hpp"
 
 #define PART_CLOSE_VELOCITY 0.25f
 constexpr float kVehicleMaxExitVelocity = 0.15f;
@@ -224,8 +229,6 @@ void VehicleObject::updateTransform(const glm::vec3& pos,
     getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
     getClump()->getFrame()->setTranslation(pos);
 }
-
-#include <glm/gtc/type_ptr.hpp>
 
 void VehicleObject::tick(float dt) {
     RW_UNUSED(dt);

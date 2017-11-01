@@ -1,13 +1,25 @@
-#pragma once
-#ifndef _CHARACTEROBJECT_HPP_
-#define _CHARACTEROBJECT_HPP_
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-#include <BulletDynamics/Character/btKinematicCharacterController.h>
-#include <btBulletCollisionCommon.h>
+#ifndef _RWENGINE_CHARACTEROBJECT_HPP_
+#define _RWENGINE_CHARACTEROBJECT_HPP_
+
 #include <array>
-#include <data/AnimGroup.hpp>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+#include <glm/gtc/constants.hpp>
 #include <glm/glm.hpp>
+
+#include <rw/forward.hpp>
+
+#include <data/AnimGroup.hpp>
 #include <objects/GameObject.hpp>
+
+class BaseModelInfo;
+class CharacterController;
+class btCapsuleShapeZ;
+class btKinematicCharacterController;
+class btPairCachingGhostObject;
 
 constexpr int kMaxInventorySlots = 13;
 

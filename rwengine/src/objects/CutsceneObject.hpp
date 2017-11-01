@@ -1,7 +1,14 @@
-#pragma once
-#ifndef _CUTSCENEOBJECT_HPP_
-#define _CUTSCENEOBJECT_HPP_
+#ifndef _RWENGINE_CUTSCENEOBJECT_HPP_
+#define _RWENGINE_CUTSCENEOBJECT_HPP_
+#include <glm/glm.hpp>
+
+#include <rw/forward.hpp>
+
 #include <objects/GameObject.hpp>
+
+class BaseModelInfo;
+class GameWorld;
+class ModelFrame;
 
 /**
  * @brief Object type used for cutscene animations.

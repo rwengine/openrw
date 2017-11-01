@@ -1,21 +1,26 @@
-#include <ai/CharacterController.hpp>
-#include <engine/Animator.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameWorld.hpp>
-#include <objects/CharacterObject.hpp>
-#include <objects/VehicleObject.hpp>
-#include <rw/defines.hpp>
-
-#include "loaders/LoaderIFP.hpp"
+#include "objects/CharacterObject.hpp"
 
 #include <algorithm>
+#include <cctype>
+#include <cstdlib>
+#include <memory>
 
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletDynamicsCommon.h>
-// Required for BT_BULLET_VERSION
-#include "LinearMath/btScalar.h"
+
+#include <rw/defines.hpp>
+
+#include "ai/CharacterController.hpp"
+#include "engine/Animator.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameState.hpp"
+#include "engine/GameWorld.hpp"
+#include "loaders/LoaderIFP.hpp"
+#include "objects/VehicleObject.hpp"
+
 #ifndef BT_BULLET_VERSION
-#warning Unable to find BT_BULLET_VERSION
+#error Unable to find BT_BULLET_VERSION
 #endif
 
 const float CharacterObject::DefaultJumpSpeed = 2.f;

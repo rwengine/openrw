@@ -2,6 +2,10 @@
 #define RWGAME_RWGAME_HPP
 
 #include <chrono>
+
+//FIXME: should be in rwengine, deeply hidden
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
