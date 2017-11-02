@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+#include <rw/filesystem.hpp>
+
 /// \brief Points to one file within the archive
 class LoaderIMGFile {
 public:
@@ -34,7 +36,7 @@ public:
     /// Load the structure of the archive
     /// Omit the extension in filename so both .dir and .img are loaded when
     /// appropriate
-    bool load(const std::string& filename);
+    bool load(const rwfs::path& filename);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Please delete[] the memory in the end.
@@ -56,7 +58,7 @@ public:
 private:
     Versions m_version;     ///< Version of this IMG archive
     uint32_t m_assetCount;  ///< Number of assets in the current archive
-    std::string m_archive;  ///< Path to the archive being used (no extension)
+    rwfs::path m_archive;  ///< Path to the archive being used (no extension)
 
     std::vector<LoaderIMGFile> m_assets;  ///< Asset info of the archive
 };
