@@ -1,4 +1,8 @@
 #include "GameBase.hpp"
+
+#include <rw/defines.hpp>
+#include <rw/filesystem.hpp>
+
 #include "GitSHA1.h"
 
 #include "SDL.h"
@@ -6,21 +10,19 @@
 // Use first 8 chars of git hash as the build string
 const std::string kBuildStr(kGitSHA1Hash, 8);
 const std::string kWindowTitle = "RWGame";
+const std::string kDefaultConfigFileName = "openrw.ini";
 constexpr int kWindowWidth = 800;
 constexpr int kWindowHeight = 600;
 
-GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
+GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
+        log(inlog),
+        config(),
+        window(),
+        options() {
     log.info("Game", "Build: " + kBuildStr);
 
-    if (!config.isValid()) {
-        log.error("Config", "Invalid INI file at \""
-            + config.getConfigFile() + "\".\n"
-            + "Adapt the following default INI to your configuration.\n"
-            + config.getDefaultINIString());
-        throw std::runtime_error(config.getParseResult().what());
-    }
-
     size_t w = kWindowWidth, h = kWindowHeight;
+    rwfs::path configPath;
     bool fullscreen = false;
     bool help = false;
 
@@ -29,6 +31,7 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
     po::options_description desc("Available options");
     desc.add_options()(
         "help", "Show this help message")(
+        "config,c", po::value<rwfs::path>(), "Path of configuration file")(
         "width,w", po::value<size_t>(), "Game resolution width in pixel")(
         "height,h", po::value<size_t>(), "Game resolution height in pixel")(
         "fullscreen,f", "Enable fullscreen mode")(
@@ -58,6 +61,20 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) : log(inlog) {
     }
     if (vm.count("fullscreen")) {
         fullscreen = true;
+    }
+    if (vm.count("config")) {
+        configPath = vm["config"].as<rwfs::path>();
+    } else {
+        configPath = GameConfig::getDefaultConfigPath() / kDefaultConfigFileName;
+    }
+
+    config.loadFile(configPath);
+    if (!config.isValid()) {
+        log.error("Config", "Invalid INI file at \""
+            + config.getConfigPath().string() + "\".\n"
+            + "Adapt the following default INI to your configuration.\n"
+            + config.getDefaultINIString());
+        throw std::runtime_error(config.getParseResult().what());
     }
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)

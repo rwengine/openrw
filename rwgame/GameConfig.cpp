@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include <rw/defines.hpp>
+#include <rw/filesystem.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -9,26 +10,21 @@ namespace pt = boost::property_tree;
 
 const std::string kConfigDirectoryName("OpenRW");
 
-GameConfig::GameConfig(const std::string &configName,
-                       const std::string &configPath)
-    : m_configName(configName)
-    , m_configPath(configPath)
+GameConfig::GameConfig()
+    : m_configPath()
     , m_parseResult()
     , m_inputInvertY(false) {
-    if (m_configPath.empty()) {
-        m_configPath = getDefaultConfigPath();
-    }
-
-    // Look up the path to use
-    auto configFile = getConfigFile();
-
-    std::string dummy;
-    m_parseResult =
-        parseConfig(ParseType::FILE, configFile, ParseType::CONFIG, dummy);
 }
 
-std::string GameConfig::getConfigFile() const {
-    return m_configPath + "/" + m_configName;
+void GameConfig::loadFile(const rwfs::path &path) {
+    m_configPath = path;
+    std::string dummy;
+    m_parseResult =
+        parseConfig(ParseType::FILE, path.string(), ParseType::CONFIG, dummy);
+}
+
+rwfs::path GameConfig::getConfigPath() const {
+    return m_configPath;
 }
 
 bool GameConfig::isValid() const {
@@ -39,37 +35,48 @@ const GameConfig::ParseResult &GameConfig::getParseResult() const {
     return m_parseResult;
 }
 
-std::string GameConfig::getDefaultConfigPath() {
+rwfs::path GameConfig::getDefaultConfigPath() {
 #if defined(RW_LINUX) || defined(RW_FREEBSD) || defined(RW_NETBSD) || \
     defined(RW_OPENBSD)
     char *config_home = getenv("XDG_CONFIG_HOME");
     if (config_home != nullptr) {
-        return std::string(config_home) + "/" + kConfigDirectoryName;
+        return rwfs::path(config_home) / kConfigDirectoryName;
     }
     char *home = getenv("HOME");
     if (home != nullptr) {
-        return std::string(home) + "/.config/" + kConfigDirectoryName;
+        return rwfs::path(home) / ".config/" / kConfigDirectoryName;
     }
 
 #elif defined(RW_OSX)
     char *home = getenv("HOME");
     if (home)
-        return std::string(home) + "/Library/Preferences/" +
+        return rwfs::path(home) / "Library/Preferences/" /
                kConfigDirectoryName;
 
 #else
-    return ".";
+    return rwfs::path();
 #endif
 
     // Well now we're stuck.
     RW_ERROR("No default config path found.");
-    return ".";
+    return rwfs::path();
 }
 
 std::string stripComments(const std::string &str) {
     auto s = std::string(str, 0, str.find_first_of(";#"));
     return s.erase(s.find_last_not_of(" \n\r\t") + 1);
 }
+
+struct PathTranslator {
+    typedef std::string internal_type;
+    typedef rwfs::path external_type;
+    boost::optional<external_type> get_value(const internal_type &str) {
+        return rwfs::path(str);
+    }
+    boost::optional<internal_type> put_value(const external_type &path) {
+        return path.string();
+    }
+};
 
 struct StringTranslator {
     typedef std::string internal_type;
@@ -115,8 +122,8 @@ struct IntTranslator {
 };
 
 GameConfig::ParseResult GameConfig::saveConfig() {
-    auto filename = getConfigFile();
-    return parseConfig(ParseType::CONFIG, "", ParseType::FILE, filename);
+    auto configPath = getConfigPath().string();
+    return parseConfig(ParseType::CONFIG, "", ParseType::FILE, configPath);
 }
 
 std::string GameConfig::getDefaultINIString() {
@@ -210,13 +217,14 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
 
     auto deft = StringTranslator();
     auto boolt = BoolTranslator();
+    auto patht = PathTranslator();
 
     // Add new configuration parameters here.
     // Additionally, add them to the unit test.
 
     // @todo Don't allow path separators and relative directories
     read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3",
-                deft, false);
+                patht, false);
     read_config("game.language", this->m_gameLanguage, "american", deft);
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
@@ -273,6 +281,10 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
         RW_MESSAGE(e.what());
     }
 
+    if (parseResult.type() == ParseResult::ErrorType::UNINITIALIZED) {
+        parseResult.markGood();
+    }
+
     return parseResult;
 }
 
@@ -307,7 +319,7 @@ GameConfig::ParseResult::ParseResult(GameConfig::ParseType srcType,
 }
 
 GameConfig::ParseResult::ParseResult()
-    : m_result(ErrorType::GOOD)
+    : m_result(ErrorType::UNINITIALIZED)
     , m_inputfilename()
     , m_outputfilename()
     , m_line(0)
@@ -329,6 +341,10 @@ void GameConfig::ParseResult::failInputFile(size_t line,
     this->m_result = ParseResult::ErrorType::INVALIDINPUTFILE;
     this->m_line = line;
     this->m_message = message;
+}
+
+void GameConfig::ParseResult::markGood() {
+    this-> m_result = ParseResult::ErrorType::GOOD;
 }
 
 void GameConfig::ParseResult::failArgument() {
@@ -365,6 +381,9 @@ const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData()
 std::string GameConfig::ParseResult::what() const {
     std::ostringstream oss;
     switch (this->m_result) {
+        case ErrorType::UNINITIALIZED:
+            oss << "Parsing was skipped or did not finish.";
+            break;
         case ErrorType::GOOD:
             oss << "Parsing completed without errors.";
             break;
