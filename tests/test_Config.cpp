@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
                       0);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
-    BOOST_CHECK_EQUAL(config.getGameDataPath(), "/dev/test");
+    BOOST_CHECK_EQUAL(config.getGameDataPath().string(), "/dev/test");
     BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
     BOOST_CHECK(config.getInputInvertY());
 }
@@ -300,7 +300,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
     BOOST_CHECK(!config.getInputInvertY());
-    BOOST_CHECK_EQUAL(config.getGameDataPath(), "Liberty City");
+    BOOST_CHECK_EQUAL(config.getGameDataPath().string(), "Liberty City");
 }
 
 BOOST_AUTO_TEST_CASE(test_config_save) {
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(test_config_save) {
 
     GameConfig config2;
     config2.loadFile(tempFile.path());
-    BOOST_CHECK_EQUAL(config2.getGameDataPath(), "Liberty City");
+    BOOST_CHECK_EQUAL(config2.getGameDataPath().string(), "Liberty City");
 
     simpleConfig_t cfg2 = readConfig(tempFile.path());
     BOOST_CHECK_EQUAL(cfg2["game"]["path"], "Liberty City");

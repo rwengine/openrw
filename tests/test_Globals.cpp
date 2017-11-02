@@ -6,6 +6,6 @@
 std::string Global::getGamePath() {
     GameConfig config;
     config.loadFile(GameConfig::getDefaultConfigPath() / "openrw.ini");
-    return config.getGameDataPath();
+    return config.getGameDataPath().string(); //FIXME: use path
 }
 #endif

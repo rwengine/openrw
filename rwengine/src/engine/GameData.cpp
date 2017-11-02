@@ -20,7 +20,7 @@
 #include <iostream>
 #include <sstream>
 
-GameData::GameData(Logger* log, const std::string& path)
+GameData::GameData(Logger* log, const rwfs::path& path)
     : datpath(path), logger(log), engine(nullptr) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
@@ -696,11 +696,13 @@ float GameData::getWaveHeightAt(const glm::vec3& ws) const {
            WATER_HEIGHT;
 }
 
-bool GameData::isValidGameDirectory(const std::string& path) {
-    if (path.empty()) {
+bool GameData::isValidGameDirectory(const rwfs::path& path) {
+    rwfs::error_code ec;
+    if (!rwfs::is_directory(path, ec)) {
+        std::cerr << "first test failed\n";
         return false;
     }
 
     LoaderIMG i;
-    return i.load(path + "/models/gta3.img");
+    return i.load((path / "models/gta3.img").string()); //FIXME: to path
 }

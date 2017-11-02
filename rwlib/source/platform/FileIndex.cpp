@@ -34,7 +34,7 @@ FileHandle FileIndex::openFilePath(const std::string& file_path) {
     return std::make_shared<FileContentsInfo>(data, length);
 }
 
-void FileIndex::indexTree(const std::string& root) {
+void FileIndex::indexTree(const rwfs::path& root) {
     for (const rwfs::path& path : rwfs::recursive_directory_iterator(root)) {
         if (!rwfs::is_regular_file(path)) {
             continue;
