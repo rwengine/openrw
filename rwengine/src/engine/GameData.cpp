@@ -704,5 +704,5 @@ bool GameData::isValidGameDirectory(const rwfs::path& path) {
     }
 
     LoaderIMG i;
-    return i.load((path / "models/gta3.img").string()); //FIXME: to path
+    return i.load(path / "models/gta3.img");
 }
