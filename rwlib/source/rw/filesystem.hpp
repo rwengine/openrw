@@ -7,14 +7,26 @@
 
 #if RW_FS_LIBRARY == RW_FS_CXX17
 #include <filesystem>
-namespace rwfs = std::filesystem;
+#include <system_error>
+namespace rwfs {
+    using namespace std::filesystem;
+    using error_code = std::error_code;
+}
 #elif RW_FS_LIBRARY == RW_FS_CXXTS
 #include <experimental/filesystem>
-namespace rwfs = std::experimental::filesystem;
+#include <system_error>
+namespace rwfs {
+    using namespace std::experimental::filesystem;
+    using error_code = std::error_code;
+}
 #elif RW_FS_LIBRARY == RW_FS_BOOST
 #include <boost/filesystem.hpp>
 #include <boost/functional/hash.hpp>
-namespace rwfs = boost::filesystem;
+#include <boost/system/error_code.hpp>
+namespace rwfs {
+    using namespace boost::filesystem;
+    using error_code = boost::system::error_code;
+}
 #if BOOST_VERSION < 105600
 namespace boost {
 namespace filesystem {
