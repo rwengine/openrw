@@ -213,8 +213,8 @@ public:
      */
     std::string getDefaultINIString();
 
-    const std::string &getGameDataPath() const {
-        return m_gamePath.string(); //FIXME: change to path
+    const rwfs::path &getGameDataPath() const {
+        return m_gamePath;
     }
     const std::string &getGameLanguage() const {
         return m_gameLanguage;

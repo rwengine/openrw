@@ -68,7 +68,7 @@ public:
      * Adds the files contained within the given directory tree to the
      * file index.
      */
-    void indexTree(const std::string& root);
+    void indexTree(const rwfs::path& root);
 
     /**
      * Adds the files contained within the given Archive file to the

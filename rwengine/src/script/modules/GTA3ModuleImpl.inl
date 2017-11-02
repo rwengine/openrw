@@ -9684,7 +9684,7 @@ void opcode_0354(const ScriptArguments& args, const ScriptFloat arg1) {
 		vehicle0->setPrimaryColour(c1);\
 		vehicle0->setSecondaryColour(c2);\
 		args.getWorld()->chase.addChaseVehicle(vehicle0, path,\
-											   args.getWorld()->data->getDataPath()+"/data/paths/CHASE" #path ".DAT");\
+					args.getWorld()->data->getDataPath().string()+"/data/paths/CHASE" #path ".DAT");\
 	}
 
 	CHASE_VEHICLE(116,   273.5422f,  -1167.1907f,   24.9906f, 64.f,    2, 1,  0);

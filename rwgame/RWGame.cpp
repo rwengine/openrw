@@ -46,11 +46,11 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                               ? options["benchmark"].as<std::string>()
                               : "");
 
-    log.info("Game", "Game directory: " + config.getGameDataPath());
+    log.info("Game", "Game directory: " + config.getGameDataPath().string());
 
     if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
         throw std::runtime_error("Invalid game directory path: " +
-                                 config.getGameDataPath());
+                                 config.getGameDataPath().string());
     }
 
     data.load();
@@ -70,7 +70,7 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                        btIDebugDraw::DBG_DrawConstraintLimits);
     debug.setShaderProgram(renderer.worldProg.get());
 
-    data.loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
+    data.loadDynamicObjects((config.getGameDataPath() / "data/object.dat").string()); // FIXME: use path
 
     data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
