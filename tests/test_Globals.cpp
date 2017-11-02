@@ -4,6 +4,8 @@
 
 #if RW_TEST_WITH_DATA
 std::string Global::getGamePath() {
-    return GameConfig("openrw.ini").getGameDataPath();
+    GameConfig config;
+    config.loadFile(GameConfig::getDefaultConfigPath() / "openrw.ini");
+    return config.getGameDataPath();
 }
 #endif

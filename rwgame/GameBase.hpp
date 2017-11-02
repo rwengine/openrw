@@ -25,7 +25,7 @@ public:
 
 protected:
     Logger& log;
-    GameConfig config{"openrw.ini"};
+    GameConfig config;
     GameWindow window;
     boost::program_options::variables_map options;
 };

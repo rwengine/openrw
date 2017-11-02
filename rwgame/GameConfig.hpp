@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <rw/filesystem.hpp>
+
 class GameConfig {
 private:
     enum ParseType { DEFAULT, CONFIG, FILE, STRING };
@@ -19,6 +21,8 @@ public:
     class ParseResult {
     public:
         enum ErrorType {
+            /// UNINITIALIZED: The config was not initialized
+            UNINITIALIZED,
             /// GOOD: Input file/string was good
             GOOD,
             /// INVALIDINPUTFILE: There was some error while reading from a file
@@ -69,6 +73,12 @@ public:
          * @return A vector with all the keys
          */
         const std::vector<std::string> &getKeysInvalidData() const;
+
+        /**
+         * @brief Mark this result as valid
+         */
+        void markGood();
+
         /**
          * @brief failInputFile Fail because the input file was invalid
          * @param line Line number where the error is located
@@ -164,17 +174,20 @@ public:
     };
 
     /**
-     * @brief GameConfig Loads a game configuration
-     * @param configName The configuration filename to load
-     * @param configPath Where to look.
+     * @brief GameConfig Create a game configuration (initially invalid)
      */
-    GameConfig(const std::string &configName,
-               const std::string &configPath = getDefaultConfigPath());
+    GameConfig();
 
     /**
-     * @brief getFilePath Returns the system file path for the configuration
+     * @brief Initialize this object using the config file at path
+     * @param path Path of the configuration file
      */
-    std::string getConfigFile() const;
+    void loadFile(const rwfs::path &path);
+
+    /**
+     * @brief getConfigPath Returns the path for the configuration
+     */
+    rwfs::path getConfigPath() const;
 
     /**
      * @brief writeConfig Save the game configuration
@@ -201,7 +214,7 @@ public:
     std::string getDefaultINIString();
 
     const std::string &getGameDataPath() const {
-        return m_gamePath;
+        return m_gamePath.string(); //FIXME: change to path
     }
     const std::string &getGameLanguage() const {
         return m_gameLanguage;
@@ -210,8 +223,8 @@ public:
         return m_inputInvertY;
     }
 
+    static rwfs::path getDefaultConfigPath();
 private:
-    static std::string getDefaultConfigPath();
 
     /**
      * @brief parseConfig Load data from source and write it to destination.
@@ -230,14 +243,13 @@ private:
                             ParseType destType, std::string &destination);
 
     /* Config State */
-    std::string m_configName;
-    std::string m_configPath;
+    rwfs::path m_configPath;
     ParseResult m_parseResult;
 
     /* Actual Configuration */
 
     /// Path to the game data
-    std::string m_gamePath;
+    rwfs::path m_gamePath;
 
     /// Language for game
     std::string m_gameLanguage = "american";
