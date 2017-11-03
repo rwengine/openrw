@@ -103,11 +103,10 @@ if(TEST_COVERAGE)
             "-fprofile-arcs"
             "-ftest-coverage"
         )
-    set_target_properties(rw_interface
-        PROPERTIES
-            INTERFACE_LINK_LIBRARIES
-                gcov
-    )
+    target_link_libraries(rw_interface
+        INTERFACE
+            gcov
+        )
 endif()
 
 include(CMakeParseArguments)
