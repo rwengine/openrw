@@ -24,4 +24,4 @@ endif()
 option(CHECK_INCLUDES "Analyze #includes in C and C++ source files")
 
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
-option(SEPERATE_TEST_SUITES "Add each test suite as seperate test")
+option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")

@@ -88,7 +88,7 @@ target_link_libraries(run_tests
 
 openrw_target_apply_options(TARGET run_tests)
 
-if(SEPERATE_TEST_SUITES)
+if(SEPARATE_TEST_SUITES)
     foreach(TEST ${TESTS})
         add_test(
             NAME "${TEST}"
