@@ -5,20 +5,47 @@ add_library(openrw::interface ALIAS rw_interface)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-target_compile_options(rw_interface
-    INTERFACE
-        "-Wall"
-        "-Wextra"
-        "-Wdouble-promotion"
-        "-Wpedantic"
-        "-pthread"
-    )
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(rw_interface
+        INTERFACE
+            "-Wall"
+            "-Wextra"
+            "-Wdouble-promotion"
+            "-Wpedantic"
+            "-pthread"
+        )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_definitions(rw_interface
+        INTERFACE
+            "_SCL_SECURE_NO_WARNINGS"
+            "_CRT_SECURE_NO_WARNINGS"
+        )
+else()
+    message(FATAL_ERROR "Unknown compiler ID: '${CMAKE_CXX_COMPILER_ID}'")
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+    target_compile_options(rw_interface
+        INTERFACE
+            "-Wno-gnu-array-member-paren-init"
+        )
+endif()
+
+if(MINGW)
+    target_compile_options(rw_interface
+        INTERFACE
+            "-fpermissive"
+        )
+endif()
+
 target_compile_definitions(rw_interface
     INTERFACE
         "$<$<CONFIG:Debug>:RW_DEBUG=1>"
         "GLM_FORCE_RADIANS"
         "GLM_ENABLE_EXPERIMENTAL"
         "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
+        "RENDER_PROFILER=0"
+        "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
     )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
@@ -57,20 +84,6 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
 endif()
-
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-    target_compile_options(rw_interface INTERFACE "-Wno-gnu-array-member-paren-init")
-endif()
-
-if(MINGW)
-    target_compile_options(rw_interface INTERFACE "-fpermissive")
-endif()
-
-target_compile_definitions(rw_interface
-    INTERFACE
-        "RENDER_PROFILER=0"
-        "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
-    )
 
 if(ENABLE_SCRIPT_DEBUG)
     target_compile_definitions(rw_interface
