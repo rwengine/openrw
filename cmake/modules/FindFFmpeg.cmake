@@ -62,14 +62,14 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIR)
 
 if(FFMPEG_FOUND AND NOT TARGET ffmpeg::ffmpeg)
-  list(GET FFMPEG_LIBRARIES 0 FFMPEG_FIRST_LIBRARY)
-  set(FFMPEG_OTHER_LIBRARIES "${FFMPEG_LIBRARIES}")
-  list(REMOVE_AT FFMPEG_OTHER_LIBRARIES 0)
-  add_library(ffmpeg::ffmpeg UNKNOWN IMPORTED)
-  set_target_properties(ffmpeg::ffmpeg PROPERTIES
-    IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
-    IMPORTED_LOCATION "${FFMPEG_FIRST_LIBRARY}"
-    INTERFACE_LINK_LIBRARIES "${FFMPEG_OTHER_LIBRARIES}"
-    INTERFACE_INCLUDE_DIRECTORIES "${FFMPEG_INCLUDE_DIR}"
-    )
+    add_library(ffmpeg INTERFACE)
+    target_link_libraries(ffmpeg
+        INTERFACE
+            ${FFMPEG_LIBRARIES}
+        )
+    target_include_directories(ffmpeg SYSTEM
+        INTERFACE
+            "${FFMPEG_INCLUDE_DIR}"
+        )
+    add_library(ffmpeg::ffmpeg ALIAS ffmpeg)
 endif()

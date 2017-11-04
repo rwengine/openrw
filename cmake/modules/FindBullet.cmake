@@ -1,17 +1,17 @@
 # Override CMake's FindBullet module:
-# create an IMPORTED TARGET
+# - create a bullet::bullet TARGET
 
 include("${CMAKE_ROOT}/Modules/FindBullet.cmake")
 
 if(BULLET_FOUND AND NOT TARGET bullet::bullet)
-  list(GET BULLET_LIBRARIES 0 BULLET_FIRST_LIBRARY)
-  set(BULLET_OTHER_LIBRARIES "${BULLET_LIBRARIES}")
-  list(REMOVE_AT BULLET_OTHER_LIBRARIES 0)
-  add_library(bullet::bullet UNKNOWN IMPORTED)
-  set_target_properties(bullet::bullet PROPERTIES
-    IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
-    IMPORTED_LOCATION "${BULLET_FIRST_LIBRARY}"
-    INTERFACE_LINK_LIBRARIES "${BULLET_OTHER_LIBRARIES}"
-    INTERFACE_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIR}"
-    )
+    add_library(bullet INTERFACE)
+    target_link_libraries(bullet
+        INTERFACE
+            ${BULLET_LIBRARIES}
+        )
+    target_include_directories(bullet SYSTEM
+        INTERFACE
+            "${BULLET_INCLUDE_DIR}"
+        )
+    add_library(bullet::bullet ALIAS bullet)
 endif()

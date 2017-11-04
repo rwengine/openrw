@@ -1,13 +1,17 @@
-# Override CMake's FindBullet module:
-# create an IMPORTED TARGET
+# Override CMake's FindOpenAL module:
+# - create a OpenAL::OpenAL target
 
 include("${CMAKE_ROOT}/Modules/FindOpenAL.cmake")
 
 if(OPENAL_FOUND AND NOT TARGET OpenAL::OpenAL)
-  add_library(OpenAL::OpenAL UNKNOWN IMPORTED)
-  set_target_properties(OpenAL::OpenAL PROPERTIES
-    IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
-    IMPORTED_LOCATION "${OPENAL_LIBRARY}"
-    INTERFACE_INCLUDE_DIRECTORIES "${OPENAL_INCLUDE_DIR}"
-    )
+    add_library(OpenAL INTERFACE)
+    target_link_libraries(OpenAL
+        INTERFACE
+            "${OPENAL_LIBRARY}"
+        )
+    target_include_directories(OpenAL SYSTEM
+        INTERFACE
+            "${OPENAL_INCLUDE_DIR}"
+        )
+    add_library(OpenAL::OpenAL ALIAS OpenAL)
 endif()
