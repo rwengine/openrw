@@ -65,8 +65,10 @@ IF(GLM_FOUND)
 ENDIF(GLM_FOUND)
 
 if(GLM_FOUND AND NOT TARGET glm::glm)
-  add_library(glm::glm INTERFACE IMPORTED)
-  set_target_properties(glm::glm PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${GLM_INCLUDE_DIR}"
-    )
+    add_library(glm INTERFACE)
+    target_include_directories(glm SYSTEM
+        INTERFACE
+            "${GLM_INCLUDE_DIR}"
+        )
+    add_library(glm::glm ALIAS glm)
 endif()
