@@ -56,6 +56,7 @@ target_include_directories(rwlib
 
 target_link_libraries(rwlib
     PUBLIC
+        glm::glm
         openrw::interface
     PRIVATE
         OpenGL::GL
