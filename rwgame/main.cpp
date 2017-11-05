@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include <iostream>
 #include "RWGame.hpp"
 #include "SDL.h"
@@ -5,6 +6,7 @@
 #include <core/Logger.hpp>
 
 int main(int argc, char* argv[]) {
+    SDL_SetMainReady();
     // Initialise Logging before anything else happens
     StdOutReceiver logstdout;
     Logger logger({ &logstdout });
