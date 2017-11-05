@@ -62,8 +62,14 @@ add_executable(rwtests
 target_compile_definitions(rwtests
     PRIVATE
         "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
-        "BOOST_TEST_DYN_LINK"
     )
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_compile_definitions(rwtests
+        PRIVATE
+            "BOOST_TEST_DYN_LINK"
+        )
+endif()
 
 target_include_directories(rwtests
     SYSTEM
