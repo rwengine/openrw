@@ -50,6 +50,11 @@ if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
 set(FFMPEG_FOUND TRUE)
 endif()
 
+find_library(FFMPEG_SWRESAMPLE
+NAMES swresample
+PATHS ${_FFMPEG_SWRESAMPLE_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+)
+
 set(FFMPEG_INCLUDE_DIR ${FFMPEG_AVCODEC_INCLUDE_DIR})
 
 set(FFMPEG_LIBRARIES
@@ -57,6 +62,10 @@ ${FFMPEG_LIBAVCODEC}
 ${FFMPEG_LIBAVFORMAT}
 ${FFMPEG_LIBAVUTIL}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    list(APPEND FFMPEG_LIBRARIES "${FFMPEG_SWRESAMPLE}" secur32.lib Ws2_32.lib)
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIR)
