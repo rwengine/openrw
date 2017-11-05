@@ -55,29 +55,29 @@ foreach(TEST ${TESTS})
     list(APPEND TEST_SOURCES "test_${TEST}.cpp")
 endforeach()
 
-add_executable(run_tests
+add_executable(rwtests
     ${TEST_SOURCES}
     )
 
-target_compile_definitions(run_tests
+target_compile_definitions(rwtests
     PRIVATE
         "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
         "BOOST_TEST_DYN_LINK"
     )
 
-target_include_directories(run_tests
+target_include_directories(rwtests
     SYSTEM
     PRIVATE
         ${Boost_INCLUDE_DIRS}
     )
 
-target_include_directories(run_tests
+target_include_directories(rwtests
     PRIVATE
         "${CMAKE_SOURCE_DIR}/tests"
         "${CMAKE_SOURCE_DIR}/rwgame"
     )
 
-target_link_libraries(run_tests
+target_link_libraries(rwtests
     PRIVATE
         rwengine
         SDL2::SDL2
@@ -86,13 +86,13 @@ target_link_libraries(run_tests
         ${Boost_SYSTEM_LIBRARY}
     )
 
-openrw_target_apply_options(TARGET run_tests)
+openrw_target_apply_options(TARGET rwtests)
 
 if(SEPARATE_TEST_SUITES)
     foreach(TEST ${TESTS})
         add_test(
             NAME "${TEST}"
-            COMMAND "$<TARGET_FILE:run_tests>" "-t" "${TEST}Tests"
+            COMMAND "$<TARGET_FILE:rwtests>" "-t" "${TEST}Tests"
             )
         set_tests_properties("${TEST}"
             PROPERTIES
@@ -101,7 +101,7 @@ if(SEPARATE_TEST_SUITES)
     endforeach()
 else()
     add_test(NAME UnitTests
-        COMMAND "$<TARGET_FILE:run_tests>"
+        COMMAND "$<TARGET_FILE:rwtests>"
         )
     set_tests_properties(UnitTests
         PROPERTIES
