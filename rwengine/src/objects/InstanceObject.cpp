@@ -147,7 +147,7 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
         }
 
         if (collision) {
-            body.reset(new CollisionInstance);
+            body = std::make_unique<CollisionInstance>();
             body->createPhysicsBody(this, collision, dynamics.get());
             body->getBulletBody()->setActivationState(ISLAND_SLEEPING);
         }

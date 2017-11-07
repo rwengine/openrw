@@ -34,7 +34,7 @@ public:
 
     static Handle create(GLuint name, const glm::ivec2& size,
                          bool transparent) {
-        return Handle(new TextureData(name, size, transparent));
+        return std::make_shared<TextureData>(name, size, transparent);
     }
 
 private:

@@ -176,7 +176,7 @@ void GenericDATLoader::loadHandling(const std::string& name,
 
             auto mit = vehicleData.find(info.ID);
             if (mit == vehicleData.end()) {
-                vehicleData.insert({info.ID, VehicleInfoHandle(new VehicleInfo{
+                vehicleData.insert({info.ID, std::make_shared<VehicleInfo>(VehicleInfo{
                                                  info, {}, {}})});
             } else {
                 mit->second->handling = info;
