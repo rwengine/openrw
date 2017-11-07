@@ -122,5 +122,5 @@ FileHandle FileIndex::openFile(const std::string& filename) {
         return nullptr;
     }
 
-    return FileHandle(new FileContentsInfo{data, length});
+    return std::make_shared<FileContentsInfo>(data, length);
 }
