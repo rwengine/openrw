@@ -86,7 +86,7 @@ void GameData::loadLevelFile(const std::string& path) {
     currenttextureslot = "generic";
 
     for (std::string line, cmd; std::getline(datfile, line);) {
-        if (line.size() == 0 || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#') continue;
 #ifndef RW_WINDOWS
         line.erase(line.size() - 1);
 #endif

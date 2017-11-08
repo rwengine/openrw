@@ -384,13 +384,13 @@ std::string GameConfig::ParseResult::what() const {
             break;
         case ErrorType::INVALIDCONTENT:
             oss << "Error while parsing \"" << this->m_inputfilename << "\".";
-            if (this->m_keys_requiredMissing.size()) {
+            if (!this->m_keys_requiredMissing.empty()) {
                 oss << "\nRequired keys that are missing:";
                 for (auto &key : this->m_keys_requiredMissing) {
                     oss << "\n - " << key;
                 }
             }
-            if (this->m_keys_invalidData.size()) {
+            if (!this->m_keys_invalidData.empty()) {
                 oss << "\nKeys that contain invalid data:";
                 for (auto &key : this->m_keys_invalidData) {
                     oss << "\n - " << key;
@@ -401,7 +401,7 @@ std::string GameConfig::ParseResult::what() const {
             oss << "Unknown error.";
             break;
     }
-    if (this->m_unknownData.size()) {
+    if (!this->m_unknownData.empty()) {
         oss << "\nUnknown configuration keys:";
         for (const auto &keyvalue : m_unknownData) {
             oss << "\n - " << keyvalue.first;
