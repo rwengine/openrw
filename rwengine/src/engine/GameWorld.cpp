@@ -258,7 +258,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     glm::u8vec3 prim(255), sec(128);
     auto palit = data->vehiclePalettes.find(
         vti->name);  // modelname is conveniently lowercase (usually)
-    if (palit != data->vehiclePalettes.end() && palit->second.size() > 0) {
+    if (palit != data->vehiclePalettes.end() && !palit->second.empty()) {
         std::uniform_int_distribution<int> uniform(0, palit->second.size() - 1);
         int set = uniform(randomEngine);
         prim = data->vehicleColours[palit->second[set].first];
@@ -270,7 +270,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto model = vti->getModel();
     auto info = data->vehicleInfo.find(vti->handling_);
     if (model && info != data->vehicleInfo.end() &&
-        info->second->wheels.size() == 0 && info->second->seats.size() == 0) {
+            info->second->wheels.empty() && info->second->seats.empty()) {
         auto root = model->getFrame();
         for (const auto& frame : root->getChildren()) {
             const std::string& name = frame->getName();

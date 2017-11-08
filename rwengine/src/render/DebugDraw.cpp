@@ -51,7 +51,7 @@ void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
 }
 
 void DebugDraw::flush(GameRenderer *renderer) {
-    if (lines.size() == 0) {
+    if (lines.empty()) {
         return;
     }
 
