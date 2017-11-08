@@ -150,32 +150,28 @@ ScriptObjectType<VehicleObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return ScriptObjectType<VehicleObject>(param.handleValue(),
-                                           getObject<VehicleObject>(arg));
+    return {param.handleValue(), getObject<VehicleObject>(arg)};
 }
 template <>
 ScriptObjectType<InstanceObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return ScriptObjectType<InstanceObject>(param.handleValue(),
-                                            getObject<InstanceObject>(arg));
+    return {param.handleValue(), getObject<InstanceObject>(arg)};
 }
 template <>
 ScriptObjectType<CharacterObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return ScriptObjectType<CharacterObject>(param.handleValue(),
-                                             getObject<CharacterObject>(arg));
+    return {param.handleValue(), getObject<CharacterObject>(arg)};
 }
 template <>
 ScriptObjectType<PickupObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return ScriptObjectType<PickupObject>(param.handleValue(),
-                                          getObject<PickupObject>(arg));
+    return {param.handleValue(), getObject<PickupObject>(arg)};
 }
 template <>
 ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
@@ -190,7 +186,7 @@ ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
         auto playerObject = static_cast<CharacterObject*>(object);
         ctrl = static_cast<PlayerController*>(playerObject->controller);
     }
-    return ScriptObjectType<PlayerController>(param.handleValue(), ctrl);
+    return {param.handleValue(), ctrl};
 }
 template <>
 ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
@@ -202,7 +198,7 @@ ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     if (size_t(*param.handleValue()) < generators.size()) {
         generator = &generators[*param.handleValue()];
     }
-    return ScriptObjectType<VehicleGenerator>(param.handleValue(), generator);
+    return {param.handleValue(), generator};
 }
 template <>
 ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
@@ -214,7 +210,7 @@ ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
     if (size_t(*param.handleValue()) < garages.size()) {
         garage = &garages[*param.handleValue()];
     }
-    return ScriptObjectType<GarageInfo>(param.handleValue(), garage);
+    return {param.handleValue(), garage};
 }
 template <>
 ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
@@ -227,11 +223,11 @@ ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
     if (it != blips.end()) {
         blip = &it->second;
     }
-    return ScriptObjectType<BlipData>(param.handleValue(), blip);
+    return {param.handleValue(), blip};
 }
 template <>
 ScriptObjectType<int> ScriptArguments::getScriptObject(unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return ScriptObjectType<int>(param.handleValue(), (int*)nullptr);
+    return {param.handleValue(), (int*)nullptr};
 }

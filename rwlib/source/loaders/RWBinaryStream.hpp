@@ -67,7 +67,7 @@ public:
      * @brief Returns a new stream for the data inside this one.
      */
     RWBStream getInnerStream() const {
-        return RWBStream(_dataCur, _currChunkSz);
+        return {_dataCur, _currChunkSz};
     }
 };
 
