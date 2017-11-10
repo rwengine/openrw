@@ -166,6 +166,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
                 }
             }
         }
+        av_free_packet(&readingPacket);
     }
 
     // Cleanup
