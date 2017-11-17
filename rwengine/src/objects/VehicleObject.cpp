@@ -351,9 +351,6 @@ void VehicleObject::tickPhysics(float dt) {
                     if (_lastHeight >= wH) {
                         // we are for real, underwater
                         inWater = true;
-                    } else if (inWater == false) { // @todo This condition is unnecessary
-                        // It's just a tunnel or something, we good.
-                        inWater = false;
                     }
                 } else {
                     // The water is beneath us
