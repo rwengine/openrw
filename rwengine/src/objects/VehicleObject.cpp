@@ -792,7 +792,7 @@ void VehicleObject::grantOccupantRewards(CharacterObject* character) {
             || getVehicle()->vehiclename_ == "CABBIE"
             || getVehicle()->vehiclename_ == "BORGNINE") {
             // Earn $25 from taxi cabs
-            /// @todo implement this
+            character->engine->state->playerInfo.money += 25;
         } else if (getVehicle()->vehiclename_ == "POLICAR") {
             // Police cruisers give 5 shotgun cartridges
             character->addToInventory(4, 5);
