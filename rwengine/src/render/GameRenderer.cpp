@@ -496,8 +496,6 @@ void GameRenderer::renderEffects(GameWorld* world) {
 
         auto& p = particle.position;
 
-        glm::mat4 m(1.f);
-
         // Figure the direction to the camera center.
         auto amp = cpos - p;
         glm::vec3 ptc = particle.up;
@@ -508,24 +506,17 @@ void GameRenderer::renderEffects(GameWorld* world) {
             ptc = amp;
         }
 
-        glm::vec3 f = glm::normalize(particle.direction);
-        glm::vec3 s = glm::cross(f, glm::normalize(ptc));
-        glm::vec3 u = glm::cross(s, f);
-        m[0][0] = s.x;
-        m[1][0] = s.y;
-        m[2][0] = s.z;
-        m[0][1] = -f.x;
-        m[1][1] = -f.y;
-        m[2][1] = -f.z;
-        m[0][2] = u.x;
-        m[1][2] = u.y;
-        m[2][2] = u.z;
-        m[3][0] = -glm::dot(s, p);
-        m[3][1] = glm::dot(f, p);
-        m[3][2] = -glm::dot(u, p);
-        m = glm::scale(glm::inverse(m), glm::vec3(particle.size, 1.f));
+        ptc = glm::normalize(ptc);
 
-        // m = glm::translate(m, p);
+        glm::mat4 transformMat(1.f);
+
+        glm::mat4 lookMat = glm::lookAt(
+            glm::vec3(0.0f,0.0f,0.0f),
+            ptc,
+            glm::vec3(0.0f,0.0f,1.0f));
+
+        transformMat = glm::scale(glm::translate(transformMat,p),
+            glm::vec3(particle.size,1.0f)) * glm::inverse(lookMat);
 
         Renderer::DrawParameters dp;
         dp.textures = {particle.texture->getName()};
@@ -536,7 +527,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
         dp.blend = true;
         dp.diffuse = 1.f;
 
-        renderer->drawArrays(m, &particleDraw, dp);
+        renderer->drawArrays(transformMat, &particleDraw, dp);
     }
 }
 
