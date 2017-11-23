@@ -1,0 +1,15 @@
+FROM base/archlinux
+
+RUN pacman -Syy --noconfirm \
+    core/gcc \
+    make \
+    extra/boost \
+    extra/cmake \
+    extra/ffmpeg \
+    extra/bullet \
+    community/glm \
+    extra/openal \
+    extra/sdl2 \
+    extra/qt5-base
+
+CMD ["/bin/bash"]
