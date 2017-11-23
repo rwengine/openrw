@@ -1,32 +1,38 @@
-sudo: required
-dist: trusty
-language: generic
-env:
-  - CXX=g++-5 CC=gcc-5
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-      - libbullet-dev
-      - libsdl2-dev
-      - libglm-dev
-      - libopenal-dev
-      - libavcodec-dev
-      - libavformat-dev
-      - libboost-filesystem-dev
-      - libboost-program-options-dev
-      # Dependencies for BUILD_TESTS
-      - libboost-test-dev
-      # Dependencies for BUILD_VIEWER
-      - qt5-default
-      - libqt5opengl5-dev
+language: cpp
+
 git:
     depth: 3
-script:
-    - ctest -S cmake/ctest/travis_script.ctest -VV -DSRC_DIR=. -DBIN_DIR=build
-    - if [ -f FATAL_ERROR ]; then printf "Fatal failure detected.\nExiting with non-zero result code.\n"; exit 1; fi
+
+matrix:
+  include:
+  - os: linux
+    env: NAME="Ubuntu Linux (Latest)"
+    services: docker
+    script:
+      - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
+  - os: linux
+    env: NAME="Fedora Linux (Latest)"
+    services: docker
+    script:
+      - scripts/docker/docker_travis.sh "fedora_latest.docker"
+  - os: linux
+    env: NAME="Arch Linux (Latest)"
+    services: docker
+    script:
+      - scripts/docker/docker_travis.sh "arch_latest.docker"
+  - os: osx
+    env: NAME="Apple MacOS"
+    osx_image: xcode9.2
+    install:
+      - brew update
+      - brew upgrade
+      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2
+      - export PATH="/usr/local/opt/openal-soft/bin:/usr/local/opt/qt/bin:$PATH"
+      - export PKG_CONFIG_PATH=/usr/local/opt/openal-soft/lib/pkgconfig
+    script:
+      - mkdir -p "$TRAVIS_BUILD_DIR/build"
+      - ctest -S "$TRAVIS_BUILD_DIR/cmake/ctest/travis_script.ctest" -VV -DSRC_DIR="$TRAVIS_BUILD_DIR" -DBIN_DIR="$TRAVIS_BUILD_DIR/build"
+
 notifications:
     email: false
 #    irc:
