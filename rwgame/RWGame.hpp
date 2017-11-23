@@ -29,6 +29,7 @@ class RWGame : public GameBase {
 
     bool inFocus = true;
     ViewCamera currentCam;
+    ViewCamera lastCam;
 
     enum class DebugViewMode {
         Disabled,

@@ -51,6 +51,9 @@ bool SoundManager::initializeOpenAL() {
         return false;
     }
 
+    //Needed for max distance
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
     return true;
 }
 
@@ -228,6 +231,21 @@ void SoundManager::playSound(const std::string& name) {
         alCheck(alSourcePlay(sounds[name].buffer.source));
     }
 }
+
+void SoundManager::playSound(const std::string& name, const glm::vec3 position, const bool looping, const float maxDist) {
+    if (sounds.find(name) != sounds.end()) {
+        alCheck(alSource3f(sounds[name].buffer.source, AL_POSITION, position.x, position.y, position.z));
+        if(looping){
+            alCheck(alSourcei(sounds[name].buffer.source, AL_LOOPING, AL_TRUE));
+        }
+
+        alCheck(alSourcef(sounds[name].buffer.source, AL_PITCH, 1.f));
+        alCheck(alSourcef(sounds[name].buffer.source, AL_GAIN, 1.f));
+        alCheck(alSourcef(sounds[name].buffer.source, AL_MAX_DISTANCE, maxDist));
+        alCheck(alSourcePlay(sounds[name].buffer.source));
+    }
+}
+
 void SoundManager::pauseSound(const std::string& name) {
     if (sounds.find(name) != sounds.end()) {
         alCheck(alSourcePause(sounds[name].buffer.source));
@@ -277,3 +295,23 @@ void SoundManager::pause(bool p) {
         }
     }
 }
+
+void SoundManager::setListenerPosition(const glm::vec3 position) {
+    alListener3f(AL_POSITION, position.x, position.y, position.z);
+}
+
+void SoundManager::setListenerVelocity(const glm::vec3 vel) {
+    alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
+}
+
+void SoundManager::setListenerOrientation(const glm::vec3 at, const glm::vec3 up) {
+    float v[6] = {at.x, at.y, at.z, up.x, up.y, up.z};
+    alListenerfv(AL_ORIENTATION, v);
+}
+
+void SoundManager::setSoundPosition(const std::string name,const glm::vec3 position) {
+    if (sounds.find(name) != sounds.end()) {
+        alCheck(alSource3f(sounds[name].buffer.source, AL_POSITION, position.x, position.y, position.z));
+    }
+}
+

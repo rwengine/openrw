@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <glm/glm.hpp>
 
 class SoundManager {
 public:
@@ -15,6 +16,7 @@ public:
     bool loadSound(const std::string& name, const std::string& fileName);
     bool isLoaded(const std::string& name);
     void playSound(const std::string& name);
+    void playSound(const std::string& name, const glm::vec3 position, const bool looping = false, const float maxDist = 10.f); 
     void pauseSound(const std::string& name);
     bool isPlaying(const std::string& name);
 
@@ -23,6 +25,12 @@ public:
     bool loadMusic(const std::string& name, const std::string& fileName);
     void playMusic(const std::string& name);
     void stopMusic(const std::string& name);
+
+    void setListenerPosition(const glm::vec3 position);
+    void setListenerVelocity(const glm::vec3 vel);
+    void setListenerOrientation(const glm::vec3 at, const glm::vec3 up  = glm::vec3(0.f, 0.f, 1.f));
+
+    void setSoundPosition(const std::string name,const glm::vec3 position);
 
     void pause(bool p);
 

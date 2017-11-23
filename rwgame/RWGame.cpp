@@ -542,6 +542,7 @@ void RWGame::render(float alpha, float time) {
 
     // Update the camera
     if (!StateManager::get().states.empty()) {
+        lastCam = currentCam;
         currentCam = StateManager::get().states.back()->getCamera(alpha);
     }
 
@@ -556,6 +557,13 @@ void RWGame::render(float alpha, float time) {
     if (state.isCinematic) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
+
+    //Update Listener parameters
+    world->sound.setListenerPosition(viewCam.position);
+    if(time!=0) {
+        world->sound.setListenerVelocity((viewCam.position - lastCam.position) / time);
+    }
+    world->sound.setListenerOrientation(viewCam.getCenter(), viewCam.getUp());
 
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
