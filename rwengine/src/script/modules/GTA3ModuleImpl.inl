@@ -4437,8 +4437,8 @@ void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
 */
 void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound0, ScriptSound& sound1) {
     auto world = args.getWorld();
-    world->sound.loadSound("FLASH", world->data->getDataPath().string() + "audio/PoliceSiren.mp3");
-    world->sound.playSound("FLASH", coord, true, 1000);
+    world->sound.loadSound("FLASH",  world->data->getDataPath().string() + "audio/sfx", 24);
+    world->sound.playSound("FLASH", coord, true);
 }
 
 /**

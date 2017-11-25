@@ -2,7 +2,10 @@
 
 #include <cstring>
 #include <string>
-
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libavutil/file.h>
 LoaderSDT::LoaderSDT() : m_version(GTAIIIVC), m_assetCount(0) {
 }
 
@@ -25,6 +28,11 @@ typedef struct {
         uint32_t size;
     } data;
 } WaveHeader;
+
+struct buffer_data {
+    uint8_t *ptr;
+    size_t size; ///< size left in the buffer
+};
 
 bool LoaderSDT::load(const std::string& filename) {
     auto baseName = filename;
@@ -114,7 +122,6 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
     } else
         return 0;
 }
-
 /// Writes the contents of assetname to filename
 bool LoaderSDT::saveAsset(size_t index, const std::string& filename,
                           bool asWave) {
@@ -138,6 +145,46 @@ bool LoaderSDT::saveAsset(size_t index, const std::string& filename,
         delete[] raw_data;
         return false;
     }
+}
+
+static int read_packet(void *opaque, uint8_t *buf, int buf_size)
+{
+    struct buffer_data *bd = (struct buffer_data *)opaque;
+    buf_size = FFMIN(buf_size, bd->size);
+    printf("ptr:%p size:%zu\n", bd->ptr, bd->size);
+    /* copy internal buffer data to buf */
+    memcpy(buf, bd->ptr, buf_size);
+    bd->ptr  += buf_size;
+    bd->size -= buf_size;
+    return buf_size;
+}
+
+AVFormatContext * LoaderSDT::loadSound(size_t index, bool asWave) {
+
+    char * raw_data = loadToMemory(index, asWave);
+    if (!raw_data) return nullptr;
+    LoaderSDTFile assetInfo{};
+    bool found = findAssetInfo(index, assetInfo);
+    if (!found || !raw_data) {
+        std::cerr << "Error loading sound";
+        return nullptr;
+    }
+    constexpr size_t ioBufferSize = 4096;
+    uint8_t * ioBuffer = (uint8_t *)av_malloc(ioBufferSize); // can get av_free()ed by libav
+
+    struct buffer_data * bd = new buffer_data();
+    av_register_all();
+
+    bd->size = sizeof(WaveHeader) + assetInfo.size; 
+    bd->ptr =  new uint8_t[bd->size];
+    memcpy(bd->ptr, raw_data, bd->size);
+
+    AVIOContext * avioContext = avio_alloc_context(ioBuffer, ioBufferSize, 0, &*bd, &read_packet, nullptr, nullptr);
+    AVFormatContext * container = avformat_alloc_context();
+    container->pb = avioContext;
+
+    delete[] raw_data;
+    return container;
 }
 
 /// Get the information of an asset by its index

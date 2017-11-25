@@ -69,7 +69,7 @@ bool SoundManager::initializeAVCodec() {
     return true;
 }
 
-void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
+void SoundManager::SoundSource::loadFromFile(const std::string& filename, const size_t index) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
@@ -79,10 +79,21 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
 
     // Allocate formatting context
     AVFormatContext* formatContext = nullptr;
-    if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
-        av_frame_free(&frame);
-        std::cerr << "Error opening audio file (" << filename << ")" << std::endl;
-        return;
+    if(filename.find("audio/sfx") != std::string::npos) {
+        LoaderSDT loader;
+        loader.load(filename);
+        std::cout<<filename;
+        formatContext = loader.loadSound(index);
+        avformat_open_input(&formatContext, "nothint", NULL, NULL);
+        if(formatContext)
+            std::cerr << "Załadowano (" << filename << ")" << std::endl;
+    }
+    else {
+        if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
+            av_frame_free(&frame);
+            std::cerr << "Error opening audio file (" << filename << ")" << std::endl;
+            return;
+        }
     }
 
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
@@ -128,13 +139,13 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     }
 
     // Right now we only support signed 16-bit audio
-    if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
+    /*if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
         std::cerr << "Audio data isn't in a planar signed 16-bit format" << std::endl;
         av_frame_free(&frame);
         avcodec_close(codecContext);
         avformat_close_input(&formatContext);
         return;
-    }
+    }*/
 
     // Start reading audio packets
     AVPacket readingPacket;
@@ -201,7 +212,7 @@ bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource) {
 }
 
 bool SoundManager::loadSound(const std::string& name,
-                             const std::string& fileName) {
+                             const std::string& fileName, const size_t index) {
     Sound* sound = nullptr;
     auto sound_iter = sounds.find(name);
 
@@ -213,7 +224,7 @@ bool SoundManager::loadSound(const std::string& name,
                                        std::forward_as_tuple());
         sound = &emplaced.first->second;
 
-        sound->source.loadFromFile(fileName);
+        sound->source.loadFromFile(fileName, index);
         sound->isLoaded = sound->buffer.bufferData(sound->source);
     }
 

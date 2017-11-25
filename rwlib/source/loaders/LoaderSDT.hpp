@@ -5,6 +5,17 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+}
+
+// Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
+#define av_frame_alloc  avcodec_alloc_frame
+#define av_frame_free   avcodec_free_frame
+#endif
 
 /// \brief Points to one file within the archive
 class LoaderSDTFile {
@@ -43,6 +54,9 @@ public:
     /// Warning: Please delete[] the memory in the end.
     /// Warning: Returns NULL (0) if by any reason it can't load the file
     char* loadToMemory(size_t index, bool asWave = true);
+
+    AVFormatContext * loadSound(size_t index, bool asWave = true);
+
 
     /// Writes the contents of index to filename
     bool saveAsset(size_t index, const std::string& filename,

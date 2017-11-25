@@ -7,16 +7,17 @@
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
+#include <loaders/LoaderSDT.hpp>
 
 class SoundManager {
 public:
     SoundManager();
     ~SoundManager();
 
-    bool loadSound(const std::string& name, const std::string& fileName);
+    bool loadSound(const std::string& name, const std::string& fileName, const size_t index = 0);
     bool isLoaded(const std::string& name);
     void playSound(const std::string& name);
-    void playSound(const std::string& name, const glm::vec3 position, const bool looping = false, const float maxDist = 10.f); 
+    void playSound(const std::string& name, const glm::vec3 position, const bool looping = false, const float maxDist = 30.f); 
     void pauseSound(const std::string& name);
     bool isPlaying(const std::string& name);
 
@@ -40,7 +41,7 @@ private:
         friend class SoundBuffer;
 
     public:
-        void loadFromFile(const std::string& filename);
+        void loadFromFile(const std::string& filename, const size_t index = 0);
 
     private:
         std::vector<int16_t> data;
