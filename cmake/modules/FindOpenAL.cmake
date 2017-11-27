@@ -3,7 +3,7 @@
 
 include("${CMAKE_ROOT}/Modules/FindOpenAL.cmake")
 
-if(OPENAL_FOUND)
+if(OPENAL_FOUND AND NOT TARGET OpenAL::OpenAL)
   add_library(OpenAL::OpenAL UNKNOWN IMPORTED)
   set_target_properties(OpenAL::OpenAL PROPERTIES
     IMPORTED_LINK_INTERFACE_LANGUAGES "C;CXX"
