@@ -58,7 +58,7 @@ target_link_libraries(rwlib
     PUBLIC
         openrw::interface
     PRIVATE
-        OpenGL::OpenGL
+        OpenGL::GL
     )
 
 openrw_target_apply_options(TARGET rwlib)
