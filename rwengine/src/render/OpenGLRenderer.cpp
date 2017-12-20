@@ -468,3 +468,6 @@ const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
 #endif
     return profileInfo[0];
 }
+
+Renderer::ShaderProgram::~ShaderProgram() {
+}

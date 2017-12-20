@@ -140,7 +140,11 @@ public:
 
     class ShaderProgram {
         // This just provides an opaque handle for external users.
+        public:
+            virtual ~ShaderProgram() = 0;
     };
+
+    virtual ~Renderer() = default;
 
     virtual std::string getIDString() const = 0;
 
@@ -249,6 +253,7 @@ public:
     public:
         OpenGLShaderProgram(GLuint p) : program(p) {
         }
+
         ~OpenGLShaderProgram() {
             glDeleteProgram(program);
         }
@@ -271,6 +276,8 @@ public:
     };
 
     OpenGLRenderer();
+
+    ~OpenGLRenderer() = default;
 
     std::string getIDString() const override;
 
