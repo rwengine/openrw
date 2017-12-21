@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "script/ScriptTypes.hpp"
+#include "rw/bit_cast.cpp"
 
 /**
  * @brief Handles in-memory SCM file data including section offsets.
@@ -33,7 +34,7 @@ public:
 
     template <class T>
     T read(unsigned int offset) const {
-        return *(T*)(_data + offset);
+        return bit_cast<T>(*(_data + offset));
     }
 
     uint32_t getMainSize() const {

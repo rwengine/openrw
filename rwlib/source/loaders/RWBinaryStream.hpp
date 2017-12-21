@@ -2,10 +2,12 @@
 #define _LIBRW_RWBINARYSTREAM_HPP_
 #include <cstdint>
 #include <glm/glm.hpp>
+#include <cstring>
 
 #include <cstddef>
 
 #include "rw/defines.hpp"
+#include "rw/bit_cast.cpp"
 
 /**
  * @brief Class for working with RenderWare binary streams.
@@ -39,11 +41,13 @@ public:
         // _nextChunk is initally = to _data, making this a non-op
         _dataCur = _nextChunk;
 
-        ChunkID id = *(ChunkID*)(_dataCur);
+        ChunkID id = bit_cast<std::uint32_t>(*_dataCur);
         _dataCur += sizeof(ChunkID);
-        _currChunkSz = *(std::uint32_t*)(_dataCur);
+
+        _currChunkSz = bit_cast<std::uint32_t>(*_dataCur);
         _dataCur += sizeof(std::uint32_t);
-        _chunkVersion = *(std::uint32_t*)(_dataCur);
+
+        _chunkVersion = bit_cast<std::uint32_t>(*_dataCur);
         _dataCur += sizeof(std::uint32_t);
 
         _nextChunk = _dataCur + _currChunkSz;

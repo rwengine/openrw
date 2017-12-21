@@ -124,7 +124,7 @@ LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
 
     char *headerPtr = listStream.getCursor();
 
-    unsigned int numGeometries = *(std::uint32_t *)headerPtr;
+    unsigned int numGeometries = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     std::vector<GeometryPtr> geometrylist;
@@ -156,19 +156,20 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     char *headerPtr = geomStream.getCursor();
 
-    geom->flags = *(std::uint16_t *)headerPtr;
+    geom->flags = bit_cast<std::uint16_t>(*headerPtr);
     headerPtr += sizeof(std::uint16_t);
 
-    /*unsigned short numUVs = *(std::uint8_t*)headerPtr;*/
+    /*unsigned short numUVs = bit_cast<std::uint8_t>(*headerPtr);*/
     headerPtr += sizeof(std::uint8_t);
-    /*unsigned short moreFlags = *(std::uint8_t*)headerPtr;*/
+    /*unsigned short moreFlags = bit_cast<std::uint8_t>(*headerPtr);*/
     headerPtr += sizeof(std::uint8_t);
 
-    unsigned int numTris = *(std::uint32_t *)headerPtr;
+    unsigned int numTris = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
-    unsigned int numVerts = *(std::uint32_t *)headerPtr;
+    unsigned int numVerts = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
-    /*unsigned int numFrames = *(std::uint32_t*)headerPtr;*/
+
+    /*unsigned int numFrames = bit_cast<std::uint32_t>(*headerPtr);*/
     headerPtr += sizeof(std::uint32_t);
 
     std::vector<GeometryVertex> verts;
@@ -182,7 +183,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     if ((geom->flags & 8) == 8) {
         for (size_t v = 0; v < numVerts; ++v) {
-            verts[v].colour = *(glm::u8vec4 *)headerPtr;
+            verts[v].colour = bit_cast<glm::u8vec4>(*headerPtr);
             headerPtr += sizeof(glm::u8vec4);
         }
     } else {
@@ -193,27 +194,28 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     if ((geom->flags & 4) == 4 || (geom->flags & 128) == 128) {
         for (size_t v = 0; v < numVerts; ++v) {
-            verts[v].texcoord = *(glm::vec2 *)headerPtr;
+            verts[v].texcoord = bit_cast<glm::vec2>(*headerPtr);
             headerPtr += sizeof(glm::vec2);
         }
     }
 
     // Grab indicies data to generate normals (if applicable).
-    RW::BSGeometryTriangle *triangles = (RW::BSGeometryTriangle *)headerPtr;
+    auto triangles = std::make_unique<RW::BSGeometryTriangle[]>(numTris);
+    memcpy(triangles.get(), headerPtr, sizeof(RW::BSGeometryTriangle) * numTris);
     headerPtr += sizeof(RW::BSGeometryTriangle) * numTris;
 
-    geom->geometryBounds = *(RW::BSGeometryBounds *)headerPtr;
+    geom->geometryBounds = bit_cast<RW::BSGeometryBounds>(*headerPtr);
     geom->geometryBounds.radius = std::abs(geom->geometryBounds.radius);
     headerPtr += sizeof(RW::BSGeometryBounds);
 
     for (size_t v = 0; v < numVerts; ++v) {
-        verts[v].position = *(glm::vec3 *)headerPtr;
+        verts[v].position = bit_cast<glm::vec3>(*headerPtr);
         headerPtr += sizeof(glm::vec3);
     }
 
     if ((geom->flags & 16) == 16) {
         for (size_t v = 0; v < numVerts; ++v) {
-            verts[v].normal = *(glm::vec3 *)headerPtr;
+            verts[v].normal = bit_cast<glm::vec3>(*headerPtr);
             headerPtr += sizeof(glm::vec3);
         }
     } else {
@@ -276,7 +278,7 @@ void LoaderDFF::readMaterialList(GeometryPtr &geom, const RWBStream &stream) {
         throw DFFLoaderException("MaterialList missing struct chunk");
     }
 
-    unsigned int numMaterials = *(std::uint32_t *)listStream.getCursor();
+    unsigned int numMaterials = bit_cast<std::uint32_t>(*listStream.getCursor());
 
     geom->materials.reserve(numMaterials);
 
@@ -306,18 +308,21 @@ void LoaderDFF::readMaterial(GeometryPtr &geom, const RWBStream &stream) {
 
     // Unkown
     matData += sizeof(std::uint32_t);
-    material.colour = *(glm::u8vec4 *)matData;
+    material.colour = bit_cast<glm::u8vec4>(*matData);
+
     matData += sizeof(std::uint32_t);
     // Unkown
     matData += sizeof(std::uint32_t);
-    /*bool usesTexture = *(std::uint32_t*)matData;*/
+    /*bool usesTexture = bit_cast<std::uint32_t>(*matData);*/
     matData += sizeof(std::uint32_t);
 
-    material.ambientIntensity = *(float *)matData;
+    material.ambientIntensity = bit_cast<float>(*matData);
     matData += sizeof(float);
-    /*float specular = *(float*)matData;*/
+
+    /*float specular = bit_cast<float>(*matData);*/
     matData += sizeof(float);
-    material.diffuseIntensity = *(float *)matData;
+
+    material.diffuseIntensity = bit_cast<float>(*matData);
     matData += sizeof(float);
     material.flags = 0;
 
@@ -381,10 +386,10 @@ void LoaderDFF::readGeometryExtension(GeometryPtr &geom,
 void LoaderDFF::readBinMeshPLG(GeometryPtr &geom, const RWBStream &stream) {
     auto data = stream.getCursor();
 
-    geom->facetype = static_cast<Geometry::FaceType>(*(std::uint32_t *)data);
+    geom->facetype = static_cast<Geometry::FaceType>(bit_cast<std::uint32_t>(*data));
     data += sizeof(std::uint32_t);
 
-    unsigned int numSplits = *(std::uint32_t *)data;
+    unsigned int numSplits = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
 
     // Number of triangles.
@@ -396,9 +401,9 @@ void LoaderDFF::readBinMeshPLG(GeometryPtr &geom, const RWBStream &stream) {
 
     for (size_t s = 0; s < numSplits; ++s) {
         SubGeometry sg;
-        sg.numIndices = *(std::uint32_t *)data;
+        sg.numIndices = bit_cast<std::uint32_t>(*data);
         data += sizeof(std::uint32_t);
-        sg.material = *(std::uint32_t *)data;
+        sg.material = bit_cast<std::uint32_t>(*data);
         data += sizeof(std::uint32_t);
         sg.start = start;
         start += sg.numIndices;
@@ -423,11 +428,13 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     }
 
     auto data = atomicStream.getCursor();
-    auto frame = *(std::uint32_t *)data;
+    std::uint32_t frame = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
-    auto geometry = *(std::uint32_t *)data;
+
+    std::uint32_t geometry = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
-    auto flags = *(std::uint32_t *) data;
+
+    std::uint32_t flags = bit_cast<std::uint32_t>(*data);
 
     // Verify the atomic's particulars
     RW_CHECK(frame < framelist.size(), "atomic frame " << frame
@@ -465,7 +472,7 @@ ClumpPtr LoaderDFF::loadFromMemory(FileHandle file) {
     }
 
     // There is only one value in the struct section.
-    auto numAtomics = *(std::uint32_t *)rootStream.getCursor();
+    std::uint32_t numAtomics = bit_cast<std::uint32_t>(*rootStream.getCursor());
     RW_UNUSED(numAtomics);
 
     GeometryList geometrylist;
