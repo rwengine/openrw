@@ -9,8 +9,8 @@ class DefaultAIController : public CharacterController {
     glm::vec3 gotoPos;
 
 public:
-    DefaultAIController(CharacterObject* character)
-        : CharacterController(character) {
+    DefaultAIController()
+        : CharacterController() {
     }
 
     glm::vec3 getTargetPosition();

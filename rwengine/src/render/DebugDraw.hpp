@@ -33,6 +33,7 @@ protected:
     GeometryBuffer *lineBuff;
     DrawBuffer *dbuff;
 
+    //Ownership is handled by worldProg in renderer
     Renderer::ShaderProgram *shaderProgram;
 
     GLuint texture;

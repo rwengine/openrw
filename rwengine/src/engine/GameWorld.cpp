@@ -98,8 +98,9 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
         collisionConfig.get());
 
     dynamicsWorld->setGravity(btVector3(0.f, 0.f, -9.81f));
+    _overlappingPairCallback = std::make_unique<btGhostPairCallback>();
     broadphase->getOverlappingPairCache()->setInternalGhostPairCallback(
-        new btGhostPairCallback());
+        _overlappingPairCallback.get());
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
 }
@@ -257,7 +258,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     glm::u8vec3 prim(255), sec(128);
     auto palit = data->vehiclePalettes.find(
         vti->name);  // modelname is conveniently lowercase (usually)
-    if (palit != data->vehiclePalettes.end() && palit->second.size() > 0) {
+    if (palit != data->vehiclePalettes.end() && !palit->second.empty()) {
         std::uniform_int_distribution<int> uniform(0, palit->second.size() - 1);
         int set = uniform(randomEngine);
         prim = data->vehicleColours[palit->second[set].first];
@@ -269,7 +270,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto model = vti->getModel();
     auto info = data->vehicleInfo.find(vti->handling_);
     if (model && info != data->vehicleInfo.end() &&
-        info->second->wheels.size() == 0 && info->second->seats.size() == 0) {
+            info->second->wheels.empty() && info->second->seats.empty()) {
         auto root = model->getFrame();
         for (const auto& frame : root->getChildren()) {
             const std::string& name = frame->getName();
@@ -331,9 +332,9 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
         data->loadModel(id);
     }
 
-    auto ped = new CharacterObject(this, pos, rot, pt);
+    auto controller = new DefaultAIController();
+    auto ped = new CharacterObject(this, pos, rot, pt, controller);
     ped->setGameObjectID(gid);
-    new DefaultAIController(ped);
     pedestrianPool.insert(ped);
     allObjects.push_back(ped);
     return ped;
@@ -358,10 +359,11 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
         pt->setModel(model);
     }
 
-    auto ped = new CharacterObject(this, pos, rot, pt);
+    auto controller = new PlayerController();
+    auto ped = new CharacterObject(this, pos, rot, pt, controller);
     ped->setGameObjectID(gid);
     ped->setLifetime(GameObject::PlayerLifetime);
-    players.push_back(new PlayerController(ped));
+    players.push_back(controller);
     pedestrianPool.insert(ped);
     allObjects.push_back(ped);
     return ped;
@@ -860,6 +862,17 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
         // Random ID found by dice roll
         id = 134;
         /// @todo use zone information to decide vehicle id
+    }
+
+    auto model = data->findModelInfo<VehicleModelInfo>(id);
+    RW_ASSERT(model);
+    if (model) {
+        auto info = data->vehicleInfo.find(model->handling_);
+        if (info != data->vehicleInfo.end()) {
+            const auto& handling = info->second->handling;
+            position.z +=
+                (handling.dimensions.z / 2.f) - handling.centerOfMass.z;
+        }
     }
 
     auto vehicle = createVehicle(id, position);

@@ -8,12 +8,25 @@
 #include <string>
 #include <vector>
 
+#include "rw/forward.hpp"
+
 struct AnimationKeyframe {
     glm::quat rotation;
     glm::vec3 position;
     glm::vec3 scale;
-    float starttime;
-    int id;
+    float starttime = 0.f;
+    int id = 0;
+
+    AnimationKeyframe(glm::quat _rotation, glm::vec3 _position, glm::vec3 _scale, float _starttime, int _id)
+        : rotation(_rotation)
+        , position(_position)
+        , scale(_scale)
+        , starttime(_starttime)
+        , id(_id) {
+    }
+
+    AnimationKeyframe() {
+    }
 };
 
 struct AnimationBone {
@@ -39,6 +52,12 @@ struct AnimationBone {
 struct Animation {
     std::string name;
     std::map<std::string, AnimationBone*> bones;
+
+    ~Animation() {
+        for (auto &bone_pair : bones) {
+            delete bone_pair.second;
+        }
+    }
 
     float duration;
 };
@@ -105,7 +124,7 @@ public:
         std::string name;
     };
 
-    std::map<std::string, Animation*> animations;
+    AnimationSet animations;
 
     bool loadFromMemory(char* data);
 };

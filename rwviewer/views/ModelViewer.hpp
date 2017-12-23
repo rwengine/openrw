@@ -21,7 +21,7 @@ class Animation;
 class ModelViewer : public ViewerInterface {
     Q_OBJECT
 
-    Clump* viewing;
+    ClumpPtr viewing;
 
     QSplitter* mainSplit;
     QVBoxLayout* mainLayout;
@@ -43,7 +43,7 @@ public slots:
     /**
      * Display a raw model
      */
-    void showModel(Clump* model);
+    void showModel(ClumpPtr model);
 
     /**
      * Display a game object's model
@@ -51,7 +51,7 @@ public slots:
     void showObject(uint16_t object);
 
     void loadAnimations(const QString& file);
-    void playAnimation(Animation* anim);
+    void playAnimation(AnimationPtr anim);
 };
 
 #endif

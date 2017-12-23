@@ -11,8 +11,7 @@
 #include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
 
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <rw/filesystem.hpp>
 
 // Original save game file data structures
 typedef uint16_t BlockWord;
@@ -1251,9 +1250,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     // http://gtaforums.com/topic/758692-gta-iii-save-file-documentation/
     for (size_t g = 0; g < garageData.garageCount; ++g) {
         auto& garage = garages[g];
-        state.garages.push_back(
-            {(int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
-             glm::vec3(garage.x2, garage.y2, garage.z2), garage.type});
+        state.garages.emplace_back(
+             (int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
+             glm::vec3(garage.x2, garage.y2, garage.z2), garage.type);
     }
     for (int c = 0; c < 18; ++c) {
         if (garageData.cars[c].modelId == 0) continue;
@@ -1311,8 +1310,6 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
 }
 
 std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
-    using namespace boost::filesystem;
-
     // TODO consider windows
     auto homedir = getenv("HOME");
     if (homedir == nullptr) {
@@ -1321,16 +1318,14 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     }
     const char gameDir[] = "GTA3 User Files";
 
-    path gamePath(homedir);
+    rwfs::path gamePath(homedir);
     gamePath /= gameDir;
 
-    if (!exists(gamePath) || !is_directory(gamePath)) return {};
+    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) return {};
 
     std::vector<SaveGameInfo> infos;
-    for (const path& save_path :
-         boost::make_iterator_range(directory_iterator(gamePath), {})) {
+    for (const rwfs::path& save_path : rwfs::directory_iterator(gamePath)) {
         if (save_path.extension() == ".b") {
-            std::cout << save_path.string() << std::endl;
             infos.emplace_back(
                 SaveGameInfo{save_path.string(), false, BasicState()});
             infos.back().valid =

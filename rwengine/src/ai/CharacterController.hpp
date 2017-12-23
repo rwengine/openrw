@@ -3,6 +3,8 @@
 #define _CHARACTERCONTROLLER_HPP_
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+
+#include <memory>
 #include <string>
 
 struct AIGraphNode;
@@ -61,11 +63,11 @@ protected:
      */
     CharacterObject* character;
 
-    Activity* _currentActivity;
-    Activity* _nextActivity;
+    std::unique_ptr<Activity> _currentActivity;
+    std::unique_ptr<Activity> _nextActivity;
 
     bool updateActivity();
-    void setActivity(Activity* activity);
+    void setActivity(std::unique_ptr<Activity> activity);
 
     float m_closeDoorTimer;
 
@@ -75,17 +77,27 @@ protected:
     AIGraphNode* targetNode;
 
 public:
-    CharacterController(CharacterObject* character);
+    CharacterController();
 
     virtual ~CharacterController() {
     }
 
+    /**
+     * Get the current Activity.
+     * Callers may not store the returned pointer.
+     * @return Activity pointer.
+     */
     Activity* getCurrentActivity() const {
-        return _currentActivity;
+        return _currentActivity.get();
     }
 
+    /**
+     * Get the next Activity
+     * Callers may not store the returned pointer.
+     * @return Activity pointer.
+     */
     Activity* getNextActivity() const {
-        return _nextActivity;
+        return _nextActivity.get();
     }
 
     /**
@@ -98,7 +110,7 @@ public:
      * @param activity
      * @param position
      */
-    void setNextActivity(Activity* activity);
+    void setNextActivity(std::unique_ptr<Activity> activity);
 
     /**
      * @brief IsCurrentActivity
@@ -139,6 +151,8 @@ public:
     CharacterObject* getTargetCharacter() const {
         return leader;
     }
+
+    friend class CharacterObject;
 };
 
 #define DECL_ACTIVITY(activity_name)                     \

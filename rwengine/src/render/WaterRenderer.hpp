@@ -33,8 +33,8 @@ public:
     void render(GameRenderer* renderer, GameWorld* world);
 
 private:
-    Renderer::ShaderProgram* waterProg;
-    Renderer::ShaderProgram* maskProg;
+    std::unique_ptr<Renderer::ShaderProgram> waterProg;
+    std::unique_ptr<Renderer::ShaderProgram> maskProg;
 
     DrawBuffer maskDraw;
     GeometryBuffer maskGeom;

@@ -41,7 +41,7 @@ void BenchmarkState::enter() {
         if (!benchstream) break;
         benchstream >> point.angle.w;
         if (!benchstream) break;
-        if (track.size() == 0) {
+        if (track.empty()) {
             tmpPos = point.position;
         }
         float pointDist = glm::distance(tmpPos, point.position);
@@ -66,7 +66,7 @@ void BenchmarkState::exit() {
 }
 
 void BenchmarkState::tick(float dt) {
-    if (track.size() > 0) {
+    if (!track.empty()) {
         TrackPoint& a = track.front();
         TrackPoint& b = track.back();
         for (TrackPoint& p : track) {

@@ -12,18 +12,7 @@
 #include <gl/TextureData.hpp>
 #include <loaders/RWBinaryStream.hpp>
 
-// Forward Declerations
-class ModelFrame;
-struct Geometry;
-class Atomic;
-class Clump;
-
-// Pointer types
-using ModelFramePtr = std::shared_ptr<ModelFrame>;
-using GeometryPtr = std::shared_ptr<Geometry>;
-using AtomicPtr = std::shared_ptr<Atomic>;
-using AtomicList = std::vector<AtomicPtr>;
-using ClumpPtr = std::shared_ptr<Clump>;
+#include <rw/forward.hpp>
 
 /**
  * ModelFrame stores transformation hierarchy
@@ -136,6 +125,16 @@ struct GeometryVertex {
                 {ATRS_TexCoord, 2, sizeof(GeometryVertex), sizeof(float) * 6},
                 {ATRS_Colour, 4, sizeof(GeometryVertex), sizeof(float) * 8,
                  GL_UNSIGNED_BYTE}};
+    }
+
+    GeometryVertex(glm::vec3 _position, glm::vec3 _normal, glm::vec2 _texcoord, glm::u8vec4 _colour)
+        : position(_position)
+        , normal(_normal)
+        , texcoord(_texcoord)
+        , colour(_colour) {
+    }
+
+    GeometryVertex() {
     }
 };
 

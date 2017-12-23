@@ -182,13 +182,6 @@ struct SCMTypeInfo {
     uint8_t size;
 };
 
-typedef std::map<SCMType, SCMTypeInfo> SCMTypeInfoTable;
-
-static SCMTypeInfoTable typeData = {
-    {TInt8, {1}},  {TInt16, {2}},   {TInt32, {4}},       {TGlobal, {2}},
-    {TLocal, {2}}, {TFloat16, {2}}, {EndOfArgList, {0}},
-};
-
 struct SCMOpcodeParameter {
     SCMType type;
     union {
@@ -359,21 +352,10 @@ typedef uint16_t ScriptFunctionID;
 struct ScriptFunctionMeta {
     ScriptFunction function;
     int arguments;
-    bool conditional;
     /** API name for this function */
     const std::string signature;
     /** Human friendly description */
     const std::string description;
 };
-
-struct SCMMicrocode {
-    std::string name;
-    int parameters;
-    std::function<void(ScriptMachine*, SCMThread*,
-                       std::vector<SCMOpcodeParameter>*)>
-        func;
-};
-
-typedef std::map<SCMOpcode, SCMMicrocode> SCMMicrocodeTable;
 
 #endif

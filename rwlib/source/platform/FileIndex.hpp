@@ -1,32 +1,21 @@
 #ifndef RWENGINE_FILEINDEX_HPP
 #define RWENGINE_FILEINDEX_HPP
-#include "FileHandle.hpp"
+#include <platform/FileHandle.hpp>
+#include <rw/filesystem.hpp>
 
-#include <boost/filesystem.hpp>
-#include <boost/functional/hash.hpp>
 #include <map>
 #include <string>
 #include <unordered_map>
 
-namespace fs = boost::filesystem;
-
-namespace std {
-template <>
-struct hash<fs::path> {
-    size_t operator()(const fs::path& p) const {
-        return fs::hash_value(p);
-    }
-};
-}
 
 class FileIndex {
 private:
     /**
      * Mapping type (lower case name) => (on disk name)
      */
-    using FileSystemMap = std::unordered_map<fs::path, fs::path>;
+    using FileSystemMap = std::unordered_map<rwfs::path, rwfs::path>;
 
-    fs::path gamedatapath_;
+    rwfs::path gamedatapath_;
     FileSystemMap filesystemfiles_;
 
 public:
@@ -38,14 +27,14 @@ public:
      * true case on the file system for platforms where this is an issue.
      *
      */
-    void indexGameDirectory(const fs::path& base_path);
+    void indexGameDirectory(const rwfs::path& base_path);
 
     /**
      * @brief findFilePath finds disk path for a game data file
      * @param path
      * @return The file path as it exists on disk
      */
-    fs::path findFilePath(std::string path) {
+    rwfs::path findFilePath(std::string path) {
         auto backslash = std::string::npos;
         while ((backslash = path.find("\\")) != std::string::npos) {
             path.replace(backslash, 1, "/");
@@ -79,7 +68,7 @@ public:
      * Adds the files contained within the given directory tree to the
      * file index.
      */
-    void indexTree(const std::string& root);
+    void indexTree(const rwfs::path& root);
 
     /**
      * Adds the files contained within the given Archive file to the

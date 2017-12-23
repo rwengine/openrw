@@ -1,22 +1,20 @@
 #include <algorithm>
-#include <boost/range/iterator_range.hpp>
 #include <fstream>
 #include <loaders/LoaderIMG.hpp>
 #include <platform/FileIndex.hpp>
 
-using namespace boost::filesystem;
-
-void FileIndex::indexGameDirectory(const fs::path& base_path) {
+void FileIndex::indexGameDirectory(const rwfs::path& base_path) {
     gamedatapath_ = base_path;
 
-    for (const path& entry : boost::make_iterator_range(
-             recursive_directory_iterator(base_path), {})) {
-        if (is_regular_file(entry)) {
-            std::string name = entry.string();
-            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-            filesystemfiles_[name] = entry;
+    for (const rwfs::path& path :
+         rwfs::recursive_directory_iterator(base_path)) {
+        if (!rwfs::is_regular_file(path)) {
+            continue;
         }
+
+        std::string name = path.string();
+        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        filesystemfiles_[name] = path;
     }
 }
 
@@ -36,27 +34,27 @@ FileHandle FileIndex::openFilePath(const std::string& file_path) {
     return std::make_shared<FileContentsInfo>(data, length);
 }
 
-void FileIndex::indexTree(const std::string& root) {
-    for (const path& entry :
-         boost::make_iterator_range(recursive_directory_iterator(root), {})) {
-        std::string directory = entry.parent_path().string();
-        std::string realName = entry.filename().string();
+void FileIndex::indexTree(const rwfs::path& root) {
+    for (const rwfs::path& path : rwfs::recursive_directory_iterator(root)) {
+        if (!rwfs::is_regular_file(path)) {
+            continue;
+        }
+
+        std::string directory = path.parent_path().string();
+        std::string realName = path.filename().string();
         std::string lowerName = realName;
         std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
                        ::tolower);
-
-        if (is_regular_file(entry)) {
-            files[lowerName] = {lowerName, realName, directory, ""};
-        }
+        files[lowerName] = {lowerName, realName, directory, ""};
     }
 }
 
 void FileIndex::indexArchive(const std::string& archive) {
     // Split directory from archive name
-    path archive_path = path(archive);
-    path directory = archive_path.parent_path();
-    path archive_basename = archive_path.filename();
-    path archive_full_path = directory / archive_basename;
+    auto archive_path = rwfs::path(archive);
+    auto directory = archive_path.parent_path();
+    auto archive_basename = archive_path.filename();
+    auto archive_full_path = directory / archive_basename;
 
     LoaderIMG img;
     if (!img.load(archive_full_path.string())) {

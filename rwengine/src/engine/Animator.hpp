@@ -8,7 +8,7 @@
 #include <map>
 #include <rw/defines.hpp>
 
-class Clump;
+#include <rw/forward.hpp>
 class ModelFrame;
 
 /**
@@ -27,7 +27,7 @@ class Animator {
      * animations
      */
     struct AnimationState {
-        Animation* animation;
+        AnimationPtr animation;
         /// Timestamp of the last frame
         float time;
         /// Speed multiplier
@@ -40,7 +40,7 @@ class Animator {
     /**
      * @brief model The model being animated.
      */
-    Clump* model;
+    ClumpPtr model;
 
     /**
      * @brief Currently playing animations
@@ -48,16 +48,16 @@ class Animator {
     std::vector<AnimationState> animations;
 
 public:
-    Animator(Clump* model);
+    Animator(ClumpPtr model);
 
-    Animation* getAnimation(unsigned int slot) {
+    AnimationPtr getAnimation(unsigned int slot) {
         if (slot < animations.size()) {
             return animations[slot].animation;
         }
         return nullptr;
     }
 
-    void playAnimation(unsigned int slot, Animation* anim, float speed,
+    void playAnimation(unsigned int slot, AnimationPtr anim, float speed,
                        bool repeat) {
         if (slot >= animations.size()) {
             animations.resize(slot + 1);

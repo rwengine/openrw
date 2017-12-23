@@ -68,7 +68,7 @@ DrawBuffer ssRectDraw;
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)
-    , renderer(new OpenGLRenderer)
+    , renderer(std::make_shared<OpenGLRenderer>())
     , _renderAlpha(0.f)
     , _renderWorld(nullptr)
     , cullOverride(false)
@@ -81,22 +81,22 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
         renderer->createShader(GameShaders::WorldObject::VertexShader,
                                GameShaders::WorldObject::FragmentShader);
 
-    renderer->setUniformTexture(worldProg, "texture", 0);
-    renderer->setProgramBlockBinding(worldProg, "SceneData", 1);
-    renderer->setProgramBlockBinding(worldProg, "ObjectData", 2);
+    renderer->setUniformTexture(worldProg.get(), "texture", 0);
+    renderer->setProgramBlockBinding(worldProg.get(), "SceneData", 1);
+    renderer->setProgramBlockBinding(worldProg.get(), "ObjectData", 2);
 
     particleProg =
         renderer->createShader(GameShaders::WorldObject::VertexShader,
                                GameShaders::Particle::FragmentShader);
 
-    renderer->setUniformTexture(particleProg, "texture", 0);
-    renderer->setProgramBlockBinding(particleProg, "SceneData", 1);
-    renderer->setProgramBlockBinding(particleProg, "ObjectData", 2);
+    renderer->setUniformTexture(particleProg.get(), "texture", 0);
+    renderer->setProgramBlockBinding(particleProg.get(), "SceneData", 1);
+    renderer->setProgramBlockBinding(particleProg.get(), "ObjectData", 2);
 
     skyProg = renderer->createShader(GameShaders::Sky::VertexShader,
                                      GameShaders::Sky::FragmentShader);
 
-    renderer->setProgramBlockBinding(skyProg, "SceneData", 1);
+    renderer->setProgramBlockBinding(skyProg.get(), "SceneData", 1);
 
     postProg =
         renderer->createShader(GameShaders::DefaultPostProcess::VertexShader,
@@ -212,6 +212,7 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 
 GameRenderer::~GameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
+    glDeleteProgram(ssRectProgram);
 }
 
 float mix(uint8_t a, uint8_t b, float num) {
@@ -250,7 +251,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     glm::vec3 ambient = weather.ambientColor;
     glm::vec3 dynamic = weather.directLightColor;
 
-    float theta = (tod / (60.f * 24.f) - 0.5f) * 2 * 3.14159265;
+    float theta = (tod / (60.f * 24.f) - 0.5f) * 2.f * glm::pi<float>();
     glm::vec3 sunDirection{
         sin(theta), 0.0, cos(theta),
     };
@@ -283,7 +284,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     culled = 0;
 
-    renderer->useProgram(worldProg);
+    renderer->useProgram(worldProg.get());
 
     //===============================================================
     //	Render List Construction
@@ -317,7 +318,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
             m, glm::vec3(i.radius +
                          0.15f * glm::sin(_renderWorld->getGameTime() * 5.f)));
 
-        objectRenderer.renderClump(sphereModel, m, nullptr, renderList);
+        objectRenderer.renderClump(sphereModel.get(), m, nullptr, renderList);
     }
 
     // Render arrows above anything that isn't radar only (or hidden)
@@ -344,7 +345,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
                                glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
         model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        objectRenderer.renderClump(arrowModel, model, nullptr, renderList);
+        objectRenderer.renderClump(arrowModel.get(), model, nullptr, renderList);
     }
 
     RW_PROFILE_END();
@@ -384,9 +385,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     dp.start = 0;
     dp.count = skydomeSegments * skydomeRows * 6;
 
-    renderer->useProgram(skyProg);
-    renderer->setUniform(skyProg, "TopColor", glm::vec4(skyTop, 1.f));
-    renderer->setUniform(skyProg, "BottomColor", glm::vec4(skyBottom, 1.f));
+    renderer->useProgram(skyProg.get());
+    renderer->setUniform(skyProg.get(), "TopColor", glm::vec4(skyTop, 1.f));
+    renderer->setUniform(skyProg.get(), "BottomColor", glm::vec4(skyBottom, 1.f));
 
     renderer->draw(glm::mat4(), &skyDbuff, dp);
 
@@ -400,7 +401,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     GLuint splashTexName = 0;
     auto fc = world->state->fadeColour;
-    if ((fc.r + fc.g + fc.b) == 0 && world->state->currentSplash.size() > 0) {
+    if ((fc.r + fc.g + fc.b) == 0 && !world->state->currentSplash.empty()) {
         auto splash = world->data->findSlotTexture("generic", world->state->currentSplash);
         if (splash) {
             splashTexName = splash->getName();
@@ -462,7 +463,7 @@ void GameRenderer::renderPostProcess() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |
             GL_STENCIL_BUFFER_BIT);
 
-    renderer->useProgram(postProg);
+    renderer->useProgram(postProg.get());
 
     Renderer::DrawParameters wdp;
     wdp.start = 0;
@@ -473,7 +474,7 @@ void GameRenderer::renderPostProcess() {
 }
 
 void GameRenderer::renderEffects(GameWorld* world) {
-    renderer->useProgram(particleProg);
+    renderer->useProgram(particleProg.get());
 
     auto cpos = _camera.position;
     auto cfwd = glm::normalize(glm::inverse(_camera.rotation) *
@@ -495,8 +496,6 @@ void GameRenderer::renderEffects(GameWorld* world) {
 
         auto& p = particle.position;
 
-        glm::mat4 m(1.f);
-
         // Figure the direction to the camera center.
         auto amp = cpos - p;
         glm::vec3 ptc = particle.up;
@@ -507,24 +506,17 @@ void GameRenderer::renderEffects(GameWorld* world) {
             ptc = amp;
         }
 
-        glm::vec3 f = glm::normalize(particle.direction);
-        glm::vec3 s = glm::cross(f, glm::normalize(ptc));
-        glm::vec3 u = glm::cross(s, f);
-        m[0][0] = s.x;
-        m[1][0] = s.y;
-        m[2][0] = s.z;
-        m[0][1] = -f.x;
-        m[1][1] = -f.y;
-        m[2][1] = -f.z;
-        m[0][2] = u.x;
-        m[1][2] = u.y;
-        m[2][2] = u.z;
-        m[3][0] = -glm::dot(s, p);
-        m[3][1] = glm::dot(f, p);
-        m[3][2] = -glm::dot(u, p);
-        m = glm::scale(glm::inverse(m), glm::vec3(particle.size, 1.f));
+        ptc = glm::normalize(ptc);
 
-        // m = glm::translate(m, p);
+        glm::mat4 transformMat(1.f);
+
+        glm::mat4 lookMat = glm::lookAt(
+            glm::vec3(0.0f,0.0f,0.0f),
+            ptc,
+            glm::vec3(0.0f,0.0f,1.0f));
+
+        transformMat = glm::scale(glm::translate(transformMat,p),
+            glm::vec3(particle.size,1.0f)) * glm::inverse(lookMat);
 
         Renderer::DrawParameters dp;
         dp.textures = {particle.texture->getName()};
@@ -535,7 +527,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
         dp.blend = true;
         dp.diffuse = 1.f;
 
-        renderer->drawArrays(m, &particleDraw, dp);
+        renderer->drawArrays(transformMat, &particleDraw, dp);
     }
 }
 
@@ -614,8 +606,8 @@ void GameRenderer::renderPaths() {
     static std::vector<glm::vec3> carlines;
     static std::vector<glm::vec3> pedlines;
 
-    GLint posAttrib = glGetAttribLocation(worldProgram, "position");
-    GLint uniModel = glGetUniformLocation(worldProgram, "model");
+    GLint posAttrib = glGetAttribLocation(worldProg.get(), "position");
+    GLint uniModel = glGetUniformLocation(worldProg.get(), "model");
 
     glBindVertexArray( vao );
 

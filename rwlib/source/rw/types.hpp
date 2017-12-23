@@ -30,10 +30,6 @@
 #define WORLD_GRID_WIDTH (WORLD_GRID_SIZE / WORLD_CELL_SIZE)
 #define WORLD_GRID_CELLS (WORLD_GRID_WIDTH * WORLD_GRID_WIDTH)
 
-struct Animation;
-
-typedef std::map<std::string, Animation*> AnimationSet;
-
 namespace RWTypes {
 
 /**

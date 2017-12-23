@@ -5,16 +5,11 @@
 LoaderIMG::LoaderIMG() : m_version(GTAIIIVC), m_assetCount(0) {
 }
 
-bool LoaderIMG::load(const std::string& filename) {
-    auto baseName = filename;
-    auto extpos = filename.find(".img");
-    if (extpos != std::string::npos) {
-        baseName.erase(extpos);
-    }
-    auto dirName = baseName + ".dir";
-    auto imgName = baseName + ".img";
+bool LoaderIMG::load(const rwfs::path& filepath) {
+    auto dirPath = filepath;
+    dirPath.replace_extension(".dir");
 
-    FILE* fp = fopen(dirName.c_str(), "rb");
+    FILE* fp = fopen(dirPath.string().c_str(), "rb");
     if (fp) {
         fseek(fp, 0, SEEK_END);
         unsigned long fileSize = ftell(fp);
@@ -30,7 +25,9 @@ bool LoaderIMG::load(const std::string& filename) {
         }
 
         fclose(fp);
-        m_archive = imgName;
+        auto imgPath = filepath;
+        imgPath.replace_extension(".img");
+        m_archive = imgPath;
         return true;
     } else {
         return false;
@@ -58,9 +55,9 @@ char* LoaderIMG::loadToMemory(const std::string& assetname) {
         return nullptr;
     }
 
-    std::string imgName = m_archive;
+    auto imgName = m_archive;
 
-    FILE* fp = fopen(imgName.c_str(), "rb");
+    FILE* fp = fopen(imgName.string().c_str(), "rb");
     if (fp) {
         char* raw_data = new char[assetInfo.size * 2048];
 

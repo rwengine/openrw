@@ -48,7 +48,7 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
         glm::vec2(ui_outerMargin + ui_mapSize, vp.y - ui_outerMargin);
 
     map.screenPosition = (mapTop + mapBottom) / 2.f;
-    map.screenSize = ui_mapSize * 0.95;
+    map.screenSize = ui_mapSize * 0.95f;
 
     render->map.draw(world, map);
 }

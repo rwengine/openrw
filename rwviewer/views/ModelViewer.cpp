@@ -39,7 +39,7 @@ void ModelViewer::setViewerWidget(ViewerWidget* widget) {
     showModel(viewing);
 }
 
-void ModelViewer::showModel(Clump* model) {
+void ModelViewer::showModel(ClumpPtr model) {
     viewing = model;
     viewerWidget->showModel(model);
     frames->setModel(model);
@@ -75,6 +75,6 @@ void ModelViewer::loadAnimations(const QString& file) {
     animationWidget->setAnimations(anims);
 }
 
-void ModelViewer::playAnimation(Animation* anim) {
+void ModelViewer::playAnimation(AnimationPtr anim) {
     viewerWidget->currentObject()->animator->playAnimation(0, anim, 1.f, true);
 }

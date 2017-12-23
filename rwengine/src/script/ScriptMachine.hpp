@@ -70,8 +70,6 @@ struct UnknownType : SCMException {
     }
 };
 
-static SCMMicrocodeTable knownOps;
-
 struct SCMThread {
     typedef SCMAddress pc_t;
 
@@ -84,7 +82,7 @@ struct SCMThread {
     std::uint8_t conditionMask;
     bool conditionAND;
 
-    /** Number of MS until the thread should be waked (-1 = yeilded) */
+    /** Number of MS until the thread should be waked (-1 = yielded) */
     int wakeCounter;
     std::array<SCMByte, SCM_THREAD_LOCAL_SIZE*(SCM_VARIABLE_SIZE)> locals;
     bool isMission;

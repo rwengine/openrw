@@ -97,6 +97,9 @@ struct VehicleInfo {
         size_t size() const {
             return front.size() + back.size();
         }
+        bool empty() const {
+            return front.empty() && back.empty();
+        }
     } seats;
 };
 

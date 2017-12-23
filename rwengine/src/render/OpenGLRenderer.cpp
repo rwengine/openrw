@@ -42,7 +42,7 @@ GLuint compileShader(GLenum type, const char* source) {
     }
 
     if (status != GL_TRUE) {
-        exit(1);
+        throw std::runtime_error("Compiling shader failed");
     }
 
     return shader;
@@ -51,10 +51,18 @@ GLuint compileShader(GLenum type, const char* source) {
 GLuint compileProgram(const char* vertex, const char* fragment) {
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertex);
     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragment);
+
     GLuint prog = glCreateProgram();
+
     glAttachShader(prog, vertexShader);
     glAttachShader(prog, fragmentShader);
     glLinkProgram(prog);
+
+    glDetachShader(prog, vertexShader);
+    glDetachShader(prog, fragmentShader);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     GLint status;
     glGetProgramiv(prog, GL_LINK_STATUS, &status);
@@ -76,11 +84,8 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     }
 
     if (status != GL_TRUE) {
-        exit(1);
+        throw std::runtime_error("Linking shaders failed");
     }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     return prog;
 }
@@ -177,9 +182,9 @@ std::string OpenGLRenderer::getIDString() const {
     return ss.str();
 }
 
-Renderer::ShaderProgram* OpenGLRenderer::createShader(const std::string& vert,
+std::unique_ptr<Renderer::ShaderProgram> OpenGLRenderer::createShader(const std::string& vert,
                                                       const std::string& frag) {
-    return new OpenGLShaderProgram(compileProgram(vert.c_str(), frag.c_str()));
+    return std::make_unique<OpenGLShaderProgram>(compileProgram(vert.c_str(), frag.c_str()));
 }
 
 void OpenGLRenderer::setProgramBlockBinding(Renderer::ShaderProgram* p,

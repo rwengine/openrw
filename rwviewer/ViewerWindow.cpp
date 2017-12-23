@@ -109,8 +109,7 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
     auto mainwidget = new QWidget();
     mainwidget->setLayout(mainlayout);
 
-    QMenu* data = mb->addMenu("&Data");
-    // data->addAction("Export &Model", objectViewer, SLOT(exportModel()));
+    mb->addMenu("&Data");
 
     QMenu* anim = mb->addMenu("&Animation");
     anim->addAction("Load &Animations", this, SLOT(openAnimations()));

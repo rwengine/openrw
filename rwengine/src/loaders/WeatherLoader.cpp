@@ -92,7 +92,7 @@ WeatherLoader::WeatherData WeatherLoader::getWeatherData(WeatherCondition cond,
     size_t hour = floor(tod);
     const WeatherData& x = weather[static_cast<size_t>(cond) + hour];
     const WeatherData& y = weather[static_cast<size_t>(cond) + (hour + 1) % 24];
-    const float a = tod - floor(tod);
+    const float a = tod - std::floor(tod);
 
     WeatherData data;
     MIXPROP(ambientColor);

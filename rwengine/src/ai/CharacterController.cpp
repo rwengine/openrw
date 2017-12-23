@@ -11,15 +11,14 @@
 
 constexpr float kCloseDoorIdleTime = 2.f;
 
-CharacterController::CharacterController(CharacterObject *character)
-    : character(character)
+CharacterController::CharacterController()
+    : character(nullptr)
     , _currentActivity(nullptr)
     , _nextActivity(nullptr)
     , m_closeDoorTimer(0.f)
     , currentGoal(None)
     , leader(nullptr)
     , targetNode(nullptr) {
-    character->controller = this;
 }
 
 bool CharacterController::updateActivity() {
@@ -30,9 +29,8 @@ bool CharacterController::updateActivity() {
     return false;
 }
 
-void CharacterController::setActivity(CharacterController::Activity *activity) {
-    if (_currentActivity) delete _currentActivity;
-    _currentActivity = activity;
+void CharacterController::setActivity(std::unique_ptr<Activity> activity) {
+    _currentActivity = std::move(activity);
 }
 
 void CharacterController::skipActivity() {
@@ -44,14 +42,12 @@ void CharacterController::skipActivity() {
         setActivity(nullptr);
 }
 
-void CharacterController::setNextActivity(
-    CharacterController::Activity *activity) {
+void CharacterController::setNextActivity(std::unique_ptr<Activity> activity) {
     if (_currentActivity == nullptr) {
-        setActivity(activity);
+        setActivity(std::move(activity));
         _nextActivity = nullptr;
     } else {
-        if (_nextActivity) delete _nextActivity;
-        _nextActivity = activity;
+        _nextActivity.swap(activity);
     }
 }
 
@@ -98,13 +94,9 @@ void CharacterController::update(float dt) {
 
     if (updateActivity()) {
         character->activityFinished();
-        if (_currentActivity) {
-            delete _currentActivity;
-            _currentActivity = nullptr;
-        }
+        _currentActivity = nullptr;
         if (_nextActivity) {
-            setActivity(_nextActivity);
-            _nextActivity = nullptr;
+            setActivity(std::move(_nextActivity));
         }
     }
 }
@@ -140,7 +132,7 @@ bool Activities::GoTo::update(CharacterObject *character,
     }
 
     float hdg =
-        atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
+        std::atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
     character->setHeading(glm::degrees(hdg));
 
     controller->setMoveDirection({1.f, 0.f, 0.f});
@@ -271,7 +263,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
                 character->controller->setRunning(true);
             }
             character->setHeading(
-                glm::degrees(atan2(targetDirection.y, targetDirection.x) -
+                glm::degrees(std::atan2(targetDirection.y, targetDirection.x) -
                              glm::half_pi<float>()));
             character->controller->setMoveDirection({1.f, 0.f, 0.f});
         }
@@ -283,7 +275,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
             // out.
             character->playCycle(cycle_pullout);
             currentOccupant->controller->setNextActivity(
-                new Activities::ExitVehicle(true));
+                std::make_unique<Activities::ExitVehicle>(true));
         } else {
             character->playCycle(cycle_enter);
             character->enterVehicle(vehicle, seat);

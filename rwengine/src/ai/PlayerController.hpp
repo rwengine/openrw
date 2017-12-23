@@ -13,7 +13,7 @@ class PlayerController : public CharacterController {
     bool _enabled;
 
 public:
-    PlayerController(CharacterObject* character);
+    PlayerController();
 
     /**
      * @brief Enables and disables player input.

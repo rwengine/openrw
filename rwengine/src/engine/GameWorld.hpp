@@ -30,7 +30,6 @@ struct WeaponScan;
 struct VehicleGenerator;
 
 #include <data/Chase.hpp>
-
 #include <glm/glm.hpp>
 
 #include <btBulletCollisionCommon.h>
@@ -343,6 +342,11 @@ private:
      * Flag for pausing the simulation
      */
     bool paused;
+
+    /**
+     * Private data
+     */
+     std::unique_ptr<btOverlappingPairCallback> _overlappingPairCallback;
 };
 
 #endif

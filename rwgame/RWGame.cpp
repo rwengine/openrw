@@ -20,11 +20,17 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <functional>
+#include <iomanip>
 
 std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
     {GameRenderer::ZoneCylinderB, "zonecylb.dff"},
     {GameRenderer::Arrow, "arrow.dff"}};
+
+namespace {
+  constexpr float kPhysicsTimeStep = 1.0f/30.0f;
+  constexpr float kMaxPhysicsSubSteps = 4;
+}
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
@@ -41,11 +47,11 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                               ? options["benchmark"].as<std::string>()
                               : "");
 
-    log.info("Game", "Game directory: " + config.getGameDataPath());
+    log.info("Game", "Game directory: " + config.getGameDataPath().string());
 
     if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
         throw std::runtime_error("Invalid game directory path: " +
-                                 config.getGameDataPath());
+                                 config.getGameDataPath().string());
     }
 
     data.load();
@@ -63,9 +69,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
                        btIDebugDraw::DBG_DrawConstraintLimits);
-    debug.setShaderProgram(renderer.worldProg);
+    debug.setShaderProgram(renderer.worldProg.get());
 
-    data.loadDynamicObjects(config.getGameDataPath() + "/data/object.dat");
+    data.loadDynamicObjects((config.getGameDataPath() / "data/object.dat").string()); // FIXME: use path
 
     data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
@@ -73,9 +79,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                                       128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
-        std::string num = (m < 10 ? "0" : "");
-        std::string name = "radar" + num + std::to_string(m);
-        data.loadTXD(name + ".txd");
+        std::ostringstream oss;
+        oss << "radar" << std::setw(2) << std::setfill('0') << m << ".txd";
+        data.loadTXD(oss.str());
     }
 
     StateManager::get().enter<LoadingState>(this, [=]() {
@@ -164,7 +170,7 @@ void RWGame::handleCheatInput(char symbol) {
     cheatInputWindow = cheatInputWindow.substr(1) + symbol;
 
     // Helper to check for cheats
-    auto checkForCheat = [this](std::string cheat,
+    auto checkForCheat = [this](const std::string& cheat,
                                 std::function<void()> action) {
         RW_CHECK(cheatInputWindow.length() >= cheat.length(), "Cheat too long");
         size_t offset = cheatInputWindow.length() - cheat.length();
@@ -239,9 +245,9 @@ void RWGame::handleCheatInput(char symbol) {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
 #ifdef RW_GAME_GTA3_ANNIVERSARY
-            uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
+            // uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
 #else
-			uint16_t vehicleModel = 122;
+            // uint16_t vehicleModel = 122;
 #endif
             // @todo Spawn rhino
             // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
@@ -353,7 +359,9 @@ void RWGame::handleCheatInput(char symbol) {
 }
 
 int RWGame::run() {
-    last_clock_time = clock.now();
+    namespace chrono = std::chrono;
+    auto lastFrame = chrono::steady_clock::now();
+    float accumulatedTime = 0.0f;
 
     // Loop until we run out of states.
     bool running = true;
@@ -400,45 +408,37 @@ int RWGame::run() {
         }
         RW_PROFILE_END();
 
-        auto now = clock.now();
-        float timer =
-            std::chrono::duration<float>(now - last_clock_time).count();
-        last_clock_time = now;
-        accum += timer * timescale;
+        auto now = chrono::steady_clock::now();
+        auto deltaTime = chrono::duration<float>(now - lastFrame).count();
+        lastFrame = now;
+        accumulatedTime += deltaTime;
+
+        if(!world->isPaused()) {
+            world->dynamicsWorld->stepSimulation(deltaTime * timescale, kMaxPhysicsSubSteps, kPhysicsTimeStep);
+        }
 
         RW_PROFILE_BEGIN("Update");
-        if (accum >= GAME_TIMESTEP) {
+        while (accumulatedTime >= GAME_TIMESTEP && !world->isPaused()) {
             if (!StateManager::currentState()) {
                 break;
             }
+            accumulatedTime -= GAME_TIMESTEP;
 
             RW_PROFILE_BEGIN("state");
-            StateManager::get().tick(GAME_TIMESTEP);
+            StateManager::get().tick(GAME_TIMESTEP * timescale);
             RW_PROFILE_END();
 
             RW_PROFILE_BEGIN("engine");
-            tick(GAME_TIMESTEP);
+            tick(GAME_TIMESTEP * timescale);
             RW_PROFILE_END();
 
             getState()->swapInputState();
-
-            accum -= GAME_TIMESTEP;
-
-            // Throw away time if the accumulator reaches too high.
-            if (accum > GAME_TIMESTEP * 5.f) {
-                accum = 0.f;
-            }
         }
         RW_PROFILE_END();
 
-        float alpha = fmod(accum, GAME_TIMESTEP) / GAME_TIMESTEP;
-        if (!StateManager::currentState()->shouldWorldUpdate()) {
-            alpha = 1.f;
-        }
-
         RW_PROFILE_BEGIN("Render");
         RW_PROFILE_BEGIN("engine");
-        render(alpha, timer);
+        render(1, deltaTime);
         RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("state");
@@ -455,6 +455,8 @@ int RWGame::run() {
         // Make sure the topmost state is the correct state
         StateManager::get().updateStack();
     }
+
+    window.close();
 
     StateManager::get().clear();
 
@@ -508,7 +510,6 @@ void RWGame::tick(float dt) {
 
         state.text.tick(dt);
 
-        world->dynamicsWorld->stepSimulation(dt, 2, dt);
 
         if (vm) {
             try {
@@ -793,7 +794,7 @@ void RWGame::renderProfile() {
         for (int r = 0; r < c; ++r) {
             for (int g = 0; g < c; ++g) {
                 for (int b = 0; b < c; ++b) {
-                    perf_colours.push_back({r / c, g / c, b / c, 1.f});
+                    perf_colours.emplace_back(r / c, g / c, b / c, 1.f);
                 }
             }
         }

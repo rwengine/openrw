@@ -3,7 +3,7 @@
 #include <loaders/GenericDATLoader.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/InstanceObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 // Tests against loading various data files
 // These tests are bad but so are the interfaces so it cancels out.

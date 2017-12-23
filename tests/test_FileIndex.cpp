@@ -1,6 +1,9 @@
 #include <boost/test/unit_test.hpp>
 #include <platform/FileIndex.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
+
+#include <rw/filesystem.hpp>
+namespace fs = rwfs;
 
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 

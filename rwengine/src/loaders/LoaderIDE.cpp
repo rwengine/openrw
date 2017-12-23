@@ -217,16 +217,16 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         getline(buffstream, buff, ',');  // "Always 0"
 
                         getline(buffstream, buff, ',');
-                        node.position.x = atof(buff.c_str()) * 1 / 16.f;
+                        node.position.x = strtof(buff.c_str(), nullptr) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.y = atof(buff.c_str()) * 1 / 16.f;
+                        node.position.y = strtof(buff.c_str(), nullptr) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.z = atof(buff.c_str()) * 1 / 16.f;
+                        node.position.z = strtof(buff.c_str(), nullptr) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.size = atof(buff.c_str()) * 1 / 16.f;
+                        node.size = strtof(buff.c_str(), nullptr) / 16.f;
 
                         getline(buffstream, buff, ',');
                         node.other_thing = atoi(buff.c_str());

@@ -49,7 +49,7 @@ class GameRenderer {
     Logger* logger;
 
     /** The low-level drawing interface to use */
-    Renderer* renderer;
+    std::shared_ptr<Renderer> renderer;
 
     // Temporary variables used during rendering
     float _renderAlpha;
@@ -62,14 +62,14 @@ class GameRenderer {
     ViewCamera _camera;
     ViewCamera cullingCamera;
     bool cullOverride;
-    
+
     /** Number of culling events */
     size_t culled;
 
     GLuint framebufferName;
     GLuint fbTextures[2];
     GLuint fbRenderBuffers[1];
-    Renderer::ShaderProgram* postProg;
+    std::unique_ptr<Renderer::ShaderProgram> postProg;
 
     /// Texture used to replace textures missing from the data
     GLuint m_missingTexture;
@@ -79,9 +79,9 @@ public:
     ~GameRenderer();
 
     /** @todo Clean up all these shader program and location variables */
-    Renderer::ShaderProgram* worldProg;
-    Renderer::ShaderProgram* skyProg;
-    Renderer::ShaderProgram* particleProg;
+    std::unique_ptr<Renderer::ShaderProgram> worldProg;
+    std::unique_ptr<Renderer::ShaderProgram> skyProg;
+    std::unique_ptr<Renderer::ShaderProgram> particleProg;
 
     GLuint ssRectProgram;
     GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
@@ -99,7 +99,7 @@ public:
     GLuint getMissingTexture() const {
         return m_missingTexture;
     }
-    
+
     size_t getCulledCount() {
         return culled;
     }
@@ -140,7 +140,7 @@ public:
     void setupRender();
     void renderPostProcess();
 
-    Renderer* getRenderer() {
+    std::shared_ptr<Renderer> getRenderer() {
         return renderer;
     }
 
@@ -174,16 +174,15 @@ public:
      *
      * GameRenderer will take ownership of the Model* pointer
      */
-    void setSpecialModel(SpecialModel usage, Clump* model) {
-        specialmodels_[usage].reset(model);
+    void setSpecialModel(SpecialModel usage, ClumpPtr model) {
+        specialmodels_[usage] = model;
     }
 
 private:
     /// Hard-coded models to use for each of the special models
-    std::unique_ptr<Clump>
-        specialmodels_[SpecialModel::SpecialModelCount];
-    Clump* getSpecialModel(SpecialModel usage) const {
-        return specialmodels_[usage].get();
+    ClumpPtr specialmodels_[SpecialModel::SpecialModelCount];
+    ClumpPtr getSpecialModel(SpecialModel usage) const {
+        return specialmodels_[usage];
     }
 };
 

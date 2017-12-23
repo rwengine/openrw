@@ -20,7 +20,7 @@
 #include <iostream>
 #include <sstream>
 
-GameData::GameData(Logger* log, const std::string& path)
+GameData::GameData(Logger* log, const rwfs::path& path)
     : datpath(path), logger(log), engine(nullptr) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
@@ -86,7 +86,7 @@ void GameData::loadLevelFile(const std::string& path) {
     currenttextureslot = "generic";
 
     for (std::string line, cmd; std::getline(datfile, line);) {
-        if (line.size() == 0 || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#') continue;
 #ifndef RW_WINDOWS
         line.erase(line.size() - 1);
 #endif
@@ -247,8 +247,8 @@ void GameData::loadCarcols(const std::string& path) {
 
                 if (std::getline(ss, r, ',') && std::getline(ss, g, ',') &&
                     std::getline(ss, b)) {
-                    vehicleColours.push_back(glm::u8vec3(
-                        atoi(r.c_str()), atoi(g.c_str()), atoi(b.c_str())));
+                    vehicleColours.emplace_back(
+                        atoi(r.c_str()), atoi(g.c_str()), atoi(b.c_str()));
                 }
             } else if (currentSection == CAR) {
                 std::string vehicle, p, s;
@@ -258,7 +258,7 @@ void GameData::loadCarcols(const std::string& path) {
                 std::vector<std::pair<size_t, size_t>> colours;
 
                 while (std::getline(ss, p, ',') && std::getline(ss, s, ',')) {
-                    colours.push_back({atoi(p.c_str()), atoi(s.c_str())});
+                    colours.emplace_back(atoi(p.c_str()), atoi(s.c_str()));
                 }
 
                 vehiclePalettes.insert({vehicle, colours});
@@ -324,17 +324,17 @@ void GameData::loadWater(const std::string& path) {
         std::stringstream ss(line);
 
         std::string a, b, c, d, e;
-        float fa, fb, fc, fd, fe;
 
         if (std::getline(ss, a, ',') && std::getline(ss, b, ',') &&
             std::getline(ss, c, ',') && std::getline(ss, d, ',') &&
             std::getline(ss, e, ',')) {
-            fa = atof(a.c_str());
-            fb = atof(b.c_str());
-            fc = atof(c.c_str());
-            fd = atof(d.c_str());
-            fe = atof(e.c_str());
-            waterBlocks.push_back({fa, fb, fc, fd, fe});
+
+            waterBlocks.emplace_back(
+                atof(a.c_str()),
+                atof(b.c_str()),
+                atof(c.c_str()),
+                atof(d.c_str()),
+                atof(e.c_str()));
         }
     }
 }
@@ -385,7 +385,7 @@ void GameData::getNameAndLod(std::string& name, int& lod) {
     }
 }
 
-Clump* GameData::loadClump(const std::string& name) {
+ClumpPtr GameData::loadClump(const std::string& name) {
     auto file = index.openFile(name);
     if (!file) {
         logger->error("Data", "Failed to load model " + name);
@@ -692,15 +692,17 @@ int GameData::getWaterIndexAt(const glm::vec3& ws) const {
 }
 
 float GameData::getWaveHeightAt(const glm::vec3& ws) const {
-    return (1 + sin(engine->getGameTime() + (ws.x + ws.y) * WATER_SCALE)) *
+    return (1 + std::sin(engine->getGameTime() + (ws.x + ws.y) * WATER_SCALE)) *
            WATER_HEIGHT;
 }
 
-bool GameData::isValidGameDirectory(const std::string& path) {
-    if (path.empty()) {
+bool GameData::isValidGameDirectory(const rwfs::path& path) {
+    rwfs::error_code ec;
+    if (!rwfs::is_directory(path, ec)) {
+        std::cerr << "first test failed\n";
         return false;
     }
 
     LoaderIMG i;
-    return i.load(path + "/models/gta3.img");
+    return i.load(path / "models/gta3.img");
 }

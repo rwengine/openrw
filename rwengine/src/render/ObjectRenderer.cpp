@@ -31,7 +31,7 @@ RenderKey createKey(bool transparent, float normalizedDepth,
            uint32_t(0x7FFFFF *
                     (transparent ? 1.f - normalizedDepth : normalizedDepth))
                << 8 |
-           uint8_t(0xFF & (textures.size() > 0 ? textures[0] : 0)) << 0;
+           uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)) << 0;
 }
 
 void ObjectRenderer::renderGeometry(Geometry* geom,
@@ -57,7 +57,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         if (geom->materials.size() > subgeom.material) {
             Geometry::Material& mat = geom->materials[subgeom.material];
 
-            if (mat.textures.size() > 0) {
+            if (!mat.textures.empty()) {
                 auto tex = mat.textures[0].texture;
                 if (tex) {
                     if (tex->isTransparent()) {

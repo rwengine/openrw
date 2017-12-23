@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 #include <ai/AIGraph.hpp>
 #include <ai/TrafficDirector.hpp>

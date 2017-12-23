@@ -4,7 +4,7 @@
 #include <loaders/LoaderDFF.hpp>
 #include <queue>
 
-Animator::Animator(Clump* model) : model(model) {
+Animator::Animator(ClumpPtr model) : model(model) {
 }
 
 void Animator::tick(float dt) {
@@ -45,7 +45,7 @@ void Animator::tick(float dt) {
         }
 
         for (auto& b : state.boneInstances) {
-            if (b.first->frames.size() == 0) continue;
+            if (b.first->frames.empty()) continue;
             auto kf = b.first->getInterpolatedKeyframe(animTime);
 
             BoneTransform xform;

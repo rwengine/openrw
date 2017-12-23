@@ -2,76 +2,109 @@
 #    Unit Tests
 ##############################################################################
 
-if(${TESTS_NODATA})
-	add_definitions(-DRW_TEST_WITH_DATA=0)
-else()
-	add_definitions(-DRW_TEST_WITH_DATA=1)
-endif()
+find_package(Boost COMPONENTS filesystem unit_test_framework system REQUIRED)
 
-find_package(Boost COMPONENTS filesystem unit_test_framework REQUIRED)
+set(TESTS
+    Animation
+    Archive
+    Buoyancy
+    Character
+    Chase
+    Config
+    Cutscene
+    Data
+    FileIndex
+    GameData
+    GameWorld
+    Input
+    Items
+    Lifetime
+    LoaderDFF
+    LoaderIPL
+    Logger
+    Menu
+    Object
+    ObjectData
+    Pickup
+    Renderer
+    RWBStream
+    SaveGame
+    ScriptMachine
+    State
+    Text
+    TrafficDirector
+    Vehicle
+    VisualFX
+    Weapon
+    World
+    ZoneData
+    )
 
 set(TEST_SOURCES
-	"main.cpp"
-        "test_globals.cpp"
-	"test_animation.cpp"
-	"test_archive.cpp"
-	"test_buoyancy.cpp"
-	"test_character.cpp"
-	"test_chase.cpp"
-	"test_cutscene.cpp"
-	"test_config.cpp"
-	"test_data.cpp"
-	"test_FileIndex.cpp"
-	"test_GameData.cpp"
-	"test_GameWorld.cpp"
-	"test_globals.hpp"
-	"test_items.cpp"
-	"test_Input.cpp"
-	"test_lifetime.cpp"
-	"test_loaderdff.cpp"
-	"test_LoaderIPL.cpp"
-	"test_Logger.cpp"
-	"test_menu.cpp"
-	"test_object.cpp"
-	"test_object_data.cpp"
-	"test_pickup.cpp"
-	"test_renderer.cpp"
-	"test_rwbstream.cpp"
-	"test_SaveGame.cpp"
-	"test_scriptmachine.cpp"
-	"test_state.cpp"
-	"test_text.cpp"
-	"test_trafficdirector.cpp"
-	"test_vehicle.cpp"
-	"test_VisualFX.cpp"
-	"test_weapon.cpp"
-	"test_world.cpp"
-	"test_ZoneData.cpp"
+    main.cpp
+    test_Globals.cpp
+    test_Globals.hpp
 
-	# Hack in rwgame sources until there's a per-target test suite
-	"${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
-	"${CMAKE_SOURCE_DIR}/rwgame/GameWindow.cpp"
-	"${CMAKE_SOURCE_DIR}/rwgame/GameInput.cpp"
-	)
+    # Hack in rwgame sources until there's a per-target test suite
+    "${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
+    "${CMAKE_SOURCE_DIR}/rwgame/GameWindow.cpp"
+    "${CMAKE_SOURCE_DIR}/rwgame/GameInput.cpp"
+    )
 
-ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
+foreach(TEST ${TESTS})
+    list(APPEND TEST_SOURCES "test_${TEST}.cpp")
+endforeach()
 
-add_executable(run_tests ${TEST_SOURCES})
+add_executable(run_tests
+    ${TEST_SOURCES}
+    )
 
-include_directories(
-	include
-	"${CMAKE_SOURCE_DIR}/tests"
-	"${CMAKE_SOURCE_DIR}/rwgame")
+target_compile_definitions(run_tests
+    PRIVATE
+        "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
+        "BOOST_TEST_DYN_LINK"
+    )
 
-include_directories(SYSTEM
-	${BULLET_INCLUDE_DIR})
+target_include_directories(run_tests
+    SYSTEM
+    PRIVATE
+        ${Boost_INCLUDE_DIRS}
+    )
+
+target_include_directories(run_tests
+    PRIVATE
+        "${CMAKE_SOURCE_DIR}/tests"
+        "${CMAKE_SOURCE_DIR}/rwgame"
+    )
 
 target_link_libraries(run_tests
-	rwengine
-	${OPENGL_LIBRARIES}
-	${BULLET_LIBRARIES}
-	${SDL2_LIBRARY}
-	${PNG_LIBRARIES}
-	${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    PRIVATE
+        rwengine
+        SDL2::SDL2
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+    )
 
-add_test(UnitTests run_tests)
+openrw_target_apply_options(TARGET run_tests)
+
+if(SEPERATE_TEST_SUITES)
+    foreach(TEST ${TESTS})
+        add_test(
+            NAME "${TEST}"
+            COMMAND "$<TARGET_FILE:run_tests>" "-t" "${TEST}Tests"
+            )
+        set_tests_properties("${TEST}"
+            PROPERTIES
+                TIMEOUT 300
+            )
+    endforeach()
+else()
+    add_test(NAME UnitTests
+        COMMAND "$<TARGET_FILE:run_tests>"
+        )
+    set_tests_properties(UnitTests
+        PROPERTIES
+            TIMEOUT 300
+        )
+endif()

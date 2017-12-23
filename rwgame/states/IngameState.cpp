@@ -18,6 +18,7 @@
 #include <script/ScriptMachine.hpp>
 
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/matrix_major_storage.hpp>
 
 constexpr float kAutoLookTime = 2.f;
 constexpr float kAutolookMinVelocity = 0.2f;
@@ -64,8 +65,8 @@ void IngameState::startTest() {
 void IngameState::startGame() {
     game->startScript("data/main.scm");
     game->getScriptVM()->startThread(0);
-    getWorld()->sound.playBackground(getWorld()->data->getDataPath() +
-                                     "/audio/City.wav");
+    getWorld()->sound.playBackground(getWorld()->data->getDataPath().string() +
+                                     "/audio/City.wav"); //FIXME: use path
 }
 
 void IngameState::enter() {
@@ -351,18 +352,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
             glm::normalize(glm::cross(glm::vec3(0.f, 0.f, 1.f), direction));
         auto up = glm::normalize(glm::cross(direction, right));
 
-        glm::mat3 m;
-        m[0][0] = direction.x;
-        m[0][1] = right.x;
-        m[0][2] = up.x;
-
-        m[1][0] = direction.y;
-        m[1][1] = right.y;
-        m[1][2] = up.y;
-
-        m[2][0] = direction.z;
-        m[2][1] = right.z;
-        m[2][2] = up.z;
+        glm::mat3 m = glm::rowMajor3(direction, right, up);
 
         auto qtilt = glm::angleAxis(glm::radians(tilt), direction);
 

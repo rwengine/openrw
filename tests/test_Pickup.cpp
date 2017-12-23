@@ -3,7 +3,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/ItemPickup.hpp>
 #include <objects/PickupObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
 class TestPickup : public PickupObject {
 public:
@@ -13,7 +13,7 @@ public:
         : PickupObject(engine, position, 0, OnStreet) {
     }
 
-    bool onCharacterTouch(CharacterObject* character) {
+    bool onCharacterTouch(CharacterObject*) {
         picked_up = true;
         return true;
     }

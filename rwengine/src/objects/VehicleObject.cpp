@@ -235,7 +235,7 @@ void VehicleObject::tickPhysics(float dt) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float engineForce = info->handling.acceleration * throttle * velFac;
-        if (fabs(engineForce) >= 0.001f) {
+        if (std::fabs(engineForce) >= 0.001f) {
             collision->getBulletBody()->activate(true);
         }
 
@@ -668,7 +668,7 @@ void VehicleObject::registerPart(ModelFrame* mf) {
 
     dynamicParts.insert(
         {mf->getName(),
-         {mf, normal, damage, nullptr, nullptr, false, 0.f, 0.f, 0.f}});
+         {mf, normal, damage, nullptr, nullptr, nullptr, false, 0.f, 0.f, 0.f}});
 }
 
 void VehicleObject::createObjectHinge(Part* part) {
@@ -737,6 +737,7 @@ void VehicleObject::createObjectHinge(Part* part) {
     hinge->setLimit(hingeMin, hingeMax);
     hinge->setBreakingImpulseThreshold(250.f);
 
+    part->cs = cs;
     part->body = subObject;
     part->constraint = hinge;
 
@@ -754,8 +755,10 @@ void VehicleObject::destroyObjectHinge(Part* part) {
         engine->dynamicsWorld->removeCollisionObject(part->body);
         delete part->body->getMotionState();
         delete part->body;
+        delete part->cs;
     }
 
+    part->cs = nullptr;
     part->body = nullptr;
     part->constraint = nullptr;
 

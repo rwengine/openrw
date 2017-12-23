@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <objects/CharacterObject.hpp>
-#include "test_globals.hpp"
+#include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(ItemTests)
+BOOST_AUTO_TEST_SUITE(ItemsTests)
 
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_character_inventory) {

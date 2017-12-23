@@ -51,9 +51,9 @@ bool ChaseKeyframe::load(const std::string &filePath,
             rec.up[0] / 127.5f, rec.up[1] / 127.5f, rec.up[2] / 127.5f,
         };
         glm::mat3 rotation(right, up, glm::cross(right, up));
-        frames.push_back({velocity, rec.steering, rec.driving, rec.braking,
+        frames.emplace_back(velocity, rec.steering, rec.driving, rec.braking,
                           !!rec.handbrake, rec.position,
-                          glm::quat_cast(rotation)});
+                          glm::quat_cast(rotation));
     }
 
     return true;

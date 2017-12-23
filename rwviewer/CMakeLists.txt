@@ -1,35 +1,38 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5Core REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
-add_executable(rwviewer
-	main.cpp
-	ViewerWindow.cpp
+add_executable(rwviewer WIN32
+    main.cpp
+    ViewerWindow.cpp
 
-	models/ObjectListModel.cpp
-	models/DFFFramesTreeModel.cpp
+    models/ObjectListModel.cpp
+    models/DFFFramesTreeModel.cpp
 
-	views/ViewerInterface.hpp
-	views/ObjectViewer.cpp
-	views/ModelViewer.cpp
-	views/WorldViewer.cpp
+    views/ViewerInterface.hpp
+    views/ObjectViewer.cpp
+    views/ModelViewer.cpp
+    views/WorldViewer.cpp
 
-	ViewerWidget.cpp
-	ItemListModel.cpp
-	ItemListWidget.cpp
-	IMGArchiveModel.cpp
-	widgets/ModelFramesWidget.cpp
-	AnimationListModel.cpp
-	AnimationListWidget.cpp)
-
-include_directories(SYSTEM
-	${BULLET_INCLUDE_DIR})
+    ViewerWidget.cpp
+    ItemListModel.cpp
+    ItemListWidget.cpp
+    IMGArchiveModel.cpp
+    widgets/ModelFramesWidget.cpp
+    AnimationListModel.cpp
+    AnimationListWidget.cpp
+    )
 
 target_link_libraries(rwviewer
-	rwengine
-	${OPENGL_LIBRARIES}
-	${BULLET_LIBRARIES})
-qt5_use_modules(rwviewer Widgets OpenGL)
+    rwengine
+    Qt5::OpenGL
+    Qt5::Widgets
+    )
 
-install(TARGETS rwviewer RUNTIME DESTINATION "${BIN_DIR}")
+openrw_target_apply_options(TARGET rwviewer)
+
+install(TARGETS rwviewer
+    RUNTIME DESTINATION "${BIN_DIR}"
+    )

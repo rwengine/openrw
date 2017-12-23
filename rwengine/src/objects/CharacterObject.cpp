@@ -17,7 +17,8 @@
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                                 const glm::quat& rot, BaseModelInfo* modelinfo)
+                                 const glm::quat& rot, BaseModelInfo* modelinfo,
+                                 CharacterController* controller)
     : GameObject(engine, pos, rot, modelinfo)
     , currentState({})
     , currentVehicle(nullptr)
@@ -31,18 +32,20 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , physCharacter(nullptr)
     , physObject(nullptr)
     , physShape(nullptr)
-    , controller(nullptr) {
+    , controller(controller) {
 
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));
     if (info->getModel()) {
         setModel(info->getModel());
-        animator = new Animator(getClump().get());
+        animator = new Animator(getClump());
 
         createActor();
     }
 
     animations = engine->data->getAnimGroup(info->animgroup_);
+
+    controller->character = this;
 }
 
 CharacterObject::~CharacterObject() {
@@ -50,6 +53,7 @@ CharacterObject::~CharacterObject() {
     if (currentVehicle) {
         currentVehicle->setOccupant(getCurrentSeat(), nullptr);
     }
+    delete controller;
 }
 
 void CharacterObject::createActor(const glm::vec2& size) {
@@ -122,8 +126,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         return glm::vec3();
     }
 
-    Animation* movementAnimation = animations->animation(AnimCycle::Idle);
-    Animation* currentAnim = animator->getAnimation(AnimIndexMovement);
+    AnimationPtr movementAnimation = animations->animation(AnimCycle::Idle);
+    AnimationPtr currentAnim = animator->getAnimation(AnimIndexMovement);
     bool isActionHappening =
         (animator->getAnimation(AnimIndexAction) != nullptr);
     float animationSpeed = 1.f;
@@ -173,7 +177,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
                     movementAnimation = animations->animation(AnimCycle::Walk);
                 }
             } else {
-                // Keep walkin
+                // Keep walking
                 movementAnimation = animations->animation(AnimCycle::Walk);
             }
         }
@@ -194,7 +198,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         const auto& root = modelroot->getChildren()[0];
         auto it = movementAnimation->bones.find(root->getName());
         if (it != movementAnimation->bones.end()) {
-            AnimationBone* rootBone = it->second;
+            auto rootBone = it->second;
             float step = dt;
             const float duration =
                 animator->getAnimation(AnimIndexMovement)->duration;
@@ -279,7 +283,7 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
 
     setModel(newmodel);
 
-    animator = new Animator(getClump().get());
+    animator = new Animator(getClump());
 }
 
 void CharacterObject::updateCharacter(float dt) {
@@ -472,7 +476,11 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
 
 void CharacterObject::jump() {
     if (physCharacter) {
+#if BT_BULLET_VERSION < 285
         physCharacter->jump();
+#else
+        physCharacter->jump(btVector3(0.f, 0.f, 0.f));
+#endif
         jumped = true;
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
@@ -529,7 +537,7 @@ void CharacterObject::resetToAINode() {
     }
 }
 
-void CharacterObject::playActivityAnimation(Animation* animation, bool repeat,
+void CharacterObject::playActivityAnimation(AnimationPtr animation, bool repeat,
                                             bool blocked) {
     RW_CHECK(animator != nullptr, "No Animator");
     animator->playAnimation(AnimIndexAction, animation, 1.f, repeat);
@@ -550,7 +558,7 @@ void CharacterObject::playCycle(AnimCycle cycle) {
                             flags & AnimCycleInfo::Repeat);
 }
 
-void CharacterObject::playCycleAnimOverride(AnimCycle cycle, Animation* anim) {
+void CharacterObject::playCycleAnimOverride(AnimCycle cycle, AnimationPtr anim) {
     auto flags = animations->flags(cycle);
 
     cycle_ = cycle;
@@ -616,7 +624,8 @@ void CharacterObject::useItem(bool active, bool primary) {
         if (primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
-                controller->setNextActivity(new Activities::UseItem(item));
+                controller->setNextActivity(
+                    std::make_unique<Activities::UseItem>(item));
             } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }

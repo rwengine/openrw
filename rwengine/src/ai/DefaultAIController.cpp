@@ -25,12 +25,12 @@ void DefaultAIController::update(float dt) {
                 if (leader->getCurrentVehicle() !=
                     getCharacter()->getCurrentVehicle()) {
                     skipActivity();
-                    setNextActivity(new Activities::ExitVehicle);
+                    setNextActivity(std::make_unique<Activities::ExitVehicle>());
                 }
                 // else we're already in the right spot.
             } else {
                 if (leader->getCurrentVehicle()) {
-                    setNextActivity(new Activities::EnterVehicle(
+                    setNextActivity(std::make_unique<Activities::EnterVehicle>(
                         leader->getCurrentVehicle(), 1));
                 } else {
                     glm::vec3 dir =
@@ -42,7 +42,7 @@ void DefaultAIController::update(float dt) {
                                 leader->getPosition() +
                                 (glm::normalize(-dir) * followRadius * 0.7f);
                             skipActivity();
-                            setNextActivity(new Activities::GoTo(gotoPos));
+                            setNextActivity(std::make_unique<Activities::GoTo>(gotoPos));
                         }
                     }
                 }
@@ -60,9 +60,11 @@ void DefaultAIController::update(float dt) {
                     std::uniform_int_distribution<> d(
                         0, lastTarget->connections.size() - 1);
                     targetNode = lastTarget->connections.at(d(re));
-                    setNextActivity(new Activities::GoTo(targetNode->position));
+                    setNextActivity(std::make_unique<Activities::GoTo>(
+                        targetNode->position));
                 } else if (getCurrentActivity() == nullptr) {
-                    setNextActivity(new Activities::GoTo(targetNode->position));
+                    setNextActivity(std::make_unique<Activities::GoTo>(
+                        targetNode->position));
                 }
             } else {
                 // We need to pick an initial node

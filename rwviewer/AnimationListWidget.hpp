@@ -22,7 +22,7 @@ public:
 
 signals:
 
-    void selectedAnimationChanged(Animation* anim);
+    void selectedAnimationChanged(AnimationPtr anim);
 
 public slots:
     void selectedIndexChanged(const QModelIndex& current);

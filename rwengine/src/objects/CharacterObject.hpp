@@ -81,7 +81,8 @@ public:
      * @param ped PEDS_t struct to use.
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
-                    const glm::quat& rot, BaseModelInfo* modelinfo);
+                    const glm::quat& rot, BaseModelInfo* modelinfo,
+                    CharacterController* controller);
 
     ~CharacterObject();
 
@@ -185,7 +186,7 @@ public:
      * This allows controller activities to play their own animations and
      * controll blending with movement.
      */
-    void playActivityAnimation(Animation* animation, bool repeat,
+    void playActivityAnimation(AnimationPtr animation, bool repeat,
                                bool blocking);
     /**
      * @brief activityFinished removes activity animation
@@ -205,7 +206,7 @@ public:
      * This sets the same state as playCycle, but provides an alternate
      * animation to play.
      */
-    void playCycleAnimOverride(AnimCycle cycle, Animation* anim);
+    void playCycleAnimOverride(AnimCycle cycle, AnimationPtr anim);
 
     AnimCycle getCurrentCycle() const {
         return cycle_;

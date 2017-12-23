@@ -1,6 +1,5 @@
 #include <GameConfig.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>
@@ -9,18 +8,18 @@
 #include <fstream>
 #include <map>
 
-#include "rw/defines.hpp"
+#include <rw/defines.hpp>
+#include <rw/filesystem.hpp>
 
 namespace pt = boost::property_tree;
-namespace fs = boost::filesystem;
 
 typedef std::map<std::string, std::map<std::string, std::string>>
     simpleConfig_t;
 
-simpleConfig_t readConfig(const std::string &filename) {
+simpleConfig_t readConfig(const rwfs::path &path) {
     simpleConfig_t cfg;
     pt::ptree tree;
-    pt::read_ini(filename, tree);
+    pt::read_ini(path.string(), tree);
 
     for (const auto &section : tree) {
         for (const auto &subKey : section.second) {
@@ -67,10 +66,10 @@ public:
     virtual ~Temp() {
     }
     bool exists() const {
-        return fs::exists(this->m_path);
+        return rwfs::exists(this->m_path);
     }
-    std::string path() const {
-        return this->m_path.string();
+    const rwfs::path &path() const {
+        return this->m_path;
     }
     std::string filename() const {
         return this->m_path.filename().string();
@@ -86,20 +85,17 @@ protected:
     Temp(const Temp &) = delete;
     Temp() : m_path(getRandomFilePath()) {
     }
-    Temp(const fs::path &dirname) : m_path(getRandomFilePath(dirname)) {
-    }
-    const fs::path &get_path_internal() const {
-        return this->m_path;
+    Temp(const rwfs::path &dirname) : m_path(getRandomFilePath(dirname)) {
     }
 
 private:
-    static fs::path getRandomFilePath(const fs::path &dirname) {
-        return fs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
+    static rwfs::path getRandomFilePath(const rwfs::path &dirname) {
+        return rwfs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
     }
-    static fs::path getRandomFilePath() {
-        return getRandomFilePath(fs::temp_directory_path());
+    static rwfs::path getRandomFilePath() {
+        return getRandomFilePath(rwfs::temp_directory_path());
     }
-    fs::path m_path;
+    rwfs::path m_path;
 };
 
 class TempFile;
@@ -108,22 +104,22 @@ class TempDir : public Temp {
 public:
     TempDir() : Temp() {
     }
-    TempDir(const TempDir &dirname) : Temp(dirname.get_path_internal()) {
+    TempDir(const TempDir &dirname) : Temp(dirname.path()) {
     }
     virtual ~TempDir() {
         this->remove();
     }
     virtual void change_perms_readonly() const override {
-        fs::permissions(this->get_path_internal(),
-                        fs::perms::owner_read | fs::perms::owner_exe |
-                            fs::perms::group_read | fs::perms::group_exe |
-                            fs::perms::others_read | fs::perms::others_exe);
+        rwfs::permissions(this->path(),
+                        rwfs::perms::owner_read | rwfs::perms::owner_exe |
+                        rwfs::perms::group_read | rwfs::perms::group_exe |
+                        rwfs::perms::others_read | rwfs::perms::others_exe);
     }
     virtual void remove() const override {
-        fs::remove_all(this->get_path_internal());
+        rwfs::remove_all(this->path());
     }
     void touch() const override {
-        fs::create_directories(this->get_path_internal());
+        rwfs::create_directories(this->path());
     }
     friend class TempFile;
 };
@@ -132,28 +128,28 @@ class TempFile : public Temp {
 public:
     TempFile() : Temp() {
     }
-    TempFile(const TempDir &dirname) : Temp(dirname.get_path_internal()) {
+    TempFile(const TempDir &dirname) : Temp(dirname.path()) {
     }
     virtual ~TempFile() {
         this->remove();
     }
     virtual void change_perms_readonly() const override {
-        fs::permissions(this->get_path_internal(), fs::perms::owner_read |
-                                                       fs::perms::group_read |
-                                                       fs::perms::others_read);
+        rwfs::permissions(this->path(), rwfs::perms::owner_read |
+                                                        rwfs::perms::group_read |
+                                                        rwfs::perms::others_read);
     }
     virtual void remove() const override {
-        fs::remove_all(this->get_path_internal());
+        rwfs::remove_all(this->path());
     }
     virtual void touch() const override {
-        std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
+        std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
         ofs.close();
     }
     template <typename T>
     bool append(T t) const {
         // Append argument at the end of the file.
         // File is open/closes repeatedly. Not optimal.
-        std::ofstream ofs(this->path(), std::ios::out | std::ios::app);
+        std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
         ofs << t;
         ofs.close();
         return ofs.good();
@@ -162,7 +158,7 @@ public:
     bool write(T t) const {
         // Write the argument to the file, discarding all contents.
         // File is open/closes repeatedly. Not optimal.
-        std::ofstream ofs(this->path(), std::ios::out | std::ios::trunc);
+        std::ofstream ofs(this->path().string(), std::ios::out | std::ios::trunc);
         ofs << t;
         ofs.close();
         return ofs.good();
@@ -188,72 +184,78 @@ BOOST_AUTO_TEST_CASE(test_stripWhitespace) {
 BOOST_AUTO_TEST_CASE(test_TempDir) {
     // Check the behavior of TempFile
     TempDir tempDir;
-    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+    BOOST_CHECK(!tempDir.exists());
     tempDir.touch();
-    BOOST_CHECK_EQUAL(tempDir.exists(), true);
+    BOOST_CHECK(tempDir.exists());
     tempDir.remove();
-    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+    BOOST_CHECK(!tempDir.exists());
 
     tempDir.touch();
-    BOOST_CHECK_EQUAL(tempDir.exists(), true);
+    BOOST_CHECK(tempDir.exists());
 
     TempDir tempChildDir(tempDir);
-    BOOST_CHECK_EQUAL(tempChildDir.exists(), false);
+    BOOST_CHECK(!tempChildDir.exists());
 
     tempChildDir.touch();
-    BOOST_CHECK_EQUAL(tempChildDir.exists(), true);
+    BOOST_CHECK(tempChildDir.exists());
 
     tempDir.remove();
-    BOOST_CHECK_EQUAL(tempChildDir.exists(), false);
-    BOOST_CHECK_EQUAL(tempDir.exists(), false);
+    BOOST_CHECK(!tempChildDir.exists());
+    BOOST_CHECK(!tempDir.exists());
 
     tempChildDir.touch();
-    BOOST_CHECK_EQUAL(tempChildDir.exists(), true);
+    BOOST_CHECK(tempChildDir.exists());
 
-    std::string path;
+    rwfs::path path;
     {
         TempDir tempLocal;
         tempLocal.touch();
-        BOOST_CHECK_EQUAL(tempLocal.exists(), true);
+        BOOST_CHECK(tempLocal.exists());
         path = tempLocal.path();
     }
-    BOOST_CHECK_EQUAL(fs::exists(path), false);
+    BOOST_CHECK(!rwfs::exists(path));
 }
 
 BOOST_AUTO_TEST_CASE(test_TempFile) {
     // Check the behavior of TempFile
     TempFile tempFile;
-    BOOST_CHECK_EQUAL(tempFile.exists(), false);
+    BOOST_CHECK(!tempFile.exists());
     tempFile.touch();
-    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    BOOST_CHECK(tempFile.exists());
     tempFile.remove();
-    BOOST_CHECK_EQUAL(tempFile.exists(), false);
+    BOOST_CHECK(!tempFile.exists());
 
     tempFile.touch();
-    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    BOOST_CHECK(tempFile.exists());
     tempFile.remove();
 
-    BOOST_CHECK_EQUAL(tempFile.append("abc"), true);
-    BOOST_CHECK_EQUAL(tempFile.append("def"), true);
-    BOOST_CHECK_EQUAL(tempFile.exists(), true);
+    BOOST_CHECK(tempFile.append("abc"));
+    BOOST_CHECK(tempFile.append("def"));
+    BOOST_CHECK(tempFile.exists());
     tempFile.touch();
-    std::ifstream ifs(tempFile.path());
+    std::ifstream ifs(tempFile.path().string());
     std::string line;
     std::getline(ifs, line);
     BOOST_CHECK_EQUAL(line, "abcdef");
 
     tempFile.change_perms_readonly();
-    BOOST_CHECK_EQUAL(tempFile.write("abc"), false);
-    BOOST_CHECK_EQUAL(tempFile.append("def"), false);
+    BOOST_CHECK(!tempFile.write("abc"));
+    BOOST_CHECK(!tempFile.append("def"));
 
-    std::string path;
+    rwfs::path path;
     {
         TempFile tempLocal;
         tempLocal.touch();
-        BOOST_CHECK_EQUAL(tempLocal.exists(), true);
+        BOOST_CHECK(tempLocal.exists());
         path = tempLocal.path();
     }
-    BOOST_CHECK_EQUAL(fs::exists(path), false);
+    BOOST_CHECK(!rwfs::exists(path));
+}
+
+BOOST_AUTO_TEST_CASE(test_config_initial) {
+    // Test an initial config
+    GameConfig cfg;
+    BOOST_CHECK(!cfg.isValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid) {
@@ -263,7 +265,8 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(config.isValid());
     BOOST_CHECK_EQUAL(config.getParseResult().type(),
@@ -272,9 +275,9 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
                       0);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
-    BOOST_CHECK_EQUAL(config.getGameDataPath(), "/dev/test");
+    BOOST_CHECK_EQUAL(config.getGameDataPath().string(), "/dev/test");
     BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
-    BOOST_CHECK_EQUAL(config.getInputInvertY(), true);
+    BOOST_CHECK(config.getInputInvertY());
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
@@ -286,7 +289,8 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(config.isValid());
     BOOST_CHECK_EQUAL(config.getParseResult().type(),
@@ -295,8 +299,8 @@ BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
                       0);
     BOOST_CHECK_EQUAL(config.getParseResult().getKeysInvalidData().size(), 0);
 
-    BOOST_CHECK_EQUAL(config.getInputInvertY(), false);
-    BOOST_CHECK_EQUAL(config.getGameDataPath(), "Liberty City");
+    BOOST_CHECK(!config.getInputInvertY());
+    BOOST_CHECK_EQUAL(config.getGameDataPath().string(), "Liberty City");
 }
 
 BOOST_AUTO_TEST_CASE(test_config_save) {
@@ -307,7 +311,8 @@ BOOST_AUTO_TEST_CASE(test_config_save) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(config.isValid());
 
@@ -318,8 +323,9 @@ BOOST_AUTO_TEST_CASE(test_config_save) {
     BOOST_CHECK(writeResult.isValid());
     BOOST_CHECK(tempFile.exists());
 
-    GameConfig config2(tempFile.filename(), tempFile.dirname());
-    BOOST_CHECK_EQUAL(config2.getGameDataPath(), "Liberty City");
+    GameConfig config2;
+    config2.loadFile(tempFile.path());
+    BOOST_CHECK_EQUAL(config2.getGameDataPath().string(), "Liberty City");
 
     simpleConfig_t cfg2 = readConfig(tempFile.path());
     BOOST_CHECK_EQUAL(cfg2["game"]["path"], "Liberty City");
@@ -334,7 +340,8 @@ BOOST_AUTO_TEST_CASE(test_config_valid_unknown_keys) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(config.isValid());
 
@@ -355,7 +362,8 @@ BOOST_AUTO_TEST_CASE(test_config_valid_unknown_keys) {
     tempFile.remove();
     config.saveConfig();
 
-    GameConfig config2(tempFile.filename(), tempFile.dirname());
+    GameConfig config2;
+    config2.loadFile(tempFile.path());
     const auto &unknownData2 = config2.getParseResult().getUnknownData();
 
     BOOST_CHECK_EQUAL(unknownData2.size(), 2);
@@ -379,8 +387,9 @@ BOOST_AUTO_TEST_CASE(test_config_save_readonly) {
     tempFile.append(cfg);
     tempFile.change_perms_readonly();
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
-    BOOST_CHECK_EQUAL(config.isValid(), true);
+    GameConfig config;
+    config.loadFile(tempFile.path());
+    BOOST_CHECK(config.isValid());
 
     auto writeResult = config.saveConfig();
     BOOST_CHECK(!writeResult.isValid());
@@ -393,13 +402,15 @@ BOOST_AUTO_TEST_CASE(test_config_valid_default) {
     TempFile tempFile;
     BOOST_CHECK(!tempFile.exists());
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
     BOOST_CHECK(!config.isValid());
 
     auto defaultINI = config.getDefaultINIString();
     tempFile.append(defaultINI);
+    BOOST_CHECK(tempFile.exists());
 
-    config = GameConfig(tempFile.filename(), tempFile.dirname());
+    config.loadFile(tempFile.path());
     BOOST_CHECK(config.isValid());
 }
 
@@ -411,7 +422,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_emptykey) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
     const auto &parseResult = config.getParseResult();
@@ -427,7 +439,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_duplicate) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
     const auto &parseResult = config.getParseResult();
@@ -443,7 +456,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
 
@@ -465,7 +479,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
     TempFile tempFile;
     tempFile.append(cfg);
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
 
@@ -487,7 +502,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     tempFile.touch();
     BOOST_CHECK(tempFile.exists());
 
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
 
@@ -504,7 +520,9 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nodir) {
 
     BOOST_CHECK(!tempDir.exists());
     BOOST_CHECK(!tempFile.exists());
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
 
@@ -518,7 +536,8 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
     TempFile tempFile;
 
     BOOST_CHECK(!tempFile.exists());
-    GameConfig config(tempFile.filename(), tempFile.dirname());
+    GameConfig config;
+    config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
 
