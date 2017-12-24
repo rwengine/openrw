@@ -6093,8 +6093,10 @@ void opcode_020c(const ScriptArguments& args, ScriptVec3 coord, const ScriptExpl
 	@arg vehicle Car/vehicle
 */
 bool opcode_020d(const ScriptArguments& args, const ScriptVehicle vehicle) {
+	RW_UNIMPLEMENTED_OPCODE(0x020d);
+	RW_UNUSED(vehicle);
 	RW_UNUSED(args);
-	return vehicle->isFlipped();
+	return false;
 }
 
 /**
