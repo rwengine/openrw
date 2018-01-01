@@ -14,8 +14,8 @@ public:
         : ClosestRayResultCallback(from, to), _self(self) {
     }
 
-    virtual btScalar addSingleResult(
-        btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) {
+    btScalar addSingleResult(
+        btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override {
         if (rayResult.m_collisionObject == _self) {
             return 1.0;
         }

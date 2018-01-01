@@ -15,7 +15,7 @@ public:
     ItemPickup(GameWorld* world, const glm::vec3& position,
                BaseModelInfo* modelinfo, PickupType type, WeaponData* item);
 
-    bool onCharacterTouch(CharacterObject* character);
+    bool onCharacterTouch(CharacterObject* character) override;
 };
 
 #endif

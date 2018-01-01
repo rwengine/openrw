@@ -10,16 +10,17 @@ class LoadingState : public State {
 public:
     LoadingState(RWGame* game, std::function<void(void)> callback);
 
-    virtual void enter() override;
-    virtual void exit() override;
+    void enter() override;
 
-    virtual void tick(float dt) override;
+    void exit() override;
 
-    virtual void draw(GameRenderer* r) override;
+    void tick(float dt) override;
 
-    virtual bool shouldWorldUpdate() override;
+    void draw(GameRenderer* r) override;
 
-    virtual void handleEvent(const SDL_Event& event) override;
+    bool shouldWorldUpdate() override;
+
+    void handleEvent(const SDL_Event& event) override;
 };
 
 #endif  // LOADINGSTATE_HPP

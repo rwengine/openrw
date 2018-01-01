@@ -13,9 +13,9 @@ public:
         : CharacterController() {
     }
 
-    glm::vec3 getTargetPosition();
+    glm::vec3 getTargetPosition() override;
 
-    virtual void update(float dt);
+    void update(float dt) override;
 };
 
 #endif

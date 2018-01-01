@@ -46,16 +46,18 @@ public:
     void startTest();
     void startGame();
 
-    virtual void enter() override;
-    virtual void exit() override;
+    void enter() override;
 
-    virtual void tick(float dt) override;
-    virtual void draw(GameRenderer* r) override;
+    void exit() override;
 
-    virtual void handleEvent(const SDL_Event& event) override;
+    void tick(float dt) override;
+
+    void draw(GameRenderer* r) override;
+
+    void handleEvent(const SDL_Event& event) override;
     virtual void handlePlayerInput(const SDL_Event& event);
 
-    virtual bool shouldWorldUpdate() override;
+    bool shouldWorldUpdate() override;
 
     const ViewCamera& getCamera(float alpha) override;
 private:

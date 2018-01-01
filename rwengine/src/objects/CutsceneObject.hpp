@@ -14,7 +14,7 @@ public:
     CutsceneObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, ClumpPtr model,
                    BaseModelInfo* modelinfo);
-    ~CutsceneObject();
+    ~CutsceneObject() override;
 
     Type type() const override {
         return Cutscene;

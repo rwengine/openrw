@@ -31,9 +31,9 @@ public:
 
     void enterNearestVehicle();
 
-    virtual void update(float dt);
+    void update(float dt) override;
 
-    virtual glm::vec3 getTargetPosition();
+    glm::vec3 getTargetPosition() override;
 
     void jump();
 

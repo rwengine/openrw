@@ -51,7 +51,7 @@ public:
     ProjectileObject(GameWorld* world, const glm::vec3& position,
                      const ProjectileInfo& info);
 
-    ~ProjectileObject();
+    ~ProjectileObject() override;
 
     void tick(float dt) override;
 

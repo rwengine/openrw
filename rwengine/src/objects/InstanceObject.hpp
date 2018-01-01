@@ -29,7 +29,7 @@ public:
                    const glm::quat& rot, const glm::vec3& scale,
                    BaseModelInfo* modelinfo,
                    std::shared_ptr<DynamicObjectData> dyn);
-    ~InstanceObject();
+    ~InstanceObject() override;
 
     Type type() const override {
         return Instance;
@@ -43,10 +43,11 @@ public:
 
     void changeModel(BaseModelInfo* incoming);
 
-    virtual void setPosition(const glm::vec3& pos) override;
-    virtual void setRotation(const glm::quat& r) override;
+    void setPosition(const glm::vec3& pos) override;
 
-    virtual bool takeDamage(const DamageInfo& damage) override;
+    void setRotation(const glm::quat& r) override;
+
+    bool takeDamage(const DamageInfo& damage) override;
 
     void setSolid(bool solid);
 

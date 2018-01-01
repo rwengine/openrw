@@ -40,7 +40,7 @@ public:
     PickupObject(GameWorld* world, const glm::vec3& position, BaseModelInfo *modelinfo,
                  PickupType type);
 
-    ~PickupObject();
+    ~PickupObject() override;
 
     Type type() const override {
         return Pickup;
