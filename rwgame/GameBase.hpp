@@ -13,7 +13,8 @@
 class GameBase {
 public:
     GameBase(Logger& inlog, int argc, char* argv[]);
-    ~GameBase();
+
+    virtual ~GameBase() = 0;
 
     GameWindow& getWindow() {
         return window;

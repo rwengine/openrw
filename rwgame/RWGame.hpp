@@ -47,7 +47,7 @@ class RWGame : public GameBase {
 
 public:
     RWGame(Logger& log, int argc, char* argv[]);
-    ~RWGame();
+    ~RWGame() override;
 
     int run();
 
