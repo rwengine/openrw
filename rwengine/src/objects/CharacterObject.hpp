@@ -84,7 +84,7 @@ public:
                     const glm::quat& rot, BaseModelInfo* modelinfo,
                     CharacterController* controller);
 
-    ~CharacterObject();
+    ~CharacterObject() override;
 
     Type type() const override {
         return Character;
@@ -113,7 +113,7 @@ public:
      */
     void updateCharacter(float dt);
 
-    virtual void setPosition(const glm::vec3& pos) override;
+    void setPosition(const glm::vec3& pos) override;
 
     bool isPlayer() const;
 

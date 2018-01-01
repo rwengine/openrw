@@ -38,7 +38,7 @@ public:
     }
 
     bool needsResponse(const btCollisionObject* obA,
-                       const btCollisionObject* obB) {
+                       const btCollisionObject* obB) override {
         if (!(obA->getUserPointer() && obB->getUserPointer())) {
             return btCollisionDispatcher::needsResponse(obA, obB);
         }

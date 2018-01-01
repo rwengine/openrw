@@ -25,7 +25,7 @@ public:
     }
 
     void* castRay(const btVector3& from, const btVector3& to,
-                  btVehicleRaycasterResult& result) {
+                  btVehicleRaycasterResult& result) override {
         ClosestNotMeRayResultCallback rayCallback(
             _vehicle->collision->getBulletBody(), from, to);
         const void* res = 0;
@@ -55,7 +55,7 @@ public:
         : m_object(object), m_part(part) {
     }
 
-    virtual void getWorldTransform(btTransform& tform) const {
+    void getWorldTransform(btTransform& tform) const override {
         const auto& p = m_part->dummy->getDefaultTranslation();
         const auto& o = glm::toQuat(m_part->dummy->getDefaultRotation());
         tform.setOrigin(btVector3(p.x, p.y, p.z));
@@ -64,7 +64,7 @@ public:
             m_object->collision->getBulletBody()->getWorldTransform() * tform;
     }
 
-    virtual void setWorldTransform(const btTransform& tform) {
+    void setWorldTransform(const btTransform& tform) override {
         auto inv = glm::inverse(m_object->getRotation());
         const auto& rot = tform.getRotation();
         auto r2 = inv * glm::quat(rot.w(), rot.x(), rot.y(), rot.z());

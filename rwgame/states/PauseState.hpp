@@ -7,14 +7,15 @@ class PauseState : public State {
 public:
     PauseState(RWGame* game);
 
-    virtual void enter() override;
-    virtual void exit() override;
+    void enter() override;
 
-    virtual void tick(float dt) override;
+    void exit() override;
 
-    virtual void draw(GameRenderer* r) override;
+    void tick(float dt) override;
 
-    virtual void handleEvent(const SDL_Event& event) override;
+    void draw(GameRenderer* r) override;
+
+    void handleEvent(const SDL_Event& event) override;
 };
 
 #endif  // PAUSESTATE_HPP

@@ -9,7 +9,7 @@ public:
     GameObjectMotionState(GameObject* object) : m_object(object) {
     }
 
-    virtual void getWorldTransform(btTransform& tform) const {
+    void getWorldTransform(btTransform& tform) const override {
         auto& position = m_object->getPosition();
         auto& rotation = m_object->getRotation();
         tform.setOrigin(btVector3(position.x, position.y, position.z));
@@ -17,7 +17,7 @@ public:
             btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
     }
 
-    virtual void setWorldTransform(const btTransform& tform) {
+    void setWorldTransform(const btTransform& tform) override {
         auto& o = tform.getOrigin();
         auto r = tform.getRotation();
         glm::vec3 position(o.x(), o.y(), o.z());

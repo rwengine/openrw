@@ -41,7 +41,7 @@ struct IllegalInstruction : SCMException {
         : opcode(opcode), offset(offset), thread(thread) {
     }
 
-    std::string what() const {
+    std::string what() const override {
         std::stringstream ss;
         ss << "Illegal Instruction " << std::setfill('0') << std::setw(4)
            << std::hex << opcode << " encountered at offset "
@@ -60,7 +60,7 @@ struct UnknownType : SCMException {
         : type(type), offset(offset), thread(thread) {
     }
 
-    std::string what() const {
+    std::string what() const override {
         std::stringstream ss;
         ss << "Unkown data type " << std::setfill('0') << std::hex
            << static_cast<unsigned int>(type) << " encountered at offset "

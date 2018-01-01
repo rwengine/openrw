@@ -57,7 +57,7 @@ public:
                   BaseModelInfo* modelinfo, VehicleInfoHandle info,
                   const glm::u8vec3& prim, const glm::u8vec3& sec);
 
-    virtual ~VehicleObject();
+    ~VehicleObject() override;
 
     void setPosition(const glm::vec3& pos) override;
 
@@ -131,7 +131,7 @@ public:
 
     Part* getSeatEntryDoor(size_t seat);
 
-    virtual bool takeDamage(const DamageInfo& damage) override;
+    bool takeDamage(const DamageInfo& damage) override;
 
     enum FrameState { OK, DAM, BROKEN };
 

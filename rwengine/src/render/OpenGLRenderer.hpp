@@ -301,8 +301,9 @@ public:
 
     void invalidate() override;
 
-    virtual void pushDebugGroup(const std::string& title) override;
-    virtual const ProfileInfo& popDebugGroup() override;
+    void pushDebugGroup(const std::string& title) override;
+
+    const ProfileInfo& popDebugGroup() override;
 
 private:
     struct Buffer {

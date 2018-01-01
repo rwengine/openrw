@@ -55,5 +55,5 @@ private:
 };
 
 class StdOutReceiver : public Logger::MessageReceiver {
-    virtual void messageReceived(const Logger::LogMessage&);
+    void messageReceived(const Logger::LogMessage&) override;
 };
