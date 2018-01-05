@@ -86,7 +86,6 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
-    , moneyCollected(false)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
@@ -790,10 +789,7 @@ void VehicleObject::grantOccupantRewards(CharacterObject* character) {
             || getVehicle()->vehiclename_ == "CABBIE"
             || getVehicle()->vehiclename_ == "BORGNINE") {
             // Earn $25 from taxi cabs
-            if (!moneyCollected) {
-                character->engine->state->playerInfo.money += 25;
-                moneyCollected = true;
-            }
+            character->engine->state->playerInfo.money += 25;
         } else if (getVehicle()->vehiclename_ == "POLICAR") {
             // Police cruisers give 5 shotgun cartridges
             character->addToInventory(4, 5);

@@ -23,7 +23,6 @@ private:
     float throttle;
     float brake;
     bool handbrake;
-    bool moneyCollected;
 
     Atomic* chassishigh_ = nullptr;
     Atomic* chassislow_ = nullptr;
