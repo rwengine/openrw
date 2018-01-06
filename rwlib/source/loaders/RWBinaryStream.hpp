@@ -20,7 +20,7 @@ class RWBStream {
     char* _dataCur;
     char* _nextChunk;
     std::uint32_t _chunkVersion;
-    std::ptrdiff_t _currChunkSz;
+    size_t _currChunkSz;
 
 public:
     typedef std::uint32_t ChunkID;
