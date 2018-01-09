@@ -46,7 +46,7 @@ std::unique_ptr<TextureArchive> TextureArchive::create(
                    bufSize);
         }
 
-        textureArchive->textures.push_back(texture);
+        textureArchive->textures.push_back(std::move(texture));
 
         section = section->next;  // Extension
     }

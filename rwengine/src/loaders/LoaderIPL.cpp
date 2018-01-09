@@ -125,7 +125,7 @@ bool LoaderIPL::load(const std::string& filename) {
                 zone.pedGroupDay = 0;
                 zone.pedGroupNight = 0;
 
-                zones.push_back(zone);
+                zones.push_back(std::move(zone));
             }
         }
     }
