@@ -57,7 +57,7 @@ public:
         } else {
             auto tmp = currentStack.top();
             currentStack.pop();
-            currentStack.top().childProfiles.push_back(tmp);
+            currentStack.top().childProfiles.push_back(std::move(tmp));
         }
     }
 };

@@ -413,7 +413,7 @@ void LoaderDFF::readBinMeshPLG(GeometryPtr &geom, const RWBStream &stream) {
                     sizeof(std::uint32_t) * sg.numIndices);
         data += sizeof(std::uint32_t) * sg.numIndices;
 
-        geom->subgeom.push_back(sg);
+        geom->subgeom.push_back(std::move(sg));
     }
 }
 

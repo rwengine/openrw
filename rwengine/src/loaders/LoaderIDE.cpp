@@ -237,7 +237,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         getline(buffstream, buff, ',');
                         node.other_thing2 = atoi(buff.c_str());
 
-                        path.nodes.push_back(node);
+                        path.nodes.push_back(std::move(node));
                     }
 
                     auto &object = objects[path.ID];
