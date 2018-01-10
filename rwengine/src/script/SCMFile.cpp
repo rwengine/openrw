@@ -29,7 +29,7 @@ void SCMFile::loadFile(char *data, unsigned int size) {
         for (char &c : model_name) {
             c = read<char>(i++);
         }
-        models.push_back(model_name);
+        models.emplace_back(model_name);
     }
 
     i = missionSectionOffset;

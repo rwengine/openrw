@@ -364,7 +364,7 @@ void LoaderDFF::readTexture(Geometry::Material &material,
 
     TextureData::Handle textureinst =
         texturelookup ? texturelookup(name, alpha) : nullptr;
-    material.textures.push_back({name, alpha, textureinst});
+    material.textures.emplace_back(std::move(name), std::move(alpha), textureinst);
 }
 
 void LoaderDFF::readGeometryExtension(GeometryPtr &geom,

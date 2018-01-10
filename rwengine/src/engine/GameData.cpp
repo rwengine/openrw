@@ -74,7 +74,7 @@ void GameData::load() {
 
     // Clear existing zones
     gamezones = ZoneDataList{
-        {"CITYZON", 0, {-4000.f, -4000.f, -500.f}, {4000.f, 4000.f, 500.f}, 0}};
+        {"CITYZON", 0, {-4000.f, -4000.f, -500.f}, {4000.f, 4000.f, 500.f}, 0, 0, 0}};
 
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");

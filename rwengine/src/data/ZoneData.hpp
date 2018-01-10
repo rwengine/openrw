@@ -14,30 +14,30 @@
  */
 struct ZoneData {
     /**
-    * The name of the Zone (see .gxt)
-    */
+     * The name of the Zone (see .gxt)
+     */
     std::string name{};
 
     int type{};
 
     /**
-    * Bottom left of the Zone
-    */
+     * Bottom left of the Zone
+     */
     glm::vec3 min{};
 
     /**
-    * Top Right of the zone
-    */
+     * Top Right of the zone
+     */
     glm::vec3 max{};
 
     /**
-    * Island number
-    */
+     * Island number
+     */
     int island{};
 
     /**
-    * Text of the zone?
-    */
+     * Text of the zone?
+     */
     std::string text = {};
 
     /**
@@ -72,6 +72,21 @@ struct ZoneData {
      * Totally contained zones
      */
     std::vector<ZoneData*> children_ = {};
+
+    ZoneData(const std::string& _name, const int& _type, const glm::vec3& _min,
+             const glm::vec3& _max, const int& _island,
+             const unsigned int& _pedGroupDay,
+             const unsigned int& _pedGroupNight)
+        : name(_name)
+        , type(_type)
+        , min(_min)
+        , max(_max)
+        , island(_island)
+        , pedGroupDay(_pedGroupDay)
+        , pedGroupNight(_pedGroupNight) {
+    }
+
+    ZoneData() = default;
 
     static bool isZoneContained(const ZoneData& inner, const ZoneData& outer) {
         return glm::all(glm::greaterThanEqual(inner.min, outer.min)) &&

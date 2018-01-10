@@ -149,6 +149,13 @@ struct Geometry {
         std::string name;
         std::string alphaName;
         TextureData::Handle texture;
+
+        template<class String1, class String2>
+        Texture(String1&& _name, String2&& _alphaName, const TextureData::Handle &_texture)
+            : name(std::forward<String1>(_name))
+            , alphaName(std::forward<String2>(_alphaName))
+            , texture(_texture) {
+        }
     };
 
     enum { MTF_PrimaryColour = 1 << 0, MTF_SecondaryColour = 1 << 1 };
