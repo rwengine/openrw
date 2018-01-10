@@ -982,16 +982,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         Block11Zone& zone = zoneData.navZones[z];
         Block11ZoneInfo& day = zoneData.dayNightInfo[zone.dayZoneInfo];
         Block11ZoneInfo& night = zoneData.dayNightInfo[zone.nightZoneInfo];
-        ZoneData zd;
-        zd.name = zone.name;
-        zd.type = zone.type;
-        zd.min = zone.coordA;
-        zd.max = zone.coordB;
-        zd.island = zone.level;
         // @toodo restore gang density
-        zd.pedGroupDay = day.pedgroup;
-        zd.pedGroupNight = night.pedgroup;
-        gamezones.push_back(zd);
+        gamezones.emplace_back(zone.name, zone.type, zone.coordA, zone.coordB,
+                            zone.level, day.pedgroup, night.pedgroup);
     }
     // Re-build zone hierarchy
     for (ZoneData& zone : gamezones) {
