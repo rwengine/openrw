@@ -48,47 +48,6 @@ public:
 
     bool needsResponse(const btCollisionObject* obA,
                        const btCollisionObject* obB) override {
-        if (!(obA->getUserPointer() && obB->getUserPointer())) {
-            return btCollisionDispatcher::needsResponse(obA, obB);
-        }
-
-        GameObject* a = static_cast<GameObject*>(obA->getUserPointer());
-        GameObject* b = static_cast<GameObject*>(obB->getUserPointer());
-
-        bool aIsInstance = a && a->type() == GameObject::Instance;
-        bool bIsInstance = b && b->type() == GameObject::Instance;
-
-        bool exactly_one_gameobject_is_instance = aIsInstance != bIsInstance;
-
-        if (exactly_one_gameobject_is_instance) {
-            // Figure out which is the dynamic instance.
-            InstanceObject* dynInst = nullptr;
-            const btRigidBody *instBody = nullptr, *otherBody = nullptr;
-
-            if (aIsInstance) {
-                dynInst = static_cast<InstanceObject*>(a);
-                instBody = static_cast<const btRigidBody*>(obA);
-                otherBody = static_cast<const btRigidBody*>(obB);
-            } else {
-                dynInst = static_cast<InstanceObject*>(b);
-                instBody = static_cast<const btRigidBody*>(obB);
-                otherBody = static_cast<const btRigidBody*>(obA);
-            }
-
-            if (dynInst->dynamics == nullptr || !instBody->isStaticObject()) {
-                return btCollisionDispatcher::needsResponse(obA, obB);
-            }
-
-            // Attempt to determine relative velocity.
-            auto dV = (otherBody->getLinearVelocity());
-            auto impulse = dV.length();
-
-            // Ignore collision if the object is about to be uprooted.
-            if (dynInst->dynamics->uprootForce <=
-                impulse / (otherBody->getInvMass())) {
-                return false;
-            }
-        }
         return btCollisionDispatcher::needsResponse(obA, obB);
     }
 };
@@ -597,7 +556,8 @@ float GameWorld::getGameTime() const {
     return state->gameTime;
 }
 
-void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
+namespace {
+void handleVehicleResponse(GameObject *object, btManifoldPoint &mp, bool isA) {
     bool isVehicle = object->type() == GameObject::Vehicle;
     if (!isVehicle) return;
     if (mp.getAppliedImpulse() <= 100.f) return;
@@ -618,6 +578,24 @@ void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
                         mp.getAppliedImpulse()});
 }
 
+void handleInstanceResponse(InstanceObject *instance, const btManifoldPoint &mp, bool isA) {
+    if (!instance->dynamics) {
+        return;
+    }
+
+    auto dmg = isA ? mp.m_positionWorldOnA : mp.m_positionWorldOnB;
+    auto impulse = mp.getAppliedImpulse();
+
+    if (impulse > 0.0f) {
+        instance->takeDamage({{dmg.x(), dmg.y(), dmg.z()},
+                              {dmg.x(), dmg.y(), dmg.z()},
+                              0.f,
+                              GameObject::DamageInfo::Physics,
+                              impulse});
+    }
+}
+}
+
 bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
                                          void* body1) {
     auto obA = static_cast<btCollisionObject*>(body0);
@@ -633,42 +611,18 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
     bool aIsInstance = a && a->type() == GameObject::Instance;
     bool bIsInstance = b && b->type() == GameObject::Instance;
 
-    bool exactly_one_gameobject_is_instance = aIsInstance != bIsInstance;
+    bool exactly_one_is_instance = aIsInstance != bIsInstance;
 
-    if (exactly_one_gameobject_is_instance) {
-        // Figure out which is the dynamic instance.
-        InstanceObject* dynInst = nullptr;
-        const btRigidBody *instBody = nullptr, *otherBody = nullptr;
-
-        btVector3 src, dmg;
+    if (exactly_one_is_instance) {
+        InstanceObject* instance = nullptr;
 
         if (aIsInstance) {
-            dynInst = static_cast<InstanceObject*>(a);
-            instBody = static_cast<const btRigidBody*>(obA);
-            otherBody = static_cast<const btRigidBody*>(obB);
-            src = mp.getPositionWorldOnB();
-            dmg = mp.getPositionWorldOnA();
+            instance = static_cast<InstanceObject*>(a);
         } else {
-            dynInst = static_cast<InstanceObject*>(b);
-            instBody = static_cast<const btRigidBody*>(obB);
-            otherBody = static_cast<const btRigidBody*>(obA);
-            src = mp.getPositionWorldOnA();
-            dmg = mp.getPositionWorldOnB();
+            instance = static_cast<InstanceObject*>(b);
         }
 
-        if (dynInst->dynamics != nullptr && instBody->isStaticObject()) {
-            // Attempt to determine relative velocity.
-            auto dV = (otherBody->getLinearVelocity());
-            auto impulse = dV.length() / (otherBody->getInvMass());
-
-            if (dynInst->dynamics->uprootForce <= impulse) {
-                dynInst->takeDamage({{dmg.x(), dmg.y(), dmg.z()},
-                                     {src.x(), src.y(), src.z()},
-                                     0.f,
-                                     GameObject::DamageInfo::Physics,
-                                     impulse});
-            }
-        }
+        handleInstanceResponse(instance, mp, aIsInstance);
     }
 
     // Handle vehicles
