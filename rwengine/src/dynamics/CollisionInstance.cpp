@@ -144,12 +144,6 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     m_body->setUserPointer(object);
     object->engine->dynamicsWorld->addRigidBody(m_body);
 
-    if (dynamics && dynamics->uprootForce > 0.f) {
-        m_body->setCollisionFlags(
-            m_body->getCollisionFlags() |
-            btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-    }
-
     return true;
 }
 
