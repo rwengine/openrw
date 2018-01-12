@@ -50,8 +50,6 @@ void InstanceObject::tick(float dt) {
     if (dynamics && body) {
         if (_enablePhysics) {
             if (body->getBulletBody()->isStaticObject()) {
-                // Apparently bodies must be removed and re-added if their mass
-                // changes.
                 body->changeMass(dynamics->mass);
             }
         }
@@ -157,7 +155,6 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
         if (collision) {
             body = std::make_unique<CollisionInstance>();
             body->createPhysicsBody(this, collision, dynamics.get());
-            body->getBulletBody()->setActivationState(ISLAND_SLEEPING);
         }
     }
 }
@@ -190,8 +187,7 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
         smash = dynamics->collDamageFlags == 80;
 
         if (dmg.impulse >= dynamics->uprootForce &&
-            (body->getBulletBody()->getCollisionFlags() &
-             btRigidBody::CF_STATIC_OBJECT) != 0) {
+            body->getBulletBody()->isStaticObject()) {
             _enablePhysics = true;
         }
     }

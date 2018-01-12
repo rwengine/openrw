@@ -104,6 +104,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , physVehicle(nullptr) {
     collision->createPhysicsBody(this, modelinfo->getCollision(), nullptr,
                                  &info->handling);
+    collision->getBulletBody()->forceActivationState(DISABLE_DEACTIVATION);
     physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld.get());
     btRaycastVehicle::btVehicleTuning tuning;
 
@@ -115,7 +116,6 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     physVehicle =
         new btRaycastVehicle(tuning, collision->getBulletBody(), physRaycaster);
     physVehicle->setCoordinateSystem(0, 2, 1);
-    // physBody->setActivationState(DISABLE_DEACTIVATION);
     engine->dynamicsWorld->addAction(physVehicle);
 
     float kC = 0.5f;
@@ -242,10 +242,6 @@ void VehicleObject::tickPhysics(float dt) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float engineForce = info->handling.acceleration * throttle * velFac;
-        if (std::fabs(engineForce) >= 0.001f) {
-            collision->getBulletBody()->activate(true);
-        }
-
         float brakeF = getBraking();
 
         if (handbrake) {
