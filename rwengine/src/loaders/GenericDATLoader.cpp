@@ -37,9 +37,9 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             if (ss.peek() == ',') ss.ignore(1);
             ss >> dyndata->airRes;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->elacticity;
+            ss >> dyndata->elasticity;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->bouancy;
+            ss >> dyndata->buoyancy;
             if (ss.peek() == ',') ss.ignore(1);
             ss >> dyndata->uprootForce;
             if (ss.peek() == ',') ss.ignore(1);
@@ -47,7 +47,7 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             if (ss.peek() == ',') ss.ignore(1);
             int tmp;
             ss >> tmp;
-            dyndata->collDamageFlags = tmp;
+            dyndata->collDamageEffect = tmp;
             if (ss.peek() == ',') ss.ignore(1);
             ss >> tmp;
             dyndata->collResponseFlags = tmp;
