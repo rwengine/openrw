@@ -19,6 +19,7 @@ class GameWorld;
 class InstanceObject : public GameObject {
     float health;
     bool visible = true;
+    int changeAtomic = -1;
 
     /**
      * The Atomic instance for this object
@@ -47,7 +48,7 @@ public:
 
     void tick(float dt) override;
 
-    void changeModel(BaseModelInfo* incoming);
+    void changeModel(BaseModelInfo* incoming, int atomicNumber = 0);
 
     void setPosition(const glm::vec3& pos) override;
 

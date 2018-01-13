@@ -587,9 +587,12 @@ void handleInstanceResponse(InstanceObject *instance, const btManifoldPoint &mp,
     auto impulse = mp.getAppliedImpulse();
 
     if (impulse > 0.0f) {
+        ///@ todo Correctness: object damage calculation
+        constexpr auto kMinimumDamageImpulse = 500.f;
+        const auto hp = std::max(0.f, impulse - kMinimumDamageImpulse);
         instance->takeDamage({{dmg.x(), dmg.y(), dmg.z()},
                               {dmg.x(), dmg.y(), dmg.z()},
-                              0.f,
+                              hp,
                               GameObject::DamageInfo::Physics,
                               impulse});
     }

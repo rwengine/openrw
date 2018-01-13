@@ -59,11 +59,11 @@ BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
     BOOST_CHECK_EQUAL(lamp->mass, 600.0);
     BOOST_CHECK_EQUAL(lamp->turnMass, 4000.0);
     BOOST_CHECK_CLOSE(lamp->airRes, 0.99, 1.0);
-    BOOST_CHECK_CLOSE(lamp->elacticity, 0.05, 0.01);
-    BOOST_CHECK_EQUAL(lamp->bouancy, 50.0);
+    BOOST_CHECK_CLOSE(lamp->elasticity, 0.05, 0.01);
+    BOOST_CHECK_EQUAL(lamp->buoyancy, 50.0);
     BOOST_CHECK_EQUAL(lamp->uprootForce, 400);
     BOOST_CHECK_EQUAL(lamp->collDamageMulti, 1.0);
-    BOOST_CHECK_EQUAL(lamp->collDamageFlags, 1);
+    BOOST_CHECK_EQUAL(lamp->collDamageEffect, 1);
     BOOST_CHECK_EQUAL(lamp->collResponseFlags, 1);
     BOOST_CHECK_EQUAL(lamp->cameraAvoid, false);
 }

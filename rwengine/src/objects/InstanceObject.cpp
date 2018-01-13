@@ -47,86 +47,81 @@ InstanceObject::~InstanceObject() {
 }
 
 void InstanceObject::tick(float dt) {
-    if (dynamics && body) {
-        if (_enablePhysics) {
-            if (body->getBulletBody()->isStaticObject()) {
-                body->changeMass(dynamics->mass);
-            }
-        }
+    if (animator) animator->tick(dt);
 
-        const glm::vec3& ws = getPosition();
-        auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-        auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-        float vH = ws.z;  // - _collisionHeight/2.f;
-        float wH = 0.f;
+    if (!body || !dynamics) {
+        return;
+    }
 
-        if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
-            wY < WATER_HQ_DATA_SIZE) {
-            int i = (wX * WATER_HQ_DATA_SIZE) + wY;
-            int hI = engine->data->realWater[i];
-            if (hI < NO_WATER_INDEX) {
-                wH = engine->data->waterHeights[hI];
-                wH += engine->data->getWaveHeightAt(ws);
-                inWater = vH <= wH;
-            } else {
-                inWater = false;
-            }
-        }
-        _lastHeight = ws.z;
-
-        if (inWater) {
-            float oZ =
-                -(body->getBoundingHeight() * (dynamics->bouancy / 100.f));
-            body->getBulletBody()->activate(true);
-            // Damper motion
-            body->getBulletBody()->setDamping(0.95f, 0.9f);
-
-            auto wi = engine->data->getWaterIndexAt(ws);
-            if (wi != NO_WATER_INDEX) {
-                float h = engine->data->waterHeights[wi] + oZ;
-
-                // Calculate wave height
-                h += engine->data->getWaveHeightAt(ws);
-
-                if (ws.z <= h) {
-                    /*if( dynamics->uprootForce > 0.f &&
-                    (body->body->getCollisionFlags() &
-                    btRigidBody::CF_STATIC_OBJECT) != 0 ) {
-                        // Apparently bodies must be removed and re-added if
-                    their mass changes.
-                        engine->dynamicsWorld->removeRigidBody(body->body);
-                        btVector3 inert;
-                        body->getCollisionShape()->calculateLocalInertia(dynamics->mass,
-                    inert);
-                        body->setMassProps(dynamics->mass, inert);
-                        engine->dynamicsWorld->addRigidBody(body);
-                    }*/
-
-                    float x = (h - ws.z);
-                    float F =
-                        WATER_BUOYANCY_K * x +
-                        -WATER_BUOYANCY_C *
-                            body->getBulletBody()->getLinearVelocity().z();
-                    btVector3 forcePos = btVector3(0.f, 0.f, 2.f)
-                                             .rotate(body->getBulletBody()
-                                                         ->getOrientation()
-                                                         .getAxis(),
-                                                     body->getBulletBody()
-                                                         ->getOrientation()
-                                                         .getAngle());
-                    body->getBulletBody()->applyForce(btVector3(0.f, 0.f, F),
-                                                      forcePos);
-                }
-            }
+    if (changeAtomic != -1) {
+        RW_ASSERT(getModelInfo<SimpleModelInfo>()->getNumAtomics() >
+                  changeAtomic);
+        changeModel(getModelInfo<SimpleModelInfo>(), changeAtomic);
+        changeAtomic = -1;
+    }
+    if (_enablePhysics) {
+        if (body->getBulletBody()->isStaticObject()) {
+            body->changeMass(dynamics->mass);
         }
     }
 
-    if (animator) animator->tick(dt);
+    const glm::vec3& ws = getPosition();
+    auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
+                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+    auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
+                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+    float vH = ws.z;  // - _collisionHeight/2.f;
+    float wH = 0.f;
+
+    if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
+        wY < WATER_HQ_DATA_SIZE) {
+        int i = (wX * WATER_HQ_DATA_SIZE) + wY;
+        int hI = engine->data->realWater[i];
+        if (hI < NO_WATER_INDEX) {
+            wH = engine->data->waterHeights[hI];
+            wH += engine->data->getWaveHeightAt(ws);
+            inWater = vH <= wH;
+        } else {
+            inWater = false;
+        }
+    }
+    _lastHeight = ws.z;
+
+    if (inWater) {
+        float oZ =
+            -(body->getBoundingHeight() * (dynamics->buoyancy / 100.f));
+        body->getBulletBody()->activate(true);
+        // Damper motion
+        body->getBulletBody()->setDamping(0.95f, 0.9f);
+
+        auto wi = engine->data->getWaterIndexAt(ws);
+        if (wi != NO_WATER_INDEX) {
+            float h = engine->data->waterHeights[wi] + oZ;
+
+            // Calculate wave height
+            h += engine->data->getWaveHeightAt(ws);
+
+            if (ws.z <= h) {
+                float x = (h - ws.z);
+                float F =
+                    WATER_BUOYANCY_K * x +
+                    -WATER_BUOYANCY_C *
+                        body->getBulletBody()->getLinearVelocity().z();
+                btVector3 forcePos = btVector3(0.f, 0.f, 2.f)
+                                         .rotate(body->getBulletBody()
+                                                     ->getOrientation()
+                                                     .getAxis(),
+                                                 body->getBulletBody()
+                                                     ->getOrientation()
+                                                     .getAngle());
+                body->getBulletBody()->applyForce(btVector3(0.f, 0.f, F),
+                                                  forcePos);
+            }
+        }
+    }
 }
 
-void InstanceObject::changeModel(BaseModelInfo* incoming) {
+void InstanceObject::changeModel(BaseModelInfo* incoming, int atomicNumber) {
     if (body) {
         body.reset();
     }
@@ -141,12 +136,13 @@ void InstanceObject::changeModel(BaseModelInfo* incoming) {
         setModel(getModelInfo<SimpleModelInfo>()->getModel());
         auto collision = getModelInfo<SimpleModelInfo>()->getCollision();
 
-        auto modelatomic = getModelInfo<SimpleModelInfo>()->getAtomic(0);
-        if (modelatomic) {
-            auto previousatomic = atomic_;
-            atomic_ = modelatomic->clone();
-            if (previousatomic) {
-                atomic_->setFrame(previousatomic->getFrame());
+        RW_ASSERT(getModelInfo<SimpleModelInfo>()->getNumAtomics() > atomicNumber);
+        auto atomic = getModelInfo<SimpleModelInfo>()->getAtomic(atomicNumber);
+        if (atomic) {
+            auto previous = atomic_;
+            atomic_ = atomic->clone();
+            if (previous) {
+                atomic_->setFrame(previous->getFrame());
             } else {
                 atomic_->setFrame(std::make_shared<ModelFrame>());
             }
@@ -182,20 +178,41 @@ void InstanceObject::setRotation(const glm::quat& r) {
 }
 
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
-    bool smash = false;
-    if (dynamics) {
-        smash = dynamics->collDamageFlags == 80;
+    if (!dynamics) {
+        return false;
+    }
 
-        if (dmg.impulse >= dynamics->uprootForce &&
-            body->getBulletBody()->isStaticObject()) {
-            _enablePhysics = true;
+    const auto effect = dynamics->collDamageEffect;
+
+    if (dmg.hitpoints > 0.f) {
+        switch (effect) {
+            case DynamicObjectData::Damage_ChangeModel:
+                changeAtomic = 1;
+                break;
+            case DynamicObjectData::Damage_ChangeThenSmash:
+                changeAtomic = 1;
+                RW_UNIMPLEMENTED("Collision Damage Effect: Changing, then Smashing");
+                break;
+            case DynamicObjectData::Damage_Smash:
+                RW_UNIMPLEMENTED("Collision Damage Effect: Smashing");
+                break;
+            case DynamicObjectData::Damage_SmashCardboard:
+            case DynamicObjectData::Damage_SmashWoodenBox:
+            case DynamicObjectData::Damage_SmashTrafficCone:
+            case DynamicObjectData::Damage_SmashBarPost:
+                RW_UNIMPLEMENTED("Collision Damage Effect");
+                break;
+            default:
+                break;
         }
     }
-    if (smash) {
-        health -= dmg.hitpoints;
-        return true;
+
+    if (dmg.impulse >= dynamics->uprootForce &&
+        body->getBulletBody()->isStaticObject()) {
+        _enablePhysics = true;
     }
-    return false;
+
+    return true;
 }
 
 void InstanceObject::setSolid(bool solid) {

@@ -463,24 +463,32 @@ struct DynamicObjectData {
     float mass;        // Kg
     float turnMass;    // Kg m^3
     float airRes;      // fraction
-    float elacticity;  // "
-    float bouancy;
+    float elasticity;  // "
+    float buoyancy;
     float uprootForce;  // Force
     float collDamageMulti;
-    /*
-     * 1: change model
-     * 2: split model
-     * 3: smash
-     * 4: change and smash
-     */
-    uint8_t collDamageFlags;
-    /*
-     * 1: lampost
-     * 2: smallbox
-     * 3: bigbox
-     * 4: fencepart
-     */
+
+    enum {
+        Damage_ChangeModel = 1,
+        Damage_SplitModel = 2,
+        Damage_Smash = 3,
+        Damage_ChangeThenSmash = 4,
+        Damage_SmashCardboard = 50,
+        Damage_SmashWoodenBox = 60,
+        Damage_SmashTrafficCone = 70,
+        Damage_SmashBarPost = 80,
+    };
+    uint8_t collDamageEffect;
+
+    enum {
+        Response_None = 0,
+        Response_LampPost = 1,
+        Response_SmallBox = 2,
+        Response_BigBox = 3,
+        Response_FencePart = 4,
+    };
     uint8_t collResponseFlags;
+
     bool cameraAvoid;
 };
 
