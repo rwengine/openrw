@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE(test_create) {
         BOOST_CHECK_EQUAL(controller->getNextActivity(), nullptr);
 
         Global::get().e->destroyObject(character);
-        delete controller;
     }
 }
 
@@ -116,7 +115,6 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         BOOST_CHECK_EQUAL(nullptr, character->getCurrentVehicle());
 
         Global::get().e->destroyObject(character);
-        delete controller;
     }
 }
 

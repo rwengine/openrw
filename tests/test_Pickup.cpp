@@ -4,13 +4,14 @@
 #include <objects/ItemPickup.hpp>
 #include <objects/PickupObject.hpp>
 #include "test_Globals.hpp"
+#if RW_TEST_WITH_DATA
 
 class TestPickup : public PickupObject {
 public:
     bool picked_up = false;
 
     TestPickup(GameWorld* engine, const glm::vec3& position)
-        : PickupObject(engine, position, 0, OnStreet) {
+        : PickupObject(engine, position, Global::get().d->modelinfo[0].get(), OnStreet) {
     }
 
     bool onCharacterTouch(CharacterObject*) {
@@ -21,7 +22,6 @@ public:
 
 BOOST_AUTO_TEST_SUITE(PickupTests)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
     {
         auto character =
@@ -90,6 +90,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
         Global::get().e->destroyObject(character);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif
