@@ -389,16 +389,15 @@ void CharacterObject::updateCharacter(float dt) {
 }
 
 void CharacterObject::setPosition(const glm::vec3& pos) {
+    auto realPos = pos;
     if (physCharacter) {
-        btVector3 bpos(pos.x, pos.y, pos.z);
-        if (std::abs(-100.f - pos.z) < 0.01f) {
-            // Find the ground position
-            auto gpos = engine->getGroundAtPosition(pos);
-            bpos.setZ(gpos.z + 1.f);
+        if (pos.z <= -99.f) {
+            realPos = engine->getGroundAtPosition(pos);
         }
+        btVector3 bpos(realPos.x, realPos.y, realPos.z + 1.0f);
         physCharacter->warp(bpos);
     }
-    position = pos;
+    position = realPos;
     getClump()->getFrame()->setTranslation(pos);
 }
 
