@@ -257,17 +257,15 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
     }
 
     float mindist = glm::length(vehicle->getPosition() - m_camera.position) / kVehicleDrawDistanceFactor;
-    if (mindist < kVehicleLODDistance) {
-        // Swich visibility to the high LOD
-        vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
-        vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
-    } else if (mindist < kVehicleDrawDistance) {
-        // Switch to low
-        vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, false);
-        vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, true);
-    } else {
+    if (mindist > kVehicleDrawDistance) {
         culled++;
         return;
+    }
+
+    if (vehicle->getLowLOD() && vehicle->getHighLOD()) {
+        const bool highLOD = mindist < kVehicleLODDistance;
+        vehicle->getHighLOD()->setFlag(Atomic::ATOMIC_RENDER, highLOD);
+        vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, !highLOD);
     }
 
     renderClump(clump.get(), glm::mat4(), vehicle, outList);

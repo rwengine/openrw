@@ -156,25 +156,30 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     setModel(getVehicle()->getModel());
     setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
 
+    const auto vehicleInfo = getModelInfo<VehicleModelInfo>();
+    const auto isBoat = (vehicleInfo->vehicletype_ == VehicleModelInfo::BOAT);
+    const std::string baseName = isBoat? "boat":"chassis";
+
     // Locate the Atomics for the chassis_hi and chassis_vlo frames
     for (const auto& atomic : getClump()->getAtomics()) {
         auto frame = atomic->getFrame().get();
-        if (frame->getName() == "chassis_vlo") {
+        if (frame->getName() == baseName+"_vlo") {
             chassislow_ = atomic.get();
         }
-        if (frame->getName() == "chassis_hi") {
+        if (frame->getName() == baseName+"_hi") {
             chassishigh_ = atomic.get();
         }
     }
 
     // Create meta-data for dummy parts
-    auto chassisframe = getClump()->findFrame("chassis_dummy");
-    RW_CHECK(chassisframe, "Vehicle has no chassis_dummy");
-    for (auto& frame : chassisframe->getChildren()) {
-        auto& name = frame->getName();
-        bool isDum = name.find("_dummy") != name.npos;
-        if (isDum) {
-            registerPart(frame.get());
+    auto dummy = getClump()->findFrame("chassis_dummy");
+    if (dummy) {
+        for (auto& frame : dummy->getChildren()) {
+            auto& name = frame->getName();
+            bool isDum = name.find("_dummy") != name.npos;
+            if (isDum) {
+                registerPart(frame.get());
+            }
         }
     }
 }
