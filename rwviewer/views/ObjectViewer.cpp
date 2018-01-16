@@ -1,16 +1,112 @@
 #include "ObjectViewer.hpp"
-#include <QDebug>
-#include <QMenu>
 #include <models/ObjectListModel.hpp>
-#include "ViewerWidget.hpp"
+#include <ViewerWindow.hpp>
 
-ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent,
-                           Qt::WindowFlags f)
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QMenu>
+
+
+class ObjectSearchModel : public QSortFilterProxyModel {
+public:
+    ObjectSearchModel(QObject* parent)
+        : QSortFilterProxyModel(parent) { }
+
+    void showCARS(bool cars) {
+        _showCars = cars;
+        invalidateFilter();
+    }
+
+    void showOBJS(bool objs) {
+        _showMisc = objs;
+        invalidateFilter();
+    }
+
+    void showPEDS(bool peds) {
+        _showPeds = peds;
+        invalidateFilter();
+    }
+
+    void filterName(const QString& name) {
+        _name = name.toStdString();
+        invalidateFilter();
+    }
+
+    bool filterAcceptsRow(int sourceRow,
+                          const QModelIndex &sourceParent) const override
+    {
+        auto index0 = sourceModel()->index(sourceRow, 0, sourceParent);
+        const auto& model = _data->modelinfo.at(index0.internalId());
+
+        switch (model->type()) {
+            case ModelDataType::VehicleInfo:
+                if (!_showCars)
+                    return false;
+                break;
+            case ModelDataType::PedInfo:
+                if (!_showPeds)
+                    return false;
+                break;
+            default:
+                if (!_showMisc)
+                    return false;
+                break;
+        }
+
+        return !(!_name.empty() && model->name.find(_name) == std::string::npos);
+    }
+
+    void setModel(ObjectListModel* model) {
+        _data = model->gameData();
+        QSortFilterProxyModel::setSourceModel(model);
+    }
+
+    GameData* _data = nullptr;
+private:
+    bool _showPeds = true;
+    bool _showMisc = true;
+    bool _showCars = true;
+
+    std::string _name;
+};
+
+namespace {
+QLayout* searchControls(ObjectSearchModel* search) {
+    auto bar = new QHBoxLayout;
+
+    auto searchBox = new QLineEdit;
+    searchBox->setPlaceholderText("Search");
+    QObject::connect(searchBox, &QLineEdit::textChanged, search, &ObjectSearchModel::filterName);
+
+    auto cars = new QCheckBox;
+    cars->setText("CARS");
+    cars->setChecked(true);
+    QObject::connect(cars, &QCheckBox::clicked, search, &ObjectSearchModel::showCARS );
+    auto peds = new QCheckBox;
+    peds->setText("PEDS");
+    peds->setChecked(true);
+    QObject::connect(peds, &QCheckBox::clicked, search, &ObjectSearchModel::showPEDS );
+    auto misc = new QCheckBox;
+    misc->setText("Misc");
+    misc->setChecked(true);
+    QObject::connect(misc, &QCheckBox::clicked, search, &ObjectSearchModel::showOBJS );
+
+    bar->addWidget(searchBox, 1);
+    bar->addWidget(cars);
+    bar->addWidget(peds);
+    bar->addWidget(misc);
+
+    return bar;
+}
+}
+
+ObjectViewer::ObjectViewer(QWidget* parent, Qt::WindowFlags f)
     : ViewerInterface(parent, f) {
-    mainLayout = new QHBoxLayout;
+    mainLayout = new QHBoxLayout(this);
+
+    auto leftLayout = new QVBoxLayout;
 
     objectList = new QTableView;
-
     objectMenu = new QMenu(objectList);
     objectList->setContextMenuPolicy(Qt::CustomContextMenu);
     auto viewModelAction = new QAction("View Model", objectMenu);
@@ -18,11 +114,22 @@ ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent,
     connect(viewModelAction, SIGNAL(triggered()), this, SLOT(menuViewModel()));
     connect(objectList, SIGNAL(customContextMenuRequested(QPoint)), this,
             SLOT(onCustomContextMenu(QPoint)));
+    filterModel = new ObjectSearchModel(this);
+    objectList->setModel(filterModel);
+    objectList->setColumnWidth(0, 50);
+    objectList->setColumnWidth(1, 150);
+    objectList->setColumnWidth(2, 200);
+    objectList->setSortingEnabled(true);
+    connect(objectList->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+            SLOT(showItem(QModelIndex)));
 
-    mainLayout->addWidget(objectList);
+    leftLayout->addLayout(searchControls(filterModel));
+    leftLayout->addWidget(objectList);
+    mainLayout->addLayout(leftLayout, 6);
 
-    previewWidget = viewer;
-    previewWidget->setMinimumSize(250, 250);
+    previewWidget = createViewer();
+    previewWidget->setMode(ViewerWidget::Mode::Object);
 
     infoLayout = new QGridLayout;
 
@@ -35,29 +142,23 @@ ObjectViewer::ObjectViewer(ViewerWidget* viewer, QWidget* parent,
     infoLayout->addWidget(previewClass, 2, 1);
     infoLayout->addWidget(new QLabel("Model"), 3, 0);
     infoLayout->addWidget(previewModel, 3, 1);
+    infoLayout->addWidget(QWidget::createWindowContainer(previewWidget), 0, 0, 1, 2);
+    infoLayout->setRowStretch(0, 1);
 
-    mainLayout->addLayout(infoLayout);
-
-    this->setLayout(mainLayout);
-
-    setViewerWidget(previewWidget);
-}
-
-void ObjectViewer::setViewerWidget(ViewerWidget* widget) {
-    // widgetLayout->removeWidget(previewWidget);
-    previewWidget = widget;
-    infoLayout->addWidget(previewWidget, 0, 0, 1, 2);
+    mainLayout->addLayout(infoLayout, 4);
+    setLayout(mainLayout);
 }
 
 void ObjectViewer::worldChanged() {
-    if (objectList->model()) {
-        delete objectList->model();
+    if (filterModel->sourceModel()) {
+        delete filterModel->sourceModel();
     }
 
-    objectList->setModel(new ObjectListModel(world()->data, objectList));
-    connect(objectList->selectionModel(),
-            SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-            SLOT(showItem(QModelIndex)));
+    auto newModel = new ObjectListModel(world()->data, this);
+    filterModel->setModel(newModel);
+    objectList->sortByColumn(0, Qt::AscendingOrder);
+
+    objectList->resizeColumnsToContents();
 }
 
 void ObjectViewer::showItem(qint16 item) {
@@ -73,7 +174,8 @@ void ObjectViewer::showItem(qint16 item) {
 }
 
 void ObjectViewer::showItem(QModelIndex model) {
-    showItem(model.internalId());
+    auto source = filterModel->mapToSource(model);
+    showItem(source.internalId());
 }
 
 void ObjectViewer::onCustomContextMenu(const QPoint& p) {
@@ -85,7 +187,7 @@ void ObjectViewer::onCustomContextMenu(const QPoint& p) {
 
 void ObjectViewer::menuViewModel() {
     if (contextMenuIndex.isValid()) {
-        auto id = contextMenuIndex.internalId();
-        showObjectModel(id);
+        auto source = filterModel->mapToSource(contextMenuIndex);
+        showObjectModel(source.internalId());
     }
 }

@@ -15,6 +15,7 @@ add_executable(rwviewer WIN32
     views/ObjectViewer.cpp
     views/ModelViewer.cpp
     views/WorldViewer.cpp
+    views/ViewerInterface.cpp
 
     ViewerWidget.cpp
     ItemListModel.cpp

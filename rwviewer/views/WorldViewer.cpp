@@ -3,22 +3,13 @@
 
 #include <QFileDialog>
 
-WorldViewer::WorldViewer(ViewerWidget* viewer, QWidget* parent,
-                         Qt::WindowFlags f)
+WorldViewer::WorldViewer(QWidget* parent, Qt::WindowFlags f)
     : ViewerInterface(parent, f) {
     mainLayout = new QVBoxLayout;
 
-    viewerWidget = viewer;
-    viewerWidget->setMinimumSize(250, 250);
+    mainLayout->addWidget(QWidget::createWindowContainer(createViewer()));
 
-    this->setLayout(mainLayout);
-}
-
-void WorldViewer::setViewerWidget(ViewerWidget* widget) {
-    viewerWidget = widget;
-    // Clear the active model
-    widget->showModel(nullptr);
-    mainLayout->addWidget(viewerWidget);
+    setLayout(mainLayout);
 }
 
 void WorldViewer::loadPlacements(const QString& file) {

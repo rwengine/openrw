@@ -1,12 +1,11 @@
 #include <QApplication>
-#include <QStyleFactory>
 #include "ViewerWindow.hpp"
 
 int main(int argc, char *argv[]) {
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
 
     ViewerWindow viewer;
-    viewer.show();
 
     return app.exec();
 }

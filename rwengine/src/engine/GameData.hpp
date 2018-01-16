@@ -150,7 +150,7 @@ public:
     /**
      * Loads and associates a model's data
      */
-    void loadModel(ModelID model);
+    bool loadModel(ModelID model);
 
     /**
      * Loads an IFP file containing animations

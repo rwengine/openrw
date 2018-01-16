@@ -6,37 +6,22 @@
 #include <widgets/ModelFramesWidget.hpp>
 #include "ViewerWidget.hpp"
 
-ModelViewer::ModelViewer(ViewerWidget* viewer, QWidget* parent,
-                         Qt::WindowFlags f)
+ModelViewer::ModelViewer(QWidget* parent, Qt::WindowFlags f)
     : ViewerInterface(parent, f), viewing(nullptr) {
     mainSplit = new QSplitter;
     mainLayout = new QVBoxLayout;
 
-    viewerWidget = viewer;
-    viewerWidget->setMinimumSize(250, 250);
-
-    animationWidget = new AnimationListWidget;
-    connect(animationWidget, SIGNAL(selectedAnimationChanged(Animation*)),
-            SLOT(playAnimation(Animation*)));
-
     frames = new ModelFramesWidget;
     frames->setMaximumWidth(300);
 
+    viewerWidget = createViewer();
+    viewerWidget->setMode(ViewerWidget::Mode::Model);
+
     mainSplit->addWidget(frames);
-    mainSplit->addWidget(animationWidget);
+    mainSplit->addWidget(QWidget::createWindowContainer(viewerWidget));
     mainLayout->addWidget(mainSplit);
 
-    this->setLayout(mainLayout);
-
-    connect(frames, SIGNAL(selectedFrameChanged(ModelFrame*)), viewerWidget,
-            SLOT(selectFrame(ModelFrame*)));
-    setViewerWidget(viewerWidget);
-}
-
-void ModelViewer::setViewerWidget(ViewerWidget* widget) {
-    viewerWidget = widget;
-    mainSplit->addWidget(viewerWidget);
-    showModel(viewing);
+    setLayout(mainLayout);
 }
 
 void ModelViewer::showModel(ClumpPtr model) {
@@ -46,35 +31,27 @@ void ModelViewer::showModel(ClumpPtr model) {
 }
 
 void ModelViewer::showObject(uint16_t object) {
-    viewerWidget->showObject(object);
-    viewing = viewerWidget->currentModel();
-    frames->setModel(viewing);
-}
-
-void ModelViewer::loadAnimations(const QString& file) {
-    std::ifstream dfile(file.toStdString().c_str(), std::ios_base::binary);
-    AnimationList anims;
-
-    if (dfile.is_open()) {
-        dfile.seekg(0, std::ios_base::end);
-        size_t length = dfile.tellg();
-        dfile.seekg(0);
-        char* file = new char[length];
-        dfile.read(file, length);
-
-        LoaderIFP loader;
-        if (loader.loadFromMemory(file)) {
-            for (auto& f : loader.animations) {
-                anims.push_back(f);
-            }
-        }
-
-        delete[] file;
+    auto def = world()->data->modelinfo[object].get();
+    if (!def) {
+        return;
     }
 
-    animationWidget->setAnimations(anims);
+    auto modelName = def->name + ".dff";
+    auto textureName = def->name + ".txd";
+    auto textures = world()->data->loadTextureArchive(textureName);
+
+    LoaderDFF dffLoader;
+    dffLoader.setTextureLookupCallback(
+        [&](const std::string& texture, const std::string&) {
+            return textures.at(texture);
+        });
+
+    auto file = world()->data->index.openFile(modelName);
+    if (!file) {
+        RW_ERROR("Couldn't load " << modelName);
+        return;
+    }
+    showModel(dffLoader.loadFromMemory(file));
 }
 
-void ModelViewer::playAnimation(AnimationPtr anim) {
-    viewerWidget->currentObject()->animator->playAnimation(0, anim, 1.f, true);
-}
+

@@ -1,35 +1,44 @@
 #include "ViewerWidget.hpp"
 #include <QFileDialog>
 #include <QMouseEvent>
-#include <algorithm>
-#include <data/Clump.hpp>
 #include <engine/Animator.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <objects/CharacterObject.hpp>
-#include <objects/GameObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <render/GameRenderer.hpp>
 #include <render/ObjectRenderer.hpp>
-#include <render/OpenGLRenderer.hpp>
 
-ViewerWidget::ViewerWidget(QGLFormat g, QWidget* parent,
-                           const QGLWidget* shareWidget, Qt::WindowFlags f)
-    : QGLWidget(g, parent, shareWidget, f)
-    , renderer(nullptr)
-    , gworld(nullptr)
-    , activeModel(nullptr)
+constexpr float kViewFov = glm::radians(90.0f);
+
+namespace {
+ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
+                        float viewDistance, glm::mat4& view, glm::mat4& proj)
+{
+    ViewCamera vc;
+    glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y),
+                  cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
+
+    vc.position = eye * viewDistance;
+    vc.frustum.aspectRatio = viewPort.x / viewPort.y;
+    proj = vc.frustum.projection();
+    view = glm::lookAt(vc.position, {0.f, 0.f, 0.f}, {0.f, 0.f, 1.f});
+    vc.rotation = -glm::quat_cast(view);
+    vc.frustum.update(proj * view);
+    return vc;
+}
+}
+
+ViewerWidget::ViewerWidget(QOpenGLContext* context, QWindow* parent)
+    : QWindow(parent)
+    , context(context)
     , selectedFrame(nullptr)
-    , dummyObject(nullptr)
-    , currentObjectID(0)
-    , _lastModel(nullptr)
-    , canimation(nullptr)
     , viewDistance(1.f)
     , dragging(false)
     , moveFast(false)
     , _frameWidgetDraw(nullptr)
     , _frameWidgetGeom(nullptr) {
-    setFocusPolicy(Qt::StrongFocus);
+    setSurfaceType(OpenGLSurface);
 }
 
 struct WidgetVertex {
@@ -43,12 +52,7 @@ std::vector<WidgetVertex> widgetVerts = {{-.5f, 0.f, 0.f}, {.5f, 0.f, 0.f},
                                          {0.f, -.5f, 0.f}, {0.f, .5f, 0.f},
                                          {0.f, 0.f, -.5f}, {0.f, 0.f, .5f}};
 
-void ViewerWidget::initializeGL() {
-    QGLWidget::initializeGL();
-    timer.setInterval(25);
-    connect(&timer, SIGNAL(timeout()), SLOT(updateGL()));
-    timer.start();
-
+void ViewerWidget::initGL() {
     _frameWidgetDraw = new DrawBuffer;
     _frameWidgetDraw->setFaceType(GL_LINES);
     _frameWidgetGeom = new GeometryBuffer;
@@ -64,88 +68,93 @@ void ViewerWidget::initializeGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void ViewerWidget::resizeGL(int w, int h) {
-    QGLWidget::resizeGL(w, h);
-    glViewport(0, 0, w, h);
-}
-
-void ViewerWidget::paintGL() {
-    glClearColor(0.3f, 0.3f, 0.3f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glViewport(0, 0, width(), height());
-
-    if (world() == nullptr) return;
-
-    RW_CHECK(renderer != nullptr, "GameRenderer is null");
-    auto& r = *renderer;
-
-    r.setViewport(width(), height());
-
-    if (dummyObject && dummyObject->animator) {
-        dummyObject->animator->tick(1.f / 60.f);
-    }
-
-    r.getRenderer()->invalidate();
-
-    glEnable(GL_DEPTH_TEST);
-
-    glm::mat4 m(1.f);
+void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
+    glm::mat4 view, proj;
+    const auto& vc = OrbitCamera({width(), height()},
+                                 viewAngles,
+                                 viewDistance,
+                                 view, proj);
 
     r.getRenderer()->useProgram(r.worldProg.get());
+    r.getRenderer()->setSceneParameters(
+            {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
+             glm::vec4(0.f), 90.f, vc.frustum.far});
+    model->getFrame()->updateHierarchyTransform();
 
-    ViewCamera vc;
+    ObjectRenderer _renderer(world(), vc, 1.f, 0);
+    RenderList renders;
+    _renderer.renderClump(model.get(), glm::mat4(), nullptr, renders);
+    r.getRenderer()->drawBatched(renders);
 
-    float viewFov = glm::radians(45.f);
+    drawFrameWidget(model->getFrame().get());
+    r.renderPostProcess();
+}
 
-    vc.frustum.far = 500.f;
-    vc.frustum.near = 0.1f;
-    vc.frustum.fov = viewFov;
-    vc.frustum.aspectRatio = width() / (height() * 1.f);
+void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
+    glm::mat4 view, proj;
+    const auto& vc = OrbitCamera({width(), height()},
+                                 viewAngles,
+                                 viewDistance,
+                                 view, proj);
 
-    ClumpPtr model = activeModel;
-    if (model != _lastModel) {
-        _lastModel = model;
-        emit modelChanged(_lastModel);
-    }
-
-    glm::vec3 eye(sin(viewAngles.x) * cos(viewAngles.y),
-                  cos(viewAngles.x) * cos(viewAngles.y), sin(viewAngles.y));
-
-    if (model) {
-        model->getFrame()->updateHierarchyTransform();
-
-        // Ensure camera is still accurate
-        vc.position = eye * viewDistance;
-        glm::mat4 proj = vc.frustum.projection();
-        glm::mat4 view = glm::lookAt(vc.position, glm::vec3(0.f, 0.f, 0.f),
-                                     glm::vec3(0.f, 0.f, 1.f));
-        vc.rotation = -glm::quat_cast(view);
-        vc.frustum.update(proj * view);
-
-        r.getRenderer()->setSceneParameters(
+    r.getRenderer()->useProgram(r.worldProg.get());
+    r.getRenderer()->setSceneParameters(
             {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
              glm::vec4(0.f), 90.f, vc.frustum.far});
 
-        r.getRenderer()->invalidate();
+    ObjectRenderer objectRenderer(world(), vc, 1.f, 0);
+    RenderList renders;
+    objectRenderer.buildRenderList(object, renders);
+    std::sort(renders.begin(), renders.end(),
+              [](const Renderer::RenderInstruction& a,
+                 const Renderer::RenderInstruction& b) {
+                  return a.sortKey < b.sortKey;
+              });
+    r.getRenderer()->drawBatched(renders);
+    r.renderPostProcess();
+}
 
-        r.setupRender();
+void ViewerWidget::drawWorld(GameRenderer& r) {
+    ViewCamera vc;
+    vc.frustum.fov = kViewFov;
+    vc.frustum.far = 1000.f;
+    vc.frustum.near = 0.1f;
+    vc.position = viewPosition;
+    vc.rotation = glm::angleAxis(glm::half_pi<float>() + viewAngles.x,
+                                 glm::vec3(0.f, 0.f, 1.f)) *
+                  glm::angleAxis(viewAngles.y, glm::vec3(0.f, 1.f, 0.f));
+    vc.frustum.aspectRatio = width() / (height() * 1.f);
+    r.renderWorld(world(), vc, 0.f);
+}
 
-        ObjectRenderer renderer(world(), vc, 1.f, 0);
-        RenderList renders;
-        renderer.renderClump(model.get(), glm::mat4(), nullptr, renders);
-        r.getRenderer()->drawBatched(renders);
+void ViewerWidget::paintGL() {
+    glViewport(0, 0, width(), height());
+    glClearColor(0.3f, 0.3f, 0.3f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        drawFrameWidget(model->getFrame().get());
-        r.renderPostProcess();
-    } else if (world()->allObjects.size() > 0) {
-        vc.frustum.fov = glm::radians(90.f);
-        vc.frustum.far = 1000.f;
-        vc.position = viewPosition;
-        vc.rotation = glm::angleAxis(glm::half_pi<float>() + viewAngles.x,
-                                     glm::vec3(0.f, 0.f, 1.f)) *
-                      glm::angleAxis(viewAngles.y, glm::vec3(0.f, 1.f, 0.f));
-        r.renderWorld(world(), vc, 0.f);
+    if (world() == nullptr) return;
+
+    RW_CHECK(_renderer != nullptr, "GameRenderer is null");
+    auto& r = *_renderer;
+    r.getRenderer()->invalidate();
+    r.setViewport(width(), height());
+
+    glEnable(GL_DEPTH_TEST);
+
+
+    r.getRenderer()->invalidate();
+    r.setupRender();
+
+    switch (_viewMode) {
+    case Mode::Model:
+        if (_model) drawModel(r, _model);
+        break;
+    case Mode::Object:
+        if (_object) drawObject(r, _object);
+        break;
+    case Mode::World:
+        drawWorld(r);
+        break;
     }
 }
 
@@ -166,9 +175,9 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
     }
     dp.textures = {whiteTex};
 
-    RW_CHECK(renderer != nullptr, "GameRenderer is null");
-    if(renderer != nullptr) {
-        renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
+    RW_CHECK(_renderer != nullptr, "GameRenderer is null");
+    if(_renderer != nullptr) {
+        _renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
     }
 
     for (auto c : f->getChildren()) {
@@ -177,40 +186,51 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
 }
 
 GameWorld* ViewerWidget::world() {
-    return gworld;
+    return _world;
 }
 
-void ViewerWidget::showObject(qint16 item) {
-    currentObjectID = item;
+void ViewerWidget::showObject(quint16 item) {
+    RW_ASSERT(world());
+    _viewMode = Mode::Object;
+    _objectID = item;
 
-    if (dummyObject) gworld->destroyObject(dummyObject);
+    if (_object) _world->destroyObject(_object);
+    _object = nullptr;
 
     auto def = world()->data->modelinfo[item].get();
+    if (!def) {
+        return;
+    }
 
-    if (def) {
-        switch (def->type()) {
-            default:
-                dummyObject = gworld->createInstance(item, {});
-                break;
-            case ModelDataType::PedInfo:
-                dummyObject = gworld->createPedestrian(item, {});
-                break;
-            case ModelDataType::VehicleInfo:
-                dummyObject = gworld->createVehicle(item, {});
-                break;
-        }
+    if (!world()->data->loadModel(item)) {
+        return;
+    }
 
-        RW_CHECK(dummyObject != nullptr, "Dummy Object is null");
-        if (dummyObject != nullptr) {
-            activeModel = dummyObject->getModel();
-        }
+    switch (def->type()) {
+    default:
+        _object = _world->createInstance(item, {});
+        break;
+    case ModelDataType::PedInfo:
+        _object = _world->createPedestrian(item, {});
+        break;
+    case ModelDataType::VehicleInfo:
+        _object = _world->createVehicle(item, {});
+        break;
+    }
+
+    RW_CHECK(_object != nullptr, "Dummy Object is null");
+
+    if (_object->getModel()) {
+        auto objectRadius = _object->getModel()->getBoundingRadius();
+        viewDistance = objectRadius * 2;
+        viewAngles.x = glm::radians(-45.f);
+        viewAngles.y = glm::radians(22.5f);
     }
 }
 
 void ViewerWidget::showModel(ClumpPtr model) {
-    if (dummyObject) gworld->destroyObject(dummyObject);
-    dummyObject = nullptr;
-    activeModel = model;
+    _viewMode = Mode::Model;
+    _model = model;
 }
 
 void ViewerWidget::selectFrame(ModelFrame* frame) {
@@ -218,12 +238,12 @@ void ViewerWidget::selectFrame(ModelFrame* frame) {
 }
 
 void ViewerWidget::exportModel() {
+#if 0
     QString toSv = QFileDialog::getSaveFileName(
         this, "Export Model", QDir::homePath(), "Model (*.DFF)");
 
     if (toSv.size() == 0) return;
 
-#if 0
 	auto it = world()->objectTypes.find(currentObjectID);
 	if( it != world()->objectTypes.end() ) {
 		for( auto& archive : world()->data.archives ) {
@@ -238,14 +258,6 @@ void ViewerWidget::exportModel() {
 		}
 	}
 #endif
-}
-
-void ViewerWidget::dataLoaded(GameWorld* world) {
-    gworld = world;
-}
-
-void ViewerWidget::setRenderer(GameRenderer* render) {
-    renderer = render;
 }
 
 void ViewerWidget::keyPressEvent(QKeyEvent* e) {
@@ -270,11 +282,11 @@ void ViewerWidget::keyReleaseEvent(QKeyEvent* e) {
 }
 
 ClumpPtr ViewerWidget::currentModel() const {
-    return activeModel;
+    return _model;
 }
 
 GameObject* ViewerWidget::currentObject() const {
-    return dummyObject;
+    return _object;
 }
 
 void ViewerWidget::mousePressEvent(QMouseEvent* e) {
@@ -297,3 +309,42 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent* e) {
 void ViewerWidget::wheelEvent(QWheelEvent* e) {
     viewDistance = qMax(viewDistance - e->angleDelta().y() / 240.f, 0.5f);
 }
+
+void ViewerWidget::gameLoaded(GameWorld *world, GameRenderer *renderer) {
+    _world = world;
+    _renderer = renderer;
+}
+
+void ViewerWidget::renderNow() {
+    if (!isExposed()) {
+        return;
+    }
+
+    context->makeCurrent(this);
+
+    if (!initialised) {
+        initGL();
+        initialised = true;
+    }
+
+    paintGL();
+    context->swapBuffers(this);
+
+    requestUpdate();
+}
+
+bool ViewerWidget::event(QEvent *e) {
+    switch(e->type()) {
+    case QEvent::UpdateRequest:
+        renderNow();
+        return true;
+    default: return QWindow::event(e);
+    }
+}
+
+void ViewerWidget::exposeEvent(QExposeEvent *) {
+    if (isExposed()) {
+        requestUpdate();
+    }
+}
+

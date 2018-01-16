@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _OBJECTVIEWER_HPP_
 #define _OBJECTVIEWER_HPP_
 #include <engine/GameData.hpp>
@@ -10,9 +9,12 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QTableView>
+#include <QSortFilterProxyModel>
 
 class ViewerWidget;
 class Clump;
+
+class ObjectSearchModel;
 
 class ObjectViewer : public ViewerInterface {
     Q_OBJECT
@@ -29,23 +31,18 @@ class ObjectViewer : public ViewerInterface {
     QMenu* objectMenu;
     QModelIndex contextMenuIndex;
 
-public:
-    ObjectViewer(ViewerWidget* viewer = 0, QWidget* parent = 0,
-                 Qt::WindowFlags f = 0);
+    ObjectSearchModel* filterModel;
 
-    void setViewerWidget(ViewerWidget* widget);
+public:
+    ObjectViewer(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
 protected:
     void worldChanged() override;
 
 signals:
-
-    void modelChanged(Clump* model);
-
     void showObjectModel(uint16_t object);
 
 public slots:
-
     void showItem(qint16 item);
 
 private slots:

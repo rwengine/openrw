@@ -9,14 +9,12 @@
 #include <render/GameRenderer.hpp>
 
 #include <QApplication>
-#include <QDebug>
 #include <QFileDialog>
 #include <QMenuBar>
-#include <QOffscreenSurface>
 #include <QPushButton>
 #include <QSettings>
-#include <QSignalMapper>
-#include <fstream>
+#include <QWindow>
+#include <QMessageBox>
 
 static int MaxRecentGames = 5;
 
@@ -25,8 +23,16 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
     , gameData(nullptr)
     , gameWorld(nullptr)
     , renderer(nullptr) {
+    show();
     setMinimumSize(640, 480);
+    createMenus();
+    if (!setupEngine()) {
+        return;
+    }
+    createDefaultViews();
+}
 
+void ViewerWindow::createMenus() {
     QMenuBar* mb = this->menuBar();
     QMenu* file = mb->addMenu("&File");
 
@@ -45,82 +51,50 @@ ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
     connect(ex, SIGNAL(triggered()), QApplication::instance(),
             SLOT(closeAllWindows()));
 
-    //----------------------- View Mode setup
-
-    QGLFormat glFormat;
-    glFormat.setVersion(3, 3);
-    glFormat.setProfile(QGLFormat::CoreProfile);
-
-    viewerWidget = new ViewerWidget(glFormat);
-    viewerWidget->context()->makeCurrent();
-    connect(this, SIGNAL(loadedData(GameWorld*)), viewerWidget,
-            SLOT(dataLoaded(GameWorld*)));
-
-    //------------- Object Viewer
-    m_views[ViewMode::Object] = new ObjectViewer(viewerWidget);
-    m_viewNames[ViewMode::Object] = "Objects";
-
-    //------------- Model Viewer
-    m_views[ViewMode::Model] = new ModelViewer(viewerWidget);
-    m_viewNames[ViewMode::Model] = "Model";
-
-    //------------- World Viewer
-    m_views[ViewMode::World] = new WorldViewer(viewerWidget);
-    m_viewNames[ViewMode::World] = "World";
-
-    //------------- display mode switching
-    viewSwitcher = new QStackedWidget;
-    auto signalMapper = new QSignalMapper(this);
-    auto switchPanel = new QVBoxLayout();
-    int i = 0;
-    for (auto viewer : m_views) {
-        viewSwitcher->addWidget(viewer);
-        connect(this, SIGNAL(loadedData(GameWorld*)), viewer,
-                SLOT(showData(GameWorld*)));
-
-        auto viewerButton = new QPushButton(m_viewNames[i].c_str());
-        signalMapper->setMapping(m_views[i], i);
-        signalMapper->setMapping(viewerButton, i);
-        connect(viewerButton, SIGNAL(clicked()), signalMapper, SLOT(map()));
-        switchPanel->addWidget(viewerButton);
-        i++;
-    }
-    // Map world viewer loading placements to switch to the world viewer
-    connect(m_views[ViewMode::World], SIGNAL(placementsLoaded(QString)),
-            signalMapper, SLOT(map()));
-
-    switchView(ViewMode::Object);
-
-    connect(m_views[ViewMode::Object], SIGNAL(showObjectModel(uint16_t)), this,
-            SLOT(showObjectModel(uint16_t)));
-    connect(m_views[ViewMode::Object], SIGNAL(showObjectModel(uint16_t)),
-            m_views[ViewMode::Model], SLOT(showObject(uint16_t)));
-    connect(this, SIGNAL(loadAnimations(QString)), m_views[ViewMode::Model],
-            SLOT(loadAnimations(QString)));
-
-    connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(switchView(int)));
-    connect(signalMapper, SIGNAL(mapped(int)), viewSwitcher,
-            SLOT(setCurrentIndex(int)));
-
-    switchPanel->addStretch();
-    auto mainlayout = new QHBoxLayout();
-    mainlayout->addLayout(switchPanel);
-    mainlayout->addWidget(viewSwitcher);
-    auto mainwidget = new QWidget();
-    mainwidget->setLayout(mainlayout);
-
     mb->addMenu("&Data");
 
-    QMenu* anim = mb->addMenu("&Animation");
-    anim->addAction("Load &Animations", this, SLOT(openAnimations()));
-
-    QMenu* map = mb->addMenu("&Map");
-    map->addAction("Load IPL", m_views[ViewMode::World],
-                   SLOT(loadPlacements()));
-
-    this->setCentralWidget(mainwidget);
-
     updateRecentGames();
+}
+
+bool ViewerWindow::setupEngine() {
+    QSurfaceFormat format = windowHandle()->format();
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(3,3);
+    context_ = new QOpenGLContext(this);
+    context_->setShareContext(QOpenGLContext::globalShareContext());
+    context_->setFormat(format);
+
+    hiddenSurface = new QOffscreenSurface(windowHandle()->screen());
+    hiddenSurface->setFormat(format);
+    hiddenSurface->create();
+
+    if (!context_->create()) {
+        QMessageBox::critical(this, "OpenGL Failure",
+                              "Failed to create OpenGL context");
+        QApplication::exit(1);
+        return false;
+    }
+
+    return true;
+}
+
+void ViewerWindow::createDefaultViews() {
+    views = new QTabWidget(this);
+
+    auto objectView = new ObjectViewer(this);
+    views->addTab(objectView, "Objects");
+    connect(this, &ViewerWindow::gameLoaded, objectView, &ObjectViewer::showData);
+
+    auto modelView = new ModelViewer(this);
+    views->addTab(modelView, "Model");
+    connect(this, &ViewerWindow::gameLoaded, modelView, &ModelViewer::showData);
+    connect(objectView, &ObjectViewer::showObjectModel, modelView, &ModelViewer::showObject);
+
+    auto worldView = new WorldViewer(this);
+    views->addTab(worldView, "World");
+    connect(this, &ViewerWindow::gameLoaded, worldView, &WorldViewer::showData);
+
+    setCentralWidget(views);
 }
 
 void ViewerWindow::showEvent(QShowEvent*) {
@@ -140,14 +114,6 @@ void ViewerWindow::closeEvent(QCloseEvent* event) {
     QMainWindow::closeEvent(event);
 }
 
-void ViewerWindow::openAnimations() {
-    QFileDialog dialog(this, "Open Animations", QDir::homePath(),
-                       "IFP Animations (*.ifp)");
-    if (dialog.exec()) {
-        loadAnimations(dialog.selectedFiles()[0]);
-    }
-}
-
 void ViewerWindow::loadGame() {
     QString dir = QFileDialog::getExistingDirectory(
         this, tr("Open Directory"), QDir::homePath(),
@@ -158,19 +124,26 @@ void ViewerWindow::loadGame() {
 
 void ViewerWindow::loadGame(const QString& path) {
     QDir gameDir(path);
-
-    if (gameDir.exists() && path.size() > 0) {
-        gameData =
-            new GameData(&engineLog, gameDir.absolutePath().toStdString());
-        gameWorld = new GameWorld(&engineLog, gameData);
-        renderer = new GameRenderer(&engineLog, gameData);
-        gameWorld->state = new GameState;
-        viewerWidget->setRenderer(renderer);
-
-        gameWorld->data->load();
-
-        loadedData(gameWorld);
+    if (path.isEmpty()) {
+        return;
     }
+    if (!gameDir.exists()) {
+        QMessageBox::critical(this, "Error", "The requested path doesn't exist");
+        return;
+    }
+
+    if (!makeCurrent()) {
+        return;
+    }
+
+    gameData = std::make_unique<GameData>(&engineLog, gameDir.absolutePath().toStdString());
+    gameWorld = std::make_unique<GameWorld>(&engineLog, gameData.get());
+    renderer = std::make_unique<GameRenderer>(&engineLog, gameData.get());
+    gameWorld->state = new GameState;
+
+    gameWorld->data->load();
+
+    gameLoaded(gameWorld.get(), renderer.get());
 
     QSettings settings("OpenRW", "rwviewer");
     QStringList recent = settings.value("recentGames").toStringList();
@@ -189,19 +162,8 @@ void ViewerWindow::openRecent() {
     }
 }
 
-void ViewerWindow::switchView(int mode) {
-    if (mode < int(m_views.size())) {
-        m_views[mode]->setViewerWidget(viewerWidget);
-    } else {
-        RW_ERROR("Unhandled view mode" << mode);
-    }
-}
-
 void ViewerWindow::showObjectModel(uint16_t) {
-    // Switch to the model viewer
-    switchView(ViewMode::Model);
-    viewSwitcher->setCurrentIndex(
-        viewSwitcher->indexOf(m_views[ViewMode::Model]));
+#warning implement me
 }
 
 void ViewerWindow::updateRecentGames() {
@@ -220,4 +182,23 @@ void ViewerWindow::updateRecentGames() {
     }
 
     recentSep->setVisible(recent.size() > 0);
+}
+
+ViewerWindow::~ViewerWindow() {
+
+}
+
+bool ViewerWindow::makeCurrent() {
+    if (!context_->makeCurrent(hiddenSurface)) {
+        QMessageBox::critical(this, "OpenGL", "makeCurrent failed");
+        QApplication::exit(1);
+        return false;
+    }
+    return  true;
+}
+
+ViewerWidget *ViewerWindow::createViewer() {
+    auto view = new ViewerWidget(context_, windowHandle());
+    connect(this, &ViewerWindow::gameLoaded, view, &ViewerWidget::gameLoaded);
+    return view;
 }

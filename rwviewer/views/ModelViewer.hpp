@@ -3,7 +3,6 @@
 #define _MODELVIEWER_HPP_
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
-#include "AnimationListWidget.hpp"
 
 #include "ViewerInterface.hpp"
 
@@ -16,7 +15,6 @@
 class ViewerWidget;
 class Clump;
 class ModelFramesWidget;
-class Animation;
 
 class ModelViewer : public ViewerInterface {
     Q_OBJECT
@@ -29,14 +27,8 @@ class ModelViewer : public ViewerInterface {
 
     ModelFramesWidget* frames;
 
-    AnimationList loadedAnimations;
-    AnimationListWidget* animationWidget;
-
 public:
-    ModelViewer(ViewerWidget* viewer = 0, QWidget* parent = 0,
-                Qt::WindowFlags f = 0);
-
-    void setViewerWidget(ViewerWidget* widget) override;
+    ModelViewer(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
 public slots:
 
@@ -49,9 +41,6 @@ public slots:
      * Display a game object's model
      */
     void showObject(uint16_t object);
-
-    void loadAnimations(const QString& file);
-    void playAnimation(AnimationPtr anim);
 };
 
 #endif

@@ -13,19 +13,22 @@ public:
         : QWidget(parent, f), m_world(nullptr) {
     }
 
-    virtual void setViewerWidget(ViewerWidget* widget) = 0;
-
     GameWorld* world() {
         return m_world;
     }
 
 protected:
-    virtual void worldChanged() {
-    }
+    virtual void worldChanged() {}
+
+    ViewerWidget* createViewer();
+
+signals:
+    void gameLoaded(GameWorld*, GameRenderer*);
 
 public slots:
-    void showData(GameWorld* world) {
+    void showData(GameWorld* world, GameRenderer* renderer) {
         m_world = world;
+        gameLoaded(world, renderer);
         worldChanged();
     }
 

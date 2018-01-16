@@ -1,6 +1,5 @@
-#pragma once
-#ifndef _VIEWERWIDGET_HPP_
-#define _VIEWERWIDGET_HPP_
+#ifndef _RWVIEWER_VIEWERWIDGET_HPP_
+#define _RWVIEWER_VIEWERWIDGET_HPP_
 #include <QTimer>
 #include <data/Clump.hpp>
 #include <engine/GameData.hpp>
@@ -13,27 +12,77 @@
 // Prevent Qt from conflicting with glLoadGen
 #define GL_ARB_debug_output
 #define GL_KHR_debug
-#include <QGLWidget>
+#include <QOpenGLWindow>
 
 class GameRenderer;
 class Clump;
-class ViewerWidget : public QGLWidget {
+class ViewerWidget : public QWindow {
     Q_OBJECT
+public:
+    enum class Mode {
+        //! View an Object, \see showObject
+        Object,
+        //! View a DFF model, \see showModel
+        Model,
+        //! View loaded instances, \see showWorld();
+        World,
+    };
 
-    GameRenderer* renderer;
+    ViewerWidget(QOpenGLContext* context, QWindow* parent);
 
-    QString currentFile;
+    void initGL();
+    void paintGL();
 
-    QTimer timer;
-    GameWorld* gworld;
+    void renderNow();
+    bool event(QEvent*) override;
 
-    ClumpPtr activeModel;
-    ModelFrame* selectedFrame;
-    GameObject* dummyObject;
-    quint16 currentObjectID;
+    void exposeEvent(QExposeEvent*) override;
 
-    ClumpPtr _lastModel;
-    Animation* canimation;
+    ClumpPtr currentModel() const;
+    GameObject* currentObject() const;
+
+    GameWorld* world();
+
+    void setMode(Mode m) {
+        _viewMode = m;
+    }
+
+    Mode currentMode() const {
+        return _viewMode;
+    }
+
+public slots:
+    void showObject(quint16 item);
+    void showModel(ClumpPtr model);
+    void selectFrame(ModelFrame* frame);
+    void exportModel();
+
+    void gameLoaded(GameWorld* world, GameRenderer* renderer);
+
+signals:
+    void fileOpened(const QString& file);
+
+    void modelChanged(ClumpPtr model);
+
+protected:
+    void keyPressEvent(QKeyEvent*) override;
+    void keyReleaseEvent(QKeyEvent*) override;
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
+    void wheelEvent(QWheelEvent*) override;
+
+    Mode _viewMode = Mode::World;
+
+    QOpenGLContext* context;
+    GameWorld* _world = nullptr;
+    GameRenderer* _renderer = nullptr;
+
+    ClumpPtr _model;
+    ModelFrame* selectedFrame = nullptr;
+    GameObject* _object = nullptr;
+    quint16 _objectID = 0;
+
 
     float viewDistance;
     glm::vec2 viewAngles;
@@ -49,47 +98,12 @@ class ViewerWidget : public QGLWidget {
     GLuint whiteTex;
 
     void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
+    bool initialised = false;
 
-public:
-    ViewerWidget(QGLFormat g, QWidget* parent = 0,
-                 const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
+    void drawModel(GameRenderer& r, ClumpPtr& model);
+    void drawObject(GameRenderer& r, GameObject* object);
+    void drawWorld(GameRenderer& r);
 
-    virtual void initializeGL();
-
-    virtual void resizeGL(int w, int h);
-
-    virtual void paintGL();
-
-    ClumpPtr currentModel() const;
-    GameObject* currentObject() const;
-
-    GameWorld* world();
-
-public slots:
-
-    void showObject(qint16 item);
-    void showModel(ClumpPtr model);
-    void selectFrame(ModelFrame* frame);
-
-    void exportModel();
-
-    void dataLoaded(GameWorld* world);
-
-    void setRenderer(GameRenderer* renderer);
-
-signals:
-
-    void fileOpened(const QString& file);
-
-    void modelChanged(ClumpPtr model);
-
-protected:
-    void keyPressEvent(QKeyEvent*) override;
-    void keyReleaseEvent(QKeyEvent*) override;
-    void mousePressEvent(QMouseEvent*) override;
-    void mouseReleaseEvent(QMouseEvent*) override;
-    void mouseMoveEvent(QMouseEvent*) override;
-    void wheelEvent(QWheelEvent*) override;
 };
 
 #endif

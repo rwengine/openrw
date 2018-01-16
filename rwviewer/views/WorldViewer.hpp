@@ -18,10 +18,7 @@ class WorldViewer : public ViewerInterface {
     ViewerWidget* viewerWidget;
 
 public:
-    WorldViewer(ViewerWidget* viewer = 0, QWidget* parent = 0,
-                Qt::WindowFlags f = 0);
-
-    void setViewerWidget(ViewerWidget* widget) override;
+    WorldViewer(QWidget* parent = 0, Qt::WindowFlags f = 0);
 
 signals:
     void placementsLoaded(const QString& file);

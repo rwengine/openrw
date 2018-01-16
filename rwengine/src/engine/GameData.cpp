@@ -444,7 +444,7 @@ void GameData::loadModelFile(const std::string& name) {
     }
 }
 
-void GameData::loadModel(ModelID model) {
+bool GameData::loadModel(ModelID model) {
     auto info = modelinfo[model].get();
     /// @todo replace openFile with API for loading from CDIMAGE archives
     auto name = info->name;
@@ -482,13 +482,13 @@ void GameData::loadModel(ModelID model) {
     if (!file) {
         logger->error("Data", "Failed to load model for " +
                                   std::to_string(model) + " [" + name + "]");
-        return;
+        return false;
     }
     auto m = dffLoader.loadFromMemory(file);
     if (!m) {
         logger->error("Data",
                       "Error loading model file for " + std::to_string(model));
-        return;
+        return false;
     }
     /// @todo handle timeinfo models correctly.
     auto isSimple = info->type() == ModelDataType::SimpleInfo;
@@ -509,6 +509,8 @@ void GameData::loadModel(ModelID model) {
         clump->setModel(m);
         /// @todo how is LOD handled for clump objects?
     }
+
+    return true;
 }
 
 void GameData::loadIFP(const std::string& name) {
