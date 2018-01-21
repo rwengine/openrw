@@ -11835,9 +11835,7 @@ void opcode_03e6(const ScriptArguments& args) {
 	@arg arg1 
 */
 void opcode_03e7(const ScriptArguments& args, const ScriptHudFlash arg1) {
-	RW_UNIMPLEMENTED_OPCODE(0x03e7);
-	RW_UNUSED(arg1);
-	RW_UNUSED(args);
+	args.getState()->hudFlash = (HudFlash)arg1;
 }
 
 /**
