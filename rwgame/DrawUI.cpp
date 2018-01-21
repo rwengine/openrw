@@ -32,26 +32,29 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render) {
     MapRenderer::MapInfo map;
 
-    glm::quat camRot = currentView.rotation;
+    if (world->state->hudFlash != HudFlash::FlashRadar
+        || std::fmod(world->getGameTime(), 0.5f) >= .25f) {
+        glm::quat camRot = currentView.rotation;
 
-    map.rotation = glm::roll(camRot) - glm::half_pi<float>();
-    map.worldSize = ui_worldSizeMin;
-    map.worldSize = ui_worldSizeMax;
-    if (player) {
-        map.worldCenter = glm::vec2(player->getCharacter()->getPosition());
+        map.rotation = glm::roll(camRot) - glm::half_pi<float>();
+        map.worldSize = ui_worldSizeMin;
+        map.worldSize = ui_worldSizeMax;
+        if (player) {
+            map.worldCenter = glm::vec2(player->getCharacter()->getPosition());
+        }
+
+        const glm::ivec2& vp = render->getRenderer()->getViewport();
+
+        glm::vec2 mapTop =
+            glm::vec2(ui_outerMargin, vp.y - (ui_outerMargin + ui_mapSize));
+        glm::vec2 mapBottom =
+            glm::vec2(ui_outerMargin + ui_mapSize, vp.y - ui_outerMargin);
+
+        map.screenPosition = (mapTop + mapBottom) / 2.f;
+        map.screenSize = ui_mapSize * 0.95f;
+
+        render->map.draw(world, map);
     }
-
-    const glm::ivec2& vp = render->getRenderer()->getViewport();
-
-    glm::vec2 mapTop =
-        glm::vec2(ui_outerMargin, vp.y - (ui_outerMargin + ui_mapSize));
-    glm::vec2 mapBottom =
-        glm::vec2(ui_outerMargin + ui_mapSize, vp.y - ui_outerMargin);
-
-    map.screenPosition = (mapTop + mapBottom) / 2.f;
-    map.screenSize = ui_mapSize * 0.95f;
-
-    render->map.draw(world, map);
 }
 
 void drawPlayerInfo(PlayerController* player, GameWorld* world,
@@ -104,8 +107,9 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
     infoTextY += ui_textHeight;
 
-    if (player->getCharacter()->getCurrentState().health > ui_lowHealth
-        || fmod(world->getGameTime(), 0.5) >= .25) { // UI: Blinking health indicator if health is low
+    if ((world->state->hudFlash != HudFlash::FlashHealth
+        && player->getCharacter()->getCurrentState().health > ui_lowHealth)
+        || std::fmod(world->getGameTime(), 0.5f) >= .25f) { // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().health;

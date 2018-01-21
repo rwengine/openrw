@@ -243,6 +243,13 @@ struct GarageInfo {
     }
 };
 
+enum class HudFlash {
+    Disabled = -1,
+    FlashArmor = 3,
+    FlashHealth = 4,
+    FlashRadar = 8
+};
+
 /**
  * Gameplay state object that holds persistent state, and references runtime
  * world state.
@@ -301,6 +308,7 @@ public:
     float cutsceneStartTime;
     /** Flag for rendering cutscene letterbox */
     bool isCinematic;
+    HudFlash hudFlash;
 
     std::string lastMissionName;
 
