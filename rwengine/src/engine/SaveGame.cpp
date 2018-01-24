@@ -1322,9 +1322,35 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
     return true;
 }
 
+#ifdef RW_WINDOWS
+char* readUserPath() {
+    LONG retval;
+    const char* lpSubKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+    const char* lpValueName = "Personal";
+    DWORD lpType = REG_SZ;
+    HKEY phkResult;
+    static char lpData[1000];
+    DWORD lpcbData = sizeof(lpData);
+
+    retval = RegOpenKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, KEY_READ, &phkResult);
+    if (ERROR_SUCCESS != retval) { return nullptr; }
+
+    retval = RegQueryValueEx(phkResult, lpValueName, NULL, &lpType, (LPBYTE) lpData, &lpcbData);
+    if (ERROR_SUCCESS != retval) { return nullptr; }
+
+    retval = RegCloseKey(phkResult);
+    if (ERROR_SUCCESS != retval) { return nullptr; }
+
+    return lpData;
+}
+#endif
+
 std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
-    // TODO consider windows
+#ifdef RW_WINDOWS
+    auto homedir = readUserPath(); // already includes MyDocuments/Documents
+#else
     auto homedir = getenv("HOME");
+#endif
     if (homedir == nullptr) {
         std::cerr << "Unable to determine home directory" << std::endl;
         return {};
