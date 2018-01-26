@@ -48,9 +48,9 @@ AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time) {
 }
 
 AnimationKeyframe AnimationBone::getKeyframe(float time) {
-    for (size_t f = 0; f < frames.size(); ++f) {
-        if (time >= frames[f].starttime) {
-            return frames[f];
+    for (auto &frame : frames) {
+        if (time >= frame.starttime) {
+            return frame;
         }
     }
     return frames.back();

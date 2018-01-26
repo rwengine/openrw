@@ -40,9 +40,9 @@ bool LoaderIMG::load(const rwfs::path& filepath) {
 /// Get the information of a asset in the examining archive
 bool LoaderIMG::findAssetInfo(const std::string& assetname,
                               LoaderIMGFile& out) {
-    for (size_t i = 0; i < m_assets.size(); ++i) {
-        if (boost::iequals(m_assets[i].name, assetname)) {
-            out = m_assets[i];
+    for (auto &asset : m_assets) {
+        if (boost::iequals(asset.name, assetname)) {
+            out = asset;
             return true;
         }
     }

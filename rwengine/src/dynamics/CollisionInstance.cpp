@@ -78,8 +78,7 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     t.setIdentity();
 
     // Boxes
-    for (size_t i = 0; i < collision->boxes.size(); ++i) {
-        auto& box = collision->boxes[i];
+    for (const auto &box : collision->boxes) {
         auto size = (box.max - box.min) / 2.f;
         auto mid = (box.min + box.max) / 2.f;
         btCollisionShape* bshape =
@@ -94,8 +93,7 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     }
 
     // Spheres
-    for (size_t i = 0; i < collision->spheres.size(); ++i) {
-        auto& sphere = collision->spheres[i];
+    for (const auto &sphere : collision->spheres) {
         btCollisionShape* sshape = new btSphereShape(sphere.radius);
         t.setOrigin(
             btVector3(sphere.center.x, sphere.center.y, sphere.center.z));

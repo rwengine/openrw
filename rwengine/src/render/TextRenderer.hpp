@@ -66,7 +66,7 @@ public:
 
 private:
     std::string fonts[GAME_FONTS];
-    GlyphInfo glyphData[GAME_GLYPHS];
+    std::array<GlyphInfo, GAME_GLYPHS> glyphData;
 
     GameRenderer* renderer;
     std::unique_ptr<Renderer::ShaderProgram> textShader;
