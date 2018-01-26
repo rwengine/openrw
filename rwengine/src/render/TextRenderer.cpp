@@ -91,9 +91,7 @@ TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
     textShader = renderer->getRenderer()->createShader(TextVertexShader,
                                                        TextFragmentShader);
 
-    for (int g = 0; g < GAME_GLYPHS; g++) {
-        glyphData[g] = {.9f};
-    }
+    std::fill(glyphData.begin(), glyphData.end(), GlyphInfo{.9f});
 
     glyphData[charToIndex(' ')].widthFrac = 0.4f;
     glyphData[charToIndex('-')].widthFrac = 0.5f;

@@ -47,9 +47,9 @@ bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
         weather.bottomCloudColor = readRGB(ss);
 
         int d;
-        for (size_t i = 0; i < 4; i++) {
+        for (auto &i : weather.unknown) {
             ss >> d;
-            weather.unknown[i] = d;
+            i = d;
         }
 
         outWeather.entries.push_back(weather);

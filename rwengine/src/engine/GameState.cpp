@@ -121,9 +121,9 @@ GameState::GameState()
 
 int GameState::addRadarBlip(BlipData& blip) {
     int l = 0;
-    for (auto x = radarBlips.begin(); x != radarBlips.end(); ++x) {
-        if ((x->first) != l) {
-            l = x->first - 1;
+    for (const auto &radarBlip : radarBlips) {
+        if ((radarBlip.first) != l) {
+            l = radarBlip.first - 1;
         } else {
             l++;
         }

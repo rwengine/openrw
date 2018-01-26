@@ -86,8 +86,7 @@ bool GameWorld::placeItems(const std::string& name) {
 
     if (ipll.load(path)) {
         // Find the object.
-        for (size_t i = 0; i < ipll.m_instances.size(); ++i) {
-            std::shared_ptr<InstanceData> inst = ipll.m_instances[i];
+        for (auto inst : ipll.m_instances) {
             if (!createInstance(inst->id, inst->pos, inst->rot)) {
                 logger->error("World", "No object data for instance " +
                                            std::to_string(inst->id) + " in " +

@@ -521,16 +521,16 @@ void CharacterObject::resetToAINode() {
     bool vehicleNode = !!getCurrentVehicle();
     AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
-    for (auto it = nodes.begin(); it != nodes.end(); ++it) {
+    for (const auto &node : nodes) {
         if (vehicleNode) {
-            if ((*it)->type == AIGraphNode::Pedestrian) continue;
+            if (node->type == AIGraphNode::Pedestrian) continue;
         } else {
-            if ((*it)->type == AIGraphNode::Vehicle) continue;
+            if (node->type == AIGraphNode::Vehicle) continue;
         }
 
-        float dist = glm::length((*it)->position - getPosition());
+        float dist = glm::length(node->position - getPosition());
         if (dist < d) {
-            nearest = *it;
+            nearest = node;
             d = dist;
         }
     }
