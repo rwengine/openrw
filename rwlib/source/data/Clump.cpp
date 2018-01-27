@@ -50,6 +50,7 @@ void ModelFrame::addChild(ModelFramePtr child) {
     }
     child->parent_ = this;
     children_.push_back(child);
+    child->updateHierarchyTransform();
 }
 
 ModelFrame* ModelFrame::findDescendant(const std::string& name) const {
