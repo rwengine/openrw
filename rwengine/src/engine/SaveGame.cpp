@@ -26,6 +26,19 @@
 #include "script/ScriptMachine.hpp"
 #include "script/ScriptTypes.hpp"
 
+namespace {
+    constexpr int kNrOfWeapons = 13;
+    constexpr int kNrOfStoredCars = 18;
+    constexpr int kNrOfPickups = 336;
+    constexpr int kNrOfBlips = 32;
+    constexpr int kNrOfNavZones = 50;
+    constexpr int kNrOfDayNightInfo = 100;
+    constexpr int kNrOfMapZones = 25;
+    constexpr int kNrOfAudioZones = 36;
+    constexpr int kNrOfGangs = 9;
+    constexpr int kNrOfPedTypes = 23;
+}
+
 // Original save game file data structures
 typedef uint16_t BlockWord;
 typedef uint32_t BlockDword;
@@ -100,7 +113,7 @@ struct StructPed {
     float health;
     float armour;
     uint8_t unknown2[148];
-    StructWeaponSlot weapons[13];
+    std::array<StructWeaponSlot, kNrOfWeapons> weapons;
     uint8_t unknown3[348];
 };
 
@@ -210,7 +223,7 @@ struct Block2GarageData {
     BlockDword bfImportExportShoreside;
     BlockDword bfImportExportUnused;
     BlockDword GA_21lastTime;
-    StructStoredCar cars[18];
+    std::array<StructStoredCar, kNrOfStoredCars> cars;
 };
 
 struct Block3VehicleState {
@@ -308,7 +321,7 @@ struct Block7Pickup {
 };
 
 struct Block7Data {
-    Block7Pickup pickups[336];
+    std::array<Block7Pickup, kNrOfPickups> pickups;
     BlockWord pickupIndex;
     uint8_t align[2];
     BlockWord collectedPickups[20];
@@ -366,7 +379,7 @@ struct Block10Blip {
 };
 
 struct Block10Data {
-    Block10Blip blips[32];
+    std::array<Block10Blip, kNrOfBlips> blips;
 };
 
 struct Block11Zone {
@@ -398,12 +411,12 @@ struct Block11Data {
     BlockDword currentLevel;
     BlockWord findIndex;
     BlockWord align;
-    Block11Zone navZones[50];
-    Block11ZoneInfo dayNightInfo[100];
+    std::array<Block11Zone, kNrOfNavZones> navZones;
+    std::array<Block11ZoneInfo, kNrOfDayNightInfo> dayNightInfo;
     BlockWord numNavZones;
     BlockWord numZoneInfos;
-    Block11Zone mapZones[25];
-    Block11AudioZone audioZones[36];
+    std::array<Block11Zone, kNrOfMapZones> mapZones;
+    std::array<Block11AudioZone, kNrOfAudioZones> audioZones;
     BlockWord numMapZones;
     BlockWord numAudioZones;
 };
@@ -417,7 +430,7 @@ struct Block12Gang {
 };
 
 struct Block12Data {
-    Block12Gang gangs[9];
+    std::array<Block12Gang, kNrOfGangs> gangs;
 };
 
 struct Block13CarGenerator {
@@ -481,7 +494,7 @@ struct Block19PedType {
     BlockDword avoidflags_;
 };
 struct Block19Data {
-    Block19PedType types[23];
+    std::array<Block19PedType, kNrOfPedTypes> types;
 };
 
 void SaveGame::writeGame(GameState& state, const std::string& file) {
@@ -595,8 +608,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         std::cout << "Player Health: " << ped.info.health << " ("
                   << ped.info.armour << ")" << std::endl;
         std::cout << "Player model: " << ped.modelName << std::endl;
-        for (int w = 0; w < 13; ++w) {
-            auto& wep = players[p].info.weapons[w];
+        for (const auto &wep : players[p].info.weapons) {
             std::cout << "ID " << wep.weaponId << " " << wep.inClip << " "
                       << wep.totalBullets << std::endl;
         }
@@ -636,8 +648,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     std::cout << "Shoreside IE: " << garageData.bfImportExportShoreside
               << std::endl;
     std::cout << "GA21 last shown: " << garageData.GA_21lastTime << std::endl;
-    for (int c = 0; c < 18; ++c) {
-        StructStoredCar& car = garageData.cars[c];
+    for (const auto &car : garageData.cars) {
         if (car.modelId == 0) continue;
         std::cout << " " << car.modelId << " " << uint16_t(car.colorFG) << "/"
                   << uint16_t(car.colorBG) << " " << car.immunities
@@ -796,11 +807,10 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(pickupData);
 
 #if RW_DEBUG
-    for (int c = 0; c < 336; ++c) {
-        Block7Pickup& p = pickupData.pickups[c];
-        if (p.type == 0) continue;
-        std::cout << " " << uint16_t(p.type) << " " << p.position.x << " "
-                  << p.position.y << " " << p.position.z << std::endl;
+    for (const auto &pickup : pickupData.pickups) {
+        if (pickup.type == 0) continue;
+        std::cout << " " << uint16_t(pickup.type) << " " << pickup.position.x << " "
+                  << pickup.position.y << " " << pickup.position.z << std::endl;
     }
 #endif
 
@@ -866,11 +876,10 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(radarData);
 
 #if RW_DEBUG
-    for (int b = 0; b < 32; ++b) {
-        Block10Blip& p = radarData.blips[b];
-        if (p.type == 0) continue;
-        std::cout << " " << p.position.x << " " << p.position.y << " "
-                  << p.position.z << std::endl;
+    for (const auto &blip : radarData.blips) {
+        if (blip.type == 0) continue;
+        std::cout << " " << blip.position.x << " " << blip.position.y << " "
+                  << blip.position.z << std::endl;
     }
 #endif
 
@@ -887,8 +896,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(zoneData.currentLevel);
     READ_VALUE(zoneData.findIndex);
     READ_VALUE(zoneData.align);
-    for (int z = 0; z < 50; z++) {
-        Block11Zone& zone = zoneData.navZones[z];
+    for (auto &zone : zoneData.navZones) {
         READ_VALUE(zone.name);
         READ_VALUE(zone.coordA);
         READ_VALUE(zone.coordB);
@@ -900,8 +908,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(zone.parentZone);
         READ_VALUE(zone.siblingZone);
     }
-    for (int z = 0; z < 100; z++) {
-        Block11ZoneInfo& info = zoneData.dayNightInfo[z];
+    for (auto &info : zoneData.dayNightInfo) {
         READ_VALUE(info.density)
         READ_VALUE(info.unknown1)
         READ_VALUE(info.peddensity)
@@ -911,8 +918,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     }
     READ_VALUE(zoneData.numNavZones);
     READ_VALUE(zoneData.numZoneInfos);
-    for (int z = 0; z < 25; z++) {
-        Block11Zone& zone = zoneData.mapZones[z];
+    for (auto &zone : zoneData.mapZones) {
         READ_VALUE(zone.name);
         READ_VALUE(zone.coordA);
         READ_VALUE(zone.coordB);
@@ -924,8 +930,8 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(zone.parentZone);
         READ_VALUE(zone.siblingZone);
     }
-    for (int z = 0; z < 36; z++) {
-        READ_VALUE(zoneData.audioZones[z]);
+    for (auto &audioZone : zoneData.audioZones) {
+        READ_VALUE(audioZone);
     }
     READ_VALUE(zoneData.numMapZones);
     READ_VALUE(zoneData.numAudioZones);
@@ -1008,10 +1014,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(gangData);
 
 #if RW_DEBUG
-    for (int g = 0; g < 9; ++g) {
-        Block12Gang& p = gangData.gangs[g];
-        std::cout << " " << p.carModelId << " " << p.weaponPrimary << " "
-                  << p.weaponSecondary << std::endl;
+    for (const auto &gang : gangData.gangs) {
+        std::cout << " " << gang.carModelId << " " << gang.weaponPrimary << " "
+                  << gang.weaponSecondary << std::endl;
     }
 #endif
 
@@ -1203,15 +1208,15 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(pedTypeData);
 
 #if RW_DEBUG
-    for (int i = 0; i < 23; ++i) {
-        printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", pedTypeData.types[i].bitstring_,
-               pedTypeData.types[i].unknown2,
-               pedTypeData.types[i].unknown3,
-               pedTypeData.types[i].unknown4,
-               pedTypeData.types[i].fleedistance,
-               pedTypeData.types[i].headingchangerate,
-               pedTypeData.types[i].threatflags_,
-               pedTypeData.types[i].avoidflags_);
+    for (const auto &type : pedTypeData.types) {
+        printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", type.bitstring_,
+               type.unknown2,
+               type.unknown3,
+               type.unknown4,
+               type.fleedistance,
+               type.headingchangerate,
+               type.threatflags_,
+               type.avoidflags_);
     }
 #endif
 
@@ -1251,7 +1256,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         cs.armour = players[0].info.armour;
         state.playerObject = player->getGameObjectID();
         state.maxWantedLevel = players[0].maxWantedLevel;
-        for (int w = 0; w < 13; ++w) {
+        for (int w = 0; w < kNrOfWeapons; ++w) {
             auto& wep = ply.info.weapons[w];
             cs.weapons[w].weaponId = wep.weaponId;
             cs.weapons[w].bulletsClip = wep.inClip;
@@ -1267,9 +1272,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
              (int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
              glm::vec3(garage.x2, garage.y2, garage.z2), garage.type);
     }
-    for (int c = 0; c < 18; ++c) {
-        if (garageData.cars[c].modelId == 0) continue;
-        auto& car = garageData.cars[c];
+    for (auto &c : garageData.cars) {
+        if (c.modelId == 0) continue;
+        auto& car = c;
         glm::quat rotation(
             glm::mat3(glm::cross(car.rotation, glm::vec3(0.f, 0.f, 1.f)),
                       car.rotation, glm::vec3(0.f, 0.f, 1.f)));
