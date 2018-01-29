@@ -17,9 +17,12 @@ int32_t mixint(int32_t x, int32_t y, float a) {
 #define MIXPROP_INT(prop) data.prop = mixint(x.prop, y.prop, a)
 
 Weather::Entry Weather::getWeatherData(WeatherCondition cond, float tod) {
-    size_t hour = floor(tod);
-    const auto& x = entries[static_cast<size_t>(cond) + hour];
-    const auto& y = entries[static_cast<size_t>(cond) + (hour + 1) % 24];
+    const auto i = size_t(cond) * 24;
+    RW_ASSERT(i < entries.size());
+
+    size_t hour = std::floor(tod);
+    const auto& x = entries[i + hour];
+    const auto& y = entries[i + (hour + 1) % 24];
     const float a = tod - std::floor(tod);
 
     Entry data;

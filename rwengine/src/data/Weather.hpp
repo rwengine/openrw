@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-enum WeatherCondition { Sunny = 0, Cloudy = 24, Rainy = 48, Foggy = 72 };
+enum class WeatherCondition { Sunny = 0, Cloudy = 1, Rainy = 2, Foggy = 3 };
 
 class Weather {
 public:
@@ -39,7 +39,7 @@ public:
      * @param tod float time of day
      * @return Correctly interpolated values.
      */
-    Entry getWeatherData(WeatherCondition cond, float tod);
+    Entry getWeatherData(WeatherCondition condition, float tod);
 
     std::vector<Entry> entries;
 };

@@ -227,6 +227,8 @@ void GameRenderer::setupRender() {
 
 void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
                                float alpha) {
+    const auto& state = world->state;
+
     _renderAlpha = alpha;
     _renderWorld = world;
 
@@ -239,10 +241,12 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     float tod = world->getHour() + world->getMinute() / 60.f;
 
-    // Requires a float 0-24
-    auto weatherID = static_cast<WeatherCondition>(
-            world->state->basic.nextWeather * 24);
-    auto weather = world->data->weather.getWeatherData(weatherID, tod);
+    const auto currentWeather = WeatherCondition(state->basic.nextWeather);
+    const auto lastWeather = WeatherCondition(state->basic.lastWeather);
+    /// @todo Interpolate when weatherInterpolation is < 1
+    RW_UNUSED(lastWeather);
+
+    auto weather = world->data->weather.getWeatherData(currentWeather, tod);
 
     glm::vec3 skyTop = weather.skyTopColor;
     glm::vec3 skyBottom = weather.skyBottomColor;
