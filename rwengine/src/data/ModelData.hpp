@@ -347,7 +347,7 @@ public:
     VehicleClass vehicleclass_;
     int frequency_;
     int level_;
-    int componentrules_;
+    unsigned long componentrules_;
     std::string vehiclename_;
 
     static VehicleType findVehicleType(const std::string& name) {
