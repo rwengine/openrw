@@ -17,15 +17,15 @@
 #include <rw/defines.hpp>
 #include <rw/forward.hpp>
 
+#include <data/AnimGroup.hpp>
 #include <data/GameTexts.hpp>
 #include <data/ModelData.hpp>
 #include <data/PedData.hpp>
+#include <data/Weather.hpp>
 #include <data/ZoneData.hpp>
-#include <data/AnimGroup.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/LoaderTXD.hpp>
-#include <loaders/WeatherLoader.hpp>
 #include <objects/VehicleInfo.hpp>
 #include <gl/TextureData.hpp>
 
@@ -269,9 +269,9 @@ public:
     TextureLoader textureLoader;
 
     /**
-     * Weather Loader
+     * Weather Data
      */
-    WeatherLoader weatherLoader;
+    Weather weather;
 
     /**
      * Texture slots, containing loaded textures.

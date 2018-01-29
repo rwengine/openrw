@@ -46,6 +46,7 @@ set(RWENGINE_SOURCES
     src/data/PedData.cpp
     src/data/PedData.hpp
     src/data/WeaponData.hpp
+    src/data/Weather.cpp
     src/data/ZoneData.hpp
 
     src/dynamics/CollisionInstance.cpp

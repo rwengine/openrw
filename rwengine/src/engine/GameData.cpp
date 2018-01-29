@@ -16,16 +16,13 @@
 #include <rw/types.hpp>
 
 #include "core/Logger.hpp"
-//#include "data/WeaponData.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
 #include "loaders/LoaderCOL.hpp"
-#include "loaders/LoaderDFF.hpp"
 #include "loaders/LoaderIDE.hpp"
 #include "loaders/LoaderIFP.hpp"
-#include "loaders/LoaderIMG.hpp"
 #include "loaders/LoaderIPL.hpp"
-#include "loaders/LoaderTXD.hpp"
+#include "loaders/WeatherLoader.hpp"
 #include "platform/FileHandle.hpp"
 #include "script/SCMFile.hpp"
 #include "loaders/GenericDATLoader.hpp"
@@ -281,7 +278,9 @@ void GameData::loadCarcols(const std::string& path) {
 
 void GameData::loadWeather(const std::string& path) {
     auto syspath = index.findFilePath(path).string();
-    weatherLoader.load(syspath);
+    if (!WeatherLoader::load(syspath, weather)) {
+        throw std::runtime_error("Loading Weather " + path + " failed");
+    }
 }
 
 void GameData::loadHandling(const std::string& path) {

@@ -240,9 +240,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     float tod = world->getHour() + world->getMinute() / 60.f;
 
     // Requires a float 0-24
-    auto weatherID = static_cast<WeatherLoader::WeatherCondition>(
-        world->state->basic.nextWeather * 24);
-    auto weather = world->data->weatherLoader.getWeatherData(weatherID, tod);
+    auto weatherID = static_cast<WeatherCondition>(
+            world->state->basic.nextWeather * 24);
+    auto weather = world->data->weather.getWeatherData(weatherID, tod);
 
     glm::vec3 skyTop = weather.skyTopColor;
     glm::vec3 skyBottom = weather.skyBottomColor;
