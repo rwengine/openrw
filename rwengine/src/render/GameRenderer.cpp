@@ -243,10 +243,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     const auto currentWeather = WeatherCondition(state->basic.nextWeather);
     const auto lastWeather = WeatherCondition(state->basic.lastWeather);
-    /// @todo Interpolate when weatherInterpolation is < 1
-    RW_UNUSED(lastWeather);
-
-    auto weather = world->data->weather.getWeatherData(currentWeather, tod);
+    const auto weatherTransition = state->basic.weatherInterpolation;
+    auto weather = world->data->weather.interpolate(lastWeather,
+                                                    currentWeather,
+                                                    weatherTransition,
+                                                    tod);
 
     float theta = (tod / (60.f * 24.f) - 0.5f) * 2.f * glm::pi<float>();
     glm::vec3 sunDirection{

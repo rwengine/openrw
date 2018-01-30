@@ -34,14 +34,9 @@ public:
         uint8_t unknown[4];
     };
 
-    /**
-     * @brief getWeatherData returns interpolated Weather data for the time of
-     * day.
-     * @param cond weather condition
-     * @param tod float time of day
-     * @return Correctly interpolated values.
-     */
-    Entry getWeatherData(WeatherCondition condition, float tod);
+    Entry interpolate(WeatherCondition lastWeather,
+                      WeatherCondition nextWeather,
+                      float a, float tod);
 
     std::vector<Entry> entries;
 };
