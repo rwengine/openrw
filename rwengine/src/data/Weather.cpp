@@ -5,7 +5,7 @@ namespace {
 Weather::Entry interpolateWeather(const Weather::Entry& a,
                                   const Weather::Entry& b,
                                   float t) {
-#define MIXPROP(prop) glm::mix(a.prop, b.prop, t)
+#define MIXPROP(prop) static_cast<decltype(a.prop)>((1.0f - t) * a.prop + (t * b.prop))
     return {
             MIXPROP(ambientColor),
             MIXPROP(directLightColor),
