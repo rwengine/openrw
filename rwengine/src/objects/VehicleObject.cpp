@@ -155,33 +155,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
 
     setModel(getVehicle()->getModel());
     setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
-
-    const auto vehicleInfo = getModelInfo<VehicleModelInfo>();
-    const auto isBoat = (vehicleInfo->vehicletype_ == VehicleModelInfo::BOAT);
-    const std::string baseName = isBoat? "boat":"chassis";
-
-    // Locate the Atomics for the chassis_hi and chassis_vlo frames
-    for (const auto& atomic : getClump()->getAtomics()) {
-        auto frame = atomic->getFrame().get();
-        if (frame->getName() == baseName+"_vlo") {
-            chassislow_ = atomic.get();
-        }
-        if (frame->getName() == baseName+"_hi") {
-            chassishigh_ = atomic.get();
-        }
-    }
-
-    // Create meta-data for dummy parts
-    auto dummy = getClump()->findFrame("chassis_dummy");
-    if (dummy) {
-        for (auto& frame : dummy->getChildren()) {
-            auto& name = frame->getName();
-            bool isDum = name.find("_dummy") != name.npos;
-            if (isDum) {
-                registerPart(frame.get());
-            }
-        }
-    }
+    setupModel();
 }
 
 VehicleObject::~VehicleObject() {
@@ -195,6 +169,89 @@ VehicleObject::~VehicleObject() {
 
     delete physVehicle;
     delete physRaycaster;
+}
+
+void VehicleObject::setupModel() {
+    const auto vehicleInfo = getModelInfo<VehicleModelInfo>();
+    const auto isBoat = (vehicleInfo->vehicletype_ == VehicleModelInfo::BOAT);
+    const std::string baseName = isBoat? "boat":"chassis";
+    const auto dummy = getClump()->findFrame("chassis_dummy");
+
+    for (const auto& atomic : getClump()->getAtomics()) {
+        auto frame = atomic->getFrame().get();
+        const auto& name = frame->getName();
+        if (name == baseName+"_vlo") {
+            chassislow_ = atomic.get();
+        }
+        if (name == baseName+"_hi") {
+            chassishigh_ = atomic.get();
+        }
+        if (name.find("extra") == 0) {
+            if (name.size() == 5) {
+                continue;
+            }
+
+            auto partNumber = (std::stoul(name.c_str()+5)-1);
+            extras_.at(partNumber) = atomic.get();
+            setExtraEnabled(partNumber, false);
+        }
+
+    }
+
+    if (!dummy) {
+        return;
+    }
+
+    for (const auto& frame : dummy->getChildren()) {
+        const auto& name = frame->getName();
+        if (name.find("_dummy") != std::string::npos) {
+            registerPart(frame.get());
+        }
+    }
+
+    auto compRules = vehicleInfo->componentrules_;
+    auto numComponents = [](int rule) {
+        if ((rule & 0xFFF) == 0xFFF) return 0;
+        if ((rule & 0xFF0) == 0xFF0) return 1;
+        if ((rule & 0xF00) == 0xF00) return 2;
+        return 3;
+    };
+    auto& random = engine->randomEngine;
+    while (compRules != 0) {
+        auto rule = (compRules & 0xFFFF);
+        auto type = static_cast<ComponentRuleType>(rule >> 12);
+        compRules >>= 16;
+
+        long int result = -1;
+        switch (type) {
+            case ComponentRuleType::Any:
+            case ComponentRuleType::RainOnly: {
+                auto max = numComponents(rule) - 1;
+                auto i = std::uniform_int_distribution<>(0, max)(random);
+                result = (rule >> (4 * i)) & 0xF;
+            } break;
+            case ComponentRuleType::Optional: {
+                auto max = numComponents(rule) - 1;
+                auto i = std::uniform_int_distribution<>(-1, max)(random);
+                if (i == -1) {
+                    break;
+                }
+                result = (rule >> (4 * i)) & 0xF;
+            } break;
+            case ComponentRuleType::Random:
+                /// @todo this should fail to enable the 6th component
+                result = std::uniform_int_distribution<>(0, 5)(random);
+                break;
+        }
+
+        if (type == ComponentRuleType::RainOnly && !engine->isRaining()) {
+            continue;
+        }
+
+        if (result >= 0) {
+            setExtraEnabled(size_t(result), true);
+        }
+    }
 }
 
 void VehicleObject::setPosition(const glm::vec3& pos) {
@@ -233,6 +290,15 @@ void VehicleObject::updateTransform(const glm::vec3& pos,
     rotation = rot;
     getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
     getClump()->getFrame()->setTranslation(pos);
+}
+
+void VehicleObject::setExtraEnabled(size_t extra, bool enabled) {
+    auto atomic = extras_.at(extra);
+    if (!atomic) {
+        return;
+    }
+
+    atomic->setFlag(Atomic::ATOMIC_RENDER, enabled);
 }
 
 void VehicleObject::tick(float dt) {
@@ -614,9 +680,9 @@ void VehicleObject::applyWaterFloat(const glm::vec3& relPt) {
 }
 
 void VehicleObject::setPartLocked(VehicleObject::Part* part, bool locked) {
-    if (part->body == nullptr && locked == false) {
+    if (part->body == nullptr && !locked) {
         createObjectHinge(part);
-    } else if (part->body != nullptr && locked == true) {
+    } else if (part->body != nullptr && locked) {
         destroyObjectHinge(part);
 
         // Restore default bone transform

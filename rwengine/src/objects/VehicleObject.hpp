@@ -39,6 +39,8 @@ private:
 
     Atomic* chassishigh_ = nullptr;
     Atomic* chassislow_ = nullptr;
+
+    std::array<Atomic*, 6> extras_;
 public:
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
@@ -88,6 +90,8 @@ public:
     Type type() const override {
         return Vehicle;
     }
+
+    void setExtraEnabled(size_t extra, bool enabled);
 
     void setSteeringAngle(float);
 
@@ -176,6 +180,7 @@ public:
     void grantOccupantRewards(CharacterObject* character);
 
 private:
+    void setupModel();
     void registerPart(ModelFrame* mf);
     void createObjectHinge(Part* part);
     void destroyObjectHinge(Part* part);

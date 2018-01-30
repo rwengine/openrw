@@ -302,6 +302,14 @@ private:
     ClumpPtr model_ = nullptr;
 };
 
+
+enum class ComponentRuleType {
+    Any = 1,
+    RainOnly = 2,
+    Optional = 3,
+    Random = 4
+};
+
 /**
  * Data for a vehicle model type
  */

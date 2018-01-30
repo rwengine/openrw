@@ -183,6 +183,9 @@ public:
      */
     void offsetGameTime(int minutes);
 
+    //! Check if the weather conditions are rainy
+    bool isRaining() const;
+
     glm::vec3 getGroundAtPosition(const glm::vec3& pos) const;
 
     float getGameTime() const;
