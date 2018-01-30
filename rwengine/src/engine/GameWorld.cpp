@@ -858,3 +858,8 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
 
     return vehicle;
 }
+
+bool GameWorld::isRaining() const {
+    return WeatherCondition (state->basic.nextWeather) ==
+            WeatherCondition::Rainy;
+}
