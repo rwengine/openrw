@@ -6,17 +6,19 @@
 #include <cstdint>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 enum class WeatherCondition { Sunny = 0, Cloudy = 1, Rainy = 2, Foggy = 3 };
 
 class Weather {
 public:
     struct Entry {
-        RWTypes::RGB ambientColor;
-        RWTypes::RGB directLightColor;
-        RWTypes::RGB skyTopColor;
-        RWTypes::RGB skyBottomColor;
-        RWTypes::RGB sunCoreColor;
-        RWTypes::RGB sunCoronaColor;
+        glm::vec3 ambientColor;
+        glm::vec3 directLightColor;
+        glm::vec3 skyTopColor;
+        glm::vec3 skyBottomColor;
+        glm::vec3 sunCoreColor;
+        glm::vec3 sunCoronaColor;
         float sunCoreSize;
         float sunCoronaSize;
         float sunBrightness;
@@ -26,9 +28,9 @@ public:
         float farClipping;
         float fogStart;
         float amountGroundLight;
-        RWTypes::RGB lowCloudColor;
-        RWTypes::RGB topCloudColor;
-        RWTypes::RGB bottomCloudColor;
+        glm::vec3 lowCloudColor;
+        glm::vec3 topCloudColor;
+        glm::vec3 bottomCloudColor;
         uint8_t unknown[4];
     };
 

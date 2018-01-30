@@ -248,11 +248,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     auto weather = world->data->weather.getWeatherData(currentWeather, tod);
 
-    glm::vec3 skyTop = weather.skyTopColor;
-    glm::vec3 skyBottom = weather.skyBottomColor;
-    glm::vec3 ambient = weather.ambientColor;
-    glm::vec3 dynamic = weather.directLightColor;
-
     float theta = (tod / (60.f * 24.f) - 0.5f) * 2.f * glm::pi<float>();
     glm::vec3 sunDirection{
         sin(theta), 0.0, cos(theta),
@@ -265,18 +260,19 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     auto view = _camera.getView();
     auto proj = _camera.frustum.projection();
 
-    Renderer::SceneUniformData sceneParams{proj,
-                                           view,
-                                           glm::vec4{ambient, 0.0f},
-                                           glm::vec4{dynamic, 0.0f},
-                                           glm::vec4(skyBottom, 1.f),
-                                           glm::vec4(camera.position, 0.f),
-                                           weather.fogStart,
-                                           _camera.frustum.far};
+    Renderer::SceneUniformData sceneParams{
+        proj,
+        view,
+        glm::vec4{weather.ambientColor, 0.0f},
+        glm::vec4{weather.directLightColor, 0.0f},
+        glm::vec4{weather.skyBottomColor, 1.f},
+        glm::vec4{camera.position, 0.f},
+        weather.fogStart,
+        _camera.frustum.far};
 
     renderer->setSceneParameters(sceneParams);
 
-    renderer->clear(glm::vec4(skyBottom, 1.f));
+    renderer->clear(glm::vec4(weather.skyBottomColor, 1.f));
 
     _camera.frustum.update(proj * view);
     if (cullOverride) {
@@ -388,8 +384,10 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     dp.count = skydomeSegments * skydomeRows * 6;
 
     renderer->useProgram(skyProg.get());
-    renderer->setUniform(skyProg.get(), "TopColor", glm::vec4(skyTop, 1.f));
-    renderer->setUniform(skyProg.get(), "BottomColor", glm::vec4(skyBottom, 1.f));
+    renderer->setUniform(skyProg.get(), "TopColor",
+                         glm::vec4{weather.skyTopColor, 1.f});
+    renderer->setUniform(skyProg.get(), "BottomColor",
+                         glm::vec4{weather.skyBottomColor, 1.f});
 
     renderer->draw(glm::mat4(), &skyDbuff, dp);
 

@@ -1,26 +1,14 @@
 #include <loaders/WeatherLoader.hpp>
 
 #include <algorithm>
-#include <cctype>
-#include <cmath>
-#include <cstdlib>
 #include <fstream>
 #include <sstream>
 
 namespace {
-RWTypes::RGB readRGB(std::stringstream &ss)  {
-    RWTypes::RGB color;
-    std::string r, g, b;
-
-    std::getline(ss, r, ' ');
-    std::getline(ss, g, ' ');
-    std::getline(ss, b, ' ');
-
-    color.r = atoi(r.c_str());
-    color.b = atoi(b.c_str());
-    color.g = atoi(g.c_str());
-
-    return color;
+glm::vec3 readRGB(std::stringstream &ss)  {
+    int r, g, b;
+    ss >> r >> g >> b;
+    return {r/255.f, g/255.f, b/255.f};
 }
 }
 
@@ -35,18 +23,7 @@ bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
             continue;
 
         Weather::Entry weather;
-
-        // Convert tabs into spaces
-        std::replace(line.begin(), line.end(), '\t', ' ');
-        // Remove all duplicate whitespace
-        line.erase(std::unique(line.begin(), line.end(),
-                               [](char l, char r) {
-                                   return l == r && std::isspace(l);
-                               }),
-                   line.end());
-
         std::stringstream ss(line);
-        std::string tmpstr;
 
         weather.ambientColor = readRGB(ss);
         weather.directLightColor = readRGB(ss);
@@ -55,32 +32,24 @@ bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
         weather.sunCoreColor = readRGB(ss);
         weather.sunCoronaColor = readRGB(ss);
 
-        std::getline(ss, tmpstr, ' ');
-        weather.sunCoreSize = atof(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.sunCoronaSize = atof(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.sunBrightness = atof(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.shadowIntensity = atoi(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.lightShading = atoi(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.poleShading = atoi(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.farClipping = atof(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.fogStart = atof(tmpstr.c_str());
-        std::getline(ss, tmpstr, ' ');
-        weather.amountGroundLight = atof(tmpstr.c_str());
+        ss >> weather.sunCoreSize;
+        ss >> weather.sunCoronaSize;
+        ss >> weather.sunBrightness;
+        ss >> weather.shadowIntensity;
+        ss >> weather.lightShading;
+        ss >> weather.poleShading;
+        ss >> weather.farClipping;
+        ss >> weather.fogStart;
+        ss >> weather.amountGroundLight;
 
         weather.lowCloudColor = readRGB(ss);
         weather.topCloudColor = readRGB(ss);
         weather.bottomCloudColor = readRGB(ss);
 
+        int d;
         for (size_t i = 0; i < 4; i++) {
-            std::getline(ss, tmpstr, ' ');
-            weather.unknown[i] = atoi(tmpstr.c_str());
+            ss >> d;
+            weather.unknown[i] = d;
         }
 
         outWeather.entries.push_back(weather);
