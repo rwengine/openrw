@@ -1,0 +1,20 @@
+FROM fedora:latest
+
+# ffmpeg-devel needs rpmfusion
+RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+RUN dnf update -y \
+    && dnf install -y \
+        boost-devel \
+        gcc gcc-c++ \
+        boost-devel \
+        cmake \
+        bullet-devel \
+        ffmpeg-devel \
+        glm-devel \
+        openal-soft-devel \
+        SDL2-devel \
+        qt5-devel
+
+CMD ["/bin/bash"]

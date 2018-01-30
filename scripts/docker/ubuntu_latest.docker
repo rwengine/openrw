@@ -1,0 +1,22 @@
+FROM ubuntu:rolling
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --no-upgrade -y \
+        build-essential \
+        cmake \
+        gcc-7 \
+        g++-7 \
+        libavcodec-dev \
+        libavformat-dev \
+        libboost-filesystem-dev \
+        libboost-program-options-dev \
+        libbullet-dev \
+        libglm-dev \
+        libopenal-dev \
+        libsdl2-dev \
+        libboost-test-dev \
+        libqt5opengl5-dev \
+        iwyu \
+        qt5-default
+
+CMD ["/bin/bash"]

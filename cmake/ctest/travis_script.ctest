@@ -16,9 +16,13 @@ get_filename_component(BIN_DIR "${BIN_DIR}" ABSOLUTE)
 
 set(CTEST_SOURCE_DIRECTORY "${SRC_DIR}")
 set(CTEST_BINARY_DIRECTORY "${BIN_DIR}")
-
 set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
-ctest_empty_binary_directory("${BIN_DIR}")
+
+message(STATUS "Removing binary directory '${CTEST_BINARY_DIRECTORY}'...")
+if(EXISTS "${BIN_DIR}/CMakeCache.txt")
+    message(STATUS "CMakeCache.txt file exists ==> removing")
+    ctest_empty_binary_directory("${BIN_DIR}")
+endif()
 
 set(CTEST_SITE "${CTEST_SITE_BASE}-NODATA")
 ctest_start("Continuous")
@@ -61,32 +65,24 @@ ctest_build(
     NUMBER_WARNINGS BUILD_NB_WARNINGS_DATA
     )
 
-math(EXPR CONFIGURE_RESULT "${CONFIGURE_RESULT_DATA}+${CONFIGURE_RESULT_NODATA}")
-math(EXPR BUILD_NB_ERRORS "${BUILD_NB_ERRORS_DATA}+${BUILD_NB_ERRORS_NODATA}")
-math(EXPR BUILD_NB_WARNINGS "${BUILD_NB_WARNINGS_DATA}+${BUILD_NB_WARNINGS_NODATA}")
-
-file(REMOVE FATAL_ERROR)
-if(NOT CONFIGURE_RESULT EQUAL "0")
-    message(WARNING "Configure error detected!")
-    file(APPEND "FATAL_ERROR" "configure error\n")
-endif()
-
-if(NOT BUILD_NB_ERRORS EQUAL "0")
-    message(WARNING "Build failure detected!")
-    file(APPEND "FATAL_ERROR" "build error\n")
-endif()
-
-if(NOT TEST_RESULT EQUAL "0")
-    message(WARNING "Test failure detected!")
-    file(WRITE "FATAL_ERROR" "test(s) error\n")
-endif()
-
 if(TRAVIS)
     ctest_submit(
         RETURN_VALUE SUBMIT_RESULT
         )
 
-    if(NOT SUBMIT_RESULT EQUAL "0")
-        message(WARNING "Submit failure detected!")
+    if(SUBMIT_RESULT)
+        message(FATAL_ERROR "Submit failure detected!")
     endif()
+endif()
+
+if(CONFIGURE_RESULT_DATA OR CONFIGURE_RESULT_NODATA)
+    message(FATAL_ERROR "Configure error detected!")
+endif()
+
+if(BUILD_NB_ERRORS_DATA OR BUILD_NB_ERRORS_NODATA)
+    message(FATAL_ERROR "Build failure detected!")
+endif()
+
+if(TEST_RESULT)
+    message(FATAL_ERROR "Test failure detected!")
 endif()
