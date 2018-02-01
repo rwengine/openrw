@@ -41,6 +41,8 @@ def create(ns: argparse.Namespace):
     sub_run(['docker', 'exec', ns.name, 'groupadd', '--gid', str(gid), ns.username])
     sub_run(['docker', 'exec', ns.name, 'useradd', '--create-home',
                     '--uid', str(ns.uid), '-g', ns.username, ns.username])
+    sub_run(['docker', 'exec', ns.name, 'chown', '{0}:{0}'.format(ns.username),
+                    '/build', '/src'])
 
 
 def exec(ns: argparse.Namespace):
