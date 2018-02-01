@@ -867,7 +867,7 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
     }
 
     std::string keyName = SDL_GetKeyName(event.key.keysym.sym);
-    if (keyName.length() == 1) {
+    if (getPlayer() && keyName.length() == 1) {
         char symbol = keyName[0];
         handleCheatInput(symbol);
     }
