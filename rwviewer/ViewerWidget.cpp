@@ -128,7 +128,7 @@ void ViewerWidget::drawWorld(GameRenderer& r) {
 }
 
 void ViewerWidget::paintGL() {
-    glViewport(0, 0, width(), height());
+    glViewport(0, 0, width() * devicePixelRatio(), height() * devicePixelRatio());
     glClearColor(0.3f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -137,7 +137,7 @@ void ViewerWidget::paintGL() {
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     auto& r = *_renderer;
     r.getRenderer()->invalidate();
-    r.setViewport(width(), height());
+    r.setViewport(width() * devicePixelRatio(), height() * devicePixelRatio());
 
     glEnable(GL_DEPTH_TEST);
 
