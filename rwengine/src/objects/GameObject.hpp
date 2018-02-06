@@ -161,12 +161,12 @@ public:
         /**
          * World position of damage
          */
-        glm::vec3 damageLocation;
+        glm::vec3 damageLocation{};
 
         /**
          * World position of the source (used for direction)
          */
-        glm::vec3 damageSource;
+        glm::vec3 damageSource{};
 
         /**
          * Magnitude of destruction
@@ -209,7 +209,7 @@ public:
     }
 
     glm::mat4 getTimeAdjustedTransform(float alpha) const {
-        glm::mat4 t;
+        glm::mat4 t{1.0f};
         t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
         t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
         return t;

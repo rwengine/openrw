@@ -8,13 +8,13 @@ void ScreenText::tick(float dt) {
     // Remove all the immedate text
     m_textQueues[static_cast<size_t>(ScreenTextType::Immediate)].clear();
 
-    for (unsigned int t = 0; t < m_textQueues.size(); ++t) {
-        for (unsigned int i = 0; i < m_textQueues[t].size();) {
-            auto& big = m_textQueues[t][i];
+    for (auto &textQueue : m_textQueues) {
+        for (unsigned int i = 0; i < textQueue.size();) {
+            auto& big = textQueue[i];
 
             big.displayedMS += millis;
             if (big.displayedMS >= big.durationMS) {
-                m_textQueues[t].erase(m_textQueues[t].begin() + i);
+                textQueue.erase(textQueue.begin() + i);
             } else {
                 ++i;
             }

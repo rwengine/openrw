@@ -59,8 +59,8 @@ struct AreaIndicatorInfo {
     enum AreaIndicatorType { Cylinder };
 
     AreaIndicatorType type;
-    glm::vec3 position;
-    glm::vec3 radius;
+    glm::vec3 position{};
+    glm::vec3 radius{};
 };
 
 /**
@@ -102,34 +102,34 @@ public:
      * Creates an instance
      */
     InstanceObject* createInstance(const uint16_t id, const glm::vec3& pos,
-                                   const glm::quat& rot = glm::quat());
+                                   const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f});
 
     /**
      * @brief Creates an InstanceObject for use in the current Cutscene.
      */
     CutsceneObject* createCutsceneObject(const uint16_t id,
                                          const glm::vec3& pos,
-                                         const glm::quat& rot = glm::quat());
+                                         const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f});
 
     /**
      * Creates a vehicle
      */
     VehicleObject* createVehicle(const uint16_t id, const glm::vec3& pos,
-                                 const glm::quat& rot = glm::quat(),
+                                 const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
                                  GameObjectID gid = 0);
 
     /**
      * Creates a pedestrian.
      */
     CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos,
-                                      const glm::quat& rot = glm::quat(),
+                                      const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
                                       GameObjectID gid = 0);
 
     /**
      * Creates a player
      */
     CharacterObject* createPlayer(const glm::vec3& pos,
-                                  const glm::quat& rot = glm::quat(),
+                                  const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
                                   GameObjectID gid = 0);
 
     /**

@@ -16,24 +16,24 @@ struct ZoneData {
     /**
     * The name of the Zone (see .gxt)
     */
-    std::string name;
+    std::string name{};
 
-    int type;
+    int type{};
 
     /**
     * Bottom left of the Zone
     */
-    glm::vec3 min;
+    glm::vec3 min{};
 
     /**
     * Top Right of the zone
     */
-    glm::vec3 max;
+    glm::vec3 max{};
 
     /**
     * Island number
     */
-    int island;
+    int island{};
 
     /**
     * Text of the zone?

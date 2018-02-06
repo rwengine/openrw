@@ -18,7 +18,7 @@ struct WeaponData {
     float meleeRadius;
     float lifeSpan;
     float spread;
-    glm::vec3 fireOffset;
+    glm::vec3 fireOffset{};
     std::string animation1;
     std::string animation2;
     float animLoopStart;
@@ -51,10 +51,10 @@ struct WeaponScan {
 
     float damage;
 
-    glm::vec3 center;
+    glm::vec3 center{};
     float radius;
 
-    glm::vec3 end;
+    glm::vec3 end{};
 
     WeaponData* weapon;
 

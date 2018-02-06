@@ -193,7 +193,7 @@ void IngameState::tick(float dt) {
             }
         }
 
-        glm::vec3 movement;
+        glm::vec3 movement{};
         movement.x = input(GameInputState::GoForward) -
                      input(GameInputState::GoBackwards),
         movement.y =

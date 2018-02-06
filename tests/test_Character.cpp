@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(test_activities) {
     }
     {
         VehicleObject* vehicle = Global::get().e->createVehicle(
-            90u, glm::vec3(10.f, 0.f, 0.f), glm::quat());
+            90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
         BOOST_REQUIRE(vehicle != nullptr);
         BOOST_REQUIRE(vehicle->getModel() != nullptr);
 

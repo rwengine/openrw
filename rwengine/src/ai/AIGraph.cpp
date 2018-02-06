@@ -28,8 +28,7 @@ void AIGraph::createPathNodes(const glm::vec3& position,
         glm::vec3 nodePosition = position + (rotation * node.position);
 
         if (node.type == PathNode::EXTERNAL) {
-            for (size_t rn = 0; rn < externalNodes.size(); ++rn) {
-                auto& realNode = externalNodes[rn];
+            for (auto &realNode : externalNodes) {
                 auto d = glm::distance2(realNode->position, nodePosition);
                 if (d < 1.f) {
                     pathNodes.push_back(realNode);

@@ -99,7 +99,7 @@ public:
      */
     int activeEntry;
 
-    glm::vec2 offset;
+    glm::vec2 offset{};
 
     void draw(GameRenderer* r) {
         glm::vec2 basis(offset);
@@ -126,9 +126,9 @@ public:
 
     void click(const float x, const float y) {
         glm::vec2 c(x - offset.x, y - offset.y);
-        for (auto it = entries.begin(); it != entries.end(); ++it) {
+        for (auto &entry : entries) {
             if (c.y > 0.f && c.y < size) {
-                (*it).activate(c.x, c.y);
+                entry.activate(c.x, c.y);
                 return;
             } else {
                 c.y -= size;

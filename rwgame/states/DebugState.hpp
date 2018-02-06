@@ -5,8 +5,8 @@
 
 class DebugState : public State {
     ViewCamera _debugCam;
-    glm::vec3 _movement;
-    glm::vec2 _debugLook;
+    glm::vec3 _movement{};
+    glm::vec2 _debugLook{};
     bool _freeLook = false;
     bool _sonicMode = false;
     bool _invertedY;
@@ -19,7 +19,7 @@ class DebugState : public State {
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
-               const glm::quat& vd = {});
+               const glm::quat& vd = {1.0f,0.0f,0.0f,0.0f});
 
     void enter() override;
 

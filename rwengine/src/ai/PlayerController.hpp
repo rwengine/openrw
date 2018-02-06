@@ -6,9 +6,9 @@
 #include <ai/CharacterController.hpp>
 
 class PlayerController : public CharacterController {
-    glm::quat cameraRotation;
+    glm::quat cameraRotation{1.0f,0.0f,0.0f,0.0f};
 
-    glm::vec3 direction;
+    glm::vec3 direction{};
 
     glm::quat lastRotation;
 

@@ -159,10 +159,10 @@ struct GameStats {
 struct TextDisplayData {
     // This is set by the final display text command.
     GameString text;
-    glm::vec2 position;
+    glm::vec2 position{};
 
-    glm::vec4 colourFG;
-    glm::vec4 colourBG;
+    glm::vec4 colourFG{};
+    glm::vec4 colourBG{};
 };
 
 /**
@@ -181,7 +181,7 @@ struct BlipData {
     BlipType type;
     GameObjectID target;
     // If target is null then use coord
-    glm::vec3 coord;
+    glm::vec3 coord{};
 
     std::string texture;  // Texture for use in the radar
     uint32_t colour = 0;  // Color value (index or RGBA)

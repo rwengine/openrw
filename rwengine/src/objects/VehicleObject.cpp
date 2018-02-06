@@ -351,7 +351,7 @@ void VehicleObject::tickPhysics(float dt) {
         for (auto& seat : seatOccupants) {
             auto character = static_cast<CharacterObject*>(seat.second);
 
-            glm::vec3 passPosition;
+            glm::vec3 passPosition{};
             if (character->isEnteringOrExitingVehicle()) {
                 passPosition = getSeatEntryPositionWorld(seat.first);
             } else {

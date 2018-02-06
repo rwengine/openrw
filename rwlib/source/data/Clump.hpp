@@ -22,14 +22,14 @@ class ModelFrame {
     unsigned int index;
     glm::mat3 defaultRotation;
     glm::vec3 defaultTranslation;
-    glm::mat4 matrix;
-    glm::mat4 worldtransform_;
+    glm::mat4 matrix{1.0f};
+    glm::mat4 worldtransform_{1.0f};
     ModelFrame* parent_;
     std::string name;
     std::vector<ModelFramePtr> children_;
 
 public:
-    ModelFrame(unsigned int index = 0, glm::mat3 dR = glm::mat3(),
+    ModelFrame(unsigned int index = 0, glm::mat3 dR = glm::mat3{1.0f},
                glm::vec3 dT = glm::vec3());
 
     void reset();
@@ -114,10 +114,10 @@ struct SubGeometry {
 };
 
 struct GeometryVertex {
-    glm::vec3 position; /* 0 */
-    glm::vec3 normal;   /* 24 */
-    glm::vec2 texcoord; /* 48 */
-    glm::u8vec4 colour; /* 64 */
+    glm::vec3 position{}; /* 0 */
+    glm::vec3 normal{};   /* 24 */
+    glm::vec2 texcoord{}; /* 48 */
+    glm::u8vec4 colour{}; /* 64 */
 
     /** @see GeometryBuffer */
     static const AttributeList vertex_attributes() {
@@ -155,7 +155,7 @@ struct Geometry {
 
     struct Material {
         std::vector<Texture> textures;
-        glm::u8vec4 colour;
+        glm::u8vec4 colour{};
 
         uint8_t flags;
 

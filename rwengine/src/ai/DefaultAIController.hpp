@@ -4,7 +4,7 @@
 #include <ai/CharacterController.hpp>
 
 class DefaultAIController : public CharacterController {
-    glm::vec3 gotoPos;
+    glm::vec3 gotoPos{};
 
 public:
     DefaultAIController()

@@ -683,8 +683,7 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw Garage bounds
-    for (size_t g = 0; g < state.garages.size(); ++g) {
-        auto& garage = state.garages[g];
+    for (const auto &garage : state.garages) {
         btVector3 minColor(1.f, 0.f, 0.f);
         btVector3 maxColor(0.f, 1.f, 0.f);
         btVector3 min(garage.min.x, garage.min.y, garage.min.z);
@@ -699,8 +698,7 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw vehicle generators
-    for (size_t v = 0; v < state.vehicleGenerators.size(); ++v) {
-        auto& generator = state.vehicleGenerators[v];
+    for (const auto &generator : state.vehicleGenerators) {
         btVector3 color(1.f, 0.f, 0.f);
         btVector3 position(generator.position.x, generator.position.y,
                            generator.position.z);

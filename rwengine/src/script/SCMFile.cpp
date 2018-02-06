@@ -26,8 +26,8 @@ void SCMFile::loadFile(char *data, unsigned int size) {
     int i = modelSectionOffset + sizeof(uint32_t);
     for (unsigned int m = 0; m < model_count; ++m) {
         char model_name[24];
-        for (size_t c = 0; c < 24; ++c) {
-            model_name[c] = read<char>(i++);
+        for (char &c : model_name) {
+            c = read<char>(i++);
         }
         models.push_back(model_name);
     }

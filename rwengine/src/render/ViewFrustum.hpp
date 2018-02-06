@@ -12,8 +12,8 @@ class ViewFrustum {
 public:
     class ViewPlane {
     public:
-        glm::vec3 normal;
-        float distance;
+	glm::vec3 normal{};
+        float distance{};
     };
 
     float near;
@@ -50,8 +50,8 @@ public:
         float d;
         bool result = true;
 
-        for (size_t i = 0; i < 6; ++i) {
-            d = glm::dot(planes[i].normal, center) + planes[i].distance;
+        for (const auto &plane : planes) {
+            d = glm::dot(plane.normal, center) + plane.distance;
             if (d < -radius) result = false;
         }
 

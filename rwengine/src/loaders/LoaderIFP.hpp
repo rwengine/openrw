@@ -13,9 +13,9 @@
 #include <rw/forward.hpp>
 
 struct AnimationKeyframe {
-    glm::quat rotation;
-    glm::vec3 position;
-    glm::vec3 scale;
+    glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
+    glm::vec3 position{};
+    glm::vec3 scale{1.0f};
     float starttime = 0.f;
     int id = 0;
 

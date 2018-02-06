@@ -35,13 +35,13 @@ public:
         /// Message to be displayed (including markup)
         GameString text;
         /// On screen position
-        glm::vec2 screenPosition;
+        glm::vec2 screenPosition{};
         /// font size
         float size;
         /// Base colour
-        glm::u8vec3 baseColour;
+        glm::u8vec3 baseColour{};
         /// Background colour
-        glm::u8vec4 backgroundColour;
+        glm::u8vec4 backgroundColour{};
         /// Horizontal Alignment
         TextAlignemnt align;
         /// Wrap width
@@ -66,7 +66,7 @@ public:
 
 private:
     std::string fonts[GAME_FONTS];
-    GlyphInfo glyphData[GAME_GLYPHS];
+    std::array<GlyphInfo, GAME_GLYPHS> glyphData;
 
     GameRenderer* renderer;
     std::unique_ptr<Renderer::ShaderProgram> textShader;

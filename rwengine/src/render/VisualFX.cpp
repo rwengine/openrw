@@ -40,7 +40,7 @@ VisualFX::~VisualFX() {
 }
 
 const glm::vec3& VisualFX::getPosition() const {
-    static glm::vec3 errorRef;
+    static glm::vec3 errorRef{};
     switch (type) {
         case VisualFX::Particle:
             return particle.position;

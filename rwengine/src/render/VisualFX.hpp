@@ -17,10 +17,10 @@ public:
     };
     struct ParticleData {
         /** Initial world position */
-        glm::vec3 position;
+        glm::vec3 position{};
 
         /** Direction of particle */
-        glm::vec3 direction;
+        glm::vec3 direction{};
 
         /** Particle orientation modes */
         enum Orientation {
