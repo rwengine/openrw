@@ -23,14 +23,14 @@ class MapRenderer {
 public:
     struct MapInfo {
         /// World coordinate center
-        glm::vec2 worldCenter;
+        glm::vec2 worldCenter{};
         /// World units to fit on the map
         float worldSize;
 
         /// yaw of the map
         float rotation = 0.f;
 
-        glm::vec2 screenPosition;
+        glm::vec2 screenPosition{};
         float screenSize;
         /// Make the map circular, or don't.
         bool clipToSize = true;

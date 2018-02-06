@@ -43,7 +43,7 @@ class RWGame : public GameBase {
     };
 
     DebugViewMode debugview_ = DebugViewMode::Disabled;
-    int lastDraws;  /// Number of draws issued for the last frame.
+    int lastDraws{};  /// Number of draws issued for the last frame.
 
     std::string cheatInputWindow = std::string(32, ' ');
 

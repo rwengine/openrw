@@ -99,10 +99,12 @@ GameState::GameState()
     , maxWantedLevel(0)
     , playerObject(0)
     , scriptOnMissionFlag(nullptr)
+    , nextRestartLocation{}
     , fadeOut(true)
     , fadeStart(0.f)
     , fadeTime(0.f)
     , fadeSound(false)
+    , fadeColour{}
     , skipCutscene(false)
     , isIntroPlaying(false)
     , currentCutscene(nullptr)
@@ -111,6 +113,8 @@ GameState::GameState()
     , hudFlash(HudFlash::Disabled)
     , cameraNear(0.1f)
     , cameraFixed(false)
+    , cameraPosition{}
+    , cameraRotation{1.0f,0.0f,0.0f,0.0f}
     , cameraTarget(0)
     , importExportPortland(0)
     , importExportShoreside(0)

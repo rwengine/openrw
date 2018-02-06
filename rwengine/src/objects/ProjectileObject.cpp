@@ -113,7 +113,7 @@ void ProjectileObject::cleanup() {
 
 ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
                                    const ProjectileObject::ProjectileInfo& info)
-    : GameObject(world, position, glm::quat(), nullptr)
+    : GameObject(world, position, glm::quat{1.0f,0.0f,0.0f,0.0f}, nullptr)
     , _info(info)
     , _body(nullptr)
     , _ghostBody(nullptr)

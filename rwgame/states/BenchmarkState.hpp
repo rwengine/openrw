@@ -6,8 +6,8 @@
 class BenchmarkState : public State {
     struct TrackPoint {
         float time;
-        glm::vec3 position;
-        glm::quat angle;
+        glm::vec3 position{};
+        glm::quat angle{1.0f,0.0f,0.0f,0.0f};
     };
     std::vector<TrackPoint> track;
 

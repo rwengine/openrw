@@ -23,7 +23,7 @@ typedef uint64_t RenderKey;
 typedef std::uint32_t RenderIndex;
 
 struct VertexP2 {
-    glm::vec2 position;
+    glm::vec2 position{};
 
     static const AttributeList vertex_attributes() {
         return {{ATRS_Position, 2, sizeof(VertexP2), 0ul}};
@@ -39,7 +39,7 @@ struct VertexP2 {
 
 
 struct VertexP3 {
-    glm::vec3 position;
+    glm::vec3 position{};
 
     static const AttributeList vertex_attributes() {
         return {
@@ -80,7 +80,7 @@ public:
         // Depth writing state
         bool depthWrite;
         /// Material
-        glm::u8vec4 colour;
+        glm::u8vec4 colour{};
         /// Material
         float ambient;
         /// Material
@@ -120,20 +120,20 @@ public:
     typedef std::vector<RenderInstruction> RenderList;
 
     struct ObjectUniformData {
-        glm::mat4 model;
-        glm::vec4 colour;
+        glm::mat4 model{1.0f};
+        glm::vec4 colour{1.0f};
         float diffuse;
         float ambient;
         float visibility;
     };
 
     struct SceneUniformData {
-        glm::mat4 projection;
-        glm::mat4 view;
-        glm::vec4 ambient;
-        glm::vec4 dynamic;
-        glm::vec4 fogColour;
-        glm::vec4 campos;
+        glm::mat4 projection{1.0f};
+        glm::mat4 view{1.0f};
+        glm::vec4 ambient{};
+        glm::vec4 dynamic{};
+        glm::vec4 fogColour{};
+        glm::vec4 campos{};
         float fogStart;
         float fogEnd;
     };
@@ -234,8 +234,8 @@ public:
     virtual const ProfileInfo& popDebugGroup() = 0;
 
 private:
-    glm::ivec2 viewport;
-    glm::mat4 projection2D;
+    glm::ivec2 viewport{};
+    glm::mat4 projection2D{1.0f};
 
 protected:
     int drawCounter;

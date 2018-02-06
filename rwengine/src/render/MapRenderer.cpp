@@ -88,9 +88,9 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     float worldScale = mi.screenSize / mi.worldSize;
 
     auto proj = renderer->get2DProjection();
-    glm::mat4 view, model;
+    glm::mat4 view{1.0f}, model{1.0f};
     renderer->setUniform(rectProg.get(), "proj", proj);
-    renderer->setUniform(rectProg.get(), "model", glm::mat4());
+    renderer->setUniform(rectProg.get(), "model", glm::mat4(1.0f));
     renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
@@ -104,7 +104,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilMask(0xFF);
         glColorMask(0x00, 0x00, 0x00, 0x00);
-        renderer->drawArrays(glm::mat4(), &circle, dp);
+        renderer->drawArrays(glm::mat4(1.0f), &circle, dp);
         glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
         glStencilFunc(GL_EQUAL, 1, 0xFF);
     }
@@ -140,11 +140,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
 
         renderer->setUniform(rectProg.get(), "model", tilemodel);
 
-        renderer->drawArrays(glm::mat4(), &rect, dp);
+        renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
     }
 
     // From here on out we will work in screenspace
-    renderer->setUniform(rectProg.get(), "view", glm::mat4());
+    renderer->setUniform(rectProg.get(), "view", glm::mat4(1.0f));
 
     if (mi.clipToSize) {
         glDisable(GL_STENCIL_TEST);
@@ -154,11 +154,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
             data->findSlotTexture("hud", "radardisc");
         dp.textures = {radarDisc->getName()};
 
-        glm::mat4 model;
+        glm::mat4 model{1.0f};
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
         model = glm::scale(model, glm::vec3(mi.screenSize * 1.07f));
         renderer->setUniform(rectProg.get(), "model", model);
-        renderer->drawArrays(glm::mat4(), &rect, dp);
+        renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
     }
@@ -256,7 +256,7 @@ void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view,
 
     glm::vec3 viewPos(
         view * glm::vec4(glm::vec2(1.f, -1.f) * adjustedCoord, 0.f, 1.f));
-    glm::mat4 model;
+    glm::mat4 model{1.0f};
     model = glm::translate(model, viewPos);
     model = glm::scale(model, glm::vec3(size));
     model = glm::rotate(model, heading, glm::vec3(0.f, 0.f, 1.f));

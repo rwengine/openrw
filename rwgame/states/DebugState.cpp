@@ -352,7 +352,7 @@ void DebugState::spawnFollower(unsigned int id) {
 
     glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
-    glm::vec3 hit, normal;
+    glm::vec3 hit{}, normal{};
     if (game->hitWorldRay(ch->position + (fwd * 10.f), {0.f, 0.f, -2.f}, hit,
                           normal)) {
         auto spawnPos = hit + normal;

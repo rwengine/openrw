@@ -20,13 +20,13 @@ class IngameState : public State {
     std::string save;
     bool newgame;
     ViewCamera _look;
-    glm::vec3 cameraPosition;
+    glm::vec3 cameraPosition{};
     /** Timer to hold user camera position */
     float autolookTimer;
     CameraMode camMode;
 
     /// Player camera input since the last update
-    glm::vec2 cameradelta_;
+    glm::vec2 cameradelta_{};
     /// Invert Y axis movement
     bool m_invertedY;
     /// Free look in vehicles.

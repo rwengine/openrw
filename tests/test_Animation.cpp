@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
                 1.0f,
                 AnimationBone::RT0,
                 {
-                    {glm::quat(), glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0},
-                    {glm::quat(), glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1},
+                    {glm::quat{1.0f,0.0f,0.0f,0.0f}, glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0},
+                    {glm::quat{1.0f,0.0f,0.0f,0.0f}, glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1},
                 }
             };
 

@@ -120,7 +120,7 @@ void CharacterObject::destroyActor() {
 }
 
 glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
-    glm::vec3 animTranslate;
+    glm::vec3 animTranslate{};
 
     if (motionBlockedByActivity) {
         // Clear any residual motion animation

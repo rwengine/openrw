@@ -69,7 +69,7 @@ void ViewerWidget::initGL() {
 }
 
 void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
-    glm::mat4 view, proj;
+    glm::mat4 view{1.0f}, proj{1.0f};
     const auto& vc = OrbitCamera({width(), height()},
                                  viewAngles,
                                  viewDistance,
@@ -83,7 +83,7 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
 
     ObjectRenderer _renderer(world(), vc, 1.f, 0);
     RenderList renders;
-    _renderer.renderClump(model.get(), glm::mat4(), nullptr, renders);
+    _renderer.renderClump(model.get(), glm::mat4(1.0f), nullptr, renders);
     r.getRenderer()->drawBatched(renders);
 
     drawFrameWidget(model->getFrame().get());
@@ -91,7 +91,7 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
 }
 
 void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
-    glm::mat4 view, proj;
+    glm::mat4 view{1.0f}, proj{1.0f};
     const auto& vc = OrbitCamera({width(), height()},
                                  viewAngles,
                                  viewDistance,
@@ -263,7 +263,7 @@ void ViewerWidget::exportModel() {
 void ViewerWidget::keyPressEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Shift) moveFast = true;
 
-    glm::vec3 movement;
+    glm::vec3 movement{};
     if (e->key() == Qt::Key_W) movement.y += moveFast ? 10.f : 1.f;
     if (e->key() == Qt::Key_S) movement.y -= moveFast ? 10.f : 1.f;
     if (e->key() == Qt::Key_A) movement.x -= moveFast ? 10.f : 1.f;

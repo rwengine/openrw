@@ -328,7 +328,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
             continue;
         }
 
-        glm::mat4 model;
+        glm::mat4 model{1.0f};
 
         if (blip.second.target > 0) {
             auto object = world->getBlipTarget(blip.second);
@@ -390,7 +390,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     renderer->setUniform(skyProg.get(), "BottomColor",
                          glm::vec4{weather.skyBottomColor, 1.f});
 
-    renderer->draw(glm::mat4(), &skyDbuff, dp);
+    renderer->draw(glm::mat4(1.0f), &skyDbuff, dp);
 
     profSky = renderer->popDebugGroup();
 
@@ -471,7 +471,7 @@ void GameRenderer::renderPostProcess() {
     wdp.count = ssRectGeom.getCount();
     wdp.textures = {fbTextures[0]};
 
-    renderer->drawArrays(glm::mat4(), &ssRectDraw, wdp);
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
 void GameRenderer::renderEffects(GameWorld* world) {

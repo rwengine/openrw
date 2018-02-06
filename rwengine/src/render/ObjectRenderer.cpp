@@ -204,7 +204,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     }
 
     // Render the atomic the instance thinks it should be
-    renderAtomic(atomic.get(), glm::mat4(), instance, outList);
+    renderAtomic(atomic.get(), glm::mat4(1.0f), instance, outList);
 }
 
 void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
@@ -229,7 +229,7 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         }
     }
 
-    renderClump(pedestrian->getClump().get(), glm::mat4(), nullptr, outList);
+    renderClump(pedestrian->getClump().get(), glm::mat4(1.0f), nullptr, outList);
 
     auto item = pedestrian->getActiveItem();
     const auto& weapon = pedestrian->engine->data->weaponData[item];
@@ -268,7 +268,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
         vehicle->getLowLOD()->setFlag(Atomic::ATOMIC_RENDER, !highLOD);
     }
 
-    renderClump(clump.get(), glm::mat4(), vehicle, outList);
+    renderClump(clump.get(), glm::mat4(1.0f), vehicle, outList);
 
     auto modelinfo = vehicle->getVehicle();
     auto woi =
@@ -295,7 +295,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
             btMatrix3x3(steerQ) * btMatrix3x3(rollQ) * basis,
             wi.m_chassisConnectionPointCS +
                 wi.m_wheelDirectionCS * wi.m_raycastInfo.m_suspensionLength);
-        glm::mat4 wheelM;
+        glm::mat4 wheelM{1.0f};
         t.getOpenGLMatrix(glm::value_ptr(wheelM));
         wheelM = clump->getFrame()->getWorldTransform() * wheelM;
         wheelM = glm::scale(wheelM, glm::vec3(modelinfo->wheelscale_));
@@ -310,7 +310,7 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     if (!pickup->isEnabled()) return;
 
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(), pickup->getPosition());
+    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), pickup->getPosition());
     modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime(),
                               glm::vec3(0.f, 0.f, 1.f));
 
@@ -328,7 +328,7 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
 
     auto cutsceneOffset = m_world->state->currentCutscene->meta.sceneOffset +
                           glm::vec3(0.f, 0.f, 1.f);
-    glm::mat4 cutscenespace;
+    glm::mat4 cutscenespace{1.0f};
 
     cutscenespace = glm::translate(cutscenespace, cutsceneOffset);
     if (cutscene->getParentActor()) {

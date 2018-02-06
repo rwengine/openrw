@@ -19,8 +19,8 @@ void Animator::tick(float dt) {
     }
 
     struct BoneTransform {
-        glm::vec3 translation;
-        glm::quat rotation;
+        glm::vec3 translation{};
+        glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
     };
 
 #if 0
