@@ -1210,11 +1210,11 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 #if RW_DEBUG
     for (const auto &type : pedTypeData.types) {
         printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", type.bitstring_,
-               type.unknown2,
-               type.unknown3,
-               type.unknown4,
-               type.fleedistance,
-               type.headingchangerate,
+               static_cast<double>(type.unknown2),
+               static_cast<double>(type.unknown3),
+               static_cast<double>(type.unknown4),
+               static_cast<double>(type.fleedistance),
+               static_cast<double>(type.headingchangerate),
                type.threatflags_,
                type.avoidflags_);
     }

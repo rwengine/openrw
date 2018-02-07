@@ -1,5 +1,6 @@
 #include "engine/Animator.hpp"
 
+#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -47,7 +48,7 @@ void Animator::tick(float dt) {
         if (!state.repeat) {
             animTime = std::min(animTime, state.animation->duration);
         } else {
-            animTime = fmod(animTime, state.animation->duration);
+            animTime = std::fmod(animTime, state.animation->duration);
         }
 
         for (auto& b : state.boneInstances) {

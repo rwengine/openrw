@@ -31,7 +31,7 @@ struct WeaponData {
     int modelID;
     std::uint32_t flags;
 
-    int inventorySlot;
+    std::uint32_t inventorySlot;
 };
 
 /**

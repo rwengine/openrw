@@ -185,8 +185,8 @@ public:
 
     glm::vec3 getLookDirection() const {
         float theta = m_look.y - glm::half_pi<float>();
-        return glm::vec3(sin(-m_look.x) * cos(theta),
-                         cos(-m_look.x) * cos(theta), sin(theta));
+        return glm::vec3(std::sin(-m_look.x) * std::cos(theta),
+                         std::cos(-m_look.x) * std::cos(theta), std::sin(theta));
     }
 
     /**
