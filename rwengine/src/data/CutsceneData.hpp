@@ -21,7 +21,7 @@ struct CutsceneMetadata {
     std::string name;
 
     /// The origin for coordinates in the cutscene
-    glm::vec3 sceneOffset;
+    glm::vec3 sceneOffset{};
 
     std::vector<ModelEntry> models;
     std::map<float, TextEntry> texts;

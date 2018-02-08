@@ -99,7 +99,7 @@ public:
      */
     int activeEntry;
 
-    glm::vec2 offset;
+    glm::vec2 offset{};
 
     void draw(GameRenderer* r) {
         glm::vec2 basis(offset);

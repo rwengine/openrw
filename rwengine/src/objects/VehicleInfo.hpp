@@ -19,8 +19,8 @@ struct VehicleHandlingInfo {
 
     std::string ID;
     float mass;
-    glm::vec3 dimensions;
-    glm::vec3 centerOfMass;
+    glm::vec3 dimensions{};
+    glm::vec3 centerOfMass{};
     float percentSubmerged;
     float tractionMulti;
     float tractionLoss;
@@ -65,11 +65,11 @@ struct VehicleHandlingInfo {
 };
 
 struct WheelInfo {
-    glm::vec3 position;
+    glm::vec3 position{};
 };
 
 struct SeatInfo {
-    glm::vec3 offset;
+    glm::vec3 offset{};
 };
 
 /**

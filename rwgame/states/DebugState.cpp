@@ -49,6 +49,7 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
          {"-Vehicles", [=] { this->enterMenu(createVehicleMenu()); }},
          {"-AI", [=] { this->enterMenu(createAIMenu()); }},
          {"-Weapons", [=] { this->enterMenu(createWeaponMenu()); }},
+         {"-Weather", [=] { this->enterMenu(createWeatherMenu()); }},
          {"Set Super Jump", [=] { player->setJumpSpeed(20.f); }},
          {"Set Normal Jump",
           [=] { player->setJumpSpeed(CharacterObject::DefaultJumpSpeed); }},
@@ -204,6 +205,20 @@ std::shared_ptr<Menu> DebugState::createWeaponMenu() {
     return menu;
 }
 
+std::shared_ptr<Menu> DebugState::createWeatherMenu() {
+    auto menu =
+        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
+                     kDebugFont, kDebugEntryHeight);
+    std::string w[4]{"Sunny","Cloudy","Rainy","Foggy"};
+    //auto gw = game->getWorld();
+    for (int i = 0; i < 4; ++i) {
+        menu->lambda(w[i], [=] { game->getWorld()->state->basic.nextWeather = i; });
+    }
+
+    menu->offset = kDebugMenuOffset;
+    return menu;
+}
+
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
     : State(game), _invertedY(game->getConfig().getInputInvertY()) {
     this->enterMenu(createDebugMenu());
@@ -352,7 +367,7 @@ void DebugState::spawnFollower(unsigned int id) {
 
     glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
-    glm::vec3 hit, normal;
+    glm::vec3 hit{}, normal{};
     if (game->hitWorldRay(ch->position + (fwd * 10.f), {0.f, 0.f, -2.f}, hit,
                           normal)) {
         auto spawnPos = hit + normal;

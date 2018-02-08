@@ -61,8 +61,8 @@ private:
     void createActor(const glm::vec2& size = glm::vec2(0.45f, 1.2f));
     void destroyActor();
 
-    glm::vec3 movement;
-    glm::vec2 m_look;
+    glm::vec3 movement{};
+    glm::vec2 m_look{};
 
     bool running;
     bool jumped;
@@ -71,7 +71,7 @@ private:
     bool motionBlockedByActivity;
 
     glm::vec3 updateMovementAnimation(float dt);
-    glm::vec3 currenteMovementStep;
+    glm::vec3 currenteMovementStep{};
 
     AnimCycle cycle_;
 

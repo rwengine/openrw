@@ -9,7 +9,7 @@ BOOST_AUTO_TEST_CASE(test_vehicle_buoyancy) {
     glm::vec2 tpos(-WATER_WORLD_SIZE / 2.f + 10.f);
     {
         VehicleObject* vehicle = Global::get().e->createVehicle(
-            90u, glm::vec3(tpos, 100.f), glm::quat());
+            90u, glm::vec3(tpos, 100.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
         BOOST_REQUIRE(vehicle != nullptr);
 

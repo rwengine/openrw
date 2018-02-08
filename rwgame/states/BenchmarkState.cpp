@@ -24,7 +24,7 @@ void BenchmarkState::enter() {
     game->getWorld()->state->basic.gameMinute = clockMinute;
 
     float time = 0.f;
-    glm::vec3 tmpPos;
+    glm::vec3 tmpPos{};
     while (benchstream) {
         TrackPoint point;
         benchstream >> point.time;

@@ -12,8 +12,8 @@ class ViewFrustum {
 public:
     class ViewPlane {
     public:
-        glm::vec3 normal;
-        float distance;
+	glm::vec3 normal{};
+        float distance{};
     };
 
     float near;

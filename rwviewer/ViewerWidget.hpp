@@ -85,12 +85,12 @@ protected:
 
 
     float viewDistance;
-    glm::vec2 viewAngles;
-    glm::vec3 viewPosition;
+    glm::vec2 viewAngles{};
+    glm::vec3 viewPosition{};
 
     bool dragging;
     QPointF dstart;
-    glm::vec2 dastart;
+    glm::vec2 dastart{};
     bool moveFast;
 
     DrawBuffer* _frameWidgetDraw;

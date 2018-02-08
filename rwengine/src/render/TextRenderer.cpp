@@ -302,7 +302,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.textures = {ftexture->getName()};
     dp.depthWrite = false;
 
-    renderer->getRenderer()->drawArrays(glm::mat4(), &db, dp);
+    renderer->getRenderer()->drawArrays(glm::mat4(1.0f), &db, dp);
 
     renderer->getRenderer()->popDebugGroup();
 }

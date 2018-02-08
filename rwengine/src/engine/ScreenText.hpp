@@ -37,15 +37,15 @@ struct ScreenTextEntry {
     /// After processing numbers
     GameString text;
     /// in the virtual 640x480 screen space
-    glm::vec2 position;
+    glm::vec2 position{};
     /// Font number
     int font;
     /// Font size
     int size;
     /// Background colour (or, if a == 0, shadow offset)
-    glm::u8vec4 colourBG;
+    glm::u8vec4 colourBG{};
     /// Foreground colour
-    glm::u8vec3 colourFG;
+    glm::u8vec3 colourFG{};
     /// Alignment (left = 0, center = 1, right = 2)
     unsigned char alignment;
     /// Onscreen duration

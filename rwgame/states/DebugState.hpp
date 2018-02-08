@@ -5,8 +5,8 @@
 
 class DebugState : public State {
     ViewCamera _debugCam;
-    glm::vec3 _movement;
-    glm::vec2 _debugLook;
+    glm::vec3 _movement{};
+    glm::vec2 _debugLook{};
     bool _freeLook = false;
     bool _sonicMode = false;
     bool _invertedY;
@@ -16,10 +16,11 @@ class DebugState : public State {
     std::shared_ptr<Menu> createVehicleMenu();
     std::shared_ptr<Menu> createAIMenu();
     std::shared_ptr<Menu> createWeaponMenu();
+    std::shared_ptr<Menu> createWeatherMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
-               const glm::quat& vd = {});
+               const glm::quat& vd = {1.0f,0.0f,0.0f,0.0f});
 
     void enter() override;
 

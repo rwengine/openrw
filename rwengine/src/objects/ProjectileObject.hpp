@@ -24,7 +24,7 @@ public:
 
     struct ProjectileInfo {
         ProjectileType type;
-        glm::vec3 direction;
+        glm::vec3 direction{};
         float velocity;
 
         /** Time to dentonation or removal */

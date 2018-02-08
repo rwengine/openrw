@@ -31,7 +31,7 @@ bool ChaseKeyframe::load(const std::string &filePath,
         uint8_t driving;
         uint8_t braking;
         uint8_t handbrake;
-        glm::vec3 position;
+        glm::vec3 position{};
     };
 
     static_assert(sizeof(ChaseEntryRecord) == 28,

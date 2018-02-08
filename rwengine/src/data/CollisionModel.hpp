@@ -19,14 +19,14 @@ struct CollisionModel {
 
     /// @todo give shapes surface data
     struct Sphere {
-        glm::vec3 center;
+        glm::vec3 center{};
         float radius;
         Surface surface;
     };
 
     struct Box {
-        glm::vec3 min;
-        glm::vec3 max;
+        glm::vec3 min{};
+        glm::vec3 max{};
         Surface surface;
     };
 

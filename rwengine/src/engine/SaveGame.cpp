@@ -108,7 +108,7 @@ struct StructWeaponSlot {
 };
 struct StructPed {
     uint8_t unknown0_[52];
-    glm::vec3 position;
+    glm::vec3 position{};
     uint8_t unknown1[640];
     float health;
     float armour;
@@ -130,8 +130,8 @@ struct Block1PlayerPed {
 
 struct StructStoredCar {
     BlockDword modelId;
-    glm::vec3 position;
-    glm::vec3 rotation;
+    glm::vec3 position{};
+    glm::vec3 rotation{};
     BlockDword immunities;
     uint8_t colorFG;
     uint8_t colorBG;
@@ -186,8 +186,8 @@ struct StructGarage {
     float z2;
     float doorOpenStart;
     float doorOpenAngle;
-    glm::vec2 unknownCoord1;
-    glm::vec2 unknownCoord2;
+    glm::vec2 unknownCoord1{};
+    glm::vec2 unknownCoord2{};
     float doorAZ;
     float doorBZ;
     BlockDword unknown15;
@@ -228,7 +228,7 @@ struct Block2GarageData {
 
 struct Block3VehicleState {
     uint8_t unknown1[52];
-    glm::vec3 position;
+    glm::vec3 position{};
     uint8_t unknown2[1384];
 };
 
@@ -241,7 +241,7 @@ struct Block3Vehicle {
 
 struct Block3BoatState {
     uint8_t unknown1[52];
-    glm::vec3 position;
+    glm::vec3 position{};
     uint8_t unknown2[1092];
 };
 
@@ -255,7 +255,7 @@ struct Block3Boat {
 struct Block4Object {
     BlockWord modelId;
     BlockDword reference;
-    glm::vec3 position;
+    glm::vec3 position{};
     int8_t rotation[9];  /// @todo Confirm that this is: right, forward, down
     uint8_t unknown1[3];
     float unknown2;
@@ -277,7 +277,7 @@ struct Block6Crane {
     float y1Pickup;
     float x2Pickup;
     float y2Pickup;
-    glm::vec3 dropoff;
+    glm::vec3 dropoff{};
     float dropoffHeadingRads;
     float pickupArmRads;
     float dropoffArmRads;
@@ -288,8 +288,8 @@ struct Block6Crane {
     float armCurrentRads;
     float armCurrentDistance;
     float armCurrentHeight;
-    glm::vec3 hookInitialPosition;
-    glm::vec3 hookCurrentPosition;
+    glm::vec3 hookInitialPosition{};
+    glm::vec3 hookCurrentPosition{};
     float unknown1[2];
     BlockDword vehiclePtr;
     BlockDword gameTime;
@@ -317,7 +317,7 @@ struct Block7Pickup {
     BlockDword regenTime;
     BlockWord modelId;
     BlockWord flags;
-    glm::vec3 position;
+    glm::vec3 position{};
 };
 
 struct Block7Data {
@@ -333,7 +333,7 @@ struct Block8Data {
 };
 
 struct Block8Phone {
-    glm::vec3 position;
+    glm::vec3 position{};
     BlockDword messagePtr[6];
     BlockDword messageEndTime;
     BlockDword staticIndex;
@@ -343,7 +343,7 @@ struct Block8Phone {
 };
 
 struct Block9Restart {
-    glm::vec3 position;
+    glm::vec3 position{};
     float angle;
 };
 
@@ -367,7 +367,7 @@ struct Block10Blip {
     BlockDword entityHandle;
     float unknown1;
     float unknown2;
-    glm::vec3 position;
+    glm::vec3 position{};
     BlockWord unknown3;
     uint8_t brightness;
     uint8_t unknown4;
@@ -384,8 +384,8 @@ struct Block10Data {
 
 struct Block11Zone {
     char name[8];
-    glm::vec3 coordA;
-    glm::vec3 coordB;
+    glm::vec3 coordA{};
+    glm::vec3 coordB{};
     BlockDword type;
     BlockDword level;
     BlockWord dayZoneInfo;
@@ -435,7 +435,7 @@ struct Block12Data {
 
 struct Block13CarGenerator {
     BlockDword modelId;
-    glm::vec3 position;
+    glm::vec3 position{};
     float angle;
     BlockWord colourFG;
     BlockWord colourBG;
@@ -475,7 +475,7 @@ struct Block15AudioObject {
     BlockDword index;
     BlockWord soundIndex;
     uint8_t align[2];
-    glm::vec3 position;
+    glm::vec3 position{};
     BlockDword unknown1;
 };
 

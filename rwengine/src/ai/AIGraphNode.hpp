@@ -14,7 +14,7 @@ struct AIGraphNode {
     };
 
     NodeType type;
-    glm::vec3 position;
+    glm::vec3 position{};
     float size;
     int other_thing;
     int other_thing2;

@@ -23,7 +23,7 @@ ModelFrame::ModelFrame(unsigned int index, glm::mat3 dR, glm::vec3 dT)
 }
 
 void ModelFrame::reset() {
-    matrix = glm::translate(glm::mat4(), defaultTranslation) *
+    matrix = glm::translate(glm::mat4(1.0f), defaultTranslation) *
              glm::mat4(defaultRotation);
     updateHierarchyTransform();
 }
