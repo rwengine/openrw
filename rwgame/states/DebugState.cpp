@@ -49,6 +49,7 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
          {"-Vehicles", [=] { this->enterMenu(createVehicleMenu()); }},
          {"-AI", [=] { this->enterMenu(createAIMenu()); }},
          {"-Weapons", [=] { this->enterMenu(createWeaponMenu()); }},
+         {"-Weather", [=] { this->enterMenu(createWeatherMenu()); }},
          {"Set Super Jump", [=] { player->setJumpSpeed(20.f); }},
          {"Set Normal Jump",
           [=] { player->setJumpSpeed(CharacterObject::DefaultJumpSpeed); }},
@@ -198,6 +199,20 @@ std::shared_ptr<Menu> DebugState::createWeaponMenu() {
     for (int i = 1; i < kMaxInventorySlots; ++i) {
         auto& name = getWorld()->data->weaponData[i]->name;
         menu->lambda(name, [=] { giveItem(i); });
+    }
+
+    menu->offset = kDebugMenuOffset;
+    return menu;
+}
+
+std::shared_ptr<Menu> DebugState::createWeatherMenu() {
+    auto menu =
+        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
+                     kDebugFont, kDebugEntryHeight);
+    std::string w[4]{"Sunny","Cloudy","Rainy","Foggy"};
+    //auto gw = game->getWorld();
+    for (int i = 0; i < 4; ++i) {
+        menu->lambda(w[i], [=] { game->getWorld()->state->basic.nextWeather = i; });
     }
 
     menu->offset = kDebugMenuOffset;
