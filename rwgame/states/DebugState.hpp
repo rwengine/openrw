@@ -16,6 +16,7 @@ class DebugState : public State {
     std::shared_ptr<Menu> createVehicleMenu();
     std::shared_ptr<Menu> createAIMenu();
     std::shared_ptr<Menu> createWeaponMenu();
+    std::shared_ptr<Menu> createWeatherMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
