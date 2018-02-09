@@ -20,18 +20,17 @@ matrix:
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
-#  - os: osx
-#    env: NAME="Apple MacOS"
-#    osx_image: xcode9.2
-#    install:
-#      - brew update
-#      - brew upgrade
-#      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2
-#      - export PATH="/usr/local/opt/openal-soft/bin:/usr/local/opt/qt/bin:$PATH"
-#      - export PKG_CONFIG_PATH=/usr/local/opt/openal-soft/lib/pkgconfig
-#    script:
-#      - mkdir -p "$TRAVIS_BUILD_DIR/build"
-#      - ctest -S "$TRAVIS_BUILD_DIR/cmake/ctest/travis_script.ctest" -VV -DSRC_DIR="$TRAVIS_BUILD_DIR" -DBIN_DIR="$TRAVIS_BUILD_DIR/build"
+  - os: osx
+    env: NAME="Apple macOS"
+    osx_image: xcode9.2
+    install:
+      - brew update
+      - brew upgrade
+      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2
+      - export PATH="/usr/local/opt/qt/bin:$PATH"
+    script:
+      - mkdir -p "$TRAVIS_BUILD_DIR/build"
+      - ctest -S "$TRAVIS_BUILD_DIR/cmake/ctest/travis_script.ctest" -VV -DSRC_DIR="$TRAVIS_BUILD_DIR" -DBIN_DIR="$TRAVIS_BUILD_DIR/build"
 
 notifications:
     email: false
