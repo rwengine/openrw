@@ -232,6 +232,16 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
         logger->warning("World", "No colour palette for vehicle " + vti->name);
     }
 
+    auto addSeats = [](std::vector<SeatInfo>& seats, glm::vec3&& offset) {
+        // Left seat
+        offset.x = -offset.x;
+        seats.push_back({offset});
+
+        // Right seat
+        offset.x = -offset.x;
+        seats.push_back({offset});
+    };
+
     auto model = vti->getModel();
     auto info = data->vehicleInfo.find(vti->handling_);
     if (model && info != data->vehicleInfo.end() &&
@@ -249,26 +259,20 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
                 // These are nested within chassis_dummy
                 auto frontseat = frame->findDescendant("ped_frontseat");
                 auto backseat = frame->findDescendant("ped_backseat");
+
                 if (frontseat) {
-                    auto p = frontseat->getDefaultTranslation();
-                    // Left seat
-                    p.x = -p.x;
-                    info->second->seats.front.push_back({p});
-                    // Right seat
-                    p.x = -p.x;
-                    info->second->seats.front.push_back({p});
+                    addSeats(info->second->seats.front, frontseat->getDefaultTranslation());
                 }
                 if (backseat) {
                     // @todo how does this work for the barracks, ambulance
                     // or coach?
-                    auto p = backseat->getDefaultTranslation();
-                    // Left seat
-                    p.x = -p.x;
-                    info->second->seats.back.push_back({p});
-                    // Right seat
-                    p.x = -p.x;
-                    info->second->seats.back.push_back({p});
+                    addSeats(info->second->seats.back, backseat->getDefaultTranslation());
                 }
+            } else if (name == "ped_frontseat") {
+                // The speeder boat does not have a chassis_dummy but has the
+                // frontseat directly in the root frame.
+
+                addSeats(info->second->seats.front, frame->getDefaultTranslation());
             }
         }
     }
