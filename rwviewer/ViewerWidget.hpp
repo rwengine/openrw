@@ -9,9 +9,9 @@
 #include <glm/glm.hpp>
 #include <loaders/LoaderIFP.hpp>
 
-// Prevent Qt from conflicting with glLoadGen
-#define GL_ARB_debug_output
-#define GL_KHR_debug
+// Prevent Qt from conflicting with glLoadGen on macOS
+#include "OpenGLCompat.h"
+
 #include <QOpenGLWindow>
 
 class GameRenderer;
