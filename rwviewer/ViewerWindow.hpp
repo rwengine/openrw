@@ -4,6 +4,9 @@
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 
+// Prevent Qt from conflicting with glLoadGen on macOS
+#include "OpenGLCompat.h"
+
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QVBoxLayout>
