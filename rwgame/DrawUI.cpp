@@ -8,6 +8,7 @@
 
 #include <glm/gtc/constants.hpp>
 #include <iomanip>
+#include <sstream>
 
 constexpr size_t ui_textSize = 25;
 constexpr size_t ui_textHeight = 22;

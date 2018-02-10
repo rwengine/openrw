@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_TEXTRENDERER_HPP_
 #define _RWENGINE_TEXTRENDERER_HPP_
 
+#include <array>
 #include <memory>
 #include <string>
 #include <array>
