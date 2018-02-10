@@ -1,0 +1,62 @@
+cmake_minimum_required(VERSION 3.2.2)
+
+set(MODEL_NAME "experimental")
+
+include("${CTEST_SCRIPT_DIRECTORY}/utils.ctest")
+
+openrw_src_dir(CTEST_SOURCE_DIRECTORY)
+if($ENV{DOCKER})
+    set(CTEST_BINARY_DIRECTORY "/build")
+else()
+    openrw_bin_dir(CTEST_BINARY_DIRECTORY "experimental")
+endif()
+set(CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+
+openrw_build_name(BUILDER_NAME BUILD_NAME)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "Linux detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_linux.ctest")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    message(STATUS "Windows detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_windows.ctest")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    message(STATUS "MacOS X detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_darwin.ctest")
+else()
+    message(FATAL_ERROR "Unknown CMAKE_SYSTEM_NAME detected '${CMAKE_SYSTEM_NAME}'")
+endif()
+
+set(ERROR_MESSAGES)
+
+set(SEPARATE_TEST_SUITES TRUE)
+
+if($ENV{RUN_COVERAGE})
+    set(RUN_COVERAGE TRUE)
+else()
+    set(RUN_COVERAGE FALSE)
+endif()
+set(RUN_MEMCHECK FALSE) #TODO
+
+set(APPEND_RESULTS FALSE)
+if($ENV{SUBMIT})
+    set(SUBMIT TRUE)
+else()
+    set(SUBMIT FALSE)
+endif()
+
+set(EMPTY_BINARY_DIR TRUE)
+set(TESTS_NODATA FALSE)
+set(RUN_TESTS TRUE)
+
+include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
+
+if(ERROR_MESSAGES)
+    foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
+        message(SEND_ERROR "${ERROR_MESSAGE}")
+    endforeach()
+    message(FATAL_ERROR "Error(s) detected")
+endif()

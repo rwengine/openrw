@@ -6,22 +6,22 @@ git:
 matrix:
   include:
   - os: linux
-    env: NAME="Ubuntu Linux (Latest)"
+    env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
   - os: linux
-    env: NAME="Fedora Linux (Latest)"
+    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"
   - os: linux
-    env: NAME="Arch Linux (Latest)"
+    env: NAME="Arch Linux (Latest)" NAME_SUFFIX="arch"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
   - os: osx
-    env: NAME="Apple macOS"
+    env: NAME="Apple macOS" NAME_SUFFIX="mac"
     osx_image: xcode9.2
     install:
       - brew update
@@ -30,7 +30,7 @@ matrix:
       - export PATH="/usr/local/opt/qt/bin:$PATH"
     script:
       - mkdir -p "$TRAVIS_BUILD_DIR/build"
-      - ctest -S "$TRAVIS_BUILD_DIR/cmake/ctest/travis_script.ctest" -VV -DSRC_DIR="$TRAVIS_BUILD_DIR" -DBIN_DIR="$TRAVIS_BUILD_DIR/build"
+      - ctest -VV -S "$TRAVIS_BUILD_DIR/cmake/ctest/script_ci.ctest"
 
 notifications:
     email: false
