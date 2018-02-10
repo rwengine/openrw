@@ -17,6 +17,7 @@ target_compile_definitions(rw_interface
     INTERFACE
         "$<$<CONFIG:Debug>:RW_DEBUG=1>"
         "GLM_FORCE_RADIANS"
+        "GLM_ENABLE_EXPERIMENTAL"
         "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
     )
 
