@@ -7,11 +7,13 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Geometry::Geometry() : flags(0) {
+Geometry::Geometry() : EBO(0), flags(0) {
 }
 
 Geometry::~Geometry() {
-    glDeleteBuffers(1, &EBO);
+    if (EBO) {
+        glDeleteBuffers(1, &EBO);
+    }
 }
 
 ModelFrame::ModelFrame(unsigned int index, glm::mat3 dR, glm::vec3 dT)
