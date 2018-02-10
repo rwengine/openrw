@@ -1,0 +1,104 @@
+set(_WIN_NEEDED_VARS
+    BOOST_ROOT
+    BOOST_VERSION
+    CMAKE_GENERATOR
+    CONFIGURATION
+    DEP_DIR
+    PLATFORM
+    WIN_DEP_NAME
+    WIN_DEP_URL
+    )
+foreach(_WIN_NEEDED_VAR ${_WIN_NEEDED_VARS})
+    set("${_WIN_NEEDED_VAR}" "$ENV{${_WIN_NEEDED_VAR}}")
+    message(STATUS "configure_windows: script argument: ${_WIN_NEEDED_VAR} = '${${_WIN_NEEDED_VAR}}'")
+    if("${${_WIN_NEEDED_VAR}}" STREQUAL "")
+        message(FATAL_ERROR "${_WIN_NEEDED_VAR} is empty")
+    endif()
+endforeach()
+
+string(REPLACE "." "_" _BOOST_VERSION_UNDERSCORED "${BOOST_VERSION}")
+set(BOOST_ROOT "${BOOST_ROOT}\\boost_${_BOOST_VERSION_UNDERSCORED}")
+
+string(TOLOWER "${PLATFORM}" PLATFORM)
+if(PLATFORM STREQUAL "win32")
+    set(CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+    set(TRIPLET "x86-windows-static")
+elseif(PLATFORM STREQUAL "x64")
+    set(CMAKE_GENERATOR "${CMAKE_GENERATOR} Win64")
+    set(TRIPLET "x64-windows-static")
+else()
+    message(FATAL_ERROR "Unknown platform (${PLATFORM})")
+endif()
+
+string(TOLOWER "${CONFIGURATION}" CONFIGURATION)
+if(CONFIGURATION STREQUAL "debug")
+    set(DEBUG TRUE)
+    set(_LIBRARY_DIR_INFIX "debug")
+elseif(CONFIGURATION STREQUAL "release")
+    set(DEBUG FALSE)
+    set(_LIBRARY_DIR_INFIX "")
+else()
+    message(FATAL_ERROR "Unknown configuration '${CONFIGURATION}'")
+endif()
+
+file(MAKE_DIRECTORY "${DEP_DIR}")
+set(_WIN_DEP_DIR "${DEP_DIR}\\${WIN_DEP_NAME}")
+set(TRIPLET_DIR "${_WIN_DEP_DIR}\\${TRIPLET}")
+
+message(STATUS "Checking windows dependency dir '${_WIN_DEP_DIR}'...")
+if(NOT IS_DIRECTORY "${_WIN_DEP_DIR}")
+    message(STATUS "... does not exist.")
+    message(STATUS "Executing git clone...")
+    execute_process(
+        COMMAND git clone --depth 1 -- "${WIN_DEP_URL}"
+        WORKING_DIRECTORY "${DEP_DIR}"
+        RESULT_VARIABLE GIT_RESULT
+        )
+    if(GIT_RESULT)
+        message(FATAL_ERROR "Failed to clone '${WIN_DEP_URL}'")
+    endif()
+else()
+    message(STATUS "... exists.")
+    message(STATUS "Skipping git clone")
+endif()
+
+set(_INCLUDE_PATH
+    "${TRIPLET_DIR}\\include"
+    )
+set(ENV{OPENALDIR} "${TRIPLET_DIR}\\include\\AL")
+set(ENV{SDL2DIR} "${TRIPLET_DIR}\\include\\SDL2")
+
+set(_LIBRARY_PATH
+    "${TRIPLET_DIR}\\${_LIBRARY_DIR_INFIX}\\lib"
+    )
+
+set(_C_FLAGS "/DWIN32 /D_WINDOWS /W3 /utf-8 /MP")
+set(_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /utf-8 /GR /EHsc /MP")
+set(_C_FLAGS_DEBUG "/D_DEBUG /MTd /Z7 /Ob0 /Od /RTC1")
+set(_C_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
+set(_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /DNDEBUG")
+set(_C_FLAGS_RELWITHDEBINFO "/MT /Zi /O2 /Ob1 /DNDEBUG")
+
+set(CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+set(DEBUG "${DEBUG}")
+set(CONFIGURE_EXTRA_OPTIONS
+    "-DCMAKE_INCLUDE_PATH=${_INCLUDE_PATH}"
+    "-DCMAKE_LIBRARY_PATH=${_LIBRARY_PATH}"
+    "-DCMAKE_C_FLAGS=${_C_FLAGS}"
+    "-DCMAKE_C_FLAGS_DEBUG=${_C_FLAGS_DEBUG}"
+    "-DCMAKE_C_FLAGS_MINSIZEREL=${_C_FLAGS_MINSIZEREL}"
+    "-DCMAKE_C_FLAGS_RELEASE=${_C_FLAGS_RELEASE}"
+    "-DCMAKE_C_FLAGS_RELWITHDEBINFO=${_C_FLAGS_RELWITHDEBINFO}"
+    "-DCMAKE_CXX_FLAGS=${_CXX_FLAGS}"
+    "-DCMAKE_CXX_FLAGS_DEBUG=${_C_FLAGS_DEBUG}"
+    "-DCMAKE_CXX_FLAGS_MINSIZEREL=${_C_FLAGS_MINSIZEREL}"
+    "-DCMAKE_CXX_FLAGS_RELEASE=${_C_FLAGS_RELEASE}"
+    "-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=${_C_FLAGS_RELWITHDEBINFO}"
+    "-DBOOST_ROOT=${BOOST_ROOT}"
+    "-DBoost_USE_STATIC_LIBS=TRUE"
+    "-DBoost_USE_STATIC_RUNTIME=TRUE"
+    )
+
+set(BUILD_VIEWER FALSE) #FIXME: ENABLE
+set(COVERAGE_COMMAND "echo") #FIXME: ENABLE
+set(CHECK_INCLUDES FALSE) #FIXME: ENABLE

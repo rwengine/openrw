@@ -1,0 +1,160 @@
+# This file does:
+# - check whether all arguments are defined,
+# - clean the build directory,
+# - configure, build and test,
+# - coverage and memcheck,
+# - submit
+
+set(_ARGS_BOOL
+    EMPTY_BINARY_DIR
+
+    DEBUG
+    CHECK_INCLUDES
+    BUILD_VIEWER
+
+    RUN_TESTS
+    TESTS_NODATA
+    SEPARATE_TEST_SUITES
+
+    RUN_MEMCHECK
+
+    APPEND_RESULTS
+    RUN_COVERAGE
+    SUBMIT
+    )
+
+set(_ARGS_ONEVAL
+    CTEST_SOURCE_DIRECTORY
+    CTEST_BINARY_DIRECTORY
+    MODEL_NAME
+    BUILDER_NAME
+    BUILD_NAME
+
+    CMAKE_GENERATOR
+    COVERAGE_COMMAND
+    )
+
+set(_ARGS_MULVAL
+    CONFIGURE_EXTRA_OPTIONS
+    )
+
+foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
+    set(_VAL "${${_ARG}}")
+    message(STATUS "build parameter: ${_ARG}='${_VAL}'")
+    if(_VAL STREQUAL "")
+        message(FATAL_ERROR "Need value for build parameter '${_ARG}'")
+    endif()
+endforeach()
+
+# CTEST_CMAKE_GENERATOR and CTEST_COVERAGE_COMMAND needed by CTest
+set(CTEST_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+set(CTEST_COVERAGE_COMMAND "${COVERAGE_COMMAND}")
+
+set(CTEST_SITE "${BUILDER_NAME}")
+set(CTEST_BUILD_NAME "${BUILD_NAME}")
+
+set(NUMBER_ERRORS "0")
+set(NUMBER_WARNINGS "0")
+
+if(EMPTY_BINARY_DIR)
+    message(STATUS "Removing binary directory '${CTEST_BINARY_DIRECTORY}'...")
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt")
+        message(STATUS "CMakeCache.txt file exists ==> removing")
+        ctest_empty_binary_directory("${CTEST_BINARY_DIRECTORY}")
+    endif()
+endif()
+
+set(_CTEST_START_EXTRA_ARGS)
+set(_CTEST_CONFIGURE_EXTRA_ARGS)
+if(APPEND_RESULTS)
+    list(APPEND _CTEST_START_EXTRA_ARGS "APPEND")
+    list(APPEND _CTEST_CONFIGURE_EXTRA_ARGS "APPEND")
+endif()
+
+message(STATUS "Starting test...")
+ctest_start("${MODEL_NAME}" ${_CTEST_START_EXTRA_ARGS})
+
+# CTEST_CONFIGURATION_TYPE is needed on Windows (no leading underscore)
+if(DEBUG)
+    set(_CMAKE_BUILD_TYPE "Debug")
+    set(_CTEST_BUILD_CONFIGURATION "Debug")
+    set(CTEST_CONFIGURATION_TYPE "Debug")
+else()
+    set(_CMAKE_BUILD_TYPE "Release")
+    set(_CTEST_BUILD_CONFIGURATION "Release")
+    set(CTEST_CONFIGURATION_TYPE "Release")
+endif()
+
+set(_CONFIGURE_OPTIONS
+    "-DBUILD_VIEWER=${BUILD_VIEWER}"
+    "-DBUILD_TESTS=TRUE"
+    "-DTESTS_NODATA=${TESTS_NODATA}"
+    "-DTEST_COVERAGE=${RUN_COVERAGE}"
+    "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
+    "-DCHECK_INCLUDES=${CHECK_INCLUDES}"
+    "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
+    )
+
+message(STATUS "Configuring...")
+message(STATUS "options='${_CONFIGURE_OPTIONS}'")
+message(STATUS "extra options='${CONFIGURE_EXTRA_OPTIONS}'")
+ctest_configure(
+    OPTIONS
+        "${_CONFIGURE_OPTIONS};${CONFIGURE_EXTRA_OPTIONS}"
+    RETURN_VALUE
+        _CONFIGURE_RESULT
+    ${_CTEST_CONFIGURE_EXTRA_ARGS}
+    )
+
+message(STATUS "Building...")
+ctest_build(
+    CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+    NUMBER_ERRORS _NB_BUILD_ERRORS
+    NUMBER_WARNINGS _NB_BUILD_WARNINGS
+    )
+
+if(RUN_TESTS)
+    message(STATUS "Running tests...")
+    ctest_test(
+        RETURN_VALUE _TEST_RESULT
+        )
+else()
+    message(STATUS "Skipping tests...")
+endif()
+
+if(RUN_COVERAGE)
+    message(STATUS "Collecting coverage...")
+    ctest_coverage(
+        RETURN_VALUE _COVERAGE_RESULT
+        )
+else()
+    message(STATUS "Coverage skipped.")
+endif()
+
+if(RUN_MEMCHECK)
+    message(STATUS "Running memcheck...")
+    message(AUTHOR_WARNING "Memcheck not implemented (yet).")
+else()
+    message(STATUS "Memcheck skipped.")
+endif()
+
+if(SUBMIT)
+    message(STATUS "Submitting...")
+    ctest_submit(
+        RETURN_VALUE _SUBMIT_RESULT
+        )
+else()
+    message(STATUS "Submit skipped.")
+endif()
+
+if(_CONFIGURE_RESULT)
+    list(APPEND ERROR_MESSAGES "Configure error detected!")
+endif()
+
+if(_NB_BUILD_ERRORS)
+    list(APPEND ERROR_MESSAGES "Build failure detected!")
+endif()
+
+if(_TEST_RESULT)
+    list(APPEND ERROR_MESSAGES "Test failure detected!")
+endif()

@@ -1,0 +1,64 @@
+cmake_minimum_required(VERSION 3.2.2)
+
+set(MODEL_NAME "continuous")
+
+include("${CTEST_SCRIPT_DIRECTORY}/utils.ctest")
+
+openrw_src_dir(CTEST_SOURCE_DIRECTORY)
+if($ENV{DOCKER})
+    set(CTEST_BINARY_DIRECTORY "/build")
+else()
+    openrw_bin_dir_default(CTEST_BINARY_DIRECTORY)
+endif()
+set(CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
+
+openrw_build_name(BUILDER_NAME_BASE BUILD_NAME)
+set(BUILDER_NAME_BASE "${BUILDER_NAME_BASE}-$ENV{NAME_SUFFIX}")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "Linux detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_linux.ctest")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    message(STATUS "Windows detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_windows.ctest")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    message(STATUS "MacOS X detected")
+
+    include("${CTEST_SCRIPT_DIRECTORY}/configure_darwin.ctest")
+else()
+    message(FATAL_ERROR "Unknown CMAKE_SYSTEM_NAME detected '${CMAKE_SYSTEM_NAME}'")
+endif()
+
+set(ERROR_MESSAGES)
+
+set(SEPARATE_TEST_SUITES FALSE)
+set(RUN_COVERAGE FALSE)
+set(RUN_MEMCHECK FALSE)
+set(SUBMIT TRUE)
+
+# Build with no data and test
+set(BUILDER_NAME "${BUILDER_NAME_BASE}-nodata")
+set(APPEND_RESULTS FALSE)
+set(EMPTY_BINARY_DIR TRUE)
+set(TESTS_NODATA TRUE)
+set(RUN_TESTS TRUE)
+
+include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
+
+# Build with data and do not test
+set(BUILDER_NAME "${BUILDER_NAME_BASE}-data")
+set(APPEND_RESULTS FALSE)
+set(EMPTY_BINARY_DIR FALSE)
+set(TESTS_NODATA FALSE)
+set(RUN_TESTS FALSE)
+
+include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
+
+if(ERROR_MESSAGES)
+    foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
+        message(SEND_ERROR "${ERROR_MESSAGE}")
+    endforeach()
+    message(FATAL_ERROR "Error(s) detected")
+endif()

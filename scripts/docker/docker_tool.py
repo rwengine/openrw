@@ -30,6 +30,7 @@ def create(ns: argparse.Namespace):
     if not build_dir.exists():
         build_dir.mkdir()
     env_args = [a for e in ns.env for a in ('-e', e)]
+    env_args += ['-e', 'DOCKER=TRUE', ]
     run_args = ['docker', 'run',
                     '-v', '{}:/src:ro,z'.format(str(openrw_dir)),
                     '-v', '{}:/build:rw,z'.format(str(build_dir)) ] + \
@@ -42,7 +43,7 @@ def create(ns: argparse.Namespace):
     sub_run(['docker', 'exec', ns.name, 'useradd', '--create-home',
                     '--uid', str(ns.uid), '-g', ns.username, ns.username])
     sub_run(['docker', 'exec', ns.name, 'chown', '{0}:{0}'.format(ns.username),
-                    '/build', '/src'])
+                    '/build'])
 
 
 def exec(ns: argparse.Namespace):
