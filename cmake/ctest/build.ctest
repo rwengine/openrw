@@ -156,5 +156,5 @@ if(_NB_BUILD_ERRORS)
 endif()
 
 if(_TEST_RESULT)
-    list(APPEND ERROR_MESSAGES "Test failure detected!")
+    list(APPEND WARNING_MESSAGES "Test failure detected!")
 endif()
