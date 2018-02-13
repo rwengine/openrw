@@ -31,6 +31,7 @@ else()
     message(FATAL_ERROR "Unknown CMAKE_SYSTEM_NAME detected '${CMAKE_SYSTEM_NAME}'")
 endif()
 
+set(WARNING_MESSAGES)
 set(ERROR_MESSAGES)
 
 set(SEPARATE_TEST_SUITES FALSE)
@@ -55,6 +56,13 @@ set(TESTS_NODATA FALSE)
 set(RUN_TESTS FALSE)
 
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
+
+if(WARNING_MESSAGES)
+    foreach(WARNING_MESSAGE ${WARNING_MESSAGES})
+        message(WARNING "${WARNING_MESSAGE}")
+    endforeach()
+    message(WARNING "Warning(s) detected")
+endif()
 
 if(ERROR_MESSAGES)
     foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
