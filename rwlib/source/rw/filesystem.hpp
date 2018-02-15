@@ -27,6 +27,7 @@ namespace rwfs {
     using namespace boost::filesystem;
     using error_code = boost::system::error_code;
 }
+#include <boost/version.hpp>
 #if BOOST_VERSION < 105600
 namespace boost {
 namespace filesystem {
