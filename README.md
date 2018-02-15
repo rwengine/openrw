@@ -1,6 +1,6 @@
 # OpenRW
 
-[![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
+## About
 
 OpenRW is a cross-platform, open source re-implementation of Rockstar Games'
 Grand Theft Auto III, a classic 3D action game first published in 2001.
@@ -8,6 +8,11 @@ OpenRW has been ported to Linux, macOS, Windows, and several variants of BSD.
 
 A legitimate copy of the original PC game is required to run OpenRW. Without
 this it will not be possible to play.
+
+Status | Platform
+---:| ---
+[![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | Ubuntu, Fedora, Arch, macOS
+[![Build Status](https://ci.appveyor.com/api/projects/status/xyffurxul8m7heq6/branch/master?svg=true)](https://ci.appveyor.com/project/danhedron/openrw/branch/master) | Visual Studio 2017
 
 ## Links
 
