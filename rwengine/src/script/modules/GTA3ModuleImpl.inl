@@ -24,7 +24,7 @@
     opcode 0000
 */
 void opcode_0000(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0000);
+    // Does nothing.
     RW_UNUSED(args);
 }
 
@@ -48,7 +48,6 @@ void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
     @arg arg1 
 */
 void opcode_0002(const ScriptArguments& args, const ScriptLabel arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0002);
     auto thread = args.getThread();
     thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
 }
