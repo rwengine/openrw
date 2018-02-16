@@ -1761,9 +1761,7 @@ void opcode_0097(const ScriptArguments& args, ScriptFloat& arg1L) {
     @arg arg1G 
 */
 void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0098);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(args);
+    arg1G = args.getVM()->getRandomNumber(0.f, 1.f);
 }
 
 /**
@@ -1773,9 +1771,8 @@ void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
     @arg arg1G 
 */
 void opcode_0099(const ScriptArguments& args, ScriptInt& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0099);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(args);
+    // TODO: For GTA III and VC, the range is 0-65535, for GTA: SA it is 0-32767
+    arg1G = args.getVM()->getRandomNumber(0, 65535);
 }
 
 /**
@@ -6041,16 +6038,12 @@ bool opcode_0207(const ScriptArguments& args, const ScriptCharacter character, c
     @brief %3d% = random_float %1d% %2d%
 
     opcode 0208
-    @arg arg1 
-    @arg arg2 
-    @arg arg3 
+    @arg min
+    @arg max
+    @arg result
 */
-void opcode_0208(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, ScriptFloat& arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x0208);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(args);
+void opcode_0208(const ScriptArguments& args, const ScriptFloat min, const ScriptFloat max, ScriptFloat& result) {
+    result = args.getVM()->getRandomNumber(min, max);
 }
 
 /**
@@ -6059,11 +6052,10 @@ void opcode_0208(const ScriptArguments& args, const ScriptFloat arg1, const Scri
     opcode 0209
     @arg min
     @arg max
-    @arg arg3 
+    @arg result
 */
-void opcode_0209(const ScriptArguments& args, const ScriptInt min, const ScriptInt max, ScriptInt& arg3) {
-    RW_UNUSED(args);
-    arg3 = std::rand() % (max - min) + min;
+void opcode_0209(const ScriptArguments& args, const ScriptInt min, const ScriptInt max, ScriptInt& result) {
+    result = args.getVM()->getRandomNumber(min, max);
 }
 
 /**
