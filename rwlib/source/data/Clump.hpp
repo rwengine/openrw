@@ -135,8 +135,7 @@ struct GeometryVertex {
         , colour(_colour) {
     }
 
-    GeometryVertex() {
-    }
+    GeometryVertex() = default;
 };
 
 /**

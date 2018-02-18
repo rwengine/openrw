@@ -38,9 +38,7 @@ GameData::GameData(Logger* log, const rwfs::path& path)
         });
 }
 
-GameData::~GameData() {
-    /// @todo don't leak models
-}
+GameData::~GameData() = default;
 
 void GameData::load() {
     index.indexGameDirectory(datpath);

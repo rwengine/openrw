@@ -71,8 +71,7 @@ struct TextVertex {
         , colour(_colour) {
     }
 
-    TextVertex() {
-    }
+    TextVertex() = default;
 
     static const AttributeList vertex_attributes() {
         return {
@@ -132,8 +131,7 @@ TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
     }
 }
 
-TextRenderer::~TextRenderer() {
-}
+TextRenderer::~TextRenderer() = default;
 
 void TextRenderer::setFontTexture(int index, const std::string& texture) {
     if (index < GAME_FONTS) {

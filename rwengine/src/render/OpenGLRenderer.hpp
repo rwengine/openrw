@@ -33,8 +33,7 @@ struct VertexP2 {
         : position({_x, _y}) {
     }
 
-    VertexP2() {
-    }
+    VertexP2() = default;
 };
 
 
@@ -51,8 +50,7 @@ struct VertexP3 {
         : position({_x, _y, _z}) {
     }
 
-    VertexP3() {
-    }
+    VertexP3() = default;
 };
 
 class Renderer {

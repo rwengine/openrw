@@ -20,8 +20,7 @@ public:
      * @brief The Activity struct interface
      */
     struct Activity {
-        virtual ~Activity() {
-        }
+        virtual ~Activity() = default;
 
         virtual std::string name() const = 0;
 
@@ -77,8 +76,7 @@ protected:
 public:
     CharacterController();
 
-    virtual ~CharacterController() {
-    }
+    virtual ~CharacterController() = default;
 
     /**
      * Get the current Activity.

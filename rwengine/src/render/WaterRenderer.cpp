@@ -55,8 +55,7 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
     gridDraw.addGeometry(&gridGeom);
 }
 
-WaterRenderer::~WaterRenderer() {
-}
+WaterRenderer::~WaterRenderer() = default;
 
 void WaterRenderer::setWaterTable(float* waterHeights, unsigned int nHeights,
                                   uint8_t* tiles, unsigned int nTiles) {

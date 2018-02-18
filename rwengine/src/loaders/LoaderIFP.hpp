@@ -27,8 +27,7 @@ struct AnimationKeyframe {
         , id(_id) {
     }
 
-    AnimationKeyframe() {
-    }
+    AnimationKeyframe() = default;
 };
 
 struct AnimationBone {

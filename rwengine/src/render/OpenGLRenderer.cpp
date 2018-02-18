@@ -469,5 +469,4 @@ const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
     return profileInfo[0];
 }
 
-Renderer::ShaderProgram::~ShaderProgram() {
-}
+Renderer::ShaderProgram::~ShaderProgram() = default;

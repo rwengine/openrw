@@ -31,8 +31,7 @@ public:
         }
     }
 
-    virtual ~State() {
-    }
+    virtual ~State() = default;
 
     void enterMenu(const std::shared_ptr<Menu>& menu) {
         nextMenu = menu;
