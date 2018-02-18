@@ -16,7 +16,7 @@ constexpr GLuint kUBOIndexDraw = 2;
 
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, NULL);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
 
     GLint status;
@@ -30,7 +30,7 @@ GLuint compileShader(GLenum type, const char* source) {
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
         GLchar* buffer = new GLchar[len];
-        glGetShaderInfoLog(shader, len, NULL, buffer);
+        glGetShaderInfoLog(shader, len, nullptr, buffer);
 
         GLint sourceLen;
         glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
@@ -79,7 +79,7 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
         GLchar* buffer = new GLchar[len];
-        glGetProgramInfoLog(prog, len, NULL, buffer);
+        glGetProgramInfoLog(prog, len, nullptr, buffer);
 
         RW_ERROR("[OGL] Program InfoLog(" << prog << "):\n"
                   << buffer);
@@ -376,7 +376,7 @@ bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
 {
     glGenBuffers(1, &out.name);
     glBindBuffer(GL_UNIFORM_BUFFER, out.name);
-    glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_STREAM_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STREAM_DRAW);
 
     if (entrySize != size) {
         GLint UBOAlignment;
@@ -399,7 +399,7 @@ void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t siz
         RW_ASSERT(size <= buffer.entrySize);
         if (buffer.currentEntry >= buffer.entryCount) {
             // Orphan the buffer, we don't want it anymore
-            glBufferData(GL_UNIFORM_BUFFER, buffer.bufferSize, NULL,
+            glBufferData(GL_UNIFORM_BUFFER, buffer.bufferSize, nullptr,
                          GL_STREAM_DRAW);
             buffer.currentEntry = 0;
         }

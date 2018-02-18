@@ -113,7 +113,7 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
         fclose(fp);
         return raw_data;
     } else
-        return 0;
+        return nullptr;
 }
 
 /// Writes the contents of assetname to filename

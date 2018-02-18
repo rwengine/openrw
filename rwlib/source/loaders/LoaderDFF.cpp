@@ -260,7 +260,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     size_t icount = std::accumulate(
         geom->subgeom.begin(), geom->subgeom.end(), 0u,
         [](size_t a, const SubGeometry &b) { return a + b.numIndices; });
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, 0,
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, nullptr,
                  GL_STATIC_DRAW);
     for (auto &sg : geom->subgeom) {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sg.start * sizeof(uint32_t),

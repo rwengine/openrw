@@ -37,7 +37,7 @@ public:
                   btVehicleRaycasterResult& result) override {
         ClosestNotMeRayResultCallback rayCallback(
             _vehicle->collision->getBulletBody(), from, to);
-        const void* res = 0;
+        const void* res = nullptr;
 
         _world->rayTest(from, to, rayCallback);
 

@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
         logger.error("exception", ex.what());
 
         if (SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, kErrorTitle,
-                                     ex.what(), NULL) < 0) {
+                                     ex.what(), nullptr) < 0) {
             SDL_Log("Failed to show message box\n");
         }
 
