@@ -53,16 +53,6 @@ struct ParticleVert {
     float r, g, b;
 };
 
-GeometryBuffer particleGeom;
-DrawBuffer particleDraw;
-
-std::vector<VertexP2> sspaceRect = {
-    {-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f},
-};
-
-GeometryBuffer ssRectGeom;
-DrawBuffer ssRectDraw;
-
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)

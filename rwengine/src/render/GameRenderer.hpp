@@ -62,6 +62,16 @@ class GameRenderer {
     /// Texture used to replace textures missing from the data
     GLuint m_missingTexture;
 
+    GeometryBuffer particleGeom;
+    DrawBuffer particleDraw;
+
+    std::vector<VertexP2> sspaceRect = {
+            {-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f},
+    };
+
+    GeometryBuffer ssRectGeom;
+    DrawBuffer ssRectDraw;
+
 public:
     GameRenderer(Logger* log, GameData* data);
     ~GameRenderer();

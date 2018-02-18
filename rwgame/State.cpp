@@ -2,9 +2,9 @@
 #include "RWGame.hpp"
 
 // This serves as the "initial" camera position.
-ViewCamera defaultView({-250.f, -550.f, 75.f},
+const ViewCamera defaultView{{-250.f, -550.f, 75.f},
                        glm::angleAxis(glm::radians(5.f),
-                                      glm::vec3(0.f, 1.f, 0.f)));
+                                      glm::vec3(0.f, 1.f, 0.f))};
 
 void State::handleEvent(const SDL_Event& e) {
     auto m = getCurrentMenu();
