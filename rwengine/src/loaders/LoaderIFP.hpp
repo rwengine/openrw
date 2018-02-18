@@ -71,7 +71,7 @@ class LoaderIFP {
         return reinterpret_cast<T*>(data + b);
     }
     template <class T>
-    T* peek(char* data, size_t* ofs) {
+    T* peek(char* data, const size_t* ofs) {
         return reinterpret_cast<T*>(data + *ofs);
     }
 
