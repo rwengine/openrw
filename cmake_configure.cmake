@@ -48,8 +48,6 @@ target_compile_definitions(rw_interface
         "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
     )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(rw_interface INTERFACE "RW_LINUX")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

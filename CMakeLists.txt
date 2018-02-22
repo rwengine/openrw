@@ -7,8 +7,7 @@ include(GNUInstallDirs)
 # Read the configuration arguments
 include("${PROJECT_SOURCE_DIR}/cmake_options.cmake")
 
-# Create a rw_interface TARGET that holds all compiler options
-include("${PROJECT_SOURCE_DIR}/cmake_configure.cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 # Include git hash in source
 include(GetGitRevisionDescription)
@@ -26,6 +25,9 @@ find_package(SDL2 REQUIRED)
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
 endif()
+
+# Create a rw_interface TARGET that holds all compiler options
+include("${PROJECT_SOURCE_DIR}/cmake_configure.cmake")
 
 add_subdirectory(rwlib)
 add_subdirectory(rwengine)
