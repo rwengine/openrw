@@ -4259,10 +4259,8 @@ void opcode_0180(const ScriptArguments& args, ScriptInt& arg1G) {
     @arg arg2G 
 */
 void opcode_0181(const ScriptArguments& args, const ScriptContact arg1, ScriptInt& arg2G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0181);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2G);
-    RW_UNUSED(args);
+    auto& c = args.getState()->scriptContacts.at(arg1);
+    c.onMissionOffset = args.getVM()->getGlobalOffset(arg2G);
 }
 
 /**
@@ -4273,10 +4271,8 @@ void opcode_0181(const ScriptArguments& args, const ScriptContact arg1, ScriptIn
     @arg arg2 
 */
 void opcode_0182(const ScriptArguments& args, const ScriptContact arg1, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0182);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+    auto& c = args.getState()->scriptContacts.at(arg1);
+    c.baseBrief = arg2;
 }
 
 /**

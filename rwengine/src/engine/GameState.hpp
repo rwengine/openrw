@@ -250,9 +250,37 @@ enum class HudFlash {
     FlashRadar = 8
 };
 
+enum class ScriptContactID {
+    Luigi = 0,
+    Joey = 1,
+    Toni = 2,
+    Frankie = 3,
+    Asuka = 4,
+    Kenji = 5,
+    Ray = 6,
+    Love = 7,
+    Maria = 8,
+    RaySuburban = 9,
+    AsukaSuburban = 10,
+    KenjiSuburban = 11,
+    EightBall = 12,
+    Hispanic = 13,
+    Yardie = 14,
+    Hoods = 15,
+};
+
+struct ScriptContactData {
+    uint32_t onMissionOffset;
+    uint32_t baseBrief;
+};
+
 /**
- * Gameplay state object that holds persistent state, and references runtime
- * world state.
+ * Game and Runtime state
+ *
+ * Certain fields are initialized by the SCM file, and persisted in saves
+ * such as the Contact data, max wanted level, restart locations etc.
+ *
+ * Other fields are ephemeral such as controller state.
  */
 class GameState {
 public:
@@ -360,6 +388,8 @@ public:
      * Script Machine associated with this state if it exists.
      */
     ScriptMachine* script;
+
+    std::array<ScriptContactData, 16> scriptContacts = { };
 
     GameState();
 

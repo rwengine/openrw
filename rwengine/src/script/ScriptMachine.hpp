@@ -140,6 +140,10 @@ public:
         return state;
     }
 
+    uint32_t getGlobalOffset(ScriptInt& global) const {
+        return uint32_t((SCMByte*)(&global) - globalData.data());
+    }
+
     /**
      * @brief executes threads until they are all in waiting state.
      */
