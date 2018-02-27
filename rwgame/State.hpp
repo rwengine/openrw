@@ -3,8 +3,8 @@
 #include <render/ViewCamera.hpp>
 #include "GameWindow.hpp"
 #include "MenuSystem.hpp"
-#include "SDL.h"
-#include "SDL_events.h"
+#include <SDL.h>
+#include <SDL_events.h>
 
 class RWGame;
 class GameWorld;
