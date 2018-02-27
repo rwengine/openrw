@@ -63,12 +63,3 @@ IF(GLM_FOUND)
         MESSAGE(STATUS "GLM_INCLUDE_DIR = ${GLM_INCLUDE_DIR}")
     ENDIF(NOT GLM_FIND_QUIETLY)
 ENDIF(GLM_FOUND)
-
-if(GLM_FOUND AND NOT TARGET glm::glm)
-    add_library(glm INTERFACE)
-    target_include_directories(glm SYSTEM
-        INTERFACE
-            "${GLM_INCLUDE_DIR}"
-        )
-    add_library(glm::glm ALIAS glm)
-endif()

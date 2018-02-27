@@ -69,16 +69,3 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FFmpeg DEFAULT_MSG FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIR)
-
-if(FFMPEG_FOUND AND NOT TARGET ffmpeg::ffmpeg)
-    add_library(ffmpeg INTERFACE)
-    target_link_libraries(ffmpeg
-        INTERFACE
-            ${FFMPEG_LIBRARIES}
-        )
-    target_include_directories(ffmpeg SYSTEM
-        INTERFACE
-            "${FFMPEG_INCLUDE_DIR}"
-        )
-    add_library(ffmpeg::ffmpeg ALIAS ffmpeg)
-endif()

@@ -70,12 +70,6 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 target_include_directories(rwtests
-    SYSTEM
-    PRIVATE
-        ${Boost_INCLUDE_DIRS}
-    )
-
-target_include_directories(rwtests
     PRIVATE
         "${CMAKE_SOURCE_DIR}/tests"
         "${CMAKE_SOURCE_DIR}/rwgame"
@@ -84,10 +78,9 @@ target_include_directories(rwtests
 target_link_libraries(rwtests
     PRIVATE
         rwengine
-        SDL2::SDL2
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
+        rwdep::SDL2
+        rwdep::boost_filesystem
+        rwdep::boost_unit_test_framework
     )
 
 openrw_target_apply_options(TARGET rwtests)

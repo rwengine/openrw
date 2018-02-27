@@ -44,12 +44,6 @@ add_executable(rwgame
     )
 
 target_include_directories(rwgame
-    SYSTEM
-    PRIVATE
-        ${Boost_INCLUDE_DIRS}
-    )
-
-target_include_directories(rwgame
     PUBLIC
         "${CMAKE_SOURCE_DIR}/rwgame"
     )
@@ -57,8 +51,8 @@ target_include_directories(rwgame
 target_link_libraries(rwgame
     PRIVATE
         rwengine
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        SDL2::SDL2
+        rwdep::boost_program_options
+        rwdep::SDL2
     )
 
 openrw_target_apply_options(TARGET rwgame)

@@ -47,15 +47,10 @@ target_include_directories(rwlib
         "${CMAKE_CURRENT_SOURCE_DIR}/source"
     )
 
-target_include_directories(rwlib
-    SYSTEM
-    PRIVATE
-        ${Boost_INCLUDE_DIRS}
-    )
-
 target_link_libraries(rwlib
     PUBLIC
-        glm::glm
+        rwdep::boost
+        rwdep::glm
         openrw::interface
     PRIVATE
         OpenGL::GL

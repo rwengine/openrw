@@ -14,6 +14,8 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 message(STATUS "Building ${CMAKE_PROJECT_NAME} GIT SHA1: ${GIT_SHA1}")
 
+include(WrapTargets)
+
 find_package(Boost REQUIRED)
 find_package(Boost COMPONENTS program_options system REQUIRED)
 if(FILESYSTEM_LIBRARY STREQUAL "BOOST")
@@ -33,6 +35,8 @@ find_package(Bullet REQUIRED)
 find_package(GLM REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
+
+rwdep_wrap_find_packages()
 
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
