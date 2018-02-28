@@ -2675,7 +2675,7 @@ bool opcode_00f1(const ScriptArguments& args, const ScriptCharacter character, S
     @arg arg5 Boolean true/false
 */
 bool opcode_00f2(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
-    // @todo if characters is in vehicles, game uses vehicle positions instead of character ones
+    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker);
 }
 
@@ -2690,7 +2690,7 @@ bool opcode_00f2(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_00f3(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto condition = character->getCurrentVehicle() == nullptr;
-    // @todo if characters is in vehicles, game uses vehicle positions instead of character ones
+    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
@@ -2705,7 +2705,7 @@ bool opcode_00f3(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_00f4(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto condition = character->getCurrentVehicle() != nullptr;
-    // @todo if characters is in vehicles, game uses vehicle positions instead of character ones
+    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
