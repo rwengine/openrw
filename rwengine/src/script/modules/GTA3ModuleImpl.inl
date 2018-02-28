@@ -24,7 +24,6 @@
     opcode 0000
 */
 void opcode_0000(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0000);
     RW_UNUSED(args);
 }
 
