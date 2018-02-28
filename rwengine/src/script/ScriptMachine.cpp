@@ -169,7 +169,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
 
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile* file,
                              ScriptModule* ops)
-    : file(file), module(ops), state(_state) {
+    : file(file), module(ops), state(_state), debugFlag(false) {
     // Copy globals
     auto size = file->getGlobalsSize();
     globalData.resize(size);

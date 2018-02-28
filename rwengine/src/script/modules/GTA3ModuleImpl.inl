@@ -1761,8 +1761,7 @@ void opcode_0097(const ScriptArguments& args, ScriptFloat& arg1L) {
     @arg arg1G 
 */
 void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0098);
-    RW_UNUSED(arg1G);
+    arg1G = std::rand() / static_cast <float> (RAND_MAX);
     RW_UNUSED(args);
 }
 
@@ -1773,8 +1772,7 @@ void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
     @arg arg1G 
 */
 void opcode_0099(const ScriptArguments& args, ScriptInt& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0099);
-    RW_UNUSED(arg1G);
+    arg1G = std::rand();
     RW_UNUSED(args);
 }
 
@@ -1892,9 +1890,10 @@ void opcode_00a1(const ScriptArguments& args, const ScriptCharacter character, S
     @arg character 
 */
 bool opcode_00a2(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x00a2);
-    RW_UNUSED(character);
     RW_UNUSED(args);
+    if (character) {
+    	return character->isAlive();
+    }
     return false;
 }
 
@@ -2204,12 +2203,15 @@ void opcode_00c0(const ScriptArguments& args, const ScriptInt hour, const Script
     @arg arg2 
     @arg arg3 
 */
-void opcode_00c1(const ScriptArguments& args, const ScriptInt arg1, const ScriptInt arg2, ScriptInt& arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x00c1);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(args);
+void opcode_00c1(const ScriptArguments& args, const ScriptInt hour, const ScriptInt minute, ScriptInt& minutesUntil) {
+    int targetTime = hour * 60 + minute;
+    int currentTime = args.getWorld()->getHour() * 60 + args.getWorld()->getMinute();
+
+    if (targetTime < currentTime) {
+        targetTime += 1440;
+    }
+
+    minutesUntil = targetTime - currentTime;
 }
 
 /**
@@ -2233,8 +2235,8 @@ bool opcode_00c2(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     opcode 00c3
 */
 void opcode_00c3(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x00c3);
-    RW_UNUSED(args);
+    args.getVM()->setDebugFlag(true);
+
 }
 
 /**
@@ -2243,8 +2245,7 @@ void opcode_00c3(const ScriptArguments& args) {
     opcode 00c4
 */
 void opcode_00c4(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x00c4);
-    RW_UNUSED(args);
+    args.getVM()->setDebugFlag(false);
 }
 
 /**
@@ -2252,9 +2253,9 @@ void opcode_00c4(const ScriptArguments& args) {
 
     opcode 00c5
 */
-void opcode_00c5(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x00c5);
+bool opcode_00c5(const ScriptArguments& args) {
     RW_UNUSED(args);
+    return true;
 }
 
 /**
@@ -2262,9 +2263,9 @@ void opcode_00c5(const ScriptArguments& args) {
 
     opcode 00c6
 */
-void opcode_00c6(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x00c6);
+bool opcode_00c6(const ScriptArguments& args) {
     RW_UNUSED(args);
+    return false;
 }
 
 /**
@@ -2381,10 +2382,6 @@ bool opcode_00dd(const ScriptArguments& args, const ScriptCharacter character, c
     @arg model 
 */
 bool opcode_00de(const ScriptArguments& args, const ScriptPlayer player, const ScriptModelID model) {
-    RW_UNIMPLEMENTED_OPCODE(0x00de);
-    RW_UNUSED(player);
-    RW_UNUSED(model);
-    RW_UNUSED(args);
     return script::isInModel(args, player->getCharacter(), model);
 }
 
