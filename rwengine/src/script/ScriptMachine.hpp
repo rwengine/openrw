@@ -92,6 +92,9 @@ struct SCMThread {
     unsigned int stackDepth;
     /// Stores the return-addresses for calls.
     std::array<pc_t, SCM_STACK_DEPTH> calls;
+
+    bool deathOrArrestCheck;
+    bool wastedOrBusted;
 };
 
 /**
