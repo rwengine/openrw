@@ -223,6 +223,14 @@ inline void addObjectToMissionCleanup(const ScriptArguments& args,
         args.getState()->missionObjects.push_back(object);
     }
 }
+
+inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
+                                      GameObject* object) {
+    if (args.getThread()->isMission) {
+        auto& mo = args.getState()->missionObjects;
+        mo.erase(std::remove(mo.begin(), mo.end(), object), mo.end());
+    }
+}
 }
 
 #endif

@@ -5028,9 +5028,11 @@ bool opcode_01c1(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character Character/ped
 */
 void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNUSED(args);
-    /// @todo check if this also removes the character from mission cleanup
+    /// @todo: there's more logic than only changing life time
     character->setLifetime(GameObject::TrafficLifetime);
+    if (args.getThread()->isMission) {
+        removeObjectFromMissionCleanup(character);
+    }
 }
 
 /**
@@ -5040,9 +5042,11 @@ void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c3);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(args);
+    /// @todo: there's more logic than only changing life time
+    vehicle->setLifetime(GameObject::TrafficLifetime);
+    if (args.getThread()->isMission) {
+        removeObjectFromMissionCleanup(vehicle);
+    }
 }
 
 /**
@@ -5052,9 +5056,11 @@ void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c4);
-    RW_UNUSED(object);
-    RW_UNUSED(args);
+    /// @todo: there's more logic than only changing life time
+    object->setLifetime(GameObject::TrafficLifetime);
+    if (args.getThread()->isMission) {
+        removeObjectFromMissionCleanup(object);
+    }
 }
 
 /**
@@ -5064,9 +5070,8 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     @arg character Character/ped
 */
 void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c5);
-    RW_UNUSED(character);
     RW_UNUSED(args);
+    removeObjectFromMissionCleanup(character);
 }
 
 /**
@@ -5076,9 +5081,8 @@ void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c6);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    removeObjectFromMissionCleanup(vehicle);
 }
 
 /**
@@ -5088,9 +5092,8 @@ void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c7);
-    RW_UNUSED(object);
     RW_UNUSED(args);
+    removeObjectFromMissionCleanup(object);
 }
 
 /**
