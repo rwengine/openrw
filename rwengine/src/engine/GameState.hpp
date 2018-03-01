@@ -191,6 +191,8 @@ struct BlipData {
 
     uint16_t size = 3;  // Only used if texture is empty
 
+    uint8_t brightness = 1; // Don't really know how it is used 
+
     enum DisplayMode { Hide = 0, MarkerOnly = 1, RadarOnly = 2, ShowBoth = 3 };
 
     /* Should the blip be displayed? */

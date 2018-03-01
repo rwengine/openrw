@@ -2577,7 +2577,7 @@ bool opcode_00e8(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00e9(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker);
 }
 
@@ -2594,7 +2594,7 @@ bool opcode_00e9(const ScriptArguments& args, const ScriptPlayer player, const S
 bool opcode_00ea(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
     auto condition = plyChar->getCurrentVehicle() == nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker, condition);
 }
 
@@ -2610,7 +2610,7 @@ bool opcode_00ea(const ScriptArguments& args, const ScriptPlayer player, const S
 bool opcode_00eb(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
     auto condition = plyChar->getCurrentVehicle() != nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker, condition);
 }
 
@@ -2707,7 +2707,7 @@ bool opcode_00f1(const ScriptArguments& args, const ScriptCharacter character, S
     @arg arg5 Boolean true/false
 */
 bool opcode_00f2(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker);
 }
 
@@ -2722,7 +2722,7 @@ bool opcode_00f2(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_00f3(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto condition = character0->getCurrentVehicle() == nullptr;
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
@@ -2737,7 +2737,7 @@ bool opcode_00f3(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_00f4(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec2 radius, const ScriptBoolean showMarker) {
     auto condition = character0->getCurrentVehicle() != nullptr;
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
@@ -2855,7 +2855,7 @@ bool opcode_00fa(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 */
 bool opcode_00fb(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker);
 }
 
@@ -2873,7 +2873,7 @@ bool opcode_00fb(const ScriptArguments& args, const ScriptPlayer player, const S
 bool opcode_00fc(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
     auto condition = plyChar->getCurrentVehicle() == nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker, condition);
 }
 
@@ -2889,7 +2889,7 @@ bool opcode_00fc(const ScriptArguments& args, const ScriptPlayer player, const S
 bool opcode_00fd(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto plyChar = player->getCharacter();
     auto condition = plyChar->getCurrentVehicle() != nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadiusNear(args, plyChar, character, radius, showMarker, condition);
 }
 
@@ -2903,7 +2903,7 @@ bool opcode_00fd(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg arg8 Boolean true/false
 */
 bool opcode_00fe(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker);
 }
 
@@ -2918,7 +2918,7 @@ bool opcode_00fe(const ScriptArguments& args, const ScriptCharacter character, S
 */
 bool opcode_00ff(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character->getCurrentVehicle() == nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker, condition);
 }
 
@@ -2933,7 +2933,7 @@ bool opcode_00ff(const ScriptArguments& args, const ScriptCharacter character, S
 */
 bool opcode_0100(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character->getCurrentVehicle() != nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker, condition);
 }
 
@@ -2948,7 +2948,7 @@ bool opcode_0100(const ScriptArguments& args, const ScriptCharacter character, S
 */
 bool opcode_0101(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character->isStopped();
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker, condition);
 }
 
@@ -2963,7 +2963,7 @@ bool opcode_0101(const ScriptArguments& args, const ScriptCharacter character, S
 */
 bool opcode_0102(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character->isStopped() && character->getCurrentVehicle() == nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker, condition);
 }
 
@@ -2978,7 +2978,7 @@ bool opcode_0102(const ScriptArguments& args, const ScriptCharacter character, S
 */
 bool opcode_0103(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 center, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character->isStopped() && character->getCurrentVehicle() != nullptr;
-    // @todo if character is in vehicle, game uses vehicle position instead of character one
+    /// @todo if character is in vehicle, game uses vehicle position instead of character one
     return script::objectInRadius(args, character.get(), center, radius, showMarker, condition);
 }
 
@@ -2992,7 +2992,7 @@ bool opcode_0103(const ScriptArguments& args, const ScriptCharacter character, S
     @arg arg6 Boolean true/false
 */
 bool opcode_0104(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec3 radius, const ScriptBoolean showMarker) {
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker);
 }
 
@@ -3007,7 +3007,7 @@ bool opcode_0104(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_0105(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character0->getCurrentVehicle() == nullptr;
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
@@ -3022,7 +3022,7 @@ bool opcode_0105(const ScriptArguments& args, const ScriptCharacter character0, 
 */
 bool opcode_0106(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1, ScriptVec3 radius, const ScriptBoolean showMarker) {
     auto condition = character0->getCurrentVehicle() != nullptr;
-    // @todo if characters are in vehicles, game uses vehicle positions instead of character ones
+    /// @todo if characters are in vehicles, game uses vehicle positions instead of character ones
     return script::objectInRadiusNear(args, character0, character1, radius, showMarker, condition);
 }
 
@@ -3792,7 +3792,7 @@ void opcode_0160(const ScriptArguments& args, ScriptVec3 coord, const ScriptChan
 void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
     auto& data = script::createObjectBlip(args, vehicle);
     data.colour = colour;
-    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
     data.display = static_cast <BlipData::DisplayMode> (display);
     blip = &data;
 }
@@ -3812,7 +3812,7 @@ void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const
 void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
     auto& data = script::createObjectBlip(args, character);
     data.colour = colour;
-    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
     data.display = static_cast <BlipData::DisplayMode> (display);
     blip = &data;
 }
@@ -3833,7 +3833,7 @@ void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_0163(const ScriptArguments& args, const ScriptObject instance, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
     auto& data = script::createObjectBlip(args, instance);
     data.colour = colour;
-    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
     data.display = static_cast <BlipData::DisplayMode> (display);
     blip = &data;
 }
@@ -3859,6 +3859,7 @@ void opcode_0164(const ScriptArguments& args, const ScriptBlip blip) {
     @arg arg2 
 */
 void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipColour colour) {
+    RW_UNUSED(args);
     blip->colour = colour;
 }
 
@@ -3869,11 +3870,9 @@ void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg blip Blip
     @arg arg2 Boolean true/false
 */
-void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0166);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
+void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt brightness) {
     RW_UNUSED(args);
+    blip->brightness = brightness;
 }
 
 /**
@@ -3885,13 +3884,12 @@ void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg arg5 
     @arg blip Blip
 */
-void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlipColour arg4, const ScriptBlipDisplay arg5, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0167);
-    RW_UNUSED(coord);
-    RW_UNUSED(arg4);
-    RW_UNUSED(arg5);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createBlip(args, script::getGround(args, coord), BlipData::Coord);
+    data.colour = colour;
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
@@ -3901,11 +3899,9 @@ void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlip
     @arg blip Blip
     @arg arg2 
 */
-void opcode_0168(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0168);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
+void opcode_0168(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt size) {
     RW_UNUSED(args);
+    blip->size = size;
 }
 
 /**
@@ -3932,7 +3928,7 @@ void opcode_016a(const ScriptArguments& args, const ScriptInt time, const Script
 }
 
 /**
-    @brief   fading
+    @brief fading
 
     opcode 016b
 */
@@ -4841,12 +4837,14 @@ bool opcode_01b0(const ScriptArguments& args, const ScriptVehicle vehicle, const
     @arg arg2 
     @arg arg3 
 */
-void opcode_01b1(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType arg2, const ScriptInt arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x01b1);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
+void opcode_01b1(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponID, const ScriptInt bullets) {
     RW_UNUSED(args);
+    RW_CHECK(weaponID >= 0, "Weapon-ID too low");
+    RW_CHECK(weaponID < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
+
+    auto plyChar = player->getCharacter();
+    plyChar->addToInventory(weaponID, bullets);
+    plyChar->setActiveItem(weaponID);
 }
 
 /**
@@ -4858,19 +4856,12 @@ void opcode_01b1(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg arg3 
 */
 void opcode_01b2(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponID, const ScriptInt bullets) {
-    CharacterState& cs = character->getCurrentState();
+    RW_UNUSED(args);
     RW_CHECK(weaponID >= 0, "Weapon-ID too low");
     RW_CHECK(weaponID < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
 
-    // Give character the weapon
-    auto& weapon = cs.weapons[weaponID];
-    weapon.weaponId = weaponID;
-    weapon.bulletsClip = bullets; /// @todo what to set here?
-    weapon.bulletsTotal = bullets;
-
-    // Set active weapon
-    cs.currentWeapon = weaponID;
-    RW_UNUSED(args);
+    character->addToInventory(weaponID, bullets);
+    character->setActiveItem(weaponID);
 }
 
 /**
@@ -5037,9 +5028,9 @@ bool opcode_01c1(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character Character/ped
 */
 void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
+    RW_UNUSED(args);
     /// @todo check if this also removes the character from mission cleanup
     character->setLifetime(GameObject::TrafficLifetime);
-    RW_UNUSED(args);
 }
 
 /**
