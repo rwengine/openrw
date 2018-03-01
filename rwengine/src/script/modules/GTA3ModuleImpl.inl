@@ -21,17 +21,23 @@
 /**
     @brief NOP
 
-    opcode 0000
+    opcode 0000 / 0
+
+    Does nothing
+    Note: not used in the game
 */
 void opcode_0000(const ScriptArguments& args) {
     RW_UNUSED(args);
 }
 
 /**
-    @brief wait %1d% ms
+    @brief WAIT time
 
-    opcode 0001
-    @arg time Time (ms)
+    opcode 0001 / 1
+
+    Yields execution of the script for specified amount of time in milliseconds
+
+    @arg time Time to yield in ms
 */
 void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
     RW_CHECK(time >= 0, "negative wait time is not supported");
@@ -41,21 +47,27 @@ void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 }
 
 /**
-    @brief goto %1p%
+    @brief GOTO label
 
-    opcode 0002
-    @arg arg1 
+    opcode 0002 / 2
+
+    Jumps to a label in the script
+
+    @arg label Position in the script it will jump to
 */
-void opcode_0002(const ScriptArguments& args, const ScriptLabel arg1) {
+void opcode_0002(const ScriptArguments& args, const ScriptLabel label) {
     auto thread = args.getThread();
-    thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+    thread->programCounter = label < 0 ? thread->baseAddress - label : label;
 }
 
 /**
-    @brief shake_cam %1d%
+    @brief SHAKE_CAM time
 
-    opcode 0003
-    @arg time Time (ms)
+    opcode 0003 / 3
+
+    Shakes the camera
+
+    @arg time Time to shake in ms
 */
 void opcode_0003(const ScriptArguments& args, const ScriptInt time) {
     RW_UNIMPLEMENTED_OPCODE(0x0003);
@@ -64,87 +76,111 @@ void opcode_0003(const ScriptArguments& args, const ScriptInt time) {
 }
 
 /**
-    @brief %1d% = %2d%
+    @brief SET_VAR_INT lvalue rvalue
 
-    opcode 0004
-    @arg arg1G 
-    @arg arg2 
+    opcode 0004 / 4
+
+    lvalue = rvalue
+
+    @arg lvalue Script variable
+    @arg rvalue Int value to assign
 */
-void opcode_0004(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+void opcode_0004(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1G = arg2;
+    lvalue = rvalue;
 }
 
 /**
-    @brief %1d% = %2d%
+    @brief SET_VAR_FLOAT lvalue rvalue
 
-    opcode 0005
-    @arg arg1G 
-    @arg arg2 
+    opcode 0005 / 5
+
+    lvalue = rvalue
+
+    @arg lvalue Script variable
+    @arg rvalue Float value to assign
 */
-void opcode_0005(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+void opcode_0005(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1G = arg2;
+    lvalue = rvalue;
 }
 
 /**
-    @brief %1d% = %2d%
+    @brief SET_LVAR_INT lvalue rvalue
 
-    opcode 0006
-    @arg arg1L 
-    @arg arg2 
+    opcode 0006 / 6
+
+    lvalue = rvalue
+    Note: same as SET_VAR_INT
+
+    @arg lvalue Script variable
+    @arg rvalue Int value to assign
 */
-void opcode_0006(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+void opcode_0006(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1L = arg2;
+    lvalue = rvalue;
 }
 
 /**
-    @brief %1d% = %2d%
+    @brief SET_LVAR_FLOAT lvalue rvalue
 
-    opcode 0007
-    @arg arg1L 
-    @arg arg2 
+    opcode 0007 / 7
+
+    lvalue = rvalue
+    Note: same as SET_VAR_FLOAT
+
+    @arg lvalue Script variable
+    @arg rvalue Float value to assign
 */
-void opcode_0007(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+void opcode_0007(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1L = arg2;
+    lvalue = rvalue;
 }
 
 /**
-    @brief %1d% += %2d%
+    @brief ADD_VAL_TO_INT_VAR lvalue rvalue
 
-    opcode 0008
-    @arg arg1G 
-    @arg arg2 
+    opcode 0008 / 8
+
+    lvalue += rvalue
+
+    @arg lvalue Script variable
+    @arg rvalue Int value to add
 */
-void opcode_0008(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+void opcode_0008(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1G += arg2;
+    lvalue += rvalue;
 }
 
 /**
-    @brief %1d% += %2d%
+    @brief ADD_VAL_TO_FLOAT_VAR lvalue rvalue
 
-    opcode 0009
-    @arg arg1G 
-    @arg arg2 
+    opcode 0009 / 9
+
+    lvalue += rvalue
+
+    @arg lvalue Script variable
+    @arg rvalue Float value to add
 */
-void opcode_0009(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+void opcode_0009(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1G += arg2;
+    lvalue += rvalue;
 }
 
 /**
-    @brief %1d% += %2h%
+    @brief ADD_VAL_TO_INT_LVAR lvalue rvalue
 
-    opcode 000a
-    @arg arg1L 
-    @arg arg2 
+    opcode 000A / 10
+
+    lvalue += rvalue
+    Note: same as ADD_VAL_TO_INT_VAR
+
+    @arg lvalue Script variable
+    @arg rvalue Int value to add
 */
-void opcode_000a(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+void opcode_000a(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1L += arg2;
+    lvalue += rvalue;
 }
 
 /**
@@ -3753,31 +3789,53 @@ void opcode_0160(const ScriptArguments& args, ScriptVec3 coord, const ScriptChan
     @arg arg3 Boolean true/false
     @arg blip Blip
 */
-void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptBlipColour arg2, const ScriptBoolean arg3, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0161);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, vehicle);
+    data.colour = colour;
+    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
-    @brief %4d% = create_marker_above_actor %1d% color %2d% visibility %3d%
+    @brief ADD_BLIP_FOR_CHAR_OLD pedHandle colour display outblipHandle
 
-    opcode 0162
-    @arg character Character/ped
-    @arg arg2 
-    @arg arg3 
-    @arg blip Blip
+    opcode 0162 / 354
+
+    Creates and attaches blip for an ped
+
+    @arg pedHandle Ped
+    @arg colour Blip colour
+    @arg display Blip display mode
+    @arg outblipHandle Created blip
 */
-void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, const ScriptBlipColour arg2, const ScriptBlipDisplay arg3, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0162);
-    RW_UNUSED(character);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, character);
+    data.colour = colour;
+    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
+}
+
+/**
+    @brief ADD_BLIP_FOR_OBJECT_OLD objectHandle colour display outblipHandle
+
+    opcode 0163 / 355
+
+    Creates and attaches blip for an object
+    Note: not used in the game
+
+    @arg objectHandle Object
+    @arg colour Blip colour
+    @arg display Blip display mode
+    @arg outblipHandle Created blip
+*/
+void opcode_0163(const ScriptArguments& args, const ScriptObject instance, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, instance);
+    data.colour = colour;
+    // @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
@@ -3800,11 +3858,8 @@ void opcode_0164(const ScriptArguments& args, const ScriptBlip blip) {
     @arg blip Blip
     @arg arg2 
 */
-void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipColour arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0165);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipColour colour) {
+    blip->colour = colour;
 }
 
 /**
