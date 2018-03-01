@@ -167,26 +167,9 @@ const char* getBlipSprite(ScriptRadarSprite sprite);
 
 inline BlipData& createBlipSprite(const ScriptArguments& args, const ScriptVec3& coord,
                                   BlipData::BlipType type, int sprite) {
-    BlipData data;
-    data.coord = coord;
-    data.type = type;
-    switch (type) {
-        case BlipData::Contact:
-            data.colour = 2;
-            break;
-        case BlipData::Coord:
-            data.colour = 5;
-            break;
-        default:
-            RW_ERROR("Unhandled blip type");
-            break;
-    }
-    data.target = 0;
-    data.display = BlipData::ShowBoth;
+    auto& data = script::createBlip(args, coord, type);
     data.texture = getBlipSprite(sprite);
-    data.size = 3;
-    auto blip = args.getState()->addRadarBlip(data);
-    return args.getState()->radarBlips[blip];
+    return data;
 }
 
 inline BlipData& createObjectBlip(const ScriptArguments& args,
@@ -224,35 +207,9 @@ inline BlipData& createObjectBlip(const ScriptArguments& args,
 
 inline BlipData createObjectBlipSprite(const ScriptArguments& args,
                                        GameObject* object, int sprite) {
-    BlipData data;
-    switch (object->type()) {
-        case GameObject::Vehicle:
-            data.type = BlipData::Vehicle;
-            data.colour = 0;
-            break;
-        case GameObject::Character:
-            data.type = BlipData::Character;
-            data.colour = 1;
-            break;
-        case GameObject::Pickup:
-            data.type = BlipData::Pickup;
-            data.colour = 6;
-            break;
-        case GameObject::Instance:
-            data.type = BlipData::Instance;
-            data.colour = 6;
-            break;
-        default:
-            data.type = BlipData::None;
-            RW_ERROR("Unhandled blip type");
-            break;
-    }
-    data.target = object->getScriptObjectID();
-    data.display = BlipData::ShowBoth;
+    auto& data = script::createObjectBlip(args, object);
     data.texture = getBlipSprite(sprite);
-    data.size = 3;
-    auto blip = args.getState()->addRadarBlip(data);
-    return args.getState()->radarBlips[blip];
+    return data;
 }
 
 ScriptModel getModel(const ScriptArguments& args, ScriptModel model);
@@ -266,6 +223,6 @@ inline void addObjectToMissionCleanup(const ScriptArguments& args,
         args.getState()->missionObjects.push_back(object);
     }
 }
-} // namespace end
+}
 
 #endif
