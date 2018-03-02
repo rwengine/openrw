@@ -82,7 +82,7 @@ void opcode_0003(const ScriptArguments& args, const ScriptInt time) {
 
     lvalue = rvalue
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for int script variable 
     @arg rvalue Int value to assign
 */
 void opcode_0004(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
@@ -97,7 +97,7 @@ void opcode_0004(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt
 
     lvalue = rvalue
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for float script variable 
     @arg rvalue Float value to assign
 */
 void opcode_0005(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
@@ -113,7 +113,7 @@ void opcode_0005(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptF
     lvalue = rvalue
     Note: same as SET_VAR_INT
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for int script variable 
     @arg rvalue Int value to assign
 */
 void opcode_0006(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
@@ -129,7 +129,7 @@ void opcode_0006(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt
     lvalue = rvalue
     Note: same as SET_VAR_FLOAT
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for float script variable 
     @arg rvalue Float value to assign
 */
 void opcode_0007(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
@@ -144,7 +144,7 @@ void opcode_0007(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptF
 
     lvalue += rvalue
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for int script variable 
     @arg rvalue Int value to add
 */
 void opcode_0008(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
@@ -159,7 +159,7 @@ void opcode_0008(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt
 
     lvalue += rvalue
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for float script variable 
     @arg rvalue Float value to add
 */
 void opcode_0009(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
@@ -175,7 +175,7 @@ void opcode_0009(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptF
     lvalue += rvalue
     Note: same as ADD_VAL_TO_INT_VAR
 
-    @arg lvalue Script variable
+    @arg lvalue Pointer for int script variable 
     @arg rvalue Int value to add
 */
 void opcode_000a(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
@@ -184,303 +184,392 @@ void opcode_000a(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt
 }
 
 /**
-    @brief %1d% += %2d%
+    @brief ADD_VAL_TO_FLOAT_LVAR lvalue rvalue
 
-    opcode 000b
-    @arg arg1L 
-    @arg arg2 
+    opcode 000B / 11
+
+    lvalue += rvalue
+    Note: same as ADD_VAL_TO_FLOAT_VAR
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to add
 */
-void opcode_000b(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+void opcode_000b(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1L += arg2;
+    lvalue += rvalue;
 }
 
 /**
-    @brief %1d% -= %2d%
+    @brief SUB_VAL_FROM_INT_VAR lvalue rvalue
 
-    opcode 000c
-    @arg arg1G 
-    @arg arg2 
+    opcode 000C / 12
+
+    lvalue -= rvalue
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to subtract
 */
-void opcode_000c(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+void opcode_000c(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1G -= arg2;
+    lvalue -= rvalue;
 }
 
 /**
-    @brief %1d% -= %2d%
+    @brief SUB_VAL_FROM_FLOAT_VAR lvalue rvalue
 
-    opcode 000d
-    @arg arg1G 
-    @arg arg2 
+    opcode 000D / 13
+
+    lvalue -= rvalue
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to subtract
 */
-void opcode_000d(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+void opcode_000d(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1G -= arg2;
+    lvalue -= rvalue;
 }
 
 /**
-    @brief %1d% -= %2h%
+    @brief SUB_VAL_FROM_INT_LVAR lvalue rvalue
 
-    opcode 000e
-    @arg arg1L 
-    @arg arg2 
+    opcode 000E / 14
+
+    lvalue -= rvalue
+    Note: same as SUB_VAL_FROM_INT_VAR
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to subtract
 */
-void opcode_000e(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+void opcode_000e(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1L -= arg2;
+    lvalue -= rvalue;
 }
 
 /**
-    @brief %1d% -= %2d%
+    @brief SUB_VAL_FROM_FLOAT_LVAR lvalue rvalue
 
-    opcode 000f
-    @arg arg1L 
-    @arg arg2 
+    opcode 000F / 15
+
+    lvalue -= rvalue
+    Note: same as SUB_VAL_FROM_FLOAT_VAR
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to subtract
 */
-void opcode_000f(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+void opcode_000f(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1L -= arg2;
+    lvalue -= rvalue;
 }
 
 /**
-    @brief %1d% *= %2d%
+    @brief MULT_INT_VAR_BY_VAL lvalue rvalue
 
-    opcode 0010
-    @arg arg1G 
-    @arg arg2 
+    opcode 0010 / 16
+
+    lvalue *= rvalue
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to multiply
 */
-void opcode_0010(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+void opcode_0010(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1G *= arg2;
+    lvalue *= rvalue;
 }
 
 /**
-    @brief %1d% *= %2d%
+    @brief MULT_FLOAT_VAR_BY_VAL lvalue rvalue
 
-    opcode 0011
-    @arg arg1G 
-    @arg arg2 
+    opcode 0011 / 17
+
+    lvalue *= rvalue
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to multiply
 */
-void opcode_0011(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+void opcode_0011(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1G *= arg2;
+    lvalue *= rvalue;
 }
 
 /**
-    @brief %1d% *= %2d%
+    @brief MULT_INT_LVAR_BY_VAL lvalue rvalue
 
-    opcode 0012
-    @arg arg1L 
-    @arg arg2 
+    opcode 0012 / 18
+
+    lvalue *= rvalue
+    Note: same as MULT_INT_VAR_BY_VAL
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to multiply
 */
-void opcode_0012(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+void opcode_0012(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1L *= arg2;
+    lvalue *= rvalue;
 }
 
 /**
-    @brief %1d% *= %2d%
+    @brief MULT_FLOAT_LVAR_BY_VAL lvalue rvalue
 
-    opcode 0013
-    @arg arg1L 
-    @arg arg2 
+    opcode 0013 / 19
+
+    lvalue *= rvalue
+    Note: same as MULT_FLOAT_VAR_BY_VAL
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to multiply
 */
-void opcode_0013(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+void opcode_0013(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1L *= arg2;
+    lvalue *= rvalue;
 }
 
 /**
-    @brief %1d% /= %2d%
+    @brief DIV_INT_VAR_BY_VAL lvalue rvalue
 
-    opcode 0014
-    @arg arg1G 
-    @arg arg2 
+    opcode 0014 / 20
+
+    lvalue /= rvalue
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to divide with
 */
-void opcode_0014(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+void opcode_0014(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1G /= arg2;
+    lvalue /= rvalue;
 }
 
 /**
-    @brief %1d% /= %2d%
+    @brief DIV_FLOAT_VAR_BY_VAL lvalue rvalue
 
-    opcode 0015
-    @arg arg1G 
-    @arg arg2 
+    opcode 0015 / 21
+
+    lvalue /= rvalue
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to divide with
 */
-void opcode_0015(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+void opcode_0015(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1G /= arg2;
+    lvalue /= rvalue;
 }
 
 /**
-    @brief %1d% /= %2d%
+    @brief DIV_INT_LVAR_BY_VAL lvalue rvalue
 
-    opcode 0016
-    @arg arg1L 
-    @arg arg2 
+    opcode 0016 / 22
+
+    lvalue /= rvalue
+    Note: same as DIV_INT_VAR_BY_VAL
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value to divide with
 */
-void opcode_0016(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+void opcode_0016(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    arg1L /= arg2;
+    lvalue /= rvalue;
 }
 
 /**
-    @brief %1d% /= %2d%
+    @brief DIV_FLOAT_LVAR_BY_VAL lvalue rvalue
 
-    opcode 0017
-    @arg arg1L 
-    @arg arg2 
+    opcode 0017 / 23
+
+    lvalue /= rvalue
+    Note: same as DIV_FLOAT_VAR_BY_VAL
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value to divide with
 */
-void opcode_0017(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+void opcode_0017(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    arg1L /= arg2;
+    lvalue /= rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_VAR_GREATER_THAN_NUMBER lvalue rvalue
 
-    opcode 0018
-    @arg arg1G 
-    @arg arg2 
+    opcode 0018 / 24
+
+    lvalue > rvalue
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value
 */
-bool opcode_0018(const ScriptArguments& args, ScriptInt& arg1G, const ScriptInt arg2) {
+bool opcode_0018(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_LVAR_GREATER_THAN_NUMBER lvalue rvalue
 
-    opcode 0019
-    @arg arg1L 
-    @arg arg2 
+    opcode 0019 / 25
+
+    lvalue > rvalue
+    Note: same as IS_INT_VAR_GREATER_THAN_NUMBER
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Int value
 */
-bool opcode_0019(const ScriptArguments& args, ScriptInt& arg1L, const ScriptInt arg2) {
+bool opcode_0019(const ScriptArguments& args, ScriptInt& lvalue, const ScriptInt rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_NUMBER_GREATER_THAN_INT_VAR lvalue rvalue
 
-    opcode 001a
-    @arg arg1 
-    @arg arg2G 
+    opcode 001A / 26
+
+    lvalue > rvalue
+
+    @arg lvalue Int value
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001a(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2G) {
+bool opcode_001a(const ScriptArguments& args, const ScriptInt lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1 > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_NUMBER_GREATER_THAN_INT_LVAR lvalue rvalue
 
-    opcode 001b
-    @arg arg1 
-    @arg arg2L 
+    opcode 001B / 27
+
+    lvalue > rvalue
+    Note: same as IS_NUMBER_GREATER_THAN_INT_VAR
+
+    @arg lvalue Int value
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001b(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2L) {
+bool opcode_001b(const ScriptArguments& args, const ScriptInt lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1 > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_VAR_GREATER_THAN_INT_VAR lvalue rvalue
 
-    opcode 001c
-    @arg arg1G 
-    @arg arg2G 
+    opcode 001С / 28
+
+    lvalue > rvalue
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2G) {
+bool opcode_001c(const ScriptArguments& args, ScriptInt& lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_LVAR_GREATER_THAN_INT_LVAR lvalue rvalue
 
-    opcode 001d
-    @arg arg1L 
-    @arg arg2L 
+    opcode 001D / 29
+
+    lvalue > rvalue
+    Note: same as IS_INT_VAR_GREATER_THAN_INT_VAR
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001d(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
+bool opcode_001d(const ScriptArguments& args, ScriptInt& lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_VAR_GREATER_THAN_INT_LVAR lvalue rvalue
 
-    opcode 001e
-    @arg arg1G 
-    @arg arg2L 
+    opcode 001E / 30
+
+    lvalue > rvalue
+    Note: same as IS_INT_VAR_GREATER_THAN_INT_VAR
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
+bool opcode_001e(const ScriptArguments& args, ScriptInt& lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_INT_LVAR_GREATER_THAN_INT_VAR lvalue rvalue
 
-    opcode 001f
-    @arg arg1L 
-    @arg arg2G 
+    opcode 001F / 31
+
+    lvalue > rvalue
+    Note: same as IS_INT_VAR_GREATER_THAN_INT_VAR
+
+    @arg lvalue Pointer for int script variable 
+    @arg rvalue Pointer for int script variable 
 */
-bool opcode_001f(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2G) {
+bool opcode_001f(const ScriptArguments& args, ScriptInt& lvalue, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_VAR_GREATER_THAN_NUMBER lvalue rvalue
 
-    opcode 0020
-    @arg arg1G 
-    @arg arg2 
+    opcode 0020 / 32
+
+    lvalue > rvalue
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value
 */
-bool opcode_0020(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
+bool opcode_0020(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_LVAR_GREATER_THAN_NUMBER lvalue rvalue
 
-    opcode 0021
-    @arg arg1L 
-    @arg arg2 
+    opcode 0021 / 33
+
+    lvalue > rvalue
+    Note: same as IS_FLOAT_VAR_GREATER_THAN_NUMBER
+
+    @arg lvalue Pointer for float script variable 
+    @arg rvalue Float value
 */
-bool opcode_0021(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
+bool opcode_0021(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_NUMBER_GREATER_THAN_FLOAT_VAR lvalue rvalue
 
-    opcode 0022
-    @arg arg1 
-    @arg arg2G 
+    opcode 0022 / 34
+
+    lvalue > rvalue
+
+    @arg lvalue Float value
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0022(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2G) {
+bool opcode_0022(const ScriptArguments& args, const ScriptFloat lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1 > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_NUMBER_GREATER_THAN_FLOAT_LVAR lvalue rvalue
 
-    opcode 0023
-    @arg arg1 
-    @arg arg2L 
+    opcode 0023 / 35
+
+    lvalue > rvalue
+    Note: same as IS_NUMBER_GREATER_THAN_FLOAT_VAR
+
+    @arg lvalue Float value
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0023(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2L) {
+bool opcode_0023(const ScriptArguments& args, const ScriptFloat lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1 > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
@@ -870,9 +959,11 @@ void opcode_004d(const ScriptArguments& args, const ScriptLabel arg1) {
 }
 
 /**
-    @brief end_thread
+    @brief TERMINATE_THIS_SCRIPT
 
-    opcode 004e
+    opcode 004E / 78
+
+    Terminates current script thread
 */
 void opcode_004e(const ScriptArguments& args) {
     auto thread = args.getThread();
@@ -916,9 +1007,11 @@ void opcode_0050(const ScriptArguments& args, const ScriptLabel arg1) {
 }
 
 /**
-    @brief return
+    @brief RETURN
 
-    opcode 0051
+    opcode 0051 / 81
+
+    Returns from current subroutine
 */
 void opcode_0051(const ScriptArguments& args) {
     auto thread = args.getThread();
@@ -926,22 +1019,47 @@ void opcode_0051(const ScriptArguments& args) {
 }
 
 /**
-    @brief  %5d% = create_player %1o% at %2d% %3d% %4d%
+    @brief LINE
 
-    opcode 0053
-    @arg model Model ID
-    @arg coord Coordinates
-    @arg player Player
+    opcode 0052 / 82
+
+    Does nothing
+    Note: not used in the game
 */
-void opcode_0053(const ScriptArguments& args, const ScriptInt model, ScriptVec3 coord, ScriptPlayer& player) {
+void opcode_0052(const ScriptArguments& args,
+                 const ScriptInt arg1, const ScriptInt arg2,
+                 const ScriptInt arg3, const ScriptInt arg4,
+                 const ScriptInt arg5, const ScriptInt arg6) {
+    RW_UNUSED(arg1);
+    RW_UNUSED(arg2);
+    RW_UNUSED(arg3);
+    RW_UNUSED(arg4);
+    RW_UNUSED(arg5);
+    RW_UNUSED(arg6);
+    RW_UNUSED(args);
+}
+
+/**
+    @brief CREATE_PLAYER index x y z outPlayerHandle
+
+    opcode 0053 / 83
+
+    Creates a player
+
+    @arg index Player index
+    @arg x X coordinate
+    @arg y Y coordinate
+    @arg z Z coordinate
+    @arg outPlayerHandle Created player
+*/
+void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 coord, ScriptPlayer& player) {
     auto position = coord;
     if (position.z < -90.f) {
     	args.getWorld()->getGroundAtPosition(position);
     }
 
-    /// @todo use model
-    RW_UNUSED(model);
-    RW_UNIMPLEMENTED("player model");
+    // index used for PlayerInfo
+    RW_UNUSED(index);
 
     /// @todo fix the API interfaces that are now totally incoherent
     auto character = args.getWorld()->createPlayer(position + script::kSpawnOffset);
@@ -5671,17 +5789,21 @@ void opcode_01f7(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg model3 Model ID
     @arg arg9 Boolean true/false
 */
-void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptWeaponType weaponID, const ScriptInt time, const ScriptInt arg4, const ScriptModelID model0, const ScriptModelID model1, const ScriptModelID model2, const ScriptModelID model3, const ScriptBoolean arg9) {
+void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry,
+                 const ScriptWeaponType weaponID, const ScriptInt timeLimit,
+                 const ScriptInt killsRequired, const ScriptModelID model0ToKill,
+                 const ScriptModelID model1ToKill, const ScriptModelID model2ToKill,
+                 const ScriptModelID model3ToKill, const ScriptBoolean showMessagesAndPlaySound) {
     RW_UNIMPLEMENTED_OPCODE(0x01f9);
     RW_UNUSED(gxtEntry);
     RW_UNUSED(weaponID);
-    RW_UNUSED(time);
-    RW_UNUSED(arg4);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(model2);
-    RW_UNUSED(model3);
-    RW_UNUSED(arg9);
+    RW_UNUSED(timeLimit);
+    RW_UNUSED(killsRequired);
+    RW_UNUSED(model0ToKill);
+    RW_UNUSED(model1ToKill);
+    RW_UNUSED(model2ToKill);
+    RW_UNUSED(model3ToKill);
+    RW_UNUSED(showMessagesAndPlaySound);
     RW_UNUSED(args);
 }
 
@@ -5691,10 +5813,10 @@ void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry, const
     opcode 01fa
     @arg arg1 
 */
-void opcode_01fa(const ScriptArguments& args, ScriptInt& arg1) {
+void opcode_01fa(const ScriptArguments& args, ScriptInt& state) {
     RW_UNIMPLEMENTED_OPCODE(0x01fa);
-    RW_UNUSED(arg1);
     RW_UNUSED(args);
+    state = 0;
 }
 
 /**
@@ -9864,17 +9986,21 @@ bool opcode_0366(const ScriptArguments& args, const ScriptObject object) {
     @arg model3 Model ID
     @arg arg9 Boolean true/false
 */
-void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptWeaponType arg2, const ScriptInt arg3, const ScriptInt arg4, const ScriptModelID model0, const ScriptModelID model1, const ScriptModelID model2, const ScriptModelID model3, const ScriptBoolean arg9) {
+void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry,
+                 const ScriptWeaponType weaponID, const ScriptInt timeLimit,
+                 const ScriptInt killsRequired, const ScriptModelID model0ToKill,
+                 const ScriptModelID model1ToKill, const ScriptModelID model2ToKill,
+                 const ScriptModelID model3ToKill, const ScriptBoolean showMessagesAndPlaySound) {
     RW_UNIMPLEMENTED_OPCODE(0x0367);
     RW_UNUSED(gxtEntry);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(model2);
-    RW_UNUSED(model3);
-    RW_UNUSED(arg9);
+    RW_UNUSED(weaponID);
+    RW_UNUSED(timeLimit);
+    RW_UNUSED(killsRequired);
+    RW_UNUSED(model0ToKill);
+    RW_UNUSED(model1ToKill);
+    RW_UNUSED(model2ToKill);
+    RW_UNUSED(model3ToKill);
+    RW_UNUSED(showMessagesAndPlaySound);
     RW_UNUSED(args);
 }
 
@@ -11310,14 +11436,16 @@ void opcode_03c5(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     opcode 03c6
     @arg arg1 
 */
-bool opcode_03c6(const ScriptArguments& args, const ScriptLevel arg1) {
+bool opcode_03c6(const ScriptArguments& args, const ScriptLevel island) {
     // The paramter to this is actually the island number.
     // Not sure how that will fit into the scheme of full paging
     /// @todo use the current player zone island number to return the correct value.
-    RW_UNIMPLEMENTED_OPCODE(0x03c6);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
-    return true;
+    // this might be very slow 
+    auto world = args.getWorld();
+    auto plyChar = world->pedestrianPool.find(world->state->playerObject);   
+    auto zone = world->data->findZoneAt(plyChar->getPosition());
+
+    return island == zone->island;
 }
 
 /**
