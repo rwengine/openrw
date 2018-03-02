@@ -5031,7 +5031,7 @@ void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
     /// @todo: there's more logic than only changing life time
     character->setLifetime(GameObject::TrafficLifetime);
     if (args.getThread()->isMission) {
-        removeObjectFromMissionCleanup(character);
+        script::removeObjectFromMissionCleanup(args, character);
     }
 }
 
@@ -5045,7 +5045,7 @@ void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
     /// @todo: there's more logic than only changing life time
     vehicle->setLifetime(GameObject::TrafficLifetime);
     if (args.getThread()->isMission) {
-        removeObjectFromMissionCleanup(vehicle);
+        script::removeObjectFromMissionCleanup(args, vehicle);
     }
 }
 
@@ -5059,7 +5059,7 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     /// @todo: there's more logic than only changing life time
     object->setLifetime(GameObject::TrafficLifetime);
     if (args.getThread()->isMission) {
-        removeObjectFromMissionCleanup(object);
+        script::removeObjectFromMissionCleanup(args, object);
     }
 }
 
@@ -5071,7 +5071,7 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
 */
 void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
     RW_UNUSED(args);
-    removeObjectFromMissionCleanup(character);
+    script::removeObjectFromMissionCleanup(args, character);
 }
 
 /**
@@ -5082,7 +5082,7 @@ void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
 */
 void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
     RW_UNUSED(args);
-    removeObjectFromMissionCleanup(vehicle);
+    script::removeObjectFromMissionCleanup(args, vehicle);
 }
 
 /**
@@ -5093,7 +5093,7 @@ void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
 */
 void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
     RW_UNUSED(args);
-    removeObjectFromMissionCleanup(object);
+    script::removeObjectFromMissionCleanup(args, object);
 }
 
 /**
@@ -5594,8 +5594,8 @@ void opcode_01ef(const ScriptArguments& args, const ScriptFloat arg1, const Scri
     opcode 01f0
     @arg arg1 
 */
-void opcode_01f0(const ScriptArguments& args, const ScriptInt arg1) {
-    args.getState()->maxWantedLevel = arg1;
+void opcode_01f0(const ScriptArguments& args, const ScriptInt wantedLevel) {
+    args.getState()->maxWantedLevel = wantedLevel;
 }
 
 /**
@@ -5630,8 +5630,8 @@ bool opcode_01f4(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character Character/ped
 */
 void opcode_01f5(const ScriptArguments& args, const ScriptPlayer player, ScriptCharacter& character) {
-    character = player->getCharacter();
     RW_UNUSED(args);
+    character = player->getCharacter();
 }
 
 /**
@@ -5704,9 +5704,9 @@ void opcode_01fa(const ScriptArguments& args, ScriptInt& arg1) {
     @arg arg1 
     @arg arg2 
 */
-void opcode_01fb(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2) {
+void opcode_01fb(const ScriptArguments& args, const ScriptFloat rvalue, ScriptFloat& lvalue) {
     RW_UNUSED(args);
-    arg2 = std::sqrt(arg1);
+    lvalue = std::sqrt(rvalue);
 }
 
 /**
