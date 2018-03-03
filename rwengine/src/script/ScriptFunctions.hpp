@@ -3,6 +3,7 @@
 
 #include <rw/defines.hpp>
 
+#include <ai/AIGraphNode.hpp>
 #include <data/GameTexts.hpp>
 #include <data/ModelData.hpp>
 #include <engine/GameData.hpp>
@@ -13,6 +14,7 @@
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/ScriptTypes.hpp>
+#include <glm/gtx/norm.hpp>
 
 /**
  * Implementations for common functions likely to be shared
@@ -229,6 +231,26 @@ inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
     if (args.getThread()->isMission) {
         auto& mo = args.getState()->missionObjects;
         mo.erase(std::remove(mo.begin(), mo.end(), object), mo.end());
+    }
+}
+
+inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, AIGraphNode::NodeType type,
+                           ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
+    coord = script::getGround(args, coord);
+    float closest = 2000.f;
+    std::vector<AIGraphNode*> nodes;
+    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
+    
+    for (const auto &node : nodes) {
+        if (node->type == type) {
+            float dist = glm::distance2(coord, node->position);
+            if (dist < closest) {
+                closest = dist;
+                xCoord = node->position.x;
+                yCoord = node->position.y;
+                zCoord = node->position.z;
+            }
+        }
     }
 }
 }
