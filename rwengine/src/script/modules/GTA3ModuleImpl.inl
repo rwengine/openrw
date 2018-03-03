@@ -13,8 +13,10 @@
 #include <objects/ObjectTypes.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <ai/AIGraphNode.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -4995,35 +4997,43 @@ void opcode_01b4(const ScriptArguments& args, const ScriptPlayer player, const S
 }
 
 /**
-    @brief force_weather %1d%
+    @brief FORCE_WEATHER
 
-    opcode 01b5
-    @arg arg1 
+    opcode 01B5 / 437
+
+    Description
+
+    @arg weatherID Weather ID
 */
-void opcode_01b5(const ScriptArguments& args, const ScriptWeather arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x01b5);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_01b5(const ScriptArguments& args, const ScriptWeather weatherID) {
+    args.getState()->basic.forcedWeather = weatherID;
 }
 
 /**
-    @brief set_weather %1d%
+    @brief FORCE_WEATHER_NOW weatherID
 
-    opcode 01b6
+    opcode 01B6 / 438
+
+    Description
+
     @arg weatherID Weather ID
 */
 void opcode_01b6(const ScriptArguments& args, const ScriptWeather weatherID) {
+    args.getState()->basic.lastWeather = weatherID;
     args.getState()->basic.nextWeather = weatherID;
+    args.getState()->basic.forcedWeather = weatherID;
 }
 
 /**
-    @brief release_weather
+    @brief RELEASE_WEATHER
 
-    opcode 01b7
+    opcode 01B7 / 439
+
+    Description
 */
 void opcode_01b7(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x01b7);
     RW_UNUSED(args);
+    args.getState()->basic.forcedWeather = -1;
 }
 
 /**
@@ -6077,12 +6087,9 @@ bool opcode_0207(const ScriptArguments& args, const ScriptCharacter character, c
     @arg arg2 
     @arg arg3 
 */
-void opcode_0208(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, ScriptFloat& arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x0208);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
+void opcode_0208(const ScriptArguments& args, const ScriptFloat low, const ScriptFloat high, ScriptFloat& random) {
     RW_UNUSED(args);
+    random = low + static_cast <float> (std::rand()) / (static_cast <float> (RAND_MAX / (high - low)));
 }
 
 /**
@@ -7628,12 +7635,22 @@ bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg zCoord Z Coord
 */
 void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    RW_UNIMPLEMENTED_OPCODE(0x02c0);
-    RW_UNUSED(coord);
-    RW_UNUSED(xCoord);
-    RW_UNUSED(yCoord);
-    RW_UNUSED(zCoord);
-    RW_UNUSED(args);
+    /// @todo this is experimental 
+    float closest = 100.f;
+    std::vector<AIGraphNode*> nodes;
+    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
+    
+    for (auto it = nodes.begin(); it != nodes.end(); it++) {
+        if ((*it)->type == AIGraphNode::NodeType::Pedestrian) {
+            float dist = glm::distance2(coord, (*it)->position);
+            if (dist < closest) {
+                closest = dist;
+                xCoord = (*it)->position.x;
+                yCoord = (*it)->position.y;
+                zCoord = (*it)->position.z;
+            }
+        }
+    }
 }
 
 /**
@@ -10257,10 +10274,14 @@ void opcode_0375(const ScriptArguments& args, const ScriptString gxtEntry0, cons
     @arg character Character/ped
 */
 void opcode_0376(const ScriptArguments& args, ScriptVec3 coord, ScriptCharacter& character) {
+    /// @todo should be random ped
+    uint16_t model = 7;
+
+    coord = script::getGround(args, coord);
+    character = args.getWorld()->createPedestrian(model, coord + script::kSpawnOffset);
+    script::addObjectToMissionCleanup(args, character);
+
     RW_UNIMPLEMENTED_OPCODE(0x0376);
-    RW_UNUSED(coord);
-    RW_UNUSED(character);
-    RW_UNUSED(args);
 }
 
 /**
@@ -13145,6 +13166,59 @@ void opcode_0455(const ScriptArguments& args, ScriptFloat& arg1, ScriptFloat& ar
     RW_UNUSED(arg3);
     RW_UNUSED(args);
 }
+
+/**
+    @brief IS_PLAYER_TARGETTING_ANY_CHAR player
+
+    opcode 0456 / 1110
+
+    Description
+
+    @arg player Player index
+*/
+bool opcode_0456(const ScriptArguments& args, const ScriptPlayer player) {
+    RW_UNIMPLEMENTED_OPCODE(0x0456);
+    RW_UNUSED(player);
+    RW_UNUSED(args);
+    return false;
+}
+
+/**
+    @brief IS_PLAYER_TARGETTING_CHAR player ped
+
+    opcode 0457 / 1111
+
+    Description
+
+    @arg player Player index
+    @arg ped Ped
+*/
+bool opcode_0457(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character) {
+    RW_UNIMPLEMENTED_OPCODE(0x0457);
+    RW_UNUSED(player);
+    RW_UNUSED(character);
+    RW_UNUSED(args);
+    return false;
+}
+
+/**
+    @brief IS_PLAYER_TARGETTING_OBJECT player object
+
+    opcode 0458 / 1112
+
+    Description
+
+    @arg player Player index
+    @arg object Object
+*/
+bool opcode_0458(const ScriptArguments& args, const ScriptPlayer player, const ScriptObject object) {
+    RW_UNIMPLEMENTED_OPCODE(0x0458);
+    RW_UNUSED(player);
+    RW_UNUSED(object);
+    RW_UNUSED(args);
+    return false;
+}
+
 
 /**
     @brief end_threads_named %1s%

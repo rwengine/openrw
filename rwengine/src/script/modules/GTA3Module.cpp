@@ -911,6 +911,9 @@ GTA3Module::GTA3Module() : ScriptModule("GTA3") {
     bind(0x0453, 4, opcode_0453);
     bind(0x0454, 3, opcode_0454);
     bind(0x0455, 3, opcode_0455);
+    bind(0x0456, 1, opcode_0456);
+    bind(0x0457, 2, opcode_0457);
+    bind(0x0458, 2, opcode_0458);
     bind(0x0459, 1, opcode_0459);
     bind(0x045b, 5, opcode_045b);
     bind(0x0463, 3, opcode_0463);
