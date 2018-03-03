@@ -7635,7 +7635,8 @@ bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg zCoord Z Coord
 */
 void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    /// @todo this is experimental 
+    /// @todo this is experimental
+    coord = script::getGround(args, coord);
     float closest = 100.f;
     std::vector<AIGraphNode*> nodes;
     args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
@@ -9631,7 +9632,7 @@ bool opcode_034d(const ScriptArguments& args, const ScriptObject object, const S
     @arg arg7 
     @arg arg8 Boolean true/false
 */
-void opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptBoolean arg8) {
+bool opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptBoolean arg8) {
     RW_UNIMPLEMENTED_OPCODE(0x034e);
     RW_UNUSED(object);
     RW_UNUSED(coord);
@@ -9640,6 +9641,7 @@ void opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptV
     RW_UNUSED(arg7);
     RW_UNUSED(arg8);
     RW_UNUSED(args);
+    return true;
 }
 
 /**
@@ -10060,10 +10062,10 @@ void opcode_0368(const ScriptArguments& args, ScriptVec2 coord0, ScriptVec2 coor
     @arg vehicle Car/vehicle
 */
 void opcode_0369(const ScriptArguments& args, const ScriptPlayer player, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x0369);
-    RW_UNUSED(player);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    auto plyChar = player->getCharacter();
+    vehicle->setOccupant(0, plyChar);
+    plyChar->setCurrentVehicle(vehicle, 0);
 }
 
 /**
@@ -10742,23 +10744,27 @@ void opcode_0394(const ScriptArguments& args, const ScriptInt arg1) {
     @arg clearParticles Boolean true/false
 */
 void opcode_0395(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptBoolean clearParticles) {
-    GameWorld* gw = args.getWorld();
+    auto gw = args.getWorld();
 
-    for(auto& v : gw->vehiclePool.objects)
+    for (auto& v : gw->vehiclePool.objects)
     {
-    	if( glm::distance(coord, v.second->getPosition()) < radius )
+    	if (v.second->getLifetime() != GameObject::MissionLifetime) {
+    		continue;
+    	}
+
+    	if (glm::distance(coord, v.second->getPosition()) < radius)
     	{
     		gw->destroyObjectQueued(v.second);
     	}
     }
 
-    for(auto& p : gw->pedestrianPool.objects)
+    for (auto& p : gw->pedestrianPool.objects)
     {
-    	// Hack: Not sure what other objects are exempt from this opcode
-    	if (p.second->getLifetime() == GameObject::PlayerLifetime) {
+    	if (p.second->getLifetime() == GameObject::PlayerLifetime || p.second->getLifetime() != GameObject::MissionLifetime) {
     		continue;
     	}
-    	if( glm::distance(coord, p.second->getPosition()) < radius )
+
+    	if (glm::distance(coord, p.second->getPosition()) < radius)
     	{
     		gw->destroyObjectQueued(p.second);
     	}
