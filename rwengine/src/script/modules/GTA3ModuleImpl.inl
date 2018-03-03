@@ -13,10 +13,8 @@
 #include <objects/ObjectTypes.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <ai/AIGraphNode.hpp>
 #include <ai/PlayerController.hpp>
 #include <data/CutsceneData.hpp>
-#include <glm/gtx/norm.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -7625,23 +7623,7 @@ bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg zCoord Z Coord
 */
 void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    /// @todo this is experimental
-    coord = script::getGround(args, coord);
-    float closest = 2000.f;
-    std::vector<AIGraphNode*> nodes;
-    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
-    
-    for (const auto &node : nodes) {
-        if (node->type == AIGraphNode::NodeType::Pedestrian) {
-            float dist = glm::distance2(coord, node->position);
-            if (dist < closest) {
-                closest = dist;
-                xCoord = node->position.x;
-                yCoord = node->position.y;
-                zCoord = node->position.z;
-            }
-        }
-    }
+    script::getClosestNode(args, coord, AIGraphNode::NodeType::Pedestrian, xCoord, yCoord, zCoord);
 }
 
 /**
@@ -7654,12 +7636,7 @@ void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCo
     @arg zCoord Z Coord
 */
 void opcode_02c1(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    RW_UNIMPLEMENTED_OPCODE(0x02c1);
-    RW_UNUSED(coord);
-    RW_UNUSED(xCoord);
-    RW_UNUSED(yCoord);
-    RW_UNUSED(zCoord);
-    RW_UNUSED(args);
+    script::getClosestNode(args, coord, AIGraphNode::NodeType::Vehicle, xCoord, yCoord, zCoord);
 }
 
 /**
@@ -7920,12 +7897,10 @@ bool opcode_02d5(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg player 
     @arg arg2 
 */
-bool opcode_02d7(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x02d7);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
+bool opcode_02d7(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponId) {
     RW_UNUSED(args);
-    return false;
+    auto plyChar = player->getCharacter();
+    return plyChar->getCurrentState().weapons[plyChar->getActiveItem()].weaponId == weaponId;
 }
 
 /**
@@ -7935,12 +7910,9 @@ bool opcode_02d7(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg character Character/ped
     @arg weaponID Weapon ID
 */
-bool opcode_02d8(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponID) {
-    RW_UNIMPLEMENTED_OPCODE(0x02d8);
-    RW_UNUSED(character);
-    RW_UNUSED(weaponID);
+bool opcode_02d8(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponId) {
     RW_UNUSED(args);
-    return false;
+    return character->getCurrentState().weapons[character->getActiveItem()].weaponId == weaponId;
 }
 
 /**
