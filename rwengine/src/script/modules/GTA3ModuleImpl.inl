@@ -55,9 +55,9 @@ void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 
     @arg label Position in the script it will jump to
 */
-void opcode_0002(const ScriptArguments& args, const ScriptLabel label) {
+void opcode_0002(const ScriptArguments& args, const ScriptLabel pc) {
     auto thread = args.getThread();
-    thread->programCounter = label < 0 ? thread->baseAddress - label : label;
+    thread->programCounter = pc < 0 ? thread->baseAddress - pc : pc;
 }
 
 /**
@@ -4958,7 +4958,7 @@ bool opcode_01b0(const ScriptArguments& args, const ScriptVehicle vehicle, const
 void opcode_01b1(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponID, const ScriptInt bullets) {
     RW_UNUSED(args);
     RW_CHECK(weaponID >= 0, "Weapon-ID too low");
-    RW_CHECK(weaponID < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
+    RW_CHECK(weaponID < static_cast<int>(player->getCharacter()->getCurrentState().weapons.size()), "Weapon-ID too high");
 
     auto plyChar = player->getCharacter();
     plyChar->addToInventory(weaponID, bullets);
@@ -4976,7 +4976,7 @@ void opcode_01b1(const ScriptArguments& args, const ScriptPlayer player, const S
 void opcode_01b2(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponID, const ScriptInt bullets) {
     RW_UNUSED(args);
     RW_CHECK(weaponID >= 0, "Weapon-ID too low");
-    RW_CHECK(weaponID < static_cast<int>(cs.weapons.size()), "Weapon-ID too high");
+    RW_CHECK(weaponID < static_cast<int>(character->getCurrentState().weapons.size()), "Weapon-ID too high");
 
     character->addToInventory(weaponID, bullets);
     character->setActiveItem(weaponID);
@@ -5147,9 +5147,12 @@ bool opcode_01c1(const ScriptArguments& args, const ScriptVehicle vehicle) {
 */
 void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
     /// @todo: there's more logic than only changing life time
-    character->setLifetime(GameObject::TrafficLifetime);
-    if (args.getThread()->isMission) {
-        script::removeObjectFromMissionCleanup(args, character);
+    if (character) {
+        character->setLifetime(GameObject::TrafficLifetime);
+
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, character);
+        }
     }
 }
 
@@ -5161,9 +5164,12 @@ void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
 */
 void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
     /// @todo: there's more logic than only changing life time
-    vehicle->setLifetime(GameObject::TrafficLifetime);
-    if (args.getThread()->isMission) {
-        script::removeObjectFromMissionCleanup(args, vehicle);
+    if (vehicle) {
+        vehicle->setLifetime(GameObject::TrafficLifetime);
+
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, vehicle);
+        }
     }
 }
 
@@ -5175,9 +5181,12 @@ void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
 */
 void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     /// @todo: there's more logic than only changing life time
-    object->setLifetime(GameObject::TrafficLifetime);
-    if (args.getThread()->isMission) {
-        script::removeObjectFromMissionCleanup(args, object);
+    if (object) {
+        object->setLifetime(GameObject::TrafficLifetime);
+        
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, object);
+        }
     }
 }
 
@@ -11442,7 +11451,7 @@ bool opcode_03c6(const ScriptArguments& args, const ScriptLevel island) {
     /// @todo use the current player zone island number to return the correct value.
     // this might be very slow 
     auto world = args.getWorld();
-    auto plyChar = world->pedestrianPool.find(world->state->playerObject);   
+    auto plyChar = world->pedestrianPool.find(world->state->playerObject);
     auto zone = world->data->findZoneAt(plyChar->getPosition());
 
     return island == zone->island;
