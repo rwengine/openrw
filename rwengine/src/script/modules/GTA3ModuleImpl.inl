@@ -1079,8 +1079,8 @@ void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 
     @arg zCoord Z Coord
 */
 void opcode_0054(const ScriptArguments& args, const ScriptPlayer player, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    script::getObjectPosition(player->getCharacter(), xCoord, yCoord, zCoord);
     RW_UNUSED(args);
+    script::getObjectPosition(player->getCharacter(), xCoord, yCoord, zCoord);
 }
 
 /**
@@ -1091,8 +1091,8 @@ void opcode_0054(const ScriptArguments& args, const ScriptPlayer player, ScriptF
     @arg coord Coordinates
 */
 void opcode_0055(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord) {
-    player->getCharacter()->setPosition(coord + script::kSpawnOffset);
     RW_UNUSED(args);
+    player->getCharacter()->setPosition(coord + script::kSpawnOffset);
 }
 
 /**
@@ -5043,11 +5043,9 @@ void opcode_01b7(const ScriptArguments& args) {
     @arg player 
     @arg arg2 
 */
-void opcode_01b8(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x01b8);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
+void opcode_01b8(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponId) {
     RW_UNUSED(args);
+    player->getCharacter()->setActiveItem(weaponId);
 }
 
 /**
@@ -5055,13 +5053,11 @@ void opcode_01b8(const ScriptArguments& args, const ScriptPlayer player, const S
 
     opcode 01b9
     @arg character Character/ped
-    @arg weaponID Weapon ID
+    @arg weaponId Weapon ID
 */
-void opcode_01b9(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponID) {
-    RW_UNIMPLEMENTED_OPCODE(0x01b9);
-    RW_UNUSED(character);
-    RW_UNUSED(weaponID);
+void opcode_01b9(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponId) {
     RW_UNUSED(args);
+    character->setActiveItem(weaponId);
 }
 
 /**
@@ -5074,12 +5070,8 @@ void opcode_01b9(const ScriptArguments& args, const ScriptCharacter character, c
     @arg zCoord Z Coord
 */
 void opcode_01bb(const ScriptArguments& args, const ScriptObject object, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    RW_UNIMPLEMENTED_OPCODE(0x01bb);
-    RW_UNUSED(object);
-    RW_UNUSED(xCoord);
-    RW_UNUSED(yCoord);
-    RW_UNUSED(zCoord);
     RW_UNUSED(args);
+    script::getObjectPosition(object, xCoord, yCoord, zCoord);
 }
 
 /**
@@ -5090,10 +5082,8 @@ void opcode_01bb(const ScriptArguments& args, const ScriptObject object, ScriptF
     @arg coord Coordinates
 */
 void opcode_01bc(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x01bc);
-    RW_UNUSED(object);
-    RW_UNUSED(coord);
     RW_UNUSED(args);
+    script::setObjectPosition(object, coord);
 }
 
 /**
@@ -5131,11 +5121,11 @@ void opcode_01be(const ScriptArguments& args, const ScriptCharacter character, c
     @arg player Player
     @arg arg2 
 */
-void opcode_01c0(const ScriptArguments& args, const ScriptPlayer player, ScriptInt& arg2) {
+void opcode_01c0(const ScriptArguments& args, const ScriptPlayer player, ScriptInt& wantedLevel) {
     RW_UNIMPLEMENTED_OPCODE(0x01c0);
     RW_UNUSED(player);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    wantedLevel = 0;
 }
 
 /**
@@ -7637,18 +7627,18 @@ bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
 void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
     /// @todo this is experimental
     coord = script::getGround(args, coord);
-    float closest = 100.f;
+    float closest = 2000.f;
     std::vector<AIGraphNode*> nodes;
     args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
     
-    for (auto it = nodes.begin(); it != nodes.end(); it++) {
-        if ((*it)->type == AIGraphNode::NodeType::Pedestrian) {
-            float dist = glm::distance2(coord, (*it)->position);
+    for (const auto &node : nodes) {
+        if (node->type == AIGraphNode::NodeType::Pedestrian) {
+            float dist = glm::distance2(coord, node->position);
             if (dist < closest) {
                 closest = dist;
-                xCoord = (*it)->position.x;
-                yCoord = (*it)->position.y;
-                zCoord = (*it)->position.z;
+                xCoord = node->position.x;
+                yCoord = node->position.y;
+                zCoord = node->position.z;
             }
         }
     }
