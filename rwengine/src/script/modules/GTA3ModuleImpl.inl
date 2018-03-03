@@ -47,13 +47,13 @@ void opcode_0001(const ScriptArguments& args, const ScriptInt time) {
 }
 
 /**
-    @brief GOTO label
+    @brief GOTO pc
 
     opcode 0002 / 2
 
     Jumps to a label in the script
 
-    @arg label Position in the script it will jump to
+    @arg pc Position in the script it will jump to
 */
 void opcode_0002(const ScriptArguments& args, const ScriptLabel pc) {
     auto thread = args.getThread();
@@ -7156,22 +7156,23 @@ void opcode_02a1(const ScriptArguments& args, const ScriptInt arg1, const Script
 }
 
 /**
-    @brief create_particle %1a% %5d% at %2d% %3d% %4d%
+    @brief ADD_PARTICLE_EFFECT effectID x y z unknownFlag
 
-    opcode 02a2
-    @arg arg1 
-    @arg arg2 
-    @arg arg3 
-    @arg arg4 
-    @arg arg5 
+    opcode 02a2 / 674
+
+    Adds particle effect
+
+    @arg effectID Particle effect id
+    @arg x X coordinate 
+    @arg y Y coordinate
+    @arg z Z coordinate
+    @arg unknownFlag Unknown flag
 */
-void opcode_02a2(const ScriptArguments& args, const ScriptPObject arg1, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptInt arg5) {
+void opcode_02a2(const ScriptArguments& args, const ScriptPObject effectID, ScriptVec3 coord, const ScriptBoolean unknownFlag) {
     RW_UNIMPLEMENTED_OPCODE(0x02a2);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
-    RW_UNUSED(arg5);
+    RW_UNUSED(effectID);
+    RW_UNUSED(coord);
+    RW_UNUSED(unknownFlag);
     RW_UNUSED(args);
 }
 
@@ -7181,8 +7182,8 @@ void opcode_02a2(const ScriptArguments& args, const ScriptPObject arg1, const Sc
     opcode 02a3
     @arg arg1 Boolean true/false
 */
-void opcode_02a3(const ScriptArguments& args, const ScriptBoolean arg1) {
-    args.getState()->isCinematic = arg1;
+void opcode_02a3(const ScriptArguments& args, const ScriptBoolean flag) {
+    args.getState()->isCinematic = flag;
 }
 
 /**
@@ -7194,10 +7195,7 @@ void opcode_02a3(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg blip Blip
 */
 void opcode_02a7(const ScriptArguments& args, ScriptVec3 coord, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
-    BlipData data;
-    data.coord = coord;
-    data.texture = script::getBlipSprite(blipSprite);
-    args.getState()->addRadarBlip(data);
+    auto& data = script::createBlipSprite(args, coord, BlipData::Contact, blipSprite);
     blip = &data;
     RW_UNIMPLEMENTED("Radar Blip Indicator Sphere");
 }
@@ -7211,10 +7209,7 @@ void opcode_02a7(const ScriptArguments& args, ScriptVec3 coord, const ScriptRada
     @arg blip Blip
 */
 void opcode_02a8(const ScriptArguments& args, ScriptVec3 coord, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
-    BlipData data;
-    data.coord = coord;
-    data.texture = script::getBlipSprite(blipSprite);
-    args.getState()->addRadarBlip(data);
+    auto& data = script::createBlipSprite(args, coord, BlipData::Coord, blipSprite);
     blip = &data;
 }
 
@@ -7789,32 +7784,37 @@ bool opcode_02cc(const ScriptArguments& args, const ScriptObject object) {
 }
 
 /**
-    @brief call %1p% %2p%
+    @brief GOSUB_FILE pc unused
 
-    opcode 02cd
-    @arg arg1 
-    @arg arg2 
+    opcode 02CD / 717
+
+    Branches to a subroutine
+
+    @arg pc Position in the script it will jump to
+    @arg unused Not used 
 */
-void opcode_02cd(const ScriptArguments& args, const ScriptLabel arg1, const ScriptLabel arg2) {
-    RW_UNUSED(arg2);
-    /// @todo determine what arg2 is used for
-    auto label = arg1 < 0 ? args.getThread()->baseAddress - arg1 : arg1;
-    args.getThread()->calls[args.getThread()->stackDepth++] = args.getThread()->programCounter;
-    args.getThread()->programCounter = label;
+void opcode_02cd(const ScriptArguments& args, const ScriptLabel pc, const ScriptLabel unused) {
+    RW_UNUSED(unused);
+    auto thread = args.getThread();
+    thread->calls[thread->stackDepth++] = thread->programCounter;
+    thread->programCounter = pc;
 }
 
 /**
-    @brief get_ground_z_for_3d_coord %1d% %2d% %3d% store_to %4d%
+    @brief GET_GROUND_Z_FOR_3D_COORD x y z groundZ
 
-    opcode 02ce
-    @arg coord Coordinates
-    @arg zCoord Z Coord
+    opcode 02CE / 718
+
+    Gets the height in the z-axis of the ground below the specified coordinates point
+
+    @arg x X coordinate
+    @arg y Y coordinate
+    @arg z Z coordinate
+    @arg groundZ Z ground coordinate
 */
-void opcode_02ce(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& zCoord) {
-    RW_UNIMPLEMENTED_OPCODE(0x02ce);
-    RW_UNUSED(coord);
-    RW_UNUSED(zCoord);
-    RW_UNUSED(args);
+void opcode_02ce(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& groundZ) {
+    auto groundPoint = script::getGround(args, coord);
+    groundZ = groundPoint.z;
 }
 
 /**
@@ -11744,8 +11744,8 @@ void opcode_03dc(const ScriptArguments& args, const ScriptPickup pickup, ScriptB
     @arg arg2 
     @arg blip 
 */
-void opcode_03dd(const ScriptArguments& args, const ScriptPickup pickup, const ScriptRadarSprite arg2, ScriptBlip& blip) {
-    auto data = script::createObjectBlipSprite(args, pickup, arg2);
+void opcode_03dd(const ScriptArguments& args, const ScriptPickup pickup, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
+    auto data = script::createObjectBlipSprite(args, pickup, blipSprite);
     blip = &data;
 }
 
@@ -12412,35 +12412,35 @@ void opcode_0418(const ScriptArguments& args, const ScriptObject object, const S
 }
 
 /**
-    @brief get_ammo_of_player %1d% weapon %2c% store_to %3d%
+    @brief GET_AMMO_IN_PLAYER_WEAPON player weaponId bullets
 
-    opcode 0419
-    @arg player0 Weapon ID
-    @arg player1 Player
-    @arg arg3 
+    opcode 0419 / 1049
+
+    Description
+
+    @arg player Player index
+    @arg weaponId Weapon ID
+    @arg bullets  
 */
-void opcode_0419(const ScriptArguments& args, const ScriptPlayer player0, const ScriptWeaponType player1, ScriptInt& arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x0419);
-    RW_UNUSED(player0);
-    RW_UNUSED(player1);
-    RW_UNUSED(arg3);
+void opcode_0419(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponId, ScriptInt& bullets) {
     RW_UNUSED(args);
+    bullets = player->getCharacter()->getCurrentState().weapons[weaponId].bulletsTotal;
 }
 
 /**
-    @brief get_ammo_of_actor %1d% weapon %2c% store_to %3d%
+    @brief GET_AMMO_IN_CHAR_WEAPON character weaponId bullets
 
-    opcode 041a
-    @arg character0 Weapon ID
-    @arg character1 Character/ped
-    @arg arg3 
+    opcode 041A / 1050
+
+    Description
+
+    @arg character Character
+    @arg weaponId Weapon ID
+    @arg bullets 
 */
-void opcode_041a(const ScriptArguments& args, const ScriptCharacter character0, const ScriptWeaponType character1, ScriptInt& arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x041a);
-    RW_UNUSED(character0);
-    RW_UNUSED(character1);
-    RW_UNUSED(arg3);
+void opcode_041a(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponId, ScriptInt& bullets) {
     RW_UNUSED(args);
+    bullets = character->getCurrentState().weapons[weaponId].bulletsTotal;
 }
 
 /**
