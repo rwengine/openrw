@@ -66,21 +66,23 @@ struct Block0RunningScript {
     uint32_t prevPointer;
     char name[8];
     BlockDword programCounter;
-    BlockDword stack[4];
-    BlockDword unknown0;
-    BlockDword unknown1;
+    BlockDword stack[6];
     BlockWord stackCounter;
     BlockWord unknown2;
     SCMByte variables[16 * 4];
     BlockDword timerA;
     BlockDword timerB;
     uint8_t ifFlag;
-    uint8_t unknown3;
-    uint8_t unknown4;
+    uint8_t isMission;
+    uint8_t isActive;
     uint8_t _align0;
     BlockDword wakeTimer;
     BlockWord ifNumber;  // ?
-    uint8_t unknown[6];
+    uint8_t notFlag;
+    uint8_t deathOrArrestCheck;
+    uint8_t wastedOrBusted;
+    uint8_t missionFlag;
+    uint8_t _align1[2];
 };
 
 struct Block0ScriptData {
