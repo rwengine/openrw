@@ -18,6 +18,8 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+// Total number of opcodes including NOPs in GTA:III PC v1.1 - 1153
+
 /**
     @brief NOP
 
@@ -573,51 +575,66 @@ bool opcode_0023(const ScriptArguments& args, const ScriptFloat lvalue, ScriptFl
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR lvalue rvalue
 
-    opcode 0024
-    @arg arg1G 
-    @arg arg2G 
+    opcode 0024 / 36
+
+    lvalue > rvalue
+
+    @arg lvalue Pointer for float script variable
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0024(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2G) {
+bool opcode_0024(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_LVAR_GREATER_THAN_FLOAT_LVAR lvalue rvalue
 
-    opcode 0025
-    @arg arg1L 
-    @arg arg2L 
+    opcode 0025 / 37
+
+    lvalue > rvalue
+    Note: same as IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR
+
+    @arg lvalue Pointer for float script variable
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0025(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
+bool opcode_0025(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_VAR_GREATER_THAN_FLOAT_LVAR lvalue rvalue
 
-    opcode 0026
-    @arg arg1G 
-    @arg arg2L 
+    opcode 0026 / 38
+
+    lvalue > rvalue
+    Note: same as IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR
+
+    @arg lvalue Pointer for float script variable
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0026(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
+bool opcode_0026(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1G > arg2L;
+    return lvalue > rvalue;
 }
 
 /**
-    @brief   %1d% > %2d%
+    @brief IS_FLOAT_LVAR_GREATER_THAN_FLOAT_VAR lvalue rvalue
 
-    opcode 0027
-    @arg arg1L 
-    @arg arg2G 
+    opcode 0027 / 39
+
+    lvalue > rvalue
+    Note: same as IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR
+
+    @arg lvalue Pointer for float script variable
+    @arg rvalue Pointer for float script variable
 */
-bool opcode_0027(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2G) {
+bool opcode_0027(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1L > arg2G;
+    return lvalue > rvalue;
 }
 
 /**
@@ -661,11 +678,11 @@ bool opcode_002a(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& a
 
     opcode 002b
     @arg arg1 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_002b(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& arg2L) {
+bool opcode_002b(const ScriptArguments& args, const ScriptInt arg1, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1 >= arg2L;
+    return arg1 >= rvalue;
 }
 
 /**
@@ -685,11 +702,11 @@ bool opcode_002c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2G
 
     opcode 002d
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_002d(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
+bool opcode_002d(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1L >= arg2L;
+    return arg1L >= rvalue;
 }
 
 /**
@@ -697,11 +714,11 @@ bool opcode_002d(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 002e
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_002e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
+bool opcode_002e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1G >= arg2L;
+    return arg1G >= rvalue;
 }
 
 /**
@@ -757,11 +774,11 @@ bool opcode_0032(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloa
 
     opcode 0033
     @arg arg1 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_0033(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& arg2L) {
+bool opcode_0033(const ScriptArguments& args, const ScriptFloat arg1, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1 >= arg2L;
+    return arg1 >= rvalue;
 }
 
 /**
@@ -781,11 +798,11 @@ bool opcode_0034(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0035
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_0035(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
+bool opcode_0035(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1L >= arg2L;
+    return arg1L >= rvalue;
 }
 
 /**
@@ -793,11 +810,11 @@ bool opcode_0035(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0036
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_0036(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
+bool opcode_0036(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1G >= arg2L;
+    return arg1G >= rvalue;
 }
 
 /**
@@ -853,11 +870,11 @@ bool opcode_003a(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2G
 
     opcode 003b
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_003b(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
+bool opcode_003b(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1L == arg2L;
+    return arg1L == rvalue;
 }
 
 /**
@@ -865,11 +882,11 @@ bool opcode_003b(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 003c
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_003c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
+bool opcode_003c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
     RW_UNUSED(args);
-    return arg1G == arg2L;
+    return arg1G == rvalue;
 }
 
 /**
@@ -913,11 +930,11 @@ bool opcode_0044(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0045
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_0045(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
+bool opcode_0045(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1L == arg2L;
+    return arg1L == rvalue;
 }
 
 /**
@@ -925,36 +942,43 @@ bool opcode_0045(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0046
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-bool opcode_0046(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
+bool opcode_0046(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
     RW_UNUSED(args);
-    return arg1G == arg2L;
+    return arg1G == rvalue;
 }
 
 /**
-    @brief goto_if_true %1p%
+    @brief GOTO_IF_TRUE pc
 
-    opcode 004c
-    @arg arg1 
+    opcode 004C / 76
+
+    Jumps to a label in the script if the condition is true
+    Note: not used in the game
+
+    @arg pc Position in the script it will jump to
 */
-void opcode_004c(const ScriptArguments& args, const ScriptLabel arg1) {
+void opcode_004c(const ScriptArguments& args, const ScriptLabel pc) {
     auto thread = args.getThread();
     if (thread->conditionResult) {
-    	thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+    	thread->programCounter = pc < 0 ? thread->baseAddress - pc : pc;
     }
 }
 
 /**
-    @brief goto_if_false %1p%
+    @brief GOTO_IF_FALSE pc
 
-    opcode 004d
-    @arg arg1 
+    opcode 004D / 77
+
+    Jumps to a label in the script if the condition is false
+
+    @arg pc Position in the script it will jump to
 */
-void opcode_004d(const ScriptArguments& args, const ScriptLabel arg1) {
+void opcode_004d(const ScriptArguments& args, const ScriptLabel pc) {
     auto thread = args.getThread();
-    if (! thread->conditionResult) {
-    	thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+    if (!thread->conditionResult) {
+    	thread->programCounter = pc < 0 ? thread->baseAddress - pc : pc;
     }
 }
 
@@ -978,8 +1002,8 @@ void opcode_004e(const ScriptArguments& args) {
     @arg arg1 
     @arg arg2 
 */
-void opcode_004f(const ScriptArguments& args, const ScriptLabel arg1) {
-    args.getVM()->startThread(arg1, false);
+void opcode_004f(const ScriptArguments& args, const ScriptLabel pc) {
+    args.getVM()->startThread(pc, false);
     auto& threads = args.getVM()->getThreads();
     SCMThread& thread = threads.back();
     // Copy arguments to locals
@@ -995,15 +1019,18 @@ void opcode_004f(const ScriptArguments& args, const ScriptLabel arg1) {
 }
 
 /**
-    @brief gosub %1p%
+    @brief GOSUB pc
 
-    opcode 0050
-    @arg arg1 
+    opcode 0050 / 80
+
+    Branches to a subroutine
+
+    @arg pc Position in the script it will jump to
 */
-void opcode_0050(const ScriptArguments& args, const ScriptLabel arg1) {
+void opcode_0050(const ScriptArguments& args, const ScriptLabel pc) {
     auto thread = args.getThread();
     thread->calls[thread->stackDepth++] = thread->programCounter;
-    thread->programCounter = arg1 < 0 ? thread->baseAddress - arg1 : arg1;
+    thread->programCounter = pc < 0 ? thread->baseAddress - pc : pc;
 }
 
 /**
@@ -1148,10 +1175,10 @@ void opcode_0059(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 005a
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_005a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
-    arg1L += arg2L;
+void opcode_005a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
+    arg1L += rvalue;
     RW_UNUSED(args);
 }
 
@@ -1160,10 +1187,10 @@ void opcode_005a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 005b
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_005b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    arg1L += arg2L;
+void opcode_005b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
+    arg1L += rvalue;
     RW_UNUSED(args);
 }
 
@@ -1196,10 +1223,10 @@ void opcode_005d(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 005e
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_005e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
-    arg1G += arg2L;
+void opcode_005e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
+    arg1G += rvalue;
     RW_UNUSED(args);
 }
 
@@ -1208,10 +1235,10 @@ void opcode_005e(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L
 
     opcode 005f
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_005f(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    arg1G += arg2L;
+void opcode_005f(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
+    arg1G += rvalue;
     RW_UNUSED(args);
 }
 
@@ -1244,10 +1271,10 @@ void opcode_0061(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0062
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0062(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
-    arg1L -= arg2L;
+void opcode_0062(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
+    arg1L -= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1256,10 +1283,10 @@ void opcode_0062(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 0063
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0063(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    arg1L -= arg2L;
+void opcode_0063(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
+    arg1L -= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1292,10 +1319,10 @@ void opcode_0065(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0066
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0066(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
-    arg1G -= arg2L;
+void opcode_0066(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
+    arg1G -= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1304,10 +1331,10 @@ void opcode_0066(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L
 
     opcode 0067
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0067(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    arg1G -= arg2L;
+void opcode_0067(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
+    arg1G -= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1340,10 +1367,10 @@ void opcode_0069(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 006a
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_006a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
-    arg1L *= arg2L;
+void opcode_006a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
+    arg1L *= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1352,10 +1379,10 @@ void opcode_006a(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 006b
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_006b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    arg1L *= arg2L;
+void opcode_006b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
+    arg1L *= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1364,10 +1391,10 @@ void opcode_006b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 006c
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_006c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
-    arg1G *= arg2L;
+void opcode_006c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
+    arg1G *= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1376,10 +1403,10 @@ void opcode_006c(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L
 
     opcode 006d
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_006d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    arg1G *= arg2L;
+void opcode_006d(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
+    arg1G *= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1436,10 +1463,10 @@ void opcode_0071(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0072
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0072(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
-    arg1L /= arg2L;
+void opcode_0072(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
+    arg1L /= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1448,10 +1475,10 @@ void opcode_0072(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L
 
     opcode 0073
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0073(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    arg1L /= arg2L;
+void opcode_0073(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
+    arg1L /= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1460,10 +1487,10 @@ void opcode_0073(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0074
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0074(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
-    arg1G /= arg2L;
+void opcode_0074(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
+    arg1G /= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1472,10 +1499,10 @@ void opcode_0074(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L
 
     opcode 0075
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0075(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    arg1G /= arg2L;
+void opcode_0075(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
+    arg1G /= rvalue;
     RW_UNUSED(args);
 }
 
@@ -1510,11 +1537,8 @@ void opcode_0077(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
     @arg arg1G 
     @arg arg2 
 */
-void opcode_0078(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0078);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_0078(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1524,11 +1548,8 @@ void opcode_0078(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFl
     @arg arg1L 
     @arg arg2 
 */
-void opcode_0079(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0079);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_0079(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1538,11 +1559,8 @@ void opcode_0079(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFl
     @arg arg1G 
     @arg arg2G 
 */
-void opcode_007a(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2G) {
-    RW_UNIMPLEMENTED_OPCODE(0x007a);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2G);
-    RW_UNUSED(args);
+void opcode_007a(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1550,13 +1568,10 @@ void opcode_007a(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 007b
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_007b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    RW_UNIMPLEMENTED_OPCODE(0x007b);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2L);
-    RW_UNUSED(args);
+void opcode_007b(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1564,13 +1579,10 @@ void opcode_007b(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 007c
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_007c(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    RW_UNIMPLEMENTED_OPCODE(0x007c);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2L);
-    RW_UNUSED(args);
+void opcode_007c(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1580,11 +1592,8 @@ void opcode_007c(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
     @arg arg1L 
     @arg arg2G 
 */
-void opcode_007d(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2G) {
-    RW_UNIMPLEMENTED_OPCODE(0x007d);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2G);
-    RW_UNUSED(args);
+void opcode_007d(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue += rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1594,11 +1603,8 @@ void opcode_007d(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
     @arg arg1G 
     @arg arg2 
 */
-void opcode_007e(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFloat arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x007e);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_007e(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1608,11 +1614,8 @@ void opcode_007e(const ScriptArguments& args, ScriptFloat& arg1G, const ScriptFl
     @arg arg1L 
     @arg arg2 
 */
-void opcode_007f(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFloat arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x007f);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_007f(const ScriptArguments& args, ScriptFloat& lvalue, const ScriptFloat rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1622,11 +1625,8 @@ void opcode_007f(const ScriptArguments& args, ScriptFloat& arg1L, const ScriptFl
     @arg arg1G 
     @arg arg2G 
 */
-void opcode_0080(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0080);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2G);
-    RW_UNUSED(args);
+void opcode_0080(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1634,13 +1634,10 @@ void opcode_0080(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0081
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0081(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    RW_UNIMPLEMENTED_OPCODE(0x0081);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2L);
-    RW_UNUSED(args);
+void opcode_0081(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1648,13 +1645,10 @@ void opcode_0081(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0082
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0082(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    RW_UNIMPLEMENTED_OPCODE(0x0082);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(arg2L);
-    RW_UNUSED(args);
+void opcode_0082(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1664,11 +1658,8 @@ void opcode_0082(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
     @arg arg1L 
     @arg arg2G 
 */
-void opcode_0083(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2G) {
-    RW_UNIMPLEMENTED_OPCODE(0x0083);
-    RW_UNUSED(arg1L);
-    RW_UNUSED(arg2G);
-    RW_UNUSED(args);
+void opcode_0083(const ScriptArguments& args, ScriptFloat& lvalue, ScriptFloat& rvalue) {
+    lvalue -= rvalue * args.getState()->basic.timeStep;
 }
 
 /**
@@ -1688,10 +1679,10 @@ void opcode_0084(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2G
 
     opcode 0085
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0085(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& arg2L) {
-    arg1L = arg2L;
+void opcode_0085(const ScriptArguments& args, ScriptInt& arg1L, ScriptInt& rvalue) {
+    arg1L = rvalue;
     RW_UNUSED(args);
 }
 
@@ -1712,10 +1703,10 @@ void opcode_0086(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& a
 
     opcode 0087
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0087(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& arg2L) {
-    arg1L = arg2L;
+void opcode_0087(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& rvalue) {
+    arg1L = rvalue;
     RW_UNUSED(args);
 }
 
@@ -1724,10 +1715,10 @@ void opcode_0087(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 0088
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0088(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& arg2L) {
-    arg1G = arg2L;
+void opcode_0088(const ScriptArguments& args, ScriptFloat& arg1G, ScriptFloat& rvalue) {
+    arg1G = rvalue;
     RW_UNUSED(args);
 }
 
@@ -1748,10 +1739,10 @@ void opcode_0089(const ScriptArguments& args, ScriptFloat& arg1L, ScriptFloat& a
 
     opcode 008a
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_008a(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& arg2L) {
-    arg1G = arg2L;
+void opcode_008a(const ScriptArguments& args, ScriptInt& arg1G, ScriptInt& rvalue) {
+    arg1G = rvalue;
     RW_UNUSED(args);
 }
 
@@ -1820,10 +1811,10 @@ void opcode_008f(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg
 
     opcode 0090
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg2L) {
-    arg1G = static_cast<ScriptInt>(arg2L);
+void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& rvalue) {
+    arg1G = static_cast<ScriptInt>(rvalue);
     RW_UNUSED(args);
 }
 
@@ -1832,10 +1823,10 @@ void opcode_0090(const ScriptArguments& args, ScriptInt& arg1G, ScriptFloat& arg
 
     opcode 0091
     @arg arg1G 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg2L) {
-    arg1G = static_cast<ScriptFloat>(arg2L);
+void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& rvalue) {
+    arg1G = static_cast<ScriptFloat>(rvalue);
     RW_UNUSED(args);
 }
 
@@ -1844,10 +1835,10 @@ void opcode_0091(const ScriptArguments& args, ScriptFloat& arg1G, ScriptInt& arg
 
     opcode 0092
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg2L) {
-    arg1L = static_cast<ScriptInt>(arg2L);
+void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& rvalue) {
+    arg1L = static_cast<ScriptInt>(rvalue);
     RW_UNUSED(args);
 }
 
@@ -1856,10 +1847,10 @@ void opcode_0092(const ScriptArguments& args, ScriptInt& arg1L, ScriptFloat& arg
 
     opcode 0093
     @arg arg1L 
-    @arg arg2L 
+    @arg rvalue 
 */
-void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& arg2L) {
-    arg1L = static_cast<ScriptFloat>(arg2L);
+void opcode_0093(const ScriptArguments& args, ScriptFloat& arg1L, ScriptInt& rvalue) {
+    arg1L = static_cast<ScriptFloat>(rvalue);
     RW_UNUSED(args);
 }
 
@@ -2347,12 +2338,15 @@ void opcode_00c0(const ScriptArguments& args, const ScriptInt hour, const Script
 }
 
 /**
-    @brief %3d% = get_minutes_until_time_of_day %1d% %2d%
+    @brief GET_MINUTES_TO_TIME_OF_DAY hour minute minutesUntil
 
-    opcode 00c1
-    @arg arg1 
-    @arg arg2 
-    @arg arg3 
+    opcode 00C1 / 193
+
+    Description
+
+    @arg hour 
+    @arg minute 
+    @arg minutesUntil 
 */
 void opcode_00c1(const ScriptArguments& args, const ScriptInt hour, const ScriptInt minute, ScriptInt& minutesUntil) {
     int targetTime = hour * 60 + minute;
