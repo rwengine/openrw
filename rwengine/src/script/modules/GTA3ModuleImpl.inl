@@ -2451,9 +2451,9 @@ void opcode_00d8(const ScriptArguments& args) {
     if (args.getThread()->isMission) {
         auto& missionObjects = args.getState()->missionObjects;
         for (auto object : missionObjects) {
-            args.getWorld()->destroyObjectQueued(object);
+            /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
+            object->setLifetime(GameObject::TrafficLifetime);
         }
-        
         missionObjects.clear();
     }
 }
@@ -5138,7 +5138,7 @@ bool opcode_01c1(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character Character/ped
 */
 void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
-    /// @todo: there's more logic than only changing life time
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
     if (character) {
         character->setLifetime(GameObject::TrafficLifetime);
 
@@ -5155,7 +5155,7 @@ void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    /// @todo: there's more logic than only changing life time
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
     if (vehicle) {
         vehicle->setLifetime(GameObject::TrafficLifetime);
 
@@ -5172,7 +5172,7 @@ void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
-    /// @todo: there's more logic than only changing life time
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
     if (object) {
         object->setLifetime(GameObject::TrafficLifetime);
         

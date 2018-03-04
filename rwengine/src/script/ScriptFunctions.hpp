@@ -35,7 +35,10 @@ inline void setObjectPosition(GameObject* object, const ScriptVec3& coord) {
 }
 
 inline VehicleObject* getCharacterVehicle(CharacterObject* character) {
-    return character->getCurrentVehicle();
+    if (character) {
+        return character->getCurrentVehicle();
+    }
+    return nullptr;
 }
 inline bool isInModel(const ScriptArguments& args, CharacterObject* character,
                       int model) {
