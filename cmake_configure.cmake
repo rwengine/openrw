@@ -125,17 +125,39 @@ endif()
 
 include(CMakeParseArguments)
 
-if(CHECK_INCLUDES)
+if(CHECK_IWYU)
     find_package(IncludeWhatYouUse REQUIRED)
+endif()
+
+if(CHECK_CLANGTIDY)
+    find_program(CLANGTIDY_PROGRAM
+        clang-tidy
+    )
+    if(NOT CLANGTIDY_PROGRAM)
+        message(FATAL_ERROR "Cannot find clang-tidy")
+    endif()
+    set(CLANGTIDY_ARGS "${CLANGTIDY_PROGRAM}")
+    list(APPEND CLANGTIDY_ARGS
+        "-style=file"
+        "-checks=*"
+    )
 endif()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
     cmake_parse_arguments("OPENRW_APPLY" "" "TARGET" "" ${ARGN})
-    if(CHECK_INCLUDES)
+    if(CHECK_IWYU)
         iwyu_check(TARGET "${OPENRW_APPLY_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
+        )
+    endif()
+
+    if(CHECK_CLANGTIDY)
+        set_target_properties("${OPENRW_APPLY_TARGET}"
+            PROPERTIES
+                C_CLANG_TIDY "${CLANGTIDY_ARGS}"
+                CXX_CLANG_TIDY "${CLANGTIDY_ARGS}"
         )
     endif()
 endfunction()
