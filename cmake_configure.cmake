@@ -141,6 +141,9 @@ if(CHECK_CLANGTIDY)
         "-style=file"
         "-checks=*"
     )
+    if(CHECK_CLANGTIDY_FIX)
+        list(APPEND CLANGTIDY_ARGS "-fix")
+    endif()
 endif()
 
 function(openrw_target_apply_options)
