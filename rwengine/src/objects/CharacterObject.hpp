@@ -68,6 +68,7 @@ private:
 
     bool running = false;
     bool jumped = false;
+    AnimationPtr jumpAnimation = nullptr;
     float jumpSpeed = DefaultJumpSpeed;
 
     bool motionBlockedByActivity = false;
