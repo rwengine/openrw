@@ -313,7 +313,9 @@ void VehicleObject::tickPhysics(float dt) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float engineForce = info->handling.acceleration * throttle * velFac;
+        float engineForceStart = 1.85f * engineForce;
         float brakeF = getBraking();
+        float velocity = collision->getBulletBody()->getLinearVelocity().length();
 
         if (handbrake) {
             brakeF = 5.f;
@@ -326,11 +328,11 @@ void VehicleObject::tickPhysics(float dt) {
                  wi.m_bIsFrontWheel) ||
                 (info->handling.driveType == VehicleHandlingInfo::Rear &&
                  !wi.m_bIsFrontWheel)) {
-                physVehicle->applyEngineForce(engineForce, w);
+                physVehicle->applyEngineForce(velocity < 5.f ? engineForceStart : engineForce, w);
             }
 
             float brakeReal =
-                5.f * info->handling.brakeDeceleration *
+                8.f * info->handling.brakeDeceleration *
                 (wi.m_bIsFrontWheel ? info->handling.brakeBias
                                     : 1.f - info->handling.brakeBias);
             physVehicle->setBrake(brakeReal * brakeF, w);
