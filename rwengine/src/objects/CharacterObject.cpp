@@ -225,6 +225,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         animator->setAnimationSpeed(AnimIndexMovement, animationSpeed);
     }
 
+    if (jumped && !isOnGround() && jumpAnimation != nullptr)
+        movementAnimation = jumpAnimation;
+
     // If we have to, interrogate the movement animation
     const auto& modelroot = getClump()->getFrame();
     if (movementAnimation != animations->animation(AnimCycle::Idle) &&
@@ -357,7 +360,10 @@ void CharacterObject::updateCharacter(float dt) {
 
         if (jumped) {
             if (!isOnGround()) {
-                walkDir = rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
+                // Get some inertia from the previous animation
+                walkDir /= 4.f;
+
+                walkDir += rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
             }
         }
 
@@ -543,6 +549,12 @@ void CharacterObject::jump() {
         physCharacter->jump(btVector3(0.f, 0.f, 0.f));
 #endif
         jumped = true;
+        jumpAnimation = animator->getAnimation(AnimIndexMovement);
+
+        // There is no kinetic energy left after a jump
+        if (jumpAnimation == animations->animation(AnimCycle::JumpLand))
+            jumpAnimation = nullptr;
+
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
                                 1.f, false);
