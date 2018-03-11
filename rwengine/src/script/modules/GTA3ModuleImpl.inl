@@ -3353,7 +3353,7 @@ bool opcode_0118(const ScriptArguments& args, const ScriptCharacter character) {
     if (character) {
     	return !character->isAlive();
     }
-    return false;
+    return true;
 }
 
 /**
@@ -7949,16 +7949,17 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 
     // Only try to find a character if this is a known zone
     auto zone = args.getWorld()->data->findZone(areaName);
-    if(zone) {
+    if (zone) {
 
     	// Create a list of candidate characters by iterating and checking if the char is in this zone
     	std::vector<std::pair<GameObjectID, GameObject*>> candidates;
-    	for(auto& p : args.getWorld()->pedestrianPool.objects) {
+    	for (auto& p : args.getWorld()->pedestrianPool.objects) {
     		auto character = static_cast<CharacterObject*>(p.second);
 
     		// We only consider characters walking around normally
     		/// @todo not sure if we are able to grab script objects or players too
-    		if(character->getLifetime() != GameObject::TrafficLifetime) {
+            // husho: only grab traffic objects
+    		if (character->getLifetime() != GameObject::TrafficLifetime) {
     			continue;
     		}
 
@@ -7977,10 +7978,14 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
     	if (candidateCount > 0) {
     		// Return the handle for any random character in this zone and use lifetime for use by script
     		// @todo verify if the lifetime is actually changed in the original game
+            // husho: lifetime is changed to mission object lifetime
     		unsigned int randomIndex = std::rand() % candidateCount;
     		const auto p = candidates[randomIndex];
     		auto character = static_cast<CharacterObject*>(p.second);
-    		character->setLifetime(GameObject::UnknownLifetime);
+    		character->setLifetime(GameObject::MissionLifetime);
+            if (args.getThread()->isMission) {
+                script::addObjectToMissionCleanup(args, character);
+            }
     		*args[1].globalInteger = p.first;
     		return;
     	}
