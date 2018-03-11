@@ -35,6 +35,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , m_look(0.f, glm::half_pi<float>())
     , running(false)
     , jumped(false)
+    , jumpAnimation(NULL)
     , jumpSpeed(DefaultJumpSpeed)
     , motionBlockedByActivity(false)
     , cycle_(AnimCycle::Idle)
@@ -119,6 +120,52 @@ void CharacterObject::destroyActor() {
     }
 }
 
+glm::vec3 CharacterObject::translateMovementAnimation(float dt,
+                                                      AnimationPtr movementAnimation) {
+    glm::vec3 animTranslate{};
+
+    const auto& modelroot = getClump()->getFrame();
+    if (movementAnimation != animations->animation(AnimCycle::Idle) &&
+        !modelroot->getChildren().empty()) {
+        const auto& root = modelroot->getChildren()[0];
+        auto it = movementAnimation->bones.find(root->getName());
+        if (it != movementAnimation->bones.end()) {
+            auto rootBone = it->second;
+            float step = dt;
+            const float duration =
+                animator->getAnimation(AnimIndexMovement)->duration;
+            float animTime =
+                fmod(animator->getAnimationTime(AnimIndexMovement), duration);
+
+            // Handle any remaining transformation before the end of the
+            // keyframes
+            if ((animTime + step) > duration) {
+                glm::vec3 a =
+                    rootBone->getInterpolatedKeyframe(animTime).position;
+                glm::vec3 b =
+                    rootBone->getInterpolatedKeyframe(duration).position;
+                glm::vec3 d = (b - a);
+                animTranslate.y += d.y;
+                step -= (duration - animTime);
+                animTime = 0.f;
+            }
+
+            glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
+            glm::vec3 b =
+                rootBone->getInterpolatedKeyframe(animTime + step).position;
+            glm::vec3 d = (b - a);
+            animTranslate.y += d.y;
+
+            // Kludge: Drop y component of root bone
+            auto t = glm::vec3(root->getTransform()[3]);
+            t.y = 0.f;
+            root->setTranslation(t);
+        }
+    }
+
+    return animTranslate;
+}
+
 glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     glm::vec3 animTranslate{};
 
@@ -201,44 +248,11 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     }
 
     // If we have to, interrogate the movement animation
-    const auto& modelroot = getClump()->getFrame();
-    if (movementAnimation != animations->animation(AnimCycle::Idle) &&
-        !modelroot->getChildren().empty()) {
-        const auto& root = modelroot->getChildren()[0];
-        auto it = movementAnimation->bones.find(root->getName());
-        if (it != movementAnimation->bones.end()) {
-            auto rootBone = it->second;
-            float step = dt;
-            const float duration =
-                animator->getAnimation(AnimIndexMovement)->duration;
-            float animTime =
-                fmod(animator->getAnimationTime(AnimIndexMovement), duration);
-
-            // Handle any remaining transformation before the end of the
-            // keyframes
-            if ((animTime + step) > duration) {
-                glm::vec3 a =
-                    rootBone->getInterpolatedKeyframe(animTime).position;
-                glm::vec3 b =
-                    rootBone->getInterpolatedKeyframe(duration).position;
-                glm::vec3 d = (b - a);
-                animTranslate.y += d.y;
-                step -= (duration - animTime);
-                animTime = 0.f;
-            }
-
-            glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
-            glm::vec3 b =
-                rootBone->getInterpolatedKeyframe(animTime + step).position;
-            glm::vec3 d = (b - a);
-            animTranslate.y += d.y;
-
-            // Kludge: Drop y component of root bone
-            auto t = glm::vec3(root->getTransform()[3]);
-            t.y = 0.f;
-            root->setTranslation(t);
-        }
-    }
+    if (jumped == true && jumpAnimation != NULL)
+        // Get inertia from the previous animation when jumping
+        animTranslate = translateMovementAnimation(dt, jumpAnimation) / 3.0f;
+    else
+        animTranslate = translateMovementAnimation(dt, movementAnimation);
 
     return animTranslate;
 }
@@ -330,7 +344,7 @@ void CharacterObject::updateCharacter(float dt) {
 
         if (jumped) {
             if (!isOnGround()) {
-                walkDir = rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
+                walkDir += rotation * glm::vec3(0.f, jumpSpeed * dt, 0.f);
             }
         }
 
@@ -490,6 +504,12 @@ void CharacterObject::jump() {
         physCharacter->jump(btVector3(0.f, 0.f, 0.f));
 #endif
         jumped = true;
+        jumpAnimation = animator->getAnimation(AnimIndexMovement);
+
+        // There is no kinetic energy left after a jump
+        if (jumpAnimation == animations->animation(AnimCycle::JumpLand))
+            jumpAnimation = animations->animation(AnimCycle::Idle);
+
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
                                 1.f, false);
