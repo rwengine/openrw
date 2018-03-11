@@ -7124,10 +7124,8 @@ bool opcode_029f(const ScriptArguments& args, const ScriptPlayer player) {
     @arg character Character/ped
 */
 bool opcode_02a0(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x02a0);
-    RW_UNUSED(character);
     RW_UNUSED(args);
-    return false;
+    return character->isStopped();
 }
 
 /**
@@ -7601,10 +7599,8 @@ void opcode_02bc(const ScriptArguments& args, const ScriptInt arg1) {
     @arg vehicle Car/vehicle
 */
 bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x02bf);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
-    return false;
+    return vehicle->isInWater();
 }
 
 /**
@@ -8824,8 +8820,8 @@ void opcode_030a(const ScriptArguments& args, const ScriptString arg1, const Scr
     opcode 030c
     @arg arg1 
 */
-void opcode_030c(const ScriptArguments& args, const ScriptInt arg1) {
-    args.getState()->currentProgress += arg1;
+void opcode_030c(const ScriptArguments& args, const ScriptInt progress) {
+    args.getState()->currentProgress += progress;
 }
 
 /**
@@ -8834,8 +8830,8 @@ void opcode_030c(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 030d
     @arg arg1 
 */
-void opcode_030d(const ScriptArguments& args, const ScriptInt arg1) {
-    args.getState()->maxProgress = arg1;
+void opcode_030d(const ScriptArguments& args, const ScriptInt progress) {
+    args.getState()->maxProgress = progress;
 }
 
 /**
@@ -8904,8 +8900,7 @@ void opcode_0312(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 0313
 */
 void opcode_0313(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0313);
-    RW_UNUSED(args);
+    args.getState()->gameStats.uniqueStuntsFound++;
 }
 
 /**
@@ -8914,8 +8909,8 @@ void opcode_0313(const ScriptArguments& args) {
     opcode 0314
     @arg arg1 
 */
-void opcode_0314(const ScriptArguments& args, const ScriptInt arg1) {
-    args.getState()->gameStats.uniqueStuntsTotal = arg1;
+void opcode_0314(const ScriptArguments& args, const ScriptInt stunts) {
+    args.getState()->gameStats.uniqueStuntsTotal = stunts;
 }
 
 /**
@@ -8924,8 +8919,7 @@ void opcode_0314(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 0315
 */
 void opcode_0315(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0315);
-    RW_UNUSED(args);
+    args.getState()->gameStats.passengersDroppedOff++;
 }
 
 /**
@@ -8946,8 +8940,7 @@ void opcode_0316(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 0317
 */
 void opcode_0317(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0317);
-    RW_UNUSED(args);
+    args.getState()->gameStats.missionAttempts++;
 }
 
 /**
