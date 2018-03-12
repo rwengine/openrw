@@ -1793,7 +1793,11 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
 
     coord = script::getGround(args, coord);
     character = args.getWorld()->createPedestrian(model, coord + script::kSpawnOffset);
-    script::addObjectToMissionCleanup(args, character);
+    character->setLifetime(GameObject::MissionLifetime);
+
+    if (args.getThread()->isMission) {
+        script::addObjectToMissionCleanup(args, character);
+    }
 
     /// @todo track object mission status
 }
@@ -1936,7 +1940,11 @@ bool opcode_00a4(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptVec3 coord, ScriptVehicle& vehicle) {
     coord = script::getGround(args, coord);
     vehicle = args.getWorld()->createVehicle(model, coord + script::kSpawnOffset);
-    script::addObjectToMissionCleanup(args, vehicle);
+    vehicle->setLifetime(GameObject::MissionLifetime);
+
+    if (args.getThread()->isMission) {
+        script::addObjectToMissionCleanup(args, vehicle);
+    }
 }
 
 /**
@@ -2303,15 +2311,14 @@ void opcode_00d7(const ScriptArguments& args, const ScriptLabel arg1) {
     opcode 00d8
 */
 void opcode_00d8(const ScriptArguments& args) {
-    /// @todo verify behaviour
-    auto& missionObjects = args.getState()->missionObjects;
-    for (auto object : missionObjects) {
-    	args.getWorld()->destroyObjectQueued(object);
+    if (args.getThread()->isMission) {
+        auto& missionObjects = args.getState()->missionObjects;
+        for (auto object : missionObjects) {
+            /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
+            object->setLifetime(GameObject::TrafficLifetime);
+        }
+        missionObjects.clear();
     }
-    
-    missionObjects.clear();
-    
-    *args.getState()->scriptOnMissionFlag = 0;
 }
 
 /**
@@ -3433,7 +3440,11 @@ void opcode_0129(const ScriptArguments& args, const ScriptVehicle vehicle, const
 
     character =
         args.getWorld()->createPedestrian(model, vehicle->getPosition());
-    script::addObjectToMissionCleanup(args, character);
+    character->setLifetime(GameObject::MissionLifetime);
+
+    if (args.getThread()->isMission) {
+        script::addObjectToMissionCleanup(args, character);
+    }
 
     character->setCurrentVehicle(vehicle, 0);
     vehicle->setOccupant(0, character);
@@ -5129,9 +5140,14 @@ bool opcode_01c1(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character Character/ped
 */
 void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
-    /// @todo check if this also removes the character from mission cleanup
-    character->setLifetime(GameObject::TrafficLifetime);
-    RW_UNUSED(args);
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
+    if (character) {
+        character->setLifetime(GameObject::TrafficLifetime);
+
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, character);
+        }
+    }
 }
 
 /**
@@ -5141,9 +5157,14 @@ void opcode_01c2(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c3);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(args);
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
+    if (vehicle) {
+        vehicle->setLifetime(GameObject::TrafficLifetime);
+
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, vehicle);
+        }
+    }
 }
 
 /**
@@ -5153,9 +5174,14 @@ void opcode_01c3(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c4);
-    RW_UNUSED(object);
-    RW_UNUSED(args);
+    /// @todo: there's more logic than only changing life time, or maybe it should be done in cleanUpTraffic
+    if (object) {
+        object->setLifetime(GameObject::TrafficLifetime);
+        
+        if (args.getThread()->isMission) {
+            script::removeObjectFromMissionCleanup(args, object);
+        }
+    }
 }
 
 /**
@@ -5165,9 +5191,8 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     @arg character Character/ped
 */
 void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c5);
-    RW_UNUSED(character);
     RW_UNUSED(args);
+    script::removeObjectFromMissionCleanup(args, character);
 }
 
 /**
@@ -5177,9 +5202,8 @@ void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c6);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    script::removeObjectFromMissionCleanup(args, vehicle);
 }
 
 /**
@@ -5189,9 +5213,8 @@ void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNIMPLEMENTED_OPCODE(0x01c7);
-    RW_UNUSED(object);
     RW_UNUSED(args);
+    script::removeObjectFromMissionCleanup(args, object);
 }
 
 /**
@@ -5208,7 +5231,11 @@ void opcode_01c8(const ScriptArguments& args, const ScriptVehicle vehicle, const
     RW_UNUSED(pedType);
 
     character = args.getWorld()->createPedestrian(model, vehicle->getPosition());
-    script::addObjectToMissionCleanup(args, character);
+    character->setLifetime(GameObject::MissionLifetime);
+
+    if (args.getThread()->isMission) {
+        script::addObjectToMissionCleanup(args, character);
+    }
 
     int pickedseat = arg4;
     if (pickedseat <= -1) {
@@ -7953,16 +7980,17 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
 
     // Only try to find a character if this is a known zone
     auto zone = args.getWorld()->data->findZone(areaName);
-    if(zone) {
+    if (zone) {
 
     	// Create a list of candidate characters by iterating and checking if the char is in this zone
     	std::vector<std::pair<GameObjectID, GameObject*>> candidates;
-    	for(auto& p : args.getWorld()->pedestrianPool.objects) {
+    	for (auto& p : args.getWorld()->pedestrianPool.objects) {
     		auto character = static_cast<CharacterObject*>(p.second);
 
     		// We only consider characters walking around normally
     		/// @todo not sure if we are able to grab script objects or players too
-    		if(character->getLifetime() != GameObject::TrafficLifetime) {
+            // husho: only grab traffic objects
+    		if (character->getLifetime() != GameObject::TrafficLifetime) {
     			continue;
     		}
 
@@ -7981,10 +8009,14 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
     	if (candidateCount > 0) {
     		// Return the handle for any random character in this zone and use lifetime for use by script
     		// @todo verify if the lifetime is actually changed in the original game
+            // husho: lifetime is changed to mission object lifetime
     		unsigned int randomIndex = std::rand() % candidateCount;
     		const auto p = candidates[randomIndex];
     		auto character = static_cast<CharacterObject*>(p.second);
-    		character->setLifetime(GameObject::UnknownLifetime);
+    		character->setLifetime(GameObject::MissionLifetime);
+            if (args.getThread()->isMission) {
+                script::addObjectToMissionCleanup(args, character);
+            }
     		*args[1].globalInteger = p.first;
     		return;
     	}
@@ -10696,23 +10728,27 @@ void opcode_0394(const ScriptArguments& args, const ScriptInt arg1) {
     @arg clearParticles Boolean true/false
 */
 void opcode_0395(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptBoolean clearParticles) {
-    GameWorld* gw = args.getWorld();
+    auto gw = args.getWorld();
 
-    for(auto& v : gw->vehiclePool.objects)
+    for (auto& v : gw->vehiclePool.objects)
     {
-    	if( glm::distance(coord, v.second->getPosition()) < radius )
+    	if (v.second->getLifetime() != GameObject::MissionLifetime) {
+    		continue;
+    	}
+
+    	if (glm::distance(coord, v.second->getPosition()) < radius)
     	{
     		gw->destroyObjectQueued(v.second);
     	}
     }
 
-    for(auto& p : gw->pedestrianPool.objects)
+    for (auto& p : gw->pedestrianPool.objects)
     {
-    	// Hack: Not sure what other objects are exempt from this opcode
-    	if (p.second->getLifetime() == GameObject::PlayerLifetime) {
+    	if (p.second->getLifetime() == GameObject::PlayerLifetime || p.second->getLifetime() != GameObject::MissionLifetime) {
     		continue;
     	}
-    	if( glm::distance(coord, p.second->getPosition()) < radius )
+
+    	if (glm::distance(coord, p.second->getPosition()) < radius)
     	{
     		gw->destroyObjectQueued(p.second);
     	}

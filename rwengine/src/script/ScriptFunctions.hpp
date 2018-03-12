@@ -208,7 +208,16 @@ inline void addObjectToMissionCleanup(const ScriptArguments& args,
     if (args.getThread()->isMission) {
         /// @todo verify if the mission object list should be kept on a
         /// per-thread basis?
+        /// husho: mission object list is one for all threads
         args.getState()->missionObjects.push_back(object);
+    }
+}
+
+inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
+                                      GameObject* object) {
+    if (args.getThread()->isMission) {
+        auto& mo = args.getState()->missionObjects;
+        mo.erase(std::remove(mo.begin(), mo.end(), object), mo.end());
     }
 }
 }
