@@ -9978,17 +9978,21 @@ bool opcode_0366(const ScriptArguments& args, const ScriptObject object) {
     @arg model3 Model ID
     @arg arg9 Boolean true/false
 */
-void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptWeaponType arg2, const ScriptInt arg3, const ScriptInt arg4, const ScriptModelID model0, const ScriptModelID model1, const ScriptModelID model2, const ScriptModelID model3, const ScriptBoolean arg9) {
+void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry,
+                 const ScriptWeaponType weaponID, const ScriptInt timeLimit,
+                 const ScriptInt killsRequired, const ScriptModelID model0ToKill,
+                 const ScriptModelID model1ToKill, const ScriptModelID model2ToKill,
+                 const ScriptModelID model3ToKill, const ScriptBoolean showMessagesAndPlaySound) {
     RW_UNIMPLEMENTED_OPCODE(0x0367);
     RW_UNUSED(gxtEntry);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(model2);
-    RW_UNUSED(model3);
-    RW_UNUSED(arg9);
+    RW_UNUSED(weaponID);
+    RW_UNUSED(timeLimit);
+    RW_UNUSED(killsRequired);
+    RW_UNUSED(model0ToKill);
+    RW_UNUSED(model1ToKill);
+    RW_UNUSED(model2ToKill);
+    RW_UNUSED(model3ToKill);
+    RW_UNUSED(showMessagesAndPlaySound);
     RW_UNUSED(args);
 }
 
