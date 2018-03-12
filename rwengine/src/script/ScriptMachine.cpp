@@ -11,6 +11,12 @@
 #include "script/ScriptModule.hpp"
 
 void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
+    // @todo check if player is respawning after death or arrest
+    if (t.isMission && t.deathOrArrestCheck && false) {
+        t.stackDepth = 0;
+        t.programCounter = t.calls[t.stackDepth];
+    }
+
     if (t.wakeCounter > 0) {
         t.wakeCounter = std::max(t.wakeCounter - msPassed, 0);
     }
@@ -169,7 +175,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
 
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile* file,
                              ScriptModule* ops)
-    : file(file), module(ops), state(_state) {
+    : file(file), module(ops), state(_state), debugFlag(false) {
     // Copy globals
     auto size = file->getGlobalsSize();
     globalData.resize(size);
@@ -193,6 +199,8 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission) {
     t.isMission = mission;
     t.finished = false;
     t.stackDepth = 0;
+    t.deathOrArrestCheck = false;
+    t.wastedOrBusted = false;
     _activeThreads.push_back(t);
 }
 

@@ -92,6 +92,9 @@ struct SCMThread {
     unsigned int stackDepth;
     /// Stores the return-addresses for calls.
     std::array<pc_t, SCM_STACK_DEPTH> calls;
+
+    bool deathOrArrestCheck;
+    bool wastedOrBusted;
 };
 
 /**
@@ -144,6 +147,14 @@ public:
         return uint32_t((SCMByte*)(&global) - globalData.data());
     }
 
+    bool getDebugFlag() const {
+        return debugFlag;
+    }
+
+    void setDebugFlag(bool flag) {
+        debugFlag = flag;
+    }
+
     /**
      * @brief executes threads until they are all in waiting state.
      */
@@ -153,7 +164,8 @@ private:
     SCMFile* file;
     ScriptModule* module;
     GameState* state;
-
+    bool debugFlag;
+    
     std::list<SCMThread> _activeThreads;
 
     void executeThread(SCMThread& t, int msPassed);
