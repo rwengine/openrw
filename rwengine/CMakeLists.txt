@@ -66,6 +66,9 @@ set(RWENGINE_SOURCES
     src/engine/ScreenText.cpp
     src/engine/ScreenText.hpp
 
+    src/gameplay/Rampage.cpp
+    src/gameplay/Rampage.hpp
+
     src/items/Weapon.cpp
     src/items/Weapon.hpp
 
