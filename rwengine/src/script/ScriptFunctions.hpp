@@ -141,6 +141,39 @@ inline GameString gxt(const ScriptArguments& args, const ScriptString id) {
     return args.getWorld()->data->texts.text(id);
 }
 
+inline BlipData& createBlip(const ScriptArguments& args, const ScriptVec3& coord,
+                            BlipData::BlipType type) {
+    BlipData data;
+    data.coord = coord;
+    data.type = type;
+    switch (type) {
+        case BlipData::Contact:
+            data.colour = 2;
+            break;
+        case BlipData::Coord:
+            data.colour = 5;
+            break;
+        default:
+            RW_ERROR("Unhandled blip type");
+            break;
+    }
+    data.target = 0;
+    data.display = BlipData::ShowBoth;
+    data.texture = "";
+    data.size = 3;
+    auto blip = args.getState()->addRadarBlip(data);
+    return args.getState()->radarBlips[blip];
+}
+
+const char* getBlipSprite(ScriptRadarSprite sprite);
+
+inline BlipData& createBlipSprite(const ScriptArguments& args, const ScriptVec3& coord,
+                                  BlipData::BlipType type, int sprite) {
+    auto& data = script::createBlip(args, coord, type);
+    data.texture = getBlipSprite(sprite);
+    return data;
+}
+
 inline BlipData& createObjectBlip(const ScriptArguments& args,
                                   GameObject* object) {
     BlipData data;
@@ -162,7 +195,7 @@ inline BlipData& createObjectBlip(const ScriptArguments& args,
             data.colour = 6;  // @todo 4 in Vice City
             break;
         default:
-            data.type = BlipData::Location;
+            data.type = BlipData::None;
             RW_ERROR("Unhandled blip type");
             break;
     }
@@ -174,31 +207,9 @@ inline BlipData& createObjectBlip(const ScriptArguments& args,
     return args.getState()->radarBlips[blip];
 }
 
-const char* getBlipSprite(ScriptRadarSprite sprite);
-
 inline BlipData createObjectBlipSprite(const ScriptArguments& args,
                                        GameObject* object, int sprite) {
-    BlipData data;
-    args.getState()->addRadarBlip(data);
-    switch (object->type()) {
-        case GameObject::Vehicle:
-            data.type = BlipData::Vehicle;
-            break;
-        case GameObject::Character:
-            data.type = BlipData::Character;
-            break;
-        case GameObject::Pickup:
-            data.type = BlipData::Pickup;
-            break;
-        case GameObject::Instance:
-            data.type = BlipData::Instance;
-            break;
-        default:
-            data.type = BlipData::Location;
-            RW_ERROR("Unhandled blip type");
-            break;
-    }
-    data.target = object->getScriptObjectID();
+    auto& data = script::createObjectBlip(args, object);
     data.texture = getBlipSprite(sprite);
     return data;
 }
