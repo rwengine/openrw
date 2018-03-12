@@ -34,22 +34,6 @@ public:
      */
     void setPopulationLimits(int maxPeds, int maxCars);
 
-    void setPedDensity(float density) {
-        pedDensity = density;
-    }
-
-    float getPedDensity() const {
-        return pedDensity;
-    }
-
-    void setCarDensity(float density) {
-        carDensity = density;
-    }
-
-    float getCarDensity() const {
-        return carDensity;
-    }
-
 private:
     AIGraph* graph;
     GameWorld* world;
