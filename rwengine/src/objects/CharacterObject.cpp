@@ -579,6 +579,7 @@ void CharacterObject::addToInventory(int slot, int ammo) {
     if (slot < kMaxInventorySlots) {
         currentState.weapons[slot].weaponId = slot;
         currentState.weapons[slot].bulletsTotal += ammo;
+        /// @todo add reload logic here based on weapon type
     }
 }
 
