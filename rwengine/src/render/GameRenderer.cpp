@@ -357,7 +357,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     std::sort(renderList.begin(), renderList.end(),
               [](const Renderer::RenderInstruction& a,
                  const Renderer::RenderInstruction& b) {
-                  return a.sortKey < b.sortKey;
+                    if (!a.drawInfo.blend && b.drawInfo.blend) return true;
+                    if (a.drawInfo.blend && !b.drawInfo.blend) return false;
+                    if (a.sortKey < b.sortKey) return true;
+
+                    return false;
               });
     RW_PROFILE_END();
 
