@@ -1,4 +1,4 @@
-FROM fedora:rawhide
+FROM fedora:branched
 
 # ffmpeg-devel needs rpmfusion
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
@@ -10,6 +10,7 @@ RUN dnf update -y \
         gcc gcc-c++ \
         boost-devel \
         cmake \
+        make \
         bullet-devel \
         ffmpeg-devel \
         glm-devel \
