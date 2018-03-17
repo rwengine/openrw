@@ -25,6 +25,7 @@ matrix:
     osx_image: xcode9.2
     install:
       - brew update
+      - brew upgrade python
       - brew upgrade
       - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack
       - export PATH="/usr/local/opt/qt/bin:$PATH"
