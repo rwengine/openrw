@@ -66,10 +66,13 @@ private:
 
     bool running;
     bool jumped;
+    AnimationPtr jumpAnimation;
     float jumpSpeed;
 
     bool motionBlockedByActivity;
 
+    glm::vec3 translateMovementAnimation(float dt,
+                                         AnimationPtr movementAnimation);
     glm::vec3 updateMovementAnimation(float dt);
     glm::vec3 currenteMovementStep{};
 
