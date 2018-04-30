@@ -43,6 +43,7 @@ GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const {
     auto playerId = parameters->at(player).integerValue();
     PlayerController* controller = getWorld()->players.at(playerId);
     RW_CHECK(controller != nullptr, "No controller for player " << player);
+    RW_CHECK(controller->getCharacter(), "No character for player " << player);
     return controller->getCharacter();
 }
 

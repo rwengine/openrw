@@ -209,6 +209,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         if (it != movementAnimation->bones.end()) {
             auto rootBone = it->second;
             float step = dt;
+            RW_CHECK(animator->getAnimation(AnimIndexMovement), "Failed to read animation using index " << AnimIndexMovement);
             const float duration =
                 animator->getAnimation(AnimIndexMovement)->duration;
             float animTime =
