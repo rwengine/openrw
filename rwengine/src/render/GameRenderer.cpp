@@ -344,14 +344,14 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     // Also parallelizable
     RW_PROFILE_BEGIN("Sort");
+    // Earlier position in the array means earlier object's rendering
+    // Transparent objects should be sorted and rendered after opaque
     std::sort(renderList.begin(), renderList.end(),
               [](const Renderer::RenderInstruction& a,
                  const Renderer::RenderInstruction& b) {
                     if (!a.drawInfo.blend && b.drawInfo.blend) return true;
                     if (a.drawInfo.blend && !b.drawInfo.blend) return false;
-                    if (a.sortKey < b.sortKey) return true;
-
-                    return false;
+                    return (a.sortKey > b.sortKey);
               });
     RW_PROFILE_END();
 
