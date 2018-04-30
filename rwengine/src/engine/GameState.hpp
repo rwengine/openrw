@@ -172,11 +172,13 @@ struct BlipData {
     int id;
 
     enum BlipType {
-        Location = 0,
+        None = 0,
         Vehicle = 1,
-        Pickup = 2,
-        Character = 3,
-        Instance = 4,
+        Character = 2,
+        Instance = 3,
+        Coord = 4,
+        Contact = 5,
+        Pickup = 6
     };
     BlipType type;
     GameObjectID target;
@@ -189,12 +191,14 @@ struct BlipData {
 
     uint16_t size = 3;  // Only used if texture is empty
 
+    uint8_t brightness = 1; // Don't really know how it is used 
+
     enum DisplayMode { Hide = 0, MarkerOnly = 1, RadarOnly = 2, ShowBoth = 3 };
 
     /* Should the blip be displayed? */
     DisplayMode display;
 
-    BlipData() : id(-1), type(Location), target(0), display(ShowBoth) {
+    BlipData() : id(-1), type(None), target(0), display(ShowBoth) {
     }
 
     int getScriptObjectID() const {
