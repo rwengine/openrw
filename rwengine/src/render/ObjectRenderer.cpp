@@ -35,13 +35,10 @@ constexpr float kMagicLODDistance = 330.f;
 constexpr float kVehicleLODDistance = 70.f;
 constexpr float kVehicleDrawDistance = 280.f;
 
-RenderKey createKey(bool transparent, float normalizedDepth,
+RenderKey createKey(float normalizedDepth,
                     Renderer::Textures& textures) {
-    return ((transparent ? 0x1 : 0x0) << 31) |
-           uint32_t(0x7FFFFF *
-                    (transparent ? 1.f - normalizedDepth : normalizedDepth))
-               << 8 |
-           uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)) << 0;
+    return (uint32_t(0x7FFFFF * normalizedDepth) << 8 |
+           uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)));
 }
 
 void ObjectRenderer::renderGeometry(Geometry* geom,
@@ -110,7 +107,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         float depth = (distance - m_camera.frustum.near) /
                       (m_camera.frustum.far - m_camera.frustum.near);
         outList.emplace_back(
-            createKey(isTransparent, depth * depth, dp.textures), modelMatrix,
+            createKey(depth * depth, dp.textures), modelMatrix,
             &geom->dbuff, dp);
     }
 }
