@@ -21,8 +21,7 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
     animator = new Animator(getClump());
 }
 
-CutsceneObject::~CutsceneObject() {
-}
+CutsceneObject::~CutsceneObject() = default;
 
 void CutsceneObject::tick(float dt) {
     animator->tick(dt);

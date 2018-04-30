@@ -2,14 +2,11 @@
 
 #include <new>
 
-VisualFX::LightData::~LightData() {
-}
+VisualFX::LightData::~LightData() = default;
 
-VisualFX::ParticleData::~ParticleData() {
-}
+VisualFX::ParticleData::~ParticleData() = default;
 
-VisualFX::TrailData::~TrailData() {
-}
+VisualFX::TrailData::~TrailData() = default;
 
 VisualFX::VisualFX(VisualFX::EffectType type) : type(type) {
     switch (type) {

@@ -26,8 +26,8 @@ class SCMFile;
 
 
 struct SCMException {
-    virtual ~SCMException() {
-    }
+    virtual ~SCMException() = default;
+
     virtual std::string what() const = 0;
 };
 
@@ -119,7 +119,7 @@ struct SCMThread {
 class ScriptMachine {
 public:
     ScriptMachine(GameState* state, SCMFile* file, ScriptModule* ops);
-    ~ScriptMachine() { }
+    ~ScriptMachine() = default;
 
     SCMFile* getFile() const {
         return file;

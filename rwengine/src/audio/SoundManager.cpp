@@ -24,7 +24,7 @@ SoundManager::SoundManager() {
 SoundManager::~SoundManager() {
     // De-initialize OpenAL
     if (alContext) {
-        alcMakeContextCurrent(NULL);
+        alcMakeContextCurrent(nullptr);
         alcDestroyContext(alContext);
     }
 
@@ -32,13 +32,13 @@ SoundManager::~SoundManager() {
 }
 
 bool SoundManager::initializeOpenAL() {
-    alDevice = alcOpenDevice(NULL);
+    alDevice = alcOpenDevice(nullptr);
     if (!alDevice) {
         RW_ERROR("Could not find OpenAL device!");
         return false;
     }
 
-    alContext = alcCreateContext(alDevice, NULL);
+    alContext = alcCreateContext(alDevice, nullptr);
     if (!alContext) {
         RW_ERROR("Could not create OpenAL context!");
         return false;
@@ -102,7 +102,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     codecContext->codec = codec;
 
     // Open the codec
-    if (avcodec_open2(codecContext, codecContext->codec, NULL) != 0) {
+    if (avcodec_open2(codecContext, codecContext->codec, nullptr) != 0) {
         av_frame_free(&frame);
         avformat_close_input(&formatContext);
         RW_ERROR("Couldn't open the audio codec context");

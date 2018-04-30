@@ -55,11 +55,10 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
     gridDraw.addGeometry(&gridGeom);
 }
 
-WaterRenderer::~WaterRenderer() {
-}
+WaterRenderer::~WaterRenderer() = default;
 
-void WaterRenderer::setWaterTable(float* waterHeights, unsigned int nHeights,
-                                  uint8_t* tiles, unsigned int nTiles) {
+void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int nHeights,
+                                  const uint8_t* tiles, const unsigned int nTiles) {
     // Determine the dimensions of the input tiles
     int edgeNum = sqrt(nTiles);
     float tileSize = WATER_WORLD_SIZE / edgeNum;

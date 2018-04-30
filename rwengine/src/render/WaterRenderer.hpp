@@ -30,8 +30,8 @@ public:
      * This data is used to create the internal stencil mask for clipping
      * the water rendering.
      */
-    void setWaterTable(float* waterHeights, unsigned int nHeights,
-                       uint8_t* tiles, unsigned int nTiles);
+    void setWaterTable(const float* waterHeights, const unsigned int nHeights,
+                       const uint8_t* tiles, const unsigned int nTiles);
 
     void setDataTexture(GLuint fbBinding, GLuint dataTexture);
 

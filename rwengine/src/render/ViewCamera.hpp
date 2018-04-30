@@ -6,15 +6,14 @@
 
 class ViewCamera {
 public:
-    ViewFrustum frustum;
+    ViewFrustum frustum{0.1f, 5000.f, glm::radians(45.f), 1.f};
 
     glm::vec3 position;
     glm::quat rotation;
 
     ViewCamera(const glm::vec3& pos = {},
-	       const glm::quat& rot = {1.0f,0.0f,0.0f,0.0f})
-        : frustum({0.1f, 5000.f, glm::radians(45.f), 1.f})
-        , position(pos)
+            const glm::quat& rot = {1.0f,0.0f,0.0f,0.0f})
+        : position(pos)
         , rotation(rot) {
     }
 

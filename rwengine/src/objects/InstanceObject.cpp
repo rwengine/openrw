@@ -43,8 +43,7 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
     }
 }
 
-InstanceObject::~InstanceObject() {
-}
+InstanceObject::~InstanceObject() = default;
 
 void InstanceObject::tick(float dt) {
     if (animator) animator->tick(dt);

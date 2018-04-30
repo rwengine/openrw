@@ -129,7 +129,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     cars->level_ = std::atoi(buff.c_str());
 
                     getline(strstream, buff, ',');
-                    cars->componentrules_ = std::stoul(buff, 0, 16);
+                    cars->componentrules_ = std::stoul(buff, nullptr, 16);
 
                     switch (cars->vehicletype_) {
                         case VehicleModelInfo::CAR:

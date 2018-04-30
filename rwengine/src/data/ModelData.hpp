@@ -49,8 +49,7 @@ public:
     BaseModelInfo(ModelDataType type) : type_(type) {
     }
 
-    virtual ~BaseModelInfo() {
-    }
+    virtual ~BaseModelInfo() = default;
 
     ModelID id() const {
         return modelid_;

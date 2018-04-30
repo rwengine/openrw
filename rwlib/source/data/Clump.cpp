@@ -98,8 +98,7 @@ ModelFrame* Clump::findFrame(const std::string& name) const {
     return rootframe_->findDescendant(name);
 }
 
-Clump::~Clump() {
-}
+Clump::~Clump() = default;
 
 void Clump::recalculateMetrics() {
     boundingRadius = std::numeric_limits<float>::min();

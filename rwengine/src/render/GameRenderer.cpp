@@ -53,16 +53,6 @@ struct ParticleVert {
     float r, g, b;
 };
 
-GeometryBuffer particleGeom;
-DrawBuffer particleDraw;
-
-std::vector<VertexP2> sspaceRect = {
-    {-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f},
-};
-
-GeometryBuffer ssRectGeom;
-DrawBuffer ssRectDraw;
-
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)
@@ -115,13 +105,13 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 
     glBindTexture(GL_TEXTURE_2D, fbTextures[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 128, 128, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, NULL);
+                 GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D, fbTextures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 128, 128, 0, GL_RED, GL_FLOAT,
-                 NULL);
+                 nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -705,10 +695,10 @@ void GameRenderer::setViewport(int w, int h) {
 
         glBindTexture(GL_TEXTURE_2D, fbTextures[0]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB,
-                     GL_UNSIGNED_BYTE, NULL);
+                     GL_UNSIGNED_BYTE, nullptr);
         glBindTexture(GL_TEXTURE_2D, fbTextures[1]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, w, h, 0, GL_RED, GL_FLOAT,
-                     NULL);
+                     nullptr);
 
         glBindRenderbuffer(GL_RENDERBUFFER, fbRenderBuffers[0]);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
