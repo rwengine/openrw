@@ -415,9 +415,9 @@ int RWGame::run() {
         auto now = chrono::steady_clock::now();
         auto deltaTime = chrono::duration<float>(now - lastFrame).count();
         lastFrame = now;
-        accumulatedTime += deltaTime;
 
         if(!world->isPaused()) {
+            accumulatedTime += deltaTime;
             world->dynamicsWorld->stepSimulation(deltaTime * timescale, kMaxPhysicsSubSteps, kPhysicsTimeStep);
         }
 
