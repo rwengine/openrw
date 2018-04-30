@@ -19,7 +19,12 @@ public:
     bool isLoaded(const std::string& name);
     void playSound(const std::string& name);
     void pauseSound(const std::string& name);
+
+    bool isPaused(const std::string& name);
     bool isPlaying(const std::string& name);
+
+    void pauseAllSounds();
+    void resumeAllSounds();
 
     bool playBackground(const std::string& fileName);
 

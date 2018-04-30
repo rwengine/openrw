@@ -231,6 +231,18 @@ void SoundManager::pauseSound(const std::string& name) {
         alCheck(alSourcePause(sounds[name].buffer.source));
     }
 }
+
+bool SoundManager::isPaused(const std::string& name) {
+    if (sounds.find(name) != sounds.end()) {
+        ALint sourceState;
+        alCheck(alGetSourcei(sounds[name].buffer.source, AL_SOURCE_STATE,
+                             &sourceState));
+        return AL_PAUSED == sourceState;
+    }
+
+    return false;
+}
+
 bool SoundManager::isPlaying(const std::string& name) {
     if (sounds.find(name) != sounds.end()) {
         ALint sourceState;
@@ -240,6 +252,21 @@ bool SoundManager::isPlaying(const std::string& name) {
     }
 
     return false;
+}
+
+void SoundManager::pauseAllSounds() {
+    for (auto &sound : sounds) {
+        if(isPlaying(sound.first)) {
+            pauseSound(sound.first);
+        }
+    }
+}
+
+void SoundManager::resumeAllSounds() {
+    for (auto &sound : sounds) {
+        if(isPaused(sound.first))
+            playSound(sound.first);
+    }
 }
 
 bool SoundManager::playBackground(const std::string& fileName) {
@@ -269,9 +296,9 @@ void SoundManager::stopMusic(const std::string& name) {
 void SoundManager::pause(bool p) {
     if (backgroundNoise.length() > 0) {
         if (p) {
-            pauseSound(backgroundNoise);
+            pauseAllSounds();
         } else {
-            playSound(backgroundNoise);
+            resumeAllSounds();
         }
     }
 }
