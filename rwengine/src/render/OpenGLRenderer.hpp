@@ -75,6 +75,8 @@ public:
         Textures textures;
         /// Alpha blending state
         bool blend;
+        /// Blending mode 0 - glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 1 - glBlendFunc(GL_ONE, GL_ONE);
+        size_t blendMode;
         // Depth writing state
         bool depthWrite;
         /// Material
@@ -89,6 +91,7 @@ public:
         // Default state -- should be moved to materials
         DrawParameters()
             : blend(false)
+            , blendMode(0)
             , depthWrite(true)
             , ambient(1.f)
             , diffuse(1.f)
@@ -339,17 +342,33 @@ private:
     DrawBuffer* currentDbuff = nullptr;
     OpenGLShaderProgram* currentProgram = nullptr;
     bool blendEnabled = false;
+    size_t blendMode = 0;
     bool depthWriteEnabled = false;
     GLuint currentUBO = 0;
     GLuint currentUnit = 0;
     std::map<GLuint, GLuint> currentTextures;
 
+    void setBlendMode(size_t mode) {
+        switch (mode) {
+            default:
+            case 0:
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                break;
+            case 1:
+                glBlendFunc(GL_ONE, GL_ONE);
+                break;
+        }
+        blendMode = mode;
+    }
+
     // Set state
-    void setBlend(bool enable) {
+    void setBlend(bool enable, size_t mode) {
         if (enable && !blendEnabled) {
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            setBlendMode(mode);
             blendEnabled = enable;
+        } else if (enable && blendEnabled && blendMode!=mode) {
+            setBlendMode(mode);
         } else if(!enable && blendEnabled) {
             glDisable(GL_BLEND);
             blendEnabled = enable;

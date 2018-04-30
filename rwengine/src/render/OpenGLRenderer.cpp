@@ -280,7 +280,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
         useTexture(u, p.textures[u]);
     }
 
-    setBlend(p.blend);
+    setBlend(p.blend,p.blendMode);
     setDepthWrite(p.depthWrite);
 
     ObjectUniformData objectData{model,
