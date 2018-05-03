@@ -56,7 +56,7 @@ struct VertexP3 {
 /**
  * Enum used to determine which blending mode to use
  */
-enum BlendMode {
+enum class BlendMode {
     BLEND_NONE,
     BLEND_ALPHA,
     BLEND_ADDITIVE
@@ -361,6 +361,8 @@ private:
         if (mode!=blendMode) {
             switch (mode) {
                 default:
+                    assert(false);
+                    break;
                 case BLEND_NONE:
                     glDisable(GL_BLEND);
                     break;
