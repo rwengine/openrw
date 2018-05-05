@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdio>
 #include <string>
+#include <libavutil/file.h>
 
 #include "rw/defines.hpp"
 
@@ -113,6 +114,46 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
         return raw_data;
     } else
         return nullptr;
+}
+
+static int read_packet(void *opaque, uint8_t *buf, int buf_size) {
+    auto* bd = reinterpret_cast<bufferData*>(opaque);
+    buf_size = FFMIN(buf_size, bd->size);
+    /* copy internal buffer data to buf */
+    memcpy(buf, bd->ptr, buf_size);
+    bd->ptr  += buf_size;
+    bd->size -= buf_size;
+    return buf_size;
+}
+
+AVFormatContext* LoaderSDT::loadSound(size_t index, bool asWave) {
+    raw_sound = loadToMemory(index, asWave);
+    if (!raw_sound) {
+        return nullptr;
+    }
+
+    bool found = findAssetInfo(index, assetInfo);
+    if (!found || !raw_sound) {
+        RW_ERROR("Error loading sound");
+        return nullptr;
+    }
+    ioBuffer = reinterpret_cast<uint8_t*>(av_malloc(ioBufferSize)); /// Will be freeded in SoundManager after buffering
+
+    bd = std::make_unique<bufferData>();
+    av_register_all();
+
+    bd->size = sizeof(WaveHeader) + assetInfo.size;
+    bdDataStart = std::make_unique<uint8_t[]>(bd->size); /// Store start ptr of data to be able freed memory later
+    bd->ptr = bdDataStart.get();
+
+    memcpy(bd->ptr, raw_sound, bd->size);
+
+
+    AVIOContext* avioContext = avio_alloc_context(ioBuffer, ioBufferSize, 0, &*bd, &read_packet, nullptr, nullptr); /// Will be freeded in SoundManager
+    AVFormatContext* container = avformat_alloc_context();
+    container->pb = avioContext;
+
+    return container;
 }
 
 /// Writes the contents of assetname to filename

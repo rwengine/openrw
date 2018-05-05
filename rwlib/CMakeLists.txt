@@ -59,6 +59,7 @@ target_link_libraries(rwlib
     PUBLIC
         glm::glm
         openrw::interface
+        ffmpeg::ffmpeg
     PRIVATE
         OpenGL::GL
     )
