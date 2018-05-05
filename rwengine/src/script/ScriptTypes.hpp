@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include <rw/defines.hpp>
+#include "audio/SoundManager.hpp"
 
 class CharacterObject;
 class CutsceneObject;
@@ -107,9 +108,9 @@ using ScriptVehicleGenerator = ScriptObjectType<VehicleGenerator>;
 using ScriptBlip = ScriptObjectType<BlipData>;
 using ScriptGarage = ScriptObjectType<GarageInfo>;
 using ScriptPayphone = ScriptObjectType<Payphone>;
+using ScriptSound = ScriptObjectType<Sound>;
 
 /// @todo replace these with real types for sounds etc.
-using ScriptSound = ScriptObjectType<int>;
 using ScriptFire = ScriptObjectType<int>;
 using ScriptSphere = ScriptObjectType<int>;
 
@@ -347,6 +348,10 @@ ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
 template <>
 ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
     unsigned int arg) const;
+template <>
+ScriptObjectType<Sound> ScriptArguments::getScriptObject(
+    unsigned int arg) const;
+
 
 typedef std::function<void(const ScriptArguments&)> ScriptFunction;
 typedef std::function<bool(const ScriptArguments&)> ScriptFunctionBoolean;

@@ -70,6 +70,8 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
         _overlappingPairCallback.get());
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
+
+    sound.loadSfxSounds(data->getDataPath().string());
 }
 
 GameWorld::~GameWorld() {

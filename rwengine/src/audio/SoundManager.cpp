@@ -2,19 +2,34 @@
 
 #include "audio/alCheck.hpp"
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-}
 //ab
 #include <rw/defines.hpp>
 
-// Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
-#define av_frame_alloc  avcodec_alloc_frame
-#define av_frame_free   avcodec_free_frame
-#endif
+int SoundManager::convertScriptIndexIntoSfx(const int scriptId) {
+    for(const auto &data : sfxData) {
+        if(scriptId == data.id ) {
+            return data.sfx;
+        }
+    }
+    return 0;
+}
+
+Sound& SoundManager::getSoundRef( const size_t& name) {
+    return buffers[name];
+}
+
+Sound& SoundManager::getSoundRef( const std::string& name) {
+    return sounds[name];
+}
+
+int SoundManager::getScriptRange(const int scriptId) {
+    for(const auto &data : sfxData) {
+        if(scriptId == data.id ) {
+            return data.range;
+        }
+    }
+    return -1;
+}
 
 SoundManager::SoundManager() {
     initializeOpenAL();
@@ -49,6 +64,9 @@ bool SoundManager::initializeOpenAL() {
         return false;
     }
 
+    //Needed for max distance
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
     return true;
 }
 
@@ -56,141 +74,10 @@ bool SoundManager::initializeAVCodec() {
     av_register_all();
 
 #if RW_DEBUG && RW_VERBOSE_DEBUG_MESSAGES
-        av_log_set_level(AV_LOG_WARNING);
+    av_log_set_level(AV_LOG_WARNING);
 #else
-        av_log_set_level(AV_LOG_ERROR);
+    av_log_set_level(AV_LOG_ERROR);
 #endif
-
-    return true;
-}
-
-void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
-    // Allocate audio frame
-    AVFrame* frame = av_frame_alloc();
-    if (!frame) {
-        RW_ERROR("Error allocating the audio frame");
-        return;
-    }
-
-    // Allocate formatting context
-    AVFormatContext* formatContext = nullptr;
-    if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
-        av_frame_free(&frame);
-        RW_ERROR("Error opening audio file (" << filename << ")");
-        return;
-    }
-
-    if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-        av_frame_free(&frame);
-        avformat_close_input(&formatContext);
-        RW_ERROR("Error finding audio stream info");
-        return;
-    }
-
-    // Find the audio stream
-    AVCodec* codec = nullptr;
-    int streamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
-    if (streamIndex < 0) {
-        av_frame_free(&frame);
-        avformat_close_input(&formatContext);
-        RW_ERROR("Could not find any audio stream in the file " << filename);
-        return;
-    }
-
-    AVStream* audioStream = formatContext->streams[streamIndex];
-    AVCodecContext* codecContext = audioStream->codec;
-    codecContext->codec = codec;
-
-    // Open the codec
-    if (avcodec_open2(codecContext, codecContext->codec, nullptr) != 0) {
-        av_frame_free(&frame);
-        avformat_close_input(&formatContext);
-        RW_ERROR("Couldn't open the audio codec context");
-        return;
-    }
-
-    // Expose audio metadata
-    channels = codecContext->channels;
-    sampleRate = codecContext->sample_rate;
-
-    // OpenAL only supports mono or stereo, so error on more than 2 channels
-    if(channels > 2) {
-        RW_ERROR("Audio has more than two channels");
-        av_frame_free(&frame);
-        avcodec_close(codecContext);
-        avformat_close_input(&formatContext);
-        return;
-    }
-
-    // Right now we only support signed 16-bit audio
-    if(codecContext->sample_fmt != AV_SAMPLE_FMT_S16P) {
-        RW_ERROR("Audio data isn't in a planar signed 16-bit format");
-        av_frame_free(&frame);
-        avcodec_close(codecContext);
-        avformat_close_input(&formatContext);
-        return;
-    }
-
-    // Start reading audio packets
-    AVPacket readingPacket;
-    av_init_packet(&readingPacket);
-
-    while (av_read_frame(formatContext, &readingPacket) == 0) {
-        if (readingPacket.stream_index == audioStream->index) {
-            AVPacket decodingPacket = readingPacket;
-
-            while (decodingPacket.size > 0) {
-                // Decode audio packet
-                int gotFrame = 0;
-                int len = avcodec_decode_audio4(codecContext, frame, &gotFrame, &decodingPacket);
-
-                if (len >= 0 && gotFrame) {
-                    // Write samples to audio buffer
-
-                    for(size_t i = 0; i < static_cast<size_t>(frame->nb_samples); i++) {
-                        // Interleave left/right channels
-                        for(size_t channel = 0; channel < channels; channel++) {
-                            int16_t sample = reinterpret_cast<int16_t *>(frame->data[channel])[i];
-                            data.push_back(sample);
-                        }
-                    }
-
-                    decodingPacket.size -= len;
-                    decodingPacket.data += len;
-                }
-                else {
-                    decodingPacket.size = 0;
-                    decodingPacket.data = nullptr;
-                }
-            }
-        }
-        av_free_packet(&readingPacket);
-    }
-
-    // Cleanup
-    av_frame_free(&frame);
-    avcodec_close(codecContext);
-    avformat_close_input(&formatContext);
-}
-
-SoundManager::SoundBuffer::SoundBuffer() {
-    alCheck(alGenSources(1, &source));
-    alCheck(alGenBuffers(1, &buffer));
-
-    alCheck(alSourcef(source, AL_PITCH, 1));
-    alCheck(alSourcef(source, AL_GAIN, 1));
-    alCheck(alSource3f(source, AL_POSITION, 0, 0, 0));
-    alCheck(alSource3f(source, AL_VELOCITY, 0, 0, 0));
-    alCheck(alSourcei(source, AL_LOOPING, AL_FALSE));
-}
-
-bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource) {
-    alCheck(alBufferData(
-        buffer, soundSource.channels == 1 ? AL_FORMAT_MONO16
-                                          : AL_FORMAT_STEREO16,
-        &soundSource.data.front(), soundSource.data.size() * sizeof(int16_t),
-        soundSource.sampleRate));
-    alCheck(alSourcei(source, AL_BUFFER, buffer));
 
     return true;
 }
@@ -208,71 +95,149 @@ bool SoundManager::loadSound(const std::string& name,
                                        std::forward_as_tuple());
         sound = &emplaced.first->second;
 
-        sound->source.loadFromFile(fileName);
-        sound->isLoaded = sound->buffer.bufferData(sound->source);
+        sound->source = std::make_shared<SoundSource>();
+        sound->buffer = std::make_unique<SoundBuffer>();
+
+        sound->source->loadFromFile(fileName);
+        sound->isLoaded = sound->buffer->bufferData(*sound->source);
     }
 
     return sound->isLoaded;
 }
+
+void SoundManager::loadSfxSounds(const std::string& path) {
+    sfx.reserve(kNrOfAllSfx);
+    for(size_t i = 0; i < kNrOfAllSfx; i++) { //3032 is number of all sfx sounds in gta3
+        Sound* sound = nullptr;
+
+        auto emplaced = sfx.emplace(std::piecewise_construct,
+                                    std::forward_as_tuple(i),
+                                    std::forward_as_tuple());
+        sound = &emplaced.first->second;
+
+        sound->source = std::make_shared<SoundSource>();
+        sound->source->loadSfx(path, i);
+
+    }
+}
+
+size_t SoundManager::createSfxInstance(const size_t& index) {
+    Sound* sound = nullptr;
+    auto soundRef = sfx.find(index);
+
+    //Let's try reuse buffor
+    for(auto& sound : buffers) {
+        std::lock_guard<std::mutex> lock(*sound.second.soundMutex);
+        if (sound.second.buffer && sound.second.isStoped())  { //Let's use this buffor
+            sound.second.buffer = std::make_unique<SoundBuffer>();
+            sound.second.source = soundRef->second.source;
+            sound.second.isLoaded = sound.second.buffer->bufferData(*sound.second.source);
+            return sound.first;
+        }
+    }
+    // Hmmm, we should create new buffor
+    auto emplaced = buffers.emplace(std::piecewise_construct,
+                                    std::forward_as_tuple(bufforNr),
+                                    std::forward_as_tuple());
+    std::lock_guard<std::mutex> lock(*emplaced.first->second.soundMutex);
+    sound = &emplaced.first->second;
+
+    sound->id = bufforNr;
+    sound->buffer = std::make_unique<SoundBuffer>();
+    sound->source = soundRef->second.source;
+    sound->isLoaded = sound->buffer->bufferData(*sound->source);
+    bufforNr++;
+
+    return sound->id;
+}
+
 bool SoundManager::isLoaded(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        return sounds[name].isLoaded;
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        return sound->second.isLoaded;
     }
-
-    return false;
-}
-void SoundManager::playSound(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        alCheck(alSourcePlay(sounds[name].buffer.source));
-    }
-}
-void SoundManager::pauseSound(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        alCheck(alSourcePause(sounds[name].buffer.source));
-    }
-}
-
-bool SoundManager::isPaused(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        ALint sourceState;
-        alCheck(alGetSourcei(sounds[name].buffer.source, AL_SOURCE_STATE,
-                             &sourceState));
-        return AL_PAUSED == sourceState;
-    }
-
     return false;
 }
 
 bool SoundManager::isPlaying(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        ALint sourceState;
-        alCheck(alGetSourcei(sounds[name].buffer.source, AL_SOURCE_STATE,
-                             &sourceState));
-        return AL_PLAYING == sourceState;
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        return sound->second.isPlaying();
     }
-
     return false;
+}
+
+bool SoundManager::isStoped(const std::string& name) {
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        return sound->second.isStoped();
+    }
+    return false;
+}
+
+bool SoundManager::isPaused(const std::string& name) {
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        return sound->second.isPaused();
+    }
+    return false;
+}
+
+void SoundManager::playSound(const std::string& name) {
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        return sound->second.play();
+    }
+}
+
+void SoundManager::playSfx(const size_t& name, const glm::vec3 position, const bool looping, const int maxDist) {
+    auto buffer = buffers.find(name) ;
+    if (buffer != buffers.end()) {
+        buffer->second.setPosition(position);
+        if(looping){
+            buffer->second.setLooping(looping);
+        }
+
+        buffer->second.setPitch(1.f);
+        buffer->second.setGain(1.f);
+        if(maxDist != -1) {
+            buffer->second.setMaxDistance(maxDist);
+        }
+        buffer->second.play();
+    }
 }
 
 void SoundManager::pauseAllSounds() {
     for (auto &sound : sounds) {
-        if(isPlaying(sound.first)) {
-            pauseSound(sound.first);
+        if(sound.second.isPlaying()) {
+            sound.second.pause();
+        }
+    }
+    for (auto &sound : buffers) {
+        if(sound.second.isPlaying()) {
+            sound.second.pause();
         }
     }
 }
 
 void SoundManager::resumeAllSounds() {
     for (auto &sound : sounds) {
-        if(isPaused(sound.first))
-            playSound(sound.first);
+        if(sound.second.isPaused()) {
+            sound.second.play();
+        }
+    }
+    for (auto &sound : buffers) {
+        if(sound.second.isPaused()) {
+            sound.second.play();
+        }
     }
 }
 
 bool SoundManager::playBackground(const std::string& fileName) {
     if (this->loadSound(fileName, fileName)) {
         backgroundNoise = fileName;
-        this->playSound(fileName);
+        auto& sound = getSoundRef(fileName);
+        sound.play();
         return true;
     }
 
@@ -285,11 +250,16 @@ bool SoundManager::loadMusic(const std::string& name,
 }
 
 void SoundManager::playMusic(const std::string& name) {
-    playSound(name);
+    auto sound  = sounds.find(name);
+    if (sound != sounds.end()) {
+        sound->second.play();
+    }
 }
+
 void SoundManager::stopMusic(const std::string& name) {
-    if (sounds.find(name) != sounds.end()) {
-        alCheck(alSourceStop(sounds[name].buffer.source));
+    auto sound  = sounds.find(name);
+    if (sound != sounds.end()) {
+        sound->second.stop();
     }
 }
 
@@ -302,3 +272,23 @@ void SoundManager::pause(bool p) {
         }
     }
 }
+
+void SoundManager::setListenerPosition(const glm::vec3 position) {
+    alListener3f(AL_POSITION, position.x, position.y, position.z);
+}
+
+void SoundManager::setListenerVelocity(const glm::vec3 vel) {
+    alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
+}
+
+void SoundManager::setListenerOrientation(const glm::vec3 at) {
+    float v[6] = {0, at.y, 0, 0, 0, at.z};
+    alListenerfv(AL_ORIENTATION, v);
+}
+
+void SoundManager::setSoundPosition(const std::string name,const glm::vec3 position) {
+    if (sounds.find(name) != sounds.end()) {
+        alCheck(alSource3f(sounds[name].buffer->source, AL_POSITION, position.x, position.y, position.z));
+    }
+}
+
