@@ -46,6 +46,11 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
 InstanceObject::~InstanceObject() = default;
 
 void InstanceObject::tick(float dt) {
+    RW_UNUSED(dt);
+    // Moved to tickPhysics
+}
+
+void InstanceObject::tickPhysics(float dt) {
     if (animator) animator->tick(dt);
 
     if (!body || !dynamics) {
@@ -113,7 +118,7 @@ void InstanceObject::tick(float dt) {
                                                  body->getBulletBody()
                                                      ->getOrientation()
                                                      .getAngle());
-                body->getBulletBody()->applyForce(btVector3(0.f, 0.f, F),
+                body->getBulletBody()->applyImpulse(btVector3(0.f, 0.f, F),
                                                   forcePos);
             }
         }
