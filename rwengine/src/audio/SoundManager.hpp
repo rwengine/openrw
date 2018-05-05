@@ -12,6 +12,8 @@
 #include <al.h>
 #include <alc.h>
 
+#include <rw/filesystem.hpp>
+
 class SoundManager {
 public:
     SoundManager();
@@ -43,6 +45,7 @@ private:
 
     public:
         void loadFromFile(const rwfs::path& filePath);
+        void loadSfx(const rwfs::path& path, const size_t& index, const bool asWave = true);
 
     private:
         std::vector<int16_t> data;

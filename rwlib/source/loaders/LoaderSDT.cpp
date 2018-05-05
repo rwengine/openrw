@@ -6,32 +6,9 @@
 
 #include "rw/debug.hpp"
 
-LoaderSDT::LoaderSDT() : m_version(GTAIIIVC), m_assetCount(0) {
-}
-
-typedef struct {
-    char chunkId[4];
-    uint32_t chunkSize;
-    char format[4];
-    struct {
-        char id[4];
-        uint32_t size;
-        uint16_t audioFormat;
-        uint16_t numChannels;
-        uint32_t sampleRate;
-        uint32_t byteRate;
-        uint16_t blockAlign;
-        uint16_t bitsPerSample;
-    } fmt;
-    struct {
-        char id[4];
-        uint32_t size;
-    } data;
-} WaveHeader;
-
-bool LoaderSDT::load(const std::string& filename) {
-    const auto sdtName = filename + ".SDT";
-    const auto rawName = filename + ".RAW";
+bool LoaderSDT::load(const rwfs::path& path) {
+    const auto sdtName = path.string() + ".SDT";
+    const auto rawName = path.string() + ".RAW";
 
     FILE* fp = fopen(sdtName.c_str(), "rb");
     if (fp) {
@@ -52,6 +29,7 @@ bool LoaderSDT::load(const std::string& filename) {
         m_archive = rawName;
         return true;
     } else {
+        RW_ERROR("Error cannot find " << path);
         return false;
     }
 }
@@ -65,8 +43,7 @@ bool LoaderSDT::findAssetInfo(size_t index, LoaderSDTFile& out) {
     return false;
 }
 
-char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
-    LoaderSDTFile assetInfo;
+std::unique_ptr<char[]> LoaderSDT::loadToMemory(size_t index, bool asWave) {
     bool found = findAssetInfo(index, assetInfo);
 
     if (!found) {
@@ -78,12 +55,12 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
 
     FILE* fp = fopen(rawName.c_str(), "rb");
     if (fp) {
-        char* raw_data;
+        std::unique_ptr<char[]> raw_data;
         char* sample_data;
         if (asWave) {
-            raw_data = new char[sizeof(WaveHeader) + assetInfo.size];
+            raw_data = std::make_unique<char[]>(sizeof(WaveHeader) + assetInfo.size);
 
-            WaveHeader* header = reinterpret_cast<WaveHeader*>(raw_data);
+            auto header = reinterpret_cast<WaveHeader*>(raw_data.get());
             memcpy(header->chunkId, "RIFF", 4);
             header->chunkSize = sizeof(WaveHeader) - 8 + assetInfo.size;
             memcpy(header->format, "WAVE", 4);
@@ -98,10 +75,10 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
             memcpy(header->data.id, "data", 4);
             header->data.size = assetInfo.size;
 
-            sample_data = raw_data + sizeof(WaveHeader);
+            sample_data = raw_data.get() + sizeof(WaveHeader);
         } else {
-            raw_data = new char[assetInfo.size];
-            sample_data = raw_data;
+            raw_data = std::make_unique<char[]>(assetInfo.size);
+            sample_data = raw_data.get();
         }
 
         fseek(fp, assetInfo.offset, SEEK_SET);
@@ -118,29 +95,25 @@ char* LoaderSDT::loadToMemory(size_t index, bool asWave) {
 /// Writes the contents of assetname to filename
 bool LoaderSDT::saveAsset(size_t index, const std::string& filename,
                           bool asWave) {
-    char* raw_data = loadToMemory(index, asWave);
-    if (!raw_data) return false;
+    auto raw_sound = loadToMemory(index, asWave);
+    if (!raw_sound) return false;
 
     FILE* dumpFile = fopen(filename.c_str(), "wb");
     if (dumpFile) {
-        LoaderSDTFile asset;
-        if (findAssetInfo(index, asset)) {
-            fwrite(raw_data, 1, asset.size + (asWave ? sizeof(WaveHeader) : 0),
+        if (findAssetInfo(index, assetInfo)) {
+            fwrite(raw_sound.get(), 1, assetInfo.size + (asWave ? sizeof(WaveHeader) : 0),
                    dumpFile);
             printf("=> SDT: Saved %zu to disk with filename %s\n", index,
                    filename.c_str());
         }
         fclose(dumpFile);
 
-        delete[] raw_data;
         return true;
     } else {
-        delete[] raw_data;
         return false;
     }
 }
 
-/// Get the information of an asset by its index
 const LoaderSDTFile& LoaderSDT::getAssetInfoByIndex(size_t index) const {
     return m_assets[index];
 }
