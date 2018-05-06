@@ -19,6 +19,7 @@ class GameWorld;
 class InstanceObject : public GameObject {
     float health;
     bool visible = true;
+    bool floating = false;
     int changeAtomic = -1;
 
     /**
@@ -65,6 +66,13 @@ public:
     }
     float getVisible() const {
         return visible;
+    }
+
+    void setFloating(bool floating) {
+        this->floating = floating;
+    }
+    float getFloating() const {
+        return floating;
     }
 
     float getHealth() const {
