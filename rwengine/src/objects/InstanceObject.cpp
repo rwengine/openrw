@@ -39,7 +39,6 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
         }
 
         /// @todo store path information properly
-
         if (modelinfo->type() == ModelDataType::SimpleInfo) {
             auto simpledata = static_cast<SimpleModelInfo*>(modelinfo);
             for (auto& path : simpledata->paths) {
@@ -77,8 +76,7 @@ void InstanceObject::tickPhysics(float dt) {
 
 
     // Only certain objects should float on water
-    if ( floating )
-    {
+    if (floating) {
         const glm::vec3& ws = getPosition();
         auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
                         (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
