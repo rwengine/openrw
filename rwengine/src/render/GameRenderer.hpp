@@ -160,9 +160,8 @@ public:
     Renderer::ProfileInfo profEffects;
 
     enum SpecialModel {
-        /// @todo what is the difference between A and B
         ZoneCylinderA,
-        ZoneCylinderB,
+        ZoneCylinderB,    // same geometry as A, different UVs
         Arrow,
         SpecialModelCount
     };

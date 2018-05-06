@@ -425,9 +425,6 @@ void VehicleObject::tickPhysics(float dt) {
                     if (_lastHeight >= wH) {
                         // we are for real, underwater
                         inWater = true;
-                    } else if (inWater == false) { // @todo This condition is unnecessary
-                        // It's just a tunnel or something, we good.
-                        inWater = false;
                     }
                 } else {
                     // The water is beneath us
@@ -866,7 +863,7 @@ void VehicleObject::grantOccupantRewards(CharacterObject* character) {
             || getVehicle()->vehiclename_ == "CABBIE"
             || getVehicle()->vehiclename_ == "BORGNINE") {
             // Earn $25 from taxi cabs
-            /// @todo implement this
+            character->engine->state->playerInfo.money += 25;
         } else if (getVehicle()->vehiclename_ == "POLICAR") {
             // Police cruisers give 5 shotgun cartridges
             character->addToInventory(4, 5);
