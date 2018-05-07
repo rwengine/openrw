@@ -8,6 +8,7 @@ include("${PROJECT_SOURCE_DIR}/cmake_options.cmake")
 # Create a rw_interface TARGET that holds all compiler options
 include("${PROJECT_SOURCE_DIR}/cmake_configure.cmake")
 
+set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
