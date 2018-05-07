@@ -94,6 +94,9 @@ struct SCMThread {
     unsigned int stackDepth;
     /// Stores the return-addresses for calls.
     std::array<pc_t, SCM_STACK_DEPTH> calls;
+
+    bool deathOrArrestCheck;
+    bool wastedOrBusted;
 };
 
 /**
@@ -146,6 +149,14 @@ public:
         return uint32_t((SCMByte*)(&global) - globalData.data());
     }
 
+    bool getDebugFlag() const {
+        return debugFlag;
+    }
+
+    void setDebugFlag(bool flag) {
+        debugFlag = flag;
+    }
+
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value, T>::type
     getRandomNumber(T min, T max) {
@@ -169,6 +180,7 @@ private:
     SCMFile* file;
     ScriptModule* module;
     GameState* state;
+    bool debugFlag;
 
     std::list<SCMThread> _activeThreads;
 
