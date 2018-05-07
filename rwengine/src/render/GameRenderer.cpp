@@ -408,6 +408,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
     if (fadeTimer < world->state->fadeTime || !world->state->fadeOut) {
+        /// @todo rewrite this render code to use renderer class
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glUseProgram(ssRectProgram);
         glUniform2f(ssRectOffset, 0.f, 0.f);
         glUniform2f(ssRectSize, 1.f, 1.f);
@@ -542,7 +544,9 @@ void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
+    /// @todo rewrite this render code to use renderer class
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUniform2f(ssRectOffset, extents.x, extents.y);
     glUniform2f(ssRectSize, extents.z, extents.w);
 
@@ -572,7 +576,9 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
+    /// @todo rewrite this render code to use renderer class
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUniform2f(ssRectOffset, extents.x, extents.y);
     glUniform2f(ssRectSize, extents.z, extents.w);
 
@@ -672,7 +678,9 @@ void GameRenderer::renderPaths() {
 }
 
 void GameRenderer::renderLetterbox() {
+    /// @todo rewrite this render code to use renderer class
     glUseProgram(ssRectProgram);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     const float cinematicExperienceSize = 0.15f;
     glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
     glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
