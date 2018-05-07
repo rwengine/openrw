@@ -19,6 +19,7 @@ class GameWorld;
 class InstanceObject : public GameObject {
     float health;
     bool visible = true;
+    bool floating = false;
     int changeAtomic = -1;
 
     /**
@@ -48,6 +49,8 @@ public:
 
     void tick(float dt) override;
 
+    void tickPhysics(float dt);
+
     void changeModel(BaseModelInfo* incoming, int atomicNumber = 0);
 
     void setPosition(const glm::vec3& pos) override;
@@ -63,6 +66,13 @@ public:
     }
     float getVisible() const {
         return visible;
+    }
+
+    void setFloating(bool floating) {
+        this->floating = floating;
+    }
+    float getFloating() const {
+        return floating;
     }
 
     float getHealth() const {

@@ -33,6 +33,11 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
             setVisible(false);
         }
 
+        // Make sure bouys float on water
+        if (modelinfo->name.find("bouy") != std::string::npos) {
+            setFloating(true);
+        }
+
         /// @todo store path information properly
         if (modelinfo->type() == ModelDataType::SimpleInfo) {
             auto simpledata = static_cast<SimpleModelInfo*>(modelinfo);
@@ -46,6 +51,11 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
 InstanceObject::~InstanceObject() = default;
 
 void InstanceObject::tick(float dt) {
+    RW_UNUSED(dt);
+    // Moved to tickPhysics
+}
+
+void InstanceObject::tickPhysics(float dt) {
     if (animator) animator->tick(dt);
 
     if (!body || !dynamics) {
@@ -64,57 +74,61 @@ void InstanceObject::tick(float dt) {
         }
     }
 
-    const glm::vec3& ws = getPosition();
-    auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
-                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-    auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
-                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-    float vH = ws.z;  // - _collisionHeight/2.f;
-    float wH = 0.f;
 
-    if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
-        wY < WATER_HQ_DATA_SIZE) {
-        int i = (wX * WATER_HQ_DATA_SIZE) + wY;
-        int hI = engine->data->realWater[i];
-        if (hI < NO_WATER_INDEX) {
-            wH = engine->data->waterHeights[hI];
-            wH += engine->data->getWaveHeightAt(ws);
-            inWater = vH <= wH;
-        } else {
-            inWater = false;
+    // Only certain objects should float on water
+    if (floating) {
+        const glm::vec3& ws = getPosition();
+        auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
+                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+        auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
+                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+        float vH = ws.z;  // - _collisionHeight/2.f;
+        float wH = 0.f;
+
+        if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
+            wY < WATER_HQ_DATA_SIZE) {
+            int i = (wX * WATER_HQ_DATA_SIZE) + wY;
+            int hI = engine->data->realWater[i];
+            if (hI < NO_WATER_INDEX) {
+                wH = engine->data->waterHeights[hI];
+                wH += engine->data->getWaveHeightAt(ws);
+                inWater = vH <= wH;
+            } else {
+                inWater = false;
+            }
         }
-    }
-    _lastHeight = ws.z;
+        _lastHeight = ws.z;
 
-    if (inWater) {
-        float oZ =
-            -(body->getBoundingHeight() * (dynamics->buoyancy / 100.f));
-        body->getBulletBody()->activate(true);
-        // Damper motion
-        body->getBulletBody()->setDamping(0.95f, 0.9f);
+        if (inWater) {
+            float oZ =
+                -(body->getBoundingHeight() * (dynamics->buoyancy / 100.f));
+            body->getBulletBody()->activate(true);
+            // Damper motion
+            body->getBulletBody()->setDamping(0.95f, 0.9f);
 
-        auto wi = engine->data->getWaterIndexAt(ws);
-        if (wi != NO_WATER_INDEX) {
-            float h = engine->data->waterHeights[wi] + oZ;
+            auto wi = engine->data->getWaterIndexAt(ws);
+            if (wi != NO_WATER_INDEX) {
+                float h = engine->data->waterHeights[wi] + oZ;
 
-            // Calculate wave height
-            h += engine->data->getWaveHeightAt(ws);
+                // Calculate wave height
+                h += engine->data->getWaveHeightAt(ws);
 
-            if (ws.z <= h) {
-                float x = (h - ws.z);
-                float F =
-                    WATER_BUOYANCY_K * x +
-                    -WATER_BUOYANCY_C *
-                        body->getBulletBody()->getLinearVelocity().z();
-                btVector3 forcePos = btVector3(0.f, 0.f, 2.f)
-                                         .rotate(body->getBulletBody()
-                                                     ->getOrientation()
-                                                     .getAxis(),
-                                                 body->getBulletBody()
-                                                     ->getOrientation()
-                                                     .getAngle());
-                body->getBulletBody()->applyForce(btVector3(0.f, 0.f, F),
-                                                  forcePos);
+                if (ws.z <= h) {
+                    float x = (h - ws.z);
+                    float F =
+                        WATER_BUOYANCY_K * x +
+                        -WATER_BUOYANCY_C *
+                            body->getBulletBody()->getLinearVelocity().z();
+                    btVector3 forcePos = btVector3(0.f, 0.f, 2.f)
+                                             .rotate(body->getBulletBody()
+                                                         ->getOrientation()
+                                                         .getAxis(),
+                                                     body->getBulletBody()
+                                                         ->getOrientation()
+                                                         .getAngle());
+                    body->getBulletBody()->applyImpulse(btVector3(0.f, 0.f, F),
+                                                      forcePos);
+                }
             }
         }
     }

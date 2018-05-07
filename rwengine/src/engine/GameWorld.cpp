@@ -651,6 +651,11 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
         CharacterObject* object = static_cast<CharacterObject*>(p.second);
         object->tickPhysics(timeStep);
     }
+
+    for (auto& p : world->instancePool.objects) {
+        InstanceObject* object = static_cast<InstanceObject*>(p.second);
+        object->tickPhysics(timeStep);
+    }
 }
 
 void GameWorld::loadCutscene(const std::string& name) {
