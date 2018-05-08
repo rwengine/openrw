@@ -1,7 +1,7 @@
 #include "LoadingState.hpp"
 #include "RWGame.hpp"
 
-LoadingState::LoadingState(RWGame* game, std::function<void(void)> callback)
+LoadingState::LoadingState(RWGame* game, const std::function<void(void)>& callback)
     : State(game), complete(callback) {
 }
 

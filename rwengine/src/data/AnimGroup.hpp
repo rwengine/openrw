@@ -202,8 +202,13 @@ struct AnimCycleInfo {
     /// The actual animation
     AnimationPtr anim = nullptr;
 
-    AnimCycleInfo(const std::string& name = "", uint32_t flags = 0)
-        : name(name), flags(flags) {
+    template <class String>
+    AnimCycleInfo(String&& _name, uint32_t _flags = 0)
+        : name(std::forward<String>(_name))
+        , flags(_flags) {
+    }
+    AnimCycleInfo(uint32_t _flags = 0)
+        : flags(_flags) {
     }
 };
 
@@ -226,9 +231,10 @@ struct AnimGroup {
 
     static uint32_t getAnimationFlags(const std::string& animation);
 
-    AnimGroup(const std::string& name,
+    template <class String>
+    AnimGroup(String&& name,
               const std::initializer_list<AnimCycleInfo>& cycles = {})
-        : name_(name) {
+        : name_(std::forward<String>(name)) {
         std::copy(std::begin(cycles), std::end(cycles),
                   std::begin(animations_));
     }

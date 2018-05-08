@@ -36,7 +36,7 @@ public:
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
                    BaseModelInfo* modelinfo,
-                   std::shared_ptr<DynamicObjectData> dyn);
+                   const std::shared_ptr<DynamicObjectData>& dyn);
     ~InstanceObject() override;
 
     Type type() const override {

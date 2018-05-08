@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define ZONE_GANG_COUNT 13
@@ -73,11 +74,12 @@ struct ZoneData {
      */
     std::vector<ZoneData*> children_ = {};
 
-    ZoneData(const std::string& _name, const int& _type, const glm::vec3& _min,
+    template <class String>
+    ZoneData(String&& _name, const int& _type, const glm::vec3& _min,
              const glm::vec3& _max, const int& _island,
              const unsigned int& _pedGroupDay,
              const unsigned int& _pedGroupNight)
-        : name(_name)
+        : name(std::forward<String>(_name))
         , type(_type)
         , min(_min)
         , max(_max)

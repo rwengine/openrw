@@ -15,7 +15,8 @@ class DFFLoaderException {
     std::string _message;
 
 public:
-    DFFLoaderException(const std::string& message) : _message(message) {
+    template <class String>
+    DFFLoaderException(String&& message) : _message(message) {
     }
 
     const std::string& which() {
@@ -32,7 +33,7 @@ public:
 
     ClumpPtr loadFromMemory(FileHandle file);
 
-    void setTextureLookupCallback(TextureLookupCallback tlc) {
+    void setTextureLookupCallback(const TextureLookupCallback& tlc) {
         texturelookup = tlc;
     }
 

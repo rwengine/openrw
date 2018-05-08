@@ -171,7 +171,7 @@ public:
      *
      * GameRenderer will take ownership of the Model* pointer
      */
-    void setSpecialModel(SpecialModel usage, ClumpPtr model) {
+    void setSpecialModel(SpecialModel usage, const ClumpPtr& model) {
         specialmodels_[usage] = model;
     }
 

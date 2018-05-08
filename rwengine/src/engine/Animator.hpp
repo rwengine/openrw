@@ -46,7 +46,7 @@ class Animator {
     std::vector<AnimationState> animations;
 
 public:
-    Animator(ClumpPtr model);
+    Animator(const ClumpPtr& _model);
 
     AnimationPtr getAnimation(unsigned int slot) {
         if (slot < animations.size()) {
@@ -55,7 +55,7 @@ public:
         return nullptr;
     }
 
-    void playAnimation(unsigned int slot, AnimationPtr anim, float speed,
+    void playAnimation(unsigned int slot, const AnimationPtr& anim, float speed,
                        bool repeat) {
         if (slot >= animations.size()) {
             animations.resize(slot + 1);

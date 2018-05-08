@@ -28,9 +28,10 @@ struct InstanceData {
     /**
      * Constructor
      */
-    InstanceData(int _id, std::string _model, glm::vec3 _pos, glm::vec3 _scale,  glm::quat _rot)
+     template <class String>
+    InstanceData(int _id, String&& _model, glm::vec3 _pos, glm::vec3 _scale,  glm::quat _rot)
         : id(_id)
-        , model(_model)
+        , model(std::forward<String>(_model))
         , pos(_pos)
         , scale(_scale)
         , rot(_rot){

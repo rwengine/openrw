@@ -7,6 +7,7 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <random>
 #include <type_traits>
@@ -38,9 +39,10 @@ struct IllegalInstruction : SCMException {
     unsigned int offset;
     std::string thread;
 
-    IllegalInstruction(SCMOpcode opcode, unsigned int offset,
-                       const std::string& thread)
-        : opcode(opcode), offset(offset), thread(thread) {
+    template <class String>
+    IllegalInstruction(SCMOpcode _opcode, unsigned int _offset,
+                       String&& _thread)
+        : opcode(_opcode), offset(_offset), thread(std::forward<String>(_thread)) {
     }
 
     std::string what() const override {
@@ -58,8 +60,9 @@ struct UnknownType : SCMException {
     unsigned int offset;
     std::string thread;
 
-    UnknownType(SCMByte type, unsigned int offset, const std::string& thread)
-        : type(type), offset(offset), thread(thread) {
+    template <class String>
+    UnknownType(SCMByte _type, unsigned int _offset, String&& _thread)
+        : type(_type), offset(_offset), thread(std::forward<String>(_thread)) {
     }
 
     std::string what() const override {

@@ -39,10 +39,10 @@ public:
         std::function<void(void)> callback;
 
     public:
-        MenuEntry(const std::string& n, std::function<void(void)> cb)
+        MenuEntry(const std::string& n, const std::function<void(void)>& cb)
             : text(GameStringUtil::fromString(n)), callback(cb) {
         }
-        MenuEntry(const GameString& n, std::function<void(void)> cb)
+        MenuEntry(const GameString& n, const std::function<void(void)>& cb)
             : text(n), callback(cb) {
         }
 

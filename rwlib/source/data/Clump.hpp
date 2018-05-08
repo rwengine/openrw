@@ -203,7 +203,7 @@ public:
         ATOMIC_RENDER = 0x04
     };
 
-    void setFrame(ModelFramePtr frame) {
+    void setFrame(const ModelFramePtr& frame) {
         frame_ = frame;
     }
 
@@ -211,7 +211,7 @@ public:
         return frame_;
     }
 
-    void setGeometry(GeometryPtr geom) {
+    void setGeometry(const GeometryPtr& geom) {
         geometry_ = geom;
     }
 

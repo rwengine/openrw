@@ -79,9 +79,7 @@ GameWorld::~GameWorld() {
     }
 }
 
-bool GameWorld::placeItems(const std::string& name) {
-    std::string path = name;
-
+bool GameWorld::placeItems(const std::string& path) {
     LoaderIPL ipll;
 
     if (ipll.load(path)) {

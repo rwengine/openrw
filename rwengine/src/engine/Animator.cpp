@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <cmath>
 
-Animator::Animator(ClumpPtr model) : model(model) {
+Animator::Animator(const ClumpPtr& _model) : model(_model) {
 }
 
 void Animator::tick(float dt) {

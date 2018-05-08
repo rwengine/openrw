@@ -110,7 +110,7 @@ public:
     /**
      * Changes the current model, used for re-dressing chars
      */
-    void setModel(ClumpPtr model) {
+    void setModel(const ClumpPtr& model) {
         model_ = model;
     }
 
@@ -248,7 +248,7 @@ class ClumpObject {
     ClumpPtr clump_;
 
 protected:
-    void setClump(ClumpPtr ptr) {
+    void setClump(const ClumpPtr& ptr) {
         clump_ = ptr;
     }
 
