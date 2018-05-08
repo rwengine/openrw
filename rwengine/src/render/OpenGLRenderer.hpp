@@ -261,7 +261,7 @@ public:
         OpenGLShaderProgram(GLuint p) : program(p) {
         }
 
-        ~OpenGLShaderProgram() {
+        ~OpenGLShaderProgram() override {
             glDeleteProgram(program);
         }
 
@@ -284,7 +284,7 @@ public:
 
     OpenGLRenderer();
 
-    ~OpenGLRenderer() = default;
+    ~OpenGLRenderer() override = default;
 
     std::string getIDString() const override;
 
