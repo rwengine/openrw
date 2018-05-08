@@ -1,6 +1,6 @@
 #ifndef _RWENGINE_PATHDATA_HPP_
 #define _RWENGINE_PATHDATA_HPP_
-#include <stdint.h>
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
