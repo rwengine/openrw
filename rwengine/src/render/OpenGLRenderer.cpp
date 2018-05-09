@@ -280,7 +280,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
         useTexture(u, p.textures[u]);
     }
 
-    setBlend(p.blend,p.blendMode);
+    setBlend(p.blendMode);
     setDepthWrite(p.depthWrite);
 
     ObjectUniformData objectData{model,
@@ -368,8 +368,7 @@ void OpenGLRenderer::invalidate() {
     currentProgram = nullptr;
     currentTextures.clear();
     currentUBO = 0;
-    blendEnabled = false;
-    glDisable(GL_BLEND);
+    setBlend(BLEND_NONE);
 }
 
 bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)

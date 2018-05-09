@@ -77,7 +77,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
 
     Renderer::DrawParameters dp { };
     dp.start = 0;
-    dp.blend = true;
+    dp.blendMode = BLEND_ALPHA;
     dp.depthWrite = false;
 
     // World out the number of units per tile

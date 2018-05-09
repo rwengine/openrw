@@ -341,7 +341,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     culled += objectRenderer.culled;
     renderer->pushDebugGroup("Objects");
     renderer->pushDebugGroup("RenderList");
-
     // Also parallelizable
     RW_PROFILE_BEGIN("Sort");
     // Earlier position in the array means earlier object's rendering
@@ -349,12 +348,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     std::sort(renderList.begin(), renderList.end(),
               [](const Renderer::RenderInstruction& a,
                  const Renderer::RenderInstruction& b) {
-                    if (!a.drawInfo.blend && b.drawInfo.blend) return true;
-                    if (a.drawInfo.blend && !b.drawInfo.blend) return false;
+                    if (a.drawInfo.blendMode==BLEND_NONE && b.drawInfo.blendMode!=BLEND_NONE) return true;
+                    if (a.drawInfo.blendMode!=BLEND_NONE && b.drawInfo.blendMode==BLEND_NONE) return false;
                     return (a.sortKey > b.sortKey);
               });
     RW_PROFILE_END();
-
     RW_PROFILE_BEGIN("Draw");
     renderer->drawBatched(renderList);
     RW_PROFILE_END();
@@ -519,8 +517,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
         dp.colour = glm::u8vec4(particle.colour * 255.f);
         dp.start = 0;
         dp.count = 4;
-        dp.blend = true;
-        dp.blendMode = 1;
+        dp.blendMode = BLEND_ADDITIVE;
         dp.diffuse = 1.f;
 
         renderer->drawArrays(transformMat, &particleDraw, dp);
