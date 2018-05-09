@@ -368,7 +368,7 @@ void OpenGLRenderer::invalidate() {
     currentProgram = nullptr;
     currentTextures.clear();
     currentUBO = 0;
-    setBlend(BLEND_NONE);
+    setBlend(BlendMode::BLEND_NONE);
 }
 
 bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)

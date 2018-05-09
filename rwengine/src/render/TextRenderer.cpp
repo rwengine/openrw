@@ -294,7 +294,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     Renderer::DrawParameters dp;
     dp.start = 0;
-    dp.blendMode = BLEND_ALPHA;
+    dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
     auto ftexture = renderer->getData()->findSlotTexture("fonts", fonts[ti.font]);
     dp.textures = {ftexture->getName()};

@@ -97,7 +97,7 @@ public:
 
         // Default state -- should be moved to materials
         DrawParameters()
-            : blendMode(BLEND_NONE)
+            : blendMode(BlendMode::BLEND_NONE)
             , depthWrite(true)
             , ambient(1.f)
             , diffuse(1.f)
@@ -347,7 +347,7 @@ private:
     // State Cache
     DrawBuffer* currentDbuff = nullptr;
     OpenGLShaderProgram* currentProgram = nullptr;
-    BlendMode blendMode = BLEND_NONE;
+    BlendMode blendMode = BlendMode::BLEND_NONE;
     bool depthWriteEnabled = false;
     GLuint currentUBO = 0;
     GLuint currentUnit = 0;
@@ -355,7 +355,7 @@ private:
 
     // Set state
     void setBlend(BlendMode mode) {
-        if (mode!=BLEND_NONE && blendMode==BLEND_NONE)//To don't call glEnable again when it already enabled
+        if (mode!=BlendMode::BLEND_NONE && blendMode==BlendMode::BLEND_NONE)//To don't call glEnable again when it already enabled
             glEnable(GL_BLEND);
 
         if (mode!=blendMode) {
@@ -363,13 +363,13 @@ private:
                 default:
                     assert(false);
                     break;
-                case BLEND_NONE:
+                case BlendMode::BLEND_NONE:
                     glDisable(GL_BLEND);
                     break;
-                case BLEND_ALPHA:
+                case BlendMode::BLEND_ALPHA:
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     break;
-                case BLEND_ADDITIVE:
+                case BlendMode::BLEND_ADDITIVE:
                     glBlendFunc(GL_ONE, GL_ONE);
                     break;
 
