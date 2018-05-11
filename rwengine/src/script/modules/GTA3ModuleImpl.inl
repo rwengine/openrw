@@ -3870,35 +3870,57 @@ void opcode_0160(const ScriptArguments& args, ScriptVec3 coord, const ScriptChan
 
     opcode 0161
     @arg vehicle Car/vehicle
-    @arg arg2 
-    @arg arg3 Boolean true/false
+    @arg color Blip color 
+    @arg display Blip display mode
     @arg blip Blip
 */
-void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptBlipColour arg2, const ScriptBoolean arg3, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0161);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0161(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, vehicle);
+    data.colour = colour;
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
     @brief %4d% = create_marker_above_actor %1d% color %2d% visibility %3d%
 
     opcode 0162
-    @arg character Character/ped
-    @arg arg2 
-    @arg arg3 
-    @arg blip Blip
+
+    Creates and attaches blip for a ped
+
+    @arg character Ped
+    @arg colour Blip colour
+    @arg display Blip display mode
+    @arg blip Created blip
 */
-void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, const ScriptBlipColour arg2, const ScriptBlipDisplay arg3, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0162);
-    RW_UNUSED(character);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0162(const ScriptArguments& args, const ScriptCharacter character, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, character);
+    data.colour = colour;
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
+}
+
+/**
+    @brief %4d% = create_marker_above_object %1d% color %2d% visibility %3d%
+
+    opcode 0163
+
+    Creates and attaches blip for an object
+    Note: not used in the game
+
+    @arg instance Object
+    @arg colour Blip colour
+    @arg display Blip display mode
+    @arg blip Created blip
+*/
+void opcode_0163(const ScriptArguments& args, const ScriptObject instance, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createObjectBlip(args, instance);
+    data.colour = colour;
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
@@ -3919,13 +3941,11 @@ void opcode_0164(const ScriptArguments& args, const ScriptBlip blip) {
 
     opcode 0165
     @arg blip Blip
-    @arg arg2 
+    @arg colour Blip colour
 */
-void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipColour arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0165);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
+void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipColour colour) {
     RW_UNUSED(args);
+    blip->colour = colour;
 }
 
 /**
@@ -3933,13 +3953,11 @@ void opcode_0165(const ScriptArguments& args, const ScriptBlip blip, const Scrip
 
     opcode 0166
     @arg blip Blip
-    @arg arg2 Boolean true/false
+    @arg brightness Blip brightness
 */
-void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0166);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
+void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt brightness) {
     RW_UNUSED(args);
+    blip->brightness = brightness;
 }
 
 /**
@@ -3947,17 +3965,16 @@ void opcode_0166(const ScriptArguments& args, const ScriptBlip blip, const Scrip
 
     opcode 0167
     @arg coord Coordinates
-    @arg arg4 
-    @arg arg5 
+    @arg colour Blip color
+    @arg display Blip display mode
     @arg blip Blip
 */
-void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlipColour arg4, const ScriptBlipDisplay arg5, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0167);
-    RW_UNUSED(coord);
-    RW_UNUSED(arg4);
-    RW_UNUSED(arg5);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlipColour colour, const ScriptBlipDisplay display, ScriptBlip& blip) {
+    auto& data = script::createBlip(args, script::getGround(args, coord), BlipData::Coord);
+    data.colour = colour;
+    /// @todo change ScriptBlipDisplay to BlipData::DisplayMode
+    data.display = static_cast <BlipData::DisplayMode> (display);
+    blip = &data;
 }
 
 /**
@@ -3965,13 +3982,11 @@ void opcode_0167(const ScriptArguments& args, ScriptVec3 coord, const ScriptBlip
 
     opcode 0168
     @arg blip Blip
-    @arg arg2 
+    @arg size Blip size
 */
-void opcode_0168(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0168);
-    RW_UNUSED(blip);
-    RW_UNUSED(arg2);
+void opcode_0168(const ScriptArguments& args, const ScriptBlip blip, const ScriptInt size) {
     RW_UNUSED(args);
+    blip->size = size;
 }
 
 /**
@@ -4359,11 +4374,9 @@ void opcode_0188(const ScriptArguments& args, const ScriptObject object, ScriptB
     @arg coord Coordinates
     @arg blip Blip
 */
-void opcode_0189(const ScriptArguments& args, ScriptVec3 coord, ScriptBlip& blip) {
-    RW_UNIMPLEMENTED_OPCODE(0x0189);
-    RW_UNUSED(coord);
-    RW_UNUSED(blip);
-    RW_UNUSED(args);
+void opcode_0189(const ScriptArguments& args, const ScriptVec3 coord, ScriptBlip& blip) {
+    auto& data = script::createBlip(args, script::getGround(args, coord), BlipData::Contact);
+    blip = &data;
 }
 
 /**
@@ -4373,16 +4386,8 @@ void opcode_0189(const ScriptArguments& args, ScriptVec3 coord, ScriptBlip& blip
     @arg coord Coordinates
     @arg blip Blip
 */
-void opcode_018a(const ScriptArguments& args, ScriptVec3 coord, ScriptBlip& blip) {
-    BlipData data;
-    data.target = 0;
-    data.coord = script::getGround(args, coord);
-    // Coordinate blips are not visible
-    data.display = BlipData::RadarOnly;
-    data.texture = "";
-    data.colour = 5;
-    data.size = 3;
-    args.getState()->addRadarBlip(data);
+void opcode_018a(const ScriptArguments& args, const ScriptVec3 coord, ScriptBlip& blip) {
+    auto& data = script::createBlip(args, script::getGround(args, coord), BlipData::Coord);
     blip = &data;
 }
 
@@ -4391,10 +4396,11 @@ void opcode_018a(const ScriptArguments& args, ScriptVec3 coord, ScriptBlip& blip
 
     opcode 018b
     @arg blip Blip
-    @arg arg2 
+    @arg display Blip display mode
 */
-void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipDisplay arg2) {
-    switch (arg2) {
+void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const ScriptBlipDisplay display) {
+    RW_UNUSED(args);
+    switch (display) {
     default:
     	blip->display = BlipData::Hide;
     	break;
@@ -4408,7 +4414,6 @@ void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     	blip->display = BlipData::ShowBoth;
     	break;
     }
-    RW_UNUSED(args);
 }
 
 /**
@@ -7163,10 +7168,7 @@ void opcode_02a3(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg blip Blip
 */
 void opcode_02a7(const ScriptArguments& args, ScriptVec3 coord, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
-    BlipData data;
-    data.coord = coord;
-    data.texture = script::getBlipSprite(blipSprite);
-    args.getState()->addRadarBlip(data);
+    auto& data = script::createBlipSprite(args, coord, BlipData::Contact, blipSprite);
     blip = &data;
     RW_UNIMPLEMENTED("Radar Blip Indicator Sphere");
 }
@@ -7180,10 +7182,7 @@ void opcode_02a7(const ScriptArguments& args, ScriptVec3 coord, const ScriptRada
     @arg blip Blip
 */
 void opcode_02a8(const ScriptArguments& args, ScriptVec3 coord, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
-    BlipData data;
-    data.coord = coord;
-    data.texture = script::getBlipSprite(blipSprite);
-    args.getState()->addRadarBlip(data);
+    auto& data = script::createBlipSprite(args, coord, BlipData::Coord, blipSprite);
     blip = &data;
 }
 
@@ -11704,12 +11703,12 @@ void opcode_03dc(const ScriptArguments& args, const ScriptPickup pickup, ScriptB
     @brief pickup %1d% show_on_radar %2d% %3d%
 
     opcode 03dd
-    @arg pickup 
-    @arg arg2 
-    @arg blip 
+    @arg pickup Pickup blip
+    @arg blipSprite Blip sprite
+    @arg blip Blip
 */
-void opcode_03dd(const ScriptArguments& args, const ScriptPickup pickup, const ScriptRadarSprite arg2, ScriptBlip& blip) {
-    auto data = script::createObjectBlipSprite(args, pickup, arg2);
+void opcode_03dd(const ScriptArguments& args, const ScriptPickup pickup, const ScriptRadarSprite blipSprite, ScriptBlip& blip) {
+    auto data = script::createObjectBlipSprite(args, pickup, blipSprite);
     blip = &data;
 }
 
