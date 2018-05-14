@@ -1,12 +1,12 @@
 #include "objects/VehicleObject.hpp"
 
 #include <algorithm>
-#include <limits>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 
-#include <btBulletDynamicsCommon.h>
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#include <btBulletDynamicsCommon.h>
 #include <glm/gtx/quaternion.hpp>
 
 #include <data/Clump.hpp>
@@ -96,6 +96,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     , throttle(0.f)
     , brake(0.f)
     , handbrake(true)
+    , health(1000.f)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
@@ -175,16 +176,16 @@ VehicleObject::~VehicleObject() {
 void VehicleObject::setupModel() {
     const auto vehicleInfo = getModelInfo<VehicleModelInfo>();
     const auto isBoat = (vehicleInfo->vehicletype_ == VehicleModelInfo::BOAT);
-    const std::string baseName = isBoat? "boat":"chassis";
+    const std::string baseName = isBoat ? "boat" : "chassis";
     const auto dummy = getClump()->findFrame("chassis_dummy");
 
     for (const auto& atomic : getClump()->getAtomics()) {
         auto frame = atomic->getFrame().get();
         const auto& name = frame->getName();
-        if (name == baseName+"_vlo") {
+        if (name == baseName + "_vlo") {
             chassislow_ = atomic.get();
         }
-        if (name == baseName+"_hi") {
+        if (name == baseName + "_hi") {
             chassishigh_ = atomic.get();
         }
         if (name.find("extra") == 0) {
@@ -192,11 +193,10 @@ void VehicleObject::setupModel() {
                 continue;
             }
 
-            auto partNumber = (std::stoul(name.c_str()+5)-1);
+            auto partNumber = (std::stoul(name.c_str() + 5) - 1);
             extras_.at(partNumber) = atomic.get();
             setExtraEnabled(partNumber, false);
         }
-
     }
 
     if (!dummy) {
@@ -445,7 +445,8 @@ void VehicleObject::tickPhysics(float dt) {
 
             float bbZ = info->handling.dimensions.z / 2.f;
 
-            float oZ = -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
+            float oZ =
+                -bbZ / 2.f + (bbZ * (info->handling.percentSubmerged / 120.f));
 
             if (isBoat) {
                 oZ = 0.f;
@@ -527,6 +528,18 @@ float VehicleObject::getVelocity() const {
         return (physVehicle->getCurrentSpeedKmHour() * 1000.f) / (60.f * 60.f);
     }
     return 0.f;
+}
+
+bool VehicleObject::isWrecked() const {
+    return health < 250.f;
+}
+
+void VehicleObject::setHealth(float h) {
+    health = h;
+}
+
+float VehicleObject::getHealth() const {
+    return health;
 }
 
 void VehicleObject::setSteeringAngle(float a) {
@@ -641,6 +654,8 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
             }
             /// @todo determine when doors etc. should un-latch
         }
+
+        health -= dmg.hitpoints;
     }
 
     return true;
@@ -738,9 +753,9 @@ void VehicleObject::registerPart(ModelFrame* mf) {
         }
     }
 
-    dynamicParts.insert(
-        {mf->getName(),
-         {mf, normal, damage, nullptr, nullptr, nullptr, false, 0.f, 0.f, 0.f}});
+    dynamicParts.insert({mf->getName(),
+                         {mf, normal, damage, nullptr, nullptr, nullptr, false,
+                          0.f, 0.f, 0.f}});
 }
 
 void VehicleObject::createObjectHinge(Part* part) {
@@ -860,9 +875,9 @@ bool VehicleObject::collectSpecial() {
 
 void VehicleObject::grantOccupantRewards(CharacterObject* character) {
     if (character->isPlayer() && collectSpecial()) {
-        if (getVehicle()->vehiclename_ == "TAXI"
-            || getVehicle()->vehiclename_ == "CABBIE"
-            || getVehicle()->vehiclename_ == "BORGNINE") {
+        if (getVehicle()->vehiclename_ == "TAXI" ||
+            getVehicle()->vehiclename_ == "CABBIE" ||
+            getVehicle()->vehiclename_ == "BORGNINE") {
             // Earn $25 from taxi cabs
             engine->state->playerInfo.money += 25;
         } else if (getVehicle()->vehiclename_ == "POLICAR") {

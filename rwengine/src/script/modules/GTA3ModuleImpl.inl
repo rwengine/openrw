@@ -2018,9 +2018,10 @@ void opcode_00ab(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
     @arg vehicle 
 */
 bool opcode_00ac(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x00ac);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    if (vehicle) {
+    	return !vehicle->isWrecked();
+    }
     return false;
 }
 
@@ -3330,10 +3331,11 @@ bool opcode_0118(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 bool opcode_0119(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x0119);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
-    return false;
+    if (vehicle) {
+        return vehicle->isWrecked();
+    }
+    return true;
 }
 
 /**
@@ -4324,11 +4326,8 @@ bool opcode_0184(const ScriptArguments& args, const ScriptCharacter character, c
     @arg arg2 
 */
 bool opcode_0185(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0185);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
-    return true;
+    return vehicle->getHealth() <= arg2;
 }
 
 /**
@@ -6396,10 +6395,8 @@ void opcode_0223(const ScriptArguments& args, const ScriptCharacter character, c
     @arg arg2 
 */
 void opcode_0224(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0224);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    vehicle->setHealth(static_cast<float> (arg2));
 }
 
 /**
@@ -6438,11 +6435,8 @@ void opcode_0226(const ScriptArguments& args, const ScriptCharacter character, S
     @arg arg2 
 */
 void opcode_0227(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptInt& arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0227);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
-    arg2 = 1000.f;
+    arg2 = static_cast<int> (vehicle->getHealth());
 }
 
 /**

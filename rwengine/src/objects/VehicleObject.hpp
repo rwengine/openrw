@@ -41,7 +41,10 @@ private:
     Atomic* chassislow_ = nullptr;
 
     std::array<Atomic*, 6> extras_;
+
 public:
+    float health;
+
     VehicleInfoHandle info;
     glm::u8vec3 colourPrimary;
     glm::u8vec3 colourSecondary;
@@ -57,7 +60,7 @@ public:
         ModelFrame* dummy;
         Atomic* normal;
         Atomic* damaged;
-        btCollisionShape *cs;
+        btCollisionShape* cs;
         btRigidBody* body;
         btHingeConstraint* constraint;
         bool moveToAngle;
@@ -84,12 +87,22 @@ public:
         return getModelInfo<VehicleModelInfo>();
     }
 
-    Atomic* getHighLOD() const { return chassishigh_; }
-    Atomic* getLowLOD() const { return chassislow_; }
+    Atomic* getHighLOD() const {
+        return chassishigh_;
+    }
+    Atomic* getLowLOD() const {
+        return chassislow_;
+    }
 
     Type type() const override {
         return Vehicle;
     }
+
+    bool isWrecked() const;
+
+    void setHealth(float);
+
+    float getHealth() const;
 
     void setExtraEnabled(size_t extra, bool enabled);
 
@@ -166,15 +179,15 @@ public:
     void setSecondaryColour(uint8_t color);
 
     /**
-    * @brief isStopped
-    * @return True if the vehicle isn't moving
-    */
+     * @brief isStopped
+     * @return True if the vehicle isn't moving
+     */
     bool isStopped() const;
 
     /**
-    * @brief collectSpecial
-    * @return True if mHasSpecial was true opon calling
-    */
+     * @brief collectSpecial
+     * @return True if mHasSpecial was true opon calling
+     */
     bool collectSpecial();
 
     void grantOccupantRewards(CharacterObject* character);
