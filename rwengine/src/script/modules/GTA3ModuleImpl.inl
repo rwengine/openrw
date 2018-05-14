@@ -4327,7 +4327,7 @@ bool opcode_0184(const ScriptArguments& args, const ScriptCharacter character, c
 */
 bool opcode_0185(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptInt arg2) {
     RW_UNUSED(args);
-    return vehicle->getHealth() <= arg2;
+    return vehicle->getHealth() > arg2;
 }
 
 /**
