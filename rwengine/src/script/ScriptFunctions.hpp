@@ -144,19 +144,20 @@ inline BlipData& createBlip(const ScriptArguments& args, const ScriptVec3& coord
     BlipData data;
     data.coord = coord;
     data.type = type;
+    data.display = BlipData::ShowBoth;
     switch (type) {
         case BlipData::Contact:
             data.colour = 2;
             break;
         case BlipData::Coord:
             data.colour = 5;
+            data.display = BlipData::RadarOnly;
             break;
         default:
             RW_ERROR("Unhandled blip type");
             break;
     }
     data.target = 0;
-    data.display = BlipData::ShowBoth;
     data.texture = "";
     data.size = 3;
     auto blip = args.getState()->addRadarBlip(data);
