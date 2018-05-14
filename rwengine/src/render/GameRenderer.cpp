@@ -341,7 +341,6 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     culled += objectRenderer.culled;
     renderer->pushDebugGroup("Objects");
     renderer->pushDebugGroup("RenderList");
-
     // Also parallelizable
     RW_PROFILE_BEGIN("Sort");
     // Earlier position in the array means earlier object's rendering
@@ -349,12 +348,11 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     std::sort(renderList.begin(), renderList.end(),
               [](const Renderer::RenderInstruction& a,
                  const Renderer::RenderInstruction& b) {
-                    if (!a.drawInfo.blend && b.drawInfo.blend) return true;
-                    if (a.drawInfo.blend && !b.drawInfo.blend) return false;
+                    if (a.drawInfo.blendMode==BlendMode::BLEND_NONE && b.drawInfo.blendMode!=BlendMode::BLEND_NONE) return true;
+                    if (a.drawInfo.blendMode!=BlendMode::BLEND_NONE && b.drawInfo.blendMode==BlendMode::BLEND_NONE) return false;
                     return (a.sortKey > b.sortKey);
               });
     RW_PROFILE_END();
-
     RW_PROFILE_BEGIN("Draw");
     renderer->drawBatched(renderList);
     RW_PROFILE_END();
@@ -410,6 +408,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
     if (fadeTimer < world->state->fadeTime || !world->state->fadeOut) {
+        /// @todo rewrite this render code to use renderer class
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glUseProgram(ssRectProgram);
         glUniform2f(ssRectOffset, 0.f, 0.f);
         glUniform2f(ssRectSize, 1.f, 1.f);
@@ -519,7 +519,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
         dp.colour = glm::u8vec4(particle.colour * 255.f);
         dp.start = 0;
         dp.count = 4;
-        dp.blend = true;
+        dp.blendMode = BlendMode::BLEND_ADDITIVE;
         dp.diffuse = 1.f;
 
         renderer->drawArrays(transformMat, &particleDraw, dp);
@@ -544,7 +544,9 @@ void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
+    /// @todo rewrite this render code to use renderer class
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUniform2f(ssRectOffset, extents.x, extents.y);
     glUniform2f(ssRectSize, extents.z, extents.w);
 
@@ -574,7 +576,9 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
+    /// @todo rewrite this render code to use renderer class
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUniform2f(ssRectOffset, extents.x, extents.y);
     glUniform2f(ssRectSize, extents.z, extents.w);
 
@@ -674,7 +678,9 @@ void GameRenderer::renderPaths() {
 }
 
 void GameRenderer::renderLetterbox() {
+    /// @todo rewrite this render code to use renderer class
     glUseProgram(ssRectProgram);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     const float cinematicExperienceSize = 0.15f;
     glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
     glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);

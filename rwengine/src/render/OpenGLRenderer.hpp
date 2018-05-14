@@ -53,6 +53,15 @@ struct VertexP3 {
     VertexP3() = default;
 };
 
+/**
+ * Enum used to determine which blending mode to use
+ */
+enum class BlendMode {
+    BLEND_NONE,
+    BLEND_ALPHA,
+    BLEND_ADDITIVE
+};
+
 class Renderer {
 public:
     typedef std::vector<GLuint> Textures;
@@ -73,8 +82,8 @@ public:
         unsigned int start;
         /// Textures to use
         Textures textures;
-        /// Alpha blending state
-        bool blend;
+        /// Blending mode
+        BlendMode blendMode;
         // Depth writing state
         bool depthWrite;
         /// Material
@@ -88,7 +97,7 @@ public:
 
         // Default state -- should be moved to materials
         DrawParameters()
-            : blend(false)
+            : blendMode(BlendMode::BLEND_NONE)
             , depthWrite(true)
             , ambient(1.f)
             , diffuse(1.f)
@@ -338,22 +347,36 @@ private:
     // State Cache
     DrawBuffer* currentDbuff = nullptr;
     OpenGLShaderProgram* currentProgram = nullptr;
-    bool blendEnabled = false;
+    BlendMode blendMode = BlendMode::BLEND_NONE;
     bool depthWriteEnabled = false;
     GLuint currentUBO = 0;
     GLuint currentUnit = 0;
     std::map<GLuint, GLuint> currentTextures;
 
     // Set state
-    void setBlend(bool enable) {
-        if (enable && !blendEnabled) {
+    void setBlend(BlendMode mode) {
+        if (mode!=BlendMode::BLEND_NONE && blendMode==BlendMode::BLEND_NONE)//To don't call glEnable again when it already enabled
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            blendEnabled = enable;
-        } else if(!enable && blendEnabled) {
-            glDisable(GL_BLEND);
-            blendEnabled = enable;
+
+        if (mode!=blendMode) {
+            switch (mode) {
+                default:
+                    assert(false);
+                    break;
+                case BlendMode::BLEND_NONE:
+                    glDisable(GL_BLEND);
+                    break;
+                case BlendMode::BLEND_ALPHA:
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    break;
+                case BlendMode::BLEND_ADDITIVE:
+                    glBlendFunc(GL_ONE, GL_ONE);
+                    break;
+
+            }
         }
+
+        blendMode = mode;
     }
 
     void setDepthWrite(bool enable) {

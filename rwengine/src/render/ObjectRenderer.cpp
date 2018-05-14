@@ -100,7 +100,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
             dp.ambient = mat.ambientIntensity;
         }
 
-        dp.blend = isTransparent;
+        dp.blendMode = isTransparent ? BlendMode::BLEND_ALPHA : BlendMode::BLEND_NONE;
 
         glm::vec3 position(modelMatrix[3]);
         float distance = glm::length(m_camera.position - position);
