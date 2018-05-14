@@ -140,7 +140,6 @@ AVFormatContext* LoaderSDT::loadSound(size_t index, bool asWave) {
     ioBuffer = reinterpret_cast<uint8_t*>(av_malloc(ioBufferSize)); /// Will be freeded in SoundManager after buffering
 
     bd = std::make_unique<bufferData>();
-    av_register_all();
 
     bd->size = sizeof(WaveHeader) + assetInfo.size;
     bdDataStart = std::make_unique<uint8_t[]>(bd->size); /// Store start ptr of data to be able freed memory later
