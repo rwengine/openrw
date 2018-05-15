@@ -99,7 +99,12 @@ GameState::GameState()
     , maxWantedLevel(0)
     , playerObject(0)
     , scriptOnMissionFlag(nullptr)
+    , overrideNextRestart(false)
     , nextRestartLocation{}
+    , hospitalRestarts{}
+    , policeRestarts{}
+    , hospitalIslandOverride(false)
+    , policeIslandOverride(false)
     , fadeOut(true)
     , fadeStart(0.f)
     , fadeTime(0.f)
@@ -114,7 +119,7 @@ GameState::GameState()
     , cameraNear(0.1f)
     , cameraFixed(false)
     , cameraPosition{}
-    , cameraRotation{1.0f,0.0f,0.0f,0.0f}
+    , cameraRotation{1.0f, 0.0f, 0.0f, 0.0f}
     , cameraTarget(0)
     , importExportPortland(0)
     , importExportShoreside(0)
@@ -125,7 +130,7 @@ GameState::GameState()
 
 int GameState::addRadarBlip(BlipData& blip) {
     int l = 0;
-    for (const auto &radarBlip : radarBlips) {
+    for (const auto& radarBlip : radarBlips) {
         if ((radarBlip.first) != l) {
             l = radarBlip.first - 1;
         } else {
@@ -144,4 +149,71 @@ void GameState::removeBlip(int blip) {
     if (it != radarBlips.end()) {
         radarBlips.erase(it);
     }
+}
+
+void GameState::addHospitalRestart(const glm::vec4 location) {
+    hospitalRestarts.push_back(location);
+}
+
+void GameState::addPoliceRestart(const glm::vec4 location) {
+    policeRestarts.push_back(location);
+}
+
+void GameState::overrideRestart(const glm::vec4 location) {
+    overrideNextRestart = true;
+    nextRestartLocation = location;
+}
+
+void GameState::cancelRestartOverride() {
+    overrideNextRestart = false;
+}
+
+const glm::vec4 GameState::getClosestRestart(
+    RestartType type, const glm::vec3 playerPosition) const {
+    float closest = 10000.f;
+    glm::vec4 result;
+
+    ZoneData* playerZone = world->data->findZoneAt(playerPosition);
+
+    const std::vector<glm::vec4>* iter = nullptr;
+    int islandOverride = 0;
+
+    if (type == Hospital) {
+        iter = &hospitalRestarts;
+        islandOverride = hospitalIslandOverride;
+    } else if (type == Police) {
+        iter = &policeRestarts;
+        islandOverride = policeIslandOverride;
+    }
+
+    for (auto& location : *iter) {
+        glm::vec3 location3d(location);
+
+        ZoneData* restartZone = world->data->findZoneAt(location3d);
+
+        if ((playerZone->island == restartZone->island &&
+             islandOverride != 0) ||
+            islandOverride == 0) {
+            if (glm::distance(location3d, playerPosition) < closest) {
+                result = location;
+                closest = glm::distance(location3d, playerPosition);
+            }
+        }
+    }
+
+    return result;
+}
+
+void GameState::fade(float time, bool f) {
+    fadeTime = time;
+    fadeOut = f;
+    fadeStart = world->getGameTime();
+}
+
+bool GameState::isFading() const {
+    return world->getGameTime() < fadeStart + fadeTime;
+}
+
+void GameState::setFadeColour(glm::i32vec3 colour) {
+    fadeColour = colour;
 }

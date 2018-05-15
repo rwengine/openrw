@@ -148,6 +148,11 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         movementAnimation =
             animations->animation(AnimCycle::KnockOutShotFront0);
         repeat = false;
+        if (currentAnim ==
+                animations->animation(AnimCycle::KnockOutShotFront0) &&
+            animator->isCompleted(AnimIndexMovement)) {
+            SetDead();
+        }
     } else if (jumped) {
         repeat = false;
         if (currentAnim == animations->animation(AnimCycle::JumpLaunch) &&
@@ -407,8 +412,26 @@ bool CharacterObject::isPlayer() const {
     return engine->state->playerObject == getGameObjectID();
 }
 
+bool CharacterObject::isDying() const {
+    return currentState.isDying;
+}
+
+bool CharacterObject::isDead() const {
+    return currentState.isDead;
+}
+
 bool CharacterObject::isAlive() const {
-    return currentState.health > 0.f;
+    return !isDying() && !isDead();
+}
+
+void CharacterObject::Die() {
+    currentState.isDying = true;
+    currentState.isDead = false;
+}
+
+void CharacterObject::SetDead() {
+    currentState.isDying = false;
+    currentState.isDead = true;
 }
 
 bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat) {
@@ -485,6 +508,9 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
     }
     if (dmgPoints > 0.f) {
         currentState.health = std::max(0.f, currentState.health - dmgPoints);
+    }
+    if (currentState.health <= 0.f) {
+        Die();
     }
     return true;
 }
@@ -650,5 +676,11 @@ void CharacterObject::useItem(bool active, bool primary) {
             currentState.secondaryActive = active;
             /// @todo handle scopes and sights
         }
+    }
+}
+
+void CharacterObject::clearInventory() {
+    for (int slot = 0; slot < kMaxInventorySlots; ++slot) {
+        removeFromInventory(slot);
     }
 }

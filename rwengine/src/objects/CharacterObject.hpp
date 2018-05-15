@@ -7,8 +7,8 @@
 #include <cstdint>
 #include <string>
 
-#include <glm/gtc/constants.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <rw/forward.hpp>
 
@@ -37,6 +37,8 @@ struct CharacterWeaponSlot {
 struct CharacterState {
     float health = 100.f;
     float armour = 0.f;
+    bool isDying = false;
+    bool isDead = false;
     std::array<CharacterWeaponSlot, kMaxInventorySlots> weapons;
     uint16_t currentWeapon = 0;
     uint32_t lastFireTimeMS = 0;
@@ -129,7 +131,13 @@ public:
 
     bool isPlayer() const;
 
+    bool isDying() const;
+    bool isDead() const;
     bool isAlive() const;
+
+    void Die();
+    void SetDead();
+
     bool takeDamage(const DamageInfo& damage) override;
 
     bool enterVehicle(VehicleObject* vehicle, size_t seat);
@@ -186,7 +194,8 @@ public:
     glm::vec3 getLookDirection() const {
         float theta = m_look.y - glm::half_pi<float>();
         return glm::vec3(std::sin(-m_look.x) * std::cos(theta),
-                         std::cos(-m_look.x) * std::cos(theta), std::sin(theta));
+                         std::cos(-m_look.x) * std::cos(theta),
+                         std::sin(theta));
     }
 
     /**
@@ -250,6 +259,8 @@ public:
     void useItem(bool active, bool primary = true);
 
     void cycleInventory(bool up);
+
+    void clearInventory();
 };
 
 #endif

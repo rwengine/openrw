@@ -4,6 +4,7 @@
 
 #include <glm/gtc/quaternion.hpp>
 
+#include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
 #include "objects/CharacterObject.hpp"
 #include "objects/GameObject.hpp"
@@ -12,7 +13,9 @@
 PlayerController::PlayerController()
     : CharacterController()
     , lastRotation(glm::vec3(0.f, 0.f, 0.f))
-    , _enabled(true) {
+    , missionRestartRequired(false)
+    , _enabled(true)
+    , restartState(Alive) {
 }
 
 void PlayerController::setInputEnabled(bool enabled) {
@@ -58,12 +61,210 @@ void PlayerController::enterNearestVehicle() {
         }
 
         if (nearest) {
-            setNextActivity(std::make_unique<Activities::EnterVehicle>(nearest, 0));
+            setNextActivity(
+                std::make_unique<Activities::EnterVehicle>(nearest, 0));
+        }
+    }
+}
+
+void PlayerController::requestMissionRestart() {
+    missionRestartRequired = true;
+}
+
+bool PlayerController::isMissionRestartRequired() const {
+    return missionRestartRequired;
+}
+
+bool PlayerController::isWasted() const {
+    return character->isDead();
+}
+
+bool PlayerController::isBusted() const {
+    return false;
+}
+
+void PlayerController::restart() {
+    GameWorld* world = character->engine;
+    GameState* state = character->engine->state;
+
+    glm::vec3 restartPosition;
+    float restartHeading = 0.f;
+
+    if (state->overrideNextRestart) {
+        restartPosition = glm::vec3(state->nextRestartLocation);
+        restartHeading = state->nextRestartLocation.w;
+    } else {
+        GameState::RestartType type;
+
+        if (isBusted()) {
+            type = GameState::RestartType::Police;
+        }
+
+        if (isWasted()) {
+            type = GameState::RestartType::Hospital;
+        }
+
+        glm::vec4 closestRestart =
+            state->getClosestRestart(type, character->getPosition());
+        restartPosition = glm::vec3(closestRestart);
+        restartHeading = closestRestart.w;
+    }
+
+    if (isWasted()) {
+        if (!state->playerInfo.singlePayerHealthcare) {
+            if (state->playerInfo.money >= 1000) {
+                state->playerInfo.money -= 1000;
+            } else {
+                state->playerInfo.money = 0;
+            }
+        } else {
+            state->playerInfo.singlePayerHealthcare = false;
+        }
+
+        state->gameStats.timesHospital++;
+    }
+
+    if (isBusted()) {
+        if (!state->playerInfo.thaneOfLibertyCity) {
+            // @todo implement wanted system
+            uint8_t wantedLevel = 0;
+            uint32_t penalty = 0;
+
+            switch (wantedLevel) {
+                case 0:
+                    penalty = 100;
+                    break;
+                case 1:
+                    penalty = 100;
+                    break;
+                case 2:
+                    penalty = 200;
+                    break;
+                case 3:
+                    penalty = 400;
+                    break;
+                case 4:
+                    penalty = 600;
+                    break;
+                case 5:
+                    penalty = 900;
+                    break;
+                case 6:
+                    penalty = 1500;
+                    break;
+            }
+
+            if (state->playerInfo.money >= penalty) {
+                state->playerInfo.money -= penalty;
+            } else {
+                state->playerInfo.money = 0;
+            }
+        } else {
+            state->playerInfo.thaneOfLibertyCity = false;
+        }
+
+        state->gameStats.timesBusted++;
+    }
+
+    // Clean up mission restart
+    missionRestartRequired = false;
+
+    // Clean up overrides
+    state->hospitalIslandOverride = 0;
+    state->policeIslandOverride = 0;
+
+    // Set position and heading for any restart
+    character->setPosition(restartPosition);
+    character->setHeading(restartHeading);
+
+    if (isWasted() || isBusted()) {
+        // Advance 12 hours
+        world->offsetGameTime(60 * 12);
+
+        character->getCurrentState().health = 100.f;
+        // Reset dying state
+        character->getCurrentState().isDying = false;
+        character->getCurrentState().isDead = false;
+
+        // Remove weapons
+        character->clearInventory();
+    }
+}
+
+void PlayerController::restartLogic() {
+    GameWorld* world = character->engine;
+    GameState* state = character->engine->state;
+
+    switch (restartState) {
+        case Alive: {
+            if (isWasted() || isBusted() || isMissionRestartRequired()) {
+                state->fade(2000 / 1000.f, false);
+
+                restartState = FadingIn;
+            }
+
+            if (isWasted()) {
+                state->setFadeColour(glm::i32vec3(0xc8, 0xc8, 0xc8));
+
+                // Show "wasted" text
+                const auto& gxtEntry = "DEAD";
+                const auto& text = world->data->texts.text(gxtEntry);
+                state->text.addText<ScreenTextType::Big>(
+                    ScreenTextEntry::makeBig(gxtEntry, text, 3, 4000));
+            }
+
+            if (isBusted()) {
+                state->setFadeColour(glm::i32vec3(0x00, 0x00, 0x00));
+
+                // Show "busted" text
+                const auto& gxtEntry = "BUSTED";
+                const auto& text = world->data->texts.text(gxtEntry);
+                state->text.addText<ScreenTextType::Big>(
+                    ScreenTextEntry::makeBig(gxtEntry, text, 3, 5000));
+            }
+
+            if (isMissionRestartRequired()) {
+                state->setFadeColour(glm::i32vec3(0x00, 0x00, 0x00));
+            }
+
+            break;
+        }
+        case FadingIn: {
+            if (!state->isFading()) {
+                restartState = Restarting;
+            }
+
+            break;
+        }
+        case Restarting: {
+            state->fade(4000 / 1000.f, true);
+
+            if (isWasted()) {
+                state->setFadeColour(glm::i32vec3(0xc8, 0xc8, 0xc8));
+            }
+
+            if (isBusted() || isMissionRestartRequired()) {
+                state->setFadeColour(glm::i32vec3(0x00, 0x00, 0x00));
+            }
+
+            restart();
+
+            restartState = FadingOut;
+
+            break;
+        }
+        case FadingOut: {
+            if (!state->isFading()) {
+                restartState = Alive;
+            }
+
+            break;
         }
     }
 }
 
 void PlayerController::update(float dt) {
+    restartLogic();
     CharacterController::update(dt);
 }
 

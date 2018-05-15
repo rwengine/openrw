@@ -2,8 +2,8 @@
 #define _RWENGINE_GAMESTATE_HPP_
 #include <bitset>
 #include <cstdint>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -11,7 +11,9 @@
 
 #include <data/GameTexts.hpp>
 #include <data/VehicleGenerator.hpp>
+#include <engine/GameData.hpp>
 #include <engine/GameInputState.hpp>
+#include <engine/GameWorld.hpp>
 #include <engine/ScreenText.hpp>
 #include <objects/ObjectTypes.hpp>
 
@@ -191,7 +193,7 @@ struct BlipData {
 
     uint16_t size = 3;  // Only used if texture is empty
 
-    uint8_t brightness = 1; // Don't really know how it is used 
+    uint8_t brightness = 1;  // Don't really know how it is used
 
     enum DisplayMode { Hide = 0, MarkerOnly = 1, RadarOnly = 2, ShowBoth = 3 };
 
@@ -323,14 +325,31 @@ public:
     /** Objects created by the current mission */
     std::vector<GameObject*> missionObjects;
 
-    bool overrideNextStart;
+    bool overrideNextRestart;
     glm::vec4 nextRestartLocation;
+    std::vector<glm::vec4> hospitalRestarts, policeRestarts;
+    int hospitalIslandOverride, policeIslandOverride;
+
+    void addHospitalRestart(const glm::vec4 location);
+    void addPoliceRestart(const glm::vec4 location);
+    void overrideRestart(const glm::vec4 location);
+    void cancelRestartOverride();
+
+    enum RestartType { Hospital, Police };
+
+    const glm::vec4 getClosestRestart(RestartType type,
+                                      const glm::vec3 playerPosition) const;
 
     bool fadeOut;
     float fadeStart;
     float fadeTime;
     bool fadeSound;
     glm::u16vec3 fadeColour;
+
+    // @todo fadeOut should be replaced with enum?
+    void fade(float time, bool f);
+    bool isFading() const;
+    void setFadeColour(glm::i32vec3 colour);
 
     std::string currentSplash;
 
@@ -393,7 +412,7 @@ public:
      */
     ScriptMachine* script;
 
-    std::array<ScriptContactData, 16> scriptContacts = { };
+    std::array<ScriptContactData, 16> scriptContacts = {};
 
     GameState();
 

@@ -1,18 +1,32 @@
 #ifndef _RWENGINE_PLAYERCONTROLLER_HPP_
 #define _RWENGINE_PLAYERCONTROLLER_HPP_
 
+#include <ai/CharacterController.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <ai/CharacterController.hpp>
 
 class PlayerController : public CharacterController {
-    glm::quat cameraRotation{1.0f,0.0f,0.0f,0.0f};
+    glm::quat cameraRotation{1.0f, 0.0f, 0.0f, 0.0f};
 
     glm::vec3 direction{};
 
     glm::quat lastRotation;
 
+    bool missionRestartRequired;
+
     bool _enabled;
+
+    enum RestartState {
+        Alive,
+        FadingIn,
+        Restarting,
+        FadingOut,
+    } restartState;
+
+    // handles player respawn logic
+    void restartLogic();
+
+    void restart();
 
 public:
     PlayerController();
@@ -32,6 +46,14 @@ public:
     void exitVehicle();
 
     void enterNearestVehicle();
+
+    void requestMissionRestart();
+
+    bool isMissionRestartRequired() const;
+
+    bool isWasted() const;
+    // @todo not implemented yet
+    bool isBusted() const;
 
     void update(float dt) override;
 
