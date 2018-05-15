@@ -11339,9 +11339,9 @@ void opcode_03d6(const ScriptArguments& args, const ScriptString gxtEntry) {
     @arg coord Coordinates
 */
 void opcode_03d7(const ScriptArguments& args, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x03d7);
-    RW_UNUSED(coord);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto& wav = world->sound.getSoundRef(world->missionAudio);
+    wav.setPosition(coord);
 }
 
 /**
