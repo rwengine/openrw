@@ -17,10 +17,11 @@ class DebugState : public State {
     std::shared_ptr<Menu> createAIMenu();
     std::shared_ptr<Menu> createWeaponMenu();
     std::shared_ptr<Menu> createWeatherMenu();
+    std::shared_ptr<Menu> createMissionsMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
-               const glm::quat& vd = {1.0f,0.0f,0.0f,0.0f});
+               const glm::quat& vd = {1.0f, 0.0f, 0.0f, 0.0f});
 
     void enter() override;
 

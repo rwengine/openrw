@@ -4,14 +4,16 @@
 #include <engine/GameState.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <iostream>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
+#include <script/SCMFile.hpp>
 #include <sstream>
-#include <iostream>
 #include "RWGame.hpp"
 
 constexpr float kDebugEntryHeight = 14.f;
+constexpr float kDebugEntryHeightMissions = 12.f;
 constexpr int kDebugFont = 2;
 const glm::vec2 kDebugMenuOffset = glm::vec2(10.f, 50.f);
 
@@ -50,6 +52,7 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
          {"-AI", [=] { this->enterMenu(createAIMenu()); }},
          {"-Weapons", [=] { this->enterMenu(createWeaponMenu()); }},
          {"-Weather", [=] { this->enterMenu(createWeatherMenu()); }},
+         {"-Missions", [=] { this->enterMenu(createMissionsMenu()); }},
          {"Set Super Jump", [=] { player->setJumpSpeed(20.f); }},
          {"Set Normal Jump",
           [=] { player->setJumpSpeed(CharacterObject::DefaultJumpSpeed); }},
@@ -105,7 +108,6 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
           }},
          {"Unsolid garage doors",
           [=] {
-
               std::vector<std::string> garageDoorModels{
                   "8ballsuburbandoor",  "amcogaragedoor",
                   "bankjobdoor",        "bombdoor",
@@ -210,10 +212,125 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    std::string w[4]{"Sunny","Cloudy","Rainy","Foggy"};
+    std::string w[4]{"Sunny", "Cloudy", "Rainy", "Foggy"};
 
     for (int i = 0; i < 4; ++i) {
-        menu->lambda(w[i], [=] { game->getWorld()->state->basic.nextWeather = i; });
+        menu->lambda(w[i],
+                     [=] { game->getWorld()->state->basic.nextWeather = i; });
+    }
+
+    menu->offset = kDebugMenuOffset;
+    return menu;
+}
+
+std::shared_ptr<Menu> DebugState::createMissionsMenu() {
+    auto menu =
+        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
+                     kDebugFont, kDebugEntryHeightMissions);
+
+    std::string w[80]{
+        "Intro Movie",
+        "Hospital Info Scene",
+        "Police Station Info Scene",
+        "RC Diablo Destruction",
+        "RC Mafia Massacre",
+        "RC Rumpo Rampage",
+        "RC Casino Calamity",
+        "Patriot Playground",
+        "A Ride In The Park",
+        "Gripped!",
+        "Multistorey Mayhem",
+        "Paramedic",
+        "Firefighter",
+        "Vigilante",
+        "Taxi Driver",
+        "The Crook",
+        "The Thieves",
+        "The Wife",
+        "Her Lover",
+        "Give Me Liberty and Luigi's Girls",
+        "Don't Spank My Bitch Up",
+        "Drive Misty For Me",
+        "Pump-Action Pimp",
+        "The Fuzz Ball",
+        "Mike Lips Last Lunch",
+        "Farewell 'Chunky' Lee Chong",
+        "Van Heist",
+        "Cipriani's Chauffeur",
+        "Dead Skunk In The Trunk",
+        "The Getaway",
+        "Taking Out The Laundry",
+        "The Pick-Up",
+        "Salvatore's Called A Meeting",
+        "Triads And Tribulations",
+        "Blow Fish",
+        "Chaperone",
+        "Cutting The Grass",
+        "Bomb Da Base: Act I",
+        "Bomb Da Base: Act II",
+        "Last Requests",
+        "Turismo",
+        "I Scream, You Scream",
+        "Trial By Fire",
+        "Big'N'Veiny",
+        "Sayonara Salvatore",
+        "Under Surveillance",
+        "Paparazzi Purge",
+        "Payday For Ray",
+        "Two-Faced Tanner",
+        "Kanbu Bust-Out",
+        "Grand Theft Auto",
+        "Deal Steal",
+        "Shima",
+        "Smack Down",
+        "Silence The Sneak",
+        "Arms Shortage",
+        "Evidence Dash",
+        "Gone Fishing",
+        "Plaster Blaster",
+        "Marked Man",
+        "Liberator",
+        "Waka-Gashira Wipeout!",
+        "A Drop In The Ocean",
+        "Bling-Bling Scramble",
+        "Uzi Rider",
+        "Gangcar Round-Up",
+        "Kingdom Come",
+        "Grand Theft Aero",
+        "Escort Service",
+        "Decoy",
+        "Love's Disappearance",
+        "Bait",
+        "Espresso-2-Go!",
+        "S.A.M.",
+        "Uzi Money",
+        "Toyminator",
+        "Rigged To Blow",
+        "Bullion Run",
+        "Rumble",
+        "The Exchange",
+    };
+
+    for (int i = 0; i < 79; ++i) {
+        menu->lambda(w[i], [=] {
+            ScriptMachine* vm = game->getScriptVM();
+
+            if (vm) {
+                std::list<SCMThread>& threads = vm->getThreads();
+
+                for (auto& thread : threads) {
+                    if (thread.isMission) {
+                        thread.wakeCounter = -1;
+                        thread.finished = true;
+                    }
+                }
+
+                RW_ASSERT(i < vm->getFile()->getMissionOffsets().size());
+
+                auto offset = vm->getFile()->getMissionOffsets()[i];
+                vm->startThread(offset, true);
+            }
+        });
     }
 
     menu->offset = kDebugMenuOffset;
