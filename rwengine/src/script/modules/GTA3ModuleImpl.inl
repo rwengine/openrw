@@ -3175,10 +3175,8 @@ void opcode_0114(const ScriptArguments& args, const ScriptCharacter character, c
     @arg player Player
 */
 bool opcode_0117(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x0117);
-    RW_UNUSED(player);
     RW_UNUSED(args);
-    return false;
+    return player->isWasted();
 }
 
 /**
