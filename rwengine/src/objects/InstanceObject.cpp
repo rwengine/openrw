@@ -19,10 +19,13 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                std::shared_ptr<DynamicObjectData> dyn)
     : GameObject(engine, pos, rot, modelinfo)
     , health(100.f)
+    , visible(true)
+    , floating(false)
+    , usePhysics(false)
+    , changeAtomic(-1)
     , scale(scale)
     , body(nullptr)
-    , dynamics(dyn)
-    , _enablePhysics(false) {
+    , dynamics(dyn) {
     if (modelinfo) {
         changeModel(modelinfo);
         setPosition(pos);
@@ -68,12 +71,10 @@ void InstanceObject::tickPhysics(float dt) {
         changeModel(getModelInfo<SimpleModelInfo>(), changeAtomic);
         changeAtomic = -1;
     }
-    if (_enablePhysics) {
-        if (body->getBulletBody()->isStaticObject()) {
-            body->changeMass(dynamics->mass);
-        }
-    }
 
+    if (usePhysics) {
+        body->changeMass(dynamics->mass);
+    }
 
     // Only certain objects should float on water
     if (floating) {
@@ -127,7 +128,7 @@ void InstanceObject::tickPhysics(float dt) {
                                                          ->getOrientation()
                                                          .getAngle());
                     body->getBulletBody()->applyImpulse(btVector3(0.f, 0.f, F),
-                                                      forcePos);
+                                                        forcePos);
                 }
             }
         }
@@ -149,7 +150,8 @@ void InstanceObject::changeModel(BaseModelInfo* incoming, int atomicNumber) {
         setModel(getModelInfo<SimpleModelInfo>()->getModel());
         auto collision = getModelInfo<SimpleModelInfo>()->getCollision();
 
-        RW_ASSERT(getModelInfo<SimpleModelInfo>()->getNumAtomics() > atomicNumber);
+        RW_ASSERT(getModelInfo<SimpleModelInfo>()->getNumAtomics() >
+                  atomicNumber);
         auto atomic = getModelInfo<SimpleModelInfo>()->getAtomic(atomicNumber);
         if (atomic) {
             auto previous = atomic_;
@@ -190,6 +192,19 @@ void InstanceObject::setRotation(const glm::quat& r) {
     GameObject::setRotation(r);
 }
 
+void InstanceObject::setStatic(bool s) {
+    int flags = body->getBulletBody()->getCollisionFlags();
+
+    if (s) {
+        flags |= btCollisionObject::CF_STATIC_OBJECT;
+    } else {
+        flags &= ~btCollisionObject::CF_STATIC_OBJECT;
+    }
+
+    body->getBulletBody()->setCollisionFlags(flags);
+    static_ = s;
+}
+
 bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
     if (!dynamics) {
         return false;
@@ -198,13 +213,20 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
     const auto effect = dynamics->collDamageEffect;
 
     if (dmg.hitpoints > 0.f) {
+        if (effect || dynamics->collResponseFlags) {
+            if (dmg.impulse >= dynamics->uprootForce && !isStatic()) {
+                usePhysics = true;
+            }
+        }
+
         switch (effect) {
             case DynamicObjectData::Damage_ChangeModel:
                 changeAtomic = 1;
                 break;
             case DynamicObjectData::Damage_ChangeThenSmash:
                 changeAtomic = 1;
-                RW_UNIMPLEMENTED("Collision Damage Effect: Changing, then Smashing");
+                RW_UNIMPLEMENTED(
+                    "Collision Damage Effect: Changing, then Smashing");
                 break;
             case DynamicObjectData::Damage_Smash:
                 RW_UNIMPLEMENTED("Collision Damage Effect: Smashing");
@@ -218,11 +240,6 @@ bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
             default:
                 break;
         }
-    }
-
-    if (dmg.impulse >= dynamics->uprootForce &&
-        body->getBulletBody()->isStaticObject()) {
-        _enablePhysics = true;
     }
 
     return true;
