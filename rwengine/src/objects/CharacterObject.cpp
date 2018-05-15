@@ -42,7 +42,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     , physObject(nullptr)
     , physShape(nullptr)
     , controller(controller) {
-
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));
     if (info->getModel()) {
@@ -130,8 +129,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 
     // Things are simpler if we're in a vehicle
     if (getCurrentVehicle()) {
-        animator->playAnimation(AnimIndexMovement, animations->animation(AnimCycle::CarSit),
-                                1.f, true);
+        animator->playAnimation(AnimIndexMovement,
+                                animations->animation(AnimCycle::CarSit), 1.f,
+                                true);
         return glm::vec3();
     }
 
@@ -209,7 +209,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         if (it != movementAnimation->bones.end()) {
             auto rootBone = it->second;
             float step = dt;
-            RW_CHECK(animator->getAnimation(AnimIndexMovement), "Failed to read animation using index " << AnimIndexMovement);
+            RW_CHECK(
+                animator->getAnimation(AnimIndexMovement),
+                "Failed to read animation using index " << AnimIndexMovement);
             const float duration =
                 animator->getAnimation(AnimIndexMovement)->duration;
             float animTime =
@@ -266,8 +268,7 @@ void CharacterObject::tick(float dt) {
 void CharacterObject::tickPhysics(float dt) {
     if (physCharacter) {
         auto s = currenteMovementStep * dt;
-        physCharacter->setWalkDirection(
-            btVector3(s.x, s.y, s.z));
+        physCharacter->setWalkDirection(btVector3(s.x, s.y, s.z));
     }
 }
 
@@ -472,6 +473,11 @@ void CharacterObject::setCurrentVehicle(VehicleObject* value, size_t seat) {
 bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
     // Right now there's no state that determines immunity to any kind of damage
     float dmgPoints = dmg.hitpoints;
+
+    if (getCurrentVehicle()) {
+        return false;
+    }
+
     if (currentState.armour > 0.f) {
         dmgPoints -= currentState.armour;
         currentState.armour =
@@ -522,7 +528,7 @@ void CharacterObject::resetToAINode() {
     bool vehicleNode = !!getCurrentVehicle();
     AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
-    for (const auto &node : nodes) {
+    for (const auto& node : nodes) {
         if (vehicleNode) {
             if (node->type == AIGraphNode::Pedestrian) continue;
         } else {
@@ -567,7 +573,8 @@ void CharacterObject::playCycle(AnimCycle cycle) {
                             flags & AnimCycleInfo::Repeat);
 }
 
-void CharacterObject::playCycleAnimOverride(AnimCycle cycle, AnimationPtr anim) {
+void CharacterObject::playCycleAnimOverride(AnimCycle cycle,
+                                            AnimationPtr anim) {
     auto flags = animations->flags(cycle);
 
     cycle_ = cycle;
