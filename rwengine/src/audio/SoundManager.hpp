@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_SOUNDMANAGER_HPP_
 #define _RWENGINE_SOUNDMANAGER_HPP_
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <map>

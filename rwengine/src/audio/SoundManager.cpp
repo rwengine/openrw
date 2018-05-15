@@ -6,27 +6,30 @@
 #include <rw/defines.hpp>
 
 int SoundManager::convertScriptIndexIntoSfx(const int scriptId) {
-    for(const auto &data : sfxData) {
-        if(scriptId == data.id ) {
-            return data.sfx;
-        }
-    }
-    return 0;
+    const auto finded = std::find_if(std::begin(sfxData), std::end(sfxData),
+                                     [&scriptId](const SoundInstanceData data){return data.id == scriptId;});
+    return finded->sfx;
 }
 
-Sound& SoundManager::getSoundRef( const size_t& name) {
+Sound& SoundManager::getSoundRef(const size_t& name) {
+    auto ref = buffers.find(name);
+    if(ref != buffers.end()) {
+        return ref->second;
+    } else {    // Hmm, we should reload this
+        createSfxInstance(name);
+    }
     return buffers[name];
 }
 
-Sound& SoundManager::getSoundRef( const std::string& name) {
-    return sounds[name];
+Sound& SoundManager::getSoundRef(const std::string& name) {
+    return sounds[name]; // todo reloading, how to check is it wav/mp3?
 }
 
 int SoundManager::getScriptRange(const int scriptId) {
-    for(const auto &data : sfxData) {
-        if(scriptId == data.id ) {
-            return data.range;
-        }
+    const auto finded = std::find_if(std::begin(sfxData), std::end(sfxData),
+                                     [&scriptId](const SoundInstanceData data){return data.id == scriptId;});
+    if(finded != std::end(sfxData)) {
+        return finded->sfx;
     }
     return -1;
 }
@@ -105,7 +108,7 @@ bool SoundManager::loadSound(const std::string& name,
 
 void SoundManager::loadSfxSounds(const std::string& path) {
     sfx.reserve(kNrOfAllSfx);
-    for(size_t i = 0; i < kNrOfAllSfx; i++) { //3032 is number of all sfx sounds in gta3
+    for(size_t i = 0; i < kNrOfAllSfx; i++) {
         Sound* sound = nullptr;
 
         auto emplaced = sfx.emplace(std::piecewise_construct,
