@@ -172,7 +172,7 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative,
                                transparent);
 }
 
-bool TextureLoader::loadFromMemory(FileHandle file,
+bool TextureLoader::loadFromMemory(const FileHandle& file,
                                    TextureArchive& inTextures) {
     auto data = file->data;
     RW::BinaryStreamSection root(data);

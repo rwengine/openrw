@@ -6,7 +6,7 @@ class GameTexts;
 
 class LoaderGXT {
 public:
-    void load(GameTexts& texts, FileHandle& file);
+    void load(GameTexts& texts, const FileHandle& file);
 };
 
 #endif

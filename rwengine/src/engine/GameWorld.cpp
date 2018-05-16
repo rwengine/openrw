@@ -79,22 +79,22 @@ GameWorld::~GameWorld() {
     }
 }
 
-bool GameWorld::placeItems(const std::string& path) {
+bool GameWorld::placeItems(const std::string& name) {
     LoaderIPL ipll;
 
-    if (ipll.load(path)) {
+    if (ipll.load(name)) {
         // Find the object.
         for (const auto &inst : ipll.m_instances) {
             if (!createInstance(inst->id, inst->pos, inst->rot)) {
                 logger->error("World", "No object data for instance " +
                                            std::to_string(inst->id) + " in " +
-                                           path);
+                                           name);
             }
         }
 
         return true;
     } else {
-        logger->error("Data", "Failed to load IPL " + path);
+        logger->error("Data", "Failed to load IPL " + name);
         return false;
     }
 

@@ -6,7 +6,7 @@
 
 class TextureLoader {
 public:
-    bool loadFromMemory(FileHandle file, TextureArchive& inTextures);
+    bool loadFromMemory(const FileHandle& file, TextureArchive& inTextures);
 };
 
 #endif

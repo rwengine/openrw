@@ -31,7 +31,7 @@ public:
     using GeometryList = std::vector<GeometryPtr>;
     using FrameList = std::vector<ModelFramePtr>;
 
-    ClumpPtr loadFromMemory(FileHandle file);
+    ClumpPtr loadFromMemory(const FileHandle& file);
 
     void setTextureLookupCallback(const TextureLookupCallback& tlc) {
         texturelookup = tlc;
@@ -46,15 +46,15 @@ private:
 
     GeometryPtr readGeometry(const RWBStream& stream);
 
-    void readMaterialList(GeometryPtr& geom, const RWBStream& stream);
+    void readMaterialList(const GeometryPtr& geom, const RWBStream& stream);
 
-    void readMaterial(GeometryPtr& geom, const RWBStream& stream);
+    void readMaterial(const GeometryPtr& geom, const RWBStream& stream);
 
     void readTexture(Geometry::Material& material, const RWBStream& stream);
 
-    void readGeometryExtension(GeometryPtr& geom, const RWBStream& stream);
+    void readGeometryExtension(const GeometryPtr& geom, const RWBStream& stream);
 
-    void readBinMeshPLG(GeometryPtr& geom, const RWBStream& stream);
+    void readBinMeshPLG(const GeometryPtr& geom, const RWBStream& stream);
 
     AtomicPtr readAtomic(FrameList& framelist, GeometryList& geometrylist,
                          const RWBStream& stream);

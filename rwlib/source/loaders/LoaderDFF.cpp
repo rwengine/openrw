@@ -270,7 +270,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     return geom;
 }
 
-void LoaderDFF::readMaterialList(GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readMaterialList(const GeometryPtr &geom, const RWBStream &stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -294,7 +294,7 @@ void LoaderDFF::readMaterialList(GeometryPtr &geom, const RWBStream &stream) {
     }
 }
 
-void LoaderDFF::readMaterial(GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
     auto materialStream = stream.getInnerStream();
 
     auto matStructID = materialStream.getNextChunk();
@@ -367,7 +367,7 @@ void LoaderDFF::readTexture(Geometry::Material &material,
     material.textures.emplace_back(std::move(name), std::move(alpha), textureinst);
 }
 
-void LoaderDFF::readGeometryExtension(GeometryPtr &geom,
+void LoaderDFF::readGeometryExtension(const GeometryPtr &geom,
                                       const RWBStream &stream) {
     auto extStream = stream.getInnerStream();
 
@@ -383,7 +383,7 @@ void LoaderDFF::readGeometryExtension(GeometryPtr &geom,
     }
 }
 
-void LoaderDFF::readBinMeshPLG(GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readBinMeshPLG(const GeometryPtr &geom, const RWBStream &stream) {
     auto data = stream.getCursor();
 
     geom->facetype = static_cast<Geometry::FaceType>(bit_cast<std::uint32_t>(*data));
@@ -454,7 +454,7 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     return atomic;
 }
 
-ClumpPtr LoaderDFF::loadFromMemory(FileHandle file) {
+ClumpPtr LoaderDFF::loadFromMemory(const FileHandle& file) {
     auto model = std::make_shared<Clump>();
 
     RWBStream rootStream(file->data, file->length);

@@ -87,7 +87,7 @@ public:
         return parent_;
     }
 
-    void addChild(ModelFramePtr child);
+    void addChild(const ModelFramePtr& child);
 
     const std::vector<ModelFramePtr>& getChildren() const {
         return children_;
@@ -259,7 +259,7 @@ public:
         return boundingRadius;
     }
 
-    void addAtomic(AtomicPtr& atomic) {
+    void addAtomic(const AtomicPtr& atomic) {
         atomics_.push_back(atomic);
     }
 
@@ -267,7 +267,7 @@ public:
         return atomics_;
     }
 
-    void setFrame(ModelFramePtr& root) {
+    void setFrame(const ModelFramePtr& root) {
         rootframe_ = root;
     }
 
