@@ -1930,6 +1930,7 @@ bool opcode_00a4(const ScriptArguments& args, const ScriptCharacter character, c
     @arg vehicle Car/vehicle
 */
 void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptVec3 coord, ScriptVehicle& vehicle) {
+    // @todo calculate distance from centre of mass to base of model and apply it as spawnOffset
     coord = script::getGround(args, coord);
     vehicle = args.getWorld()->createVehicle(model, coord + script::kSpawnOffset);
     script::addObjectToMissionCleanup(args, vehicle);
@@ -5328,9 +5329,8 @@ void opcode_01df(const ScriptArguments& args, const ScriptCharacter character, c
     @arg character 
 */
 void opcode_01e0(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x01e0);
-    RW_UNUSED(character);
     RW_UNUSED(args);
+    character->controller->setTargetCharacter(nullptr);
 }
 
 /**
@@ -8693,60 +8693,60 @@ void opcode_030d(const ScriptArguments& args, const ScriptInt arg1) {
     @brief save_jump_distance %1d%
 
     opcode 030e
-    @arg arg1 
+    @arg distance 
 */
-void opcode_030e(const ScriptArguments& args, const ScriptFloat arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x030e);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_030e(const ScriptArguments& args, const ScriptFloat distance) {
+    if (args.getWorld()->state->gameStats.insaneJumpMaxDistance < distance) {
+        args.getWorld()->state->gameStats.insaneJumpMaxDistance = distance;
+    }
 }
 
 /**
     @brief save_jump_height %1d%
 
     opcode 030f
-    @arg arg1 
+    @arg height 
 */
-void opcode_030f(const ScriptArguments& args, const ScriptFloat arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x030f);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_030f(const ScriptArguments& args, const ScriptFloat height) {
+    if (args.getWorld()->state->gameStats.insaneJumpMaxHeight < height) {
+        args.getWorld()->state->gameStats.insaneJumpMaxHeight = height;
+    }
 }
 
 /**
     @brief save_jump_flips %1d%
 
     opcode 0310
-    @arg arg1 
+    @arg flips 
 */
-void opcode_0310(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0310);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0310(const ScriptArguments& args, const ScriptInt flips) {
+    if (args.getWorld()->state->gameStats.insaneJumpMaxFlips < flips) {
+        args.getWorld()->state->gameStats.insaneJumpMaxFlips = flips;
+    }
 }
 
 /**
     @brief save_jump_rotation %1d%
 
     opcode 0311
-    @arg arg1 
+    @arg rotation 
 */
-void opcode_0311(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0311);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0311(const ScriptArguments& args, const ScriptInt rotation) {
+    if (args.getWorld()->state->gameStats.insangeJumpMaxRotation < rotation) {
+        args.getWorld()->state->gameStats.insangeJumpMaxRotation = rotation;
+    }
 }
 
 /**
     @brief save_jump_type %1d%
 
     opcode 0312
-    @arg arg1 
+    @arg best 
 */
-void opcode_0312(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0312);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0312(const ScriptArguments& args, const ScriptInt best) {
+    if (args.getWorld()->state->gameStats.bestStunt < best) {
+        args.getWorld()->state->gameStats.bestStunt = best;
+    }
 }
 
 /**
@@ -8783,12 +8783,10 @@ void opcode_0315(const ScriptArguments& args) {
     @brief save_taxi_earnings_from %1d%
 
     opcode 0316
-    @arg arg1 
+    @arg money 
 */
-void opcode_0316(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0316);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0316(const ScriptArguments& args, const ScriptInt money) {
+    args.getState()->gameStats.taxiRevenue += money;
 }
 
 /**
@@ -8886,11 +8884,8 @@ bool opcode_031f(const ScriptArguments& args, const ScriptCharacter character0, 
     @arg player Player
 */
 bool opcode_0320(const ScriptArguments& args, const ScriptCharacter character, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x0320);
-    RW_UNUSED(character);
-    RW_UNUSED(player);
     RW_UNUSED(args);
-    return false;
+    return character->controller->getTargetCharacter() == player->getCharacter();
 }
 
 /**
@@ -9388,8 +9383,7 @@ void opcode_0349(const ScriptArguments& args, const ScriptFont arg1) {
     opcode 034a
 */
 void opcode_034a(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x034a);
-    RW_UNUSED(args);
+    args.getState()->gameStats.portlandPassed = 1;
 }
 
 /**
@@ -9398,8 +9392,7 @@ void opcode_034a(const ScriptArguments& args) {
     opcode 034b
 */
 void opcode_034b(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x034b);
-    RW_UNUSED(args);
+    args.getState()->gameStats.stauntonPassed = 1;
 }
 
 /**
@@ -9408,8 +9401,7 @@ void opcode_034b(const ScriptArguments& args) {
     opcode 034c
 */
 void opcode_034c(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x034c);
-    RW_UNUSED(args);
+    args.getState()->gameStats.shoresidePassed = 1;
 }
 
 /**
@@ -9444,7 +9436,7 @@ bool opcode_034d(const ScriptArguments& args, const ScriptObject object, const S
     @arg arg7 
     @arg arg8 Boolean true/false
 */
-void opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptBoolean arg8) {
+bool opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptBoolean arg8) {
     RW_UNIMPLEMENTED_OPCODE(0x034e);
     RW_UNUSED(object);
     RW_UNUSED(coord);
@@ -9453,6 +9445,7 @@ void opcode_034e(const ScriptArguments& args, const ScriptObject object, ScriptV
     RW_UNUSED(arg7);
     RW_UNUSED(arg8);
     RW_UNUSED(args);
+    return true;
 }
 
 /**
@@ -11622,15 +11615,15 @@ void opcode_03e1(const ScriptArguments& args, ScriptInt& arg1) {
 }
 
 /**
-    @brief actor %1d% exit_car
+    @brief save_turismo_time %1d%
 
     opcode 03e2
-    @arg arg1 
+    @arg time 
 */
-void opcode_03e2(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x03e2);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_03e2(const ScriptArguments& args, const ScriptInt time) {
+    if (args.getState()->gameStats.bestTurismoTime > time) {
+        args.getState()->gameStats.bestTurismoTime = time;
+    }
 }
 
 /**
@@ -11916,48 +11909,48 @@ void opcode_03fc(const ScriptArguments& args, const ScriptCharacter character, c
     @brief save_offroad_time %1d%
 
     opcode 03fd
-    @arg arg1 
+    @arg newTime 
 */
-void opcode_03fd(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x03fd);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_03fd(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.patriotPlaygroundTime > newTime) {
+        args.getState()->gameStats.patriotPlaygroundTime = newTime;
+    }
 }
 
 /**
     @brief save_offroadII_time %1d%
 
     opcode 03fe
-    @arg arg1 
+    @arg newTime 
 */
-void opcode_03fe(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x03fe);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_03fe(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.aRideInTheParkTime > newTime) {
+        args.getState()->gameStats.aRideInTheParkTime = newTime;
+    }
 }
 
 /**
     @brief save_offroadIII_time %1d%
 
     opcode 03ff
-    @arg arg1 
+    @arg newTime 
 */
-void opcode_03ff(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x03ff);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_03ff(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.grippedTime > newTime) {
+        args.getState()->gameStats.grippedTime = newTime;
+    }
 }
 
 /**
     @brief save_mayhem_time %1d%
 
     opcode 0400
-    @arg object Object
+    @arg newTime
 */
-void opcode_0400(const ScriptArguments& args, const ScriptInt object) {
-    RW_UNIMPLEMENTED_OPCODE(0x0400);
-    RW_UNUSED(object);
-    RW_UNUSED(args);
+void opcode_0400(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.multistoryMayhemTime > newTime) {
+        args.getState()->gameStats.multistoryMayhemTime = newTime;
+    }
 }
 
 /**
@@ -11966,8 +11959,7 @@ void opcode_0400(const ScriptArguments& args, const ScriptInt object) {
     opcode 0401
 */
 void opcode_0401(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0401);
-    RW_UNUSED(args);
+    args.getState()->gameStats.peopleSaved++;
 }
 
 /**
@@ -11976,20 +11968,19 @@ void opcode_0401(const ScriptArguments& args) {
     opcode 0402
 */
 void opcode_0402(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0402);
-    RW_UNUSED(args);
+    args.getState()->gameStats.criminalsKilled++;
 }
 
 /**
     @brief save_highest_ambulance_level %1d%
 
     opcode 0403
-    @arg arg1 
+    @arg level 
 */
-void opcode_0403(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0403);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0403(const ScriptArguments& args, const ScriptInt level) {
+    if (args.getState()->gameStats.highestParamedicLevel < level) {
+        args.getState()->gameStats.highestParamedicLevel = level;
+    }
 }
 
 /**
@@ -11998,8 +11989,7 @@ void opcode_0403(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 0404
 */
 void opcode_0404(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0404);
-    RW_UNUSED(args);
+    args.getState()->gameStats.firesExtinguished++;
 }
 
 /**
@@ -12018,34 +12008,34 @@ void opcode_0405(const ScriptArguments& args, const ScriptPhone phone) {
     @brief save_dodo_flight_time %1d%
 
     opcode 0406
-    @arg arg1 
+    @arg newTime 
 */
-void opcode_0406(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0406);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0406(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.longestDodoFlight < newTime) {
+        args.getState()->gameStats.longestDodoFlight = newTime;
+    }
 }
 
 /**
     @brief time_taken_defuse_mission = %1d%
 
     opcode 0407
-    @arg vehicle Car/vehicle
+    @arg newTime
 */
-void opcode_0407(const ScriptArguments& args, const ScriptInt vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x0407);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(args);
+void opcode_0407(const ScriptArguments& args, const ScriptInt newTime) {
+    if (args.getState()->gameStats.bombDefusalTime > newTime) {
+        args.getState()->gameStats.bombDefusalTime = newTime;
+    }
 }
 
 /**
     @brief set_total_rampages_to %1d%
 
     opcode 0408
-    @arg arg1 
+    @arg total 
 */
-void opcode_0408(const ScriptArguments& args, const ScriptInt arg1) {
-    args.getState()->gameStats.totalRampages = arg1;
+void opcode_0408(const ScriptArguments& args, const ScriptInt total) {
+    args.getState()->gameStats.totalRampages = total;
 }
 
 /**
@@ -12516,13 +12506,12 @@ void opcode_042e(const ScriptArguments& args, const ScriptInt statID, const Scri
 
     opcode 042f
     @arg statID Stat ID
-    @arg arg2 
+    @arg value 
 */
-void opcode_042f(const ScriptArguments& args, const ScriptInt statID, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x042f);
-    RW_UNUSED(statID);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_042f(const ScriptArguments& args, const ScriptInt statID, const ScriptInt value) {
+    if (args.getState()->gameStats.highestScore[statID] < value) {
+        args.getState()->gameStats.highestScore[statID] = value;
+    }
 }
 
 /**
