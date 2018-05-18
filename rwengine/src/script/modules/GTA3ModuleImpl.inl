@@ -3183,10 +3183,8 @@ void opcode_0114(const ScriptArguments& args, const ScriptCharacter character, c
     @arg player Player
 */
 bool opcode_0117(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x0117);
-    RW_UNUSED(player);
     RW_UNUSED(args);
-    return false;
+    return player->isWasted();
 }
 
 /**
@@ -3877,7 +3875,7 @@ void opcode_0168(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg colour Colour (0-255)
 */
 void opcode_0169(const ScriptArguments& args, ScriptRGB colour) {
-    args.getState()->fadeColour = colour;
+    args.getState()->setFadeColour(colour);
 }
 
 /**
@@ -3888,9 +3886,7 @@ void opcode_0169(const ScriptArguments& args, ScriptRGB colour) {
     @arg scriptFade Boolean true/false
 */
 void opcode_016a(const ScriptArguments& args, const ScriptInt time, const ScriptBoolean scriptFade) {
-    args.getState()->fadeTime = time / 1000.f;
-    args.getState()->fadeOut = scriptFade;
-    args.getState()->fadeStart = args.getWorld()->getGameTime();
+    args.getState()->fade(time / 1000.f, scriptFade);
 }
 
 /**
@@ -3902,8 +3898,7 @@ bool opcode_016b(const ScriptArguments& args) {
     if (args.getWorld()->state->skipCutscene) {
     	return false;
     }
-    return args.getWorld()->getGameTime() <
-    	args.getState()->fadeStart + args.getState()->fadeTime;
+    return args.getState()->isFading();
 }
 
 /**
@@ -3913,11 +3908,9 @@ bool opcode_016b(const ScriptArguments& args) {
     @arg coord Coordinates
     @arg angle Angle
 */
-void opcode_016c(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat angle) {
-    RW_UNIMPLEMENTED_OPCODE(0x016c);
-    RW_UNUSED(coord);
-    RW_UNUSED(angle);
-    RW_UNUSED(args);
+void opcode_016c(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
+    coord = script::getGround(args, coord);
+    args.getState()->addHospitalRestart(glm::vec4(coord, heading));
 }
 
 /**
@@ -3927,11 +3920,9 @@ void opcode_016c(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     @arg coord Coordinates
     @arg angle Angle
 */
-void opcode_016d(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat angle) {
-    RW_UNIMPLEMENTED_OPCODE(0x016d);
-    RW_UNUSED(coord);
-    RW_UNUSED(angle);
-    RW_UNUSED(args);
+void opcode_016d(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
+    coord = script::getGround(args, coord);
+    args.getState()->addPoliceRestart(glm::vec4(coord, heading));
 }
 
 /**
@@ -3941,10 +3932,9 @@ void opcode_016d(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     @arg coord Coordinates
     @arg angle Angle
 */
-void opcode_016e(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat angle) {
-    args.getState()->overrideNextStart = true;
-    /// @todo why is this a vec4
-    args.getState()->nextRestartLocation = glm::vec4(coord, angle);
+void opcode_016e(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
+    coord = script::getGround(args, coord);
+    args.getState()->overrideRestart(glm::vec4(coord, heading));
 }
 
 /**
@@ -5634,7 +5624,7 @@ void opcode_01f5(const ScriptArguments& args, const ScriptPlayer player, ScriptC
     opcode 01f6
 */
 void opcode_01f6(const ScriptArguments& args) {
-    args.getState()->overrideNextStart = false;
+    args.getState()->cancelRestartOverride();
 }
 
 /**
@@ -6827,21 +6817,12 @@ void opcode_0254(const ScriptArguments& args) {
     @arg coord Coordinates
     @arg angle Angle
 */
-void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat angle) {
-    auto object = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
-    RW_CHECK(object != nullptr ,"No player found");
-    auto player = static_cast<CharacterObject*>(object);
-
-    /// @todo Implment a proper force exit vehicle path
-    auto cv = player->getCurrentVehicle();
-    if ( cv != nullptr )
-    {
-    	cv->setOccupant( player->getCurrentSeat(), nullptr );
-    	player->setCurrentVehicle(nullptr, 0);
-    }
-
-    player->setPosition(coord + script::kSpawnOffset);
-    player->setHeading(angle);
+void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
+    coord = script::getGround(args, coord);
+    args.getState()->overrideRestart(glm::vec4(coord, heading));
+    // @todo Add support for multiple players
+    PlayerController* player = args.getState()->world->players.at(0);
+    player->requestMissionRestart();
 }
 
 /**
@@ -6851,10 +6832,8 @@ void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     @arg player Player
 */
 bool opcode_0256(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x0256);
-    RW_UNUSED(player);
     RW_UNUSED(args);
-    return player.get() != nullptr;
+    return !player->isWasted() && !player->isBusted();
 }
 
 /**
@@ -12202,10 +12181,9 @@ void opcode_0412(const ScriptArguments& args, const ScriptVehicle vehicle, const
     @arg arg2 Boolean true/false
 */
 void opcode_0413(const ScriptArguments& args, const ScriptPlayer player, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0413);
+    // @todo support multiple players?
     RW_UNUSED(player);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+    args.getState()->playerInfo.thaneOfLibertyCity = arg2;
 }
 
 /**
@@ -12216,10 +12194,9 @@ void opcode_0413(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg arg2 Boolean true/false
 */
 void opcode_0414(const ScriptArguments& args, const ScriptPlayer player, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0414);
+    // @todo support multiple players?
     RW_UNUSED(player);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+    args.getState()->playerInfo.singlePayerHealthcare = arg2;
 }
 
 /**
@@ -12338,9 +12315,7 @@ void opcode_041e(const ScriptArguments& args, const ScriptRadio arg1, const Scri
     @arg arg1 
 */
 void opcode_041f(const ScriptArguments& args, const ScriptLevel arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x041f);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+    args.getState()->hospitalIslandOverride = arg1;
 }
 
 /**
@@ -12350,9 +12325,7 @@ void opcode_041f(const ScriptArguments& args, const ScriptLevel arg1) {
     @arg arg1 
 */
 void opcode_0420(const ScriptArguments& args, const ScriptLevel arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0420);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+    args.getState()->policeIslandOverride = arg1;
 }
 
 /**
