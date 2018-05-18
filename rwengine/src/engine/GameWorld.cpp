@@ -26,7 +26,7 @@
 #include "objects/CharacterObject.hpp"
 #include "objects/CutsceneObject.hpp"
 #include "objects/InstanceObject.hpp"
-#include "objects/ItemPickup.hpp"
+#include "objects/PickupObject.hpp"
 #include "objects/VehicleObject.hpp"
 
 #include "render/ViewCamera.hpp"
@@ -360,6 +360,21 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     // If nothing, create a generic pickup instead of an item pickup
     if (it != data->weaponData.end()) {
         pickup = new ItemPickup(this, pos, modelInfo, pickuptype, it->get());
+    } else if (modelInfo->name == "info" || modelInfo->name == "briefcase" ||
+               modelInfo->name == "floatpackge1") {
+        pickup = new DummyPickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "killfrenzy") {
+        pickup = new RampagePickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "health") {
+        pickup = new HealthPickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "bodyarmour") {
+        pickup = new ArmourPickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "package1") {
+        pickup = new CollectablePickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "adrenaline") {
+        pickup = new AdrenalinePickup(this, pos, modelInfo, pickuptype);
+    } else if (modelInfo->name == "Money") {
+        pickup = new MoneyPickup(this, pos, modelInfo, pickuptype, 0);
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
         pickup = new PickupObject(this, pos, modelInfo, pickuptype);

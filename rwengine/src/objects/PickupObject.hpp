@@ -44,8 +44,8 @@ public:
     static float respawnTime(PickupType type);
     static uint32_t behaviourFlags(PickupType type);
 
-    PickupObject(GameWorld* world, const glm::vec3& position, BaseModelInfo *modelinfo,
-                 PickupType type);
+    PickupObject(GameWorld* world, const glm::vec3& position,
+                 BaseModelInfo* modelinfo, PickupType type);
 
     ~PickupObject() override;
 
@@ -69,8 +69,16 @@ public:
         return m_collected;
     }
 
+    void setCollected(bool collected) {
+        m_collected = collected;
+    }
+
     PickupType getPickupType() const {
         return m_type;
+    }
+
+    virtual bool isRampage() const {
+        return false;
     }
 
 private:
@@ -83,6 +91,110 @@ private:
     short m_colourId;
 
     PickupType m_type;
+};
+
+/**
+ * @brief The ItemPickup class
+ * Inserts an item into a characters inventory on pickup.
+ */
+
+struct WeaponData;
+
+class ItemPickup : public PickupObject {
+    WeaponData* item;
+
+public:
+    ItemPickup(GameWorld* world, const glm::vec3& position,
+               BaseModelInfo* modelinfo, PickupType type, WeaponData* item);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The DummyPickup class
+ */
+class DummyPickup : public PickupObject {
+public:
+    DummyPickup(GameWorld* world, const glm::vec3& position,
+                BaseModelInfo* modelinfo, PickupType type);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The RampagePickup class
+ */
+class RampagePickup : public PickupObject {
+public:
+    RampagePickup(GameWorld* world, const glm::vec3& position,
+                  BaseModelInfo* modelinfo, PickupType type);
+
+    bool isRampage() const override {
+        return true;
+    }
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The HealthPickup class
+ */
+class HealthPickup : public PickupObject {
+public:
+    HealthPickup(GameWorld* world, const glm::vec3& position,
+                 BaseModelInfo* modelinfo, PickupType type);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The ArmourPickup class
+ */
+class ArmourPickup : public PickupObject {
+public:
+    ArmourPickup(GameWorld* world, const glm::vec3& position,
+                 BaseModelInfo* modelinfo, PickupType type);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The CollectablePickup class
+ */
+class CollectablePickup : public PickupObject {
+public:
+    CollectablePickup(GameWorld* world, const glm::vec3& position,
+                      BaseModelInfo* modelinfo, PickupType type);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The AdrenalinePickup class
+ */
+class AdrenalinePickup : public PickupObject {
+public:
+    AdrenalinePickup(GameWorld* world, const glm::vec3& position,
+                     BaseModelInfo* modelinfo, PickupType type);
+
+    bool onCharacterTouch(CharacterObject* character) override;
+};
+
+/**
+ * @brief The MoneyPickup class
+ */
+class MoneyPickup : public PickupObject {
+    uint32_t money;
+
+public:
+    MoneyPickup(GameWorld* world, const glm::vec3& position,
+                BaseModelInfo* modelinfo, PickupType type, uint32_t money);
+
+    void setMoney(uint32_t m) {
+        money = m;
+    };
+
+    bool onCharacterTouch(CharacterObject* character) override;
 };
 
 #endif

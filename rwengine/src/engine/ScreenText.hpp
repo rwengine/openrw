@@ -22,8 +22,10 @@ enum class ScreenTextType {
     Immediate = 3,
     /// High priority cutscene text
     HighPriority = 4,
+
+    HiddenPackageText = 5,
     ///
-    _Count = 5
+    _Count = 6
 };
 constexpr unsigned int ScreenTypeTextCount =
     static_cast<unsigned int>(ScreenTextType::_Count);
@@ -67,6 +69,9 @@ struct ScreenTextEntry {
 
     static ScreenTextEntry makeHelp(const GameStringKey& id,
                                     const GameString& str);
+
+    static ScreenTextEntry makeHiddenPackageText(const GameStringKey& id,
+                                                 const GameString& str);
 };
 
 /**

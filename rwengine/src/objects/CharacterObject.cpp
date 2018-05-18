@@ -12,6 +12,7 @@
 #include <rw/defines.hpp>
 
 #include "ai/CharacterController.hpp"
+#include "ai/PlayerController.hpp"
 #include "engine/Animator.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
@@ -194,6 +195,13 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
                 // Keep walking
                 movementAnimation = animations->animation(AnimCycle::Walk);
             }
+        }
+    }
+
+    if (controller) {
+        if (static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
+            movementAnimation == animations->animation(AnimCycle::WalkStart)) {
+            animationSpeed *= 2;
         }
     }
 

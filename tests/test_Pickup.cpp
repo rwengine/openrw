@@ -1,7 +1,6 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
 #include <objects/CharacterObject.hpp>
-#include <objects/ItemPickup.hpp>
 #include <objects/PickupObject.hpp>
 #include "test_Globals.hpp"
 #if RW_TEST_WITH_DATA
@@ -11,7 +10,8 @@ public:
     bool picked_up = false;
 
     TestPickup(GameWorld* engine, const glm::vec3& position)
-        : PickupObject(engine, position, Global::get().d->modelinfo[0].get(), OnStreet) {
+        : PickupObject(engine, position, Global::get().d->modelinfo[0].get(),
+                       OnStreet) {
     }
 
     bool onCharacterTouch(CharacterObject*) {
