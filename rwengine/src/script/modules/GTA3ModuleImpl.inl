@@ -10549,39 +10549,8 @@ void opcode_0394(const ScriptArguments& args, const ScriptInt arg1) {
     @arg clearParticles Boolean true/false
 */
 void opcode_0395(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptBoolean clearParticles) {
-    GameWorld* gw = args.getWorld();
-
-    for (auto& v : gw->vehiclePool.objects)
-    {
-    	if (v.second->getLifetime() != GameObject::MissionLifetime) {
-    		continue;
-    	}
-
-    	if (glm::distance(coord, v.second->getPosition()) < radius)
-    	{
-    		gw->destroyObjectQueued(v.second);
-    	}
-    }
-
-    for (auto& p : gw->pedestrianPool.objects)
-    {
-    	if (p.second->getLifetime() == GameObject::PlayerLifetime || p.second->getLifetime() != GameObject::MissionLifetime) {
-    		continue;
-    	}
-
-    	if (glm::distance(coord, p.second->getPosition()) < radius)
-    	{
-    		gw->destroyObjectQueued(p.second);
-    	}
-    }
-
-    /// @todo Do we also have to clear all projectiles + particles *in this area*, even if the bool is false?
-
-    if (clearParticles)
-    {
-    	RW_UNUSED(clearParticles);
-    	RW_UNIMPLEMENTED("should clear all particles and projectiles (not limited to area!)");
-    }
+    coord = script::getGround(args, coord);
+    args.getWorld()->clearObjectsWithinArea(coord, radius, clearParticles);
 }
 
 /**

@@ -35,7 +35,6 @@
 #include <rw_mingw.hpp>
 #endif
 
-
 // Behaviour Tuning
 constexpr float kMaxTrafficSpawnRadius = 100.f;
 constexpr float kMaxTrafficCleanupRadius = kMaxTrafficSpawnRadius * 1.25f;
@@ -86,7 +85,7 @@ bool GameWorld::placeItems(const std::string& name) {
 
     if (ipll.load(path)) {
         // Find the object.
-        for (const auto &inst : ipll.m_instances) {
+        for (const auto& inst : ipll.m_instances) {
             if (!createInstance(inst->id, inst->pos, inst->rot)) {
                 logger->error("World", "No object data for instance " +
                                            std::to_string(inst->id) + " in " +
@@ -245,7 +244,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto model = vti->getModel();
     auto info = data->vehicleInfo.find(vti->handling_);
     if (model && info != data->vehicleInfo.end() &&
-            info->second->wheels.empty() && info->second->seats.empty()) {
+        info->second->wheels.empty() && info->second->seats.empty()) {
         auto root = model->getFrame();
         for (const auto& frame : root->getChildren()) {
             const std::string& name = frame->getName();
@@ -261,18 +260,21 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
                 auto backseat = frame->findDescendant("ped_backseat");
 
                 if (frontseat) {
-                    addSeats(info->second->seats.front, frontseat->getDefaultTranslation());
+                    addSeats(info->second->seats.front,
+                             frontseat->getDefaultTranslation());
                 }
                 if (backseat) {
                     // @todo how does this work for the barracks, ambulance
                     // or coach?
-                    addSeats(info->second->seats.back, backseat->getDefaultTranslation());
+                    addSeats(info->second->seats.back,
+                             backseat->getDefaultTranslation());
                 }
             } else if (name == "ped_frontseat") {
                 // The speeder boat does not have a chassis_dummy but has the
                 // frontseat directly in the root frame.
 
-                addSeats(info->second->seats.front, frame->getDefaultTranslation());
+                addSeats(info->second->seats.front,
+                         frame->getDefaultTranslation());
             }
         }
     }
@@ -560,7 +562,7 @@ float GameWorld::getGameTime() const {
 }
 
 namespace {
-void handleVehicleResponse(GameObject *object, btManifoldPoint &mp, bool isA) {
+void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
     bool isVehicle = object->type() == GameObject::Vehicle;
     if (!isVehicle) return;
     if (mp.getAppliedImpulse() <= 100.f) return;
@@ -581,7 +583,8 @@ void handleVehicleResponse(GameObject *object, btManifoldPoint &mp, bool isA) {
                         mp.getAppliedImpulse()});
 }
 
-void handleInstanceResponse(InstanceObject *instance, const btManifoldPoint &mp, bool isA) {
+void handleInstanceResponse(InstanceObject* instance, const btManifoldPoint& mp,
+                            bool isA) {
     if (!instance->dynamics) {
         return;
     }
@@ -600,7 +603,7 @@ void handleInstanceResponse(InstanceObject *instance, const btManifoldPoint &mp,
                               impulse});
     }
 }
-}
+}  // namespace
 
 bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
                                          void* body1) {
@@ -868,6 +871,69 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
 }
 
 bool GameWorld::isRaining() const {
-    return WeatherCondition (state->basic.nextWeather) ==
-            WeatherCondition::Rainy;
+    return WeatherCondition(state->basic.nextWeather) ==
+           WeatherCondition::Rainy;
+}
+
+void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
+                                       const float radius,
+                                       const bool clearParticles) {
+    bool skipFlag = false;
+
+    // Vehicles
+    for (auto& obj : vehiclePool.objects) {
+        skipFlag = false;
+
+        // Skip if it's the player or owned by player or owned by mission
+        if (obj.second->getLifetime() == GameObject::PlayerLifetime ||
+            obj.second->getLifetime() == GameObject::MissionLifetime) {
+            continue;
+        }
+
+        // Check if we have any important objects in a vehicle, if we do - don't
+        // erase it
+        for (auto& seat :
+             static_cast<VehicleObject*>(obj.second)->seatOccupants) {
+            auto character = static_cast<CharacterObject*>(seat.second);
+
+            if (character->getLifetime() == GameObject::PlayerLifetime ||
+                character->getLifetime() == GameObject::MissionLifetime) {
+                skipFlag = true;
+            }
+        }
+
+        if (skipFlag) {
+            continue;
+        }
+
+        if (glm::distance(center, obj.second->getPosition()) < radius) {
+            destroyObjectQueued(obj.second);
+        }
+    }
+
+    // Peds
+    for (auto& obj : pedestrianPool.objects) {
+        // Skip if it's the player or owned by player or owned by mission
+        if (obj.second->getLifetime() == GameObject::PlayerLifetime ||
+            obj.second->getLifetime() == GameObject::MissionLifetime) {
+            continue;
+        }
+
+        if (glm::distance(center, obj.second->getPosition()) < radius) {
+            destroyObjectQueued(obj.second);
+        }
+    }
+
+    /// @todo Do we also have to clear all projectiles + particles *in this
+    /// area*, even if the bool is false?
+
+    if (clearParticles) {
+        RW_UNUSED(clearParticles);
+        RW_UNIMPLEMENTED(
+            "should clear all particles and projectiles (not limited to "
+            "area!)");
+    }
+
+    // @todo Remove all temp objects, extinguish all fires, remove all
+    // explosions, remove all projectiles
 }

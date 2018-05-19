@@ -173,6 +173,10 @@ void PlayerController::restart() {
     state->hospitalIslandOverride = 0;
     state->policeIslandOverride = 0;
 
+    // Clear whole world
+    // Original game uses 4000.f radius
+    world->clearObjectsWithinArea(character->getPosition(), 10000.f, true);
+
     // Set position and heading for any restart
     character->setPosition(restartPosition);
     character->setHeading(restartHeading);
