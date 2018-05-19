@@ -143,6 +143,11 @@ public:
     ClumpPtr loadClump(const std::string& name);
 
     /**
+     * Loads an archived model and returns it directly
+     */
+    ClumpPtr loadClump(const std::string& name, const std::string& textureSlot);
+
+    /**
      * Loads a DFF and associates its atomics with models.
      */
     void loadModelFile(const std::string& name);

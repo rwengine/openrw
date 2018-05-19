@@ -409,6 +409,15 @@ ClumpPtr GameData::loadClump(const std::string& name) {
     return m;
 }
 
+ClumpPtr GameData::loadClump(const std::string& name, const std::string& textureSlot) {
+    std::string currentSlot = currenttextureslot;
+    if (textureSlot.size()>0)
+        currenttextureslot = textureSlot;
+    ClumpPtr result = loadClump(name);
+    currenttextureslot = currentSlot;
+    return result;
+}
+
 void GameData::loadModelFile(const std::string& name) {
     auto file = index.openFilePath(name);
     if (!file) {
