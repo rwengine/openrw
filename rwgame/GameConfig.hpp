@@ -222,6 +222,15 @@ public:
     bool getInputInvertY() const {
         return m_inputInvertY;
     }
+    int getWindowWidth() const {
+        return m_windowWidth;
+    }
+    int getWindowHeight() const {
+        return m_windowHeight;
+    }
+    bool getWindowFullscreen() const {
+        return m_windowFullscreen;
+    }
 
     static rwfs::path getDefaultConfigPath();
 private:
@@ -256,6 +265,13 @@ private:
 
     /// Invert the y axis for camera control.
     bool m_inputInvertY;
+
+    /// Size of the window
+    int m_windowWidth;
+    int m_windowHeight;
+    
+    /// Set the window to fullscreen
+    bool m_windowFullscreen;
 };
 
 #endif
