@@ -114,10 +114,7 @@ void ProjectileObject::cleanup() {
 ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
                                    const ProjectileObject::ProjectileInfo& info)
     : GameObject(world, position, glm::quat{1.0f,0.0f,0.0f,0.0f}, nullptr)
-    , _info(info)
-    , _body(nullptr)
-    , _ghostBody(nullptr)
-    , _exploded(false) {
+    , _info(info) {
     _shape = new btSphereShape(0.45f);
     btVector3 inertia(0.f, 0.f, 0.f);
     _shape->calculateLocalInertia(1.f, inertia);

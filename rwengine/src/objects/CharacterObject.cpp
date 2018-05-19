@@ -30,18 +30,6 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
                                  const glm::quat& rot, BaseModelInfo* modelinfo,
                                  CharacterController* controller)
     : GameObject(engine, pos, rot, modelinfo)
-    , currentState({})
-    , currentVehicle(nullptr)
-    , currentSeat(0)
-    , m_look(0.f, glm::half_pi<float>())
-    , running(false)
-    , jumped(false)
-    , jumpSpeed(DefaultJumpSpeed)
-    , motionBlockedByActivity(false)
-    , cycle_(AnimCycle::Idle)
-    , physCharacter(nullptr)
-    , physObject(nullptr)
-    , physShape(nullptr)
     , controller(controller) {
     auto info = getModelInfo<PedModelInfo>();
     setClump(ClumpPtr(info->getModel()->clone()));

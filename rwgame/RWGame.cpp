@@ -44,8 +44,7 @@ constexpr float kMaxPhysicsSubSteps = 2;
 RWGame::RWGame(Logger& log, int argc, char* argv[])
     : GameBase(log, argc, argv)
     , data(&log, config.getGameDataPath())
-    , renderer(&log, &data)
-    , lastDraws(0) {
+    , renderer(&log, &data) {
     bool newgame = options.count("newgame");
     bool test = options.count("test");
     std::string startSave(

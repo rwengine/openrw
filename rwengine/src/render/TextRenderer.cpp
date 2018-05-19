@@ -82,10 +82,6 @@ struct TextVertex {
     }
 };
 
-TextRenderer::TextInfo::TextInfo()
-    : font(0), size(1.f), baseColour({1.f, 1.f, 1.f}), align(Left), wrapX(0) {
-}
-
 TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
     textShader = renderer->getRenderer()->createShader(TextVertexShader,
                                                        TextFragmentShader);
@@ -130,8 +126,6 @@ TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
         }
     }
 }
-
-TextRenderer::~TextRenderer() = default;
 
 void TextRenderer::setFontTexture(int index, const std::string& texture) {
     if (index < GAME_FONTS) {

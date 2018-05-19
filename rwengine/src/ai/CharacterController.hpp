@@ -58,23 +58,23 @@ protected:
     /**
      * The character being controlled.
      */
-    CharacterObject* character;
+    CharacterObject* character = nullptr;
 
-    std::unique_ptr<Activity> _currentActivity;
-    std::unique_ptr<Activity> _nextActivity;
+    std::unique_ptr<Activity> _currentActivity = nullptr;
+    std::unique_ptr<Activity> _nextActivity = nullptr;
 
     bool updateActivity();
     void setActivity(std::unique_ptr<Activity> activity);
 
-    float m_closeDoorTimer;
+    float m_closeDoorTimer{0.f};
 
     // Goal related variables
-    Goal currentGoal;
-    CharacterObject* leader;
-    AIGraphNode* targetNode;
+    Goal currentGoal{None};
+    CharacterObject* leader = nullptr;
+    AIGraphNode* targetNode = nullptr;
 
 public:
-    CharacterController();
+    CharacterController() = default;
 
     virtual ~CharacterController() = default;
 

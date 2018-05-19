@@ -16,12 +16,12 @@ public:
         float distance{};
     };
 
-    float near;
-    float far;
-    float fov;
-    float aspectRatio;
+    float near{};
+    float far{};
+    float fov{};
+    float aspectRatio{};
 
-    ViewPlane planes[6];
+    ViewPlane planes[6]{};
 
     ViewFrustum(float near, float far, float fov, float aspect)
         : near(near), far(far), fov(fov), aspectRatio(aspect) {

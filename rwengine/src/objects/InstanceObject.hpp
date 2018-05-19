@@ -17,12 +17,12 @@ class GameWorld;
  *  A simple object instance
  */
 class InstanceObject : public GameObject {
-    float health;
-    bool visible;
-    bool floating;
-    bool static_;
-    bool usePhysics;
-    int changeAtomic;
+    float health = 100.f;
+    bool visible =true;
+    bool floating = false;
+    bool static_ = false;
+    bool usePhysics = false;
+    int changeAtomic = -1;
 
     /**
      * The Atomic instance for this object

@@ -15,9 +15,9 @@ class BenchmarkState : public State {
 
     std::string benchfile;
 
-    float benchmarkTime;
-    float duration;
-    uint32_t frameCounter;
+    float benchmarkTime{0.f};
+    float duration{0.f};
+    uint32_t frameCounter{0};
 
 public:
     BenchmarkState(RWGame* game, const std::string& benchfile);

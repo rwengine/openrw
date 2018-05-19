@@ -47,7 +47,7 @@ protected:
     DrawBuffer *dbuff;
 
     //Ownership is handled by worldProg in renderer
-    Renderer::ShaderProgram *shaderProgram;
+    Renderer::ShaderProgram *shaderProgram = nullptr;
 
     GLuint texture;
 };

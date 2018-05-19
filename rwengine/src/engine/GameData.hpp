@@ -58,9 +58,9 @@ public:
      * @param path Path to the root of the game data.
      */
     GameData(Logger* log, const rwfs::path& path);
-    ~GameData();
+    ~GameData() = default;
 
-    GameWorld* engine;
+    GameWorld* engine = nullptr;
 
     /**
      * Returns the current platform

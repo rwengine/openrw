@@ -8,12 +8,11 @@
 #include <render/GameRenderer.hpp>
 
 class GameWindow {
-    SDL_Window* window;
-    SDL_Surface* icon;
-    SDL_GLContext glcontext;
-
+    SDL_Window* window = nullptr;
+    SDL_Surface* icon = nullptr;
+    SDL_GLContext glcontext{nullptr};
 public:
-    GameWindow();
+    GameWindow() = default;
 
     void create(const std::string& title, size_t w, size_t h, bool fullscreen);
     void close();

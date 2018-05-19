@@ -57,11 +57,11 @@ struct ScriptObjectType {
     /**
      * @brief m_id VM Memory containing the object handler
      */
-    ScriptInt* m_id;
+    ScriptInt* m_id = nullptr;
     /**
      * @brief m_object Real object instance
      */
-    T* m_object;
+    T* m_object = nullptr;
 
     ScriptObjectType(ScriptInt* var, GameObject* object)
         : m_id(var), m_object(static_cast<T*>(object)) {
@@ -236,8 +236,8 @@ typedef std::vector<SCMOpcodeParameter> SCMParams;
 
 class ScriptArguments {
     const SCMParams* parameters;
-    SCMThread* thread;
-    ScriptMachine* machine;
+    SCMThread* thread = nullptr;
+    ScriptMachine* machine = nullptr;
 
 public:
     ScriptArguments(const SCMParams* p, SCMThread* t, ScriptMachine* m)

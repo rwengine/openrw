@@ -16,21 +16,21 @@ class IngameState : public State {
         CAMERA_MAX
     };
 
-    bool started;
+    bool started = false;
     std::string save;
     bool newgame;
-    ViewCamera _look;
+    ViewCamera _look{};
     glm::vec3 cameraPosition{};
     /** Timer to hold user camera position */
-    float autolookTimer;
-    CameraMode camMode;
+    float autolookTimer{0.f};
+    CameraMode camMode{IngameState::CAMERA_NORMAL};
 
     /// Player camera input since the last update
     glm::vec2 cameradelta_{};
     /// Invert Y axis movement
     bool m_invertedY;
     /// Free look in vehicles.
-    bool m_vehicleFreeLook;
+    bool m_vehicleFreeLook = true;
 
     float moneyTimer = 0.f;  // Timer used to updated displayed money value
 

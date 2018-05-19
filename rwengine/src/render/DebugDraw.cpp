@@ -13,7 +13,7 @@
 
 #include "render/GameRenderer.hpp"
 
-DebugDraw::DebugDraw() : shaderProgram(nullptr) {
+DebugDraw::DebugDraw() {
     lineBuff = new GeometryBuffer;
     dbuff = new DrawBuffer;
     dbuff->setFaceType(GL_LINES);

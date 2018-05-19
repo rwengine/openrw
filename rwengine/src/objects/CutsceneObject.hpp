@@ -14,14 +14,14 @@ class ModelFrame;
  * @brief Object type used for cutscene animations.
  */
 class CutsceneObject : public GameObject, public ClumpObject {
-    GameObject* _parent;
-    ModelFrame* _bone;
+    GameObject* _parent = nullptr;
+    ModelFrame* _bone = nullptr;
 
 public:
     CutsceneObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const ClumpPtr& model,
                    BaseModelInfo* modelinfo);
-    ~CutsceneObject() override;
+    ~CutsceneObject() override = default;
 
     Type type() const override {
         return Cutscene;

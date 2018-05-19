@@ -24,11 +24,7 @@
 
 TrafficDirector::TrafficDirector(AIGraph* g, GameWorld* w)
     : graph(g)
-    , world(w)
-    , pedDensity(1.f)
-    , carDensity(1.f)
-    , maximumPedestrians(20)
-    , maximumCars(10) {
+    , world(w) {
 }
 
 std::vector<AIGraphNode*> TrafficDirector::findAvailableNodes(

@@ -25,14 +25,14 @@ class GameWorld;
 class GameObject {
     glm::vec3 _lastPosition;
     glm::quat _lastRotation;
-    GameObjectID objectID;
+    GameObjectID objectID = 0;
 
     BaseModelInfo* modelinfo_;
 
     /**
      * Model used for rendering
      */
-    ClumpPtr model_;
+    ClumpPtr model_ = nullptr;
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
@@ -43,37 +43,30 @@ public:
     glm::vec3 position;
     glm::quat rotation;
 
-    GameWorld* engine;
+    GameWorld* engine = nullptr;
 
-    Animator* animator;  /// Object's animator.
+    Animator* animator = nullptr;  /// Object's animator.
 
-    bool inWater;
+    bool inWater = false;
 
     /**
      * @brief stores the height of water at the last tick
      */
-    float _lastHeight;
+    float _lastHeight = std::numeric_limits<float>::max();
 
     /**
      * Should object be rendered?
      */
-    bool visible;
+    bool visible = true;
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
                BaseModelInfo* modelinfo)
         : _lastPosition(pos)
         , _lastRotation(rot)
-        , objectID(0)
         , modelinfo_(modelinfo)
-        , model_(nullptr)
         , position(pos)
         , rotation(rot)
-        , engine(engine)
-        , animator(nullptr)
-        , inWater(false)
-        , _lastHeight(std::numeric_limits<float>::max())
-        , visible(true)
-        , lifetime(GameObject::UnknownLifetime) {
+        , engine(engine) {
         if (modelinfo_) {
             modelinfo_->addReference();
         }
@@ -241,7 +234,7 @@ public:
     }
 
 private:
-    ObjectLifetime lifetime;
+    ObjectLifetime lifetime = GameObject::UnknownLifetime;
 };
 
 class ClumpObject {

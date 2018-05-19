@@ -55,34 +55,34 @@ class GameWorld;
  */
 class CharacterObject : public GameObject, public ClumpObject {
 private:
-    CharacterState currentState;
+    CharacterState currentState{};
 
-    VehicleObject* currentVehicle;
-    size_t currentSeat;
+    VehicleObject* currentVehicle = nullptr;
+    size_t currentSeat{0};
 
     void createActor(const glm::vec2& size = glm::vec2(0.45f, 1.2f));
     void destroyActor();
 
     glm::vec3 movement{};
-    glm::vec2 m_look{};
+    glm::vec2 m_look{0.f, glm::half_pi<float>()};
 
-    bool running;
-    bool jumped;
-    float jumpSpeed;
+    bool running = false;
+    bool jumped = false;
+    float jumpSpeed = DefaultJumpSpeed;
 
-    bool motionBlockedByActivity;
+    bool motionBlockedByActivity = false;
 
     glm::vec3 updateMovementAnimation(float dt);
     glm::vec3 currenteMovementStep{};
 
-    AnimCycle cycle_;
+    AnimCycle cycle_ = AnimCycle::Idle;
 
 public:
     static const float DefaultJumpSpeed;
 
-    btKinematicCharacterController* physCharacter;
-    btPairCachingGhostObject* physObject;
-    btCapsuleShapeZ* physShape;
+    btKinematicCharacterController* physCharacter = nullptr;
+    btPairCachingGhostObject* physObject = nullptr;
+    btCapsuleShapeZ* physShape = nullptr;
 
     CharacterController* controller;
 

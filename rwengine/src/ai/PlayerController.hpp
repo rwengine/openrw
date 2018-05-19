@@ -11,28 +11,28 @@ private:
 
     glm::vec3 direction{};
 
-    glm::quat lastRotation;
+    glm::quat lastRotation = glm::vec3(0.f, 0.f, 0.f);
 
-    bool missionRestartRequired;
+    bool missionRestartRequired = false;
 
-    bool adrenalineEffect;
-    float adrenalineEffectTime;
+    bool adrenalineEffect = false;
+    float adrenalineEffectTime{0};
 
-    bool _enabled;
+    bool _enabled = true;
 
     enum RestartState {
         Alive,
         FadingOut,
         Restarting,
-        FadingIn,
-    } restartState;
+        FadingIn
+    } restartState = Alive;
 
     enum PayphoneState {
         Left,
         Talking,
         PickingUp,
         HangingUp,
-    } payphoneState;
+    } payphoneState = Left;
 
     // handles player respawn logic
     void restartLogic();
@@ -40,7 +40,7 @@ private:
     void restart();
 
 public:
-    PlayerController();
+    PlayerController() = default;
 
     /**
      * @brief Enables and disables player input.

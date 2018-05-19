@@ -301,7 +301,7 @@ public:
     /**
      * Randomness Engine
      */
-    std::default_random_engine randomEngine;
+    std::default_random_engine randomEngine{std::random_device{}()};
 
     /**
      * Bullet
@@ -385,7 +385,7 @@ private:
     /**
      * Flag for pausing the simulation
      */
-    bool paused;
+    bool paused = false;
 
     /**
      * Private data

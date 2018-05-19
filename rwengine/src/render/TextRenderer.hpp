@@ -33,23 +33,23 @@ public:
         enum TextAlignemnt { Left = 0, Right = 1, Center = 2 };
 
         /// Font index @see TextRenderer::setFontTexture
-        int font;
+        int font{0};
         /// Message to be displayed (including markup)
         GameString text;
         /// On screen position
         glm::vec2 screenPosition{};
         /// font size
-        float size;
+        float size{1.f};
         /// Base colour
-        glm::u8vec3 baseColour{};
+        glm::u8vec3 baseColour{1.f, 1.f, 1.f};
         /// Background colour
         glm::u8vec4 backgroundColour{};
         /// Horizontal Alignment
-        TextAlignemnt align;
+        TextAlignemnt align = Left;
         /// Wrap width
-        int wrapX;
+        int wrapX{0};
 
-        TextInfo();
+        TextInfo() = default;
     };
 
     /**
@@ -60,7 +60,7 @@ public:
     };
 
     TextRenderer(GameRenderer* renderer);
-    ~TextRenderer();
+    ~TextRenderer() = default;
 
     void setFontTexture(int index, const std::string& font);
 

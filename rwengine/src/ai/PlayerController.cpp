@@ -13,15 +13,6 @@
 
 class Animator;
 
-PlayerController::PlayerController()
-    : CharacterController()
-    , lastRotation(glm::vec3(0.f, 0.f, 0.f))
-    , missionRestartRequired(false)
-    , _enabled(true)
-    , restartState(Alive)
-    , payphoneState(Left) {
-}
-
 void PlayerController::setInputEnabled(bool enabled) {
     _enabled = enabled;
 }

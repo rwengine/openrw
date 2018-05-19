@@ -23,16 +23,6 @@
 
 constexpr float kCloseDoorIdleTime = 2.f;
 
-CharacterController::CharacterController()
-    : character(nullptr)
-    , _currentActivity(nullptr)
-    , _nextActivity(nullptr)
-    , m_closeDoorTimer(0.f)
-    , currentGoal(None)
-    , leader(nullptr)
-    , targetNode(nullptr) {
-}
-
 bool CharacterController::updateActivity() {
     if (_currentActivity && character->isAlive()) {
         return _currentActivity->update(character, this);

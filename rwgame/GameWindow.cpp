@@ -1,9 +1,6 @@
 #include "GameWindow.hpp"
 #include <core/Logger.hpp>
 
-GameWindow::GameWindow() : window(nullptr), glcontext(nullptr) {
-}
-
 void GameWindow::create(const std::string& title, size_t w, size_t h,
                         bool fullscreen) {
     Uint32 style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;

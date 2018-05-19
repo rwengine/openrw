@@ -20,7 +20,7 @@ class GameWorld;
 class WaterRenderer {
 public:
     WaterRenderer(GameRenderer* renderer);
-    ~WaterRenderer();
+    ~WaterRenderer() = default;
 
     /**
      * Creates the required data for rendering the water. Accepts
@@ -41,19 +41,19 @@ public:
     void render(GameRenderer* renderer, GameWorld* world);
 
 private:
-    std::unique_ptr<Renderer::ShaderProgram> waterProg;
-    std::unique_ptr<Renderer::ShaderProgram> maskProg;
+    std::unique_ptr<Renderer::ShaderProgram> waterProg = nullptr;
+    std::unique_ptr<Renderer::ShaderProgram> maskProg = nullptr;
 
-    DrawBuffer maskDraw;
-    GeometryBuffer maskGeom;
+    DrawBuffer maskDraw{};
+    GeometryBuffer maskGeom{};
 
     std::vector<int> maskSizes;
 
-    DrawBuffer gridDraw;
-    GeometryBuffer gridGeom;
+    DrawBuffer gridDraw{};
+    GeometryBuffer gridGeom{};
 
-    GLuint fbOutput;
-    GLuint dataTexture;
+    GLuint fbOutput{};
+    GLuint dataTexture{};
 };
 
 #endif
