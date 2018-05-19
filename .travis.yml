@@ -25,6 +25,7 @@ matrix:
     osx_image: xcode9.2
     install:
       - brew update
+      - /usr/bin/yes | pip2 uninstall numpy  # see https://github.com/travis-ci/travis-ci/issues/6688
       - brew upgrade python
       - brew upgrade
       - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack
