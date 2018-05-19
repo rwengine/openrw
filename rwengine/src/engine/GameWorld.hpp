@@ -9,9 +9,9 @@
 #include <string>
 #include <vector>
 
+#include <LinearMath/btScalar.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <LinearMath/btScalar.h>
 
 #include <ai/AIGraph.hpp>
 #include <ai/AIGraphNode.hpp>
@@ -102,34 +102,39 @@ public:
      * Creates an instance
      */
     InstanceObject* createInstance(const uint16_t id, const glm::vec3& pos,
-                                   const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f});
+                                   const glm::quat& rot = glm::quat{
+                                       1.0f, 0.0f, 0.0f, 0.0f});
 
     /**
      * @brief Creates an InstanceObject for use in the current Cutscene.
      */
     CutsceneObject* createCutsceneObject(const uint16_t id,
                                          const glm::vec3& pos,
-                                         const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f});
+                                         const glm::quat& rot = glm::quat{
+                                             1.0f, 0.0f, 0.0f, 0.0f});
 
     /**
      * Creates a vehicle
      */
     VehicleObject* createVehicle(const uint16_t id, const glm::vec3& pos,
-                                 const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
+                                 const glm::quat& rot = glm::quat{1.0f, 0.0f,
+                                                                  0.0f, 0.0f},
                                  GameObjectID gid = 0);
 
     /**
      * Creates a pedestrian.
      */
-    CharacterObject* createPedestrian(const uint16_t id, const glm::vec3& pos,
-                                      const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
-                                      GameObjectID gid = 0);
+    CharacterObject* createPedestrian(
+        const uint16_t id, const glm::vec3& pos,
+        const glm::quat& rot = glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
+        GameObjectID gid = 0);
 
     /**
      * Creates a player
      */
     CharacterObject* createPlayer(const glm::vec3& pos,
-                                  const glm::quat& rot = glm::quat{1.0f,0.0f,0.0f,0.0f},
+                                  const glm::quat& rot = glm::quat{1.0f, 0.0f,
+                                                                   0.0f, 0.0f},
                                   GameObjectID gid = 0);
 
     /**
@@ -344,6 +349,9 @@ public:
      */
     VehicleObject* tryToSpawnVehicle(VehicleGenerator& gen);
 
+    void clearObjectsWithinArea(const glm::vec3 center, const float radius,
+                                const bool clearParticles);
+
 private:
     /**
      * @brief Used by objects to delete themselves during updates.
@@ -360,7 +368,7 @@ private:
     /**
      * Private data
      */
-     std::unique_ptr<btOverlappingPairCallback> _overlappingPairCallback;
+    std::unique_ptr<btOverlappingPairCallback> _overlappingPairCallback;
 };
 
 #endif
