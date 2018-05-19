@@ -2421,13 +2421,23 @@ bool opcode_00e0(const ScriptArguments& args, const ScriptPlayer player) {
     @arg player Player
     @arg buttonID Button ID
 */
-bool opcode_00e1(const ScriptArguments& args, const ScriptPad player, const ScriptButton buttonID) {
+bool opcode_00e1(const ScriptArguments& args, const ScriptPad player,
+                 const ScriptButton buttonID) {
     RW_UNIMPLEMENTED_OPCODE(0x00e1);
     // Hack: not implemented correctly.
     if (player == 0) {
-    	if (buttonID == 19) { // Look behind / sub mission
-    		return args.getState()->input[0].pressed(GameInputState::Submission);
-    	}
+        if (buttonID == 12) {  // not implemented correctly
+            return args.getState()->input[0].pressed(
+                GameInputState::Jump);
+        }
+        if (buttonID == 16) {  // not implemented correctly
+            return args.getState()->input[0].pressed(
+                GameInputState::Jump);
+        }
+        if (buttonID == 19) {  // Look behind / sub mission
+            return args.getState()->input[0].pressed(
+                GameInputState::Submission);
+        }
     }
     return false;
 }
