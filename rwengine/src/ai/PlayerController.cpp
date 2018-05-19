@@ -173,6 +173,14 @@ void PlayerController::restart() {
     state->hospitalIslandOverride = 0;
     state->policeIslandOverride = 0;
 
+    // If we are in vehicle get us out
+    auto* vehicle = character->getCurrentVehicle();
+    if (vehicle) {
+        auto seat = character->getCurrentSeat();
+        character->setCurrentVehicle(nullptr, seat);
+        vehicle->setOccupant(seat, nullptr);
+    }
+
     // Clear whole world
     // Original game uses 4000.f radius
     world->clearObjectsWithinArea(character->getPosition(), 10000.f, true);
