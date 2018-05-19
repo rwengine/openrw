@@ -411,7 +411,7 @@ ClumpPtr GameData::loadClump(const std::string& name) {
 
 ClumpPtr GameData::loadClump(const std::string& name, const std::string& textureSlot) {
     std::string currentSlot = currenttextureslot;
-    if (textureSlot.size()>0)
+    if (!textureSlot.empty())
         currenttextureslot = textureSlot;
     ClumpPtr result = loadClump(name);
     currenttextureslot = currentSlot;

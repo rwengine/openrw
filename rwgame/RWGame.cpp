@@ -26,7 +26,7 @@
 #include <iomanip>
 #include <iostream>
 
-std::map<GameRenderer::SpecialModel, std::pair<std::string,std::string>> kSpecialModels = {
+const std::map<GameRenderer::SpecialModel, std::pair<std::string,std::string>> kSpecialModels = {
     {GameRenderer::ZoneCylinderA, std::pair<std::string,std::string>("zonecyla.dff", "particle")},
     {GameRenderer::ZoneCylinderB, std::pair<std::string,std::string>("zonecylb.dff", "particle")},
     {GameRenderer::Arrow,         std::pair<std::string,std::string>("arrow.dff",    "")}};
