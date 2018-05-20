@@ -31,10 +31,14 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
         throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
     }
 
+    icon = IMG_Load("logo.png");
+    SDL_SetWindowIcon(window, icon);
+
     SDL_ShowWindow(window);
 }
 
 void GameWindow::close() {
+    SDL_FreeSurface(icon);
     SDL_GL_DeleteContext(glcontext);
     SDL_DestroyWindow(window);
 

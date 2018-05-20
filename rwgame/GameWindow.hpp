@@ -4,12 +4,14 @@
 #include <glm/vec2.hpp>
 #include <string>
 #include <SDL.h>
+#include "SDL_image.h"
 
 #include <render/GameRenderer.hpp>
 
 class GameWindow {
     SDL_Window* window;
     SDL_GLContext glcontext;
+    SDL_Surface* icon;
 
 public:
     GameWindow();
