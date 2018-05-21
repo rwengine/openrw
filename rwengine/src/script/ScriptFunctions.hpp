@@ -3,6 +3,7 @@
 
 #include <rw/defines.hpp>
 
+#include <ai/AIGraphNode.hpp>
 #include <data/GameTexts.hpp>
 #include <data/ModelData.hpp>
 #include <engine/GameData.hpp>
@@ -13,6 +14,7 @@
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/ScriptTypes.hpp>
+#include <glm/gtx/norm.hpp>
 
 /**
  * Implementations for common functions likely to be shared
@@ -129,7 +131,7 @@ inline void destroyObject(const ScriptArguments& args, GameObject* object) {
 }
 
 inline ScriptVec3 getGround(const ScriptArguments& args, ScriptVec3 p) {
-    if (p.z < -90.f) {
+    if (p.z <= -100.f) {
         p = args.getWorld()->getGroundAtPosition(p);
     }
     return p;
@@ -230,6 +232,31 @@ inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
     if (args.getThread()->isMission) {
         auto& mo = args.getState()->missionObjects;
         mo.erase(std::remove(mo.begin(), mo.end(), object), mo.end());
+    }
+}
+        
+inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, AIGraphNode::NodeType type,
+                           ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
+    coord = script::getGround(args, coord);
+    float closest = 10000.f;
+    std::vector<AIGraphNode*> nodes;
+    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
+
+    for (const auto &node : nodes) {
+        if (node->type == type) {
+            // This is how the original game calculates distance,
+            // weighted manhattan-distance where the vertical distance
+            // has to be 3x as close to be considered.
+            float dist  = std::abs(coord.x - node->position.x);
+            dist += std::abs(coord.y - node->position.y);
+            dist += std::abs(coord.z - node->position.z) * 3.f;
+            if (dist < closest) {
+                closest = dist;
+                xCoord = node->position.x;
+                yCoord = node->position.y;
+                zCoord = node->position.z;
+            }
+        }
     }
 }
 }
