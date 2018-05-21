@@ -6,7 +6,7 @@
 #include "engine/Animator.hpp"
 
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
-                               const glm::quat &rot, ClumpPtr model,
+                               const glm::quat &rot, const ClumpPtr& model,
                                BaseModelInfo *modelinfo)
     : GameObject(engine, pos, rot, modelinfo)
     , _parent(nullptr)

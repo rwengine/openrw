@@ -9,7 +9,7 @@
 
 #include "data/GameTexts.hpp"
 
-void LoaderGXT::load(GameTexts &texts, FileHandle &file) {
+void LoaderGXT::load(GameTexts &texts, const FileHandle &file) {
     auto data = file->data;
 
     data += 4;  // TKEY

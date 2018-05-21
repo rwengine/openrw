@@ -42,7 +42,7 @@ void ModelFrame::updateHierarchyTransform() {
     }
 }
 
-void ModelFrame::addChild(ModelFramePtr child) {
+void ModelFrame::addChild(const ModelFramePtr& child) {
     // Make sure the child is an orphan
     if (child->getParent()) {
         auto& other_children = child->getParent()->children_;

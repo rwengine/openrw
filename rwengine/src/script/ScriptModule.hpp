@@ -153,7 +153,9 @@ void do_unpacked_call(Tret (*const& func)(Targs...),
  */
 class ScriptModule {
 public:
-    ScriptModule(const std::string& name) : name(name) {
+    template <class String>
+    ScriptModule(String&& _name)
+        : name(std::forward<String>(_name)) {
     }
 
     const std::string& getName() const {

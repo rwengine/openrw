@@ -30,9 +30,8 @@ typedef struct {
 } WaveHeader;
 
 bool LoaderSDT::load(const std::string& filename) {
-    auto baseName = filename;
-    auto sdtName = baseName + ".SDT";
-    auto rawName = baseName + ".RAW";
+    const auto sdtName = filename + ".SDT";
+    const auto rawName = filename + ".RAW";
 
     FILE* fp = fopen(sdtName.c_str(), "rb");
     if (fp) {

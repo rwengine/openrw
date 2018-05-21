@@ -8,7 +8,7 @@ class LoadingState : public State {
     std::function<void(void)> complete;
 
 public:
-    LoadingState(RWGame* game, std::function<void(void)> callback);
+    LoadingState(RWGame* game, const std::function<void(void)>& callback);
 
     void enter() override;
 

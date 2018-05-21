@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <string>
+#include <utility>
 #include <vector>
 
 /**
@@ -22,9 +23,12 @@ public:
         /// Logged message
         std::string message;
 
-        LogMessage(const std::string& cc, MessageSeverity ss,
-                   const std::string& mm)
-            : component(cc), severity(ss), message(mm) {
+        template <class String1, class String2>
+        LogMessage(String1&& cc, MessageSeverity ss,
+                   String2&& mm)
+            : component(std::forward<String1>(cc))
+            , severity(ss)
+            , message(std::forward<String2>(mm)) {
         }
     };
 

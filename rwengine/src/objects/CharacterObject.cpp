@@ -578,7 +578,7 @@ void CharacterObject::resetToAINode() {
     }
 }
 
-void CharacterObject::playActivityAnimation(AnimationPtr animation, bool repeat,
+void CharacterObject::playActivityAnimation(const AnimationPtr& animation, bool repeat,
                                             bool blocked) {
     RW_CHECK(animator != nullptr, "No Animator");
     animator->playAnimation(AnimIndexAction, animation, 1.f, repeat);
@@ -600,7 +600,7 @@ void CharacterObject::playCycle(AnimCycle cycle) {
 }
 
 void CharacterObject::playCycleAnimOverride(AnimCycle cycle,
-                                            AnimationPtr anim) {
+                                            const AnimationPtr& anim) {
     auto flags = animations->flags(cycle);
 
     cycle_ = cycle;

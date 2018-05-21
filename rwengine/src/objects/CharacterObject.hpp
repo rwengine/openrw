@@ -207,7 +207,7 @@ public:
      * This allows controller activities to play their own animations and
      * controll blending with movement.
      */
-    void playActivityAnimation(AnimationPtr animation, bool repeat,
+    void playActivityAnimation(const AnimationPtr& animation, bool repeat,
                                bool blocking);
     /**
      * @brief activityFinished removes activity animation
@@ -227,7 +227,7 @@ public:
      * This sets the same state as playCycle, but provides an alternate
      * animation to play.
      */
-    void playCycleAnimOverride(AnimCycle cycle, AnimationPtr anim);
+    void playCycleAnimOverride(AnimCycle cycle, const AnimationPtr& anim);
 
     AnimCycle getCurrentCycle() const {
         return cycle_;

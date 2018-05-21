@@ -137,7 +137,7 @@ public:
     }
 
     /// @todo change with librw
-    void setAtomic(ClumpPtr model, int n, AtomicPtr atomic) {
+    void setAtomic(const ClumpPtr& model, int n, const AtomicPtr& atomic) {
         model_ = model;
         /// @todo disassociated the Atomic from Clump
         atomics_[n] = atomic;
@@ -281,7 +281,7 @@ public:
     ClumpModelInfo(ModelDataType type) : BaseModelInfo(type) {
     }
 
-    void setModel(ClumpPtr model) {
+    void setModel(const ClumpPtr& model) {
         model_ = model;
     }
 

@@ -87,7 +87,7 @@ public:
         return parent_;
     }
 
-    void addChild(ModelFramePtr child);
+    void addChild(const ModelFramePtr& child);
 
     const std::vector<ModelFramePtr>& getChildren() const {
         return children_;
@@ -203,7 +203,7 @@ public:
         ATOMIC_RENDER = 0x04
     };
 
-    void setFrame(ModelFramePtr frame) {
+    void setFrame(const ModelFramePtr& frame) {
         frame_ = frame;
     }
 
@@ -211,7 +211,7 @@ public:
         return frame_;
     }
 
-    void setGeometry(GeometryPtr geom) {
+    void setGeometry(const GeometryPtr& geom) {
         geometry_ = geom;
     }
 
@@ -259,7 +259,7 @@ public:
         return boundingRadius;
     }
 
-    void addAtomic(AtomicPtr& atomic) {
+    void addAtomic(const AtomicPtr& atomic) {
         atomics_.push_back(atomic);
     }
 
@@ -267,7 +267,7 @@ public:
         return atomics_;
     }
 
-    void setFrame(ModelFramePtr& root) {
+    void setFrame(const ModelFramePtr& root) {
         rootframe_ = root;
     }
 
