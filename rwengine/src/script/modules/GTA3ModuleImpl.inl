@@ -6908,10 +6908,8 @@ void opcode_029b(const ScriptArguments& args, const ScriptModel model, ScriptVec
     @arg vehicle 
 */
 bool opcode_029c(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x029c);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
-    return false;
+    return vehicle->getVehicle()->vehicletype_ == VehicleModelInfo::BOAT;
 }
 
 /**
@@ -9087,10 +9085,8 @@ void opcode_0335(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg arg2 Boolean true/false
 */
 void opcode_0336(const ScriptArguments& args, const ScriptPlayer player, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0336);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    player->getCharacter()->visible = arg2;
 }
 
 /**
@@ -9101,10 +9097,8 @@ void opcode_0336(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg arg2 Boolean true/false
 */
 void opcode_0337(const ScriptArguments& args, const ScriptCharacter character, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0337);
-    RW_UNUSED(character);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    character->visible = arg2;
 }
 
 /**
@@ -9628,10 +9622,8 @@ void opcode_035d(const ScriptArguments& args, const ScriptObject object) {
     @arg arg2 
 */
 void opcode_035e(const ScriptArguments& args, const ScriptPlayer player, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x035e);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    player->getCharacter()->getCurrentState().armour = arg2;
 }
 
 /**
@@ -9642,10 +9634,8 @@ void opcode_035e(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg arg2 
 */
 void opcode_035f(const ScriptArguments& args, const ScriptCharacter character, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x035f);
-    RW_UNUSED(character);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
+    character->getCurrentState().armour = arg2;
 }
 
 /**
@@ -9823,10 +9813,10 @@ void opcode_0369(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg vehicle Car/vehicle
 */
 void opcode_036a(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x036a);
-    RW_UNUSED(character);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    //@TODO check the seat is empty
+    vehicle->setOccupant(0, character);
+    character->setCurrentVehicle(vehicle, 0);
 }
 
 /**
@@ -12436,11 +12426,8 @@ void opcode_042f(const ScriptArguments& args, const ScriptInt statID, const Scri
     @arg arg2 
 */
 bool opcode_0431(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0431);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
     RW_UNUSED(args);
-    return false;
+    return !vehicle->getOccupant(arg2);
 }
 
 /**
@@ -12639,8 +12626,8 @@ bool opcode_0442(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg player Player
 */
 bool opcode_0443(const ScriptArguments& args, const ScriptPlayer player) {
-    return player->getCharacter()->getCurrentVehicle() != nullptr;
     RW_UNUSED(args);
+    return player->getCharacter()->getCurrentVehicle();
 }
 
 /**
@@ -12714,22 +12701,19 @@ bool opcode_0448(const ScriptArguments& args, const ScriptCharacter character, c
     @arg character Character/ped
 */
 bool opcode_0449(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x0449);
-    RW_UNUSED(character);
     RW_UNUSED(args);
-    return false;
+    return !character->getCurrentVehicle();
 }
 
 /**
-    @brief 
+    @brief   player %1d% on_foot
 
     opcode 044a
     @arg player Player
 */
-void opcode_044a(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x044a);
-    RW_UNUSED(player);
+bool opcode_044a(const ScriptArguments& args, const ScriptPlayer player) {
     RW_UNUSED(args);
+    return !player->getCharacter()->getCurrentVehicle();
 }
 
 /**
@@ -12739,10 +12723,8 @@ void opcode_044a(const ScriptArguments& args, const ScriptPlayer player) {
     @arg character Character/ped
 */
 bool opcode_044b(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x044b);
-    RW_UNUSED(character);
     RW_UNUSED(args);
-    return false;
+    return !character->getCurrentVehicle();
 }
 
 /**
