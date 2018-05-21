@@ -218,6 +218,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
     auto deft = StringTranslator();
     auto boolt = BoolTranslator();
     auto patht = PathTranslator();
+    auto intt = IntTranslator();
 
     // Add new configuration parameters here.
     // Additionally, add them to the unit test.
@@ -228,6 +229,10 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
     read_config("game.language", this->m_gameLanguage, "american", deft);
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
+
+    read_config("window.width", this->m_windowWidth, 800, intt);
+    read_config("window.height", this->m_windowHeight, 600, intt);
+    read_config("window.fullscreen", this->m_windowFullscreen, false, boolt);
 
     // Build the unknown key/value map from the correct source
     switch (srcType) {

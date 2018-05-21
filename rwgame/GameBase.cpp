@@ -89,6 +89,16 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
         throw std::runtime_error(config.getParseResult().what());
     }
 
+    if (!vm.count("width")) {
+        w = config.getWindowWidth();
+    }
+    if (!vm.count("height")) {
+        h = config.getWindowHeight();
+    }
+    if (!vm.count("fullscreen")) {
+        fullscreen = config.getWindowFullscreen();
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
         throw std::runtime_error("Failed to initialize SDL2!");
 
