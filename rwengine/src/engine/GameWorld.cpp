@@ -371,6 +371,80 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     return pickup;
 }
 
+GarageInfo* GameWorld::createGarage(const glm::vec3 coord0,
+                                    const glm::vec3 coord1, const int type) {
+    glm::vec3 min;
+    glm::vec3 max;
+    glm::vec3 midpoint;
+
+    min.x = std::min(coord0.x, coord1.x);
+    min.y = std::min(coord0.y, coord1.y);
+    min.z = std::min(coord0.z, coord1.z);
+
+    max.x = std::max(coord0.x, coord1.x);
+    max.y = std::max(coord0.y, coord1.y);
+    max.z = std::max(coord0.z, coord1.z);
+
+    midpoint.x = (min.x + max.x) / 2;
+    midpoint.y = (min.y + max.y) / 2;
+    midpoint.z = (min.z + max.z) / 2;
+
+    // Find door object for this garage
+    InstanceObject* door = nullptr;
+
+    for (auto p : instancePool.objects) {
+        auto o = p.second;
+        if (!o->getModel()) continue;
+        if (!SimpleModelInfo::isDoorModel(
+                o->getModelInfo<BaseModelInfo>()->name))
+            continue;
+
+        // Is this how the game finds door object?
+        if (glm::distance(midpoint, o->getPosition()) < 20.f) {
+            door = static_cast<InstanceObject*>(o);
+        }
+    }
+
+    // Create garage
+    int id = state->garages.size();
+    GarageInfo* info =
+        new GarageInfo{id, min, max, static_cast<GarageType>(type)};
+    state->garages.push_back(*info);
+
+    switch (static_cast<GarageType>(type)) {
+        case GarageType::Mission:
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2:
+        case GarageType::MissionForCarToComeOut:
+        case GarageType::MissionKeepCar:
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3:
+        case GarageType::MissionToOpenAndClose:
+        case GarageType::MissionForSpecificCar:
+        case GarageType::MissionKeepCarAndRemainClosed: {
+            info->state = GarageState::Closed;
+            break;
+        }
+
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray:
+        case GarageType::Crusher: {
+            info->state = GarageState::Opened;
+            break;
+        }
+    }
+
+    // Create controller
+    std::unique_ptr<GarageController> garageController(
+        new GarageController(this, info, door));
+    garageControllers.push_back(std::move(garageController));
+
+    return info;
+}
+
 void GameWorld::ObjectPool::insert(GameObject* object) {
     if (object->getGameObjectID() == 0) {
         // Find the lowest free GameObjectID.

@@ -1263,7 +1263,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         auto& garage = garages[g];
         state.garages.emplace_back(
              (int)g, glm::vec3(garage.x1, garage.y1, garage.z1),
-             glm::vec3(garage.x2, garage.y2, garage.z2), garage.type);
+             glm::vec3(garage.x2, garage.y2, garage.z2), static_cast<GarageType>(garage.type));
     }
     for (auto &c : garageData.cars) {
         if (c.modelId == 0) continue;

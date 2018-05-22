@@ -13,6 +13,7 @@
 #include <data/VehicleGenerator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameInputState.hpp>
+
 #include <engine/GameWorld.hpp>
 #include <engine/ScreenText.hpp>
 #include <objects/ObjectTypes.hpp>
@@ -208,40 +209,49 @@ struct BlipData {
     }
 };
 
+enum class GarageType {
+    Mission = 1,
+    BombShop1 = 2,
+    BombShop2 = 3,
+    BombShop3 = 4,
+    Respray = 5,
+    CollectCars1 = 8,
+    CollectCars2 = 9,
+    MissionForCarToComeOut = 11,
+    Crusher = 13,
+    MissionKeepCar = 14,
+    Hideout1 = 16,
+    Hideout2 = 17,
+    Hideout3 = 18,
+    MissionToOpenAndClose = 19,
+    MissionForSpecificCar = 20,
+    MissionKeepCarAndRemainClosed = 21,
+};
+
+enum class GarageState { Closed, Closing, Opening, Opened };
+
 /**
  * Data for garages
  */
 struct GarageInfo {
-    enum /*GarageType*/ {
-        GARAGE_MISSION = 1,
-        GARAGE_BOMBSHOP1 = 2,
-        GARAGE_BOMBSHOP2 = 3,
-        GARAGE_BOMBSHOP3 = 4,
-        GARAGE_RESPRAY = 5,
-        GARAGE_INVALID = 6,
-        GARAGE_SPECIFIC_CARS_ONLY = 7, /* See Opcode 0x21B */
-        GARAGE_COLLECTCARS1 = 8,       /* See Opcode 0x03D4 */
-        GARAGE_COLLECTCARS2 = 9,
-        GARAGE_COLLECTCARS3 = 10, /* Unused */
-        GARAGE_OPENFOREXIT = 11,
-        GARAGE_INVALID2 = 12,
-        GARAGE_CRUSHER = 13,
-        GARAGE_MISSION_KEEPCAR = 14,
-        GARAGE_FOR_SCRIPT = 15,
-        GARAGE_HIDEOUT_ONE = 16,   /* Portland */
-        GARAGE_HIDEOUT_TWO = 17,   /* Staunton */
-        GARAGE_HIDEOUT_THREE = 18, /* Shoreside */
-        GARAGE_FOR_SCRIPT2 = 19,
-        GARAGE_OPENS_FOR_SPECIFIC_CAR = 20,
-        GARAGE_OPENS_ONCE = 21
-    };
+    GarageType type;
+
     int id;
     glm::vec3 min;
     glm::vec3 max;
-    int type;
 
-    GarageInfo(int id_, const glm::vec3 min_, const glm::vec3 max_, int type_)
-        : id(id_), min(min_), max(max_), type(type_) {
+    GameObject* target;
+
+    GarageState state;
+
+    GarageInfo(int id_, const glm::vec3 min_, const glm::vec3 max_,
+               GarageType type_)
+        : type(type_)
+        , id(id_)
+        , min(min_)
+        , max(max_)
+        , target(nullptr)
+        , state(GarageState::Closed) {
     }
 
     int getScriptObjectID() const {

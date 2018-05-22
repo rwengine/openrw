@@ -1,11 +1,12 @@
 #ifndef _RWENGINE_MODELDATA_HPP_
 #define _RWENGINE_MODELDATA_HPP_
-#include <cstdint>
 #include <array>
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -113,6 +114,20 @@ private:
 
 using ModelInfoTable =
     std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>>;
+
+static std::unordered_set<std::string> doorModels = {
+    "oddjgaragdoor",      "bombdoor",           "door_bombshop",
+    "vheistlocdoor",      "door2_garage",       "ind_slidedoor",
+    "bankjobdoor",        "door_jmsgrage",      "jamesgrge_kb",
+    "door_sfehousegrge",  "shedgaragedoor",     "door4_garage",
+    "door_col_compnd_01", "door_col_compnd_02", "door_col_compnd_03",
+    "door_col_compnd_04", "door_col_compnd_05", "impex_door",
+    "SalvGarage",         "door3_garage",       "leveldoor2",
+    "double_garage_dr",   "amcogaragedoor",     "towergaragedoor1",
+    "towergaragedoor2",   "towergaragedoor3",   "plysve_gragedoor",
+    "impexpsubgrgdoor",   "Sub_sprayshopdoor",  "ind_plyrwoor",
+    "8ballsuburbandoor",  "crushercrush",       "crushertop",
+};
 
 /**
  * Model data for simple types
@@ -249,6 +264,10 @@ public:
         return related_;
     }
 
+    static bool isDoorModel(std::string m) {
+        return doorModels.find(m) != doorModels.end();
+    }
+
 private:
     ClumpPtr model_;
     std::array<AtomicPtr, 3> atomics_;
@@ -300,7 +319,6 @@ public:
 private:
     ClumpPtr model_ = nullptr;
 };
-
 
 enum class ComponentRuleType {
     Any = 1,
