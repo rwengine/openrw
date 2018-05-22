@@ -12,14 +12,17 @@
 #include "script/ScriptModule.hpp"
 
 void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
-    // @todo Add support for multiple players
-    PlayerController* player = getState()->world->players.at(0);
-    if (t.isMission
-        && t.deathOrArrestCheck
-        && (player->isWasted() || player->isBusted())) {
-        t.wastedOrBusted = true;
-        t.stackDepth = 0;
-        t.programCounter = t.calls[t.stackDepth];
+    auto& players = getState()->world->players;
+
+    if (!players.empty()) {
+        // @todo Add support for multiple players
+        PlayerController* player = players.at(0);
+        if (t.isMission && t.deathOrArrestCheck &&
+            (player->isWasted() || player->isBusted())) {
+            t.wastedOrBusted = true;
+            t.stackDepth = 0;
+            t.programCounter = t.calls[t.stackDepth];
+        }
     }
 
     if (t.wakeCounter > 0) {
@@ -180,7 +183,11 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
 
 ScriptMachine::ScriptMachine(GameState* _state, SCMFile* file,
                              ScriptModule* ops)
-    : file(file), module(ops), state(_state), debugFlag(false), randomNumberGen(std::random_device()()) {
+    : file(file)
+    , module(ops)
+    , state(_state)
+    , debugFlag(false)
+    , randomNumberGen(std::random_device()()) {
     // Copy globals
     auto size = file->getGlobalsSize();
     globalData.resize(size);
@@ -204,7 +211,7 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission) {
     t.isMission = mission;
     t.finished = false;
     t.stackDepth = 0;
-    t.deathOrArrestCheck = false;
+    t.deathOrArrestCheck = true;
     t.wastedOrBusted = false;
     _activeThreads.push_back(t);
 }
