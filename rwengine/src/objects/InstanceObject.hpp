@@ -18,9 +18,11 @@ class GameWorld;
  */
 class InstanceObject : public GameObject {
     float health;
-    bool visible = true;
-    bool floating = false;
-    int changeAtomic = -1;
+    bool visible;
+    bool floating;
+    bool static_;
+    bool usePhysics;
+    int changeAtomic;
 
     /**
      * The Atomic instance for this object
@@ -31,7 +33,6 @@ public:
     glm::vec3 scale;
     std::unique_ptr<CollisionInstance> body;
     std::shared_ptr<DynamicObjectData> dynamics;
-    bool _enablePhysics;
 
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
@@ -59,19 +60,27 @@ public:
 
     bool takeDamage(const DamageInfo& damage) override;
 
-    void setSolid(bool solid);
+    void setSolid(bool s);
 
-    void setVisible(bool visible) {
-        this->visible = visible;
+    void setStatic(bool s);
+
+    bool isStatic() const {
+        return static_;
     }
-    float getVisible() const {
+
+    void setVisible(bool v) {
+        visible = v;
+    }
+
+    bool isVisible() const {
         return visible;
     }
 
-    void setFloating(bool floating) {
-        this->floating = floating;
+    void setFloating(bool f) {
+        floating = f;
     }
-    float getFloating() const {
+
+    bool isFloating() const {
         return floating;
     }
 

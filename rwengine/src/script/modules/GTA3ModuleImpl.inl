@@ -2989,11 +2989,10 @@ bool opcode_0106(const ScriptArguments& args, const ScriptCharacter character0, 
     @arg object Object
 */
 void opcode_0107(const ScriptArguments& args, const ScriptModel model, ScriptVec3 coord, ScriptObject& object) {
-    RW_UNIMPLEMENTED_OPCODE(0x0107);
-    RW_UNUSED(model);
-    RW_UNUSED(coord);
-    RW_UNUSED(object);
-    RW_UNUSED(args);
+    // @todo calculate distance from centre of mass to base of model and apply it as spawnOffset
+    coord = script::getGround(args, coord);
+    object = args.getWorld()->createInstance(script::getModel(args, model), coord);
+    object->setStatic(true);
 }
 
 /**
@@ -6890,15 +6889,9 @@ void opcode_0299(const ScriptArguments& args, const ScriptGarage garage) {
     @arg object Object
 */
 void opcode_029b(const ScriptArguments& args, const ScriptModel model, ScriptVec3 coord, ScriptObject& object) {
-    auto modelid = model;
-    if (modelid < 0) {
-    	/// @todo move this to args.getModel();
-    	auto& models = args.getVM()->getFile()->getModels();
-    	auto& modelname = models[-modelid];
-    	modelid = args.getWorld()->data->findModelObject(modelname);
-    }
-
-    object = args.getWorld()->createInstance(modelid, coord);
+    coord = script::getGround(args, coord);
+    object = args.getWorld()->createInstance(script::getModel(args, model), coord);
+    object->setStatic(true);
 }
 
 /**
@@ -10435,13 +10428,11 @@ void opcode_0391(const ScriptArguments& args) {
 
     opcode 0392
     @arg object Object
-    @arg arg2 Boolean true/false
+    @arg dynamic Boolean true/false
 */
-void opcode_0392(const ScriptArguments& args, const ScriptObject object, const ScriptBoolean arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x0392);
-    RW_UNUSED(object);
-    RW_UNUSED(arg2);
+void opcode_0392(const ScriptArguments& args, const ScriptObject object, const ScriptBoolean dynamic) {
     RW_UNUSED(args);
+    object->setStatic(!dynamic);
 }
 
 /**

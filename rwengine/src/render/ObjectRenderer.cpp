@@ -35,10 +35,9 @@ constexpr float kMagicLODDistance = 330.f;
 constexpr float kVehicleLODDistance = 70.f;
 constexpr float kVehicleDrawDistance = 280.f;
 
-RenderKey createKey(float normalizedDepth,
-                    Renderer::Textures& textures) {
+RenderKey createKey(float normalizedDepth, Renderer::Textures& textures) {
     return (uint32_t(0x7FFFFF * normalizedDepth) << 8 |
-           uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)));
+            uint8_t(0xFF & (!textures.empty() ? textures[0] : 0)));
 }
 
 void ObjectRenderer::renderGeometry(Geometry* geom,
@@ -106,9 +105,8 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         float distance = glm::length(m_camera.position - position);
         float depth = (distance - m_camera.frustum.near) /
                       (m_camera.frustum.far - m_camera.frustum.near);
-        outList.emplace_back(
-            createKey(depth * depth, dp.textures), modelMatrix,
-            &geom->dbuff, dp);
+        outList.emplace_back(createKey(depth * depth, dp.textures), modelMatrix,
+                             &geom->dbuff, dp);
     }
 }
 
@@ -154,7 +152,7 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     }
 
     // Only draw visible objects
-    if (!instance->getVisible()) {
+    if (!instance->isVisible()) {
         return;
     }
 
@@ -226,7 +224,8 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
         }
     }
 
-    renderClump(pedestrian->getClump().get(), glm::mat4(1.0f), nullptr, outList);
+    renderClump(pedestrian->getClump().get(), glm::mat4(1.0f), nullptr,
+                outList);
 
     auto item = pedestrian->getActiveItem();
     const auto& weapon = pedestrian->engine->data->weaponData[item];
@@ -254,7 +253,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
         return;
     }
 
-    float mindist = glm::length(vehicle->getPosition() - m_camera.position) / kVehicleDrawDistanceFactor;
+    float mindist = glm::length(vehicle->getPosition() - m_camera.position) /
+                    kVehicleDrawDistanceFactor;
     if (mindist > kVehicleDrawDistance) {
         culled++;
         return;
@@ -308,7 +308,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     if (!pickup->isEnabled()) return;
 
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), pickup->getPosition());
+    glm::mat4 modelMatrix =
+        glm::translate(glm::mat4(1.0f), pickup->getPosition());
     modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime(),
                               glm::vec3(0.f, 0.f, 1.f));
 
