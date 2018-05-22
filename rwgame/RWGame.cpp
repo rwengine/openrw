@@ -26,10 +26,10 @@
 #include <iomanip>
 #include <iostream>
 
-std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
-    {GameRenderer::ZoneCylinderA, "zonecyla.dff"},
-    {GameRenderer::ZoneCylinderB, "zonecylb.dff"},
-    {GameRenderer::Arrow, "arrow.dff"}};
+const std::map<GameRenderer::SpecialModel, std::pair<std::string,std::string>> kSpecialModels = {
+    {GameRenderer::ZoneCylinderA, std::pair<std::string,std::string>("zonecyla.dff", "particle")},
+    {GameRenderer::ZoneCylinderB, std::pair<std::string,std::string>("zonecylb.dff", "particle")},
+    {GameRenderer::Arrow,         std::pair<std::string,std::string>("arrow.dff",    "")}};
 
 namespace {
 constexpr float kMaxPhysicsSubSteps = 2;
@@ -60,7 +60,7 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     data.load();
 
     for (const auto& p : kSpecialModels) {
-        auto model = data.loadClump(p.second);
+        auto model = data.loadClump(p.second.first, p.second.second);
         renderer.setSpecialModel(p.first, model);
     }
 
