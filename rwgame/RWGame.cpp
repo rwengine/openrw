@@ -32,9 +32,8 @@ std::map<GameRenderer::SpecialModel, std::string> kSpecialModels = {
     {GameRenderer::Arrow, "arrow.dff"}};
 
 namespace {
-  constexpr float kPhysicsTimeStep = 1.0f/30.0f;
-  constexpr float kMaxPhysicsSubSteps = 4;
-}
+constexpr float kMaxPhysicsSubSteps = 2;
+}  // namespace
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
@@ -75,7 +74,8 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
                        btIDebugDraw::DBG_DrawConstraintLimits);
     debug.setShaderProgram(renderer.worldProg.get());
 
-    data.loadDynamicObjects((config.getGameDataPath() / "data/object.dat").string()); // FIXME: use path
+    data.loadDynamicObjects((config.getGameDataPath() / "data/object.dat")
+                                .string());  // FIXME: use path
 
     data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
 
@@ -249,9 +249,9 @@ void RWGame::handleCheatInput(char symbol) {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
 #ifdef RW_GAME_GTA3_ANNIVERSARY
-            // uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
+        // uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
 #else
-            // uint16_t vehicleModel = 122;
+        // uint16_t vehicleModel = 122;
 #endif
             // @todo Spawn rhino
             // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
@@ -364,7 +364,9 @@ void RWGame::handleCheatInput(char symbol) {
 
 int RWGame::run() {
     namespace chrono = std::chrono;
+
     auto lastFrame = chrono::steady_clock::now();
+    float deltaTime = GAME_TIMESTEP;
     float accumulatedTime = 0.0f;
 
     // Loop until we run out of states.
@@ -412,37 +414,48 @@ int RWGame::run() {
         }
         RW_PROFILE_END();
 
-        auto now = chrono::steady_clock::now();
-        auto deltaTime = chrono::duration<float>(now - lastFrame).count();
-        lastFrame = now;
+        auto currentFrame = chrono::steady_clock::now();
+        auto frameTime =
+            chrono::duration<float>(currentFrame - lastFrame).count();
+        lastFrame = currentFrame;
 
-        if(!world->isPaused()) {
-            accumulatedTime += deltaTime;
-            world->dynamicsWorld->stepSimulation(deltaTime * timescale, kMaxPhysicsSubSteps, kPhysicsTimeStep);
+        // Clamp frameTime, so we won't freeze completely
+        if (frameTime > 0.1f) {
+            frameTime = 0.1f;
         }
 
+        accumulatedTime += frameTime;
+
+        auto deltaTimeWithTimeScale = deltaTime * world->state->basic.timeScale;
+
         RW_PROFILE_BEGIN("Update");
-        while (accumulatedTime >= GAME_TIMESTEP && !world->isPaused()) {
+        while (accumulatedTime >= deltaTime && !world->isPaused()) {
             if (!StateManager::currentState()) {
                 break;
             }
-            accumulatedTime -= GAME_TIMESTEP;
+
+            RW_PROFILE_BEGIN("physics");
+            world->dynamicsWorld->stepSimulation(
+                deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+            RW_PROFILE_END();
 
             RW_PROFILE_BEGIN("state");
-            StateManager::get().tick(GAME_TIMESTEP * timescale);
+            StateManager::get().tick(deltaTimeWithTimeScale);
             RW_PROFILE_END();
 
             RW_PROFILE_BEGIN("engine");
-            tick(GAME_TIMESTEP * timescale);
+            tick(deltaTimeWithTimeScale);
             RW_PROFILE_END();
 
             getState()->swapInputState();
+
+            accumulatedTime -= deltaTime;
         }
         RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("Render");
         RW_PROFILE_BEGIN("engine");
-        render(1, deltaTime);
+        render(1, frameTime);
         RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("state");
@@ -514,7 +527,6 @@ void RWGame::tick(float dt) {
 
         state.text.tick(dt);
 
-
         if (vm) {
             try {
                 vm->execute(dt);
@@ -528,7 +540,7 @@ void RWGame::tick(float dt) {
         /// @todo this doesn't make sense as the condition
         if (state.playerObject) {
             currentCam.frustum.update(currentCam.frustum.projection() *
-                                   currentCam.getView());
+                                      currentCam.getView());
             // Use the current camera position to spawn pedestrians.
             world->cleanupTraffic(currentCam);
             // Only create new traffic outside cutscenes
@@ -683,7 +695,7 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw Garage bounds
-    for (const auto &garage : state.garages) {
+    for (const auto& garage : state.garages) {
         btVector3 minColor(1.f, 0.f, 0.f);
         btVector3 maxColor(0.f, 1.f, 0.f);
         btVector3 min(garage.min.x, garage.min.y, garage.min.z);
@@ -698,7 +710,7 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw vehicle generators
-    for (const auto &generator : state.vehicleGenerators) {
+    for (const auto& generator : state.vehicleGenerators) {
         btVector3 color(1.f, 0.f, 0.f);
         btVector3 position(generator.position.x, generator.position.y,
                            generator.position.z);
@@ -808,23 +820,25 @@ void RWGame::renderProfile() {
     ti.font = 2;
     ti.size = lineHeight - 2.f;
     ti.baseColour = glm::u8vec3(255);
-    std::function<void(const perf::ProfileEntry&, int)> renderEntry = [&](
-        const perf::ProfileEntry& entry, int depth) {
-        int g = 0;
-        for (auto& event : entry.childProfiles) {
-            auto duration = event.end - event.start;
-            float y = 60.f + (depth * (lineHeight + 5.f));
-            renderer.drawColour(
-                perf_colours[(std::hash<std::string>()(entry.label) * (g++)) %
-                             perf_colours.size()],
-                {xscale * event.start, y, xscale * duration, lineHeight});
-            ti.screenPosition.x = xscale * (event.start);
-            ti.screenPosition.y = y + 2.f;
-            ti.text = GameStringUtil::fromString(event.label + " " + std::to_string(duration) + " us ");
-            renderer.text.renderText(ti);
-            renderEntry(event, depth + 1);
-        }
-    };
+    std::function<void(const perf::ProfileEntry&, int)> renderEntry =
+        [&](const perf::ProfileEntry& entry, int depth) {
+            int g = 0;
+            for (auto& event : entry.childProfiles) {
+                auto duration = event.end - event.start;
+                float y = 60.f + (depth * (lineHeight + 5.f));
+                renderer.drawColour(
+                    perf_colours[(std::hash<std::string>()(entry.label) *
+                                  (g++)) %
+                                 perf_colours.size()],
+                    {xscale * event.start, y, xscale * duration, lineHeight});
+                ti.screenPosition.x = xscale * (event.start);
+                ti.screenPosition.y = y + 2.f;
+                ti.text = GameStringUtil::fromString(
+                    event.label + " " + std::to_string(duration) + " us ");
+                renderer.text.renderText(ti);
+                renderEntry(event, depth + 1);
+            }
+        };
     renderEntry(frame, 0);
     ti.screenPosition = glm::vec2(xscale * (16000), 40.f);
     ti.text = GameStringUtil::fromString(".16 ms");
@@ -845,10 +859,10 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
             world->offsetGameTime(30);
             break;
         case SDLK_9:
-            timescale *= 0.5f;
+            world->state->basic.timeScale *= 0.5f;
             break;
         case SDLK_0:
-            timescale *= 2.0f;
+            world->state->basic.timeScale *= 2.0f;
             break;
         case SDLK_F1:
             toggle_debug(DebugViewMode::General);

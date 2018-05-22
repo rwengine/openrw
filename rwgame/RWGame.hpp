@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-//FIXME: should be in rwengine, deeply hidden
+// FIXME: should be in rwengine, deeply hidden
 #include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
 #include <engine/GameData.hpp>
@@ -47,8 +47,6 @@ class RWGame : public GameBase {
 
     std::string cheatInputWindow = std::string(32, ' ');
 
-    float timescale = 1.f;
-
 public:
     RWGame(Logger& log, int argc, char* argv[]);
     ~RWGame() override;
@@ -76,7 +74,7 @@ public:
         return renderer;
     }
 
-    ScriptMachine *getScriptVM() const {
+    ScriptMachine* getScriptVM() const {
         return vm.get();
     }
 

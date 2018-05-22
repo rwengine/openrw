@@ -11,7 +11,7 @@ BasicState::BasicState()
     , gameMinute{0}
     , padMode{0}
     , timeMS{0}
-    , timeScale{0}
+    , timeScale{1.f}
     , timeStep{0}
     , timeStep_unclipped{0}
     , frameCounter{0}
