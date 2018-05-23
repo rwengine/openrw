@@ -402,12 +402,12 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     if ((world->state->isCinematic || world->state->currentCutscene) &&
-        splashTexName != 0) {
+        splashTexName != 0 && !world->isPaused()) {
         renderLetterbox();
     }
 
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
-    if (fadeTimer < world->state->fadeTime || !world->state->fadeOut) {
+    if ((fadeTimer < world->state->fadeTime || !world->state->fadeOut) && !world->isPaused()) {
         /// @todo rewrite this render code to use renderer class
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glUseProgram(ssRectProgram);
@@ -439,7 +439,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     if ((world->state->isCinematic || world->state->currentCutscene) &&
-        splashTexName == 0) {
+        splashTexName == 0 && !world->isPaused()) {
         renderLetterbox();
     }
 
