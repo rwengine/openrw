@@ -110,8 +110,8 @@ struct GameStats {
     uint32_t mmRainfall;
     uint32_t insaneJumpMaxDistance;
     uint32_t insaneJumpMaxHeight;
-    uint32_t insaneJumpMaxFlips;
-    uint32_t insangeJumpMaxRotation;
+    int32_t insaneJumpMaxFlips;
+    int32_t insaneJumpMaxRotation;
     /*
      * 0 none completed
      * 1 insane stunt
@@ -123,7 +123,7 @@ struct GameStats {
      * 7 quadruple
      * 8 perfect quadruple
      */
-    uint32_t bestStunt;
+    int32_t bestStunt;
     uint32_t uniqueStuntsFound;
     uint32_t uniqueStuntsTotal;
     uint32_t missionAttempts;
@@ -133,24 +133,24 @@ struct GameStats {
     uint32_t portlandPassed;
     uint32_t stauntonPassed;
     uint32_t shoresidePassed;
-    uint32_t bestTurismoTime;
+    int32_t bestTurismoTime;
     float distanceWalked;
     float distanceDriven;
-    uint32_t patriotPlaygroundTime;
-    uint32_t aRideInTheParkTime;
-    uint32_t grippedTime;
-    uint32_t multistoryMayhemTime;
+    int32_t patriotPlaygroundTime;
+    int32_t aRideInTheParkTime;
+    int32_t grippedTime;
+    int32_t multistoryMayhemTime;
     uint32_t peopleSaved;
     uint32_t criminalsKilled;
-    uint32_t highestParamedicLevel;
+    int32_t highestParamedicLevel;
     uint32_t firesExtinguished;
-    uint32_t longestDodoFlight;
-    uint32_t bombDefusalTime;
+    int32_t longestDodoFlight;
+    int32_t bombDefusalTime;
     uint32_t rampagesPassed;
     uint32_t totalRampages;
     uint32_t totalMissions;
     uint32_t fastestTime[16];  // not used
-    uint32_t highestScore[16];
+    int32_t highestScore[16];
     uint32_t peopleKilledSinceCheckpoint;  // ?
     uint32_t peopleKilledSinceLastBustedOrWasted;
     char lastMissionGXT[8];
