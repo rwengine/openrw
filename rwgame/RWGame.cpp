@@ -604,7 +604,8 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused())
+        drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
