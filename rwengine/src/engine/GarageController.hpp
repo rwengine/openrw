@@ -24,6 +24,8 @@ private:
     glm::vec3 startPosition;
     glm::quat startRotation;
 
+    bool needsToUpdate;
+
     float fraction;
     float step;
     float doorHeight;
@@ -40,6 +42,8 @@ private:
     void doOnCloseEvent();
     void doOnStartOpeningEvent();
     void doOnStartClosingEvent();
+
+    void updateDoor();
 
 public:
     GameWorld* engine;

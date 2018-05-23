@@ -18,6 +18,7 @@ GarageController::GarageController(GameWorld* engine, GarageInfo* info,
                                    InstanceObject* door)
 
     : swingType(false)
+    , needsToUpdate(false)
     , fraction(0.f)
     , step(0.5f)
     , doorHeight(4.0f)
@@ -37,6 +38,8 @@ GarageController::GarageController(GameWorld* engine, GarageInfo* info,
     }
 
     // @todo set door height according to model size
+
+    updateDoor();
 }
 
 GarageController::~GarageController() {
@@ -624,6 +627,8 @@ void GarageController::tick(float dt) {
     if (!garageInfo) return;
     if (!doorObject) return;
 
+    needsToUpdate = false;
+
     switch (garageInfo->state) {
         case GarageState::Opened: {
             if (shouldClose()) {
@@ -654,6 +659,8 @@ void GarageController::tick(float dt) {
                     fraction = 1.f;
                     doOnOpenEvent();
                 }
+
+                needsToUpdate = true;
             }
 
             break;
@@ -670,12 +677,20 @@ void GarageController::tick(float dt) {
                     fraction = 0.f;
                     doOnCloseEvent();
                 }
+
+                needsToUpdate = true;
             }
 
             break;
         }
     }
 
+    if (needsToUpdate) {
+        updateDoor();
+    }
+}
+
+void GarageController::updateDoor() {
     if (swingType) {
         // @todo incomplete
         doorObject->setRotation(
