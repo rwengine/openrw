@@ -438,9 +438,8 @@ GarageInfo* GameWorld::createGarage(const glm::vec3 coord0,
     }
 
     // Create controller
-    std::unique_ptr<GarageController> garageController(
-        new GarageController(this, info, door));
-    garageControllers.push_back(std::move(garageController));
+    garageControllers.push_back(
+        std::make_unique<GarageController>(GarageController(this, info, door)));
 
     return info;
 }

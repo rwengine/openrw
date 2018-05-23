@@ -115,7 +115,7 @@ private:
 using ModelInfoTable =
     std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>>;
 
-static std::unordered_set<std::string> doorModels = {
+const static std::unordered_set<std::string> doorModels = {
     "oddjgaragdoor",      "bombdoor",           "door_bombshop",
     "vheistlocdoor",      "door2_garage",       "ind_slidedoor",
     "bankjobdoor",        "door_jmsgrage",      "jamesgrge_kb",
