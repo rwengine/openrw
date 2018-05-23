@@ -1126,7 +1126,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(state.gameStats.insaneJumpMaxDistance);
     READ_VALUE(state.gameStats.insaneJumpMaxHeight);
     READ_VALUE(state.gameStats.insaneJumpMaxFlips);
-    READ_VALUE(state.gameStats.insangeJumpMaxRotation);
+    READ_VALUE(state.gameStats.insaneJumpMaxRotation);
     READ_VALUE(state.gameStats.bestStunt);
     READ_VALUE(state.gameStats.uniqueStuntsFound);
     READ_VALUE(state.gameStats.uniqueStuntsTotal);

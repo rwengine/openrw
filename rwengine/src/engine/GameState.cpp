@@ -58,7 +58,7 @@ GameStats::GameStats()
     , insaneJumpMaxDistance{0}
     , insaneJumpMaxHeight{0}
     , insaneJumpMaxFlips{0}
-    , insangeJumpMaxRotation{0}
+    , insaneJumpMaxRotation{0}
     , bestStunt{0}
     , uniqueStuntsFound{0}
     , uniqueStuntsTotal{0}

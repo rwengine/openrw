@@ -212,9 +212,9 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    const std::array<std::string, 4> w {"Sunny", "Cloudy", "Rainy", "Foggy"};
+    const std::array<std::string, 4> w{"Sunny", "Cloudy", "Rainy", "Foggy"};
 
-    for (int i = 0; i < w.size(); ++i) {
+    for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i],
                      [=] { game->getWorld()->state->basic.nextWeather = i; });
     }
@@ -228,7 +228,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeightMissions);
 
-    const std::array<std::string, 80> w {
+    const std::array<std::string, 80> w{
         "Intro Movie",
         "Hospital Info Scene",
         "Police Station Info Scene",
@@ -311,7 +311,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
         "The Exchange",
     };
 
-    for (int i = 0; i < w.size(); ++i) {
+    for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i], [=] {
             ScriptMachine* vm = game->getScriptVM();
 

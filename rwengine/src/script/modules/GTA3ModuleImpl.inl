@@ -7688,7 +7688,7 @@ bool opcode_02d5(const ScriptArguments& args, const ScriptPlayer player, const S
 bool opcode_02d7(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType weaponId) {
     RW_UNUSED(args);
     auto plyChar = player->getCharacter();
-    return plyChar->getCurrentState().weapons[plyChar->getActiveItem()].weaponId == weaponId;
+    return plyChar->getCurrentState().weapons[plyChar->getActiveItem()].weaponId == unsigned(weaponId);
 }
 
 /**
@@ -7700,7 +7700,7 @@ bool opcode_02d7(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 bool opcode_02d8(const ScriptArguments& args, const ScriptCharacter character, const ScriptWeaponType weaponID) {
     RW_UNUSED(args);
-    return character->getCurrentState().weapons[character->getActiveItem()].weaponId == weaponID;
+    return character->getCurrentState().weapons[character->getActiveItem()].weaponId == unsigned(weaponID);
 }
 
 /**
@@ -8673,8 +8673,8 @@ void opcode_0310(const ScriptArguments& args, const ScriptInt flips) {
     @arg rotation 
 */
 void opcode_0311(const ScriptArguments& args, const ScriptInt rotation) {
-    if (args.getWorld()->state->gameStats.insangeJumpMaxRotation < rotation) {
-        args.getWorld()->state->gameStats.insangeJumpMaxRotation = rotation;
+    if (args.getWorld()->state->gameStats.insaneJumpMaxRotation < rotation) {
+        args.getWorld()->state->gameStats.insaneJumpMaxRotation = rotation;
     }
 }
 
