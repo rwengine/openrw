@@ -26,10 +26,14 @@
 #include <iomanip>
 #include <iostream>
 
-const std::map<GameRenderer::SpecialModel, std::pair<std::string,std::string>> kSpecialModels = {
-    {GameRenderer::ZoneCylinderA, std::pair<std::string,std::string>("zonecyla.dff", "particle")},
-    {GameRenderer::ZoneCylinderB, std::pair<std::string,std::string>("zonecylb.dff", "particle")},
-    {GameRenderer::Arrow,         std::pair<std::string,std::string>("arrow.dff",    "")}};
+const std::map<GameRenderer::SpecialModel, std::pair<std::string, std::string>>
+    kSpecialModels = {
+        {GameRenderer::ZoneCylinderA,
+         std::pair<std::string, std::string>("zonecyla.dff", "particle")},
+        {GameRenderer::ZoneCylinderB,
+         std::pair<std::string, std::string>("zonecylb.dff", "particle")},
+        {GameRenderer::Arrow,
+         std::pair<std::string, std::string>("arrow.dff", "")}};
 
 namespace {
 constexpr float kMaxPhysicsSubSteps = 2;
@@ -521,6 +525,10 @@ void RWGame::tick(float dt) {
         for (auto& object : world->allObjects) {
             object->_updateLastTransform();
             object->tick(dt);
+        }
+
+        for (auto& gc : world->garageControllers) {
+            gc->tick(dt);
         }
 
         world->destroyQueuedObjects();

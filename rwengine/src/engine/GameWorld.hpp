@@ -17,7 +17,9 @@
 #include <ai/AIGraphNode.hpp>
 #include <audio/SoundManager.hpp>
 
+#include <engine/GarageController.hpp>
 #include <objects/ObjectTypes.hpp>
+
 #include <render/VisualFX.hpp>
 
 #include <data/Chase.hpp>
@@ -32,6 +34,7 @@ class btSequentialImpulseConstraintSolver;
 struct btDbvtBroadphase;
 
 class GameState;
+class GarageController;
 
 class PlayerController;
 class Logger;
@@ -141,6 +144,12 @@ public:
      * Creates a pickup
      */
     PickupObject* createPickup(const glm::vec3& pos, int id, int type);
+
+    /**
+     * Creates a garage
+     */
+    GarageInfo* createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
+                             const int type);
 
     /**
      * Destroys an existing Object
@@ -254,6 +263,8 @@ public:
     ObjectPool& getTypeObjectPool(GameObject* object);
 
     std::vector<PlayerController*> players;
+
+    std::vector<std::unique_ptr<GarageController>> garageControllers;
 
     /**
      * @brief getBlipTarget

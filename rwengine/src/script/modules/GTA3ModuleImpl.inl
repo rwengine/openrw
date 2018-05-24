@@ -6094,17 +6094,10 @@ void opcode_0218(const ScriptArguments& args, const ScriptString gxtEntry, const
     @arg arg7
     @arg garage 
 */
-void opcode_0219(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coord1, const ScriptInt arg7, ScriptGarage& garage) {
-    auto& garages = args.getState()->garages;
-    int id = garages.size();
-    auto info= GarageInfo {
-    		id,
-    		coord0,
-    		coord1,
-    		arg7
-    	};
-    garages.push_back(info);
-    garage = &info;
+void opcode_0219(const ScriptArguments& args, ScriptVec3 coord0,
+                 ScriptVec3 coord1, const ScriptInt type,
+                 ScriptGarage& garage) {
+    garage = args.getWorld()->createGarage(coord0, coord1, type);
 }
 
 /**
@@ -8188,6 +8181,7 @@ void opcode_02fa(const ScriptArguments& args, const ScriptGarage garage0, const 
     @arg arg10 
 */
 void opcode_02fb(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptFloat arg8, const ScriptFloat arg9, const ScriptFloat arg10) {
+    RW_UNIMPLEMENTED_OPCODE(0x02fb);
     RW_UNUSED(arg1);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
@@ -8198,29 +8192,6 @@ void opcode_02fb(const ScriptArguments& args, const ScriptFloat arg1, const Scri
     RW_UNUSED(arg8);
     RW_UNUSED(arg9);
     RW_UNUSED(arg10);
-    glm::vec2 crane_location(args[0].real, args[1].real);
-    glm::vec2 park_min(args[2].real, args[3].real);
-    glm::vec2 park_max(args[4].real, args[5].real);
-    glm::vec3 crusher_position(args[6].real, args[7].real, args[8].real);
-    float crusher_heading = args[9].real;
-
-    RW_UNIMPLEMENTED("create_crusher_crane is incomplete");
-    /// @todo check how to store all parameters and how to create the actual crusher
-    RW_UNUSED(crane_location);
-    RW_UNUSED(crusher_position);
-    /// @todo check how the savegame stores the heading value etc.
-    RW_UNUSED(crusher_heading);
-
-    // NOTE: These values come from a savegame from the original game
-    glm::vec3 min(park_min, -1.f);
-    glm::vec3 max(park_max, 3.5f);
-    int garageType = GarageInfo::GARAGE_CRUSHER;
-
-    // NOTE: This instruction also creates or controls a garage
-    /// @todo find out if this creates a garage or if it just controls garage[0]
-    args.getWorld()->state->garages.push_back({
-    	0, min, max, garageType
-    });
 }
 
 /**
@@ -8917,7 +8888,7 @@ void opcode_0327(const ScriptArguments& args, ScriptVec2 coord0, ScriptVec2 coor
     @arg garage Handle
 */
 bool opcode_0329(const ScriptArguments& args, const ScriptGarage garage) {
-    if (garage->type != GarageInfo::GARAGE_RESPRAY) {
+    if (garage->type != GarageType::Respray) {
     	return false;
     }
 
@@ -11334,15 +11305,16 @@ bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const S
     RW_CHECK(entryIndex >= 0, "Entry index too low");
     RW_CHECK(entryIndex < 32, "Entry index too high");
 
-    if (garage->type == GarageInfo::GARAGE_COLLECTCARS1) {
+    // @todo reimplement
+    if (garage->type == GarageType::CollectCars1) {
     	return args.getState()->importExportPortland[entryIndex];
     }
-    if (garage->type == GarageInfo::GARAGE_COLLECTCARS2) {
+    if (garage->type == GarageType::CollectCars2) {
     	return args.getState()->importExportShoreside[entryIndex];
     }
-    if (garage->type == GarageInfo::GARAGE_COLLECTCARS3) {
-    	return args.getState()->importExportUnused[entryIndex];
-    }
+    // if (garage->type == GarageType::CollectCars3) {
+    // 	return args.getState()->importExportUnused[entryIndex];
+    // }
 
     return false;
 }

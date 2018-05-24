@@ -61,6 +61,8 @@ set(RWENGINE_SOURCES
     src/engine/GameState.hpp
     src/engine/GameWorld.cpp
     src/engine/GameWorld.hpp
+    src/engine/GarageController.cpp
+    src/engine/GarageController.hpp
     src/engine/SaveGame.cpp
     src/engine/SaveGame.hpp
     src/engine/ScreenText.cpp

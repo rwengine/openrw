@@ -48,6 +48,10 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                 engine->aigraph.createPathNodes(position, rot, path);
             }
         }
+
+        if (SimpleModelInfo::isDoorModel(modelinfo->name)) {
+            setStatic(true);
+        }
     }
 }
 
