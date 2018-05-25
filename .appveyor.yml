@@ -38,11 +38,11 @@ init:
 
 build_script:
   - ctest -VV -S cmake/ctest/script_ci.ctest
+  - cmake --build  "%APPVEYOR_BUILD_FOLDER%\build\rwgame" --target install --config Release
 
 # scripts to run after build
 after_build:
-  - 7z a openrw-%appveyor_repo_branch%.zip %APPVEYOR_BUILD_FOLDER%\build\rwgame\Release\
-
+  - 7z a openrw-%appveyor_repo_branch%.zip %APPVEYOR_BUILD_FOLDER%\build\bin\*
 
 artifacts:
   - path: openrw-$(appveyor_repo_branch).zip
