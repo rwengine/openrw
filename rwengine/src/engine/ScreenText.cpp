@@ -8,7 +8,7 @@ void ScreenText::tick(float dt) {
     // Remove all the immedate text
     m_textQueues[static_cast<size_t>(ScreenTextType::Immediate)].clear();
 
-    for (auto &textQueue : m_textQueues) {
+    for (auto& textQueue : m_textQueues) {
         for (unsigned int i = 0; i < textQueue.size();) {
             auto& big = textQueue[i];
 
@@ -167,4 +167,19 @@ ScreenTextEntry ScreenTextEntry::makeHelp(const GameStringKey& id,
                                           const GameString& str) {
     return {str, {20.f, 20.f}, 2, 18, {0, 0, 0, 255}, {255, 255, 255}, 0, 5000,
             0,   35,           id};
+}
+
+ScreenTextEntry ScreenTextEntry::makeHiddenPackageText(const GameStringKey& id,
+                                                       const GameString& str) {
+    return {str,
+            {318.f, 138.f},
+            2,
+            33,
+            {2, 2, 0, 0},
+            {0x59, 0x73, 0x96},
+            1,
+            5000,
+            0,
+            600,
+            id};
 }

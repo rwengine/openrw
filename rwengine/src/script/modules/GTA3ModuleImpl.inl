@@ -6021,10 +6021,12 @@ void opcode_0213(const ScriptArguments& args, const ScriptModel model, const Scr
 bool opcode_0214(const ScriptArguments& args, const ScriptPickup pickup) {
     RW_UNUSED(args);
     RW_CHECK(pickup != nullptr, "Pickup is null");
-    if (! pickup) {
-    	return false;
+    if (!pickup) {
+        return false;
     }
-    return pickup->isCollected();
+    bool collected = pickup->isCollected();
+    pickup->setCollected(false);
+    return collected;
 }
 
 /**
@@ -7802,17 +7804,14 @@ bool opcode_02e0(const ScriptArguments& args, const ScriptCharacter character) {
     @arg arg1 
     @arg arg2 
     @arg arg3 
-    @arg arg4 
+    @arg money 
     @arg pickup 
 */
-void opcode_02e1(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptInt arg4, ScriptPickup& pickup) {
-    RW_UNIMPLEMENTED_OPCODE(0x02e1);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
-    RW_UNUSED(pickup);
-    RW_UNUSED(args);
+void opcode_02e1(const ScriptArguments& args, ScriptVec3 coord, const ScriptInt money, ScriptPickup& pickup) {
+    coord = script::getGround(args, coord);
+    PickupObject* pickupObj = args.getWorld()->createPickup(coord, args.getWorld()->data->findModelObject("Money"), PickupObject::PickupType::Money);
+    static_cast<MoneyPickup*>(pickupObj)->setMoney(money);
+    pickup = pickupObj;
 }
 
 /**
@@ -7960,9 +7959,8 @@ void opcode_02eb(const ScriptArguments& args) {
     @arg coord Coordinates
 */
 void opcode_02ec(const ScriptArguments& args, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x02ec);
-    RW_UNUSED(coord);
-    RW_UNUSED(args);
+    coord = script::getGround(args, coord);
+    args.getWorld()->createPickup(coord, args.getWorld()->data->findModelObject("package1"), PickupObject::PickupType::Collectable);
 }
 
 /**
@@ -9514,13 +9512,9 @@ void opcode_035a(const ScriptArguments& args, ScriptFloat& arg1, ScriptFloat& ar
     @arg arg3 
     @arg pickup 
 */
-void opcode_035b(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, const ScriptFloat arg3, ScriptPickup& pickup) {
-    RW_UNIMPLEMENTED_OPCODE(0x035b);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(pickup);
-    RW_UNUSED(args);
+void opcode_035b(const ScriptArguments& args, ScriptVec3 coord, ScriptPickup& pickup) {
+    coord = script::getGround(args, coord);
+    pickup = args.getWorld()->createPickup(coord, args.getWorld()->data->findModelObject("floatpackge1"), PickupObject::PickupType::FloatingPackage);
 }
 
 /**

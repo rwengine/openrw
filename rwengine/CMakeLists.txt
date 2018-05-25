@@ -96,8 +96,6 @@ set(RWENGINE_SOURCES
     src/objects/GameObject.hpp
     src/objects/InstanceObject.cpp
     src/objects/InstanceObject.hpp
-    src/objects/ItemPickup.cpp
-    src/objects/ItemPickup.hpp
     src/objects/ObjectTypes.hpp
     src/objects/PickupObject.cpp
     src/objects/PickupObject.hpp

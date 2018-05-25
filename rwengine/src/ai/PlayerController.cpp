@@ -277,6 +277,17 @@ void PlayerController::restartLogic() {
 
 void PlayerController::update(float dt) {
     restartLogic();
+
+    GameWorld* world = character->engine;
+    GameState* state = character->engine->state;
+
+    if (adrenalineEffect) {
+        if (world->getGameTime() > adrenalineEffectTime) {
+            state->basic.timeScale = 1.f;
+            adrenalineEffect = false;
+        }
+    }
+
     CharacterController::update(dt);
 }
 
@@ -288,4 +299,13 @@ void PlayerController::jump() {
     if (!character->isInWater()) {
         setNextActivity(std::make_unique<Activities::Jump>());
     }
+}
+
+void PlayerController::activateAdrenalineEffect() {
+    GameWorld* world = character->engine;
+    GameState* state = character->engine->state;
+
+    adrenalineEffect = true;
+    adrenalineEffectTime = world->getGameTime() + 20.f;
+    state->basic.timeScale = 0.3f;
 }

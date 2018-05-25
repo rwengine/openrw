@@ -5,21 +5,21 @@
 #include "RWGame.hpp"
 
 #include <ai/PlayerController.hpp>
-#include <data/CutsceneData.hpp>
 #include <data/Clump.hpp>
+#include <data/CutsceneData.hpp>
 #include <data/WeaponData.hpp>
 #include <dynamics/CollisionInstance.hpp>
 #include <dynamics/RaycastCallbacks.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
-#include <objects/ItemPickup.hpp>
+#include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
 
 #include <glm/gtc/constants.hpp>
-#include <glm/gtx/norm.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
+#include <glm/gtx/norm.hpp>
 
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
@@ -55,6 +55,44 @@ void IngameState::startTest() {
         itemspawn.x += 2.5f;
     }
 
+    PickupObject* moneyObj =
+        getWorld()->createPickup(glm::vec3(276.5f, -604.f, 36.5f),
+                                 getWorld()->data->findModelObject("Money"),
+                                 PickupObject::PickupType::Money);
+    static_cast<MoneyPickup*>(moneyObj)->setMoney(100000);
+
+    getWorld()->createPickup(glm::vec3(279.f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("package1"),
+                             PickupObject::PickupType::Collectable);
+
+    getWorld()->createPickup(glm::vec3(281.5f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("health"),
+                             PickupObject::PickupType::OnStreetSlow);
+
+    getWorld()->createPickup(glm::vec3(284.f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("bodyarmour"),
+                             PickupObject::PickupType::OnStreetSlow);
+
+    getWorld()->createPickup(glm::vec3(286.5f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("adrenaline"),
+                             PickupObject::PickupType::OnStreetSlow);
+
+    getWorld()->createPickup(glm::vec3(289.f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("killfrenzy"),
+                             PickupObject::PickupType::Once);
+
+    getWorld()->createPickup(glm::vec3(291.5f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("info"),
+                             PickupObject::PickupType::Once);
+
+    getWorld()->createPickup(glm::vec3(294.f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("briefcase"),
+                             PickupObject::PickupType::Once);
+
+    getWorld()->createPickup(glm::vec3(296.5f, -604.f, 36.5f),
+                             getWorld()->data->findModelObject("floatpackge1"),
+                             PickupObject::PickupType::FloatingPackage);
+
     auto carPos = glm::vec3(286.f, -591.f, 37.f);
     auto carRot = glm::angleAxis(glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     // Landstalker, Stinger, Linerunner, Trash, Bobcat
@@ -69,7 +107,7 @@ void IngameState::startGame() {
     game->startScript("data/main.scm");
     game->getScriptVM()->startThread(0);
     getWorld()->sound.playBackground(getWorld()->data->getDataPath().string() +
-                                     "/audio/City.wav"); //FIXME: use path
+                                     "/audio/City.wav");  // FIXME: use path
 }
 
 void IngameState::enter() {

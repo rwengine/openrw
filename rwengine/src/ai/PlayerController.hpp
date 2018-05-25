@@ -14,6 +14,9 @@ class PlayerController : public CharacterController {
 
     bool missionRestartRequired;
 
+    bool adrenalineEffect;
+    float adrenalineEffectTime;
+
     bool _enabled;
 
     enum RestartState {
@@ -58,6 +61,12 @@ public:
     void update(float dt) override;
 
     glm::vec3 getTargetPosition() override;
+
+    bool isAdrenalineActive() {
+        return adrenalineEffect;
+    };
+
+    void activateAdrenalineEffect();
 
     void jump();
 
