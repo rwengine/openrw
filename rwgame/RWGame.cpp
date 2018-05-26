@@ -423,39 +423,42 @@ int RWGame::run() {
             chrono::duration<float>(currentFrame - lastFrame).count();
         lastFrame = currentFrame;
 
-        // Clamp frameTime, so we won't freeze completely
-        if (frameTime > 0.1f) {
-            frameTime = 0.1f;
-        }
+        if (!world->isPaused()) {
+            accumulatedTime += frameTime;
 
-        accumulatedTime += frameTime;
-
-        auto deltaTimeWithTimeScale = deltaTime * world->state->basic.timeScale;
-
-        RW_PROFILE_BEGIN("Update");
-        while (accumulatedTime >= deltaTime && !world->isPaused()) {
-            if (!StateManager::currentState()) {
-                break;
+            // Clamp frameTime, so we won't freeze completely
+            if (frameTime > 0.1f) {
+                frameTime = 0.1f;
             }
 
-            RW_PROFILE_BEGIN("physics");
-            world->dynamicsWorld->stepSimulation(
-                deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+            auto deltaTimeWithTimeScale =
+                deltaTime * world->state->basic.timeScale;
+
+            RW_PROFILE_BEGIN("Update");
+            while (accumulatedTime >= deltaTime && !world->isPaused()) {
+                if (!StateManager::currentState()) {
+                    break;
+                }
+
+                RW_PROFILE_BEGIN("physics");
+                world->dynamicsWorld->stepSimulation(
+                    deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+                RW_PROFILE_END();
+
+                RW_PROFILE_BEGIN("state");
+                StateManager::get().tick(deltaTimeWithTimeScale);
+                RW_PROFILE_END();
+
+                RW_PROFILE_BEGIN("engine");
+                tick(deltaTimeWithTimeScale);
+                RW_PROFILE_END();
+
+                getState()->swapInputState();
+
+                accumulatedTime -= deltaTime;
+            }
             RW_PROFILE_END();
-
-            RW_PROFILE_BEGIN("state");
-            StateManager::get().tick(deltaTimeWithTimeScale);
-            RW_PROFILE_END();
-
-            RW_PROFILE_BEGIN("engine");
-            tick(deltaTimeWithTimeScale);
-            RW_PROFILE_END();
-
-            getState()->swapInputState();
-
-            accumulatedTime -= deltaTime;
         }
-        RW_PROFILE_END();
 
         RW_PROFILE_BEGIN("Render");
         RW_PROFILE_BEGIN("engine");
