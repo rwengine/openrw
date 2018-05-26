@@ -363,6 +363,8 @@ public:
     void clearObjectsWithinArea(const glm::vec3 center, const float radius,
                                 const bool clearParticles);
 
+    PlayerController* getPlayer();
+
 private:
     /**
      * @brief Used by objects to delete themselves during updates.

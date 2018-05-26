@@ -166,7 +166,7 @@ void IngameState::tick(float dt) {
         }
     }
 
-    auto player = game->getPlayer();
+    auto player = game->getWorld()->getPlayer();
 
     if (player) {
         // Force all input to 0 if player input is disabled
@@ -280,14 +280,14 @@ void IngameState::tick(float dt) {
 
 void IngameState::draw(GameRenderer* r) {
     if (!getWorld()->state->isCinematic && getWorld()->isCutsceneDone()) {
-        drawHUD(_look, game->getPlayer(), getWorld(), r);
+        drawHUD(_look, game->getWorld()->getPlayer(), getWorld(), r);
     }
 
     State::draw(r);
 }
 
 void IngameState::handleEvent(const SDL_Event& event) {
-    auto player = game->getPlayer();
+    auto player = game->getWorld()->getPlayer();
 
     switch (event.type) {
         case SDL_KEYDOWN:
@@ -323,7 +323,7 @@ void IngameState::handleEvent(const SDL_Event& event) {
 }
 
 void IngameState::handlePlayerInput(const SDL_Event& event) {
-    auto player = game->getPlayer();
+    auto player = game->getWorld()->getPlayer();
     switch (event.type) {
         case SDL_MOUSEBUTTONDOWN:
             switch (event.button.button) {
@@ -373,7 +373,7 @@ bool IngameState::shouldWorldUpdate() {
 
 const ViewCamera& IngameState::getCamera(float alpha) {
     auto state = game->getState();
-    auto player = game->getPlayer();
+    auto player = game->getWorld()->getPlayer();
     auto world = getWorld();
 
     if (state->currentCutscene && state->cutsceneStartTime >= 0.f) {
@@ -508,8 +508,8 @@ GameObject* IngameState::getCameraTarget() const {
     auto target =
         getWorld()->pedestrianPool.find(game->getState()->cameraTarget);
 
-    if (target == nullptr && game->getPlayer()) {
-        target = game->getPlayer()->getCharacter();
+    if (target == nullptr && game->getWorld()->getPlayer()) {
+        target = game->getWorld()->getPlayer()->getCharacter();
     }
 
     // If the target is a character in a vehicle, make the vehicle the target

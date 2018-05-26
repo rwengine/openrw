@@ -1023,3 +1023,12 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
     // @todo Remove all temp objects, extinguish all fires, remove all
     // explosions, remove all projectiles
 }
+
+PlayerController* GameWorld::getPlayer() {
+    auto object = pedestrianPool.find(state->playerObject);
+    if (object) {
+        auto controller = static_cast<CharacterObject*>(object)->controller;
+        return static_cast<PlayerController*>(controller);
+    }
+    return nullptr;
+}
