@@ -366,7 +366,7 @@ int RWGame::run() {
     namespace chrono = std::chrono;
 
     auto lastFrame = chrono::steady_clock::now();
-    float deltaTime = GAME_TIMESTEP;
+    const float deltaTime = GAME_TIMESTEP;
     float accumulatedTime = 0.0f;
 
     // Loop until we run out of states.
@@ -431,7 +431,7 @@ int RWGame::run() {
                 deltaTime * world->state->basic.timeScale;
 
             RW_PROFILE_BEGIN("Update");
-            while (accumulatedTime >= deltaTime && !world->isPaused()) {
+            while (accumulatedTime >= deltaTime) {
                 if (!StateManager::currentState()) {
                     break;
                 }
