@@ -120,9 +120,6 @@ public:
     void saveGame(const std::string& savename);
     void loadGame(const std::string& savename);
 
-    /** shortcut for getWorld()->state.player->getCharacter() */
-    PlayerController* getPlayer();
-
 private:
     void tick(float dt);
     void render(float alpha, float dt);

@@ -12,11 +12,9 @@
 #include "script/ScriptModule.hpp"
 
 void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
-    auto& players = getState()->world->players;
+    auto player = state->world->getPlayer();
 
-    if (!players.empty()) {
-        // @todo Add support for multiple players
-        PlayerController* player = players.at(0);
+    if (player) {
         if (t.isMission && t.deathOrArrestCheck &&
             (player->isWasted() || player->isBusted())) {
             t.wastedOrBusted = true;
