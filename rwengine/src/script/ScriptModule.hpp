@@ -140,7 +140,7 @@ void do_unpacked_call(Tret (*const& func)(Targs...),
                       const ScriptArguments& args) {
     script_bind::binder<Tret, Targs...>::call(func, args);
 }
-}
+}  // namespace script_bind
 
 /**
  * Interface for a collection of functions that can be exported to a game script
@@ -154,8 +154,7 @@ void do_unpacked_call(Tret (*const& func)(Targs...),
 class ScriptModule {
 public:
     template <class String>
-    ScriptModule(String&& _name)
-        : name(std::forward<String>(_name)) {
+    ScriptModule(String&& _name) : name(std::forward<String>(_name)) {
     }
 
     const std::string& getName() const {

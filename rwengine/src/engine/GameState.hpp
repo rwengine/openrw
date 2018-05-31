@@ -211,56 +211,6 @@ struct BlipData {
     }
 };
 
-enum class GarageType {
-    Mission = 1,
-    BombShop1 = 2,
-    BombShop2 = 3,
-    BombShop3 = 4,
-    Respray = 5,
-    CollectCars1 = 8,
-    CollectCars2 = 9,
-    MissionForCarToComeOut = 11,
-    Crusher = 13,
-    MissionKeepCar = 14,
-    Hideout1 = 16,
-    Hideout2 = 17,
-    Hideout3 = 18,
-    MissionToOpenAndClose = 19,
-    MissionForSpecificCar = 20,
-    MissionKeepCarAndRemainClosed = 21,
-};
-
-enum class GarageState { Closed, Closing, Opening, Opened };
-
-/**
- * Data for garages
- */
-struct GarageInfo {
-    GarageType type;
-
-    int id;
-    glm::vec3 min;
-    glm::vec3 max;
-
-    GameObject* target;
-
-    GarageState state;
-
-    GarageInfo(int id_, const glm::vec3 min_, const glm::vec3 max_,
-               GarageType type_)
-        : type(type_)
-        , id(id_)
-        , min(min_)
-        , max(max_)
-        , target(nullptr)
-        , state(GarageState::Closed) {
-    }
-
-    int getScriptObjectID() const {
-        return id;
-    }
-};
-
 enum class HudFlash {
     Disabled = -1,
     FlashArmor = 3,
@@ -405,8 +355,6 @@ public:
     std::vector<VehicleGenerator> vehicleGenerators;
 
     std::map<int, BlipData> radarBlips;
-
-    std::vector<GarageInfo> garages;
 
     /**
      * Bitsets for the car import / export list mission

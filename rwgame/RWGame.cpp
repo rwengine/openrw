@@ -537,8 +537,8 @@ void RWGame::tick(float dt) {
             object->tick(dt);
         }
 
-        for (auto& gc : world->garageControllers) {
-            gc->tick(dt);
+        for (auto& g : world->garages) {
+            g->tick(dt);
         }
 
         for (auto& p : world->payphones) {
@@ -717,11 +717,11 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     // Draw Garage bounds
-    for (const auto& garage : state.garages) {
+    for (const auto& garage : world->garages) {
         btVector3 minColor(1.f, 0.f, 0.f);
         btVector3 maxColor(0.f, 1.f, 0.f);
-        btVector3 min(garage.min.x, garage.min.y, garage.min.z);
-        btVector3 max(garage.max.x, garage.max.y, garage.max.z);
+        btVector3 min(garage->min.x, garage->min.y, garage->min.z);
+        btVector3 max(garage->max.x, garage->max.y, garage->max.z);
         debug.drawLine(min, min + btVector3(0.5f, 0.f, 0.f), minColor);
         debug.drawLine(min, min + btVector3(0.f, 0.5f, 0.f), minColor);
         debug.drawLine(min, min + btVector3(0.f, 0.f, 0.5f), minColor);

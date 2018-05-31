@@ -10,8 +10,8 @@
 #include "objects/InstanceObject.hpp"
 #include "objects/PickupObject.hpp"
 #include "objects/VehicleObject.hpp"
-#include "script/ScriptMachine.hpp"
 #include "script/SCMFile.hpp"
+#include "script/ScriptMachine.hpp"
 
 GameState* ScriptArguments::getState() const {
     return getVM()->getState();
@@ -45,6 +45,12 @@ GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const {
     RW_CHECK(controller != nullptr, "No controller for player " << player);
     RW_CHECK(controller->getCharacter(), "No character for player " << player);
     return controller->getCharacter();
+}
+
+// @todo figure out original cast
+template <>
+ScriptGarageType ScriptArguments::getParameter<ScriptGarageType>(unsigned int arg) const {
+    return static_cast<Garage::Type>(getParameters().at(arg).integerValue());
 }
 
 template <>
@@ -208,14 +214,14 @@ ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     return {param.handleValue(), generator};
 }
 template <>
-ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
+ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    auto& garages = getWorld()->state->garages;
-    GarageInfo* garage = nullptr;
+    auto& garages = getWorld()->garages;
+    Garage* garage = nullptr;
     if (size_t(*param.handleValue()) < garages.size()) {
-        garage = &garages[*param.handleValue()];
+        garage = garages[*param.handleValue()].get();
     }
     return {param.handleValue(), garage};
 }
