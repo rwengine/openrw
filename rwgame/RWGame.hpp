@@ -132,6 +132,7 @@ private:
     void renderDebugObjects(float time, ViewCamera& camera);
     void renderProfile();
 
+    void showHelpMessage(const GameStringKey& id);
     void handleCheatInput(char symbol);
 
     void globalKeyEvent(const SDL_Event& event);

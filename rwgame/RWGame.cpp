@@ -160,6 +160,11 @@ void RWGame::startScript(const std::string& name) {
     }
 }
 
+void RWGame::showHelpMessage(const GameStringKey& id) {
+    state.text.addText<ScreenTextType::Help>(
+            ScreenTextEntry::makeHelp(id, data.texts.text(id)));
+}
+
 PlayerController* RWGame::getPlayer() {
     auto object = world->pedestrianPool.find(state.playerObject);
     if (object) {
@@ -201,8 +206,7 @@ void RWGame::handleCheatInput(char symbol) {
 #endif
         checkForCheat(health_cheat, [&] {
             player->getCurrentState().health = 100.f;
-            // @todo ShowHelpMessage("CHEAT3"); // III / VC: Inputting health
-            // cheat.
+            showHelpMessage("CHEAT3"); // III / VC: Inputting health cheat.
         });
 
 #if RW_GAME_VERSION >= 1100  // Changed cheat name in version 1.1
@@ -212,31 +216,40 @@ void RWGame::handleCheatInput(char symbol) {
 #endif
         checkForCheat(armor_cheat, [&] {
             player->getCurrentState().armour = 100.f;
-            // @todo ShowHelpMessage("CHEAT4"); // III / VC: Inputting armor
-            // cheat.
+            showHelpMessage("CHEAT4"); // III / VC: Inputting armor cheat.
         });
 
         checkForCheat("GUNSGUNSGUNS", [&] {
-            // @todo give player weapons
-            // @todo ShowHelpMessage("CHEAT2"); // III / VC: Inputting weapon
-            // cheats.
+            const std::vector<int> ammo = {1,  //baseball bat
+                                           100,//pistol
+                                           100,//uzi
+                                           20, //shotgun
+                                           5,  //grenade
+                                           5,  //molotov
+                                           5,  //rocket launcher
+                                           20, //flamethrower
+                                           200,//ak47
+                                           200,//m16
+                                           5   //sniper rifle
+                                           };
+            for (unsigned long i = 0; i < ammo.size(); i++)
+                player->addToInventory(i+1,ammo[i]);
+            showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
         });
 
         checkForCheat("IFIWEREARICHMAN", [&] {
             state.playerInfo.money += 250000;
-            // @todo ShowHelpMessage("CHEAT6"); // III: Inputting money cheat.
+            showHelpMessage("CHEAT6"); // III: Inputting money cheat.
         });
 
         checkForCheat("MOREPOLICEPLEASE", [&] {
             // @todo raise to next wanted level
-            // @todo ShowHelpMessage("CHEAT5"); // III / VC: Inputting wanted
-            // level cheats.
+            showHelpMessage("CHEAT5"); // III / VC: Inputting wanted level cheats.
         });
 
         checkForCheat("NOPOLICEPLEASE", [&] {
             // @todo lower to next lower wanted level
-            // @todo ShowHelpMessage("CHEAT5"); // III / VC: Inputting wanted
-            // level cheats.
+            showHelpMessage("CHEAT5"); // III / VC: Inputting wanted level cheats.
         });
     }
 
@@ -245,51 +258,50 @@ void RWGame::handleCheatInput(char symbol) {
         checkForCheat("BANGBANGBANG", [&] {
             // @todo Explode nearby vehicles
             // @todo What radius?
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("GIVEUSATANK", [&] {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
-#ifdef RW_GAME_GTA3_ANNIVERSARY
-        // uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
+#if RW_GAME_GTA3_ANNIVERSARY != 0
+         uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
 #else
-        // uint16_t vehicleModel = 122;
+         uint16_t vehicleModel = 122;
 #endif
-            // @todo Spawn rhino
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            auto ch = getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
+            auto playerRot = ch->getRotation();
+            auto spawnPos = ch->getPosition();
+            spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f);
+            auto spawnRot = glm::quat(
+                    glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
+            getWorld()->createVehicle(vehicleModel, spawnPos, spawnRot);
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("CORNERSLIKEMAD", [&] {
             // @todo Weird car handling
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ANICESETOFWHEELS", [&] {
             // @todo Hide car bodies
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("CHITTYCHITTYBB", [&] {
             // @todo Cars can fly
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("NASTYLIMBCHEAT", [&] {
             // @todo Makes it possible to shoot limbs off, iirc?
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ILIKEDRESSINGUP", [&] {
             // @todo Which skins will be chosen?
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
     }
 
@@ -299,36 +311,31 @@ void RWGame::handleCheatInput(char symbol) {
             // @todo Give all pedestrians weapons.. this is also saved in the
             // savegame?!
             // @todo Which weapons do they get?
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("NOBODYLIKESME", [&] {
             // @todo Set all pedestrians hostile towards player.. this is also
             // saved in the savegame?!
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ITSALLGOINGMAAAD", [&] {
             // @todo Set all pedestrians to fighting each other.. this is also
             // saved in the savegame?!
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         // Game speed cheats
 
         checkForCheat("TIMEFLIESWHENYOU", [&] {
             // @todo Set fast gamespeed
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
 
         checkForCheat("BOOOOORING", [&] {
             // @todo Set slow gamespeed
-            // @todo ShowHelpMessage("CHEAT1"); // III / VC: Inputting most
-            // cheats.
+            showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
         });
     }
 
@@ -336,32 +343,27 @@ void RWGame::handleCheatInput(char symbol) {
     {
         checkForCheat("ILIKESCOTLAND", [&] {
             // @todo Set weather to cloudy
-            // @todo ShowHelpMessage("CHEAT7"); // III / VC: Inputting weather
-            // cheats.
+            showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("SKINCANCERFORME", [&] {
             // @todo Set sunny / normal weather
-            // @todo ShowHelpMessage("CHEAT7"); // III / VC: Inputting weather
-            // cheats.
+            showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("MADWEATHER", [&] {
             // @todo Set bad weather
-            // @todo ShowHelpMessage("CHEAT7"); // III / VC: Inputting weather
-            // cheats.
+            showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("ILOVESCOTLAND", [&] {
             // @todo Set weather to rainy
-            // @todo ShowHelpMessage("CHEAT7"); // III / VC: Inputting weather
-            // cheats.
+            showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("PEASOUP", [&] {
             // @todo Set weather to foggy
-            // @todo ShowHelpMessage("CHEAT7"); // III / VC: Inputting weather
-            // cheats.
+            showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
         });
     }
 }
