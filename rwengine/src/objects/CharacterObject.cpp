@@ -254,11 +254,11 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
 void CharacterObject::tick(float dt) {
     if (controller) {
         controller->update(dt);
-    }
 
-    // Reset back to idle cycle when not in an activity
-    if (controller->getCurrentActivity() == nullptr) {
-        cycle_ = AnimCycle::Idle;
+        // Reset back to idle cycle when not in an activity
+        if (controller->getCurrentActivity() == nullptr) {
+            cycle_ = AnimCycle::Idle;
+        }
     }
 
     animator->tick(dt);
