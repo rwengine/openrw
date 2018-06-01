@@ -654,9 +654,9 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
             }
             /// @todo determine when doors etc. should un-latch
         }
-
-        health -= dmg.hitpoints;
     }
+
+    health -= dmg.hitpoints;
 
     return true;
 }
