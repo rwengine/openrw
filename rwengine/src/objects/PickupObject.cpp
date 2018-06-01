@@ -14,6 +14,7 @@
 #include "engine/ScreenText.hpp"
 #include "objects/CharacterObject.hpp"
 #include "objects/PickupObject.hpp"
+#include "objects/VehicleObject.hpp"
 
 uint32_t colours[14] = {
     0xff0000,  // bat, detonator, adrenaline
@@ -22,7 +23,7 @@ uint32_t colours[14] = {
     0xffff00,  // shotgun
     0xff00ff,  // ak47
     0x00ffff,  // m16
-    0xff8000,  // sniper
+    0xff8000,  // sniper, donkeymag
     0x00ff80,  // rocket
     0x8000ff,  // flame
     0x80ff00,  // molotov
@@ -32,7 +33,7 @@ uint32_t colours[14] = {
     0xffff00,  // health, bonus
 };
 
-bool PickupObject::doesRespawn(PickupType type) {
+bool PickupObject::defaultDoesRespawn(PickupType type) {
     switch (type) {
         case Once:
         case OnceTimeout:
@@ -51,7 +52,7 @@ bool PickupObject::doesRespawn(PickupType type) {
     }
 }
 
-float PickupObject::respawnTime(PickupType type) {
+float PickupObject::defaultRespawnTime(PickupType type) {
     switch (type) {
         case InShop:
             return 5.f;
@@ -63,7 +64,8 @@ float PickupObject::respawnTime(PickupType type) {
     }
 }
 
-uint32_t PickupObject::behaviourFlags(PickupType type) {
+PickupObject::BehaviourFlags PickupObject::defaultBehaviourFlags(
+    PickupType type) {
     switch (type) {
         case InShop:
         case OnStreet:
@@ -78,12 +80,12 @@ uint32_t PickupObject::behaviourFlags(PickupType type) {
         case MineArmed:
         case NauticalMineInactive:
         case NauticalMineArmed:
-            return 0;
+            return None;
         case FloatingPackage:
         case FloatingPackageFloating:
             return PickupInVehicle;
         default:
-            return 0;
+            return None;
     }
 }
 
@@ -118,7 +120,7 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
         m_colourId = 4;
     else if (modelinfo->name == "m16")
         m_colourId = 5;
-    else if (modelinfo->name == "sniper")
+    else if (modelinfo->name == "sniper" || modelinfo->name == "donkeymag")
         m_colourId = 6;
     else if (modelinfo->name == "rocket")
         m_colourId = 7;
@@ -152,11 +154,9 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
             engine->data->findSlotTexture("particle", "coronaringa");
     }
 
-    auto flags = behaviourFlags(m_type);
-    RW_UNUSED(flags);
-
-    RW_CHECK((flags & PickupInVehicle) == 0,
-             "In Vehicle pickup not implemented yet");
+    respawn = defaultDoesRespawn(m_type);
+    respawnTime = defaultRespawnTime(m_type);
+    behaviourFlags = defaultBehaviourFlags(m_type);
 
     setEnabled(true);
     setCollected(false);
@@ -186,7 +186,7 @@ void PickupObject::tick(float dt) {
 
     if (!m_enabled) {
         // Check if our type of pickup respawns
-        if (doesRespawn(m_type)) {
+        if (doesRespawn()) {
             m_enableTimer -= dt;
             if (m_enableTimer <= 0.f) {
                 setEnabled(true);
@@ -210,7 +210,7 @@ void PickupObject::tick(float dt) {
         btBroadphasePairArray& pairArray =
             m_ghost->getOverlappingPairCache()->getOverlappingPairArray();
         int numPairs = pairArray.size();
-        auto flags = behaviourFlags(m_type);
+        auto flags = getBehaviourFlags();
 
         for (int i = 0; i < numPairs; i++) {
             manifoldArray.clear();
@@ -229,11 +229,27 @@ void PickupObject::tick(float dt) {
                         static_cast<CharacterObject*>(object);
 
                     if (character->isPlayer()) {
-                        setCollected(onCharacterTouch(character));
+                        setCollected(onPlayerTouch());
                         setEnabled(!isCollected());
 
                         if (!m_enabled) {
-                            m_enableTimer = respawnTime(m_type);
+                            m_enableTimer = getRespawnTime();
+                        }
+                    }
+                }
+                if ((flags & PickupInVehicle) == PickupInVehicle &&
+                    object->type() == Vehicle) {
+                    VehicleObject* vehicle =
+                        static_cast<VehicleObject*>(object);
+
+                    if (vehicle->getOccupant(0) ==
+                        static_cast<GameObject*>(
+                            engine->getPlayer()->getCharacter())) {
+                        setCollected(onPlayerVehicleTouch());
+                        setEnabled(!isCollected());
+
+                        if (!m_enabled) {
+                            m_enableTimer = getRespawnTime();
                         }
                     }
                 }
@@ -261,7 +277,7 @@ ItemPickup::ItemPickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type), item(item) {
 }
 
-bool ItemPickup::onCharacterTouch(CharacterObject* character) {
+bool ItemPickup::onPlayerTouch() {
     auto totalRounds = 0;
 
     switch (item->modelID) {
@@ -298,6 +314,8 @@ bool ItemPickup::onCharacterTouch(CharacterObject* character) {
         totalRounds /= 5;
     }
 
+    const auto& character = engine->getPlayer()->getCharacter();
+
     character->addToInventory(item->inventorySlot, totalRounds);
 
     return true;
@@ -308,8 +326,7 @@ DummyPickup::DummyPickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool DummyPickup::onCharacterTouch(CharacterObject* character) {
-    RW_UNUSED(character);
+bool DummyPickup::onPlayerTouch() {
     return true;
 }
 
@@ -318,9 +335,7 @@ RampagePickup::RampagePickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool RampagePickup::onCharacterTouch(CharacterObject* character) {
-    RW_UNUSED(character);
-
+bool RampagePickup::onPlayerTouch() {
     if (engine->state->scriptOnMissionFlag == nullptr) {
         return false;
     }
@@ -337,7 +352,9 @@ HealthPickup::HealthPickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool HealthPickup::onCharacterTouch(CharacterObject* character) {
+bool HealthPickup::onPlayerTouch() {
+    const auto& character = engine->getPlayer()->getCharacter();
+
     if (character->getCurrentState().health >= 100.f) {
         return false;
     }
@@ -352,7 +369,9 @@ ArmourPickup::ArmourPickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool ArmourPickup::onCharacterTouch(CharacterObject* character) {
+bool ArmourPickup::onPlayerTouch() {
+    const auto& character = engine->getPlayer()->getCharacter();
+
     if (character->getCurrentState().armour >= 100.f) {
         return false;
     }
@@ -368,10 +387,8 @@ CollectablePickup::CollectablePickup(GameWorld* world,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool CollectablePickup::onCharacterTouch(CharacterObject* character) {
-    RW_UNUSED(character);
-
-    GameState* state = engine->state;
+bool CollectablePickup::onPlayerTouch() {
+    const auto& state = engine->state;
 
     if (state->playerInfo.hiddenPackagesCollected ==
         state->playerInfo.hiddenPackageCount) {
@@ -408,9 +425,8 @@ AdrenalinePickup::AdrenalinePickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type) {
 }
 
-bool AdrenalinePickup::onCharacterTouch(CharacterObject* character) {
-    static_cast<PlayerController*>(character->controller)
-        ->activateAdrenalineEffect();
+bool AdrenalinePickup::onPlayerTouch() {
+    engine->getPlayer()->activateAdrenalineEffect();
 
     return true;
 }
@@ -421,10 +437,19 @@ MoneyPickup::MoneyPickup(GameWorld* world, const glm::vec3& position,
     : PickupObject(world, position, modelinfo, type), money(money) {
 }
 
-bool MoneyPickup::onCharacterTouch(CharacterObject* character) {
-    RW_UNUSED(character);
-
+bool MoneyPickup::onPlayerTouch() {
     engine->state->playerInfo.money += money;
+
+    return true;
+}
+
+BigNVeinyPickup::BigNVeinyPickup(GameWorld* world, const glm::vec3& position,
+                                 BaseModelInfo* modelinfo, PickupType type)
+    : PickupObject(world, position, modelinfo, type) {
+}
+
+bool BigNVeinyPickup::onPlayerVehicleTouch() {
+    engine->state->bigNVeinyPickupsCollected++;
 
     return true;
 }

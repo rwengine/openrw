@@ -375,6 +375,9 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
         pickup = new AdrenalinePickup(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "Money") {
         pickup = new MoneyPickup(this, pos, modelInfo, pickuptype, 0);
+     } else if (modelInfo->name == "donkeymag") {
+        pickup = new BigNVeinyPickup(this, pos, modelInfo, pickuptype);
+        pickup->setBehaviourFlags(PickupObject::BehaviourFlags::PickupInVehicle);
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
         pickup = new PickupObject(this, pos, modelInfo, pickuptype);
