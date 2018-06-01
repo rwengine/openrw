@@ -5427,13 +5427,12 @@ void opcode_01e8(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
 
     opcode 01e9
     @arg vehicle Car/vehicle
-    @arg arg2 
+    @arg numOfPassengers 
 */
-void opcode_01e9(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptInt& arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x01e9);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
+void opcode_01e9(const ScriptArguments& args, const ScriptVehicle vehicle,
+                 ScriptInt& numOfPassengers) {
     RW_UNUSED(args);
+    numOfPassengers = vehicle->seatOccupants.size();
 }
 
 /**
@@ -5441,13 +5440,12 @@ void opcode_01e9(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 
     opcode 01ea
     @arg vehicle Car/vehicle
-    @arg arg2 
+    @arg maxNumOfPassengers 
 */
-void opcode_01ea(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptInt& arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x01ea);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(arg2);
+void opcode_01ea(const ScriptArguments& args, const ScriptVehicle vehicle,
+                 ScriptInt& maxNumOfPassengers) {
     RW_UNUSED(args);
+    maxNumOfPassengers = vehicle->info->seats.size();
 }
 
 /**
@@ -9940,11 +9938,21 @@ void opcode_0375(const ScriptArguments& args, const ScriptString gxtEntry0, cons
     @arg coord Coordinates
     @arg character Character/ped
 */
-void opcode_0376(const ScriptArguments& args, ScriptVec3 coord, ScriptCharacter& character) {
-    RW_UNIMPLEMENTED_OPCODE(0x0376);
-    RW_UNUSED(coord);
-    RW_UNUSED(character);
-    RW_UNUSED(args);
+void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
+                 ScriptCharacter& character) {
+    coord = script::getGround(args, coord);
+    const auto& world = args.getWorld();
+    const auto& state = args.getState();
+    const auto& zone = world->data->findZoneAt(
+        world->getPlayer()->getCharacter()->getPosition());
+    const bool day =
+        (state->basic.gameHour >= 8 && state->basic.gameHour <= 19);
+    const int groupId =
+        zone ? (day ? zone->pedGroupDay : zone->pedGroupNight) : 0;
+    const auto& pedGroup = data->pedgroups.at(groupId);
+    const auto model = pedGroup.at(
+        args.getVM()->getRandomNumber((std::size_t)0, pedGroup.size() - 1));
+    character = world->createPedestrian(model, coord + script::kSpawnOffset);
 }
 
 /**
@@ -11103,11 +11111,9 @@ void opcode_03c5(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 bool opcode_03c6(const ScriptArguments& args, const ScriptLevel island) {
     // The parameter to this is actually the island number.
     // Not sure how that will fit into the scheme of full paging
-    /// @todo use the current player zone island number to return the correct value.
-    // this might be very slow 
-    auto world = args.getWorld();
-    auto plyChar = world->pedestrianPool.find(world->state->playerObject);
-    auto zone = world->data->findZoneAt(plyChar->getPosition());
+    const auto& world = args.getWorld();
+    const auto& zone = world->data->findZoneAt(
+        world->getPlayer()->getCharacter()->getPosition());
 
     return island == zone->island;
 }
