@@ -582,6 +582,9 @@ void GarageController::doOnStartClosingEvent() {
 
     switch (garageInfo->type) {
         case GarageType::Mission:
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3:
         case GarageType::CollectCars1:
         case GarageType::CollectCars2: {
             controller->setInputEnabled(false);
