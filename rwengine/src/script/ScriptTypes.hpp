@@ -23,6 +23,7 @@ class ScriptModule;
 struct SCMThread;
 class GameState;
 class GameWorld;
+class Payphone;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
@@ -105,10 +106,10 @@ struct GarageInfo;
 using ScriptVehicleGenerator = ScriptObjectType<VehicleGenerator>;
 using ScriptBlip = ScriptObjectType<BlipData>;
 using ScriptGarage = ScriptObjectType<GarageInfo>;
+using ScriptPayphone = ScriptObjectType<Payphone>;
 
 /// @todo replace these with real types for sounds etc.
 using ScriptSound = ScriptObjectType<int>;
-using ScriptPhone = ScriptObjectType<int>;
 using ScriptFire = ScriptObjectType<int>;
 using ScriptSphere = ScriptObjectType<int>;
 
@@ -336,6 +337,9 @@ ScriptObjectType<PickupObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
 ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
+    unsigned int arg) const;
+template <>
+ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
 ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(

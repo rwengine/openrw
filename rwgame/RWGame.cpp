@@ -528,6 +528,10 @@ void RWGame::tick(float dt) {
             gc->tick(dt);
         }
 
+        for (auto& p : world->payphones) {
+            p->tick(dt);
+        }
+
         world->destroyQueuedObjects();
 
         state.text.tick(dt);

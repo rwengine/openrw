@@ -459,6 +459,12 @@ GarageInfo* GameWorld::createGarage(const glm::vec3 coord0,
     return info;
 }
 
+Payphone* GameWorld::createPayphone(const glm::vec2 coord) {
+    int id = payphones.size();
+    payphones.push_back(std::make_unique<Payphone>(this, id, coord));
+    return payphones.back().get();
+}
+
 void GameWorld::ObjectPool::insert(GameObject* object) {
     if (object->getGameObjectID() == 0) {
         // Find the lowest free GameObjectID.
