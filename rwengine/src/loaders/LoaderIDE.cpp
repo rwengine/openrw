@@ -192,7 +192,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
 
                     std::string linebuff, buff;
                     for (size_t p = 0; p < 12; ++p) {
-                        PathNode node;
+                        PathNode node{};
 
                         getline(str, linebuff);
                         std::stringstream buffstream(linebuff);
