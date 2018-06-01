@@ -232,7 +232,7 @@ void RWGame::handleCheatInput(char symbol) {
                                            200,//m16
                                            5   //sniper rifle
                                            };
-            for (unsigned long i = 0; i < ammo.size(); i++)
+            for (std::vector<int>::size_type i = 0; i < ammo.size(); i++)
                 player->addToInventory(i+1,ammo[i]);
             showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
         });
