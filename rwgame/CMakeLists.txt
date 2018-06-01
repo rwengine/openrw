@@ -65,4 +65,6 @@ target_link_libraries(rwgame
 
 openrw_target_apply_options(TARGET rwgame)
 
-install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
+install(TARGETS rwgame
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )

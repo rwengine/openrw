@@ -159,3 +159,10 @@ target_include_directories(rwengine
     )
 
 openrw_target_apply_options(TARGET rwengine)
+
+if(INSTALL_LIBS)
+    install(TARGETS rwengine
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        )
+endif()

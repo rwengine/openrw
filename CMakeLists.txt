@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.2.2)
 
 project(OpenRW)
 
+include(GNUInstallDirs)
+
 # Read the configuration arguments
 include("${PROJECT_SOURCE_DIR}/cmake_options.cmake")
 
@@ -38,11 +40,9 @@ if(BUILD_TESTS)
 endif()
 
 # Copy the license to the install directory
-if(CMAKE_SYSTEM_NAME MATCHES "Linux|FreeBSD")
-    install(FILES COPYING
-        DESTINATION "${DOC_DIR}"
-        )
-endif()
+install(FILES COPYING
+    DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+    )
 
 # Copy the license to the build directory (for CI)
 file(COPY COPYING
