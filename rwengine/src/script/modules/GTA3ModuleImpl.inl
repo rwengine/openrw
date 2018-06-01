@@ -9943,7 +9943,8 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
     coord = script::getGround(args, coord);
     const auto& world = args.getWorld();
     const auto& state = args.getState();
-    const auto& zone = world->data->findZoneAt(
+    const auto& data = world->data;
+    const auto& zone = data->findZoneAt(
         world->getPlayer()->getCharacter()->getPosition());
     const bool day =
         (state->basic.gameHour >= 8 && state->basic.gameHour <= 19);
