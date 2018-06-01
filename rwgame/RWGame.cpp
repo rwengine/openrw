@@ -220,19 +220,19 @@ void RWGame::handleCheatInput(char symbol) {
         });
 
         checkForCheat("GUNSGUNSGUNS", [&] {
-            const std::array<int, 11> ammo = {1,  //baseball bat
-                                              100,//pistol
-                                              100,//uzi
-                                              20, //shotgun
-                                              5,  //grenade
-                                              5,  //molotov
-                                              5,  //rocket launcher
-                                              20, //flamethrower
-                                              200,//ak47
-                                              200,//m16
-                                              5   //sniper rifle
-                                              };
-            for (size_type i = 0; i < ammo.size(); i++)
+            constexpr std::array<int, 11> ammo = {1,  //baseball bat
+                                                  100,//pistol
+                                                  100,//uzi
+                                                  20, //shotgun
+                                                  5,  //grenade
+                                                  5,  //molotov
+                                                  5,  //rocket launcher
+                                                  20, //flamethrower
+                                                  200,//ak47
+                                                  200,//m16
+                                                  5   //sniper rifle
+                                                  };
+            for (std::array<int, 11>::size_type i = 0; i < ammo.size(); i++)
                 player->addToInventory(i+1,ammo[i]);
             showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
         });
@@ -269,11 +269,10 @@ void RWGame::handleCheatInput(char symbol) {
 #else
          uint16_t vehicleModel = 122;
 #endif
-            auto ch = getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
-            auto playerRot = ch->getRotation();
-            auto spawnPos = ch->getPosition();
-            spawnPos += playerRot * glm::vec3(0.f, 3.f, 0.f);
-            auto spawnRot = glm::quat(
+            const auto ch = getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
+            const auto playerRot = ch->getRotation();
+            const auto spawnPos = ch->getPosition() + playerRot * glm::vec3(0.f, 3.f, 0.f);
+            const auto spawnRot = glm::quat(
                     glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
             getWorld()->createVehicle(vehicleModel, spawnPos, spawnRot);
             showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
