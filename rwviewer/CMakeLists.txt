@@ -35,5 +35,5 @@ target_link_libraries(rwviewer
 openrw_target_apply_options(TARGET rwviewer)
 
 install(TARGETS rwviewer
-    RUNTIME DESTINATION "${BIN_DIR}"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
