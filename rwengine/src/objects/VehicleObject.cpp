@@ -708,12 +708,11 @@ void VehicleObject::setPartTarget(VehicleObject::Part* part, bool enable,
     if (enable) {
         if (part->body == nullptr) {
             setPartLocked(part, false);
+        } else {
+            part->body->activate(true);
         }
-
         part->targetAngle = target;
         part->moveToAngle = true;
-
-        part->body->activate(true);
     } else {
         part->targetAngle = target;
         part->moveToAngle = false;
