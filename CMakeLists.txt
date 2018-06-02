@@ -48,3 +48,5 @@ install(FILES COPYING
 file(COPY COPYING
     DESTINATION "${PROJECT_BINARY_DIR}"
     )
+
+include(CMakeCPack.cmake)
