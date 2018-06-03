@@ -156,7 +156,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     std::vector<TextVertex> geo;
 
     float maxWidth = 0.f;
-    float maxHeight = 0.f;
+    float maxHeight = ss.y;
 
     auto text = ti.text;
 
