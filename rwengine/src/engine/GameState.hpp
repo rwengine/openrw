@@ -386,6 +386,12 @@ public:
      */
     std::vector<TextDisplayData> texts;
 
+    /**
+     * Script timer
+     */
+    int32_t* scriptTimerVariable = nullptr;
+    bool scriptTimerPaused = false;
+
     /** The camera near value currently set by the script */
     float cameraNear;
     bool cameraFixed;

@@ -491,6 +491,7 @@ void RWGame::tick(float dt) {
     State* currState = StateManager::get().states.back().get();
 
     static float clockAccumulator = 0.f;
+    static float scriptTimerAccumulator = 0.f;
     if (currState->shouldWorldUpdate()) {
         world->chase.update(dt);
 
@@ -510,6 +511,22 @@ void RWGame::tick(float dt) {
                 }
             }
             clockAccumulator -= 1.f;
+        }
+
+        if (state.scriptTimerVariable && !state.scriptTimerPaused) {
+            scriptTimerAccumulator += dt;
+            while (scriptTimerAccumulator >= 1.f) {
+                (*state.scriptTimerVariable) -= 1000;
+                if (*state.scriptTimerVariable <= 0) {
+                    (*state.scriptTimerVariable) = 0;
+                    state.scriptTimerVariable = nullptr;
+                }
+                //                                11 seconds
+                if (*state.scriptTimerVariable <= 11000) {
+                    // @todo beep
+                }
+                scriptTimerAccumulator -= 1.f;
+            }
         }
 
         // Clean up old VisualFX
@@ -615,8 +632,7 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    if (!world->isPaused())
-        drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
