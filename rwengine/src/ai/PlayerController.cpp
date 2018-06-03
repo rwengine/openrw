@@ -94,7 +94,7 @@ void PlayerController::restart() {
         restartPosition = glm::vec3(state->nextRestartLocation);
         restartHeading = state->nextRestartLocation.w;
     } else {
-        GameState::RestartType type;
+        GameState::RestartType type{};
 
         if (isBusted()) {
             type = GameState::RestartType::Police;
