@@ -407,7 +407,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
-    if ((fadeTimer < world->state->fadeTime || !world->state->fadeOut) && !world->isPaused()) {
+    if ((fadeTimer <= world->state->fadeTime || !world->state->fadeOut) && !world->isPaused()) {
         /// @todo rewrite this render code to use renderer class
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glUseProgram(ssRectProgram);
@@ -423,7 +423,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        float fadeFrac = 0.f;
+        float fadeFrac = 1.f;
         if (world->state->fadeTime > 0.f) {
             fadeFrac = std::min(fadeTimer / world->state->fadeTime, 1.f);
         }
