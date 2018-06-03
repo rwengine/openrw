@@ -25,6 +25,10 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
         }
     }
 
+    if (t.allowWaitSkip && getState()->input[0].pressed(GameInputState::Jump)) {
+        t.wakeCounter = 0;
+        t.allowWaitSkip = false;
+    }
     if (t.wakeCounter > 0) {
         t.wakeCounter = std::max(t.wakeCounter - msPassed, 0);
     }
@@ -213,6 +217,7 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission) {
     t.stackDepth = 0;
     t.deathOrArrestCheck = true;
     t.wastedOrBusted = false;
+    t.allowWaitSkip = false;
     _activeThreads.push_back(t);
 }
 

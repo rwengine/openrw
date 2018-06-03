@@ -74,12 +74,12 @@ struct BasicState {
 
 /** Block 16 player info */
 struct PlayerInfo {
-    uint32_t money;
+    int32_t money;
     uint8_t unknown1;
     uint32_t unknown2;
     uint16_t unknown3;
     float unknown4;
-    uint32_t displayedMoney;
+    int32_t displayedMoney;
     uint32_t hiddenPackagesCollected;
     uint32_t hiddenPackageCount;
     uint8_t neverTired;
