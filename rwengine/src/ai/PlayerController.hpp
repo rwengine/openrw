@@ -21,9 +21,9 @@ class PlayerController : public CharacterController {
 
     enum RestartState {
         Alive,
-        FadingIn,
-        Restarting,
         FadingOut,
+        Restarting,
+        FadingIn,
     } restartState;
 
     // handles player respawn logic

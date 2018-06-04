@@ -3873,10 +3873,10 @@ void opcode_0169(const ScriptArguments& args, ScriptRGB colour) {
 
     opcode 016a
     @arg time Time (ms)
-    @arg scriptFade Boolean true/false
+    @arg fadeIn Boolean true/false
 */
-void opcode_016a(const ScriptArguments& args, const ScriptInt time, const ScriptBoolean scriptFade) {
-    args.getState()->fade(time / 1000.f, scriptFade);
+void opcode_016a(const ScriptArguments& args, const ScriptInt time, const ScriptBoolean fadeIn) {
+    args.getState()->fade(time / 1000.f, fadeIn);
 }
 
 /**
@@ -3885,9 +3885,6 @@ void opcode_016a(const ScriptArguments& args, const ScriptInt time, const Script
     opcode 016b
 */
 bool opcode_016b(const ScriptArguments& args) {
-    if (args.getWorld()->state->skipCutscene) {
-    	return false;
-    }
     return args.getState()->isFading();
 }
 
