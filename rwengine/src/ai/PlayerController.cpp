@@ -210,9 +210,9 @@ void PlayerController::restartLogic() {
     switch (restartState) {
         case Alive: {
             if (isWasted() || isBusted() || isMissionRestartRequired()) {
-                state->fade(2000 / 1000.f, false);
+                state->fade(2.f, false);
 
-                restartState = FadingIn;
+                restartState = FadingOut;
             }
 
             if (isWasted()) {
@@ -241,7 +241,7 @@ void PlayerController::restartLogic() {
 
             break;
         }
-        case FadingIn: {
+        case FadingOut: {
             if (!state->isFading()) {
                 restartState = Restarting;
             }
@@ -249,7 +249,7 @@ void PlayerController::restartLogic() {
             break;
         }
         case Restarting: {
-            state->fade(4000 / 1000.f, true);
+            state->fade(4.f, true);
 
             if (isWasted()) {
                 state->setFadeColour(glm::i32vec3(0xc8, 0xc8, 0xc8));
@@ -261,11 +261,11 @@ void PlayerController::restartLogic() {
 
             restart();
 
-            restartState = FadingOut;
+            restartState = FadingIn;
 
             break;
         }
-        case FadingOut: {
+        case FadingIn: {
             if (!state->isFading()) {
                 restartState = Alive;
             }

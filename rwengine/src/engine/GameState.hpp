@@ -350,7 +350,7 @@ public:
     const glm::vec4 getClosestRestart(RestartType type,
                                       const glm::vec3 playerPosition) const;
 
-    bool fadeOut;
+    bool fadeIn;
     float fadeStart;
     float fadeTime;
     bool fadeSound;
