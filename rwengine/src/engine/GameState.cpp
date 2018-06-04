@@ -93,6 +93,7 @@ GameStats::GameStats()
 
 GameState::GameState()
     : basic{}
+    , rampage(this)
     , gameTime(0.f)
     , currentProgress(0)
     , maxProgress(1)
@@ -216,4 +217,75 @@ bool GameState::isFading() const {
 
 void GameState::setFadeColour(glm::i32vec3 colour) {
     fadeColour = colour;
+}
+
+Rampage::Status Rampage::getStatus() const {
+    return status;
+}
+
+void Rampage::init(const std::string& gxtEntry, const int32_t weaponID,
+                   const int32_t time, const int32_t kills,
+                   const std::array<int32_t, 4>& modelsToKill,
+                   const bool headshot) {
+    if (gxtEntry != "PAGE_00") {
+        special = true;
+    }
+    status = Ongoing;
+    weapon = weaponID;
+    endTime = state->world->getGameTime() + static_cast<float>(time) / 1000.f;
+    killsRequired = kills;
+    modelIDsToKill = modelsToKill;
+    headshotOnly = headshot;
+}
+
+void Rampage::tick(float dt) {
+    RW_UNUSED(dt);
+    if (getStatus() != Ongoing) {
+        return;
+    }
+
+    if (endTime <= state->world->getGameTime()) {
+        status = Failed;
+    }
+
+    if (killsRequired <= 0) {
+        if (!special) {
+            state->gameStats.rampagesPassed++;
+        }
+
+        status = Passed;
+    }
+}
+
+uint32_t Rampage::getKillsForThisModel(ModelID model) {
+    const auto& search = modelIDsKilled.find(model);
+    if (search != modelIDsKilled.end()) {
+        return search->second;
+    }
+    return 0;
+}
+
+void Rampage::clearKills() {
+    modelIDsKilled.clear();
+}
+
+void Rampage::onCharacterDie(CharacterObject* victim, GameObject* killer) {
+    if (getStatus() != Ongoing) {
+        return;
+    }
+
+    if (killer) {
+        if (!static_cast<CharacterObject*>(killer)->isPlayer()) {
+            return;
+        }
+    }
+
+    const auto modelID = victim->getModelInfo<BaseModelInfo>()->id();
+    const auto isRightModel = std::find(std::begin(modelIDsToKill),
+                                        std::end(modelIDsToKill), modelID);
+
+    if (isRightModel != std::end(modelIDsToKill)) {
+        modelIDsKilled[modelID]++;
+        killsRequired--;
+    }
 }

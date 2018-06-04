@@ -173,14 +173,12 @@ PickupObject::~PickupObject() {
 }
 
 void PickupObject::tick(float dt) {
-    if (isRampage()) {
-        if (engine->state->scriptOnMissionFlag != nullptr) {
-            if (*(engine->state->scriptOnMissionFlag) != 0 && isEnabled()) {
-                setEnabled(false);
-            } else if (*(engine->state->scriptOnMissionFlag) == 0 &&
-                       !isEnabled()) {
-                setEnabled(true);
-            }
+    if (isRampage() && engine->state->scriptOnMissionFlag != nullptr) {
+        if (*(engine->state->scriptOnMissionFlag) != 0 && isEnabled()) {
+            setEnabled(false);
+        } else if (*(engine->state->scriptOnMissionFlag) == 0 && !isEnabled() &&
+                   !isCollected()) {
+            setEnabled(true);
         }
     }
 
@@ -204,7 +202,7 @@ void PickupObject::tick(float dt) {
     m_corona->particle.colour =
         glm::vec4(red / 255.f, green / 255.f, blue / 255.f, 1.f) * colourValue;
 
-    if (m_enabled) {
+    if (!isCollected()) {
         // Sort out interactions with things that may or may not be players.
         btManifoldArray manifoldArray;
         btBroadphasePairArray& pairArray =
