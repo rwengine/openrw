@@ -65,7 +65,7 @@ target_link_libraries(rwlib
 
 openrw_target_apply_options(TARGET rwlib)
 
-if(INSTALL_LIBS)
+if(BUILD_SHARED_LIBS)
     install(TARGETS rwlib
         ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
