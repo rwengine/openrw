@@ -408,6 +408,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
     if (!world->isPaused()) {
+        glEnable(GL_BLEND);
         /// @todo rewrite this render code to use renderer class
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glUseProgram(ssRectProgram);
