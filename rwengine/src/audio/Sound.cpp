@@ -1,5 +1,6 @@
 #include "audio/alCheck.hpp"
 #include "audio/Sound.hpp"
+#include <iostream>
 
 // Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
@@ -10,6 +11,12 @@
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(57,80,100)
 #define avio_context_free av_freep
 #endif
+
+#define OUTPUT_CHANNELS 2
+#define OUTPUT_RATE 44100
+#define BUFFER_SIZE 192000
+#define OUTPUT_BITS 16
+#define OUTPUT_FMT AV_SAMPLE_FMT_S16
 
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));
@@ -109,8 +116,8 @@ void SoundSource::loadFromFile(const std::string& filename) {
 #endif
 
     // Expose audio metadata
-    channels = codecContext->channels;
-    sampleRate = codecContext->sample_rate;
+    channels = OUTPUT_CHANNELS;
+    sampleRate = OUTPUT_RATE;
 
     // OpenAL only supports mono or stereo, so error on more than 2 channels
     if(channels > 2) {
@@ -120,6 +127,9 @@ void SoundSource::loadFromFile(const std::string& filename) {
         avformat_close_input(&formatContext);
         return;
     }
+
+    // prepare resampler
+    SwrContext* swr = nullptr;
 
     // Start reading audio packets
     AVPacket readingPacket;
@@ -162,28 +172,60 @@ void SoundSource::loadFromFile(const std::string& filename) {
 
     while (av_read_frame(formatContext, &readingPacket) == 0) {
         if (readingPacket.stream_index == audioStream->index) {
-            AVPacket decodingPacket = readingPacket;
 
-            int sendPacket = avcodec_send_packet(codecContext, &decodingPacket);
+            int sendPacket = avcodec_send_packet(codecContext, &readingPacket);
+            av_packet_unref(&readingPacket);
             int receiveFrame = 0;
 
             while ((receiveFrame = avcodec_receive_frame(codecContext, frame)) == 0) {
+                if(!swr) {
+                    if(frame->channel_layout == 0) {
+                        frame->channel_layout = AV_CH_LAYOUT_MONO; // It's probably mono
+                        frame->channels = 1;
+                    }
+                    swr = swr_alloc_set_opts(nullptr,
+                                             AV_CH_LAYOUT_STEREO,    // output
+                                             OUTPUT_FMT,                                        // output
+                                             OUTPUT_RATE,                                       // output
+                                             frame->channel_layout,   // input
+                                             static_cast<AVSampleFormat>(frame->format),                                      // input
+                                             frame->sample_rate,                                            // input
+                                             0,
+                                             nullptr);
+                    if (!swr) {
+                        fprintf(stderr, "Resampler has not been properly initialized\n");
+                        return;
+                    }
+                    swr_init(swr);
+                    if (!swr_is_initialized(swr)) {
+                        fprintf(stderr, "Resampler has not been properly initialized\n");
+                        return;
+                    }
+                }
                 // Decode audio packet
 
                 if (receiveFrame == 0 && sendPacket == 0) {
                     // Write samples to audio buffer
+                    AVFrame* resampled = av_frame_alloc();
 
-                    for(size_t i = 0; i < static_cast<size_t>(frame->nb_samples); i++) {
-                        // Interleave left/right channels
-                        for(size_t channel = 0; channel < channels; channel++) {
-                            int16_t sample = reinterpret_cast<int16_t *>(frame->data[channel])[i];
-                            data.push_back(sample);
-                        }
+                    resampled->channel_layout = AV_CH_LAYOUT_STEREO;
+                    resampled->sample_rate = OUTPUT_RATE;
+                    resampled->format = OUTPUT_FMT;
+                    resampled->channels = OUTPUT_CHANNELS;
+
+                    swr_config_frame(swr, resampled, frame);
+
+                    if (swr_convert_frame(swr, resampled, frame) < 0) {
+                        std::cout << "Error resampling "<< filename << '\n';
                     }
+                    for(size_t i = 0; i < static_cast<size_t>(resampled->nb_samples) * channels; i++) {
+                        data.push_back(reinterpret_cast<int16_t *>(resampled->data[0])[i]);
+                    }
+
+                    av_frame_unref(resampled);
                 }
             }
         }
-        av_packet_unref(&readingPacket);
     }
 
 #endif
@@ -191,6 +233,9 @@ void SoundSource::loadFromFile(const std::string& filename) {
     // Cleanup
     /// Free all data used by the frame.
     av_frame_free(&frame);
+
+    /// Free resampler
+    swr_free(&swr);
 
     /// Close the context and free all data associated to it, but not the context itself.
     avcodec_close(codecContext);

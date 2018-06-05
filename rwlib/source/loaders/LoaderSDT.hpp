@@ -8,10 +8,13 @@
 #include <vector>
 
 extern "C" {
+#include <libavutil/opt.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
 #include <libavformat/avio.h>
+#include <libavutil/avutil.h>
+#include <libavutil/opt.h>
+#include <libswresample/swresample.h>
 }
 
 // Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
