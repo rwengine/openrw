@@ -147,6 +147,9 @@ void RWGame::loadGame(const std::string& savename) {
     if (!SaveGame::loadGame(state, savename)) {
         log.error("Game", "Failed to load game");
     }
+
+    // Set fade splash
+    state.world->data->loadSplash("SPLASH1");
 }
 
 void RWGame::startScript(const std::string& name) {
@@ -602,8 +605,7 @@ void RWGame::render(float alpha, float time) {
     }
     RW_PROFILE_END();
 
-    if (!world->isPaused())
-        drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
