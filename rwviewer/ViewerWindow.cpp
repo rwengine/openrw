@@ -163,7 +163,7 @@ void ViewerWindow::openRecent() {
 }
 
 void ViewerWindow::showObjectModel(uint16_t) {
-#warning implement me
+#pragma message("implement me")
 }
 
 void ViewerWindow::updateRecentGames() {
