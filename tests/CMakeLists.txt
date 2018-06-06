@@ -62,13 +62,6 @@ target_compile_definitions(rwtests
         "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
     )
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(rwtests
-        PRIVATE
-            "BOOST_TEST_DYN_LINK"
-        )
-endif()
-
 target_include_directories(rwtests
     PRIVATE
         "${CMAKE_SOURCE_DIR}/tests"

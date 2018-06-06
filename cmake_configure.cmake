@@ -80,6 +80,14 @@ else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
 endif()
 
+
+if(NOT BOOST_STATIC)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            BOOST_ALL_DYN_LINK
+        )
+endif()
+
 if(ENABLE_SCRIPT_DEBUG)
     target_compile_definitions(rw_interface
         INTERFACE
