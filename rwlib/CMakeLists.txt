@@ -2,8 +2,6 @@
 ##      RWLIB
 ###########################################################
 
-find_package(Boost REQUIRED)
-
 SET(RWLIB_SOURCES
     # GL stuff is only here temporarily, hoping to move it back to rwengine
     source/gl/gl_core_3_3.c

@@ -14,6 +14,18 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 message(STATUS "Building ${CMAKE_PROJECT_NAME} GIT SHA1: ${GIT_SHA1}")
 
+find_package(Boost REQUIRED)
+find_package(Boost COMPONENTS program_options system REQUIRED)
+if(FILESYSTEM_LIBRARY STREQUAL "BOOST")
+    find_package(Boost COMPONENTS filesystem system REQUIRED)
+endif()
+if(BUILD_TESTS)
+    find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+endif()
+if(CHECK_INCLUDES)
+    find_package(IncludeWhatYouUse REQUIRED)
+endif()
+
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -24,6 +36,10 @@ find_package(SDL2 REQUIRED)
 
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
+endif()
+
+if(CHECK_IWYU)
+    find_package(IncludeWhatYouUse REQUIRED)
 endif()
 
 # Create a rw_interface TARGET that holds all compiler options

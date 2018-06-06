@@ -2,8 +2,6 @@
 #    Unit Tests
 ##############################################################################
 
-find_package(Boost COMPONENTS filesystem unit_test_framework system REQUIRED)
-
 set(TESTS
     Animation
     Archive

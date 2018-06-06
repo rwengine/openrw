@@ -72,7 +72,6 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
         target_link_libraries(rw_interface INTERFACE "stdc++fs")
     endif()
 elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
-    find_package(Boost COMPONENTS system filesystem REQUIRED)
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
     target_include_directories(rw_interface INTERFACE ${Boost_INCLUDE_DIRS})
     target_link_libraries(rw_interface INTERFACE
@@ -144,10 +143,6 @@ foreach(SAN ${ENABLE_SANITIZERS})
 endforeach()
 
 include(CMakeParseArguments)
-
-if(CHECK_IWYU)
-    find_package(IncludeWhatYouUse REQUIRED)
-endif()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
