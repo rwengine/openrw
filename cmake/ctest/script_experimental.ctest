@@ -43,10 +43,10 @@ endif()
 set(RUN_MEMCHECK FALSE) #TODO
 
 set(APPEND_RESULTS FALSE)
-if($ENV{SUBMIT})
-    set(SUBMIT TRUE)
+if($ENV{USE_CONAN})
+    set(RES TRUE)
 else()
-    set(SUBMIT FALSE)
+    set(RES FALSE)
 endif()
 
 set(EMPTY_BINARY_DIR TRUE)

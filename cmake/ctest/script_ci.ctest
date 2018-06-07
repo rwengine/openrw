@@ -37,7 +37,7 @@ set(ERROR_MESSAGES)
 set(SEPARATE_TEST_SUITES FALSE)
 set(RUN_COVERAGE FALSE)
 set(RUN_MEMCHECK FALSE)
-set(SUBMIT TRUE)
+openrw_should_submit_ci(SUBMIT)
 
 # Build with no data and test
 set(BUILDER_NAME "${BUILDER_NAME_BASE}-nodata")
