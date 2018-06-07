@@ -1,0 +1,66 @@
+FROM ubuntu:rolling
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends --no-upgrade -y \
+        build-essential \
+        cmake \
+        gcc-8 \
+        g++-8 \
+            # scripts to install conan \
+            python3-pip \
+            python3-distutils \
+            python3-setuptools \
+            python3-wheel \
+            # packet build requirements \
+            git \
+            autoconf \
+            automake \
+            autotools-dev \
+            libtool \
+            m4 \
+            sudo \
+            # conan-qt5 dependencies https://github.com/bincrafters/conan-qt/blob/stable/5.11/conanfile.py \
+            libx11-6 \
+            libfontconfig1-dev \
+            libxrender-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxfixes-dev \
+            libxft-dev \
+            libxi-dev \
+            libgl1-mesa-dev \
+            libxcb1 \
+            libxcb1-dev \
+            libxrandr-dev \
+            libx11-xcb1 \
+            libx11-xcb-dev \
+            libxcb-keysyms1 \
+            libxcb-keysyms1-dev \
+            libxcb-image0 \
+            libxcb-image0-dev \
+            libxcb-shm0 \
+            libxcb-shm0-dev \
+            libxcb-icccm4 \
+            libx11-dev \
+            libxcb-icccm4-dev \
+            libxcb-sync1 \
+            libxcb-sync-dev \
+            libxcb-xfixes0-dev \
+            libxcb-shape0-dev \
+            libxcb-render-util0-dev \
+            libxcb-randr0-dev \
+            libxcb-render-util0 \
+            libxcb-glx0-dev \
+            libxcb-xinerama0 \
+            libxcb-xinerama0-dev \
+            # conan-ffmpeg dependencies https://github.com/bincrafters/conan-ffmpeg/blob/stable/3.4/conanfile.py \
+            libasound2-dev \
+            libpulse-dev \
+            # conan-sdl2 dependencies https://github.com/bincrafters/conan-sdl2/blob/stable/2.0.8/conanfile.py\
+            libxinerama-dev \
+            libxkbcommon-dev \
+    && apt-get clean
+
+# RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 50 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+
+CMD [ /bin/bash ]

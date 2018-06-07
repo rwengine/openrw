@@ -11,3 +11,6 @@ if(MODEL_NAME STREQUAL "EXPERIMENTAL")
 else()
     set(CHECK_INCLUDES FALSE)
 endif()
+
+set(CONAN_ARCH "x86_64")
+set(CONAN_PROFILE "${CTEST_SOURCE_DIRECTORY}/scripts/conan/darwin")

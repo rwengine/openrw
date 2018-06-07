@@ -20,6 +20,10 @@ matrix:
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
+  - os: linux
+    env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1
+    script:
+      - scripts/docker/docker_travis.sh "conan_base.docker"
   - os: osx
     env: NAME="Apple macOS" NAME_SUFFIX="mac"
     osx_image: xcode9.2

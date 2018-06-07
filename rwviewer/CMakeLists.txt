@@ -27,9 +27,10 @@ add_executable(rwviewer WIN32
     )
 
 target_link_libraries(rwviewer
-    rwengine
-    Qt5::OpenGL
-    Qt5::Widgets
+    PRIVATE
+        rwengine
+        Qt5::OpenGL
+        Qt5::Widgets
     )
 
 openrw_target_apply_options(TARGET rwviewer)
@@ -37,3 +38,8 @@ openrw_target_apply_options(TARGET rwviewer)
 install(TARGETS rwviewer
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
+
+if(USE_CONAN)
+    set(QT5_ROOT "${CONAN_QT_ROOT}")
+    configure_file(qt.conf.in qt.conf)
+endif()

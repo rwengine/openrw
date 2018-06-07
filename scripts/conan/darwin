@@ -1,0 +1,8 @@
+include(default)
+
+[options]
+openrw:viewer=True
+# https://github.com/bincrafters/community/issues/120
+ffmpeg:vdpau=False
+ffmpeg:vaapi=False
+ffmpeg:xcb=False

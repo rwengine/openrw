@@ -1,13 +1,11 @@
 # This file does:
 # - check whether all arguments are defined,
-# - clean the build directory,
 # - configure, build and test,
 # - coverage and memcheck,
 # - submit
 
 set(_ARGS_BOOL
-    EMPTY_BINARY_DIR
-
+    USE_CONAN
     DEBUG
     CHECK_INCLUDES
     BUILD_VIEWER
@@ -32,6 +30,9 @@ set(_ARGS_ONEVAL
     BUILDER_NAME
     BUILD_NAME
 
+    CONAN_ARCH
+    CONAN_PROFILE
+
     CMAKE_GENERATOR
     COVERAGE_COMMAND
     )
@@ -55,17 +56,6 @@ set(CTEST_COVERAGE_COMMAND "${COVERAGE_COMMAND}")
 set(CTEST_SITE "${BUILDER_NAME}")
 set(CTEST_BUILD_NAME "${BUILD_NAME}")
 
-set(NUMBER_ERRORS "0")
-set(NUMBER_WARNINGS "0")
-
-if(EMPTY_BINARY_DIR)
-    message(STATUS "Removing binary directory '${CTEST_BINARY_DIRECTORY}'...")
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt")
-        message(STATUS "CMakeCache.txt file exists ==> removing")
-        ctest_empty_binary_directory("${CTEST_BINARY_DIRECTORY}")
-    endif()
-endif()
-
 set(_CTEST_START_EXTRA_ARGS)
 set(_CTEST_CONFIGURE_EXTRA_ARGS)
 if(APPEND_RESULTS)
@@ -75,6 +65,70 @@ endif()
 
 message(STATUS "Starting test...")
 ctest_start("${MODEL_NAME}" ${_CTEST_START_EXTRA_ARGS})
+
+if(USE_CONAN)
+    find_program(CONAN_BIN
+        NAMES conan
+        HINTS
+            "$ENV{HOME}/.local/bin"
+            )
+    if(NOT CONAN_BIN)
+        message(STATUS "Cannot find conan. Installing conan...")
+        execute_process(
+            COMMAND pip3 install --user conan
+            RESULT_VARIABLE RES
+            )
+        if(RES)
+            message(FATAL_ERROR "Installation of conan failed")
+        endif()
+
+        find_program(CONAN_BIN
+            NAMES conan
+            HINTS
+                "$ENV{HOME}/.local/bin"
+                )
+        message(STATUS "Found conan: ${CONAN_BIN}")
+        if(NOT CONAN_BIN)
+            message(FATAL_ERROR "Cannot find conan.")
+        endif()
+
+        execute_process(
+            COMMAND "${CONAN_BIN}" user
+            RESULT_VARIABLE RES
+            )
+        if(RES)
+            message(FATAL_ERROR "Configuration of conan failed")
+        endif()
+        execute_process(
+            COMMAND "${CONAN_BIN}" remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
+            RESULT_VARIABLE RES
+            )
+        if(RES)
+            message(FATAL_ERROR "Adding bincrafters remote failed")
+        endif()
+    endif()
+
+    if(DEBUG)
+        set(CONAN_CONFIGURATION "Debug")
+    else()
+        set(CONAN_CONFIGURATION "Release")
+    endif()
+
+    execute_process(
+        COMMAND
+            "${CONAN_BIN}" install "${CTEST_SOURCE_DIRECTORY}" -pr "${CONAN_PROFILE}"
+                -s arch=${CONAN_ARCH} -s build_type=${CONAN_CONFIGURATION} --build missing
+        WORKING_DIRECTORY "${CTEST_BINARY_DIRECTORY}"
+        RESULT_VARIABLE RES
+        )
+    if(RES)
+        message(FATAL_ERROR "conan install failed")
+    endif()
+
+    list(APPEND CONFIGURE_EXTRA_OPTIONS
+        "-DBOOST_STATIC=True"
+        )
+endif()
 
 # CTEST_CONFIGURATION_TYPE is needed on Windows (no leading underscore)
 if(DEBUG)
@@ -96,6 +150,7 @@ set(_CONFIGURE_OPTIONS
     "-DCHECK_INCLUDES=${CHECK_INCLUDES}"
     "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
     "-DENABLE_SANITIZERS=${ENABLE_SANITIZERS}"
+    "-DUSE_CONAN=${USE_CONAN}"
     )
 
 message(STATUS "Configuring...")
@@ -113,7 +168,6 @@ message(STATUS "Building...")
 ctest_build(
     CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
     NUMBER_ERRORS _NB_BUILD_ERRORS
-    NUMBER_WARNINGS _NB_BUILD_WARNINGS
     )
 
 if(RUN_TESTS)

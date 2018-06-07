@@ -27,5 +27,6 @@ set(ENABLE_SANITIZERS "" CACHE STRING "Enable selected sanitizer.")
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
 option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
 
-
 option(BOOST_STATIC "Link against static Boost libraries")
+
+option(USE_CONAN "Use Conan as packet manager")
