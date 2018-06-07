@@ -28,7 +28,10 @@ if(CHECK_INCLUDES)
     find_package(IncludeWhatYouUse REQUIRED)
 endif()
 
+# Do not link to SDL2main library
+set(SDL2_BUILDING_LIBRARY True)
 set(OpenGL_GL_PREFERENCE GLVND)
+
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
