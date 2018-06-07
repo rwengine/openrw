@@ -298,7 +298,6 @@ class Rampage {
     float endTime = 0.f;
     uint32_t killsRequired = 0;
     std::array<int32_t, 4> modelIDsToKill{};
-    bool onGoing = false;
     bool special = false;
     bool headshotOnly = false;
     std::unordered_map<int32_t, int32_t> modelIDsKilled{};
@@ -318,6 +317,8 @@ public:
     void init(const std::string& gxtEntry, const int32_t weaponID,
               const int32_t time, const int32_t kills,
               const std::array<int32_t, 4>& modelsToKill, const bool headshot);
+
+    float getRemainingTime() const;
 
     uint32_t getKillsForThisModel(ModelID model);
     void clearKills();
