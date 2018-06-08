@@ -141,6 +141,9 @@ void TextRenderer::setFontTexture(int index, const std::string& texture) {
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                               bool forceColour) {
+    if ((ti.text.empty()) || (ti.text[0] == '*'))
+        return;
+
     renderer->getRenderer()->pushDebugGroup("Text");
     renderer->getRenderer()->useProgram(textShader.get());
 
@@ -162,9 +165,6 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     for (size_t i = 0; i < text.length(); ++i) {
         char16_t c = text[i];
-
-        if (c == '*')
-           break;
 
         // Handle any markup changes.
         if (c == '~' && text.length() > i + 1) {
