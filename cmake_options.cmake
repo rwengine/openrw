@@ -29,4 +29,4 @@ option(CHECK_CLANGTIDY_FIX "Apply fixes from clang-tidy (!!!RUN ON CLEAN GIT TRE
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
 option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
 
-option(ENABLE_SANITIZERS "Enable selected sanitizer.")
+set(ENABLE_SANITIZERS "" CACHE STRING "Enable selected sanitizer.")
