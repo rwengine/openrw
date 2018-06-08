@@ -147,17 +147,26 @@ endforeach()
 
 include(CMakeParseArguments)
 
-if(CHECK_INCLUDES)
+if(CHECK_IWYU)
     find_package(IncludeWhatYouUse REQUIRED)
 endif()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
     cmake_parse_arguments("OPENRW_APPLY" "" "TARGET" "" ${ARGN})
-    if(CHECK_INCLUDES)
+    if(CHECK_IWYU)
         iwyu_check(TARGET "${OPENRW_APPLY_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
+        )
+    endif()
+
+    if(CHECK_CLANGTIDY)
+        clang_tidy_check_target(
+            TARGET "${OPENRW_APPLY_TARGET}"
+            FORMAT_STYLE "file"
+            FIX "${CHECK_CLANGTIDY_FIX}"
+            CHECK_ALL
         )
     endif()
 endfunction()

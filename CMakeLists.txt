@@ -16,6 +16,10 @@ find_package(GLM REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
 
+if(CHECK_CLANGTIDY)
+    find_package(ClangTidy REQUIRED)
+endif()
+
 # Include git hash in source
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)

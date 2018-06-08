@@ -21,7 +21,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release")
 endif()
 
-option(CHECK_INCLUDES "Analyze #includes in C and C++ source files")
+option(CHECK_IWYU "Enable IncludeWhatYouUse (Analyze #includes in C and C++ source files)")
+
+option(CHECK_CLANGTIDY "Enable clang-tidy (A clang-based C++ linter tool)")
+option(CHECK_CLANGTIDY_FIX "Apply fixes from clang-tidy (!!!RUN ON CLEAN GIT TREE!!!)")
 
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
 option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
