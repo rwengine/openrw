@@ -43,8 +43,8 @@ set(_ARGS_MULVAL
 foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
     set(_VAL "${${_ARG}}")
     message(STATUS "build parameter: ${_ARG}='${_VAL}'")
-    if(_VAL STREQUAL "")
-        message(FATAL_ERROR "Need value for build parameter '${_ARG}'")
+    if(NOT DEFINED _VAL)
+        message(FATAL_ERROR "Build parameter '${_ARG}' not defined")
     endif()
 endforeach()
 

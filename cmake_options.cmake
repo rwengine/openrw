@@ -26,4 +26,4 @@ option(CHECK_INCLUDES "Analyze #includes in C and C++ source files")
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
 option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
 
-option(ENABLE_SANITIZERS "Enable selected sanitizer.")
+set(ENABLE_SANITIZERS "" CACHE STRING "Enable selected sanitizer.")
