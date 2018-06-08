@@ -4,8 +4,10 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <glm/glm.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <rw/defines.hpp>
 
@@ -16,17 +18,21 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     std::string dataStr(file->data, file->length);
     std::stringstream ss(dataStr);
 
+    std::vector<std::string> lineParts;
+
     int numZooms = 0;
     ss >> numZooms;
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numZooms; ++i) {
-        float t = 0.f;
-        float z = 0.f;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::string line;
+        ss >> line;
+
+        boost::split(lineParts, line, boost::is_any_of(","));
+
+        float t = stof(lineParts[0]);
+        float z = stof(lineParts[1]);
+
         tracks.zoom[t] = z;
         tracks.duration = std::max(t, tracks.duration);
     }
@@ -38,12 +44,14 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numRotations; ++i) {
-        float t = 0.f;
-        float r = 0.f;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> r;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::string line;
+        ss >> line;
+
+        boost::split(lineParts, line, boost::is_any_of(","));
+
+        float t = stof(lineParts[0]);
+        float r = stof(lineParts[1]);
+
         tracks.rotation[t] = r;
         tracks.duration = std::max(t, tracks.duration);
     }
@@ -55,16 +63,17 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numPositions; ++i) {
-        float t = 0.f;
+        std::string line;
+        ss >> line;
+
+        boost::split(lineParts, line, boost::is_any_of(","));
+
+        float t = stof(lineParts[0]);
         glm::vec3 p;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> p.x;
-        ss.ignore(1, ',');
-        ss >> p.y;
-        ss.ignore(1, ',');
-        ss >> p.z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        p.x = stof(lineParts[1]);
+        p.y = stof(lineParts[2]);
+        p.z = stof(lineParts[3]);
+
         tracks.position[t] = p;
         tracks.duration = std::max(t, tracks.duration);
     }
@@ -76,16 +85,17 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numTargets; ++i) {
-        float t = 0.f;
+        std::string line;
+        ss >> line;
+
+        boost::split(lineParts, line, boost::is_any_of(","));
+
+        float t = stof(lineParts[0]);
         glm::vec3 p;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> p.x;
-        ss.ignore(1, ',');
-        ss >> p.y;
-        ss.ignore(1, ',');
-        ss >> p.z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        p.x = stof(lineParts[1]);
+        p.y = stof(lineParts[2]);
+        p.z = stof(lineParts[3]);
+
         tracks.target[t] = p;
         tracks.duration = std::max(t, tracks.duration);
     }
