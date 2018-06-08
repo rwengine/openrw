@@ -7685,8 +7685,7 @@ bool opcode_02d8(const ScriptArguments& args, const ScriptCharacter character, c
     opcode 02d9
 */
 void opcode_02d9(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x02d9);
-    RW_UNUSED(args);
+    args.getState()->bigNVeinyPickupsCollected = 0;
 }
 
 /**

@@ -314,7 +314,7 @@ bool ItemPickup::onPlayerTouch() {
         totalRounds /= 5;
     }
 
-    const auto& character = engine->getPlayer()->getCharacter();
+    auto character = engine->getPlayer()->getCharacter();
 
     character->addToInventory(item->inventorySlot, totalRounds);
 
@@ -353,7 +353,7 @@ HealthPickup::HealthPickup(GameWorld* world, const glm::vec3& position,
 }
 
 bool HealthPickup::onPlayerTouch() {
-    const auto& character = engine->getPlayer()->getCharacter();
+    auto character = engine->getPlayer()->getCharacter();
 
     if (character->getCurrentState().health >= 100.f) {
         return false;
@@ -370,7 +370,7 @@ ArmourPickup::ArmourPickup(GameWorld* world, const glm::vec3& position,
 }
 
 bool ArmourPickup::onPlayerTouch() {
-    const auto& character = engine->getPlayer()->getCharacter();
+    auto character = engine->getPlayer()->getCharacter();
 
     if (character->getCurrentState().armour >= 100.f) {
         return false;
@@ -388,7 +388,7 @@ CollectablePickup::CollectablePickup(GameWorld* world,
 }
 
 bool CollectablePickup::onPlayerTouch() {
-    const auto& state = engine->state;
+    auto state = engine->state;
 
     if (state->playerInfo.hiddenPackagesCollected ==
         state->playerInfo.hiddenPackageCount) {
