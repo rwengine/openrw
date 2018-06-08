@@ -18,6 +18,8 @@
 #include <engine/ScreenText.hpp>
 #include <objects/ObjectTypes.hpp>
 
+#include <script/ScriptTypes.hpp>
+
 class GameWorld;
 class GameObject;
 class ScriptMachine;
@@ -330,7 +332,7 @@ public:
      * @brief Stores a pointer to script global that stores the on-mission
      * state.
      */
-    int32_t* scriptOnMissionFlag;
+    ScriptInt* scriptOnMissionFlag;
 
     /** Objects created by the current mission */
     std::vector<GameObject*> missionObjects;
@@ -389,7 +391,7 @@ public:
     /**
      * Script timer
      */
-    int32_t* scriptTimerVariable = nullptr;
+    ScriptInt* scriptTimerVariable = nullptr;
     bool scriptTimerPaused = false;
 
     /** The camera near value currently set by the script */
