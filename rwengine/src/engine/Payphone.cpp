@@ -31,9 +31,6 @@ Payphone::Payphone(GameWorld* engine_, const int id_, const glm::vec2 coord)
     message.clear();
 }
 
-Payphone::~Payphone() {
-}
-
 void Payphone::enable() {
     state = State::Ringing;
 }
