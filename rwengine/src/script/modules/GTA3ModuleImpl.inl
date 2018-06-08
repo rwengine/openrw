@@ -2320,7 +2320,7 @@ void opcode_00d8(const ScriptArguments& args) {
         missionObjects.clear();
     }
 
-    auto player = args.getWorld()->getPlayer();
+    const auto& player = args.getWorld()->getPlayer();
     player->freeFromCutscene();
 }
 
@@ -7844,7 +7844,7 @@ void opcode_02e4(const ScriptArguments& args, const ScriptString arg1) {
     args.getWorld()->loadCutscene(arg1);
     args.getState()->cutsceneStartTime = -1.f;
 
-    auto player = args.getWorld()->getPlayer();
+    const auto& player = args.getWorld()->getPlayer();
     player->prepareForCutscene();
 }
 
@@ -7936,7 +7936,7 @@ bool opcode_02e9(const ScriptArguments& args) {
 void opcode_02ea(const ScriptArguments& args) {
     args.getWorld()->clearCutscene();
 
-    auto player = args.getWorld()->getPlayer();
+    const auto& player = args.getWorld()->getPlayer();
     player->freeFromCutscene();
 }
 
