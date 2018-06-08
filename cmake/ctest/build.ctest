@@ -18,6 +18,8 @@ set(_ARGS_BOOL
 
     RUN_MEMCHECK
 
+    ENABLE_SANITIZERS
+
     APPEND_RESULTS
     RUN_COVERAGE
     SUBMIT
@@ -41,8 +43,8 @@ set(_ARGS_MULVAL
 foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
     set(_VAL "${${_ARG}}")
     message(STATUS "build parameter: ${_ARG}='${_VAL}'")
-    if(_VAL STREQUAL "")
-        message(FATAL_ERROR "Need value for build parameter '${_ARG}'")
+    if(NOT DEFINED _VAL)
+        message(FATAL_ERROR "Build parameter '${_ARG}' not defined")
     endif()
 endforeach()
 
@@ -93,6 +95,7 @@ set(_CONFIGURE_OPTIONS
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
     "-DCHECK_INCLUDES=${CHECK_INCLUDES}"
     "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
+    "-DENABLE_SANITIZERS=${ENABLE_SANITIZERS}"
     )
 
 message(STATUS "Configuring...")
