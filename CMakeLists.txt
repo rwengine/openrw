@@ -15,6 +15,7 @@ find_package(Bullet REQUIRED)
 find_package(GLM REQUIRED)
 find_package(FFmpeg REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)

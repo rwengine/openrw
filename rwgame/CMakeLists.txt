@@ -61,8 +61,11 @@ target_link_libraries(rwgame
         rwengine
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         SDL2::SDL2
+        SDL2_image
     )
 
 openrw_target_apply_options(TARGET rwgame)
 
 install(TARGETS rwgame RUNTIME DESTINATION "${BIN_DIR}")
+
+configure_file(logo.png logo.png COPYONLY)
