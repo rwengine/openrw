@@ -160,15 +160,6 @@ void RWGame::startScript(const std::string& name) {
     }
 }
 
-PlayerController* RWGame::getPlayer() {
-    auto object = world->pedestrianPool.find(state.playerObject);
-    if (object) {
-        auto controller = static_cast<CharacterObject*>(object)->controller;
-        return static_cast<PlayerController*>(controller);
-    }
-    return nullptr;
-}
-
 // Modifiers for GTA3 we try to recreate
 #define RW_GAME_VERSION 1100
 #define RW_GAME_GTA3_GERMAN 0
@@ -192,7 +183,7 @@ void RWGame::handleCheatInput(char symbol) {
 
     // Player related cheats
     {
-        auto player = getPlayer()->getCharacter();
+        auto player = getWorld()->getPlayer()->getCharacter();
 
 #ifdef RW_GAME_GTA3_GERMAN  // Germans got their own cheat
         std::string health_cheat = "GESUNDHEIT";
@@ -893,7 +884,7 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
     }
 
     std::string keyName = SDL_GetKeyName(event.key.keysym.sym);
-    if (getPlayer() && keyName.length() == 1) {
+    if (getWorld()->getPlayer() && keyName.length() == 1) {
         char symbol = keyName[0];
         handleCheatInput(symbol);
     }

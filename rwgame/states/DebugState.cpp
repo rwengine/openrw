@@ -35,8 +35,8 @@ static void jumpCharacter(RWGame* game, CharacterObject* player,
 
 std::shared_ptr<Menu> DebugState::createDebugMenu() {
     CharacterObject* player = nullptr;
-    if (game->getPlayer()) {
-        player = game->getPlayer()->getCharacter();
+    if (game->getWorld()->getPlayer()) {
+        player = game->getWorld()->getPlayer()->getCharacter();
     }
 
     auto menu = Menu::create(
@@ -78,8 +78,8 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
 
 std::shared_ptr<Menu> DebugState::createMapMenu() {
     CharacterObject* player = nullptr;
-    if (game->getPlayer()) {
-        player = game->getPlayer()->getCharacter();
+    if (game->getWorld()->getPlayer()) {
+        player = game->getWorld()->getPlayer()->getCharacter();
     }
 
     auto menu = Menu::create(
@@ -468,7 +468,7 @@ void DebugState::printCameraDetails() {
 }
 
 void DebugState::spawnVehicle(unsigned int id) {
-    auto ch = game->getPlayer()->getCharacter();
+    auto ch = game->getWorld()->getPlayer()->getCharacter();
     if (!ch) return;
 
     auto playerRot = ch->getRotation();
@@ -480,7 +480,7 @@ void DebugState::spawnVehicle(unsigned int id) {
 }
 
 void DebugState::spawnFollower(unsigned int id) {
-    auto ch = game->getPlayer()->getCharacter();
+    auto ch = game->getWorld()->getPlayer()->getCharacter();
     if (!ch) return;
 
     glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
@@ -498,8 +498,8 @@ void DebugState::spawnFollower(unsigned int id) {
 
 void DebugState::giveItem(int slot) {
     CharacterObject* player = nullptr;
-    if (game->getPlayer()) {
-        player = game->getPlayer()->getCharacter();
+    if (game->getWorld()->getPlayer()) {
+        player = game->getWorld()->getPlayer()->getCharacter();
     }
 
     if (player) {

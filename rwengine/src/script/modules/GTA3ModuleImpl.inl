@@ -6743,8 +6743,7 @@ void opcode_0254(const ScriptArguments& args) {
 void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
     coord = script::getGround(args, coord);
     args.getState()->overrideRestart(glm::vec4(coord, heading));
-    // @todo Add support for multiple players
-    PlayerController* player = args.getState()->world->players.at(0);
+    auto player = args.getWorld()->getPlayer();
     player->requestMissionRestart();
 }
 
@@ -8180,6 +8179,7 @@ void opcode_02fa(const ScriptArguments& args, const ScriptGarage garage0, const 
 */
 void opcode_02fb(const ScriptArguments& args, const ScriptFloat arg1, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4, const ScriptFloat arg5, const ScriptFloat arg6, const ScriptFloat arg7, const ScriptFloat arg8, const ScriptFloat arg9, const ScriptFloat arg10) {
     RW_UNIMPLEMENTED_OPCODE(0x02fb);
+    RW_UNUSED(args);
     RW_UNUSED(arg1);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
