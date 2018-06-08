@@ -25,6 +25,7 @@ set(TESTS
     Menu
     Object
     ObjectData
+    Payphone
     Pickup
     Renderer
     RWBStream
