@@ -3,7 +3,6 @@
 
 //Based on https://gist.github.com/socantre/3472964
 #include <cstring> // memcpy
-#include <type_traits> // is_trivially_copyable
 #include "rw/defines.hpp" // RW_ASSERT
 
 template <class Dest, class Source>
