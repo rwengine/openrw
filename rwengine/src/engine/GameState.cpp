@@ -105,11 +105,11 @@ GameState::GameState()
     , policeRestarts{}
     , hospitalIslandOverride(false)
     , policeIslandOverride(false)
-    , fadeOut(true)
+    , fadeIn(true)
     , fadeStart(0.f)
     , fadeTime(0.f)
     , fadeSound(false)
-    , fadeColour{}
+    , fadeColour{0.f, 0.f, 0.f}
     , skipCutscene(false)
     , isIntroPlaying(false)
     , currentCutscene(nullptr)
@@ -206,12 +206,12 @@ const glm::vec4 GameState::getClosestRestart(
 
 void GameState::fade(float time, bool f) {
     fadeTime = time;
-    fadeOut = f;
+    fadeIn = f;
     fadeStart = world->getGameTime();
 }
 
 bool GameState::isFading() const {
-    return world->getGameTime() < fadeStart + fadeTime;
+    return world->getGameTime() <= fadeStart + fadeTime;
 }
 
 void GameState::setFadeColour(glm::i32vec3 colour) {
