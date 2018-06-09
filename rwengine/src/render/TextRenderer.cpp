@@ -141,7 +141,7 @@ void TextRenderer::setFontTexture(int index, const std::string& texture) {
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                               bool forceColour) {
-    if ((ti.text.empty()) || (ti.text[0] == '*'))
+    if (ti.text.empty() || ti.text[0] == '*')
         return;
 
     renderer->getRenderer()->pushDebugGroup("Text");
