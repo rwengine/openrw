@@ -38,3 +38,8 @@ init:
 
 build_script:
   - ctest -VV -S cmake/ctest/script_ci.ctest
+
+after_build:
+  - cd "%APPVEYOR_BUILD_FOLDER%\build"
+  - cpack -C Release -G TXZ
+  - appveyor PushArtifact OpenRW-%APPVEYOR_REPO_COMMIT:~0,8%.tar.xz

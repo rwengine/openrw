@@ -14,9 +14,6 @@ set_property(CACHE FAILED_CHECK_ACTION PROPERTY STRINGS "IGNORE" "ABORT" "BREAKP
 set(FILESYSTEM_LIBRARY "BOOST" CACHE STRING "Which filesystem library to use")
 set_property(CACHE FILESYSTEM_LIBRARY PROPERTY STRINGS "CXX17" "CXXTS" "BOOST")
 
-set(BIN_DIR "bin" CACHE STRING "Prefix subdirectory to put the binaries in.")
-set(DOC_DIR "share/doc/openrw" CACHE STRING "Prefix subdirectory to put the documentation in.")
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release")
 endif()

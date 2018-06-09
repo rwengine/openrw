@@ -114,3 +114,7 @@ else()
             TIMEOUT 300
         )
 endif()
+
+install(TARGETS rwtests
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )

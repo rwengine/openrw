@@ -63,4 +63,16 @@ target_link_libraries(rwlib
         OpenGL::GL
     )
 
+set_target_properties(rwlib
+        PROPERTIES
+            OUTPUT_NAME rw
+    )
+
 openrw_target_apply_options(TARGET rwlib)
+
+if(BUILD_SHARED_LIBS)
+    install(TARGETS rwlib
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        )
+endif()
