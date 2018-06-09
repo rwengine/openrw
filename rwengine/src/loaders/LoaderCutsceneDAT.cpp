@@ -30,8 +30,8 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
 
         boost::split(lineParts, line, boost::is_any_of(","));
 
-        float t = stof(lineParts[0]);
-        float z = stof(lineParts[1]);
+        float t = stof(lineParts.at(0));
+        float z = stof(lineParts.at(1));
 
         tracks.zoom[t] = z;
         tracks.duration = std::max(t, tracks.duration);
@@ -49,8 +49,8 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
 
         boost::split(lineParts, line, boost::is_any_of(","));
 
-        float t = stof(lineParts[0]);
-        float r = stof(lineParts[1]);
+        float t = stof(lineParts.at(0));
+        float r = stof(lineParts.at(1));
 
         tracks.rotation[t] = r;
         tracks.duration = std::max(t, tracks.duration);
@@ -68,11 +68,11 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
 
         boost::split(lineParts, line, boost::is_any_of(","));
 
-        float t = stof(lineParts[0]);
+        float t = stof(lineParts.at(0));
         glm::vec3 p;
-        p.x = stof(lineParts[1]);
-        p.y = stof(lineParts[2]);
-        p.z = stof(lineParts[3]);
+        p.x = stof(lineParts.at(1));
+        p.y = stof(lineParts.at(2));
+        p.z = stof(lineParts.at(3));
 
         tracks.position[t] = p;
         tracks.duration = std::max(t, tracks.duration);
@@ -90,11 +90,11 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
 
         boost::split(lineParts, line, boost::is_any_of(","));
 
-        float t = stof(lineParts[0]);
+        float t = stof(lineParts.at(0));
         glm::vec3 p;
-        p.x = stof(lineParts[1]);
-        p.y = stof(lineParts[2]);
-        p.z = stof(lineParts[3]);
+        p.x = stof(lineParts.at(1));
+        p.y = stof(lineParts.at(2));
+        p.z = stof(lineParts.at(3));
 
         tracks.target[t] = p;
         tracks.duration = std::max(t, tracks.duration);
