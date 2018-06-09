@@ -1,9 +1,9 @@
 #include "DrawUI.hpp"
 #include <ai/PlayerController.hpp>
-#include <engine/GameState.hpp>
-#include <objects/CharacterObject.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
+#include <objects/CharacterObject.hpp>
 #include <render/GameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>
@@ -24,17 +24,49 @@ const glm::u8vec3 ui_timeColour(196, 165, 119);
 const glm::u8vec3 ui_moneyColour(89, 113, 147);
 const glm::u8vec3 ui_healthColour(187, 102, 47);
 const glm::u8vec3 ui_armourColour(123, 136, 93);
+const glm::u8vec3 ui_rampageTimerColour(123, 136, 93);
 const glm::u8vec3 ui_shadowColour(0, 0, 0);
 constexpr float ui_mapSize = 150.f;
 constexpr float ui_worldSizeMin = 200.f;
 constexpr float ui_worldSizeMax = 300.f;
 
+void drawRampage(GameWorld* world, GameRenderer* render) {
+    float rampageTimerX = 0 + ui_infoMargin;
+    float rampageTimerY = 0.f + ui_outerMargin;
+
+    TextRenderer::TextInfo ti;
+    ti.font = 1;
+    ti.size = ui_textSize;
+    ti.align = TextRenderer::TextInfo::Left;
+
+    {
+        float remainingTime = world->state->rampage.getRemainingTime();
+        int32_t seconds = static_cast<int32_t>(remainingTime);
+
+        std::stringstream ss;
+        ss << std::setw(1) << std::setfill('0')
+           <<  seconds / 60 << std::setw(0)
+           << ":" << std::setw(2)
+           << seconds % 60;
+
+        ti.text = GameStringUtil::fromString(ss.str());
+    }
+
+    ti.baseColour = ui_shadowColour;
+    ti.screenPosition = glm::vec2(rampageTimerX + 1.f, rampageTimerY + 1.f);
+    render->text.renderText(ti);
+
+    ti.baseColour = ui_rampageTimerColour;
+    ti.screenPosition = glm::vec2(rampageTimerX, rampageTimerY);
+    render->text.renderText(ti);
+}
+
 void drawMap(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render) {
     MapRenderer::MapInfo map;
 
-    if (world->state->hudFlash != HudFlash::FlashRadar
-        || std::fmod(world->getGameTime(), 0.5f) >= .25f) {
+    if (world->state->hudFlash != HudFlash::FlashRadar ||
+        std::fmod(world->getGameTime(), 0.5f) >= .25f) {
         glm::quat camRot = currentView.rotation;
 
         map.rotation = glm::roll(camRot) - glm::half_pi<float>();
@@ -108,9 +140,10 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
     infoTextY += ui_textHeight;
 
-    if ((world->state->hudFlash != HudFlash::FlashHealth
-        && player->getCharacter()->getCurrentState().health > ui_lowHealth)
-        || std::fmod(world->getGameTime(), 0.5f) >= .25f) { // UI: Blinking health indicator if health is low
+    if ((world->state->hudFlash != HudFlash::FlashHealth &&
+         player->getCharacter()->getCurrentState().health > ui_lowHealth) ||
+        std::fmod(world->getGameTime(), 0.5f) >=
+            .25f) {  // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().health;
@@ -201,8 +234,8 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
             // The clip is actually there, but it holds just one shot/charge
             displayBulletsTotal += slotInfo.bulletsClip;
 
-            ti.text = GameStringUtil::fromString(
-                std::to_string(displayBulletsTotal));
+            ti.text =
+                GameStringUtil::fromString(std::to_string(displayBulletsTotal));
         } else {
             // Limit the maximal displayed length for the total bullet count
             if (slotInfo.bulletsTotal > 9999) {
@@ -229,6 +262,7 @@ void drawHUD(ViewCamera& currentView, PlayerController* player,
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
+        drawRampage(world, render);
     }
 }
 
