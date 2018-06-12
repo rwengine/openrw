@@ -3456,12 +3456,10 @@ void opcode_014d(const ScriptArguments& args, const ScriptString arg1, const Scr
     @brief start_timer_at %1d%
 
     opcode 014e
-    @arg arg1G Global timer storage
+    @arg timer
 */
-void opcode_014e(const ScriptArguments& args, ScriptInt& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x014e);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(args);
+void opcode_014e(const ScriptArguments& args, ScriptInt& timer) {
+    args.getState()->scriptTimerVariable = &timer;
 }
 
 /**
@@ -3470,10 +3468,9 @@ void opcode_014e(const ScriptArguments& args, ScriptInt& arg1G) {
     opcode 014f
     @arg arg1G Global timer storage
 */
-void opcode_014f(const ScriptArguments& args, ScriptInt& arg1G) {
-    RW_UNIMPLEMENTED_OPCODE(0x014f);
-    RW_UNUSED(arg1G);
-    RW_UNUSED(args);
+void opcode_014f(const ScriptArguments& args, ScriptInt& unused) {
+    RW_UNUSED(unused);
+    args.getState()->scriptTimerVariable = nullptr;
 }
 
 /**
@@ -10413,10 +10410,8 @@ void opcode_0395(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     opcode 0396
     @arg arg1 Boolean true/false
 */
-void opcode_0396(const ScriptArguments& args, const ScriptBoolean arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0396);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_0396(const ScriptArguments& args, const ScriptBoolean paused) {
+    args.getState()->scriptTimerPaused = paused;
 }
 
 /**
