@@ -1,9 +1,9 @@
 #include "DrawUI.hpp"
 #include <ai/PlayerController.hpp>
-#include <engine/GameState.hpp>
-#include <objects/CharacterObject.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
+#include <objects/CharacterObject.hpp>
 #include <render/GameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>
@@ -12,11 +12,16 @@
 
 constexpr size_t ui_textSize = 25;
 constexpr size_t ui_textHeight = 22;
+constexpr size_t ui_elementMargin = 3;
 constexpr size_t ui_outerMargin = 20;
 constexpr size_t ui_infoMargin = 10;
 constexpr size_t ui_weaponSize = 64;
 constexpr size_t ui_ammoSize = 14;
 constexpr size_t ui_ammoHeight = 16;
+constexpr size_t ui_wantedLevelHeight =
+    ui_outerMargin + ui_weaponSize + ui_elementMargin;
+constexpr size_t ui_scriptTimerHeight =
+    ui_wantedLevelHeight + ui_textHeight + ui_elementMargin;
 constexpr size_t ui_armourOffset = ui_textSize * 3;
 constexpr size_t ui_maxWantedLevel = 6;
 constexpr size_t ui_lowHealth = 9;
@@ -24,17 +29,49 @@ const glm::u8vec3 ui_timeColour(196, 165, 119);
 const glm::u8vec3 ui_moneyColour(89, 113, 147);
 const glm::u8vec3 ui_healthColour(187, 102, 47);
 const glm::u8vec3 ui_armourColour(123, 136, 93);
+const glm::u8vec3 ui_scriptTimerColour(186, 101, 50);
 const glm::u8vec3 ui_shadowColour(0, 0, 0);
 constexpr float ui_mapSize = 150.f;
 constexpr float ui_worldSizeMin = 200.f;
 constexpr float ui_worldSizeMax = 300.f;
 
+void drawScriptTimer(GameWorld* world, GameRenderer* render) {
+    if (world->state->scriptTimerVariable) {
+        float scriptTimerTextX =
+            render->getRenderer()->getViewport().x - ui_outerMargin;
+        float scriptTimerTextY = ui_scriptTimerHeight;
+
+        TextRenderer::TextInfo ti;
+        ti.font = 1;
+        ti.size = ui_textSize;
+        ti.align = TextRenderer::TextInfo::Right;
+
+        {
+            int32_t seconds = *world->state->scriptTimerVariable / 1000;
+            std::stringstream ss;
+            ss << std::setw(2) << std::setfill('0') << seconds / 60
+               << std::setw(0) << ":" << std::setw(2) << seconds % 60;
+
+            ti.text = GameStringUtil::fromString(ss.str());
+        }
+
+        ti.baseColour = ui_shadowColour;
+        ti.screenPosition =
+            glm::vec2(scriptTimerTextX + 1.f, scriptTimerTextY + 1.f);
+        render->text.renderText(ti);
+
+        ti.baseColour = ui_scriptTimerColour;
+        ti.screenPosition = glm::vec2(scriptTimerTextX, scriptTimerTextY);
+        render->text.renderText(ti);
+    }
+}
+
 void drawMap(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render) {
     MapRenderer::MapInfo map;
 
-    if (world->state->hudFlash != HudFlash::FlashRadar
-        || std::fmod(world->getGameTime(), 0.5f) >= .25f) {
+    if (world->state->hudFlash != HudFlash::FlashRadar ||
+        std::fmod(world->getGameTime(), 0.5f) >= .25f) {
         glm::quat camRot = currentView.rotation;
 
         map.rotation = glm::roll(camRot) - glm::half_pi<float>();
@@ -67,7 +104,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
                   (ui_outerMargin + ui_weaponSize);
     float iconY = ui_outerMargin;
     float wantedX = render->getRenderer()->getViewport().x - (ui_outerMargin);
-    float wantedY = ui_outerMargin + ui_weaponSize + 3.f;
+    float wantedY = ui_wantedLevelHeight;
 
     TextRenderer::TextInfo ti;
     ti.font = 1;
@@ -81,12 +118,14 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
         ti.text = GameStringUtil::fromString(ss.str());
     }
+
     ti.baseColour = ui_shadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
     render->text.renderText(ti);
 
     ti.baseColour = ui_timeColour;
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
+
     render->text.renderText(ti);
 
     infoTextY += ui_textHeight;
@@ -98,25 +137,30 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
         ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str());
     }
+
     ti.baseColour = ui_shadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
     render->text.renderText(ti);
 
     ti.baseColour = ui_moneyColour;
+
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
     render->text.renderText(ti);
 
     infoTextY += ui_textHeight;
 
-    if ((world->state->hudFlash != HudFlash::FlashHealth
-        && player->getCharacter()->getCurrentState().health > ui_lowHealth)
-        || std::fmod(world->getGameTime(), 0.5f) >= .25f) { // UI: Blinking health indicator if health is low
+    if ((world->state->hudFlash != HudFlash::FlashHealth &&
+         player->getCharacter()->getCurrentState().health > ui_lowHealth) ||
+        std::fmod(world->getGameTime(), 0.5f) >=
+            .25f) {  // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().health;
         ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str());
+
         ti.baseColour = ui_shadowColour;
         ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
+
         render->text.renderText(ti);
 
         ti.baseColour = ui_healthColour;
@@ -129,6 +173,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(3) << std::setfill('0')
            << (int)player->getCharacter()->getCurrentState().armour;
         ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str());
+
         ti.baseColour = ui_shadowColour;
         ti.screenPosition =
             glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY + 1.f);
@@ -201,8 +246,8 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
             // The clip is actually there, but it holds just one shot/charge
             displayBulletsTotal += slotInfo.bulletsClip;
 
-            ti.text = GameStringUtil::fromString(
-                std::to_string(displayBulletsTotal));
+            ti.text =
+                GameStringUtil::fromString(std::to_string(displayBulletsTotal));
         } else {
             // Limit the maximal displayed length for the total bullet count
             if (slotInfo.bulletsTotal > 9999) {
@@ -229,6 +274,7 @@ void drawHUD(ViewCamera& currentView, PlayerController* player,
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
+        drawScriptTimer(world, render);
     }
 }
 
