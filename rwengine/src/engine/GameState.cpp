@@ -217,3 +217,8 @@ bool GameState::isFading() const {
 void GameState::setFadeColour(glm::i32vec3 colour) {
     fadeColour = colour;
 }
+
+void GameState::showHelpMessage(const GameStringKey& id) {
+    text.addText<ScreenTextType::Help>(
+            ScreenTextEntry::makeHelp(id, world->data->texts.text(id)));
+}
