@@ -51,10 +51,6 @@ else()
     rwdep_wrap_find_packages()
 endif()
 
-if(CHECK_INCLUDES)
-    find_package(IncludeWhatYouUse REQUIRED)
-endif()
-
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
