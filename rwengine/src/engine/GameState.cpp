@@ -103,8 +103,8 @@ GameState::GameState()
     , nextRestartLocation{}
     , hospitalRestarts{}
     , policeRestarts{}
-    , hospitalIslandOverride(false)
-    , policeIslandOverride(false)
+    , hospitalIslandOverride(0)
+    , policeIslandOverride(0)
     , fadeIn(true)
     , fadeStart(0.f)
     , fadeTime(0.f)
