@@ -198,11 +198,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         }
     }
 
-    if (controller) {
-        if (static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
-            movementAnimation == animations->animation(AnimCycle::WalkStart)) {
-            animationSpeed *= 2;
-        }
+    if (isPlayer() && static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
+        movementAnimation == animations->animation(AnimCycle::WalkStart)) {
+        animationSpeed *= 2;
     }
 
     // Check if we need to change the animation or change speed
