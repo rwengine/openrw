@@ -123,7 +123,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     glm::vec3 animTranslate{};
 
     if (controller) {
-        const auto& c = static_cast<PlayerController*>(controller);
+        auto c = static_cast<PlayerController*>(controller);
 
         if (c->isTalkingOnPayphone()) {
             animator->playAnimation(

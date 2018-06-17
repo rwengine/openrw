@@ -24,11 +24,15 @@ Payphone::Payphone(GameWorld* engine_, const int id_, const glm::vec2 coord)
         }
         if (glm::distance(coord, glm::vec2(o->getPosition())) < 2.f) {
             object = static_cast<InstanceObject*>(o);
+            break;
         }
     }
 
-    position = object->getPosition();
     message.clear();
+
+    if (object) {
+        position = object->getPosition();
+    }
 }
 
 void Payphone::enable() {

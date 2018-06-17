@@ -461,7 +461,7 @@ GarageInfo* GameWorld::createGarage(const glm::vec3 coord0,
 
 Payphone* GameWorld::createPayphone(const glm::vec2 coord) {
     int id = payphones.size();
-    payphones.push_back(std::make_unique<Payphone>(this, id, coord));
+    payphones.emplace_back(this, id, coord);
     return payphones.back().get();
 }
 
