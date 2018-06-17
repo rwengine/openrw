@@ -2320,7 +2320,7 @@ void opcode_00d8(const ScriptArguments& args) {
         missionObjects.clear();
     }
 
-    const auto& player = args.getWorld()->getPlayer();
+    auto player = args.getWorld()->getPlayer();
     player->freeFromCutscene();
 }
 
@@ -6736,7 +6736,7 @@ void opcode_0254(const ScriptArguments& args) {
 void opcode_0255(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat heading) {
     coord = script::getGround(args, coord);
     args.getState()->overrideRestart(glm::vec4(coord, heading));
-    const auto& player = args.getWorld()->getPlayer();
+    auto player = args.getWorld()->getPlayer();
     player->requestMissionRestart();
 }
 
@@ -7844,7 +7844,7 @@ void opcode_02e4(const ScriptArguments& args, const ScriptString arg1) {
     args.getWorld()->loadCutscene(arg1);
     args.getState()->cutsceneStartTime = -1.f;
 
-    const auto& player = args.getWorld()->getPlayer();
+    auto player = args.getWorld()->getPlayer();
     player->prepareForCutscene();
 }
 
@@ -7936,7 +7936,7 @@ bool opcode_02e9(const ScriptArguments& args) {
 void opcode_02ea(const ScriptArguments& args) {
     args.getWorld()->clearCutscene();
 
-    const auto& player = args.getWorld()->getPlayer();
+    auto player = args.getWorld()->getPlayer();
     player->freeFromCutscene();
 }
 
@@ -9762,7 +9762,7 @@ void opcode_036a(const ScriptArguments& args, const ScriptCharacter character, c
 */
 void opcode_036d(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt arg2, const ScriptInt arg3, const ScriptInt time, const ScriptInt arg5) {
     RW_UNUSED(arg5);
-    const auto& world = args.getWorld();
+    auto world = args.getWorld();
 
     unsigned short style = args[4].integerValue();
 
