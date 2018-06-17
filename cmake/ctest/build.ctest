@@ -144,6 +144,8 @@ endif()
 if(SUBMIT)
     message(STATUS "Submitting...")
     ctest_submit(
+        RETRY_COUNT 5
+        RETRY_DELAY 120
         RETURN_VALUE _SUBMIT_RESULT
         )
 else()
@@ -160,4 +162,8 @@ endif()
 
 if(_TEST_RESULT)
     list(APPEND WARNING_MESSAGES "Test failure detected!")
+endif()
+
+if(_SUBMIT_RESULT)
+    list(APPEND ERROR_MESSAGES "Test submission failure detected!")
 endif()
