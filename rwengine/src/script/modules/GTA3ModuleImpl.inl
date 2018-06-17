@@ -2234,8 +2234,6 @@ bool opcode_00c2(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     RW_UNUSED(coord);
     RW_UNUSED(radius);
     RW_UNUSED(args);
-    // expose camera interface to World/State class?
-    // return args.getWorld()->getCamera().frustum.intersects(coord, radius);
     return false;
 }
 
