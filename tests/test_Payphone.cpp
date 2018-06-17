@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(PayphoneTests)
 BOOST_AUTO_TEST_CASE(test_payphone_interaction) {
     {
         const auto playerID = 7777;
-        const auto& character = Global::get().e->createPlayer(
+        auto character = Global::get().e->createPlayer(
             {0.f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, playerID);
         BOOST_REQUIRE(character != nullptr);
 
@@ -21,11 +21,11 @@ BOOST_AUTO_TEST_CASE(test_payphone_interaction) {
 
         // phonebooth1 from ipl file
         const auto modelID = 1335;
-        auto* payphoneObj = Global::get().e->createInstance(
+        auto payphoneObj = Global::get().e->createInstance(
             modelID, {1.f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f});
         BOOST_REQUIRE(payphoneObj != nullptr);
 
-        const auto& payphone = Global::get().e->createPayphone({1.f, 0.f});
+        auto payphone = Global::get().e->createPayphone({1.f, 0.f});
         BOOST_REQUIRE(payphone != nullptr);
         payphone->setMessageAndStartRinging("");
 
