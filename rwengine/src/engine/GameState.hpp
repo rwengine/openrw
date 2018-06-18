@@ -450,6 +450,11 @@ public:
     void swapInputState() {
         input[1] = input[0];
     }
+
+    /**
+     * Adds help message
+     */
+    void showHelpMessage(const GameStringKey& id);
 };
 
 #endif
