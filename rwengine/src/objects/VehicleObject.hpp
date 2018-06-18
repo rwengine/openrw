@@ -128,6 +128,8 @@ public:
 
     bool isFlipped() const;
 
+    bool isUpright() const;
+
     float getVelocity() const;
 
     void ejectAll();

@@ -519,8 +519,13 @@ void VehicleObject::tickPhysics(float dt) {
 }
 
 bool VehicleObject::isFlipped() const {
-    auto up = getRotation() * glm::vec3(0.f, 0.f, 1.f);
-    return up.z <= -0.1f;
+    auto forward = getRotation() * glm::vec3(0.f, 0.f, 1.f);
+    return forward.z <= -0.97f;
+}
+
+bool VehicleObject::isUpright() const {
+    auto forward = getRotation() * glm::vec3(0.f, 0.f, 1.f);
+    return forward.z >= 0.f;
 }
 
 float VehicleObject::getVelocity() const {
