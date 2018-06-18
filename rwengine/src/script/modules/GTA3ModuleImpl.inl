@@ -11112,8 +11112,8 @@ void opcode_03c5(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 bool opcode_03c6(const ScriptArguments& args, const ScriptLevel island) {
     // The parameter to this is actually the island number.
     // Not sure how that will fit into the scheme of full paging
-    const auto& world = args.getWorld();
-    const auto& zone = world->data->findZoneAt(
+    auto world = args.getWorld();
+    auto zone = world->data->findZoneAt(
         world->getPlayer()->getCharacter()->getPosition());
 
     return island == zone->island;
