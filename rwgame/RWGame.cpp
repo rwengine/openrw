@@ -258,7 +258,7 @@ void RWGame::handleCheatInput(char symbol) {
 #else
          uint16_t vehicleModel = 122;
 #endif
-            const auto ch = getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
+            const auto ch = getWorld()->getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
             const auto playerRot = ch->getRotation();
             const auto spawnPos = ch->getPosition() + playerRot * glm::vec3(0.f, 3.f, 0.f);
             const auto spawnRot = glm::quat(
