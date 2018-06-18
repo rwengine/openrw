@@ -2319,6 +2319,9 @@ void opcode_00d8(const ScriptArguments& args) {
         }
         missionObjects.clear();
     }
+
+    auto player = args.getWorld()->getPlayer();
+    player->freeFromCutscene();
 }
 
 /**
@@ -4802,11 +4805,16 @@ void opcode_01b2(const ScriptArguments& args, const ScriptCharacter character, c
 
     opcode 01b4
     @arg player Player
-    @arg arg2 Boolean true/false
+    @arg control Boolean true/false
 */
-void opcode_01b4(const ScriptArguments& args, const ScriptPlayer player, const ScriptBoolean arg2) {
-    player->setInputEnabled(arg2);
+void opcode_01b4(const ScriptArguments& args, const ScriptPlayer player,
+                 const ScriptBoolean control) {
     RW_UNUSED(args);
+    if (control) {
+        player->freeFromCutscene();
+    } else {
+        player->prepareForCutscene();
+    }
 }
 
 /**
@@ -7835,6 +7843,9 @@ void opcode_02e3(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
 void opcode_02e4(const ScriptArguments& args, const ScriptString arg1) {
     args.getWorld()->loadCutscene(arg1);
     args.getState()->cutsceneStartTime = -1.f;
+
+    auto player = args.getWorld()->getPlayer();
+    player->prepareForCutscene();
 }
 
 /**
@@ -7924,6 +7935,9 @@ bool opcode_02e9(const ScriptArguments& args) {
 */
 void opcode_02ea(const ScriptArguments& args) {
     args.getWorld()->clearCutscene();
+
+    auto player = args.getWorld()->getPlayer();
+    player->freeFromCutscene();
 }
 
 /**
@@ -9748,7 +9762,7 @@ void opcode_036a(const ScriptArguments& args, const ScriptCharacter character, c
 */
 void opcode_036d(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptInt arg2, const ScriptInt arg3, const ScriptInt time, const ScriptInt arg5) {
     RW_UNUSED(arg5);
-    const auto& world = args.getWorld();
+    auto world = args.getWorld();
 
     unsigned short style = args[4].integerValue();
 
@@ -9883,13 +9897,9 @@ void opcode_0372(const ScriptArguments& args, const ScriptCharacter character, c
     opcode 0373
 */
 void opcode_0373(const ScriptArguments& args) {
-    // @todo verify unlocking player
-    // This restores control at the end of "Drive Misty for me"
-    auto player = args.getWorld()->players.at(0);
-    player->setInputEnabled(true);
+    RW_UNIMPLEMENTED_OPCODE(0x0373);
     args.getWorld()->state->cameraTarget = 0;
     args.getWorld()->state->cameraFixed = false;
-    RW_UNIMPLEMENTED_OPCODE(0x0373);
 }
 
 /**
@@ -11565,9 +11575,8 @@ bool opcode_03ee(const ScriptArguments& args, const ScriptPlayer player) {
     @arg player Player
 */
 void opcode_03ef(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x03ef);
-    RW_UNUSED(player);
     RW_UNUSED(args);
+    player->prepareForCutscene();
 }
 
 /**
