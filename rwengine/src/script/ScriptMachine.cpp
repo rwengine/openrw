@@ -24,7 +24,9 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
             t.programCounter = t.calls[t.stackDepth];
         }
     }
-
+    // There is 02a1 opcode that is used only during "Kingdom Come", which
+    // basically acts like a wait command, but waiting time can be skipped
+    // by pressing 'X'? PS2 button
     if (t.allowWaitSkip && getState()->input[0].pressed(GameInputState::Jump)) {
         t.wakeCounter = 0;
         t.allowWaitSkip = false;
