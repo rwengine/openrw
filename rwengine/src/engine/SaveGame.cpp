@@ -829,7 +829,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 
 #if RW_DEBUG
     std::cout << "Payphones: " << payphoneData.numPayphones << std::endl;
-    for (auto& payphone : payphones) {
+    for (const auto& payphone : payphones) {
         std::cout << " " << uint16_t(payphone.state) << " " << payphone.position.x
                   << " " << payphone.position.y << " " << payphone.position.z
                   << std::endl;
@@ -1256,8 +1256,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     }
 
     // @todo restore properly
-    for (size_t p = 0; p < payphoneData.numPayphones; ++p) {
-        Block8Payphone& payphone = payphones[p];
+    for (const auto& payphone : payphones) {
         state.world->createPayphone(glm::vec2(payphone.position));
     }
 
