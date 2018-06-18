@@ -823,15 +823,13 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block8Data payphoneData;
     READ_VALUE(payphoneData);
     std::vector<Block8Payphone> payphones(payphoneData.numPayphones);
-    for (size_t p = 0; p < payphoneData.numPayphones; ++p) {
-        Block8Payphone& payphone = payphones[p];
+    for (auto& payphone : payphones) {
         READ_VALUE(payphone)
     }
 
 #if RW_DEBUG
     std::cout << "Payphones: " << payphoneData.numPayphones << std::endl;
-    for (size_t p = 0; p < payphoneData.numPayphones; ++p) {
-        Block8Payphone& payphone = payphones[p];
+    for (auto& payphone : payphones) {
         std::cout << " " << uint16_t(payphone.state) << " " << payphone.position.x
                   << " " << payphone.position.y << " " << payphone.position.z
                   << std::endl;
