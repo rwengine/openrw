@@ -6604,70 +6604,64 @@ void opcode_0249(const ScriptArguments& args, const ScriptModel model) {
 }
 
 /**
-    @brief %3d% = create_phone_at %1d% %2d%
+    @brief %3d% = create_payphone_at %1d% %2d%
 
     opcode 024a
     @arg coord Coordinates
-    @arg phone Handle
+    @arg payphone Handle
 */
-void opcode_024a(const ScriptArguments& args, ScriptVec2 coord, ScriptPhone& phone) {
-    RW_UNIMPLEMENTED_OPCODE(0x024a);
-    RW_UNUSED(coord);
-    RW_UNUSED(phone);
-    RW_UNUSED(args);
+void opcode_024a(const ScriptArguments& args, const ScriptVec2 coord, ScriptPayphone& payphone) {
+    payphone = args.getWorld()->createPayphone(coord);
 }
 
 /**
-    @brief text_phone_repeatedly %1d% %2g%
+    @brief text_payphone_repeatedly %1d% %2g%
 
     opcode 024b
-    @arg phone 
+    @arg payphone 
     @arg arg2 
 */
-void opcode_024b(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2) {
+void opcode_024b(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2) {
     RW_UNIMPLEMENTED_OPCODE(0x024b);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(args);
 }
 
 /**
-    @brief text_phone %1d% %2g%
+    @brief text_payphone %1d% %2g%
 
     opcode 024c
-    @arg phone 
-    @arg arg2 
+    @arg payphone 
+    @arg text 
 */
-void opcode_024c(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x024c);
-    RW_UNUSED(phone);
-    RW_UNUSED(arg2);
+void opcode_024c(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString text) {
     RW_UNUSED(args);
+    payphone->setMessageAndStartRinging(text);
 }
 
 /**
-    @brief   phone_text_been_displayed %1d%
+    @brief   payphone_text_been_displayed %1d%
 
     opcode 024d
-    @arg phone 
+    @arg payphone 
 */
-bool opcode_024d(const ScriptArguments& args, const ScriptPhone phone) {
+bool opcode_024d(const ScriptArguments& args, const ScriptPayphone payphone) {
     RW_UNIMPLEMENTED_OPCODE(0x024d);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(args);
     return false;
 }
 
 /**
-    @brief disable_phone %1d%
+    @brief disable_payphone %1d%
 
     opcode 024e
-    @arg phone 
+    @arg payphone 
 */
-void opcode_024e(const ScriptArguments& args, const ScriptPhone phone) {
-    RW_UNIMPLEMENTED_OPCODE(0x024e);
-    RW_UNUSED(phone);
+void opcode_024e(const ScriptArguments& args, const ScriptPayphone payphone) {
     RW_UNUSED(args);
+    payphone->disable();
 }
 
 /**
@@ -9955,49 +9949,49 @@ void opcode_0377(const ScriptArguments& args, const ScriptCharacter character) {
 }
 
 /**
-    @brief text_phone_1string_repeatedly %1d% %2g% %3g%  
+    @brief text_payphone_1string_repeatedly %1d% %2g% %3g%  
 
     opcode 0378
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
 */
-void opcode_0378(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3) {
+void opcode_0378(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3) {
     RW_UNIMPLEMENTED_OPCODE(0x0378);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(args);
 }
 
 /**
-    @brief text_phone_1string %1d% %2g% %3g%  
+    @brief text_payphone_1string %1d% %2g% %3g%  
 
     opcode 0379
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
 */
-void opcode_0379(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3) {
+void opcode_0379(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3) {
     RW_UNIMPLEMENTED_OPCODE(0x0379);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(args);
 }
 
 /**
-    @brief text_phone_2strings_repeatedly %1d% %2g% %3g% %4g%  
+    @brief text_payphone_2strings_repeatedly %1d% %2g% %3g% %4g%  
 
     opcode 037a
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
 */
-void opcode_037a(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4) {
+void opcode_037a(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4) {
     RW_UNIMPLEMENTED_OPCODE(0x037a);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10005,17 +9999,17 @@ void opcode_037a(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_2strings %1d% %2g% %3g% %4g%  
+    @brief text_payphone_2strings %1d% %2g% %3g% %4g%  
 
     opcode 037b
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
 */
-void opcode_037b(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4) {
+void opcode_037b(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4) {
     RW_UNIMPLEMENTED_OPCODE(0x037b);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10023,18 +10017,18 @@ void opcode_037b(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_3strings_repeatedly %1d% %2g% %3g% %4g% %5g%  
+    @brief text_payphone_3strings_repeatedly %1d% %2g% %3g% %4g% %5g%  
 
     opcode 037c
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
     @arg arg5 
 */
-void opcode_037c(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5) {
+void opcode_037c(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5) {
     RW_UNIMPLEMENTED_OPCODE(0x037c);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10043,18 +10037,18 @@ void opcode_037c(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_3strings %1d% %2g% %3g% %4g% %5g%  
+    @brief text_payphone_3strings %1d% %2g% %3g% %4g% %5g%  
 
     opcode 037d
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
     @arg arg5 
 */
-void opcode_037d(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5) {
+void opcode_037d(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5) {
     RW_UNIMPLEMENTED_OPCODE(0x037d);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10165,19 +10159,19 @@ void opcode_0385(const ScriptArguments& args, const ScriptString gxtEntry0, cons
 }
 
 /**
-    @brief text_phone_4strings_repeatedly %1d% %2g% %3g% %4g% %5g% %6g%  
+    @brief text_payphone_4strings_repeatedly %1d% %2g% %3g% %4g% %5g% %6g%  
 
     opcode 0386
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
     @arg arg5 
     @arg arg6 
 */
-void opcode_0386(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6) {
+void opcode_0386(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6) {
     RW_UNIMPLEMENTED_OPCODE(0x0386);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10187,19 +10181,19 @@ void opcode_0386(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_4strings %1d% %2g% %3g% %4g% %5g% %6g%  
+    @brief text_payphone_4strings %1d% %2g% %3g% %4g% %5g% %6g%  
 
     opcode 0387
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
     @arg arg5 
     @arg arg6 
 */
-void opcode_0387(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6) {
+void opcode_0387(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6) {
     RW_UNIMPLEMENTED_OPCODE(0x0387);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10209,10 +10203,10 @@ void opcode_0387(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_5strings_repeatedly %1d% %2g% %3g% %4g% %5g% %6g% %7g%  
+    @brief text_payphone_5strings_repeatedly %1d% %2g% %3g% %4g% %5g% %6g% %7g%  
 
     opcode 0388
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
@@ -10220,9 +10214,9 @@ void opcode_0387(const ScriptArguments& args, const ScriptPhone phone, const Scr
     @arg arg6 
     @arg arg7 
 */
-void opcode_0388(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6, const ScriptString arg7) {
+void opcode_0388(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6, const ScriptString arg7) {
     RW_UNIMPLEMENTED_OPCODE(0x0388);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -10233,10 +10227,10 @@ void opcode_0388(const ScriptArguments& args, const ScriptPhone phone, const Scr
 }
 
 /**
-    @brief text_phone_5strings %1d% %2g% %3g% %4g% %5g% %6g% %7g%  
+    @brief text_payphone_5strings %1d% %2g% %3g% %4g% %5g% %6g% %7g%  
 
     opcode 0389
-    @arg phone 
+    @arg payphone 
     @arg arg2 
     @arg arg3 
     @arg arg4 
@@ -10244,9 +10238,9 @@ void opcode_0388(const ScriptArguments& args, const ScriptPhone phone, const Scr
     @arg arg6 
     @arg arg7 
 */
-void opcode_0389(const ScriptArguments& args, const ScriptPhone phone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6, const ScriptString arg7) {
+void opcode_0389(const ScriptArguments& args, const ScriptPayphone payphone, const ScriptString arg2, const ScriptString arg3, const ScriptString arg4, const ScriptString arg5, const ScriptString arg6, const ScriptString arg7) {
     RW_UNIMPLEMENTED_OPCODE(0x0389);
-    RW_UNUSED(phone);
+    RW_UNUSED(payphone);
     RW_UNUSED(arg2);
     RW_UNUSED(arg3);
     RW_UNUSED(arg4);
@@ -11028,16 +11022,14 @@ void opcode_03c1(const ScriptArguments& args, const ScriptPlayer player, ScriptV
 }
 
 /**
-    @brief   phone %1d% answered
+    @brief   payphone %1d% answered
 
     opcode 03c2
-    @arg phone 
+    @arg payphone 
 */
-bool opcode_03c2(const ScriptArguments& args, const ScriptPhone phone) {
-    RW_UNIMPLEMENTED_OPCODE(0x03c2);
-    RW_UNUSED(phone);
+bool opcode_03c2(const ScriptArguments& args, const ScriptPayphone payphone) {
     RW_UNUSED(args);
-    return false;
+    return payphone->isTalking();
 }
 
 /**
@@ -11819,15 +11811,14 @@ void opcode_0404(const ScriptArguments& args) {
 }
 
 /**
-    @brief enable_phone %1d%
+    @brief enable_payphone %1d%
 
     opcode 0405
-    @arg phone Handle
+    @arg payphone Handle
 */
-void opcode_0405(const ScriptArguments& args, const ScriptPhone phone) {
-    RW_UNIMPLEMENTED_OPCODE(0x0405);
-    RW_UNUSED(phone);
+void opcode_0405(const ScriptArguments& args, const ScriptPayphone payphone) {
     RW_UNUSED(args);
+    payphone->enable();
 }
 
 /**
@@ -12586,16 +12577,15 @@ void opcode_0446(const ScriptArguments& args, const ScriptCharacter character, c
 }
 
 /**
-    @brief    is_player_lifting_a_phone %1d%
+    @brief    is_player_lifting_a_payphone %1d%
 
     opcode 0447
     @arg player Player
 */
 bool opcode_0447(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x0447);
-    RW_UNUSED(player);
     RW_UNUSED(args);
-    return false;
+    return player->isPickingUpPayphone() || player->isTalkingOnPayphone() ||
+           player->isHangingUpPayphone();
 }
 
 /**

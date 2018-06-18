@@ -63,6 +63,8 @@ set(RWENGINE_SOURCES
     src/engine/GameWorld.hpp
     src/engine/GarageController.cpp
     src/engine/GarageController.hpp
+    src/engine/Payphone.cpp
+    src/engine/Payphone.hpp
     src/engine/SaveGame.cpp
     src/engine/SaveGame.hpp
     src/engine/ScreenText.cpp

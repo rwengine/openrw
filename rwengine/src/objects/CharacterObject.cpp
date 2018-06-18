@@ -122,6 +122,32 @@ void CharacterObject::destroyActor() {
 glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     glm::vec3 animTranslate{};
 
+    if (controller) {
+        auto c = static_cast<PlayerController*>(controller);
+
+        if (c->isTalkingOnPayphone()) {
+            animator->playAnimation(
+                AnimIndexMovement,
+                animations->animation(AnimCycle::PhoneTalk), 1.f,
+                true);
+            return glm::vec3();
+        }
+        if (c->isPickingUpPayphone()) {
+            if (animator->isCompleted(AnimIndexMovement)) {
+                c->talkOnPayphone();
+            } else {
+                return glm::vec3();
+            }
+        }
+        if (c->isHangingUpPayphone()) {
+            if (animator->isCompleted(AnimIndexMovement)) {
+                c->leavePayphone();
+            } else {
+                return glm::vec3();
+            }
+        }
+    }
+
     if (motionBlockedByActivity) {
         // Clear any residual motion animation
         animator->playAnimation(AnimIndexMovement, nullptr, 1.f, false);
@@ -584,8 +610,8 @@ void CharacterObject::resetToAINode() {
     }
 }
 
-void CharacterObject::playActivityAnimation(const AnimationPtr& animation, bool repeat,
-                                            bool blocked) {
+void CharacterObject::playActivityAnimation(const AnimationPtr& animation,
+                                            bool repeat, bool blocked) {
     RW_CHECK(animator != nullptr, "No Animator");
     animator->playAnimation(AnimIndexAction, animation, 1.f, repeat);
     motionBlockedByActivity = blocked;

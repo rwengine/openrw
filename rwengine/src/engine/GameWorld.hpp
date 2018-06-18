@@ -18,6 +18,7 @@
 #include <audio/SoundManager.hpp>
 
 #include <engine/GarageController.hpp>
+#include <engine/Payphone.hpp>
 #include <objects/ObjectTypes.hpp>
 
 #include <render/VisualFX.hpp>
@@ -35,6 +36,7 @@ struct btDbvtBroadphase;
 
 class GameState;
 class GarageController;
+class Payphone;
 
 class PlayerController;
 class Logger;
@@ -152,6 +154,11 @@ public:
                              const int type);
 
     /**
+     * Creates a payphone
+     */
+    Payphone* createPayphone(const glm::vec2 coord);
+
+    /**
      * Destroys an existing Object
      */
     void destroyObject(GameObject* object);
@@ -265,6 +272,8 @@ public:
     std::vector<PlayerController*> players;
 
     std::vector<std::unique_ptr<GarageController>> garageControllers;
+
+    std::vector<std::unique_ptr<Payphone>> payphones;
 
     /**
      * @brief getBlipTarget
