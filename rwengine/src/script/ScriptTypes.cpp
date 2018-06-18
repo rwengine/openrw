@@ -220,6 +220,17 @@ ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
     return {param.handleValue(), garage};
 }
 template <>
+ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
+    unsigned int arg) const {
+    auto& param = (*this)[arg];
+    RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
+    auto index = *param.handleValue();
+    RW_CHECK(index >= 0, "Object index is negative");
+    auto& payphones = getWorld()->payphones;
+    auto payphone = payphones.at(size_t(index)).get();
+    return {param.handleValue(), payphone};
+}
+template <>
 ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];

@@ -328,11 +328,11 @@ struct Block7Data {
 };
 
 struct Block8Data {
-    BlockDword numPhones;
-    BlockDword numActivePhones;
+    BlockDword numPayphones;
+    BlockDword numActivePayphones;
 };
 
-struct Block8Phone {
+struct Block8Payphone {
     glm::vec3 position{};
     BlockDword messagePtr[6];
     BlockDword messageEndTime;
@@ -815,25 +815,23 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 #endif
 
     // Block 8
-    BlockSize phoneBlockSize;
-    BLOCK_HEADER(phoneBlockSize)
-    BlockDword phoneDataSize;
-    READ_VALUE(phoneDataSize)
+    BlockSize payphoneBlockSize;
+    BLOCK_HEADER(payphoneBlockSize)
+    BlockDword payphoneDataSize;
+    READ_VALUE(payphoneDataSize)
 
-    Block8Data phoneData;
-    READ_VALUE(phoneData);
-    std::vector<Block8Phone> phones(phoneData.numPhones);
-    for (size_t p = 0; p < phoneData.numPhones; ++p) {
-        Block8Phone& phone = phones[p];
-        READ_VALUE(phone)
+    Block8Data payphoneData;
+    READ_VALUE(payphoneData);
+    std::vector<Block8Payphone> payphones(payphoneData.numPayphones);
+    for (auto& payphone : payphones) {
+        READ_VALUE(payphone)
     }
 
 #if RW_DEBUG
-    std::cout << "Phones: " << phoneData.numPhones << std::endl;
-    for (size_t p = 0; p < phoneData.numPhones; ++p) {
-        Block8Phone& phone = phones[p];
-        std::cout << " " << uint16_t(phone.state) << " " << phone.position.x
-                  << " " << phone.position.y << " " << phone.position.z
+    std::cout << "Payphones: " << payphoneData.numPayphones << std::endl;
+    for (const auto& payphone : payphones) {
+        std::cout << " " << uint16_t(payphone.state) << " " << payphone.position.x
+                  << " " << payphone.position.y << " " << payphone.position.z
                   << std::endl;
     }
 #endif
@@ -1255,6 +1253,11 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
             cs.weapons[w].bulletsClip = wep.inClip;
             cs.weapons[w].bulletsTotal = wep.totalBullets;
         }
+    }
+
+    // @todo restore properly
+    for (const auto& payphone : payphones) {
+        state.world->createPayphone(glm::vec2(payphone.position));
     }
 
     // TODO restore garage data

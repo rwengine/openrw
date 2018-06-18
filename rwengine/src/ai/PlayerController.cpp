@@ -4,18 +4,22 @@
 
 #include <glm/gtc/quaternion.hpp>
 
+#include "engine/Animator.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
 #include "objects/CharacterObject.hpp"
 #include "objects/GameObject.hpp"
 #include "objects/VehicleObject.hpp"
 
+class Animator;
+
 PlayerController::PlayerController()
     : CharacterController()
     , lastRotation(glm::vec3(0.f, 0.f, 0.f))
     , missionRestartRequired(false)
     , _enabled(true)
-    , restartState(Alive) {
+    , restartState(Alive)
+    , payphoneState(Left) {
 }
 
 void PlayerController::setInputEnabled(bool enabled) {
@@ -273,6 +277,42 @@ void PlayerController::restartLogic() {
             break;
         }
     }
+}
+
+void PlayerController::pickUpPayphone() {
+    payphoneState = PayphoneState::PickingUp;
+
+    character->animator->playAnimation(
+        AnimIndexMovement, character->animations->animation(AnimCycle::PhoneIn),
+        1.f, false);
+}
+
+void PlayerController::hangUpPayphone() {
+    payphoneState = PayphoneState::HangingUp;
+
+    character->animator->playAnimation(
+        AnimIndexMovement,
+        character->animations->animation(AnimCycle::PhoneOut), 1.f, false);
+}
+
+void PlayerController::talkOnPayphone() {
+    payphoneState = PayphoneState::Talking;
+}
+
+void PlayerController::leavePayphone() {
+    payphoneState = Left;
+}
+
+bool PlayerController::isPickingUpPayphone() const {
+    return payphoneState == PayphoneState::PickingUp;
+}
+
+bool PlayerController::isHangingUpPayphone() const {
+    return payphoneState == PayphoneState::HangingUp;
+}
+
+bool PlayerController::isTalkingOnPayphone() const {
+    return payphoneState == PayphoneState::Talking;
 }
 
 void PlayerController::update(float dt) {

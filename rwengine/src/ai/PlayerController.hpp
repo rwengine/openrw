@@ -6,6 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 
 class PlayerController : public CharacterController {
+private:
     glm::quat cameraRotation{1.0f, 0.0f, 0.0f, 0.0f};
 
     glm::vec3 direction{};
@@ -25,6 +26,13 @@ class PlayerController : public CharacterController {
         Restarting,
         FadingIn,
     } restartState;
+
+    enum PayphoneState {
+        Left,
+        Talking,
+        PickingUp,
+        HangingUp,
+    } payphoneState;
 
     // handles player respawn logic
     void restartLogic();
@@ -57,6 +65,22 @@ public:
     bool isWasted() const;
     // @todo not implemented yet
     bool isBusted() const;
+
+    // Play payphone pick up anim
+    void pickUpPayphone();
+    // Play payphone hang up anim
+    void hangUpPayphone();
+    // Play talking on payphone anim
+    void talkOnPayphone();
+    // Reset any payphone anim
+    void leavePayphone();
+
+    // Is payphone pick up anim playing
+    bool isPickingUpPayphone() const;
+    // Is payphone hang up anim playing
+    bool isHangingUpPayphone() const;
+    // Is talking on payphone anim playing
+    bool isTalkingOnPayphone() const;
 
     void update(float dt) override;
 
