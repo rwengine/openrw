@@ -224,11 +224,10 @@ ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
+    auto index = *param.handleValue();
+    RW_CHECK(index >= 0, "Object index is negative");
     auto& payphones = getWorld()->payphones;
-    Payphone* payphone = nullptr;
-    if (size_t(*param.handleValue()) < payphones.size()) {
-        payphone = payphones[*param.handleValue()].get();
-    }
+    auto payphone = payphones.at(size_t(index)).get();
     return {param.handleValue(), payphone};
 }
 template <>
