@@ -349,3 +349,20 @@ void PlayerController::activateAdrenalineEffect() {
     adrenalineEffectTime = world->getGameTime() + 20.f;
     state->basic.timeScale = 0.3f;
 }
+
+void PlayerController::prepareForCutscene() {
+    setInputEnabled(false);
+
+    // @todo: make player invincible
+    //                    ignored by police
+
+    // clear all particles, projectiles, extinguish all fires
+    //                                              including cars on fire
+}
+
+void PlayerController::freeFromCutscene() {
+    setInputEnabled(true);
+
+    // @todo: make player no longer invincible
+    //                              ignored by police
+}

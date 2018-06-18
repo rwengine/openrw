@@ -82,6 +82,14 @@ public:
     // Is talking on payphone anim playing
     bool isTalkingOnPayphone() const;
 
+    // @todo not implemented yet
+    // makes player invincible, ignored by police, clears all particles,
+    // projectiles, extinguish all fires, including cars on fire
+    void prepareForCutscene();
+    // @todo not implemented yet
+    // makes player no longer invincible and not ignored by police
+    void freeFromCutscene();
+
     void update(float dt) override;
 
     glm::vec3 getTargetPosition() override;
