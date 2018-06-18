@@ -5,12 +5,12 @@
 #include <cstdint>
 #include <iomanip>
 #include <list>
+#include <random>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
-#include <random>
-#include <type_traits>
 
 #include <script/ScriptTypes.hpp>
 
@@ -27,7 +27,6 @@ class SCMFile;
 #define SCM_VARIABLE_SIZE 4
 #define SCM_STACK_DEPTH 4
 
-
 struct SCMException {
     virtual ~SCMException() = default;
 
@@ -42,7 +41,9 @@ struct IllegalInstruction : SCMException {
     template <class String>
     IllegalInstruction(SCMOpcode _opcode, unsigned int _offset,
                        String&& _thread)
-        : opcode(_opcode), offset(_offset), thread(std::forward<String>(_thread)) {
+        : opcode(_opcode)
+        , offset(_offset)
+        , thread(std::forward<String>(_thread)) {
     }
 
     std::string what() const override {
@@ -100,6 +101,8 @@ struct SCMThread {
 
     bool deathOrArrestCheck;
     bool wastedOrBusted;
+
+    bool allowWaitSkip;
 };
 
 /**
@@ -160,17 +163,18 @@ public:
         debugFlag = flag;
     }
 
-    template<typename T>
+    template <typename T>
     typename std::enable_if<std::is_integral<T>::value, T>::type
     getRandomNumber(T min, T max) {
         std::uniform_int_distribution<> dist(min, max);
         return dist(randomNumberGen);
     }
 
-    template<typename T>
+    template <typename T>
     typename std::enable_if<std::is_floating_point<T>::value, T>::type
     getRandomNumber(T min, T max) {
-        std::uniform_real_distribution<> dist(static_cast<double>(min), static_cast<double>(max));
+        std::uniform_real_distribution<> dist(static_cast<double>(min),
+                                              static_cast<double>(max));
         return dist(randomNumberGen);
     }
 

@@ -3013,10 +3013,8 @@ void opcode_0108(const ScriptArguments& args, const ScriptObject object) {
     @arg money 
 */
 void opcode_0109(const ScriptArguments& args, const ScriptPlayer player, const ScriptInt money) {
-    RW_UNIMPLEMENTED_OPCODE(0x0109);
     RW_UNUSED(player);
-    RW_UNUSED(money);
-    RW_UNUSED(args);
+    args.getState()->playerInfo.money += money;
 }
 
 /**
@@ -3027,11 +3025,8 @@ void opcode_0109(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg money 
 */
 bool opcode_010a(const ScriptArguments& args, const ScriptPlayer player, const ScriptInt money) {
-    RW_UNIMPLEMENTED_OPCODE(0x010a);
     RW_UNUSED(player);
-    RW_UNUSED(money);
-    RW_UNUSED(args);
-    return false;
+    return args.getState()->playerInfo.money > money;
 }
 
 /**
@@ -3042,10 +3037,8 @@ bool opcode_010a(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg money 
 */
 void opcode_010b(const ScriptArguments& args, const ScriptPlayer player, ScriptInt& money) {
-    RW_UNIMPLEMENTED_OPCODE(0x010b);
     RW_UNUSED(player);
-    RW_UNUSED(args);
-    money = 0;
+    money = args.getState()->playerInfo.money;
 }
 
 /**
@@ -3570,14 +3563,16 @@ void opcode_0156(const ScriptArguments& args, const ScriptString arg1, const Scr
     opcode 0157
     @arg player Player
     @arg cameraModeID Camera mode ID
-    @arg arg3 
+    @arg cameraChangeModeID
 */
-void opcode_0157(const ScriptArguments& args, const ScriptPlayer player, const ScriptCamMode cameraModeID, const ScriptChangeCamMode arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x0157);
-    RW_UNUSED(player);
+void opcode_0157(const ScriptArguments& args, const ScriptPlayer player,
+                 const ScriptCamMode cameraModeID,
+                 const ScriptChangeCamMode cameraChangeModeID) {
+    args.getWorld()->state->cameraTarget =
+        player->getCharacter()->getGameObjectID();
+
     RW_UNUSED(cameraModeID);
-    RW_UNUSED(arg3);
-    RW_UNUSED(args);
+    RW_UNUSED(cameraChangeModeID);
 }
 
 /**
@@ -3586,14 +3581,16 @@ void opcode_0157(const ScriptArguments& args, const ScriptPlayer player, const S
     opcode 0158
     @arg vehicle Car/vehicle
     @arg cameraModeID Camera mode ID
-    @arg arg3 
+    @arg cameraChangeModeID
 */
-void opcode_0158(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptCamMode cameraModeID, const ScriptChangeCamMode arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x0158);
-    RW_UNUSED(vehicle);
+void opcode_0158(const ScriptArguments& args, const ScriptVehicle vehicle,
+                 const ScriptCamMode cameraModeID,
+                 const ScriptChangeCamMode cameraChangeModeID) {
+    if (vehicle) {
+        args.getWorld()->state->cameraTarget = vehicle->getGameObjectID();
+    }
     RW_UNUSED(cameraModeID);
-    RW_UNUSED(arg3);
-    RW_UNUSED(args);
+    RW_UNUSED(cameraChangeModeID);
 }
 
 /**
@@ -3602,14 +3599,16 @@ void opcode_0158(const ScriptArguments& args, const ScriptVehicle vehicle, const
     opcode 0159
     @arg character Character/ped
     @arg cameraModeID Camera mode ID
-    @arg arg3 
+    @arg cameraChangeModeID
 */
-void opcode_0159(const ScriptArguments& args, const ScriptCharacter character, const ScriptCamMode cameraModeID, const ScriptChangeCamMode arg3) {
+void opcode_0159(const ScriptArguments& args, const ScriptCharacter character,
+                 const ScriptCamMode cameraModeID,
+                 const ScriptChangeCamMode cameraChangeModeID) {
     if (character) {
-    	args.getWorld()->state->cameraTarget = character->getGameObjectID();
+        args.getWorld()->state->cameraTarget = character->getGameObjectID();
     }
     RW_UNUSED(cameraModeID);
-    RW_UNUSED(arg3);
+    RW_UNUSED(cameraChangeModeID);
 }
 
 /**
@@ -3666,12 +3665,10 @@ void opcode_015c(const ScriptArguments& args, const ScriptString areaName, const
     @brief set_time_scale %1d%
 
     opcode 015d
-    @arg arg1 
+    @arg scale 
 */
-void opcode_015d(const ScriptArguments& args, const ScriptFloat arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x015d);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_015d(const ScriptArguments& args, const ScriptFloat scale) {
+    args.getState()->basic.timeScale = scale;
 }
 
 /**
@@ -4073,16 +4070,15 @@ bool opcode_0179(const ScriptArguments& args, const ScriptCharacter character, c
     @brief set_player %1d% weapon %2d% ammo_to %3d%
 
     opcode 017a
-    @arg player 
-    @arg arg2 
-    @arg arg3 
+    @arg player
+    @arg weaponID Weapon ID
+    @arg arg3
 */
-void opcode_017a(const ScriptArguments& args, const ScriptPlayer player, const ScriptWeaponType arg2, const ScriptInt arg3) {
-    RW_UNIMPLEMENTED_OPCODE(0x017a);
-    RW_UNUSED(player);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
+void opcode_017a(const ScriptArguments& args, const ScriptPlayer player,
+                 const ScriptWeaponType weaponID, const ScriptInt ammo) {
     RW_UNUSED(args);
+    player->getCharacter()->getCurrentState().weapons[weaponID].bulletsTotal =
+        ammo;
 }
 
 /**
@@ -4909,18 +4905,21 @@ void opcode_01bd(const ScriptArguments& args, ScriptInt& time) {
     @brief set_actor %1d% to_look_at_spot %2d% %3d% %4d%
 
     opcode 01be
-    @arg character 
-    @arg arg2 
-    @arg arg3 
-    @arg arg4 
+    @arg character
+    @arg arg2
+    @arg arg3
+    @arg arg4
 */
-void opcode_01be(const ScriptArguments& args, const ScriptCharacter character, const ScriptFloat arg2, const ScriptFloat arg3, const ScriptFloat arg4) {
-    RW_UNIMPLEMENTED_OPCODE(0x01be);
-    RW_UNUSED(character);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
+void opcode_01be(const ScriptArguments& args, const ScriptCharacter character,
+                 const ScriptVec3 coord) {
     RW_UNUSED(args);
+    GameObject* object = character;
+    if (character->getCurrentVehicle()) {
+        object = character->getCurrentVehicle();
+    }
+    const auto& pos = object->getPosition() - coord;
+    object->setHeading(
+        glm::degrees(glm::atan(pos.x, pos.y) + glm::half_pi<float>()));
 }
 
 /**
@@ -5923,10 +5922,8 @@ void opcode_020c(const ScriptArguments& args, ScriptVec3 coord, const ScriptExpl
     @arg vehicle Car/vehicle
 */
 bool opcode_020d(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x020d);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
-    return false;
+    return vehicle->isUpright();
 }
 
 /**
@@ -5937,10 +5934,10 @@ bool opcode_020d(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg character1 
 */
 void opcode_020e(const ScriptArguments& args, const ScriptCharacter character0, const ScriptCharacter character1) {
-    RW_UNIMPLEMENTED_OPCODE(0x020e);
-    RW_UNUSED(character0);
-    RW_UNUSED(character1);
     RW_UNUSED(args);
+    const auto& pos = character1->getPosition();
+    character0->setHeading(
+        glm::degrees(glm::atan(pos.x, pos.y) + glm::half_pi<float>()));
 }
 
 /**
@@ -5951,10 +5948,10 @@ void opcode_020e(const ScriptArguments& args, const ScriptCharacter character0, 
     @arg player 
 */
 void opcode_020f(const ScriptArguments& args, const ScriptCharacter character, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x020f);
-    RW_UNUSED(character);
-    RW_UNUSED(player);
     RW_UNUSED(args);
+    const auto& pos = player->getCharacter()->getPosition();
+    character->setHeading(
+        glm::degrees(glm::atan(pos.x, pos.y) + glm::half_pi<float>()));
 }
 
 /**
@@ -5965,10 +5962,10 @@ void opcode_020f(const ScriptArguments& args, const ScriptCharacter character, c
     @arg character Character/ped
 */
 void opcode_0210(const ScriptArguments& args, const ScriptPlayer player, const ScriptCharacter character) {
-    RW_UNIMPLEMENTED_OPCODE(0x0210);
-    RW_UNUSED(player);
-    RW_UNUSED(character);
     RW_UNUSED(args);
+    const auto& pos = character->getPosition();
+    player->getCharacter()->setHeading(
+        glm::degrees(glm::atan(pos.x, pos.y) + glm::half_pi<float>()));
 }
 
 /**
@@ -6889,17 +6886,18 @@ bool opcode_02a0(const ScriptArguments& args, const ScriptCharacter character) {
 }
 
 /**
-    @brief 
+    @brief skippable_wait
 
     opcode 02a1
-    @arg arg1 
-    @arg arg2 
+    @arg time 
+    @arg waitSkip 
 */
-void opcode_02a1(const ScriptArguments& args, const ScriptInt arg1, const ScriptInt arg2) {
-    RW_UNIMPLEMENTED_OPCODE(0x02a1);
-    RW_UNUSED(arg1);
-    RW_UNUSED(arg2);
-    RW_UNUSED(args);
+void opcode_02a1(const ScriptArguments& args, const ScriptInt time, const ScriptBoolean waitSkip) {
+    RW_CHECK(time >= 0, "negative wait time is not supported");
+    auto thread = args.getThread();
+    // Scripts use wait 0 to yield
+    thread->wakeCounter = time > 0 ? time : -1;
+    thread->allowWaitSkip = waitSkip;
 }
 
 /**
@@ -9594,11 +9592,11 @@ void opcode_0361(const ScriptArguments& args, const ScriptGarage garage) {
     @arg character Character/ped
     @arg coord Coordinates
 */
-void opcode_0362(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x0362);
-    RW_UNUSED(character);
-    RW_UNUSED(coord);
+void opcode_0362(const ScriptArguments& args, const ScriptCharacter character,
+                 ScriptVec3 coord) {
     RW_UNUSED(args);
+    character->setCurrentVehicle(nullptr, 0);
+    character->setPosition(coord);
 }
 
 /**
@@ -10593,11 +10591,11 @@ void opcode_039e(const ScriptArguments& args, const ScriptCharacter character, c
     @arg vehicle Car/vehicle
     @arg coord Coordinates
 */
-void opcode_039f(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec2 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x039f);
-    RW_UNUSED(vehicle);
-    RW_UNUSED(coord);
+void opcode_039f(const ScriptArguments& args, const ScriptVehicle vehicle,
+                 ScriptVec2 coord) {
     RW_UNUSED(args);
+    vehicle->setHeading(
+        glm::degrees(glm::atan(coord.x, coord.y) + glm::half_pi<float>()));
 }
 
 /**
@@ -10909,9 +10907,8 @@ void opcode_03b7(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg player 
 */
 void opcode_03b8(const ScriptArguments& args, const ScriptPlayer player) {
-    RW_UNIMPLEMENTED_OPCODE(0x03b8);
-    RW_UNUSED(player);
     RW_UNUSED(args);
+    player->getCharacter()->clearInventory();
 }
 
 /**

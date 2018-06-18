@@ -128,7 +128,7 @@ void PlayerController::restart() {
         if (!state->playerInfo.thaneOfLibertyCity) {
             // @todo implement wanted system
             uint8_t wantedLevel = 0;
-            uint32_t penalty = 0;
+            int32_t penalty = 0;
 
             switch (wantedLevel) {
                 case 0:
