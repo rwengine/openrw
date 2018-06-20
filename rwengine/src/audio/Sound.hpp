@@ -47,7 +47,7 @@ public:
 
     bool isPlaying() const;
     bool isPaused() const;
-    bool isStoped() const;
+    bool isStopped() const;
 
     void play();
     void pause();
@@ -82,8 +82,8 @@ struct Sound {
     bool isPaused() const {
         return buffer->isPaused();
     }
-    bool isStoped() const {
-        return buffer->isStoped();
+    bool isStopped() const {
+        return buffer->isStopped();
     }
 
     void play()  {

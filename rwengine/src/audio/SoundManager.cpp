@@ -128,7 +128,7 @@ size_t SoundManager::createSfxInstance(const size_t& index) {
 
     //Let's try reuse buffor
     for(auto& sound : buffers) {
-        if (sound.second.buffer && sound.second.isStoped())  { //Let's use this buffor
+        if (sound.second.buffer && sound.second.isStopped())  { //Let's use this buffor
             sound.second.buffer = std::make_unique<SoundBuffer>();
             sound.second.source = soundRef->second.source;
             sound.second.isLoaded = sound.second.buffer->bufferData(*sound.second.source);
@@ -166,10 +166,10 @@ bool SoundManager::isPlaying(const std::string& name) {
     return false;
 }
 
-bool SoundManager::isStoped(const std::string& name) {
+bool SoundManager::isStopped(const std::string& name) {
     auto sound = sounds.find(name);
     if (sound != sounds.end()) {
-        return sound->second.isStoped();
+        return sound->second.isStopped();
     }
     return false;
 }

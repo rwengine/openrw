@@ -12,10 +12,8 @@
 #define avio_context_free av_freep
 #endif
 
-#define OUTPUT_CHANNELS 2
-#define BUFFER_SIZE 192000
-#define OUTPUT_BITS 16
-#define OUTPUT_FMT AV_SAMPLE_FMT_S16
+constexpr int kNrOfOutputChannels = 2;
+constexpr AVSampleFormat OUTPUT_FMT = AV_SAMPLE_FMT_S16;
 
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));
@@ -115,7 +113,7 @@ void SoundSource::loadFromFile(const std::string& filename) {
 #endif
 
     // Expose audio metadata
-    channels = OUTPUT_CHANNELS;
+    channels = kNrOfOutputChannels;
     sampleRate = codecContext->sample_rate;
 
     // OpenAL only supports mono or stereo, so error on more than 2 channels
@@ -185,21 +183,21 @@ void SoundSource::loadFromFile(const std::string& filename) {
                         frame->channel_layout = av_get_default_channel_layout(1);
                     }
                     swr = swr_alloc_set_opts(nullptr,
-                                             AV_CH_LAYOUT_STEREO,    // output
-                                             OUTPUT_FMT,                                        // output
-                                             frame->sample_rate,                                       // output
-                                             frame->channel_layout,   // input
-                                             static_cast<AVSampleFormat>(frame->format),                                      // input
-                                             frame->sample_rate,                                            // input
+                                             AV_CH_LAYOUT_STEREO,                           // output channel layout
+                                             OUTPUT_FMT,                                    // output format
+                                             frame->sample_rate,                            // output sample rate
+                                             frame->channel_layout,                         // input channel layout
+                                             static_cast<AVSampleFormat>(frame->format),    // input format
+                                             frame->sample_rate,                            // input sample rate
                                              0,
                                              nullptr);
                     if (!swr) {
-                        fprintf(stderr, "Resampler has not been properly initialized\n");
+                        RW_ERROR("Resampler has not been successfully allocated.");
                         return;
                     }
                     swr_init(swr);
                     if (!swr_is_initialized(swr)) {
-                        fprintf(stderr, "Resampler has not been properly initialized\n");
+                        RW_ERROR("Resampler has not been properly initialized.");
                         return;
                     }
                 }
@@ -212,21 +210,21 @@ void SoundSource::loadFromFile(const std::string& filename) {
                     resampled->channel_layout = AV_CH_LAYOUT_STEREO;
                     resampled->sample_rate = frame->sample_rate;
                     resampled->format = OUTPUT_FMT;
-                    resampled->channels = OUTPUT_CHANNELS;
+                    resampled->channels = kNrOfOutputChannels;
 
                     swr_config_frame(swr, resampled, frame);
                     if (swr_convert_frame(swr, resampled, frame) < 0) {
-                        std::cout << "Error resampling "<< filename << '\n';
+                        RW_ERROR("Error resampling "<< filename << '\n');
                     }
                     for(size_t i = 0; i < static_cast<size_t>(resampled->nb_samples) * channels; i++) {
                         data.push_back(reinterpret_cast<int16_t *>(resampled->data[0])[i]);
                     }
+                    av_frame_unref(resampled);
                 }
             }
         }
     }
 
-    av_frame_unref(resampled);
 #endif
 
     // Cleanup
@@ -327,7 +325,7 @@ void SoundSource::loadSfx(const rwfs::path& path, const size_t& index) {
 
     // Expose audio metadata
     channels = codecContext->channels;
-    sampleRate =loader.assetInfo.sampleRate;
+    sampleRate = loader.assetInfo.sampleRate;
 
     // OpenAL only supports mono or stereo, so error on more than 2 channels
     if(channels > 2) {
@@ -437,7 +435,7 @@ bool SoundBuffer::isPaused() const {
     return AL_PAUSED == sourceState;
 }
 
-bool SoundBuffer::isStoped() const {
+bool SoundBuffer::isStopped() const {
     ALint sourceState;
     alCheck(alGetSourcei(source, AL_SOURCE_STATE,
                          &sourceState));

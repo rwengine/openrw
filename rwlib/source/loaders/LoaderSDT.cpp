@@ -52,6 +52,7 @@ bool LoaderSDT::load(const rwfs::path& path) {
         m_archive = rawName;
         return true;
     } else {
+        RW_ERROR("Error cannot find " << path);
         return false;
     }
 }
