@@ -246,7 +246,7 @@ void SoundSource::loadFromFile(const std::string& filename) {
     avformat_close_input(&formatContext);
 }
 
-void SoundSource::loadSfx(const std::string& path, const size_t& index) {
+void SoundSource::loadSfx(const rwfs::path& path, const size_t& index) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
@@ -257,7 +257,7 @@ void SoundSource::loadSfx(const std::string& path, const size_t& index) {
     // Allocate formatting context
     AVFormatContext* formatContext = nullptr;
     LoaderSDT loader{};
-    loader.load(path + "audio/sfx");
+    loader.load(path / "audio/sfx");
     formatContext = loader.loadSound(index);
 
     if (avformat_open_input(&formatContext, "nothint", nullptr, nullptr) != 0) {

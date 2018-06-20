@@ -71,7 +71,7 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
 
-    sound.loadSfxSounds(data->getDataPath().string());
+    sound.loadSfxSounds(data->getDataPath());
 }
 
 GameWorld::~GameWorld() {

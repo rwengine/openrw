@@ -12,6 +12,7 @@
 
 #include "loaders/LoaderSDT.hpp"
 #include "rw/defines.hpp"
+#include <rw/filesystem.hpp>
 
 /// Opaque for raw sound,
 /// cooperate with ffmpeg
@@ -25,7 +26,7 @@ public:
     void loadFromFile(const std::string& filename);
 
     /// Load sound from sdt file
-    void loadSfx(const std::string& path, const size_t& index);
+    void loadSfx(const rwfs::path& path, const size_t& index);
 
 private:
     /// Raw data

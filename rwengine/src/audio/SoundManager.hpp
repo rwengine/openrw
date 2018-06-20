@@ -1,6 +1,10 @@
 #ifndef _RWENGINE_SOUNDMANAGER_HPP_
 #define _RWENGINE_SOUNDMANAGER_HPP_
 
+#include "audio/Sound.hpp"
+
+#include <rw/filesystem.hpp>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -13,8 +17,6 @@
 
 #include <al.h>
 #include <alc.h>
-
-#include "audio/Sound.hpp"
 
 /// Script is using different numeration of sounds
 /// than postion index in sfx file.
@@ -159,7 +161,7 @@ public:
     bool loadSound(const std::string& name, const std::string& fileName);
 
     /// Load all sfx sounds
-    void loadSfxSounds(const std::string& path);
+    void loadSfxSounds(const rwfs::path& path);
 
     /// Get position index in sdt file
     int convertScriptIndexIntoSfx(const int scriptId);

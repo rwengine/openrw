@@ -106,7 +106,7 @@ bool SoundManager::loadSound(const std::string& name,
     return sound->isLoaded;
 }
 
-void SoundManager::loadSfxSounds(const std::string& path) {
+void SoundManager::loadSfxSounds(const rwfs::path& path) {
     sfx.reserve(kNrOfAllSfx);
     for(size_t i = 0; i < kNrOfAllSfx; i++) {
         Sound* sound = nullptr;

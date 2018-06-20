@@ -1,6 +1,8 @@
 #ifndef _LIBRW_LOADERSDT_HPP_
 #define _LIBRW_LOADERSDT_HPP_
 
+#include <rw/filesystem.hpp>
+
 #include <cstdint>
 #include <cstddef>
 #include <memory>
@@ -64,7 +66,7 @@ public:
 
     /// Load the structure of the archive
     /// Omit the extension in filename
-    bool load(const std::string& filename);
+    bool load(const rwfs::path& path);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Please delete[] the memory in the end.
