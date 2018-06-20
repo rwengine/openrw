@@ -128,7 +128,6 @@ size_t SoundManager::createSfxInstance(const size_t& index) {
 
     //Let's try reuse buffor
     for(auto& sound : buffers) {
-        std::lock_guard<std::mutex> lock(*sound.second.soundMutex);
         if (sound.second.buffer && sound.second.isStoped())  { //Let's use this buffor
             sound.second.buffer = std::make_unique<SoundBuffer>();
             sound.second.source = soundRef->second.source;
@@ -140,7 +139,6 @@ size_t SoundManager::createSfxInstance(const size_t& index) {
     auto emplaced = buffers.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(bufforNr),
                                     std::forward_as_tuple());
-    std::lock_guard<std::mutex> lock(*emplaced.first->second.soundMutex);
     sound = &emplaced.first->second;
 
     sound->id = bufforNr;

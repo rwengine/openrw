@@ -67,7 +67,6 @@ private:
 /// Each command connected
 /// with playment is passed to SoundBuffer
 struct Sound {
-    std::unique_ptr<std::mutex> soundMutex = std::make_unique<std::mutex>(); // mutexes can't be copied
     size_t id = 0;
     std::shared_ptr<SoundSource> source = nullptr;
     std::unique_ptr<SoundBuffer> buffer = nullptr;
