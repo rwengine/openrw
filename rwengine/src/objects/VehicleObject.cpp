@@ -337,14 +337,23 @@ void VehicleObject::tickPhysics(float dt) {
             physVehicle->setBrake(brakeReal * brakeF, w);
 
             if (wi.m_bIsFrontWheel) {
-                float sign = std::signbit(steerAngle) ? -1.f : 1.f;
-                physVehicle->setSteeringValue(
-                    std::min(glm::radians(info->handling.steeringLock),
-                             std::abs(steerAngle)) *
-                        sign,
-                    w);
-                // physVehicle->setSteeringValue(std::min(3.141f/2.f,
-                // std::abs(steerAngle)) * sign, w);
+                float currentVal = physVehicle->getSteeringValue(w);
+                float currentSign = std::signbit(currentVal) ? -1.f : 1.f;
+                float newVal;
+
+                if (std::abs(steerAngle) < 0.001f) {   // no steering?
+                    newVal = std::max(0.0f,std::abs(currentVal) - 4.f * dt) *
+                        currentSign; 
+                } else {
+                    newVal = currentVal + steerAngle * dt * 4.f;
+
+                    float limit = glm::radians(info->handling.steeringLock);
+
+                    if (std::abs(newVal) > limit)
+                        newVal = limit * currentSign;
+                }
+
+                physVehicle->setSteeringValue(newVal,w);
             }
         }
 
