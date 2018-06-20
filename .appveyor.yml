@@ -36,10 +36,15 @@ init:
   - cmake --version
   - msbuild /version
 
+install:
+  - cd "%APPVEYOR_BUILD_FOLDER%"
+  - for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
+  - if NOT "%APPVEYOR_REPO_COMMIT%" == "%COMMIT_HASH%" echo "Appveyor hash does not match checkout out hash" && exit 1
+
 build_script:
   - ctest -VV -S cmake/ctest/script_ci.ctest
 
 after_build:
   - cd "%APPVEYOR_BUILD_FOLDER%\build"
   - cpack -C Release -G TXZ
-  - appveyor PushArtifact OpenRW-%APPVEYOR_REPO_COMMIT:~0,8%.tar.xz
+  - appveyor PushArtifact OpenRW-%COMMIT_HASH:~0,8%.tar.xz
