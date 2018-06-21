@@ -1,91 +1,96 @@
 #ifndef _LIBRW_FILEINDEX_HPP_
 #define _LIBRW_FILEINDEX_HPP_
 
-#include <algorithm>
-#include <cctype>
-#include <map>
-#include <string>
+#include "rw/filesystem.hpp"
+#include "rw/forward.hpp"
+
 #include <unordered_map>
 
-#include <rw/filesystem.hpp>
-#include <rw/forward.hpp>
-
 class FileIndex {
-private:
-    /**
-     * Mapping type (lower case name) => (on disk name)
-     */
-    using FileSystemMap = std::unordered_map<rwfs::path, rwfs::path>;
-
-    rwfs::path gamedatapath_;
-    FileSystemMap filesystemfiles_;
-
 public:
     /**
-     * @brief indexDirectory finds the true case for each file in the tree
-     * @param base_path
+     * @brief normalizeString Normalize a file path
+     * @param filePath the path to normalize
+     * @return normalized file path
+     */
+    static std::string normalizeFilePath(const std::string &filePath);
+
+    /**
+     * @brief indexDirectory index all files at path
+     * @param path the path to index
      *
      * This is used to build the mapping of lower-case file paths to the
      * true case on the file system for platforms where this is an issue.
-     *
      */
-    void indexGameDirectory(const rwfs::path& base_path);
+    void indexTree(const rwfs::path &path);
 
     /**
      * @brief findFilePath finds disk path for a game data file
-     * @param path
+     * @param filePath the path to find
      * @return The file path as it exists on disk
+     * @throws if this FileIndex has not indexed the path
      */
-    rwfs::path findFilePath(std::string path) {
-        auto backslash = std::string::npos;
-        while ((backslash = path.find("\\")) != std::string::npos) {
-            path.replace(backslash, 1, "/");
-        }
-        auto realpath = gamedatapath_ / path;
-        std::string name = realpath.string();
-        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-        return filesystemfiles_[name];
-    }
+    rwfs::path findFilePath(const std::string &filePath) const;
 
     /**
-     * @brief openFilePath opens a file on the disk
-     * @param file_path
-     * @return A handle for the file on the disk
+     * @brief openFileRaw Opens a raw file on the disk
+     * @param filePath the path to open
+     * @return FileHandle to the file
+     * @throws if this FileIndex has not indexed the path
      */
-    FileHandle openFilePath(const std::string& file_path);
-
-    struct IndexData {
-        /// Lowercase identifying filename
-        std::string filename;
-        /// Original filename
-        std::string originalName;
-        /// Containing directory
-        std::string directory;
-        /// The archive filename (if applicable)
-        std::string archive;
-    };
-
-    /**
-     * Adds the files contained within the given directory tree to the
-     * file index.
-     */
-    void indexTree(const rwfs::path& root);
+    FileHandle openFileRaw(const std::string &filePath) const;
 
     /**
      * Adds the files contained within the given Archive file to the
      * file index.
+     * @param filePath path to the archive
+     * @throws if this FileIndex has not indexed the archive itself
      */
-    void indexArchive(const std::string& archive);
+    void indexArchive(const std::string &filePath);
 
     /**
      * Returns a FileHandle for the file if it can be found in the
      * file index, otherwise an empty FileHandle is returned.
+     * @param filePath name of the file to open
+     * @return FileHandle to the file, nullptr if this FileINdexed has not indexed the path
      */
-    FileHandle openFile(const std::string& filename);
+    FileHandle openFile(const std::string &filePath);
 
 private:
-    std::map<std::string, IndexData> files;
+    /**
+     * @brief Type of the indexed data.
+     */
+    enum IndexedDataType {
+        /// Is a file on disk
+        FILE,
+        /// Is a member of an archive
+        ARCHIVE,
+    };
+
+    /**
+     * @brief All information of indexed data.
+     */
+    struct IndexedData {
+        /// Type of indexed data.
+        IndexedDataType type;
+        /// Path of indexed data.
+        std::string path;
+        /// Extra data of assets (FIXME: use c++17 std::variant or std::option)
+        std::string assetData;
+    };
+
+    /**
+     * @brief indexedData_ A mapping from filepath (relative to game data path) to an IndexedData item.
+     */
+    std::unordered_map<std::string, IndexedData> indexedData_;
+
+    /**
+     * @brief getIndexedDataAt Get IndexedData for filePath
+     * @param filePath the file path to get the IndexedData for
+     * @return IndexedData pointer if this FileIndex has indexed the filePath
+     * @throws If this FileIndex has not indexed filePath
+     */
+    const IndexedData *getIndexedDataAt(const std::string &filePath) const;
 };
 
 #endif

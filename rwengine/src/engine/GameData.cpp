@@ -41,7 +41,6 @@ GameData::GameData(Logger* log, const rwfs::path& path)
 GameData::~GameData() = default;
 
 void GameData::load() {
-    index.indexGameDirectory(datpath);
     index.indexTree(datpath);
 
     loadIMG("models/gta3.img");
@@ -191,8 +190,7 @@ void GameData::loadCOL(const size_t zone, const std::string& name) {
 }
 
 void GameData::loadIMG(const std::string& name) {
-    auto syspath = index.findFilePath(name).string();
-    index.indexArchive(syspath);
+    index.indexArchive(name);
 }
 
 void GameData::loadIPL(const std::string& path) {
@@ -290,7 +288,7 @@ void GameData::loadHandling(const std::string& path) {
 }
 
 SCMFile* GameData::loadSCM(const std::string& path) {
-    auto scm_h = index.openFilePath(path);
+    auto scm_h = index.openFileRaw(path);
     SCMFile* scm = new SCMFile;
     scm->loadFile(scm_h->data, scm_h->length);
     scm_h.reset();
@@ -298,7 +296,7 @@ SCMFile* GameData::loadSCM(const std::string& path) {
 }
 
 void GameData::loadGXT(const std::string& name) {
-    auto file = index.openFilePath(name);
+    auto file = index.openFileRaw(name);
 
     LoaderGXT loader;
 
@@ -419,7 +417,7 @@ ClumpPtr GameData::loadClump(const std::string& name, const std::string& texture
 }
 
 void GameData::loadModelFile(const std::string& name) {
-    auto file = index.openFilePath(name);
+    auto file = index.openFileRaw(name);
     if (!file) {
         logger->log("Data", Logger::Error, "Failed to load model file " + name);
         return;

@@ -691,11 +691,7 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
 }
 
 void GameWorld::loadCutscene(const std::string& name) {
-    std::string lowerName(name);
-    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
-                   ::tolower);
-
-    auto datfile = data->index.openFile(lowerName + ".dat");
+    auto datfile = data->index.openFile(name + ".dat");
 
     CutsceneData* cutscene = new CutsceneData;
 
@@ -704,7 +700,7 @@ void GameWorld::loadCutscene(const std::string& name) {
         loaderdat.load(cutscene->tracks, datfile);
     }
 
-    data->loadIFP(lowerName + ".ifp");
+    data->loadIFP(name + ".ifp");
 
     cutsceneAudioLoaded = data->loadAudioStream(name + ".mp3");
 

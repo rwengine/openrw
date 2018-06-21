@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE(TextTests)
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(load_test) {
     {
-        auto d = Global::get().e->data->index.openFilePath("text/english.gxt");
+        auto d = Global::get().e->data->index.openFileRaw("text/english.gxt");
 
         GameTexts texts;
 
