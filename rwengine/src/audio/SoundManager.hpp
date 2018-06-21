@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <rw/filesystem.hpp>
+
 #include <al.h>
 #include <alc.h>
 
@@ -15,7 +17,7 @@ public:
     SoundManager();
     ~SoundManager();
 
-    bool loadSound(const std::string& name, const std::string& fileName);
+    bool loadSound(const std::string& name, const rwfs::path& path);
     bool isLoaded(const std::string& name);
     void playSound(const std::string& name);
     void pauseSound(const std::string& name);
@@ -26,9 +28,9 @@ public:
     void pauseAllSounds();
     void resumeAllSounds();
 
-    bool playBackground(const std::string& fileName);
+    bool playBackground(const std::string& name);
 
-    bool loadMusic(const std::string& name, const std::string& fileName);
+    bool loadMusic(const std::string& name, const rwfs::path& path);
     void playMusic(const std::string& name);
     void stopMusic(const std::string& name);
 
@@ -40,7 +42,7 @@ private:
         friend class SoundBuffer;
 
     public:
-        void loadFromFile(const std::string& filename);
+        void loadFromFile(const rwfs::path& filePath);
 
     private:
         std::vector<int16_t> data;

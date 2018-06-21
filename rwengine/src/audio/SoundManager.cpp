@@ -64,7 +64,7 @@ bool SoundManager::initializeAVCodec() {
     return true;
 }
 
-void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
+void SoundManager::SoundSource::loadFromFile(const rwfs::path& filePath) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
@@ -74,9 +74,9 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
 
     // Allocate formatting context
     AVFormatContext* formatContext = nullptr;
-    if (avformat_open_input(&formatContext, filename.c_str(), nullptr, nullptr) != 0) {
+    if (avformat_open_input(&formatContext, filePath.string().c_str(), nullptr, nullptr) != 0) {
         av_frame_free(&frame);
-        RW_ERROR("Error opening audio file (" << filename << ")");
+        RW_ERROR("Error opening audio file (" << filePath << ")");
         return;
     }
 
@@ -93,7 +93,7 @@ void SoundManager::SoundSource::loadFromFile(const std::string& filename) {
     if (streamIndex < 0) {
         av_frame_free(&frame);
         avformat_close_input(&formatContext);
-        RW_ERROR("Could not find any audio stream in the file " << filename);
+        RW_ERROR("Could not find any audio stream in the file " << filePath);
         return;
     }
 
@@ -196,7 +196,7 @@ bool SoundManager::SoundBuffer::bufferData(SoundSource& soundSource) {
 }
 
 bool SoundManager::loadSound(const std::string& name,
-                             const std::string& fileName) {
+                             const rwfs::path& path) {
     Sound* sound = nullptr;
     auto sound_iter = sounds.find(name);
 
@@ -208,7 +208,7 @@ bool SoundManager::loadSound(const std::string& name,
                                        std::forward_as_tuple());
         sound = &emplaced.first->second;
 
-        sound->source.loadFromFile(fileName);
+        sound->source.loadFromFile(path);
         sound->isLoaded = sound->buffer.bufferData(sound->source);
     }
 
@@ -280,8 +280,8 @@ bool SoundManager::playBackground(const std::string& fileName) {
 }
 
 bool SoundManager::loadMusic(const std::string& name,
-                             const std::string& fileName) {
-    return loadSound(name, fileName);
+                             const rwfs::path& path) {
+    return loadSound(name, path);
 }
 
 void SoundManager::playMusic(const std::string& name) {
