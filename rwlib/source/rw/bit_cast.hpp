@@ -1,10 +1,9 @@
-#ifndef _LIBRW_BIT_CAST_CPP_
-#define _LIBRW_BIT_CAST_CPP_
+#ifndef _LIBRW_BIT_CAST_HPP_
+#define _LIBRW_BIT_CAST_HPP_
 
 //Based on https://gist.github.com/socantre/3472964
 #include <cstring> // memcpy
 #include <type_traits> // is_trivially_copyable
-#include "rw/debug.hpp" // RW_ASSERT
 
 template <class Dest, class Source>
 inline Dest bit_cast(Source const &source) {

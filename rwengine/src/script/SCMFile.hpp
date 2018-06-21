@@ -1,12 +1,13 @@
 #ifndef _RWENGINE_SCMFILE_HPP_
 #define _RWENGINE_SCMFILE_HPP_
 
+#include "script/ScriptTypes.hpp"
+
+#include <rw/bit_cast.hpp>
+
 #include <cstdint>
 #include <string>
 #include <vector>
-
-#include "script/ScriptTypes.hpp"
-#include "rw/bit_cast.cpp"
 
 /**
  * @brief Handles in-memory SCM file data including section offsets.
