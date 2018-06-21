@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 
 #include <render/GameRenderer.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 /**
  * Default values for menus that should match the look and feel of the original

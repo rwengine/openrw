@@ -14,7 +14,7 @@
 #include <glm/glm.hpp>
 
 #include <platform/FileIndex.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/forward.hpp>
 
 #include <data/AnimGroup.hpp>

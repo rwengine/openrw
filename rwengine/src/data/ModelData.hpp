@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <data/Clump.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/forward.hpp>
 
 #include <data/CollisionModel.hpp>

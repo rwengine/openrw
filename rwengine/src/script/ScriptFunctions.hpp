@@ -1,7 +1,7 @@
 #ifndef _RWENGINE_SCRIPTFUNCTIONS_HPP_
 #define _RWENGINE_SCRIPTFUNCTIONS_HPP_
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include <ai/AIGraphNode.hpp>
 #include <data/GameTexts.hpp>

@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-#include "rw/defines.hpp"
+#include "rw/debug.hpp"
 #include "rw/bit_cast.cpp"
 
 /**

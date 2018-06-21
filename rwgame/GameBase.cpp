@@ -6,7 +6,7 @@
 
 #include <SDL.h>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "GitSHA1.h"
 

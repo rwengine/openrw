@@ -1,6 +1,6 @@
 #include "engine/Payphone.hpp"
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "ai/PlayerController.hpp"
 

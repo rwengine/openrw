@@ -12,7 +12,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "data/ZoneData.hpp"
 #include "engine/GameData.hpp"

@@ -9,7 +9,7 @@
 #include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletDynamicsCommon.h>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "ai/CharacterController.hpp"
 #include "ai/PlayerController.hpp"

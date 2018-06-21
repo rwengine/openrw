@@ -8,7 +8,7 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 //ab
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 // Rename some functions for older libavcodec/ffmpeg versions (e.g. Ubuntu Trusty)
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)

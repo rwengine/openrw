@@ -9,7 +9,7 @@
 
 #include <glm/glm.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "engine/Garage.hpp"
 

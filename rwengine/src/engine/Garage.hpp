@@ -1,9 +1,9 @@
-#ifndef _RWENGINE_Garage_HPP_
-#define _RWENGINE_Garage_HPP_
+#ifndef _RWENGINE_GARAGE_HPP_
+#define _RWENGINE_GARAGE_HPP_
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 class PlayerController;
 

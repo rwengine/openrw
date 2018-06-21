@@ -3,7 +3,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdio>
 
-#include "rw/defines.hpp"
+#include "rw/debug.hpp"
 
 LoaderIMG::LoaderIMG() : m_version(GTAIIIVC), m_assetCount(0) {
 }

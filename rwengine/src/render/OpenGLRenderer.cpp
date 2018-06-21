@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <gl/DrawBuffer.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 namespace {
 constexpr GLuint kUBOIndexScene = 1;

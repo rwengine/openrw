@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <fstream>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "engine/GameWorld.hpp"
 #include "objects/GameObject.hpp"

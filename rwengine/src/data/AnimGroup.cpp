@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/forward.hpp>
 
 // The default animations for every cycle

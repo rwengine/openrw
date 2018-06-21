@@ -9,7 +9,7 @@
 #include <vector>
 #define time_unit std::chrono::microseconds
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 namespace perf {
 

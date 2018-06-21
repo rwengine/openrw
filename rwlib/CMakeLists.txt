@@ -20,7 +20,7 @@ SET(RWLIB_SOURCES
     source/rw/filesystem.hpp
     source/rw/forward.hpp
     source/rw/types.hpp
-    source/rw/defines.hpp
+    source/rw/debug.hpp
 
     source/platform/FileHandle.hpp
     source/platform/FileIndex.hpp

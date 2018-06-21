@@ -14,7 +14,7 @@
 #include "gl/gl_core_3_3.h"
 #include "loaders/RWBinaryStream.hpp"
 #include "platform/FileHandle.hpp"
-#include "rw/defines.hpp"
+#include "rw/debug.hpp"
 
 enum DFFChunks {
     CHUNK_STRUCT = 0x0001,

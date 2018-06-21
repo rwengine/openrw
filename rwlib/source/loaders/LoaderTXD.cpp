@@ -10,7 +10,7 @@
 #include "gl/gl_core_3_3.h"
 #include "loaders/RWBinaryStream.hpp"
 #include "platform/FileHandle.hpp"
-#include "rw/defines.hpp"
+#include "rw/debug.hpp"
 
 GLuint gErrorTextureData[] = {0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF};
 GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};

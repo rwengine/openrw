@@ -7,7 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/forward.hpp>
 
 #include <data/ModelData.hpp>

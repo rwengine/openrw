@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include <objects/GameObject.hpp>
 

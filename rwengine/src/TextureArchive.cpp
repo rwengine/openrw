@@ -4,7 +4,7 @@
 #include <cstring>
 #include <memory>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "BinaryStream.hpp"
 

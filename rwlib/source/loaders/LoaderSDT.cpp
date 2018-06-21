@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <string>
 
-#include "rw/defines.hpp"
+#include "rw/debug.hpp"
 
 LoaderSDT::LoaderSDT() : m_version(GTAIIIVC), m_assetCount(0) {
 }

@@ -3,7 +3,7 @@
 #include "game.hpp"
 
 #include <engine/SaveGame.hpp>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include "RWGame.hpp"
 
 MenuState::MenuState(RWGame* game) : State(game) {

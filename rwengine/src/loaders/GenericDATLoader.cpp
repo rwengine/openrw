@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include <data/ModelData.hpp>
 #include <data/WeaponData.hpp>
