@@ -29,4 +29,4 @@ option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
 
 option(BOOST_STATIC "Link against static Boost libraries")
 
-option(USE_CONAN "Use Conan as packet manager")
+option(USE_CONAN "Use Conan as package manager")
