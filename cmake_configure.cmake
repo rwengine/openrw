@@ -86,7 +86,7 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
 elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
     target_link_libraries(rw_interface INTERFACE
-        rwdep::boost_filesystem
+        Boost::filesystem
         )
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")

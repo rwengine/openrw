@@ -1,7 +1,3 @@
-##############################################################################
-#    Unit Tests
-##############################################################################
-
 set(TESTS
     Animation
     Archive
@@ -47,9 +43,9 @@ set(TEST_SOURCES
     test_Globals.hpp
 
     # Hack in rwgame sources until there's a per-target test suite
-    "${CMAKE_SOURCE_DIR}/rwgame/GameConfig.cpp"
-    "${CMAKE_SOURCE_DIR}/rwgame/GameWindow.cpp"
-    "${CMAKE_SOURCE_DIR}/rwgame/GameInput.cpp"
+    "${PROJECT_SOURCE_DIR}/rwgame/GameConfig.cpp"
+    "${PROJECT_SOURCE_DIR}/rwgame/GameWindow.cpp"
+    "${PROJECT_SOURCE_DIR}/rwgame/GameInput.cpp"
     )
 
 foreach(TEST ${TESTS})
@@ -67,16 +63,16 @@ target_compile_definitions(rwtests
 
 target_include_directories(rwtests
     PRIVATE
-        "${CMAKE_SOURCE_DIR}/tests"
-        "${CMAKE_SOURCE_DIR}/rwgame"
+        "${PROJECT_SOURCE_DIR}/tests"
+        "${PROJECT_SOURCE_DIR}/rwgame"
     )
 
 target_link_libraries(rwtests
     PRIVATE
         rwengine
-        rwdep::SDL2
-        rwdep::boost_filesystem
-        rwdep::boost_unit_test_framework
+        SDL2::SDL2
+        Boost::filesystem
+        Boost::unit_test_framework
     )
 
 openrw_target_apply_options(TARGET rwtests)

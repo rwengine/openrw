@@ -7,8 +7,8 @@ add_executable(rwfontmap
 target_link_libraries(rwfontmap
     PUBLIC
         rwcore
-        rwdep::freetype
-        rwdep::boost_program_options
+        Freetype::Freetype
+        Boost::program_options
         Qt5::Gui
     )
 

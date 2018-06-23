@@ -1,7 +1,3 @@
-###########################################################
-##      RWENGINE
-###########################################################
-
 set(RWENGINE_SOURCES
     src/ai/AIGraph.cpp
     src/ai/AIGraph.hpp
@@ -147,10 +143,10 @@ add_library(rwengine
 target_link_libraries(rwengine
     PUBLIC
         rwcore
-        rwdep::bullet
-        rwdep::ffmpeg
-        rwdep::glm
-        rwdep::OpenAL
+        bullet::bullet
+        ffmpeg::ffmpeg
+        glm::glm
+        OpenAL::OpenAL
     )
 
 target_include_directories(rwengine

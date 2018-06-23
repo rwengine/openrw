@@ -51,8 +51,8 @@ target_include_directories(rwcore
 
 target_link_libraries(rwcore
     PUBLIC
-        rwdep::boost
-        rwdep::glm
+        Boost::boost
+        glm::glm
         openrw::interface
     PRIVATE
         OpenGL::GL
