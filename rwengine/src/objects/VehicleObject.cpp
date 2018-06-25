@@ -310,6 +310,8 @@ void VehicleObject::tick(float dt) {
 void VehicleObject::tickPhysics(float dt) {
     RW_UNUSED(dt);
 
+    static constexpr float steeringWeight = 1.f/0.35f;
+
     if (physVehicle) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
@@ -338,19 +340,20 @@ void VehicleObject::tickPhysics(float dt) {
 
             if (wi.m_bIsFrontWheel) {
                 float currentVal = physVehicle->getSteeringValue(w);
-                float currentSign = std::signbit(currentVal) ? -1.f : 1.f;
+                float currentSign = std::copysign(1.0f, currentVal);
                 float newVal;
 
                 if (std::abs(steerAngle) < 0.001f) {   // no steering?
-                    newVal = std::max(0.0f,std::abs(currentVal) - 4.f * dt) *
-                        currentSign; 
+                    newVal = std::max(0.0f,std::abs(currentVal) -
+                                      steeringWeight * dt) * currentSign;
                 } else {
-                    newVal = currentVal + steerAngle * dt * 4.f;
+                    newVal = currentVal + steerAngle * dt * steeringWeight;
 
                     float limit = glm::radians(info->handling.steeringLock);
 
-                    if (std::abs(newVal) > limit)
+                    if (std::abs(newVal) > limit) {
                         newVal = limit * currentSign;
+                    }
                 }
 
                 physVehicle->setSteeringValue(newVal,w);
@@ -376,7 +379,7 @@ void VehicleObject::tickPhysics(float dt) {
 
         if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
             if (isInWater()) {
-                float sign = std::signbit(steerAngle) ? -1.f : 1.f;
+                float sign = std::copysign(1.0f, steerAngle);
                 float steer =
                     std::min(glm::radians(info->handling.steeringLock),
                              std::abs(steerAngle)) *
