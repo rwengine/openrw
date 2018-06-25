@@ -317,18 +317,22 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
 
             if (vm) {
                 std::list<SCMThread>& threads = vm->getThreads();
+                const auto& offsets = vm->getFile()->getMissionOffsets();
+
+                RW_ASSERT(!offsets.empty());
 
                 for (auto& thread : threads) {
-                    if (thread.isMission) {
+                    if (thread.baseAddress >= offsets[0]) {
                         thread.wakeCounter = -1;
                         thread.finished = true;
                     }
                 }
 
-                RW_ASSERT(i < vm->getFile()->getMissionOffsets().size());
+                game->getState()->radarBlips.clear();
 
-                auto offset = vm->getFile()->getMissionOffsets()[i];
-                vm->startThread(offset, true);
+                RW_ASSERT(i < offsets.size());
+
+                vm->startThread(offsets[i], true);
             }
         });
     }

@@ -1223,7 +1223,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     for (size_t s = 0; s < numScripts; ++s) {
         state.script->startThread(scripts[s].programCounter);
         SCMThread& thread = threads.back();
-        // thread.baseAddress // ??
+        // no baseAddress in III and VC
         strncpy(thread.name, scripts[s].name, sizeof(SCMThread::name) - 1);
         thread.conditionResult = scripts[s].ifFlag;
         thread.conditionCount = scripts[s].ifNumber;
