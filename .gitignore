@@ -5,3 +5,4 @@ documentation/
 *swp
 *.user*
 .DS_Store
+.vscode/

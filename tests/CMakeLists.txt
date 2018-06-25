@@ -16,6 +16,7 @@ set(TESTS
     FileIndex
     GameData
     GameWorld
+    Garage
     Input
     Items
     Lifetime

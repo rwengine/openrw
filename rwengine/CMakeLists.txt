@@ -61,8 +61,8 @@ set(RWENGINE_SOURCES
     src/engine/GameState.hpp
     src/engine/GameWorld.cpp
     src/engine/GameWorld.hpp
-    src/engine/GarageController.cpp
-    src/engine/GarageController.hpp
+    src/engine/Garage.cpp
+    src/engine/Garage.hpp
     src/engine/Payphone.cpp
     src/engine/Payphone.hpp
     src/engine/SaveGame.cpp

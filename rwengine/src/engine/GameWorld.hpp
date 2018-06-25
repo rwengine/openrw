@@ -17,7 +17,7 @@
 #include <ai/AIGraphNode.hpp>
 #include <audio/SoundManager.hpp>
 
-#include <engine/GarageController.hpp>
+#include <engine/Garage.hpp>
 #include <engine/Payphone.hpp>
 #include <objects/ObjectTypes.hpp>
 
@@ -35,7 +35,7 @@ class btSequentialImpulseConstraintSolver;
 struct btDbvtBroadphase;
 
 class GameState;
-class GarageController;
+class Garage;
 class Payphone;
 
 class PlayerController;
@@ -150,8 +150,8 @@ public:
     /**
      * Creates a garage
      */
-    GarageInfo* createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
-                             const int type);
+    Garage* createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
+                         Garage::Type type);
 
     /**
      * Creates a payphone
@@ -271,7 +271,7 @@ public:
 
     std::vector<PlayerController*> players;
 
-    std::vector<std::unique_ptr<GarageController>> garageControllers;
+    std::vector<std::unique_ptr<Garage>> garages;
 
     std::vector<std::unique_ptr<Payphone>> payphones;
 

@@ -6103,8 +6103,8 @@ void opcode_0218(const ScriptArguments& args, const ScriptString gxtEntry, const
     @arg arg7
     @arg garage 
 */
-void opcode_0219(const ScriptArguments& args, ScriptVec3 coord0,
-                 ScriptVec3 coord1, const ScriptInt type,
+void opcode_0219(const ScriptArguments& args, const ScriptVec3 coord0,
+                 const ScriptVec3 coord1, const ScriptGarageType type,
                  ScriptGarage& garage) {
     garage = args.getWorld()->createGarage(coord0, coord1, type);
 }
@@ -6117,10 +6117,8 @@ void opcode_0219(const ScriptArguments& args, ScriptVec3 coord0,
     @arg vehicle Car/vehicle
 */
 void opcode_021b(const ScriptArguments& args, const ScriptGarage garage, const ScriptVehicle vehicle) {
-    RW_UNIMPLEMENTED_OPCODE(0x021b);
-    RW_UNUSED(garage);
-    RW_UNUSED(vehicle);
     RW_UNUSED(args);
+    garage->target = vehicle.get();
 }
 
 /**
@@ -6130,16 +6128,8 @@ void opcode_021b(const ScriptArguments& args, const ScriptGarage garage, const S
     @arg garage 
 */
 bool opcode_021c(const ScriptArguments& args, const ScriptGarage garage) {
-    auto& objects = args.getWorld()->vehiclePool.objects;
-    for(auto& v : objects) {
-    	// @todo if this car only accepts mission cars we probably have to filter here / only check for one specific car
-    	auto vp = v.second->getPosition();
-    	if (vp.x >= garage->min.x && vp.y >= garage->min.y && vp.z >= garage->min.z &&
-    	    vp.x <= garage->max.x && vp.y <= garage->max.y && vp.z <= garage->max.z) {
-    		return true;
-    	}
-    }
-    return false;
+    RW_UNUSED(args);
+    return garage->isTargetInsideGarage();
 }
 
 /**
@@ -6843,9 +6833,8 @@ void opcode_0298(const ScriptArguments& args, const ScriptModelID model0, Script
     @arg garage 
 */
 void opcode_0299(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x0299);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
+    garage->activate();
 }
 
 /**
@@ -7342,9 +7331,8 @@ bool opcode_02b8(const ScriptArguments& args, const ScriptPlayer player, ScriptV
     @arg garage 
 */
 void opcode_02b9(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x02b9);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
+    garage->deactivate();
 }
 
 /**
@@ -8163,11 +8151,9 @@ void opcode_02f9(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
     @arg garage0 
     @arg garage1 
 */
-void opcode_02fa(const ScriptArguments& args, const ScriptGarage garage0, const ScriptGarageType garage1) {
-    RW_UNIMPLEMENTED_OPCODE(0x02fa);
-    RW_UNUSED(garage0);
-    RW_UNUSED(garage1);
+void opcode_02fa(const ScriptArguments& args, const ScriptGarage garage, const ScriptGarageType garageType) {
     RW_UNUSED(args);
+    garage->type = garageType;
 }
 
 /**
@@ -8894,18 +8880,8 @@ void opcode_0327(const ScriptArguments& args, ScriptVec2 coord0, ScriptVec2 coor
     @arg garage Handle
 */
 bool opcode_0329(const ScriptArguments& args, const ScriptGarage garage) {
-    if (garage->type != GarageType::Respray) {
-    	return false;
-    }
-
-    auto playerobj = args.getWorld()->pedestrianPool.find(args.getState()->playerObject);
-    auto pp = playerobj->getPosition();
-    if (pp.x >= garage->min.x && pp.y >= garage->min.y && pp.z >= garage->min.z &&
-        pp.x <= garage->max.x && pp.y <= garage->max.y && pp.z <= garage->max.z) {
-    	return true;
-    }
-
-    return false;
+    RW_UNUSED(args);
+    return garage->resprayDone;
 }
 
 /**
@@ -9584,9 +9560,8 @@ void opcode_035f(const ScriptArguments& args, const ScriptCharacter character, c
     @arg garage 
 */
 void opcode_0360(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x0360);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
+    garage->open();
 }
 
 /**
@@ -9596,9 +9571,8 @@ void opcode_0360(const ScriptArguments& args, const ScriptGarage garage) {
     @arg garage 
 */
 void opcode_0361(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x0361);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
+    garage->close();
 }
 
 /**
@@ -10698,12 +10672,11 @@ void opcode_03a4(const ScriptArguments& args, const ScriptString name) {
     @arg garage1 
     @arg model 
 */
-void opcode_03a5(const ScriptArguments& args, const ScriptGarage garage0, const ScriptGarageType garage1, const ScriptModelID model) {
-    RW_UNIMPLEMENTED_OPCODE(0x03a5);
-    RW_UNUSED(garage0);
-    RW_UNUSED(garage1);
-    RW_UNUSED(model);
+void opcode_03a5(const ScriptArguments& args, const ScriptGarage garage, const ScriptGarageType garageType, const ScriptModelID model) {
     RW_UNUSED(args);
+    garage->type = garageType;
+    garage->targetModel = model;
+    garage->state = Garage::State::Closed;
 }
 
 /**
@@ -10826,10 +10799,8 @@ bool opcode_03b0(const ScriptArguments& args, const ScriptGarage garage) {
     @arg garage 
 */
 bool opcode_03b1(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x03b1);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
-    return false;
+    return garage->state == Garage::State::Closed;
 }
 
 /**
@@ -10964,12 +10935,11 @@ void opcode_03ba(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     @brief set_garage %1d% door_type_to_swing_open
 
     opcode 03bb
-    @arg garage 
+    @arg garage
 */
 void opcode_03bb(const ScriptArguments& args, const ScriptGarage garage) {
-    RW_UNIMPLEMENTED_OPCODE(0x03bb);
-    RW_UNUSED(garage);
     RW_UNUSED(args);
+    garage->makeDoorSwing();
 }
 
 /**
@@ -11302,21 +11272,18 @@ void opcode_03d3(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCo
     @arg garage Handle
     @arg arg2 
 */
-bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const ScriptInt arg2) {
-    int entryIndex = arg2;
+bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const ScriptInt index) {
+    int entryIndex = index;
     RW_CHECK(entryIndex >= 0, "Entry index too low");
     RW_CHECK(entryIndex < 32, "Entry index too high");
 
     // @todo reimplement
-    if (garage->type == GarageType::CollectCars1) {
-    	return args.getState()->importExportPortland[entryIndex];
+    if (garage->type == Garage::Type::CollectCars1) {
+        return args.getState()->importExportPortland[entryIndex];
     }
-    if (garage->type == GarageType::CollectCars2) {
-    	return args.getState()->importExportShoreside[entryIndex];
+    if (garage->type == Garage::Type::CollectCars2) {
+        return args.getState()->importExportShoreside[entryIndex];
     }
-    // if (garage->type == GarageType::CollectCars3) {
-    // 	return args.getState()->importExportUnused[entryIndex];
-    // }
 
     return false;
 }
@@ -12179,18 +12146,7 @@ void opcode_0421(const ScriptArguments& args, const ScriptBoolean arg1) {
 */
 bool opcode_0422(const ScriptArguments& args, const ScriptGarage garage, const ScriptVehicle vehicle) {
     RW_UNUSED(args);
-    /// @todo move to garage code
-
-    if (vehicle) {
-    	/// @todo if this car only accepts mission cars we probably have to filter here / only check for one specific car
-    	auto vp = vehicle->getPosition();
-    	if(vp.x >= garage->min.x && vp.y >= garage->min.y && vp.z >= garage->min.z &&
-    	   vp.x <= garage->max.x && vp.y <= garage->max.y && vp.z <= garage->max.z) {
-    		return true;
-    	}
-    }
-
-    return false;
+    return garage->isObjectInsideGarage(vehicle.get());
 }
 
 /**

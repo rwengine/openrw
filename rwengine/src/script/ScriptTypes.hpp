@@ -11,6 +11,8 @@
 
 #include <rw/defines.hpp>
 
+#include "engine/Garage.hpp"
+
 class CharacterObject;
 class CutsceneObject;
 class GameObject;
@@ -24,6 +26,7 @@ struct SCMThread;
 class GameState;
 class GameWorld;
 class Payphone;
+class Garage;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
@@ -98,14 +101,13 @@ using ScriptPlayer = ScriptObjectType<PlayerController>;
 using ScriptVehicle = ScriptObjectType<VehicleObject>;
 using ScriptCharacter = ScriptObjectType<CharacterObject>;
 using ScriptPickup = ScriptObjectType<PickupObject>;
+using ScriptGarage = ScriptObjectType<Garage>;
 
 struct VehicleGenerator;
 struct BlipData;
-struct GarageInfo;
 
 using ScriptVehicleGenerator = ScriptObjectType<VehicleGenerator>;
 using ScriptBlip = ScriptObjectType<BlipData>;
-using ScriptGarage = ScriptObjectType<GarageInfo>;
 using ScriptPayphone = ScriptObjectType<Payphone>;
 
 /// @todo replace these with real types for sounds etc.
@@ -159,7 +161,7 @@ using ScriptParticle = int;
 using ScriptTempact = int;
 using ScriptSoundType = int;
 using ScriptPickupType = int;
-using ScriptGarageType = int;
+using ScriptGarageType = Garage::Type;
 
 ///////////////////////////////////////////////////////////
 // Script Bytecode Types
@@ -345,7 +347,7 @@ template <>
 ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
-ScriptObjectType<GarageInfo> ScriptArguments::getScriptObject(
+ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 
 typedef std::function<void(const ScriptArguments&)> ScriptFunction;
