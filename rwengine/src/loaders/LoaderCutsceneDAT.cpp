@@ -21,14 +21,16 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numZooms; ++i) {
-        float t = 0.f;
-        float z = 0.f;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        tracks.zoom[t] = z;
+        std::string st, sz;
+        std::getline(ss, st, ',');
+        std::getline(ss, sz, ',');
+
+        float t = std::stof(st);
+
+        tracks.zoom[t] = std::stof(sz);
         tracks.duration = std::max(t, tracks.duration);
+
+        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     ss.ignore(std::numeric_limits<std::streamsize>::max(), ';');
@@ -38,14 +40,16 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numRotations; ++i) {
-        float t = 0.f;
-        float r = 0.f;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> r;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        tracks.rotation[t] = r;
+        std::string st, sr;
+        std::getline(ss, st, ',');
+        std::getline(ss, sr, ',');
+
+        float t = std::stof(st);
+
+        tracks.rotation[t] = std::stof(sr);
         tracks.duration = std::max(t, tracks.duration);
+
+        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     ss.ignore(std::numeric_limits<std::streamsize>::max(), ';');
@@ -55,18 +59,19 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numPositions; ++i) {
-        float t = 0.f;
-        glm::vec3 p;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> p.x;
-        ss.ignore(1, ',');
-        ss >> p.y;
-        ss.ignore(1, ',');
-        ss >> p.z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::string st, sx, sy, sz;
+        std::getline(ss, st, ',');
+        std::getline(ss, sx, ',');
+        std::getline(ss, sy, ',');
+        std::getline(ss, sz, ',');
+
+        float t = std::stof(st);
+        glm::vec3 p{std::stof(sx), std::stof(sy), std::stof(sz)};
+
         tracks.position[t] = p;
         tracks.duration = std::max(t, tracks.duration);
+
+        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     ss.ignore(std::numeric_limits<std::streamsize>::max(), ';');
@@ -76,18 +81,19 @@ void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
     ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     for (int i = 0; i < numTargets; ++i) {
-        float t = 0.f;
-        glm::vec3 p;
-        ss >> t;
-        ss.ignore(2, ',');
-        ss >> p.x;
-        ss.ignore(1, ',');
-        ss >> p.y;
-        ss.ignore(1, ',');
-        ss >> p.z;
-        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::string st, sx, sy, sz;
+        std::getline(ss, st, ',');
+        std::getline(ss, sx, ',');
+        std::getline(ss, sy, ',');
+        std::getline(ss, sz, ',');
+
+        float t = std::stof(st);
+        glm::vec3 p{std::stof(sx), std::stof(sy), std::stof(sz)};
+
         tracks.target[t] = p;
         tracks.duration = std::max(t, tracks.duration);
+
+        ss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
     RW_CHECK(ss.eof() || ss.good(), "Loading CutsceneDAT file failed");
