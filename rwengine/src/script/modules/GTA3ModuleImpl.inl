@@ -7402,24 +7402,27 @@ void opcode_02c2(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
     @brief create_donkey_mags %1d%
 
     opcode 02c3
-    @arg arg1 
+    @arg unused
 */
-void opcode_02c3(const ScriptArguments& args, const ScriptInt arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x02c3);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_02c3(const ScriptArguments& args, const ScriptInt unused) {
+    RW_UNUSED(unused);
+    args.getState()->bigNVeinyPickupsCollected = 0;
+
+    for (auto& pos : BigNVeinyPickup::getBigNVeinyPickupsLocations()) {
+        args.getWorld()->createPickup(
+            pos, args.getWorld()->data->findModelObject("donkeymag"),
+            PickupObject::PickupType::OnStreet);
+    }
 }
 
 /**
     @brief %1d% = donkey_mags_picked_up
 
     opcode 02c5
-    @arg arg1 
+    @arg collected
 */
-void opcode_02c5(const ScriptArguments& args, ScriptInt& arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x02c5);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_02c5(const ScriptArguments& args, ScriptInt& collected) {
+    collected = args.getState()->bigNVeinyPickupsCollected;
 }
 
 /**
@@ -7428,8 +7431,12 @@ void opcode_02c5(const ScriptArguments& args, ScriptInt& arg1) {
     opcode 02c6
 */
 void opcode_02c6(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x02c6);
-    RW_UNUSED(args);
+    for (auto& p : args.getWorld()->pickupPool.objects) {
+        auto pickup = static_cast<BigNVeinyPickup*>(p.second);
+        if (pickup->isBigNVeinyPickup()) {
+            script::destroyObject(args, pickup);
+        }
+    }
 }
 
 /**
@@ -7666,8 +7673,7 @@ bool opcode_02d8(const ScriptArguments& args, const ScriptCharacter character, c
     opcode 02d9
 */
 void opcode_02d9(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x02d9);
-    RW_UNUSED(args);
+    args.getState()->bigNVeinyPickupsCollected = 0;
 }
 
 /**

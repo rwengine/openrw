@@ -482,6 +482,7 @@ void RWGame::tick(float dt) {
 
     static float clockAccumulator = 0.f;
     static float scriptTimerAccumulator = 0.f;
+    static ScriptInt beepTime = std::numeric_limits<ScriptInt>::max();
     if (currState->shouldWorldUpdate()) {
         world->chase.update(dt);
 
@@ -503,19 +504,25 @@ void RWGame::tick(float dt) {
             clockAccumulator -= 1.f;
         }
 
+        constexpr float timerClockRate = 1.f / 30.f;
+
         if (state.scriptTimerVariable && !state.scriptTimerPaused) {
             scriptTimerAccumulator += dt;
-            while (scriptTimerAccumulator >= 1.f) {
-                (*state.scriptTimerVariable) -= 1000;
+            while (scriptTimerAccumulator >= timerClockRate) {
+                // Original game uses milliseconds
+                (*state.scriptTimerVariable) -= timerClockRate * 1000;
                 if (*state.scriptTimerVariable <= 0) {
                     (*state.scriptTimerVariable) = 0;
                     state.scriptTimerVariable = nullptr;
                 }
                 //                                11 seconds
-                if (*state.scriptTimerVariable <= 11000) {
+                if (*state.scriptTimerVariable <= 11000 &&
+                    beepTime - *state.scriptTimerVariable >= 1000) {
+                    beepTime = *state.scriptTimerVariable;
+
                     // @todo beep
                 }
-                scriptTimerAccumulator -= 1.f;
+                scriptTimerAccumulator -= timerClockRate;
             }
         }
 

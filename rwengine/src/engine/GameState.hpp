@@ -344,6 +344,8 @@ public:
     ScriptInt* scriptTimerVariable = nullptr;
     bool scriptTimerPaused = false;
 
+    int bigNVeinyPickupsCollected = 0;
+
     /** The camera near value currently set by the script */
     float cameraNear;
     bool cameraFixed;

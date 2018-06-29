@@ -14,7 +14,7 @@ public:
                        OnStreet) {
     }
 
-    bool onCharacterTouch(CharacterObject*) {
+    bool onPlayerTouch() {
         picked_up = true;
         return true;
     }
@@ -24,9 +24,11 @@ BOOST_AUTO_TEST_SUITE(PickupTests)
 
 BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
     {
+        auto objectID = 9999;
         auto character =
-            Global::get().e->createPedestrian(1, {30.1f, 0.f, 0.f});
+            Global::get().e->createPlayer({30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
         BOOST_REQUIRE(character != nullptr);
+        Global::get().e->state->playerObject = objectID;
 
         TestPickup* p = new TestPickup(Global::get().e, {30.f, 0.f, 0.f});
 
@@ -60,9 +62,11 @@ BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
 
 BOOST_AUTO_TEST_CASE(test_item_pickup) {
     {
+        auto objectID = 9999;
         auto character =
-            Global::get().e->createPedestrian(1, {30.1f, 0.f, 0.f});
+            Global::get().e->createPlayer({30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
         BOOST_REQUIRE(character != nullptr);
+        Global::get().e->state->playerObject = objectID;
 
         auto pistol = Global::get().d->weaponData[1].get();
         auto model = Global::get().d->modelinfo[pistol->modelID].get();
