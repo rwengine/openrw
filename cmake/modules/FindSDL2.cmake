@@ -194,16 +194,3 @@ IF(SDL2_STATIC)
     SET(SDL2_LIBRARY ${SDL2_LINK_FLAGS})
   ENDIF()
 ENDIF(SDL2_STATIC)
-
-if(SDL2_FOUND AND NOT TARGET SDL2::SDL2)
-    add_library(SDL2 INTERFACE)
-    target_link_libraries(SDL2
-        INTERFACE
-            ${SDL2_LIBRARY}
-        )
-    target_include_directories(SDL2 SYSTEM
-        INTERFACE
-            "${SDL2_INCLUDE_DIR}"
-        )
-    add_library(SDL2::SDL2 ALIAS SDL2)
-endif()

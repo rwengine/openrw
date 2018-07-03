@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED
 #include <iostream>
 #include "RWGame.hpp"
-#include "SDL.h"
+#include <SDL.h>
 
 #include <core/Logger.hpp>
 

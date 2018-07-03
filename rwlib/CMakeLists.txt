@@ -2,8 +2,6 @@
 ##      RWLIB
 ###########################################################
 
-find_package(Boost REQUIRED)
-
 SET(RWLIB_SOURCES
     # GL stuff is only here temporarily, hoping to move it back to rwengine
     source/gl/gl_core_3_3.c
@@ -49,15 +47,10 @@ target_include_directories(rwlib
         "${CMAKE_CURRENT_SOURCE_DIR}/source"
     )
 
-target_include_directories(rwlib
-    SYSTEM
-    PRIVATE
-        ${Boost_INCLUDE_DIRS}
-    )
-
 target_link_libraries(rwlib
     PUBLIC
-        glm::glm
+        rwdep::boost
+        rwdep::glm
         openrw::interface
     PRIVATE
         OpenGL::GL

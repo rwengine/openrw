@@ -48,8 +48,6 @@ target_compile_definitions(rw_interface
         "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
     )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(rw_interface INTERFACE "RW_LINUX")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -66,6 +64,14 @@ else()
     message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif()
 
+if(USE_CONAN)
+    if(CONAN_SETTINGS_COMPILER_LIBCXX STREQUAL "libstdc++11")
+        target_compile_definitions(rw_interface INTERFACE _GLIBCXX_USE_CXX11_ABI=1)
+    elseif(CONAN_SETTINGS_COMPILER_LIBCXX STREQUAL "libstdc++")
+        target_compile_definitions(rw_interface INTERFACE _GLIBCXX_USE_CXX11_ABI=0)
+    endif()
+endif()
+
 if(FILESYSTEM_LIBRARY STREQUAL "CXX17")
     set(CMAKE_CXX_STANDARD 17)
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=0")
@@ -78,15 +84,20 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
         target_link_libraries(rw_interface INTERFACE "stdc++fs")
     endif()
 elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
-    find_package(Boost COMPONENTS system filesystem REQUIRED)
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
-    target_include_directories(rw_interface INTERFACE ${Boost_INCLUDE_DIRS})
     target_link_libraries(rw_interface INTERFACE
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
+        rwdep::boost_filesystem
         )
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
+endif()
+
+
+if(NOT BOOST_STATIC)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            BOOST_ALL_DYN_LINK
+        )
 endif()
 
 if(ENABLE_SCRIPT_DEBUG)
@@ -150,10 +161,6 @@ foreach(SAN ${ENABLE_SANITIZERS})
 endforeach()
 
 include(CMakeParseArguments)
-
-if(CHECK_IWYU)
-    find_package(IncludeWhatYouUse REQUIRED)
-endif()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")

@@ -4,21 +4,20 @@ image:
 clone_depth: 1
 shallow_clone: false
 
-# All paths in the environment section should be
-# cmake-style paths: using forward-slashes (/).
+cache:
+  - C:\Users\appveyor\.conan -> conanfile.py
+  - C:\.conan -> conanfile.py
+
 environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
   PYTHON: "C:\\Python36-x64"
-  CMAKE_GENERATOR: "Visual Studio 15 2017"
-  BOOST_ROOT: "C:\\Libraries"
-  BOOST_VERSION: "1.65.1"
-  DEP_DIR: "C:\\dependencies"
-  WIN_DEP_NAME: "openrw-windows-dependencies"
-  WIN_DEP_URL: "https://github.com/rwengine/openrw-windows-dependencies"
+  CMAKE_GENERATOR_BASE: "Visual Studio 15 2017"
   NAME_SUFFIX: "windows"
+  USE_CONAN: 1
 
 platform:
-  - Win32
-#  - x64
+#  - Win32
+  - x64
 
 configuration:
 #  - Debug
@@ -27,14 +26,16 @@ configuration:
 matrix:
   fast_finish: false
 
-cache:
-  - C:\dependencies -> .appveyor.yml, cmake/ctest/script_ci.ctest, cmake/ctest/utils.ctest, , cmake/ctest/configure_windows.ctest
+clone_folder: C:\projects\openrw
 
 init:
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python --version
   - cmake --version
   - msbuild /version
+  - pip3 install conan
+  - conan user
+  - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 
 install:
   - cd "%APPVEYOR_BUILD_FOLDER%"
@@ -42,7 +43,7 @@ install:
   - if NOT "%APPVEYOR_REPO_COMMIT%" == "%COMMIT_HASH%" echo "Appveyor hash does not match checkout out hash" && exit 1
 
 build_script:
-  - ctest -VV -S cmake/ctest/script_ci.ctest
+  - ctest -VV -S "%APPVEYOR_BUILD_FOLDER%/cmake/ctest/script_ci.ctest"
 
 after_build:
   - cd "%APPVEYOR_BUILD_FOLDER%\build"

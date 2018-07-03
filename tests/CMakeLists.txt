@@ -2,8 +2,6 @@
 #    Unit Tests
 ##############################################################################
 
-find_package(Boost COMPONENTS filesystem unit_test_framework system REQUIRED)
-
 set(TESTS
     Animation
     Archive
@@ -66,19 +64,6 @@ target_compile_definitions(rwtests
         "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
     )
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(rwtests
-        PRIVATE
-            "BOOST_TEST_DYN_LINK"
-        )
-endif()
-
-target_include_directories(rwtests
-    SYSTEM
-    PRIVATE
-        ${Boost_INCLUDE_DIRS}
-    )
-
 target_include_directories(rwtests
     PRIVATE
         "${CMAKE_SOURCE_DIR}/tests"
@@ -88,10 +73,9 @@ target_include_directories(rwtests
 target_link_libraries(rwtests
     PRIVATE
         rwengine
-        SDL2::SDL2
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
+        rwdep::SDL2
+        rwdep::boost_filesystem
+        rwdep::boost_unit_test_framework
     )
 
 openrw_target_apply_options(TARGET rwtests)

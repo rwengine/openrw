@@ -2,7 +2,7 @@
 #define _TESTGLOBALS_HPP_
 
 #include <btBulletDynamicsCommon.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <GameWindow.hpp>
 #include <boost/test/unit_test.hpp>
 #include <core/Logger.hpp>

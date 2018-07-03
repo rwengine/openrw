@@ -1,0 +1,11 @@
+include(default)
+
+[options]
+openrw:viewer=True
+sdl2:esd=False
+sdl2:wayland=True
+sdl2:x11=True
+# https://github.com/bincrafters/community/issues/120
+ffmpeg:vdpau=False
+ffmpeg:vaapi=False
+ffmpeg:xcb=False

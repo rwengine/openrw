@@ -44,6 +44,9 @@ def create(ns: argparse.Namespace):
                     '--uid', str(ns.uid), '-g', ns.username, ns.username])
     sub_run(['docker', 'exec', ns.name, 'chown', '{0}:{0}'.format(ns.username),
                     '/build'])
+    sub_run(['docker', 'exec', ns.name, 'usermod', '-a', '-G', 'sudo', ns.username])
+    sub_run(['docker', 'exec', ns.name, '/bin/bash', '-c', 'printf "{0}:{0}" | chpasswd'.format(ns.username)])
+    sub_run(['docker', 'exec', ns.name, '/bin/bash', '-c', 'printf "{0} ALL= NOPASSWD: ALL\n" >> /etc/sudoers'.format(ns.username)])
 
 
 def exec(ns: argparse.Namespace):
