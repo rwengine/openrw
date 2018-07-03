@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "ai/AIGraphNode.hpp"
+
 #include <rw/types.hpp>
 
 struct AIGraphNode;
@@ -32,7 +34,7 @@ public:
                          PathData& path);
 
     void gatherExternalNodesNear(const glm::vec3& center, const float radius,
-                                 std::vector<AIGraphNode*>& nodes);
+                                 std::vector<AIGraphNode*>& nodes, AIGraphNode::NodeType type);
 };
 
 #endif

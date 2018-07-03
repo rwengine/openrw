@@ -51,7 +51,11 @@ public:
         /**
          * Wander randomly around the map
          */
-        TrafficWander
+        TrafficWander,
+        /**
+         * Drive randomly around the map
+         */
+        TrafficDriver
     };
 
 protected:
@@ -68,12 +72,19 @@ protected:
 
     float m_closeDoorTimer{0.f};
 
+    // When driving a vehicle 
+    int m_lane;
+
     // Goal related variables
     Goal currentGoal{None};
     CharacterObject* leader = nullptr;
-    AIGraphNode* targetNode = nullptr;
 
 public:
+
+    AIGraphNode* targetNode;
+    AIGraphNode* lastTargetNode;
+    AIGraphNode* nextTargetNode;
+
     CharacterController() = default;
 
     virtual ~CharacterController() = default;
@@ -132,6 +143,30 @@ public:
     void setMoveDirection(const glm::vec3& movement);
     void setLookDirection(const glm::vec2& look);
 
+    /**
+     * @brief createRoadTarget When driving on a road, the targetNode must be shifted to a specific lane
+     */
+    glm::vec3 calculateRoadTarget(const glm::vec3& target,
+                                  const glm::vec3& start, const glm::vec3& end);
+
+    /**
+     * @brief steerTo When owning a vehicle, set the steering angle to drive to a target
+     */
+    void steerTo(const glm::vec3& target);
+
+    /**
+     * @brief checkForObstacles Check whether a pedestrian or vehicle is the way
+     */
+    bool checkForObstacles();
+
+    void setLane(int lane) {
+        m_lane = lane;
+    }
+
+    int getLane() const {
+        return m_lane;
+    }
+
     void setRunning(bool run);
 
     void setGoal(Goal goal) {
@@ -173,6 +208,25 @@ struct GoTo : public CharacterController::Activity {
 
     GoTo(const glm::vec3& target, bool _sprint = false)
         : target(target), sprint(_sprint) {
+    }
+
+    bool update(CharacterObject* character, CharacterController* controller) override;
+
+    bool canSkip(CharacterObject*, CharacterController*) const override {
+        return true;
+    }
+};
+
+struct DriveTo : public CharacterController::Activity {
+    DECL_ACTIVITY(DriveTo)
+
+    AIGraphNode* targetNode = nullptr;
+    bool rampant = false;  // Drive fast, ignore traffic rules @todo
+
+    DriveTo() = default;
+
+    DriveTo(AIGraphNode* targetNode, bool _rampant = false)
+        : targetNode(targetNode), rampant(_rampant) {
     }
 
     bool update(CharacterObject* character, CharacterController* controller) override;

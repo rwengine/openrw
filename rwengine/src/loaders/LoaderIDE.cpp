@@ -232,10 +232,10 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         node.size = strtof(buff.c_str(), nullptr) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.other_thing = atoi(buff.c_str());
+                        node.leftLanes = atoi(buff.c_str());
 
                         getline(buffstream, buff, ',');
-                        node.other_thing2 = atoi(buff.c_str());
+                        node.rightLanes = atoi(buff.c_str());
 
                         path.nodes.push_back(node);
                     }

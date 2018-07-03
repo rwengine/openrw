@@ -106,7 +106,7 @@ public:
 
     void setExtraEnabled(size_t extra, bool enabled);
 
-    void setSteeringAngle(float);
+    void setSteeringAngle(float, bool=false);
 
     float getSteeringAngle() const;
 
@@ -134,7 +134,7 @@ public:
 
     void ejectAll();
 
-    GameObject* getOccupant(size_t seat);
+    GameObject* getOccupant(size_t seat) const;
 
     void setOccupant(size_t seat, GameObject* occupant);
 
@@ -150,6 +150,12 @@ public:
      * @return True if the given seat is the driver's seat.
      */
     bool isOccupantDriver(size_t seat) const;
+
+    /**
+     * @brief getDriver
+     * @return CharacterObject* if there is a driver
+     */
+    CharacterObject* getDriver() const;
 
     glm::vec3 getSeatEntryPosition(size_t seat) const {
         auto pos = info->seats[seat].offset;
@@ -191,6 +197,21 @@ public:
      * @return True if mHasSpecial was true opon calling
      */
     bool collectSpecial();
+
+    /**
+     * @brief isInFront
+     * @return a positive distance when the point is in front of the car
+     * and a negative distance when the point is behind the car
+     */
+    float isInFront(const glm::vec3& point);
+
+    /**
+     * @brief collectSpecial
+     * @return a positive distance when the point is at the right side of the car
+     * and a negative distance when the point is at the left side of the car
+     */
+    float isOnSide(const glm::vec3& point);
+
 
     void grantOccupantRewards(CharacterObject* character);
 

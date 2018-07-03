@@ -99,6 +99,7 @@ void CharacterController::update(float dt) {
         _currentActivity = nullptr;
         if (_nextActivity) {
             setActivity(std::move(_nextActivity));
+            _nextActivity = nullptr;
         }
     }
 }
@@ -139,6 +140,255 @@ bool Activities::GoTo::update(CharacterObject *character,
 
     controller->setMoveDirection({1.f, 0.f, 0.f});
     controller->setRunning(sprint);
+
+    return false;
+}
+
+glm::vec3 CharacterController::calculateRoadTarget(const glm::vec3 &target,
+                                                   const glm::vec3 &start,
+                                                   const glm::vec3 &end) {
+    // @todo set the real value
+    static constexpr float roadWidth = 5.f;
+
+    static const glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
+    const glm::vec3 dir = glm::normalize(start - end);
+
+    // Calculate the strafe vector
+    glm::vec3 strafe = glm::cross(up, dir);
+
+    const glm::vec3 laneOffset =
+        strafe *
+        (roadWidth / 2 + roadWidth * static_cast<float>(getLane() - 1));
+
+    return target + laneOffset;
+}
+
+void CharacterController::steerTo(const glm::vec3 &target) {
+    // We can't drive without a vehicle
+    VehicleObject* vehicle = character->getCurrentVehicle();
+    if (vehicle == nullptr) {
+        return;
+    }
+
+    // Calculate the steeringAngle
+    float steeringAngle = 0.0f;
+    float deviation = glm::abs(vehicle->isOnSide(target)) / 5.f;
+
+    // If we are almost at the right angle, decrease the deviation to reduce wiggling
+    if (deviation < 1.f) deviation = deviation / 5.f;
+
+    // Make sure to normalize the value
+    deviation = glm::clamp(deviation, 0.f, 1.f);
+
+    // Set the right sign
+    steeringAngle = std::copysign(deviation, -vehicle->isOnSide(target));
+
+    vehicle->setSteeringAngle(steeringAngle, true);  
+}
+
+// @todo replace this by raytest/raycast logic
+bool CharacterController::checkForObstacles()
+{
+    // We can't drive without a vehicle
+    VehicleObject* vehicle = character->getCurrentVehicle();
+    if (vehicle == nullptr) {
+        return false;
+    }
+
+    // The minimal distance we test for objects
+    static constexpr float minColDist = 20.f;
+
+    // Try to stop before pedestrians
+    for (const auto &obj : character->engine->pedestrianPool.objects) {
+        // Verify that the character isn't the driver and is walking
+        if (obj.second != character && ((CharacterObject*)obj.second)->getCurrentVehicle() == nullptr) {
+            // Only check characters that are near our vehicle
+            if (glm::distance(vehicle->getPosition(), obj.second->getPosition()) <= minColDist) {
+                // Check if the character is in front of us and in our way
+                if ( vehicle->isInFront(obj.second->getPosition()) > -3.f 
+                    && vehicle->isInFront(obj.second->getPosition()) < 10.f 
+                    && glm::abs(vehicle->isOnSide(obj.second->getPosition())) < 3.f ) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // Brake when a car is in front of us and change lanes when possible
+    for (const auto &obj : character->engine->vehiclePool.objects) {
+        // Verify that the vehicle isn't our vehicle
+        if (obj.second != vehicle) {
+            // Only check vehicles that are near our vehicle
+            if (glm::distance(vehicle->getPosition(), obj.second->getPosition()) <= minColDist) {
+                // Check if the vehicle is in front of us and in our way
+                if ( vehicle->isInFront(obj.second->getPosition()) > 0.f 
+                    && vehicle->isInFront(obj.second->getPosition()) < 10.f 
+                    && glm::abs(vehicle->isOnSide(obj.second->getPosition())) < 2.5f ) {
+                    // Check if the road has more than one lane
+                    // @todo we don't know the direction of the road, so for now, choose the bigger value
+                    int maxLanes = targetNode->rightLanes > targetNode->leftLanes ?
+                                    targetNode->rightLanes : targetNode->leftLanes;
+                    if (maxLanes > 1) {
+                        // Change the lane, firstly check if there is an occupant
+                        if (((VehicleObject *)obj.second)->getDriver() !=
+                            nullptr) {
+                            // @todo for now we don't know the lane where the player is currently driving
+                            // so just slow down, in the future calculate the lane
+                            if (((VehicleObject *)obj.second)
+                                    ->getDriver()
+                                    ->isPlayer()) {
+                                return true;
+                            }
+                            else {
+                                int avoidLane = ((VehicleObject *)obj.second)
+                                                    ->getDriver()
+                                                    ->controller->getLane();
+
+                                // @todo for now just two lanes
+                                if (avoidLane == 1) character->controller->setLane(2);
+                                else character->controller->setLane(1);
+                            }
+                        }					
+                    }
+                    else {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Activities::DriveTo::update(CharacterObject *character,
+                              CharacterController *controller) {
+
+    // We can't drive without a vehicle
+    VehicleObject* vehicle = character->getCurrentVehicle();
+    if (vehicle == nullptr) {
+        return true;
+    }
+
+    // Get the nodes from the controller
+    AIGraphNode* lastTargetNode = controller->lastTargetNode;
+    AIGraphNode* nextTargetNode = controller->nextTargetNode;
+
+
+    // That's the position the vehicle is actually targeting
+    // depending on the lane, we have to shift its position
+    glm::vec3 roadTarget;
+
+    // A list of nodes we can choose from
+    std::vector<AIGraphNode*> potentialNodes = targetNode->connections;
+
+    // Make sure that we have a lastTargetNode
+    if (lastTargetNode == nullptr) {
+        for (const auto &node : potentialNodes) {
+            if (vehicle->isInFront(node->position) < 0.f) {
+                lastTargetNode = node;
+                break;
+            }
+        }
+    }
+    if (lastTargetNode == nullptr) {
+        return false;
+    }
+
+    // Remove unwanted nodes
+    for( auto i = potentialNodes.begin(); i != potentialNodes.end(); ) {
+        // @todo we don't know the direction of the road, so for now, choose the bigger value
+        int maxLanes = (*i)->rightLanes > (*i)->leftLanes ? (*i)->rightLanes : (*i)->leftLanes;
+
+        // We don't want roads with lanes <= 0, also ignore the lastTargetNode
+        if ( (*i) == lastTargetNode || maxLanes <= 0) {
+            i = potentialNodes.erase(i);
+        }
+        else {
+            ++i;
+        }
+    }
+
+    // That's a dead end, try to turn around
+    if (potentialNodes.empty()) {
+        //@todo try to turn around
+    }
+    // Just a normal road
+    if (potentialNodes.size() == 1) {
+        roadTarget = controller->calculateRoadTarget(
+            targetNode->position, lastTargetNode->position,
+            potentialNodes.at(0)->position);
+    }
+    // Intersection, choose a direction
+    else if (potentialNodes.size() > 1) {
+        // Choose the next node randomly
+        if(nextTargetNode == nullptr) {
+            auto& random = character->engine->randomEngine;
+            int i = std::uniform_int_distribution<>(0, potentialNodes.size() - 1)(random);
+            nextTargetNode = potentialNodes.at(i);
+        }
+
+        // Set the nextTargetNode to make sure we go this direction
+        controller->nextTargetNode = nextTargetNode;
+
+        roadTarget = controller->calculateRoadTarget(targetNode->position,
+                                                     lastTargetNode->position,
+                                                     nextTargetNode->position);
+    }
+    // Otherwise set the target to the current node
+    else {
+        roadTarget = targetNode->position;
+    }
+
+    // Check whether we reached the node
+    const auto targetDistance = glm::vec2(vehicle->getPosition() - roadTarget);
+
+    static constexpr float reachDistance = 5.0f;
+
+    if (glm::length(targetDistance) <= reachDistance) {
+        // Finish the activity
+        return true;
+    } 
+
+    // @todo set real values
+    static constexpr float maximumSpeed = 10.f;
+    static constexpr float intersectionSpeed = 3.5f;
+
+    float currentSpeed = 0.f;
+
+    // Set the speed depending on where we are driving
+    if ( potentialNodes.size() == 1 ) {
+        currentSpeed = maximumSpeed;
+    }
+    else {
+        currentSpeed = intersectionSpeed;
+    }
+
+    // Check whether a pedestrian or vehicle is in our way
+    if (controller->checkForObstacles() == true) {
+        currentSpeed = 0.f;
+    }
+
+    // Is the vehicle slower than it should be
+    if (vehicle->getVelocity() < currentSpeed) {
+        vehicle->setHandbraking(false);
+
+        // The vehicle is driving backwards, accelerate
+        if (vehicle->getVelocity() < 0) {
+            vehicle->setThrottle(1.f);
+        }
+        // Slowly accelerate until we reach the designated speed
+        else {
+            vehicle->setThrottle(1.f - (vehicle->getVelocity() / currentSpeed));
+        }
+    }
+    // We are to fast, activate the handbrake - works better
+    else {
+        vehicle->setHandbraking(true);
+    }
+
+    // Steer to the target
+    controller->steerTo(roadTarget);
 
     return false;
 }
@@ -276,6 +526,11 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
             // Play the pullout animation and tell the other character to get
             // out.
             character->playCycle(cycle_pullout);
+
+            if (currentOccupant->controller->getCurrentActivity() != nullptr) {
+                currentOccupant->controller->skipActivity();
+            }
+
             currentOccupant->controller->setNextActivity(
                 std::make_unique<Activities::ExitVehicle>(true));
         } else {

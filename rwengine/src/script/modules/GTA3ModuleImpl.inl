@@ -2057,9 +2057,16 @@ void opcode_00ad(const ScriptArguments& args, const ScriptVehicle vehicle, const
 */
 void opcode_00ae(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptDrivingMode arg2) {
     RW_UNIMPLEMENTED_OPCODE(0x00ae);
-    RW_UNUSED(vehicle);
     RW_UNUSED(arg2);
     RW_UNUSED(args);
+
+    // Check whether we have a driver
+    if (vehicle->getDriver() != nullptr)
+    {
+        // @todo set the right driving style and lane
+        vehicle->getDriver()->controller->setGoal(CharacterController::TrafficDriver);
+        vehicle->getDriver()->controller->setLane(1);
+    }
 }
 
 /**
