@@ -78,6 +78,7 @@ target_link_libraries(rwtests
 
 openrw_target_apply_options(
     TARGET rwtests
+    FORMAT
     INSTALL INSTALL_PDB
     )
 

@@ -63,5 +63,6 @@ target_link_libraries(rwgame
 
 openrw_target_apply_options(
     TARGET rwgame
+    FORMAT
     INSTALL INSTALL_PDB
     )

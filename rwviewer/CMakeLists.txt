@@ -33,12 +33,12 @@ add_executable(rwviewer
     views/WorldViewer.cpp
     views/ViewerInterface.hpp
     views/ViewerInterface.cpp
-    
+
     QOpenGLContextWrapper.hpp
     QOpenGLContextWrapper.cpp
     ViewerWidget.hpp
     ViewerWidget.cpp
-    
+
     widgets/AnimationListWidget.hpp
     widgets/AnimationListWidget.cpp
     widgets/ItemListWidget.hpp
@@ -56,6 +56,7 @@ target_link_libraries(rwviewer
 
 openrw_target_apply_options(
     TARGET rwviewer
+    FORMAT
     INSTALL INSTALL_PDB
     )
 

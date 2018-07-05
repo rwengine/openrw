@@ -54,6 +54,10 @@ endif()
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 
+if(CHECK_CLANGFORMAT)
+    find_package(ClangFormat REQUIRED)
+endif()
+
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
 endif()

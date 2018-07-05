@@ -66,7 +66,12 @@ target_link_libraries(rwcore
         OpenGL::GL
     )
 
-openrw_target_apply_options(TARGET rwcore)
+openrw_target_apply_options(TARGET rwcore
+    FORMAT
+    FORMAT_EXCEPT
+        gl/gl_core_3_3.c
+        gl/gl_core_3_3.h
+    )
 
 if(BUILD_SHARED_LIBS)
     install(TARGETS rwcore

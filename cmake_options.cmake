@@ -20,6 +20,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(CHECK_IWYU "Enable IncludeWhatYouUse (Analyze #includes in C and C++ source files)")
+option(CHECK_CLANGFORMAT "Create clang-format target")
 option(CHECK_CLANGTIDY "Enable clang-tidy (A clang-based C++ linter tool)")
 option(CHECK_CLANGTIDY_FIX "Apply fixes from clang-tidy (!!!RUN ON CLEAN GIT TREE!!!)")
 

@@ -188,12 +188,19 @@ endforeach()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
-    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB" "TARGET" "" ${ARGN})
+    cmake_parse_arguments("ORW" "FORMAT;INSTALL;INSTALL_PDB" "TARGET" "FORMAT_EXCEPT" ${ARGN})
     if(CHECK_IWYU)
         iwyu_check(TARGET "${ORW_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
         )
+    endif()
+
+    if(CHECK_CLANGFORMAT AND ORW_FORMAT)
+        clang_format_target(
+            TARGET "${ORW_TARGET}"
+            EXCEPT "${ORW_FORMAT_EXCEPT}"
+            )
     endif()
 
     if(CHECK_CLANGTIDY)

@@ -167,7 +167,9 @@ target_include_directories(rwengine
         "${CMAKE_CURRENT_SOURCE_DIR}/src"
     )
 
-openrw_target_apply_options(TARGET rwengine)
+openrw_target_apply_options(TARGET rwengine
+    FORMAT
+    )
 
 if(BUILD_SHARED_LIBS)
     install(TARGETS rwengine
