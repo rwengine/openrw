@@ -114,18 +114,18 @@ public:
     }
 
 private:
-    btPairCachingGhostObject* m_ghost;
-    btSphereShape* m_shape;
-    bool m_enabled;
-    float m_enableTimer;
-    bool m_collected;
-    VisualFX* m_corona;
-    short m_colourId;
-    bool respawn;
-    float respawnTime;
-    BehaviourFlags behaviourFlags;
+    btPairCachingGhostObject* m_ghost = nullptr;
+    btSphereShape* m_shape = nullptr;
+    bool m_enabled = false;
+    float m_enableTimer = 0.f;
+    bool m_collected = false;
+    VisualFX* m_corona = nullptr;
+    short m_colourId = 0;
+    bool respawn = false;
+    float respawnTime{};
+    BehaviourFlags behaviourFlags{};
 
-    PickupType m_type;
+    PickupType m_type{};
 };
 
 /**

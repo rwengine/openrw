@@ -35,12 +35,12 @@ public:
     void setPopulationLimits(int maxPeds, int maxCars);
 
 private:
-    AIGraph* graph;
-    GameWorld* world;
-    float pedDensity;
-    float carDensity;
-    int maximumPedestrians;
-    int maximumCars;
+    AIGraph* graph = nullptr;
+    GameWorld* world = nullptr;
+    float pedDensity = 1.f;
+    float carDensity = 1.f;
+    int maximumPedestrians = 20;
+    int maximumCars = 10;
 };
 
 #endif

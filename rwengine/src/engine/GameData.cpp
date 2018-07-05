@@ -31,14 +31,12 @@
 #include "platform/FileIndex.hpp"
 
 GameData::GameData(Logger* log, const rwfs::path& path)
-    : datpath(path), logger(log), engine(nullptr) {
+    : datpath(path), logger(log) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
             return findSlotTexture(currenttextureslot, texture);
         });
 }
-
-GameData::~GameData() = default;
 
 void GameData::load() {
     index.indexGameDirectory(datpath);

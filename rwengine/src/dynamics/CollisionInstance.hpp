@@ -17,12 +17,7 @@ struct VehicleHandlingInfo;
  */
 class CollisionInstance {
 public:
-    CollisionInstance()
-        : m_body(nullptr)
-        , m_vertArray(nullptr)
-        , m_motionState(nullptr)
-        , m_collisionHeight(0.f) {
-    }
+    CollisionInstance() = default;
 
     ~CollisionInstance();
 
@@ -41,12 +36,12 @@ public:
     void changeMass(float newMass);
 
 private:
-    btRigidBody* m_body;
+    btRigidBody* m_body = nullptr;
     std::vector<btCollisionShape*> m_shapes;
-    btTriangleIndexVertexArray* m_vertArray;
-    btMotionState* m_motionState;
+    btTriangleIndexVertexArray* m_vertArray = nullptr;
+    btMotionState* m_motionState = nullptr;
 
-    float m_collisionHeight;
+    float m_collisionHeight{0.f};
 };
 
 #endif

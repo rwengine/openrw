@@ -36,8 +36,7 @@ class ObjectRenderer {
 public:
     ObjectRenderer(GameWorld* world, const ViewCamera& camera,
                    float renderAlpha, GLuint errorTexture)
-        : culled(0)
-        , m_world(world)
+        : m_world(world)
         , m_camera(camera)
         , m_renderAlpha(renderAlpha)
         , m_errorTexture(errorTexture) {
@@ -48,7 +47,7 @@ public:
      *
      * Exports rendering instructions for an object
      */
-    size_t culled;
+    size_t culled = 0;
     void buildRenderList(GameObject* object, RenderList& outList);
 
     void renderGeometry(Geometry* geom, const glm::mat4& modelMatrix,

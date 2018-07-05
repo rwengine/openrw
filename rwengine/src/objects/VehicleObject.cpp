@@ -92,18 +92,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
                              VehicleInfoHandle info, const glm::u8vec3& prim,
                              const glm::u8vec3& sec)
     : GameObject(engine, pos, rot, modelinfo)
-    , steerAngle(0.f)
-    , throttle(0.f)
-    , brake(0.f)
-    , handbrake(true)
-    , health(1000.f)
     , info(info)
     , colourPrimary(prim)
     , colourSecondary(sec)
-    , mHasSpecial(true)
-    , collision(new CollisionInstance)
-    , physRaycaster(nullptr)
-    , physVehicle(nullptr) {
+    , collision(new CollisionInstance) {
     collision->createPhysicsBody(this, modelinfo->getCollision(), nullptr,
                                  &info->handling);
     collision->getBulletBody()->forceActivationState(DISABLE_DEACTIVATION);

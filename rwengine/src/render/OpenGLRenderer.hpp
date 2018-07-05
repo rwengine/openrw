@@ -77,32 +77,26 @@ public:
      */
     struct DrawParameters {
         /// Number of indicies
-        size_t count;
+        size_t count{};
         /// Start index.
-        unsigned int start;
+        unsigned int start{};
         /// Textures to use
-        Textures textures;
+        Textures textures{};
         /// Blending mode
-        BlendMode blendMode;
+        BlendMode blendMode = BlendMode::BLEND_NONE;
         // Depth writing state
-        bool depthWrite;
+        bool depthWrite = true;
         /// Material
         glm::u8vec4 colour{};
         /// Material
-        float ambient;
+        float ambient{1.f};
         /// Material
-        float diffuse;
+        float diffuse{1.f};
         /// Material
-        float visibility;
+        float visibility{1.f};
 
         // Default state -- should be moved to materials
-        DrawParameters()
-            : blendMode(BlendMode::BLEND_NONE)
-            , depthWrite(true)
-            , ambient(1.f)
-            , diffuse(1.f)
-            , visibility(1.f) {
-        }
+        DrawParameters() = default;
     };
 
     /**
@@ -129,9 +123,9 @@ public:
     struct ObjectUniformData {
         glm::mat4 model{1.0f};
         glm::vec4 colour{1.0f};
-        float diffuse;
-        float ambient;
-        float visibility;
+        float diffuse{};
+        float ambient{};
+        float visibility{};
     };
 
     struct SceneUniformData {
@@ -141,8 +135,8 @@ public:
         glm::vec4 dynamic{};
         glm::vec4 fogColour{};
         glm::vec4 campos{};
-        float fogStart;
-        float fogEnd;
+        float fogStart{};
+        float fogEnd{};
     };
 
     class ShaderProgram {
@@ -220,13 +214,13 @@ public:
      * USING(RENDER_PROFILER)
      */
     struct ProfileInfo {
-        GLuint64 timerStart;
-        GLuint64 duration;
-        unsigned int primitives;
-        unsigned int draws;
-        unsigned int textures;
-        unsigned int buffers;
-        unsigned int uploads;
+        GLuint64 timerStart{};
+        GLuint64 duration{};
+        unsigned int primitives{};
+        unsigned int draws{};
+        unsigned int textures{};
+        unsigned int buffers{};
+        unsigned int uploads{};
     };
 
     /**
@@ -245,10 +239,10 @@ private:
     glm::mat4 projection2D{1.0f};
 
 protected:
-    int drawCounter;
-    int textureCounter;
-    int bufferCounter;
-    SceneUniformData lastSceneData;
+    int drawCounter{};
+    int textureCounter{};
+    int bufferCounter{};
+    SceneUniformData lastSceneData{};
 };
 
 class OpenGLRenderer : public Renderer {
@@ -329,12 +323,12 @@ public:
 
 private:
     struct Buffer {
-        GLuint name;
-        GLuint currentEntry;
+        GLuint name{};
+        GLuint currentEntry{};
 
-        GLuint entryCount;
-        GLuint entrySize;
-        GLsizei bufferSize;
+        GLuint entryCount{};
+        GLuint entrySize{};
+        GLsizei bufferSize{};
     };
 
     void useDrawBuffer(DrawBuffer* dbuff);

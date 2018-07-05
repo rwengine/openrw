@@ -26,9 +26,9 @@ public:
 
 protected:
     Logger& log;
-    GameConfig config;
-    GameWindow window;
-    boost::program_options::variables_map options;
+    GameConfig config{};
+    GameWindow window{};
+    boost::program_options::variables_map options{};
 };
 
 #endif

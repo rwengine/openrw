@@ -34,8 +34,8 @@ struct SCMException {
 };
 
 struct IllegalInstruction : SCMException {
-    SCMOpcode opcode;
-    unsigned int offset;
+    SCMOpcode opcode{};
+    unsigned int offset{0};
     std::string thread;
 
     template <class String>
@@ -57,8 +57,8 @@ struct IllegalInstruction : SCMException {
 };
 
 struct UnknownType : SCMException {
-    SCMByte type;
-    unsigned int offset;
+    SCMByte type{};
+    unsigned int offset{0};
     std::string thread;
 
     template <class String>
@@ -184,9 +184,9 @@ public:
     void execute(float dt);
 
 private:
-    SCMFile* file;
-    ScriptModule* module;
-    GameState* state;
+    SCMFile* file = nullptr;
+    ScriptModule* module = nullptr;
+    GameState* state = nullptr;
     bool debugFlag;
 
     std::list<SCMThread> _activeThreads;

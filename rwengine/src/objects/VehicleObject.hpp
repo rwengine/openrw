@@ -32,29 +32,29 @@ class btHingeConstraint;
  */
 class VehicleObject : public GameObject, public ClumpObject {
 private:
-    float steerAngle;
-    float throttle;
-    float brake;
-    bool handbrake;
+    float steerAngle{0.f};
+    float throttle{0.f};
+    float brake{0.f};
+    bool handbrake = true;
 
     Atomic* chassishigh_ = nullptr;
     Atomic* chassislow_ = nullptr;
 
-    std::array<Atomic*, 6> extras_;
+    std::array<Atomic*, 6> extras_{};
 
 public:
-    float health;
+    float health{1000.f};
 
-    VehicleInfoHandle info;
-    glm::u8vec3 colourPrimary;
-    glm::u8vec3 colourSecondary;
-    bool mHasSpecial;
+    VehicleInfoHandle info{};
+    glm::u8vec3 colourPrimary{};
+    glm::u8vec3 colourSecondary{};
+    bool mHasSpecial = true;
 
     std::map<size_t, GameObject*> seatOccupants;
 
     std::unique_ptr<CollisionInstance> collision;
-    btVehicleRaycaster* physRaycaster;
-    btRaycastVehicle* physVehicle;
+    btVehicleRaycaster* physRaycaster = nullptr;
+    btRaycastVehicle* physVehicle = nullptr;
 
     struct Part {
         ModelFrame* dummy;

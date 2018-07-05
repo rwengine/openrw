@@ -33,13 +33,9 @@ constexpr float kVehicleCameraPitch =
 
 IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
     : State(game)
-    , started(false)
     , save(save)
     , newgame(newgame)
-    , autolookTimer(0.f)
-    , camMode(IngameState::CAMERA_NORMAL)
-    , m_invertedY(game->getConfig().getInputInvertY())
-    , m_vehicleFreeLook(true) {
+    , m_invertedY(game->getConfig().getInputInvertY()) {
 }
 
 void IngameState::startTest() {

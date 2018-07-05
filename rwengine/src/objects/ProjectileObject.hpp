@@ -38,12 +38,12 @@ private:
 
     btSphereShape* _shape;
 
-    btRigidBody* _body;
+    btRigidBody* _body = nullptr;
 
     /** Used for RPGs and Molotov collision detection */
-    btPairCachingGhostObject* _ghostBody;
+    btPairCachingGhostObject* _ghostBody = nullptr;
 
-    bool _exploded;
+    bool _exploded = false;
 
     void checkPhysicsContact();
     void explode();

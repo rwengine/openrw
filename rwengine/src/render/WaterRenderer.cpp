@@ -13,7 +13,7 @@
 #include "render/GameShaders.hpp"
 #include "render/OpenGLRenderer.hpp"
 
-WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
+WaterRenderer::WaterRenderer(GameRenderer* renderer) {
     maskDraw.setFaceType(GL_TRIANGLES);
     gridDraw.setFaceType(GL_TRIANGLES);
 
@@ -54,8 +54,6 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) : waterProg(nullptr) {
     gridGeom.getDataAttributes().emplace_back(ATRS_Position, 2, 0, 0, GL_FLOAT);
     gridDraw.addGeometry(&gridGeom);
 }
-
-WaterRenderer::~WaterRenderer() = default;
 
 void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int nHeights,
                                   const uint8_t* tiles, const unsigned int nTiles) {

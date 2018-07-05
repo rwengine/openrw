@@ -8,9 +8,7 @@
 CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
                                const glm::quat &rot, const ClumpPtr& model,
                                BaseModelInfo *modelinfo)
-    : GameObject(engine, pos, rot, modelinfo)
-    , _parent(nullptr)
-    , _bone(nullptr) {
+    : GameObject(engine, pos, rot, modelinfo) {
     if (model) {
         setModel(model);
     }
@@ -20,8 +18,6 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
     setClump(ClumpPtr(getModel()->clone()));
     animator = new Animator(getClump());
 }
-
-CutsceneObject::~CutsceneObject() = default;
 
 void CutsceneObject::tick(float dt) {
     animator->tick(dt);

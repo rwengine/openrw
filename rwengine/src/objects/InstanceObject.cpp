@@ -18,13 +18,7 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                BaseModelInfo* modelinfo,
                                const std::shared_ptr<DynamicObjectData>& dyn)
     : GameObject(engine, pos, rot, modelinfo)
-    , health(100.f)
-    , visible(true)
-    , floating(false)
-    , usePhysics(false)
-    , changeAtomic(-1)
     , scale(scale)
-    , body(nullptr)
     , dynamics(dyn) {
     if (modelinfo) {
         changeModel(modelinfo);

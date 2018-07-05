@@ -20,10 +20,7 @@ constexpr int kWindowWidth = 800;
 constexpr int kWindowHeight = 600;
 
 GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
-        log(inlog),
-        config(),
-        window(),
-        options() {
+        log(inlog) {
     log.info("Game", "Build: " + kBuildStr);
 
     size_t w = kWindowWidth, h = kWindowHeight;

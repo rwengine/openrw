@@ -92,10 +92,6 @@ PickupObject::BehaviourFlags PickupObject::defaultBehaviourFlags(
 PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
                            BaseModelInfo* modelinfo, PickupType type)
     : GameObject(world, position, glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, modelinfo)
-    , m_ghost(nullptr)
-    , m_shape(nullptr)
-    , m_enabled(false)
-    , m_collected(false)
     , m_type(type) {
     btTransform tf;
     tf.setIdentity();

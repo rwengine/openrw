@@ -10,12 +10,6 @@ namespace pt = boost::property_tree;
 
 const std::string kConfigDirectoryName("OpenRW");
 
-GameConfig::GameConfig()
-    : m_configPath()
-    , m_parseResult()
-    , m_inputInvertY(false) {
-}
-
 void GameConfig::loadFile(const rwfs::path &path) {
     m_configPath = path;
     std::string dummy;

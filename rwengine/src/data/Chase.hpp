@@ -40,8 +40,7 @@ struct ChaseKeyframe {
  */
 class ChaseCoordinator {
 public:
-    ChaseCoordinator() : chaseTime(-1.f) {
-    }
+    ChaseCoordinator() = default;
 
     bool addChaseVehicle(GameObject* vehicle, int index,
                          const std::string& pathFile);
@@ -54,7 +53,7 @@ public:
     void cleanup();
 
 private:
-    float chaseTime;
+    float chaseTime{-1.f};
     struct ChaseObject {
         std::vector<ChaseKeyframe> keyframes;
         GameObject* object;

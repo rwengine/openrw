@@ -38,83 +38,83 @@ struct SystemTime {
 
 /** Block 0 State */
 struct BasicState {
-    GameStringChar saveName[24];
-    SystemTime saveTime;
-    uint32_t unknown;
-    uint16_t islandNumber;
-    glm::vec3 cameraPosition;
-    uint32_t gameMinuteMS;
-    uint32_t lastTick;
-    uint8_t gameHour;
-    uint8_t _align0[3];
-    uint8_t gameMinute;
-    uint8_t _align1[3];
-    uint16_t padMode;
-    uint8_t _align2[2];
-    uint32_t timeMS;
-    float timeScale;
-    float timeStep;
-    float timeStep_unclipped;  // Unknown purpose
-    uint32_t frameCounter;
-    float timeStep2;
-    float framesPerUpdate;
-    float timeScale2;
-    uint16_t lastWeather;
-    uint8_t _align3[2];
-    uint16_t nextWeather;
-    uint8_t _align4[2];
-    uint16_t forcedWeather;
-    uint8_t _align5[2];
-    float weatherInterpolation;
-    uint8_t dateTime[24];  // Unused
-    uint32_t weatherType;
-    float cameraData;
-    float cameraData2;
+    GameStringChar saveName[24]{0};
+    SystemTime saveTime{0, 0, 0, 0, 0, 0, 0, 0};
+    uint32_t unknown{0};
+    uint16_t islandNumber{0};
+    glm::vec3 cameraPosition{};
+    uint32_t gameMinuteMS{0};
+    uint32_t lastTick{0};
+    uint8_t gameHour{0};
+    uint8_t _align0[3]{0};
+    uint8_t gameMinute{0};
+    uint8_t _align1[3]{0};
+    uint16_t padMode{0};
+    uint8_t _align2[2]{0};
+    uint32_t timeMS{0};
+    float timeScale{1.f};
+    float timeStep{0.f};
+    float timeStep_unclipped{0};  // Unknown purpose
+    uint32_t frameCounter{0};
+    float timeStep2{0.f};
+    float framesPerUpdate{0.f};
+    float timeScale2{0.f};
+    uint16_t lastWeather{0};
+    uint8_t _align3[2]{0};
+    uint16_t nextWeather{0};
+    uint8_t _align4[2]{0};
+    uint16_t forcedWeather{0};
+    uint8_t _align5[2]{0};
+    float weatherInterpolation{1.f};
+    uint8_t dateTime[24]{0};  // Unused
+    uint32_t weatherType{0};
+    float cameraData{0};
+    float cameraData2{0};
 
-    BasicState();
+    BasicState() = default;
 };
 
 /** Block 16 player info */
 struct PlayerInfo {
-    int32_t money;
-    uint8_t unknown1;
-    uint32_t unknown2;
-    uint16_t unknown3;
-    float unknown4;
-    int32_t displayedMoney;
-    uint32_t hiddenPackagesCollected;
-    uint32_t hiddenPackageCount;
-    uint8_t neverTired;
-    uint8_t fastReload;
-    uint8_t thaneOfLibertyCity;
-    uint8_t singlePayerHealthcare;
-    uint8_t unknown5[70];
+    int32_t money{0};
+    uint8_t unknown1{0};
+    uint32_t unknown2{0};
+    uint16_t unknown3{0};
+    float unknown4{0.f};
+    int32_t displayedMoney{0};
+    uint32_t hiddenPackagesCollected{0};
+    uint32_t hiddenPackageCount{0};
+    uint8_t neverTired{0};
+    uint8_t fastReload{0};
+    uint8_t thaneOfLibertyCity{0};
+    uint8_t singlePayerHealthcare{0};
+    uint8_t unknown5[70]{0};
 
-    PlayerInfo();
+    PlayerInfo() = default;
 };
 
 /** Block 17 */
 struct GameStats {
-    uint32_t playerKills;
-    uint32_t otherKills;
-    uint32_t carsExploded;
-    uint32_t shotsHit;
-    uint32_t pedTypesKilled[23];
-    uint32_t helicoptersDestroyed;
-    uint32_t playerProgress;
-    uint32_t explosiveKgsUsed;
-    uint32_t bulletsFired;
-    uint32_t bulletsHit;
-    uint32_t carsCrushed;
-    uint32_t headshots;
-    uint32_t timesBusted;
-    uint32_t timesHospital;
-    uint32_t daysPassed;
-    uint32_t mmRainfall;
-    uint32_t insaneJumpMaxDistance;
-    uint32_t insaneJumpMaxHeight;
-    int32_t insaneJumpMaxFlips;
-    int32_t insaneJumpMaxRotation;
+    uint32_t playerKills{0};
+    uint32_t otherKills{0};
+    uint32_t carsExploded{0};
+    uint32_t shotsHit{0};
+    uint32_t pedTypesKilled[23]{};
+    uint32_t helicoptersDestroyed{0};
+    uint32_t playerProgress{0};
+    uint32_t explosiveKgsUsed{0};
+    uint32_t bulletsFired{0};
+    uint32_t bulletsHit{0};
+    uint32_t carsCrushed{0};
+    uint32_t headshots{0};
+    uint32_t timesBusted{0};
+    uint32_t timesHospital{0};
+    uint32_t daysPassed{0};
+    uint32_t mmRainfall{0};
+    uint32_t insaneJumpMaxDistance{0};
+    uint32_t insaneJumpMaxHeight{0};
+    int32_t insaneJumpMaxFlips{0};
+    int32_t insaneJumpMaxRotation{0};
     /*
      * 0 none completed
      * 1 insane stunt
@@ -126,39 +126,39 @@ struct GameStats {
      * 7 quadruple
      * 8 perfect quadruple
      */
-    int32_t bestStunt;
-    uint32_t uniqueStuntsFound;
-    uint32_t uniqueStuntsTotal;
-    uint32_t missionAttempts;
-    uint32_t missionsPassed;
-    uint32_t passengersDroppedOff;
-    uint32_t taxiRevenue;
-    uint32_t portlandPassed;
-    uint32_t stauntonPassed;
-    uint32_t shoresidePassed;
-    int32_t bestTurismoTime;
-    float distanceWalked;
-    float distanceDriven;
-    int32_t patriotPlaygroundTime;
-    int32_t aRideInTheParkTime;
-    int32_t grippedTime;
-    int32_t multistoryMayhemTime;
-    uint32_t peopleSaved;
-    uint32_t criminalsKilled;
-    int32_t highestParamedicLevel;
-    uint32_t firesExtinguished;
-    int32_t longestDodoFlight;
-    int32_t bombDefusalTime;
-    uint32_t rampagesPassed;
-    uint32_t totalRampages;
-    uint32_t totalMissions;
-    uint32_t fastestTime[16];  // not used
-    int32_t highestScore[16];
-    uint32_t peopleKilledSinceCheckpoint;  // ?
-    uint32_t peopleKilledSinceLastBustedOrWasted;
-    char lastMissionGXT[8];
+    int32_t bestStunt{0};
+    uint32_t uniqueStuntsFound{0};
+    uint32_t uniqueStuntsTotal{0};
+    uint32_t missionAttempts{0};
+    uint32_t missionsPassed{0};
+    uint32_t passengersDroppedOff{0};
+    uint32_t taxiRevenue{0};
+    uint32_t portlandPassed{0};
+    uint32_t stauntonPassed{0};
+    uint32_t shoresidePassed{0};
+    int32_t bestTurismoTime{0};
+    float distanceWalked{0};
+    float distanceDriven{0};
+    int32_t patriotPlaygroundTime{0};
+    int32_t aRideInTheParkTime{0};
+    int32_t grippedTime{0};
+    int32_t multistoryMayhemTime{0};
+    uint32_t peopleSaved{0};
+    uint32_t criminalsKilled{0};
+    int32_t highestParamedicLevel{0};
+    uint32_t firesExtinguished{0};
+    int32_t longestDodoFlight{0};
+    int32_t bombDefusalTime{0};
+    uint32_t rampagesPassed{0};
+    uint32_t totalRampages{0};
+    uint32_t totalMissions{0};
+    uint32_t fastestTime[16]{0};  // not used
+    int32_t highestScore[16]{};
+    uint32_t peopleKilledSinceCheckpoint{0};  // ?
+    uint32_t peopleKilledSinceLastBustedOrWasted{0};
+    char lastMissionGXT[8]{""};
 
-    GameStats();
+    GameStats() = default;
 };
 
 struct TextDisplayData {
@@ -255,7 +255,7 @@ public:
     /**
       Basic Game State
      */
-    BasicState basic;
+    BasicState basic{};
 
     /**
       Player stats
@@ -270,27 +270,28 @@ public:
     /**
      * Second since game was started
      */
-    float gameTime;
-    unsigned int currentProgress;
-    unsigned int maxProgress;
+    float gameTime = 0.f;
+    unsigned int currentProgress = 0;
+    unsigned int maxProgress = 1;
 
-    unsigned int maxWantedLevel;
+    unsigned int maxWantedLevel = 0;
 
-    GameObjectID playerObject;
+    GameObjectID playerObject = 0;
 
     /**
      * @brief Stores a pointer to script global that stores the on-mission
      * state.
      */
-    ScriptInt* scriptOnMissionFlag;
+    ScriptInt* scriptOnMissionFlag = nullptr;
 
     /** Objects created by the current mission */
     std::vector<GameObject*> missionObjects;
 
-    bool overrideNextRestart;
-    glm::vec4 nextRestartLocation;
+    bool overrideNextRestart = false;
+    glm::vec4 nextRestartLocation{};
     std::vector<glm::vec4> hospitalRestarts, policeRestarts;
-    int hospitalIslandOverride, policeIslandOverride;
+    int hospitalIslandOverride = 0;
+    int policeIslandOverride = 0;
 
     void addHospitalRestart(const glm::vec4 location);
     void addPoliceRestart(const glm::vec4 location);
@@ -302,11 +303,11 @@ public:
     const glm::vec4 getClosestRestart(RestartType type,
                                       const glm::vec3 playerPosition) const;
 
-    bool fadeIn;
-    float fadeStart;
-    float fadeTime;
-    bool fadeSound;
-    glm::u16vec3 fadeColour;
+    bool fadeIn = true;
+    float fadeStart = 0.f;
+    float fadeTime = 0.f;
+    bool fadeSound = false;
+    glm::u16vec3 fadeColour{0.f, 0.f, 0.f};
 
     // @todo fadeOut should be replaced with enum?
     void fade(float time, bool f);
@@ -315,13 +316,13 @@ public:
 
     std::string currentSplash;
 
-    bool skipCutscene;
-    bool isIntroPlaying;
-    CutsceneData* currentCutscene;
-    float cutsceneStartTime;
+    bool skipCutscene = false;
+    bool isIntroPlaying = false;
+    CutsceneData* currentCutscene = nullptr;
+    float cutsceneStartTime{-1.f};
     /** Flag for rendering cutscene letterbox */
-    bool isCinematic;
-    HudFlash hudFlash;
+    bool isCinematic = false;
+    HudFlash hudFlash{HudFlash::Disabled};
 
     std::string lastMissionName;
 
@@ -347,12 +348,12 @@ public:
     int bigNVeinyPickupsCollected = 0;
 
     /** The camera near value currently set by the script */
-    float cameraNear;
-    bool cameraFixed;
-    glm::vec3 cameraPosition;
-    glm::quat cameraRotation;
+    float cameraNear{0.1f};
+    bool cameraFixed = false;
+    glm::vec3 cameraPosition{};
+    glm::quat cameraRotation{1.0f, 0.0f, 0.0f, 0.0f};
 
-    GameObjectID cameraTarget;
+    GameObjectID cameraTarget = 0;
 
     std::vector<VehicleGenerator> vehicleGenerators;
 
@@ -361,28 +362,28 @@ public:
     /**
      * Bitsets for the car import / export list mission
      */
-    std::bitset<32> importExportPortland;
-    std::bitset<32> importExportShoreside;
-    std::bitset<32> importExportUnused;
+    std::bitset<32> importExportPortland = 0;
+    std::bitset<32> importExportShoreside = 0;
+    std::bitset<32> importExportUnused = 0;
 
     /**
      * State of the game input for the last 2 frames
      */
-    GameInputState input[2];
+    GameInputState input[2]{};
 
     /**
      * World to use for this state, this isn't saved, just used at runtime
      */
-    GameWorld* world;
+    GameWorld* world = nullptr;
 
     /**
      * Script Machine associated with this state if it exists.
      */
-    ScriptMachine* script;
+    ScriptMachine* script = nullptr;
 
     std::array<ScriptContactData, 16> scriptContacts = {};
 
-    GameState();
+    GameState() = default;
 
     /**
      * Adds a blip to the state, returning it's ID.

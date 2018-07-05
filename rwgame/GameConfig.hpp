@@ -176,7 +176,7 @@ public:
     /**
      * @brief GameConfig Create a game configuration (initially invalid)
      */
-    GameConfig();
+    GameConfig() = default;
 
     /**
      * @brief Initialize this object using the config file at path
@@ -252,8 +252,8 @@ private:
                             ParseType destType, std::string &destination);
 
     /* Config State */
-    rwfs::path m_configPath;
-    ParseResult m_parseResult;
+    rwfs::path m_configPath{};
+    ParseResult m_parseResult{};
 
     /* Actual Configuration */
 
@@ -264,14 +264,14 @@ private:
     std::string m_gameLanguage = "american";
 
     /// Invert the y axis for camera control.
-    bool m_inputInvertY;
+    bool m_inputInvertY = false;
 
     /// Size of the window
-    int m_windowWidth;
-    int m_windowHeight;
+    int m_windowWidth{800};
+    int m_windowHeight{600};
     
     /// Set the window to fullscreen
-    bool m_windowFullscreen;
+    bool m_windowFullscreen = false;
 };
 
 #endif

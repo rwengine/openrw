@@ -37,11 +37,11 @@ class GameRenderer {
     Logger* logger;
 
     /** The low-level drawing interface to use */
-    std::shared_ptr<Renderer> renderer;
+    std::shared_ptr<Renderer> renderer = std::make_shared<OpenGLRenderer>();
 
     // Temporary variables used during rendering
-    float _renderAlpha;
-    GameWorld* _renderWorld;
+    float _renderAlpha{0.f};
+    GameWorld* _renderWorld = nullptr;
 
     /** Internal non-descript VAOs */
     GLuint vao, debugVAO;
@@ -49,7 +49,7 @@ class GameRenderer {
     /** Camera values passed to renderWorld() */
     ViewCamera _camera;
     ViewCamera cullingCamera;
-    bool cullOverride;
+    bool cullOverride = false;
 
     /** Number of culling events */
     size_t culled;

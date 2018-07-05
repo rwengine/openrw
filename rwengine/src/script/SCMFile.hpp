@@ -15,12 +15,7 @@ class SCMFile {
 public:
     enum SCMTarget { NoTarget = 0, GTAIII = 0xC6, GTAVC = 0x6D, GTASA = 0x73 };
 
-    SCMFile()
-        : _data(nullptr)
-        , _target(NoTarget)
-        , mainSize(0)
-        , missionLargestSize(0) {
-    }
+    SCMFile() = default;
 
     ~SCMFile() {
         delete[] _data;
@@ -70,21 +65,21 @@ public:
     }
 
 private:
-    SCMByte* _data;
+    SCMByte* _data = nullptr;
 
-    SCMTarget _target;
+    SCMTarget _target{NoTarget};
 
     std::vector<std::string> models;
 
     std::vector<unsigned int> missionOffsets;
 
-    uint32_t mainSize;
-    uint32_t missionLargestSize;
+    uint32_t mainSize{0};
+    uint32_t missionLargestSize{0};
 
-    uint32_t globalSectionOffset;
-    uint32_t modelSectionOffset;
-    uint32_t missionSectionOffset;
-    uint32_t codeSectionOffset;
+    uint32_t globalSectionOffset{0};
+    uint32_t modelSectionOffset{0};
+    uint32_t missionSectionOffset{0};
+    uint32_t codeSectionOffset{0};
 };
 
 #endif
