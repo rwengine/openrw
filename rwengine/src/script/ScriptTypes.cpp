@@ -225,6 +225,15 @@ ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     }
     return {param.handleValue(), garage};
 }
+
+template <>
+ScriptObjectType<Sound> ScriptArguments::getScriptObject(
+    unsigned int arg) const {
+    auto& param = (*this)[arg];
+    RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
+    return {param.handleValue(), &getWorld()->sound.getSoundRef(arg)};
+}
+
 template <>
 ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     unsigned int arg) const {

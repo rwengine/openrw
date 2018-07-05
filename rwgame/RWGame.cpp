@@ -601,6 +601,12 @@ void RWGame::render(float alpha, float time) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
 
+    //Update Listener parameters
+    // @todo ShFil119 it should be improved
+    world->sound.setListenerPosition(currentCam.position);
+    world->sound.setListenerOrientation(glm::vec3(currentCam.rotation.x, currentCam.rotation.y, currentCam.rotation.z));
+    world->sound.setListenerVelocity(glm::vec3());
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 

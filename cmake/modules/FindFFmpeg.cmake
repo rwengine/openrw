@@ -23,6 +23,7 @@ if (PKG_CONFIG_FOUND)
 pkg_check_modules(_FFMPEG_AVCODEC libavcodec QUIET)
 pkg_check_modules(_FFMPEG_AVFORMAT libavformat QUIET)
 pkg_check_modules(_FFMPEG_AVUTIL libavutil QUIET)
+pkg_check_modules(_FFMPEG_SWRESAMPLE libswresample QUIET)
 endif (PKG_CONFIG_FOUND)
 
 find_path(FFMPEG_AVCODEC_INCLUDE_DIR
@@ -61,6 +62,7 @@ set(FFMPEG_LIBRARIES
 ${FFMPEG_LIBAVCODEC}
 ${FFMPEG_LIBAVFORMAT}
 ${FFMPEG_LIBAVUTIL}
+${FFMPEG_SWRESAMPLE}
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

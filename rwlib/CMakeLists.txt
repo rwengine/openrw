@@ -52,6 +52,7 @@ target_link_libraries(rwlib
         rwdep::boost
         rwdep::glm
         openrw::interface
+        ffmpeg::ffmpeg
     PRIVATE
         OpenGL::GL
     )

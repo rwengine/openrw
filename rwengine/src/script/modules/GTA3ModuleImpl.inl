@@ -17,6 +17,8 @@
 #include <data/CutsceneData.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <string>
+#include <iostream>
 
 /**
     @brief NOP
@@ -4273,10 +4275,9 @@ void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg sound 
 */
 void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018c);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto name = world->sound.createSfxInstance(world->sound.convertScriptIndexIntoSfx(sound));
+    world->sound.playSfx(name, coord, false, world->sound.getScriptRange(sound)/2);
 }
 
 /**
@@ -4288,11 +4289,10 @@ void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     @arg sound1 
 */
 void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound0, ScriptSound& sound1) {
-    RW_UNIMPLEMENTED_OPCODE(0x018d);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound0);
-    RW_UNUSED(sound1);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto bufferName = world->sound.createSfxInstance(world->sound.convertScriptIndexIntoSfx(sound0));
+    world->sound.playSfx(bufferName, coord, true, world->sound.getScriptRange(sound0)/2);
+    sound1 = &world->sound.getSoundRef(bufferName);
 }
 
 /**
@@ -4301,10 +4301,9 @@ void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     opcode 018e
     @arg sound 
 */
-void opcode_018e(const ScriptArguments& args, const ScriptSound sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018e);
-    RW_UNUSED(sound);
+void opcode_018e(const ScriptArguments& args, ScriptSound& sound) {
     RW_UNUSED(args);
+    sound->stop();
 }
 
 /**
@@ -10388,7 +10387,7 @@ void opcode_0394(const ScriptArguments& args, const ScriptInt arg1) {
     }
     else if (args.getWorld()->missionAudio.length() > 0)
     {
-    	args.getWorld()->sound.playSound(args.getWorld()->missionAudio);
+        args.getWorld()->sound.playSound(args.getWorld()->missionAudio);
     }
 }
 
@@ -11323,9 +11322,9 @@ void opcode_03d6(const ScriptArguments& args, const ScriptString gxtEntry) {
     @arg coord Coordinates
 */
 void opcode_03d7(const ScriptArguments& args, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x03d7);
-    RW_UNUSED(coord);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto& wav = world->sound.getSoundRef(world->missionAudio);
+    wav.setPosition(coord);
 }
 
 /**
