@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/types.hpp>
 
 #include "engine/GameData.hpp"

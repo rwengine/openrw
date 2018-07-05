@@ -11,7 +11,7 @@
 
 #include <LinearMath/btScalar.h>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "data/WeaponData.hpp"
 #include "engine/Animator.hpp"

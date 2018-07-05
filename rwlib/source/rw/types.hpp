@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <memory>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <string>
 
 #define RW_USING(feature) 1 == feature

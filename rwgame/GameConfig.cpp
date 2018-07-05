@@ -1,7 +1,7 @@
 #include "GameConfig.hpp"
 #include <algorithm>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/filesystem.hpp>
 
 #include <boost/property_tree/ini_parser.hpp>

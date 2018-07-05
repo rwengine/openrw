@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 #include "data/CutsceneData.hpp"
 #include "platform/FileHandle.hpp"

@@ -2,23 +2,35 @@
 #include <platform/FileIndex.hpp>
 #include "test_Globals.hpp"
 
-#include <rw/filesystem.hpp>
-namespace fs = rwfs;
-
 BOOST_AUTO_TEST_SUITE(FileIndexTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_directory_paths) {
-    FileIndex index;
+BOOST_AUTO_TEST_CASE(test_normalizeName) {
+    std::string ref = "a/b/c";
+    {
+        std::string dirty = "a\\b\\c";
+        BOOST_CHECK_EQUAL(ref, FileIndex::normalizeFilePath(dirty));
+    }
+    {
+        std::string dirty = "A/B/C";
+        BOOST_CHECK_EQUAL(ref, FileIndex::normalizeFilePath(dirty));
+    }
+    {
+        std::string dirty = "A\\B\\C";
+        BOOST_CHECK_EQUAL(ref, FileIndex::normalizeFilePath(dirty));
+    }
+}
 
-    index.indexGameDirectory(Global::getGamePath());
+#if RW_TEST_WITH_DATA
+BOOST_AUTO_TEST_CASE(test_indexTree) {
+    FileIndex index;
+    index.indexTree(Global::getGamePath());
 
     {
         std::string upperpath{"DATA/CULLZONE.DAT"};
         auto truepath = index.findFilePath(upperpath);
         BOOST_ASSERT(!truepath.empty());
         BOOST_CHECK(upperpath != truepath);
-        fs::path expected{Global::getGamePath()};
+        rwfs::path expected{Global::getGamePath()};
         expected /= "data/CULLZONE.DAT";
         BOOST_CHECK_EQUAL(truepath.string(), expected.string());
     }
@@ -27,28 +39,35 @@ BOOST_AUTO_TEST_CASE(test_directory_paths) {
         auto truepath = index.findFilePath(upperpath);
         BOOST_ASSERT(!truepath.empty());
         BOOST_CHECK(upperpath != truepath);
-        fs::path expected{Global::getGamePath()};
+        rwfs::path expected{Global::getGamePath()};
         expected /= "data/maps/comnbtm/comNbtm.ipl";
         BOOST_CHECK_EQUAL(truepath.string(), expected.string());
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_file) {
+BOOST_AUTO_TEST_CASE(test_openFile) {
     FileIndex index;
-
     index.indexTree(Global::getGamePath() + "/data");
 
     auto handle = index.openFile("cullzone.dat");
     BOOST_CHECK(handle != nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(test_file_archive) {
+BOOST_AUTO_TEST_CASE(test_indexArchive) {
     FileIndex index;
+    index.indexTree(Global::getGamePath());
 
-    index.indexArchive(Global::getGamePath() + "/models/gta3.img");
+    {
+        auto handle = index.openFile("landstal.dff");
+        BOOST_CHECK(handle == nullptr);
+    }
 
-    auto handle = index.openFile("landstal.dff");
-    BOOST_CHECK(handle != nullptr);
+    index.indexArchive("models/gta3.img");
+
+    {
+        auto handle = index.openFile("landstal.dff");
+        BOOST_CHECK(handle != nullptr);
+    }
 }
 #endif
 

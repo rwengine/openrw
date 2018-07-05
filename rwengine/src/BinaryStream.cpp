@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <fstream>
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 namespace RW {
 

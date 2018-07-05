@@ -7,7 +7,7 @@
 #include "ai/AIGraphNode.hpp"
 #include "data/PathData.hpp"
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/types.hpp>
 
 AIGraph::~AIGraph() {

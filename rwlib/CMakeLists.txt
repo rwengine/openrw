@@ -14,11 +14,11 @@ SET(RWLIB_SOURCES
     source/gl/TextureData.cpp
 
     source/rw/abort.cpp
-    source/rw/bit_cast.cpp
+    source/rw/bit_cast.hpp
     source/rw/filesystem.hpp
     source/rw/forward.hpp
     source/rw/types.hpp
-    source/rw/defines.hpp
+    source/rw/debug.hpp
 
     source/platform/FileHandle.hpp
     source/platform/FileIndex.hpp

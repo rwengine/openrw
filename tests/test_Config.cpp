@@ -8,7 +8,7 @@
 #include <fstream>
 #include <map>
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 #include <rw/filesystem.hpp>
 
 namespace pt = boost::property_tree;

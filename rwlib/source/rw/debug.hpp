@@ -1,5 +1,5 @@
-#ifndef _LIBRW_DEFINES_HPP_
-#define _LIBRW_DEFINES_HPP_
+#ifndef _LIBRW_DEBUG_HPP_
+#define _LIBRW_DEBUG_HPP_
 
 #if RW_DEBUG
 #include <cstdlib>

@@ -1,6 +1,6 @@
 #include "engine/ScreenText.hpp"
 
-#include <rw/defines.hpp>
+#include <rw/debug.hpp>
 
 void ScreenText::tick(float dt) {
     int millis = dt * 1000;

@@ -1,38 +1,69 @@
 #include "platform/FileIndex.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
-#include <memory>
-#include <stdexcept>
+#include <iterator>
+#include <sstream>
 
-#include <boost/range/iterator_range.hpp>
-
+#include "FileHandle.hpp"
 #include "loaders/LoaderIMG.hpp"
-#include "platform/FileHandle.hpp"
 
-void FileIndex::indexGameDirectory(const rwfs::path& base_path) {
-    gamedatapath_ = base_path;
+#include "rw/debug.hpp"
 
-    for (const rwfs::path& path :
-         rwfs::recursive_directory_iterator(base_path)) {
+std::string FileIndex::normalizeFilePath(const std::string &filePath) {
+    std::ostringstream oss;
+    std::transform(filePath.cbegin(), filePath.cend(), std::ostreambuf_iterator<char>(oss), [](char c) {
+        if (c == '\\') {
+            return '/';
+        }
+        return static_cast<char>(std::tolower(c));
+    });
+    return oss.str();
+}
+
+void FileIndex::indexTree(const rwfs::path &path) {
+    // Remove the trailing "/" or "/." from base_path. Boost 1.66 and c++17 have different lexically_relative behavior.
+    rwfs::path basePath = (path / ".").lexically_normal();
+    basePath = basePath.parent_path();
+
+    for (const rwfs::path &path :
+         rwfs::recursive_directory_iterator(basePath)) {
         if (!rwfs::is_regular_file(path)) {
             continue;
         }
+        auto relPath = path.lexically_relative(basePath);
+        std::string relPathName = normalizeFilePath(relPath.string());
+        indexedData_[relPathName] = {IndexedDataType::FILE, path.string(), ""};
 
-        std::string name = path.string();
-        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-        filesystemfiles_[name] = path;
+        auto filename = normalizeFilePath(path.filename().string());
+        indexedData_[filename] = {IndexedDataType::FILE, path.string(), ""};
     }
 }
 
-FileHandle FileIndex::openFilePath(const std::string& file_path) {
-    auto datapath = findFilePath(file_path);
-    std::ifstream dfile(datapath.string(),
-                        std::ios_base::binary | std::ios_base::ate);
+const FileIndex::IndexedData *FileIndex::getIndexedDataAt(const std::string &filePath) const {
+    auto normPath = normalizeFilePath(filePath);
+    return &indexedData_.at(normPath);
+}
+
+rwfs::path FileIndex::findFilePath(const std::string &filePath) const {
+    return getIndexedDataAt(filePath)->path;
+}
+
+FileHandle FileIndex::openFileRaw(const std::string &filePath) const {
+    const auto *indexData = getIndexedDataAt(filePath);
+    std::ifstream dfile(indexData->path, std::ios::binary);
     if (!dfile.is_open()) {
-        throw std::runtime_error("Unable to open file: " + file_path);
+        throw std::runtime_error("Unable to open file: " + filePath);
     }
 
+#if RW_DEBUG
+    if (indexData->type != IndexedDataType::FILE) {
+        RW_MESSAGE("Reading raw data from archive \"" << filePath << "\"");
+    }
+#endif
+
+    dfile.seekg(0, std::ios::end);
     auto length = dfile.tellg();
     dfile.seekg(0);
     auto data = new char[length];
@@ -41,84 +72,57 @@ FileHandle FileIndex::openFilePath(const std::string& file_path) {
     return std::make_shared<FileContentsInfo>(data, length);
 }
 
-void FileIndex::indexTree(const rwfs::path& root) {
-    for (const rwfs::path& path : rwfs::recursive_directory_iterator(root)) {
-        if (!rwfs::is_regular_file(path)) {
-            continue;
-        }
-
-        std::string directory = path.parent_path().string();
-        std::string realName = path.filename().string();
-        std::string lowerName = realName;
-        std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
-                       ::tolower);
-        files[lowerName] = {lowerName, realName, directory, ""};
-    }
-}
-
-void FileIndex::indexArchive(const std::string& archive) {
-    // Split directory from archive name
-    auto archive_path = rwfs::path(archive);
-    auto directory = archive_path.parent_path();
-    auto archive_basename = archive_path.filename();
-    auto archive_full_path = directory / archive_basename;
+void FileIndex::indexArchive(const std::string &archive) {
+    rwfs::path path = findFilePath(archive);
 
     LoaderIMG img;
-    if (!img.load(archive_full_path.string())) {
-        throw std::runtime_error("Failed to load IMG archive: " +
-                                 archive_full_path.string());
+    if (!img.load(path.string())) {
+        throw std::runtime_error("Failed to load IMG archive: " + path.string());
     }
 
-    std::string lowerName;
     for (size_t i = 0; i < img.getAssetCount(); ++i) {
-        auto& asset = img.getAssetInfoByIndex(i);
+        auto &asset = img.getAssetInfoByIndex(i);
 
         if (asset.size == 0) continue;
 
-        lowerName = asset.name;
-        std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
-                       ::tolower);
+        std::string assetName = normalizeFilePath(asset.name);
 
-        files[lowerName] = {lowerName, asset.name, directory.string(),
-                            archive_basename.string()};
+        indexedData_[assetName] = {IndexedDataType::ARCHIVE, path.string(), asset.name};
     }
 }
 
-FileHandle FileIndex::openFile(const std::string& filename) {
-    auto iterator = files.find(filename);
-    if (iterator == files.end()) {
+FileHandle FileIndex::openFile(const std::string &filePath) {
+    auto cleanFilePath = normalizeFilePath(filePath);
+    auto indexedDataPos = indexedData_.find(cleanFilePath);
+    if (indexedDataPos == indexedData_.end()) {
         return nullptr;
     }
 
-    IndexData& f = iterator->second;
-    bool isArchive = !f.archive.empty();
+    const auto &indexedData = indexedDataPos->second;
 
-    auto fsName = f.directory + "/" + f.originalName;
-
-    char* data = nullptr;
+    char *data = nullptr;
     size_t length = 0;
 
-    if (isArchive) {
-        fsName = f.directory + "/" + f.archive;
-
+    if (indexedData.type == IndexedDataType::ARCHIVE) {
         LoaderIMG img;
 
-        if (!img.load(fsName)) {
-            throw std::runtime_error("Failed to load IMG archive: " + fsName);
+        if (!img.load(indexedData.path)) {
+            throw std::runtime_error("Failed to load IMG archive: " + indexedData.path);
         }
 
         LoaderIMGFile file;
-        if (img.findAssetInfo(f.originalName, file)) {
+        auto filename = rwfs::path(indexedData.assetData).filename().string();
+        if (img.findAssetInfo(filename, file)) {
             length = file.size * 2048;
-            data = img.loadToMemory(f.originalName);
+            data = img.loadToMemory(filename);
         }
     } else {
-        std::ifstream dfile(fsName.c_str(), std::ios_base::binary);
+        std::ifstream dfile(indexedData.path, std::ios::binary);
         if (!dfile.is_open()) {
-            throw std::runtime_error("Unable to open file: " + fsName);
+            throw std::runtime_error("Unable to open file: " + indexedData.path);
         }
 
-        dfile.seekg(0, std::ios_base::end);
+        dfile.seekg(0, std::ios::end);
         length = dfile.tellg();
         dfile.seekg(0);
         data = new char[length];
