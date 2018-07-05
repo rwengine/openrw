@@ -1,4 +1,4 @@
-FROM fedora:branched
+FROM fedora:latest
 
 # ffmpeg-devel needs rpmfusion
 RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
