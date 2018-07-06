@@ -29,6 +29,8 @@
 #include "objects/PickupObject.hpp"
 #include "objects/VehicleObject.hpp"
 
+#include "platform/FileHandle.hpp"
+
 #include "render/ViewCamera.hpp"
 
 #ifdef RW_WINDOWS
@@ -695,7 +697,7 @@ void GameWorld::loadCutscene(const std::string& name) {
 
     CutsceneData* cutscene = new CutsceneData;
 
-    if (datfile) {
+    if (datfile.data) {
         LoaderCutsceneDAT loaderdat;
         loaderdat.load(cutscene->tracks, datfile);
     }

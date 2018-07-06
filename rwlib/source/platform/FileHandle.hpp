@@ -1,5 +1,6 @@
 #ifndef _LIBRW_FILEHANDLE_HPP_
 #define _LIBRW_FILEHANDLE_HPP_
+#include <cstddef>
 
 /**
  * @brief Contains a pointer to a file's contents.

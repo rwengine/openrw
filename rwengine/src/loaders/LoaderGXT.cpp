@@ -8,8 +8,8 @@
 #include <fonts/GameTexts.hpp>
 #include <platform/FileHandle.hpp>
 
-void LoaderGXT::load(GameTexts &texts, const FileHandle &file) {
-    auto data = file->data;
+void LoaderGXT::load(GameTexts &texts, const FileContentsInfo &file) {
+    auto data = file.data;
 
     data += 4;  // TKEY
 

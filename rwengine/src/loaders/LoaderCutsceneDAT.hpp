@@ -7,7 +7,7 @@ struct CutsceneTracks;
 
 class LoaderCutsceneDAT {
 public:
-    void load(CutsceneTracks& tracks, const FileHandle& file);
+    void load(CutsceneTracks& tracks, const FileContentsInfo& file);
 };
 
 #endif

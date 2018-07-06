@@ -3,6 +3,7 @@
 #include <engine/Animator.hpp>
 #include <fstream>
 #include <objects/GameObject.hpp>
+#include <platform/FileHandle.hpp>
 #include <widgets/ModelFramesWidget.hpp>
 #include "ViewerWidget.hpp"
 
@@ -47,7 +48,7 @@ void ModelViewer::showObject(uint16_t object) {
         });
 
     auto file = world()->data->index.openFile(modelName);
-    if (!file) {
+    if (!file.data) {
         RW_ERROR("Couldn't load " << modelName);
         return;
     }

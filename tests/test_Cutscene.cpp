@@ -1,6 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <data/CutsceneData.hpp>
 #include <loaders/LoaderCutsceneDAT.hpp>
+#include <platform/FileHandle.hpp>
 #include "test_Globals.hpp"
 
 BOOST_AUTO_TEST_SUITE(CutsceneTests)

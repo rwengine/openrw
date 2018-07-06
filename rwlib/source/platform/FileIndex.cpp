@@ -50,7 +50,7 @@ rwfs::path FileIndex::findFilePath(const std::string &filePath) const {
     return getIndexedDataAt(filePath)->path;
 }
 
-FileHandle FileIndex::openFileRaw(const std::string &filePath) const {
+FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
     const auto *indexData = getIndexedDataAt(filePath);
     std::ifstream dfile(indexData->path, std::ios::binary);
     if (!dfile.is_open()) {
@@ -69,7 +69,7 @@ FileHandle FileIndex::openFileRaw(const std::string &filePath) const {
     auto data = new char[length];
     dfile.read(data, length);
 
-    return std::make_shared<FileContentsInfo>(data, length);
+    return {data, static_cast<size_t>(length)};
 }
 
 void FileIndex::indexArchive(const std::string &archive) {
@@ -91,11 +91,12 @@ void FileIndex::indexArchive(const std::string &archive) {
     }
 }
 
-FileHandle FileIndex::openFile(const std::string &filePath) {
+FileContentsInfo FileIndex::openFile(const std::string &filePath) {
     auto cleanFilePath = normalizeFilePath(filePath);
     auto indexedDataPos = indexedData_.find(cleanFilePath);
+
     if (indexedDataPos == indexedData_.end()) {
-        return nullptr;
+        return {nullptr, 0};
     }
 
     const auto &indexedData = indexedDataPos->second;
@@ -129,9 +130,5 @@ FileHandle FileIndex::openFile(const std::string &filePath) {
         dfile.read(data, length);
     }
 
-    if (data == nullptr) {
-        return nullptr;
-    }
-
-    return std::make_shared<FileContentsInfo>(data, length);
+    return {data, length};
 }

@@ -455,10 +455,10 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     return atomic;
 }
 
-ClumpPtr LoaderDFF::loadFromMemory(const FileHandle& file) {
+ClumpPtr LoaderDFF::loadFromMemory(const FileContentsInfo& file) {
     auto model = std::make_shared<Clump>();
 
-    RWBStream rootStream(file->data, file->length);
+    RWBStream rootStream(file.data, file.length);
 
     auto rootID = rootStream.getNextChunk();
     if (rootID != CHUNK_CLUMP) {

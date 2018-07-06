@@ -292,8 +292,7 @@ void GameData::loadHandling(const std::string& path) {
 SCMFile* GameData::loadSCM(const std::string& path) {
     auto scm_h = index.openFileRaw(path);
     SCMFile* scm = new SCMFile;
-    scm->loadFile(scm_h->data, scm_h->length);
-    scm_h.reset();
+    scm->loadFile(scm_h.data, scm_h.length);
     return scm;
 }
 
@@ -371,7 +370,7 @@ void GameData::loadTXD(const std::string& name) {
 TextureArchive GameData::loadTextureArchive(const std::string& name) {
     /// @todo refactor loadTXD to use correct file locations
     auto file = index.openFile(name);
-    if (!file) {
+    if (!file.data) {
         logger->error("Data", "Failed to open txd: " + name);
         return {};
     }
@@ -397,7 +396,7 @@ void GameData::getNameAndLod(std::string& name, int& lod) {
 
 ClumpPtr GameData::loadClump(const std::string& name) {
     auto file = index.openFile(name);
-    if (!file) {
+    if (!file.data) {
         logger->error("Data", "Failed to load model " + name);
         return nullptr;
     }
@@ -420,7 +419,7 @@ ClumpPtr GameData::loadClump(const std::string& name, const std::string& texture
 
 void GameData::loadModelFile(const std::string& name) {
     auto file = index.openFileRaw(name);
-    if (!file) {
+    if (!file.data) {
         logger->log("Data", Logger::Error, "Failed to load model file " + name);
         return;
     }
@@ -486,7 +485,7 @@ bool GameData::loadModel(ModelID model) {
     loadTXD(slotname + ".txd");
 
     auto file = index.openFile(name + ".dff");
-    if (!file) {
+    if (!file.data) {
         logger->error("Data", "Failed to load model for " +
                                   std::to_string(model) + " [" + name + "]");
         return false;
@@ -523,9 +522,9 @@ bool GameData::loadModel(ModelID model) {
 void GameData::loadIFP(const std::string& name) {
     auto f = index.openFile(name);
 
-    if (f) {
+    if (f.data) {
         LoaderIFP loader;
-        if (loader.loadFromMemory(f->data)) {
+        if (loader.loadFromMemory(f.data)) {
             animations.insert(loader.animations.begin(),
                               loader.animations.end());
         }

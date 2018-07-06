@@ -38,7 +38,7 @@ public:
      * @return FileHandle to the file
      * @throws if this FileIndex has not indexed the path
      */
-    FileHandle openFileRaw(const std::string &filePath) const;
+    FileContentsInfo openFileRaw(const std::string &filePath) const;
 
     /**
      * Adds the files contained within the given Archive file to the
@@ -54,7 +54,7 @@ public:
      * @param filePath name of the file to open
      * @return FileHandle to the file, nullptr if this FileINdexed has not indexed the path
      */
-    FileHandle openFile(const std::string &filePath);
+    FileContentsInfo openFile(const std::string &filePath);
 
 private:
     /**

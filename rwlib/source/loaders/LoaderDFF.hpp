@@ -31,7 +31,7 @@ public:
     using GeometryList = std::vector<GeometryPtr>;
     using FrameList = std::vector<ModelFramePtr>;
 
-    ClumpPtr loadFromMemory(const FileHandle& file);
+    ClumpPtr loadFromMemory(const FileContentsInfo& file);
 
     void setTextureLookupCallback(const TextureLookupCallback& tlc) {
         texturelookup = tlc;
