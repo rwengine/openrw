@@ -69,10 +69,10 @@ target_include_directories(rwtests
 
 target_link_libraries(rwtests
     PRIVATE
+        Boost::unit_test_framework
         rwengine
         SDL2::SDL2
         Boost::filesystem
-        Boost::unit_test_framework
     )
 
 openrw_target_apply_options(TARGET rwtests)

@@ -14,4 +14,3 @@ else()
 endif()
 
 set(CONAN_ARCH "x86_64")
-set(CONAN_PROFILE "${CTEST_SOURCE_DIRECTORY}/scripts/conan/darwin")
