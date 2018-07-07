@@ -3,7 +3,7 @@
 
 #include "State.hpp"
 
-class DebugState : public State {
+class DebugState final : public State {
     ViewCamera _debugCam;
     glm::vec3 _movement{};
     glm::vec2 _debugLook{};

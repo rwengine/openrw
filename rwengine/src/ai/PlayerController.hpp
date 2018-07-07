@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-class PlayerController : public CharacterController {
+class PlayerController final : public CharacterController {
 private:
     glm::quat cameraRotation{1.0f, 0.0f, 0.0f, 0.0f};
 

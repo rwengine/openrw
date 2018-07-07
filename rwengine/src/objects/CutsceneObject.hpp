@@ -13,7 +13,7 @@ class ModelFrame;
 /**
  * @brief Object type used for cutscene animations.
  */
-class CutsceneObject : public GameObject, public ClumpObject {
+class CutsceneObject final : public GameObject, public ClumpObject {
     GameObject* _parent = nullptr;
     ModelFrame* _bone = nullptr;
 

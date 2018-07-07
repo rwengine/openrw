@@ -19,7 +19,7 @@
 
 class PlayerController;
 
-class RWGame : public GameBase {
+class RWGame final : public GameBase {
     GameData data;
     GameRenderer renderer;
     DebugDraw debug;

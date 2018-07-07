@@ -6,7 +6,7 @@
 class GameObject;
 class PlayerController;
 
-class IngameState : public State {
+class IngameState final : public State {
     enum CameraMode {
         CAMERA_CLOSE = 0,
         CAMERA_NORMAL = 1,

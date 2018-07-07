@@ -245,9 +245,9 @@ protected:
     SceneUniformData lastSceneData{};
 };
 
-class OpenGLRenderer : public Renderer {
+class OpenGLRenderer final : public Renderer {
 public:
-    class OpenGLShaderProgram : public ShaderProgram {
+    class OpenGLShaderProgram final : public ShaderProgram {
         GLuint program;
         std::map<std::string, GLint> uniforms;
 

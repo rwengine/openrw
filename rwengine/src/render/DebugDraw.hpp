@@ -17,7 +17,7 @@ class DrawBuffer;
 class GameRenderer;
 class GeometryBuffer;
 
-class DebugDraw : public btIDebugDraw {
+class DebugDraw final : public btIDebugDraw {
 public:
     DebugDraw();
     ~DebugDraw() override;

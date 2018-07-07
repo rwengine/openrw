@@ -4,7 +4,7 @@
 
 #include <functional>
 
-class LoadingState : public State {
+class LoadingState final : public State {
     std::function<void(void)> complete;
 
 public:

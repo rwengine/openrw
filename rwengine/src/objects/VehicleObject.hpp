@@ -30,7 +30,7 @@ class btHingeConstraint;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject : public GameObject, public ClumpObject {
+class VehicleObject final : public GameObject, public ClumpObject {
 private:
     float steerAngle{0.f};
     float throttle{0.f};

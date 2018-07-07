@@ -60,7 +60,7 @@ private:
     std::vector<MessageReceiver*> receivers;
 };
 
-class StdOutReceiver : public Logger::MessageReceiver {
+class StdOutReceiver final : public Logger::MessageReceiver {
     void messageReceived(const Logger::LogMessage&) override;
 };
 

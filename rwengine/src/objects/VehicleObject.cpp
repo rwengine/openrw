@@ -25,7 +25,7 @@ constexpr float kVehicleMaxExitVelocity = 0.15f;
 /**
  * A raycaster that will ignore the body of the vehicle when casting rays
  */
-class VehicleRaycaster : public btVehicleRaycaster {
+class VehicleRaycaster final : public btVehicleRaycaster {
     btDynamicsWorld* _world;
     VehicleObject* _vehicle;
 
@@ -59,7 +59,7 @@ public:
     }
 };
 
-class VehiclePartMotionState : public btMotionState {
+class VehiclePartMotionState final : public btMotionState {
 public:
     VehiclePartMotionState(VehicleObject* object, VehicleObject::Part* part)
         : m_object(object), m_part(part) {

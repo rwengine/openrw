@@ -6,7 +6,7 @@
 /**
  * Implements raycast callback that ignores a specified btCollisionObject
  */
-class ClosestNotMeRayResultCallback
+class ClosestNotMeRayResultCallback final
     : public btCollisionWorld::ClosestRayResultCallback {
     btCollisionObject* _self;
 
