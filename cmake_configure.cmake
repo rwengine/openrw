@@ -40,10 +40,10 @@ endif()
 
 target_compile_definitions(rw_interface
     INTERFACE
-        "$<$<CONFIG:Debug>:RW_DEBUG=1>"
+        "$<$<CONFIG:Debug>:RW_DEBUG>"
         "GLM_FORCE_RADIANS"
         "GLM_ENABLE_EXPERIMENTAL"
-        "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
+        "$<$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>:RW_VERBOSE_DEBUG_MESSAGES>"
         "$<$<BOOL:${ENABLE_PROFILING}>:RW_PROFILER>"
     )
 

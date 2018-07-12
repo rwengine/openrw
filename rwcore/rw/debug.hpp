@@ -1,7 +1,7 @@
 #ifndef _LIBRW_DEBUG_HPP_
 #define _LIBRW_DEBUG_HPP_
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
 #include <cstdlib>
 #include <functional>
 
@@ -39,7 +39,7 @@ void WinBreak();
 #define _RW_FAILED_CHECK_ACTION()
 #endif
 
-#if RW_DEBUG && RW_VERBOSE_DEBUG_MESSAGES
+#if defined(RW_DEBUG) && defined(RW_VERBOSE_DEBUG_MESSAGES)
 #include <iostream>
 #define RW_MESSAGE(msg) \
     std::cout << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl
