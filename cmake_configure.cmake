@@ -44,8 +44,7 @@ target_compile_definitions(rw_interface
         "GLM_FORCE_RADIANS"
         "GLM_ENABLE_EXPERIMENTAL"
         "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
-        "RENDER_PROFILER=0"
-        "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
+        "$<$<BOOL:${ENABLE_PROFILING}>:RW_PROFILER>"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

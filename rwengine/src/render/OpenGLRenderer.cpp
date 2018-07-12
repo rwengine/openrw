@@ -128,7 +128,7 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff) {
         glBindVertexArray(dbuff->getVAOName());
         currentDbuff = dbuff;
         bufferCounter++;
-#if RW_PROFILER
+#ifdef RW_PROFILER
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].buffers++;
         }
@@ -145,7 +145,7 @@ void OpenGLRenderer::useTexture(GLuint unit, GLuint tex) {
         glBindTexture(GL_TEXTURE_2D, tex);
         currentTextures[unit] = tex;
         textureCounter++;
-#if RW_PROFILER
+#ifdef RW_PROFILER
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].textures++;
         }
@@ -291,7 +291,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
     uploadUBO(UBOObject, objectData);
 
     drawCounter++;
-#if RW_PROFILER
+#ifdef RW_PROFILER
     if (currentDebugDepth > 0) {
         profileInfo[currentDebugDepth - 1].draws++;
         profileInfo[currentDebugDepth - 1].primitives += p.count;
@@ -421,7 +421,7 @@ void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t siz
 }
 
 void OpenGLRenderer::pushDebugGroup(const std::string& title) {
-#if RW_PROFILER
+#ifdef RW_PROFILER
     if (ogl_ext_KHR_debug) {
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
         ProfileInfo& prof = profileInfo[currentDebugDepth];
@@ -440,7 +440,7 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title) {
 }
 
 const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
-#if RW_PROFILER
+#ifdef RW_PROFILER
     if (ogl_ext_KHR_debug) {
         glPopDebugGroup();
         currentDebugDepth--;
