@@ -78,6 +78,9 @@ if(BUILD_TESTS)
     include(CTest)
     add_subdirectory(tests)
 endif()
+if(BUILD_TOOLS)
+    add_subdirectory(rwtools)
+endif()
 
 # Copy the license to the install directory
 install(FILES COPYING
