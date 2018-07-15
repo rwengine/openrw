@@ -340,11 +340,11 @@ void GameData::loadWater(const std::string& path) {
             std::getline(ss, e, ',')) {
 
             waterBlocks.emplace_back(
-                atof(a.c_str()),
-                atof(b.c_str()),
-                atof(c.c_str()),
-                atof(d.c_str()),
-                atof(e.c_str()));
+                lexical_cast<float>(a),
+                lexical_cast<float>(b),
+                lexical_cast<float>(c),
+                lexical_cast<float>(d),
+                lexical_cast<float>(e));
         }
     }
 }

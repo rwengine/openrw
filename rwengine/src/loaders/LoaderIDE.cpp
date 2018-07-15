@@ -83,7 +83,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
 
                     for (int i = 0; i < objs->getNumAtomics(); i++) {
                         getline(strstream, buff, ',');
-                        objs->setLodDistance(i, atof(buff.c_str()));
+                        objs->setLodDistance(i, lexical_cast<float>(buff));
                     }
 
                     objs->determineFurthest();
@@ -138,7 +138,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                             getline(strstream, buff, ',');
                             cars->wheelmodel_ = lexical_cast<int>(buff);
                             getline(strstream, buff, ',');
-                            cars->wheelscale_ = std::atof(buff.c_str());
+                            cars->wheelscale_ = lexical_cast<float>(buff);
                             break;
                         case VehicleModelInfo::PLANE:
                             /// @todo load LOD
@@ -222,16 +222,16 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         getline(buffstream, buff, ',');  // "Always 0"
 
                         getline(buffstream, buff, ',');
-                        node.position.x = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.x = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.y = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.y = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.z = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.z = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.size = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.size = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
                         node.leftLanes = lexical_cast<int>(buff);

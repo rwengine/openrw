@@ -24,4 +24,12 @@ inline int lexical_cast(const std::string& source) {
     return result;
 }
 
+template <>
+inline float lexical_cast(const std::string& source) {
+    char* end = nullptr; //for errors handling
+    float result = std::strtof(source.c_str(), &end);
+    RW_CHECK(end != source.c_str(), "Problem with conversion " << *end << " to float");
+    return result;
+}
+
 #endif
