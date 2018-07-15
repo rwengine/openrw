@@ -3,7 +3,7 @@
 
 #include "script/ScriptTypes.hpp"
 
-#include <rw/bit_cast.hpp>
+#include <rw/casts.hpp>
 
 #include <cstdint>
 #include <string>

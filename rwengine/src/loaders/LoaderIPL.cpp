@@ -14,6 +14,8 @@
 #include "data/InstanceData.hpp"
 #include "data/ZoneData.hpp"
 
+#include <rw/casts.hpp>
+
 enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 
 /// Load the IPL data into memory
@@ -76,7 +78,7 @@ bool LoaderIPL::load(const std::string& filename) {
                 getline(strstream, rotW, ',');
 
                 auto instance = std::make_shared<InstanceData>(
-                    atoi(id.c_str()),  // ID
+                    lexical_cast<int>(id),  // ID
                     model.substr(1, model.size() - 1),
                     glm::vec3(atof(posX.c_str()), atof(posY.c_str()),
                               atof(posZ.c_str())),
@@ -98,7 +100,7 @@ bool LoaderIPL::load(const std::string& filename) {
                 zone.name = value;
 
                 getline(strstream, value, ',');
-                zone.type = atoi(value.c_str());
+                zone.type = lexical_cast<int>(value);
 
                 getline(strstream, value, ',');
                 zone.min.x = atof(value.c_str());
@@ -115,7 +117,7 @@ bool LoaderIPL::load(const std::string& filename) {
                 zone.max.z = atof(value.c_str());
 
                 getline(strstream, value, ',');
-                zone.island = atoi(value.c_str());
+                zone.island = lexical_cast<int>(value);
 
                 for (int i = 0; i < ZONE_GANG_COUNT; i++) {
                     zone.gangCarDensityDay[i] = zone.gangCarDensityNight[i] =
