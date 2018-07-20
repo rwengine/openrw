@@ -240,22 +240,20 @@ inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, AIGra
     coord = script::getGround(args, coord);
     float closest = 10000.f;
     std::vector<AIGraphNode*> nodes;
-    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes);
+    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes, type);
 
     for (const auto &node : nodes) {
-        if (node->type == type) {
-            // This is how the original game calculates distance,
-            // weighted manhattan-distance where the vertical distance
-            // has to be 3x as close to be considered.
-            float dist  = std::abs(coord.x - node->position.x);
-            dist += std::abs(coord.y - node->position.y);
-            dist += std::abs(coord.z - node->position.z) * 3.f;
-            if (dist < closest) {
-                closest = dist;
-                xCoord = node->position.x;
-                yCoord = node->position.y;
-                zCoord = node->position.z;
-            }
+        // This is how the original game calculates distance,
+        // weighted manhattan-distance where the vertical distance
+        // has to be 3x as close to be considered.
+        const float dist = std::abs(coord.x - node->position.x) +
+                           std::abs(coord.y - node->position.y) +
+                           std::abs(coord.z - node->position.z) * 3.f;
+        if (dist < closest) {
+            closest = dist;
+            xCoord = node->position.x;
+            yCoord = node->position.y;
+            zCoord = node->position.z;
         }
     }
 }

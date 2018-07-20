@@ -1,5 +1,6 @@
 #include "ai/AIGraph.hpp"
 
+#include <algorithm>
 #include <cstddef>
 
 #include <glm/gtx/norm.hpp>
@@ -46,8 +47,8 @@ void AIGraph::createPathNodes(const glm::vec3& position,
             ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
             ainode->flags = AIGraphNode::None;
             ainode->size = node.size;
-            ainode->other_thing = node.other_thing;
-            ainode->other_thing2 = node.other_thing2;
+            ainode->leftLanes = node.leftLanes;
+            ainode->rightLanes = node.rightLanes;
             ainode->position = nodePosition;
             ainode->external = node.type == PathNode::EXTERNAL;
             ainode->disabled = false;
@@ -96,7 +97,8 @@ glm::ivec2 worldToGrid(const glm::vec2& world) {
 
 void AIGraph::gatherExternalNodesNear(const glm::vec3& center,
                                       const float radius,
-                                      std::vector<AIGraphNode*>& nodes) {
+                                      std::vector<AIGraphNode*>& nodes,
+                                      AIGraphNode::NodeType type) {
     // the bounds end up covering more than might fit
     auto planecoords = glm::vec2(center);
     auto minWorld = planecoords - glm::vec2(radius);
@@ -111,11 +113,12 @@ void AIGraph::gatherExternalNodesNear(const glm::vec3& center,
                 continue;
             }
             auto& external = gridNodes[i];
-            for (AIGraphNode* node : external) {
-                if (glm::distance2(center, node->position) < radius * radius) {
-                    nodes.push_back(node);
-                }
-            }
+            copy_if(external.begin(), external.end(), back_inserter(nodes),
+                    [&center, &radius, &type](const AIGraphNode* node) {
+                        return node->type == type &&
+                               glm::distance2(center, node->position) <
+                                   radius * radius;
+                    });
         }
     }
 }

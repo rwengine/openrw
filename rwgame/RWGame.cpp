@@ -754,6 +754,23 @@ void RWGame::renderDebugPaths(float time) {
         debug.drawLine(position, position + left, color);
     }
 
+    // Draw the targetNode if a character is driving a vehicle
+    for (auto& p : world->pedestrianPool.objects) {
+        auto v = static_cast<CharacterObject*>(p.second);
+
+        static const btVector3 color(1.f, 1.f, 0.f);
+
+        if (v->controller->targetNode && v->getCurrentVehicle()) {
+            const glm::vec3 pos1 = v->getPosition();
+            const glm::vec3 pos2 = v->controller->targetNode->position;
+
+            btVector3 position1(pos1.x, pos1.y, pos1.z);
+            btVector3 position2(pos2.x, pos2.y, pos2.z);
+		
+            debug.drawLine(position1, position2, color);
+	}
+    }
+
     debug.flush(&renderer);
 }
 

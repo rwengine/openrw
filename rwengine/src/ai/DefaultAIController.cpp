@@ -10,6 +10,7 @@
 
 #include "engine/GameWorld.hpp"
 #include "objects/CharacterObject.hpp"
+#include "objects/VehicleObject.hpp"
 
 glm::vec3 DefaultAIController::getTargetPosition() {
     /*if(targetNode) {
@@ -80,7 +81,11 @@ void DefaultAIController::update(float dt) {
                 auto& graph = getCharacter()->engine->aigraph;
                 AIGraphNode* node = nullptr;
                 float mindist = std::numeric_limits<float>::max();
-                for (auto n : graph.nodes) {
+                for (const auto& n : graph.nodes) {
+                    if (n->type != AIGraphNode::Pedestrian) {
+                        continue;
+		    }
+
                     float d = glm::distance(n->position,
                                             getCharacter()->getPosition());
                     if (d < mindist) {
@@ -89,6 +94,123 @@ void DefaultAIController::update(float dt) {
                     }
                 }
                 targetNode = node;
+            }
+        } break;
+        case TrafficDriver: {
+
+            // If we don't own a car, become a pedestrian
+            if (getCharacter()->getCurrentVehicle() == nullptr)
+            {
+                targetNode = nullptr;
+                nextTargetNode = nullptr;
+                lastTargetNode = nullptr;
+                currentGoal = TrafficWander;
+
+                // Try to skip the current activity
+                if (getCharacter()->controller->getCurrentActivity() != nullptr) {
+                    getCharacter()->controller->skipActivity();
+                }
+
+                setNextActivity(std::make_unique<Activities::ExitVehicle>());
+                break;
+            }
+
+            // We have a target
+            if (targetNode) {
+                // Either we reached the node or we started new, therefore set the next activity 
+                if (getCurrentActivity() == nullptr) {
+                    // Assign the last target node
+                    lastTargetNode = targetNode;
+
+                    // Assign the next target node, either it is already set, 
+                    // or we have to find one by ourselves
+                    if (nextTargetNode != nullptr) {
+                        targetNode = nextTargetNode;
+                        nextTargetNode = nullptr;
+                    }
+                    else {
+                        float mindist = std::numeric_limits<float>::max();
+                        for (const auto& node : lastTargetNode->connections) {
+                            const float distance =
+                                getCharacter()->getCurrentVehicle()->isInFront(
+                                    node->position);
+                            const float lastDistance =
+                                getCharacter()->getCurrentVehicle()->isInFront(
+                                    lastTargetNode->position);
+
+                            // Make sure, that the next node is in front of us, and farther away then the last node
+                            if (distance > 0.f && distance > lastDistance) {
+                                const float d = glm::distance(
+                                    node->position, getCharacter()
+                                                        ->getCurrentVehicle()
+                                                        ->getPosition());
+
+                                if (d < mindist) {
+                                    targetNode = node;
+                                    mindist = d;
+                                }
+                            }
+                        }
+                    }
+
+                    // If we haven't found a node, choose one randomly
+                    if (!targetNode) {
+                        auto& random = getCharacter()->engine->randomEngine;
+                        int nodeIndex = std::uniform_int_distribution<>(0, lastTargetNode->connections.size() - 1)(random);
+                        targetNode = lastTargetNode->connections.at(nodeIndex);
+                    }
+
+                    // Check whether the maximum amount of lanes changed and adjust our lane
+                    // @todo we don't know the direction of the street, so for now, choose the bigger value
+                    int maxLanes = targetNode->rightLanes > targetNode->leftLanes ? targetNode->rightLanes : targetNode->leftLanes;
+
+                    if (maxLanes < getLane()) {
+                        if(maxLanes <= 0) {
+                            setLane(1);
+                        }
+                        else {
+                            setLane(maxLanes);
+                        }
+                    }
+
+                    setNextActivity(std::make_unique<Activities::DriveTo>(
+                        targetNode, false));
+                }
+            }
+            else {
+                // We need to pick an initial node
+                auto& graph = getCharacter()->engine->aigraph;
+                AIGraphNode* node = nullptr;
+                float mindist = std::numeric_limits<float>::max();
+
+                for (const auto& n : graph.nodes) {
+                    // No vehicle node, continue
+                    if (n->type != AIGraphNode::Vehicle) {
+                        continue;
+                    }
+
+                    // The node must be ahead of the vehicle
+                    if (getCharacter()->getCurrentVehicle()->isInFront(n->position) < 0.f) {
+                        continue;
+                    }
+
+                    const float d = glm::distance(
+                        n->position,
+                        getCharacter()->getCurrentVehicle()->getPosition());
+
+                    if (d < mindist) {
+                        node = n;
+                        mindist = d;
+                    }
+                }
+
+                targetNode = node;
+		
+                // Set the next activity
+                if (targetNode) {
+                    setNextActivity(std::make_unique<Activities::DriveTo>(
+                        targetNode, false));
+                }
             }
         } break;
         default:

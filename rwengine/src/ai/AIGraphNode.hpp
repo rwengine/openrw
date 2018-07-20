@@ -16,8 +16,8 @@ struct AIGraphNode {
     NodeType type;
     glm::vec3 position{};
     float size;
-    int other_thing;
-    int other_thing2;
+    int leftLanes;
+    int rightLanes;
     bool external;
     uint8_t flags;
 

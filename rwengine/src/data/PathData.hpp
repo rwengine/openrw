@@ -16,8 +16,8 @@ struct PathNode {
     int32_t next;
     glm::vec3 position{};
     float size;
-    int other_thing;
-    int other_thing2;
+    int leftLanes;
+    int rightLanes;
 };
 
 struct PathData {

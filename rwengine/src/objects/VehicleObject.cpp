@@ -551,8 +551,18 @@ float VehicleObject::getHealth() const {
     return health;
 }
 
-void VehicleObject::setSteeringAngle(float a) {
+void VehicleObject::setSteeringAngle(float a, bool force) {
     steerAngle = a;
+
+    if (force && physVehicle) {
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+            btWheelInfo& wi = physVehicle->getWheelInfo(w);
+            
+            if (wi.m_bIsFrontWheel) {
+                physVehicle->setSteeringValue(a, w);
+            }
+        }
+    }
 }
 
 float VehicleObject::getSteeringAngle() const {
@@ -595,7 +605,7 @@ void VehicleObject::ejectAll() {
     }
 }
 
-GameObject* VehicleObject::getOccupant(size_t seat) {
+GameObject* VehicleObject::getOccupant(size_t seat) const {
     auto it = seatOccupants.find(seat);
     if (it != seatOccupants.end()) {
         return it->second;
@@ -621,6 +631,10 @@ bool VehicleObject::canOccupantExit() const {
 bool VehicleObject::isOccupantDriver(size_t seat) const {
     // This isn't true for all vehicles, but it'll do until we figure it out
     return seat == 0;
+}
+
+CharacterObject* VehicleObject::getDriver() const {
+    return static_cast<CharacterObject*>(getOccupant(0));
 }
 
 VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat) {
@@ -905,3 +919,66 @@ void VehicleObject::grantOccupantRewards(CharacterObject* character) {
         }
     }
 }
+
+float VehicleObject::isInFront(const glm::vec3& point) {
+    // The point we need to test
+    glm::vec3 testPoint;
+
+    testPoint = point - getPosition();
+
+    // The two endpoints of the line
+    glm::vec3 v1;
+    glm::vec3 v2;
+
+    static const glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
+    const glm::vec3 dir =
+        glm::normalize(getRotation() * glm::vec3(0.f, 1.f, 0.f));
+
+    // Calculate the strafe vector
+    glm::vec3 strafe = glm::cross(up, dir);
+
+    v1 = strafe;
+    v2 = -strafe;
+	
+    // Check if the point is behind or in front the car
+
+    glm::vec3 normal(v1.y - v2.y, 0, v2.x - v1.x);
+    normal = glm::normalize(normal);
+
+    const glm::vec3 vecTemp(testPoint.x - v1.x, 0, testPoint.y - v1.y);
+    double distance = glm::dot(vecTemp, normal);
+
+    return distance;
+}
+
+float VehicleObject::isOnSide(const glm::vec3& point) {
+    // The point we need to test
+    glm::vec3 testPoint;
+
+    testPoint = point - getPosition();
+
+    // The two endpoints of the line
+    glm::vec3 v1;
+    glm::vec3 v2;
+
+    static const glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
+    const glm::vec3 dir =
+        glm::normalize(getRotation() * glm::vec3(1.f, 0.f, 0.f));
+
+    // Calculate the strafe vector
+    glm::vec3 strafe = glm::cross(up, dir);
+
+    v1 = strafe;
+    v2 = -strafe;
+
+    // Check if the point is behind or in front the car
+
+    glm::vec3 normal(v1.y - v2.y, 0, v2.x - v1.x);
+    normal = glm::normalize(normal);
+
+    const glm::vec3 vecTemp(testPoint.x - v1.x, 0, testPoint.y - v1.y);
+    double distance = glm::dot(vecTemp, normal);
+
+    return distance;
+}
+
