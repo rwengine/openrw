@@ -659,7 +659,8 @@ void RWGame::renderDebugStats(float time) {
        << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
        << renderer.getCulledCount() << "/"
        << renderer.getRenderer()->getTextureCount() << "/"
-       << renderer.getRenderer()->getBufferCount() << "\n";
+       << renderer.getRenderer()->getBufferCount() << "\n"
+       << "Timescale: " << world->state->basic.timeScale;
 
     TextRenderer::TextInfo ti;
     ti.text = GameStringUtil::fromString(ss.str());
