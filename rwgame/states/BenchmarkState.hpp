@@ -3,7 +3,7 @@
 
 #include "State.hpp"
 
-class BenchmarkState : public State {
+class BenchmarkState final : public State {
     struct TrackPoint {
         float time;
         glm::vec3 position{};

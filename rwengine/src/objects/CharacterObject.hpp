@@ -53,7 +53,7 @@ class GameWorld;
  * @brief The CharacterObject struct
  * Implements Character object behaviours.
  */
-class CharacterObject : public GameObject, public ClumpObject {
+class CharacterObject final : public GameObject, public ClumpObject {
 private:
     CharacterState currentState{};
 

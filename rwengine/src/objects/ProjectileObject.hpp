@@ -14,7 +14,7 @@ struct WeaponData;
 /**
  * @brief Implements weapon projectile (e.g. molotovs, RPGs etc.)
  */
-class ProjectileObject : public GameObject {
+class ProjectileObject final : public GameObject {
 public:
     enum ProjectileType {
         Grenade,

@@ -16,7 +16,7 @@ class GameWorld;
  * @struct InstanceObject
  *  A simple object instance
  */
-class InstanceObject : public GameObject {
+class InstanceObject final : public GameObject {
     float health = 100.f;
     bool visible =true;
     bool floating = false;

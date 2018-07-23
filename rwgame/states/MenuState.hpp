@@ -3,7 +3,7 @@
 
 #include "StateManager.hpp"
 
-class MenuState : public State {
+class MenuState final : public State {
 public:
     MenuState(RWGame* game);
 

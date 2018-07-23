@@ -3,7 +3,7 @@
 
 #include "StateManager.hpp"
 
-class PauseState : public State {
+class PauseState final : public State {
 public:
     PauseState(RWGame* game);
 
