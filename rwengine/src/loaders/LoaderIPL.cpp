@@ -14,6 +14,8 @@
 #include "data/InstanceData.hpp"
 #include "data/ZoneData.hpp"
 
+#include <rw/casts.hpp>
+
 enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 
 /// Load the IPL data into memory
@@ -76,15 +78,15 @@ bool LoaderIPL::load(const std::string& filename) {
                 getline(strstream, rotW, ',');
 
                 auto instance = std::make_shared<InstanceData>(
-                    atoi(id.c_str()),  // ID
+                    lexical_cast<int>(id),  // ID
                     model.substr(1, model.size() - 1),
-                    glm::vec3(atof(posX.c_str()), atof(posY.c_str()),
-                              atof(posZ.c_str())),
-                    glm::vec3(atof(scaleX.c_str()), atof(scaleY.c_str()),
-                              atof(scaleZ.c_str())),
+                    glm::vec3(lexical_cast<float>(posX), lexical_cast<float>(posY),
+                              lexical_cast<float>(posZ)),
+                    glm::vec3(lexical_cast<float>(scaleX), lexical_cast<float>(scaleY),
+                              lexical_cast<float>(scaleZ)),
                     glm::normalize(
-                        glm::quat(-atof(rotW.c_str()), atof(rotX.c_str()),
-                                  atof(rotY.c_str()), atof(rotZ.c_str()))));
+                        glm::quat(-lexical_cast<float>(rotW), lexical_cast<float>(rotX),
+                                  lexical_cast<float>(rotY), lexical_cast<float>(rotZ))));
 
                 m_instances.push_back(instance);
             } else if (section == ZONE) {
@@ -98,24 +100,24 @@ bool LoaderIPL::load(const std::string& filename) {
                 zone.name = value;
 
                 getline(strstream, value, ',');
-                zone.type = atoi(value.c_str());
+                zone.type = lexical_cast<int>(value);
 
                 getline(strstream, value, ',');
-                zone.min.x = atof(value.c_str());
+                zone.min.x = lexical_cast<float>(value);
                 getline(strstream, value, ',');
-                zone.min.y = atof(value.c_str());
+                zone.min.y = lexical_cast<float>(value);
                 getline(strstream, value, ',');
-                zone.min.z = atof(value.c_str());
+                zone.min.z = lexical_cast<float>(value);
 
                 getline(strstream, value, ',');
-                zone.max.x = atof(value.c_str());
+                zone.max.x = lexical_cast<float>(value);
                 getline(strstream, value, ',');
-                zone.max.y = atof(value.c_str());
+                zone.max.y = lexical_cast<float>(value);
                 getline(strstream, value, ',');
-                zone.max.z = atof(value.c_str());
+                zone.max.z = lexical_cast<float>(value);
 
                 getline(strstream, value, ',');
-                zone.island = atoi(value.c_str());
+                zone.island = lexical_cast<int>(value);
 
                 for (int i = 0; i < ZONE_GANG_COUNT; i++) {
                     zone.gangCarDensityDay[i] = zone.gangCarDensityNight[i] =

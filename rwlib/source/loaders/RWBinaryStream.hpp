@@ -7,7 +7,7 @@
 #include <cstddef>
 
 #include "rw/debug.hpp"
-#include "rw/bit_cast.hpp"
+#include "rw/casts.hpp"
 
 /**
  * @brief Class for working with RenderWare binary streams.

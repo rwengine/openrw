@@ -14,7 +14,7 @@ SET(RWLIB_SOURCES
     source/gl/TextureData.cpp
 
     source/rw/abort.cpp
-    source/rw/bit_cast.hpp
+    source/rw/casts.hpp
     source/rw/filesystem.hpp
     source/rw/forward.hpp
     source/rw/types.hpp

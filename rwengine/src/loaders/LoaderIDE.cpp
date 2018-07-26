@@ -11,6 +11,8 @@
 
 #include "data/PathData.hpp"
 
+#include <rw/casts.hpp>
+
 bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
     std::ifstream str(filename);
 
@@ -71,30 +73,30 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     auto objs = std::make_unique<SimpleModelInfo>();
 
                     getline(strstream, buff, ',');
-                    objs->setModelID(atoi(buff.c_str()));
+                    objs->setModelID(lexical_cast<int>(buff));
 
                     getline(strstream, objs->name, ',');
                     getline(strstream, objs->textureslot, ',');
 
                     getline(strstream, buff, ',');
-                    objs->setNumAtomics(atoi(buff.c_str()));
+                    objs->setNumAtomics(lexical_cast<int>(buff));
 
                     for (int i = 0; i < objs->getNumAtomics(); i++) {
                         getline(strstream, buff, ',');
-                        objs->setLodDistance(i, atof(buff.c_str()));
+                        objs->setLodDistance(i, lexical_cast<float>(buff));
                     }
 
                     objs->determineFurthest();
 
                     getline(strstream, buff, ',');
-                    objs->flags = atoi(buff.c_str());
+                    objs->flags = lexical_cast<int>(buff);
 
                     // Keep reading TOBJ data
                     if (section == LoaderIDE::TOBJ) {
                         getline(strstream, buff, ',');
-                        objs->timeOn = atoi(buff.c_str());
+                        objs->timeOn = lexical_cast<int>(buff);
                         getline(strstream, buff, ',');
-                        objs->timeOff = atoi(buff.c_str());
+                        objs->timeOff = lexical_cast<int>(buff);
                     } else {
                         objs->timeOn = 0;
                         objs->timeOff = 24;
@@ -107,7 +109,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     auto cars = std::make_unique<VehicleModelInfo>();
 
                     getline(strstream, buff, ',');
-                    cars->setModelID(std::atoi(buff.c_str()));
+                    cars->setModelID(lexical_cast<int>(buff));
 
                     getline(strstream, cars->name, ',');
                     getline(strstream, cars->textureslot, ',');
@@ -123,10 +125,10 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         VehicleModelInfo::findVehicleClass(buff);
 
                     getline(strstream, buff, ',');
-                    cars->frequency_ = std::atoi(buff.c_str());
+                    cars->frequency_ = lexical_cast<int>(buff);
 
                     getline(strstream, buff, ',');
-                    cars->level_ = std::atoi(buff.c_str());
+                    cars->level_ = lexical_cast<int>(buff);
 
                     getline(strstream, buff, ',');
                     cars->componentrules_ = std::stoul(buff, nullptr, 16);
@@ -134,14 +136,14 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     switch (cars->vehicletype_) {
                         case VehicleModelInfo::CAR:
                             getline(strstream, buff, ',');
-                            cars->wheelmodel_ = std::atoi(buff.c_str());
+                            cars->wheelmodel_ = lexical_cast<int>(buff);
                             getline(strstream, buff, ',');
-                            cars->wheelscale_ = std::atof(buff.c_str());
+                            cars->wheelscale_ = lexical_cast<float>(buff);
                             break;
                         case VehicleModelInfo::PLANE:
                             /// @todo load LOD
                             getline(strstream, buff, ',');
-                            // cars->planeLOD_ = std::atoi(buff.c_str());
+                            // cars->planeLOD_ = lexical_cast<int>(buff);
                             break;
                         default:
                             break;
@@ -154,7 +156,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     auto peds = std::make_unique<PedModelInfo>();
 
                     getline(strstream, buff, ',');
-                    peds->setModelID(std::atoi(buff.c_str()));
+                    peds->setModelID(lexical_cast<int>(buff));
 
                     getline(strstream, peds->name, ',');
                     getline(strstream, peds->textureslot, ',');
@@ -168,7 +170,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     getline(strstream, peds->animgroup_, ',');
 
                     getline(strstream, buff, ',');
-                    peds->carsmask_ = std::atoi(buff.c_str());
+                    peds->carsmask_ = lexical_cast<int>(buff);
 
                     objects.emplace(peds->id(), std::move(peds));
                     break;
@@ -186,7 +188,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
 
                     std::string id;
                     getline(strstream, id, ',');
-                    path.ID = atoi(id.c_str());
+                    path.ID = lexical_cast<int>(id);
 
                     getline(strstream, path.modelName);
 
@@ -198,7 +200,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         std::stringstream buffstream(linebuff);
 
                         getline(buffstream, buff, ',');
-                        switch (atoi(buff.c_str())) {
+                        switch (lexical_cast<int>(buff)) {
                             case 0:
                                 node.type = PathNode::EMPTY;
                                 break;
@@ -215,27 +217,27 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                         }
 
                         getline(buffstream, buff, ',');
-                        node.next = atoi(buff.c_str());
+                        node.next = lexical_cast<int>(buff);
 
                         getline(buffstream, buff, ',');  // "Always 0"
 
                         getline(buffstream, buff, ',');
-                        node.position.x = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.x = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.y = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.y = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.position.z = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.position.z = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.size = strtof(buff.c_str(), nullptr) / 16.f;
+                        node.size = lexical_cast<float>(buff) / 16.f;
 
                         getline(buffstream, buff, ',');
-                        node.leftLanes = atoi(buff.c_str());
+                        node.leftLanes = lexical_cast<int>(buff);
 
                         getline(buffstream, buff, ',');
-                        node.rightLanes = atoi(buff.c_str());
+                        node.rightLanes = lexical_cast<int>(buff);
 
                         path.nodes.push_back(node);
                     }
@@ -250,7 +252,7 @@ bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
                     auto hier = std::make_unique<ClumpModelInfo>();
 
                     getline(strstream, buff, ',');
-                    hier->setModelID(std::atoi(buff.c_str()));
+                    hier->setModelID(lexical_cast<int>(buff));
 
                     getline(strstream, hier->name, ',');
                     getline(strstream, hier->textureslot, ',');

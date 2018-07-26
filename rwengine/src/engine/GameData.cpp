@@ -13,6 +13,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <data/Clump.hpp>
+#include <rw/casts.hpp>
 #include <rw/debug.hpp>
 #include <rw/types.hpp>
 
@@ -105,7 +106,7 @@ void GameData::loadLevelFile(const std::string& path) {
             } else if (cmd == "SPLASH") {
                 splash = line.substr(space + 1);
             } else if (cmd == "COLFILE") {
-                int zone = atoi(line.substr(space + 1, 1).c_str());
+                int zone = lexical_cast<int>(line.substr(space + 1, 1));
                 auto path = line.substr(space + 3);
                 loadCOL(zone, path);
             } else if (cmd == "IPL") {
@@ -252,7 +253,9 @@ void GameData::loadCarcols(const std::string& path) {
                 if (std::getline(ss, r, ',') && std::getline(ss, g, ',') &&
                     std::getline(ss, b)) {
                     vehicleColours.emplace_back(
-                        atoi(r.c_str()), atoi(g.c_str()), atoi(b.c_str()));
+                                lexical_cast<int>(r),
+                                lexical_cast<int>(g),
+                                lexical_cast<int>(b));
                 }
             } else if (currentSection == CAR) {
                 std::string vehicle, p, s;
@@ -262,7 +265,8 @@ void GameData::loadCarcols(const std::string& path) {
                 std::vector<std::pair<size_t, size_t>> colours;
 
                 while (std::getline(ss, p, ',') && std::getline(ss, s, ',')) {
-                    colours.emplace_back(atoi(p.c_str()), atoi(s.c_str()));
+                    colours.emplace_back(lexical_cast<int>(p),
+                                         lexical_cast<int>(s));
                 }
 
                 vehiclePalettes.insert({vehicle, colours});
@@ -336,11 +340,11 @@ void GameData::loadWater(const std::string& path) {
             std::getline(ss, e, ',')) {
 
             waterBlocks.emplace_back(
-                atof(a.c_str()),
-                atof(b.c_str()),
-                atof(c.c_str()),
-                atof(d.c_str()),
-                atof(e.c_str()));
+                lexical_cast<float>(a),
+                lexical_cast<float>(b),
+                lexical_cast<float>(c),
+                lexical_cast<float>(d),
+                lexical_cast<float>(e));
         }
     }
 }
@@ -386,7 +390,7 @@ TextureArchive GameData::loadTextureArchive(const std::string& name) {
 void GameData::getNameAndLod(std::string& name, int& lod) {
     auto lodpos = name.rfind("_l");
     if (lodpos != std::string::npos) {
-        lod = std::atoi(name.substr(lodpos + 2).c_str());
+        lod = lexical_cast<int>(name.substr(lodpos + 2));
         name = name.substr(0, lodpos);
     }
 }
@@ -464,7 +468,7 @@ bool GameData::loadModel(ModelID model) {
             static const std::string specialPrefix("special");
             if (!name.compare(0, specialPrefix.size(), specialPrefix)) {
                 auto sid = name.substr(specialPrefix.size());
-                unsigned short specialID = std::atoi(sid.c_str());
+                unsigned short specialID = lexical_cast<int>(sid);
                 name = engine->state->specialCharacters[specialID];
                 slotname = name;
                 break;
