@@ -79,7 +79,7 @@ void AIGraph::createPathNodes(const glm::vec3& position,
 
     for (size_t pn = 0; pn < path.nodes.size(); ++pn) {
         if (path.nodes[pn].next >= 0 &&
-            (unsigned)path.nodes[pn].next < pathNodes.size()) {
+            static_cast<unsigned>(path.nodes[pn].next) < pathNodes.size()) {
             auto node = pathNodes[pn];
             auto next = pathNodes[path.nodes[pn].next];
 
@@ -109,7 +109,7 @@ void AIGraph::gatherExternalNodesNear(const glm::vec3& center,
     for (int x = minGrid.x; x <= maxGrid.x; ++x) {
         for (int y = minGrid.y; y <= maxGrid.y; ++y) {
             int i = (x * WORLD_GRID_WIDTH) + y;
-            if (i < 0 || i >= (int)gridNodes.size()) {
+            if (i < 0 || i >= static_cast<int>(gridNodes.size())) {
                 continue;
             }
             auto& external = gridNodes[i];

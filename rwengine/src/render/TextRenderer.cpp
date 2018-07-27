@@ -19,8 +19,8 @@ int charToIndex(uint16_t g) {
 }
 
 glm::vec4 indexToCoord(int font, int index) {
-    float x = int(index % 16);
-    float y = int(index / 16) + 0.01f;
+    float x = static_cast<int>(index % 16);
+    float y = static_cast<int>(index / 16) + 0.01f;
     float fontHeight = ((font == 0) ? 16.f : 13.f);
     glm::vec2 gsize(1.f / 16.f, 1.f / fontHeight);
     return glm::vec4(x, y, x + 1, y + 0.98f) * glm::vec4(gsize, gsize);

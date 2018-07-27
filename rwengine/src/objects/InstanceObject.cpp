@@ -77,9 +77,9 @@ void InstanceObject::tickPhysics(float dt) {
     // Only certain objects should float on water
     if (floating) {
         const glm::vec3& ws = getPosition();
-        auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
+        auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
                         (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-        auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
+        auto wY = static_cast<int>((ws.y + WATER_WORLD_SIZE / 2.f) /
                         (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         float vH = ws.z;  // - _collisionHeight/2.f;
         float wH = 0.f;

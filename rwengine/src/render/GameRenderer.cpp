@@ -129,8 +129,8 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 
     size_t segments = skydomeSegments, rows = skydomeRows;
 
-    float R = 1.f / (float)(rows - 1);
-    float S = 1.f / (float)(segments - 1);
+    float R = 1.f / static_cast<float>(rows - 1);
+    float S = 1.f / static_cast<float>(segments - 1);
     std::vector<VertexP3> skydomeVerts;
     skydomeVerts.resize(rows * segments);
     for (size_t r = 0, i = 0; r < rows; ++r) {

@@ -72,7 +72,7 @@ bool DFFFramesTreeModel::setData(const QModelIndex& index,
 
     if (role == Qt::CheckStateRole) {
         if (index.column() == 0) {
-            if ((Qt::CheckState)value.toInt() == Qt::Checked) {
+            if (static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked) {
                 RW_UNIMPLEMENTED("Hiding Frames");
             } else {
             }

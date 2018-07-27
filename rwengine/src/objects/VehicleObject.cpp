@@ -38,13 +38,13 @@ public:
                   btVehicleRaycasterResult& result) override {
         ClosestNotMeRayResultCallback rayCallback(
             _vehicle->collision->getBulletBody(), from, to);
-        const void* res = nullptr;
+        void* res = nullptr;
 
         _world->rayTest(from, to, rayCallback);
 
         if (rayCallback.hasHit()) {
-            const btRigidBody* body =
-                btRigidBody::upcast(rayCallback.m_collisionObject);
+            btRigidBody* body = const_cast<btRigidBody*>(
+                btRigidBody::upcast(rayCallback.m_collisionObject));
 
             if (body && body->hasContactResponse()) {
                 result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
@@ -55,7 +55,7 @@ public:
             }
         }
 
-        return (void*)res;
+        return reinterpret_cast<void*>(res);
     }
 };
 
@@ -407,9 +407,9 @@ void VehicleObject::tickPhysics(float dt) {
         }
 
         const auto& ws = getPosition();
-        auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
+        auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
                         (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-        auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
+        auto wY = static_cast<int>((ws.y + WATER_WORLD_SIZE / 2.f) /
                         (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         btVector3 bbmin, bbmax;
         // This is in world space.

@@ -351,7 +351,7 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
     }
 
     PickupObject* pickup = nullptr;
-    auto pickuptype = (PickupObject::PickupType)type;
+    auto pickuptype = static_cast<PickupObject::PickupType>(type);
 
     auto it = std::find_if(
         data->weaponData.begin(), data->weaponData.end(),
@@ -839,7 +839,8 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
     }
 
     /// @todo take into account maxDelay as well
-    if (gen.lastSpawnTime + gen.minDelay > int(state->basic.timeMS)) {
+    if (gen.lastSpawnTime + gen.minDelay >
+        static_cast<int>(state->basic.timeMS)) {
         return nullptr;
     }
 

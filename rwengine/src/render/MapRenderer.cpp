@@ -83,7 +83,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     // World out the number of units per tile
     glm::vec2 worldSize(GAME_MAP_SIZE);
     const int mapBlockLine = 8;
-    glm::vec2 tileSize = worldSize / (float)mapBlockLine;
+    glm::vec2 tileSize = worldSize / static_cast<float>(mapBlockLine);
     // Determine the scale to show the right number of world units on the screen
     float worldScale = mi.screenSize / mi.worldSize;
 

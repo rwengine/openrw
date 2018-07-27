@@ -43,21 +43,27 @@ bool ChaseKeyframe::load(const std::string &filePath,
 
     for (size_t i = 0; i < recordCount; ++i) {
         ChaseEntryRecord rec;
-        chaseFile.read((char *)&rec, sizeof(ChaseEntryRecord));
+        chaseFile.read(reinterpret_cast<char *>(&rec),
+                       sizeof(ChaseEntryRecord));
         glm::vec3 velocity{
-            rec.velocity[0] / 16383.5f, rec.velocity[1] / 16383.5f,
+            rec.velocity[0] / 16383.5f,
+            rec.velocity[1] / 16383.5f,
             rec.velocity[2] / 16383.5f,
         };
         glm::vec3 right{
-            rec.right[0] / 127.5f, rec.right[1] / 127.5f, rec.right[2] / 127.5f,
+            rec.right[0] / 127.5f,
+            rec.right[1] / 127.5f,
+            rec.right[2] / 127.5f,
         };
         glm::vec3 up{
-            rec.up[0] / 127.5f, rec.up[1] / 127.5f, rec.up[2] / 127.5f,
+            rec.up[0] / 127.5f,
+            rec.up[1] / 127.5f,
+            rec.up[2] / 127.5f,
         };
         glm::mat3 rotation(right, up, glm::cross(right, up));
         frames.emplace_back(velocity, rec.steering, rec.driving, rec.braking,
-                          !!rec.handbrake, rec.position,
-                          glm::quat_cast(rotation));
+                            !!rec.handbrake, rec.position,
+                            glm::quat_cast(rotation));
     }
 
     return true;

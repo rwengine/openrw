@@ -2,7 +2,8 @@
 
 QVariant AnimationListModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::DisplayRole) {
-        if (index.row() >= 0 && (unsigned)index.row() < animations.size()) {
+        if (index.row() >= 0 &&
+            static_cast<unsigned>(index.row()) < animations.size()) {
             auto& f = animations.at(index.row());
             if (index.column() == 0) {
                 return QString(f.first.c_str());

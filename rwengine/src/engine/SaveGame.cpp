@@ -1216,8 +1216,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     // We keep track of the game time as a float for now
     state.gameTime = state.basic.timeMS / 1000.f;
 
-    state.scriptOnMissionFlag = (int32_t*)(state.script->getGlobals() +
-                                           (size_t)scriptData.onMissionOffset);
+    state.scriptOnMissionFlag = reinterpret_cast<int32_t*>(
+        state.script->getGlobals() +
+        static_cast<size_t>(scriptData.onMissionOffset));
 
     auto& threads = state.script->getThreads();
     for (size_t s = 0; s < numScripts; ++s) {

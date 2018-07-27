@@ -59,21 +59,22 @@ LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
 
     char *headerPtr = listStream.getCursor();
 
-    unsigned int numFrames = *(std::uint32_t *)headerPtr;
+    unsigned int numFrames = *reinterpret_cast<std::uint32_t *>(headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     FrameList framelist;
     framelist.reserve(numFrames);
 
     for (size_t f = 0; f < numFrames; ++f) {
-        auto data = (RWBSFrame *)headerPtr;
+        auto data = reinterpret_cast<RWBSFrame *>(headerPtr);
         headerPtr += sizeof(RWBSFrame);
         auto frame =
             std::make_shared<ModelFrame>(f, data->rotation, data->position);
 
-        RW_CHECK(data->index < int(framelist.size()),
+        RW_CHECK(data->index < static_cast<int>(framelist.size()),
                  "Frame parent out of bounds");
-        if (data->index != -1 && data->index < int(framelist.size())) {
+        if (data->index != -1 &&
+            data->index < static_cast<int>(framelist.size())) {
             framelist[data->index]->addChild(frame);
         }
 

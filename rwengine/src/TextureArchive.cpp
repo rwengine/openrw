@@ -21,7 +21,8 @@ std::unique_ptr<TextureArchive> TextureArchive::create(
 
     // Struct
     section = section->next;
-    textureArchive->numTextures = ((uint16_t *)section->data)[0];
+    textureArchive->numTextures =
+        reinterpret_cast<uint16_t *>(section->data)[0];
 
     for (size_t i = 0; i < textureArchive->numTextures; i++) {
         section = section->next;  // Texture Native

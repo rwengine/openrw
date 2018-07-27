@@ -701,10 +701,10 @@ void GameData::loadSplash(const std::string& name) {
 }
 
 int GameData::getWaterIndexAt(const glm::vec3& ws) const {
-    auto wX = (int)((ws.x + WATER_WORLD_SIZE / 2.f) /
-                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
-    auto wY = (int)((ws.y + WATER_WORLD_SIZE / 2.f) /
-                    (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+    auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
+                               (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+    auto wY = static_cast<int>((ws.y + WATER_WORLD_SIZE / 2.f) /
+                               (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
 
     if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
         wY < WATER_HQ_DATA_SIZE) {

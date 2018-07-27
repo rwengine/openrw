@@ -18,13 +18,15 @@ BOOST_AUTO_TEST_CASE(TestStateUpdate) {
 
         // Check that the correct inputs report pressed
         for (int c = 0; c < GameInputState::_MaxControls; ++c) {
-            switch ((GameInputState::Control)c) {
+            switch (static_cast<GameInputState::Control>(c)) {
                 case GameInputState::Jump:
                 case GameInputState::Handbrake:
-                    BOOST_CHECK(state.pressed((GameInputState::Control)c));
+                    BOOST_CHECK(
+                        state.pressed(static_cast<GameInputState::Control>(c)));
                     break;
                 default:
-                    BOOST_CHECK(!state.pressed((GameInputState::Control)c));
+                    BOOST_CHECK(!state.pressed(
+                        static_cast<GameInputState::Control>(c)));
                     break;
             }
         }
