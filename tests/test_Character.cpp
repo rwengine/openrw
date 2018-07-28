@@ -51,8 +51,10 @@ BOOST_AUTO_TEST_CASE(test_activities) {
             Global::get().e->dynamicsWorld->stepSimulation(1.f / 60.f);
         }
 
-        BOOST_CHECK_LT(
-            glm::distance(character->getPosition(), {10.f, 10.f, 0.f}), 0.1f);
+        // Actually GoTo ignores z axis (up)
+        BOOST_CHECK_LT(glm::distance(glm::vec2{character->getPosition()},
+                                        {10.f, 10.f}),
+                                        0.1f);
 
         Global::get().e->destroyObject(character);
     }
