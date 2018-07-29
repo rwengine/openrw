@@ -237,7 +237,7 @@ void SoundManager::SoundSource::loadFromFile(const rwfs::path& filePath) {
                     swr_config_frame(swr, resampled, frame);
 
                     if (swr_convert_frame(swr, resampled, frame) < 0) {
-                        RW_ERROR("Error resampling "<< filename << '\n');
+                        RW_ERROR("Error resampling "<< filePath << '\n');
                     }
 
                     for(size_t i = 0; i < static_cast<size_t>(resampled->nb_samples) * channels; i++) {
