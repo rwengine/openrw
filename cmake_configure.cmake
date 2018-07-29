@@ -12,7 +12,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "-Wextra"
             "-Wdouble-promotion"
             "-Wpedantic"
-            "-pthread"
+            "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(rw_interface
