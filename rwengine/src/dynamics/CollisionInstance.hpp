@@ -1,8 +1,11 @@
 #ifndef _RWENGINE_COLLISIONINSTANCE_HPP_
 #define _RWENGINE_COLLISIONINSTANCE_HPP_
+
+#include <memory>
 #include <vector>
 
 class btCollisionShape;
+class btCompoundShape;
 class btMotionState;
 class btRigidBody;
 class btTriangleIndexVertexArray;
@@ -26,7 +29,7 @@ public:
                            VehicleHandlingInfo* handling = nullptr);
 
     btRigidBody* getBulletBody() const {
-        return m_body;
+        return m_body.get();
     }
 
     float getBoundingHeight() const {
@@ -36,10 +39,13 @@ public:
     void changeMass(float newMass);
 
 private:
-    btRigidBody* m_body = nullptr;
-    std::vector<btCollisionShape*> m_shapes;
-    btTriangleIndexVertexArray* m_vertArray = nullptr;
-    btMotionState* m_motionState = nullptr;
+    std::unique_ptr<btRigidBody> m_body;
+
+    std::unique_ptr<btCompoundShape> cmpShape;
+    std::vector<std::unique_ptr<btCollisionShape>> m_shapes;
+    std::unique_ptr<btTriangleIndexVertexArray> m_vertArray;
+
+    std::unique_ptr<btMotionState> m_motionState;
 
     float m_collisionHeight{0.f};
 };
