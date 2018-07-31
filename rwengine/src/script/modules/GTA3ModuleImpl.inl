@@ -5234,7 +5234,7 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
     RW_UNUSED(args);
     character->controller->skipActivity();
     character->controller->setNextActivity(
-            std::make_unique<Activities::ExitVehicle>());(new Activities::ExitVehicle);
+            std::make_unique<Activities::ExitVehicle>());
 }
 
 /**
