@@ -41,22 +41,8 @@ private:
 
 CollisionInstance::~CollisionInstance() {
     if (m_body) {
-        GameObject* object = static_cast<GameObject*>(m_body->getUserPointer());
-
-        // Remove body from existance.
-        object->engine->dynamicsWorld->removeRigidBody(m_body);
-
-        for (btCollisionShape* shape : m_shapes) {
-            delete shape;
-        }
-
-        delete m_body;
-    }
-    if (m_vertArray) {
-        delete m_vertArray;
-    }
-    if (m_motionState) {
-        delete m_motionState;
+        auto object = static_cast<GameObject*>(m_body->getUserPointer());
+        object->engine->dynamicsWorld->removeRigidBody(m_body.get());
     }
 }
 
@@ -64,12 +50,11 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
                                           CollisionModel* collision,
                                           DynamicObjectData* dynamics,
                                           VehicleHandlingInfo* handling) {
-    btCompoundShape* cmpShape = new btCompoundShape;
+    cmpShape = std::make_unique<btCompoundShape>();
 
-    m_motionState = new GameObjectMotionState(object);
-    m_shapes.push_back(cmpShape);
-
-    btRigidBody::btRigidBodyConstructionInfo info(0.f, m_motionState, cmpShape);
+    m_motionState = std::make_unique<GameObjectMotionState>(object);
+    btRigidBody::btRigidBodyConstructionInfo info(0.f, m_motionState.get(),
+                                                  cmpShape.get());
 
     float colMin = std::numeric_limits<float>::max(),
           colMax = std::numeric_limits<float>::lowest();
@@ -81,43 +66,44 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     for (const auto &box : collision->boxes) {
         auto size = (box.max - box.min) / 2.f;
         auto mid = (box.min + box.max) / 2.f;
-        btCollisionShape* bshape =
-            new btBoxShape(btVector3(size.x, size.y, size.z));
+        auto bshape = std::make_unique<btBoxShape>(
+            btVector3(size.x, size.y, size.z));
         t.setOrigin(btVector3(mid.x, mid.y, mid.z));
-        cmpShape->addChildShape(t, bshape);
+        cmpShape->addChildShape(t, bshape.get());
 
         colMin = std::min(colMin, mid.z - size.z);
         colMax = std::max(colMax, mid.z + size.z);
 
-        m_shapes.push_back(bshape);
+        m_shapes.push_back(std::move(bshape));
     }
 
     // Spheres
     for (const auto &sphere : collision->spheres) {
-        btCollisionShape* sshape = new btSphereShape(sphere.radius);
+        auto sshape = std::make_unique<btSphereShape>(sphere.radius);
         t.setOrigin(
             btVector3(sphere.center.x, sphere.center.y, sphere.center.z));
-        cmpShape->addChildShape(t, sshape);
+        cmpShape->addChildShape(t, sshape.get());
 
         colMin = std::min(colMin, sphere.center.z - sphere.radius);
         colMax = std::max(colMax, sphere.center.z + sphere.radius);
 
-        m_shapes.push_back(sshape);
+        m_shapes.push_back(std::move(sshape));
     }
 
     t.setIdentity();
     auto& verts = collision->vertices;
     auto& faces = collision->faces;
     if (!verts.empty() && !faces.empty()) {
-        m_vertArray = new btTriangleIndexVertexArray(
-                    faces.size(), reinterpret_cast<int*>(faces.data()), sizeof(CollisionModel::Triangle),
-                    verts.size(), reinterpret_cast<float*>(verts.data()), sizeof(glm::vec3));
-        btBvhTriangleMeshShape* trishape =
-                new btBvhTriangleMeshShape(m_vertArray, false);
+        m_vertArray = std::make_unique<btTriangleIndexVertexArray>(
+            faces.size(), reinterpret_cast<int*>(faces.data()),
+            sizeof(CollisionModel::Triangle), verts.size(),
+            reinterpret_cast<float*>(verts.data()), sizeof(glm::vec3));
+        auto trishape =
+            std::make_unique<btBvhTriangleMeshShape>(m_vertArray.get(), false);
         trishape->setMargin(0.05f);
-        cmpShape->addChildShape(t, trishape);
+        cmpShape->addChildShape(t, trishape.get());
 
-        m_shapes.push_back(trishape);
+        m_shapes.push_back(std::move(trishape));
     }
 
     m_collisionHeight = colMax - colMin;
@@ -138,19 +124,19 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
         info.m_localInertia = inert;
     }
 
-    m_body = new btRigidBody(info);
+    m_body = std::make_unique<btRigidBody>(info);
     m_body->setUserPointer(object);
-    object->engine->dynamicsWorld->addRigidBody(m_body);
+    object->engine->dynamicsWorld->addRigidBody(m_body.get());
 
     return true;
 }
 
 void CollisionInstance::changeMass(float newMass) {
-    GameObject* object = static_cast<GameObject*>(m_body->getUserPointer());
+    auto object = static_cast<GameObject*>(m_body->getUserPointer());
     auto& dynamicsWorld = object->engine->dynamicsWorld;
-    dynamicsWorld->removeRigidBody(m_body);
+    dynamicsWorld->removeRigidBody(m_body.get());
     btVector3 inert;
     m_body->getCollisionShape()->calculateLocalInertia(newMass, inert);
     m_body->setMassProps(newMass, inert);
-    dynamicsWorld->addRigidBody(m_body);
+    dynamicsWorld->addRigidBody(m_body.get());
 }
