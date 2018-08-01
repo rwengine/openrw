@@ -316,6 +316,10 @@ void VehicleObject::tickPhysics(float dt) {
         // light vehicles.
         float kM = (std::max(1500.f, info->handling.mass) - 1500.f) / 1500.f;
 
+        // Increase the engine force based on the mass by up to 4 times.
+        // Heavy vehicles need extra engine force to be reactive enough.
+        engineForce *= std::min(1.f + kM, 4.f);
+
         if (velocity > velocityMax) {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
 
