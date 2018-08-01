@@ -14,9 +14,6 @@
 #include <fonts/GameTexts.hpp>
 #include <render/OpenGLRenderer.hpp>
 
-#define GAME_FONTS 3
-#define GAME_GLYPHS 192
-
 class GameRenderer;
 /**
  * @brief Handles rendering of bitmap font textures.
@@ -62,13 +59,35 @@ public:
     TextRenderer(GameRenderer* renderer);
     ~TextRenderer() = default;
 
-    void setFontTexture(int index, const std::string& font);
+    void setFontTexture(font_t font, const std::string& textureName);
 
     void renderText(const TextInfo& ti, bool forceColour = false);
 
 private:
-    std::string fonts[GAME_FONTS];
-    std::array<GlyphInfo, GAME_GLYPHS> glyphData;
+    class FontMetaData {
+    public:
+        FontMetaData() = default;
+        template<size_t N>
+        FontMetaData(const std::string &textureName,
+                     const std::array<std::uint8_t, N> &glyphWidths,
+                     const glm::u32vec2 &textureSize,
+                     const glm::u8vec2 &glyphOffset,
+                     const std::uint8_t monoWidth)
+            : textureName(textureName)
+            , glyphWidths(glyphWidths.cbegin(), glyphWidths.cend())
+            , textureSize(textureSize)
+            , glyphOffset(glyphOffset)
+            , monoWidth(monoWidth)
+        {
+        }
+        std::string textureName;
+        std::vector<std::uint8_t> glyphWidths;
+        glm::u32vec2 textureSize;
+        glm::u8vec2 glyphOffset;
+        std::uint8_t monoWidth;
+    };
+
+    std::array<FontMetaData, FONTS_COUNT> fonts;
 
     GameRenderer* renderer;
     std::unique_ptr<Renderer::ShaderProgram> textShader;
