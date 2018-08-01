@@ -308,9 +308,13 @@ void VehicleObject::tickPhysics(float dt) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
         float velocity = collision->getBulletBody()->getLinearVelocity().length();
+        float velocityForward = physVehicle->getCurrentSpeedKmHour() / 3.6f;
         float velocityMax = velFac / 9.f;
         float engineForce = info->handling.acceleration * throttle * velFac;
         float brakeF = getBraking();
+        // Mass coefficient, that quantifies how heavy a vehicle is and excludes
+        // light vehicles.
+        float kM = (std::max(1500.f, info->handling.mass) - 1500.f) / 1500.f;
 
         if (velocity > velocityMax) {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
@@ -323,6 +327,9 @@ void VehicleObject::tickPhysics(float dt) {
 
         if (handbrake) {
             brakeF = 5.f;
+        } else if (throttle < 0.f && velocityForward > velocityMax / 8.f) {
+            engineForce = 0.f;
+            brakeF = 2.f * std::min(1.f + kM, 4.f);
         }
 
         for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
@@ -336,7 +343,7 @@ void VehicleObject::tickPhysics(float dt) {
             }
 
             float brakeReal =
-                5.f * info->handling.brakeDeceleration *
+                8.f * info->handling.brakeDeceleration *
                 (wi.m_bIsFrontWheel ? info->handling.brakeBias
                                     : 1.f - info->handling.brakeBias);
             physVehicle->setBrake(brakeReal * brakeF, w);
