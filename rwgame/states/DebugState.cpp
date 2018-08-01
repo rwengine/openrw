@@ -153,7 +153,9 @@ std::shared_ptr<Menu> DebugState::createVehicleMenu() {
         {"Police", 116},     {"Ambulance", 106}, {"Bobcat", 112},
         {"Banshee", 119},    {"Rhino", 122},     {"Barracks", 123},
         {"Rumpo", 130},      {"Columbian", 138}, {"Dodo", 126},
-        {"Speeder", 142},    {"Yakuza", 136},
+        {"Speeder", 142},    {"Yakuza", 136},    {"Cheetah", 105},
+        {"Ambulance", 106},  {"FBI", 107},       {"Mafia", 134},
+        {"Infernus", 101},
     };
 
     for (auto& e : kVehicleTypes) {
