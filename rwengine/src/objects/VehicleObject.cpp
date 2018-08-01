@@ -307,8 +307,19 @@ void VehicleObject::tickPhysics(float dt) {
     if (physVehicle) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
+        float velocity = collision->getBulletBody()->getLinearVelocity().length();
+        float velocityMax = velFac / 9.f;
         float engineForce = info->handling.acceleration * throttle * velFac;
         float brakeF = getBraking();
+
+        if (velocity > velocityMax) {
+            btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
+
+            velocity = velocityMax;
+            v *= velocity;
+
+            collision->getBulletBody()->setLinearVelocity(v);
+        }
 
         if (handbrake) {
             brakeF = 5.f;
