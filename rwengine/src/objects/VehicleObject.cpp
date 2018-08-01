@@ -320,6 +320,15 @@ void VehicleObject::tickPhysics(float dt) {
         // Heavy vehicles need extra engine force to be reactive enough.
         engineForce *= std::min(1.f + kM, 4.f);
 
+        // Give vehicles a boost when starting (forward or backward) to reduce
+        // general sluggishness. The engine force is multiplied by 1.5 before
+        // reaching velocityMax / 4 and then reduces down to nominal force as
+        // velocity reaches velocityMax / 2.
+        if (velocity < velocityMax / 4.f)
+            engineForce *= 1.5f;
+        else if (velocity < velocityMax / 2.f)
+            engineForce *= 1.f + 0.5f * (2.f - velocity / (velocityMax / 4.f));
+
         if (velocity > velocityMax) {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
 
