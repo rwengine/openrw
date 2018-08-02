@@ -161,6 +161,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
             halfFriction +
             halfFriction * (front ? info->handling.tractionBias
                                   : 1.f - info->handling.tractionBias);
+
+        wheelsRotation.push_back(0.f);
     }
 
     setModel(getVehicle()->getModel());
@@ -385,8 +387,24 @@ void VehicleObject::tickPhysics(float dt) {
             brakeF = 2.f * std::min(1.f + kM, 4.f);
         }
 
+        if (isStopped() && std::abs(throttle) < 0.1f) {
+            btVector3 v = collision->getBulletBody()->getLinearVelocity();
+            v.setX(0.f);
+            v.setY(0.f);
+
+            collision->getBulletBody()->setLinearVelocity(v);
+
+            for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+                btWheelInfo& wi = physVehicle->getWheelInfo(w);
+                wi.m_rotation = wheelsRotation[w];
+            }
+        }
+
         for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
+
+            wheelsRotation[w] = wi.m_rotation;
+
             if (info->handling.driveType == VehicleHandlingInfo::All ||
                 (info->handling.driveType == VehicleHandlingInfo::Forward &&
                  wi.m_bIsFrontWheel) ||
