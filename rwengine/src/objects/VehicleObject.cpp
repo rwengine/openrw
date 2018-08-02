@@ -139,7 +139,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
             kC * 2.f * btSqrt(wi.m_suspensionStiffness);
         wi.m_wheelsDampingRelaxation =
             kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-        wi.m_rollInfluence = 0.30f;
+        // Roll influence prevents cars from easily flipping wheels.
+        // Tune with care!
+        wi.m_rollInfluence = 0.02f;
+
         float halfFriction = tuning.m_frictionSlip * 0.5f;
         wi.m_frictionSlip =
             halfFriction +
