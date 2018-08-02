@@ -310,7 +310,10 @@ void VehicleObject::tickPhysics(float dt) {
         float velocity = collision->getBulletBody()->getLinearVelocity().length();
         float velocityForward = physVehicle->getCurrentSpeedKmHour() / 3.6f;
         float velocityMax = velFac / 9.f;
-        float engineForce = info->handling.acceleration * throttle * velFac;
+        // The engine force is calculated from the acceleration and max velocity
+        // of the vehicle, with a specific coefficient to make it adapted to
+        // Bullet physics and avoid reaching top speed too fast.
+        float engineForce = info->handling.acceleration * throttle * velFac / 1.2f;
         float brakeF = getBraking();
         // Mass coefficient, that quantifies how heavy a vehicle is and excludes
         // light vehicles.
