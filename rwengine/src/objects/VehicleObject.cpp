@@ -104,7 +104,20 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
 
     float travel = fabs(info->handling.suspensionUpperLimit -
                         info->handling.suspensionLowerLimit);
-    tuning.m_frictionSlip = 3.f;
+    float maxVelocity = info->handling.maxVelocity;
+    float accelerationFloor = std::max(info->handling.acceleration, 30.f);
+    float massFloor = std::min(info->handling.mass, 3000.f);
+    // The friction slip represents the friction coefficient between each wheel
+    // and the ground. The higher the coefficient, the more slippery the contact
+    // gets between the wheel and the ground. Fast vehicles (with a significant
+    // acceleration and max speed for a low mass) tend to need a high
+    // coefficient (> 5.f) to allow properly turning when steering. On the other
+    // hand, slow vehicles tend to need a lower coefficient or they will be too
+    // reactive when turning. This (purely empirical) formula is an attempt to
+    // apply this idea, with floors to avoid too much divergence.
+    // For some reason, the calculation with handling info gives us a value in
+    // the right range, with an offset to set a sane base.
+    tuning.m_frictionSlip = 1.8f + maxVelocity * accelerationFloor / massFloor;
     tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
     physVehicle =
