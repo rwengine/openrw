@@ -268,6 +268,15 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
             colour = glm::vec3(ti.baseColour) * (1 / 255.f);
         }
 
+        // Handle special chars.
+        if (c == '\n') {
+            coord.x = 0.f;
+            coord.y += ss.y;
+            maxHeight = coord.y + ss.y;
+            lineLength = 0;
+            continue;
+        }
+
         auto glyph = charToIndex(c);
         if (glyph >= fontMetaData.glyphWidths.size()) {
             continue;
@@ -291,15 +300,6 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
         auto tex = indexToTexCoord(glyph, fontMetaData.textureSize, fontMetaData.glyphOffset);
         ss.x = ti.size * static_cast<float>(fontMetaData.glyphOffset.x) / fontMetaData.glyphOffset.y;
-
-        // Handle special chars.
-        if (c == '\n') {
-            coord.x = 0.f;
-            coord.y += ss.y;
-            maxHeight = coord.y + ss.y;
-            lineLength = 0;
-            continue;
-        }
         lineLength++;
 
         glm::vec2 p = coord;
