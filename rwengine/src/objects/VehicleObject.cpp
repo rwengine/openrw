@@ -310,6 +310,8 @@ void VehicleObject::tickPhysics(float dt) {
         float velocity = collision->getBulletBody()->getLinearVelocity().length();
         float velocityForward = physVehicle->getCurrentSpeedKmHour() / 3.6f;
         float velocityMax = velFac / 9.f;
+        float steerValue = 0.f;
+        float steerLimit = glm::radians(info->handling.steeringLock);
         // The engine force is calculated from the acceleration and max velocity
         // of the vehicle, with a specific coefficient to make it adapted to
         // Bullet physics and avoid reaching top speed too fast.
@@ -318,6 +320,19 @@ void VehicleObject::tickPhysics(float dt) {
         // Mass coefficient, that quantifies how heavy a vehicle is and excludes
         // light vehicles.
         float kM = (std::max(1500.f, info->handling.mass) - 1500.f) / 1500.f;
+        unsigned int count = 0;
+
+        // Get the global vehicle steering value (for front wheels only).
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+            btWheelInfo& wi = physVehicle->getWheelInfo(w);
+
+            if (wi.m_bIsFrontWheel) {
+                steerValue += physVehicle->getSteeringValue(w);
+                count++;
+            }
+        }
+
+        steerValue /= count;
 
         // Increase the engine force based on the mass by up to 4 times.
         // Heavy vehicles need extra engine force to be reactive enough.
@@ -331,6 +346,12 @@ void VehicleObject::tickPhysics(float dt) {
             engineForce *= 1.5f;
         else if (velocity < velocityMax / 2.f)
             engineForce *= 1.f + 0.5f * (2.f - velocity / (velocityMax / 4.f));
+
+        // Reduce the engine force when steering, by a factor of up to 1.25 for
+        // the maximum steering angle, linearly back to nominal value when no
+        // steering is applied.
+        if (std::abs(steerValue) > steerLimit / 8.f && velocity > velocityMax / 3.f)
+            engineForce /= 1.f + std::abs(steerValue) / (4.f * steerLimit);
 
         if (velocity > velocityMax) {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
