@@ -256,5 +256,5 @@ template <>
 ScriptObjectType<int> ScriptArguments::getScriptObject(unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
-    return {param.handleValue(), (int*)nullptr};
+    return {param.handleValue(), static_cast<int*>(nullptr)};
 }

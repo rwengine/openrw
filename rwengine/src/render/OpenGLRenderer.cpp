@@ -97,8 +97,8 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
 void Renderer::setViewport(const glm::ivec2& vp) {
     viewport = vp;
 
-    projection2D =
-        glm::ortho(0.f, (float)viewport.x, (float)viewport.y, 0.f, -1.f, 1.f);
+    projection2D = glm::ortho(0.f, static_cast<float>(viewport.x),
+                              static_cast<float>(viewport.y), 0.f, -1.f, 1.f);
 }
 
 void Renderer::swap() {
@@ -303,7 +303,7 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw,
     setDrawState(model, draw, p);
 
     glDrawElements(draw->getFaceType(), p.count, GL_UNSIGNED_INT,
-                   (void*)(sizeof(RenderIndex) * p.start));
+                   reinterpret_cast<void*>(sizeof(RenderIndex) * p.start));
 }
 
 void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
@@ -353,7 +353,7 @@ void OpenGLRenderer::drawBatched(const RenderList& list) {
 			}
 
 			glDrawElements(draw.dbuff->getFaceType(), draw.drawInfo.count, GL_UNSIGNED_INT,
-						   (void*) (sizeof(RenderIndex) * draw.drawInfo.start));
+                           reinterpret_cast<void*>(sizeof(RenderIndex) * draw.drawInfo.start));
 		}
 	}
 #else

@@ -301,8 +301,8 @@ void IngameState::handleEvent(const SDL_Event& event) {
                     }
                     break;
                 case SDLK_c:
-                    camMode =
-                        CameraMode((camMode + (CameraMode)1) % CAMERA_MAX);
+                    camMode = static_cast<CameraMode>(
+                        (camMode + static_cast<CameraMode>(1)) % CAMERA_MAX);
                     break;
                 default:
                     break;
@@ -435,7 +435,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
     lookTargetPosition += glm::vec3(0.f, 0.f, 0.5f);
 
     if (target->type() == GameObject::Vehicle) {
-        auto vehicle = (VehicleObject*)target;
+        auto vehicle = static_cast<VehicleObject*>(target);
         auto model = vehicle->getModel();
         auto maxDist = model->getBoundingRadius() * 2.f;
         viewDistance = viewDistance + maxDist;
@@ -510,7 +510,8 @@ GameObject* IngameState::getCameraTarget() const {
 
     // If the target is a character in a vehicle, make the vehicle the target
     if (target && target->type() == GameObject::Character) {
-        auto vehicle = ((CharacterObject*)target)->getCurrentVehicle();
+        auto vehicle =
+            (static_cast<CharacterObject*>(target))->getCurrentVehicle();
         if (vehicle) {
             target = vehicle;
         }

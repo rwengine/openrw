@@ -9940,15 +9940,15 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
     auto world = args.getWorld();
     auto state = args.getState();
     auto data = world->data;
-    auto zone = data->findZoneAt(
-        world->getPlayer()->getCharacter()->getPosition());
+    auto zone =
+        data->findZoneAt(world->getPlayer()->getCharacter()->getPosition());
     const bool day =
         (state->basic.gameHour >= 8 && state->basic.gameHour <= 19);
     const int groupId =
         zone ? (day ? zone->pedGroupDay : zone->pedGroupNight) : 0;
     const auto& pedGroup = data->pedgroups.at(groupId);
-    const auto model = pedGroup.at(
-        args.getVM()->getRandomNumber((std::size_t)0, pedGroup.size() - 1));
+    const auto model = pedGroup.at(args.getVM()->getRandomNumber(
+        static_cast<std::size_t>(0), pedGroup.size() - 1));
     character = world->createPedestrian(model, coord + script::kSpawnOffset);
 }
 
@@ -11502,7 +11502,7 @@ void opcode_03e6(const ScriptArguments& args) {
     @arg arg1 
 */
 void opcode_03e7(const ScriptArguments& args, const ScriptHudFlash arg1) {
-    args.getState()->hudFlash = (HudFlash)arg1;
+    args.getState()->hudFlash = static_cast<HudFlash>(arg1);
 }
 
 /**

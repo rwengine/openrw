@@ -110,10 +110,10 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     auto& faces = collision->faces;
     if (!verts.empty() && !faces.empty()) {
         m_vertArray = new btTriangleIndexVertexArray(
-            faces.size(), (int*)faces.data(), sizeof(CollisionModel::Triangle),
-            verts.size(), (float*)verts.data(), sizeof(glm::vec3));
+                    faces.size(), reinterpret_cast<int*>(faces.data()), sizeof(CollisionModel::Triangle),
+                    verts.size(), reinterpret_cast<float*>(verts.data()), sizeof(glm::vec3));
         btBvhTriangleMeshShape* trishape =
-            new btBvhTriangleMeshShape(m_vertArray, false);
+                new btBvhTriangleMeshShape(m_vertArray, false);
         trishape->setMargin(0.05f);
         cmpShape->addChildShape(t, trishape);
 

@@ -48,17 +48,17 @@ bool LoaderCOL::load(const std::string& path) {
         model->modelid = head.modelid;
 
         auto readFloat = [&]() {
-            auto f = (float*)d;
+            auto f = reinterpret_cast<float*>(d);
             d += sizeof(float);
             return *f;
         };
         auto readU8 = [&]() {
-            auto f = (uint8_t*)d;
+            auto f = reinterpret_cast<uint8_t*>(d);
             d += sizeof(uint8_t);
             return *f;
         };
         auto readU32 = [&]() {
-            auto f = (uint32_t*)d;
+            auto f = reinterpret_cast<uint32_t*>(d);
             d += sizeof(uint32_t);
             return *f;
         };

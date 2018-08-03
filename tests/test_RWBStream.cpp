@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(iterate_stream_test) {
         auto innerCursor = inner.getCursor();
 
         // This is a value inside in the Clump's struct header section.
-        BOOST_CHECK_EQUAL(*(std::uint32_t*)innerCursor, 0x10);
+        BOOST_CHECK_EQUAL(*reinterpret_cast<std::uint32_t*>(innerCursor), 0x10);
     }
 }
 #endif

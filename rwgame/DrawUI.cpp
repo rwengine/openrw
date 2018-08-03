@@ -155,7 +155,8 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
             .25f) {  // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
-           << (int)player->getCharacter()->getCurrentState().health;
+           << static_cast<int>(
+                  player->getCharacter()->getCurrentState().health);
         ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str());
 
         ti.baseColour = ui_shadowColour;
@@ -171,7 +172,8 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     if (player->getCharacter()->getCurrentState().armour > 0) {
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
-           << (int)player->getCharacter()->getCurrentState().armour;
+           << static_cast<int>(
+                  player->getCharacter()->getCurrentState().armour);
         ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str());
 
         ti.baseColour = ui_shadowColour;
@@ -309,8 +311,8 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
 
             // Check for the background type
             if (t.colourBG.a == 0) {
-                glm::vec2 shadowPosition((int8_t)t.colourBG.x,
-                                         (int8_t)t.colourBG.y);
+                glm::vec2 shadowPosition(static_cast<int8_t>(t.colourBG.x),
+                                         static_cast<int8_t>(t.colourBG.y));
 
                 ti.baseColour = glm::vec3(0.f);
                 ti.screenPosition += shadowPosition;

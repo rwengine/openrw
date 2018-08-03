@@ -160,8 +160,8 @@ void GenericDATLoader::loadHandling(const std::string& name,
             char dt, et;
             ss >> dt;
             ss >> et;
-            info.driveType = (VehicleHandlingInfo::DriveType)dt;
-            info.engineType = (VehicleHandlingInfo::EngineType)et;
+            info.driveType = static_cast<VehicleHandlingInfo::DriveType>(dt);
+            info.engineType = static_cast<VehicleHandlingInfo::EngineType>(et);
             ss >> info.brakeDeceleration;
             ss >> info.brakeBias;
             ss >> info.ABS;

@@ -152,7 +152,8 @@ public:
     }
 
     uint32_t getGlobalOffset(ScriptInt& global) const {
-        return uint32_t((SCMByte*)(&global) - globalData.data());
+        return static_cast<uint32_t>(reinterpret_cast<SCMByte*>(&global) -
+                                     globalData.data());
     }
 
     bool getDebugFlag() const {

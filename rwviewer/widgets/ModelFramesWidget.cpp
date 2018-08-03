@@ -16,8 +16,8 @@ void ModelFramesWidget::updateInfoBox(ClumpPtr, ModelFrame* f) {
 
 void ModelFramesWidget::selectedModelChanged(const QModelIndex& n,
                                              const QModelIndex&) {
-    updateInfoBox(gmodel, (ModelFrame*)n.internalPointer());
-    selectedFrameChanged((ModelFrame*)n.internalPointer());
+    updateInfoBox(gmodel, static_cast<ModelFrame*>(n.internalPointer()));
+    selectedFrameChanged(static_cast<ModelFrame*>(n.internalPointer()));
 }
 
 ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)

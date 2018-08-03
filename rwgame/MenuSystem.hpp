@@ -105,7 +105,7 @@ public:
         glm::vec2 basis(offset);
         for (size_t i = 0; i < entries.size(); ++i) {
             bool active = false;
-            if (activeEntry >= 0 && i == (unsigned)activeEntry) {
+            if (activeEntry >= 0 && i == static_cast<unsigned>(activeEntry)) {
                 active = true;
             }
             entries[i].draw(font, size, active, r, basis);
@@ -138,14 +138,15 @@ public:
 
     // Activates the menu entry at the current active index.
     void activate() {
-        if (activeEntry >= 0 && (unsigned)activeEntry < entries.size()) {
+        if (activeEntry >= 0 &&
+            static_cast<unsigned>(activeEntry) < entries.size()) {
             entries[activeEntry].activate(0.f, 0.f);
         }
     }
 
     void move(int movement) {
         activeEntry += movement;
-        if (activeEntry >= int(entries.size())) {
+        if (activeEntry >= static_cast<int>(entries.size())) {
             activeEntry = 0;
         } else if (activeEntry < 0) {
             activeEntry = entries.size() - 1;

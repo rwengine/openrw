@@ -46,10 +46,10 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
     bmask = 0x00ff0000;
     amask = 0xff000000;
 #endif
-    icon = SDL_CreateRGBSurfaceFrom((void*)windowIconData,
-                                    windowIconWidth, windowIconHeight,
-                                    32, windowIconWidth * (32 / 8),
-                                    rmask, gmask, bmask, amask);
+    icon = SDL_CreateRGBSurfaceFrom(
+        static_cast<void*>(const_cast<unsigned char*>(windowIconData)),
+        windowIconWidth, windowIconHeight, 32, windowIconWidth * (32 / 8),
+        rmask, gmask, bmask, amask);
     SDL_SetWindowIcon(window, icon);
 
     SDL_ShowWindow(window);

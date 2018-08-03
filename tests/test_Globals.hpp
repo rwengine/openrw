@@ -58,7 +58,7 @@ template <>
 struct print_log_value<GameString> {
     void operator()(std::ostream& s, GameString const& v) {
         for (GameString::size_type i = 0u; i < v.size(); ++i) {
-            s << (char)v[i];
+            s << static_cast<char>(v[i]);
         }
     }
 };
