@@ -15,11 +15,13 @@ class OpenrwConan(ConanFile):
     options = {
         'test_data': [True, False],
         'viewer': [True, False],
+        'tools': [True, False],
     }
 
     default_options = (
         'test_data=False',
         'viewer=False',
+        'tools=False',
         'bullet:shared=False',
         'ffmpeg:iconv=False',
         'libalsa:disable_python=True',  # https://github.com/conan-community/community/issues/3
@@ -41,7 +43,10 @@ class OpenrwConan(ConanFile):
         ),
         'viewer': (
             'Qt/5.11@bincrafters/stable',
-        )
+        ),
+        'tools': (
+            'freetype/2.9.0@bincrafters/stable',
+        ),
     }
 
     def requirements(self):
@@ -49,6 +54,9 @@ class OpenrwConan(ConanFile):
             self.requires(dep)
         if self.options.viewer:
             for dep in self._rw_dependencies['viewer']:
+                self.requires(dep)
+        if self.options.tools:
+            for dep in self._rw_dependencies['tools']:
                 self.requires(dep)
 
     def _configure_cmake(self):
@@ -58,6 +66,7 @@ class OpenrwConan(ConanFile):
             'CMAKE_BUILD_TYPE': self.settings.build_type,
             'BUILD_TESTS': True,
             'BUILD_VIEWER': self.options.viewer,
+            'BUILD_TOOLS': self.options.tools,
             'TESTS_NODATA': not self.options.test_data,
             'USE_CONAN': True,
             'BOOST_STATIC': not self.options['boost'].shared,
