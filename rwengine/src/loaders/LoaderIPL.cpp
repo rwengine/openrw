@@ -29,7 +29,7 @@ bool LoaderIPL::load(const std::string& filename) {
         std::string line;
         getline(str, line);
         line.erase(std::find_if(line.rbegin(), line.rend(),
-                                std::not1(std::ptr_fun<int, int>(std::isspace)))
+                                [](auto c) { return !std::isspace(c); })
                        .base(),
                    line.end());
 
