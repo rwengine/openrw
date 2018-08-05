@@ -50,7 +50,7 @@ class TextViewer : public ViewerInterface {
     void setGameString(const GameString &gameString);
     std::vector<std::string> getFontTextureNames();
 public:
-    TextViewer(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    TextViewer(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
 
 signals:
     void fontChanged(font_t font);

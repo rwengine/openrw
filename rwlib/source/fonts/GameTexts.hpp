@@ -29,10 +29,10 @@ using GameStringKey = std::string;
  */
 using font_t = size_t;
 
-static const font_t FONT_PAGER = 0;
-static const font_t FONT_PRICEDOWN = 1;
-static const font_t FONT_ARIAL = 2;
-static const font_t FONTS_COUNT = 3;
+static constexpr font_t FONT_PAGER = 0;
+static constexpr font_t FONT_PRICEDOWN = 1;
+static constexpr font_t FONT_ARIAL = 2;
+static constexpr font_t FONTS_COUNT = 3;
 
 namespace GameStringUtil {
 /**

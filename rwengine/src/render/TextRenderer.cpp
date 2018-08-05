@@ -259,9 +259,9 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y}, glm::vec2{tex.z, tex.w}, colour);
     }
 
-    if (ti.align == TextInfo::Right) {
+    if (ti.align == TextInfo::TextAlignment::Right) {
         alignment.x -= maxWidth;
-    } else if (ti.align == TextInfo::Center) {
+    } else if (ti.align == TextInfo::TextAlignment::Center) {
         alignment.x -= (maxWidth / 2.f);
     }
 

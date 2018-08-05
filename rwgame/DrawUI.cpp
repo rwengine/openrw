@@ -44,7 +44,7 @@ void drawScriptTimer(GameWorld* world, GameRenderer* render) {
         TextRenderer::TextInfo ti;
         ti.font = FONT_PRICEDOWN;
         ti.size = ui_textSize;
-        ti.align = TextRenderer::TextInfo::Right;
+        ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
         {
             int32_t seconds = *world->state->scriptTimerVariable / 1000;
@@ -109,7 +109,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     TextRenderer::TextInfo ti;
     ti.font = FONT_PRICEDOWN;
     ti.size = ui_textSize;
-    ti.align = TextRenderer::TextInfo::Right;
+    ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
     {
         std::stringstream ss;
@@ -264,7 +264,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ti.baseColour = ui_shadowColour;
         ti.font = FONT_ARIAL;
         ti.size = ui_ammoSize;
-        ti.align = TextRenderer::TextInfo::Center;
+        ti.align = TextRenderer::TextInfo::TextAlignment::Center;
         ti.screenPosition = glm::vec2(iconX + ui_weaponSize / 2.f,
                                       iconY + ui_weaponSize - ui_ammoHeight);
         render->text.renderText(ti);
@@ -299,13 +299,13 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
             ti.screenPosition = (t.position / glm::vec2(640.f, 480.f)) * vp;
             switch (t.alignment) {
                 case 0:
-                    ti.align = TextRenderer::TextInfo::Left;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
                     break;
                 case 1:
-                    ti.align = TextRenderer::TextInfo::Center;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Center;
                     break;
                 case 2:
-                    ti.align = TextRenderer::TextInfo::Right;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Right;
                     break;
             }
 

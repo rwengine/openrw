@@ -28,7 +28,7 @@ public:
 public slots:
     void fontChanged(font_t font);
 private:
-    font_t m_font;
+    font_t m_font = FONT_PAGER;
     TextMapType m_textMap;
 };
 

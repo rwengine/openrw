@@ -16,7 +16,7 @@ FontMap::FontMap(std::initializer_list<std::reference_wrapper<const gschar_unico
             m_from_unicode[m.second] = m.first;
         }
     }
-    const auto &q = m_from_unicode.find(UNICODE_QUESTION_MARK);
+    const auto &q = m_from_unicode.find(UnicodeValue::UNICODE_QUESTION_MARK);
     if (q == m_from_unicode.end()) {
         RW_ERROR("Font does not have a question mark");
         m_unknown_gschar = ' ';
@@ -44,7 +44,7 @@ unicode_t FontMap::to_unicode(GameStringChar c) const {
     }
     const auto &p = m_to_unicode.find(c);
     if (p == m_to_unicode.end()) {
-        return UNICODE_REPLACEMENT_CHARACTER;
+        return UnicodeValue::UNICODE_REPLACEMENT_CHARACTER;
     }
     return p->second;
 }

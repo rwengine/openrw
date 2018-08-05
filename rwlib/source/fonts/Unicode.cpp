@@ -22,11 +22,8 @@ size_t unicode_to_utf8(unicode_t unicode, char c[4]) {
         c[3] = 0x80 | (unicode & 0x3f);
         return 4;
     } else {
-        return unicode_to_utf8(UNICODE_REPLACEMENT_CHARACTER, c);
+        return unicode_to_utf8(UnicodeValue::UNICODE_REPLACEMENT_CHARACTER, c);
     }
-}
-
-Utf8UnicodeIterator::Utf8UnicodeIterator() : m_is(nullptr), m_finished(true) {
 }
 
 Utf8UnicodeIterator::Utf8UnicodeIterator(std::istream &is) : m_is(&is), m_finished(false) {
@@ -55,19 +52,19 @@ void Utf8UnicodeIterator::next_unicode() {
         unicode = c & 0x07;
         nb_bytes = 3;
     } else {
-        unicode = UNICODE_REPLACEMENT_CHARACTER;
+        unicode = UnicodeValue::UNICODE_REPLACEMENT_CHARACTER;
         nb_bytes = 0;
     }
     while (nb_bytes != 0) {
         c = m_is->get();
         if (c == EOF) {
-            unicode = UNICODE_REPLACEMENT_CHARACTER;
+            unicode = UnicodeValue::UNICODE_REPLACEMENT_CHARACTER;
             m_finished = true;
             break;
         }
         cc = static_cast<char>(c);
         if ((c & 0xc0) != 0x80) {
-            unicode = UNICODE_REPLACEMENT_CHARACTER;
+            unicode = UnicodeValue::UNICODE_REPLACEMENT_CHARACTER;
             break;
         }
         unicode = (unicode << 6) | (c & 0x3f);

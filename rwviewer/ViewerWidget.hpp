@@ -91,17 +91,17 @@ protected:
     quint16 _objectID = 0;
 
 
-    float viewDistance;
+    float viewDistance = 1.f;
     glm::vec2 viewAngles{};
     glm::vec3 viewPosition{};
 
-    bool dragging;
+    bool dragging = false;
     QPointF dstart;
     glm::vec2 dastart{};
-    bool moveFast;
+    bool moveFast = false;
 
-    DrawBuffer* _frameWidgetDraw;
-    GeometryBuffer* _frameWidgetGeom;
+    DrawBuffer* _frameWidgetDraw = nullptr;
+    GeometryBuffer* _frameWidgetGeom = nullptr;
     GLuint whiteTex;
 
     void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));

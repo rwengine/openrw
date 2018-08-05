@@ -34,14 +34,7 @@ ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
 
 ViewerWidget::ViewerWidget(QOpenGLContext* context, QWindow* parent)
     : QWindow(parent)
-    , context(context)
-    , textInfos()
-    , selectedFrame(nullptr)
-    , viewDistance(1.f)
-    , dragging(false)
-    , moveFast(false)
-    , _frameWidgetDraw(nullptr)
-    , _frameWidgetGeom(nullptr) {
+    , context(context) {
     setSurfaceType(OpenGLSurface);
 }
 

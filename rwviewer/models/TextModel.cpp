@@ -4,7 +4,7 @@
 #include <QBrush>
 
 TextModel::TextModel(QObject *parent)
-     : QAbstractTableModel(parent), m_font(FONT_PAGER) {
+     : QAbstractTableModel(parent) {
 
 }
 

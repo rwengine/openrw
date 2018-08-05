@@ -26,12 +26,12 @@ private:
     /**
      * @brief m_is Pointer to the utf8 stream to iterate over.
      */
-    std::istream *m_is;
+    std::istream *m_is = nullptr;
 
     /**
      * @brief m_finished true if the stream is finished/invalid.
      */
-    bool m_finished;
+    bool m_finished = true;
 
     /**
      * @brief m_unicode Current unicode point.
@@ -47,7 +47,7 @@ public:
     /**
      * @brief Create an empty unicode iterator. The iterator is not good.
      */
-    Utf8UnicodeIterator();
+    Utf8UnicodeIterator() = default;
     /**
      * @brief Create a unicode iterator that iterates over a utf8 stream.
      * @param is utf8 stream
@@ -119,8 +119,8 @@ private:
 
 /**
  * Unicode data points used by OpenRW.
-     */
-    enum UnicodeValue {
+ */
+enum UnicodeValue : unicode_t {
     UNICODE_TAB                             = 0x09, /* '\t' */
     UNICODE_NEW_LINE                        = 0x0a, /* '\n' */
     UNICODE_CARRIAGE_RETURN                 = 0x0d, /* '\r' */
