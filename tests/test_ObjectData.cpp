@@ -3,10 +3,6 @@
 #include <loaders/LoaderIDE.hpp>
 #include "test_Globals.hpp"
 
-struct WithLoaderIDE {
-    LoaderIDE loader;
-};
-
 namespace {
 constexpr auto kTestDataObjects = R"(
 objs
@@ -49,11 +45,16 @@ void ASSERT_VEHICLE_IS(BaseModelInfo& info, const char* model, const char* txd,
 }
 }
 
+struct WithLoaderIDE {
+    LoaderIDE loader;
+
+    std::istringstream test_data_stream {kTestDataObjects};
+};
+
 BOOST_FIXTURE_TEST_SUITE(ObjectDataTests, WithLoaderIDE)
 
 BOOST_AUTO_TEST_CASE(parses_basic_instance) {
-    std::istringstream str {kTestDataObjects};
-    loader.load(str, {});
+    loader.load(test_data_stream, {});
 
     BOOST_ASSERT(loader.objects.find(1100) != loader.objects.end());
     auto info = loader.objects[1100].get();
@@ -62,8 +63,7 @@ BOOST_AUTO_TEST_CASE(parses_basic_instance) {
 }
 
 BOOST_AUTO_TEST_CASE(parses_vehicle) {
-    std::istringstream str {kTestDataObjects};
-    loader.load(str, {});
+    loader.load(test_data_stream, {});
 
     BOOST_ASSERT(loader.objects.find(90) != loader.objects.end());
     auto obj = loader.objects[90].get();
