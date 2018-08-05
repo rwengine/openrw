@@ -15,9 +15,11 @@
 
 bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
     std::ifstream str(filename);
-
     if (!str.is_open()) return false;
+    return load(str, stats);
+}
 
+bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
     auto find_stat_id = [&](const std::string &name) {
         auto it =
             std::find_if(stats.begin(), stats.end(),
