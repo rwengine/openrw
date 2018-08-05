@@ -292,7 +292,7 @@ void GameData::loadHandling(const std::string& path) {
 SCMFile* GameData::loadSCM(const std::string& path) {
     auto scm_h = index.openFileRaw(path);
     SCMFile* scm = new SCMFile;
-    scm->loadFile(scm_h.data, scm_h.length);
+    scm->loadFile(scm_h.data.get(), scm_h.length);
     return scm;
 }
 
@@ -524,7 +524,7 @@ void GameData::loadIFP(const std::string& name) {
 
     if (f.data) {
         LoaderIFP loader;
-        if (loader.loadFromMemory(f.data)) {
+        if (loader.loadFromMemory(f.data.get())) {
             animations.insert(loader.animations.begin(),
                               loader.animations.end());
         }

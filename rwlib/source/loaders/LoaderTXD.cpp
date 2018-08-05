@@ -174,7 +174,7 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative,
 
 bool TextureLoader::loadFromMemory(const FileContentsInfo& file,
                                    TextureArchive& inTextures) {
-    auto data = file.data;
+    auto data = file.data.get();
     RW::BinaryStreamSection root(data);
     /*auto texDict =*/root.readStructure<RW::BSTextureDictionary>();
 
