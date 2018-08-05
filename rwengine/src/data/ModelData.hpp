@@ -172,7 +172,7 @@ public:
         loddistances_[n] = d;
     }
 
-    float getLodDistance(int n) {
+    float getLodDistance(int n) const {
         RW_CHECK(n < 3, "Lod Index out of range");
         return loddistances_[n];
     }
