@@ -68,7 +68,7 @@ struct WithLoaderIDE {
     std::istringstream test_data_stream {kTestDataObjects};
 };
 
-BOOST_FIXTURE_TEST_SUITE(ObjectDataTests, WithLoaderIDE)
+BOOST_FIXTURE_TEST_SUITE(LoaderIDETests, WithLoaderIDE)
 
 BOOST_AUTO_TEST_CASE(objects_contains_modelID) {
     loader.load(test_data_stream, {});
