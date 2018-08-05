@@ -3,17 +3,19 @@
 #include <loaders/LoaderIDE.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(ObjectDataTests)
+struct WithLoaderIDE {
+    LoaderIDE loader;
+};
+
+BOOST_FIXTURE_TEST_SUITE(ObjectDataTests, WithLoaderIDE)
 
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(parses_basic_instance) {
-    LoaderIDE l;
+    loader.load(Global::get().getGamePath() + "/data/maps/generic.ide", {});
 
-    l.load(Global::get().getGamePath() + "/data/maps/generic.ide", {});
+    BOOST_ASSERT(loader.objects.find(1100) != loader.objects.end());
 
-    BOOST_ASSERT(l.objects.find(1100) != l.objects.end());
-
-    auto obj = l.objects[1100].get();
+    auto obj = loader.objects[1100].get();
 
     auto def = dynamic_cast<SimpleModelInfo *>(obj);
 
@@ -27,13 +29,11 @@ BOOST_AUTO_TEST_CASE(parses_basic_instance) {
 }
 
 BOOST_AUTO_TEST_CASE(parses_vehicle) {
-    LoaderIDE l;
+    loader.load(Global::get().getGamePath() + "/data/default.ide", {});
 
-    l.load(Global::get().getGamePath() + "/data/default.ide", {});
+    BOOST_ASSERT(loader.objects.find(90) != loader.objects.end());
 
-    BOOST_ASSERT(l.objects.find(90) != l.objects.end());
-
-    auto obj = l.objects[90].get();
+    auto obj = loader.objects[90].get();
 
     auto def = dynamic_cast<VehicleModelInfo*>(obj);
 
