@@ -5378,7 +5378,6 @@ void opcode_01e3(const ScriptArguments& args, const ScriptString gxtEntry, const
     auto str =
             ScreenText::format(
                 script::gxt(args, gxtEntry),
-                FONT_PRICEDOWN,
                 GameStringUtil::fromString(std::to_string(arg2), FONT_PRICEDOWN));
     args.getState()->text.addText<ScreenTextType::Big>(
                 ScreenTextEntry::makeBig(
@@ -9763,7 +9762,6 @@ void opcode_036d(const ScriptArguments& args, const ScriptString gxtEntry, const
 
     auto str =
         ScreenText::format(script::gxt(args, gxtEntry),
-                           FONT_PRICEDOWN,
                            GameStringUtil::fromString(std::to_string(arg2), FONT_PRICEDOWN),
                            GameStringUtil::fromString(std::to_string(arg3), FONT_PRICEDOWN));
 

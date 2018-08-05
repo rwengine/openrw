@@ -197,11 +197,9 @@ static const FontMap::gschar_unicode_map_t map_gta3_font_2_priv = {
     {0xb1, UNICODE_ACUTE_ACCENT},
 };
 
-const FontMap map_gta3_font0({map_gta3_font_common, map_gta3_font_0_priv});
-const FontMap map_gta3_font1({map_gta3_font_common, map_gta3_font_1_priv});
-const FontMap map_gta3_font2({map_gta3_font_common, map_gta3_font_2_priv});
+const FontMap fontmap_gta3_font_common({map_gta3_font_common});
 
-const std::array<FontMap, 3> maps_gta3_font = {
+const std::array<FontMap, 3> fontmaps_gta3_font = {
     FontMap({map_gta3_font_common, map_gta3_font_0_priv}),
     FontMap({map_gta3_font_common, map_gta3_font_1_priv}),
     FontMap({map_gta3_font_common, map_gta3_font_2_priv}),

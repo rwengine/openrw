@@ -36,20 +36,25 @@ static const font_t FONTS_COUNT = 3;
 
 namespace GameStringUtil {
 /**
- * @brief fromString Converts a string to a GameString
+ * @brief fromString Converts a std::string to a GameString, depending on the font
  *
- * Encoding of GameStrings depends on the font, only simple ASCII chars will map
- * well
+ * Encoding of GameStrings depends on the font. Unknown chars are converted to a "unknown GameStringChar" (such as '?').
  */
 GameString fromString(const std::string& str, font_t font);
 
 /**
- * @brief fromString Converts a string to a GameString
+ * @brief fromString Converts a GameString to a std::string, depending on the font
  *
- * Encoding of GameStrings depends on the font, only simple ASCII chars will map
- * well
+ * Encoding of GameStrings depends on the font. Unknown GameStringChar's are converted to a UNICODE_REPLACEMENT_CHARACTER utf-8 sequence.
  */
 std::string toString(const GameString& str, font_t font);
+
+/**
+ * @brief fromString Converts a string to a GameString, independent on the font (only characthers known to all fonts are converted)
+ *
+ * Encoding of GameStrings does not depend on the font. Unknown chars are converted to a "unknown GameStringChar" (such as '?').
+ */
+GameString fromStringCommon(const std::string& str);
 }
 
 /**

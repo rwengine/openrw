@@ -6,23 +6,13 @@
 #include <array>
 
 /**
- * Font mapping of font style 0: Pager
+ * Commong font mapping of all fonts.
  */
-extern const FontMap map_gta3_font0;
-
-/**
- * Font mapping of font style 1: Pricedown
- */
-extern const FontMap map_gta3_font1;
-
-/**
- * Font mapping of font style 2: Arial
- */
-extern const FontMap map_gta3_font2;
+extern const FontMap fontmap_gta3_font_common;
 
 /**
  * Array of all font mappings.
  */
-extern const std::array<FontMap, 3> maps_gta3_font;
+extern const std::array<FontMap, 3> fontmaps_gta3_font;
 
 #endif

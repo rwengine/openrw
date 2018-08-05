@@ -109,16 +109,16 @@ BOOST_AUTO_TEST_CASE(format_test) {
     const auto codeStr2 = T("~1~Hello ~1~ world~1~");
     const auto codeStr3 = T("Hello world~1~");
 
-    auto f1 = ScreenText::format(codeStr1, FONT_PRICEDOWN, T("r"));
+    auto f1 = ScreenText::format(codeStr1, T("r"));
     BOOST_CHECK_EQUAL(f1, T("Hello r world"));
 
-    auto f2 = ScreenText::format(codeStr2, FONT_PRICEDOWN, T("k"), T("h"));
+    auto f2 = ScreenText::format(codeStr2, T("k"), T("h"));
     BOOST_CHECK_EQUAL(f2, T("kHello h world~1~"));
 
-    auto f3 = ScreenText::format(codeStr3, FONT_PRICEDOWN, T("x"));
+    auto f3 = ScreenText::format(codeStr3, T("x"));
     BOOST_CHECK_EQUAL(f3, T("Hello worldx"));
 
-    auto f4 = ScreenText::format(codeStr3, FONT_PRICEDOWN, T("x"), T("k"));
+    auto f4 = ScreenText::format(codeStr3, T("x"), T("k"));
     BOOST_CHECK_EQUAL(f4, T("Hello worldx"));
 }
 

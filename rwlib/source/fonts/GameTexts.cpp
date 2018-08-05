@@ -7,9 +7,13 @@
 
 GameString GameStringUtil::fromString(const std::string& str, font_t font) {
     RW_ASSERT(font < FONTS_COUNT);
-    return maps_gta3_font[font].to_GameString(str);
+    return fontmaps_gta3_font[font].to_GameString(str);
+}
+
+GameString GameStringUtil::fromStringCommon(const std::string& str) {
+    return fontmap_gta3_font_common.to_GameString(str);
 }
 
 std::string GameStringUtil::toString(const GameString& str, font_t font) {
-    return maps_gta3_font[font].to_string(str);
+    return fontmaps_gta3_font[font].to_string(str);
 }

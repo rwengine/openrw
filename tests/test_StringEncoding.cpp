@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(utf8_iterator_ranged_for_loop) {
 }
 
 BOOST_AUTO_TEST_CASE(GameStringChar_simple) {
-    for (const auto &fontmap : maps_gta3_font) {
+    for (const auto &fontmap : fontmaps_gta3_font) {
         auto c = fontmap.to_GameStringChar('x');
         BOOST_CHECK_EQUAL(c, GameStringChar('x'));
         auto u = fontmap.to_unicode('x');
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(GameStringChar_simple) {
 
 BOOST_AUTO_TEST_CASE(GameString_simple) {
     std::string s = "Hello world";
-    for (const auto &fontmap : maps_gta3_font) {
+    for (const auto &fontmap : fontmaps_gta3_font) {
         auto gs = fontmap.to_GameString(s);
         BOOST_CHECK_EQUAL(s.size(), gs.length());
         for (size_t i = 0; i < s.size(); ++i) {
