@@ -39,9 +39,8 @@ public:
     bool load(const rwfs::path& filename);
 
     /// Load a file from the archive to memory and pass a pointer to it
-    /// Warning: Please delete[] the memory in the end.
-    /// Warning: Returns NULL (0) if by any reason it can't load the file
-    char* loadToMemory(const std::string& assetname);
+    /// Warning: Returns nullptr if by any reason it can't load the file
+    std::unique_ptr<char[]> loadToMemory(const std::string& assetname);
 
     /// Writes the contents of assetname to filename
     bool saveAsset(const std::string& assetname, const std::string& filename);

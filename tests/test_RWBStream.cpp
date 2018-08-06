@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE(iterate_stream_test) {
     {
         auto d = Global::get().e->data->index.openFile("landstal.dff");
 
-        RWBStream stream(d->data, d->length);
+        RWBStream stream(d.data.get(), d.length);
 
         RWBStream::ChunkID id = stream.getNextChunk();
 

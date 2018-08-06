@@ -2,6 +2,7 @@
 #include <engine/ScreenText.hpp>
 #include <fonts/GameTexts.hpp>
 #include <loaders/LoaderGXT.hpp>
+#include <platform/FileHandle.hpp>
 #include "test_Globals.hpp"
 
 #define T(x) GameStringUtil::fromString(x, FONT_PRICEDOWN)

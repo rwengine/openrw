@@ -6,7 +6,7 @@
 #include <iterator>
 #include <sstream>
 
-#include "FileHandle.hpp"
+#include "platform/FileHandle.hpp"
 #include "loaders/LoaderIMG.hpp"
 
 #include "rw/debug.hpp"
@@ -50,7 +50,7 @@ rwfs::path FileIndex::findFilePath(const std::string &filePath) const {
     return getIndexedDataAt(filePath)->path;
 }
 
-FileHandle FileIndex::openFileRaw(const std::string &filePath) const {
+FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
     const auto *indexData = getIndexedDataAt(filePath);
     std::ifstream dfile(indexData->path, std::ios::binary);
     if (!dfile.is_open()) {
@@ -66,10 +66,10 @@ FileHandle FileIndex::openFileRaw(const std::string &filePath) const {
     dfile.seekg(0, std::ios::end);
     auto length = dfile.tellg();
     dfile.seekg(0);
-    auto data = new char[length];
-    dfile.read(data, length);
+    auto data = std::make_unique<char[]>(length);
+    dfile.read(data.get(), length);
 
-    return std::make_shared<FileContentsInfo>(data, length);
+    return {std::move(data), static_cast<size_t>(length)};
 }
 
 void FileIndex::indexArchive(const std::string &archive) {
@@ -91,16 +91,17 @@ void FileIndex::indexArchive(const std::string &archive) {
     }
 }
 
-FileHandle FileIndex::openFile(const std::string &filePath) {
+FileContentsInfo FileIndex::openFile(const std::string &filePath) {
     auto cleanFilePath = normalizeFilePath(filePath);
     auto indexedDataPos = indexedData_.find(cleanFilePath);
+
     if (indexedDataPos == indexedData_.end()) {
-        return nullptr;
+        return {nullptr, 0};
     }
 
     const auto &indexedData = indexedDataPos->second;
 
-    char *data = nullptr;
+    std::unique_ptr<char[]> data = nullptr;
     size_t length = 0;
 
     if (indexedData.type == IndexedDataType::ARCHIVE) {
@@ -125,13 +126,9 @@ FileHandle FileIndex::openFile(const std::string &filePath) {
         dfile.seekg(0, std::ios::end);
         length = dfile.tellg();
         dfile.seekg(0);
-        data = new char[length];
-        dfile.read(data, length);
+        data = std::make_unique<char[]>(length);
+        dfile.read(data.get(), length);
     }
 
-    if (data == nullptr) {
-        return nullptr;
-    }
-
-    return std::make_shared<FileContentsInfo>(data, length);
+    return {std::move(data), length};
 }

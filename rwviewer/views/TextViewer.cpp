@@ -8,10 +8,11 @@
 #include <iomanip>
 #include <iostream>
 
+#include <boost/filesystem.hpp>
 #include <fonts/GameTexts.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include <models/TextModel.hpp>
-#include <boost/filesystem.hpp>
+#include <platform/FileHandle.hpp>
 #include <render/GameRenderer.hpp>
 
 #include <QGroupBox>

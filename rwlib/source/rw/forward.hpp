@@ -16,7 +16,6 @@ class Clump;
 
 // Pointer types
 using AnimationPtr = std::shared_ptr<Animation>;
-using FileHandle = std::shared_ptr<FileContentsInfo>;
 using ModelFramePtr = std::shared_ptr<ModelFrame>;
 using GeometryPtr = std::shared_ptr<Geometry>;
 using AtomicPtr = std::shared_ptr<Atomic>;

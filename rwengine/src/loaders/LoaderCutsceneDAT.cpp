@@ -12,8 +12,8 @@
 #include "data/CutsceneData.hpp"
 #include "platform/FileHandle.hpp"
 
-void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileHandle& file) {
-    std::string dataStr(file->data, file->length);
+void LoaderCutsceneDAT::load(CutsceneTracks &tracks, const FileContentsInfo& file) {
+    std::string dataStr(file.data.get(), file.length);
     std::stringstream ss(dataStr);
 
     int numZooms = 0;

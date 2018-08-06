@@ -1,4 +1,5 @@
 #include <boost/test/unit_test.hpp>
+#include <platform/FileHandle.hpp>
 #include <platform/FileIndex.hpp>
 #include "test_Globals.hpp"
 
@@ -50,7 +51,7 @@ BOOST_AUTO_TEST_CASE(test_openFile) {
     index.indexTree(Global::getGamePath() + "/data");
 
     auto handle = index.openFile("cullzone.dat");
-    BOOST_CHECK(handle != nullptr);
+    BOOST_CHECK(handle.data != nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(test_indexArchive) {
@@ -59,14 +60,14 @@ BOOST_AUTO_TEST_CASE(test_indexArchive) {
 
     {
         auto handle = index.openFile("landstal.dff");
-        BOOST_CHECK(handle == nullptr);
+        BOOST_CHECK(handle.data == nullptr);
     }
 
     index.indexArchive("models/gta3.img");
 
     {
         auto handle = index.openFile("landstal.dff");
-        BOOST_CHECK(handle != nullptr);
+        BOOST_CHECK(handle.data != nullptr);
     }
 }
 #endif
