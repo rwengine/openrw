@@ -2,11 +2,14 @@
 #include <loaders/LoaderIPL.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(LoaderIPLTests)
+struct WithLoaderIPL {
+    LoaderIPL loader;
+};
+
+BOOST_FIXTURE_TEST_SUITE(LoaderIPLTests, WithLoaderIPL)
 
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_load_zones) {
-    LoaderIPL loader;
     const auto& gdpath = Global::get().getGamePath();
     BOOST_REQUIRE(loader.load(gdpath + "/data/gta3.zon"));
 
