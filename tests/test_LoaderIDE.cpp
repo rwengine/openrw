@@ -23,13 +23,13 @@ void ASSERT_INSTANCE_IS(BaseModelInfo& info, const char* model, const char* txd,
         const std::array<float, N>& lods, size_t flags) {
     BOOST_ASSERT(info.type() == SimpleModelInfo::kType);
     const auto& t = dynamic_cast<SimpleModelInfo&>(info);
-    BOOST_CHECK_EQUAL(t.name, model);
-    BOOST_CHECK_EQUAL(t.textureslot, txd);
-    BOOST_CHECK_EQUAL(t.getNumAtomics(), lods.size());
+    BOOST_TEST(t.name == model);
+    BOOST_TEST(t.textureslot == txd);
+    BOOST_TEST(t.getNumAtomics() == lods.size());
     for (auto i = 0u; i < lods.size(); ++i) {
-        BOOST_CHECK_EQUAL(t.getLodDistance(i), lods[i]);
+        BOOST_TEST(t.getLodDistance(i) == lods[i]);
     }
-    BOOST_CHECK_EQUAL(t.flags, flags);
+    BOOST_TEST(t.flags == flags);
 }
 
 void ASSERT_VEHICLE_IS(BaseModelInfo& info, const char* model, const char* txd,
@@ -37,15 +37,15 @@ void ASSERT_VEHICLE_IS(BaseModelInfo& info, const char* model, const char* txd,
         VehicleModelInfo::VehicleClass clas_, int frequency, ModelID wheel, float wheelScale) {
     BOOST_ASSERT(info.type() == VehicleModelInfo::kType);
     const auto& t = dynamic_cast<VehicleModelInfo&>(info);
-    BOOST_CHECK_EQUAL(t.name, model);
-    BOOST_CHECK_EQUAL(t.textureslot, txd);
-    BOOST_CHECK_EQUAL(t.vehicletype_, type);
-    BOOST_CHECK_EQUAL(t.handling_, handling);
-    BOOST_CHECK_EQUAL(t.vehiclename_, name);
-    BOOST_CHECK_EQUAL(t.vehicleclass_, clas_);
-    BOOST_CHECK_EQUAL(t.frequency_, frequency);
-    BOOST_CHECK_EQUAL(t.wheelmodel_, wheel);
-    BOOST_CHECK_EQUAL(t.wheelscale_, wheelScale);
+    BOOST_TEST(t.name == model);
+    BOOST_TEST(t.textureslot == txd);
+    BOOST_TEST(t.vehicletype_ == type);
+    BOOST_TEST(t.handling_ == handling);
+    BOOST_TEST(t.vehiclename_ == name);
+    BOOST_TEST(t.vehicleclass_ == clas_);
+    BOOST_TEST(t.frequency_ == frequency);
+    BOOST_TEST(t.wheelmodel_ == wheel);
+    BOOST_TEST(t.wheelscale_ == wheelScale);
 }
 
 void ASSERT_PED_IS(BaseModelInfo& info, const char* model, const char* txd,
@@ -53,12 +53,12 @@ void ASSERT_PED_IS(BaseModelInfo& info, const char* model, const char* txd,
                    size_t carmask) {
     BOOST_ASSERT(info.type() == PedModelInfo::kType);
     const auto& t = dynamic_cast<PedModelInfo&>(info);
-    BOOST_CHECK_EQUAL(t.name, model);
-    BOOST_CHECK_EQUAL(t.textureslot, txd);
-    BOOST_CHECK_EQUAL(t.pedtype_, type);
-    BOOST_CHECK_EQUAL(t.statindex_, statindex);
-    BOOST_CHECK_EQUAL(t.animgroup_, animgroup);
-    BOOST_CHECK_EQUAL(t.carsmask_, carmask);
+    BOOST_TEST(t.name == model);
+    BOOST_TEST(t.textureslot == txd);
+    BOOST_TEST(t.pedtype_ == type);
+    BOOST_TEST(t.statindex_ == statindex);
+    BOOST_TEST(t.animgroup_ == animgroup);
+    BOOST_TEST(t.carsmask_ == carmask);
 }
 }
 
@@ -72,7 +72,7 @@ BOOST_FIXTURE_TEST_SUITE(LoaderIDETests, WithLoaderIDE)
 
 BOOST_AUTO_TEST_CASE(objects_contains_modelID) {
     loader.load(test_data_stream, {});
-    BOOST_ASSERT(loader.objects.find(1100) != loader.objects.end());
+    BOOST_CHECK(loader.objects.find(1100) != loader.objects.end());
 }
 
 BOOST_AUTO_TEST_CASE(instance_data_is_correct) {
