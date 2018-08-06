@@ -11,7 +11,7 @@
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 
-#include <data/GameTexts.hpp>
+#include <fonts/GameTexts.hpp>
 #include <render/OpenGLRenderer.hpp>
 
 #define GAME_FONTS 3
@@ -30,10 +30,10 @@ public:
      * @todo Can this be merged with the gamestate text entries?
      */
     struct TextInfo {
-        enum TextAlignemnt { Left = 0, Right = 1, Center = 2 };
+        enum class TextAlignment { Left = 0, Right = 1, Center = 2 };
 
         /// Font index @see TextRenderer::setFontTexture
-        int font{0};
+        font_t font{FONT_PAGER};
         /// Message to be displayed (including markup)
         GameString text;
         /// On screen position
@@ -45,7 +45,7 @@ public:
         /// Background colour
         glm::u8vec4 backgroundColour{};
         /// Horizontal Alignment
-        TextAlignemnt align = Left;
+        TextAlignment align = TextAlignment::Left;
         /// Wrap width
         int wrapX{0};
 

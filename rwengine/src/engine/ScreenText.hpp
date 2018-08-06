@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#include <data/GameTexts.hpp>
+#include <fonts/GameTexts.hpp>
 
 enum class ScreenTextType {
     /// Big text will be rendered according to the proscribed style.
@@ -144,7 +144,7 @@ public:
 
     template <class... Args>
     static GameString format(GameString format, Args&&... args) {
-        static auto kReplacementMarker = GameStringUtil::fromString("~1~");
+        static auto kReplacementMarker = GameStringUtil::fromStringCommon("~1~");
         const std::array<GameString, sizeof...(args)> vals = {{args...}};
         size_t x = 0, val = 0;
         // We're only looking for numerical replacement markers

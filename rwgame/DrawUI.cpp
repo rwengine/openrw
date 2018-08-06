@@ -42,9 +42,9 @@ void drawScriptTimer(GameWorld* world, GameRenderer* render) {
         float scriptTimerTextY = ui_scriptTimerHeight;
 
         TextRenderer::TextInfo ti;
-        ti.font = 1;
+        ti.font = FONT_PRICEDOWN;
         ti.size = ui_textSize;
-        ti.align = TextRenderer::TextInfo::Right;
+        ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
         {
             int32_t seconds = *world->state->scriptTimerVariable / 1000;
@@ -52,7 +52,7 @@ void drawScriptTimer(GameWorld* world, GameRenderer* render) {
             ss << std::setw(2) << std::setfill('0') << seconds / 60
                << std::setw(0) << ":" << std::setw(2) << seconds % 60;
 
-            ti.text = GameStringUtil::fromString(ss.str());
+            ti.text = GameStringUtil::fromString(ss.str(), ti.font);
         }
 
         ti.baseColour = ui_shadowColour;
@@ -107,16 +107,16 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     float wantedY = ui_wantedLevelHeight;
 
     TextRenderer::TextInfo ti;
-    ti.font = 1;
+    ti.font = FONT_PRICEDOWN;
     ti.size = ui_textSize;
-    ti.align = TextRenderer::TextInfo::Right;
+    ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
     {
         std::stringstream ss;
         ss << std::setw(2) << std::setfill('0') << world->getHour()
            << std::setw(0) << ":" << std::setw(2) << world->getMinute();
 
-        ti.text = GameStringUtil::fromString(ss.str());
+        ti.text = GameStringUtil::fromString(ss.str(), ti.font);
     }
 
     ti.baseColour = ui_shadowColour;
@@ -135,7 +135,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(8) << std::setfill('0')
            << world->state->playerInfo.displayedMoney;
 
-        ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str());
+        ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str(), ti.font);
     }
 
     ti.baseColour = ui_shadowColour;
@@ -157,7 +157,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(3) << std::setfill('0')
            << static_cast<int>(
                   player->getCharacter()->getCurrentState().health);
-        ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str());
+        ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str(), ti.font);
 
         ti.baseColour = ui_shadowColour;
         ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
@@ -174,7 +174,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(3) << std::setfill('0')
            << static_cast<int>(
                   player->getCharacter()->getCurrentState().armour);
-        ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str());
+        ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str(), ti.font);
 
         ti.baseColour = ui_shadowColour;
         ti.screenPosition =
@@ -249,7 +249,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
             displayBulletsTotal += slotInfo.bulletsClip;
 
             ti.text =
-                GameStringUtil::fromString(std::to_string(displayBulletsTotal));
+                GameStringUtil::fromString(std::to_string(displayBulletsTotal), ti.font);
         } else {
             // Limit the maximal displayed length for the total bullet count
             if (slotInfo.bulletsTotal > 9999) {
@@ -258,13 +258,13 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
             ti.text = GameStringUtil::fromString(
                 std::to_string(displayBulletsTotal) + "-" +
-                std::to_string(slotInfo.bulletsClip));
+                std::to_string(slotInfo.bulletsClip), ti.font);
         }
 
         ti.baseColour = ui_shadowColour;
-        ti.font = 2;
+        ti.font = FONT_ARIAL;
         ti.size = ui_ammoSize;
-        ti.align = TextRenderer::TextInfo::Center;
+        ti.align = TextRenderer::TextInfo::TextAlignment::Center;
         ti.screenPosition = glm::vec2(iconX + ui_weaponSize / 2.f,
                                       iconY + ui_weaponSize - ui_ammoHeight);
         render->text.renderText(ti);
@@ -284,7 +284,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
     const auto vp = glm::vec2(renderer->getRenderer()->getViewport());
 
     TextRenderer::TextInfo ti;
-    ti.font = 2;
+    ti.font = FONT_ARIAL;
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 20.f;
 
@@ -299,13 +299,13 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
             ti.screenPosition = (t.position / glm::vec2(640.f, 480.f)) * vp;
             switch (t.alignment) {
                 case 0:
-                    ti.align = TextRenderer::TextInfo::Left;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
                     break;
                 case 1:
-                    ti.align = TextRenderer::TextInfo::Center;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Center;
                     break;
                 case 2:
-                    ti.align = TextRenderer::TextInfo::Right;
+                    ti.align = TextRenderer::TextInfo::TextAlignment::Right;
                     break;
             }
 

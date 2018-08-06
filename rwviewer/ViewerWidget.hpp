@@ -6,8 +6,9 @@
 #include <engine/GameWorld.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <glm/glm.hpp>
 #include <loaders/LoaderIFP.hpp>
+#include <render/TextRenderer.hpp>
+#include <glm/glm.hpp>
 
 // Prevent Qt from conflicting with glLoadGen on macOS
 #include "OpenGLCompat.h"
@@ -16,6 +17,7 @@
 
 class GameRenderer;
 class Clump;
+
 class ViewerWidget : public QWindow {
     Q_OBJECT
 public:
@@ -26,6 +28,8 @@ public:
         Model,
         //! View loaded instances, \see showWorld();
         World,
+        //! View text strings, \see showText
+        Text,
     };
 
     ViewerWidget(QOpenGLContext* context, QWindow* parent);
@@ -54,6 +58,8 @@ public:
 public slots:
     void showObject(quint16 item);
     void showModel(ClumpPtr model);
+    void clearText();
+    void showText(const TextRenderer::TextInfo &ti);
     void selectFrame(ModelFrame* frame);
     void exportModel();
 
@@ -78,23 +84,24 @@ protected:
     GameWorld* _world = nullptr;
     GameRenderer* _renderer = nullptr;
 
+    std::vector<TextRenderer::TextInfo> textInfos;
     ClumpPtr _model;
     ModelFrame* selectedFrame = nullptr;
     GameObject* _object = nullptr;
     quint16 _objectID = 0;
 
 
-    float viewDistance;
+    float viewDistance = 1.f;
     glm::vec2 viewAngles{};
     glm::vec3 viewPosition{};
 
-    bool dragging;
+    bool dragging = false;
     QPointF dstart;
     glm::vec2 dastart{};
-    bool moveFast;
+    bool moveFast = false;
 
-    DrawBuffer* _frameWidgetDraw;
-    GeometryBuffer* _frameWidgetGeom;
+    DrawBuffer* _frameWidgetDraw = nullptr;
+    GeometryBuffer* _frameWidgetGeom = nullptr;
     GLuint whiteTex;
 
     void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
@@ -103,6 +110,7 @@ protected:
     void drawModel(GameRenderer& r, ClumpPtr& model);
     void drawObject(GameRenderer& r, GameObject* object);
     void drawWorld(GameRenderer& r);
+    void drawText(GameRenderer& r);
 
 };
 

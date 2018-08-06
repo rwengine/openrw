@@ -40,13 +40,13 @@ public:
 
     public:
         MenuEntry(const std::string& n, const std::function<void(void)>& cb)
-            : text(GameStringUtil::fromString(n)), callback(cb) {
+            : text(GameStringUtil::fromString(n, FONT_PRICEDOWN)), callback(cb) {
         }
         MenuEntry(const GameString& n, const std::function<void(void)>& cb)
             : text(n), callback(cb) {
         }
 
-        void draw(int font, float size, bool active, GameRenderer* r,
+        void draw(font_t font, float size, bool active, GameRenderer* r,
                   glm::vec2& basis) {
             TextRenderer::TextInfo ti;
             ti.font = font;
@@ -90,7 +90,7 @@ public:
     }
 
     Menu& lambda(const std::string& n, std::function<void(void)> callback) {
-        entries.emplace_back(GameStringUtil::fromString(n), callback);
+        entries.emplace_back(GameStringUtil::fromString(n, FONT_PRICEDOWN), callback);
         return *this;
     }
 

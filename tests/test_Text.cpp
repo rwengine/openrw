@@ -1,10 +1,10 @@
 #include <boost/test/unit_test.hpp>
-#include <data/GameTexts.hpp>
 #include <engine/ScreenText.hpp>
+#include <fonts/GameTexts.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include "test_Globals.hpp"
 
-#define T(x) GameStringUtil::fromString(x)
+#define T(x) GameStringUtil::fromString(x, FONT_PRICEDOWN)
 
 BOOST_AUTO_TEST_SUITE(TextTests)
 
@@ -20,6 +20,15 @@ BOOST_AUTO_TEST_CASE(load_test) {
         loader.load(texts, d);
 
         BOOST_CHECK_EQUAL(texts.text("1008"), T("BUSTED"));
+    }
+}
+#endif
+
+BOOST_AUTO_TEST_CASE(special_chars) {
+    {
+        auto newline = T("\n");
+        BOOST_CHECK_EQUAL(newline.size(), 1);
+        BOOST_CHECK_EQUAL(newline[0], '\n');
     }
 }
 
@@ -132,6 +141,5 @@ BOOST_AUTO_TEST_CASE(format_remove) {
 
     BOOST_CHECK_EQUAL(1, st.getText<ScreenTextType::Big>().size());
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

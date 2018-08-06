@@ -76,7 +76,7 @@ public:
      * should be controlled via a different mechanism.
      */
     struct DrawParameters {
-        /// Number of indicies
+        /// Number of indices
         size_t count{};
         /// Start index.
         unsigned int start{};

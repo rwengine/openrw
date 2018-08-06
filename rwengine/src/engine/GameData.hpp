@@ -18,11 +18,11 @@
 #include <rw/forward.hpp>
 
 #include <data/AnimGroup.hpp>
-#include <data/GameTexts.hpp>
 #include <data/ModelData.hpp>
 #include <data/PedData.hpp>
 #include <data/Weather.hpp>
 #include <data/ZoneData.hpp>
+#include <fonts/GameTexts.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/LoaderTXD.hpp>

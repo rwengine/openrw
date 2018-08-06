@@ -27,6 +27,15 @@ SET(RWLIB_SOURCES
     source/data/Clump.hpp
     source/data/Clump.cpp
 
+    source/fonts/FontMap.cpp
+    source/fonts/FontMap.hpp
+    source/fonts/FontMapGta3.cpp
+    source/fonts/FontMapGta3.hpp
+    source/fonts/GameTexts.cpp
+    source/fonts/GameTexts.hpp
+    source/fonts/Unicode.cpp
+    source/fonts/Unicode.hpp
+
     source/loaders/LoaderIMG.hpp
     source/loaders/LoaderIMG.cpp
     source/loaders/RWBinaryStream.hpp

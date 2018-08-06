@@ -120,6 +120,7 @@ ObjectViewer::ObjectViewer(QWidget* parent, Qt::WindowFlags f)
     objectList->setColumnWidth(1, 150);
     objectList->setColumnWidth(2, 200);
     objectList->setSortingEnabled(true);
+    objectList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
     connect(objectList->selectionModel(),
             SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
             SLOT(showItem(QModelIndex)));

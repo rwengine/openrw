@@ -68,9 +68,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     }
 
     // Set up text renderer
-    renderer.text.setFontTexture(0, "pager");
-    renderer.text.setFontTexture(1, "font1");
-    renderer.text.setFontTexture(2, "font2");
+    renderer.text.setFontTexture(FONT_PAGER, "pager");
+    renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
@@ -663,8 +663,8 @@ void RWGame::renderDebugStats(float time) {
        << "Timescale: " << world->state->basic.timeScale;
 
     TextRenderer::TextInfo ti;
-    ti.text = GameStringUtil::fromString(ss.str());
-    ti.font = 2;
+    ti.font = FONT_ARIAL;
+    ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
@@ -786,8 +786,8 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
        << " Peds: " << world->pedestrianPool.objects.size() << "\n";
 
     TextRenderer::TextInfo ti;
-    ti.text = GameStringUtil::fromString(ss.str());
-    ti.font = 2;
+    ti.font = FONT_ARIAL;
+    ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
@@ -809,7 +809,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         if (screen.z >= 1.f) {
             return;
         }
-        ti.text = GameStringUtil::fromString(ss.str());
+        ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
         screen.y = viewport.w - screen.y;
         ti.screenPosition = glm::vec2(screen);
         ti.size = 10.f;
@@ -863,7 +863,7 @@ void RWGame::renderProfile() {
     float xscale = renderer.getRenderer()->getViewport().x / upperlimit;
     TextRenderer::TextInfo ti;
     ti.align = TextRenderer::TextInfo::Left;
-    ti.font = 2;
+    ti.font = FONT_ARIAL;
     ti.size = lineHeight - 2.f;
     ti.baseColour = glm::u8vec3(255);
     std::function<void(const perf::ProfileEntry&, int)> renderEntry =
@@ -880,14 +880,14 @@ void RWGame::renderProfile() {
                 ti.screenPosition.x = xscale * (event.start);
                 ti.screenPosition.y = y + 2.f;
                 ti.text = GameStringUtil::fromString(
-                    event.label + " " + std::to_string(duration) + " us ");
+                    event.label + " " + std::to_string(duration) + " us ", ti.font);
                 renderer.text.renderText(ti);
                 renderEntry(event, depth + 1);
             }
         };
     renderEntry(frame, 0);
     ti.screenPosition = glm::vec2(xscale * (16000), 40.f);
-    ti.text = GameStringUtil::fromString(".16 ms");
+    ti.text = GameStringUtil::fromString(".16 ms", ti.font);
     renderer.text.renderText(ti);
 #endif
 }

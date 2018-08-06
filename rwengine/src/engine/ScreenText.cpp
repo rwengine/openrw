@@ -2,6 +2,8 @@
 
 #include <rw/debug.hpp>
 
+#include "fonts/FontMapGta3.hpp"
+
 void ScreenText::tick(float dt) {
     int millis = dt * 1000;
 
@@ -35,7 +37,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
         case 1:
             return {str,
                     {320.f, 252.f},
-                    1,
+                    FONT_PRICEDOWN,
                     50,
                     {2, 0, 0, 0},
                     {58, 119, 133},
@@ -54,7 +56,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
         case 2:
             return {str,
                     {620.f, 380.f},
-                    1,
+                    FONT_PRICEDOWN,
                     30,
                     {2, 3, 0, 0},
                     {214, 171, 9},
@@ -73,7 +75,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
         case 3:
             return {str,
                     {320.f, 400.f},
-                    1,
+                    FONT_PRICEDOWN,
                     50,
                     {5, 5, 0, 0},
                     {169, 123, 88},  /// @todo verify
@@ -93,7 +95,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
         case 5:
             return {str,
                     {320.f, 176.f},
-                    2,
+                    FONT_ARIAL,
                     50,
                     ((style == 4) ? glm::u8vec4({2, 2, 0, 0})
                                   : glm::u8vec4({-2, -2, 0, 0})),
@@ -113,7 +115,7 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
         case 6:
             return {str,
                     {320.f, 240.f},
-                    2,
+                    FONT_ARIAL,
                     50,
                     {2, 2, 0, 0},
                     {152, 89, 39},
@@ -128,9 +130,9 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
             break;
     }
 
-    return {GameStringUtil::fromString("Error, style " + std::to_string(style)),
+    return {GameStringUtil::fromString("Error, style " + std::to_string(style), FONT_PRICEDOWN),
             {320.f, 400.f},
-            2,
+            FONT_ARIAL,
             50,
             {20, 20, 0, 0},
             {20, 20, 200},
@@ -152,7 +154,7 @@ ScreenTextEntry ScreenTextEntry::makeHighPriority(const GameStringKey& id,
     // @todo verify: Size: 15 Pixel high letters ('S', 'l')
     return {str,
             {320.f, 420.f},
-            2,
+            FONT_ARIAL,
             18,
             {1, 0, 0, 0},
             {255, 255, 255},
@@ -165,7 +167,7 @@ ScreenTextEntry ScreenTextEntry::makeHighPriority(const GameStringKey& id,
 
 ScreenTextEntry ScreenTextEntry::makeHelp(const GameStringKey& id,
                                           const GameString& str) {
-    return {str, {20.f, 20.f}, 2, 18, {0, 0, 0, 255}, {255, 255, 255}, 0, 5000,
+    return {str, {20.f, 20.f}, FONT_ARIAL, 18, {0, 0, 0, 255}, {255, 255, 255}, 0, 5000,
             0,   35,           id};
 }
 
@@ -173,7 +175,7 @@ ScreenTextEntry ScreenTextEntry::makeHiddenPackageText(const GameStringKey& id,
                                                        const GameString& str) {
     return {str,
             {318.f, 138.f},
-            2,
+            FONT_ARIAL,
             33,
             {2, 2, 0, 0},
             {0x59, 0x73, 0x96},

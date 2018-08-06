@@ -28,14 +28,14 @@ void LoadingState::handleEvent(const SDL_Event& e) {
 }
 
 void LoadingState::draw(GameRenderer* r) {
-    static auto kLoadingString = GameStringUtil::fromString("Loading...");
+    static auto kLoadingString = GameStringUtil::fromString("Loading...", FONT_ARIAL);
     // Display some manner of loading screen.
     TextRenderer::TextInfo ti;
     ti.text = kLoadingString;
     auto size = r->getRenderer()->getViewport();
     ti.size = 25.f;
     ti.screenPosition = glm::vec2(50.f, size.y - ti.size - 50.f);
-    ti.font = 2;
+    ti.font = FONT_PRICEDOWN;
     ti.baseColour = glm::u8vec3(255);
     r->text.renderText(ti);
 }

@@ -405,9 +405,9 @@ bool CollectablePickup::onPlayerTouch() {
         auto text = ScreenText::format(
             engine->data->texts.text(gxtEntry),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackagesCollected)),
+                std::to_string(state->playerInfo.hiddenPackagesCollected), FONT_PRICEDOWN),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackageCount)));
+                std::to_string(state->playerInfo.hiddenPackageCount), FONT_PRICEDOWN));
 
         state->text.addText<ScreenTextType::HiddenPackageText>(
             ScreenTextEntry::makeHiddenPackageText(gxtEntry, text));

@@ -375,8 +375,8 @@ void DebugState::draw(GameRenderer* r) {
     ss << (zone ? zone->name : "No Zone") << "\n";
 
     TextRenderer::TextInfo ti;
-    ti.text = GameStringUtil::fromString(ss.str());
-    ti.font = 2;
+    ti.font = FONT_ARIAL;
+    ti.text = GameStringUtil::fromString(ss.str(), ti.font);
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
