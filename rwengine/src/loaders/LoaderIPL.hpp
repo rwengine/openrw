@@ -15,8 +15,11 @@ struct InstanceData;
 */
 class LoaderIPL {
 public:
-    /// Load the IPL data into memory
+    /// Load the IPL data from filename
     bool load(const std::string& filename);
+
+    /// Parse IPL data from the stream
+    bool load(std::istream& stream);
 
     /// The list of instances from the IPL file
     std::vector<std::shared_ptr<InstanceData>> m_instances;
