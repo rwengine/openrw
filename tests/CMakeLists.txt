@@ -19,11 +19,11 @@ set(TESTS
     Items
     Lifetime
     LoaderDFF
+    LoaderIDE
     LoaderIPL
     Logger
     Menu
     Object
-    ObjectData
     Payphone
     Pickup
     Renderer

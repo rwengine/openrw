@@ -16,12 +16,20 @@ inline Dest bit_cast(Source const &source) {
 template <class T, class S>
 inline T lexical_cast(const S& s);
 
+template <class T, class S>
+inline T lexical_cast(const S& s, size_t base);
+
 template <>
-inline int lexical_cast(const std::string& source) {
+inline int lexical_cast(const std::string& source, size_t base) {
     char* end = nullptr; //for errors handling
-    int result = std::strtol(source.c_str(), &end, 10);
+    int result = std::strtol(source.c_str(), &end, base);
     RW_CHECK(end != source.c_str(), "Problem with conversion " << *end << " to int");
     return result;
+}
+
+template <>
+inline int lexical_cast(const std::string& source) {
+    return lexical_cast<int>(source, 10);
 }
 
 template <>
