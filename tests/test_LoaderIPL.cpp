@@ -2,30 +2,37 @@
 #include <loaders/LoaderIPL.hpp>
 #include "test_Globals.hpp"
 
+namespace {
+constexpr auto kIPLTestData = R"(
+zone
+ZONE_A, 1, -100.0, -200.00, -100.0, 100.0, 1000.0, 100.0, 1
+ZONE_B, 0,  200.0, 10.0, -100.0, 100.0, 1000.0, 100.0, 2
+end
+)";
+}
+
 struct WithLoaderIPL {
     LoaderIPL loader;
 
-    std::ifstream test_data_stream {Global::get().getGamePath() + "/data/gta3.zon"};
+    std::istringstream test_data_stream {kIPLTestData};
 };
 
 BOOST_FIXTURE_TEST_SUITE(LoaderIPLTests, WithLoaderIPL)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(zone_count_is_correct) {
     BOOST_REQUIRE(loader.load(test_data_stream));
 
-    BOOST_TEST(loader.zones.size() == 42);
+    BOOST_TEST(loader.zones.size() == 2);
 }
 
 BOOST_AUTO_TEST_CASE(zone_data_is_correct) {
     BOOST_REQUIRE(loader.load(test_data_stream));
 
     auto& zone1 = loader.zones[1];
-    BOOST_TEST(zone1.name == "PORT_W");
+    BOOST_TEST(zone1.name == "ZONE_B");
     BOOST_TEST(zone1.type == 0);
-    BOOST_TEST(zone1.min.x == 751.68f);
-    BOOST_TEST(zone1.island == 1);
+    BOOST_TEST(zone1.min.x == 200.0f);
+    BOOST_TEST(zone1.island == 2);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
