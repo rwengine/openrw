@@ -172,7 +172,7 @@ bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
                     getline(strstream, peds->animgroup_, ',');
 
                     getline(strstream, buff, ',');
-                    peds->carsmask_ = static_cast<int>(std::strtol(buff.c_str(), nullptr, 16));
+                    peds->carsmask_ = lexical_cast<int>(buff, 16);
 
                     objects.emplace(peds->id(), std::move(peds));
                     break;
