@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 
+#include <LinearMath/btScalar.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -36,6 +37,7 @@ private:
     float throttle{0.f};
     float brake{0.f};
     bool handbrake = true;
+    std::vector<btScalar> wheelsRotation;
 
     Atomic* chassishigh_ = nullptr;
     Atomic* chassislow_ = nullptr;

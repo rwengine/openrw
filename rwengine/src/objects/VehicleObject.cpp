@@ -104,7 +104,20 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
 
     float travel = fabs(info->handling.suspensionUpperLimit -
                         info->handling.suspensionLowerLimit);
-    tuning.m_frictionSlip = 3.f;
+    float maxVelocity = info->handling.maxVelocity;
+    float accelerationFloor = std::max(info->handling.acceleration, 30.f);
+    float massFloor = std::min(info->handling.mass, 3000.f);
+    // The friction slip represents the friction coefficient between each wheel
+    // and the ground. The higher the coefficient, the more slippery the contact
+    // gets between the wheel and the ground. Fast vehicles (with a significant
+    // acceleration and max speed for a low mass) tend to need a high
+    // coefficient (> 5.f) to allow properly turning when steering. On the other
+    // hand, slow vehicles tend to need a lower coefficient or they will be too
+    // reactive when turning. This (purely empirical) formula is an attempt to
+    // apply this idea, with floors to avoid too much divergence.
+    // For some reason, the calculation with handling info gives us a value in
+    // the right range, with an offset to set a sane base.
+    tuning.m_frictionSlip = 1.8f + maxVelocity * accelerationFloor / massFloor;
     tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
     physVehicle =
@@ -139,12 +152,17 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
             kC * 2.f * btSqrt(wi.m_suspensionStiffness);
         wi.m_wheelsDampingRelaxation =
             kR * 2.f * btSqrt(wi.m_suspensionStiffness);
-        wi.m_rollInfluence = 0.30f;
+        // Roll influence prevents cars from easily flipping wheels.
+        // Tune with care!
+        wi.m_rollInfluence = 0.02f;
+
         float halfFriction = tuning.m_frictionSlip * 0.5f;
         wi.m_frictionSlip =
             halfFriction +
             halfFriction * (front ? info->handling.tractionBias
                                   : 1.f - info->handling.tractionBias);
+
+        wheelsRotation.push_back(0.f);
     }
 
     setModel(getVehicle()->getModel());
@@ -307,15 +325,86 @@ void VehicleObject::tickPhysics(float dt) {
     if (physVehicle) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
-        float engineForce = info->handling.acceleration * throttle * velFac;
+        float velocity = collision->getBulletBody()->getLinearVelocity().length();
+        float velocityForward = physVehicle->getCurrentSpeedKmHour() / 3.6f;
+        float velocityMax = velFac / 9.f;
+        float steerValue = 0.f;
+        float steerLimit = glm::radians(info->handling.steeringLock);
+        // The engine force is calculated from the acceleration and max velocity
+        // of the vehicle, with a specific coefficient to make it adapted to
+        // Bullet physics and avoid reaching top speed too fast.
+        float engineForce = info->handling.acceleration * throttle * velFac / 1.2f;
         float brakeF = getBraking();
+        // Mass coefficient, that quantifies how heavy a vehicle is and excludes
+        // light vehicles.
+        float kM = (std::max(1500.f, info->handling.mass) - 1500.f) / 1500.f;
+        unsigned int count = 0;
+
+        // Get the global vehicle steering value (for front wheels only).
+        for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+            btWheelInfo& wi = physVehicle->getWheelInfo(w);
+
+            if (wi.m_bIsFrontWheel) {
+                steerValue += physVehicle->getSteeringValue(w);
+                count++;
+            }
+        }
+
+        steerValue /= count;
+
+        // Increase the engine force based on the mass by up to 4 times.
+        // Heavy vehicles need extra engine force to be reactive enough.
+        engineForce *= std::min(1.f + kM, 4.f);
+
+        // Give vehicles a boost when starting (forward or backward) to reduce
+        // general sluggishness. The engine force is multiplied by 1.5 before
+        // reaching velocityMax / 4 and then reduces down to nominal force as
+        // velocity reaches velocityMax / 2.
+        if (velocity < velocityMax / 4.f)
+            engineForce *= 1.5f;
+        else if (velocity < velocityMax / 2.f)
+            engineForce *= 1.f + 0.5f * (2.f - velocity / (velocityMax / 4.f));
+
+        // Reduce the engine force when steering, by a factor of up to 1.25 for
+        // the maximum steering angle, linearly back to nominal value when no
+        // steering is applied.
+        if (std::abs(steerValue) > steerLimit / 8.f && velocity > velocityMax / 3.f)
+            engineForce /= 1.f + std::abs(steerValue) / (4.f * steerLimit);
+
+        if (velocity > velocityMax) {
+            btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
+
+            velocity = velocityMax;
+            v *= velocity;
+
+            collision->getBulletBody()->setLinearVelocity(v);
+        }
 
         if (handbrake) {
             brakeF = 5.f;
+        } else if (throttle < 0.f && velocityForward > velocityMax / 8.f) {
+            engineForce = 0.f;
+            brakeF = 2.f * std::min(1.f + kM, 4.f);
+        }
+
+        if (isStopped() && std::abs(throttle) < 0.1f) {
+            btVector3 v = collision->getBulletBody()->getLinearVelocity();
+            v.setX(0.f);
+            v.setY(0.f);
+
+            collision->getBulletBody()->setLinearVelocity(v);
+
+            for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
+                btWheelInfo& wi = physVehicle->getWheelInfo(w);
+                wi.m_rotation = wheelsRotation[w];
+            }
         }
 
         for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
+
+            wheelsRotation[w] = wi.m_rotation;
+
             if (info->handling.driveType == VehicleHandlingInfo::All ||
                 (info->handling.driveType == VehicleHandlingInfo::Forward &&
                  wi.m_bIsFrontWheel) ||
@@ -325,7 +414,7 @@ void VehicleObject::tickPhysics(float dt) {
             }
 
             float brakeReal =
-                5.f * info->handling.brakeDeceleration *
+                8.f * info->handling.brakeDeceleration *
                 (wi.m_bIsFrontWheel ? info->handling.brakeBias
                                     : 1.f - info->handling.brakeBias);
             physVehicle->setBrake(brakeReal * brakeF, w);
