@@ -12,18 +12,24 @@
 #include "engine/GameData.hpp"
 #include "render/GameRenderer.hpp"
 
-int charToIndex(uint16_t g) {
+namespace {
+
+unsigned charToIndex(std::uint16_t g) {
     // Correct for the default font maps
     /// @todo confirm for JA / RU font maps
     return g - 32;
 }
 
-glm::vec4 indexToCoord(font_t font, int index) {
-    float x = static_cast<int>(index % 16);
-    float y = static_cast<int>(index / 16) + 0.01f;
-    float fontHeight = ((font == FONT_PAGER) ? 16.f : 13.f);
-    glm::vec2 gsize(1.f / 16.f, 1.f / fontHeight);
-    return glm::vec4(x, y, x + 1, y + 0.98f) * glm::vec4(gsize, gsize);
+glm::vec4 indexToTexCoord(int index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
+    constexpr unsigned TEXTURE_COLUMNS = 16;
+    const float x = index % TEXTURE_COLUMNS;
+    const float y = index / TEXTURE_COLUMNS;
+    // Add offset to avoid 'leakage' between adjacent glyphs
+    float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
+    float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
+    float p = ((x + 1) * glyphOffset.x - 1.5f) / textureSize.x;
+    float q = ((y + 1) * glyphOffset.y - 1.5f) / textureSize.y;
+    return glm::vec4(s, t, p, q);
 }
 
 const char* TextVertexShader = R"(
@@ -40,9 +46,9 @@ uniform vec2 alignment;
 
 void main()
 {
-	gl_Position = proj * vec4(alignment + position, 0.0, 1.0);
-	TexCoord = texcoord;
-	Colour = colour;
+    gl_Position = proj * vec4(alignment + position, 0.0, 1.0);
+    TexCoord = texcoord;
+    Colour = colour;
 })";
 
 const char* TextFragmentShader = R"(
@@ -56,9 +62,63 @@ out vec4 outColour;
 
 void main()
 {
-	float a = texture(fontTexture, TexCoord).a;
-	outColour = vec4(Colour, a);
+    float a = texture(fontTexture, TexCoord).a;
+    outColour = vec4(Colour, a);
 })";
+
+
+constexpr size_t GLYPHS_NB = 193;
+using FontWidthLut = std::array<std::uint8_t, GLYPHS_NB>;
+
+constexpr std::array<std::uint8_t, 193> fontWidthsPager = {
+     3,  3,  6,  8,  6, 10,  8,  3,  5,  5,  7,  0,  3,  7,  3,  0, //  1
+     6,  4,  6,  6,  7,  6,  6,  6,  6,  6,  3,  0,  0,  0,  0,  6, //  2
+     0,  6,  6,  6,  6,  6,  6,  6,  6,  3,  6,  6,  5,  8,  7,  6, //  3
+     6,  7,  6,  6,  5,  6,  6,  8,  6,  7,  7,  0,  0,  0,  0,  0, //  4
+     0,  6,  6,  6,  6,  6,  5,  6,  6,  3,  4,  6,  3,  9,  6,  6, //  5
+     6,  6,  5,  6,  5,  6,  6,  8,  6,  6,  5,  0,  0,  0,  0,  0, //  6
+     6,  6,  6,  6,  8,  6,  6,  6,  6,  6,  5,  5,  6,  6,  6,  6, //  7
+     6,  6,  6,  6,  6,  6,  7,  6,  6,  6,  6,  9,  6,  6,  6,  6, //  8
+     6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  7,  6,  6, //  9
+     3,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 10
+     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 11
+     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 12
+     8,
+};
+
+constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {
+    11, 13, 30, 27, 20, 24, 22, 12, 14, 14,  0, 26,  9, 14,  9, 26, //  1
+    20, 19, 20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20, //  2
+    27, 20, 20, 20, 20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20, //  3
+    20, 20, 20, 20, 22, 20, 22, 32, 20, 20, 19, 27, 20, 32, 23, 13, //  4
+    27, 21, 21, 21, 21, 21, 18, 22, 21, 12, 20, 22, 17, 30, 22, 21, //  5
+    21, 21, 21, 22, 21, 21, 21, 29, 19, 23, 21, 28, 25,  0,  0,  0, //  6
+    20, 20, 20, 20, 30, 20, 20, 20, 20, 20, 10, 10, 10, 10, 21, 21, //  7
+    21, 21, 20, 20, 20, 20, 21, 21, 21, 21, 21, 32, 23, 21, 21, 21, //  8
+    21, 12, 12, 12, 12, 21, 21, 21, 21, 21, 21, 21, 21, 20, 20, 20, //  9
+    13, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 10
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 11
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
+    16,
+};
+
+constexpr std::array<std::uint8_t, 193> fontWidthsArial = {
+    27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29, //  1
+    47, 33, 45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39, //  2
+    61, 53, 51, 47, 49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51, //  3
+    47, 51, 49, 49, 45, 51, 49, 59, 59, 47, 51, 31, 27, 31, 29, 27, //  4
+    19, 43, 45, 43, 43, 45, 27, 45, 43, 21, 33, 45, 23, 65, 43, 43, //  5
+    47, 45, 33, 41, 29, 43, 41, 61, 51, 43, 43, 67, 53, 67, 67, 71, //  6
+    53, 53, 53, 53, 65, 49, 45, 45, 45, 45, 23, 23, 23, 23, 51, 51, //  7
+    51, 51, 51, 51, 51, 51, 51, 43, 43, 43, 43, 65, 43, 45, 45, 45, //  8
+    45, 21, 21, 21, 21, 43, 43, 43, 43, 43, 43, 43, 43, 53, 43, 39, //  9
+    25, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 10
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19, // 11
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
+    19,
+};
+
+}
 
 struct TextVertex {
     glm::vec2 position;
@@ -85,46 +145,43 @@ struct TextVertex {
 TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
     textShader = renderer->getRenderer()->createShader(TextVertexShader,
                                                        TextFragmentShader);
-
-    std::fill(glyphData.begin(), glyphData.end(), GlyphInfo{.9f});
-
-    glyphData[charToIndex(' ')].widthFrac = 0.4f;
-    glyphData[charToIndex('-')].widthFrac = 0.5f;
-    glyphData[charToIndex('\'')].widthFrac = 0.5f;
-    glyphData[charToIndex('(')].widthFrac = 0.45f;
-    glyphData[charToIndex(')')].widthFrac = 0.45f;
-    glyphData[charToIndex(':')].widthFrac = 0.65f;
-    glyphData[charToIndex('$')].widthFrac = 0.65f;
-
-    for (char g = '0'; g <= '9'; ++g) {
-        glyphData[charToIndex(g)].widthFrac = 0.65f;
-    }
-
-    // Assumes contiguous a-z character encoding
-    for (char g = 0; g <= ('z' - 'a'); g++) {
-        glyphData[charToIndex('a' + g)].widthFrac = 0.7f;
-        glyphData[charToIndex('A' + g)].widthFrac = 0.7f;
-    }
-    // case 'i':
-    glyphData[charToIndex('i')].widthFrac = 0.4f;
-    glyphData[charToIndex('I')].widthFrac = 0.4f;
-    // case 'l':
-    glyphData[charToIndex('l')].widthFrac = 0.5f;
-    glyphData[charToIndex('L')].widthFrac = 0.5f;
-    // case 'm':
-    glyphData[charToIndex('m')].widthFrac = 1.0f;
-    glyphData[charToIndex('M')].widthFrac = 1.0f;
-    // case 'w':
-    glyphData[charToIndex('w')].widthFrac = 1.0f;
-    glyphData[charToIndex('W')].widthFrac = 1.0f;
-    // case 'accent aigu'
-    glyphData[0x91].widthFrac = 0.6f;
 }
 
-void TextRenderer::setFontTexture(int index, const std::string& texture) {
-    if (index < GAME_FONTS) {
-        fonts[index] = texture;
+void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
+    if (font >= FONTS_COUNT) {
+        RW_ERROR("Illegal font: " << font);
+        return;
     }
+    auto ftexture = renderer->getData()->findSlotTexture("fonts", textureName);
+    const glm::u32vec2 textureSize = ftexture->getSize();
+    glm::u8vec2 glyphOffset{textureSize.x / 16, textureSize.x / 16};
+    if (font != FONT_PAGER) {
+        glyphOffset.y += glyphOffset.y / 4;
+    }
+    const FontWidthLut *glyphWidths;
+    switch (font) {
+    case FONT_PAGER:
+        glyphWidths = &fontWidthsPager;
+        break;
+    case FONT_PRICEDOWN:
+        glyphWidths = &fontWidthsPriceDown;
+        break;
+    case FONT_ARIAL:
+        glyphWidths = &fontWidthsArial;
+        break;
+    }
+    std::uint8_t monoWidth = 0;
+    if (font == FONT_PAGER) {
+        monoWidth = 1 + *std::max_element(fontWidthsPager.cbegin(),
+                                          fontWidthsPager.cend());
+    }
+    fonts[font] = FontMetaData{
+        textureName,
+        *glyphWidths,
+        textureSize,
+        glyphOffset,
+        monoWidth
+    };
 }
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
@@ -151,11 +208,13 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     auto text = ti.text;
 
+    const auto &fontMetaData = fonts[ti.font];
+
     for (size_t i = 0; i < text.length(); ++i) {
         char16_t c = text[i];
 
         // Handle any markup changes.
-        if (c == '~' && text.length() > i + 1) {
+        if (c == '~' && text.length() > i + 2) {
             switch (text[i + 1]) {
                 case 'b':  // Blue
                     text.erase(text.begin() + i, text.begin() + i + 3);
@@ -209,8 +268,17 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
             colour = glm::vec3(ti.baseColour) * (1 / 255.f);
         }
 
-        int glyph = charToIndex(c);
-        if (glyph >= GAME_GLYPHS) {
+        // Handle special chars.
+        if (c == '\n') {
+            coord.x = 0.f;
+            coord.y += ss.y;
+            maxHeight = coord.y + ss.y;
+            lineLength = 0;
+            continue;
+        }
+
+        auto glyph = charToIndex(c);
+        if (glyph >= fontMetaData.glyphWidths.size()) {
             continue;
         }
 
@@ -230,24 +298,20 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
             }
         }
 
-        auto& data = glyphData[glyph];
-        auto tex = indexToCoord(ti.font, glyph);
-
-        ss.x = ti.size * data.widthFrac;
-        tex.z = tex.x + (tex.z - tex.x) * data.widthFrac;
-
-        // Handle special chars.
-        if (c == '\n') {
-            coord.x = 0.f;
-            coord.y += ss.y;
-            maxHeight = coord.y + ss.y;
-            lineLength = 0;
-            continue;
-        }
+        auto tex = indexToTexCoord(glyph, fontMetaData.textureSize, fontMetaData.glyphOffset);
+        ss.x = ti.size * static_cast<float>(fontMetaData.glyphOffset.x) / fontMetaData.glyphOffset.y;
         lineLength++;
 
         glm::vec2 p = coord;
-        coord.x += ss.x;
+        float factor = ti.size / static_cast<float>(fontMetaData.glyphOffset.y);
+        float glyphWidth = factor * static_cast<float>(fontMetaData.glyphWidths[glyph]);
+        if (fontMetaData.monoWidth != 0) {
+            float monoWidth = factor * fontMetaData.monoWidth;
+            p.x += static_cast<float>(monoWidth - glyphWidth) / 2;
+            coord.x += monoWidth;
+        } else {
+            coord.x += glyphWidth;
+        }
         maxWidth = std::max(coord.x, maxWidth);
 
         geo.emplace_back(glm::vec2{p.x, p.y + ss.y}, glm::vec2{tex.x, tex.w}, colour);
@@ -287,7 +351,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.start = 0;
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
-    auto ftexture = renderer->getData()->findSlotTexture("fonts", fonts[ti.font]);
+    auto ftexture = renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
     dp.textures = {ftexture->getName()};
     dp.depthWrite = false;
 

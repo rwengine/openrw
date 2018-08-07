@@ -156,10 +156,6 @@ void TextViewer::onGameStringChange(const GameString &gameString) {
     if (hexLineEdit->text().compare(newHexText)) {
         hexLineEdit->setText(newHexText);
     }
-    auto newText = QString::fromStdString(GameStringUtil::toString(gameString, currentFont));
-    if (textEdit->toPlainText().compare(newText)) {
-        textEdit->setText(newText);
-    }
 
     updateRender();
 }
