@@ -92,6 +92,7 @@ PickupObject::BehaviourFlags PickupObject::defaultBehaviourFlags(
 PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
                            BaseModelInfo* modelinfo, PickupType type)
     : GameObject(world, position, glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, modelinfo)
+    , m_corona(world->createParticleEffect())
     , m_type(type) {
     btTransform tf;
     tf.setIdentity();
@@ -134,19 +135,18 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
     else if (modelinfo->name == "health" || modelinfo->name == "bonus")
         m_colourId = 13;
 
-    m_corona = world->createEffect(VisualFX::Particle);
-    m_corona->particle.position = getPosition();
-    m_corona->particle.direction = glm::vec3(0.f, 0.f, 1.f);
-    m_corona->particle.orientation = VisualFX::ParticleData::Camera;
+    m_corona.position = getPosition();
+    m_corona.direction = glm::vec3(0.f, 0.f, 1.f);
+    m_corona.orientation = ParticleFX::Camera;
 
     // @todo float package should float on the water
     if (m_type == FloatingPackage) {
         // verify offset and texture?
-        m_corona->particle.position += glm::vec3(0.f, 0.f, 0.7f);
-        m_corona->particle.texture =
+        m_corona.position += glm::vec3(0.f, 0.f, 0.7f);
+        m_corona.texture =
             engine->data->findSlotTexture("particle", "coronastar");
     } else {
-        m_corona->particle.texture =
+        m_corona.texture =
             engine->data->findSlotTexture("particle", "coronaringa");
     }
 
@@ -162,7 +162,6 @@ PickupObject::~PickupObject() {
     if (m_ghost) {
         setEnabled(false);
         engine->destroyEffect(m_corona);
-        delete m_corona;
         delete m_ghost;
         delete m_shape;
     }
@@ -197,7 +196,7 @@ void PickupObject::tick(float dt) {
     float red = (*colour >> 16) & 0xFF;
     float green = (*colour >> 8) & 0xFF;
     float blue = *colour & 0xFF;
-    m_corona->particle.colour =
+    m_corona.colour =
         glm::vec4(red / 255.f, green / 255.f, blue / 255.f, 1.f) * colourValue;
 
     if (m_enabled) {
@@ -258,10 +257,10 @@ void PickupObject::setEnabled(bool enabled) {
     if (!m_enabled && enabled) {
         engine->dynamicsWorld->addCollisionObject(
             m_ghost, btBroadphaseProxy::SensorTrigger);
-        m_corona->particle.size = glm::vec2(1.5f, 1.5f);
+        m_corona.size = glm::vec2(1.5f, 1.5f);
     } else if (m_enabled && !enabled) {
         engine->dynamicsWorld->removeCollisionObject(m_ghost);
-        m_corona->particle.size = glm::vec2(0.f, 0.f);
+        m_corona.size = glm::vec2(0.f, 0.f);
     }
 
     m_enabled = enabled;
