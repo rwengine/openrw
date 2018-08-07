@@ -214,7 +214,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         char16_t c = text[i];
 
         // Handle any markup changes.
-        if (c == '~' && text.length() > i + 1) {
+        if (c == '~' && text.length() > i + 2) {
             switch (text[i + 1]) {
                 case 'b':  // Blue
                     text.erase(text.begin() + i, text.begin() + i + 3);
