@@ -76,6 +76,7 @@ static const FontMap::gschar_unicode_map_t map_gta3_font_common = {
     {0x78, UnicodeValue::UNICODE_SMALL_X},
     {0x79, UnicodeValue::UNICODE_SMALL_Y},
     {0x7a, UnicodeValue::UNICODE_SMALL_Z},
+    {0x7e, UnicodeValue::UNICODE_TILDE},
     {0x80, UnicodeValue::UNICODE_CAPITAL_A_GRAVE},
     {0x81, UnicodeValue::UNICODE_CAPITAL_A_ACUTE},
     {0x82, UnicodeValue::UNICODE_CAPITAL_A_CIRCUMFLEX},
