@@ -13,17 +13,20 @@
 
 #include "data/InstanceData.hpp"
 #include "data/ZoneData.hpp"
+#include "LoaderIPL.hpp"
+
 
 #include <rw/casts.hpp>
 
 enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 
-/// Load the IPL data into memory
 bool LoaderIPL::load(const std::string& filename) {
     std::ifstream str(filename);
-
     if (!str.is_open()) return false;
+    return load(str);
+}
 
+bool LoaderIPL::load(std::istream &str) {
     SectionTypes section = NONE;
     while (!str.eof()) {
         std::string line;
@@ -134,3 +137,4 @@ bool LoaderIPL::load(const std::string& filename) {
 
     return true;
 }
+
