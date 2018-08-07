@@ -11,3 +11,8 @@ target_link_libraries(rwfontmap
         rwdep::boost_program_options
         Qt5::Gui
     )
+
+install(TARGETS rwfontmap
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+    

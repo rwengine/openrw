@@ -3,11 +3,6 @@
 ###########################################################
 
 set(RWENGINE_SOURCES
-    src/BinaryStream.cpp
-    src/BinaryStream.hpp
-    src/TextureArchive.cpp
-    src/TextureArchive.hpp
-
     src/ai/AIGraph.cpp
     src/ai/AIGraph.hpp
     src/ai/AIGraphNode.cpp
