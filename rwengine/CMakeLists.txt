@@ -21,10 +21,15 @@ set(RWENGINE_SOURCES
     src/ai/TrafficDirector.cpp
     src/ai/TrafficDirector.hpp
 
-    src/audio/SoundManager.cpp
-    src/audio/SoundManager.hpp
     src/audio/alCheck.cpp
     src/audio/alCheck.hpp
+    src/audio/Sound.hpp
+    src/audio/SoundBuffer.cpp
+    src/audio/SoundBuffer.hpp
+    src/audio/SoundManager.cpp
+    src/audio/SoundManager.hpp
+    src/audio/SoundSource.cpp
+    src/audio/SoundSource.hpp
 
     src/core/Logger.cpp
     src/core/Logger.hpp
