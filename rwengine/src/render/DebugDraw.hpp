@@ -8,7 +8,7 @@
 #include <LinearMath/btScalar.h>
 
 #include <data/Clump.hpp>
-#include <gl/gl_core_3_3.h>
+#include <GL/glew.h>
 
 #include "render/OpenGLRenderer.hpp"
 

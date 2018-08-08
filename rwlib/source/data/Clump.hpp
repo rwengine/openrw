@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-#include <gl/gl_core_3_3.h>
+#include <GL/glew.h>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 #include <gl/TextureData.hpp>

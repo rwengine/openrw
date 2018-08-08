@@ -7,7 +7,7 @@
 #include <iterator>
 #include <vector>
 
-#include <gl/gl_core_3_3.h>
+#include <GL/glew.h>
 
 #include "engine/GameData.hpp"
 #include "render/GameRenderer.hpp"

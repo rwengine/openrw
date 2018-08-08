@@ -32,7 +32,7 @@ matrix:
       - /usr/bin/yes | pip2 uninstall numpy  # see https://github.com/travis-ci/travis-ci/issues/6688
       - brew upgrade python
       - brew upgrade
-      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack
+      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 glew jack
       - export PATH="/usr/local/opt/qt/bin:$PATH"
     script:
       - mkdir -p "$TRAVIS_BUILD_DIR/build"

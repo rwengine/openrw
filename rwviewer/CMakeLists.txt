@@ -6,7 +6,6 @@ find_package(Qt5Widgets REQUIRED)
 
 add_executable(rwviewer WIN32
     main.cpp
-    OpenGLCompat.h
 
     ViewerWindow.hpp
     ViewerWindow.cpp
