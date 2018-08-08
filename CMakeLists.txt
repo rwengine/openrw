@@ -66,7 +66,7 @@ endif()
 # Create a rw_interface TARGET that holds all compiler options
 include("${PROJECT_SOURCE_DIR}/cmake_configure.cmake")
 
-add_subdirectory(rwlib)
+add_subdirectory(rwcore)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
 
