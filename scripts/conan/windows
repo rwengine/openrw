@@ -1,5 +1,6 @@
 include(default)
 
 [options]
+openrw:tools=True
 openrw:viewer=True
 ffmpeg:qsv=False

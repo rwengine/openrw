@@ -16,6 +16,7 @@ RUN apt-get update \
         libsdl2-dev \
         libboost-test-dev \
         libqt5opengl5-dev \
+        libfreetype6-dev \
         iwyu \
         qt5-default
 

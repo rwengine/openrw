@@ -1,6 +1,7 @@
 include(default)
 
 [options]
+openrw:tools=True
 openrw:viewer=True
 # https://github.com/bincrafters/community/issues/120
 ffmpeg:vdpau=False

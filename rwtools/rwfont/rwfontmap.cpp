@@ -183,9 +183,9 @@ public:
     }
 
     void write(const rwfs::path &bitmap_path, const rwfs::path &advance_path) {
-        QImageWriter writer(bitmap_path.c_str());
+        QImageWriter writer(QString::fromStdString(bitmap_path.string()));
         writer.write(m_texture);
-        std::ofstream ofs(advance_path.c_str(), std::ios_base::out);
+        std::ofstream ofs(advance_path.string(), std::ios_base::out);
         ofs << m_aspectratio << '\n';
         for (auto adv : m_advances) {
             ofs << int(adv) << '\n';
