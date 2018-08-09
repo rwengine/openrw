@@ -43,6 +43,7 @@ else()
     find_package(Bullet REQUIRED)
     find_package(GLM REQUIRED)
     find_package(FFmpeg REQUIRED)
+    find_package(GLEW REQUIRED)
     find_package(SDL2 REQUIRED)
 
     rwdep_wrap_find_packages()

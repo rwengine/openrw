@@ -16,6 +16,7 @@ RUN dnf update -y \
         glm-devel \
         openal-soft-devel \
         SDL2-devel \
+        glew-devel \
         qt5-devel \
         libasan
 

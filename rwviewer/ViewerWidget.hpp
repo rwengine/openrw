@@ -10,9 +10,6 @@
 #include <render/TextRenderer.hpp>
 #include <glm/glm.hpp>
 
-// Prevent Qt from conflicting with glLoadGen on macOS
-#include "OpenGLCompat.h"
-
 #include <QOpenGLWindow>
 
 class GameRenderer;

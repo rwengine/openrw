@@ -162,7 +162,11 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p) {
 
 OpenGLRenderer::OpenGLRenderer() {
     // We need to query for some profiling exts.
-    ogl_CheckExtensions();
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        RW_ERROR("glewInit() failed: " << glewGetErrorString(err));
+        throw std::runtime_error(reinterpret_cast<const char *>(glewGetErrorString(err)));
+    }
 
     glGenQueries(1, &debugQuery);
 

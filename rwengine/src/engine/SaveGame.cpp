@@ -1325,6 +1325,9 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
 }
 
 #ifdef RW_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 char* readUserPath() {
     LONG retval;
     const char* lpSubKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";

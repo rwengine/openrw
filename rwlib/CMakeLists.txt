@@ -4,8 +4,6 @@
 
 SET(RWLIB_SOURCES
     # GL stuff is only here temporarily, hoping to move it back to rwengine
-    source/gl/gl_core_3_3.c
-    source/gl/gl_core_3_3.h
     source/gl/DrawBuffer.hpp
     source/gl/DrawBuffer.cpp
     source/gl/GeometryBuffer.hpp
@@ -61,6 +59,7 @@ target_link_libraries(rwlib
         rwdep::boost
         rwdep::glm
         openrw::interface
+        rwdep::GLEW
     PRIVATE
         OpenGL::GL
     )
