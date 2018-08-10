@@ -1,16 +1,15 @@
 #ifndef _VIEWERWINDOW_HPP_
 #define _VIEWERWINDOW_HPP_
+
+#include "QOpenGLContextWrapper.hpp"
+
 #include <core/Logger.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
 
-// Prevent Qt from conflicting with glLoadGen on macOS
-#include "OpenGLCompat.h"
-
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QVBoxLayout>
-#include <QOpenGLContext>
 #include <QOffscreenSurface>
 
 #include <memory>
@@ -21,7 +20,7 @@ class GameRenderer;
 
 class ViewerWindow : public QMainWindow {
     Q_OBJECT
-    QOpenGLContext* context_;
+    QOpenGLContextWrapper m_context;
     QOffscreenSurface* hiddenSurface;
     QTabWidget* views;
 

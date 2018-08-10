@@ -21,6 +21,7 @@ static int MaxRecentGames = 5;
 
 ViewerWindow::ViewerWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
+    , m_context(this)
     , gameData(nullptr)
     , gameWorld(nullptr)
     , renderer(nullptr) {
@@ -64,15 +65,13 @@ bool ViewerWindow::setupEngine() {
     QSurfaceFormat format = windowHandle()->format();
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setVersion(3,3);
-    context_ = new QOpenGLContext(this);
-    context_->setShareContext(QOpenGLContext::globalShareContext());
-    context_->setFormat(format);
+    m_context.setup(format);
 
     hiddenSurface = new QOffscreenSurface(windowHandle()->screen());
     hiddenSurface->setFormat(format);
     hiddenSurface->create();
 
-    if (!context_->create()) {
+    if (!m_context.create()) {
         QMessageBox::critical(this, "OpenGL Failure",
                               "Failed to create OpenGL context");
         QApplication::exit(1);
@@ -194,16 +193,16 @@ ViewerWindow::~ViewerWindow() {
 }
 
 bool ViewerWindow::makeCurrent() {
-    if (!context_->makeCurrent(hiddenSurface)) {
+    if (!m_context.makeCurrent(hiddenSurface)) {
         QMessageBox::critical(this, "OpenGL", "makeCurrent failed");
         QApplication::exit(1);
         return false;
     }
-    return  true;
+    return true;
 }
 
 ViewerWidget *ViewerWindow::createViewer() {
-    auto view = new ViewerWidget(context_, windowHandle());
+    auto view = new ViewerWidget(&m_context, windowHandle());
     connect(this, &ViewerWindow::gameLoaded, view, &ViewerWidget::gameLoaded);
     return view;
 }

@@ -6,7 +6,6 @@ find_package(Qt5Widgets REQUIRED)
 
 add_executable(rwviewer WIN32
     main.cpp
-    OpenGLCompat.h
 
     ViewerWindow.hpp
     ViewerWindow.cpp
@@ -44,6 +43,8 @@ add_executable(rwviewer WIN32
     AnimationListModel.cpp
     AnimationListWidget.hpp
     AnimationListWidget.cpp
+    QOpenGLContextWrapper.cpp
+    QOpenGLContextWrapper.hpp
     )
 
 target_link_libraries(rwviewer
