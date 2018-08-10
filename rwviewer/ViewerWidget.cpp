@@ -1,6 +1,7 @@
 #include "ViewerWidget.hpp"
-#include <QFileDialog>
-#include <QMouseEvent>
+
+#include "QOpenGLContextWrapper.hpp"
+
 #include <engine/Animator.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameWorld.hpp>
@@ -11,6 +12,9 @@
 #include <render/GameRenderer.hpp>
 #include <render/ObjectRenderer.hpp>
 #include <render/TextRenderer.hpp>
+
+#include <QFileDialog>
+#include <QMouseEvent>
 
 constexpr float kViewFov = glm::radians(90.0f);
 
@@ -32,9 +36,9 @@ ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
 }
 }
 
-ViewerWidget::ViewerWidget(QOpenGLContext* context, QWindow* parent)
+ViewerWidget::ViewerWidget(QOpenGLContextWrapper* context, QWindow* parent)
     : QWindow(parent)
-    , context(context) {
+    , m_context(context) {
     setSurfaceType(OpenGLSurface);
 }
 
@@ -335,7 +339,7 @@ void ViewerWidget::renderNow() {
         return;
     }
 
-    context->makeCurrent(this);
+    m_context->makeCurrent(this);
 
     if (!initialised) {
         initGL();
@@ -343,7 +347,7 @@ void ViewerWidget::renderNow() {
     }
 
     paintGL();
-    context->swapBuffers(this);
+    m_context->swapBuffers(this);
 
     requestUpdate();
 }
