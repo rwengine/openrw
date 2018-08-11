@@ -54,7 +54,7 @@ public:
 };
 
 GameWorld::GameWorld(Logger* log, GameData* dat)
-    : logger(log), data(dat) {
+    : logger(log), data(dat), sound(this) {
     data->engine = this;
 
     collisionConfig = std::make_unique<btDefaultCollisionConfiguration>();

@@ -8,6 +8,8 @@ extern "C" {
 }
 
 #include "audio/alCheck.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
 
 #include <rw/types.hpp>
 
@@ -25,7 +27,9 @@ Sound& SoundManager::getSoundRef(const std::string& name) {
     return sounds[name];  // @todo reloading, how to check is it wav/mp3?
 }
 
-SoundManager::SoundManager() {
+SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
+    sdt.load(_engine->data->getDataPath() / "audio/sfx");
+
     initializeOpenAL();
     initializeAVCodec();
 }
@@ -97,7 +101,7 @@ bool SoundManager::loadSound(const std::string& name,
     return sound->isLoaded;
 }
 
-void SoundManager::loadSfxSound(const rwfs::path& path, size_t index) {
+void SoundManager::loadSound(size_t index) {
     Sound* sound = nullptr;
 
     auto emplaced =
@@ -106,12 +110,18 @@ void SoundManager::loadSfxSound(const rwfs::path& path, size_t index) {
     sound = &emplaced.first->second;
 
     sound->source = std::make_shared<SoundSource>();
-    sound->source->loadSfx(path, sdt, index);
+    sound->source->loadSfx(sdt, index);
 }
 
 size_t SoundManager::createSfxInstance(size_t index) {
     Sound* sound = nullptr;
     auto soundRef = sfx.find(index);
+
+    if(soundRef == sfx.end()) {
+        // Sound source is not loaded yet
+        loadSound(index);
+        soundRef = sfx.find(index);
+    }
 
     // Try to reuse first available buffer
     // (aka with stopped state)

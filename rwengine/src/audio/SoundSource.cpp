@@ -254,16 +254,13 @@ static int read_packet(void* opaque, uint8_t* buf, int buf_size) {
     return buf_size;
 }
 
-void SoundSource::loadSfx(const rwfs::path& path, LoaderSDT& sdt, size_t index, bool asWave) {
+void SoundSource::loadSfx(LoaderSDT& sdt, size_t index, bool asWave) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
         RW_ERROR("Error allocating the audio frame");
         return;
     }
-
-
-    sdt.load(path / "audio/sfx");
 
     /// Now we need to prepare "custom" format context
     /// We need sdt loader for that purpose

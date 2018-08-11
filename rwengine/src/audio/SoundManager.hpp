@@ -18,6 +18,8 @@
 #include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
 
+class GameWorld;
+
 /// Game's sound manager.
 /// It handles all stuff connected with sounds.
 /// Worth noted: there are three types of sounds,
@@ -26,14 +28,14 @@
 /// instances simultaneously without duplicating raw source).
 class SoundManager {
 public:
-    SoundManager();
+    SoundManager(GameWorld* engine);
     ~SoundManager();
 
     /// Load sound from file and store it with selected name
     bool loadSound(const std::string& name, const std::string& fileName);
 
-    /// Load all sfx sounds
-    void loadSfxSound(const rwfs::path& path, size_t index);
+    /// Load selected sfx sound
+    void loadSound(size_t index);
 
     Sound& getSoundRef(size_t name);
     Sound& getSoundRef(const std::string& name);
@@ -105,6 +107,7 @@ private:
     /// Nr of already created buffers
     size_t bufferNr = 0;
 
+    GameWorld* _engine;
     LoaderSDT sdt{};
 };
 
