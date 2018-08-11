@@ -17,6 +17,7 @@ RUN dnf update -y \
         openal-soft-devel \
         SDL2-devel \
         qt5-devel \
+        freetype-devel \
         libasan
 
 CMD ["/bin/bash"]

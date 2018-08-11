@@ -1,5 +1,4 @@
 # fixme: conan support
-find_package(Freetype REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Gui)
 add_executable(rwfontmap
     rwfontmap.cpp
@@ -7,8 +6,13 @@ add_executable(rwfontmap
 
 target_link_libraries(rwfontmap
     PUBLIC
-        rwlib
-        Freetype::Freetype
+        rwcore
+        rwdep::freetype
+        rwdep::boost_program_options
         Qt5::Gui
-        Boost::program_options
     )
+
+install(TARGETS rwfontmap
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+    

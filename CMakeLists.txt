@@ -35,6 +35,9 @@ else()
     if(BUILD_TESTS)
         find_package(Boost COMPONENTS unit_test_framework REQUIRED)
     endif()
+    if(BUILD_TOOLS)
+        find_package(Freetype REQUIRED)
+    endif()
 
     # Do not link to SDL2main library
     set(SDL2_BUILDING_LIBRARY True)

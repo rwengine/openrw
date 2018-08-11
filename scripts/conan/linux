@@ -1,6 +1,7 @@
 include(default)
 
 [options]
+openrw:tools=True
 openrw:viewer=True
 sdl2:esd=False
 sdl2:wayland=True
