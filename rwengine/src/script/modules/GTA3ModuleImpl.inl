@@ -1,20 +1,21 @@
-#include <script/ScriptTypes.hpp>
-#include <script/ScriptMachine.hpp>
-#include <script/SCMFile.hpp>
-#include <script/ScriptFunctions.hpp>
-#include <engine/GameWorld.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameData.hpp>
-#include <engine/Animator.hpp>
+#include <ai/PlayerController.hpp>
+#include <audio/SfxParameters.hpp>
 #include <core/Logger.hpp>
-#include <objects/CutsceneObject.hpp>
+#include <data/CutsceneData.hpp>
+#include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
+#include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/CutsceneObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/ObjectTypes.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <ai/PlayerController.hpp>
-#include <data/CutsceneData.hpp>
+#include <script/SCMFile.hpp>
+#include <script/ScriptFunctions.hpp>
+#include <script/ScriptMachine.hpp>
+#include <script/ScriptTypes.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -4280,10 +4281,10 @@ void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg sound 
 */
 void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018c);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto metaData = getSoundInstanceData(sound);
+    auto name = world->sound.createSfxInstance(metaData->sfx);
+    world->sound.playSfx(name, coord, false, metaData->range);
 }
 
 /**
