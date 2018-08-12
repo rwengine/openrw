@@ -18,6 +18,8 @@ set(RWENGINE_SOURCES
 
     src/audio/alCheck.cpp
     src/audio/alCheck.hpp
+    src/audio/SfxParameters.cpp
+    src/audio/SfxParameters.hpp
     src/audio/Sound.hpp
     src/audio/SoundBuffer.cpp
     src/audio/SoundBuffer.hpp
