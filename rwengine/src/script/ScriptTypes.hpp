@@ -11,6 +11,7 @@
 
 #include <rw/debug.hpp>
 
+#include "audio/Sound.hpp"
 #include "engine/Garage.hpp"
 
 class CharacterObject;
@@ -109,9 +110,9 @@ struct BlipData;
 using ScriptVehicleGenerator = ScriptObjectType<VehicleGenerator>;
 using ScriptBlip = ScriptObjectType<BlipData>;
 using ScriptPayphone = ScriptObjectType<Payphone>;
+using ScriptSound = ScriptObjectType<Sound>;
 
-/// @todo replace these with real types for sounds etc.
-using ScriptSound = ScriptObjectType<int>;
+/// @todo replace these with real types
 using ScriptFire = ScriptObjectType<int>;
 using ScriptSphere = ScriptObjectType<int>;
 
@@ -348,6 +349,9 @@ ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
 ScriptObjectType<Garage> ScriptArguments::getScriptObject(
+    unsigned int arg) const;
+template <>
+ScriptObjectType<Sound> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 
 typedef std::function<void(const ScriptArguments&)> ScriptFunction;
