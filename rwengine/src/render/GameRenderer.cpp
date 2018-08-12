@@ -32,14 +32,6 @@ constexpr uint32_t kMissingTextureBytes[] = {
     0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
 };
 
-struct WaterVertex {
-    static const AttributeList vertex_attributes() {
-        return {{ATRS_Position, 2, sizeof(WaterVertex), 0ul}};
-    }
-
-    float x, y;
-};
-
 /// @todo collapse all of these into "VertPNC" etc.
 struct ParticleVert {
     static const AttributeList vertex_attributes() {
@@ -167,10 +159,6 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 
     glBindVertexArray(0);
 
-    glGenBuffers(1, &debugVBO);
-    glGenTextures(1, &debugTex);
-    glGenVertexArrays(1, &debugVAO);
-
     particleGeom.uploadVertices<ParticleVert>(
         {{0.5f, 0.5f, 1.f, 1.f, 1.f, 1.f, 1.f},
          {-0.5f, 0.5f, 0.f, 1.f, 1.f, 1.f, 1.f},
@@ -179,7 +167,7 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     particleDraw.addGeometry(&particleGeom);
     particleDraw.setFaceType(GL_TRIANGLE_STRIP);
 
-    ssRectGeom.uploadVertices(sspaceRect);
+    ssRectGeom.uploadVertices<VertexP2>({{-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f}});
     ssRectDraw.addGeometry(&ssRectGeom);
     ssRectDraw.setFaceType(GL_TRIANGLE_STRIP);
 
@@ -197,10 +185,6 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
 GameRenderer::~GameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
     glDeleteProgram(ssRectProgram);
-}
-
-float mix(uint8_t a, uint8_t b, float num) {
-    return a + (b - a) * num;
 }
 
 void GameRenderer::setupRender() {
@@ -441,19 +425,13 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     renderPostProcess();
-
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void GameRenderer::renderPostProcess() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glStencilMask(0xFF);
     glClearStencil(0x00);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT |
-            GL_STENCIL_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     renderer->useProgram(postProg.get());
 
@@ -523,10 +501,6 @@ void GameRenderer::renderEffects(GameWorld* world) {
     }
 }
 
-void GameRenderer::drawOnScreenText() {
-    /// @ TODO
-}
-
 void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
     glUseProgram(ssRectProgram);
 
@@ -589,89 +563,6 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
 
     // Ooops
     renderer->invalidate();
-}
-
-void GameRenderer::renderPaths() {
-    /*glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, debugTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    static std::vector<glm::vec3> carlines;
-    static std::vector<glm::vec3> pedlines;
-
-    GLint posAttrib = glGetAttribLocation(worldProg.get(), "position");
-    GLint uniModel = glGetUniformLocation(worldProg.get(), "model");
-
-    glBindVertexArray( vao );
-
-    for( size_t n = 0; n < engine->aigraph.nodes.size(); ++n ) {
-        auto start = engine->aigraph.nodes[n];
-
-        if( start->type == AIGraphNode::Pedestrian ) {
-            pedlines.push_back(start->position);
-            if( start->external ) {
-                pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 2.f));
-            }
-            else {
-                pedlines.push_back(start->position+glm::vec3(0.f, 0.f, 1.f));
-            }
-        }
-        else {
-            carlines.push_back(start->position-glm::vec3(start->size / 2.f, 0.f,
-    0.f));
-            carlines.push_back(start->position+glm::vec3(start->size / 2.f, 0.f,
-    0.f));
-        }
-
-        for( size_t c = 0; c < start->connections.size(); ++c ) {
-            auto end = start->connections[c];
-
-            if( start->type == AIGraphNode::Pedestrian ) {
-                pedlines.push_back(start->position + glm::vec3(0.f, 0.f, 1.f));
-                pedlines.push_back(end->position + glm::vec3(0.f, 0.f, 1.f));
-            }
-            else {
-                carlines.push_back(start->position + glm::vec3(0.f, 0.f, 1.f));
-                carlines.push_back(end->position + glm::vec3(0.f, 0.f, 1.f));
-            }
-        }
-    }
-
-    glm::mat4 model;
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-    glEnableVertexAttribArray(posAttrib);
-
-    glBindBuffer(GL_ARRAY_BUFFER, debugVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * carlines.size(),
-    &(carlines[0]), GL_STREAM_DRAW);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    float img[] = {1.f, 0.f, 0.f};
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
-        0, GL_RGB, GL_FLOAT, img
-    );
-
-    glDrawArrays(GL_LINES, 0, carlines.size());
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * pedlines.size(),
-    &(pedlines[0]), GL_STREAM_DRAW);
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    float img2[] = {0.f, 1.f, 0.f};
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, 1, 1,
-        0, GL_RGB, GL_FLOAT, img2
-    );
-
-    glDrawArrays(GL_LINES, 0, pedlines.size());
-
-    pedlines.clear();
-    carlines.clear();
-    glBindVertexArray( 0 );*/
 }
 
 void GameRenderer::renderLetterbox() {
