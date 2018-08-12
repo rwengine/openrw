@@ -119,6 +119,9 @@ public:
     void drawTexture(TextureData* texture, glm::vec4 extents);
     void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
+    /** Render full screen splash / fade */
+    void renderSplash(GameWorld* world, GLuint tex, glm::u16vec3 fc);
+
     /** Increases cinematic value */
     void renderLetterbox();
 

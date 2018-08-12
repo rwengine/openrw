@@ -373,7 +373,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     glDisable(GL_DEPTH_TEST);
 
     GLuint splashTexName = 0;
-    auto fc = world->state->fadeColour;
+    const auto fc = world->state->fadeColour;
     if ((fc.r + fc.g + fc.b) == 0 && !world->state->currentSplash.empty()) {
         auto splash = world->data->findSlotTexture("generic", world->state->currentSplash);
         if (splash) {
@@ -386,37 +386,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
         renderLetterbox();
     }
 
-    float fadeTimer = world->getGameTime() - world->state->fadeStart;
     if (!world->isPaused()) {
-        glEnable(GL_BLEND);
-        /// @todo rewrite this render code to use renderer class
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glUseProgram(ssRectProgram);
-        glUniform2f(ssRectOffset, 0.f, 0.f);
-        glUniform2f(ssRectSize, 1.f, 1.f);
-
-        glUniform1i(ssRectTexture, 0);
-
-        if (splashTexName != 0) {
-            glBindTexture(GL_TEXTURE_2D, splashTexName);
-            fc = glm::u16vec3(0, 0, 0);
-        } else {
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-
-        float fadeFrac = 1.f;
-        if (world->state->fadeTime > 0.f) {
-            fadeFrac = std::min(fadeTimer / world->state->fadeTime, 1.f);
-        }
-
-        float a = world->state->fadeIn ? 1.f - fadeFrac : fadeFrac;
-
-        glm::vec4 fadeNormed(fc.r / 255.f, fc.g / 255.f, fc.b / 255.f, a);
-
-        glUniform4fv(ssRectColour, 1, glm::value_ptr(fadeNormed));
-
-        glBindVertexArray(ssRectDraw.getVAOName());
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        renderSplash(world, splashTexName, fc);
     }
 
     if ((world->state->isCinematic || world->state->currentCutscene) &&
@@ -425,6 +396,40 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     renderPostProcess();
+}
+
+void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
+    float fadeTimer = world->getGameTime() - world->state->fadeStart;
+
+    glEnable(GL_BLEND);
+    /// @todo rewrite this render code to use renderer class
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(ssRectProgram);
+    glUniform2f(ssRectOffset, 0.f, 0.f);
+    glUniform2f(ssRectSize, 1.f, 1.f);
+
+    glUniform1i(ssRectTexture, 0);
+
+    if (splashTexName != 0) {
+        glBindTexture(GL_TEXTURE_2D, splashTexName);
+        fc = glm::u16vec3(0, 0, 0);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    float fadeFrac = 1.f;
+    if (world->state->fadeTime > 0.f) {
+        fadeFrac = std::min(fadeTimer / world->state->fadeTime, 1.f);
+    }
+
+    float a = world->state->fadeIn ? 1.f - fadeFrac : fadeFrac;
+
+    glm::vec4 fadeNormed(fc.r / 255.f, fc.g / 255.f, fc.b / 255.f, a);
+
+    glUniform4fv(ssRectColour, 1, glm::value_ptr(fadeNormed));
+
+    glBindVertexArray(ssRectDraw.getVAOName());
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
 void GameRenderer::renderPostProcess() {
