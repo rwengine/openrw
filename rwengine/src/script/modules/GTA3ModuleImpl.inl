@@ -4296,11 +4296,11 @@ void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     @arg sound1 
 */
 void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound0, ScriptSound& sound1) {
-    RW_UNIMPLEMENTED_OPCODE(0x018d);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound0);
-    RW_UNUSED(sound1);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto metaData = getSoundInstanceData(sound0);
+    auto bufferName = world->sound.createSfxInstance(metaData->sfx);
+    world->sound.playSfx(bufferName, coord, true, metaData->range);
+    sound1 = &world->sound.getSoundRef(bufferName);
 }
 
 /**
