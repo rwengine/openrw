@@ -10,13 +10,11 @@
 #include <render/TextRenderer.hpp>
 #include <glm/glm.hpp>
 
-// Prevent Qt from conflicting with glLoadGen on macOS
-#include "OpenGLCompat.h"
+#include <QWindow>
 
-#include <QOpenGLWindow>
-
-class GameRenderer;
 class Clump;
+class GameRenderer;
+class QOpenGLContextWrapper;
 
 class ViewerWidget : public QWindow {
     Q_OBJECT
@@ -32,7 +30,7 @@ public:
         Text,
     };
 
-    ViewerWidget(QOpenGLContext* context, QWindow* parent);
+    ViewerWidget(QOpenGLContextWrapper* context, QWindow* parent);
 
     void initGL();
     void paintGL();
@@ -80,7 +78,7 @@ protected:
 
     Mode _viewMode = Mode::World;
 
-    QOpenGLContext* context;
+    QOpenGLContextWrapper* m_context;
     GameWorld* _world = nullptr;
     GameRenderer* _renderer = nullptr;
 
