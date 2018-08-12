@@ -4310,9 +4310,8 @@ void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     @arg sound 
 */
 void opcode_018e(const ScriptArguments& args, const ScriptSound sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018e);
-    RW_UNUSED(sound);
     RW_UNUSED(args);
+    sound->stop();
 }
 
 /**
