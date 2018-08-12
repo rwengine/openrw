@@ -10,6 +10,7 @@ extern "C" {
 #include "audio/alCheck.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"
+#include "render/ViewCamera.hpp"
 
 #include <rw/types.hpp>
 
@@ -272,6 +273,14 @@ void SoundManager::pause(bool p) {
             resumeAllSounds();
         }
     }
+}
+
+void SoundManager::updateListenerTransform(const ViewCamera& currentCam) {
+    // @todo ShFil119 it should be improved
+    _engine->sound.setListenerPosition(currentCam.position);
+    _engine->sound.setListenerOrientation(glm::vec3(
+        currentCam.rotation.x, currentCam.rotation.y, currentCam.rotation.z));
+    //world->sound.setListenerVelocity(glm::vec3());
 }
 
 void SoundManager::setListenerPosition(const glm::vec3& position) {

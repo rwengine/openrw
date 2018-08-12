@@ -19,6 +19,7 @@
 #include <loaders/LoaderSDT.hpp>
 
 class GameWorld;
+class ViewCamera;
 
 /// Game's sound manager.
 /// It handles all stuff connected with sounds.
@@ -74,6 +75,9 @@ public:
     bool loadMusic(const std::string& name, const std::string& fileName);
     void playMusic(const std::string& name);
     void stopMusic(const std::string& name);
+
+    /// Updating listener tranform, called by main loop of game.
+    void updateListenerTransform(const ViewCamera& currentCam);
 
     /// Setting position of listener for openAL.
     void setListenerPosition(const glm::vec3& position);
