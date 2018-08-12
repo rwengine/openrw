@@ -128,7 +128,10 @@ bool Activities::GoTo::update(CharacterObject *character,
 
     // Ignore vertical axis for the sake of simplicity.
     if (glm::length(glm::vec2(targetDirection)) < 0.1f) {
-        character->setPosition(glm::vec3(glm::vec2(target), cpos.z));
+        // Apply an offset so that the feet are the center
+        const float z_offset = character->physShape->getHalfHeight() +
+                               character->physShape->getRadius();
+        character->setPosition(glm::vec3(glm::vec2(target), cpos.z - z_offset));
         controller->setMoveDirection({0.f, 0.f, 0.f});
         character->controller->setRunning(false);
         return true;

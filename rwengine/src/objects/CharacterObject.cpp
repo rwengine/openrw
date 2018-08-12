@@ -427,7 +427,10 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
         if (pos.z <= -99.f) {
             realPos = engine->getGroundAtPosition(pos);
         }
-        btVector3 bpos(realPos.x, realPos.y, realPos.z + 1.0f);
+        // Apply an offset so that the feet are the center
+        const float z_offset =
+            physShape->getHalfHeight() + physShape->getRadius();
+        btVector3 bpos(realPos.x, realPos.y, realPos.z + z_offset);
         physCharacter->warp(bpos);
     }
     position = realPos;
