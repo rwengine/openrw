@@ -510,10 +510,7 @@ void RWGame::tick(float dt) {
             while (scriptTimerAccumulator >= timerClockRate) {
                 // Original game uses milliseconds
                 (*state.scriptTimerVariable) -= timerClockRate * 1000;
-                if (*state.scriptTimerVariable <= 0) {
-                    (*state.scriptTimerVariable) = 0;
-                    state.scriptTimerVariable = nullptr;
-                }
+		    
                 //                                11 seconds
                 if (*state.scriptTimerVariable <= 11000 &&
                     beepTime - *state.scriptTimerVariable >= 1000) {
@@ -521,6 +518,12 @@ void RWGame::tick(float dt) {
 
                     // @todo beep
                 }
+		    
+                if (*state.scriptTimerVariable <= 0) {
+                    (*state.scriptTimerVariable) = 0;
+                    state.scriptTimerVariable = nullptr;
+                }
+
                 scriptTimerAccumulator -= timerClockRate;
             }
         }
