@@ -16,7 +16,7 @@ matrix:
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"
   - os: linux
-    env: NAME="Arch Linux (Latest)" NAME_SUFFIX="arch"
+    env: NAME="Arch Linux (Latest)" NAME_SUFFIX="arch" DEBUG=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
