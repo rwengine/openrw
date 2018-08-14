@@ -171,20 +171,14 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     ssRectDraw.addGeometry(&ssRectGeom);
     ssRectDraw.setFaceType(GL_TRIANGLE_STRIP);
 
-    ssRectProgram =
-        compileProgram(GameShaders::ScreenSpaceRect::VertexShader,
-                       GameShaders::ScreenSpaceRect::FragmentShader);
-
-    ssRectTexture = glGetUniformLocation(ssRectProgram, "texture");
-    ssRectColour = glGetUniformLocation(ssRectProgram, "colour");
-    ssRectSize = glGetUniformLocation(ssRectProgram, "size");
-    ssRectOffset = glGetUniformLocation(ssRectProgram, "offset");
-
+    ssRectProg =
+        renderer->createShader(GameShaders::ScreenSpaceRect::VertexShader,
+                               GameShaders::ScreenSpaceRect::FragmentShader);
+    renderer->setUniform(ssRectProg.get(), "texture", 0);
 }
 
 GameRenderer::~GameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
-    glDeleteProgram(ssRectProgram);
 }
 
 void GameRenderer::setupRender() {
@@ -401,20 +395,8 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
 
-    glEnable(GL_BLEND);
-    /// @todo rewrite this render code to use renderer class
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glUseProgram(ssRectProgram);
-    glUniform2f(ssRectOffset, 0.f, 0.f);
-    glUniform2f(ssRectSize, 1.f, 1.f);
-
-    glUniform1i(ssRectTexture, 0);
-
     if (splashTexName != 0) {
-        glBindTexture(GL_TEXTURE_2D, splashTexName);
         fc = glm::u16vec3(0, 0, 0);
-    } else {
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     float fadeFrac = 1.f;
@@ -423,13 +405,24 @@ void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16
     }
 
     float a = world->state->fadeIn ? 1.f - fadeFrac : fadeFrac;
+    if (a <= 0.f) {
+        return;
+    }
 
     glm::vec4 fadeNormed(fc.r / 255.f, fc.g / 255.f, fc.b / 255.f, a);
 
-    glUniform4fv(ssRectColour, 1, glm::value_ptr(fadeNormed));
+    renderer->useProgram(ssRectProg.get());
+    renderer->setUniform(ssRectProg.get(), "colour", fadeNormed);
+    renderer->setUniform(ssRectProg.get(), "size", glm::vec2{1.f, 1.f});
+    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{0.f, 0.f});
 
-    glBindVertexArray(ssRectDraw.getVAOName());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    Renderer::DrawParameters wdp;
+    wdp.depthMode = DepthMode::OFF;
+    wdp.blendMode = BlendMode::BLEND_ALPHA;
+    wdp.count = ssRectGeom.getCount();
+    wdp.textures = {splashTexName};
+
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
 void GameRenderer::renderPostProcess() {
@@ -507,8 +500,6 @@ void GameRenderer::renderEffects(GameWorld* world) {
 }
 
 void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
-    glUseProgram(ssRectProgram);
-
     // Move into NDC
     extents.x /= renderer->getViewport().x;
     extents.y /= renderer->getViewport().y;
@@ -520,27 +511,21 @@ void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
-    /// @todo rewrite this render code to use renderer class
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glUniform2f(ssRectOffset, extents.x, extents.y);
-    glUniform2f(ssRectSize, extents.z, extents.w);
+    renderer->useProgram(ssRectProg.get());
+    renderer->setUniform(ssRectProg.get(), "colour", glm::vec4{0.f, 0.f, 0.f, 1.f});
+    renderer->setUniform(ssRectProg.get(), "size", glm::vec2{extents.z, extents.w});
+    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{extents.x, extents.y});
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture->getName());
-    glUniform1i(ssRectTexture, 0);
-    glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
+    Renderer::DrawParameters wdp;
+    wdp.depthMode = DepthMode::OFF;
+    wdp.blendMode = BlendMode::BLEND_ALPHA;
+    wdp.count = ssRectGeom.getCount();
+    wdp.textures = {texture->getName()};
 
-    glBindVertexArray(ssRectDraw.getVAOName());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    // Ooops
-    renderer->invalidate();
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
 void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
-    glUseProgram(ssRectProgram);
-
     // Move into NDC
     extents.x /= renderer->getViewport().x;
     extents.y /= renderer->getViewport().y;
@@ -552,43 +537,35 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     extents.y -= .5f;
     extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
 
-    /// @todo rewrite this render code to use renderer class
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glUniform2f(ssRectOffset, extents.x, extents.y);
-    glUniform2f(ssRectSize, extents.z, extents.w);
+    renderer->useProgram(ssRectProg.get());
+    renderer->setUniform(ssRectProg.get(), "colour", colour);
+    renderer->setUniform(ssRectProg.get(), "size", glm::vec2{extents.z, extents.w});
+    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{extents.x, extents.y});
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUniform1i(ssRectTexture, 0);
-    glUniform4f(ssRectColour, colour.r, colour.g, colour.b, colour.a);
+    Renderer::DrawParameters wdp;
+    wdp.depthMode = DepthMode::OFF;
+    wdp.blendMode = BlendMode::BLEND_ALPHA;
+    wdp.count = ssRectGeom.getCount();
+    wdp.textures = {0};
 
-    glBindVertexArray(ssRectDraw.getVAOName());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    // Ooops
-    renderer->invalidate();
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
 void GameRenderer::renderLetterbox() {
-    /// @todo rewrite this render code to use renderer class
-    glUseProgram(ssRectProgram);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    const float cinematicExperienceSize = 0.15f;
-    glUniform2f(ssRectOffset, 0.f, -1.f * (1.f - cinematicExperienceSize));
-    glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
+    constexpr float cinematicExperienceSize = 0.15f;
+    renderer->useProgram(ssRectProg.get());
+    renderer->setUniform(ssRectProg.get(), "colour", glm::vec4{0.f, 0.f, 0.f, 1.f});
+    renderer->setUniform(ssRectProg.get(), "size", glm::vec2{1.f, cinematicExperienceSize});
+    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{0.f,-1.f * (1.f - cinematicExperienceSize)});
+    Renderer::DrawParameters wdp;
+    wdp.depthMode = DepthMode::OFF;
+    wdp.blendMode = BlendMode::BLEND_NONE;
+    wdp.count = ssRectGeom.getCount();
+    wdp.textures = {0};
 
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUniform1i(ssRectTexture, 0);
-    glUniform4f(ssRectColour, 0.f, 0.f, 0.f, 1.f);
-
-    glBindVertexArray(ssRectDraw.getVAOName());
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    glUniform2f(ssRectOffset, 0.f, 1.f * (1.f - cinematicExperienceSize));
-    glUniform2f(ssRectSize, 1.f, cinematicExperienceSize);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
+    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{0.f, 1.f * (1.f - cinematicExperienceSize)});
+    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
 void GameRenderer::setViewport(int w, int h) {

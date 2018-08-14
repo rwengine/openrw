@@ -77,8 +77,7 @@ public:
     std::unique_ptr<Renderer::ShaderProgram> skyProg;
     std::unique_ptr<Renderer::ShaderProgram> particleProg;
 
-    GLuint ssRectProgram;
-    GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
+    std::unique_ptr<Renderer::ShaderProgram> ssRectProg;
 
     GLuint skydomeIBO;
 
