@@ -233,9 +233,9 @@ if(_NB_BUILD_ERRORS)
 endif()
 
 if(_TEST_RESULT)
-    list(APPEND WARNING_MESSAGES "Test failure detected!")
+    list(APPEND ERROR_MESSAGES "Test failure detected!")
 endif()
 
 if(_SUBMIT_RESULT)
-    list(APPEND ERROR_MESSAGES "Test submission failure detected!")
+    list(APPEND WARNING_MESSAGES "Test submission failure detected!")
 endif()
