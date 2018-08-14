@@ -29,7 +29,9 @@ Sound& SoundManager::getSoundRef(const std::string& name) {
 }
 
 SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
-    sdt.load(_engine->data->getDataPath() / "audio/sfx");
+    auto sdtPath = _engine->data->index.findFilePath("audio/sfx.SDT");
+    auto rawPath = _engine->data->index.findFilePath("audio/sfx.RAW");
+    sdt.load(sdtPath, rawPath);
 
     initializeOpenAL();
     initializeAVCodec();

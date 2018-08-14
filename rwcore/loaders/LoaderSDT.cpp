@@ -6,9 +6,9 @@
 
 #include "rw/debug.hpp"
 
-bool LoaderSDT::load(const rwfs::path& path) {
-    const auto sdtName = path.string() + ".SDT";
-    const auto rawName = path.string() + ".RAW";
+bool LoaderSDT::load(const rwfs::path& sdtPath, const rwfs::path& rawPath) {
+    const auto sdtName = sdtPath.string();
+    const auto rawName = rawPath.string();
 
     FILE* fp = fopen(sdtName.c_str(), "rb");
     if (fp) {
@@ -29,7 +29,7 @@ bool LoaderSDT::load(const rwfs::path& path) {
         m_archive = rawName;
         return true;
     } else {
-        RW_ERROR("Error cannot find " << path);
+        RW_ERROR("Error cannot open " << sdtName);
         return false;
     }
 }
