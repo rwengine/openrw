@@ -77,17 +77,7 @@ public:
     void stopMusic(const std::string& name);
 
     /// Updating listener tranform, called by main loop of game.
-    void updateListenerTransform(const ViewCamera& currentCam);
-
-    /// Setting position of listener for openAL.
-    void setListenerPosition(const glm::vec3& position);
-
-    /// Setting velocity of velocity for openAL.
-    void setListenerVelocity(const glm::vec3& vel);
-
-    /// Setting orientation of listener for openAL.
-    /// Worth noted v = { at.x, at.y, at.z, up.x, up.y, up.z}
-    void setListenerOrientation(const glm::vec3& at);
+    void updateListenerTransform(const ViewCamera& cam);
 
     /// Setting position of sound source in buffer.
     void setSoundPosition(const std::string& name, const glm::vec3& position);

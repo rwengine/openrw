@@ -275,25 +275,21 @@ void SoundManager::pause(bool p) {
     }
 }
 
-void SoundManager::updateListenerTransform(const ViewCamera& currentCam) {
-    // @todo ShFil119 it should be improved
-    _engine->sound.setListenerPosition(currentCam.position);
-    _engine->sound.setListenerOrientation(glm::vec3(
-        currentCam.rotation.x, currentCam.rotation.y, currentCam.rotation.z));
-    //world->sound.setListenerVelocity(glm::vec3());
-}
+void SoundManager::updateListenerTransform(const ViewCamera& cam) {
+    // Orientation
+    auto up = cam.rotation * glm::vec3(0.f, 0.f, 1.f);
+    auto at = cam.rotation * glm::vec3(1.f, 0.f, 0.f);
+    float orientation[6] = {at.x, at.y, at.z, up.x, up.y, up.z};
+    alListenerfv(AL_ORIENTATION, orientation);
 
-void SoundManager::setListenerPosition(const glm::vec3& position) {
-    alListener3f(AL_POSITION, position.x, position.y, position.z);
-}
+    // Position
+    float position[3] = {cam.position.x, cam.position.y, cam.position.z};
+    alListenerfv(AL_POSITION, position);
 
-void SoundManager::setListenerVelocity(const glm::vec3& vel) {
-    alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
-}
-
-void SoundManager::setListenerOrientation(const glm::vec3& at) {
-    float v[6] = {0, at.y, 0, 0, 0, at.z};
-    alListenerfv(AL_ORIENTATION, v);
+    // @todo ShFil119 it should be implemented
+    // Velocity
+    // float velocity[3] = ...
+    // alListenerfv(AL_VELOCITY, velocity);
 }
 
 void SoundManager::setSoundPosition(const std::string& name,
