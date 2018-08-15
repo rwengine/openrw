@@ -131,6 +131,11 @@ void Rampage::tick(float dt) {
 
         status = Passed;
     }
+
+}
+
+float Rampage::getRemainingTime() const {
+    return endTime - state->world->getGameTime();
 }
 
 uint32_t Rampage::getKillsForThisModel(ModelID model) {

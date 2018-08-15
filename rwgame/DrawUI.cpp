@@ -30,6 +30,7 @@ const glm::u8vec3 ui_moneyColour(89, 113, 147);
 const glm::u8vec3 ui_healthColour(187, 102, 47);
 const glm::u8vec3 ui_armourColour(123, 136, 93);
 const glm::u8vec3 ui_scriptTimerColour(186, 101, 50);
+const glm::u8vec3 ui_rampageTimerColour(123, 136, 93);
 const glm::u8vec3 ui_shadowColour(0, 0, 0);
 constexpr float ui_mapSize = 150.f;
 constexpr float ui_worldSizeMin = 200.f;
@@ -64,6 +65,37 @@ void drawScriptTimer(GameWorld* world, GameRenderer* render) {
         ti.screenPosition = glm::vec2(scriptTimerTextX, scriptTimerTextY);
         render->text.renderText(ti);
     }
+}
+
+void drawRampage(GameWorld* world, GameRenderer* render) {
+    float rampageTimerX = 0 + ui_infoMargin;
+    float rampageTimerY = 0.f + ui_outerMargin;
+
+    TextRenderer::TextInfo ti;
+    ti.font = 1;
+    ti.size = ui_textSize;
+    ti.align = TextRenderer::TextInfo::Left;
+
+    {
+        float remainingTime = world->state->rampage.getRemainingTime();
+        int32_t seconds = static_cast<int32_t>(remainingTime);
+
+        std::stringstream ss;
+        ss << std::setw(1) << std::setfill('0')
+           <<  seconds / 60 << std::setw(0)
+           << ":" << std::setw(2)
+           << seconds % 60;
+
+        ti.text = GameStringUtil::fromString(ss.str());
+    }
+
+    ti.baseColour = ui_shadowColour;
+    ti.screenPosition = glm::vec2(rampageTimerX + 1.f, rampageTimerY + 1.f);
+    render->text.renderText(ti);
+
+    ti.baseColour = ui_rampageTimerColour;
+    ti.screenPosition = glm::vec2(rampageTimerX, rampageTimerY);
+    render->text.renderText(ti);
 }
 
 void drawMap(ViewCamera& currentView, PlayerController* player,
@@ -277,6 +309,7 @@ void drawHUD(ViewCamera& currentView, PlayerController* player,
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
         drawScriptTimer(world, render);
+        drawRampage(world, render);
     }
 }
 
