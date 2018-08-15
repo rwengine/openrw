@@ -7,9 +7,7 @@ class DefaultAIController final : public CharacterController {
     glm::vec3 gotoPos{};
 
 public:
-    DefaultAIController()
-        : CharacterController() {
-    }
+    DefaultAIController() = default;
 
     glm::vec3 getTargetPosition() override;
 

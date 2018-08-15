@@ -256,11 +256,13 @@ void RWGame::handleCheatInput(char symbol) {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
 #if RW_GAME_GTA3_ANNIVERSARY != 0
-         uint16_t vehicleModel = 110;  // @todo Which cars are spawned?!
+         // @todo Which cars are spawned?!
+         uint16_t vehicleModel = 110;
 #else
          uint16_t vehicleModel = 122;
 #endif
-            const auto ch = getWorld()->getPlayer()->getCharacter();// @todo Change spawn place to be more like in original game
+            // @todo Change spawn place to be more like in original game
+            const auto ch = getWorld()->getPlayer()->getCharacter();
             const auto playerRot = ch->getRotation();
             const auto spawnPos = ch->getPosition() + playerRot * glm::vec3(0.f, 3.f, 0.f);
             const auto spawnRot = glm::quat(
