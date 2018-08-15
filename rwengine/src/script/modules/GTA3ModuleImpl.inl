@@ -11481,6 +11481,7 @@ void opcode_03e4(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg gxtEntry GXT entry
 */
 void opcode_03e5(const ScriptArguments& args, const ScriptString gxtEntry) {
+    args.getState()->text.clear<ScreenTextType::Big>();
     args.getState()->text.addText<ScreenTextType::Big>(
         ScreenTextEntry::makeHelp(gxtEntry, script::gxt(args, gxtEntry)));
 }
