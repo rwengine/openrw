@@ -16,7 +16,7 @@ public:
     void loadFromFile(const rwfs::path& filePath);
 
     /// Load sound from sdt file
-    void loadSfx(const rwfs::path& path, LoaderSDT& sdt, size_t index, bool asWave = true);
+    void loadSfx(LoaderSDT& sdt, size_t index, bool asWave = true);
 
 private:
     /// Raw data

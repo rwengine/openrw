@@ -8,6 +8,9 @@ extern "C" {
 }
 
 #include "audio/alCheck.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameWorld.hpp"
+#include "render/ViewCamera.hpp"
 
 #include <rw/types.hpp>
 
@@ -25,7 +28,11 @@ Sound& SoundManager::getSoundRef(const std::string& name) {
     return sounds[name];  // @todo reloading, how to check is it wav/mp3?
 }
 
-SoundManager::SoundManager() {
+SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
+    auto sdtPath = _engine->data->index.findFilePath("audio/sfx.SDT");
+    auto rawPath = _engine->data->index.findFilePath("audio/sfx.RAW");
+    sdt.load(sdtPath, rawPath);
+
     initializeOpenAL();
     initializeAVCodec();
 }
@@ -71,6 +78,12 @@ bool SoundManager::initializeAVCodec() {
     av_log_set_level(AV_LOG_ERROR);
 #endif
 
+    // Some older versions of FFmpeg require it
+    // before calling  avformat_alloc_context()
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
+    av_register_all();
+#endif
+
     return true;
 }
 
@@ -97,7 +110,7 @@ bool SoundManager::loadSound(const std::string& name,
     return sound->isLoaded;
 }
 
-void SoundManager::loadSfxSound(const rwfs::path& path, size_t index) {
+void SoundManager::loadSound(size_t index) {
     Sound* sound = nullptr;
 
     auto emplaced =
@@ -106,12 +119,18 @@ void SoundManager::loadSfxSound(const rwfs::path& path, size_t index) {
     sound = &emplaced.first->second;
 
     sound->source = std::make_shared<SoundSource>();
-    sound->source->loadSfx(path, sdt, index);
+    sound->source->loadSfx(sdt, index);
 }
 
 size_t SoundManager::createSfxInstance(size_t index) {
     Sound* sound = nullptr;
     auto soundRef = sfx.find(index);
+
+    if(soundRef == sfx.end()) {
+        // Sound source is not loaded yet
+        loadSound(index);
+        soundRef = sfx.find(index);
+    }
 
     // Try to reuse first available buffer
     // (aka with stopped state)
@@ -264,17 +283,21 @@ void SoundManager::pause(bool p) {
     }
 }
 
-void SoundManager::setListenerPosition(const glm::vec3& position) {
-    alListener3f(AL_POSITION, position.x, position.y, position.z);
-}
+void SoundManager::updateListenerTransform(const ViewCamera& cam) {
+    // Orientation
+    auto up = cam.rotation * glm::vec3(0.f, 0.f, 1.f);
+    auto at = cam.rotation * glm::vec3(1.f, 0.f, 0.f);
+    float orientation[6] = {at.x, at.y, at.z, up.x, up.y, up.z};
+    alListenerfv(AL_ORIENTATION, orientation);
 
-void SoundManager::setListenerVelocity(const glm::vec3& vel) {
-    alListener3f(AL_VELOCITY, vel.x, vel.y, vel.z);
-}
+    // Position
+    float position[3] = {cam.position.x, cam.position.y, cam.position.z};
+    alListenerfv(AL_POSITION, position);
 
-void SoundManager::setListenerOrientation(const glm::vec3& at) {
-    float v[6] = {0, at.y, 0, 0, 0, at.z};
-    alListenerfv(AL_ORIENTATION, v);
+    // @todo ShFil119 it should be implemented
+    // Velocity
+    // float velocity[3] = ...
+    // alListenerfv(AL_VELOCITY, velocity);
 }
 
 void SoundManager::setSoundPosition(const std::string& name,

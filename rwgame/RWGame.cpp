@@ -604,6 +604,8 @@ void RWGame::render(float alpha, float time) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
 
+    world->sound.updateListenerTransform(viewCam);
+
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
