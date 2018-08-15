@@ -556,6 +556,7 @@ void RWGame::tick(float dt) {
 
         world->destroyQueuedObjects();
 
+        state.rampage.tick(dt);
         state.text.tick(dt);
 
         if (vm) {
