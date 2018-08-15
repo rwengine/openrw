@@ -282,6 +282,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
 
     setBlend(p.blendMode);
     setDepthWrite(p.depthWrite);
+    setDepthMode(p.depthMode);
 
     ObjectUniformData objectData{model,
                              glm::vec4(p.colour.r / 255.f, p.colour.g / 255.f,
@@ -369,6 +370,7 @@ void OpenGLRenderer::invalidate() {
     currentTextures.clear();
     currentUBO = 0;
     setBlend(BlendMode::BLEND_NONE);
+    setDepthMode(DepthMode::OFF);
 }
 
 bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
