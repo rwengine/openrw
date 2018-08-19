@@ -437,6 +437,7 @@ void GameRenderer::renderPostProcess() {
     wdp.start = 0;
     wdp.count = ssRectGeom.getCount();
     wdp.textures = {fbTextures[0]};
+    wdp.depthMode = DepthMode::OFF;
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
