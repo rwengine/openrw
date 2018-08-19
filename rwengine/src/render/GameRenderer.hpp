@@ -170,6 +170,8 @@ private:
     ClumpPtr getSpecialModel(SpecialModel usage) const {
         return specialmodels_[usage];
     }
+
+    void drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents);
 };
 
 #endif

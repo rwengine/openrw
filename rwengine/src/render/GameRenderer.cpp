@@ -500,32 +500,14 @@ void GameRenderer::renderEffects(GameWorld* world) {
 }
 
 void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
-    // Move into NDC
-    extents.x /= renderer->getViewport().x;
-    extents.y /= renderer->getViewport().y;
-    extents.z /= renderer->getViewport().x;
-    extents.w /= renderer->getViewport().y;
-    extents.x += extents.z / 2.f;
-    extents.y += extents.w / 2.f;
-    extents.x -= .5f;
-    extents.y -= .5f;
-    extents *= glm::vec4(2.f, -2.f, 1.f, 1.f);
-
-    renderer->useProgram(ssRectProg.get());
-    renderer->setUniform(ssRectProg.get(), "colour", glm::vec4{0.f, 0.f, 0.f, 1.f});
-    renderer->setUniform(ssRectProg.get(), "size", glm::vec2{extents.z, extents.w});
-    renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{extents.x, extents.y});
-
-    Renderer::DrawParameters wdp;
-    wdp.depthMode = DepthMode::OFF;
-    wdp.blendMode = BlendMode::BLEND_ALPHA;
-    wdp.count = ssRectGeom.getCount();
-    wdp.textures = {texture->getName()};
-
-    renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
+    drawRect({0.f, 0.f, 0.f, 1.f}, texture, extents);
 }
 
 void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
+    drawRect(colour, nullptr, extents);
+}
+
+void GameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents) {
     // Move into NDC
     extents.x /= renderer->getViewport().x;
     extents.y /= renderer->getViewport().y;
@@ -546,7 +528,7 @@ void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_ALPHA;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {0};
+    wdp.textures = {texture ? texture->getName() : 0};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
