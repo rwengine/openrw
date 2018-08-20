@@ -16,21 +16,27 @@ cmake_generator_lookup = {
 }
 architectures = ['x64', 'x86']
 
+conan_arch_map = {
+    'x86': 'x86',
+    'x64': 'x86_64',
+}
+
 
 def to_cmake_generator(vs_version, arch):
     cmake_generator = cmake_generator_lookup[vs_version]
     if arch == 'x64':
         cmake_generator = '{} Win64'.format(cmake_generator)
     return cmake_generator
-
-
+    
+    
 def create_solution(path, vs_version, arch):
     conan, _, _ = conan_api.ConanAPIV1.factory()
     conan.remote_add(remote='bincrafters', url='https://api.bintray.com/conan/bincrafters/public-conan', force=True)
+    conan_arch = conan_arch_map[arch]
     conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
-                  settings=('build_type=Debug', ), install_folder=path)
+                  settings=('build_type=Debug', 'arch={}'.format(conan_arch), ), install_folder=path)
     conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
-                  settings=('build_type=Release', ), install_folder=path)
+                  settings=('build_type=Release', 'arch={}'.format(conan_arch), ), install_folder=path)
     cmake_generator = to_cmake_generator(vs_version=vs_version, arch=arch)
     subprocess.run([
         'cmake', '-DUSE_CONAN=TRUE', '-DBOOST_STATIC=TRUE',
