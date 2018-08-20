@@ -867,7 +867,7 @@ void RWGame::renderProfile() {
 
     float xscale = renderer.getRenderer()->getViewport().x / upperlimit;
     TextRenderer::TextInfo ti;
-    ti.align = TextRenderer::TextInfo::Left;
+    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
     ti.font = FONT_ARIAL;
     ti.size = lineHeight - 2.f;
     ti.baseColour = glm::u8vec3(255);

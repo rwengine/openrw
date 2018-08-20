@@ -7,7 +7,7 @@
 set(_ARGS_BOOL
     USE_CONAN
     DEBUG
-    CHECK_INCLUDES
+    CHECK_IWYU
     BUILD_TOOLS
     BUILD_VIEWER
 
@@ -32,7 +32,6 @@ set(_ARGS_ONEVAL
     BUILD_NAME
 
     CONAN_ARCH
-    CONAN_PROFILE
 
     CMAKE_GENERATOR
     COVERAGE_COMMAND
@@ -115,10 +114,17 @@ if(USE_CONAN)
         set(CONAN_CONFIGURATION "Release")
     endif()
 
+    if(BUILD_VIEWER)
+        set(_BUILD_VIEWER True)
+    else()
+        set(_BUILD_VIEWER False)
+    endif()
+
     execute_process(
         COMMAND
-            "${CONAN_BIN}" install "${CTEST_SOURCE_DIRECTORY}" -pr "${CONAN_PROFILE}"
-                -s arch=${CONAN_ARCH} -s build_type=${CONAN_CONFIGURATION} --build missing
+            "${CONAN_BIN}" install "${CTEST_SOURCE_DIRECTORY}"
+                -s arch=${CONAN_ARCH} -s build_type=${CONAN_CONFIGURATION}
+                -o viewer=${_BUILD_VIEWER} --build missing
         WORKING_DIRECTORY "${CTEST_BINARY_DIRECTORY}"
         RESULT_VARIABLE RES
         )
@@ -129,6 +135,16 @@ if(USE_CONAN)
     list(APPEND CONFIGURE_EXTRA_OPTIONS
         "-DBOOST_STATIC=True"
         )
+
+    execute_process(
+        COMMAND
+            "${CONAN_BIN}" remove -f -b -s "*"
+        WORKING_DIRECTORY "${CTEST_BINARY_DIRECTORY}"
+        RESULT_VARIABLE RES
+        )
+    if(RES)
+        message(FATAL_ERROR "conan remove failed")
+    endif()
 endif()
 
 # CTEST_CONFIGURATION_TYPE is needed on Windows (no leading underscore)
@@ -149,7 +165,7 @@ set(_CONFIGURE_OPTIONS
     "-DTESTS_NODATA=${TESTS_NODATA}"
     "-DTEST_COVERAGE=${RUN_COVERAGE}"
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
-    "-DCHECK_INCLUDES=${CHECK_INCLUDES}"
+    "-DCHECK_IWYU=${CHECK_IWYU}"
     "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
     "-DENABLE_SANITIZERS=${ENABLE_SANITIZERS}"
     "-DUSE_CONAN=${USE_CONAN}"
@@ -217,9 +233,9 @@ if(_NB_BUILD_ERRORS)
 endif()
 
 if(_TEST_RESULT)
-    list(APPEND WARNING_MESSAGES "Test failure detected!")
+    list(APPEND ERROR_MESSAGES "Test failure detected!")
 endif()
 
 if(_SUBMIT_RESULT)
-    list(APPEND ERROR_MESSAGES "Test submission failure detected!")
+    list(APPEND WARNING_MESSAGES "Test submission failure detected!")
 endif()

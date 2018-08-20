@@ -64,6 +64,18 @@ else()
     message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
 endif()
 
+target_compile_definitions(rw_interface
+    INTERFACE
+        BOOST_ALL_NO_LIB
+    )
+
+if(NOT BOOST_STATIC)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            BOOST_ALL_DYN_LINK
+    	)
+endif()
+
 if(USE_CONAN)
     if(CONAN_SETTINGS_COMPILER_LIBCXX STREQUAL "libstdc++11")
         target_compile_definitions(rw_interface INTERFACE _GLIBCXX_USE_CXX11_ABI=1)
@@ -86,18 +98,10 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
 elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
     target_link_libraries(rw_interface INTERFACE
-        rwdep::boost_filesystem
+        Boost::filesystem
         )
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
-endif()
-
-
-if(NOT BOOST_STATIC)
-    target_compile_definitions(rw_interface
-        INTERFACE
-            BOOST_ALL_DYN_LINK
-        )
 endif()
 
 if(ENABLE_SCRIPT_DEBUG)

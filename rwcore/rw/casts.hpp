@@ -2,6 +2,7 @@
 #define _LIBRW_CASTS_HPP_
 
 #include <cstring> // memcpy
+#include <string>
 
 #include "rw/debug.hpp"
 

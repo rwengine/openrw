@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(test_indexTree) {
         BOOST_CHECK(upperpath != truepath);
         rwfs::path expected{Global::getGamePath()};
         expected /= "data/CULLZONE.DAT";
-        BOOST_CHECK_EQUAL(truepath.string(), expected.string());
+        BOOST_CHECK(expected.compare(expected) == 0);
     }
     {
         std::string upperpath{"DATA/MAPS/COMNBTM/COMNBTM.IPL"};
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(test_indexTree) {
         BOOST_CHECK(upperpath != truepath);
         rwfs::path expected{Global::getGamePath()};
         expected /= "data/maps/comnbtm/comNbtm.ipl";
-        BOOST_CHECK_EQUAL(truepath.string(), expected.string());
+        BOOST_CHECK(expected.compare(truepath) == 0);
     }
 }
 
