@@ -4,7 +4,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
-add_executable(rwviewer WIN32
+add_executable(rwviewer
     main.cpp
 
     ViewerWindow.hpp
