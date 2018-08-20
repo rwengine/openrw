@@ -15,6 +15,7 @@
 #include <engine/GameWorld.hpp>
 #include <engine/ScreenText.hpp>
 #include <fonts/GameTexts.hpp>
+#include <objects/CharacterObject.hpp>
 #include <objects/ObjectTypes.hpp>
 #include <script/ScriptTypes.hpp>
 
@@ -22,6 +23,8 @@ class GameWorld;
 class GameObject;
 class ScriptMachine;
 struct CutsceneData;
+
+class CharacterObject;
 
 struct SystemTime {
     uint16_t year;
@@ -240,6 +243,44 @@ struct ScriptContactData {
     uint32_t baseBrief;
 };
 
+class Rampage {
+    int32_t weapon = 0;
+    float endTime = 0.f;
+    uint32_t killsRequired = 0;
+    std::array<int32_t, 4> modelIDsToKill{};
+    bool special = false;
+    bool headshotOnly = false;
+    std::unordered_map<int32_t, int32_t> modelIDsKilled{};
+
+public:
+    enum Status {
+        None = 0,
+        Ongoing = 1,
+        Passed = 2,
+        Failed = 3,
+    } status = None;
+
+    GameState* state;
+
+    Status getStatus() const;
+
+    void init(const std::string& gxtEntry, const int32_t weaponID,
+              const int32_t time, const int32_t kills,
+              const std::array<int32_t, 4>& modelsToKill, const bool headshot);
+
+    float getRemainingTime() const;
+
+    uint32_t getKillsForThisModel(ModelID model);
+    void clearKills();
+
+    void tick(float dt);
+
+    void onCharacterDie(CharacterObject* character, GameObject* killer);
+
+    Rampage(GameState* s) : state(s) {
+    }
+};
+
 /**
  * Game and Runtime state
  *
@@ -264,6 +305,8 @@ public:
       Game Stats
       */
     GameStats gameStats;
+
+    Rampage rampage;
 
     /**
      * Second since game was started
