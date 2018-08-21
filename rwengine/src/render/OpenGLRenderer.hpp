@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <glm/glm.hpp>
 
@@ -69,7 +70,7 @@ enum class DepthMode {
 
 class Renderer {
 public:
-    typedef std::vector<GLuint> Textures;
+    typedef std::array<GLuint,2> Textures;
 
     /**
      * @brief The DrawParameters struct stores drawing state
