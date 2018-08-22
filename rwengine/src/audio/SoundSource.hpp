@@ -9,7 +9,7 @@
 /// (loading and decoding sound)
 class SoundSource {
     friend class SoundManager;
-    friend class SoundBuffer;
+    friend struct SoundBuffer;
 
 public:
     /// Load sound from mp3/wav file
