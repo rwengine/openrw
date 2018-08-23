@@ -18,6 +18,7 @@ find_package(Threads REQUIRED)
 target_link_libraries(microprofile
     PUBLIC
         Threads::Threads
+        openrw::checks
 )
 
 add_library(microprofile::microprofile ALIAS microprofile)
