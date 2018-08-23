@@ -14,6 +14,7 @@ class SoundBuffer {
 
 public:
     SoundBuffer();
+    ~SoundBuffer();
     bool bufferData(SoundSource& soundSource);
 
     bool isPlaying() const;

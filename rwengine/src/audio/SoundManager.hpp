@@ -86,7 +86,9 @@ public:
 
 private:
     bool initializeOpenAL();
-    bool initializeAVCodec();
+    void initializeAVCodec();
+
+    void deinitializeOpenAL();
 
     ALCcontext* alContext = nullptr;
     ALCdevice* alDevice = nullptr;
