@@ -44,7 +44,7 @@ class GameRenderer {
     GameWorld* _renderWorld = nullptr;
 
     /** Internal non-descript VAOs */
-    GLuint vao, debugVAO;
+    GLuint vao;
 
     /** Camera values passed to renderWorld() */
     ViewCamera _camera;
@@ -65,10 +65,6 @@ class GameRenderer {
     GeometryBuffer particleGeom;
     DrawBuffer particleDraw;
 
-    std::vector<VertexP2> sspaceRect = {
-            {-1.f, -1.f}, {1.f, -1.f}, {-1.f, 1.f}, {1.f, 1.f},
-    };
-
     GeometryBuffer ssRectGeom;
     DrawBuffer ssRectDraw;
 
@@ -81,11 +77,9 @@ public:
     std::unique_ptr<Renderer::ShaderProgram> skyProg;
     std::unique_ptr<Renderer::ShaderProgram> particleProg;
 
-    GLuint ssRectProgram;
-    GLint ssRectTexture, ssRectColour, ssRectSize, ssRectOffset;
+    std::unique_ptr<Renderer::ShaderProgram> ssRectProg;
 
-    GLuint skydomeVBO, skydomeIBO, debugVBO;
-    GLuint debugTex;
+    GLuint skydomeIBO;
 
     DrawBuffer skyDbuff;
     GeometryBuffer skyGbuff;
@@ -119,18 +113,13 @@ public:
     void renderEffects(GameWorld* world);
 
     /**
-     * @brief Draws the current on screen text.
-     */
-    void drawOnScreenText();
-
-    /**
      * @brief Draws a texture on the screen
      */
     void drawTexture(TextureData* texture, glm::vec4 extents);
     void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
-    /** method for rendering AI debug information */
-    void renderPaths();
+    /** Render full screen splash / fade */
+    void renderSplash(GameWorld* world, GLuint tex, glm::u16vec3 fc);
 
     /** Increases cinematic value */
     void renderLetterbox();
@@ -181,6 +170,8 @@ private:
     ClumpPtr getSpecialModel(SpecialModel usage) const {
         return specialmodels_[usage];
     }
+
+    void drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents);
 };
 
 #endif
