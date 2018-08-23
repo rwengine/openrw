@@ -43,13 +43,7 @@ SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
 }
 
 SoundManager::~SoundManager() {
-    // De-initialize OpenAL
-    if (alContext) {
-        alcMakeContextCurrent(nullptr);
-        alcDestroyContext(alContext);
-    }
-
-    if (alDevice) alcCloseDevice(alDevice);
+    deinitializeOpenAL();
 }
 
 bool SoundManager::initializeOpenAL() {
@@ -76,7 +70,7 @@ bool SoundManager::initializeOpenAL() {
     return true;
 }
 
-bool SoundManager::initializeAVCodec() {
+void SoundManager::initializeAVCodec() {
 #if defined(RW_DEBUG) && defined(RW_VERBOSE_DEBUG_MESSAGES)
     av_log_set_level(AV_LOG_WARNING);
 #else
@@ -88,8 +82,24 @@ bool SoundManager::initializeAVCodec() {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
     av_register_all();
 #endif
+}
 
-    return true;
+void SoundManager::deinitializeOpenAL() {
+    // Buffers have to been removed before openAL is deinitialized
+    sounds.clear();
+    buffers.clear();
+
+    // De-initialize OpenAL
+    if (alContext) {
+         alcMakeContextCurrent(nullptr);
+         alcDestroyContext(alContext);
+     }
+     alContext = nullptr;
+
+     if (alDevice) {
+         alcCloseDevice(alDevice);
+     }
+     alDevice = nullptr;
 }
 
 bool SoundManager::loadSound(const std::string& name,

@@ -11,6 +11,7 @@
 /// sound instance.
 struct SoundBuffer {
     SoundBuffer();
+    ~SoundBuffer();
     bool bufferData(SoundSource& soundSource);
 
     bool isPlaying() const;
