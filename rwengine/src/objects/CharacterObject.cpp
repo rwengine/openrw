@@ -32,7 +32,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     : GameObject(engine, pos, rot, modelinfo)
     , controller(controller) {
     auto info = getModelInfo<PedModelInfo>();
-    setClump(ClumpPtr(info->getModel()->clone()));
+    setClump(info->getModel()->clone());
     if (info->getModel()) {
         setModel(info->getModel());
         animator = new Animator(getClump());

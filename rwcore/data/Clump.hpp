@@ -278,7 +278,7 @@ public:
     /**
      * @return A Copy of the frames and atomics in this clump
      */
-    Clump* clone() const;
+    ClumpPtr clone() const;
 
 private:
     float boundingRadius;

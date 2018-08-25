@@ -166,7 +166,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     }
 
     setModel(getVehicle()->getModel());
-    setClump(ClumpPtr(getModelInfo<VehicleModelInfo>()->getModel()->clone()));
+    setClump(getModelInfo<VehicleModelInfo>()->getModel()->clone());
     setupModel();
 }
 

@@ -15,7 +15,7 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
     else {
         setModel(getModelInfo<ClumpModelInfo>()->getModel());
     }
-    setClump(ClumpPtr(getModel()->clone()));
+    setClump(getModel()->clone());
     animator = new Animator(getClump());
 }
 
