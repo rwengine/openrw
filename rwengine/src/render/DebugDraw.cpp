@@ -14,8 +14,6 @@
 #include "render/GameRenderer.hpp"
 
 DebugDraw::DebugDraw() {
-    lineBuff = new GeometryBuffer;
-    dbuff = new DrawBuffer;
     dbuff->setFaceType(GL_LINES);
 
     glGenTextures(1, &texture);
@@ -29,11 +27,6 @@ DebugDraw::DebugDraw() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     maxlines = 0;
-}
-
-DebugDraw::~DebugDraw() {
-    delete dbuff;
-    delete lineBuff;
 }
 
 void DebugDraw::drawLine(const btVector3 &from, const btVector3 &to,
@@ -65,7 +58,7 @@ void DebugDraw::flush(GameRenderer *renderer) {
     renderer->getRenderer()->useProgram(shaderProgram);
 
     lineBuff->uploadVertices(lines);
-    dbuff->addGeometry(lineBuff);
+    dbuff->addGeometry(lineBuff.get());
 
     Renderer::DrawParameters dp;
     dp.textures = {texture};
@@ -75,7 +68,7 @@ void DebugDraw::flush(GameRenderer *renderer) {
     dp.count = lines.size();
     dp.diffuse = 1.f;
 
-    renderer->getRenderer()->drawArrays(glm::mat4(1.f), dbuff, dp);
+    renderer->getRenderer()->drawArrays(glm::mat4(1.f), dbuff.get(), dp);
 
     renderer->getRenderer()->invalidate();
 
