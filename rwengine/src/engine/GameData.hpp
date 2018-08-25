@@ -104,7 +104,7 @@ public:
 
     void loadHandling(const std::string& path);
 
-    SCMFile* loadSCM(const std::string& path);
+    SCMFile loadSCM(const std::string& path);
 
     void loadGXT(const std::string& name);
 

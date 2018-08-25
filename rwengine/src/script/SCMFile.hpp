@@ -22,6 +22,10 @@ public:
         delete[] _data;
     }
 
+    operator bool() {
+        return _data;
+    }
+
     void loadFile(char* data, unsigned int size);
 
     SCMByte* data() const {

@@ -152,10 +152,9 @@ void RWGame::loadGame(const std::string& savename) {
 }
 
 void RWGame::startScript(const std::string& name) {
-    script.reset(data.loadSCM(name));
+    script = data.loadSCM(name);
     if (script) {
-        vm = std::make_unique<ScriptMachine>(&state, script.get(), &opcodes);
-
+        vm = std::make_unique<ScriptMachine>(&state, script, &opcodes);
         state.script = vm.get();
     } else {
         log.error("Game", "Failed to load SCM: " + name);

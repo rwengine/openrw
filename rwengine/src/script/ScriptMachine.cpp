@@ -36,7 +36,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
 
     while (t.wakeCounter == 0) {
         auto pc = t.programCounter;
-        auto opcode = file->read<SCMOpcode>(pc);
+        auto opcode = file.read<SCMOpcode>(pc);
 
         bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) ==
                                      SCM_NEGATE_CONDITIONAL_MASK);
@@ -56,7 +56,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
         auto requiredParams = std::abs(code.arguments);
 
         for (int p = 0; p < requiredParams || hasExtraParameters; ++p) {
-            auto type_r = file->read<SCMByte>(pc);
+            auto type_r = file.read<SCMByte>(pc);
             auto type = static_cast<SCMType>(type_r);
 
             if (type_r > 42) {
@@ -72,27 +72,27 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
                     hasExtraParameters = false;
                     break;
                 case TInt8:
-                    parameters.back().integer = file->read<std::int8_t>(pc);
+                    parameters.back().integer = file.read<std::int8_t>(pc);
                     pc += sizeof(SCMByte);
                     break;
                 case TInt16:
-                    parameters.back().integer = file->read<std::int16_t>(pc);
+                    parameters.back().integer = file.read<std::int16_t>(pc);
                     pc += sizeof(SCMByte) * 2;
                     break;
                 case TGlobal: {
-                    auto v = file->read<std::uint16_t>(pc);
+                    auto v = file.read<std::uint16_t>(pc);
                     parameters.back().globalPtr =
                         globalData.data() + v;  //* SCM_VARIABLE_SIZE;
-                    if (v >= file->getGlobalsSize()) {
+                    if (v >= file.getGlobalsSize()) {
                         state->world->logger->error(
                             "SCM", "Global Out of bounds! " +
                                        std::to_string(v) + " " +
-                                       std::to_string(file->getGlobalsSize()));
+                                       std::to_string(file.getGlobalsSize()));
                     }
                     pc += sizeof(SCMByte) * 2;
                 } break;
                 case TLocal: {
-                    auto v = file->read<std::uint16_t>(pc);
+                    auto v = file.read<std::uint16_t>(pc);
                     parameters.back().globalPtr =
                         t.locals.data() + v * SCM_VARIABLE_SIZE;
                     if (v >= SCM_THREAD_LOCAL_SIZE) {
@@ -102,17 +102,17 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
                     pc += sizeof(SCMByte) * 2;
                 } break;
                 case TInt32:
-                    parameters.back().integer = file->read<std::int32_t>(pc);
+                    parameters.back().integer = file.read<std::int32_t>(pc);
                     pc += sizeof(SCMByte) * 4;
                     break;
                 case TString:
-                    std::copy(file->data() + pc, file->data() + pc + 8,
+                    std::copy(file.data() + pc, file.data() + pc + 8,
                               parameters.back().string);
                     pc += sizeof(SCMByte) * 8;
                     break;
                 case TFloat16:
                     parameters.back().real =
-                        file->read<std::int16_t>(pc) / 16.f;
+                        file.read<std::int16_t>(pc) / 16.f;
                     pc += sizeof(SCMByte) * 2;
                     break;
                 default:
@@ -185,7 +185,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
     }
 }
 
-ScriptMachine::ScriptMachine(GameState* _state, SCMFile* file,
+ScriptMachine::ScriptMachine(GameState* _state, SCMFile& file,
                              ScriptModule* ops)
     : file(file)
     , module(ops)
@@ -193,10 +193,10 @@ ScriptMachine::ScriptMachine(GameState* _state, SCMFile* file,
     , debugFlag(false)
     , randomNumberGen(std::random_device()()) {
     // Copy globals
-    auto size = file->getGlobalsSize();
+    auto size = file.getGlobalsSize();
     globalData.resize(size);
-    auto offset = file->getGlobalSection();
-    std::copy(file->data() + offset, file->data() + offset + size,
+    auto offset = file.getGlobalSection();
+    std::copy(file.data() + offset, file.data() + offset + size,
               globalData.begin());
 }
 

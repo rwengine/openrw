@@ -32,7 +32,7 @@ int ScriptArguments::getModel(unsigned int arg) const {
     /// @todo verify this behaviour
     if (id < 0) {
         id = -id;
-        const auto& model = getVM()->getFile()->getModels()[id];
+        const auto& model = getVM()->getFile().getModels()[id];
         id = getWorld()->data->findModelObject(model);
     }
 

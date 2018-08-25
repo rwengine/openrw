@@ -11,6 +11,7 @@
 #include <engine/GameWorld.hpp>
 #include <render/DebugDraw.hpp>
 #include <render/GameRenderer.hpp>
+#include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/modules/GTA3Module.hpp>
 #include "game.hpp"
@@ -29,7 +30,7 @@ class RWGame final : public GameBase {
 
     GTA3Module opcodes;
     std::unique_ptr<ScriptMachine> vm;
-    std::unique_ptr<SCMFile> script;
+    SCMFile script;
 
     bool inFocus = true;
     ViewCamera currentCam;

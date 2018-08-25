@@ -560,7 +560,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 
     BlockDword scriptVarCount;
     READ_SIZE(scriptVarCount)
-    RW_ASSERT(scriptVarCount == state.script->getFile()->getGlobalsSize());
+    RW_ASSERT(scriptVarCount == state.script->getFile().getGlobalsSize());
 
     if (fread(state.script->getGlobals(), sizeof(SCMByte), scriptVarCount,
               loadFile) != scriptVarCount) {

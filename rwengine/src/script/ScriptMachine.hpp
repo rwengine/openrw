@@ -129,10 +129,10 @@ struct SCMThread {
  */
 class ScriptMachine {
 public:
-    ScriptMachine(GameState* state, SCMFile* file, ScriptModule* ops);
+    ScriptMachine(GameState* state, SCMFile& file, ScriptModule* ops);
     ~ScriptMachine() = default;
 
-    SCMFile* getFile() const {
+    SCMFile& getFile() const {
         return file;
     }
 
@@ -185,7 +185,7 @@ public:
     void execute(float dt);
 
 private:
-    SCMFile* file = nullptr;
+    SCMFile& file;
     ScriptModule* module = nullptr;
     GameState* state = nullptr;
     bool debugFlag;

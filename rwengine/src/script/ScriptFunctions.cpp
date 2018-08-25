@@ -35,7 +35,7 @@ const char* script::getBlipSprite(ScriptRadarSprite sprite) {
 ScriptModel script::getModel(const ScriptArguments& args, ScriptModel model) {
     if (model < 0) {
         /// @todo verify that this is how the game uses negative models
-        const auto& m = args.getVM()->getFile()->getModels()[-model];
+        const auto& m = args.getVM()->getFile().getModels()[-model];
         return args.getWorld()->data->findModelObject(m);
     }
     return model;
