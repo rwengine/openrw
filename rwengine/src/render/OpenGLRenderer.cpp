@@ -29,20 +29,17 @@ GLuint compileShader(GLenum type, const char* source) {
     GLint len;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
-        GLchar* buffer = new GLchar[len];
-        glGetShaderInfoLog(shader, len, nullptr, buffer);
+        auto buffer = std::make_unique<GLchar[]>(len);
+        glGetShaderInfoLog(shader, len, nullptr, buffer.get());
 
         GLint sourceLen;
         glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &sourceLen);
-        GLchar* sourceBuff = new GLchar[sourceLen];
-        glGetShaderSource(shader, sourceLen, nullptr, sourceBuff);
+        auto sourceBuff = std::make_unique<GLchar[]>(sourceLen);
+        glGetShaderSource(shader, sourceLen, nullptr, sourceBuff.get());
 
         RW_ERROR("[OGL] Shader InfoLog(" << shader << "):\n"
-                  << buffer << "\nSource:\n"
-                  << sourceBuff);
-
-        delete[] buffer;
-        delete[] sourceBuff;
+                  << buffer.get() << "\nSource:\n"
+                  << sourceBuff.get());
     }
 
     if (status != GL_TRUE) {
@@ -78,13 +75,11 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
     GLint len;
     glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
     if (len > 1) {
-        GLchar* buffer = new GLchar[len];
-        glGetProgramInfoLog(prog, len, nullptr, buffer);
+        auto buffer = std::make_unique<GLchar[]>(len);
+        glGetProgramInfoLog(prog, len, nullptr, buffer.get());
 
         RW_ERROR("[OGL] Program InfoLog(" << prog << "):\n"
-                  << buffer);
-
-        delete[] buffer;
+                  << buffer.get());
     }
 
     if (status != GL_TRUE) {
