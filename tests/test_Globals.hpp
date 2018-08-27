@@ -79,32 +79,8 @@ public:
     Logger log;
 #endif
 
-    Global() {
-        if (SDL_Init(SDL_INIT_VIDEO) < 0)
-            throw std::runtime_error("Failed to initialize SDL2!");
-
-        window.create("Tests", 800, 600, false);
-        window.hideCursor();
-
-#if RW_TEST_WITH_DATA
-        d = new GameData(&log, getGamePath());
-
-        d->load();
-
-        e = new GameWorld(&log, d);
-        s = new GameState;
-        e->state = s;
-
-        e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
-#endif
-    }
-
-    ~Global() {
-        window.close();
-#if RW_TEST_WITH_DATA
-        delete e;
-#endif
-    }
+    Global();
+    ~Global();
 
 #if RW_TEST_WITH_DATA
     static std::string getGamePath();
