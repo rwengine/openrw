@@ -17,6 +17,7 @@ docker=$1
         TRAVIS_REPO_SLUG=$TRAVIS_REPO_SLUG \
         TRAVIS_BRANCH=$TRAVIS_BRANCH \
         USE_CONAN=$USE_CONAN \
+        ALSOFT_DRIVERS=null \
         DEBUG=$DEBUG \
         XDG_RUNTIME_DIR=/tmp
 
