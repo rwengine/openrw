@@ -39,6 +39,18 @@ if(MINGW)
         )
 endif()
 
+if(WIN32)
+    # Required minimum version of Windows = Vista
+    set(RW_NTDDI_VISTA 0x06000000)
+    set(RW_WINVER 0x0600)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            "NTDDI_VERSION=${RW_NTDDI_VISTA}"
+            "WINVER=${RW_WINVER}"
+            "_WIN32_WINNT=${RW_WINVER}"
+        )
+endif()
+
 target_compile_definitions(rw_interface
     INTERFACE
         "$<$<CONFIG:Debug>:RW_DEBUG>"
