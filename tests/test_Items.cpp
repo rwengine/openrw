@@ -4,8 +4,8 @@
 
 BOOST_AUTO_TEST_SUITE(ItemsTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_character_inventory) {
+BOOST_AUTO_TEST_CASE(test_character_inventory,
+                     * utf::precondition(with_data{})) {
     {
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
@@ -25,6 +25,5 @@ BOOST_AUTO_TEST_CASE(test_character_inventory) {
         Global::get().e->destroyObject(character);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

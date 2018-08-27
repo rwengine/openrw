@@ -7,8 +7,6 @@ option(BUILD_VIEWER "Build GUI data viewer")
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
 
-option(TESTS_NODATA "Build tests for no-data testing")
-
 set(FAILED_CHECK_ACTION "IGNORE" CACHE STRING "What action to perform on a failed RW_CHECK (in debug mode)")
 set_property(CACHE FAILED_CHECK_ACTION PROPERTY STRINGS "IGNORE" "ABORT" "BREAKPOINT")
 

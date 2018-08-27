@@ -4,8 +4,8 @@
 
 BOOST_AUTO_TEST_SUITE(GameDataTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_object_data) {
+BOOST_AUTO_TEST_CASE(test_object_data,
+                     * utf::precondition(with_data{})) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
 
@@ -25,7 +25,8 @@ BOOST_AUTO_TEST_CASE(test_object_data) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_ped_stats) {
+BOOST_AUTO_TEST_CASE(test_ped_stats,
+                     * utf::precondition(with_data{})) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
 
@@ -45,7 +46,8 @@ BOOST_AUTO_TEST_CASE(test_ped_stats) {
     BOOST_CHECK_EQUAL(stat2.flags_, 2);
 }
 
-BOOST_AUTO_TEST_CASE(test_ped_stat_info) {
+BOOST_AUTO_TEST_CASE(test_ped_stat_info,
+                     * utf::precondition(with_data{})) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
 
@@ -59,7 +61,8 @@ BOOST_AUTO_TEST_CASE(test_ped_stat_info) {
     BOOST_CHECK_EQUAL(cop->statindex_, stat_cop.id_);
 }
 
-BOOST_AUTO_TEST_CASE(test_ped_relations) {
+BOOST_AUTO_TEST_CASE(test_ped_relations,
+                     * utf::precondition(with_data{})) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
 
@@ -79,7 +82,8 @@ BOOST_AUTO_TEST_CASE(test_ped_relations) {
                           PedRelationship::THREAT_EXPLOSION);
 }
 
-BOOST_AUTO_TEST_CASE(test_ped_groups) {
+BOOST_AUTO_TEST_CASE(test_ped_groups,
+                     * utf::precondition(with_data{})) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
 
@@ -94,6 +98,5 @@ BOOST_AUTO_TEST_CASE(test_ped_groups) {
     BOOST_REQUIRE_GE(red.size(), 8);
     BOOST_CHECK_EQUAL(red[0], 34);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

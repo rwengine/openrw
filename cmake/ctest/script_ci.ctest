@@ -55,19 +55,11 @@ set(RUN_COVERAGE FALSE)
 set(RUN_MEMCHECK FALSE)
 openrw_should_submit_ci(SUBMIT)
 
-# Build with no data and test
-set(BUILDER_NAME "${BUILDER_NAME_BASE}-nodata")
+# Configure, build and test with no data
+set(BUILDER_NAME "${BUILDER_NAME_BASE}")
 set(APPEND_RESULTS FALSE)
 set(TESTS_NODATA TRUE)
 set(RUN_TESTS TRUE)
-
-include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
-
-# Build with data and do not test
-set(BUILDER_NAME "${BUILDER_NAME_BASE}-data")
-set(APPEND_RESULTS FALSE)
-set(TESTS_NODATA FALSE)
-set(RUN_TESTS FALSE)
 
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
 

@@ -1,95 +1,43 @@
 #ifndef _TESTGLOBALS_HPP_
 #define _TESTGLOBALS_HPP_
 
-#include <btBulletDynamicsCommon.h>
-#include <SDL.h>
-#include <GameWindow.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include "boost_fixes.hpp"
+
+namespace utf = boost::unit_test;
+namespace tt = boost::test_tools;
+
 #include <core/Logger.hpp>
+#include <GameWindow.hpp>
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
 
-// Boost moved the print_log_value struct in version 1.59
-// TODO: use another testing library
-#if BOOST_VERSION >= 105900
-#define BOOST_NS_MAGIC namespace tt_detail {
-#define BOOST_NS_MAGIC_CLOSING }
-#else
-#define BOOST_NS_MAGIC
-#define BOOST_NS_MAGIC_CLOSING
-#endif
-
-namespace boost {
-namespace test_tools {
-BOOST_NS_MAGIC
-template <>
-struct print_log_value<glm::vec3> {
-    void operator()(std::ostream& s, glm::vec3 const& v) {
-        s << glm::to_string(v);
-    }
+struct GlobalArgs {
+    bool with_data = true;
 };
-BOOST_NS_MAGIC_CLOSING
-}
-}
-
-#if BOOST_VERSION < 106400
-namespace boost {
-namespace test_tools {
-BOOST_NS_MAGIC
-template <>
-struct print_log_value<std::nullptr_t> {
-    void operator()(std::ostream& s, std::nullptr_t) {
-        s << "nullptr";
-    }
-};
-BOOST_NS_MAGIC_CLOSING
-}
-}
-#endif
-
-namespace boost {
-namespace test_tools {
-BOOST_NS_MAGIC
-template <>
-struct print_log_value<GameString> {
-    void operator()(std::ostream& s, GameString const& v) {
-        for (GameString::size_type i = 0u; i < v.size(); ++i) {
-            s << static_cast<char>(v[i]);
-        }
-    }
-};
-BOOST_NS_MAGIC_CLOSING
-}
-}
-
-#undef BOOST_NS_MAGIC
-#undef BOOST_NS_MAGIC_CLOSING
+extern GlobalArgs global_args;
 
 class Global {
 public:
-    GameWindow window;
-#if RW_TEST_WITH_DATA
-    GameData* d;
-    GameWorld* e;
-    GameState* s;
-    Logger log;
-#endif
-
-    Global();
+    Global(const GlobalArgs& args);
     ~Global();
 
-#if RW_TEST_WITH_DATA
     static std::string getGamePath();
-#endif
 
-    static Global& get() {
-        static Global g;
-        return g;
-    }
+    GameWindow window;
+    GameData* d = nullptr;
+    GameWorld* e = nullptr;
+    GameState* s = nullptr;
+    Logger log;
+    static Global& get();
+};
+
+struct with_data {
+    tt::assertion_result operator()(utf::test_unit_id id) const;
 };
 
 #endif

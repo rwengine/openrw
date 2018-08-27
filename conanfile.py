@@ -10,13 +10,11 @@ class OpenrwConan(ConanFile):
     description = "OpenRW 'Open ReWrite' is an un-official open source recreation of the classic Grand Theft Auto III game executable"
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
-        'test_data': [True, False],
         'viewer': [True, False],
         'tools': [True, False],
     }
 
     default_options = (
-        'test_data=False',
         'viewer=True',
         'tools=True',
         'bullet:shared=False',
@@ -66,7 +64,6 @@ class OpenrwConan(ConanFile):
             'BUILD_TESTS': True,
             'BUILD_VIEWER': self.options.viewer,
             'BUILD_TOOLS': self.options.tools,
-            'TESTS_NODATA': not self.options.test_data,
             'USE_CONAN': True,
             'BOOST_STATIC': not self.options['boost'].shared,
         }
