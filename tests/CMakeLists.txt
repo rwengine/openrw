@@ -38,6 +38,8 @@ set(TESTS
     )
 
 set(TEST_SOURCES
+    boost_fixes.hpp
+
     main.cpp
     test_Globals.cpp
     test_Globals.hpp
@@ -56,11 +58,6 @@ add_executable(rwtests
     ${TEST_SOURCES}
     )
 
-target_compile_definitions(rwtests
-    PRIVATE
-        "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
-    )
-
 target_include_directories(rwtests
     PRIVATE
         "${PROJECT_SOURCE_DIR}/tests"
@@ -70,6 +67,7 @@ target_include_directories(rwtests
 target_link_libraries(rwtests
     PRIVATE
         Boost::unit_test_framework
+        Boost::program_options
         rwengine
         SDL2::SDL2
         Boost::filesystem
@@ -89,10 +87,18 @@ if(SEPARATE_TEST_SUITES)
             )
     endforeach()
 else()
-    add_test(NAME UnitTests
+    add_test(NAME all_tests
         COMMAND "$<TARGET_FILE:rwtests>"
         )
-    set_tests_properties(UnitTests
+    set_tests_properties(all_tests
+        PROPERTIES
+            TIMEOUT 300
+        )
+
+    add_test(NAME all_tests_no_data
+        COMMAND "$<TARGET_FILE:rwtests>" "--" "--nodata"
+        )
+    set_tests_properties(all_tests
         PROPERTIES
             TIMEOUT 300
         )

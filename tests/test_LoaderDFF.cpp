@@ -5,8 +5,8 @@
 
 BOOST_AUTO_TEST_SUITE(LoaderDFFTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_load_dff) {
+BOOST_AUTO_TEST_CASE(test_load_dff,
+                     * utf::precondition(with_data{})) {
     {
         auto d = Global::get().e->data->index.openFile("landstal.dff");
 
@@ -25,8 +25,6 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
         BOOST_REQUIRE(atomic->getFrame());
     }
 }
-
-#endif
 
 BOOST_AUTO_TEST_CASE(test_clump_clone) {
     {

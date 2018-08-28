@@ -10,8 +10,8 @@
 
 BOOST_AUTO_TEST_SUITE(DataTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_weapon_dat) {
+BOOST_AUTO_TEST_CASE(test_weapon_dat,
+                     * utf::precondition(with_data{})) {
     GenericDATLoader l;
     WeaponDataPtrs weaponData;
 
@@ -42,7 +42,8 @@ BOOST_AUTO_TEST_CASE(test_weapon_dat) {
     BOOST_CHECK(data->flags == 0);
 }
 
-BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
+BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader,
+                     * utf::precondition(with_data{})) {
     GenericDATLoader l;
     DynamicObjectDataPtrs loaded;
 
@@ -68,7 +69,8 @@ BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
     BOOST_CHECK_EQUAL(lamp->cameraAvoid, false);
 }
 
-BOOST_AUTO_TEST_CASE(test_handling_data_loader) {
+BOOST_AUTO_TEST_CASE(test_handling_data_loader,
+                     * utf::precondition(with_data{})) {
     GenericDATLoader l;
     VehicleInfoPtrs loaded;
 
@@ -86,7 +88,8 @@ BOOST_AUTO_TEST_CASE(test_handling_data_loader) {
     BOOST_CHECK_EQUAL(handling.engineType, VehicleHandlingInfo::Petrol);
 }
 
-BOOST_AUTO_TEST_CASE(test_model_files_loaded) {
+BOOST_AUTO_TEST_CASE(test_model_files_loaded,
+                     * utf::precondition(with_data{})) {
     auto& d = Global::get().d;
 
     // The weapon models should be associated by the MODELFILE entries
@@ -96,7 +99,8 @@ BOOST_AUTO_TEST_CASE(test_model_files_loaded) {
     BOOST_CHECK_NE(ak47->getAtomic(0), nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(test_model_archive_loaded) {
+BOOST_AUTO_TEST_CASE(test_model_archive_loaded,
+                     * utf::precondition(with_data{})) {
     auto& d = Global::get().d;
     auto& e = Global::get().e;
 
@@ -121,6 +125,5 @@ BOOST_AUTO_TEST_CASE(test_model_archive_loaded) {
         e->destroyObject(inst);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

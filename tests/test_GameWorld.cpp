@@ -6,8 +6,8 @@
 
 BOOST_AUTO_TEST_SUITE(GameWorldTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_gameobject_id) {
+BOOST_AUTO_TEST_CASE(test_gameobject_id,
+                     * utf::precondition(with_data{})) {
     GameWorld gw(&Global::get().log, Global::get().d);
 
     auto object1 = gw.createInstance(1337, glm::vec3(100.f, 0.f, 0.f));
@@ -16,7 +16,8 @@ BOOST_AUTO_TEST_CASE(test_gameobject_id) {
     BOOST_CHECK_NE(object1->getGameObjectID(), object2->getGameObjectID());
 }
 
-BOOST_AUTO_TEST_CASE(test_offsetgametime) {
+BOOST_AUTO_TEST_CASE(test_offsetgametime,
+                     * utf::precondition(with_data{})) {
     GameWorld gw(&Global::get().log, Global::get().d);
     gw.state = new GameState();
 
@@ -67,6 +68,5 @@ BOOST_AUTO_TEST_CASE(test_offsetgametime) {
     BOOST_CHECK_EQUAL(9, gw.getHour());
     BOOST_CHECK_EQUAL(25, gw.getMinute());
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

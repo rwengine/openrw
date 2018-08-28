@@ -162,7 +162,6 @@ set(_CONFIGURE_OPTIONS
     "-DBUILD_TOOLS=${BUILD_TOOLS}"
     "-DBUILD_VIEWER=${BUILD_VIEWER}"
     "-DBUILD_TESTS=TRUE"
-    "-DTESTS_NODATA=${TESTS_NODATA}"
     "-DTEST_COVERAGE=${RUN_COVERAGE}"
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
     "-DCHECK_IWYU=${CHECK_IWYU}"
@@ -190,7 +189,13 @@ ctest_build(
 
 if(RUN_TESTS)
     message(STATUS "Running tests...")
+    if(TESTS_NODATA)
+        set(TEST_INCLUDE_REGEX "no_data")
+    else()
+        set(TEST_INCLUDE_REGEX "")
+    endif()
     ctest_test(
+        INCLUDE "${TEST_INCLUDE_REGEX}"
         RETURN_VALUE _TEST_RESULT
         )
 else()

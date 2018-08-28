@@ -1,14 +1,16 @@
+#include "test_Globals.hpp"
+
 #include <ai/DefaultAIController.hpp>
-#include <boost/test/unit_test.hpp>
 #include <engine/Animator.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include "test_Globals.hpp"
+
+#include <btBulletDynamicsCommon.h>
 
 BOOST_AUTO_TEST_SUITE(CharacterTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_create) {
+BOOST_AUTO_TEST_CASE(test_create,
+                     * utf::precondition(with_data{})) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
@@ -31,7 +33,8 @@ BOOST_AUTO_TEST_CASE(test_create) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_activities) {
+BOOST_AUTO_TEST_CASE(test_activities,
+                     * utf::precondition(with_data{})) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {0.f, 0.f, 225.6f});
@@ -120,7 +123,8 @@ BOOST_AUTO_TEST_CASE(test_activities) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_death) {
+BOOST_AUTO_TEST_CASE(test_death,
+                     * utf::precondition(with_data{})) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
@@ -148,7 +152,8 @@ BOOST_AUTO_TEST_CASE(test_death) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_cycle_animating) {
+BOOST_AUTO_TEST_CASE(test_cycle_animating,
+                     * utf::precondition(with_data{})) {
     {
         auto character =
             Global::get().e->createPedestrian(1, {100.f, 100.f, 50.f});
@@ -162,6 +167,5 @@ BOOST_AUTO_TEST_CASE(test_cycle_animating) {
                           static_cast<uint32_t>(AnimCycle::ArrestGun));
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

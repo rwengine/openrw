@@ -5,8 +5,8 @@
 
 BOOST_AUTO_TEST_SUITE(VehicleTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_create_vehicle) {
+BOOST_AUTO_TEST_CASE(test_create_vehicle,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle =
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -26,7 +26,8 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle) {
     Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(vehicle_parts) {
+BOOST_AUTO_TEST_CASE(vehicle_parts,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle =
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -49,7 +50,8 @@ BOOST_AUTO_TEST_CASE(vehicle_parts) {
     Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
+BOOST_AUTO_TEST_CASE(vehicle_part_vis,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle =
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -71,7 +73,8 @@ BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
     Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(test_door_position) {
+BOOST_AUTO_TEST_CASE(test_door_position,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
         90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -85,7 +88,8 @@ BOOST_AUTO_TEST_CASE(test_door_position) {
     Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(test_hinges) {
+BOOST_AUTO_TEST_CASE(test_hinges,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
         90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -111,7 +115,8 @@ BOOST_AUTO_TEST_CASE(test_hinges) {
     Global::get().e->destroyObject(vehicle);
 }
 
-BOOST_AUTO_TEST_CASE(test_open_part) {
+BOOST_AUTO_TEST_CASE(test_open_part,
+                     * utf::precondition(with_data{})) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
         90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
@@ -130,6 +135,5 @@ BOOST_AUTO_TEST_CASE(test_open_part) {
 
     Global::get().e->destroyObject(vehicle);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

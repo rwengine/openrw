@@ -1,13 +1,15 @@
-#include <boost/test/unit_test.hpp>
+#include "test_Globals.hpp"
+
 #include <data/WeaponData.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ProjectileObject.hpp>
-#include "test_Globals.hpp"
+
+#include <btBulletDynamicsCommon.h>
 
 BOOST_AUTO_TEST_SUITE(WeaponTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(TestWeaponScan) {
+BOOST_AUTO_TEST_CASE(TestWeaponScan,
+                     * utf::precondition(with_data{})) {
     {
         // Test RADIUS scan
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
@@ -25,7 +27,8 @@ BOOST_AUTO_TEST_CASE(TestWeaponScan) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(TestProjectile) {
+BOOST_AUTO_TEST_CASE(TestProjectile,
+                     * utf::precondition(with_data{})) {
     {
         auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
@@ -113,6 +116,5 @@ BOOST_AUTO_TEST_CASE(TestProjectile) {
         Global::get().e->destroyQueuedObjects();
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

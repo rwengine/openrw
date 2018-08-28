@@ -17,8 +17,8 @@ std::ostream& operator<<(std::ostream& os, const AIGraphNode* yt) {
 
 BOOST_AUTO_TEST_SUITE(TrafficDirectorTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_available_nodes) {
+BOOST_AUTO_TEST_CASE(test_available_nodes,
+                     * utf::precondition(with_data{})) {
     AIGraph graph;
 
     PathData path{PathData::PATH_PED,
@@ -56,7 +56,8 @@ BOOST_AUTO_TEST_CASE(test_available_nodes) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_node_not_blocking) {
+BOOST_AUTO_TEST_CASE(test_node_not_blocking,
+                     * utf::precondition(with_data{})) {
     AIGraph graph;
 
     PathData path{PathData::PATH_PED,
@@ -83,7 +84,8 @@ BOOST_AUTO_TEST_CASE(test_node_not_blocking) {
     Global::get().e->destroyObject(box);
 }
 
-BOOST_AUTO_TEST_CASE(test_node_blocking) {
+BOOST_AUTO_TEST_CASE(test_node_blocking,
+                     * utf::precondition(with_data{})) {
     AIGraph graph;
 
     PathData path{PathData::PATH_PED,
@@ -110,7 +112,8 @@ BOOST_AUTO_TEST_CASE(test_node_blocking) {
     Global::get().e->destroyObject(ped);
 }
 
-BOOST_AUTO_TEST_CASE(test_node_density) {
+BOOST_AUTO_TEST_CASE(test_node_density,
+                     * utf::precondition(with_data{})) {
     AIGraph graph;
 
     PathData path{PathData::PATH_PED,
@@ -144,7 +147,8 @@ BOOST_AUTO_TEST_CASE(test_node_density) {
     Global::get().e->destroyObject(ped);
 }
 
-BOOST_AUTO_TEST_CASE(test_create_traffic) {
+BOOST_AUTO_TEST_CASE(test_create_traffic,
+                     * utf::precondition(with_data{})) {
     AIGraph graph;
 
     PathData path{PathData::PATH_PED,
@@ -164,6 +168,5 @@ BOOST_AUTO_TEST_CASE(test_create_traffic) {
 
     // Global::get().e->destroyObject(created[0]);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
