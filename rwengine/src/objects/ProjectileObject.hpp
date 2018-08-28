@@ -38,12 +38,12 @@ public:
 private:
     ProjectileInfo _info;
 
-    btSphereShape* _shape;
+    std::unique_ptr<btSphereShape> _shape;
 
-    btRigidBody* _body = nullptr;
+    std::unique_ptr<btRigidBody> _body;
 
     /** Used for RPGs and Molotov collision detection */
-    btPairCachingGhostObject* _ghostBody = nullptr;
+    std::unique_ptr<btPairCachingGhostObject> _ghostBody;
 
     bool _exploded = false;
 
