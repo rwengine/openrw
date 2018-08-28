@@ -367,45 +367,7 @@ int RWGame::run() {
     while (StateManager::currentState() && running) {
         RW_PROFILE_FRAME_BOUNDARY();
 
-        RW_PROFILE_BEGIN("Input");
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_QUIT:
-                    running = false;
-                    break;
-
-                case SDL_WINDOWEVENT:
-                    switch (event.window.event) {
-                        case SDL_WINDOWEVENT_FOCUS_GAINED:
-                            inFocus = true;
-                            break;
-
-                        case SDL_WINDOWEVENT_FOCUS_LOST:
-                            inFocus = false;
-                            break;
-                    }
-                    break;
-
-                case SDL_KEYDOWN:
-                    globalKeyEvent(event);
-                    break;
-
-                case SDL_MOUSEMOTION:
-                    event.motion.xrel *= MOUSE_SENSITIVITY_SCALE;
-                    event.motion.yrel *= MOUSE_SENSITIVITY_SCALE;
-                    break;
-            }
-
-            GameInput::updateGameInputState(&getState()->input[0], event);
-
-            RW_PROFILE_BEGIN("State");
-            if (StateManager::currentState()) {
-                StateManager::currentState()->handleEvent(event);
-            }
-            RW_PROFILE_END()
-        }
-        RW_PROFILE_END();
+        running = updateInput();
 
         auto currentFrame = chrono::steady_clock::now();
         auto frameTime =
@@ -420,48 +382,10 @@ int RWGame::run() {
                 frameTime = 0.1f;
             }
 
-            auto deltaTimeWithTimeScale =
-                deltaTime * world->state->basic.timeScale;
-
-            RW_PROFILE_BEGIN("Update");
-            while (accumulatedTime >= deltaTime) {
-                if (!StateManager::currentState()) {
-                    break;
-                }
-
-                RW_PROFILE_BEGIN("physics");
-                world->dynamicsWorld->stepSimulation(
-                    deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
-                RW_PROFILE_END();
-
-                RW_PROFILE_BEGIN("state");
-                StateManager::get().tick(deltaTimeWithTimeScale);
-                RW_PROFILE_END();
-
-                RW_PROFILE_BEGIN("engine");
-                tick(deltaTimeWithTimeScale);
-                RW_PROFILE_END();
-
-                getState()->swapInputState();
-
-                accumulatedTime -= deltaTime;
-            }
-            RW_PROFILE_END();
+            accumulatedTime = tickWorld(deltaTime, accumulatedTime);
         }
 
-        RW_PROFILE_BEGIN("Render");
-        RW_PROFILE_BEGIN("engine");
         render(1, frameTime);
-        RW_PROFILE_END();
-
-        RW_PROFILE_BEGIN("state");
-        if (StateManager::currentState()) {
-            StateManager::get().draw(&renderer);
-        }
-        RW_PROFILE_END();
-        RW_PROFILE_END();
-
-        renderProfile();
 
         getWindow().swap();
 
@@ -474,6 +398,79 @@ int RWGame::run() {
     StateManager::get().clear();
 
     return 0;
+}
+
+float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
+    auto deltaTimeWithTimeScale =
+            deltaTime * world->state->basic.timeScale;
+
+    RW_PROFILE_BEGIN("Update");
+    while (accumulatedTime >= deltaTime) {
+        if (!StateManager::currentState()) {
+            break;
+        }
+
+        RW_PROFILE_BEGIN("physics");
+        world->dynamicsWorld->stepSimulation(
+                deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+        RW_PROFILE_END();
+
+        RW_PROFILE_BEGIN("state");
+        StateManager::get().tick(deltaTimeWithTimeScale);
+        RW_PROFILE_END();
+
+        RW_PROFILE_BEGIN("engine");
+        tick(deltaTimeWithTimeScale);
+        RW_PROFILE_END();
+
+        getState()->swapInputState();
+
+        accumulatedTime -= deltaTime;
+    }
+    RW_PROFILE_END();
+    return accumulatedTime;
+}
+
+bool RWGame::updateInput() {
+    RW_PROFILE_BEGIN("Input");
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_QUIT:
+                return false;
+
+            case SDL_WINDOWEVENT:
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_FOCUS_GAINED:
+                        inFocus = true;
+                        break;
+
+                    case SDL_WINDOWEVENT_FOCUS_LOST:
+                        inFocus = false;
+                        break;
+                }
+                break;
+
+            case SDL_KEYDOWN:
+                globalKeyEvent(event);
+                break;
+
+            case SDL_MOUSEMOTION:
+                event.motion.xrel *= MOUSE_SENSITIVITY_SCALE;
+                event.motion.yrel *= MOUSE_SENSITIVITY_SCALE;
+                break;
+        }
+
+        GameInput::updateGameInputState(&getState()->input[0], event);
+
+        RW_PROFILE_BEGIN("State");
+        if (StateManager::currentState()) {
+            StateManager::currentState()->handleEvent(event);
+        }
+        RW_PROFILE_END()
+    }
+    RW_PROFILE_END();
+    return true;
 }
 
 void RWGame::tick(float dt) {
@@ -572,6 +569,9 @@ void RWGame::tick(float dt) {
 }
 
 void RWGame::render(float alpha, float time) {
+    RW_PROFILE_BEGIN("Render");
+    RW_PROFILE_BEGIN("engine");
+
     lastDraws = getRenderer().getRenderer()->getDrawCount();
 
     getRenderer().getRenderer()->swap();
@@ -606,6 +606,22 @@ void RWGame::render(float alpha, float time) {
 
     renderer.getRenderer()->popDebugGroup();
 
+    renderDebugView(time, viewCam);
+
+    if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
+    RW_PROFILE_END();
+
+    RW_PROFILE_BEGIN("state");
+    if (StateManager::currentState()) {
+        StateManager::get().draw(&renderer);
+    }
+    RW_PROFILE_END();
+    RW_PROFILE_END();
+
+    renderProfile();
+}
+
+void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
     RW_PROFILE_BEGIN("debug");
     switch (debugview_) {
         case DebugViewMode::General:
@@ -625,8 +641,6 @@ void RWGame::render(float alpha, float time) {
             break;
     }
     RW_PROFILE_END();
-
-    if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
 }
 
 void RWGame::renderDebugStats(float time) {
