@@ -57,7 +57,7 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
         throw std::runtime_error("Unable to open file: " + filePath);
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     if (indexData->type != IndexedDataType::FILE) {
         RW_MESSAGE("Reading raw data from archive \"" << filePath << "\"");
     }

@@ -403,7 +403,7 @@ private:
     template <class T>
     void uploadUBO(Buffer& buffer, const T& data) {
         uploadUBOEntry(buffer, &data, sizeof(T));
-#if RW_PROFILER
+#ifdef RW_PROFILER
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].uploads++;
         }

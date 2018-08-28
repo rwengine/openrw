@@ -849,7 +849,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
 }
 
 void RWGame::renderProfile() {
-#if RW_PROFILER
+#ifdef RW_PROFILER
     auto& frame = perf::Profiler::get().getFrame();
     constexpr float upperlimit = 30000.f;
     constexpr float lineHeight = 15.f;
