@@ -6,7 +6,9 @@
 
 #include <rw/debug.hpp>
 
+#include <render/VisualFX.hpp>
 #include <objects/GameObject.hpp>
+
 
 class btPairCachingGhostObject;
 class btSphereShape;
@@ -119,7 +121,7 @@ private:
     bool m_enabled = false;
     float m_enableTimer = 0.f;
     bool m_collected = false;
-    VisualFX* m_corona = nullptr;
+    ParticleFX& m_corona;
     short m_colourId = 0;
     bool respawn = false;
     float respawnTime{};

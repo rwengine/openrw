@@ -7,7 +7,6 @@
 #include "data/WeaponData.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"
-#include "render/VisualFX.hpp"
 
 void ProjectileObject::checkPhysicsContact() {
     btManifoldArray manifoldArray;
@@ -77,17 +76,17 @@ void ProjectileObject::explode() {
                            0.f});
         }
 
-        auto tex = engine->data->findSlotTexture("particle", "explo02");
+        auto& explosion = engine->createParticleEffect();
 
-        auto explosion = engine->createEffect(VisualFX::Particle);
-        explosion->particle.size = glm::vec2(exp_size);
-        explosion->particle.texture = tex;
-        explosion->particle.starttime = engine->getGameTime();
-        explosion->particle.lifetime = 0.5f;
-        explosion->particle.orientation = VisualFX::ParticleData::Camera;
-        explosion->particle.colour = glm::vec4(1.0f);
-        explosion->particle.position = getPosition();
-        explosion->particle.direction = glm::vec3(0.f, 0.f, 1.f);
+        auto tex = engine->data->findSlotTexture("particle", "explo02");
+        explosion.texture = tex;
+        explosion.size = glm::vec2(exp_size);
+        explosion.starttime = engine->getGameTime();
+        explosion.lifetime = 0.5f;
+        explosion.orientation = ParticleFX::Camera;
+        explosion.colour = glm::vec4(1.0f);
+        explosion.position = getPosition();
+        explosion.direction = glm::vec3(0.f, 0.f, 1.f);
 
         _exploded = true;
         engine->destroyObjectQueued(this);

@@ -179,14 +179,24 @@ public:
     void doWeaponScan(const WeaponScan& scan);
 
     /**
-     * Allocates a new VisualFX of the given type
+     * Allocates a new Light Effect
      */
-    VisualFX* createEffect(VisualFX::EffectType type);
+    LightFX& createLightEffect();
+
+    /**
+     * Allocates a new Particle Effect
+     */
+    ParticleFX& createParticleEffect();
+
+    /**
+     * Allocates a new Trail Effect
+     */
+    TrailFX& createTrailEffect();
 
     /**
      * Immediately destoys the given effect
      */
-    void destroyEffect(VisualFX* effect);
+    void destroyEffect(VisualFX& effect);
 
     /**
      * Returns the current hour
@@ -296,7 +306,7 @@ public:
      * Visual Effects
      * @todo Consider using lighter handing mechanism
      */
-    std::vector<VisualFX*> effects;
+    std::vector<std::unique_ptr<VisualFX>> effects;
 
     /**
      * Randomness Engine
@@ -363,6 +373,11 @@ public:
 
     void setPaused(bool pause);
     bool isPaused() const;
+
+    /**
+     * Clean up old VisualFX
+     */
+    void updateEffects();
 
     /**
      * Attempt to spawn a vehicle at a vehicle generator

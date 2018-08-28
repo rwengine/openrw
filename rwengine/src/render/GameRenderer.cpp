@@ -452,26 +452,25 @@ void GameRenderer::renderEffects(GameWorld* world) {
     auto& effects = world->effects;
 
     std::sort(effects.begin(), effects.end(),
-              [&](const VisualFX* a, const VisualFX* b) {
-                  return glm::distance(a->getPosition(), cpos) >
-                         glm::distance(b->getPosition(), cpos);
+              [&](const auto& a, const auto& b) {
+                  return glm::distance(a->position, cpos) >
+                         glm::distance(b->position, cpos);
               });
 
-    for (VisualFX* fx : effects) {
+    for (auto& fx : effects) {
         // Other effects not implemented yet
-        if (fx->getType() != VisualFX::Particle) continue;
+        if (fx->getType() != Particle) continue;
+        auto particle = static_cast<ParticleFX*>(fx.get());
 
-        auto& particle = fx->particle;
-
-        auto& p = particle.position;
+        auto& p = particle->position;
 
         // Figure the direction to the camera center.
         auto amp = cpos - p;
-        glm::vec3 ptc = particle.up;
+        glm::vec3 ptc = particle->up;
 
-        if (particle.orientation == VisualFX::ParticleData::UpCamera) {
+        if (particle->orientation == ParticleFX::UpCamera) {
             ptc = glm::normalize(amp - (glm::dot(amp, cfwd)) * cfwd);
-        } else if (particle.orientation == VisualFX::ParticleData::Camera) {
+        } else if (particle->orientation == ParticleFX::Camera) {
             ptc = amp;
         }
 
@@ -485,12 +484,12 @@ void GameRenderer::renderEffects(GameWorld* world) {
             glm::vec3(0.0f,0.0f,1.0f));
 
         transformMat = glm::scale(glm::translate(transformMat,p),
-            glm::vec3(particle.size,1.0f)) * glm::inverse(lookMat);
+            glm::vec3(particle->size,1.0f)) * glm::inverse(lookMat);
 
         Renderer::DrawParameters dp;
-        dp.textures = {particle.texture->getName()};
+        dp.textures = {particle->texture->getName()};
         dp.ambient = 1.f;
-        dp.colour = glm::u8vec4(particle.colour * 255.f);
+        dp.colour = glm::u8vec4(particle->colour * 255.f);
         dp.start = 0;
         dp.count = 4;
         dp.blendMode = BlendMode::BLEND_ADDITIVE;

@@ -528,18 +528,7 @@ void RWGame::tick(float dt) {
             }
         }
 
-        // Clean up old VisualFX
-        for (int i = 0; i < static_cast<int>(world->effects.size()); ++i) {
-            VisualFX* effect = world->effects[i];
-            if (effect->getType() == VisualFX::Particle) {
-                auto& part = effect->particle;
-                if (part.lifetime < 0.f) continue;
-                if (world->getGameTime() >= part.starttime + part.lifetime) {
-                    world->destroyEffect(effect);
-                    --i;
-                }
-            }
-        }
+        world->updateEffects();
 
         for (auto& object : world->allObjects) {
             object->_updateLastTransform();
@@ -772,9 +761,9 @@ void RWGame::renderDebugPaths(float time) {
 
             btVector3 position1(pos1.x, pos1.y, pos1.z);
             btVector3 position2(pos2.x, pos2.y, pos2.z);
-		
+
             debug.drawLine(position1, position2, color);
-	}
+    }
     }
 
     debug.flush(&renderer);
