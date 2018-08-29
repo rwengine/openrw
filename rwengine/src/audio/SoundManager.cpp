@@ -226,7 +226,7 @@ void SoundManager::playSfx(size_t name, const glm::vec3& position, bool looping,
         buffer->second.setPitch(1.f);
         buffer->second.setGain(1.f);
         if (maxDist != -1) {
-            buffer->second.setMaxDistance(maxDist);
+            buffer->second.setMaxDistance(static_cast<float>(maxDist));
         }
         buffer->second.play();
     }

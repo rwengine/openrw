@@ -49,7 +49,7 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) {
         }
     }
 
-    gridGeom.uploadVertices(grid.size(), sizeof(glm::vec2) * grid.size(),
+    gridGeom.uploadVertices(static_cast<GLsizei>(grid.size()), sizeof(glm::vec2) * grid.size(),
                             grid.data());
     gridGeom.getDataAttributes().emplace_back(ATRS_Position, 2, 0, 0, GL_FLOAT);
     gridDraw.addGeometry(&gridGeom);
@@ -58,15 +58,15 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) {
 void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int nHeights,
                                   const uint8_t* tiles, const unsigned int nTiles) {
     // Determine the dimensions of the input tiles
-    int edgeNum = sqrt(nTiles);
+    auto edgeNum = static_cast<unsigned int>(sqrt(nTiles));
     float tileSize = WATER_WORLD_SIZE / edgeNum;
     glm::vec2 wO{-WATER_WORLD_SIZE / 2.f, -WATER_WORLD_SIZE / 2.f};
 
     std::vector<glm::vec3> vertexData;
 
-    for (int x = 0; x < edgeNum; x++) {
+    for (auto x = 0u; x < edgeNum; x++) {
         int xi = x * WATER_HQ_DATA_SIZE;
-        for (int y = 0; y < edgeNum; y++) {
+        for (auto y = 0u; y < edgeNum; y++) {
             if (tiles[xi + y] >= nHeights) continue;
 
             // Tiles with the magic value contain no water.
@@ -87,7 +87,7 @@ void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int 
         }
     }
 
-    maskGeom.uploadVertices(vertexData.size(),
+    maskGeom.uploadVertices(static_cast<GLsizei>(vertexData.size()),
                             sizeof(glm::vec3) * vertexData.size(),
                             vertexData.data());
     maskGeom.getDataAttributes().emplace_back(ATRS_Position, 3, 0, 0, GL_FLOAT);

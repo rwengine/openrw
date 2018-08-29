@@ -95,9 +95,12 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     auto& faces = collision->faces;
     if (!verts.empty() && !faces.empty()) {
         m_vertArray = std::make_unique<btTriangleIndexVertexArray>(
-            faces.size(), reinterpret_cast<int*>(faces.data()),
-            sizeof(CollisionModel::Triangle), verts.size(),
-            reinterpret_cast<float*>(verts.data()), sizeof(glm::vec3));
+            static_cast<int>(faces.size()),
+            reinterpret_cast<int*>(faces.data()),
+            static_cast<int>(sizeof(CollisionModel::Triangle)),
+            static_cast<int>(verts.size()),
+            reinterpret_cast<float*>(verts.data()),
+            static_cast<int>(sizeof(glm::vec3)));
         auto trishape =
             std::make_unique<btBvhTriangleMeshShape>(m_vertArray.get(), false);
         trishape->setMargin(0.05f);

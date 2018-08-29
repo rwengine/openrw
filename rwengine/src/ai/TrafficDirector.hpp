@@ -39,8 +39,8 @@ private:
     GameWorld* world = nullptr;
     float pedDensity = 1.f;
     float carDensity = 1.f;
-    int maximumPedestrians = 20;
-    int maximumCars = 10;
+    size_t maximumPedestrians = 20;
+    size_t maximumCars = 10;
 };
 
 #endif

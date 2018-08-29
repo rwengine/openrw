@@ -53,7 +53,7 @@ struct VehicleGenerator {
         , remainingSpawns(remainingSpawns_) {
     }
 
-    int getScriptObjectID() const {
+    size_t getScriptObjectID() const {
         return generatorID;
     }
 };

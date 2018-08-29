@@ -29,7 +29,7 @@ public:
         return _data.get();
     }
 
-    void loadFile(char* data, unsigned int size);
+    void loadFile(char* data, size_t size);
 
     SCMByte* data() const {
         return _data.get();

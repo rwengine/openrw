@@ -11,7 +11,7 @@
 #include "objects/GameObject.hpp"
 #include "objects/InstanceObject.hpp"
 
-Payphone::Payphone(GameWorld* engine_, const int id_, const glm::vec2 coord)
+Payphone::Payphone(GameWorld* engine_, size_t id_, glm::vec2 coord)
     : engine(engine_), id(id_) {
     // Find payphone object, original game does this differently
     for (const auto& p : engine->instancePool.objects) {

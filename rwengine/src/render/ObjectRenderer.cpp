@@ -277,9 +277,9 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 
     auto wheelatomic = woi->getDistanceAtomic(mindist);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-        auto& wi = vehicle->physVehicle->getWheelInfo(w);
+        auto& wi = vehicle->physVehicle->getWheelInfo(static_cast<int>(w));
         // Construct our own matrix so we can use the local transform
-        vehicle->physVehicle->updateWheelTransform(w, false);
+        vehicle->physVehicle->updateWheelTransform(static_cast<int>(w), false);
         bool isRhino = (vehicle->getVehicle()->vehiclename_ == "RHINO");
 
         auto up = -wi.m_wheelDirectionCS;

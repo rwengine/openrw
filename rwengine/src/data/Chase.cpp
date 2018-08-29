@@ -96,7 +96,7 @@ void ChaseCoordinator::start() {
 
 void ChaseCoordinator::update(float dt) {
     chaseTime += dt;
-    size_t frameNum = chaseTime * KEYFRAMES_PER_SECOND;
+    auto frameNum = static_cast<size_t>(chaseTime * KEYFRAMES_PER_SECOND);
     for (auto &it : chaseVehicles) {
         RW_CHECK(frameNum < it.second.keyframes.size(),
                  "Vehicle out of chase keyframes");

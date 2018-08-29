@@ -20,10 +20,10 @@ unsigned charToIndex(std::uint16_t g) {
     return g - 32;
 }
 
-glm::vec4 indexToTexCoord(int index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
+static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
     constexpr unsigned TEXTURE_COLUMNS = 16;
-    const float x = index % TEXTURE_COLUMNS;
-    const float y = index / TEXTURE_COLUMNS;
+    const float x = static_cast<float>(index % TEXTURE_COLUMNS);
+    const float y = static_cast<float>(index / TEXTURE_COLUMNS);
     // Add offset to avoid 'leakage' between adjacent glyphs
     float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
     float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
@@ -284,7 +284,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         // will need to be wrapped
         if (ti.wrapX > 0 && coord.x > 0.f && !std::isspace(c)) {
             auto wend = std::find_if(std::begin(text) + i, std::end(text),
-                                     [](char x) { return std::isspace(x); });
+                                     [](GameStringChar c) { return std::isspace(c); });
             if (wend != std::end(text)) {
                 auto word = std::distance(std::begin(text) + i, wend);
                 if (lineLength + word >= ti.wrapX) {

@@ -17,7 +17,7 @@ class BaseModelInfo;
 class GameWorld;
 class CharacterObject;
 class VehicleObject;
-class VisualFX;
+struct VisualFX;
 
 /**
  * @brief The PickupObject class

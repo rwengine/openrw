@@ -228,7 +228,7 @@ SCMByte* ScriptMachine::getGlobals() {
 
 void ScriptMachine::execute(float dt) {
     RW_PROFILE_SCOPEC(__func__, MP_ORANGERED);
-    int ms = dt * 1000.f;
+    int ms = static_cast<int>(dt * 1000.f);
     for (auto t = _activeThreads.begin(); t != _activeThreads.end(); ++t) {
         auto& thread = *t;
         executeThread(thread, ms);

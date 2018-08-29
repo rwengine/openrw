@@ -72,9 +72,9 @@ public:
     enum class State { Closed, Closing, Opening, Opened };
 
     GameWorld* engine;
-    int id;
+    size_t id;
 
-    int getScriptObjectID() const {
+    size_t getScriptObjectID() const {
         return id;
     }
 
@@ -91,8 +91,8 @@ public:
 
     bool resprayDone = false;
 
-    Garage(GameWorld* engine_, const int id_, const glm::vec3 coord0,
-               const glm::vec3 coord1, const Type type_);
+    Garage(GameWorld* engine_, size_t id_, glm::vec3 coord0,
+               glm::vec3 coord1, Type type_);
     ~Garage() = default;
 
     void makeDoorSwing();

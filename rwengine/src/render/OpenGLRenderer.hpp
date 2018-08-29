@@ -85,7 +85,7 @@ public:
         /// Number of indices
         size_t count{};
         /// Start index.
-        unsigned int start{};
+        size_t start{};
         /// Textures to use
         Textures textures{};
         /// Blending mode

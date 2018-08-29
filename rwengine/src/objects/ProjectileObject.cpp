@@ -55,7 +55,7 @@ void ProjectileObject::explode() {
 
         const float exp_size = 10.f;
         const float damageSize = 5.f;
-        const float damage = _info.weapon->damage;
+        const float damage = static_cast<float>(_info.weapon->damage);
 
         for (auto& o : engine->allObjects) {
             if (o == this) continue;

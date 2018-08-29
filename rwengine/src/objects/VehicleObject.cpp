@@ -1042,7 +1042,7 @@ float VehicleObject::isInFront(const glm::vec3& point) {
     normal = glm::normalize(normal);
 
     const glm::vec3 vecTemp(testPoint.x - v1.x, 0, testPoint.y - v1.y);
-    double distance = glm::dot(vecTemp, normal);
+    float distance = glm::dot(vecTemp, normal);
 
     return distance;
 }
@@ -1073,7 +1073,7 @@ float VehicleObject::isOnSide(const glm::vec3& point) {
     normal = glm::normalize(normal);
 
     const glm::vec3 vecTemp(testPoint.x - v1.x, 0, testPoint.y - v1.y);
-    double distance = glm::dot(vecTemp, normal);
+    float distance = glm::dot(vecTemp, normal);
 
     return distance;
 }

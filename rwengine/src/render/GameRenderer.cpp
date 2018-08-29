@@ -144,12 +144,12 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     skydomeIndBuff.resize(rows * segments * 6);
     for (size_t r = 0, i = 0; r < (rows - 1); ++r) {
         for (size_t s = 0; s < (segments - 1); ++s) {
-            skydomeIndBuff[i++] = r * segments + s;
-            skydomeIndBuff[i++] = r * segments + (s + 1);
-            skydomeIndBuff[i++] = (r + 1) * segments + (s + 1);
-            skydomeIndBuff[i++] = r * segments + s;
-            skydomeIndBuff[i++] = (r + 1) * segments + (s + 1);
-            skydomeIndBuff[i++] = (r + 1) * segments + s;
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + s);
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + s);
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + s);
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
@@ -325,7 +325,7 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
     // run in parallel with a good threading system.
     RenderList renderList;
     // Naive optimisation, assume 50% hitrate
-    renderList.reserve(world->allObjects.size() * 0.5f);
+    renderList.reserve(static_cast<size_t>(world->allObjects.size() * 0.5f));
 
     ObjectRenderer objectRenderer(_renderWorld,
                                   (cullOverride ? cullingCamera : _camera),

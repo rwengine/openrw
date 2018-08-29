@@ -26,13 +26,13 @@ public:
 
     State state = State::Idle;
 
-    int id;
+    size_t id;
 
-    int getScriptObjectID() const {
+    size_t getScriptObjectID() const {
         return id;
     }
 
-    Payphone(GameWorld* engine_, const int id_, const glm::vec2 coord);
+    Payphone(GameWorld* engine_, size_t id_, glm::vec2 coord);
     ~Payphone() = default;
 
     // Makes a payphone ring
