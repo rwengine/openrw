@@ -23,6 +23,7 @@ else()
 endif()
 
 set(CONFIGURE_EXTRA_OPTIONS ";")
+set(BUILD_EXTRA_FLAGS "")
 
 if(CONFIGURATION STREQUAL "Debug")
     set(DEBUG TRUE)

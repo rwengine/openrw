@@ -39,6 +39,7 @@ set(_ARGS_ONEVAL
 
 set(_ARGS_MULVAL
     CONFIGURE_EXTRA_OPTIONS
+    BUILD_EXTRA_FLAGS
     )
 
 foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
@@ -186,6 +187,7 @@ ctest_configure(
 message(STATUS "Building...")
 ctest_build(
     CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+    FLAGS ${BUILD_EXTRA_FLAGS}
     NUMBER_ERRORS _NB_BUILD_ERRORS
     )
 
