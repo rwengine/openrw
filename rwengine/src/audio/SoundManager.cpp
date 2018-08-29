@@ -28,6 +28,11 @@ Sound& SoundManager::getSoundRef(const std::string& name) {
     return sounds[name];  // @todo reloading, how to check is it wav/mp3?
 }
 
+SoundManager::SoundManager() {
+    initializeOpenAL();
+    initializeAVCodec();
+}
+
 SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
     auto sdtPath = _engine->data->index.findFilePath("audio/sfx.SDT");
     auto rawPath = _engine->data->index.findFilePath("audio/sfx.RAW");

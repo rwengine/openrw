@@ -9,10 +9,7 @@
 
 /// OpenAL tool for playing
 /// sound instance.
-class SoundBuffer {
-    friend class SoundManager;
-
-public:
+struct SoundBuffer {
     SoundBuffer();
     bool bufferData(SoundSource& soundSource);
 
@@ -30,7 +27,6 @@ public:
     void setGain(float gain);
     void setMaxDistance(float maxDist);
 
-private:
     ALuint source;
     ALuint buffer;
 };

@@ -29,6 +29,7 @@ class ViewCamera;
 /// instances simultaneously without duplicating raw source).
 class SoundManager {
 public:
+    SoundManager();
     SoundManager(GameWorld* engine);
     ~SoundManager();
 

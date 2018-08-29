@@ -28,6 +28,7 @@ set(TESTS
     ScriptMachine
     State
     StringEncoding
+    Sound
     Text
     TrafficDirector
     Vehicle
