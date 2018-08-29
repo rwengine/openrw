@@ -16,7 +16,7 @@ set(FILESYSTEM_LIBRARY "BOOST" CACHE STRING "Which filesystem library to use")
 set_property(CACHE FILESYSTEM_LIBRARY PROPERTY STRINGS "CXX17" "CXXTS" "BOOST")
 
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel")
 endif()
 
 option(CHECK_IWYU "Enable IncludeWhatYouUse (Analyze #includes in C and C++ source files)")
