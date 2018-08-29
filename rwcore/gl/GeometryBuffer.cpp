@@ -1,8 +1,5 @@
 #include "gl/GeometryBuffer.hpp"
 
-GeometryBuffer::GeometryBuffer() : vbo(0), num(0) {
-}
-
 GeometryBuffer::~GeometryBuffer() {
     if (vbo != 0) {
         glDeleteBuffers(1, &vbo);

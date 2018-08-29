@@ -16,12 +16,14 @@ bool LoaderSDT::load(const rwfs::path& sdtPath, const rwfs::path& rawPath) {
         unsigned long fileSize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        m_assetCount = fileSize / 20;
-        m_assets.resize(m_assetCount);
+        size_t expectedCount = fileSize / 20;
+        m_assets.resize(expectedCount);
 
-        if ((m_assetCount = fread(&m_assets[0], sizeof(LoaderSDTFile),
-                                  m_assetCount, fp)) != fileSize / 20) {
-            m_assets.resize(m_assetCount);
+        size_t actualCount = fread(&m_assets[0], sizeof(LoaderSDTFile),
+                expectedCount, fp);
+
+        if (expectedCount != actualCount) {
+            m_assets.resize(actualCount);
             RW_ERROR("Error reading records in SDT archive");
         }
 
@@ -118,8 +120,8 @@ const LoaderSDTFile& LoaderSDT::getAssetInfoByIndex(size_t index) const {
     return m_assets[index];
 }
 
-uint32_t LoaderSDT::getAssetCount() const {
-    return m_assetCount;
+size_t LoaderSDT::getAssetCount() const {
+    return m_assets.size();
 }
 
 LoaderSDT::Version LoaderSDT::getVersion() const {

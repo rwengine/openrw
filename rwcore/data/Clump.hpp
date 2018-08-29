@@ -107,7 +107,7 @@ public:
  */
 
 struct SubGeometry {
-    GLuint start = 0;
+    size_t start = 0;
     size_t material = 0;
     std::vector<uint32_t> indices;
     size_t numIndices = 0;

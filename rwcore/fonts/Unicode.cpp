@@ -4,22 +4,22 @@
 
 size_t unicode_to_utf8(unicode_t unicode, char c[4]) {
     if (unicode < 0x80) { // 7 bits
-        c[0] = unicode;
+        c[0] = static_cast<char>(unicode);
         return 1;
     } else if (unicode < 0x800) { // 11 bits
-        c[0] = 0xc0 | (unicode >> 6);
-        c[1] = 0x80 | (unicode & 0x3f);
+        c[0] = static_cast<char>(0xc0 | (unicode >> 6));
+        c[1] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 2;
     } else if (unicode < 0x10000) { // 16 bits
-        c[0] = 0xe0 | (unicode >> 12);
-        c[1] = 0x80 | ((unicode >> 6) & 0x3f);
-        c[2] = 0x80 | (unicode & 0x3f);
+        c[0] = static_cast<char>(0xe0 | (unicode >> 12));
+        c[1] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
+        c[2] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 3;
     } else if (unicode < 0x110000) { // 21 bits
-        c[0] = 0xf0 | (unicode >> 18);
-        c[1] = 0x80 | ((unicode >> 12) & 0x3f);
-        c[2] = 0x80 | ((unicode >> 6) & 0x3f);
-        c[3] = 0x80 | (unicode & 0x3f);
+        c[0] = static_cast<char>(0xf0 | (unicode >> 18));
+        c[1] = static_cast<char>(0x80 | ((unicode >> 12) & 0x3f));
+        c[2] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
+        c[3] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 4;
     } else {
         return unicode_to_utf8(UnicodeValue::UNICODE_REPLACEMENT_CHARACTER, c);

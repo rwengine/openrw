@@ -9,7 +9,7 @@
 //Based on https://gist.github.com/socantre/3472964
 template <class Dest, class Source>
 inline Dest bit_cast(Source const &source) {
-    Dest dest = Dest{};
+    Dest dest;
     std::memcpy(&dest, &source, sizeof(Dest));
     return dest;
 }
@@ -18,10 +18,10 @@ template <class T, class S>
 inline T lexical_cast(const S& s);
 
 template <class T, class S>
-inline T lexical_cast(const S& s, size_t base);
+inline T lexical_cast(const S& s, int base);
 
 template <>
-inline int lexical_cast(const std::string& source, size_t base) {
+inline int lexical_cast(const std::string& source, int base) {
     char* end = nullptr; //for errors handling
     int result = std::strtol(source.c_str(), &end, base);
     RW_CHECK(end != source.c_str(), "Problem with conversion " << *end << " to int");

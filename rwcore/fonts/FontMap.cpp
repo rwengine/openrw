@@ -28,7 +28,7 @@ FontMap::FontMap(std::initializer_list<std::reference_wrapper<const gschar_unico
 GameStringChar FontMap::to_GameStringChar(unicode_t u) const {
     if (u < 0x20) {
         /* Passthrough control characters */
-        return u;
+        return static_cast<GameStringChar>(u);
     }
     const auto &p = m_from_unicode.find(u);
     if (p == m_from_unicode.end()) {

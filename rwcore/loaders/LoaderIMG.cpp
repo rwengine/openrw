@@ -5,9 +5,6 @@
 
 #include "rw/debug.hpp"
 
-LoaderIMG::LoaderIMG() : m_version(GTAIIIVC), m_assetCount(0) {
-}
-
 bool LoaderIMG::load(const rwfs::path& filepath) {
     auto dirPath = filepath;
     dirPath.replace_extension(".dir");
@@ -18,12 +15,13 @@ bool LoaderIMG::load(const rwfs::path& filepath) {
         unsigned long fileSize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
 
-        m_assetCount = fileSize / 32;
-        m_assets.resize(m_assetCount);
+        std::size_t expectedCount = fileSize / 32;
+        m_assets.resize(expectedCount);
+        std::size_t actualCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
+                expectedCount, fp);
 
-        if ((m_assetCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
-                                  m_assetCount, fp)) != fileSize / 32) {
-            m_assets.resize(m_assetCount);
+        if (expectedCount != actualCount) {
+            m_assets.resize(actualCount);
             RW_ERROR("Error reading records in IMG archive");
         }
 
@@ -102,6 +100,6 @@ const LoaderIMGFile& LoaderIMG::getAssetInfoByIndex(size_t index) const {
     return m_assets[index];
 }
 
-uint32_t LoaderIMG::getAssetCount() const {
-    return m_assetCount;
+std::size_t LoaderIMG::getAssetCount() const {
+    return m_assets.size();
 }

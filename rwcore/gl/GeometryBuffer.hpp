@@ -20,10 +20,10 @@ struct AttributeIndex {
     AttributeSemantic sem;
     GLsizei size;
     GLsizei stride;
-    GLsizei offset;
+    size_t offset;
     GLenum type;
 
-    AttributeIndex(AttributeSemantic s, GLsizei sz, GLsizei strd, GLsizei offs,
+    AttributeIndex(AttributeSemantic s, GLsizei sz, GLsizei strd, size_t offs,
                    GLenum type = GL_FLOAT)
         : sem(s), size(sz), stride(strd), offset(offs), type(type) {
     }
@@ -35,15 +35,15 @@ typedef std::vector<AttributeIndex> AttributeList;
  * GeometryBuffer stores a set of vertex attribute data
  */
 class GeometryBuffer {
-    GLuint vbo;
-    GLsizei num;
+    GLuint vbo = 0;
+    GLsizei num = 0;
 
-    AttributeList attributes;
+    AttributeList attributes{};
 
 public:
-    GeometryBuffer();
+    GeometryBuffer() = default;
     template <class T>
-    GeometryBuffer(const std::vector<T>& data) : vbo(0), num(0) {
+    GeometryBuffer(const std::vector<T>& data) {
         uploadVertices(data);
     }
 
@@ -65,7 +65,7 @@ public:
      */
     template <class T>
     void uploadVertices(const std::vector<T>& data) {
-        uploadVertices(data.size(), data.size() * sizeof(T), data.data());
+        uploadVertices(static_cast<GLsizei>(data.size()), data.size() * sizeof(T), data.data());
         // Assume T has a static method for attributes;
         attributes = T::vertex_attributes();
     }
