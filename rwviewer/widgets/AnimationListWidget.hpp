@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _ANIMATIONLISTWIDGET_HPP_
 #define _ANIMATIONLISTWIDGET_HPP_
 #include <QDockWidget>

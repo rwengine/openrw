@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _ITEMLISTWIDGET_HPP_
 #define _ITEMLISTWIDGET_HPP_
 #include <QDockWidget>

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _ANIMATIONLISTMODEL_HPP_
 #define _ANIMATIONLISTMODEL_HPP_
 #include <QAbstractItemModel>

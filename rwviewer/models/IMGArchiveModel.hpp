@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _IMGARCHIVEMODEL_HPP_
 #define _IMGARCHIVEMODEL_HPP_
 #include <QAbstractItemModel>

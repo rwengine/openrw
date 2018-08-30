@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _MODELVIEWER_HPP_
 #define _MODELVIEWER_HPP_
 #include <engine/GameData.hpp>
