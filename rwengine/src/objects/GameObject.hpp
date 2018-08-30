@@ -148,6 +148,21 @@ public:
      */
     void setHeading(float heading);
 
+    /**
+     * @brief getCenterOffset Returns the offset from center of mass to base of model
+     * This function should be overwritten by a derived class
+     */
+    virtual glm::vec3 getCenterOffset() {
+        return glm::vec3(0.f, 0.f, 1.f);
+    }
+
+    /**
+     * @brief applyOffset Applies the offset from getCenterOffset to the object
+     */
+    void applyOffset() {
+         setPosition(getPosition() + getCenterOffset());
+    }
+
     struct DamageInfo {
         enum DamageType { Explosion, Burning, Bullet, Physics };
 

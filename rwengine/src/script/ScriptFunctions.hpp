@@ -21,7 +21,6 @@
  * among many script modules and opcodes.
  */
 namespace script {
-const ScriptVec3 kSpawnOffset = ScriptVec3(0.f, 0.f, 1.f);
 
 inline void getObjectPosition(GameObject* object, ScriptFloat& x,
                               ScriptFloat& y, ScriptFloat& z) {
@@ -31,7 +30,8 @@ inline void getObjectPosition(GameObject* object, ScriptFloat& x,
     z = p.z;
 }
 inline void setObjectPosition(GameObject* object, const ScriptVec3& coord) {
-    object->setPosition(coord + script::kSpawnOffset);
+    object->setPosition(coord);
+    object->applyOffset();
 }
 
 inline VehicleObject* getCharacterVehicle(CharacterObject* character) {
