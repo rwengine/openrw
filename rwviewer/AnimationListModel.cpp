@@ -25,7 +25,7 @@ QVariant AnimationListModel::headerData(int section,
 }
 
 int AnimationListModel::rowCount(const QModelIndex&) const {
-    return animations.size();
+    return static_cast<int>(animations.size());
 }
 
 int AnimationListModel::columnCount(const QModelIndex&) const {

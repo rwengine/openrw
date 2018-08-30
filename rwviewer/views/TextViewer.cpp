@@ -217,7 +217,7 @@ void TextViewer::worldChanged() {
     textMap.keys.resize(keys.size());
     std::move(keys.begin(), keys.end(), textMap.keys.begin());
 
-    textModel->setData(textMap);
+    textModel->setMapData(textMap);
 }
 
 std::vector<std::string> TextViewer::getFontTextureNames() {

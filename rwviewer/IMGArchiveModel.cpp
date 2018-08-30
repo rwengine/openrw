@@ -30,7 +30,7 @@ QVariant IMGArchiveModel::headerData(int section, Qt::Orientation orientation,
 }
 
 int IMGArchiveModel::rowCount(const QModelIndex&) const {
-    return archive.getAssetCount();
+    return static_cast<int>(archive.getAssetCount());
 }
 
 int IMGArchiveModel::columnCount(const QModelIndex&) const {

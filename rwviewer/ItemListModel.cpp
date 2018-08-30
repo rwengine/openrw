@@ -14,7 +14,7 @@ ItemListModel::ItemListModel(GameWorld *world, QObject *parent)
 }
 
 int ItemListModel::rowCount(const QModelIndex &) const {
-    return _world->data->modelinfo.size();
+    return static_cast<int>(_world->data->modelinfo.size());
 }
 
 int ItemListModel::columnCount(const QModelIndex &) const {
