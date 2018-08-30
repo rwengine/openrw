@@ -604,7 +604,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(ped.modelName)
         READ_VALUE(ped.align)
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
         std::cout << "Player Health: " << ped.info.health << " ("
                   << ped.info.armour << ")" << std::endl;
         std::cout << "Player model: " << ped.modelName << std::endl;
@@ -639,7 +639,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(garages[i]);
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Garages: " << garageData.garageCount << std::endl;
     std::cout << "Bombs Free: " << garageData.freeBombs << std::endl;
     std::cout << "Sprays Free: " << garageData.freeResprays << std::endl;
@@ -674,7 +674,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(veh.modelId)
         READ_VALUE(veh.unknown2)
         READ_VALUE(veh.state)
-#if RW_DEBUG
+#ifdef RW_DEBUG
         std::cout << " v " << veh.modelId << " " << veh.state.position.x << " "
                   << veh.state.position.y << " " << veh.state.position.z
                   << std::endl;
@@ -687,7 +687,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(veh.modelId)
         READ_VALUE(veh.unknown2)
         READ_VALUE(veh.state)
-#if RW_DEBUG
+#ifdef RW_DEBUG
         std::cout << " b " << veh.modelId << " " << veh.state.position.x << " "
                   << veh.state.position.y << " " << veh.state.position.z
                   << std::endl;
@@ -736,7 +736,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         inst->setRotation(glm::normalize(static_cast<glm::quat>(m)));
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Objects " << objectCount << std::endl;
     for (size_t o = 0; o < objectCount; ++o) {
         auto& obj = objects[o];
@@ -786,7 +786,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(crane)
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Cranes: " << craneData.numCranes << std::endl;
     for (size_t c = 0; c < craneData.numCranes; ++c) {
         Block6Crane& crane = craneData.cranes[c];
@@ -806,7 +806,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block7Data pickupData;
     READ_VALUE(pickupData);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     for (const auto &pickup : pickupData.pickups) {
         if (pickup.type == 0) continue;
         std::cout << " " << uint16_t(pickup.type) << " " << pickup.position.x << " "
@@ -827,7 +827,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(payphone)
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Payphones: " << payphoneData.numPayphones << std::endl;
     for (const auto& payphone : payphones) {
         std::cout << " " << uint16_t(payphone.state) << " " << payphone.position.x
@@ -847,7 +847,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block9Data restartData;
     READ_VALUE(restartData);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Hospitals: " << restartData.numHospitals
               << " police: " << restartData.numPolice << std::endl;
     for (int s = 0; s < restartData.numHospitals; ++s) {
@@ -873,7 +873,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block10Data radarData;
     READ_VALUE(radarData);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     for (const auto &blip : radarData.blips) {
         if (blip.type == 0) continue;
         std::cout << " " << blip.position.x << " " << blip.position.y << " "
@@ -934,7 +934,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(zoneData.numMapZones);
     READ_VALUE(zoneData.numAudioZones);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "zones: " << zoneData.numNavZones << " "
               << zoneData.numZoneInfos << " " << zoneData.numMapZones << " "
               << zoneData.numAudioZones << std::endl;
@@ -1004,7 +1004,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block12Data gangData;
     READ_VALUE(gangData);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     for (const auto &gang : gangData.gangs) {
         std::cout << " " << gang.carModelId << " " << gang.weaponPrimary << " "
                   << gang.weaponSecondary << std::endl;
@@ -1028,7 +1028,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(carGenerators[g])
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Car generators: " << carGeneratorData.generatorCount
               << std::endl;
     for (size_t g = 0; g < carGeneratorData.generatorCount; ++g) {
@@ -1051,7 +1051,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(particles[p])
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "particles: " << particleCount << std::endl;
 #endif
 
@@ -1071,7 +1071,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(audioObjects[a])
     }
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Audio Objects: " << audioCount << std::endl;
 #endif
 
@@ -1094,7 +1094,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(state.playerInfo.singlePayerHealthcare)
     READ_VALUE(state.playerInfo.unknown5)
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Player money: " << state.playerInfo.money << " ("
               << state.playerInfo.displayedMoney << ")" << std::endl;
 #endif
@@ -1157,7 +1157,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(state.gameStats.peopleKilledSinceLastBustedOrWasted);
     READ_VALUE(state.gameStats.lastMissionGXT);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     std::cout << "Player kills: " << state.gameStats.playerKills << std::endl;
     std::cout << "longest flight " << state.gameStats.longestDodoFlight
               << std::endl;
@@ -1172,7 +1172,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block18Data streamingData;
     READ_VALUE(streamingData);
 
-#if RW_DEBUG && 0  // No idea what the data in the section means yet
+#if defined(RW_DEBUG) && 0  // No idea what the data in the section means yet
     static const size_t streamSize = sqrt(200 * 8);
     for (int x = 0; x < streamSize; ++x) {
         for (int y = 0; y < streamSize; ++y) {
@@ -1198,7 +1198,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     Block19Data pedTypeData;
     READ_VALUE(pedTypeData);
 
-#if RW_DEBUG
+#ifdef RW_DEBUG
     for (const auto &type : pedTypeData.types) {
         printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", type.bitstring_,
                static_cast<double>(type.unknown2),

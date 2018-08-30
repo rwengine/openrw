@@ -1,7 +1,7 @@
 #ifndef _RWENGINE_PROFILER_HPP_
 #define _RWENGINE_PROFILER_HPP_
 
-#if RW_PROFILER
+#ifdef RW_PROFILER
 #include <chrono>
 #include <cstdint>
 #include <stack>

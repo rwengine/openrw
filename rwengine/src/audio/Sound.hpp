@@ -22,8 +22,8 @@ struct Sound {
     size_t id = 0;
     bool isLoaded = false;
 
-    std::shared_ptr<SoundSource> source = nullptr;
-    std::unique_ptr<SoundBuffer> buffer = nullptr;
+    std::shared_ptr<SoundSource> source;
+    std::unique_ptr<SoundBuffer> buffer;
 
     Sound() = default;
 

@@ -10,12 +10,16 @@ from conans.client import conan_api
 
 
 openrw_path = Path(__file__).resolve().parents[2]
-windows_profile = openrw_path / 'scripts' / 'conan' / 'windows'
 cmake_generator_lookup = {
     2015: 'Visual Studio 14 2015',
     2017: 'Visual Studio 15 2017',
 }
 architectures = ['x64', 'x86']
+
+conan_arch_map = {
+    'x86': 'x86',
+    'x64': 'x86_64',
+}
 
 
 def to_cmake_generator(vs_version, arch):
@@ -23,18 +27,20 @@ def to_cmake_generator(vs_version, arch):
     if arch == 'x64':
         cmake_generator = '{} Win64'.format(cmake_generator)
     return cmake_generator
-
-
+    
+    
 def create_solution(path, vs_version, arch):
     conan, _, _ = conan_api.ConanAPIV1.factory()
     conan.remote_add(remote='bincrafters', url='https://api.bintray.com/conan/bincrafters/public-conan', force=True)
-    conan.install(path=openrw_path, profile_name=windows_profile, generators=('cmake_multi',),
-                  options=('openrw:viewer=False', ), settings=('build_type=Debug', ), install_folder=path)
-    conan.install(path=openrw_path, profile_name=windows_profile, generators=('cmake_multi',),
-                  options=('openrw:viewer=False', ), settings=('build_type=Release', ), install_folder=path)
+    conan_arch = conan_arch_map[arch]
+    conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
+                  settings=('build_type=Debug', 'arch={}'.format(conan_arch), ), install_folder=path)
+    conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
+                  settings=('build_type=Release', 'arch={}'.format(conan_arch), ), install_folder=path)
     cmake_generator = to_cmake_generator(vs_version=vs_version, arch=arch)
     subprocess.run([
-        'cmake', '-DUSE_CONAN=1', '-DBOOST_STATIC=TRUE', '-DBUILD_TESTS=1',
+        'cmake', '-DUSE_CONAN=TRUE', '-DBOOST_STATIC=TRUE',
+        '-DBUILD_TESTS=TRUE', '-DBUILD_VIEWER=TRUE', '-DBUILD_TOOLS=TRUE',
         '-G{}'.format(cmake_generator), str(openrw_path),
     ], cwd=path, check=True)
 

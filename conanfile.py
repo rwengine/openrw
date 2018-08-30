@@ -1,9 +1,6 @@
 from conans import ConanFile, CMake
 from conans.errors import ConanException
 
-# FIXME:
-# - no sound in cutscenes. Also no subtitles.
-
 
 class OpenrwConan(ConanFile):
     name = 'openrw'
@@ -20,11 +17,9 @@ class OpenrwConan(ConanFile):
 
     default_options = (
         'test_data=False',
-        'viewer=False',
-        'tools=False',
+        'viewer=True',
+        'tools=True',
         'bullet:shared=False',
-        'ffmpeg:iconv=False',
-        'libalsa:disable_python=True',  # https://github.com/conan-community/community/issues/3
         'sdl2:sdl2main=False',
     )
 
@@ -42,12 +37,16 @@ class OpenrwConan(ConanFile):
             'boost/1.67.0@conan/stable',
         ),
         'viewer': (
-            'Qt/5.11@bincrafters/stable',
+            'Qt/5.11.1@bincrafters/stable',
         ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
         ),
     }
+
+    def configure(self):
+        if self.options.viewer:
+            self.options['Qt'].opengl = 'desktop'
 
     def requirements(self):
         for dep in self._rw_dependencies['game']:

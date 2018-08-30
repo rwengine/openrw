@@ -44,6 +44,14 @@ add_library(rwcore
     loaders/LoaderTXD.cpp
     )
 
+if(WIN32)
+    target_sources(rwcore
+        PRIVATE
+            platform/RWWindows.hpp
+            platform/RWWindows.cpp
+        )
+endif()
+
 target_include_directories(rwcore
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -51,8 +59,8 @@ target_include_directories(rwcore
 
 target_link_libraries(rwcore
     PUBLIC
-        rwdep::boost
-        rwdep::glm
+        Boost::boost
+        glm::glm
         openrw::interface
     PRIVATE
         OpenGL::GL

@@ -18,6 +18,9 @@
 #include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
 
+class GameWorld;
+class ViewCamera;
+
 /// Game's sound manager.
 /// It handles all stuff connected with sounds.
 /// Worth noted: there are three types of sounds,
@@ -27,13 +30,14 @@
 class SoundManager {
 public:
     SoundManager();
+    SoundManager(GameWorld* engine);
     ~SoundManager();
 
     /// Load sound from file and store it with selected name
     bool loadSound(const std::string& name, const std::string& fileName);
 
-    /// Load all sfx sounds
-    void loadSfxSound(const rwfs::path& path, size_t index);
+    /// Load selected sfx sound
+    void loadSound(size_t index);
 
     Sound& getSoundRef(size_t name);
     Sound& getSoundRef(const std::string& name);
@@ -73,15 +77,8 @@ public:
     void playMusic(const std::string& name);
     void stopMusic(const std::string& name);
 
-    /// Setting position of listener for openAL.
-    void setListenerPosition(const glm::vec3& position);
-
-    /// Setting velocity of velocity for openAL.
-    void setListenerVelocity(const glm::vec3& vel);
-
-    /// Setting orientation of listener for openAL.
-    /// Worth noted v = { at.x, at.y, at.z, up.x, up.y, up.z}
-    void setListenerOrientation(const glm::vec3& at);
+    /// Updating listener tranform, called by main loop of game.
+    void updateListenerTransform(const ViewCamera& cam);
 
     /// Setting position of sound source in buffer.
     void setSoundPosition(const std::string& name, const glm::vec3& position);
@@ -90,7 +87,9 @@ public:
 
 private:
     bool initializeOpenAL();
-    bool initializeAVCodec();
+    void initializeAVCodec();
+
+    void deinitializeOpenAL();
 
     ALCcontext* alContext = nullptr;
     ALCdevice* alDevice = nullptr;
@@ -105,6 +104,7 @@ private:
     /// Nr of already created buffers
     size_t bufferNr = 0;
 
+    GameWorld* _engine;
     LoaderSDT sdt{};
 };
 

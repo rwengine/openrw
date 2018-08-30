@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 
 #include <objects/GameObject.hpp>
+#include "render/VisualFX.hpp"
+
 
 class GameWorld;
 class btPairCachingGhostObject;

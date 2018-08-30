@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <glm/glm.hpp>
 
@@ -62,9 +63,14 @@ enum class BlendMode {
     BLEND_ADDITIVE
 };
 
+enum class DepthMode {
+    OFF,
+    LESS,
+};
+
 class Renderer {
 public:
-    typedef std::vector<GLuint> Textures;
+    typedef std::array<GLuint,2> Textures;
 
     /**
      * @brief The DrawParameters struct stores drawing state
@@ -84,7 +90,9 @@ public:
         Textures textures{};
         /// Blending mode
         BlendMode blendMode = BlendMode::BLEND_NONE;
-        // Depth writing state
+        /// Depth
+        DepthMode depthMode = DepthMode::LESS;
+        /// Depth writing state
         bool depthWrite = true;
         /// Material
         glm::u8vec4 colour{};
@@ -342,6 +350,7 @@ private:
     DrawBuffer* currentDbuff = nullptr;
     OpenGLShaderProgram* currentProgram = nullptr;
     BlendMode blendMode = BlendMode::BLEND_NONE;
+    DepthMode depthMode = DepthMode::OFF;
     bool depthWriteEnabled = false;
     GLuint currentUBO = 0;
     GLuint currentUnit = 0;
@@ -373,6 +382,17 @@ private:
         blendMode = mode;
     }
 
+    void setDepthMode(DepthMode mode) {
+        if (mode != depthMode) {
+            if (depthMode == DepthMode::OFF) glEnable(GL_DEPTH_TEST);
+            switch(mode) {
+                case DepthMode::OFF: glDisable(GL_DEPTH_TEST); break;
+                case DepthMode::LESS: glDepthFunc(GL_LESS); break;
+            }
+            depthMode = mode;
+        }
+    }
+
     void setDepthWrite(bool enable) {
         if (enable != depthWriteEnabled) {
             glDepthMask(enable ? GL_TRUE : GL_FALSE);
@@ -383,7 +403,7 @@ private:
     template <class T>
     void uploadUBO(Buffer& buffer, const T& data) {
         uploadUBOEntry(buffer, &data, sizeof(T));
-#if RW_PROFILER
+#ifdef RW_PROFILER
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].uploads++;
         }

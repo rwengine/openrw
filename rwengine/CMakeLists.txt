@@ -1,7 +1,3 @@
-###########################################################
-##      RWENGINE
-###########################################################
-
 set(RWENGINE_SOURCES
     src/ai/AIGraph.cpp
     src/ai/AIGraph.hpp
@@ -18,6 +14,8 @@ set(RWENGINE_SOURCES
 
     src/audio/alCheck.cpp
     src/audio/alCheck.hpp
+    src/audio/SfxParameters.cpp
+    src/audio/SfxParameters.hpp
     src/audio/Sound.hpp
     src/audio/SoundBuffer.cpp
     src/audio/SoundBuffer.hpp
@@ -147,10 +145,10 @@ add_library(rwengine
 target_link_libraries(rwengine
     PUBLIC
         rwcore
-        rwdep::bullet
-        rwdep::ffmpeg
-        rwdep::glm
-        rwdep::OpenAL
+        bullet::bullet
+        ffmpeg::ffmpeg
+        glm::glm
+        OpenAL::OpenAL
     )
 
 target_include_directories(rwengine

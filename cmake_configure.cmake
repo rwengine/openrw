@@ -2,6 +2,7 @@ add_library(rw_interface INTERFACE)
 add_library(openrw::interface ALIAS rw_interface)
 
 # target_compile_features(rw_interface INTERFACE cxx_std_14) is not supported by CMake 3.2
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -38,14 +39,25 @@ if(MINGW)
         )
 endif()
 
+if(WIN32)
+    # Required minimum version of Windows = Vista
+    set(RW_NTDDI_VISTA 0x06000000)
+    set(RW_WINVER 0x0600)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            "NTDDI_VERSION=${RW_NTDDI_VISTA}"
+            "WINVER=${RW_WINVER}"
+            "_WIN32_WINNT=${RW_WINVER}"
+        )
+endif()
+
 target_compile_definitions(rw_interface
     INTERFACE
-        "$<$<CONFIG:Debug>:RW_DEBUG=1>"
+        "$<$<CONFIG:Debug>:RW_DEBUG>"
         "GLM_FORCE_RADIANS"
         "GLM_ENABLE_EXPERIMENTAL"
-        "RW_VERBOSE_DEBUG_MESSAGES=$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>"
-        "RENDER_PROFILER=0"
-        "RW_PROFILER=$<BOOL:${ENABLE_PROFILING}>"
+        "$<$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>:RW_VERBOSE_DEBUG_MESSAGES>"
+        "$<$<BOOL:${ENABLE_PROFILING}>:RW_PROFILER>"
     )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -62,6 +74,18 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions(rw_interface INTERFACE "RW_WINDOWS")
 else()
     message(FATAL_ERROR "Unknown platform \"${CMAKE_SYSTEM_NAME}\". please update CMakeLists.txt.")
+endif()
+
+target_compile_definitions(rw_interface
+    INTERFACE
+        BOOST_ALL_NO_LIB
+    )
+
+if(NOT BOOST_STATIC)
+    target_compile_definitions(rw_interface
+        INTERFACE
+            BOOST_ALL_DYN_LINK
+    	)
 endif()
 
 if(USE_CONAN)
@@ -86,18 +110,10 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
 elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
     target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
     target_link_libraries(rw_interface INTERFACE
-        rwdep::boost_filesystem
+        Boost::filesystem
         )
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
-endif()
-
-
-if(NOT BOOST_STATIC)
-    target_compile_definitions(rw_interface
-        INTERFACE
-            BOOST_ALL_DYN_LINK
-        )
 endif()
 
 if(ENABLE_SCRIPT_DEBUG)

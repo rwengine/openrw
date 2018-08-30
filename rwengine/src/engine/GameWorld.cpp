@@ -54,7 +54,7 @@ public:
 };
 
 GameWorld::GameWorld(Logger* log, GameData* dat)
-    : logger(log), data(dat) {
+    : logger(log), data(dat), sound(this) {
     data->engine = this;
 
     collisionConfig = std::make_unique<btDefaultCollisionConfiguration>();
@@ -497,15 +497,30 @@ void GameWorld::destroyQueuedObjects() {
     }
 }
 
-VisualFX* GameWorld::createEffect(VisualFX::EffectType type) {
-    auto effect = new VisualFX(type);
-    effects.push_back(effect);
-    return effect;
+LightFX& GameWorld::createLightEffect() {
+    auto effect = std::make_unique<LightFX>();
+    auto& ref = *effect;
+    effects.push_back(std::move(effect));
+    return ref;
 }
 
-void GameWorld::destroyEffect(VisualFX* effect) {
+ParticleFX& GameWorld::createParticleEffect() {
+    auto effect = std::make_unique<ParticleFX>();
+    auto& ref = *effect;
+    effects.push_back(std::move(effect));
+    return ref;
+}
+
+TrailFX& GameWorld::createTrailEffect() {
+    auto effect = std::make_unique<TrailFX>();
+    auto& ref = *effect;
+    effects.push_back(std::move(effect));
+    return ref;
+}
+
+void GameWorld::destroyEffect(VisualFX& effect) {
     for (auto it = effects.begin(); it != effects.end();) {
-        if (*it == effect) {
+        if (it->get() == &effect) {
             it = effects.erase(it);
         } else {
             it++;
@@ -831,6 +846,20 @@ void GameWorld::setPaused(bool pause) {
 
 bool GameWorld::isPaused() const {
     return paused;
+}
+
+void GameWorld::updateEffects() {
+    for (int i = 0; i < static_cast<int>(effects.size()); ++i) {
+        auto& effect = effects[i];
+        if (effect->getType() == Particle) {
+            auto particle = static_cast<ParticleFX*>(effect.get());
+            if (particle->lifetime < 0.f) continue;
+            if (getGameTime() >= particle->starttime + particle->lifetime) {
+                destroyEffect(*particle);
+                --i;
+            }
+        }
+    }
 }
 
 VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {

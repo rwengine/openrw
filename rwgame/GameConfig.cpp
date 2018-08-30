@@ -1,12 +1,19 @@
 #include "GameConfig.hpp"
-#include <algorithm>
 
 #include <rw/debug.hpp>
 #include <rw/filesystem.hpp>
 
+#include <algorithm>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 namespace pt = boost::property_tree;
+
+#ifdef RW_WINDOWS
+#include <Shlobj.h>
+#include <winerror.h>
+
+#include <platform/RWWindows.hpp>
+#endif
 
 const std::string kConfigDirectoryName("OpenRW");
 
@@ -44,9 +51,16 @@ rwfs::path GameConfig::getDefaultConfigPath() {
 #elif defined(RW_OSX)
     char *home = getenv("HOME");
     if (home)
-        return rwfs::path(home) / "Library/Preferences/" /
-               kConfigDirectoryName;
+        return rwfs::path(home) / "Library/Preferences/" / kConfigDirectoryName;
 
+#elif defined(RW_WINDOWS)
+    wchar_t *widePath;
+    auto res = SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT,
+                                    nullptr, &widePath);
+    if (SUCCEEDED(res)) {
+        auto utf8Path = wideStringToACP(widePath);
+        return rwfs::path(utf8Path) / kConfigDirectoryName;
+    }
 #else
     return rwfs::path();
 #endif
@@ -343,7 +357,7 @@ void GameConfig::ParseResult::failInputFile(size_t line,
 }
 
 void GameConfig::ParseResult::markGood() {
-    this-> m_result = ParseResult::ErrorType::GOOD;
+    this->m_result = ParseResult::ErrorType::GOOD;
 }
 
 void GameConfig::ParseResult::failArgument() {

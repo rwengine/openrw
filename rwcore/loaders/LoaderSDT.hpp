@@ -62,8 +62,7 @@ public:
     ~LoaderSDT() = default;
 
     /// Load the structure of the archive
-    /// Omit the extension in filename
-    bool load(const rwfs::path& path);
+    bool load(const rwfs::path& sdtPath, const rwfs::path& rawPath);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file

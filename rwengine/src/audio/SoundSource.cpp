@@ -150,7 +150,7 @@ void SoundSource::loadFromFile(const rwfs::path& filePath) {
     }
 #else
 
-    AVFrame* resampled = nullptr;
+    AVFrame* resampled = av_frame_alloc();
 
     while (av_read_frame(formatContext, &readingPacket) == 0) {
         if (readingPacket.stream_index == audioStream->index) {
@@ -191,7 +191,6 @@ void SoundSource::loadFromFile(const rwfs::path& filePath) {
                 // Decode audio packet
                 if (receiveFrame == 0 && sendPacket == 0) {
                     // Write samples to audio buffer
-                    resampled = av_frame_alloc();
                     resampled->channel_layout = AV_CH_LAYOUT_STEREO;
                     resampled->sample_rate = frame->sample_rate;
                     resampled->format = kOutputFMT;
@@ -215,6 +214,9 @@ void SoundSource::loadFromFile(const rwfs::path& filePath) {
             }
         }
     }
+
+    /// Free all data used by the resampled frame.
+    av_frame_free(&resampled);
 
 #endif
 
@@ -254,16 +256,13 @@ static int read_packet(void* opaque, uint8_t* buf, int buf_size) {
     return buf_size;
 }
 
-void SoundSource::loadSfx(const rwfs::path& path, LoaderSDT& sdt, size_t index, bool asWave) {
+void SoundSource::loadSfx(LoaderSDT& sdt, size_t index, bool asWave) {
     // Allocate audio frame
     AVFrame* frame = av_frame_alloc();
     if (!frame) {
         RW_ERROR("Error allocating the audio frame");
         return;
     }
-
-
-    sdt.load(path / "audio/sfx");
 
     /// Now we need to prepare "custom" format context
     /// We need sdt loader for that purpose

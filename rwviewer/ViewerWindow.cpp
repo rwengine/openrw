@@ -144,11 +144,11 @@ void ViewerWindow::loadGame(const QString& path) {
     }
 
     gameData = std::make_unique<GameData>(&engineLog, gameDir.absolutePath().toStdString());
+    gameData->load();
+
     gameWorld = std::make_unique<GameWorld>(&engineLog, gameData.get());
     renderer = std::make_unique<GameRenderer>(&engineLog, gameData.get());
     gameWorld->state = new GameState;
-
-    gameWorld->data->load();
 
     renderer->text.setFontTexture(FONT_PAGER, "pager");
     renderer->text.setFontTexture(FONT_PRICEDOWN, "font1");

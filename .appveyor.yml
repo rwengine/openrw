@@ -10,6 +10,7 @@ cache:
 
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  ALSOFT_DRIVERS: null
   PYTHON: "C:\\Python36-x64"
   CMAKE_GENERATOR_BASE: "Visual Studio 15 2017"
   NAME_SUFFIX: "windows"
@@ -48,5 +49,5 @@ build_script:
 
 after_build:
   - cd "%APPVEYOR_BUILD_FOLDER%\build"
-  - cpack -C Release -G TXZ
+  - cpack -C %CONFIGURATION% -G TXZ
   - appveyor PushArtifact OpenRW-%COMMIT_HASH:~0,8%.tar.xz

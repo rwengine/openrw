@@ -148,10 +148,6 @@ TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
 }
 
 void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
-    if (font >= FONTS_COUNT) {
-        RW_ERROR("Illegal font: " << font);
-        return;
-    }
     auto ftexture = renderer->getData()->findSlotTexture("fonts", textureName);
     const glm::u32vec2 textureSize = ftexture->getSize();
     glm::u8vec2 glyphOffset{textureSize.x / 16, textureSize.x / 16};
@@ -169,6 +165,8 @@ void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
     case FONT_ARIAL:
         glyphWidths = &fontWidthsArial;
         break;
+    default:
+        throw std::runtime_error("Illegal font");
     }
     std::uint8_t monoWidth = 0;
     if (font == FONT_PAGER) {
@@ -353,7 +351,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.count = gb.getCount();
     auto ftexture = renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
     dp.textures = {ftexture->getName()};
-    dp.depthWrite = false;
+    dp.depthMode = DepthMode::OFF;
 
     renderer->getRenderer()->drawArrays(glm::mat4(1.0f), &db, dp);
 

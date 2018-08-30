@@ -15,6 +15,11 @@ SoundBuffer::SoundBuffer() {
     alCheck(alSourcei(source, AL_LOOPING, AL_FALSE));
 }
 
+SoundBuffer::~SoundBuffer() {
+    alCheck(alDeleteSources(1, &source));
+    alCheck(alDeleteBuffers(1, &buffer));
+}
+
 bool SoundBuffer::bufferData(SoundSource& soundSource) {
     alCheck(alBufferData(
         buffer,

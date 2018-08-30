@@ -424,17 +424,21 @@ void CharacterObject::updateCharacter(float dt) {
 void CharacterObject::setPosition(const glm::vec3& pos) {
     auto realPos = pos;
     if (physCharacter) {
-        if (pos.z <= -99.f) {
+        if (pos.z <= -100.f) {
             realPos = engine->getGroundAtPosition(pos);
         }
-        // Apply an offset so that the feet are the center
-        const float z_offset =
-            physShape->getHalfHeight() + physShape->getRadius();
-        btVector3 bpos(realPos.x, realPos.y, realPos.z + z_offset);
+        btVector3 bpos(realPos.x, realPos.y, realPos.z);
         physCharacter->warp(bpos);
     }
     position = realPos;
     getClump()->getFrame()->setTranslation(pos);
+}
+
+glm::vec3 CharacterObject::getCenterOffset() {
+    // Return an offset so that the feet are on the ground
+    const float z_offset =
+        physShape->getHalfHeight() + physShape->getRadius();
+    return glm::vec3(0.f, 0.f, z_offset);
 }
 
 bool CharacterObject::isPlayer() const {

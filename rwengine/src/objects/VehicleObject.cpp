@@ -284,6 +284,17 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
     }
 }
 
+glm::vec3 VehicleObject::getCenterOffset() {
+    // Calculate the offset from the center to the base of the vehicle
+    btVector3 aabbMin;
+    btVector3 aabbMax;
+
+    collision->getBulletBody()->getAabb(aabbMin, aabbMax);
+    float z_offset = (aabbMax.z() - aabbMin.z()) / 2;
+
+    return glm::vec3(0.f, 0.f, z_offset);
+}
+
 void VehicleObject::setRotation(const glm::quat& orientation) {
     getClump()->getFrame()->setRotation(glm::mat3_cast(orientation));
     if (collision->getBulletBody()) {

@@ -1,20 +1,21 @@
-#include <script/ScriptTypes.hpp>
-#include <script/ScriptMachine.hpp>
-#include <script/SCMFile.hpp>
-#include <script/ScriptFunctions.hpp>
-#include <engine/GameWorld.hpp>
-#include <engine/GameState.hpp>
-#include <engine/GameData.hpp>
-#include <engine/Animator.hpp>
+#include <ai/PlayerController.hpp>
+#include <audio/SfxParameters.hpp>
 #include <core/Logger.hpp>
-#include <objects/CutsceneObject.hpp>
+#include <data/CutsceneData.hpp>
+#include <engine/Animator.hpp>
+#include <engine/GameData.hpp>
+#include <engine/GameState.hpp>
+#include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/CutsceneObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/ObjectTypes.hpp>
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <ai/PlayerController.hpp>
-#include <data/CutsceneData.hpp>
+#include <script/SCMFile.hpp>
+#include <script/ScriptFunctions.hpp>
+#include <script/ScriptMachine.hpp>
+#include <script/ScriptTypes.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -910,7 +911,8 @@ void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 
 
     coord = script::getGround(args, coord);
     /// @todo fix the API interfaces that are now totally incoherent
-    auto character = args.getWorld()->createPlayer(coord + script::kSpawnOffset);
+    auto character = args.getWorld()->createPlayer(coord);
+    character->applyOffset();
     player = static_cast<PlayerController*>(character->controller);
     args.getState()->playerObject = character->getGameObjectID();
 }
@@ -938,7 +940,8 @@ void opcode_0054(const ScriptArguments& args, const ScriptPlayer player, ScriptF
 */
 void opcode_0055(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord) {
     RW_UNUSED(args);
-    player->getCharacter()->setPosition(coord + script::kSpawnOffset);
+    player->getCharacter()->setPosition(coord);
+    player->getCharacter()->applyOffset();
 }
 
 /**
@@ -1789,7 +1792,8 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
     RW_UNUSED(pedType);
 
     coord = script::getGround(args, coord);
-    character = args.getWorld()->createPedestrian(model, coord + script::kSpawnOffset);
+    character = args.getWorld()->createPedestrian(model, coord);
+    character->applyOffset();
     character->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
@@ -1938,7 +1942,8 @@ bool opcode_00a4(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptVec3 coord, ScriptVehicle& vehicle) {
     // @todo calculate distance from centre of mass to base of model and apply it as spawnOffset
     coord = script::getGround(args, coord);
-    vehicle = args.getWorld()->createVehicle(model, coord + script::kSpawnOffset);
+    vehicle = args.getWorld()->createVehicle(model, coord);
+    vehicle->applyOffset();
     vehicle->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
@@ -4280,10 +4285,10 @@ void opcode_018b(const ScriptArguments& args, const ScriptBlip blip, const Scrip
     @arg sound 
 */
 void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018c);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto metaData = getSoundInstanceData(sound);
+    auto name = world->sound.createSfxInstance(metaData->sfx);
+    world->sound.playSfx(name, coord, false, metaData->range);
 }
 
 /**
@@ -4295,11 +4300,11 @@ void opcode_018c(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     @arg sound1 
 */
 void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoundType sound0, ScriptSound& sound1) {
-    RW_UNIMPLEMENTED_OPCODE(0x018d);
-    RW_UNUSED(coord);
-    RW_UNUSED(sound0);
-    RW_UNUSED(sound1);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto metaData = getSoundInstanceData(sound0);
+    auto bufferName = world->sound.createSfxInstance(metaData->sfx);
+    world->sound.playSfx(bufferName, coord, true, metaData->range);
+    sound1 = &world->sound.getSoundRef(bufferName);
 }
 
 /**
@@ -4309,9 +4314,8 @@ void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     @arg sound 
 */
 void opcode_018e(const ScriptArguments& args, const ScriptSound sound) {
-    RW_UNIMPLEMENTED_OPCODE(0x018e);
-    RW_UNUSED(sound);
     RW_UNUSED(args);
+    sound->stop();
 }
 
 /**
@@ -9948,7 +9952,8 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
     const auto& pedGroup = data->pedgroups.at(groupId);
     const auto model = pedGroup.at(args.getVM()->getRandomNumber(
         static_cast<std::size_t>(0), pedGroup.size() - 1));
-    character = world->createPedestrian(model, coord + script::kSpawnOffset);
+    character = world->createPedestrian(model, coord);
+    character->applyOffset();
 }
 
 /**
@@ -11329,9 +11334,9 @@ void opcode_03d6(const ScriptArguments& args, const ScriptString gxtEntry) {
     @arg coord Coordinates
 */
 void opcode_03d7(const ScriptArguments& args, ScriptVec3 coord) {
-    RW_UNIMPLEMENTED_OPCODE(0x03d7);
-    RW_UNUSED(coord);
-    RW_UNUSED(args);
+    auto world = args.getWorld();
+    auto& wav = world->sound.getSoundRef(world->missionAudio);
+    wav.setPosition(coord);
 }
 
 /**
@@ -11481,6 +11486,7 @@ void opcode_03e4(const ScriptArguments& args, const ScriptBoolean arg1) {
     @arg gxtEntry GXT entry
 */
 void opcode_03e5(const ScriptArguments& args, const ScriptString gxtEntry) {
+    args.getState()->text.clear<ScreenTextType::Big>();
     args.getState()->text.addText<ScreenTextType::Big>(
         ScreenTextEntry::makeHelp(gxtEntry, script::gxt(args, gxtEntry)));
 }

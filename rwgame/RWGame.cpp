@@ -510,10 +510,7 @@ void RWGame::tick(float dt) {
             while (scriptTimerAccumulator >= timerClockRate) {
                 // Original game uses milliseconds
                 (*state.scriptTimerVariable) -= timerClockRate * 1000;
-                if (*state.scriptTimerVariable <= 0) {
-                    (*state.scriptTimerVariable) = 0;
-                    state.scriptTimerVariable = nullptr;
-                }
+		    
                 //                                11 seconds
                 if (*state.scriptTimerVariable <= 11000 &&
                     beepTime - *state.scriptTimerVariable >= 1000) {
@@ -521,22 +518,17 @@ void RWGame::tick(float dt) {
 
                     // @todo beep
                 }
+		    
+                if (*state.scriptTimerVariable <= 0) {
+                    (*state.scriptTimerVariable) = 0;
+                    state.scriptTimerVariable = nullptr;
+                }
+
                 scriptTimerAccumulator -= timerClockRate;
             }
         }
 
-        // Clean up old VisualFX
-        for (int i = 0; i < static_cast<int>(world->effects.size()); ++i) {
-            VisualFX* effect = world->effects[i];
-            if (effect->getType() == VisualFX::Particle) {
-                auto& part = effect->particle;
-                if (part.lifetime < 0.f) continue;
-                if (world->getGameTime() >= part.starttime + part.lifetime) {
-                    world->destroyEffect(effect);
-                    --i;
-                }
-            }
-        }
+        world->updateEffects();
 
         for (auto& object : world->allObjects) {
             object->_updateLastTransform();
@@ -600,6 +592,8 @@ void RWGame::render(float alpha, float time) {
     if (state.isCinematic) {
         viewCam.frustum.fov *= viewCam.frustum.aspectRatio;
     }
+
+    world->sound.updateListenerTransform(viewCam);
 
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -767,9 +761,9 @@ void RWGame::renderDebugPaths(float time) {
 
             btVector3 position1(pos1.x, pos1.y, pos1.z);
             btVector3 position2(pos2.x, pos2.y, pos2.z);
-		
+
             debug.drawLine(position1, position2, color);
-	}
+    }
     }
 
     debug.flush(&renderer);
@@ -844,7 +838,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
 }
 
 void RWGame::renderProfile() {
-#if RW_PROFILER
+#ifdef RW_PROFILER
     auto& frame = perf::Profiler::get().getFrame();
     constexpr float upperlimit = 30000.f;
     constexpr float lineHeight = 15.f;
@@ -862,7 +856,7 @@ void RWGame::renderProfile() {
 
     float xscale = renderer.getRenderer()->getViewport().x / upperlimit;
     TextRenderer::TextInfo ti;
-    ti.align = TextRenderer::TextInfo::Left;
+    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
     ti.font = FONT_ARIAL;
     ti.size = lineHeight - 2.f;
     ti.baseColour = glm::u8vec3(255);
