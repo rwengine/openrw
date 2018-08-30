@@ -911,7 +911,8 @@ void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 
 
     coord = script::getGround(args, coord);
     /// @todo fix the API interfaces that are now totally incoherent
-    auto character = args.getWorld()->createPlayer(coord + script::kSpawnOffset);
+    auto character = args.getWorld()->createPlayer(coord);
+    character->applyOffset();
     player = static_cast<PlayerController*>(character->controller);
     args.getState()->playerObject = character->getGameObjectID();
 }
@@ -939,7 +940,8 @@ void opcode_0054(const ScriptArguments& args, const ScriptPlayer player, ScriptF
 */
 void opcode_0055(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord) {
     RW_UNUSED(args);
-    player->getCharacter()->setPosition(coord + script::kSpawnOffset);
+    player->getCharacter()->setPosition(coord);
+    player->getCharacter()->applyOffset();
 }
 
 /**
@@ -1790,7 +1792,8 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
     RW_UNUSED(pedType);
 
     coord = script::getGround(args, coord);
-    character = args.getWorld()->createPedestrian(model, coord + script::kSpawnOffset);
+    character = args.getWorld()->createPedestrian(model, coord);
+    character->applyOffset();
     character->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
@@ -1939,7 +1942,8 @@ bool opcode_00a4(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptVec3 coord, ScriptVehicle& vehicle) {
     // @todo calculate distance from centre of mass to base of model and apply it as spawnOffset
     coord = script::getGround(args, coord);
-    vehicle = args.getWorld()->createVehicle(model, coord + script::kSpawnOffset);
+    vehicle = args.getWorld()->createVehicle(model, coord);
+    vehicle->applyOffset();
     vehicle->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
@@ -9948,7 +9952,8 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
     const auto& pedGroup = data->pedgroups.at(groupId);
     const auto model = pedGroup.at(args.getVM()->getRandomNumber(
         static_cast<std::size_t>(0), pedGroup.size() - 1));
-    character = world->createPedestrian(model, coord + script::kSpawnOffset);
+    character = world->createPedestrian(model, coord);
+    character->applyOffset();
 }
 
 /**

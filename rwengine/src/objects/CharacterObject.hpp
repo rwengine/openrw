@@ -130,6 +130,8 @@ public:
 
     void setPosition(const glm::vec3& pos) override;
 
+    glm::vec3 getCenterOffset() override;
+
     bool isPlayer() const;
 
     bool isDying() const;
