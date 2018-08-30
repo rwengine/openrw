@@ -18,8 +18,11 @@ docker=$1
         TRAVIS_BRANCH=$TRAVIS_BRANCH \
         USE_CONAN=$USE_CONAN \
         ALSOFT_DRIVERS=null \
+        CC=$CC \
+        CXX=$CXX \
         DEBUG=$DEBUG \
         XDG_RUNTIME_DIR=/tmp
 
 # execute test
-"$curdir/docker_tool.py" exec -n openrw_builder -U travis -- /bin/bash -c "ctest -VV -S /src/cmake/ctest/script_ci.ctest -VV"
+"$curdir/docker_tool.py" exec -n openrw_builder -U travis -- /bin/bash -c \
+    "ctest -VV -S /src/cmake/ctest/script_ci.ctest -VV"

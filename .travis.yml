@@ -6,25 +6,30 @@ git:
 matrix:
   include:
   - os: linux
+    compiler: gcc
     env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
   - os: linux
-    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora"
+    compiler: clang
+    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"
   - os: linux
+    compiler: gcc
     env: NAME="Arch Linux (Latest)" NAME_SUFFIX="arch" DEBUG=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
   - os: linux
+    compiler: gcc
     env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1
     script:
       - scripts/docker/docker_travis.sh "conan_base.docker"
   - os: osx
+    compiler: clang
     env: NAME="Apple macOS" NAME_SUFFIX="mac"
     osx_image: xcode9.4
     install:
