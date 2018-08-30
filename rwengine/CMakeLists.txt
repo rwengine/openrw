@@ -41,8 +41,10 @@ set(RWENGINE_SOURCES
     src/data/PathData.hpp
     src/data/PedData.cpp
     src/data/PedData.hpp
+    src/data/VehicleGenerator.hpp
     src/data/WeaponData.hpp
     src/data/Weather.cpp
+    src/data/Weather.hpp
     src/data/ZoneData.hpp
 
     src/dynamics/CollisionInstance.cpp
@@ -53,6 +55,7 @@ set(RWENGINE_SOURCES
     src/engine/Animator.hpp
     src/engine/GameData.cpp
     src/engine/GameData.hpp
+    src/engine/GameInputState.hpp
     src/engine/GameState.cpp
     src/engine/GameState.hpp
     src/engine/GameWorld.cpp
@@ -136,6 +139,7 @@ set(RWENGINE_SOURCES
     src/script/ScriptTypes.hpp
     src/script/modules/GTA3Module.cpp
     src/script/modules/GTA3Module.hpp
+    src/script/modules/GTA3ModuleImpl.inl
     )
 
 add_library(rwengine

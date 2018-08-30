@@ -5,7 +5,7 @@
 #include <QLineEdit>
 #include <QListView>
 #include <QSortFilterProxyModel>
-#include "AnimationListModel.hpp"
+#include "models/AnimationListModel.hpp"
 
 class AnimationListWidget : public QDockWidget {
     Q_OBJECT

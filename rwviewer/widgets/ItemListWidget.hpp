@@ -5,7 +5,7 @@
 #include <QLineEdit>
 #include <QSortFilterProxyModel>
 #include <QTableView>
-#include "ItemListModel.hpp"
+#include "models/ItemListModel.hpp"
 
 class ItemListWidget : public QDockWidget {
     Q_OBJECT

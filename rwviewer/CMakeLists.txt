@@ -9,15 +9,20 @@ add_executable(rwviewer
 
     ViewerWindow.hpp
     ViewerWindow.cpp
-
+    
+    models/AnimationListModel.hpp
+    models/AnimationListModel.cpp
     models/ObjectListModel.hpp
     models/ObjectListModel.cpp
     models/DFFFramesTreeModel.hpp
     models/DFFFramesTreeModel.cpp
+    models/IMGArchiveModel.hpp
+    models/IMGArchiveModel.cpp
+    models/ItemListModel.hpp
+    models/ItemListModel.cpp
     models/TextModel.hpp
     models/TextModel.cpp
 
-    views/ViewerInterface.hpp
     views/ObjectViewer.hpp
     views/ObjectViewer.cpp
     views/ModelViewer.hpp
@@ -28,23 +33,18 @@ add_executable(rwviewer
     views/WorldViewer.cpp
     views/ViewerInterface.hpp
     views/ViewerInterface.cpp
-
-    ViewerWidget.cpp
+    
+    QOpenGLContextWrapper.hpp
+    QOpenGLContextWrapper.cpp
     ViewerWidget.hpp
-    ItemListModel.hpp
-    ItemListModel.cpp
-    ItemListWidget.hpp
-    ItemListWidget.cpp
-    IMGArchiveModel.hpp
-    IMGArchiveModel.cpp
+    ViewerWidget.cpp
+    
+    widgets/AnimationListWidget.hpp
+    widgets/AnimationListWidget.cpp
+    widgets/ItemListWidget.hpp
+    widgets/ItemListWidget.cpp
     widgets/ModelFramesWidget.hpp
     widgets/ModelFramesWidget.cpp
-    AnimationListModel.hpp
-    AnimationListModel.cpp
-    AnimationListWidget.hpp
-    AnimationListWidget.cpp
-    QOpenGLContextWrapper.cpp
-    QOpenGLContextWrapper.hpp
     )
 
 target_link_libraries(rwviewer
