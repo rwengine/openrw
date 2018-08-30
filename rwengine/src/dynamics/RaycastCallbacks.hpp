@@ -1,7 +1,13 @@
 #ifndef _RWENGINE_RAYCASTCALLBACKS_HPP_
 #define _RWENGINE_RAYCASTCALLBACKS_HPP_
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
 
 /**
  * Implements raycast callback that ignores a specified btCollisionObject

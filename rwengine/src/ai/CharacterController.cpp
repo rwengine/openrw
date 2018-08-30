@@ -4,8 +4,15 @@
 #include <limits>
 #include <utility>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
 

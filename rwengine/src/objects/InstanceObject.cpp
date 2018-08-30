@@ -3,8 +3,14 @@
 #include <cstdint>
 #include <string>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <btBulletDynamicsCommon.h>
 #include <glm/gtc/quaternion.hpp>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
 
 #include <rw/types.hpp>
 

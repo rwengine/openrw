@@ -5,8 +5,15 @@
 #include <cstdlib>
 #include <limits>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtx/quaternion.hpp>
 
 #include <data/Clump.hpp>

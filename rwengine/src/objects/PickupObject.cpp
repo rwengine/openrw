@@ -2,8 +2,15 @@
 
 #include <cmath>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "ai/PlayerController.hpp"
@@ -402,9 +409,11 @@ bool CollectablePickup::onPlayerTouch() {
         auto text = ScreenText::format(
             engine->data->texts.text(gxtEntry),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackagesCollected), FONT_PRICEDOWN),
+                std::to_string(state->playerInfo.hiddenPackagesCollected),
+                FONT_PRICEDOWN),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackageCount), FONT_PRICEDOWN));
+                std::to_string(state->playerInfo.hiddenPackageCount),
+                FONT_PRICEDOWN));
 
         state->text.addText<ScreenTextType::HiddenPackageText>(
             ScreenTextEntry::makeHiddenPackageText(gxtEntry, text));

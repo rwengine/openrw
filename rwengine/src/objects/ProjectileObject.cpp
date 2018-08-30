@@ -1,7 +1,14 @@
 #include "objects/ProjectileObject.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "data/WeaponData.hpp"

@@ -9,7 +9,14 @@
 #include <string>
 #include <vector>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <LinearMath/btScalar.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
