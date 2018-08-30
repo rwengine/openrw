@@ -284,7 +284,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         // will need to be wrapped
         if (ti.wrapX > 0 && coord.x > 0.f && !std::isspace(c)) {
             auto wend = std::find_if(std::begin(text) + i, std::end(text),
-                                     [](GameStringChar c) { return std::isspace(c); });
+                                     [](auto c) { return std::isspace(c); });
             if (wend != std::end(text)) {
                 auto word = std::distance(std::begin(text) + i, wend);
                 if (lineLength + word >= ti.wrapX) {

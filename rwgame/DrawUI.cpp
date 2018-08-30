@@ -37,8 +37,8 @@ constexpr float ui_worldSizeMax = 300.f;
 
 void drawScriptTimer(GameWorld* world, GameRenderer* render) {
     if (world->state->scriptTimerVariable) {
-        float scriptTimerTextX =
-            render->getRenderer()->getViewport().x - ui_outerMargin;
+        float scriptTimerTextX = static_cast<float>(
+            render->getRenderer()->getViewport().x - ui_outerMargin);
         float scriptTimerTextY = ui_scriptTimerHeight;
 
         TextRenderer::TextInfo ti;
@@ -97,13 +97,13 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
 
 void drawPlayerInfo(PlayerController* player, GameWorld* world,
                     GameRenderer* render) {
-    float infoTextX = render->getRenderer()->getViewport().x -
-                      (ui_outerMargin + ui_weaponSize + ui_infoMargin);
+    float infoTextX = static_cast<float>(render->getRenderer()->getViewport().x -
+                      (ui_outerMargin + ui_weaponSize + ui_infoMargin));
     float infoTextY = 0.f + ui_outerMargin;
-    float iconX = render->getRenderer()->getViewport().x -
-                  (ui_outerMargin + ui_weaponSize);
+    float iconX = static_cast<float>(render->getRenderer()->getViewport().x -
+                  (ui_outerMargin + ui_weaponSize));
     float iconY = ui_outerMargin;
-    float wantedX = render->getRenderer()->getViewport().x - (ui_outerMargin);
+    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - ui_outerMargin);
     float wantedY = ui_wantedLevelHeight;
 
     TextRenderer::TextInfo ti;
@@ -292,7 +292,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
 
     for (auto& l : alltext) {
         for (auto& t : l) {
-            ti.size = t.size;
+            ti.size = static_cast<float>(t.size);
             ti.font = t.font;
             ti.text = t.text;
             ti.wrapX = t.wrapX;

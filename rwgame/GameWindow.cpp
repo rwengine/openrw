@@ -15,7 +15,7 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED, w, h, style);
+                              SDL_WINDOWPOS_CENTERED, static_cast<int>(w), static_cast<int>(h), style);
     if (window == nullptr) {
         // Window creation failure is fatal
         std::string sdlErrorStr = SDL_GetError();

@@ -104,7 +104,7 @@ struct BoolTranslator {
         boost::optional<external_type> res;
         try {
             res = std::stoi(stripComments(str)) != 0;
-        } catch (std::invalid_argument &e) {
+        } catch (std::invalid_argument &) {
         }
         return res;
     }
@@ -120,7 +120,7 @@ struct IntTranslator {
         boost::optional<external_type> res;
         try {
             res = std::stoi(stripComments(str));
-        } catch (std::invalid_argument &e) {
+        } catch (std::invalid_argument &) {
         }
         return res;
     }
@@ -191,6 +191,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
                 try {
                     sourceValue = srcTree.get<config_t>(key, translator);
                 } catch (pt::ptree_bad_path &e) {
+                    RW_UNUSED(e);
                     // Catches missing key-value pairs: fail when required
                     if (!optional) {
                         parseResult.failRequiredMissing(key);
@@ -199,6 +200,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
                     }
                     sourceValue = defaultValue;
                 } catch (pt::ptree_bad_data &e) {
+                    RW_UNUSED(e);
                     // Catches illegal value data: always fail
                     parseResult.failInvalidData(key);
                     RW_MESSAGE(e.what());

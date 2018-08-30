@@ -218,7 +218,7 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
 
     for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i],
-                     [=] { game->getWorld()->state->basic.nextWeather = i; });
+                     [=] { game->getWorld()->state->basic.nextWeather = static_cast<std::uint16_t>(i); });
     }
 
     menu->offset = kDebugMenuOffset;

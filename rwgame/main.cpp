@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         RWGame game(logger, argc, argv);
 
         return game.run();
-    } catch (std::invalid_argument& ex) {
+    } catch (std::invalid_argument&) {
         // This exception is thrown when either an invalid command line option
         // or a --help is found. The RWGame constructor prints a usage message
         // in this case and then throws this exception.
