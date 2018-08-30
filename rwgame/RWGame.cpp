@@ -45,6 +45,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     : GameBase(log, argc, argv)
     , data(&log, config.getGameDataPath())
     , renderer(&log, &data) {
+    RW_PROFILE_THREAD("Main");
+    RW_TIMELINE_ENTER("Startup", MP_YELLOW);
+
     bool newgame = options.count("newgame");
     bool test = options.count("test");
     std::string startSave(
@@ -106,6 +109,7 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     });
 
     log.info("Game", "Started");
+    RW_TIMELINE_LEAVE("Startup");
 }
 
 RWGame::~RWGame() {
@@ -401,38 +405,31 @@ int RWGame::run() {
 }
 
 float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
+    RW_PROFILE_SCOPE(__func__);
     auto deltaTimeWithTimeScale =
             deltaTime * world->state->basic.timeScale;
 
-    RW_PROFILE_BEGIN("Update");
     while (accumulatedTime >= deltaTime) {
         if (!StateManager::currentState()) {
             break;
         }
 
-        RW_PROFILE_BEGIN("physics");
         world->dynamicsWorld->stepSimulation(
                 deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
-        RW_PROFILE_END();
 
-        RW_PROFILE_BEGIN("state");
         StateManager::get().tick(deltaTimeWithTimeScale);
-        RW_PROFILE_END();
 
-        RW_PROFILE_BEGIN("engine");
         tick(deltaTimeWithTimeScale);
-        RW_PROFILE_END();
 
         getState()->swapInputState();
 
         accumulatedTime -= deltaTime;
     }
-    RW_PROFILE_END();
     return accumulatedTime;
 }
 
 bool RWGame::updateInput() {
-    RW_PROFILE_BEGIN("Input");
+    RW_PROFILE_SCOPE(__func__);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -463,17 +460,16 @@ bool RWGame::updateInput() {
 
         GameInput::updateGameInputState(&getState()->input[0], event);
 
-        RW_PROFILE_BEGIN("State");
         if (StateManager::currentState()) {
+            RW_PROFILE_SCOPE("State");
             StateManager::currentState()->handleEvent(event);
         }
-        RW_PROFILE_END()
     }
-    RW_PROFILE_END();
     return true;
 }
 
 void RWGame::tick(float dt) {
+    RW_PROFILE_SCOPE(__func__);
     State* currState = StateManager::get().states.back().get();
 
     static float clockAccumulator = 0.f;
@@ -569,8 +565,7 @@ void RWGame::tick(float dt) {
 }
 
 void RWGame::render(float alpha, float time) {
-    RW_PROFILE_BEGIN("Render");
-    RW_PROFILE_BEGIN("engine");
+    RW_PROFILE_SCOPE(__func__);
 
     lastDraws = getRenderer().getRenderer()->getDrawCount();
 
@@ -600,29 +595,22 @@ void RWGame::render(float alpha, float time) {
 
     renderer.getRenderer()->pushDebugGroup("World");
 
-    RW_PROFILE_BEGIN("world");
     renderer.renderWorld(world.get(), viewCam, alpha);
-    RW_PROFILE_END();
 
     renderer.getRenderer()->popDebugGroup();
 
     renderDebugView(time, viewCam);
 
     if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
-    RW_PROFILE_END();
 
-    RW_PROFILE_BEGIN("state");
     if (StateManager::currentState()) {
+        RW_PROFILE_SCOPE("state");
         StateManager::get().draw(&renderer);
     }
-    RW_PROFILE_END();
-    RW_PROFILE_END();
-
-    renderProfile();
 }
 
 void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
-    RW_PROFILE_BEGIN("debug");
+    RW_PROFILE_SCOPE(__func__);
     switch (debugview_) {
         case DebugViewMode::General:
             renderDebugStats(time);
@@ -640,7 +628,6 @@ void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
         default:
             break;
     }
-    RW_PROFILE_END();
 }
 
 void RWGame::renderDebugStats(float time) {
@@ -849,55 +836,6 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
 
         showdata(c, ss);
     }
-}
-
-void RWGame::renderProfile() {
-#ifdef RW_PROFILER
-    auto& frame = perf::Profiler::get().getFrame();
-    constexpr float upperlimit = 30000.f;
-    constexpr float lineHeight = 15.f;
-    static std::vector<glm::vec4> perf_colours;
-    if (perf_colours.size() == 0) {
-        float c = 8.f;
-        for (int r = 0; r < c; ++r) {
-            for (int g = 0; g < c; ++g) {
-                for (int b = 0; b < c; ++b) {
-                    perf_colours.emplace_back(r / c, g / c, b / c, 1.f);
-                }
-            }
-        }
-    }
-
-    float xscale = renderer.getRenderer()->getViewport().x / upperlimit;
-    TextRenderer::TextInfo ti;
-    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
-    ti.font = FONT_ARIAL;
-    ti.size = lineHeight - 2.f;
-    ti.baseColour = glm::u8vec3(255);
-    std::function<void(const perf::ProfileEntry&, int)> renderEntry =
-        [&](const perf::ProfileEntry& entry, int depth) {
-            int g = 0;
-            for (auto& event : entry.childProfiles) {
-                auto duration = event.end - event.start;
-                float y = 60.f + (depth * (lineHeight + 5.f));
-                renderer.drawColour(
-                    perf_colours[(std::hash<std::string>()(entry.label) *
-                                  (g++)) %
-                                 perf_colours.size()],
-                    {xscale * event.start, y, xscale * duration, lineHeight});
-                ti.screenPosition.x = xscale * (event.start);
-                ti.screenPosition.y = y + 2.f;
-                ti.text = GameStringUtil::fromString(
-                    event.label + " " + std::to_string(duration) + " us ", ti.font);
-                renderer.text.renderText(ti);
-                renderEntry(event, depth + 1);
-            }
-        };
-    renderEntry(frame, 0);
-    ti.screenPosition = glm::vec2(xscale * (16000), 40.f);
-    ti.text = GameStringUtil::fromString(".16 ms", ti.font);
-    renderer.text.renderText(ti);
-#endif
 }
 
 void RWGame::globalKeyEvent(const SDL_Event& event) {

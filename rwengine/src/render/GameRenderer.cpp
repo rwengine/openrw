@@ -306,17 +306,15 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 }
 
 void GameRenderer::renderObjects(const GameWorld *world) {
-    renderer->useProgram(worldProg.get());
+    RW_PROFILE_SCOPE(__func__);
 
-    RW_PROFILE_BEGIN("RenderList");
+    renderer->useProgram(worldProg.get());
 
     // This is sequential at the moment, it should be easy to make it
     // run in parallel with a good threading system.
     RenderList renderList;
     // Naive optimisation, assume 50% hitrate
     renderList.reserve(world->allObjects.size() * 0.5f);
-
-    RW_PROFILE_BEGIN("Build");
 
     ObjectRenderer objectRenderer(_renderWorld,
                                   (cullOverride ? cullingCamera : _camera),
@@ -366,12 +364,10 @@ void GameRenderer::renderObjects(const GameWorld *world) {
         objectRenderer.renderClump(arrowModel.get(), model, nullptr, renderList);
     }
 
-    RW_PROFILE_END();
     culled += objectRenderer.culled;
     renderer->pushDebugGroup("Objects");
     renderer->pushDebugGroup("RenderList");
     // Also parallelizable
-    RW_PROFILE_BEGIN("Sort");
     // Earlier position in the array means earlier object's rendering
     // Transparent objects should be sorted and rendered after opaque
     sort(renderList.begin(), renderList.end(),
@@ -383,15 +379,10 @@ void GameRenderer::renderObjects(const GameWorld *world) {
                  return false;
              return (a.sortKey > b.sortKey);
          });
-    RW_PROFILE_END();
-    RW_PROFILE_BEGIN("Draw");
     renderer->drawBatched(renderList);
-    RW_PROFILE_END();
 
     renderer->popDebugGroup();
     profObjects = renderer->popDebugGroup();
-
-    RW_PROFILE_END();
 }
 
 void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
