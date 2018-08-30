@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(objects_contains_modelID) {
 
 BOOST_AUTO_TEST_CASE(instance_data_is_correct) {
     loader.load(test_data_stream, {});
-    ASSERT_INSTANCE_IS<1>(*loader.objects[1100], "NAME", "TXD", {220}, 0);
+    ASSERT_INSTANCE_IS<1>(*loader.objects[1100], "NAME", "TXD", {220.f}, 0);
 }
 
 BOOST_AUTO_TEST_CASE(vehicle_data_is_correct) {
