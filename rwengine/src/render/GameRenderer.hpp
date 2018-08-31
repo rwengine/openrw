@@ -174,6 +174,8 @@ private:
     void drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents);
 
     void renderObjects(const GameWorld *world);
+
+    RenderList createObjectRenderList(const GameWorld *world);
 };
 
 #endif

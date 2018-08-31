@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <core/Profiler.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <rw/debug.hpp>
 
@@ -315,6 +316,7 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
 }
 
 void OpenGLRenderer::drawBatched(const RenderList& list) {
+    RW_PROFILE_SCOPE(__func__);
 #if 0  // Needs shader changes
 	// Determine how many batches we need to process the entire list
 	auto entries = list.size();

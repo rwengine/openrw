@@ -309,7 +309,18 @@ void GameRenderer::renderObjects(const GameWorld *world) {
     RW_PROFILE_SCOPE(__func__);
 
     renderer->useProgram(worldProg.get());
+    RenderList renderList = createObjectRenderList(world);
 
+    renderer->pushDebugGroup("Objects");
+    renderer->pushDebugGroup("RenderList");
+    renderer->drawBatched(renderList);
+
+    renderer->popDebugGroup();
+    profObjects = renderer->popDebugGroup();
+}
+
+RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
+    RW_PROFILE_SCOPE(__func__);
     // This is sequential at the moment, it should be easy to make it
     // run in parallel with a good threading system.
     RenderList renderList;
@@ -363,10 +374,9 @@ void GameRenderer::renderObjects(const GameWorld *world) {
         model = scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
         objectRenderer.renderClump(arrowModel.get(), model, nullptr, renderList);
     }
-
     culled += objectRenderer.culled;
-    renderer->pushDebugGroup("Objects");
-    renderer->pushDebugGroup("RenderList");
+
+    RW_PROFILE_SCOPE("sortRenderList");
     // Also parallelizable
     // Earlier position in the array means earlier object's rendering
     // Transparent objects should be sorted and rendered after opaque
@@ -379,10 +389,8 @@ void GameRenderer::renderObjects(const GameWorld *world) {
                  return false;
              return (a.sortKey > b.sortKey);
          });
-    renderer->drawBatched(renderList);
 
-    renderer->popDebugGroup();
-    profObjects = renderer->popDebugGroup();
+    return renderList;
 }
 
 void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
