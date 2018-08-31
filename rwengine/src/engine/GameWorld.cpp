@@ -7,6 +7,7 @@
 
 #include <data/Clump.hpp>
 
+#include "core/Profiler.hpp"
 #include "core/Logger.hpp"
 
 #include "engine/GameData.hpp"
@@ -653,6 +654,7 @@ void handleInstanceResponse(InstanceObject* instance, const btManifoldPoint& mp,
 
 bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
                                          void* body1) {
+    RW_PROFILE_SCOPEC(__func__, MP_GOLDENROD1);
     auto obA = static_cast<btCollisionObject*>(body0);
     auto obB = static_cast<btCollisionObject*>(body1);
 
@@ -689,18 +691,24 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
 
 void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
                                     btScalar timeStep) {
+    RW_PROFILE_SCOPEC(__func__, MP_CYAN);
     GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
+    RW_PROFILE_COUNTER_SET("physicsTick/vehiclePool", world->vehiclePool.objects.size());
     for (auto& p : world->vehiclePool.objects) {
+        RW_PROFILE_SCOPEC("VehicleObject", MP_THISTLE1);
         VehicleObject* object = static_cast<VehicleObject*>(p.second);
         object->tickPhysics(timeStep);
     }
 
+    RW_PROFILE_COUNTER_SET("physicsTick/pedestrianPool", world->pedestrianPool.objects.size());
     for (auto& p : world->pedestrianPool.objects) {
+        RW_PROFILE_SCOPEC("CharacterObject", MP_THISTLE1);
         CharacterObject* object = static_cast<CharacterObject*>(p.second);
         object->tickPhysics(timeStep);
     }
 
+    RW_PROFILE_COUNTER_SET("physicsTick/instancePool", world->instancePool.objects.size());
     for (auto& p : world->instancePool.objects) {
         InstanceObject* object = static_cast<InstanceObject*>(p.second);
         object->tickPhysics(timeStep);

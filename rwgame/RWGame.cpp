@@ -370,6 +370,7 @@ int RWGame::run() {
     bool running = true;
     while (StateManager::currentState() && running) {
         RW_PROFILE_FRAME_BOUNDARY();
+        RW_PROFILE_SCOPE("Main Loop");
 
         running = updateInput();
 
@@ -405,7 +406,7 @@ int RWGame::run() {
 }
 
 float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
-    RW_PROFILE_SCOPE(__func__);
+    RW_PROFILE_SCOPEC(__func__, MP_GREEN);
     auto deltaTimeWithTimeScale =
             deltaTime * world->state->basic.timeScale;
 
@@ -414,8 +415,11 @@ float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
             break;
         }
 
-        world->dynamicsWorld->stepSimulation(
-                deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+        {
+            RW_PROFILE_SCOPEC("stepSimulation", MP_DARKORANGE1);
+            world->dynamicsWorld->stepSimulation(
+                    deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+        }
 
         StateManager::get().tick(deltaTimeWithTimeScale);
 
@@ -521,22 +525,7 @@ void RWGame::tick(float dt) {
             }
         }
 
-        world->updateEffects();
-
-        for (auto& object : world->allObjects) {
-            object->_updateLastTransform();
-            object->tick(dt);
-        }
-
-        for (auto& g : world->garages) {
-            g->tick(dt);
-        }
-
-        for (auto& p : world->payphones) {
-            p->tick(dt);
-        }
-
-        world->destroyQueuedObjects();
+        tickObjects(dt);
 
         state.text.tick(dt);
 
@@ -564,8 +553,38 @@ void RWGame::tick(float dt) {
     }
 }
 
+void RWGame::tickObjects(float dt) const {
+    RW_PROFILE_SCOPEC(__func__, MP_MAGENTA1);
+    world->updateEffects();
+
+    {
+        RW_PROFILE_SCOPEC("allObjects", MP_HOTPINK1);
+        RW_PROFILE_COUNTER_SET("tickObjects/allObjects", world->allObjects.size());
+        for (auto &object : world->allObjects) {
+            object->_updateLastTransform();
+            object->tick(dt);
+        }
+    }
+
+    {
+        RW_PROFILE_SCOPEC("garages", MP_HOTPINK2);
+        for (auto &g : world->garages) {
+            g->tick(dt);
+        }
+    }
+
+    {
+        RW_PROFILE_SCOPEC("payphones", MP_HOTPINK3);
+        for (auto &p : world->payphones) {
+            p->tick(dt);
+        }
+    }
+
+    world->destroyQueuedObjects();
+}
+
 void RWGame::render(float alpha, float time) {
-    RW_PROFILE_SCOPE(__func__);
+    RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
 
     lastDraws = getRenderer().getRenderer()->getDrawCount();
 
