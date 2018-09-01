@@ -24,7 +24,7 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             if (lineBuff.at(0) == '*') continue;
             std::stringstream ss(lineBuff);
 
-            DynamicObjectDataPtr dyndata(new DynamicObjectData);
+            auto dyndata = std::make_shared<DynamicObjectData>();
 
             ss >> dyndata->modelName;
             auto cpos = dyndata->modelName.find(',');
@@ -73,7 +73,7 @@ void GenericDATLoader::loadWeapons(const std::string& name,
             if (linebuffer[0] == '#') continue;
             std::stringstream ss(linebuffer);
 
-            WeaponDataPtr data(new WeaponData);
+            auto data = std::make_shared<WeaponData>();
             ss >> data->name;
             if (data->name == "ENDWEAPONDATA") continue;
 

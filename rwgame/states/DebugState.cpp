@@ -319,7 +319,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
 
             if (vm) {
                 std::list<SCMThread>& threads = vm->getThreads();
-                const auto& offsets = vm->getFile()->getMissionOffsets();
+                const auto& offsets = vm->getFile().getMissionOffsets();
 
                 RW_ASSERT(!offsets.empty());
 

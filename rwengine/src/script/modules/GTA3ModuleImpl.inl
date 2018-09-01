@@ -9611,7 +9611,7 @@ void opcode_0362(const ScriptArguments& args, const ScriptCharacter character,
     @arg visible Boolean true/false
 */
 void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptModel model, const ScriptBoolean visible) {
-    auto& models = args.getVM()->getFile()->getModels();
+    auto& models = args.getVM()->getFile().getModels();
     auto& modelName = models[-model];
 
     // Attempt to find the closest object
@@ -10874,8 +10874,8 @@ void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     int name0 = std::abs(model0);
     int name1 = std::abs(model1);
 
-    auto oldmodel = args.getVM()->getFile()->getModels()[name0];
-    auto newmodel = args.getVM()->getFile()->getModels()[name1];
+    auto oldmodel = args.getVM()->getFile().getModels()[name0];
+    auto newmodel = args.getVM()->getFile().getModels()[name1];
     std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
     std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
 
@@ -12030,7 +12030,7 @@ void opcode_0415(const ScriptArguments& args, const ScriptVehicle vehicle, const
     @arg arg1 
 */
 void opcode_0417(const ScriptArguments& args, const ScriptInt arg1) {
-    auto offset = args.getVM()->getFile()->getMissionOffsets()[arg1];
+    auto offset = args.getVM()->getFile().getMissionOffsets()[arg1];
     args.getVM()->startThread(offset, true);
 }
 

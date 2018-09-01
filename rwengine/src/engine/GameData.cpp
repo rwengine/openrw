@@ -289,10 +289,10 @@ void GameData::loadHandling(const std::string& path) {
     l.loadHandling(syspath, vehicleInfo);
 }
 
-SCMFile* GameData::loadSCM(const std::string& path) {
+SCMFile GameData::loadSCM(const std::string& path) {
     auto scm_h = index.openFileRaw(path);
-    SCMFile* scm = new SCMFile;
-    scm->loadFile(scm_h.data.get(), scm_h.length);
+    SCMFile scm{};
+    scm.loadFile(scm_h.data.get(), scm_h.length);
     return scm;
 }
 

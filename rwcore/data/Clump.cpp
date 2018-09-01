@@ -113,10 +113,10 @@ void Clump::recalculateMetrics() {
     }
 }
 
-Clump* Clump::clone() const {
+ClumpPtr Clump::clone() const {
     // Clone frame hierarchy
     auto newroot = rootframe_->cloneHierarchy();
-    auto clump = new Clump;
+    auto clump = std::make_shared<Clump>();
     clump->setFrame(newroot);
 
     // This isn't the most optimal implementation, but this code is likely

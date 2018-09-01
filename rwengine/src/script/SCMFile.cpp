@@ -4,8 +4,8 @@
 #include <cstddef>
 
 void SCMFile::loadFile(char *data, unsigned int size) {
-    _data = new SCMByte[size];
-    std::copy(data, data + size, _data);
+    _data = std::make_unique<SCMByte[]>(size);
+    std::copy(data, data + size, _data.get());
 
     // Bytes required to hop over a jump opcode.
     const unsigned int jumpOpSize = 2u + 1u + 4u;

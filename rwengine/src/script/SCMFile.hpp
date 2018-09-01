@@ -17,20 +17,27 @@ public:
     enum SCMTarget { NoTarget = 0, GTAIII = 0xC6, GTAVC = 0x6D, GTASA = 0x73 };
 
     SCMFile() = default;
+    SCMFile(SCMFile&& info) = default;
+    SCMFile(SCMFile& info) = delete;
 
-    ~SCMFile() {
-        delete[] _data;
+    ~SCMFile() = default;
+
+    SCMFile& operator=(SCMFile&& info) = default;
+    SCMFile& operator=(SCMFile& info) = delete;
+
+    operator bool() {
+        return _data.get();
     }
 
     void loadFile(char* data, unsigned int size);
 
     SCMByte* data() const {
-        return _data;
+        return _data.get();
     }
 
     template <class T>
     T read(unsigned int offset) const {
-        return bit_cast<T>(*(_data + offset));
+        return bit_cast<T>(*(_data.get() + offset));
     }
 
     uint32_t getMainSize() const {
@@ -66,7 +73,7 @@ public:
     }
 
 private:
-    SCMByte* _data = nullptr;
+    std::unique_ptr<SCMByte[]> _data;
 
     SCMTarget _target{NoTarget};
 

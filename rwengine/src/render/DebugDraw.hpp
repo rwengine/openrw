@@ -20,7 +20,7 @@ class GeometryBuffer;
 class DebugDraw final : public btIDebugDraw {
 public:
     DebugDraw();
-    ~DebugDraw() override;
+    ~DebugDraw() override = default;
 
     void drawLine(const btVector3 &from, const btVector3 &to,
                   const btVector3 &color) override;
@@ -43,8 +43,8 @@ protected:
 
     std::vector<GeometryVertex> lines;
     size_t maxlines;
-    GeometryBuffer *lineBuff;
-    DrawBuffer *dbuff;
+    std::unique_ptr<GeometryBuffer> lineBuff = std::make_unique<GeometryBuffer>();
+    std::unique_ptr<DrawBuffer> dbuff = std::make_unique<DrawBuffer>();
 
     //Ownership is handled by worldProg in renderer
     Renderer::ShaderProgram *shaderProgram = nullptr;
