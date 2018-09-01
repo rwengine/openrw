@@ -211,18 +211,19 @@ void RWGame::handleCheatInput(char symbol) {
         });
 
         checkForCheat("GUNSGUNSGUNS", [&] {
-            constexpr std::array<int, 11> ammo = {1,  //baseball bat
-                                                  100,//pistol
-                                                  100,//uzi
-                                                  20, //shotgun
-                                                  5,  //grenade
-                                                  5,  //molotov
-                                                  5,  //rocket launcher
-                                                  20, //flamethrower
-                                                  200,//ak47
-                                                  200,//m16
-                                                  5   //sniper rifle
-                                                  };
+            constexpr std::array<int, 11> ammo = {{
+                1,  //baseball bat
+                100,//pistol
+                100,//uzi
+                20, //shotgun
+                5,  //grenade
+                5,  //molotov
+                5,  //rocket launcher
+                20, //flamethrower
+                200,//ak47
+                200,//m16
+                5   //sniper rifle
+            }};
             for (std::array<int, 11>::size_type i = 0; i < ammo.size(); i++)
                 player->addToInventory(static_cast<int>(i+1),ammo[i]);
             state.showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.

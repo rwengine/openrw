@@ -51,7 +51,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         dp.colour = {255, 255, 255, 255};
         dp.count = subgeom.numIndices;
         dp.start = subgeom.start;
-        dp.textures = {0};
+        dp.textures = {{0}};
         dp.visibility = 1.f;
 
         if (object && object->type() == GameObject::Instance) {
@@ -69,7 +69,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
                     if (tex->isTransparent()) {
                         isTransparent = true;
                     }
-                    dp.textures = {tex->getName()};
+                    dp.textures = {{tex->getName()}};
                 }
             }
 

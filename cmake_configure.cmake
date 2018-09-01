@@ -13,6 +13,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "-Wextra"
             "-Wdouble-promotion"
             "-Wpedantic"
+            "-Wmissing-braces"
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

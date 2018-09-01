@@ -142,8 +142,10 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
     peds.insert(peds.end(), group.cbegin(), group.cend());
 
     // Vehicles for normal traffic @todo create correct vehicle list
-    static constexpr std::array<uint16_t, 32> cars = {90, 91, 92, 94, 95, 97, 98, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 
-                                    111, 112, 116, 119, 128, 129, 130, 134, 135, 136, 138, 139, 144, 146};    
+    static constexpr std::array<uint16_t, 32> cars = {{
+        90, 91, 92, 94, 95, 97, 98, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+        111, 112, 116, 119, 128, 129, 130, 134, 135, 136, 138, 139, 144, 146
+    }};
 
     auto availablePedsNodes = findAvailableNodes(AIGraphNode::Pedestrian, camera, radius);
 

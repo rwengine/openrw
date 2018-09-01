@@ -112,7 +112,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     Renderer::DrawParameters wdp;
     wdp.start = 0;
     wdp.count = maskGeom.getCount();
-    wdp.textures = {0};
+    wdp.textures = {{0}};
     glm::mat4 m(1.0);
 
     glEnable(GL_STENCIL_TEST);
@@ -147,7 +147,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     r->setUniform(waterProg.get(), "inverseVP", ivp);
 
     wdp.count = gridGeom.getCount();
-    wdp.textures = {waterTex->getName(), dataTexture};
+    wdp.textures = {{waterTex->getName(), dataTexture}};
 
     r->drawArrays(m, &gridDraw, wdp);
 

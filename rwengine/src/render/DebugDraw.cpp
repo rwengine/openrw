@@ -68,7 +68,7 @@ void DebugDraw::flush(GameRenderer *renderer) {
     dbuff->addGeometry(lineBuff.get());
 
     Renderer::DrawParameters dp;
-    dp.textures = {texture};
+    dp.textures = {{texture}};
     dp.ambient = 1.f;
     dp.colour = glm::u8vec4(255, 255, 255, 255);
     dp.start = 0;

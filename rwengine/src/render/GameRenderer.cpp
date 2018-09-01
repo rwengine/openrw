@@ -421,7 +421,7 @@ void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_ALPHA;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {splashTexName};
+    wdp.textures = {{splashTexName}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
@@ -437,7 +437,7 @@ void GameRenderer::renderPostProcess() {
     Renderer::DrawParameters wdp;
     wdp.start = 0;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {fbTextures[0]};
+    wdp.textures = {{fbTextures[0]}};
     wdp.depthMode = DepthMode::OFF;
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
@@ -488,7 +488,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
             glm::vec3(particle->size,1.0f)) * glm::inverse(lookMat);
 
         Renderer::DrawParameters dp;
-        dp.textures = {particle->texture->getName()};
+        dp.textures = {{particle->texture->getName()}};
         dp.ambient = 1.f;
         dp.colour = glm::u8vec4(particle->colour * 255.f);
         dp.start = 0;
@@ -529,7 +529,7 @@ void GameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_ALPHA;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {texture ? texture->getName() : 0};
+    wdp.textures = {{texture ? texture->getName() : 0}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
@@ -544,7 +544,7 @@ void GameRenderer::renderLetterbox() {
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_NONE;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {0};
+    wdp.textures = {{0}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
     renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{0.f, 1.f * (1.f - cinematicExperienceSize)});

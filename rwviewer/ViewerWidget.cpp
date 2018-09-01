@@ -183,7 +183,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
         dp.colour = {255, 255, 255, 255};
         glLineWidth(1.f);
     }
-    dp.textures = {whiteTex};
+    dp.textures = {{whiteTex}};
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     if(_renderer != nullptr) {
