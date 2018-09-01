@@ -208,5 +208,11 @@ function(openrw_target_apply_options)
             APPEND
             PROPERTY STATIC_LIBRARY_FLAGS "-no_warning_for_no_symbols"
             )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        set_property(
+            TARGET "${OPENRW_APPLY_TARGET}"
+            APPEND
+            PROPERTY LINK_FLAGS "/ignore:4099"
+            )
     endif()
 endfunction()
