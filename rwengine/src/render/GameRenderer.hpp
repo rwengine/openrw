@@ -59,9 +59,6 @@ class GameRenderer {
     GLuint fbRenderBuffers[1];
     std::unique_ptr<Renderer::ShaderProgram> postProg;
 
-    /// Texture used to replace textures missing from the data
-    GLuint m_missingTexture;
-
     GeometryBuffer particleGeom;
     DrawBuffer particleDraw;
 
@@ -86,10 +83,6 @@ public:
 
     GameData* getData() const {
         return data;
-    }
-
-    GLuint getMissingTexture() const {
-        return m_missingTexture;
     }
 
     size_t getCulledCount() {

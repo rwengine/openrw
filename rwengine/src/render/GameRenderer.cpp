@@ -25,12 +25,7 @@
 #include "render/GameShaders.hpp"
 #include "render/VisualFX.hpp"
 
-const size_t skydomeSegments = 8, skydomeRows = 10;
-constexpr uint32_t kMissingTextureBytes[] = {
-    0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFFFF00FF, 0xFF0000FF,
-    0xFFFF00FF, 0xFF0000FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
-    0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
-};
+constexpr size_t skydomeSegments = 8, skydomeRows = 10;
 
 /// @todo collapse all of these into "VertPNC" etc.
 struct ParticleVert {
@@ -79,13 +74,6 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
                                GameShaders::DefaultPostProcess::FragmentShader);
 
     glGenVertexArrays(1, &vao);
-
-    glGenTextures(1, &m_missingTexture);
-    glBindTexture(GL_TEXTURE_2D, m_missingTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 kMissingTextureBytes);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glGenFramebuffers(1, &framebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
@@ -329,7 +317,7 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
 
     ObjectRenderer objectRenderer(_renderWorld,
                                   (cullOverride ? cullingCamera : _camera),
-                                  _renderAlpha, getMissingTexture());
+                                  _renderAlpha);
 
     // World Objects
     for (auto object : world->allObjects) {
