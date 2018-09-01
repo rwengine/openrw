@@ -201,4 +201,12 @@ function(openrw_target_apply_options)
             CHECK_ALL
         )
     endif()
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set_property(
+            TARGET "${OPENRW_APPLY_TARGET}"
+            APPEND
+            PROPERTY STATIC_LIBRARY_FLAGS "-no_warning_for_no_symbols"
+            )
+    endif()
 endfunction()
