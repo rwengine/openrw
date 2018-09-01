@@ -64,18 +64,18 @@ void CharacterObject::createActor(const glm::vec2& size) {
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));
 
-        physObject = new btPairCachingGhostObject();
+        physObject = std::make_unique<btPairCachingGhostObject>();
         physObject->setUserPointer(this);
         physObject->setWorldTransform(tf);
-        physShape = new btCapsuleShapeZ(size.x, size.y);
-        physObject->setCollisionShape(physShape);
+        physShape = std::make_unique<btCapsuleShapeZ>(size.x, size.y);
+        physObject->setCollisionShape(physShape.get());
         physObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
 #if BT_BULLET_VERSION < 285
-        physCharacter =
-            new btKinematicCharacterController(physObject, physShape, 0.30f, 2);
+        physCharacter = std::make_unique<btKinematicCharacterController>(
+            physObject.get(), physShape.get(), 0.30f, 2);
 #else
-        physCharacter = new btKinematicCharacterController(
-            physObject, physShape, 0.30f, btVector3(0.f, 0.f, 1.f));
+        physCharacter = std::make_unique<btKinematicCharacterController>(
+            physObject.get(), physShape.get(), 0.30f, btVector3(0.f, 0.f, 1.f));
 #endif
         physCharacter->setFallSpeed(20.f);
         physCharacter->setUseGhostSweepTest(true);
@@ -89,21 +89,20 @@ void CharacterObject::createActor(const glm::vec2& size) {
         physCharacter->setJumpSpeed(5.f);
 
         engine->dynamicsWorld->addCollisionObject(
-            physObject, btBroadphaseProxy::KinematicFilter,
+            physObject.get(), btBroadphaseProxy::KinematicFilter,
             btBroadphaseProxy::StaticFilter | btBroadphaseProxy::SensorTrigger);
-        engine->dynamicsWorld->addAction(physCharacter);
+        engine->dynamicsWorld->addAction(physCharacter.get());
     }
 }
 
 void CharacterObject::destroyActor() {
     if (physCharacter) {
-        engine->dynamicsWorld->removeCollisionObject(physObject);
-        engine->dynamicsWorld->removeAction(physCharacter);
+        engine->dynamicsWorld->removeCollisionObject(physObject.get());
+        engine->dynamicsWorld->removeAction(physCharacter.get());
 
-        delete physCharacter;
-        delete physObject;
-        delete physShape;
         physCharacter = nullptr;
+        physObject = nullptr;
+        physShape = nullptr;
     }
 }
 

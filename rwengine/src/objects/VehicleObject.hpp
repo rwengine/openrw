@@ -3,9 +3,9 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <LinearMath/btScalar.h>
 #include <glm/glm.hpp>
@@ -15,17 +15,13 @@
 #include <objects/GameObject.hpp>
 #include <objects/VehicleInfo.hpp>
 
+#include <btBulletDynamicsCommon.h>
+
 class Atomic;
 class CharacterObject;
 class CollisionInstance;
 class GameWorld;
 class ModelFrame;
-
-class btCollisionShape;
-struct btVehicleRaycaster;
-class btRaycastVehicle;
-class btRigidBody;
-class btHingeConstraint;
 
 /**
  * @class VehicleObject
@@ -55,23 +51,47 @@ public:
     std::map<size_t, GameObject*> seatOccupants;
 
     std::unique_ptr<CollisionInstance> collision;
-    btVehicleRaycaster* physRaycaster = nullptr;
-    btRaycastVehicle* physVehicle = nullptr;
+    std::unique_ptr<btVehicleRaycaster> physRaycaster;
+    std::unique_ptr<btRaycastVehicle> physVehicle;
 
     struct Part {
+        Part(ModelFrame* p_dummy, Atomic* p_normal, Atomic* p_damaged,
+             std::unique_ptr<btCollisionShape> p_cs,
+             std::unique_ptr<btRigidBody> p_body,
+             std::unique_ptr<btHingeConstraint> p_constraint,
+             bool p_moveToAngle, float p_targetAngle, float p_openAngle,
+             float p_closedAngle)
+            : dummy(p_dummy)
+            , normal(p_normal)
+            , damaged(p_damaged)
+            , cs(std::move(p_cs))
+            , body(std::move(p_body))
+            , constraint(std::move(p_constraint))
+            , moveToAngle(p_moveToAngle)
+            , targetAngle(p_targetAngle)
+            , openAngle(p_openAngle)
+            , closedAngle(p_closedAngle) {
+        }
+
+        Part(Part&& part) = default;
+        Part& operator=(Part&& part) = default;
+
+        ~Part() = default;
+
         ModelFrame* dummy;
         Atomic* normal;
         Atomic* damaged;
-        btCollisionShape* cs;
-        btRigidBody* body;
-        btHingeConstraint* constraint;
+        std::unique_ptr<btCollisionShape> cs;
+        std::unique_ptr<btRigidBody> body;
+        std::unique_ptr<btMotionState> motionState;
+        std::unique_ptr<btHingeConstraint> constraint;
         bool moveToAngle;
         float targetAngle;
         float openAngle;
         float closedAngle;
     };
 
-    std::map<std::string, Part> dynamicParts;
+    std::unordered_map<std::string, Part> dynamicParts;
 
     VehicleObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
                   BaseModelInfo* modelinfo, VehicleInfoHandle info,

@@ -116,8 +116,8 @@ public:
     }
 
 private:
-    btPairCachingGhostObject* m_ghost = nullptr;
-    btSphereShape* m_shape = nullptr;
+    std::unique_ptr<btPairCachingGhostObject> m_ghost;
+    std::unique_ptr<btSphereShape> m_shape;
     bool m_enabled = false;
     float m_enableTimer = 0.f;
     bool m_collected = false;

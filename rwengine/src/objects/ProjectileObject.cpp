@@ -95,17 +95,14 @@ void ProjectileObject::explode() {
 
 void ProjectileObject::cleanup() {
     if (_body) {
-        engine->dynamicsWorld->removeRigidBody(_body);
-        delete _body;
+        engine->dynamicsWorld->removeRigidBody(_body.get());
         _body = nullptr;
     }
     if (_ghostBody) {
-        engine->dynamicsWorld->removeCollisionObject(_ghostBody);
-        delete _ghostBody;
+        engine->dynamicsWorld->removeCollisionObject(_ghostBody.get());
         _ghostBody = nullptr;
     }
-    if (_shape) {
-        delete _shape;
+    if(_shape) {
         _shape = nullptr;
     }
 }
@@ -114,10 +111,10 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
                                    const ProjectileObject::ProjectileInfo& info)
     : GameObject(world, position, glm::quat{1.0f,0.0f,0.0f,0.0f}, nullptr)
     , _info(info) {
-    _shape = new btSphereShape(0.45f);
+    _shape = std::make_unique<btSphereShape>(0.45f);
     btVector3 inertia(0.f, 0.f, 0.f);
     _shape->calculateLocalInertia(1.f, inertia);
-    btRigidBody::btRigidBodyConstructionInfo riginfo(1.f, nullptr, _shape,
+    btRigidBody::btRigidBodyConstructionInfo riginfo(1.f, nullptr, _shape.get(),
                                                      inertia);
 
     btTransform ws;
@@ -126,13 +123,13 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
     riginfo.m_startWorldTransform = ws;
     riginfo.m_mass = 1.f;
 
-    _body = new btRigidBody(riginfo);
+    _body = std::make_unique<btRigidBody>(riginfo);
     _body->setUserPointer(this);
     _body->setLinearVelocity(
         btVector3(_info.direction.x, _info.direction.y, _info.direction.z) *
         _info.velocity);
     engine->dynamicsWorld->addRigidBody(
-        _body, btBroadphaseProxy::DefaultFilter,
+        _body.get(), btBroadphaseProxy::DefaultFilter,
         btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 
     if (_info.type == RPG) {
@@ -142,15 +139,15 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
 
     if (_info.type != Grenade) {
         // Projectiles that aren't grenades explode on contact.
-        _ghostBody = new btPairCachingGhostObject();
+        _ghostBody = std::make_unique<btPairCachingGhostObject>();
         _ghostBody->setWorldTransform(_body->getWorldTransform());
-        _ghostBody->setCollisionShape(_shape);
+        _ghostBody->setCollisionShape(_shape.get());
         _ghostBody->setUserPointer(this);
         _ghostBody->setCollisionFlags(
             btCollisionObject::CF_KINEMATIC_OBJECT |
             btCollisionObject::CF_NO_CONTACT_RESPONSE);
         engine->dynamicsWorld->addCollisionObject(
-            _ghostBody, btBroadphaseProxy::SensorTrigger,
+            _ghostBody.get(), btBroadphaseProxy::SensorTrigger,
             btBroadphaseProxy::AllFilter);
     }
 }

@@ -81,9 +81,9 @@ private:
 public:
     static const float DefaultJumpSpeed;
 
-    btKinematicCharacterController* physCharacter = nullptr;
-    btPairCachingGhostObject* physObject = nullptr;
-    btCapsuleShapeZ* physShape = nullptr;
+    std::unique_ptr<btKinematicCharacterController> physCharacter;
+    std::unique_ptr<btPairCachingGhostObject> physObject;
+    std::unique_ptr<btCapsuleShapeZ> physShape;
 
     CharacterController* controller;
 

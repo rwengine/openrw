@@ -99,7 +99,8 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     collision->createPhysicsBody(this, modelinfo->getCollision(), nullptr,
                                  &info->handling);
     collision->getBulletBody()->forceActivationState(DISABLE_DEACTIVATION);
-    physRaycaster = new VehicleRaycaster(this, engine->dynamicsWorld.get());
+    physRaycaster =
+        std::make_unique<VehicleRaycaster>(this, engine->dynamicsWorld.get());
     btRaycastVehicle::btVehicleTuning tuning;
 
     float travel = fabs(info->handling.suspensionUpperLimit -
@@ -120,10 +121,10 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
     tuning.m_frictionSlip = 1.8f + maxVelocity * accelerationFloor / massFloor;
     tuning.m_maxSuspensionTravelCm = travel * 100.f;
 
-    physVehicle =
-        new btRaycastVehicle(tuning, collision->getBulletBody(), physRaycaster);
+    physVehicle = std::make_unique<btRaycastVehicle>(
+        tuning, collision->getBulletBody(), physRaycaster.get());
     physVehicle->setCoordinateSystem(0, 2, 1);
-    engine->dynamicsWorld->addAction(physVehicle);
+    engine->dynamicsWorld->addAction(physVehicle.get());
 
     float kC = 0.5f;
     float kR = 0.6f;
@@ -173,14 +174,11 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
 VehicleObject::~VehicleObject() {
     ejectAll();
 
-    engine->dynamicsWorld->removeAction(physVehicle);
+    engine->dynamicsWorld->removeAction(physVehicle.get());
 
     for (auto& p : dynamicParts) {
         destroyObjectHinge(&p.second);
     }
-
-    delete physVehicle;
-    delete physRaycaster;
 }
 
 void VehicleObject::setupModel() {
@@ -272,7 +270,7 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
         for (auto& part : dynamicParts) {
             if (part.second.body == nullptr) continue;
-            auto body = part.second.body;
+            auto body = part.second.body.get();
             auto rel = body->getWorldTransform().getOrigin() - bodyOrigin;
             body->getWorldTransform().setOrigin(
                 btVector3(pos.x + rel.x(), pos.y + rel.y(), pos.z + rel.z()));
@@ -588,7 +586,7 @@ void VehicleObject::tickPhysics(float dt) {
                                   it.second.constraint->getHingeAngle();
                 if (glm::abs(angledelta) <= 0.01f) {
                     it.second.constraint->enableAngularMotor(false, 1.f, 1.f);
-                    dynamicParts[it.first].moveToAngle = false;
+                    it.second.moveToAngle = false;
                 } else {
                     it.second.constraint->enableAngularMotor(
                         true, glm::sign(angledelta) * 5.f, 1.f);
@@ -603,7 +601,7 @@ void VehicleObject::tickPhysics(float dt) {
                 auto d = it.second.constraint->getHingeAngle() -
                          it.second.closedAngle;
                 if (glm::abs(d) < 0.05f) {
-                    dynamicParts[it.first].moveToAngle = false;
+                    it.second.moveToAngle = false;
                     setPartLocked(&(it.second), true);
                 }
             }
@@ -752,7 +750,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
         dpoint = glm::inverse(getRotation()) * dpoint;
 
         // Set any parts within range to damaged state.
-        for (auto d : dynamicParts) {
+        for (auto& d : dynamicParts) {
             auto p = &d.second;
 
             if (p->normal == nullptr) continue;
@@ -863,10 +861,11 @@ void VehicleObject::registerPart(ModelFrame* mf) {
             damage->setFlag(Atomic::ATOMIC_RENDER, false);
         }
     }
+    Part part{mf, normal, damage, nullptr, nullptr, nullptr, false,
+     0.f, 0.f, 0.f};
 
     dynamicParts.insert({mf->getName(),
-                         {mf, normal, damage, nullptr, nullptr, nullptr, false,
-                          0.f, 0.f, 0.f}});
+                         std::move(part)});
 }
 
 void VehicleObject::createObjectHinge(Part* part) {
@@ -909,7 +908,7 @@ void VehicleObject::createObjectHinge(Part* part) {
         return;
     }
 
-    auto ms = new VehiclePartMotionState(this, part);
+    auto ms = std::make_unique<VehiclePartMotionState>(this, part);
 
     btTransform tr = btTransform::getIdentity();
     const auto& p = part->dummy->getDefaultTranslation();
@@ -917,7 +916,7 @@ void VehicleObject::createObjectHinge(Part* part) {
     tr.setOrigin(btVector3(p.x, p.y, p.z));
     tr.setRotation(btQuaternion(o.x, o.y, o.z, o.w));
 
-    btCollisionShape* cs = new btBoxShape(boxSize);
+    auto cs = std::make_unique<btBoxShape>(boxSize);
     btTransform t;
     t.setIdentity();
     t.setOrigin(boxOffset);
@@ -925,40 +924,37 @@ void VehicleObject::createObjectHinge(Part* part) {
     btVector3 inertia;
     cs->calculateLocalInertia(10.f, inertia);
 
-    btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, ms, cs, inertia);
-    btRigidBody* subObject = new btRigidBody(rginfo);
+    btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, ms.get(), cs.get(), inertia);
+    auto subObject = std::make_unique<btRigidBody>(rginfo);
     subObject->setUserPointer(this);
 
-    auto hinge = new btHingeConstraint(*collision->getBulletBody(), *subObject,
+    auto hinge = std::make_unique<btHingeConstraint>(*collision->getBulletBody(), *subObject,
                                        tr.getOrigin(), hingePosition, hingeAxis,
                                        hingeAxis);
     hinge->setLimit(hingeMin, hingeMax);
     hinge->setBreakingImpulseThreshold(250.f);
 
-    part->cs = cs;
-    part->body = subObject;
-    part->constraint = hinge;
+    part->cs = std::move(cs);
+    part->body = std::move(subObject);
+    part->motionState = std::move(ms);
+    part->constraint = std::move(hinge);
 
-    engine->dynamicsWorld->addRigidBody(part->body);
-    engine->dynamicsWorld->addConstraint(part->constraint, true);
+    engine->dynamicsWorld->addRigidBody(part->body.get());
+    engine->dynamicsWorld->addConstraint(part->constraint.get(), true);
 }
 
 void VehicleObject::destroyObjectHinge(Part* part) {
     if (part->constraint != nullptr) {
-        engine->dynamicsWorld->removeConstraint(part->constraint);
-        delete part->constraint;
+        engine->dynamicsWorld->removeConstraint(part->constraint.get());
+        part->constraint = nullptr;
     }
 
     if (part->body != nullptr) {
-        engine->dynamicsWorld->removeCollisionObject(part->body);
-        delete part->body->getMotionState();
-        delete part->body;
-        delete part->cs;
+        engine->dynamicsWorld->removeCollisionObject(part->body.get());
+        part->body = nullptr;
+        part->motionState = nullptr;
+        part->cs = nullptr;
     }
-
-    part->cs = nullptr;
-    part->body = nullptr;
-    part->constraint = nullptr;
 
     // Reset target.
     part->moveToAngle = false;
