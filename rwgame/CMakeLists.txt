@@ -61,8 +61,7 @@ target_link_libraries(rwgame
         SDL2::SDL2
     )
 
-openrw_target_apply_options(TARGET rwgame)
-
-install(TARGETS rwgame
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+openrw_target_apply_options(
+    TARGET rwgame
+    INSTALL INSTALL_PDB
     )

@@ -54,10 +54,9 @@ target_link_libraries(rwviewer
         Qt5::Widgets
     )
 
-openrw_target_apply_options(TARGET rwviewer)
-
-install(TARGETS rwviewer
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+openrw_target_apply_options(
+    TARGET rwviewer
+    INSTALL INSTALL_PDB
     )
 
 if(USE_CONAN)

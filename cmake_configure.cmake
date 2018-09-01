@@ -181,13 +181,11 @@ foreach(SAN ${ENABLE_SANITIZERS})
     endif()
 endforeach()
 
-include(CMakeParseArguments)
-
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
-    cmake_parse_arguments("OPENRW_APPLY" "" "TARGET" "" ${ARGN})
+    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB" "TARGET" "" ${ARGN})
     if(CHECK_IWYU)
-        iwyu_check(TARGET "${OPENRW_APPLY_TARGET}"
+        iwyu_check(TARGET "${ORW_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
         )
@@ -195,7 +193,7 @@ function(openrw_target_apply_options)
 
     if(CHECK_CLANGTIDY)
         clang_tidy_check_target(
-            TARGET "${OPENRW_APPLY_TARGET}"
+            TARGET "${ORW_TARGET}"
             FORMAT_STYLE "file"
             FIX "${CHECK_CLANGTIDY_FIX}"
             CHECK_ALL
@@ -204,15 +202,32 @@ function(openrw_target_apply_options)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
         set_property(
-            TARGET "${OPENRW_APPLY_TARGET}"
+            TARGET "${ORW_TARGET}"
             APPEND
             PROPERTY STATIC_LIBRARY_FLAGS "-no_warning_for_no_symbols"
             )
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set_property(
-            TARGET "${OPENRW_APPLY_TARGET}"
+            TARGET "${ORW_TARGET}"
             APPEND
             PROPERTY LINK_FLAGS "/ignore:4099"
             )
     endif()
+
+    if(ORW_INSTALL)
+        install(
+            TARGETS "${ORW_TARGET}"
+            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+            LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+            )
+    endif()
+    if(ORW_INSTALL_PDB)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+            install(FILES "$<$<OR:$<CONFIG:DEBUG>,$<CONFIG:RELWITHDEBINFO>>:$<TARGET_PDB_FILE:${ORW_TARGET}>>"
+                DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                )
+        endif()
+    endif()
+
 endfunction()
