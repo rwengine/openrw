@@ -31,7 +31,7 @@ def to_cmake_generator(vs_version, arch):
     
 def create_solution(path, vs_version, arch):
     conan, _, _ = conan_api.ConanAPIV1.factory()
-    conan.remote_add(remote='bincrafters', url='https://api.bintray.com/conan/bincrafters/public-conan', force=True)
+    conan.remote_add('bincrafters', 'https://api.bintray.com/conan/bincrafters/public-conan', force=True)
     conan_arch = conan_arch_map[arch]
     conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
                   settings=('build_type=Debug', 'arch={}'.format(conan_arch), ), install_folder=path)
