@@ -35,7 +35,7 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
     setClump(info->getModel()->clone());
     if (info->getModel()) {
         setModel(info->getModel());
-        animator = new Animator(getClump());
+        animator = std::make_unique<Animator>(getClump());
 
         createActor();
     }
@@ -234,7 +234,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         const auto& root = modelroot->getChildren()[0];
         auto it = movementAnimation->bones.find(root->getName());
         if (it != movementAnimation->bones.end()) {
-            auto rootBone = it->second;
+            auto& rootBone = it->second;
             float step = dt;
             RW_CHECK(
                 animator->getAnimation(AnimIndexMovement),
@@ -315,13 +315,9 @@ void CharacterObject::changeCharacterModel(const std::string& name) {
     engine->data->loadTXD(modelName + ".txd");
     auto newmodel = engine->data->loadClump(modelName + ".dff");
 
-    if (animator) {
-        delete animator;
-    }
-
     setModel(newmodel);
 
-    animator = new Animator(getClump());
+    animator = std::make_unique<Animator>(getClump());
 }
 
 void CharacterObject::updateCharacter(float dt) {

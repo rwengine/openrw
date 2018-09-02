@@ -81,7 +81,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
             CPAN* cpan = read<CPAN>(data, dataI);
             ANIM* frames = read<ANIM>(data, dataI);
 
-            auto bonedata = new AnimationBone;
+            auto bonedata = std::make_unique<AnimationBone>();
             bonedata->name = frames->name;
             bonedata->frames.reserve(frames->frames);
 
@@ -131,14 +131,14 @@ bool LoaderIFP::loadFromMemory(char* data) {
             std::transform(framename.begin(), framename.end(),
                            framename.begin(), ::tolower);
 
-            animation->bones.insert({framename, bonedata});
+            animation->bones.emplace(framename, std::move(bonedata));
         }
 
         data_offs = animstart + animroot->base.size;
 
         std::transform(animname.begin(), animname.end(), animname.begin(),
                        ::tolower);
-        animations.insert({animname, animation});
+        animations.emplace(animname, animation);
     }
 
     return true;

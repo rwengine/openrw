@@ -38,7 +38,7 @@ void Animator::tick(float dt) {
                 if (!frame) {
                     continue;
                 }
-                state.boneInstances.insert({bone.second, frame});
+                state.boneInstances.emplace(bone.second.get(), frame);
             }
         }
 

@@ -16,7 +16,7 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
         setModel(getModelInfo<ClumpModelInfo>()->getModel());
     }
     setClump(getModel()->clone());
-    animator = new Animator(getClump());
+    animator = std::make_unique<Animator>(getClump());
 }
 
 void CutsceneObject::tick(float dt) {
