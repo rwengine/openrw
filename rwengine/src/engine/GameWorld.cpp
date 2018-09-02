@@ -41,6 +41,18 @@
 constexpr float kMaxTrafficSpawnRadius = 100.f;
 constexpr float kMaxTrafficCleanupRadius = kMaxTrafficSpawnRadius * 1.25f;
 
+namespace {
+template <typename T>
+bool shouldEffectBeRemoved(const T& effect, float gameTime) {
+    if (effect->getType() != Particle) {
+        return false;
+    }
+    auto particle = static_cast<ParticleFX*>(effect.get());
+    return particle->lifetime >= 0.f &&
+           gameTime >= particle->starttime + particle->lifetime;
+}
+}  // namespace
+
 class WorldCollisionDispatcher : public btCollisionDispatcher {
 public:
     WorldCollisionDispatcher(btCollisionConfiguration* collisionConfiguration)
@@ -519,13 +531,10 @@ TrailFX& GameWorld::createTrailEffect() {
 }
 
 void GameWorld::destroyEffect(VisualFX& effect) {
-    for (auto it = effects.begin(); it != effects.end();) {
-        if (it->get() == &effect) {
-            it = effects.erase(it);
-        } else {
-            it++;
-        }
-    }
+    effects.erase(
+        std::remove_if(effects.begin(), effects.end(),
+                       [&effect](auto& ef) { return ef.get() == &effect; }),
+        effects.end());
 }
 
 void GameWorld::doWeaponScan(const WeaponScan& scan) {
@@ -849,17 +858,12 @@ bool GameWorld::isPaused() const {
 }
 
 void GameWorld::updateEffects() {
-    for (int i = 0; i < static_cast<int>(effects.size()); ++i) {
-        auto& effect = effects[i];
-        if (effect->getType() == Particle) {
-            auto particle = static_cast<ParticleFX*>(effect.get());
-            if (particle->lifetime < 0.f) continue;
-            if (getGameTime() >= particle->starttime + particle->lifetime) {
-                destroyEffect(*particle);
-                --i;
-            }
-        }
-    }
+    effects.erase(std::remove_if(effects.begin(), effects.end(),
+                                 [gameTime = getGameTime()](auto& effect) {
+                                     return shouldEffectBeRemoved(effect,
+                                                                  gameTime);
+                                 }),
+                  effects.end());
 }
 
 VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
