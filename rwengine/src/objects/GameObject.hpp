@@ -11,9 +11,9 @@
 #include <rw/forward.hpp>
 
 #include <data/ModelData.hpp>
+#include <engine/Animator.hpp>
 #include <objects/ObjectTypes.hpp>
 
-class Animator;
 class GameWorld;
 
 /**
@@ -45,7 +45,7 @@ public:
 
     GameWorld* engine = nullptr;
 
-    Animator* animator = nullptr;  /// Object's animator.
+    std::unique_ptr<Animator> animator;  /// Object's animator.
 
     bool inWater = false;
 

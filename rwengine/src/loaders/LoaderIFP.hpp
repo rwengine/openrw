@@ -41,6 +41,21 @@ struct AnimationBone {
     Data type;
     std::vector<AnimationKeyframe> frames;
 
+    AnimationBone() = default;
+
+    AnimationBone(const std::string& p_name, int32_t p_previous, int32_t p_next,
+                  float p_duration, Data p_type,
+                  const std::vector<AnimationKeyframe>& p_frames)
+        : name(p_name)
+        , previous(p_previous)
+        , next(p_next)
+        , duration(p_duration)
+        , type(p_type)
+        , frames(p_frames) {
+    }
+
+    ~AnimationBone() = default;
+
     AnimationKeyframe getInterpolatedKeyframe(float time);
     AnimationKeyframe getKeyframe(float time);
 };
@@ -52,13 +67,9 @@ struct AnimationBone {
  */
 struct Animation {
     std::string name;
-    std::map<std::string, AnimationBone*> bones;
+    std::map<std::string, std::unique_ptr<AnimationBone>> bones;
 
-    ~Animation() {
-        for (auto &bone_pair : bones) {
-            delete bone_pair.second;
-        }
-    }
+    ~Animation() = default;
 
     float duration;
 };

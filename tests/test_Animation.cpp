@@ -19,17 +19,15 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
         Animator animator(test_model);
 
         animation->duration = 1.f;
-        animation->bones["player"] = new AnimationBone{
-                "player",
-                0,
-                0,
-                1.0f,
-                AnimationBone::RT0,
-                {
-                    {glm::quat{1.0f,0.0f,0.0f,0.0f}, glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0},
-                    {glm::quat{1.0f,0.0f,0.0f,0.0f}, glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1},
-                }
-            };
+        animation->bones.emplace(
+            "player", std::make_unique<AnimationBone>(
+                          "player", 0, 0, 1.0f, AnimationBone::RT0,
+                          std::vector<AnimationKeyframe>{
+                              {glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
+                               glm::vec3(0.f, 0.f, 0.f), glm::vec3(), 0.f, 0},
+                              {glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
+                               glm::vec3(0.f, 1.f, 0.f), glm::vec3(), 1.0f, 1},
+                          }));
 
         animator.playAnimation(0, animation, 1.f, false);
 

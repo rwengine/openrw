@@ -676,7 +676,7 @@ bool Activities::UseItem::update(CharacterObject *character,
     auto world = character->engine;
     const auto &weapon = world->data->weaponData.at(itemslot);
     auto &state = character->getCurrentState().weapons[itemslot];
-    auto animator = character->animator;
+    auto &animator = character->animator;
     auto shootcycle = find_cycle(weapon->animation1);
     auto throwcycle = find_cycle(weapon->animation2);
 
