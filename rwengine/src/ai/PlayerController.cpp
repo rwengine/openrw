@@ -327,7 +327,8 @@ glm::vec3 PlayerController::getTargetPosition() {
 }
 
 void PlayerController::jump() {
-    if (!character->isInWater()) {
+    if (!character->isInWater() &&
+		 character->isOnGround()) {
         setNextActivity(std::make_unique<Activities::Jump>());
     }
 }
