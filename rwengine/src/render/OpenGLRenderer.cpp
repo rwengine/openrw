@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <core/Profiler.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <rw/debug.hpp>
 
@@ -123,7 +124,7 @@ void OpenGLRenderer::useDrawBuffer(DrawBuffer* dbuff) {
         glBindVertexArray(dbuff->getVAOName());
         currentDbuff = dbuff;
         bufferCounter++;
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].buffers++;
         }
@@ -140,7 +141,7 @@ void OpenGLRenderer::useTexture(GLuint unit, GLuint tex) {
         glBindTexture(GL_TEXTURE_2D, tex);
         currentTextures[unit] = tex;
         textureCounter++;
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].textures++;
         }
@@ -286,7 +287,7 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
     uploadUBO(UBOObject, objectData);
 
     drawCounter++;
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
     if (currentDebugDepth > 0) {
         profileInfo[currentDebugDepth - 1].draws++;
         profileInfo[currentDebugDepth - 1].primitives += p.count;
@@ -310,6 +311,7 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
 }
 
 void OpenGLRenderer::drawBatched(const RenderList& list) {
+    RW_PROFILE_SCOPE(__func__);
 #if 0  // Needs shader changes
 	// Determine how many batches we need to process the entire list
 	auto entries = list.size();
@@ -416,7 +418,7 @@ void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t siz
 }
 
 void OpenGLRenderer::pushDebugGroup(const std::string& title) {
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
     if (ogl_ext_KHR_debug) {
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, title.c_str());
         ProfileInfo& prof = profileInfo[currentDebugDepth];
@@ -435,7 +437,7 @@ void OpenGLRenderer::pushDebugGroup(const std::string& title) {
 }
 
 const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
     if (ogl_ext_KHR_debug) {
         glPopDebugGroup();
         currentDebugDepth--;

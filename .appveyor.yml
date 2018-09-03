@@ -43,6 +43,7 @@ install:
   - for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
   - echo APPVEYOR_REPO_COMMIT=%APPVEYOR_REPO_COMMIT%, COMMIT_HASH=%COMMIT_HASH%
   - if NOT "%APPVEYOR_REPO_COMMIT%" == "%COMMIT_HASH%" echo "Appveyor git hash does not match git checkout hash"
+  - git submodule update --init --recursive
 
 build_script:
   - ctest -VV -S "%APPVEYOR_BUILD_FOLDER%/cmake/ctest/script_ci.ctest"

@@ -18,6 +18,7 @@
 #include <rw/types.hpp>
 
 #include "core/Logger.hpp"
+#include "core/Profiler.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
 #include "loaders/LoaderCOL.hpp"
@@ -349,6 +350,7 @@ void GameData::loadWater(const std::string& path) {
 }
 
 void GameData::loadTXD(const std::string& name) {
+    RW_PROFILE_COUNTER_ADD("loadTXD", 1);
     auto slot = name;
     auto ext = name.find(".txd");
     if (ext != std::string::npos) {
@@ -368,6 +370,7 @@ void GameData::loadTXD(const std::string& name) {
 }
 
 TextureArchive GameData::loadTextureArchive(const std::string& name) {
+    RW_PROFILE_COUNTER_ADD("loadTextureArchive", 1);
     /// @todo refactor loadTXD to use correct file locations
     auto file = index.openFile(name);
     if (!file.data) {

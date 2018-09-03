@@ -128,11 +128,18 @@ private:
     void renderDebugStats(float time);
     void renderDebugPaths(float time);
     void renderDebugObjects(float time, ViewCamera& camera);
-    void renderProfile();
 
     void handleCheatInput(char symbol);
 
     void globalKeyEvent(const SDL_Event& event);
+
+    bool updateInput();
+
+    float tickWorld(const float deltaTime, float accumulatedTime);
+
+    void renderDebugView(float time, ViewCamera &viewCam);
+
+    void tickObjects(float dt) const;
 };
 
 #endif

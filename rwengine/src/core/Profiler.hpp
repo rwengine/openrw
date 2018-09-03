@@ -2,73 +2,24 @@
 #define _RWENGINE_PROFILER_HPP_
 
 #ifdef RW_PROFILER
-#include <chrono>
-#include <cstdint>
-#include <stack>
-#include <string>
-#include <vector>
-#define time_unit std::chrono::microseconds
-
-#include <rw/debug.hpp>
-
-namespace perf {
-
-struct ProfileEntry {
-    std::string label;
-    int64_t start;
-    int64_t end;
-    std::vector<ProfileEntry> childProfiles;
-};
-
-class Profiler {
-    ProfileEntry frame;
-    std::chrono::high_resolution_clock::time_point frameBegin;
-    std::stack<ProfileEntry> currentStack;
-
-public:
-    static Profiler& get() {
-        static Profiler profile;
-        return profile;
-    }
-
-    const ProfileEntry& getFrame() const {
-        return frame;
-    }
-
-    void startFrame() {
-        frameBegin = std::chrono::high_resolution_clock::now();
-        frame = {"Frame", 0, 0, {}};
-    }
-
-    void beginEvent(const std::string& label) {
-        auto now = std::chrono::duration_cast<time_unit>(
-            std::chrono::high_resolution_clock::now() - frameBegin);
-        currentStack.push({label, now.count(), 0, {}});
-    }
-
-    void endEvent() {
-        auto now = std::chrono::duration_cast<time_unit>(
-            std::chrono::high_resolution_clock::now() - frameBegin);
-        RW_CHECK(currentStack.size() > 0, "Perf stack is empty");
-        currentStack.top().end = now.count();
-        if (currentStack.size() == 1) {
-            frame.childProfiles.push_back(currentStack.top());
-            currentStack.pop();
-        } else {
-            auto tmp = currentStack.top();
-            currentStack.pop();
-            currentStack.top().childProfiles.push_back(std::move(tmp));
-        }
-    }
-};
-}
-#define RW_PROFILE_FRAME_BOUNDARY() perf::Profiler::get().startFrame();
-#define RW_PROFILE_BEGIN(label) perf::Profiler::get().beginEvent(label);
-#define RW_PROFILE_END() perf::Profiler::get().endEvent();
+#include <microprofile.h>
+#define RW_PROFILE_THREAD(name) MicroProfileOnThreadCreate(name)
+#define RW_PROFILE_FRAME_BOUNDARY() MicroProfileFlip(nullptr)
+#define RW_PROFILE_SCOPE(label) MICROPROFILE_SCOPEI("Default", label, MP_YELLOW)
+#define RW_PROFILE_SCOPEC(label, colour) MICROPROFILE_SCOPEI("Default", label, colour)
+#define RW_PROFILE_COUNTER_ADD(name, qty) MICROPROFILE_COUNTER_ADD(name, qty)
+#define RW_PROFILE_COUNTER_SET(name, qty) MICROPROFILE_COUNTER_SET(name, qty)
+#define RW_TIMELINE_ENTER(name, color) MICROPROFILE_TIMELINE_ENTER_STATIC(color, name)
+#define RW_TIMELINE_LEAVE(name) MICROPROFILE_TIMELINE_LEAVE_STATIC(name)
 #else
-#define RW_PROFILE_FRAME_BOUNDARY()
-#define RW_PROFILE_BEGIN(label)
-#define RW_PROFILE_END()
+#define RW_PROFILE_THREAD(name) do {} while (0)
+#define RW_PROFILE_FRAME_BOUNDARY() do {} while (0)
+#define RW_PROFILE_SCOPE(label) do {} while (0)
+#define RW_PROFILE_SCOPEC(label, colour)  do {} while (0)
+#define RW_PROFILE_COUNTER_ADD(name, qty) do {} while (0)
+#define RW_PROFILE_COUNTER_SET(name, qty) do {} while (0)
+#define RW_TIMELINE_ENTER(name, color) do {} while (0)
+#define RW_TIMELINE_LEAVE(name) do {} while (0)
 #endif
 
 #endif

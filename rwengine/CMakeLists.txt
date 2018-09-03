@@ -151,6 +151,13 @@ target_link_libraries(rwengine
         OpenAL::OpenAL
     )
 
+if (ENABLE_PROFILING)
+    target_link_libraries(rwengine
+        PUBLIC
+            microprofile::microprofile
+    )
+endif()
+
 target_include_directories(rwengine
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/src"

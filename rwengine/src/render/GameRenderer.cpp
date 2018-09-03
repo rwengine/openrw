@@ -247,94 +247,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     culled = 0;
 
-    renderer->useProgram(worldProg.get());
-
-    //===============================================================
-    //	Render List Construction
-    //---------------------------------------------------------------
-
-    RW_PROFILE_BEGIN("RenderList");
-
-    // This is sequential at the moment, it should be easy to make it
-    // run in parallel with a good threading system.
-    RenderList renderList;
-    // Naive optimisation, assume 50% hitrate
-    renderList.reserve(world->allObjects.size() * 0.5f);
-
-    RW_PROFILE_BEGIN("Build");
-
-    ObjectRenderer objectRenderer(_renderWorld,
-                                  (cullOverride ? cullingCamera : _camera),
-                                  _renderAlpha, getMissingTexture());
-
-    // World Objects
-    for (auto object : world->allObjects) {
-        objectRenderer.buildRenderList(object, renderList);
-    }
-
-    // Area indicators
-    auto sphereModel = getSpecialModel(ZoneCylinderA);
-    for (auto& i : world->getAreaIndicators()) {
-        glm::mat4 m(1.f);
-        m = glm::translate(m, i.position);
-        m = glm::scale(
-            m, glm::vec3(i.radius +
-                         0.15f * glm::sin(_renderWorld->getGameTime() * 5.f)));
-
-        objectRenderer.renderClump(sphereModel.get(), m, nullptr, renderList);
-    }
-
-    // Render arrows above anything that isn't radar only (or hidden)
-    auto arrowModel = getSpecialModel(Arrow);
-    for (auto& blip : world->state->radarBlips) {
-        auto dm = blip.second.display;
-        if (dm == BlipData::Hide || dm == BlipData::RadarOnly) {
-            continue;
-        }
-
-        glm::mat4 model{1.0f};
-
-        if (blip.second.target > 0) {
-            auto object = world->getBlipTarget(blip.second);
-            if (object) {
-                model = object->getTimeAdjustedTransform(_renderAlpha);
-            }
-        } else {
-            model = glm::translate(model, blip.second.coord);
-        }
-
-        float a = world->getGameTime() * glm::pi<float>();
-        model = glm::translate(model,
-                               glm::vec3(0.f, 0.f, 2.5f + glm::sin(a) * 0.5f));
-        model = glm::rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
-        model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-        objectRenderer.renderClump(arrowModel.get(), model, nullptr, renderList);
-    }
-
-    RW_PROFILE_END();
-    culled += objectRenderer.culled;
-    renderer->pushDebugGroup("Objects");
-    renderer->pushDebugGroup("RenderList");
-    // Also parallelizable
-    RW_PROFILE_BEGIN("Sort");
-    // Earlier position in the array means earlier object's rendering
-    // Transparent objects should be sorted and rendered after opaque
-    std::sort(renderList.begin(), renderList.end(),
-              [](const Renderer::RenderInstruction& a,
-                 const Renderer::RenderInstruction& b) {
-                    if (a.drawInfo.blendMode==BlendMode::BLEND_NONE && b.drawInfo.blendMode!=BlendMode::BLEND_NONE) return true;
-                    if (a.drawInfo.blendMode!=BlendMode::BLEND_NONE && b.drawInfo.blendMode==BlendMode::BLEND_NONE) return false;
-                    return (a.sortKey > b.sortKey);
-              });
-    RW_PROFILE_END();
-    RW_PROFILE_BEGIN("Draw");
-    renderer->drawBatched(renderList);
-    RW_PROFILE_END();
-
-    renderer->popDebugGroup();
-    profObjects = renderer->popDebugGroup();
-
-    RW_PROFILE_END();
+    renderObjects(world);
 
     renderer->pushDebugGroup("Water");
 
@@ -390,6 +303,94 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     }
 
     renderPostProcess();
+}
+
+void GameRenderer::renderObjects(const GameWorld *world) {
+    RW_PROFILE_SCOPE(__func__);
+
+    renderer->useProgram(worldProg.get());
+    RenderList renderList = createObjectRenderList(world);
+
+    renderer->pushDebugGroup("Objects");
+    renderer->pushDebugGroup("RenderList");
+    renderer->drawBatched(renderList);
+
+    renderer->popDebugGroup();
+    profObjects = renderer->popDebugGroup();
+}
+
+RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
+    RW_PROFILE_SCOPE(__func__);
+    // This is sequential at the moment, it should be easy to make it
+    // run in parallel with a good threading system.
+    RenderList renderList;
+    // Naive optimisation, assume 50% hitrate
+    renderList.reserve(world->allObjects.size() * 0.5f);
+
+    ObjectRenderer objectRenderer(_renderWorld,
+                                  (cullOverride ? cullingCamera : _camera),
+                                  _renderAlpha, getMissingTexture());
+
+    // World Objects
+    for (auto object : world->allObjects) {
+        objectRenderer.buildRenderList(object, renderList);
+    }
+
+    // Area indicators
+    auto sphereModel = getSpecialModel(ZoneCylinderA);
+    for (auto &i : world->getAreaIndicators()) {
+        glm::mat4 m(1.f);
+        m = translate(m, i.position);
+        m = scale(
+                m, glm::vec3(i.radius +
+                             0.15f * sin(_renderWorld->getGameTime() * 5.f)));
+
+        objectRenderer.renderClump(sphereModel.get(), m, nullptr, renderList);
+    }
+
+    // Render arrows above anything that isn't radar only (or hidden)
+    auto arrowModel = getSpecialModel(Arrow);
+    for (auto &blip : world->state->radarBlips) {
+        auto dm = blip.second.display;
+        if (dm == BlipData::Hide || dm == BlipData::RadarOnly) {
+            continue;
+        }
+
+        glm::mat4 model{1.0f};
+
+        if (blip.second.target > 0) {
+            auto object = world->getBlipTarget(blip.second);
+            if (object) {
+                model = object->getTimeAdjustedTransform(_renderAlpha);
+            }
+        } else {
+            model = translate(model, blip.second.coord);
+        }
+
+        float a = world->getGameTime() * glm::pi<float>();
+        model = translate(model,
+                          glm::vec3(0.f, 0.f, 2.5f + sin(a) * 0.5f));
+        model = rotate(model, a, glm::vec3(0.f, 0.f, 1.f));
+        model = scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+        objectRenderer.renderClump(arrowModel.get(), model, nullptr, renderList);
+    }
+    culled += objectRenderer.culled;
+
+    RW_PROFILE_SCOPE("sortRenderList");
+    // Also parallelizable
+    // Earlier position in the array means earlier object's rendering
+    // Transparent objects should be sorted and rendered after opaque
+    sort(renderList.begin(), renderList.end(),
+         [](const Renderer::RenderInstruction &a,
+            const Renderer::RenderInstruction &b) {
+             if (a.drawInfo.blendMode == BlendMode::BLEND_NONE && b.drawInfo.blendMode != BlendMode::BLEND_NONE)
+                 return true;
+             if (a.drawInfo.blendMode != BlendMode::BLEND_NONE && b.drawInfo.blendMode == BlendMode::BLEND_NONE)
+                 return false;
+             return (a.sortKey > b.sortKey);
+         });
+
+    return renderList;
 }
 
 void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
