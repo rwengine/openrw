@@ -770,7 +770,7 @@ void RWGame::renderDebugPaths(float time) {
 
     // Draw the targetNode if a character is driving a vehicle
     for (auto& p : world->pedestrianPool.objects) {
-        auto v = static_cast<CharacterObject*>(p.second);
+        auto v = static_cast<CharacterObject*>(p.second.get());
 
         static const btVector3 color(1.f, 1.f, 0.f);
 
@@ -830,8 +830,8 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     };
 
     for (auto& p : world->vehiclePool.objects) {
-        if (!isnearby(p.second)) continue;
-        auto v = static_cast<VehicleObject*>(p.second);
+        if (!isnearby(p.second.get())) continue;
+        auto v = static_cast<VehicleObject*>(p.second.get());
 
         std::stringstream ss;
         ss << v->getVehicle()->vehiclename_ << "\n"
@@ -842,8 +842,8 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         showdata(v, ss);
     }
     for (auto& p : world->pedestrianPool.objects) {
-        if (!isnearby(p.second)) continue;
-        auto c = static_cast<CharacterObject*>(p.second);
+        if (!isnearby(p.second.get())) continue;
+        auto c = static_cast<CharacterObject*>(p.second.get());
         const auto& state = c->getCurrentState();
         auto act = c->controller->getCurrentActivity();
 

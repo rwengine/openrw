@@ -201,8 +201,8 @@ bool CharacterController::checkForObstacles()
     // Try to stop before pedestrians
     for (const auto &obj : character->engine->pedestrianPool.objects) {
         // Verify that the character isn't the driver and is walking
-        if (obj.second != character &&
-            static_cast<CharacterObject *>(obj.second)->getCurrentVehicle() ==
+        if (obj.second.get() != character &&
+            static_cast<CharacterObject *>(obj.second.get())->getCurrentVehicle() ==
                 nullptr) {
             // Only check characters that are near our vehicle
             if (glm::distance(vehicle->getPosition(),
@@ -221,7 +221,7 @@ bool CharacterController::checkForObstacles()
     // Brake when a car is in front of us and change lanes when possible
     for (const auto &obj : character->engine->vehiclePool.objects) {
         // Verify that the vehicle isn't our vehicle
-        if (obj.second != vehicle) {
+        if (obj.second.get() != vehicle) {
             // Only check vehicles that are near our vehicle
             if (glm::distance(vehicle->getPosition(),
                               obj.second->getPosition()) <= minColDist) {
@@ -240,18 +240,18 @@ bool CharacterController::checkForObstacles()
                     if (maxLanes > 1) {
                         // Change the lane, firstly check if there is an
                         // occupant
-                        if (static_cast<VehicleObject *>(obj.second)
+                        if (static_cast<VehicleObject *>(obj.second.get())
                                 ->getDriver() != nullptr) {
                             // @todo for now we don't know the lane where the
                             // player is currently driving so just slow down, in
                             // the future calculate the lane
-                            if (static_cast<VehicleObject *>(obj.second)
+                            if (static_cast<VehicleObject *>(obj.second.get())
                                     ->getDriver()
                                     ->isPlayer()) {
                                 return true;
                             } else {
                                 int avoidLane =
-                                    static_cast<VehicleObject *>(obj.second)
+                                    static_cast<VehicleObject *>(obj.second.get())
                                         ->getDriver()
                                         ->controller->getLane();
 

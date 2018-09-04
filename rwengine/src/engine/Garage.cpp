@@ -30,8 +30,8 @@ Garage::Garage(GameWorld* engine_, const int id_, const glm::vec3 coord0,
     midpoint.y = (min.y + max.y) / 2;
 
     // Find door objects for this garage
-    for (const auto p : engine->instancePool.objects) {
-        const auto inst = static_cast<InstanceObject*>(p.second);
+    for (const auto& p : engine->instancePool.objects) {
+        const auto inst = static_cast<InstanceObject*>(p.second.get());
 
         if (!inst->getModel()) {
             continue;

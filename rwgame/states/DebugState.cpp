@@ -129,7 +129,7 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
 
               auto gw = game->getWorld();
               for (auto& i : gw->instancePool.objects) {
-                  auto obj = static_cast<InstanceObject*>(i.second);
+                  auto obj = static_cast<InstanceObject*>(i.second.get());
                   if (std::find(garageDoorModels.begin(),
                                 garageDoorModels.end(),
                                 obj->getModelInfo<BaseModelInfo>()->name) !=

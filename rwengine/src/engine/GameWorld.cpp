@@ -76,9 +76,13 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
 }
 
 GameWorld::~GameWorld() {
-    for (auto& p : allObjects) {
-        delete p;
-    }
+    // Bullet requires to remove each object before all physic world
+    pedestrianPool.clear();
+    instancePool.clear();
+    vehiclePool.clear();
+    pickupPool.clear();
+    cutscenePool.clear();
+    projectilePool.clear();
 }
 
 bool GameWorld::placeItems(const std::string& name) {
@@ -127,14 +131,16 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
         }
 
         auto instance =
-            new InstanceObject(this, pos, rot, glm::vec3(1.f), oi, dydata);
+            std::make_unique<InstanceObject>(this, pos, rot, glm::vec3(1.f), oi, dydata);
 
-        instancePool.insert(instance);
-        allObjects.push_back(instance);
+        auto ptr = instance.get();
 
-        modelInstances.insert({oi->name, instance});
+        instancePool.insert(std::move(instance));
+        allObjects.push_back(ptr);
 
-        return instance;
+        modelInstances.emplace(oi->name, ptr);
+
+        return ptr;
     }
 
     return nullptr;
@@ -155,7 +161,7 @@ void GameWorld::cleanupTraffic(const ViewCamera& focus) {
         if (glm::distance(focus.position, p.second->getPosition()) >=
             kMaxTrafficCleanupRadius) {
             if (!focus.frustum.intersects(p.second->getPosition(), 1.f)) {
-                destroyObjectQueued(p.second);
+                destroyObjectQueued(p.second.get());
             }
         }
     }
@@ -167,7 +173,7 @@ void GameWorld::cleanupTraffic(const ViewCamera& focus) {
         if (glm::distance(focus.position, p.second->getPosition()) >=
             kMaxTrafficCleanupRadius) {
             if (!focus.frustum.intersects(p.second->getPosition(), 1.f)) {
-                destroyObjectQueued(p.second);
+                destroyObjectQueued(p.second.get());
             }
         }
     }
@@ -198,12 +204,13 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
         }
     }
 
-    auto instance = new CutsceneObject(this, pos, rot, model, modelinfo);
+    auto instance = std::make_unique<CutsceneObject>(this, pos, rot, model, modelinfo);
+    auto ptr = instance.get();
 
-    cutscenePool.insert(instance);
-    allObjects.push_back(instance);
+    cutscenePool.insert(std::move(instance));
+    allObjects.push_back(ptr);
 
-    return instance;
+    return ptr;
 }
 
 VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
@@ -281,13 +288,14 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     }
 
     auto vehicle =
-        new VehicleObject{this, pos, rot, vti, info->second, prim, sec};
+        std::make_unique<VehicleObject>(this, pos, rot, vti, info->second, prim, sec);
+    auto ptr = vehicle.get();
     vehicle->setGameObjectID(gid);
 
-    vehiclePool.insert(vehicle);
-    allObjects.push_back(vehicle);
+    vehiclePool.insert(std::move(vehicle));
+    allObjects.push_back(ptr);
 
-    return vehicle;
+    return ptr;
 }
 
 CharacterObject* GameWorld::createPedestrian(const uint16_t id,
@@ -305,11 +313,12 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
     }
 
     auto controller = new DefaultAIController();
-    auto ped = new CharacterObject(this, pos, rot, pt, controller);
+    auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
+    auto ptr = ped.get();
     ped->setGameObjectID(gid);
-    pedestrianPool.insert(ped);
-    allObjects.push_back(ped);
-    return ped;
+    pedestrianPool.insert(std::move(ped));
+    allObjects.push_back(ptr);
+    return ptr;
 }
 
 CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
@@ -332,13 +341,14 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
     }
 
     auto controller = new PlayerController();
-    auto ped = new CharacterObject(this, pos, rot, pt, controller);
+    auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
+    auto ptr = ped.get();
     ped->setGameObjectID(gid);
     ped->setLifetime(GameObject::PlayerLifetime);
     players.push_back(controller);
-    pedestrianPool.insert(ped);
-    allObjects.push_back(ped);
-    return ped;
+    pedestrianPool.insert(std::move(ped));
+    allObjects.push_back(ptr);
+    return ptr;
 }
 
 PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
@@ -353,7 +363,7 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
         data->loadModel(id);
     }
 
-    PickupObject* pickup = nullptr;
+    std::unique_ptr<PickupObject> pickup;
     auto pickuptype = static_cast<PickupObject::PickupType>(type);
 
     auto it = std::find_if(
@@ -362,34 +372,36 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 
     // If nothing, create a generic pickup instead of an item pickup
     if (it != data->weaponData.end()) {
-        pickup = new ItemPickup(this, pos, modelInfo, pickuptype, it->get());
+        pickup = std::make_unique<ItemPickup>(this, pos, modelInfo, pickuptype, it->get());
     } else if (modelInfo->name == "info" || modelInfo->name == "briefcase" ||
                modelInfo->name == "floatpackge1") {
-        pickup = new DummyPickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<DummyPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "killfrenzy") {
-        pickup = new RampagePickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<RampagePickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "health") {
-        pickup = new HealthPickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<HealthPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "bodyarmour") {
-        pickup = new ArmourPickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<ArmourPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "package1") {
-        pickup = new CollectablePickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<CollectablePickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "adrenaline") {
-        pickup = new AdrenalinePickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<AdrenalinePickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "Money") {
-        pickup = new MoneyPickup(this, pos, modelInfo, pickuptype, 0);
+        pickup = std::make_unique<MoneyPickup>(this, pos, modelInfo, pickuptype, 0);
      } else if (modelInfo->name == "donkeymag") {
-        pickup = new BigNVeinyPickup(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<BigNVeinyPickup>(this, pos, modelInfo, pickuptype);
         pickup->setBehaviourFlags(PickupObject::BehaviourFlags::PickupInVehicle);
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
-        pickup = new PickupObject(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<PickupObject>(this, pos, modelInfo, pickuptype);
     }
 
-    pickupPool.insert(pickup);
-    allObjects.push_back(pickup);
+    auto ptr = pickup.get();
 
-    return pickup;
+    pickupPool.insert(std::move(pickup));
+    allObjects.push_back(ptr);
+
+    return ptr;
 }
 
 Garage* GameWorld::createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
@@ -405,7 +417,7 @@ Payphone* GameWorld::createPayphone(const glm::vec2 coord) {
     return payphones.back().get();
 }
 
-void GameWorld::ObjectPool::insert(GameObject* object) {
+void GameWorld::ObjectPool::insert(std::unique_ptr<GameObject> object) {
     if (object->getGameObjectID() == 0) {
         // Find the lowest free GameObjectID.
         GameObjectID availID = 1;
@@ -415,12 +427,12 @@ void GameWorld::ObjectPool::insert(GameObject* object) {
 
         object->setGameObjectID(availID);
     }
-    objects[object->getGameObjectID()] = object;
+    objects[object->getGameObjectID()] = std::move(object);
 }
 
 GameObject* GameWorld::ObjectPool::find(GameObjectID id) const {
     auto it = objects.find(id);
-    return (it == objects.end()) ? nullptr : it->second;
+    return (it == objects.end()) ? nullptr : it->second.get();
 }
 
 void GameWorld::ObjectPool::remove(GameObject* object) {
@@ -430,6 +442,10 @@ void GameWorld::ObjectPool::remove(GameObject* object) {
             it = objects.erase(it);
         }
     }
+}
+
+void GameWorld::ObjectPool::clear() {
+    objects.clear();
 }
 
 GameWorld::ObjectPool& GameWorld::getTypeObjectPool(GameObject* object) {
@@ -482,8 +498,6 @@ void GameWorld::destroyObject(GameObject* object) {
     if (it != allObjects.end()) {
         allObjects.erase(it);
     }
-
-    delete object;
 }
 
 void GameWorld::destroyObjectQueued(GameObject* object) {
@@ -697,20 +711,20 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
     RW_PROFILE_COUNTER_SET("physicsTick/vehiclePool", world->vehiclePool.objects.size());
     for (auto& p : world->vehiclePool.objects) {
         RW_PROFILE_SCOPEC("VehicleObject", MP_THISTLE1);
-        VehicleObject* object = static_cast<VehicleObject*>(p.second);
+        auto object = static_cast<VehicleObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
     RW_PROFILE_COUNTER_SET("physicsTick/pedestrianPool", world->pedestrianPool.objects.size());
     for (auto& p : world->pedestrianPool.objects) {
         RW_PROFILE_SCOPEC("CharacterObject", MP_THISTLE1);
-        CharacterObject* object = static_cast<CharacterObject*>(p.second);
+        auto object = static_cast<CharacterObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
     RW_PROFILE_COUNTER_SET("physicsTick/instancePool", world->instancePool.objects.size());
     for (auto& p : world->instancePool.objects) {
-        InstanceObject* object = static_cast<InstanceObject*>(p.second);
+        auto object = static_cast<InstanceObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 }
@@ -756,7 +770,7 @@ void GameWorld::startCutscene() {
 
 void GameWorld::clearCutscene() {
     for (auto& p : cutscenePool.objects) {
-        destroyObjectQueued(p.second);
+        destroyObjectQueued(p.second.get());
     }
 
     if (cutsceneAudio.length() > 0) {
@@ -958,7 +972,7 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
         // Check if we have any important objects in a vehicle, if we do - don't
         // erase it
         for (auto& seat :
-             static_cast<VehicleObject*>(obj.second)->seatOccupants) {
+             static_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
             auto character = static_cast<CharacterObject*>(seat.second);
 
             if (character->getLifetime() == GameObject::PlayerLifetime ||
@@ -972,7 +986,7 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
         }
 
         if (glm::distance(center, obj.second->getPosition()) < radius) {
-            destroyObjectQueued(obj.second);
+            destroyObjectQueued(obj.second.get());
         }
     }
 
@@ -985,7 +999,7 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
         }
 
         if (glm::distance(center, obj.second->getPosition()) < radius) {
-            destroyObjectQueued(obj.second);
+            destroyObjectQueued(obj.second.get());
         }
     }
 
