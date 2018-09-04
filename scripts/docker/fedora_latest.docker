@@ -6,13 +6,13 @@ RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-re
 
 RUN dnf update -y \
     && dnf install -y \
-        boost-devel \
+        cmake \
+        make \
         gcc \
         gcc-c++ \
         clang \
+        git \
         boost-devel \
-        cmake \
-        make \
         bullet-devel \
         ffmpeg-devel \
         glm-devel \

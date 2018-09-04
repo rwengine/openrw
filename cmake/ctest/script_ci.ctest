@@ -44,6 +44,8 @@ endif()
 set(WARNING_MESSAGES)
 set(ERROR_MESSAGES)
 
+set(RUN_CLANGFORMAT TRUE)
+
 if($ENV{USE_CONAN})
     set(USE_CONAN TRUE)
 else()

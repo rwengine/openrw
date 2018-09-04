@@ -1,11 +1,12 @@
 FROM base/archlinux
 
 RUN pacman -Syy --noconfirm \
+    extra/cmake \
     core/gcc \
     extra/clang \
     make \
+    extra/git \
     extra/boost \
-    extra/cmake \
     extra/ffmpeg \
     extra/bullet \
     community/glm \

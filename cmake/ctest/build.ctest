@@ -15,6 +15,7 @@ set(_ARGS_BOOL
     TESTS_NODATA
     SEPARATE_TEST_SUITES
 
+    RUN_CLANGFORMAT
     RUN_MEMCHECK
 
     ENABLE_SANITIZERS
@@ -167,6 +168,7 @@ set(_CONFIGURE_OPTIONS
     "-DTEST_COVERAGE=${RUN_COVERAGE}"
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
     "-DCHECK_IWYU=${CHECK_IWYU}"
+    "-DCHECK_CLANGFORMAT=${RUN_CLANGFORMAT}"
     "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
     "-DENABLE_SANITIZERS=${ENABLE_SANITIZERS}"
     "-DUSE_CONAN=${USE_CONAN}"
@@ -183,6 +185,9 @@ ctest_configure(
         _CONFIGURE_RESULT
     ${_CTEST_CONFIGURE_EXTRA_ARGS}
     )
+if(_CONFIGURE_RESULT)
+    list(APPEND ERROR_MESSAGES "Configure error detected!")
+endif()
 
 message(STATUS "Building...")
 ctest_build(
@@ -190,12 +195,18 @@ ctest_build(
     FLAGS ${BUILD_EXTRA_FLAGS}
     NUMBER_ERRORS _NB_BUILD_ERRORS
     )
+if(_NB_BUILD_ERRORS)
+    list(APPEND ERROR_MESSAGES "Build failure detected!")
+endif()
 
 if(RUN_TESTS)
     message(STATUS "Running tests...")
     ctest_test(
         RETURN_VALUE _TEST_RESULT
         )
+    if(_TEST_RESULT)
+        list(APPEND ERROR_MESSAGES "Test failure detected!")
+    endif()
 else()
     message(STATUS "Skipping tests...")
 endif()
@@ -223,22 +234,37 @@ if(SUBMIT)
         RETRY_DELAY 120
         RETURN_VALUE _SUBMIT_RESULT
         )
+    if(_SUBMIT_RESULT)
+        list(APPEND WARNING_MESSAGES "Test submission failure detected!")
+    endif()
+
 else()
     message(STATUS "Submit skipped.")
 endif()
 
-if(_CONFIGURE_RESULT)
-    list(APPEND ERROR_MESSAGES "Configure error detected!")
-endif()
+if(RUN_CLANGFORMAT)
+    ctest_build(
+        APPEND
+        CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+        NUMBER_ERRORS _NB_CLANGFORMAT_ERRORS
+        TARGET clang-format-check
+        )
+    if(_NB_CLANGFORMAT_ERRORS)
+        list(APPEND ERROR_MESSAGES "clang-format modified the source tree!")
+    endif()
 
-if(_NB_BUILD_ERRORS)
-    list(APPEND ERROR_MESSAGES "Build failure detected!")
-endif()
+    if(SUBMIT)
+        message(STATUS "Submitting...")
+        ctest_submit(
+            RETRY_COUNT 5
+            RETRY_DELAY 120
+            RETURN_VALUE _SUBMIT_RESULT
+            )
+        if(_SUBMIT_RESULT)
+            list(APPEND WARNING_MESSAGES "Test submission failure detected!")
+        endif()
 
-if(_TEST_RESULT)
-    list(APPEND ERROR_MESSAGES "Test failure detected!")
-endif()
-
-if(_SUBMIT_RESULT)
-    list(APPEND WARNING_MESSAGES "Test submission failure detected!")
+    else()
+        message(STATUS "Submit skipped.")
+    endif()
 endif()

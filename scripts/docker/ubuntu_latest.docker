@@ -2,11 +2,13 @@ FROM ubuntu:rolling
 
 RUN apt-get update \
     && apt-get install --no-install-recommends --no-upgrade -y \
-        build-essential \
         cmake \
+        build-essential \
         gcc-7 \
         g++-7 \
         clang-6.0 \
+        git \
+        clang-format \
         libavcodec-dev \
         libavformat-dev \
         libboost-filesystem-dev \
