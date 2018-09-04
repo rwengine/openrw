@@ -253,13 +253,13 @@ public:
      * the individual pools.
      */
     struct ObjectPool {
-        std::map<GameObjectID, GameObject*> objects;
+        std::map<GameObjectID, std::unique_ptr<GameObject>> objects;
 
         /**
          * Allocates the game object a GameObjectID and inserts it into
          * the pool
          */
-        void insert(GameObject* object);
+        void insert(std::unique_ptr<GameObject> object);
 
         /**
          * Removes a game object from this pool
@@ -270,6 +270,11 @@ public:
          * Finds a game object if it exists in this pool
          */
         GameObject* find(GameObjectID id) const;
+
+        /**
+         * Removes all stored objects
+         */
+        void clear();
     };
 
     /**

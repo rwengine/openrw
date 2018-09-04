@@ -7442,7 +7442,7 @@ void opcode_02c5(const ScriptArguments& args, ScriptInt& collected) {
 */
 void opcode_02c6(const ScriptArguments& args) {
     for (auto& p : args.getWorld()->pickupPool.objects) {
-        auto pickup = static_cast<BigNVeinyPickup*>(p.second);
+        auto pickup = static_cast<BigNVeinyPickup*>(p.second.get());
         if (pickup->isBigNVeinyPickup()) {
             script::destroyObject(args, pickup);
         }
@@ -7720,7 +7720,7 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
         // Create a list of candidate characters by iterating and checking if the char is in this zone
         std::vector<std::pair<GameObjectID, GameObject*>> candidates;
         for (auto& p : args.getWorld()->pedestrianPool.objects) {
-            auto character = static_cast<CharacterObject*>(p.second);
+            auto character = static_cast<CharacterObject*>(p.second.get());
 
             // We only consider characters walking around normally
             // @todo not sure if we are able to grab script objects or players too
@@ -7735,7 +7735,7 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
             auto& max = zone->max;
             if (cp.x > min.x && cp.y > min.y && cp.z > min.z &&
                 cp.x < max.x && cp.y < max.y && cp.z < max.z) {
-                candidates.push_back(p);
+                candidates.emplace_back(p.first, p.second.get());
             }
         }
 
@@ -9056,7 +9056,7 @@ bool opcode_0339(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     if (actors) {
     	auto& actors = args.getWorld()->pedestrianPool.objects;
     	for (const auto& o : actors) {
-    		if (script::objectInBounds(o.second, coord0, coord1)) {
+                if (script::objectInBounds(o.second.get(), coord0, coord1)) {
     			return true;
     		}
     	}
@@ -9064,7 +9064,7 @@ bool opcode_0339(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     if (cars) {
     	auto& cars = args.getWorld()->vehiclePool.objects;
     	for (const auto& o : cars) {
-    		if (script::objectInBounds(o.second, coord0, coord1)) {
+                if (script::objectInBounds(o.second.get(), coord0, coord1)) {
     			return true;
     		}
     	}
@@ -9072,7 +9072,7 @@ bool opcode_0339(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     if (objects) {
     	auto& objects = args.getWorld()->instancePool.objects;
     	for (const auto& o : objects) {
-    		if (script::objectInBounds(o.second, coord0, coord1)) {
+                if (script::objectInBounds(o.second.get(), coord0, coord1)) {
     			return true;
     		}
     	}
@@ -9622,7 +9622,7 @@ void opcode_0363(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     InstanceObject* closestObject = nullptr;
     float closestDistance = radius;
     for(auto& i : args.getWorld()->instancePool.objects) {
-    	InstanceObject* object = static_cast<InstanceObject*>(i.second);
+        InstanceObject* object = static_cast<InstanceObject*>(i.second.get());
 
     	// Check if this instance has the correct model id, early out if it isn't
     	auto modelinfo = object->getModelInfo<BaseModelInfo>();
@@ -10887,8 +10887,8 @@ void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
     auto newobjectid = args.getWorld()->data->findModelObject(newmodel);
     auto nobj = args.getWorld()->data->findModelInfo<SimpleModelInfo>(newobjectid);
 
-    for(auto p : args.getWorld()->instancePool.objects) {
-    	auto o = p.second;
+    for(auto& p : args.getWorld()->instancePool.objects) {
+        auto o = p.second.get();
     	if( !o->getModel() ) continue;
     	if( o->getModelInfo<BaseModelInfo>()->name != oldmodel ) continue;
     	float d = glm::distance(coord, o->getPosition());

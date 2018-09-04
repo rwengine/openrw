@@ -46,7 +46,7 @@ void PlayerController::enterNearestVehicle() {
         float d = 10.f;
 
         for (auto& p : world->vehiclePool.objects) {
-            auto object = p.second;
+            auto object = p.second.get();
             float vd =
                 glm::length(character->getPosition() - object->getPosition());
             if (vd < d) {

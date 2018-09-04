@@ -33,13 +33,15 @@ void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
 
     force = std::max(0.1f, force);
 
-    auto projectile = new ProjectileObject(
+    auto projectile = std::make_unique<ProjectileObject>(
         owner->engine, fireOrigin,
-        {pt, direction,
-         17.f * force,  /// @todo pull a better velocity from somewhere
-         3.5f, weapon});
+        ProjectileObject::ProjectileInfo{
+            pt, direction,
+            17.f * force,  /// @todo pull a better velocity from somewhere
+            3.5f, weapon});
+    auto ptr = projectile.get();
 
-    auto& pool = owner->engine->getTypeObjectPool(projectile);
-    pool.insert(projectile);
-    owner->engine->allObjects.push_back(projectile);
+    auto& pool = owner->engine->getTypeObjectPool(ptr);
+    pool.insert(std::move(projectile));
+    owner->engine->allObjects.push_back(ptr);
 }

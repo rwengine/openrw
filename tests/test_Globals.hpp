@@ -16,6 +16,7 @@
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
+#include <objects/GameObject.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
