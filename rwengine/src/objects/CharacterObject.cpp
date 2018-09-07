@@ -594,7 +594,7 @@ void CharacterObject::setJumpSpeed(float speed) {
 }
 
 void CharacterObject::resetToAINode() {
-    auto nodes = engine->aigraph.nodes;
+    auto& nodes = engine->aigraph.nodes;
     bool vehicleNode = !!getCurrentVehicle();
     AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
@@ -607,7 +607,7 @@ void CharacterObject::resetToAINode() {
 
         float dist = glm::length(node->position - getPosition());
         if (dist < d) {
-            nearest = node;
+            nearest = node.get();
             d = dist;
         }
     }

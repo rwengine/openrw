@@ -14,9 +14,9 @@ struct PathData;
 
 class AIGraph {
 public:
-    ~AIGraph();
+    ~AIGraph() = default;
 
-    std::vector<AIGraphNode*> nodes;
+    std::vector<std::unique_ptr<AIGraphNode>> nodes;
 
     /**
      * List of external nodes, which are links between each

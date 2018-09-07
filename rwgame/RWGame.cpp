@@ -721,7 +721,7 @@ void RWGame::renderDebugPaths(float time) {
     btVector3 roadColour(1.f, 0.f, 0.f);
     btVector3 pedColour(0.f, 0.f, 1.f);
 
-    for (AIGraphNode* n : world->aigraph.nodes) {
+    for (const auto& n : world->aigraph.nodes) {
         btVector3 p(n->position.x, n->position.y, n->position.z);
         auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
         debug.drawLine(p - btVector3(0.f, 0.f, 1.f),
@@ -731,7 +731,7 @@ void RWGame::renderDebugPaths(float time) {
         debug.drawLine(p - btVector3(0.f, 1.f, 0.f),
                        p + btVector3(0.f, 1.f, 0.f), col);
 
-        for (AIGraphNode* c : n->connections) {
+        for (const auto& c : n->connections) {
             btVector3 f(c->position.x, c->position.y, c->position.z);
             debug.drawLine(p, f, col);
         }

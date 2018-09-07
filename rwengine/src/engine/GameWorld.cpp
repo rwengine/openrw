@@ -829,7 +829,7 @@ void GameWorld::loadSpecialModel(const unsigned short index,
 
 void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
                                const glm::vec3& max) {
-    for (AIGraphNode* n : aigraph.nodes) {
+    for (auto& n : aigraph.nodes) {
         if (n->type == type) {
             if (n->position.x >= min.x && n->position.y >= min.y &&
                 n->position.z >= min.z && n->position.x <= max.x &&
@@ -842,7 +842,7 @@ void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
 
 void GameWorld::enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
                               const glm::vec3& max) {
-    for (AIGraphNode* n : aigraph.nodes) {
+    for (auto& n : aigraph.nodes) {
         if (n->type == type) {
             if (n->position.x >= min.x && n->position.y >= min.y &&
                 n->position.z >= min.z && n->position.x <= max.x &&
