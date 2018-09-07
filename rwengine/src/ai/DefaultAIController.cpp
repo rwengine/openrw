@@ -89,7 +89,7 @@ void DefaultAIController::update(float dt) {
                     float d = glm::distance(n->position,
                                             getCharacter()->getPosition());
                     if (d < mindist) {
-                        node = n;
+                        node = n.get();
                         mindist = d;
                     }
                 }
@@ -199,7 +199,7 @@ void DefaultAIController::update(float dt) {
                         getCharacter()->getCurrentVehicle()->getPosition());
 
                     if (d < mindist) {
-                        node = n;
+                        node = n.get();
                         mindist = d;
                     }
                 }
