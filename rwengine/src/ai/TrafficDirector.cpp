@@ -152,7 +152,6 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
     // We have not reached the limit of spawned pedestrians
     if (maximumPedestrians > world->pedestrianPool.objects.size()) {
         const auto availablePeds = maximumPedestrians - world->pedestrianPool.objects.size();
-        static const glm::vec3 kSpawnOffset{0.f, 0.f, 1.f};
 
         size_t counter = availablePeds;
         // maxSpawn can be -1 for "as many as possible"
@@ -172,8 +171,8 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
             // Spawn a pedestrian from the available pool
             const auto pedId = static_cast<std::uint16_t>(
                 peds[std::uniform_int_distribution<size_t>(0, peds.size() - 1)(random)]);
-            auto ped = world->createPedestrian(pedId,
-                                           spawn->position + kSpawnOffset);
+            auto ped = world->createPedestrian(pedId, spawn->position);
+            ped->applyOffset();
             ped->setLifetime(GameObject::TrafficLifetime);
             ped->controller->setGoal(CharacterController::TrafficWander);
             created.push_back(ped);
@@ -185,7 +184,6 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
     // We have not reached the limit of spawned vehicles
     if (maximumCars > world->vehiclePool.objects.size()) {
         const auto availableCars = maximumCars - world->vehiclePool.objects.size();
-        static const glm::vec3 kSpawnOffset{0.f, 0.f, 1.f};
 
         size_t counter = availableCars;
         // maxSpawn can be -1 for "as many as possible"

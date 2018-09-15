@@ -234,7 +234,7 @@ public:
     bool onPlayerTouch() override;
 };
 
-const static std::array<glm::vec3, 106> bigNVeinyPickupsLocations = {{
+constexpr static std::array<glm::vec3, 106> bigNVeinyPickupsLocations = {{
     glm::vec3(913.62219f, -155.13692f, 4.9699469f),
     glm::vec3(913.92401f, -124.12943f, 4.9692569f),
     glm::vec3(913.27899f, -93.524231f, 7.4325991f),
