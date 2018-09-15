@@ -21,8 +21,8 @@
 #include "objects/InstanceObject.hpp"
 #include "objects/VehicleObject.hpp"
 
-Garage::Garage(GameWorld* engine_, size_t id_, glm::vec3 coord0,
-               glm::vec3 coord1, Type type_)
+Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
+               const glm::vec3& coord1, Type type_)
     : engine(engine_), id(id_), type(type_) {
     min.x = std::min(coord0.x, coord1.x);
     min.y = std::min(coord0.y, coord1.y);

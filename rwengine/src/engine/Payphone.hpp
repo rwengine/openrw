@@ -32,7 +32,7 @@ public:
         return id;
     }
 
-    Payphone(GameWorld* engine_, size_t id_, glm::vec2 coord);
+    Payphone(GameWorld* engine_, size_t id_, const glm::vec2& coord);
     ~Payphone() = default;
 
     // Makes a payphone ring
