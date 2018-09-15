@@ -63,6 +63,7 @@ endif()
 target_compile_definitions(rw_interface
     INTERFACE
         "$<$<CONFIG:Debug>:RW_DEBUG>"
+        "GLM_FORCE_PURE"
         "GLM_FORCE_RADIANS"
         "GLM_ENABLE_EXPERIMENTAL"
         "$<$<BOOL:${RW_VERBOSE_DEBUG_MESSAGES}>:RW_VERBOSE_DEBUG_MESSAGES>"
