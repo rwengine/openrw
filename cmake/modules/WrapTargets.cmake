@@ -1,37 +1,25 @@
 function(rwdep_wrap_find_packages)
     if(BULLET_FOUND AND NOT TARGET bullet::bullet)
-        add_library(bullet INTERFACE)
-        target_link_libraries(bullet
-            INTERFACE
-                ${BULLET_LIBRARIES}
-            )
-        target_include_directories(bullet SYSTEM
-            INTERFACE
-                "${BULLET_INCLUDE_DIR}"
-            )
-        add_library(bullet::bullet ALIAS bullet)
+        add_library(bullet::bullet INTERFACE IMPORTED)
+        set_property(TARGET bullet::bullet
+            PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${BULLET_INCLUDE_DIR})
+        set_property(TARGET bullet::bullet
+            PROPERTY INTERFACE_LINK_LIBRARIES ${BULLET_LIBRARIES})
     endif()
 
     if(OPENAL_FOUND AND NOT TARGET OpenAL::OpenAL)
-        add_library(OpenAL INTERFACE)
-        target_link_libraries(OpenAL
-            INTERFACE
-                "${OPENAL_LIBRARY}"
-            )
-        target_include_directories(OpenAL SYSTEM
-            INTERFACE
-                "${OPENAL_INCLUDE_DIR}"
-            )
-        add_library(OpenAL::OpenAL ALIAS OpenAL)
+        add_library(OpenAL::OpenAL INTERFACE IMPORTED)
+        set_property(TARGET OpenAL::OpenAL
+            PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
+        set_property(TARGET OpenAL::OpenAL
+            PROPERTY INTERFACE_LINK_LIBRARIES ${OPENAL_LIBRARY})
     endif()
 endfunction()
 
 function(rwdep_wrap_conan_target TARGET CONAN_NAME)
-    string(RANDOM RND)
-    set(TGT "CONAN_${CONAN_NAME}_${RND}")
-    add_library("${TGT}" INTERFACE)
-    target_link_libraries("${TGT}" INTERFACE "CONAN_PKG::${CONAN_NAME}")
-    add_library("${TARGET}" ALIAS "${TGT}")
+    add_library("${TARGET}" INTERFACE IMPORTED)
+    set_property(TARGET "${TARGET}"
+        PROPERTY INTERFACE_LINK_LIBRARIES "CONAN_PKG::${CONAN_NAME}")
 endfunction()
 
 function(rwdep_wrap_conan_targets)
