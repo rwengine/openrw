@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _MODELFRAMESWIDGET_HPP_
 #define _MODELFRAMESWIDGET_HPP_
 #include <QDockWidget>

@@ -167,15 +167,14 @@ public:
     template <typename T>
     typename std::enable_if<std::is_integral<T>::value, T>::type
     getRandomNumber(T min, T max) {
-        std::uniform_int_distribution<> dist(min, max);
+        std::uniform_int_distribution<T> dist(min, max);
         return dist(randomNumberGen);
     }
 
     template <typename T>
     typename std::enable_if<std::is_floating_point<T>::value, T>::type
     getRandomNumber(T min, T max) {
-        std::uniform_real_distribution<> dist(static_cast<double>(min),
-                                              static_cast<double>(max));
+        std::uniform_real_distribution<T> dist(min, max);
         return dist(randomNumberGen);
     }
 

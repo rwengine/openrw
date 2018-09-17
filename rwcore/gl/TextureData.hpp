@@ -2,8 +2,8 @@
 #define _LIBRW_TEXTUREDATA_HPP_
 #include <gl/gl_core_3_3.h>
 #include <glm/glm.hpp>
-#include <map>
 
+#include <map>
 #include <memory>
 #include <string>
 

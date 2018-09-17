@@ -70,7 +70,7 @@ struct Sound {
         buffer->setMaxDistance(maxDist);
     }
 
-    int getScriptObjectID() const {
+    size_t getScriptObjectID() const {
         return id;
     }
 };

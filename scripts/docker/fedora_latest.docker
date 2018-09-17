@@ -7,7 +7,9 @@ RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-re
 RUN dnf update -y \
     && dnf install -y \
         boost-devel \
-        gcc gcc-c++ \
+        gcc \
+        gcc-c++ \
+        clang \
         boost-devel \
         cmake \
         make \

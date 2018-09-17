@@ -299,7 +299,8 @@ void OpenGLRenderer::draw(const glm::mat4& model, DrawBuffer* draw,
                           const Renderer::DrawParameters& p) {
     setDrawState(model, draw, p);
 
-    glDrawElements(draw->getFaceType(), p.count, GL_UNSIGNED_INT,
+    glDrawElements(draw->getFaceType(), static_cast<GLsizei>(p.count),
+                   GL_UNSIGNED_INT,
                    reinterpret_cast<void*>(sizeof(RenderIndex) * p.start));
 }
 
@@ -307,7 +308,7 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
                                 const Renderer::DrawParameters& p) {
     setDrawState(model, draw, p);
 
-    glDrawArrays(draw->getFaceType(), p.start, p.count);
+    glDrawArrays(draw->getFaceType(), static_cast<GLint>(p.start), static_cast<GLsizei>(p.count));
 }
 
 void OpenGLRenderer::drawBatched(const RenderList& list) {

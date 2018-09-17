@@ -6,6 +6,7 @@ RUN apt-get update \
         cmake \
         gcc-8 \
         g++-8 \
+        clang-6.0 \
             # scripts to install conan \
             python3-pip \
             python3-distutils \

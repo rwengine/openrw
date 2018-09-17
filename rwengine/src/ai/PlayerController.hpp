@@ -11,8 +11,6 @@ private:
 
     glm::vec3 direction{};
 
-    glm::quat lastRotation = glm::vec3(0.f, 0.f, 0.f);
-
     bool missionRestartRequired = false;
 
     bool adrenalineEffect = false;

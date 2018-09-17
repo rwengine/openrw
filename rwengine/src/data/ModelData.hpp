@@ -273,7 +273,7 @@ private:
     std::array<AtomicPtr, 3> atomics_;
     float loddistances_[3] = {};
     uint8_t numatomics_ = 0;
-    uint8_t alpha_ = 0;  /// @todo ask aap why
+//    uint8_t alpha_ = 0;  /// @todo ask aap why
     bool isbigbuilding_ = 0;
     uint8_t furthest_ = 0;
 

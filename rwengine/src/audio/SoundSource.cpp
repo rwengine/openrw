@@ -248,7 +248,7 @@ struct InputData {
 /// to buffer.
 static int read_packet(void* opaque, uint8_t* buf, int buf_size) {
     auto* input = reinterpret_cast<InputData*>(opaque);
-    buf_size = FFMIN(buf_size, input->size);
+    buf_size = std::min(buf_size, static_cast<int>(input->size));
     /* copy internal data to buf */
     memcpy(buf, input->ptr, buf_size);
     input->ptr += buf_size;

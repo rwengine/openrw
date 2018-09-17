@@ -5,7 +5,7 @@
 #include "fonts/FontMapGta3.hpp"
 
 void ScreenText::tick(float dt) {
-    int millis = dt * 1000;
+    int millis = static_cast<int>(dt * 1000);
 
     // Remove all the immedate text
     m_textQueues[static_cast<size_t>(ScreenTextType::Immediate)].clear();

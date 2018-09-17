@@ -13,7 +13,7 @@ int DFFFramesTreeModel::columnCount(const QModelIndex&) const {
 int DFFFramesTreeModel::rowCount(const QModelIndex& parent) const {
     ModelFrame* f = static_cast<ModelFrame*>(parent.internalPointer());
     if (f) {
-        return f->getChildren().size();
+        return static_cast<int>(f->getChildren().size());
     }
 
     if (parent.row() == -1) {
@@ -40,7 +40,7 @@ QModelIndex DFFFramesTreeModel::parent(const QModelIndex& child) const {
         if (cp->getParent()) {
             for (size_t i = 0; i < cp->getParent()->getChildren().size(); ++i) {
                 if (cp->getParent()->getChildren()[i].get() == c->getParent()) {
-                    return createIndex(i, 0, c->getParent());
+                    return createIndex(static_cast<int>(i), 0, c->getParent());
                 }
             }
         } else {

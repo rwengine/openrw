@@ -1,11 +1,10 @@
-#pragma once
 #ifndef _ITEMLISTWIDGET_HPP_
 #define _ITEMLISTWIDGET_HPP_
 #include <QDockWidget>
 #include <QLineEdit>
 #include <QSortFilterProxyModel>
 #include <QTableView>
-#include "ItemListModel.hpp"
+#include "models/ItemListModel.hpp"
 
 class ItemListWidget : public QDockWidget {
     Q_OBJECT

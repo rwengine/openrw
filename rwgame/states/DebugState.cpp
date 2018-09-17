@@ -214,11 +214,11 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    const std::array<std::string, 4> w{"Sunny", "Cloudy", "Rainy", "Foggy"};
+    const std::array<std::string, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i],
-                     [=] { game->getWorld()->state->basic.nextWeather = i; });
+                     [=] { game->getWorld()->state->basic.nextWeather = static_cast<std::uint16_t>(i); });
     }
 
     menu->offset = kDebugMenuOffset;
@@ -230,7 +230,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeightMissions);
 
-    const std::array<std::string, 80> w{
+    const std::array<std::string, 80> w{{
         "Intro Movie",
         "Hospital Info Scene",
         "Police Station Info Scene",
@@ -311,7 +311,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
         "Bullion Run",
         "Rumble",
         "The Exchange",
-    };
+    }};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i], [=] {

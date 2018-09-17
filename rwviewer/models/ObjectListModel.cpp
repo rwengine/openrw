@@ -5,7 +5,7 @@ ObjectListModel::ObjectListModel(GameData *dat, QObject *parent)
 }
 
 int ObjectListModel::rowCount(const QModelIndex &) const {
-    return _gameData->modelinfo.size();
+    return static_cast<int>(_gameData->modelinfo.size());
 }
 
 int ObjectListModel::columnCount(const QModelIndex &) const {

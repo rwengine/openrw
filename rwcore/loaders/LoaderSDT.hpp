@@ -79,13 +79,12 @@ public:
     const LoaderSDTFile& getAssetInfoByIndex(size_t index) const;
 
     /// Returns the number of asset files in the archive
-    uint32_t getAssetCount() const;
+    size_t getAssetCount() const;
 
     Version getVersion() const;
     LoaderSDTFile assetInfo{};
 private:
     Version m_version{GTAIIIVC};      ///< Version of this SDT archive
-    uint32_t m_assetCount{0};  ///< Number of assets in the current archive
     std::string m_archive;  ///< Path to the archive being used (no extension)
     std::vector<LoaderSDTFile> m_assets;  ///< Asset info of the archive
 };

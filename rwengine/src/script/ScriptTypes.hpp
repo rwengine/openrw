@@ -77,7 +77,7 @@ struct ScriptObjectType {
     T* operator=(T* object) {
         RW_CHECK(m_id != nullptr,
                  "ScriptObjectType has pointer to null memory location");
-        *m_id = object->getScriptObjectID();
+        *m_id = static_cast<ScriptInt>(object->getScriptObjectID());
         m_object = object;
         return object;
     }

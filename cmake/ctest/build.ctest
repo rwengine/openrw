@@ -6,7 +6,7 @@
 
 set(_ARGS_BOOL
     USE_CONAN
-    DEBUG
+    BUILD_TYPE
     CHECK_IWYU
     BUILD_TOOLS
     BUILD_VIEWER
@@ -39,6 +39,7 @@ set(_ARGS_ONEVAL
 
 set(_ARGS_MULVAL
     CONFIGURE_EXTRA_OPTIONS
+    BUILD_EXTRA_FLAGS
     )
 
 foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
@@ -65,6 +66,12 @@ endif()
 
 message(STATUS "Starting test...")
 ctest_start("${MODEL_NAME}" ${_CTEST_START_EXTRA_ARGS})
+
+set(ALL_BUILD_TYPES  Release Debug MinSizeRel RelWithDebInfo)
+list(FIND ALL_BUILD_TYPES "${BUILD_TYPE}" BUILD_TYPE_INDEX)
+if(BUILD_TYPE_INDEX EQUAL -1)
+    message(FATAL_ERROR "Unknown build type '${BUILD_TYPE}'")
+endif()
 
 if(USE_CONAN)
     find_program(CONAN_BIN
@@ -108,7 +115,7 @@ if(USE_CONAN)
         endif()
     endif()
 
-    if(DEBUG)
+    if(BUILD_TYPE STREQUAL "Debug")
         set(CONAN_CONFIGURATION "Debug")
     else()
         set(CONAN_CONFIGURATION "Release")
@@ -148,15 +155,9 @@ if(USE_CONAN)
 endif()
 
 # CTEST_CONFIGURATION_TYPE is needed on Windows (no leading underscore)
-if(DEBUG)
-    set(_CMAKE_BUILD_TYPE "Debug")
-    set(_CTEST_BUILD_CONFIGURATION "Debug")
-    set(CTEST_CONFIGURATION_TYPE "Debug")
-else()
-    set(_CMAKE_BUILD_TYPE "Release")
-    set(_CTEST_BUILD_CONFIGURATION "Release")
-    set(CTEST_CONFIGURATION_TYPE "Release")
-endif()
+set(_CMAKE_BUILD_TYPE "${BUILD_TYPE}")
+set(_CTEST_BUILD_CONFIGURATION "${BUILD_TYPE}")
+set(CTEST_CONFIGURATION_TYPE "${BUILD_TYPE}")
 
 set(_CONFIGURE_OPTIONS
     "-DBUILD_TOOLS=${BUILD_TOOLS}"
@@ -186,6 +187,7 @@ ctest_configure(
 message(STATUS "Building...")
 ctest_build(
     CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+    FLAGS ${BUILD_EXTRA_FLAGS}
     NUMBER_ERRORS _NB_BUILD_ERRORS
     )
 

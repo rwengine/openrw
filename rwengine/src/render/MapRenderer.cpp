@@ -125,7 +125,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         std::string num = (m < 10 ? "0" : "");
         std::string name = "radar" + num + std::to_string(m);
         auto texture = world->data->findSlotTexture(name, name);
-        dp.textures = {texture->getName()};
+        dp.textures = {{texture->getName()}};
 
         dp.count = 4;
 
@@ -152,7 +152,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ZERO);
         TextureData::Handle radarDisc =
             data->findSlotTexture("hud", "radardisc");
-        dp.textures = {radarDisc->getName()};
+        dp.textures = {{radarDisc->getName()}};
 
         glm::mat4 model{1.0f};
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));

@@ -82,7 +82,7 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
              glm::vec4(0.f), 90.f, vc.frustum.far});
     model->getFrame()->updateHierarchyTransform();
 
-    ObjectRenderer _renderer(world(), vc, 1.f, 0);
+    ObjectRenderer _renderer(world(), vc, 1.f);
     RenderList renders;
     _renderer.renderClump(model.get(), glm::mat4(1.0f), nullptr, renders);
     r.getRenderer()->drawBatched(renders);
@@ -103,7 +103,7 @@ void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
             {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
              glm::vec4(0.f), 90.f, vc.frustum.far});
 
-    ObjectRenderer objectRenderer(world(), vc, 1.f, 0);
+    ObjectRenderer objectRenderer(world(), vc, 1.f);
     RenderList renders;
     objectRenderer.buildRenderList(object, renders);
     std::sort(renders.begin(), renders.end(),
@@ -183,7 +183,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
         dp.colour = {255, 255, 255, 255};
         glLineWidth(1.f);
     }
-    dp.textures = {whiteTex};
+    dp.textures = {{whiteTex}};
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     if(_renderer != nullptr) {

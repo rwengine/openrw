@@ -24,7 +24,8 @@ bool SoundBuffer::bufferData(SoundSource& soundSource) {
     alCheck(alBufferData(
         buffer,
         soundSource.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-        &soundSource.data.front(), soundSource.data.size() * sizeof(int16_t),
+        &soundSource.data.front(),
+        static_cast<ALsizei>(soundSource.data.size() * sizeof(int16_t)),
         soundSource.sampleRate));
     alCheck(alSourcei(source, AL_BUFFER, buffer));
 

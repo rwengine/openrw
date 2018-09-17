@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _DFFFRAMESTREEMODEL_HPP_
 #define _DFFFRAMESTREEMODEL_HPP_
 #include <QAbstractItemModel>

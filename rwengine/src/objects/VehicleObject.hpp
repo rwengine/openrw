@@ -7,7 +7,15 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
+#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btScalar.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -15,7 +23,6 @@
 #include <objects/GameObject.hpp>
 #include <objects/VehicleInfo.hpp>
 
-#include <btBulletDynamicsCommon.h>
 
 class Atomic;
 class CharacterObject;

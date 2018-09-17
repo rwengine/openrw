@@ -52,14 +52,24 @@ endif()
 find_path(GLM_INCLUDE_DIR "glm/glm.hpp"
     PATHS ${_glm_HEADER_SEARCH_DIRS})
 
+if(GLM_INCLUDE_DIR)
+    file(READ "${GLM_INCLUDE_DIR}/glm/detail/setup.hpp" _GLM_SETUP_HPP)
+    string(REGEX MATCH "GLM: version ([0-9a-zA-Z\.\-]+)" _GLM_VERSION "${_GLM_SETUP_HPP}")
+    if(NOT _GLM_VERSION)
+        message(AUTHOR_WARNING "Cannot detect GLM version: regex does not match")
+    endif()
+    set(GLM_VERSION "${CMAKE_MATCH_1}")
+endif()
+
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GLM DEFAULT_MSG
-    GLM_INCLUDE_DIR)
+find_package_handle_standard_args(GLM
+    FOUND_VAR GLM_FOUND
+    REQUIRED_VARS GLM_INCLUDE_DIR
+    VERSION_VAR GLM_VERSION
+    )
 
 if(GLM_FOUND)
-    set(GLM_INCLUDE_DIRS "${GLM_INCLUDE_DIR}")
-    add_library(glm INTERFACE)
-    target_include_directories(glm SYSTEM
-            INTERFACE "${GLM_INCLUDE_DIR}")
-    add_library(glm::glm ALIAS glm)
+    add_library(glm::glm INTERFACE IMPORTED)
+    set_property(TARGET glm::glm
+        PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${GLM_INCLUDE_DIR})
 endif()

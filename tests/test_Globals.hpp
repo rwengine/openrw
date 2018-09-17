@@ -1,7 +1,14 @@
 #ifndef _TESTGLOBALS_HPP_
 #define _TESTGLOBALS_HPP_
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <SDL.h>
 #include <GameWindow.hpp>
 #include <boost/test/unit_test.hpp>

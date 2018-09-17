@@ -5456,7 +5456,7 @@ void opcode_01e8(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
 void opcode_01e9(const ScriptArguments& args, const ScriptVehicle vehicle,
                  ScriptInt& numOfPassengers) {
     RW_UNUSED(args);
-    numOfPassengers = vehicle->seatOccupants.size();
+    numOfPassengers = static_cast<int>(vehicle->seatOccupants.size());
 }
 
 /**
@@ -5469,7 +5469,7 @@ void opcode_01e9(const ScriptArguments& args, const ScriptVehicle vehicle,
 void opcode_01ea(const ScriptArguments& args, const ScriptVehicle vehicle,
                  ScriptInt& maxNumOfPassengers) {
     RW_UNUSED(args);
-    maxNumOfPassengers = vehicle->info->seats.size();
+    maxNumOfPassengers = static_cast<int>(vehicle->info->seats.size());
 }
 
 /**
@@ -7740,7 +7740,7 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
         }
 
         // Only return a result if we found a character
-        unsigned int candidateCount = candidates.size();
+        const auto candidateCount = candidates.size();
         if (candidateCount > 0) {
             // Return the handle for any random character in this zone and use lifetime for use by script
             // @todo verify if the lifetime is actually changed in the original game

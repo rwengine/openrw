@@ -4,8 +4,14 @@
 #include <cstddef>
 #include <vector>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <LinearMath/btIDebugDraw.h>
 #include <LinearMath/btScalar.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
 
 #include <data/Clump.hpp>
 #include <gl/gl_core_3_3.h>

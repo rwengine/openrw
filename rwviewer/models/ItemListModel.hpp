@@ -1,21 +1,23 @@
-#ifndef _OBJECTLISTMODEL_HPP_
-#define _OBJECTLISTMODEL_HPP_
+#ifndef ITEMLISTMODEL_HPP
+#define ITEMLISTMODEL_HPP
 
 #include <QAbstractItemModel>
 
-#include <engine/GameData.hpp>
+#include <engine/GameWorld.hpp>
 
-class ObjectListModel : public QAbstractTableModel {
+class ItemListModel : public QAbstractTableModel {
     Q_OBJECT
 
-    GameData* _gameData;
+    GameWorld* _world;
 
 public:
-    explicit ObjectListModel(GameData* gameDat, QObject* parent = 0);
+    explicit ItemListModel(GameWorld* _world, QObject* parent = 0);
 
-    GameData* gameData() const {
-        return _gameData;
+    GameWorld* world() const {
+        return _world;
     }
+
+    qint16 getIDOf(unsigned int row) const;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
@@ -30,4 +32,4 @@ public:
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
 };
 
-#endif  // _OBJECTLISTMODEL_HPP_
+#endif  // ITEMLISTMODEL_HPP

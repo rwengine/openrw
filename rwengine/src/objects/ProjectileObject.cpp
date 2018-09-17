@@ -1,7 +1,14 @@
 #include "objects/ProjectileObject.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "data/WeaponData.hpp"
@@ -55,7 +62,7 @@ void ProjectileObject::explode() {
 
         const float exp_size = 10.f;
         const float damageSize = 5.f;
-        const float damage = _info.weapon->damage;
+        const float damage = static_cast<float>(_info.weapon->damage);
 
         for (auto& o : engine->allObjects) {
             if (o == this) continue;

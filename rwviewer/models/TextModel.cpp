@@ -8,18 +8,18 @@ TextModel::TextModel(QObject *parent)
 
 }
 
-void TextModel::setData(const TextMapType &textMap) {
+void TextModel::setMapData(const TextMapType &textMap) {
     beginResetModel();
     m_textMap = textMap;
     endResetModel();
 }
 
 int TextModel::rowCount(const QModelIndex &) const {
-    return m_textMap.keys.size();
+    return static_cast<int>(m_textMap.keys.size());
 }
 
 int TextModel::columnCount(const QModelIndex &) const {
-    return m_textMap.languages.size();
+    return static_cast<int>(m_textMap.languages.size());
 }
 
 const GameString &TextModel::lookupIndex(const QModelIndex &index) const {

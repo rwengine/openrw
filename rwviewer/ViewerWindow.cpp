@@ -167,7 +167,7 @@ void ViewerWindow::loadGame(const QString& path) {
 }
 
 void ViewerWindow::showObjectModel(uint16_t) {
-#pragma message("implement me")
+    RW_MESSAGE("showObjectModel unimplemented");  // FIXME: unimplemented
 }
 
 void ViewerWindow::updateRecentGames() {

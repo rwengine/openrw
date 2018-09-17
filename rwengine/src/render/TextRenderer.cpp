@@ -20,10 +20,10 @@ unsigned charToIndex(std::uint16_t g) {
     return g - 32;
 }
 
-glm::vec4 indexToTexCoord(int index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
+static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
     constexpr unsigned TEXTURE_COLUMNS = 16;
-    const float x = index % TEXTURE_COLUMNS;
-    const float y = index / TEXTURE_COLUMNS;
+    const float x = static_cast<float>(index % TEXTURE_COLUMNS);
+    const float y = static_cast<float>(index / TEXTURE_COLUMNS);
     // Add offset to avoid 'leakage' between adjacent glyphs
     float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
     float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
@@ -70,7 +70,7 @@ void main()
 constexpr size_t GLYPHS_NB = 193;
 using FontWidthLut = std::array<std::uint8_t, GLYPHS_NB>;
 
-constexpr std::array<std::uint8_t, 193> fontWidthsPager = {
+constexpr std::array<std::uint8_t, 193> fontWidthsPager = {{
      3,  3,  6,  8,  6, 10,  8,  3,  5,  5,  7,  0,  3,  7,  3,  0, //  1
      6,  4,  6,  6,  7,  6,  6,  6,  6,  6,  3,  0,  0,  0,  0,  6, //  2
      0,  6,  6,  6,  6,  6,  6,  6,  6,  3,  6,  6,  5,  8,  7,  6, //  3
@@ -84,9 +84,9 @@ constexpr std::array<std::uint8_t, 193> fontWidthsPager = {
      8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 11
      8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 12
      8,
-};
+}};
 
-constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {
+constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {{
     11, 13, 30, 27, 20, 24, 22, 12, 14, 14,  0, 26,  9, 14,  9, 26, //  1
     20, 19, 20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20, //  2
     27, 20, 20, 20, 20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20, //  3
@@ -100,9 +100,9 @@ constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {
     19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 11
     19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
     16,
-};
+}};
 
-constexpr std::array<std::uint8_t, 193> fontWidthsArial = {
+constexpr std::array<std::uint8_t, 193> fontWidthsArial = {{
     27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29, //  1
     47, 33, 45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39, //  2
     61, 53, 51, 47, 49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51, //  3
@@ -116,7 +116,7 @@ constexpr std::array<std::uint8_t, 193> fontWidthsArial = {
     19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19, // 11
     19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
     19,
-};
+}};
 
 }
 
@@ -284,7 +284,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         // will need to be wrapped
         if (ti.wrapX > 0 && coord.x > 0.f && !std::isspace(c)) {
             auto wend = std::find_if(std::begin(text) + i, std::end(text),
-                                     [](char x) { return std::isspace(x); });
+                                     [](auto c) { return std::isspace(c); });
             if (wend != std::end(text)) {
                 auto word = std::distance(std::begin(text) + i, wend);
                 if (lineLength + word >= ti.wrapX) {
@@ -350,7 +350,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
     auto ftexture = renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
-    dp.textures = {ftexture->getName()};
+    dp.textures = {{ftexture->getName()}};
     dp.depthMode = DepthMode::OFF;
 
     renderer->getRenderer()->drawArrays(glm::mat4(1.0f), &db, dp);

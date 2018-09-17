@@ -2,8 +2,15 @@
 
 #include <cmath>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/quaternion.hpp>
 
 #include "ai/PlayerController.hpp"
@@ -191,9 +198,9 @@ void PickupObject::tick(float dt) {
     float time = engine->getGameTime();
     float colourValue = 0.5f * (std::sin(time * 3.0664064f) * 0.3f + 0.3f);
     uint32_t* colour = &colours[m_colourId];
-    float red = (*colour >> 16) & 0xFF;
-    float green = (*colour >> 8) & 0xFF;
-    float blue = *colour & 0xFF;
+    float red = static_cast<float>((*colour >> 16) & 0xFF);
+    float green = static_cast<float>((*colour >> 8) & 0xFF);
+    float blue = static_cast<float>(*colour & 0xFF);
     m_corona.colour =
         glm::vec4(red / 255.f, green / 255.f, blue / 255.f, 1.f) * colourValue;
 
@@ -402,9 +409,11 @@ bool CollectablePickup::onPlayerTouch() {
         auto text = ScreenText::format(
             engine->data->texts.text(gxtEntry),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackagesCollected), FONT_PRICEDOWN),
+                std::to_string(state->playerInfo.hiddenPackagesCollected),
+                FONT_PRICEDOWN),
             GameStringUtil::fromString(
-                std::to_string(state->playerInfo.hiddenPackageCount), FONT_PRICEDOWN));
+                std::to_string(state->playerInfo.hiddenPackageCount),
+                FONT_PRICEDOWN));
 
         state->text.addText<ScreenTextType::HiddenPackageText>(
             ScreenTextEntry::makeHiddenPackageText(gxtEntry, text));

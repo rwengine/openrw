@@ -31,7 +31,7 @@ public:
     };
 
     /// Construct
-    LoaderIMG();
+    LoaderIMG() = default;
 
     /// Load the structure of the archive
     /// Omit the extension in filename so both .dir and .img are loaded when
@@ -52,15 +52,14 @@ public:
     const LoaderIMGFile& getAssetInfoByIndex(size_t index) const;
 
     /// Returns the number of asset files in the archive
-    uint32_t getAssetCount() const;
+    std::size_t getAssetCount() const;
 
     Version getVersion() const {
         return m_version;
     }
 
 private:
-    Version m_version;     ///< Version of this IMG archive
-    uint32_t m_assetCount;  ///< Number of assets in the current archive
+    Version m_version = GTAIIIVC;  ///< Version of this IMG archive
     rwfs::path m_archive;  ///< Path to the archive being used (no extension)
 
     std::vector<LoaderIMGFile> m_assets;  ///< Asset info of the archive

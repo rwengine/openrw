@@ -85,7 +85,7 @@ public:
         /// Number of indices
         size_t count{};
         /// Start index.
-        unsigned int start{};
+        size_t start{};
         /// Textures to use
         Textures textures{};
         /// Blending mode
@@ -403,7 +403,7 @@ private:
     template <class T>
     void uploadUBO(Buffer& buffer, const T& data) {
         uploadUBOEntry(buffer, &data, sizeof(T));
-#ifdef RW_PROFILER
+#ifdef RW_GRAPHICS_STATS
         if (currentDebugDepth > 0) {
             profileInfo[currentDebugDepth - 1].uploads++;
         }
@@ -425,7 +425,9 @@ private:
     // Debug group profiling timers
     ProfileInfo profileInfo[MAX_DEBUG_DEPTH];
     GLuint debugQuery;
+#ifdef RW_GRAPHICS_STATS
     int currentDebugDepth = 0;
+#endif
 };
 
 /// @todo remove these from here

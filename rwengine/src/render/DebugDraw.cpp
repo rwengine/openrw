@@ -3,7 +3,14 @@
 #include <iostream>
 
 #include <glm/glm.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <LinearMath/btVector3.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
 
 #include <data/Clump.hpp>
 #include <gl/DrawBuffer.hpp>
@@ -61,7 +68,7 @@ void DebugDraw::flush(GameRenderer *renderer) {
     dbuff->addGeometry(lineBuff.get());
 
     Renderer::DrawParameters dp;
-    dp.textures = {texture};
+    dp.textures = {{texture}};
     dp.ambient = 1.f;
     dp.colour = glm::u8vec4(255, 255, 255, 255);
     dp.start = 0;

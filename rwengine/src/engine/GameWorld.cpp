@@ -1,7 +1,13 @@
 #include "engine/GameWorld.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
 
 #include <glm/gtx/norm.hpp>
 
@@ -224,8 +230,8 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto palit = data->vehiclePalettes.find(
         vti->name);  // modelname is conveniently lowercase (usually)
     if (palit != data->vehiclePalettes.end() && !palit->second.empty()) {
-        std::uniform_int_distribution<int> uniform(0, palit->second.size() - 1);
-        int set = uniform(randomEngine);
+        std::uniform_int_distribution<size_t> uniform(0, palit->second.size() - 1);
+        size_t set = uniform(randomEngine);
         prim = data->vehicleColours[palit->second[set].first];
         sec = data->vehicleColours[palit->second[set].second];
     } else {
@@ -394,13 +400,13 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 
 Garage* GameWorld::createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
                                 Garage::Type type) {
-    const int id = garages.size();
+    const size_t id = garages.size();
     garages.emplace_back(std::make_unique<Garage>(this, id, coord0, coord1, type));
     return garages.back().get();
 }
 
 Payphone* GameWorld::createPayphone(const glm::vec2 coord) {
-    int id = payphones.size();
+    const size_t id = payphones.size();
     payphones.emplace_back(std::make_unique<Payphone>(this, id, coord));
     return payphones.back().get();
 }

@@ -116,7 +116,7 @@ public:
         glm::vec2 c(x - offset.x, y - offset.y);
         for (size_t i = 0; i < entries.size(); ++i) {
             if (c.y > 0.f && c.y < size) {
-                activeEntry = i;
+                activeEntry = static_cast<int>(i);
                 return;
             } else {
                 c.y -= size;
@@ -149,7 +149,7 @@ public:
         if (activeEntry >= static_cast<int>(entries.size())) {
             activeEntry = 0;
         } else if (activeEntry < 0) {
-            activeEntry = entries.size() - 1;
+            activeEntry = static_cast<int>(entries.size() - 1);
         }
     }
 

@@ -1,8 +1,10 @@
 #ifndef _RWENGINE_SOUND_SOURCE_HPP_
 #define _RWENGINE_SOUND_SOURCE_HPP_
 
-#include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
+#include <rw/filesystem.hpp>
+
+#include <cstdint>
 
 /// Opaque for raw sound,
 /// cooperate with ffmpeg
@@ -16,14 +18,14 @@ public:
     void loadFromFile(const rwfs::path& filePath);
 
     /// Load sound from sdt file
-    void loadSfx(LoaderSDT& sdt, size_t index, bool asWave = true);
+    void loadSfx(LoaderSDT& sdt, std::size_t index, bool asWave = true);
 
 private:
     /// Raw data
     std::vector<int16_t> data;
 
-    size_t channels;
-    size_t sampleRate;
+    std::uint32_t channels;
+    std::uint32_t sampleRate;
 };
 
 #endif

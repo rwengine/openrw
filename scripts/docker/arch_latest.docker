@@ -2,6 +2,7 @@ FROM base/archlinux
 
 RUN pacman -Syy --noconfirm \
     core/gcc \
+    extra/clang \
     make \
     extra/boost \
     extra/cmake \

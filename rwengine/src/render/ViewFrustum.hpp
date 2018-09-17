@@ -32,9 +32,9 @@ public:
     }
 
     void update(const glm::mat4& proj) {
-        for (size_t i = 0; i < 6; ++i) {
+        for (auto i = 0u; i < 6; ++i) {
             float sign = (i % 2 == 0) ? 1.f : -1.f;
-            int r = i / 2;
+            auto r = i / 2;
             planes[i].normal.x = proj[0][3] + proj[0][r] * sign;
             planes[i].normal.y = proj[1][3] + proj[1][r] * sign;
             planes[i].normal.z = proj[2][3] + proj[2][r] * sign;

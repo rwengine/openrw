@@ -1,6 +1,13 @@
 #include "Garage.hpp"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtx/quaternion.hpp>
 
 #include "dynamics/CollisionInstance.hpp"
@@ -14,8 +21,8 @@
 #include "objects/InstanceObject.hpp"
 #include "objects/VehicleObject.hpp"
 
-Garage::Garage(GameWorld* engine_, const int id_, const glm::vec3 coord0,
-               const glm::vec3 coord1, const Type type_)
+Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
+               const glm::vec3& coord1, Type type_)
     : engine(engine_), id(id_), type(type_) {
     min.x = std::min(coord0.x, coord1.x);
     min.y = std::min(coord0.y, coord1.y);

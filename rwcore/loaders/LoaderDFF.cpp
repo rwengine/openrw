@@ -65,7 +65,7 @@ LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
     FrameList framelist;
     framelist.reserve(numFrames);
 
-    for (size_t f = 0; f < numFrames; ++f) {
+    for (auto f = 0u; f < numFrames; ++f) {
         auto data = reinterpret_cast<RWBSFrame *>(headerPtr);
         headerPtr += sizeof(RWBSFrame);
         auto frame =
@@ -259,7 +259,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->EBO);
 
     size_t icount = std::accumulate(
-        geom->subgeom.begin(), geom->subgeom.end(), 0u,
+        geom->subgeom.begin(), geom->subgeom.end(), size_t{0u},
         [](size_t a, const SubGeometry &b) { return a + b.numIndices; });
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, nullptr,
                  GL_STATIC_DRAW);

@@ -51,7 +51,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         dp.colour = {255, 255, 255, 255};
         dp.count = subgeom.numIndices;
         dp.start = subgeom.start;
-        dp.textures = {0};
+        dp.textures = {{0}};
         dp.visibility = 1.f;
 
         if (object && object->type() == GameObject::Instance) {
@@ -69,7 +69,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
                     if (tex->isTransparent()) {
                         isTransparent = true;
                     }
-                    dp.textures = {tex->getName()};
+                    dp.textures = {{tex->getName()}};
                 }
             }
 
@@ -277,9 +277,9 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 
     auto wheelatomic = woi->getDistanceAtomic(mindist);
     for (size_t w = 0; w < vehicle->info->wheels.size(); ++w) {
-        auto& wi = vehicle->physVehicle->getWheelInfo(w);
+        auto& wi = vehicle->physVehicle->getWheelInfo(static_cast<int>(w));
         // Construct our own matrix so we can use the local transform
-        vehicle->physVehicle->updateWheelTransform(w, false);
+        vehicle->physVehicle->updateWheelTransform(static_cast<int>(w), false);
         bool isRhino = (vehicle->getVehicle()->vehiclename_ == "RHINO");
 
         auto up = -wi.m_wheelDirectionCS;

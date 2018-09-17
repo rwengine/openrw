@@ -76,7 +76,10 @@ target_link_libraries(rwtests
         Boost::filesystem
     )
 
-openrw_target_apply_options(TARGET rwtests)
+openrw_target_apply_options(
+    TARGET rwtests
+    INSTALL INSTALL_PDB
+    )
 
 if(SEPARATE_TEST_SUITES)
     foreach(TEST ${TESTS})
@@ -98,7 +101,3 @@ else()
             TIMEOUT 300
         )
 endif()
-
-install(TARGETS rwtests
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    )

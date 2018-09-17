@@ -8,20 +8,27 @@ set(RWGAME_SOURCES
 
     GameBase.hpp
     GameBase.cpp
+    RWGame.hpp
     RWGame.cpp
-
+    GameConfig.hpp
     GameConfig.cpp
+    GameWindow.hpp
     GameWindow.cpp
+
+    DrawUI.cpp
+    DrawUI.hpp
+    MenuSystem.hpp
+    MenuSystem.cpp
+    GameInput.hpp
+    GameInput.cpp
+
+    game.hpp
+    WindowIcon.hpp
 
     StateManager.hpp
     StateManager.cpp
+    State.hpp
     State.cpp
-
-    MenuSystem.hpp
-    MenuSystem.cpp
-
-    GameInput.hpp
-    GameInput.cpp
 
     states/LoadingState.hpp
     states/LoadingState.cpp
@@ -36,7 +43,6 @@ set(RWGAME_SOURCES
     states/BenchmarkState.hpp
     states/BenchmarkState.cpp
 
-    DrawUI.cpp
     )
 
 add_executable(rwgame
@@ -55,8 +61,7 @@ target_link_libraries(rwgame
         SDL2::SDL2
     )
 
-openrw_target_apply_options(TARGET rwgame)
-
-install(TARGETS rwgame
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+openrw_target_apply_options(
+    TARGET rwgame
+    INSTALL INSTALL_PDB
     )

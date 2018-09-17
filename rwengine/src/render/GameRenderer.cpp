@@ -25,12 +25,7 @@
 #include "render/GameShaders.hpp"
 #include "render/VisualFX.hpp"
 
-const size_t skydomeSegments = 8, skydomeRows = 10;
-constexpr uint32_t kMissingTextureBytes[] = {
-    0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFFFF00FF, 0xFF0000FF,
-    0xFFFF00FF, 0xFF0000FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF,
-    0xFFFF00FF, 0xFF0000FF, 0xFFFF00FF, 0xFF0000FF,
-};
+constexpr size_t skydomeSegments = 8, skydomeRows = 10;
 
 /// @todo collapse all of these into "VertPNC" etc.
 struct ParticleVert {
@@ -79,13 +74,6 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
                                GameShaders::DefaultPostProcess::FragmentShader);
 
     glGenVertexArrays(1, &vao);
-
-    glGenTextures(1, &m_missingTexture);
-    glBindTexture(GL_TEXTURE_2D, m_missingTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 kMissingTextureBytes);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glGenFramebuffers(1, &framebufferName);
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
@@ -144,12 +132,12 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     skydomeIndBuff.resize(rows * segments * 6);
     for (size_t r = 0, i = 0; r < (rows - 1); ++r) {
         for (size_t s = 0; s < (segments - 1); ++s) {
-            skydomeIndBuff[i++] = r * segments + s;
-            skydomeIndBuff[i++] = r * segments + (s + 1);
-            skydomeIndBuff[i++] = (r + 1) * segments + (s + 1);
-            skydomeIndBuff[i++] = r * segments + s;
-            skydomeIndBuff[i++] = (r + 1) * segments + (s + 1);
-            skydomeIndBuff[i++] = (r + 1) * segments + s;
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + s);
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>(r * segments + s);
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + (s + 1));
+            skydomeIndBuff[i++] = static_cast<GLuint>((r + 1) * segments + s);
         }
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skydomeIBO);
@@ -325,11 +313,11 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
     // run in parallel with a good threading system.
     RenderList renderList;
     // Naive optimisation, assume 50% hitrate
-    renderList.reserve(world->allObjects.size() * 0.5f);
+    renderList.reserve(static_cast<size_t>(world->allObjects.size() * 0.5f));
 
     ObjectRenderer objectRenderer(_renderWorld,
                                   (cullOverride ? cullingCamera : _camera),
-                                  _renderAlpha, getMissingTexture());
+                                  _renderAlpha);
 
     // World Objects
     for (auto object : world->allObjects) {
@@ -421,7 +409,7 @@ void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_ALPHA;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {splashTexName};
+    wdp.textures = {{splashTexName}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
@@ -437,7 +425,7 @@ void GameRenderer::renderPostProcess() {
     Renderer::DrawParameters wdp;
     wdp.start = 0;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {fbTextures[0]};
+    wdp.textures = {{fbTextures[0]}};
     wdp.depthMode = DepthMode::OFF;
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
@@ -488,7 +476,7 @@ void GameRenderer::renderEffects(GameWorld* world) {
             glm::vec3(particle->size,1.0f)) * glm::inverse(lookMat);
 
         Renderer::DrawParameters dp;
-        dp.textures = {particle->texture->getName()};
+        dp.textures = {{particle->texture->getName()}};
         dp.ambient = 1.f;
         dp.colour = glm::u8vec4(particle->colour * 255.f);
         dp.start = 0;
@@ -529,7 +517,7 @@ void GameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_ALPHA;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {texture ? texture->getName() : 0};
+    wdp.textures = {{texture ? texture->getName() : 0}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
@@ -544,7 +532,7 @@ void GameRenderer::renderLetterbox() {
     wdp.depthMode = DepthMode::OFF;
     wdp.blendMode = BlendMode::BLEND_NONE;
     wdp.count = ssRectGeom.getCount();
-    wdp.textures = {0};
+    wdp.textures = {{0}};
 
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
     renderer->setUniform(ssRectProg.get(), "offset", glm::vec2{0.f, 1.f * (1.f - cinematicExperienceSize)});

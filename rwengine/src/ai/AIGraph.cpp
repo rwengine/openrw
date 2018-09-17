@@ -19,11 +19,11 @@ AIGraph::~AIGraph() {
 
 void AIGraph::createPathNodes(const glm::vec3& position,
                               const glm::quat& rotation, PathData& path) {
-    size_t startIndex = nodes.size();
+    auto startIndex = static_cast<std::uint32_t>(nodes.size());
     std::vector<AIGraphNode*> pathNodes;
     pathNodes.reserve(path.nodes.size());
 
-    for (size_t n = 0; n < path.nodes.size(); ++n) {
+    for (auto n = 0u; n < path.nodes.size(); ++n) {
         auto& node = path.nodes[n];
         AIGraphNode* ainode = nullptr;
         glm::vec3 nodePosition = position + (rotation * node.position);
@@ -71,7 +71,7 @@ void AIGraph::createPathNodes(const glm::vec3& position,
                     RW_MESSAGE("Warning: Node outside of grid at coord "
                             << gridcoord.x << " " << gridcoord.y);
                 }
-                auto index = (gridcoord.x * WORLD_GRID_WIDTH) + gridcoord.y;
+                auto index = static_cast<std::size_t>((gridcoord.x * WORLD_GRID_WIDTH) + gridcoord.y);
                 gridNodes[index].push_back(ainode);
             }
         }

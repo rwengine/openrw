@@ -4,8 +4,15 @@
 #include <limits>
 #include <utility>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4305)
+#endif
 #include <BulletDynamics/Character/btKinematicCharacterController.h>
 #include <btBulletDynamicsCommon.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305)
+#endif
+
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -336,7 +343,7 @@ bool Activities::DriveTo::update(CharacterObject *character,
         // Choose the next node randomly
         if(nextTargetNode == nullptr) {
             auto& random = character->engine->randomEngine;
-            int i = std::uniform_int_distribution<>(0, potentialNodes.size() - 1)(random);
+            auto i = std::uniform_int_distribution<std::size_t>(0, potentialNodes.size() - 1)(random);
             nextTargetNode = potentialNodes.at(i);
         }
 

@@ -11,6 +11,7 @@ target_link_libraries(rwfontmap
         Qt5::Gui
     )
 
-install(TARGETS rwfontmap
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+openrw_target_apply_options(
+    TARGET rwfontmap
+    INSTALL INSTALL_PDB
     )

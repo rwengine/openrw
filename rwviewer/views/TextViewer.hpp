@@ -39,7 +39,7 @@ class TextViewer : public ViewerInterface {
     QLineEdit *hexLineEdit;
     QTextEdit *textEdit;
 
-    virtual void worldChanged() override;
+    void worldChanged() override;
 
     GameString currentGameString;
     font_t currentFont;

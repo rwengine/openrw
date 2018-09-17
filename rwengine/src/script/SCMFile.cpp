@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 
-void SCMFile::loadFile(char *data, unsigned int size) {
+void SCMFile::loadFile(char *data, size_t size) {
     _data = std::make_unique<SCMByte[]>(size);
     std::copy(data, data + size, _data.get());
 
