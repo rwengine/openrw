@@ -7,6 +7,7 @@
 # FFMPEG_LIBAVCODEC
 # FFMPEG_LIBAVFORMAT
 # FFMPEG_LIBAVUTIL
+# FFMPEG_SWRESAMPLE
 #
 # Copyright (c) 2008 Andreas Schneider <mail@cynapses.org>
 # Modified for other libraries by Lasse Kärkkäinen <tronic>
@@ -19,68 +20,74 @@
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
-if (PKG_CONFIG_FOUND)
-pkg_check_modules(_FFMPEG_AVCODEC libavcodec QUIET)
-pkg_check_modules(_FFMPEG_AVFORMAT libavformat QUIET)
-pkg_check_modules(_FFMPEG_AVUTIL libavutil QUIET)
-pkg_check_modules(_FFMPEG_SWRESAMPLE libswresample QUIET)
-endif (PKG_CONFIG_FOUND)
-
-find_path(FFMPEG_AVCODEC_INCLUDE_DIR
-NAMES libavcodec/avcodec.h
-PATHS ${_FFMPEG_AVCODEC_INCLUDE_DIRS} /usr/include /usr/local/include /opt/local/include /sw/include
-PATH_SUFFIXES ffmpeg libav
-)
-
-find_library(FFMPEG_LIBAVCODEC
-NAMES avcodec
-PATHS ${_FFMPEG_AVCODEC_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-)
-
-find_library(FFMPEG_LIBAVFORMAT
-NAMES avformat
-PATHS ${_FFMPEG_AVFORMAT_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-)
-
-find_library(FFMPEG_LIBAVUTIL
-NAMES avutil
-PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-)
-
-if (FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
-set(FFMPEG_FOUND TRUE)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(_FFMPEG_AVCODEC libavcodec QUIET)
+    pkg_check_modules(_FFMPEG_AVFORMAT libavformat QUIET)
+    pkg_check_modules(_FFMPEG_AVUTIL libavutil QUIET)
+    pkg_check_modules(_FFMPEG_SWRESAMPLE libswresample QUIET)
 endif()
 
+find_path(FFMPEG_AVCODEC_INCLUDE_DIR
+    NAMES libavcodec/avcodec.h
+    PATHS ${_FFMPEG_AVCODEC_INCLUDE_DIRS} /usr/include /usr/local/include /opt/local/include /sw/include
+    PATH_SUFFIXES ffmpeg libav
+    )
+
+find_library(FFMPEG_LIBAVCODEC
+    NAMES avcodec
+    PATHS ${_FFMPEG_AVCODEC_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+    )
+
+find_library(FFMPEG_LIBAVFORMAT
+    NAMES avformat
+    PATHS ${_FFMPEG_AVFORMAT_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+    )
+
+find_library(FFMPEG_LIBAVUTIL
+    NAMES avutil
+    PATHS ${_FFMPEG_AVUTIL_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+    )
+
 find_library(FFMPEG_SWRESAMPLE
-NAMES swresample
-PATHS ${_FFMPEG_SWRESAMPLE_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
-)
+    NAMES swresample
+    PATHS ${_FFMPEG_SWRESAMPLE_LIBRARY_DIRS} /usr/lib /usr/local/lib /opt/local/lib /sw/lib
+    )
 
 set(FFMPEG_INCLUDE_DIR ${FFMPEG_AVCODEC_INCLUDE_DIR})
 
 set(FFMPEG_LIBRARIES
-${FFMPEG_LIBAVCODEC}
-${FFMPEG_LIBAVFORMAT}
-${FFMPEG_LIBAVUTIL}
-${FFMPEG_SWRESAMPLE}
-)
+    ${FFMPEG_LIBAVCODEC}
+    ${FFMPEG_LIBAVFORMAT}
+    ${FFMPEG_LIBAVUTIL}
+    ${FFMPEG_SWRESAMPLE}
+    )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    list(APPEND FFMPEG_LIBRARIES "${FFMPEG_SWRESAMPLE}" secur32.lib Ws2_32.lib)
+    list(APPEND FFMPEG_LIBRARIES secur32.lib Ws2_32.lib)
 endif()
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(FFmpeg DEFAULT_MSG FFMPEG_LIBRARIES FFMPEG_INCLUDE_DIR)
+if(FFMPEG_INCLUDE_DIR)
+    file(READ "${FFMPEG_INCLUDE_DIR}/libavutil/ffversion.h" __FFVERSION_H)
+    string(REGEX MATCH "#define[ ]+FFMPEG_VERSION[ ]+\"([0-9a-zA-Z\\.\\-]+)\"" _FFMPEG_VERSION "${__FFVERSION_H}")
+    if(NOT _FFMPEG_VERSION)
+        message(AUTHOR_WARNING "Cannot detect ffmpeg version: regex does not match")
+    endif()
+    set(FFMPEG_VERSION "${CMAKE_MATCH_1}")
+endif()
 
-if(FFMPEG_FOUND)
-    add_library(ffmpeg INTERFACE)
-    target_link_libraries(ffmpeg
-        INTERFACE
-            ${FFMPEG_LIBRARIES}
-        )
-    target_include_directories(ffmpeg SYSTEM
-        INTERFACE
-            "${FFMPEG_INCLUDE_DIR}"
-        )
-    add_library(ffmpeg::ffmpeg ALIAS ffmpeg)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(FFmpeg
+    FOUND_VAR FFMPEG_FOUND
+    REQUIRED_VARS FFMPEG_LIBAVCODEC FFMPEG_LIBAVFORMAT FFMPEG_LIBAVUTIL FFMPEG_SWRESAMPLE FFMPEG_INCLUDE_DIR
+    VERSION_VAR FFMPEG_VERSION
+    )
+set(FFMPEG_FOUND "${FFmpeg_FOUND}")
+
+if(FFmpeg_FOUND)
+    add_library(ffmpeg::ffmpeg INTERFACE IMPORTED)
+    set_property(TARGET ffmpeg::ffmpeg
+        PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${FFMPEG_INCLUDE_DIR})
+    set_property(TARGET ffmpeg::ffmpeg
+        PROPERTY INTERFACE_LINK_LIBRARIES ${FFMPEG_LIBRARIES})
 endif()
