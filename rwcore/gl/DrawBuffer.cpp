@@ -5,10 +5,6 @@
 #include <gl/gl_core_3_3.h>
 #include <gl/GeometryBuffer.hpp>
 
-/* TODO: Come up with a more elegant solution to "WHICH ARRAY IS IT?" */
-std::map<AttributeSemantic, GLuint> semantic_to_attrib_array = {
-    {ATRS_Position, 0}, {ATRS_Normal, 1}, {ATRS_Colour, 2}, {ATRS_TexCoord, 3}};
-
 DrawBuffer::DrawBuffer() : vao(0) {
 }
 
@@ -27,7 +23,7 @@ void DrawBuffer::addGeometry(GeometryBuffer* gbuff) {
     glBindBuffer(GL_ARRAY_BUFFER, gbuff->getVBOName());
     // Iterate the attributes present in the gbuff
     for (const AttributeIndex& at : gbuff->getDataAttributes()) {
-        GLuint vaoindex = semantic_to_attrib_array[at.sem];
+        auto vaoindex = static_cast<GLuint>(at.sem);
         glEnableVertexAttribArray(vaoindex);
         glVertexAttribPointer(vaoindex, static_cast<GLint>(at.size), at.type, GL_TRUE, at.stride,
                               reinterpret_cast<void*>(at.offset));

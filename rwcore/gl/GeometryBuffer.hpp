@@ -7,10 +7,10 @@
  * Enum used to determine which shader input an attribute maps to
  */
 enum AttributeSemantic {
-    ATRS_Position,
-    ATRS_Normal,
-    ATRS_Colour,
-    ATRS_TexCoord
+    ATRS_Position = 0,
+    ATRS_Normal = 1,
+    ATRS_Colour = 2,
+    ATRS_TexCoord = 3
 };
 
 /**
