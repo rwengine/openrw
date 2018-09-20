@@ -69,7 +69,6 @@ public:
     GameRenderer(Logger* log, GameData* data);
     ~GameRenderer();
 
-    /** @todo Clean up all these shader program and location variables */
     std::unique_ptr<Renderer::ShaderProgram> worldProg;
     std::unique_ptr<Renderer::ShaderProgram> skyProg;
     std::unique_ptr<Renderer::ShaderProgram> particleProg;
