@@ -85,6 +85,10 @@ public:
 
     void pause(bool p);
 
+    void setVolume(float vol);
+    float getCalculatedVolumeOfEffects() const;
+    float getCalculatedVolumeOfMusic() const;
+
 private:
     bool initializeOpenAL();
     void initializeAVCodec();
@@ -106,6 +110,15 @@ private:
 
     GameWorld* _engine;
     LoaderSDT sdt{};
+
+    /// Sound volume
+    float _volume = 1.f;
+
+    /// Multiplier for effects
+    float _effectsVolume = 0.2f;
+
+    /// Multiplier for music and cutscenes audio
+    float _musicVolume = 1.f;
 };
 
 #endif
