@@ -210,6 +210,8 @@ bool SoundManager::isPaused(const std::string& name) {
 void SoundManager::playSound(const std::string& name) {
     auto sound = sounds.find(name);
     if (sound != sounds.end()) {
+        auto vol = getCalculatedVolumeOfMusic();
+        sound->second.setGain(vol);
         return sound->second.play();
     }
 }
@@ -224,7 +226,7 @@ void SoundManager::playSfx(size_t name, const glm::vec3& position, bool looping,
         }
 
         buffer->second.setPitch(1.f);
-        buffer->second.setGain(1.f);
+        buffer->second.setGain(getCalculatedVolumeOfEffects());
         if (maxDist != -1) {
             buffer->second.setMaxDistance(static_cast<float>(maxDist));
         }
@@ -321,4 +323,17 @@ void SoundManager::setSoundPosition(const std::string& name,
         alCheck(alSource3f(sounds[name].buffer->source, AL_POSITION, position.x,
                            position.y, position.z));
     }
+}
+
+
+void SoundManager::setVolume(float vol) {
+    _volume = vol;
+}
+
+float SoundManager::getCalculatedVolumeOfEffects() const {
+    return _volume * _effectsVolume;
+}
+
+float SoundManager::getCalculatedVolumeOfMusic() const {
+    return _volume * _musicVolume;
 }
