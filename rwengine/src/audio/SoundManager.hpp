@@ -59,6 +59,9 @@ public:
     /// Play sound with selected name
     void playSound(const std::string& name);
 
+    /// Erase sound with selected name
+    void eraseSound(const std::string& name);
+
     /// Effect same as playSound with one parametr,
     /// but this function works for sfx and
     /// allows also for setting position,

@@ -6564,7 +6564,7 @@ void opcode_0243(const ScriptArguments& args, const ScriptCharacter character, c
 */
 void opcode_0244(const ScriptArguments& args, ScriptVec3 coord) {
     if (args.getState()->currentCutscene) {
-    	args.getState()->currentCutscene->meta.sceneOffset = coord;
+        args.getState()->currentCutscene->meta.sceneOffset = coord;
     }
 }
 
@@ -7883,19 +7883,21 @@ void opcode_02e5(const ScriptArguments& args, const ScriptModelID model, ScriptO
     @arg object Player
     @arg arg2 
 */
-void opcode_02e6(const ScriptArguments& args, const ScriptObject object, const ScriptString arg2) {
+void opcode_02e6(const ScriptArguments& args, const ScriptObject object,
+                 const ScriptString arg2) {
     RW_UNUSED(object);
     RW_UNUSED(arg2);
     /// @todo make animation data-driven rather than oop
     auto cutscene = args.getObject<CutsceneObject>(0);
     std::string animName = arg2;
-    std::transform(animName.begin(), animName.end(), animName.begin(), ::tolower);
-    auto anim = args.getWorld()->data->animations[animName];
-    if( anim ) {
-    	cutscene->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
-    }
-    else {
-    	args.getWorld()->logger->error("SCM", "Failed to load cutscene anim: " + animName);
+    std::transform(animName.begin(), animName.end(), animName.begin(),
+                   ::tolower);
+    auto anim = args.getWorld()->data->animationsCutscene.at(animName);
+    if (anim) {
+        cutscene->animator->playAnimation(AnimIndexMovement, anim, 1.f, false);
+    } else {
+        args.getWorld()->logger->error(
+            "SCM", "Failed to load cutscene anim: " + animName);
     }
 }
 
@@ -7915,9 +7917,9 @@ void opcode_02e7(const ScriptArguments& args) {
     @arg arg1 
 */
 void opcode_02e8(const ScriptArguments& args, ScriptInt& arg1) {
-    auto cutscene = args.getState()->currentCutscene;
+    auto& cutscene = args.getState()->currentCutscene;
     if (args.getState()->skipCutscene) {
-    	arg1 = cutscene ? cutscene->tracks.duration * 1000 : 0.f;
+        arg1 = cutscene ? cutscene->tracks.duration * 1000 : 0.f;
     }
     else {
     	arg1 = (args.getWorld()->getGameTime() - args.getState()->cutsceneStartTime) * 1000;
@@ -7935,7 +7937,7 @@ bool opcode_02e9(const ScriptArguments& args) {
     		return true;
     	}
     	auto time = (args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime);
-    	return time >= args.getState()->currentCutscene->tracks.duration;
+        return time >= args.getState()->currentCutscene->tracks.duration;
     }
     return true;
 }

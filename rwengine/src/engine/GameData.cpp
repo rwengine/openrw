@@ -522,14 +522,18 @@ bool GameData::loadModel(ModelID model) {
     return true;
 }
 
-void GameData::loadIFP(const std::string& name) {
+void GameData::loadIFP(const std::string& name, bool cutsceneAnimation) {
     auto f = index.openFile(name);
 
     if (f.data) {
-        LoaderIFP loader;
-        if (loader.loadFromMemory(f.data.get())) {
-            animations.insert(loader.animations.begin(),
-                              loader.animations.end());
+        if (LoaderIFP loader{}; loader.loadFromMemory(f.data.get())) {
+            if (cutsceneAnimation) {
+                animationsCutscene.insert(loader.animations.begin(),
+                                          loader.animations.end());
+            } else {
+                animations.insert(loader.animations.begin(),
+                                  loader.animations.end());
+            }
         }
     }
 }

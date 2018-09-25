@@ -3,25 +3,26 @@
 #include <bitset>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <data/VehicleGenerator.hpp>
-#include <engine/GameData.hpp>
-#include <engine/GameInputState.hpp>
-#include <engine/GameWorld.hpp>
-#include <engine/ScreenText.hpp>
 #include <fonts/GameTexts.hpp>
-#include <objects/ObjectTypes.hpp>
-#include <script/ScriptTypes.hpp>
+#include "data/CutsceneData.hpp"
+#include "data/VehicleGenerator.hpp"
+#include "engine/GameData.hpp"
+#include "engine/GameInputState.hpp"
+#include "engine/GameWorld.hpp"
+#include "engine/ScreenText.hpp"
+#include "objects/ObjectTypes.hpp"
+#include "script/ScriptTypes.hpp"
 
 class GameWorld;
 class GameObject;
 class ScriptMachine;
-struct CutsceneData;
 
 struct SystemTime {
     uint16_t year;
@@ -316,7 +317,9 @@ public:
 
     bool skipCutscene = false;
     bool isIntroPlaying = false;
-    CutsceneData* currentCutscene = nullptr;
+
+    std::optional<CutsceneData> currentCutscene;
+
     float cutsceneStartTime{-1.f};
     /** Flag for rendering cutscene letterbox */
     bool isCinematic = false;
