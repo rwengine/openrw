@@ -358,6 +358,10 @@ public:
     void clearCutscene();
     bool isCutsceneDone();
 
+    void eraseCutsceneObjects();
+    void eraseCutsceneSound();
+    void eraseCutsceneAnimations();
+
     std::string cutsceneAudio;
     bool cutsceneAudioLoaded;
     std::string missionAudio;

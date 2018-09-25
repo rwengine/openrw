@@ -380,7 +380,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
     auto world = getWorld();
 
     if (state->currentCutscene && state->cutsceneStartTime >= 0.f) {
-        auto cutscene = state->currentCutscene;
+        auto& cutscene = state->currentCutscene;
         float cutsceneTime =
             std::min(world->getGameTime() - state->cutsceneStartTime,
                      cutscene->tracks.duration);

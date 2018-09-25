@@ -212,7 +212,16 @@ void SoundManager::playSound(const std::string& name) {
     if (sound != sounds.end()) {
         auto vol = getCalculatedVolumeOfMusic();
         sound->second.setGain(vol);
-        return sound->second.play();
+        sound->second.play();
+    }
+}
+
+void SoundManager::eraseSound(const std::string& name) {
+    auto sound = sounds.find(name);
+    if (sound != sounds.end()) {
+        sounds.erase(sound);
+    } else {
+        RW_MESSAGE("Tried to erase no existing sound " << name);
     }
 }
 

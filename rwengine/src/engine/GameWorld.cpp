@@ -28,6 +28,7 @@
 #include "data/WeaponData.hpp"
 
 #include "loaders/LoaderCutsceneDAT.hpp"
+#include "loaders/LoaderIFP.hpp"
 #include "loaders/LoaderIPL.hpp"
 
 #include "objects/CharacterObject.hpp"
@@ -750,15 +751,14 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
 void GameWorld::loadCutscene(const std::string& name) {
     auto datfile = data->index.openFile(name + ".dat");
 
-    CutsceneData* cutscene = new CutsceneData;
+    state->currentCutscene = CutsceneData();
 
     if (datfile.data) {
         LoaderCutsceneDAT loaderdat;
-        loaderdat.load(cutscene->tracks, datfile);
+        loaderdat.load(state->currentCutscene->tracks, datfile);
     }
 
-    data->loadIFP(name + ".ifp");
-
+    data->loadIFP(name + ".ifp", true);
     cutsceneAudioLoaded = data->loadAudioStream(name + ".mp3");
 
     if (!cutsceneAudioLoaded) {
@@ -769,10 +769,6 @@ void GameWorld::loadCutscene(const std::string& name) {
         logger->warning("Data", "Failed to load cutscene audio: " + name);
     }
 
-    if (state->currentCutscene) {
-        delete state->currentCutscene;
-    }
-    state->currentCutscene = cutscene;
     state->currentCutscene->meta.name = name;
     logger->info("World", "Loaded cutscene: " + name);
 }
@@ -788,20 +784,32 @@ void GameWorld::startCutscene() {
 }
 
 void GameWorld::clearCutscene() {
+    eraseCutsceneObjects();
+    eraseCutsceneSound();
+    eraseCutsceneAnimations();
+
+    state->currentCutscene = std::nullopt;
+    state->isCinematic = false;
+    state->cutsceneStartTime = -1.f;
+}
+
+void GameWorld::eraseCutsceneObjects() {
     for (auto& p : cutscenePool.objects) {
         destroyObjectQueued(p.second.get());
     }
+}
 
+void GameWorld::eraseCutsceneSound() {
     if (cutsceneAudio.length() > 0) {
         sound.stopMusic(cutsceneAudio);
+        sound.eraseSound(cutsceneAudio);
         cutsceneAudio = "";
         sound.resumeAllSounds();
     }
+}
 
-    delete state->currentCutscene;
-    state->currentCutscene = nullptr;
-    state->isCinematic = false;
-    state->cutsceneStartTime = -1.f;
+void GameWorld::eraseCutsceneAnimations() {
+    data->animationsCutscene.clear();
 }
 
 bool GameWorld::isCutsceneDone() {

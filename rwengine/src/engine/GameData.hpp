@@ -160,7 +160,7 @@ public:
     /**
      * Loads an IFP file containing animations
      */
-    void loadIFP(const std::string& name);
+    void loadIFP(const std::string& name, bool cutsceneAnimation = false);
 
     /**
      * Loads data from an object definition dat.
@@ -289,9 +289,14 @@ public:
     std::vector<TextureAtlas*> atlases;
 
     /**
-     * Loaded Animations
+     * Loaded Animations (doesn't contain animations of cutscene)
      */
     AnimationSet animations;
+
+    /**
+     * Loaded Animations (only) for cutscene
+     */
+    AnimationSet animationsCutscene;
 
     /**
      * Pedestrian Animation Groups
