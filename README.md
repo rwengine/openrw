@@ -1,4 +1,5 @@
 # OpenRW
+[![IRC freenode #openrw](http://img.shields.io/freenode/%23openrw.png)](https://webchat.freenode.net/?channels=%23openrw)
 
 ## About
 
@@ -9,10 +10,10 @@ OpenRW has been ported to Linux, macOS, Windows, and several variants of BSD.
 A legitimate copy of the original PC game is required to run OpenRW. Without
 this it will not be possible to play.
 
-Status | Platform
----:| ---
-[![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | Ubuntu, Fedora, Arch, macOS
-[![Build Status](https://ci.appveyor.com/api/projects/status/xyffurxul8m7heq6/branch/master?svg=true)](https://ci.appveyor.com/project/danhedron/openrw/branch/master) | Visual Studio 2017
+Windows | Linux | macOS
+---| --- | --- 
+[![Build Status](https://ci.appveyor.com/api/projects/status/xyffurxul8m7heq6/branch/master?svg=true)](https://ci.appveyor.com/project/danhedron/openrw/branch/master) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
+
 
 ## Links
 
@@ -20,12 +21,12 @@ Status | Platform
  * [Getting Started](https://github.com/rwengine/openrw/wiki/Getting-Started)
  * [Completable Missions](https://github.com/rwengine/openrw/issues/52)
  * [Contributing](https://github.com/rwengine/openrw/wiki/Contributing)
- * IRC: #openrw @ chat.freenode.net
+ * [CDash](https://my.cdash.org/index.php?project=OpenRW)
 
 ## Screenshots
-![Looking west to Staunton](https://cloud.githubusercontent.com/assets/418211/16398933/40a62c20-3cc6-11e6-8c6a-9c50de47510c.png)
-![Poor driving skill](https://cloud.githubusercontent.com/assets/418211/16398932/40a03de2-3cc6-11e6-9e48-acc9b44a600a.png)
-![Duplicate claude in cutscene](https://cloud.githubusercontent.com/assets/418211/16399129/aa019d52-3cc7-11e6-9a33-a9fcce0b972c.png)
+![OpenRW: GTA III Opening Cutscene](https://user-images.githubusercontent.com/418211/48028326-21260b80-e143-11e8-9a7e-53c073c39cc6.png)
+![OpenRW: GTA III Driving](https://user-images.githubusercontent.com/418211/48028321-208d7500-e143-11e8-981f-70e47f5d1c50.png)
+![OpenRW: GTA III City](https://user-images.githubusercontent.com/418211/48028322-208d7500-e143-11e8-8759-ccb440f4ebf3.png)
 
 ## License
 
