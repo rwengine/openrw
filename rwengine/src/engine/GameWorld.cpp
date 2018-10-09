@@ -552,10 +552,13 @@ TrailFX& GameWorld::createTrailEffect() {
 }
 
 void GameWorld::destroyEffect(VisualFX& effect) {
-    effects.erase(
-        std::remove_if(effects.begin(), effects.end(),
-                       [&effect](auto& ef) { return ef.get() == &effect; }),
-        effects.end());
+    auto found =
+        std::find_if(effects.begin(), effects.end(),
+                     [&effect](auto& ef) { return ef.get() == &effect; });
+
+    if (found != effects.end()) {
+        effects.erase(found);
+    }
 }
 
 void GameWorld::doWeaponScan(const WeaponScan& scan) {
