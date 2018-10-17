@@ -342,8 +342,8 @@ bool Activities::DriveTo::update(CharacterObject *character,
     else if (potentialNodes.size() > 1) {
         // Choose the next node randomly
         if(nextTargetNode == nullptr) {
-            auto& random = character->engine->randomEngine;
-            auto i = std::uniform_int_distribution<std::size_t>(0, potentialNodes.size() - 1)(random);
+            auto i = character->engine->getRandomNumber(
+                0u, potentialNodes.size() - 1);
             nextTargetNode = potentialNodes.at(i);
         }
 

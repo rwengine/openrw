@@ -232,7 +232,6 @@ void VehicleObject::setupModel() {
         if ((rule & 0xF00) == 0xF00) return 2;
         return 3;
     };
-    auto& random = engine->randomEngine;
     while (compRules != 0) {
         auto rule = (compRules & 0xFFFF);
         auto type = static_cast<ComponentRuleType>(rule >> 12);
@@ -243,12 +242,12 @@ void VehicleObject::setupModel() {
             case ComponentRuleType::Any:
             case ComponentRuleType::RainOnly: {
                 auto max = numComponents(rule) - 1;
-                auto i = std::uniform_int_distribution<>(0, max)(random);
+                auto i = engine->getRandomNumber(0, max);
                 result = (rule >> (4 * i)) & 0xF;
             } break;
             case ComponentRuleType::Optional: {
                 auto max = numComponents(rule) - 1;
-                auto i = std::uniform_int_distribution<>(-1, max)(random);
+                auto i = engine->getRandomNumber(-1, max);
                 if (i == -1) {
                     break;
                 }
@@ -256,7 +255,7 @@ void VehicleObject::setupModel() {
             } break;
             case ComponentRuleType::Random:
                 /// @todo this should fail to enable the 6th component
-                result = std::uniform_int_distribution<>(0, 5)(random);
+                result = engine->getRandomNumber(0, 5);
                 break;
         }
 

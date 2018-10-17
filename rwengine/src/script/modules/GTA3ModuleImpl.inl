@@ -1765,7 +1765,7 @@ void opcode_0097(const ScriptArguments& args, ScriptFloat& arg1L) {
     @arg arg1G 
 */
 void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
-    arg1G = args.getVM()->getRandomNumber(0.f, 1.f);
+    arg1G = args.getWorld()->getRandomNumber(0.f, 1.f);
 }
 
 /**
@@ -1776,7 +1776,7 @@ void opcode_0098(const ScriptArguments& args, ScriptFloat& arg1G) {
 */
 void opcode_0099(const ScriptArguments& args, ScriptInt& arg1G) {
     // TODO: For GTA III and VC, the range is 0-65535, for GTA: SA it is 0-32767
-    arg1G = args.getVM()->getRandomNumber(0, 65535);
+    arg1G = args.getWorld()->getRandomNumber(0, 65535);
 }
 
 /**
@@ -5886,7 +5886,7 @@ bool opcode_0207(const ScriptArguments& args, const ScriptCharacter character, c
     @arg result
 */
 void opcode_0208(const ScriptArguments& args, const ScriptFloat min, const ScriptFloat max, ScriptFloat& result) {
-    result = args.getVM()->getRandomNumber(min, max);
+    result = args.getWorld()->getRandomNumber(min, max);
 }
 
 /**
@@ -5898,7 +5898,7 @@ void opcode_0208(const ScriptArguments& args, const ScriptFloat min, const Scrip
     @arg result
 */
 void opcode_0209(const ScriptArguments& args, const ScriptInt min, const ScriptInt max, ScriptInt& result) {
-    result = args.getVM()->getRandomNumber(min, max);
+    result = args.getWorld()->getRandomNumber(min, max);
 }
 
 /**
@@ -7745,7 +7745,8 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
             // Return the handle for any random character in this zone and use lifetime for use by script
             // @todo verify if the lifetime is actually changed in the original game
             // husho: lifetime is changed to mission object lifetime
-            unsigned int randomIndex = std::rand() % candidateCount;
+            auto randomIndex =
+                args.getWorld()->getRandomNumber(0u, candidateCount);
             const auto [candidateId, candidatePtr] = candidates.at(randomIndex);
             auto character = static_cast<CharacterObject*>(candidatePtr);
             character->setLifetime(GameObject::MissionLifetime);
@@ -9952,8 +9953,8 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
     const int groupId =
         zone ? (day ? zone->pedGroupDay : zone->pedGroupNight) : 0;
     const auto& pedGroup = data->pedgroups.at(groupId);
-    const auto model = pedGroup.at(args.getVM()->getRandomNumber(
-        static_cast<std::size_t>(0), pedGroup.size() - 1));
+    const auto model =
+        pedGroup.at(args.getWorld()->getRandomNumber(0u, pedGroup.size() - 1));
     character = world->createPedestrian(model, coord);
     character->applyOffset();
 }
