@@ -250,8 +250,7 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto palit = data->vehiclePalettes.find(
         vti->name);  // modelname is conveniently lowercase (usually)
     if (palit != data->vehiclePalettes.end() && !palit->second.empty()) {
-        std::uniform_int_distribution<size_t> uniform(0, palit->second.size() - 1);
-        size_t set = uniform(randomEngine);
+        size_t set = getRandomNumber(0u, palit->second.size() - 1);
         prim = data->vehicleColours[palit->second[set].first];
         sec = data->vehicleColours[palit->second[set].second];
     } else {

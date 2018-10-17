@@ -164,20 +164,6 @@ public:
         debugFlag = flag;
     }
 
-    template <typename T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type
-    getRandomNumber(T min, T max) {
-        std::uniform_int_distribution<T> dist(min, max);
-        return dist(randomNumberGen);
-    }
-
-    template <typename T>
-    typename std::enable_if<std::is_floating_point<T>::value, T>::type
-    getRandomNumber(T min, T max) {
-        std::uniform_real_distribution<T> dist(min, max);
-        return dist(randomNumberGen);
-    }
-
     /**
      * @brief executes threads until they are all in waiting state.
      */
@@ -194,8 +180,6 @@ private:
     void executeThread(SCMThread& t, int msPassed);
 
     std::vector<SCMByte> globalData;
-
-    std::mt19937 randomNumberGen;
 };
 
 #endif

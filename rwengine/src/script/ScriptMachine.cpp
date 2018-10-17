@@ -191,8 +191,7 @@ ScriptMachine::ScriptMachine(GameState* _state, SCMFile& file,
     : file(file)
     , module(ops)
     , state(_state)
-    , debugFlag(false)
-    , randomNumberGen(std::random_device()()) {
+    , debugFlag(false) {
     // Copy globals
     auto size = file.getGlobalsSize();
     globalData.resize(size);

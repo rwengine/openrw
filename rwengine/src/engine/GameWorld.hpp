@@ -321,11 +321,6 @@ public:
     std::vector<std::unique_ptr<VisualFX>> effects;
 
     /**
-     * Randomness Engine
-     */
-    std::default_random_engine randomEngine{std::random_device{}()};
-
-    /**
      * Bullet
      */
     std::unique_ptr<btDefaultCollisionConfiguration> collisionConfig;
@@ -405,6 +400,26 @@ public:
 
     PlayerController* getPlayer();
 
+    template <
+        typename T1, typename T2 = T1,
+        typename std::enable_if<std::is_integral<T1>::value>::type* = nullptr,
+        typename std::enable_if<std::is_integral<T2>::value>::type* = nullptr>
+    T1 getRandomNumber(T1 min, T2 max) {
+        std::uniform_int_distribution<T1> dist(min, max);
+        return dist(randomNumberGen);
+    }
+
+    template <
+        typename T1, typename T2 = T1,
+        typename std::enable_if<std::is_floating_point<T1>::value>::type* =
+            nullptr,
+        typename std::enable_if<std::is_floating_point<T2>::value>::type* =
+            nullptr>
+    T1 getRandomNumber(T1 min, T2 max) {
+        std::uniform_real_distribution<T1> dist(min, max);
+        return dist(randomNumberGen);
+    }
+
 private:
     /**
      * @brief Used by objects to delete themselves during updates.
@@ -422,6 +437,11 @@ private:
      * Private data
      */
     std::unique_ptr<btOverlappingPairCallback> _overlappingPairCallback;
+
+    /**
+     * Randomness Engine
+     */
+    std::default_random_engine randomNumberGen{std::random_device()()};
 };
 
 #endif

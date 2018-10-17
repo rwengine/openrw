@@ -2,7 +2,6 @@
 
 #include <limits>
 #include <memory>
-#include <random>
 
 #include "ai/AIGraph.hpp"
 #include "ai/AIGraphNode.hpp"
@@ -65,11 +64,9 @@ void DefaultAIController::update(float dt) {
                 if (glm::length(targetDistance) <= 0.1f) {
                     // Assign the next target node
                     auto lastTarget = targetNode;
-                    std::random_device rd;
-                    std::default_random_engine re(rd());
-                    std::uniform_int_distribution<size_t> d(
-                        0, lastTarget->connections.size() - 1);
-                    targetNode = lastTarget->connections.at(d(re));
+                    targetNode = lastTarget->connections.at(
+                        character->engine->getRandomNumber(
+                            0u, lastTarget->connections.size() - 1));
                     setNextActivity(std::make_unique<Activities::GoTo>(
                         targetNode->position));
                 } else if (getCurrentActivity() == nullptr) {
@@ -155,9 +152,9 @@ void DefaultAIController::update(float dt) {
 
                     // If we haven't found a node, choose one randomly
                     if (!targetNode) {
-                        auto& random = getCharacter()->engine->randomEngine;
-                        size_t nodeIndex = std::uniform_int_distribution<size_t>(0, lastTargetNode->connections.size() - 1)(random);
-                        targetNode = lastTargetNode->connections.at(nodeIndex);
+                        targetNode = lastTargetNode->connections.at(
+                            character->engine->getRandomNumber(
+                                0u, lastTargetNode->connections.size() - 1));
                     }
 
                     // Check whether the maximum amount of lanes changed and adjust our lane

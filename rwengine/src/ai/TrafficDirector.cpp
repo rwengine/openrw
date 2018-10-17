@@ -94,7 +94,6 @@ void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density) {
 std::vector<GameObject*> TrafficDirector::populateNearby(
     const ViewCamera& camera, float radius, int maxSpawn) {
 
-    auto& random = world->randomEngine;
     std::vector<GameObject*> created;
 
     /// @todo Check how "in player view" should be determined.
@@ -169,8 +168,8 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
             counter--;
 
             // Spawn a pedestrian from the available pool
-            const auto pedId = static_cast<std::uint16_t>(
-                peds[std::uniform_int_distribution<size_t>(0, peds.size() - 1)(random)]);
+            const auto pedId =
+                peds.at(world->getRandomNumber(0u, peds.size() - 1));
             auto ped = world->createPedestrian(pedId, spawn->position);
             ped->applyOffset();
             ped->setLifetime(GameObject::TrafficLifetime);
@@ -230,21 +229,21 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
             }
 
             // Choose a random lane
-            const int lane =
-                std::uniform_int_distribution<>(1, maxLanes)(random);
+            const int lane = world->getRandomNumber(1, maxLanes);
             const glm::vec3 laneOffset =
                 strafe * (2.5f + 5.f * static_cast<float>(lane - 1));
 
             // Spawn a vehicle from the available pool
-            const auto carId = static_cast<std::uint16_t>(cars[std::uniform_int_distribution<std::size_t>(
-                0, cars.size() - 1)(random)]);
+            const auto carId =
+                cars.at(world->getRandomNumber(0u, cars.size() - 1));
             auto vehicle = world->createVehicle(carId, next->position + diff + laneOffset, orientation);
             vehicle->applyOffset();
             vehicle->setLifetime(GameObject::TrafficLifetime);
             vehicle->setHandbraking(false);
 
             // Spawn a pedestrian and put it into the vehicle
-            const auto pedId = peds[std::uniform_int_distribution<std::size_t>(0, peds.size() - 1)(random)];
+            const auto pedId =
+                peds.at(world->getRandomNumber(0u, peds.size() - 1));
             CharacterObject* character = world->createPedestrian(pedId, vehicle->getPosition());
             character->setLifetime(GameObject::TrafficLifetime);
             character->setCurrentVehicle(vehicle, 0);
