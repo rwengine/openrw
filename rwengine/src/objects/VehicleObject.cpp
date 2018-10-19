@@ -882,8 +882,7 @@ void VehicleObject::registerPart(ModelFrame* mf) {
     Part part{mf, normal, damage, nullptr, nullptr, nullptr, false,
      0.f, 0.f, 0.f};
 
-    dynamicParts.insert({mf->getName(),
-                         std::move(part)});
+    dynamicParts.emplace(mf->getName(), std::move(part));
 }
 
 void VehicleObject::createObjectHinge(Part* part) {
