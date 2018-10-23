@@ -883,7 +883,8 @@ void GameWorld::clearTickData() {
 
 void GameWorld::setPaused(bool pause) {
     paused = pause;
-    if (!pause && !isCutsceneDone()) {
+    bool resumingCutscene = !pause && !isCutsceneDone();
+    if (resumingCutscene) {
         sound.playMusic(cutsceneAudio);
     } else {
         sound.pause(pause);
