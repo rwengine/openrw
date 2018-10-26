@@ -108,6 +108,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
         }
     });
 
+    setHUDScale(config.getHUDScale());
+    renderer.map.setHUDScale(config.getHUDScale());
+
     log.info("Game", "Started");
     RW_TIMELINE_LEAVE("Startup");
 }
