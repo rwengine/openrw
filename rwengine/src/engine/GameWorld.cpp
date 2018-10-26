@@ -782,6 +782,7 @@ void GameWorld::startCutscene() {
     state->skipCutscene = false;
 
     if (cutsceneAudio.length() > 0) {
+        sound.pauseAllSounds();
         sound.playMusic(cutsceneAudio);
     }
 }
@@ -794,6 +795,7 @@ void GameWorld::clearCutscene() {
     if (cutsceneAudio.length() > 0) {
         sound.stopMusic(cutsceneAudio);
         cutsceneAudio = "";
+        sound.resumeAllSounds();
     }
 
     delete state->currentCutscene;
@@ -881,7 +883,12 @@ void GameWorld::clearTickData() {
 
 void GameWorld::setPaused(bool pause) {
     paused = pause;
-    sound.pause(pause);
+    bool resumingCutscene = !pause && !isCutsceneDone();
+    if (resumingCutscene) {
+        sound.playMusic(cutsceneAudio);
+    } else {
+        sound.pause(pause);
+    }
 }
 
 bool GameWorld::isPaused() const {
