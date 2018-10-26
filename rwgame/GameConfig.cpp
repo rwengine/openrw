@@ -129,6 +129,22 @@ struct IntTranslator {
     }
 };
 
+struct FloatTranslator {
+    typedef std::string internal_type;
+    typedef float external_type;
+    boost::optional<external_type> get_value(const internal_type &str) {
+        boost::optional<external_type> res;
+        try {
+            res = std::stof(stripComments(str));
+        } catch (std::invalid_argument &) {
+        }
+        return res;
+    }
+    boost::optional<internal_type> put_value(const external_type &f) {
+        return std::to_string(f);
+    }
+};
+
 GameConfig::ParseResult GameConfig::saveConfig() {
     auto configPath = getConfigPath().string();
     return parseConfig(ParseType::CONFIG, "", ParseType::FILE, configPath);
@@ -229,6 +245,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
     auto boolt = BoolTranslator();
     auto patht = PathTranslator();
     auto intt = IntTranslator();
+    auto floatt = FloatTranslator();
 
     // Add new configuration parameters here.
     // Additionally, add them to the unit test.
@@ -237,6 +254,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
     read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3",
                 patht, false);
     read_config("game.language", this->m_gameLanguage, "american", deft);
+    read_config("game.hud_scale", this->m_HUDscale, 1.f, floatt);
 
     read_config("input.invert_y", this->m_inputInvertY, false, boolt);
 

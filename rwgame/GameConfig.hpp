@@ -231,6 +231,9 @@ public:
     bool getWindowFullscreen() const {
         return m_windowFullscreen;
     }
+    float getHUDScale() const {
+        return m_HUDscale;
+    }
 
     static rwfs::path getDefaultConfigPath();
 private:
@@ -272,6 +275,9 @@ private:
     
     /// Set the window to fullscreen
     bool m_windowFullscreen = false;
+
+    /// HUD scale parameter 
+    float m_HUDscale = 1.f;
 };
 
 #endif

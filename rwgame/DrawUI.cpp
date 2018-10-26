@@ -35,15 +35,29 @@ constexpr float ui_mapSize = 150.f;
 constexpr float ui_worldSizeMin = 200.f;
 constexpr float ui_worldSizeMax = 300.f;
 
+static float hudScale = 1.f;
+static float final_ui_textSize = ui_textSize;
+static float final_ui_textHeight = ui_textHeight;
+static float final_ui_elementMargin = ui_elementMargin;
+static float final_ui_outerMargin = ui_outerMargin;
+static float final_ui_infoMargin = ui_infoMargin;
+static float final_ui_weaponSize = ui_weaponSize;
+static float final_ui_ammoSize = ui_ammoSize;
+static float final_ui_ammoHeight = ui_ammoHeight;
+static float final_ui_wantedLevelHeight = ui_wantedLevelHeight;
+static float final_ui_scriptTimerHeight = ui_scriptTimerHeight;
+static float final_ui_armourOffset = ui_armourOffset;
+static float final_ui_mapSize = ui_mapSize;
+
 void drawScriptTimer(GameWorld* world, GameRenderer* render) {
     if (world->state->scriptTimerVariable) {
         float scriptTimerTextX = static_cast<float>(
-            render->getRenderer()->getViewport().x - ui_outerMargin);
-        float scriptTimerTextY = ui_scriptTimerHeight;
+            render->getRenderer()->getViewport().x - final_ui_outerMargin);
+        float scriptTimerTextY = final_ui_scriptTimerHeight;
 
         TextRenderer::TextInfo ti;
         ti.font = FONT_PRICEDOWN;
-        ti.size = ui_textSize;
+        ti.size = final_ui_textSize;
         ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
         {
@@ -84,12 +98,12 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
         const glm::ivec2& vp = render->getRenderer()->getViewport();
 
         glm::vec2 mapTop =
-            glm::vec2(ui_outerMargin, vp.y - (ui_outerMargin + ui_mapSize));
+            glm::vec2(final_ui_outerMargin, vp.y - (final_ui_outerMargin + final_ui_mapSize));
         glm::vec2 mapBottom =
-            glm::vec2(ui_outerMargin + ui_mapSize, vp.y - ui_outerMargin);
+            glm::vec2(final_ui_outerMargin + final_ui_mapSize, vp.y - final_ui_outerMargin);
 
         map.screenPosition = (mapTop + mapBottom) / 2.f;
-        map.screenSize = ui_mapSize * 0.95f;
+        map.screenSize = final_ui_mapSize * 0.95f;
 
         render->map.draw(world, map);
     }
@@ -98,17 +112,17 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
 void drawPlayerInfo(PlayerController* player, GameWorld* world,
                     GameRenderer* render) {
     float infoTextX = static_cast<float>(render->getRenderer()->getViewport().x -
-                      (ui_outerMargin + ui_weaponSize + ui_infoMargin));
+                      (final_ui_outerMargin + final_ui_weaponSize + ui_infoMargin));
     float infoTextY = 0.f + ui_outerMargin;
     float iconX = static_cast<float>(render->getRenderer()->getViewport().x -
-                  (ui_outerMargin + ui_weaponSize));
-    float iconY = ui_outerMargin;
-    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - ui_outerMargin);
-    float wantedY = ui_wantedLevelHeight;
+                  (final_ui_outerMargin + final_ui_weaponSize));
+    float iconY = final_ui_outerMargin;
+    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - final_ui_outerMargin);
+    float wantedY = final_ui_wantedLevelHeight;
 
     TextRenderer::TextInfo ti;
     ti.font = FONT_PRICEDOWN;
-    ti.size = ui_textSize;
+    ti.size = final_ui_textSize;
     ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
     {
@@ -128,7 +142,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
     render->text.renderText(ti);
 
-    infoTextY += ui_textHeight;
+    infoTextY += final_ui_textHeight;
 
     {
         std::stringstream ss;
@@ -147,7 +161,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
     render->text.renderText(ti);
 
-    infoTextY += ui_textHeight;
+    infoTextY += final_ui_textHeight;
 
     if ((world->state->hudFlash != HudFlash::FlashHealth &&
          player->getCharacter()->getCurrentState().health > ui_lowHealth) ||
@@ -178,11 +192,11 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
         ti.baseColour = ui_shadowColour;
         ti.screenPosition =
-            glm::vec2(infoTextX + 1.f - ui_armourOffset, infoTextY + 1.f);
+            glm::vec2(infoTextX + 1.f - final_ui_armourOffset, infoTextY + 1.f);
         render->text.renderText(ti);
 
         ti.baseColour = ui_armourColour;
-        ti.screenPosition = glm::vec2(infoTextX - ui_armourOffset, infoTextY);
+        ti.screenPosition = glm::vec2(infoTextX - final_ui_armourOffset, infoTextY);
         render->text.renderText(ti);
     }
 
@@ -231,7 +245,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");
         render->drawTexture(
             itemTexture.get(),
-            glm::vec4(iconX, iconY, ui_weaponSize, ui_weaponSize));
+            glm::vec4(iconX, iconY, final_ui_weaponSize, final_ui_weaponSize));
     }
 
     if (weapon->fireType != WeaponData::MELEE) {
@@ -263,10 +277,10 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
 
         ti.baseColour = ui_shadowColour;
         ti.font = FONT_ARIAL;
-        ti.size = ui_ammoSize;
+        ti.size = final_ui_ammoSize;
         ti.align = TextRenderer::TextInfo::TextAlignment::Center;
-        ti.screenPosition = glm::vec2(iconX + ui_weaponSize / 2.f,
-                                      iconY + ui_weaponSize - ui_ammoHeight);
+        ti.screenPosition = glm::vec2(iconX + final_ui_weaponSize / 2.f,
+                                      iconY + final_ui_weaponSize - final_ui_ammoHeight);
         render->text.renderText(ti);
     }
 }
@@ -292,7 +306,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
 
     for (auto& l : alltext) {
         for (auto& t : l) {
-            ti.size = static_cast<float>(t.size);
+            ti.size = static_cast<float>(t.size * hudScale);
             ti.font = t.font;
             ti.text = t.text;
             ti.wrapX = t.wrapX;
@@ -329,4 +343,20 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
             renderer->text.renderText(ti);
         }
     }
+}
+
+void setHUDScale(const float scale) {
+    hudScale = scale;
+    final_ui_textSize = ui_textSize * scale;
+    final_ui_textHeight = ui_textHeight * scale;
+    final_ui_elementMargin = ui_elementMargin * scale;
+    final_ui_outerMargin = ui_outerMargin * scale;
+    final_ui_infoMargin = ui_infoMargin * scale;
+    final_ui_weaponSize = ui_weaponSize * scale;
+    final_ui_ammoSize = ui_ammoSize * scale;
+    final_ui_ammoHeight = ui_ammoHeight * scale;
+    final_ui_wantedLevelHeight = ui_wantedLevelHeight * scale;
+    final_ui_scriptTimerHeight = ui_scriptTimerHeight * scale;
+    final_ui_armourOffset = ui_armourOffset * scale;
+    final_ui_mapSize = ui_mapSize * scale;
 }

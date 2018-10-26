@@ -169,11 +169,11 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glm::vec2 plyblip(player->getPosition());
         float hdg = glm::roll(player->getRotation());
         drawBlip(plyblip, view, mi, "radar_centre",
-                 glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f, mi.rotation - hdg);
+                 glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), defaultBlipSize, mi.rotation - hdg);
     }
 
     drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi,
-             "radar_north", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 24.f);
+             "radar_north", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), radarNorthBlipSize);
 
     for (auto& radarBlip : world->state->radarBlips) {
         const auto& blip = radarBlip.second;
@@ -194,7 +194,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         const auto& texture = blip.texture;
         if (!texture.empty()) {
             drawBlip(blippos, view, mi, texture,
-                     glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), 18.0f);
+                     glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), defaultBlipSize);
         } else {
             // Colours from http://www.gtamodding.com/wiki/0165 (colors not
             // specific to that opcode!)
@@ -232,7 +232,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
                              1.0f  // Note: Alpha is not controlled by blip
                              );
 
-            drawBlip(blippos, view, mi, colour, blip.size * 2.0f);
+            drawBlip(blippos, view, mi, colour, blip.size * otherBlipsScalingFactor * 2.0f);
         }
     }
 
@@ -288,4 +288,10 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view,
     // Draw outline
     renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     glDrawArrays(GL_LINE_LOOP, 0, 4);
+}
+
+void MapRenderer::setHUDScale(const float scale) {
+    defaultBlipSize *= scale;
+    radarNorthBlipSize *= scale;
+    otherBlipsScalingFactor = scale;
 }

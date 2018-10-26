@@ -10,4 +10,6 @@ void drawHUD(ViewCamera& currentView, PlayerController* player,
 
 void drawOnScreenText(GameWorld* world, GameRenderer* renderer);
 
+void setHUDScale(const float scale);
+
 #endif
