@@ -22,11 +22,11 @@
 #include <glm/gtx/norm.hpp>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4305)
+#pragma warning(disable : 4305 5033)
 #endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #ifdef _MSC_VER
-#pragma warning(default : 4305)
+#pragma warning(default : 4305 5033)
 #endif
 
 

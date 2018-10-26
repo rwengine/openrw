@@ -2,7 +2,13 @@
 
 #include <cstdint>
 
+#ifdef _MSC_VER
+#pragma warning(disable : 5033)
+#endif
 #include <BulletDynamics/Vehicle/btRaycastVehicle.h>
+#ifdef _MSC_VER
+#pragma warning(default : 5033)
+#endif
 #include <glm/gtc/type_ptr.hpp>
 
 #include <data/Clump.hpp>
