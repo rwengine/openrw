@@ -232,7 +232,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
                              1.0f  // Note: Alpha is not controlled by blip
                              );
 
-            drawBlip(blippos, view, mi, colour, blip.size * otherBlipsScalingFactor * 2.0f);
+            drawBlip(blippos, view, mi, colour, blip.size * hudScale * 2.0f);
         }
     }
 
@@ -290,8 +290,8 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view,
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 
-void MapRenderer::setHUDScale(const float scale) {
+void MapRenderer::scaleHUD(const float scale) {
     defaultBlipSize *= scale;
     radarNorthBlipSize *= scale;
-    otherBlipsScalingFactor = scale;
+    hudScale = scale;
 }

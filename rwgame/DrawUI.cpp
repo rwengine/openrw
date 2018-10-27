@@ -345,7 +345,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
     }
 }
 
-void setHUDScale(const float scale) {
+void scaleHUD(const float scale) {
     hudScale = scale;
     final_ui_textSize = ui_textSize * scale;
     final_ui_textHeight = ui_textHeight * scale;

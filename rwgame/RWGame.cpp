@@ -75,6 +75,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
     renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
+    scaleHUD(config.getHUDScale());
+    renderer.map.scaleHUD(config.getHUDScale());
+
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
                        btIDebugDraw::DBG_DrawConstraintLimits);
@@ -107,9 +110,6 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
             StateManager::get().enter<MenuState>(this);
         }
     });
-
-    setHUDScale(config.getHUDScale());
-    renderer.map.setHUDScale(config.getHUDScale());
 
     log.info("Game", "Started");
     RW_TIMELINE_LEAVE("Startup");
