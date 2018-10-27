@@ -39,7 +39,7 @@ public:
     MapRenderer(std::shared_ptr<Renderer> renderer, GameData* data);
 
     void draw(GameWorld* world, const MapInfo& mi);
-    void setHUDScale(const float scale);
+    void scaleHUD(const float scale);
 
 private:
     GameData* data;
@@ -53,7 +53,7 @@ private:
 
     float radarNorthBlipSize = 24.f;
     float defaultBlipSize = 18.f;
-    float otherBlipsScalingFactor = 1.f;
+    float hudScale = 1.f;
 
     std::unique_ptr<Renderer::ShaderProgram> rectProg;
 
