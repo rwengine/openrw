@@ -74,7 +74,6 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
     renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
-    hudDrawer = HUDDrawer();
     hudDrawer.applyHUDScale(config.getHUDScale());
     renderer.map.scaleHUD(config.getHUDScale());
 

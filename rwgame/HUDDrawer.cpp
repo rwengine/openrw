@@ -306,8 +306,8 @@ void HUDDrawer::drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
     }
 }
 
-void HUDDrawer::applyHUDScale(const float scale) {
-	hudParameters.hudScale = scale;
+void HUDDrawer::applyHUDScale(float scale) {
+    hudParameters.hudScale = scale;
     hudParameters.uiTextSize *= scale;
     hudParameters.uiTextHeight *= scale;
     hudParameters.uiElementMargin *= scale;
@@ -323,5 +323,5 @@ void HUDDrawer::applyHUDScale(const float scale) {
 }
 
 HUDDrawer::HUDParameters HUDDrawer::getHUDParameters() {
-	return hudParameters;
+    return hudParameters;
 }

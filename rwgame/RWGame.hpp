@@ -32,7 +32,7 @@ class RWGame final : public GameBase {
     GameRenderer renderer;
     DebugDraw debug;
     GameState state;
-    HUDDrawer hudDrawer;
+    HUDDrawer hudDrawer{};
 
     std::unique_ptr<GameWorld> world;
 

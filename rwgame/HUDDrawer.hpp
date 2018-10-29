@@ -38,7 +38,7 @@ public:
     HUDDrawer() = default;
     ~HUDDrawer() = default;
 
-    void applyHUDScale(const float scale);
+    void applyHUDScale(float scale);
     HUDParameters getHUDParameters();
     void drawHUD(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render);
