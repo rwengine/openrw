@@ -24,21 +24,16 @@ void Animator::tick(float dt) {
         glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
     };
 
-#if 0
-    // Blend all active animations together
-    std::map<ModelFrame*, BoneTransform> blendFrames;
-#endif
-
     for (AnimationState& state : animations) {
         if (state.animation == nullptr) continue;
 
         if (state.boneInstances.empty()) {
-            for (const auto& bone : state.animation->bones) {
-                auto frame = model->findFrame(bone.first);
+            for (const auto& [name, bonePtr] : state.animation->bones) {
+                auto frame = model->findFrame(name);
                 if (!frame) {
                     continue;
                 }
-                state.boneInstances.emplace(bone.second.get(), frame);
+                state.boneInstances.emplace(bonePtr.get(), frame);
             }
         }
 
@@ -51,42 +46,20 @@ void Animator::tick(float dt) {
             animTime = std::fmod(animTime, state.animation->duration);
         }
 
-        for (auto& b : state.boneInstances) {
-            if (b.first->frames.empty()) continue;
-            auto kf = b.first->getInterpolatedKeyframe(animTime);
+        for (auto& [bonePtr, frame] : state.boneInstances) {
+            if (bonePtr->frames.empty()) continue;
+            auto kf = bonePtr->getInterpolatedKeyframe(animTime);
 
             BoneTransform xform;
             xform.rotation = kf.rotation;
-            if (b.first->type != AnimationBone::R00) {
+            if (bonePtr->type != AnimationBone::R00) {
                 xform.translation = kf.position;
             }
-
-#if 0
-			auto prevAnim = blendFrames.find(b.second.frameIndex);
-			if (prevAnim != blendFrames.end())
-			{
-				prevAnim->second.translation += xform.translation;
-				prevAnim->second.rotation *= xform.rotation;
-			}
-			else
-			{
-				blendFrames[b.second.frameIndex] = xform;
-			}
-#else
-            b.second->setTranslation(b.second->getDefaultTranslation() +
+            frame->setTranslation(frame->getDefaultTranslation() +
                                      xform.translation);
-            b.second->setRotation(glm::mat3_cast(xform.rotation));
-#endif
+            frame->setRotation(glm::mat3_cast(xform.rotation));
         }
     }
-
-#if 0
-    for (auto& p : blendFrames) {
-        p.first->setTranslation(p.first->getDefaultTranslation() +
-                                p.second.translation);
-        p.first->setRotation(glm::mat3_cast(p.second.rotation));
-    }
-#endif
 }
 
 bool Animator::isCompleted(unsigned int slot) const {

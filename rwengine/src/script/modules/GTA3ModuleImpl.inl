@@ -7719,8 +7719,8 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
     if (zone) {
         // Create a list of candidate characters by iterating and checking if the char is in this zone
         std::vector<std::pair<GameObjectID, GameObject*>> candidates;
-        for (auto& p : args.getWorld()->pedestrianPool.objects) {
-            auto character = static_cast<CharacterObject*>(p.second.get());
+        for (auto& [id, pedestrianPtr] : args.getWorld()->pedestrianPool.objects) {
+            auto character = static_cast<CharacterObject*>(pedestrianPtr.get());
 
             // We only consider characters walking around normally
             // @todo not sure if we are able to grab script objects or players too
@@ -7735,7 +7735,7 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
             auto& max = zone->max;
             if (cp.x > min.x && cp.y > min.y && cp.z > min.z &&
                 cp.x < max.x && cp.y < max.y && cp.z < max.z) {
-                candidates.emplace_back(p.first, p.second.get());
+                candidates.emplace_back(id, pedestrianPtr.get());
             }
         }
 
@@ -7746,13 +7746,13 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
             // @todo verify if the lifetime is actually changed in the original game
             // husho: lifetime is changed to mission object lifetime
             unsigned int randomIndex = std::rand() % candidateCount;
-            const auto p = candidates[randomIndex];
-            auto character = static_cast<CharacterObject*>(p.second);
+            const auto [candidateId, candidatePtr] = candidates.at(randomIndex);
+            auto character = static_cast<CharacterObject*>(candidatePtr);
             character->setLifetime(GameObject::MissionLifetime);
             if (args.getThread()->isMission) {
                 script::addObjectToMissionCleanup(args, character);
             }
-            *args[1].globalInteger = p.first;
+            *args[1].globalInteger = candidateId;
             return;
         }
     }

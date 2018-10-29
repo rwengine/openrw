@@ -71,8 +71,8 @@ void GameInput::updateGameInputState(GameInputState *state,
             auto level = event.type == SDL_KEYDOWN ? 1.f : 0.f;
             auto& levels = state->levels;
 
-            auto range = kDefaultControls.equal_range(sym);
-            for (auto it = range.first; it != range.second; ++it) {
+            auto [rangeBegin, rangeEnd] = kDefaultControls.equal_range(sym);
+            for (auto it = rangeBegin; it != rangeEnd; ++it) {
                 levels[it->second] = level;
             }
         } break;

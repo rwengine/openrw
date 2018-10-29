@@ -12,8 +12,8 @@ using OGameStringStream = std::basic_ostringstream<GameStringChar>;
 FontMap::FontMap(std::initializer_list<std::reference_wrapper<const gschar_unicode_map_t>> maps) {
     for (const auto &map : maps) {
         m_to_unicode.insert(map.get().cbegin(), map.get().cend());
-        for (const auto &m : map.get()) {
-            m_from_unicode[m.second] = m.first;
+        for (const auto &[gameStringChar, unicode] : map.get()) {
+            m_from_unicode[unicode] = gameStringChar;
         }
     }
     const auto &q = m_from_unicode.find(UnicodeValue::UNICODE_QUESTION_MARK);

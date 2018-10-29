@@ -458,20 +458,20 @@ void VehicleObject::tickPhysics(float dt) {
         }
 
         // Update passenger positions
-        for (auto& seat : seatOccupants) {
-            auto character = static_cast<CharacterObject*>(seat.second);
+        for (auto& [seatId, objectPtr] : seatOccupants) {
+            auto character = static_cast<CharacterObject*>(objectPtr);
 
             glm::vec3 passPosition{};
             if (character->isEnteringOrExitingVehicle()) {
-                passPosition = getSeatEntryPositionWorld(seat.first);
+                passPosition = getSeatEntryPositionWorld(seatId);
             } else {
                 passPosition = getPosition();
-                if (seat.first < info->seats.size()) {
+                if (seatId < info->seats.size()) {
                     passPosition +=
-                        getRotation() * (info->seats[seat.first].offset);
+                        getRotation() * (info->seats[seatId].offset);
                 }
             }
-            seat.second->updateTransform(passPosition, getRotation());
+            objectPtr->updateTransform(passPosition, getRotation());
         }
 
         if (getVehicle()->vehicletype_ == VehicleModelInfo::BOAT) {
