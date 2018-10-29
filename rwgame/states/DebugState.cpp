@@ -108,7 +108,7 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
           }},
          {"Unsolid garage doors",
           [=] {
-              std::vector<std::string> garageDoorModels{
+              static constexpr std::array<char const*, 33> garageDoorModels{{
                   "8ballsuburbandoor",  "amcogaragedoor",
                   "bankjobdoor",        "bombdoor",
                   "crushercrush",       "crushertop",
@@ -125,11 +125,11 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
                   "SalvGarage",         "shedgaragedoor",
                   "Sub_sprayshopdoor",  "towergaragedoor1",
                   "towergaragedoor2",   "towergaragedoor3",
-                  "vheistlocdoor"};
+                  "vheistlocdoor"}};
 
               auto gw = game->getWorld();
-              for (auto& i : gw->instancePool.objects) {
-                  auto obj = static_cast<InstanceObject*>(i.second.get());
+              for (auto& [id, instancePtr] : gw->instancePool.objects) {
+                  auto obj = static_cast<InstanceObject*>(instancePtr.get());
                   if (std::find(garageDoorModels.begin(),
                                 garageDoorModels.end(),
                                 obj->getModelInfo<BaseModelInfo>()->name) !=
@@ -148,18 +148,29 @@ std::shared_ptr<Menu> DebugState::createVehicleMenu() {
     auto menu = Menu::create({{"Back", [=] { enterMenu(createDebugMenu()); }}},
                              kDebugFont, kDebugEntryHeight);
 
-    const std::map<std::string, int> kVehicleTypes = {
-        {"Landstalker", 90}, {"Taxi", 110},      {"Firetruck", 97},
-        {"Police", 116},     {"Ambulance", 106}, {"Bobcat", 112},
-        {"Banshee", 119},    {"Rhino", 122},     {"Barracks", 123},
-        {"Rumpo", 130},      {"Columbian", 138}, {"Dodo", 126},
-        {"Speeder", 142},    {"Yakuza", 136},    {"Cheetah", 105},
-        {"Ambulance", 106},  {"FBI", 107},       {"Mafia", 134},
-        {"Infernus", 101},
-    };
+    static constexpr std::array<std::tuple<char const*, unsigned int>, 19>
+        kVehicleTypes{{{"Landstalker", 90},
+                       {"Taxi", 110},
+                       {"Firetruck", 97},
+                       {"Police", 116},
+                       {"Ambulance", 106},
+                       {"Bobcat", 112},
+                       {"Banshee", 119},
+                       {"Rhino", 122},
+                       {"Barracks", 123},
+                       {"Rumpo", 130},
+                       {"Columbian", 138},
+                       {"Dodo", 126},
+                       {"Speeder", 142},
+                       {"Yakuza", 136},
+                       {"Cheetah", 105},
+                       {"Ambulance", 106},
+                       {"FBI", 107},
+                       {"Mafia", 134},
+                       {"Infernus", 101}}};
 
-    for (auto& e : kVehicleTypes) {
-        menu->lambda(e.first, [=] { spawnVehicle(e.second); });
+    for (const auto& [name, id] : kVehicleTypes) {
+        menu->lambda(name, [this, id = id] { spawnVehicle(id); });
     }
 
     menu->offset = kDebugMenuOffset;
@@ -171,23 +182,29 @@ std::shared_ptr<Menu> DebugState::createAIMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    const std::map<std::string, int> kPedTypes = {
-        {"Triad", 12}, {"Cop", 1},     {"SWAT", 2},
-        {"FBI", 3},    {"Fireman", 6}, {"Construction", 74},
-    };
+    static constexpr std::array<std::tuple<char const*, unsigned int>, 6>
+        kPedTypes{{
+            {"Triad", 12},
+            {"Cop", 1},
+            {"SWAT", 2},
+            {"FBI", 3},
+            {"Fireman", 6},
+            {"Construction", 74},
+        }};
 
-    for (auto& e : kPedTypes) {
-        menu->lambda(e.first + " Follower", [=] { spawnFollower(e.second); });
+    for (const auto& [name, id] : kPedTypes) {
+        menu->lambda(name, [this, id = id] { spawnFollower(id); });
     }
 
     menu->lambda("Kill All Peds", [=] {
-        for (auto& p : game->getWorld()->pedestrianPool.objects) {
-            if (p.second->getLifetime() == GameObject::PlayerLifetime) {
+        for (auto& [id, pedestrianPtr] :
+             game->getWorld()->pedestrianPool.objects) {
+            if (pedestrianPtr->getLifetime() == GameObject::PlayerLifetime) {
                 continue;
             }
-            p.second->takeDamage({p.second->getPosition(),
-                                  p.second->getPosition(), 100.f,
-                                  GameObject::DamageInfo::Explosion, 0.f});
+            pedestrianPtr->takeDamage({pedestrianPtr->getPosition(),
+                                       pedestrianPtr->getPosition(), 100.f,
+                                       GameObject::DamageInfo::Explosion, 0.f});
         }
     });
 
@@ -214,7 +231,7 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    const std::array<std::string, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
+    static constexpr std::array<char const*, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
         menu->lambda(w[i],
@@ -230,7 +247,7 @@ std::shared_ptr<Menu> DebugState::createMissionsMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeightMissions);
 
-    const std::array<std::string, 80> w{{
+    static constexpr std::array<char const*, 80> w{{
         "Intro Movie",
         "Hospital Info Scene",
         "Police Station Info Scene",

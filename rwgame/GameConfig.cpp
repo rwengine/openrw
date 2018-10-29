@@ -455,8 +455,8 @@ std::string GameConfig::ParseResult::what() const {
     }
     if (!this->m_unknownData.empty()) {
         oss << "\nUnknown configuration keys:";
-        for (const auto &keyvalue : m_unknownData) {
-            oss << "\n - " << keyvalue.first;
+        for (const auto &[key, value] : m_unknownData) {
+            oss << "\n - " << key;
         }
     }
     return oss.str();

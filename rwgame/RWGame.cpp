@@ -25,16 +25,13 @@
 #include <iomanip>
 #include <iostream>
 
-const std::map<GameRenderer::SpecialModel, std::pair<std::string, std::string>>
-    kSpecialModels = {
-        {GameRenderer::ZoneCylinderA,
-         std::pair<std::string, std::string>("zonecyla.dff", "particle")},
-        {GameRenderer::ZoneCylinderB,
-         std::pair<std::string, std::string>("zonecylb.dff", "particle")},
-        {GameRenderer::Arrow,
-         std::pair<std::string, std::string>("arrow.dff", "")}};
-
 namespace {
+static constexpr std::array<
+    std::tuple<GameRenderer::SpecialModel, char const*, char const*>, 3>
+    kSpecialModels{{{GameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
+                    {GameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
+                    {GameRenderer::Arrow, "arrow.dff", ""}}};
+
 constexpr float kMaxPhysicsSubSteps = 2;
 }  // namespace
 
@@ -64,9 +61,9 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
 
     data.load();
 
-    for (const auto& p : kSpecialModels) {
-        auto model = data.loadClump(p.second.first, p.second.second);
-        renderer.setSpecialModel(p.first, model);
+    for (const auto& [specialModel, fileName, name] : kSpecialModels) {
+        auto model = data.loadClump(fileName, name);
+        renderer.setSpecialModel(specialModel, model);
     }
 
     // Set up text renderer
@@ -213,7 +210,7 @@ void RWGame::handleCheatInput(char symbol) {
         });
 
         checkForCheat("GUNSGUNSGUNS", [&] {
-            constexpr std::array<int, 11> ammo = {{
+            static constexpr std::array<int, 11> ammo = {{
                 1,  //baseball bat
                 100,//pistol
                 100,//uzi
@@ -226,7 +223,7 @@ void RWGame::handleCheatInput(char symbol) {
                 200,//m16
                 5   //sniper rifle
             }};
-            for (std::array<int, 11>::size_type i = 0; i < ammo.size(); i++)
+            for (auto i = 0u; i < ammo.size(); i++)
                 player->addToInventory(static_cast<int>(i+1),ammo[i]);
             state.showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
         });

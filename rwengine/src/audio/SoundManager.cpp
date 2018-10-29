@@ -110,10 +110,10 @@ bool SoundManager::loadSound(const std::string& name,
     if (sound_iter != sounds.end()) {
         sound = &sound_iter->second;
     } else {
-        auto emplaced = sounds.emplace(std::piecewise_construct,
+        auto [it, emplaced] = sounds.emplace(std::piecewise_construct,
                                        std::forward_as_tuple(name),
                                        std::forward_as_tuple());
-        sound = &emplaced.first->second;
+        sound = &it->second;
 
         sound->source = std::make_shared<SoundSource>();
         sound->buffer = std::make_unique<SoundBuffer>();
@@ -128,10 +128,10 @@ bool SoundManager::loadSound(const std::string& name,
 void SoundManager::loadSound(size_t index) {
     Sound* sound = nullptr;
 
-    auto emplaced =
+    auto [it, emplaced] =
         sfx.emplace(std::piecewise_construct, std::forward_as_tuple(index),
                     std::forward_as_tuple());
-    sound = &emplaced.first->second;
+    sound = &it->second;
 
     sound->source = std::make_shared<SoundSource>();
     sound->source->loadSfx(sdt, index);
@@ -149,22 +149,22 @@ size_t SoundManager::createSfxInstance(size_t index) {
 
     // Try to reuse first available buffer
     // (aka with stopped state)
-    for (auto& sound : buffers) {
-        if (sound.second.buffer && sound.second.isStopped()) {
+    for (auto& [id, sound] : buffers) {
+        if (sound.buffer && sound.isStopped()) {
             // Let's use this buffer
-            sound.second.buffer = std::make_unique<SoundBuffer>();
-            sound.second.source = soundRef->second.source;
-            sound.second.isLoaded =
-                sound.second.buffer->bufferData(*sound.second.source);
-            return sound.first;
+            sound.buffer = std::make_unique<SoundBuffer>();
+            sound.source = soundRef->second.source;
+            sound.isLoaded =
+                sound.buffer->bufferData(*sound.source);
+            return id;
         }
     }
     // There's no available free buffer, so
     // we should create a new one.
-    auto emplaced = buffers.emplace(std::piecewise_construct,
+    auto [it, emplaced] = buffers.emplace(std::piecewise_construct,
                                     std::forward_as_tuple(bufferNr),
                                     std::forward_as_tuple());
-    sound = &emplaced.first->second;
+    sound = &it->second;
 
     sound->id = bufferNr;
     sound->buffer = std::make_unique<SoundBuffer>();

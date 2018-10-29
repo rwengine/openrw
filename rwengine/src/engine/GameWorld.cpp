@@ -439,8 +439,8 @@ void GameWorld::ObjectPool::insert(std::unique_ptr<GameObject> object) {
     if (object->getGameObjectID() == 0) {
         // Find the lowest free GameObjectID.
         GameObjectID availID = 1;
-        for (auto& p : objects) {
-            if (p.first == availID) availID++;
+        for (auto& [id, objectPtr] : objects) {
+            if (id == availID) availID++;
         }
 
         object->setGameObjectID(availID);
