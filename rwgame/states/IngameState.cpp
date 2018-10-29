@@ -1,6 +1,6 @@
 #include "IngameState.hpp"
 #include "DebugState.hpp"
-#include "DrawUI.hpp"
+#include "HUDDrawer.hpp"
 #include "PauseState.hpp"
 #include "RWGame.hpp"
 
@@ -283,7 +283,7 @@ void IngameState::tick(float dt) {
 
 void IngameState::draw(GameRenderer* r) {
     if (!getWorld()->state->isCinematic && getWorld()->isCutsceneDone()) {
-        drawHUD(_look, game->getWorld()->getPlayer(), getWorld(), r);
+        game->getHUDDrawer().drawHUD(_look, game->getWorld()->getPlayer(), getWorld(), r);
     }
 
     State::draw(r);

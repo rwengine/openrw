@@ -2,7 +2,6 @@
 
 #include <glm/gtx/norm.hpp>
 
-#include "DrawUI.hpp"
 #include "GameInput.hpp"
 #include "State.hpp"
 #include "states/BenchmarkState.hpp"
@@ -75,7 +74,8 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
     renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
-    HUDParameters::getInstance().scaleHUD(config.getHUDScale());
+    hudDrawer = HUDDrawer();
+    hudDrawer.applyHUDScale(config.getHUDScale());
     renderer.map.scaleHUD(config.getHUDScale());
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
@@ -623,7 +623,7 @@ void RWGame::render(float alpha, float time) {
 
     renderDebugView(time, viewCam);
 
-    if (!world->isPaused()) drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), &renderer);
 
     if (StateManager::currentState()) {
         RW_PROFILE_SCOPE("state");

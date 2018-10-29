@@ -46,6 +46,7 @@ simpleConfig_t getValidConfig() {
         "      american ;american english french german italian spanish.";
     result["input"]["invert_y"] =
         "1 #values != 0 enable input inversion. Optional.";
+    result["game"]["hud_scale"] = "2.0\t;HUD scale";
     return result;
 }
 
@@ -294,6 +295,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid) {
     BOOST_CHECK_EQUAL(config.getGameDataPath().string(), "/dev/test");
     BOOST_CHECK_EQUAL(config.getGameLanguage(), "american");
     BOOST_CHECK(config.getInputInvertY());
+    BOOST_CHECK_EQUAL(config.getHUDScale(), 2.f);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_valid_modified) {
