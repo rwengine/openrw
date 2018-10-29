@@ -23,6 +23,7 @@
 #include "game.hpp"
 
 #include "GameBase.hpp"
+#include "HUDDrawer.hpp"
 
 class PlayerController;
 
@@ -31,6 +32,7 @@ class RWGame final : public GameBase {
     GameRenderer renderer;
     DebugDraw debug;
     GameState state;
+    HUDDrawer hudDrawer;
 
     std::unique_ptr<GameWorld> world;
 
@@ -83,6 +85,10 @@ public:
 
     ScriptMachine* getScriptVM() const {
         return vm.get();
+    }
+
+    HUDDrawer& getHUDDrawer() {
+        return hudDrawer;
     }
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,

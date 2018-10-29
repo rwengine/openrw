@@ -15,8 +15,8 @@ set(RWGAME_SOURCES
     GameWindow.hpp
     GameWindow.cpp
 
-    DrawUI.cpp
-    DrawUI.hpp
+    HUDDrawer.hpp
+    HUDDrawer.cpp
     MenuSystem.hpp
     MenuSystem.cpp
     GameInput.hpp

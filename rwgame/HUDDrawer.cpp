@@ -1,4 +1,4 @@
-#include "DrawUI.hpp"
+#include "HUDDrawer.hpp"
 #include <ai/PlayerController.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
@@ -10,18 +10,15 @@
 #include <iomanip>
 #include <sstream>
 
-void drawScriptTimer(GameWorld* world, GameRenderer* render) {
-    HUDParameters& hudParams = HUDParameters::getInstance();
-    HUDParameters::Parameters parameters = hudParams.getHUDParameters();
-
+void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer* render) {
     if (world->state->scriptTimerVariable) {
         float scriptTimerTextX = static_cast<float>(
-            render->getRenderer()->getViewport().x - parameters.uiOuterMargin);
-        float scriptTimerTextY = parameters.uiScriptTimerHeight;
+            render->getRenderer()->getViewport().x - hudParameters.uiOuterMargin);
+        float scriptTimerTextY = hudParameters.uiScriptTimerHeight;
 
         TextRenderer::TextInfo ti;
         ti.font = FONT_PRICEDOWN;
-        ti.size = parameters.uiTextSize;
+        ti.size = hudParameters.uiTextSize;
         ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
         {
@@ -33,30 +30,28 @@ void drawScriptTimer(GameWorld* world, GameRenderer* render) {
             ti.text = GameStringUtil::fromString(ss.str(), ti.font);
         }
 
-        ti.baseColour = hudParams.uiShadowColour;
+        ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition =
             glm::vec2(scriptTimerTextX + 1.f, scriptTimerTextY + 1.f);
         render->text.renderText(ti);
 
-        ti.baseColour = hudParams.uiScriptTimerColour;
+        ti.baseColour = hudParameters.uiScriptTimerColour;
         ti.screenPosition = glm::vec2(scriptTimerTextX, scriptTimerTextY);
         render->text.renderText(ti);
     }
 }
 
-void drawMap(ViewCamera& currentView, PlayerController* player,
+void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render) {
     MapRenderer::MapInfo map;
-    HUDParameters& hudParams = HUDParameters::getInstance();
-    HUDParameters::Parameters parameters = hudParams.getHUDParameters();
 
     if (world->state->hudFlash != HudFlash::FlashRadar ||
         std::fmod(world->getGameTime(), 0.5f) >= .25f) {
         glm::quat camRot = currentView.rotation;
 
         map.rotation = glm::roll(camRot) - glm::half_pi<float>();
-        map.worldSize = hudParams.uiWorldSizeMin;
-        map.worldSize = hudParams.uiWorldSizeMax;
+        map.worldSize = hudParameters.uiWorldSizeMin;
+        map.worldSize = hudParameters.uiWorldSizeMax;
         if (player) {
             map.worldCenter = glm::vec2(player->getCharacter()->getPosition());
         }
@@ -64,34 +59,31 @@ void drawMap(ViewCamera& currentView, PlayerController* player,
         const glm::ivec2& vp = render->getRenderer()->getViewport();
 
         glm::vec2 mapTop =
-            glm::vec2(parameters.uiOuterMargin, vp.y - (parameters.uiOuterMargin + parameters.uiMapSize));
+            glm::vec2(hudParameters.uiOuterMargin, vp.y - (hudParameters.uiOuterMargin + hudParameters.uiMapSize));
         glm::vec2 mapBottom =
-            glm::vec2(parameters.uiOuterMargin + parameters.uiMapSize, vp.y - parameters.uiOuterMargin);
+            glm::vec2(hudParameters.uiOuterMargin + hudParameters.uiMapSize, vp.y - hudParameters.uiOuterMargin);
 
         map.screenPosition = (mapTop + mapBottom) / 2.f;
-        map.screenSize = parameters.uiMapSize * 0.95f;
+        map.screenSize = hudParameters.uiMapSize * 0.95f;
 
         render->map.draw(world, map);
     }
 }
 
-void drawPlayerInfo(PlayerController* player, GameWorld* world,
+void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
                     GameRenderer* render) {
-    HUDParameters& hudParams = HUDParameters::getInstance();
-    HUDParameters::Parameters parameters = hudParams.getHUDParameters();
-
     float infoTextX = static_cast<float>(render->getRenderer()->getViewport().x -
-                      (parameters.uiOuterMargin + parameters.uiWeaponSize + parameters.uiInfoMargin));
-    float infoTextY = 0.f + parameters.uiOuterMargin;
+                      (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize + hudParameters.uiInfoMargin));
+    float infoTextY = 0.f + hudParameters.uiOuterMargin;
     float iconX = static_cast<float>(render->getRenderer()->getViewport().x -
-                  (parameters.uiOuterMargin + parameters.uiWeaponSize));
-    float iconY = parameters.uiOuterMargin;
-    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - parameters.uiOuterMargin);
-    float wantedY = parameters.uiWantedLevelHeight;
+                  (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize));
+    float iconY = hudParameters.uiOuterMargin;
+    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - hudParameters.uiOuterMargin);
+    float wantedY = hudParameters.uiWantedLevelHeight;
 
     TextRenderer::TextInfo ti;
     ti.font = FONT_PRICEDOWN;
-    ti.size = parameters.uiTextSize;
+    ti.size = hudParameters.uiTextSize;
     ti.align = TextRenderer::TextInfo::TextAlignment::Right;
 
     {
@@ -102,16 +94,16 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ti.text = GameStringUtil::fromString(ss.str(), ti.font);
     }
 
-    ti.baseColour = hudParams.uiShadowColour;
+    ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
     render->text.renderText(ti);
 
-    ti.baseColour = hudParams.uiTimeColour;
+    ti.baseColour = hudParameters.uiTimeColour;
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
 
     render->text.renderText(ti);
 
-    infoTextY += parameters.uiTextHeight;
+    infoTextY += hudParameters.uiTextHeight;
 
     {
         std::stringstream ss;
@@ -121,19 +113,19 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str(), ti.font);
     }
 
-    ti.baseColour = hudParams.uiShadowColour;
+    ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
     render->text.renderText(ti);
 
-    ti.baseColour = hudParams.uiMoneyColour;
+    ti.baseColour = hudParameters.uiMoneyColour;
 
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
     render->text.renderText(ti);
 
-    infoTextY += parameters.uiTextHeight;
+    infoTextY += hudParameters.uiTextHeight;
 
     if ((world->state->hudFlash != HudFlash::FlashHealth &&
-         player->getCharacter()->getCurrentState().health > hudParams.uiLowHealth) ||
+         player->getCharacter()->getCurrentState().health > hudParameters.uiLowHealth) ||
         std::fmod(world->getGameTime(), 0.5f) >=
             .25f) {  // UI: Blinking health indicator if health is low
         std::stringstream ss;
@@ -142,12 +134,12 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
                   player->getCharacter()->getCurrentState().health);
         ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str(), ti.font);
 
-        ti.baseColour = hudParams.uiShadowColour;
+        ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
 
         render->text.renderText(ti);
 
-        ti.baseColour = hudParams.uiHealthColour;
+        ti.baseColour = hudParameters.uiHealthColour;
         ti.screenPosition = glm::vec2(infoTextX, infoTextY);
         render->text.renderText(ti);
     }
@@ -159,22 +151,22 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
                   player->getCharacter()->getCurrentState().armour);
         ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str(), ti.font);
 
-        ti.baseColour = hudParams.uiShadowColour;
+        ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition =
-            glm::vec2(infoTextX + 1.f - parameters.uiArmourOffset, infoTextY + 1.f);
+            glm::vec2(infoTextX + 1.f - hudParameters.uiArmourOffset, infoTextY + 1.f);
         render->text.renderText(ti);
 
-        ti.baseColour = hudParams.uiArmourColour;
-        ti.screenPosition = glm::vec2(infoTextX - parameters.uiArmourOffset, infoTextY);
+        ti.baseColour = hudParameters.uiArmourColour;
+        ti.screenPosition = glm::vec2(infoTextX - hudParameters.uiArmourOffset, infoTextY);
         render->text.renderText(ti);
     }
 
     GameString s;
-    for (size_t i = 0; i < hudParams.uiMaxWantedLevel; ++i) {
+    for (size_t i = 0; i < hudParameters.uiMaxWantedLevel; ++i) {
         s += GameSymbols::Star;
     }
     ti.text = s;
-    ti.baseColour = hudParams.uiShadowColour;
+    ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(wantedX + 1.f, wantedY + 1.f);
     render->text.renderText(ti);
 
@@ -214,7 +206,7 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
         RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");
         render->drawTexture(
             itemTexture.get(),
-            glm::vec4(iconX, iconY, parameters.uiWeaponSize, parameters.uiWeaponSize));
+            glm::vec4(iconX, iconY, hudParameters.uiWeaponSize, hudParameters.uiWeaponSize));
     }
 
     if (weapon->fireType != WeaponData::MELEE) {
@@ -244,17 +236,17 @@ void drawPlayerInfo(PlayerController* player, GameWorld* world,
                 std::to_string(slotInfo.bulletsClip), ti.font);
         }
 
-        ti.baseColour = hudParams.uiShadowColour;
+        ti.baseColour = hudParameters.uiShadowColour;
         ti.font = FONT_ARIAL;
-        ti.size = parameters.uiAmmoSize;
+        ti.size = hudParameters.uiAmmoSize;
         ti.align = TextRenderer::TextInfo::TextAlignment::Center;
-        ti.screenPosition = glm::vec2(iconX + parameters.uiWeaponSize / 2.f,
-                                      iconY + parameters.uiWeaponSize - parameters.uiAmmoHeight);
+        ti.screenPosition = glm::vec2(iconX + hudParameters.uiWeaponSize / 2.f,
+                                      iconY + hudParameters.uiWeaponSize - hudParameters.uiAmmoHeight);
         render->text.renderText(ti);
     }
 }
 
-void drawHUD(ViewCamera& currentView, PlayerController* player,
+void HUDDrawer::drawHUD(ViewCamera& currentView, PlayerController* player,
              GameWorld* world, GameRenderer* render) {
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
@@ -263,9 +255,7 @@ void drawHUD(ViewCamera& currentView, PlayerController* player,
     }
 }
 
-void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
-    HUDParameters::Parameters parameters = HUDParameters::getInstance().getHUDParameters();
-
+void HUDDrawer::drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
     const auto vp = glm::vec2(renderer->getRenderer()->getViewport());
 
     TextRenderer::TextInfo ti;
@@ -277,7 +267,7 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
 
     for (auto& l : alltext) {
         for (auto& t : l) {
-            ti.size = static_cast<float>(t.size * parameters.hudScale);
+            ti.size = static_cast<float>(t.size * hudParameters.hudScale);
             ti.font = t.font;
             ti.text = t.text;
             ti.wrapX = t.wrapX;
@@ -316,22 +306,22 @@ void drawOnScreenText(GameWorld* world, GameRenderer* renderer) {
     }
 }
 
-void HUDParameters::scaleHUD(float scale) {
-    hudParameters.hudScale = scale;
-    hudParameters.uiTextSize = uiTextSize * scale;
-    hudParameters.uiTextHeight = uiTextHeight * scale;
-    hudParameters.uiElementMargin = uiElementMargin * scale;
-    hudParameters.uiOuterMargin = uiOuterMargin * scale;
-    hudParameters.uiInfoMargin = uiInfoMargin * scale;
-    hudParameters.uiWeaponSize = uiWeaponSize * scale;
-    hudParameters.uiAmmoSize = uiAmmoSize * scale;
-    hudParameters.uiAmmoHeight = uiAmmoHeight * scale;
-    hudParameters.uiWantedLevelHeight = uiWantedLevelHeight * scale;
-    hudParameters.uiScriptTimerHeight = uiScriptTimerHeight * scale;
-    hudParameters.uiArmourOffset = uiArmourOffset * scale;
-    hudParameters.uiMapSize = uiMapSize * scale;
+void HUDDrawer::applyHUDScale(const float scale) {
+	hudParameters.hudScale = scale;
+    hudParameters.uiTextSize *= scale;
+    hudParameters.uiTextHeight *= scale;
+    hudParameters.uiElementMargin *= scale;
+    hudParameters.uiOuterMargin *= scale;
+    hudParameters.uiInfoMargin *= scale;
+    hudParameters.uiWeaponSize *= scale;
+    hudParameters.uiAmmoSize *= scale;
+    hudParameters.uiAmmoHeight *= scale;
+    hudParameters.uiWantedLevelHeight *= scale;
+    hudParameters.uiScriptTimerHeight *= scale;
+    hudParameters.uiArmourOffset *= scale;
+    hudParameters.uiMapSize *= scale;
 }
 
-HUDParameters::Parameters HUDParameters::getHUDParameters() {
-    return hudParameters;
+HUDDrawer::HUDParameters HUDDrawer::getHUDParameters() {
+	return hudParameters;
 }
