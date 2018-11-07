@@ -25,13 +25,13 @@ public:
     };
 
     struct ProjectileInfo {
-        ProjectileInfo(ProjectileType p_type, glm::vec3 p_direction,
-                       float p_velocity, float p_time, WeaponData* p_weapon)
-            : type(p_type)
-            , direction(p_direction)
-            , velocity(p_velocity)
-            , time(p_time)
-            , weapon(p_weapon) {
+        ProjectileInfo(ProjectileType type, glm::vec3 direction,
+                       float velocity, float time, WeaponData* weapon)
+            : type(type)
+            , direction(direction)
+            , velocity(velocity)
+            , time(time)
+            , weapon(weapon) {
         }
         ProjectileType type;
         glm::vec3 direction{};

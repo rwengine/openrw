@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
         BOOST_REQUIRE(character != nullptr);
         Global::get().e->state->playerObject = objectID;
 
-        auto pistol = Global::get().d->weaponData[1].get();
-        auto model = Global::get().d->modelinfo[pistol->modelID].get();
+        const auto& pistol = Global::get().d->weaponData.at(1);
+        auto model = Global::get().d->modelinfo.at(pistol.modelID).get();
 
         ItemPickup* p = new ItemPickup(Global::get().e, {30.f, 0.f, 0.f}, model,
                                        PickupObject::OnStreet, pistol);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
         auto& inventory = character->getCurrentState().weapons;
         BOOST_CHECK(std::any_of(std::begin(inventory), std::end(inventory),
                                 [&](const CharacterWeaponSlot& i) {
-                                    return i.weaponId == pistol->inventorySlot;
+                                    return i.weaponId == pistol.inventorySlot;
                                 }));
 
         Global::get().e->destroyObject(p);

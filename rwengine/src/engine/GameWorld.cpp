@@ -386,11 +386,11 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 
     auto it = std::find_if(
         data->weaponData.begin(), data->weaponData.end(),
-        [=](const std::shared_ptr<WeaponData>& x) { return x->modelID == id; });
+        [=](const auto& x) { return x.modelID == id; });
 
     // If nothing, create a generic pickup instead of an item pickup
     if (it != data->weaponData.end()) {
-        pickup = std::make_unique<ItemPickup>(this, pos, modelInfo, pickuptype, it->get());
+        pickup = std::make_unique<ItemPickup>(this, pos, modelInfo, pickuptype, *it);
     } else if (modelInfo->name == "info" || modelInfo->name == "briefcase" ||
                modelInfo->name == "floatpackge1") {
         pickup = std::make_unique<DummyPickup>(this, pos, modelInfo, pickuptype);

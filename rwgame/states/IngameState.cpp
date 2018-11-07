@@ -53,7 +53,7 @@ void IngameState::startTest() {
     glm::vec3 itemspawn(276.5f, -609.f, 36.5f);
     for (unsigned int i = 1; i < getWorld()->data->weaponData.size(); ++i) {
         auto& item = getWorld()->data->weaponData[i];
-        getWorld()->createPickup(itemspawn, item->modelID,
+        getWorld()->createPickup(itemspawn, item.modelID,
                                  PickupObject::OnStreet);
         itemspawn.x += 2.5f;
     }

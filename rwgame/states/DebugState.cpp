@@ -218,7 +218,7 @@ std::shared_ptr<Menu> DebugState::createWeaponMenu() {
                      kDebugFont, kDebugEntryHeight);
 
     for (int i = 1; i < kMaxInventorySlots; ++i) {
-        auto& name = getWorld()->data->weaponData[i]->name;
+        auto& name = getWorld()->data->weaponData[i].name;
         menu->lambda(name, [=] { giveItem(i); });
     }
 

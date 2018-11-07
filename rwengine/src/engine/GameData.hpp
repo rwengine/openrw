@@ -20,6 +20,7 @@
 #include <data/AnimGroup.hpp>
 #include <data/ModelData.hpp>
 #include <data/PedData.hpp>
+#include <data/WeaponData.hpp>
 #include <data/Weather.hpp>
 #include <data/ZoneData.hpp>
 #include <fonts/GameTexts.hpp>
@@ -315,7 +316,7 @@ public:
      */
     std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
 
-    std::vector<std::shared_ptr<WeaponData>> weaponData;
+    std::vector<WeaponData> weaponData;
 
     /**
      * Pedstrian type stats

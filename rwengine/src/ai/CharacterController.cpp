@@ -674,7 +674,7 @@ bool Activities::UseItem::update(CharacterObject *character,
     };
 
     auto world = character->engine;
-    const auto &weapon = world->data->weaponData.at(itemslot);
+    auto weapon = &world->data->weaponData.at(itemslot);
     auto &state = character->getCurrentState().weapons[itemslot];
     auto &animator = character->animator;
     auto shootcycle = find_cycle(weapon->animation1);
@@ -712,7 +712,7 @@ bool Activities::UseItem::update(CharacterObject *character,
 
             if (currenttime >= firetime && !fired) {
                 state.bulletsClip--;
-                Weapon::fireHitscan(weapon.get(), character);
+                Weapon::fireHitscan(weapon, character);
                 fired = true;
             }
             if (currenttime > loopend) {
@@ -739,7 +739,7 @@ bool Activities::UseItem::update(CharacterObject *character,
 
             if (currID >= firetime && !fired) {
                 state.bulletsClip--;
-                Weapon::fireProjectile(weapon.get(), character, power);
+                Weapon::fireProjectile(weapon, character, power);
                 fired = true;
             }
             if (animator->isCompleted(AnimIndexAction)) {
