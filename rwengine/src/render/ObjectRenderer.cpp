@@ -236,15 +236,15 @@ void ObjectRenderer::renderCharacter(CharacterObject* pedestrian,
     auto item = pedestrian->getActiveItem();
     const auto& weapon = pedestrian->engine->data->weaponData[item];
 
-    if (weapon->modelID == -1) {
+    if (weapon.modelID == -1) {
         return;  // No model for this item
     }
 
     auto handFrame = pedestrian->getClump()->findFrame("srhand");
     if (handFrame) {
         auto simple =
-            m_world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
-        RW_CHECK(simple, "Failed to read modelinfo using " << weapon->modelID);
+            m_world->data->findModelInfo<SimpleModelInfo>(weapon.modelID);
+        RW_CHECK(simple, "Failed to read modelinfo using " << weapon.modelID);
         auto itematomic = simple->getAtomic(0);
         renderAtomic(itematomic, handFrame->getWorldTransform(), nullptr,
                      outList);

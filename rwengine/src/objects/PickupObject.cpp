@@ -273,14 +273,14 @@ void PickupObject::setEnabled(bool enabled) {
 
 ItemPickup::ItemPickup(GameWorld* world, const glm::vec3& position,
                        BaseModelInfo* modelinfo, PickupType type,
-                       WeaponData* item)
-    : PickupObject(world, position, modelinfo, type), item(item) {
+                       const WeaponData& p_item)
+    : PickupObject(world, position, modelinfo, type), item(p_item) {
 }
 
 bool ItemPickup::onPlayerTouch() {
     auto totalRounds = 0;
 
-    switch (item->modelID) {
+    switch (item.modelID) {
         case 173: /* Pistol */
             totalRounds = 45;
             break;
@@ -316,7 +316,7 @@ bool ItemPickup::onPlayerTouch() {
 
     auto character = engine->getPlayer()->getCharacter();
 
-    character->addToInventory(item->inventorySlot, totalRounds);
+    character->addToInventory(item.inventorySlot, totalRounds);
 
     return true;
 }

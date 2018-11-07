@@ -138,11 +138,11 @@ private:
 struct WeaponData;
 
 class ItemPickup : public PickupObject {
-    WeaponData* item;
+    const WeaponData& item;
 
 public:
     ItemPickup(GameWorld* world, const glm::vec3& position,
-               BaseModelInfo* modelinfo, PickupType type, WeaponData* item);
+               BaseModelInfo* modelinfo, PickupType type, const WeaponData& p_item);
 
     bool onPlayerTouch() override;
 };

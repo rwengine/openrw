@@ -183,11 +183,11 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
 #endif
 
     auto item = player->getCharacter()->getActiveItem();
-    auto weapon = world->data->weaponData[item];
+    const auto& weapon = world->data->weaponData[item];
     std::string itemTextureName = "fist";
-    if (weapon && weapon->modelID > 0) {
+    if (weapon.modelID > 0) {
         auto model =
-            world->data->findModelInfo<SimpleModelInfo>(weapon->modelID);
+            world->data->findModelInfo<SimpleModelInfo>(weapon.modelID);
         if (model != nullptr) {
             itemTextureName = model->name;
         }
@@ -209,13 +209,13 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
             glm::vec4(iconX, iconY, hudParameters.uiWeaponSize, hudParameters.uiWeaponSize));
     }
 
-    if (weapon->fireType != WeaponData::MELEE) {
+    if (weapon.fireType != WeaponData::MELEE) {
         const CharacterState& cs = player->getCharacter()->getCurrentState();
         const CharacterWeaponSlot& slotInfo = cs.weapons[cs.currentWeapon];
 
         // In weapon.dat clip size of 0 or 1000+ indicates no reload
         // Clip size of 1 is being visually omitted as well
-        bool noClip = weapon->clipSize < 2 || weapon->clipSize > 999;
+        bool noClip = weapon.clipSize < 2 || weapon.clipSize > 999;
 
         uint32_t displayBulletsTotal = slotInfo.bulletsTotal;
 
