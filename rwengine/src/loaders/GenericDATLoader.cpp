@@ -132,8 +132,9 @@ void GenericDATLoader::loadWeapons(const std::string& name,
     }
 }
 
-void GenericDATLoader::loadHandling(const std::string& name,
-                                    VehicleInfoPtrs& vehicleData) {
+void GenericDATLoader::loadHandling(
+    const std::string& name,
+    std::unordered_map<std::string, VehicleInfo>& vehicleData) {
     std::ifstream hndFile(name.c_str());
 
     if (hndFile.is_open()) {
@@ -144,7 +145,9 @@ void GenericDATLoader::loadHandling(const std::string& name,
             std::stringstream ss(lineBuff);
 
             VehicleHandlingInfo info;
-            ss >> info.ID;
+            std::string ID;
+
+            ss >> ID;
             ss >> info.mass;
             ss >> info.dimensions.x;
             ss >> info.dimensions.y;
@@ -180,12 +183,15 @@ void GenericDATLoader::loadHandling(const std::string& name,
 
             RW_CHECK(ss.eof() || ss.good(), "Loading handling data file " << name << " failed");
 
-            auto mit = vehicleData.find(info.ID);
+            auto mit = vehicleData.find(ID);
+
             if (mit == vehicleData.end()) {
-                vehicleData.insert({info.ID, std::make_shared<VehicleInfo>(VehicleInfo{
-                                                 info, {}, {}})});
+                vehicleData.emplace(
+                    std::move(ID),
+                    VehicleInfo{std::move(info), std::vector<WheelInfo>{},
+                                VehicleInfo::Seats{}});
             } else {
-                mit->second->handling = info;
+                mit->second.handling = info;
             }
         }
     }

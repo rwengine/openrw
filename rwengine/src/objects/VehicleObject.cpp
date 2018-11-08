@@ -96,7 +96,7 @@ private:
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
                              const glm::quat& rot, BaseModelInfo* modelinfo,
-                             VehicleInfoHandle info, const glm::u8vec3& prim,
+                             VehicleInfo* info, const glm::u8vec3& prim,
                              const glm::u8vec3& sec)
     : GameObject(engine, pos, rot, modelinfo)
     , info(info)

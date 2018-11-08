@@ -10,8 +10,6 @@
 struct DynamicObjectData;
 struct WeaponData;
 struct VehicleInfo;
-typedef std::shared_ptr<VehicleInfo> VehicleInfoPtr;
-typedef std::map<std::string, VehicleInfoPtr> VehicleInfoPtrs;
 
 class GenericDATLoader {
 public:
@@ -22,7 +20,9 @@ public:
     void loadWeapons(const std::string& name,
                      std::vector<WeaponData>& weaponData);
 
-    void loadHandling(const std::string& name, VehicleInfoPtrs& vehicleData);
+    void loadHandling(
+        const std::string& name,
+        std::unordered_map<std::string, VehicleInfo>& vehicleData);
 };
 
 #endif

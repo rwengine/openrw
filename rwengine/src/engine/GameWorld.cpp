@@ -270,16 +270,16 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     };
 
     auto model = vti->getModel();
-    auto info = data->vehicleInfo.find(vti->handling_);
-    if (model && info != data->vehicleInfo.end() &&
-        info->second->wheels.empty() && info->second->seats.empty()) {
+    auto info = data->vehicleInfos.find(vti->handling_);
+    if (model && info != data->vehicleInfos.end() &&
+        info->second.wheels.empty() && info->second.seats.empty()) {
         auto root = model->getFrame();
         for (const auto& frame : root->getChildren()) {
             const std::string& name = frame->getName();
 
             if (name.size() > 5 && name.substr(0, 5) == "wheel") {
                 const auto& frameTrans = frame->getWorldTransform();
-                info->second->wheels.push_back({glm::vec3(frameTrans[3])});
+                info->second.wheels.push_back({glm::vec3(frameTrans[3])});
             }
 
             if (name == "chassis_dummy") {
@@ -288,27 +288,27 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
                 auto backseat = frame->findDescendant("ped_backseat");
 
                 if (frontseat) {
-                    addSeats(info->second->seats.front,
+                    addSeats(info->second.seats.front,
                              frontseat->getDefaultTranslation());
                 }
                 if (backseat) {
                     // @todo how does this work for the barracks, ambulance
                     // or coach?
-                    addSeats(info->second->seats.back,
+                    addSeats(info->second.seats.back,
                              backseat->getDefaultTranslation());
                 }
             } else if (name == "ped_frontseat") {
                 // The speeder boat does not have a chassis_dummy but has the
                 // frontseat directly in the root frame.
 
-                addSeats(info->second->seats.front,
+                addSeats(info->second.seats.front,
                          frame->getDefaultTranslation());
             }
         }
     }
 
     auto vehicle =
-        std::make_unique<VehicleObject>(this, pos, rot, vti, info->second, prim, sec);
+        std::make_unique<VehicleObject>(this, pos, rot, vti, &info->second, prim, sec);
     auto ptr = vehicle.get();
     vehicle->setGameObjectID(gid);
 
@@ -950,9 +950,9 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
     auto model = data->findModelInfo<VehicleModelInfo>(id);
     RW_ASSERT(model);
     if (model) {
-        auto info = data->vehicleInfo.find(model->handling_);
-        if (info != data->vehicleInfo.end()) {
-            const auto& handling = info->second->handling;
+        auto info = data->vehicleInfos.find(model->handling_);
+        if (info != data->vehicleInfos.end()) {
+            const auto& handling = info->second.handling;
             position.z +=
                 (handling.dimensions.z / 2.f) - handling.centerOfMass.z;
         }
