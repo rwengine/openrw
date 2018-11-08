@@ -22,7 +22,7 @@
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,
                                BaseModelInfo* modelinfo,
-                               const std::shared_ptr<DynamicObjectData>& dyn)
+                               DynamicObjectData* dyn)
     : GameObject(engine, pos, rot, modelinfo)
     , scale(scale)
     , dynamics(dyn) {
@@ -169,7 +169,7 @@ void InstanceObject::changeModel(BaseModelInfo* incoming, int atomicNumber) {
 
         if (collision) {
             body = std::make_unique<CollisionInstance>();
-            body->createPhysicsBody(this, collision, dynamics.get());
+            body->createPhysicsBody(this, collision, dynamics);
         }
     }
 }

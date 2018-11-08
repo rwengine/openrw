@@ -44,28 +44,28 @@ BOOST_AUTO_TEST_CASE(test_weapon_dat) {
 
 BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
     GenericDATLoader l;
-    DynamicObjectDataPtrs loaded;
+    std::unordered_map<std::string, DynamicObjectData> dynamicObjects;
 
     l.loadDynamicObjects(Global::get().getGamePath() + "/data/object.dat",
-                         loaded);
+                         dynamicObjects);
 
-    BOOST_ASSERT(loaded.size() > 0);
+    BOOST_ASSERT(!dynamicObjects.empty());
 
-    BOOST_ASSERT(loaded.find("wastebin") != loaded.end());
-    BOOST_ASSERT(loaded.find("lamppost1") != loaded.end());
+    BOOST_ASSERT(dynamicObjects.find("wastebin") != dynamicObjects.end());
+    BOOST_ASSERT(dynamicObjects.find("lamppost1") != dynamicObjects.end());
 
-    DynamicObjectDataPtr lamp = loaded["lamppost1"];
+    auto lamp = dynamicObjects.at("lamppost1");
 
-    BOOST_CHECK_EQUAL(lamp->mass, 600.0);
-    BOOST_CHECK_EQUAL(lamp->turnMass, 4000.0);
-    BOOST_CHECK_CLOSE(lamp->airRes, 0.99, 1.0);
-    BOOST_CHECK_CLOSE(lamp->elasticity, 0.05, 0.01);
-    BOOST_CHECK_EQUAL(lamp->buoyancy, 50.0);
-    BOOST_CHECK_EQUAL(lamp->uprootForce, 400);
-    BOOST_CHECK_EQUAL(lamp->collDamageMulti, 1.0);
-    BOOST_CHECK_EQUAL(lamp->collDamageEffect, 1);
-    BOOST_CHECK_EQUAL(lamp->collResponseFlags, 1);
-    BOOST_CHECK_EQUAL(lamp->cameraAvoid, false);
+    BOOST_CHECK_EQUAL(lamp.mass, 600.0);
+    BOOST_CHECK_EQUAL(lamp.turnMass, 4000.0);
+    BOOST_CHECK_CLOSE(lamp.airRes, 0.99, 1.0);
+    BOOST_CHECK_CLOSE(lamp.elasticity, 0.05, 0.01);
+    BOOST_CHECK_EQUAL(lamp.buoyancy, 50.0);
+    BOOST_CHECK_EQUAL(lamp.uprootForce, 400);
+    BOOST_CHECK_EQUAL(lamp.collDamageMulti, 1.0);
+    BOOST_CHECK_EQUAL(lamp.collDamageEffect, 1);
+    BOOST_CHECK_EQUAL(lamp.collResponseFlags, 1);
+    BOOST_CHECK_EQUAL(lamp.cameraAvoid, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_handling_data_loader) {

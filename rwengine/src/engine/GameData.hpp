@@ -309,7 +309,7 @@ public:
     /**
      * DynamicObjectData
      */
-    std::map<std::string, std::shared_ptr<DynamicObjectData>> dynamicObjectData;
+    std::unordered_map<std::string, DynamicObjectData> dynamicObjectData;
 
     std::vector<WeaponData> weaponData;
 

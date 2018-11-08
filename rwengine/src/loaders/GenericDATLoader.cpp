@@ -12,8 +12,9 @@
 #include <data/WeaponData.hpp>
 #include <objects/VehicleInfo.hpp>
 
-void GenericDATLoader::loadDynamicObjects(const std::string& name,
-                                          DynamicObjectDataPtrs& data) {
+void GenericDATLoader::loadDynamicObjects(
+    const std::string& name,
+    std::unordered_map<std::string, DynamicObjectData>& data) {
     std::ifstream dfile(name.c_str());
 
     if (dfile.is_open()) {
@@ -24,39 +25,40 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
             if (lineBuff.at(0) == '*') continue;
             std::stringstream ss(lineBuff);
 
-            auto dyndata = std::make_shared<DynamicObjectData>();
+            DynamicObjectData dyndata{};
+            std::string modelName;
 
-            ss >> dyndata->modelName;
-            auto cpos = dyndata->modelName.find(',');
-            if (cpos != dyndata->modelName.npos) {
-                dyndata->modelName.erase(cpos);
+            ss >> modelName;
+            auto cpos = modelName.find(',');
+            if (cpos != modelName.npos) {
+                modelName.erase(cpos);
             }
-            ss >> dyndata->mass;
+            ss >> dyndata.mass;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->turnMass;
+            ss >> dyndata.turnMass;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->airRes;
+            ss >> dyndata.airRes;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->elasticity;
+            ss >> dyndata.elasticity;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->buoyancy;
+            ss >> dyndata.buoyancy;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->uprootForce;
+            ss >> dyndata.uprootForce;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->collDamageMulti;
+            ss >> dyndata.collDamageMulti;
             if (ss.peek() == ',') ss.ignore(1);
             int tmp;
             ss >> tmp;
-            dyndata->collDamageEffect = tmp;
+            dyndata.collDamageEffect = tmp;
             if (ss.peek() == ',') ss.ignore(1);
             ss >> tmp;
-            dyndata->collResponseFlags = tmp;
+            dyndata.collResponseFlags = tmp;
             if (ss.peek() == ',') ss.ignore(1);
-            ss >> dyndata->cameraAvoid;
+            ss >> dyndata.cameraAvoid;
 
             RW_CHECK(ss.eof() || ss.good(), "Loading dynamicsObject data file " << name << " failed");
 
-            data.insert({dyndata->modelName, dyndata});
+            data.emplace(modelName, std::move(dyndata));
         }
     }
 }

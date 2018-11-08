@@ -137,10 +137,12 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
         }
 
         // Check for dynamic data.
-        auto dyit = data->dynamicObjectData.find(oi->name);
-        std::shared_ptr<DynamicObjectData> dydata;
-        if (dyit != data->dynamicObjectData.end()) {
-            dydata = dyit->second;
+        const auto dyIt = data->dynamicObjectData.find(oi->name);
+
+        DynamicObjectData* dydata = nullptr;
+
+        if (dyIt != data->dynamicObjectData.end()) {
+            dydata = &dyIt->second;
         }
 
         if (oi->name.empty()) {
