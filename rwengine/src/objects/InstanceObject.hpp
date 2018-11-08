@@ -32,12 +32,12 @@ class InstanceObject final : public GameObject {
 public:
     glm::vec3 scale;
     std::unique_ptr<CollisionInstance> body;
-    std::shared_ptr<DynamicObjectData> dynamics;
+    DynamicObjectData* dynamics;
 
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
                    BaseModelInfo* modelinfo,
-                   const std::shared_ptr<DynamicObjectData>& dyn);
+                   DynamicObjectData* dyn);
     ~InstanceObject() override;
 
     Type type() const override {

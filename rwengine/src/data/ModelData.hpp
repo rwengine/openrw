@@ -484,7 +484,6 @@ public:
  * Instances different physical properties.
  */
 struct DynamicObjectData {
-    std::string modelName;
     float mass;        // Kg
     float turnMass;    // Kg m^3
     float airRes;      // fraction
