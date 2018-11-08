@@ -287,7 +287,7 @@ void GameData::loadHandling(const std::string& path) {
     GenericDATLoader l;
     auto syspath = index.findFilePath(path).string();
 
-    l.loadHandling(syspath, vehicleInfo);
+    l.loadHandling(syspath, vehicleInfos);
 }
 
 SCMFile GameData::loadSCM(const std::string& path) {

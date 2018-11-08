@@ -267,7 +267,7 @@ public:
     /**
      * Vehicle information
      */
-    std::map<std::string, VehicleInfoHandle> vehicleInfo;
+    std::unordered_map<std::string, VehicleInfo> vehicleInfos;
 
     /**
      * Texture Loader

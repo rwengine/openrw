@@ -17,7 +17,6 @@ struct VehicleHandlingInfo {
 
     enum DriveType { Forward = 'F', Rear = 'R', All = '4' };
 
-    std::string ID;
     float mass;
     glm::vec3 dimensions{};
     glm::vec3 centerOfMass{};
@@ -83,7 +82,7 @@ struct VehicleInfo {
     /** Value for caching wheel information */
     std::vector<WheelInfo> wheels;
     /** Struct for caching seat information */
-    struct {
+    struct Seats{
         std::vector<SeatInfo> front;
         std::vector<SeatInfo> back;
 
@@ -103,9 +102,15 @@ struct VehicleInfo {
         bool empty() const {
             return front.empty() && back.empty();
         }
-    } seats;
-};
+    };
+    Seats seats;
 
-typedef std::shared_ptr<VehicleInfo> VehicleInfoHandle;
+    template <typename T1, typename T2>
+    VehicleInfo(VehicleHandlingInfo p_handling, T1&& p_wheels, T2&& p_seats)
+        : handling(p_handling)
+        , wheels(std::forward<T1>(p_wheels))
+        , seats(std::forward<T2>(p_seats)) {
+    }
+};
 
 #endif

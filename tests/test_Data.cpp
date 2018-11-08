@@ -70,15 +70,15 @@ BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
 
 BOOST_AUTO_TEST_CASE(test_handling_data_loader) {
     GenericDATLoader l;
-    VehicleInfoPtrs loaded;
+    std::unordered_map<std::string, VehicleInfo> vehicleInfos;
 
-    l.loadHandling(Global::get().getGamePath() + "/data/handling.cfg", loaded);
+    l.loadHandling(Global::get().getGamePath() + "/data/handling.cfg", vehicleInfos);
 
-    BOOST_ASSERT(loaded.size() > 0);
-    BOOST_ASSERT(loaded.find("STINGER") != loaded.end());
+    BOOST_ASSERT(!vehicleInfos.empty());
+    BOOST_ASSERT(vehicleInfos.find("STINGER") != vehicleInfos.end());
 
-    VehicleInfoPtr info = loaded["STINGER"];
-    VehicleHandlingInfo& handling = info->handling;
+    auto info = vehicleInfos.find("STINGER");
+    const auto& handling = info->second.handling;
 
     BOOST_CHECK_EQUAL(handling.mass, 1000.0);
     BOOST_CHECK_EQUAL(handling.flags, 0xA182);
