@@ -39,7 +39,7 @@ struct CutsceneTracks {
 
     float duration{0.f};
 
-    glm::vec3 getPositionAt(float time) {
+    glm::vec3 getPositionAt(float time) const {
         glm::vec3 p = position.rbegin()->second;
         for (auto it = position.begin(); it != position.end(); ++it) {
             if (it->first <= time) {
@@ -62,7 +62,7 @@ struct CutsceneTracks {
         return p;
     }
 
-    glm::vec3 getTargetAt(float time) {
+    glm::vec3 getTargetAt(float time) const {
         glm::vec3 p = position.rbegin()->second;
         for (auto it = target.begin(); it != target.end(); ++it) {
             if (it->first <= time) {
@@ -85,7 +85,7 @@ struct CutsceneTracks {
         return p;
     }
 
-    float getZoomAt(float time) {
+    float getZoomAt(float time) const {
         float r = zoom.rbegin()->second;
         for (auto it = zoom.begin(); it != zoom.end(); ++it) {
             if (it->first <= time) {
@@ -108,7 +108,7 @@ struct CutsceneTracks {
         return r;
     }
 
-    float getRotationAt(float time) {
+    float getRotationAt(float time) const {
         float r = rotation.rbegin()->second;
         for (auto it = rotation.begin(); it != rotation.end(); ++it) {
             if (it->first <= time) {
