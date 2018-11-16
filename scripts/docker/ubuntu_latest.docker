@@ -19,6 +19,7 @@ RUN apt-get update \
         libqt5opengl5-dev \
         libfreetype6-dev \
         iwyu \
+        ninja-build \
         qt5-default
 
 CMD ["/bin/bash"]

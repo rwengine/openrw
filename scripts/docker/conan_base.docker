@@ -7,6 +7,7 @@ RUN apt-get update \
         gcc-8 \
         g++-8 \
         clang-6.0 \
+        ninja-build \
             # scripts to install conan \
             python3-pip \
             python3-distutils \
