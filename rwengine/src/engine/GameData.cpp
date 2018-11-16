@@ -527,13 +527,8 @@ void GameData::loadIFP(const std::string& name, bool cutsceneAnimation) {
 
     if (f.data) {
         if (LoaderIFP loader{}; loader.loadFromMemory(f.data.get())) {
-            if (cutsceneAnimation) {
-                animationsCutscene.insert(loader.animations.begin(),
-                                          loader.animations.end());
-            } else {
-                animations.insert(loader.animations.begin(),
-                                  loader.animations.end());
-            }
+            auto& dest = cutsceneAnimation ? animationsCutscene : animations;
+            dest.insert(loader.animations.begin(), loader.animations.end());
         }
     }
 }
