@@ -4,6 +4,7 @@ RUN pacman -Syy --noconfirm \
     core/gcc \
     extra/clang \
     make \
+    ninja \
     extra/boost \
     extra/cmake \
     extra/ffmpeg \

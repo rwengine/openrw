@@ -13,6 +13,7 @@ RUN dnf update -y \
         boost-devel \
         cmake \
         make \
+        ninja-build \
         bullet-devel \
         ffmpeg-devel \
         glm-devel \
