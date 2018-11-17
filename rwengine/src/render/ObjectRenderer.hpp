@@ -36,9 +36,7 @@ class ObjectRenderer {
 public:
     ObjectRenderer(GameWorld* world, const ViewCamera& camera,
                    float renderAlpha)
-        : m_world(world)
-        , m_camera(camera)
-        , m_renderAlpha(renderAlpha) {
+        : m_world(world), m_camera(camera), m_renderAlpha(renderAlpha) {
     }
 
     /**
@@ -59,7 +57,8 @@ public:
      * @param worldtransform
      * @param object
      */
-    void renderAtomic(Atomic* atomic, const glm::mat4& worldtransform, GameObject* object, RenderList& render);
+    void renderAtomic(Atomic* atomic, const glm::mat4& worldtransform,
+                      GameObject* object, RenderList& render);
 
     /**
      * @brief renderClump Renders all visible atomics in the clump
@@ -67,7 +66,9 @@ public:
      * @param worldtransform
      * @param render
      */
-    void renderClump(Clump* model, const glm::mat4& worldtransform, GameObject* object, RenderList& render);
+    void renderClump(Clump* model, const glm::mat4& worldtransform,
+                     GameObject* object, RenderList& render);
+
 private:
     GameWorld* m_world;
     const ViewCamera& m_camera;

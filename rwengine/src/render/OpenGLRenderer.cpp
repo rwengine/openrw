@@ -39,8 +39,8 @@ GLuint compileShader(GLenum type, const char* source) {
         glGetShaderSource(shader, sourceLen, nullptr, sourceBuff.get());
 
         RW_ERROR("[OGL] Shader InfoLog(" << shader << "):\n"
-                  << buffer.get() << "\nSource:\n"
-                  << sourceBuff.get());
+                                         << buffer.get() << "\nSource:\n"
+                                         << sourceBuff.get());
     }
 
     if (status != GL_TRUE) {
@@ -79,8 +79,7 @@ GLuint compileProgram(const char* vertex, const char* fragment) {
         auto buffer = std::make_unique<GLchar[]>(len);
         glGetProgramInfoLog(prog, len, nullptr, buffer.get());
 
-        RW_ERROR("[OGL] Program InfoLog(" << prog << "):\n"
-                  << buffer.get());
+        RW_ERROR("[OGL] Program InfoLog(" << prog << "):\n" << buffer.get());
     }
 
     if (status != GL_TRUE) {
@@ -182,9 +181,10 @@ std::string OpenGLRenderer::getIDString() const {
     return ss.str();
 }
 
-std::unique_ptr<Renderer::ShaderProgram> OpenGLRenderer::createShader(const std::string& vert,
-                                                      const std::string& frag) {
-    return std::make_unique<OpenGLShaderProgram>(compileProgram(vert.c_str(), frag.c_str()));
+std::unique_ptr<Renderer::ShaderProgram> OpenGLRenderer::createShader(
+    const std::string& vert, const std::string& frag) {
+    return std::make_unique<OpenGLShaderProgram>(
+        compileProgram(vert.c_str(), frag.c_str()));
 }
 
 void OpenGLRenderer::setProgramBlockBinding(Renderer::ShaderProgram* p,
@@ -280,10 +280,11 @@ void OpenGLRenderer::setDrawState(const glm::mat4& model, DrawBuffer* draw,
     setDepthWrite(p.depthWrite);
     setDepthMode(p.depthMode);
 
-    ObjectUniformData objectData{model,
-                             glm::vec4(p.colour.r / 255.f, p.colour.g / 255.f,
-                                       p.colour.b / 255.f, p.colour.a / 255.f),
-                             1.f, 1.f, p.visibility};
+    ObjectUniformData objectData{
+        model,
+        glm::vec4(p.colour.r / 255.f, p.colour.g / 255.f, p.colour.b / 255.f,
+                  p.colour.a / 255.f),
+        1.f, 1.f, p.visibility};
     uploadUBO(UBOObject, objectData);
 
     drawCounter++;
@@ -308,7 +309,8 @@ void OpenGLRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
                                 const Renderer::DrawParameters& p) {
     setDrawState(model, draw, p);
 
-    glDrawArrays(draw->getFaceType(), static_cast<GLint>(p.start), static_cast<GLsizei>(p.count));
+    glDrawArrays(draw->getFaceType(), static_cast<GLint>(p.start),
+                 static_cast<GLsizei>(p.count));
 }
 
 void OpenGLRenderer::drawBatched(const RenderList& list) {
@@ -371,8 +373,7 @@ void OpenGLRenderer::invalidate() {
     setDepthMode(DepthMode::OFF);
 }
 
-bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
-{
+bool OpenGLRenderer::createUBO(Buffer& out, GLsizei size, GLsizei entrySize) {
     glGenBuffers(1, &out.name);
     glBindBuffer(GL_UNIFORM_BUFFER, out.name);
     glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STREAM_DRAW);
@@ -381,7 +382,8 @@ bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
         GLint UBOAlignment;
         glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &UBOAlignment);
         RW_ASSERT(UBOAlignment > 0);
-        entrySize = ((entrySize + (UBOAlignment-1))/UBOAlignment) * UBOAlignment;
+        entrySize =
+            ((entrySize + (UBOAlignment - 1)) / UBOAlignment) * UBOAlignment;
     }
 
     out.bufferSize = size;
@@ -391,8 +393,8 @@ bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
     return true;
 }
 
-void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t size)
-{
+void OpenGLRenderer::uploadUBOEntry(Buffer& buffer, const void* data,
+                                    size_t size) {
     attachUBO(buffer.name);
     if (buffer.entryCount > 1) {
         RW_ASSERT(size <= buffer.entrySize);
@@ -403,17 +405,17 @@ void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t siz
             buffer.currentEntry = 0;
         }
         const auto offset = buffer.currentEntry * buffer.entrySize;
-        const auto flags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT
-                           | GL_MAP_UNSYNCHRONIZED_BIT;
+        const auto flags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT |
+                           GL_MAP_UNSYNCHRONIZED_BIT;
         void* dst = glMapBufferRange(GL_UNIFORM_BUFFER, offset,
                                      buffer.entrySize, flags);
         RW_ASSERT(dst != nullptr);
         memcpy(dst, data, size);
         glUnmapBuffer(GL_UNIFORM_BUFFER);
-        glBindBufferRange(GL_UNIFORM_BUFFER, kUBOIndexDraw, buffer.name, offset, size);
+        glBindBufferRange(GL_UNIFORM_BUFFER, kUBOIndexDraw, buffer.name, offset,
+                          size);
         buffer.currentEntry++;
-    }
-    else {
+    } else {
         glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW);
     }
 }

@@ -33,7 +33,8 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
     if (t.wakeCounter > 0) {
         t.wakeCounter = std::max(t.wakeCounter - msPassed, 0);
     }
-    if (t.wakeCounter > 0) return;
+    if (t.wakeCounter > 0)
+        return;
 
     while (t.wakeCounter == 0) {
         auto pc = t.programCounter;
@@ -112,8 +113,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
                     pc += sizeof(SCMByte) * 8;
                     break;
                 case TFloat16:
-                    parameters.back().real =
-                        file.read<std::int16_t>(pc) / 16.f;
+                    parameters.back().real = file.read<std::int16_t>(pc) / 16.f;
                     pc += sizeof(SCMByte) * 2;
                     break;
                 default:

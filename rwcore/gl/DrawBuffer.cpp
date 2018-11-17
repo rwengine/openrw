@@ -25,7 +25,8 @@ void DrawBuffer::addGeometry(GeometryBuffer* gbuff) {
     for (const AttributeIndex& at : gbuff->getDataAttributes()) {
         auto vaoindex = static_cast<GLuint>(at.sem);
         glEnableVertexAttribArray(vaoindex);
-        glVertexAttribPointer(vaoindex, static_cast<GLint>(at.size), at.type, GL_TRUE, at.stride,
+        glVertexAttribPointer(vaoindex, static_cast<GLint>(at.size), at.type,
+                              GL_TRUE, at.stride,
                               reinterpret_cast<void*>(at.offset));
     }
 }

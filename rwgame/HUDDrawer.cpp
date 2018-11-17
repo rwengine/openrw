@@ -12,8 +12,9 @@
 
 void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer* render) {
     if (world->state->scriptTimerVariable) {
-        float scriptTimerTextX = static_cast<float>(
-            render->getRenderer()->getViewport().x - hudParameters.uiOuterMargin);
+        float scriptTimerTextX =
+            static_cast<float>(render->getRenderer()->getViewport().x -
+                               hudParameters.uiOuterMargin);
         float scriptTimerTextY = hudParameters.uiScriptTimerHeight;
 
         TextRenderer::TextInfo ti;
@@ -42,7 +43,7 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer* render) {
 }
 
 void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
-             GameWorld* world, GameRenderer* render) {
+                        GameWorld* world, GameRenderer* render) {
     MapRenderer::MapInfo map;
 
     if (world->state->hudFlash != HudFlash::FlashRadar ||
@@ -58,10 +59,12 @@ void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
 
         const glm::ivec2& vp = render->getRenderer()->getViewport();
 
-        glm::vec2 mapTop =
-            glm::vec2(hudParameters.uiOuterMargin, vp.y - (hudParameters.uiOuterMargin + hudParameters.uiMapSize));
+        glm::vec2 mapTop = glm::vec2(
+            hudParameters.uiOuterMargin,
+            vp.y - (hudParameters.uiOuterMargin + hudParameters.uiMapSize));
         glm::vec2 mapBottom =
-            glm::vec2(hudParameters.uiOuterMargin + hudParameters.uiMapSize, vp.y - hudParameters.uiOuterMargin);
+            glm::vec2(hudParameters.uiOuterMargin + hudParameters.uiMapSize,
+                      vp.y - hudParameters.uiOuterMargin);
 
         map.screenPosition = (mapTop + mapBottom) / 2.f;
         map.screenSize = hudParameters.uiMapSize * 0.95f;
@@ -71,14 +74,18 @@ void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
 }
 
 void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
-                    GameRenderer* render) {
-    float infoTextX = static_cast<float>(render->getRenderer()->getViewport().x -
-                      (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize + hudParameters.uiInfoMargin));
+                               GameRenderer* render) {
+    float infoTextX = static_cast<float>(
+        render->getRenderer()->getViewport().x -
+        (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize +
+         hudParameters.uiInfoMargin));
     float infoTextY = 0.f + hudParameters.uiOuterMargin;
-    float iconX = static_cast<float>(render->getRenderer()->getViewport().x -
-                  (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize));
+    float iconX = static_cast<float>(
+        render->getRenderer()->getViewport().x -
+        (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize));
     float iconY = hudParameters.uiOuterMargin;
-    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x - hudParameters.uiOuterMargin);
+    float wantedX = static_cast<float>(render->getRenderer()->getViewport().x -
+                                       hudParameters.uiOuterMargin);
     float wantedY = hudParameters.uiWantedLevelHeight;
 
     TextRenderer::TextInfo ti;
@@ -110,7 +117,8 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(8) << std::setfill('0')
            << world->state->playerInfo.displayedMoney;
 
-        ti.text = GameSymbols::Money + GameStringUtil::fromString(ss.str(), ti.font);
+        ti.text =
+            GameSymbols::Money + GameStringUtil::fromString(ss.str(), ti.font);
     }
 
     ti.baseColour = hudParameters.uiShadowColour;
@@ -125,14 +133,16 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
     infoTextY += hudParameters.uiTextHeight;
 
     if ((world->state->hudFlash != HudFlash::FlashHealth &&
-         player->getCharacter()->getCurrentState().health > hudParameters.uiLowHealth) ||
+         player->getCharacter()->getCurrentState().health >
+             hudParameters.uiLowHealth) ||
         std::fmod(world->getGameTime(), 0.5f) >=
             .25f) {  // UI: Blinking health indicator if health is low
         std::stringstream ss;
         ss << std::setw(3) << std::setfill('0')
            << static_cast<int>(
                   player->getCharacter()->getCurrentState().health);
-        ti.text = GameSymbols::Heart + GameStringUtil::fromString(ss.str(), ti.font);
+        ti.text =
+            GameSymbols::Heart + GameStringUtil::fromString(ss.str(), ti.font);
 
         ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
@@ -149,15 +159,17 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
         ss << std::setw(3) << std::setfill('0')
            << static_cast<int>(
                   player->getCharacter()->getCurrentState().armour);
-        ti.text = GameSymbols::Armour + GameStringUtil::fromString(ss.str(), ti.font);
+        ti.text =
+            GameSymbols::Armour + GameStringUtil::fromString(ss.str(), ti.font);
 
         ti.baseColour = hudParameters.uiShadowColour;
-        ti.screenPosition =
-            glm::vec2(infoTextX + 1.f - hudParameters.uiArmourOffset, infoTextY + 1.f);
+        ti.screenPosition = glm::vec2(
+            infoTextX + 1.f - hudParameters.uiArmourOffset, infoTextY + 1.f);
         render->text.renderText(ti);
 
         ti.baseColour = hudParameters.uiArmourColour;
-        ti.screenPosition = glm::vec2(infoTextX - hudParameters.uiArmourOffset, infoTextY);
+        ti.screenPosition =
+            glm::vec2(infoTextX - hudParameters.uiArmourOffset, infoTextY);
         render->text.renderText(ti);
     }
 
@@ -204,9 +216,9 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
     RW_CHECK(itemTexture != nullptr, "Item has 0 texture");
     if (itemTexture != nullptr) {
         RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");
-        render->drawTexture(
-            itemTexture.get(),
-            glm::vec4(iconX, iconY, hudParameters.uiWeaponSize, hudParameters.uiWeaponSize));
+        render->drawTexture(itemTexture.get(),
+                            glm::vec4(iconX, iconY, hudParameters.uiWeaponSize,
+                                      hudParameters.uiWeaponSize));
     }
 
     if (weapon->fireType != WeaponData::MELEE) {
@@ -223,8 +235,8 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
             // The clip is actually there, but it holds just one shot/charge
             displayBulletsTotal += slotInfo.bulletsClip;
 
-            ti.text =
-                GameStringUtil::fromString(std::to_string(displayBulletsTotal), ti.font);
+            ti.text = GameStringUtil::fromString(
+                std::to_string(displayBulletsTotal), ti.font);
         } else {
             // Limit the maximal displayed length for the total bullet count
             if (slotInfo.bulletsTotal > 9999) {
@@ -233,21 +245,23 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
 
             ti.text = GameStringUtil::fromString(
                 std::to_string(displayBulletsTotal) + "-" +
-                std::to_string(slotInfo.bulletsClip), ti.font);
+                    std::to_string(slotInfo.bulletsClip),
+                ti.font);
         }
 
         ti.baseColour = hudParameters.uiShadowColour;
         ti.font = FONT_ARIAL;
         ti.size = hudParameters.uiAmmoSize;
         ti.align = TextRenderer::TextInfo::TextAlignment::Center;
-        ti.screenPosition = glm::vec2(iconX + hudParameters.uiWeaponSize / 2.f,
-                                      iconY + hudParameters.uiWeaponSize - hudParameters.uiAmmoHeight);
+        ti.screenPosition = glm::vec2(
+            iconX + hudParameters.uiWeaponSize / 2.f,
+            iconY + hudParameters.uiWeaponSize - hudParameters.uiAmmoHeight);
         render->text.renderText(ti);
     }
 }
 
 void HUDDrawer::drawHUD(ViewCamera& currentView, PlayerController* player,
-             GameWorld* world, GameRenderer* render) {
+                        GameWorld* world, GameRenderer* render) {
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);

@@ -1,7 +1,7 @@
 #include <QApplication>
 #include "ViewerWindow.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
 

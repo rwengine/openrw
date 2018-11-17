@@ -17,8 +17,8 @@ bool LoaderIMG::load(const rwfs::path& filepath) {
 
         std::size_t expectedCount = fileSize / 32;
         m_assets.resize(expectedCount);
-        std::size_t actualCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
-                expectedCount, fp);
+        std::size_t actualCount =
+            fread(&m_assets[0], sizeof(LoaderIMGFile), expectedCount, fp);
 
         if (expectedCount != actualCount) {
             m_assets.resize(actualCount);
@@ -38,7 +38,7 @@ bool LoaderIMG::load(const rwfs::path& filepath) {
 /// Get the information of a asset in the examining archive
 bool LoaderIMG::findAssetInfo(const std::string& assetname,
                               LoaderIMGFile& out) {
-    for (auto &asset : m_assets) {
+    for (auto& asset : m_assets) {
         if (boost::iequals(asset.name, assetname)) {
             out = asset;
             return true;
@@ -77,7 +77,8 @@ std::unique_ptr<char[]> LoaderIMG::loadToMemory(const std::string& assetname) {
 bool LoaderIMG::saveAsset(const std::string& assetname,
                           const std::string& filename) {
     auto raw_data = loadToMemory(assetname);
-    if (!raw_data) return false;
+    if (!raw_data)
+        return false;
 
     FILE* dumpFile = fopen(filename.c_str(), "wb");
     if (dumpFile) {

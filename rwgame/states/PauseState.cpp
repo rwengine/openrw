@@ -6,12 +6,12 @@
 PauseState::PauseState(RWGame* game) : State(game) {
     auto& t = game->getGameData().texts;
 
-    auto menu = Menu::create(
-        {{t.text(MenuDefaults::kResumeGameId), [&] { done(); }},
-         {t.text(MenuDefaults::kOptionsId),
-          [] { std::cout << "Options" << std::endl; }},
-         {t.text(MenuDefaults::kQuitGameId),
-          [] { StateManager::get().clear(); }}});
+    auto menu =
+        Menu::create({{t.text(MenuDefaults::kResumeGameId), [&] { done(); }},
+                      {t.text(MenuDefaults::kOptionsId),
+                       [] { std::cout << "Options" << std::endl; }},
+                      {t.text(MenuDefaults::kQuitGameId),
+                       [] { StateManager::get().clear(); }}});
     menu->offset = glm::vec2(200.f, 200.f);
     enterMenu(menu);
 }

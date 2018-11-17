@@ -149,7 +149,7 @@ private:
 
     float tickWorld(const float deltaTime, float accumulatedTime);
 
-    void renderDebugView(float time, ViewCamera &viewCam);
+    void renderDebugView(float time, ViewCamera& viewCam);
 
     void tickObjects(float dt) const;
 };

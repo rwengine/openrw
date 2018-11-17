@@ -15,8 +15,8 @@
 #include <alc.h>
 #include <glm/glm.hpp>
 
-#include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
+#include <rw/filesystem.hpp>
 
 class GameWorld;
 class ViewCamera;

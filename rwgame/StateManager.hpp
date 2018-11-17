@@ -30,7 +30,7 @@ public:
         cleared = true;
     }
 
-    template <class T, class... Targs>
+    template<class T, class... Targs>
     void enter(Targs&&... args) {
         // Notify the previous state it has been suspended
         if (!states.empty()) {

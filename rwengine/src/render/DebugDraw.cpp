@@ -12,10 +12,10 @@
 #pragma warning(default : 4305 5033)
 #endif
 
+#include <gl/gl_core_3_3.h>
 #include <data/Clump.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <gl/gl_core_3_3.h>
 #include <rw/debug.hpp>
 
 #include "render/GameRenderer.hpp"
@@ -36,20 +36,20 @@ DebugDraw::DebugDraw() {
     maxlines = 0;
 }
 
-void DebugDraw::drawLine(const btVector3 &from, const btVector3 &to,
-                         const btVector3 &color) {
+void DebugDraw::drawLine(const btVector3& from, const btVector3& to,
+                         const btVector3& color) {
     btVector3 c = color * 255;
     lines.emplace_back(glm::vec3(from.getX(), from.getY(), from.getZ()),
-                     glm::vec3(0.f), glm::vec2(0.f),
-                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
-    lines.emplace_back(glm::vec3(to.getX(), to.getY(), to.getZ()), glm::vec3(0.f),
-                     glm::vec2(0.f),
-                     glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
+                       glm::vec3(0.f), glm::vec2(0.f),
+                       glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
+    lines.emplace_back(glm::vec3(to.getX(), to.getY(), to.getZ()),
+                       glm::vec3(0.f), glm::vec2(0.f),
+                       glm::u8vec4(c.getX(), c.getY(), c.getZ(), 255));
 }
 
-void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
-                                 const btVector3 &normalOnB, btScalar distance,
-                                 int lifeTime, const btVector3 &color) {
+void DebugDraw::drawContactPoint(const btVector3& pointOnB,
+                                 const btVector3& normalOnB, btScalar distance,
+                                 int lifeTime, const btVector3& color) {
     RW_UNUSED(pointOnB);
     RW_UNUSED(normalOnB);
     RW_UNUSED(distance);
@@ -57,7 +57,7 @@ void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
     RW_UNUSED(color);
 }
 
-void DebugDraw::flush(GameRenderer *renderer) {
+void DebugDraw::flush(GameRenderer* renderer) {
     if (lines.empty()) {
         return;
     }
@@ -87,11 +87,11 @@ void DebugDraw::flush(GameRenderer *renderer) {
     lines.clear();
 }
 
-void DebugDraw::reportErrorWarning(const char *warningString) {
+void DebugDraw::reportErrorWarning(const char* warningString) {
     std::cerr << warningString << std::endl;
 }
 
-void DebugDraw::draw3dText(const btVector3 &location, const char *textString) {
+void DebugDraw::draw3dText(const btVector3& location, const char* textString) {
     RW_UNUSED(location);
     std::cout << textString << std::endl;
 }

@@ -13,13 +13,14 @@
 #include <rw/forward.hpp>
 
 struct AnimationKeyframe {
-    glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
+    glm::quat rotation{1.0f, 0.0f, 0.0f, 0.0f};
     glm::vec3 position{};
     glm::vec3 scale{1.0f};
     float starttime = 0.f;
     int id = 0;
 
-    AnimationKeyframe(glm::quat _rotation, glm::vec3 _position, glm::vec3 _scale, float _starttime, int _id)
+    AnimationKeyframe(glm::quat _rotation, glm::vec3 _position,
+                      glm::vec3 _scale, float _starttime, int _id)
         : rotation(_rotation)
         , position(_position)
         , scale(_scale)
@@ -75,13 +76,13 @@ struct Animation {
 };
 
 class LoaderIFP {
-    template <class T>
+    template<class T>
     T* read(char* data, size_t* ofs) {
         size_t b = *ofs;
         *ofs += sizeof(T);
         return reinterpret_cast<T*>(data + b);
     }
-    template <class T>
+    template<class T>
     T* peek(char* data, const size_t* ofs) {
         return reinterpret_cast<T*>(data + *ofs);
     }

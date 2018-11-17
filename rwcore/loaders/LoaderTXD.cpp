@@ -18,8 +18,7 @@ GLuint gTextureRed[] = {0xFF0000FF};
 GLuint gTextureGreen[] = {0xFF00FF00};
 GLuint gTextureBlue[] = {0xFFFF0000};
 
-static
-TextureData::Handle getErrorTexture() {
+static TextureData::Handle getErrorTexture() {
     static GLuint errTexName = 0;
     static TextureData::Handle tex;
     if (errTexName == 0) {
@@ -36,8 +35,8 @@ TextureData::Handle getErrorTexture() {
 
 const size_t paletteSize = 1024;
 
-static
-void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
+static void processPalette(uint32_t* fullColor,
+                           RW::BinaryStreamSection& rootSection) {
     uint8_t* dataBase = reinterpret_cast<uint8_t*>(
         rootSection.raw() + sizeof(RW::BSSectionHeader) +
         sizeof(RW::BSTextureNative) - 4);
@@ -51,13 +50,12 @@ void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
     }
 }
 
-static
-TextureData::Handle createTexture(RW::BSTextureNative& texNative,
-                                  RW::BinaryStreamSection& rootSection) {
+static TextureData::Handle createTexture(RW::BSTextureNative& texNative,
+                                         RW::BinaryStreamSection& rootSection) {
     // TODO: Exception handling.
     if (texNative.platform != 8) {
         RW_ERROR("Unsupported texture platform " << std::dec
-                  << texNative.platform);
+                                                 << texNative.platform);
         return getErrorTexture();
     }
 
@@ -74,7 +72,7 @@ TextureData::Handle createTexture(RW::BSTextureNative& texNative,
 
     if (!(isPal8 || isFulc)) {
         RW_ERROR("Unsupported raster format " << std::dec
-                  << texNative.rasterformat);
+                                              << texNative.rasterformat);
         return getErrorTexture();
     }
 
@@ -182,7 +180,8 @@ bool TextureLoader::loadFromMemory(const FileContentsInfo& file,
     while (root.hasMoreData(rootI)) {
         auto rootSection = root.getNextChildSection(rootI);
 
-        if (rootSection.header.id != RW::SID_TextureNative) continue;
+        if (rootSection.header.id != RW::SID_TextureNative)
+            continue;
 
         RW::BSTextureNative texNative =
             rootSection.readStructure<RW::BSTextureNative>();

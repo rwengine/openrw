@@ -62,8 +62,8 @@ const std::unordered_multimap<int, GameInputState::Control> kDefaultControls = {
     {SDLK_e, GameInputState::LookRight},
 };
 
-void GameInput::updateGameInputState(GameInputState *state,
-                                     const SDL_Event &event) {
+void GameInput::updateGameInputState(GameInputState* state,
+                                     const SDL_Event& event) {
     switch (event.type) {
         case SDL_KEYDOWN:
         case SDL_KEYUP: {

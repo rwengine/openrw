@@ -72,7 +72,7 @@ protected:
 
     float m_closeDoorTimer{0.f};
 
-    // When driving a vehicle 
+    // When driving a vehicle
     int m_lane;
 
     // Goal related variables
@@ -80,7 +80,6 @@ protected:
     CharacterObject* leader = nullptr;
 
 public:
-
     AIGraphNode* targetNode;
     AIGraphNode* lastTargetNode;
     AIGraphNode* nextTargetNode;
@@ -144,13 +143,15 @@ public:
     void setLookDirection(const glm::vec2& look);
 
     /**
-     * @brief createRoadTarget When driving on a road, the targetNode must be shifted to a specific lane
+     * @brief createRoadTarget When driving on a road, the targetNode must be
+     * shifted to a specific lane
      */
     glm::vec3 calculateRoadTarget(const glm::vec3& target,
                                   const glm::vec3& start, const glm::vec3& end);
 
     /**
-     * @brief steerTo When owning a vehicle, set the steering angle to drive to a target
+     * @brief steerTo When owning a vehicle, set the steering angle to drive to
+     * a target
      */
     void steerTo(const glm::vec3& target);
 
@@ -186,10 +187,10 @@ public:
     friend class CharacterObject;
 };
 
-#define DECL_ACTIVITY(activity_name)                     \
-    static constexpr auto ActivityName = #activity_name; \
-    std::string name() const override {                  \
-        return ActivityName;                             \
+#define DECL_ACTIVITY(activity_name)                                           \
+    static constexpr auto ActivityName = #activity_name;                       \
+    std::string name() const override {                                        \
+        return ActivityName;                                                   \
     }
 
 // TODO: Refactor this with an ugly macro to reduce code dup.
@@ -210,7 +211,8 @@ struct GoTo : public CharacterController::Activity {
         : target(target), sprint(_sprint) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 
     bool canSkip(CharacterObject*, CharacterController*) const override {
         return true;
@@ -229,7 +231,8 @@ struct DriveTo : public CharacterController::Activity {
         : targetNode(targetNode), rampant(_rampant) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 
     bool canSkip(CharacterObject*, CharacterController*) const override {
         return true;
@@ -244,7 +247,8 @@ struct Jump : public CharacterController::Activity {
     Jump() : jumped(false) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 };
 
 struct EnterVehicle : public CharacterController::Activity {
@@ -266,7 +270,8 @@ struct EnterVehicle : public CharacterController::Activity {
     bool canSkip(CharacterObject* character,
                  CharacterController*) const override;
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 };
 
 struct ExitVehicle : public CharacterController::Activity {
@@ -277,7 +282,8 @@ struct ExitVehicle : public CharacterController::Activity {
     ExitVehicle(bool jacked_ = false) : jacked(jacked_) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 };
 
 struct UseItem : public CharacterController::Activity {
@@ -290,7 +296,8 @@ struct UseItem : public CharacterController::Activity {
     UseItem(int slot) : itemslot(slot) {
     }
 
-    bool update(CharacterObject* character, CharacterController* controller) override;
+    bool update(CharacterObject* character,
+                CharacterController* controller) override;
 };
 }
 

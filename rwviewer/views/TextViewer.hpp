@@ -24,20 +24,21 @@ class QWidget;
 class TextTableView : public QTableView {
     Q_OBJECT
 protected slots:
-    virtual void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+    virtual void selectionChanged(const QItemSelection& selected,
+                                  const QItemSelection& deselected) override;
 signals:
-    void gameStringChanged(const GameString &string);
+    void gameStringChanged(const GameString& string);
 };
 
 class TextViewer : public ViewerInterface {
     Q_OBJECT
 
-    TextModel *textModel;
-    TextTableView *textTable;
-    ViewerWidget *viewerWidget;
+    TextModel* textModel;
+    TextTableView* textTable;
+    ViewerWidget* viewerWidget;
 
-    QLineEdit *hexLineEdit;
-    QTextEdit *textEdit;
+    QLineEdit* hexLineEdit;
+    QTextEdit* textEdit;
 
     void worldChanged() override;
 
@@ -47,15 +48,16 @@ class TextViewer : public ViewerInterface {
 
     void updateRender();
 
-    void setGameString(const GameString &gameString);
+    void setGameString(const GameString& gameString);
     std::vector<std::string> getFontTextureNames();
+
 public:
     TextViewer(QWidget* parent = nullptr, Qt::WindowFlags f = nullptr);
 
 signals:
     void fontChanged(font_t font);
 private slots:
-    void onGameStringChange(const GameString &gameString);
+    void onGameStringChange(const GameString& gameString);
     void onStringChange();
     void onFontChange(size_t font);
     void onFontSizeChange(int font);

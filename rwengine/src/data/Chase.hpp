@@ -18,7 +18,9 @@ struct ChaseKeyframe {
     glm::vec3 position;
     glm::quat rotation;
 
-    ChaseKeyframe(glm::vec3 _velocity, int _steeringAngle, int _acceleratorPower, int _brakePower, bool _handbrake, glm::vec3 _position, glm::quat _rotation)
+    ChaseKeyframe(glm::vec3 _velocity, int _steeringAngle,
+                  int _acceleratorPower, int _brakePower, bool _handbrake,
+                  glm::vec3 _position, glm::quat _rotation)
         : velocity(_velocity)
         , steeringAngle(_steeringAngle)
         , acceleratorPower(_acceleratorPower)

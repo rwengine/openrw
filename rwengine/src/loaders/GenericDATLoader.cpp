@@ -20,8 +20,10 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
         std::string lineBuff;
 
         while (std::getline(dfile, lineBuff)) {
-            if (lineBuff.at(0) == ';') continue;
-            if (lineBuff.at(0) == '*') continue;
+            if (lineBuff.at(0) == ';')
+                continue;
+            if (lineBuff.at(0) == '*')
+                continue;
             std::stringstream ss(lineBuff);
 
             auto dyndata = std::make_shared<DynamicObjectData>();
@@ -32,29 +34,39 @@ void GenericDATLoader::loadDynamicObjects(const std::string& name,
                 dyndata->modelName.erase(cpos);
             }
             ss >> dyndata->mass;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->turnMass;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->airRes;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->elasticity;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->buoyancy;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->uprootForce;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->collDamageMulti;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             int tmp;
             ss >> tmp;
             dyndata->collDamageEffect = tmp;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> tmp;
             dyndata->collResponseFlags = tmp;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',')
+                ss.ignore(1);
             ss >> dyndata->cameraAvoid;
 
-            RW_CHECK(ss.eof() || ss.good(), "Loading dynamicsObject data file " << name << " failed");
+            RW_CHECK(ss.eof() || ss.good(),
+                     "Loading dynamicsObject data file " << name << " failed");
 
             data.insert({dyndata->modelName, dyndata});
         }
@@ -70,12 +82,14 @@ void GenericDATLoader::loadWeapons(const std::string& name,
         int slotNum = 0;
 
         while (std::getline(dfile, linebuffer)) {
-            if (linebuffer[0] == '#') continue;
+            if (linebuffer[0] == '#')
+                continue;
             std::stringstream ss(linebuffer);
 
             auto data = std::make_shared<WeaponData>();
             ss >> data->name;
-            if (data->name == "ENDWEAPONDATA") continue;
+            if (data->name == "ENDWEAPONDATA")
+                continue;
 
             // Skip lines with blank names (probably an empty line).
             if (std::find_if(data->name.begin(), data->name.end(), ::isalnum) ==
@@ -121,7 +135,8 @@ void GenericDATLoader::loadWeapons(const std::string& name,
             ss >> data->modelID;
             ss >> data->flags;
 
-            RW_CHECK(ss.eof() || ss.good(), "Loading weapon data file " << name << " failed");
+            RW_CHECK(ss.eof() || ss.good(),
+                     "Loading weapon data file " << name << " failed");
 
             data->inventorySlot = slotNum++;
 
@@ -138,7 +153,8 @@ void GenericDATLoader::loadHandling(const std::string& name,
         std::string lineBuff;
 
         while (std::getline(hndFile, lineBuff)) {
-            if (lineBuff.at(0) == ';') continue;
+            if (lineBuff.at(0) == ';')
+                continue;
             std::stringstream ss(lineBuff);
 
             VehicleHandlingInfo info;
@@ -176,12 +192,13 @@ void GenericDATLoader::loadHandling(const std::string& name,
             ss >> info.suspensionBias;
             ss >> std::hex >> info.flags;
 
-            RW_CHECK(ss.eof() || ss.good(), "Loading handling data file " << name << " failed");
+            RW_CHECK(ss.eof() || ss.good(),
+                     "Loading handling data file " << name << " failed");
 
             auto mit = vehicleData.find(info.ID);
             if (mit == vehicleData.end()) {
-                vehicleData.insert({info.ID, std::make_shared<VehicleInfo>(VehicleInfo{
-                                                 info, {}, {}})});
+                vehicleData.insert({info.ID, std::make_shared<VehicleInfo>(
+                                                 VehicleInfo{info, {}, {}})});
             } else {
                 mit->second->handling = info;
             }

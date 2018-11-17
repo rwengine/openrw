@@ -28,7 +28,8 @@ ItemListWidget::ItemListWidget(QWidget* parent, Qt::WindowFlags flags)
 }
 
 void ItemListWidget::worldLoaded(GameWorld* world) {
-    if (model) delete model;
+    if (model)
+        delete model;
     model = new ItemListModel(world, this);
     filter->setSourceModel(model);
 }

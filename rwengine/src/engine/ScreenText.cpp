@@ -130,7 +130,8 @@ ScreenTextEntry ScreenTextEntry::makeBig(const GameStringKey& id,
             break;
     }
 
-    return {GameStringUtil::fromString("Error, style " + std::to_string(style), FONT_PRICEDOWN),
+    return {GameStringUtil::fromString("Error, style " + std::to_string(style),
+                                       FONT_PRICEDOWN),
             {320.f, 400.f},
             FONT_ARIAL,
             50,
@@ -167,8 +168,17 @@ ScreenTextEntry ScreenTextEntry::makeHighPriority(const GameStringKey& id,
 
 ScreenTextEntry ScreenTextEntry::makeHelp(const GameStringKey& id,
                                           const GameString& str) {
-    return {str, {20.f, 20.f}, FONT_ARIAL, 18, {0, 0, 0, 255}, {255, 255, 255}, 0, 5000,
-            0,   35,           id};
+    return {str,
+            {20.f, 20.f},
+            FONT_ARIAL,
+            18,
+            {0, 0, 0, 255},
+            {255, 255, 255},
+            0,
+            5000,
+            0,
+            35,
+            id};
 }
 
 ScreenTextEntry ScreenTextEntry::makeHiddenPackageText(const GameStringKey& id,

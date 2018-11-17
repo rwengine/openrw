@@ -128,7 +128,8 @@ struct GeometryVertex {
                  GL_UNSIGNED_BYTE}};
     }
 
-    GeometryVertex(glm::vec3 _position, glm::vec3 _normal, glm::vec2 _texcoord, glm::u8vec4 _colour)
+    GeometryVertex(glm::vec3 _position, glm::vec3 _normal, glm::vec2 _texcoord,
+                   glm::u8vec4 _colour)
         : position(_position)
         , normal(_normal)
         , texcoord(_texcoord)
@@ -150,7 +151,8 @@ struct Geometry {
         TextureData::Handle texture;
 
         template<class String1, class String2>
-        Texture(String1&& _name, String2&& _alphaName, const TextureData::Handle &_texture)
+        Texture(String1&& _name, String2&& _alphaName,
+                const TextureData::Handle& _texture)
             : name(std::forward<String1>(_name))
             , alphaName(std::forward<String2>(_alphaName))
             , texture(_texture) {
@@ -230,8 +232,7 @@ public:
     void setFlag(uint32_t flag, bool set) {
         if (set) {
             flags_ |= flag;
-        }
-        else {
+        } else {
             flags_ &= ~flag;
         }
     }

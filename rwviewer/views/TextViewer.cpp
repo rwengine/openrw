@@ -15,10 +15,9 @@
 #include <platform/FileHandle.hpp>
 #include <render/GameRenderer.hpp>
 
-#include <QGroupBox>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QItemSelection>
 #include <QLineEdit>
 #include <QModelIndex>
@@ -30,29 +29,30 @@
 #include <QSplitter>
 #include <QTableView>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
-void TextTableView::selectionChanged(const QItemSelection &selected, const QItemSelection &) {
+void TextTableView::selectionChanged(const QItemSelection& selected,
+                                     const QItemSelection&) {
     if (!selected.size())
         return;
     auto index = selected.indexes()[0];
     if (!index.isValid())
         return;
 
-    auto *textModel = dynamic_cast<TextModel *>(this->model());
+    auto* textModel = dynamic_cast<TextModel*>(this->model());
     if (!textModel) {
         return;
     }
     try {
         auto gameString = textModel->lookupIndex(index);
         emit gameStringChanged(gameString);
-    } catch (std::out_of_range &) {
+    } catch (std::out_of_range&) {
         return;
     }
 }
 
 TextViewer::TextViewer(QWidget* parent, Qt::WindowFlags f)
     : ViewerInterface(parent, f) {
-
     auto dataLayout = new QVBoxLayout;
 
     auto splitter = new QSplitter;
@@ -65,22 +65,26 @@ TextViewer::TextViewer(QWidget* parent, Qt::WindowFlags f)
     textTable = new TextTableView;
     textTable->setModel(textModel);
     textTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(textTable, &TextTableView::gameStringChanged, this, &TextViewer::onGameStringChange);
+    connect(textTable, &TextTableView::gameStringChanged, this,
+            &TextViewer::onGameStringChange);
     dataLayout->addWidget(textTable);
 
     auto propLayout = new QHBoxLayout;
 
     connect(this, &TextViewer::fontChanged, this, &TextViewer::onFontChange);
     auto groupBox = new QGroupBox;
-    auto *groupBoxLayout = new QHBoxLayout;
-    auto *radioFont1 = new QRadioButton(tr("Pager"));
-    connect(radioFont1, &QRadioButton::clicked, [this]() {emit fontChanged(FONT_PAGER);});
+    auto* groupBoxLayout = new QHBoxLayout;
+    auto* radioFont1 = new QRadioButton(tr("Pager"));
+    connect(radioFont1, &QRadioButton::clicked,
+            [this]() { emit fontChanged(FONT_PAGER); });
     groupBoxLayout->addWidget(radioFont1);
-    auto *radioFont2 = new QRadioButton(tr("Pricedown"));
-    connect(radioFont2, &QRadioButton::clicked, [this]() {emit fontChanged(FONT_PRICEDOWN);});
+    auto* radioFont2 = new QRadioButton(tr("Pricedown"));
+    connect(radioFont2, &QRadioButton::clicked,
+            [this]() { emit fontChanged(FONT_PRICEDOWN); });
     groupBoxLayout->addWidget(radioFont2);
-    auto *radioFont3 = new QRadioButton(tr("Arial"));
-    connect(radioFont3, &QRadioButton::clicked, [this]() {emit fontChanged(FONT_ARIAL);});
+    auto* radioFont3 = new QRadioButton(tr("Arial"));
+    connect(radioFont3, &QRadioButton::clicked,
+            [this]() { emit fontChanged(FONT_ARIAL); });
     groupBoxLayout->addWidget(radioFont3);
     groupBox->setLayout(groupBoxLayout);
     groupBox->setProperty("border", "2px solid gray");
@@ -92,7 +96,9 @@ TextViewer::TextViewer(QWidget* parent, Qt::WindowFlags f)
     auto textSizeSpinBox = new QSpinBox;
     textSizeSpinBox->setMinimum(1);
     textSizeSpinBox->setMaximum(50);
-    connect(textSizeSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &TextViewer::onFontSizeChange);
+    connect(textSizeSpinBox,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+            &TextViewer::onFontSizeChange);
     textSizeSpinBox->setValue(20);
     textSizeLayout->addRow(tr("Font size"), textSizeSpinBox);
     propLayout->addLayout(textSizeLayout);
@@ -119,8 +125,11 @@ TextViewer::TextViewer(QWidget* parent, Qt::WindowFlags f)
     mainLayout->addWidget(splitter);
     setLayout(mainLayout);
 
-    connect(textSizeSpinBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &TextViewer::onFontSizeChange);
-    connect(textEdit, &QTextEdit::textChanged, this, &TextViewer::onStringChange);
+    connect(textSizeSpinBox,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+            &TextViewer::onFontSizeChange);
+    connect(textEdit, &QTextEdit::textChanged, this,
+            &TextViewer::onStringChange);
 }
 
 void TextViewer::onFontChange(font_t font) {
@@ -136,11 +145,12 @@ void TextViewer::onFontSizeChange(int size) {
 
 void TextViewer::onStringChange() {
     auto string = textEdit->toPlainText();
-    auto newGameString = GameStringUtil::fromString(string.toStdString(), currentFont);
+    auto newGameString =
+        GameStringUtil::fromString(string.toStdString(), currentFont);
     onGameStringChange(newGameString);
 }
 
-void TextViewer::onGameStringChange(const GameString &gameString) {
+void TextViewer::onGameStringChange(const GameString& gameString) {
     if (!currentGameString.compare(gameString)) {
         return;
     }
@@ -149,8 +159,8 @@ void TextViewer::onGameStringChange(const GameString &gameString) {
     std::ostringstream oss;
     oss << std::hex;
     for (auto c : gameString) {
-        oss << std::setw(sizeof(gameString[0])) << std::setfill('0')
-                << int(c) << " ";
+        oss << std::setw(sizeof(gameString[0])) << std::setfill('0') << int(c)
+            << " ";
     }
     auto newHexText = QString::fromStdString(oss.str());
     if (hexLineEdit->text().compare(newHexText)) {
@@ -187,11 +197,12 @@ void TextViewer::updateRender() {
         ti.align = TextRenderer::TextInfo::TextAlignment::Left;
         ti.wrapX = 0;
 
-        for(GameStringChar c=0x20; c<0xb2; ++c) {
+        for (GameStringChar c = 0x20; c < 0xb2; ++c) {
             unsigned column = c % 0x10;
             unsigned row = (c / 0x10) - 2 + 3; /* +3 to offset first line*/
             ti.text = c;
-            ti.screenPosition = glm::vec2(10 + (column * COL_STRIDE), 10 + (row * ROW_STRIDE));
+            ti.screenPosition =
+                glm::vec2(10 + (column * COL_STRIDE), 10 + (row * ROW_STRIDE));
             viewerWidget->showText(ti);
         }
     }
@@ -202,16 +213,17 @@ void TextViewer::worldChanged() {
     TextMapType textMap;
     LoaderGXT loader;
     std::set<std::string> keys;
-    for(const auto &textName : textNames) {
+    for (const auto& textName : textNames) {
         GameTexts texts;
         auto handle = world()->data->index.openFile(textName);
         loader.load(texts, handle);
-        const auto &language = textName;
+        const auto& language = textName;
         textMap.languages.push_back(language);
-        const auto &stringTable = texts.getStringTable();
-        for (const auto &tableItem : stringTable) {
+        const auto& stringTable = texts.getStringTable();
+        for (const auto& tableItem : stringTable) {
             keys.insert(tableItem.first);
-            textMap.map_lang_key_tran[language][tableItem.first] = tableItem.second;
+            textMap.map_lang_key_tran[language][tableItem.first] =
+                tableItem.second;
         }
     }
     textMap.keys.resize(keys.size());
@@ -221,14 +233,15 @@ void TextViewer::worldChanged() {
 }
 
 std::vector<std::string> TextViewer::getFontTextureNames() {
-    const auto &gameDataPath = rwfs::path(world()->data->getDataPath());
+    const auto& gameDataPath = rwfs::path(world()->data->getDataPath());
     rwfs::path textPath;
-    for (const rwfs::path &p : rwfs::directory_iterator(gameDataPath)) {
+    for (const rwfs::path& p : rwfs::directory_iterator(gameDataPath)) {
         if (!rwfs::is_directory(p)) {
             continue;
         }
         std::string filename = p.filename().string();
-        std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+        std::transform(filename.begin(), filename.end(), filename.begin(),
+                       ::tolower);
         if (!filename.compare("text")) {
             textPath = p;
             break;
@@ -238,10 +251,11 @@ std::vector<std::string> TextViewer::getFontTextureNames() {
         throw std::runtime_error("text directory not found in gamedata path");
     }
     std::vector<std::string> names;
-    for (const rwfs::path &p : rwfs::directory_iterator(textPath)) {
-//        auto langName = p.lexically_relative(gameDataPath).string();
+    for (const rwfs::path& p : rwfs::directory_iterator(textPath)) {
+        //        auto langName = p.lexically_relative(gameDataPath).string();
         auto langName = p.filename().string();
-        std::transform(langName.begin(), langName.end(), langName.begin(), ::tolower);
+        std::transform(langName.begin(), langName.end(), langName.begin(),
+                       ::tolower);
         names.push_back(langName);
     }
     return names;

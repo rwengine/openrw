@@ -105,7 +105,7 @@ public:
     ///
     void tick(float dt);
 
-    template <ScreenTextType Q, class... Args>
+    template<ScreenTextType Q, class... Args>
     void addText(Args&&... args) {
         static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount,
                       "Queue out of range");
@@ -113,21 +113,21 @@ public:
             std::forward<Args...>(args...));
     }
 
-    template <ScreenTextType Q>
+    template<ScreenTextType Q>
     const EntryList& getText() const {
         static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount,
                       "Queue out of range");
         return m_textQueues[static_cast<size_t>(Q)];
     }
 
-    template <ScreenTextType Q>
+    template<ScreenTextType Q>
     void clear() {
         static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount,
                       "Queue out of range");
         m_textQueues[static_cast<size_t>(Q)].clear();
     }
 
-    template <ScreenTextType Q>
+    template<ScreenTextType Q>
     void remove(const std::string& id) {
         static_assert(static_cast<size_t>(Q) < ScreenTypeTextCount,
                       "Queue out of range");
@@ -142,9 +142,10 @@ public:
         return m_textQueues;
     }
 
-    template <class... Args>
+    template<class... Args>
     static GameString format(GameString format, Args&&... args) {
-        static auto kReplacementMarker = GameStringUtil::fromStringCommon("~1~");
+        static auto kReplacementMarker =
+            GameStringUtil::fromStringCommon("~1~");
         const std::array<GameString, sizeof...(args)> vals = {{args...}};
         size_t x = 0, val = 0;
         // We're only looking for numerical replacement markers

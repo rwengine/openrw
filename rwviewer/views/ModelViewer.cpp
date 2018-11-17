@@ -54,5 +54,3 @@ void ModelViewer::showObject(uint16_t object) {
     }
     showModel(dffLoader.loadFromMemory(file));
 }
-
-

@@ -23,9 +23,8 @@ public:
         /// Logged message
         std::string message;
 
-        template <class String1, class String2>
-        LogMessage(String1&& cc, MessageSeverity ss,
-                   String2&& mm)
+        template<class String1, class String2>
+        LogMessage(String1&& cc, MessageSeverity ss, String2&& mm)
             : component(std::forward<String1>(cc))
             , severity(ss)
             , message(std::forward<String2>(mm)) {

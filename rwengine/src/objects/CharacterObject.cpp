@@ -35,8 +35,7 @@ const float CharacterObject::DefaultJumpSpeed = 2.f;
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
                                  const glm::quat& rot, BaseModelInfo* modelinfo,
                                  CharacterController* controller)
-    : GameObject(engine, pos, rot, modelinfo)
-    , controller(controller) {
+    : GameObject(engine, pos, rot, modelinfo), controller(controller) {
     auto info = getModelInfo<PedModelInfo>();
     setClump(info->getModel()->clone());
     if (info->getModel()) {
@@ -119,10 +118,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         auto c = static_cast<PlayerController*>(controller);
 
         if (c->isTalkingOnPayphone()) {
-            animator->playAnimation(
-                AnimIndexMovement,
-                animations->animation(AnimCycle::PhoneTalk), 1.f,
-                true);
+            animator->playAnimation(AnimIndexMovement,
+                                    animations->animation(AnimCycle::PhoneTalk),
+                                    1.f, true);
             return glm::vec3();
         }
         if (c->isPickingUpPayphone()) {
@@ -217,7 +215,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         }
     }
 
-    if (isPlayer() && static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
+    if (isPlayer() &&
+        static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
         movementAnimation == animations->animation(AnimCycle::WalkStart)) {
         animationSpeed *= 2;
     }
@@ -437,8 +436,7 @@ void CharacterObject::setPosition(const glm::vec3& pos) {
 
 glm::vec3 CharacterObject::getCenterOffset() {
     // Return an offset so that the feet are on the ground
-    const float z_offset =
-        physShape->getHalfHeight() + physShape->getRadius();
+    const float z_offset = physShape->getHalfHeight() + physShape->getRadius();
     return glm::vec3(0.f, 0.f, z_offset);
 }
 
@@ -596,9 +594,11 @@ void CharacterObject::resetToAINode() {
     float d = std::numeric_limits<float>::max();
     for (const auto& node : nodes) {
         if (vehicleNode) {
-            if (node->type == AIGraphNode::Pedestrian) continue;
+            if (node->type == AIGraphNode::Pedestrian)
+                continue;
         } else {
-            if (node->type == AIGraphNode::Vehicle) continue;
+            if (node->type == AIGraphNode::Vehicle)
+                continue;
         }
 
         float dist = glm::length(node->position - getPosition());

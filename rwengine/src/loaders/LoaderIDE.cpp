@@ -13,17 +13,18 @@
 
 #include <rw/casts.hpp>
 
-bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
+bool LoaderIDE::load(const std::string& filename, const PedStatsList& stats) {
     std::ifstream str(filename);
-    if (!str.is_open()) return false;
+    if (!str.is_open())
+        return false;
     return load(str, stats);
 }
 
 bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
-    auto find_stat_id = [&](const std::string &name) {
+    auto find_stat_id = [&](const std::string& name) {
         auto it =
             std::find_if(stats.begin(), stats.end(),
-                         [&](const PedStats &a) { return a.name_ == name; });
+                         [&](const PedStats& a) { return a.name_ == name; });
         if (it == stats.end()) {
             return -1;
         }
@@ -39,7 +40,8 @@ bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
                        .base(),
                    line.end());
 
-        if (!line.empty() && line[0] == '#') continue;
+        if (!line.empty() && line[0] == '#')
+            continue;
 
         if (line == "end") {
             section = NONE;
@@ -244,8 +246,8 @@ bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
                         path.nodes.push_back(node);
                     }
 
-                    auto &object = objects[path.ID];
-                    auto simple = dynamic_cast<SimpleModelInfo *>(object.get());
+                    auto& object = objects[path.ID];
+                    auto simple = dynamic_cast<SimpleModelInfo*>(object.get());
                     simple->paths.push_back(path);
 
                     break;

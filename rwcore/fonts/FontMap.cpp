@@ -9,14 +9,16 @@
  */
 using OGameStringStream = std::basic_ostringstream<GameStringChar>;
 
-FontMap::FontMap(std::initializer_list<std::reference_wrapper<const gschar_unicode_map_t>> maps) {
-    for (const auto &map : maps) {
+FontMap::FontMap(
+    std::initializer_list<std::reference_wrapper<const gschar_unicode_map_t>>
+        maps) {
+    for (const auto& map : maps) {
         m_to_unicode.insert(map.get().cbegin(), map.get().cend());
-        for (const auto &[gameStringChar, unicode] : map.get()) {
+        for (const auto& [gameStringChar, unicode] : map.get()) {
             m_from_unicode[unicode] = gameStringChar;
         }
     }
-    const auto &q = m_from_unicode.find(UnicodeValue::UNICODE_QUESTION_MARK);
+    const auto& q = m_from_unicode.find(UnicodeValue::UNICODE_QUESTION_MARK);
     if (q == m_from_unicode.end()) {
         RW_ERROR("Font does not have a question mark");
         m_unknown_gschar = ' ';
@@ -30,7 +32,7 @@ GameStringChar FontMap::to_GameStringChar(unicode_t u) const {
         /* Passthrough control characters */
         return static_cast<GameStringChar>(u);
     }
-    const auto &p = m_from_unicode.find(u);
+    const auto& p = m_from_unicode.find(u);
     if (p == m_from_unicode.end()) {
         return m_unknown_gschar;
     }
@@ -42,16 +44,16 @@ unicode_t FontMap::to_unicode(GameStringChar c) const {
         /* Passthrough control characters */
         return c;
     }
-    const auto &p = m_to_unicode.find(c);
+    const auto& p = m_to_unicode.find(c);
     if (p == m_to_unicode.end()) {
         return UnicodeValue::UNICODE_REPLACEMENT_CHARACTER;
     }
     return p->second;
 }
 
-std::string FontMap::to_string(const GameString &s) const {
+std::string FontMap::to_string(const GameString& s) const {
     std::ostringstream oss;
-    for (GameStringChar c: s) {
+    for (GameStringChar c : s) {
         char buffer[4];
         unicode_t u = to_unicode(c);
         auto nb = unicode_to_utf8(u, buffer);
@@ -60,7 +62,7 @@ std::string FontMap::to_string(const GameString &s) const {
     return oss.str();
 }
 
-GameString FontMap::to_GameString(const std::string &utf8) const {
+GameString FontMap::to_GameString(const std::string& utf8) const {
     OGameStringStream oss;
     std::istringstream iss(utf8);
     for (Utf8UnicodeIterator it(iss); it.good(); ++it) {

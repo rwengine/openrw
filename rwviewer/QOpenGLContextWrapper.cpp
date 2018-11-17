@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include <QOpenGLContext>
 
-QOpenGLContextWrapper::QOpenGLContextWrapper(QWidget *parent)
+QOpenGLContextWrapper::QOpenGLContextWrapper(QWidget* parent)
     : m_parent(parent) {
 }
 
@@ -24,7 +24,7 @@ bool QOpenGLContextWrapper::create() {
     return true;
 }
 
-bool QOpenGLContextWrapper::makeCurrent(QSurface *surface) {
+bool QOpenGLContextWrapper::makeCurrent(QSurface* surface) {
     return m_context->makeCurrent(surface);
 }
 
@@ -32,6 +32,6 @@ void QOpenGLContextWrapper::doneCurrent() {
     m_context->doneCurrent();
 }
 
-void QOpenGLContextWrapper::swapBuffers(QSurface *surface) {
+void QOpenGLContextWrapper::swapBuffers(QSurface* surface) {
     m_context->swapBuffers(surface);
 }

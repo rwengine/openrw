@@ -1,7 +1,7 @@
 #include "data/Chase.hpp"
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 
 #include <rw/debug.hpp>
@@ -11,8 +11,8 @@
 
 #define KEYFRAMES_PER_SECOND 30
 
-bool ChaseKeyframe::load(const std::string &filePath,
-                         std::vector<ChaseKeyframe> &frames) {
+bool ChaseKeyframe::load(const std::string& filePath,
+                         std::vector<ChaseKeyframe>& frames) {
     std::ifstream chaseFile(filePath, std::ios_base::binary);
     RW_CHECK(chaseFile.is_open(), "Failed to open chase file");
     if (!chaseFile.is_open()) {
@@ -43,8 +43,7 @@ bool ChaseKeyframe::load(const std::string &filePath,
 
     for (size_t i = 0; i < recordCount; ++i) {
         ChaseEntryRecord rec;
-        chaseFile.read(reinterpret_cast<char *>(&rec),
-                       sizeof(ChaseEntryRecord));
+        chaseFile.read(reinterpret_cast<char*>(&rec), sizeof(ChaseEntryRecord));
         glm::vec3 velocity{
             rec.velocity[0] / 16383.5f,
             rec.velocity[1] / 16383.5f,
@@ -69,8 +68,8 @@ bool ChaseKeyframe::load(const std::string &filePath,
     return true;
 }
 
-bool ChaseCoordinator::addChaseVehicle(GameObject *vehicle, int index,
-                                       const std::string &pathFile) {
+bool ChaseCoordinator::addChaseVehicle(GameObject* vehicle, int index,
+                                       const std::string& pathFile) {
     std::vector<ChaseKeyframe> keyframes;
     bool result = ChaseKeyframe::load(pathFile, keyframes);
     RW_CHECK(result, "Failed to load chase keyframes: " + pathFile);
@@ -78,7 +77,7 @@ bool ChaseCoordinator::addChaseVehicle(GameObject *vehicle, int index,
     return result;
 }
 
-GameObject *ChaseCoordinator::getChaseVehicle(int index) {
+GameObject* ChaseCoordinator::getChaseVehicle(int index) {
     return chaseVehicles.at(index).object;
 }
 
@@ -97,19 +96,20 @@ void ChaseCoordinator::start() {
 void ChaseCoordinator::update(float dt) {
     chaseTime += dt;
     auto frameNum = static_cast<size_t>(chaseTime * KEYFRAMES_PER_SECOND);
-    for (auto &it : chaseVehicles) {
+    for (auto& it : chaseVehicles) {
         RW_CHECK(frameNum < it.second.keyframes.size(),
                  "Vehicle out of chase keyframes");
-        if (frameNum >= it.second.keyframes.size()) continue;
+        if (frameNum >= it.second.keyframes.size())
+            continue;
 
-        const ChaseKeyframe &kf = it.second.keyframes[frameNum];
+        const ChaseKeyframe& kf = it.second.keyframes[frameNum];
         it.second.object->setPosition(kf.position);
         it.second.object->setRotation(kf.rotation);
     }
 }
 
 void ChaseCoordinator::cleanup() {
-    for (auto &it : chaseVehicles) {
+    for (auto& it : chaseVehicles) {
         it.second.object->engine->destroyObject(it.second.object);
     }
     chaseVehicles.clear();

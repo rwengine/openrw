@@ -15,7 +15,7 @@ private:
      * @return file path or a description of the data type
      */
     static std::string extractFilenameParseTypeData(ParseType type,
-                                                    const std::string &data);
+                                                    const std::string& data);
 
 public:
     class ParseResult {
@@ -47,8 +47,8 @@ public:
          * @param destType Type of the destination
          * @param destination The destination
          */
-        ParseResult(ParseType srcType, const std::string &source,
-                    ParseType destType, const std::string &destination);
+        ParseResult(ParseType srcType, const std::string& source,
+                    ParseType destType, const std::string& destination);
 
         /**
          * @brief ParseResult Create empty ParseResult
@@ -66,13 +66,13 @@ public:
          * @brief getKeysRequiredMissing Get the keys that were missing
          * @return A vector with all the keys
          */
-        const std::vector<std::string> &getKeysRequiredMissing() const;
+        const std::vector<std::string>& getKeysRequiredMissing() const;
 
         /**
          * @brief getKeysInvalidData Get the keys that contained invalid data
          * @return A vector with all the keys
          */
-        const std::vector<std::string> &getKeysInvalidData() const;
+        const std::vector<std::string>& getKeysInvalidData() const;
 
         /**
          * @brief Mark this result as valid
@@ -84,7 +84,7 @@ public:
          * @param line Line number where the error is located
          * @param message Description of the error
          */
-        void failInputFile(size_t line, const std::string &message);
+        void failInputFile(size_t line, const std::string& message);
 
         /**
          * @brief failArgument Fail because an argument was invalid
@@ -97,13 +97,13 @@ public:
          * @brief failRequiredMissing Fail because a required key is missing
          * @param key The key that is missing
          */
-        void failRequiredMissing(const std::string &key);
+        void failRequiredMissing(const std::string& key);
 
         /**
          * @brief failInvalidData Fail because a key contains invalid data
          * @param key The key that contains invalid data
          */
-        void failInvalidData(const std::string &key);
+        void failInvalidData(const std::string& key);
 
         /**
          * @brief failOutputFile Fail because an error occurred while while
@@ -111,7 +111,7 @@ public:
          * @param line Line number where the error is located
          * @param message Description of the error
          */
-        void failOutputFile(size_t line, const std::string &message);
+        void failOutputFile(size_t line, const std::string& message);
 
         /**
          * @brief isValid
@@ -130,13 +130,13 @@ public:
          * @param key The unknown key
          * @param value The associated data
          */
-        void addUnknownData(const std::string &key, const std::string &value);
+        void addUnknownData(const std::string& key, const std::string& value);
 
         /**
          * @brief addUnknownData Get all the unknown key value pairs
          * @return Mapping of the unknown keys with associated data
          */
-        const std::map<std::string, std::string> &getUnknownData() const;
+        const std::map<std::string, std::string>& getUnknownData() const;
 
     private:
         /// Type of the failure
@@ -168,7 +168,7 @@ public:
          * @brief setUnknownData Replace the the unknown key value pairs
          */
         void setUnknownData(
-            const std::map<std::string, std::string> &unknownData);
+            const std::map<std::string, std::string>& unknownData);
 
         friend class GameConfig;
     };
@@ -182,7 +182,7 @@ public:
      * @brief Initialize this object using the config file at path
      * @param path Path of the configuration file
      */
-    void loadFile(const rwfs::path &path);
+    void loadFile(const rwfs::path& path);
 
     /**
      * @brief getConfigPath Returns the path for the configuration
@@ -204,7 +204,7 @@ public:
      * @brief getParseResult Get more information on parsing failures
      * @return A ParseResult object  containing more information
      */
-    const ParseResult &getParseResult() const;
+    const ParseResult& getParseResult() const;
 
     /**
      * @brief getConfigString Returns the content of the default INI
@@ -213,10 +213,10 @@ public:
      */
     std::string getDefaultINIString();
 
-    const rwfs::path &getGameDataPath() const {
+    const rwfs::path& getGameDataPath() const {
         return m_gamePath;
     }
-    const std::string &getGameLanguage() const {
+    const std::string& getGameLanguage() const {
         return m_gameLanguage;
     }
     bool getInputInvertY() const {
@@ -236,8 +236,8 @@ public:
     }
 
     static rwfs::path getDefaultConfigPath();
-private:
 
+private:
     /**
      * @brief parseConfig Load data from source and write it to destination.
      * Whitespace will be stripped from unknown data.
@@ -251,8 +251,8 @@ private:
      *                    INI string if srcType == STRING
      * @return True if the parsing succeeded
      */
-    ParseResult parseConfig(ParseType srcType, const std::string &source,
-                            ParseType destType, std::string &destination);
+    ParseResult parseConfig(ParseType srcType, const std::string& source,
+                            ParseType destType, std::string& destination);
 
     /* Config State */
     rwfs::path m_configPath{};
@@ -272,11 +272,11 @@ private:
     /// Size of the window
     int m_windowWidth{800};
     int m_windowHeight{600};
-    
+
     /// Set the window to fullscreen
     bool m_windowFullscreen = false;
 
-    /// HUD scale parameter 
+    /// HUD scale parameter
     float m_HUDscale = 1.f;
 };
 

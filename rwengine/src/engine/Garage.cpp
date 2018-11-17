@@ -168,12 +168,18 @@ bool Garage::isObjectInsideGarage(GameObject* object) const {
     auto p = object->getPosition();
 
     // Do basic check first
-    if (p.x < min.x) return false;
-    if (p.y < min.y) return false;
-    if (p.z < min.z) return false;
-    if (p.x > max.x) return false;
-    if (p.y > max.y) return false;
-    if (p.z > max.z) return false;
+    if (p.x < min.x)
+        return false;
+    if (p.y < min.y)
+        return false;
+    if (p.z < min.z)
+        return false;
+    if (p.x > max.x)
+        return false;
+    if (p.y > max.y)
+        return false;
+    if (p.z > max.z)
+        return false;
 
     // Now check if all collision spheres are inside
     // garage's bounding box
@@ -184,12 +190,18 @@ bool Garage::isObjectInsideGarage(GameObject* object) const {
         for (auto& sphere : collision->spheres) {
             auto c = p + sphere.center;
             auto r = sphere.radius;
-            if (c.x + r < min.x) return false;
-            if (c.y + r < min.y) return false;
-            if (c.z + r < min.z) return false;
-            if (c.x - r > max.x) return false;
-            if (c.y - r > max.y) return false;
-            if (c.z - r > max.z) return false;
+            if (c.x + r < min.x)
+                return false;
+            if (c.y + r < min.y)
+                return false;
+            if (c.z + r < min.z)
+                return false;
+            if (c.x - r > max.x)
+                return false;
+            if (c.y - r > max.y)
+                return false;
+            if (c.z - r > max.z)
+                return false;
         }
     }
 

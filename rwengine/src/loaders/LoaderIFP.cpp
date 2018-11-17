@@ -48,7 +48,7 @@ AnimationKeyframe AnimationBone::getInterpolatedKeyframe(float time) {
 }
 
 AnimationKeyframe AnimationBone::getKeyframe(float time) {
-    for (auto &frame : frames) {
+    for (auto& frame : frames) {
         if (time >= frame.starttime) {
             return frame;
         }
@@ -98,8 +98,8 @@ bool LoaderIFP::loadFromMemory(char* data) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     time = *read<float>(data, dataI);
                     bonedata->frames.emplace_back(q, glm::vec3(0.f, 0.f, 0.f),
-                                                glm::vec3(1.f, 1.f, 1.f), time,
-                                                d);
+                                                  glm::vec3(1.f, 1.f, 1.f),
+                                                  time, d);
                 }
             } else if (type == "KRT0") {
                 bonedata->type = AnimationBone::RT0;
@@ -148,10 +148,14 @@ std::string LoaderIFP::readString(char* data, size_t* ofs) {
     size_t b = *ofs;
     for (size_t o = *ofs; (o = *ofs);) {
         *ofs += 4;
-        if (data[o + 0] == 0) break;
-        if (data[o + 1] == 0) break;
-        if (data[o + 2] == 0) break;
-        if (data[o + 3] == 0) break;
+        if (data[o + 0] == 0)
+            break;
+        if (data[o + 1] == 0)
+            break;
+        if (data[o + 2] == 0)
+            break;
+        if (data[o + 3] == 0)
+            break;
     }
     return std::string(data + b);
 }

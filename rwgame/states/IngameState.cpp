@@ -110,7 +110,9 @@ void IngameState::startGame() {
     game->startScript("data/main.scm");
     game->getScriptVM()->startThread(0);
     auto audioCityPath = getWorld()->data->index.findFilePath("audio/City.wav");
-    getWorld()->sound.playBackground(audioCityPath.string()); //FIXME: playBackground should just accept "audio/City.wav"
+    getWorld()->sound.playBackground(
+        audioCityPath.string());  // FIXME: playBackground should just accept
+                                  // "audio/City.wav"
 }
 
 void IngameState::enter() {
@@ -283,7 +285,8 @@ void IngameState::tick(float dt) {
 
 void IngameState::draw(GameRenderer* r) {
     if (!getWorld()->state->isCinematic && getWorld()->isCutsceneDone()) {
-        game->getHUDDrawer().drawHUD(_look, game->getWorld()->getPlayer(), getWorld(), r);
+        game->getHUDDrawer().drawHUD(_look, game->getWorld()->getPlayer(),
+                                     getWorld(), r);
     }
 
     State::draw(r);

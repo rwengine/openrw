@@ -1,8 +1,7 @@
 #include "DFFFramesTreeModel.hpp"
 #include <data/Clump.hpp>
 
-DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m,
-                                       QObject* parent)
+DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m, QObject* parent)
     : QAbstractItemModel(parent), model(m) {
 }
 
@@ -97,8 +96,7 @@ Qt::ItemFlags DFFFramesTreeModel::flags(const QModelIndex& index) const {
     return flags;
 }
 
-QVariant DFFFramesTreeModel::headerData(int,
-                                        Qt::Orientation orientation,
+QVariant DFFFramesTreeModel::headerData(int, Qt::Orientation orientation,
                                         int role) const {
     if (orientation == Qt::Horizontal) {
         if (role == Qt::DisplayRole) {

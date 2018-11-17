@@ -28,21 +28,29 @@ void BenchmarkState::enter() {
     while (benchstream) {
         TrackPoint point;
         benchstream >> point.time;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.position.x;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.position.y;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.position.z;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.angle.x;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.angle.y;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.angle.z;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         benchstream >> point.angle.w;
-        if (!benchstream) break;
+        if (!benchstream)
+            break;
         if (track.empty()) {
             tmpPos = point.position;
         }

@@ -6,9 +6,9 @@
 #include <engine/GameWorld.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
+#include <glm/glm.hpp>
 #include <loaders/LoaderIFP.hpp>
 #include <render/TextRenderer.hpp>
-#include <glm/glm.hpp>
 
 #include <QWindow>
 
@@ -57,7 +57,7 @@ public slots:
     void showObject(quint16 item);
     void showModel(ClumpPtr model);
     void clearText();
-    void showText(const TextRenderer::TextInfo &ti);
+    void showText(const TextRenderer::TextInfo& ti);
     void selectFrame(ModelFrame* frame);
     void exportModel();
 
@@ -109,7 +109,6 @@ protected:
     void drawObject(GameRenderer& r, GameObject* object);
     void drawWorld(GameRenderer& r);
     void drawText(GameRenderer& r);
-
 };
 
 #endif

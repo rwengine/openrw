@@ -30,12 +30,14 @@ const float followRadius = 5.f;
 void DefaultAIController::update(float dt) {
     switch (currentGoal) {
         case FollowLeader: {
-            if (!leader) break;
+            if (!leader)
+                break;
             if (getCharacter()->getCurrentVehicle()) {
                 if (leader->getCurrentVehicle() !=
                     getCharacter()->getCurrentVehicle()) {
                     skipActivity();
-                    setNextActivity(std::make_unique<Activities::ExitVehicle>());
+                    setNextActivity(
+                        std::make_unique<Activities::ExitVehicle>());
                 }
                 // else we're already in the right spot.
             } else {
@@ -52,7 +54,8 @@ void DefaultAIController::update(float dt) {
                                 leader->getPosition() +
                                 (glm::normalize(-dir) * followRadius * 0.7f);
                             skipActivity();
-                            setNextActivity(std::make_unique<Activities::GoTo>(gotoPos));
+                            setNextActivity(
+                                std::make_unique<Activities::GoTo>(gotoPos));
                         }
                     }
                 }
@@ -84,7 +87,7 @@ void DefaultAIController::update(float dt) {
                 for (const auto& n : graph.nodes) {
                     if (n->type != AIGraphNode::Pedestrian) {
                         continue;
-		    }
+                    }
 
                     float d = glm::distance(n->position,
                                             getCharacter()->getPosition());
@@ -97,17 +100,16 @@ void DefaultAIController::update(float dt) {
             }
         } break;
         case TrafficDriver: {
-
             // If we don't own a car, become a pedestrian
-            if (getCharacter()->getCurrentVehicle() == nullptr)
-            {
+            if (getCharacter()->getCurrentVehicle() == nullptr) {
                 targetNode = nullptr;
                 nextTargetNode = nullptr;
                 lastTargetNode = nullptr;
                 currentGoal = TrafficWander;
 
                 // Try to skip the current activity
-                if (getCharacter()->controller->getCurrentActivity() != nullptr) {
+                if (getCharacter()->controller->getCurrentActivity() !=
+                    nullptr) {
                     getCharacter()->controller->skipActivity();
                 }
 
@@ -117,18 +119,18 @@ void DefaultAIController::update(float dt) {
 
             // We have a target
             if (targetNode) {
-                // Either we reached the node or we started new, therefore set the next activity 
+                // Either we reached the node or we started new, therefore set
+                // the next activity
                 if (getCurrentActivity() == nullptr) {
                     // Assign the last target node
                     lastTargetNode = targetNode;
 
-                    // Assign the next target node, either it is already set, 
+                    // Assign the next target node, either it is already set,
                     // or we have to find one by ourselves
                     if (nextTargetNode != nullptr) {
                         targetNode = nextTargetNode;
                         nextTargetNode = nullptr;
-                    }
-                    else {
+                    } else {
                         float mindist = std::numeric_limits<float>::max();
                         for (const auto& node : lastTargetNode->connections) {
                             const float distance =
@@ -138,7 +140,8 @@ void DefaultAIController::update(float dt) {
                                 getCharacter()->getCurrentVehicle()->isInFront(
                                     lastTargetNode->position);
 
-                            // Make sure, that the next node is in front of us, and farther away then the last node
+                            // Make sure, that the next node is in front of us,
+                            // and farther away then the last node
                             if (distance > 0.f && distance > lastDistance) {
                                 const float d = glm::distance(
                                     node->position, getCharacter()
@@ -156,19 +159,26 @@ void DefaultAIController::update(float dt) {
                     // If we haven't found a node, choose one randomly
                     if (!targetNode) {
                         auto& random = getCharacter()->engine->randomEngine;
-                        size_t nodeIndex = std::uniform_int_distribution<size_t>(0, lastTargetNode->connections.size() - 1)(random);
+                        size_t nodeIndex =
+                            std::uniform_int_distribution<size_t>(
+                                0,
+                                lastTargetNode->connections.size() - 1)(random);
                         targetNode = lastTargetNode->connections.at(nodeIndex);
                     }
 
-                    // Check whether the maximum amount of lanes changed and adjust our lane
-                    // @todo we don't know the direction of the street, so for now, choose the bigger value
-                    int maxLanes = targetNode->rightLanes > targetNode->leftLanes ? targetNode->rightLanes : targetNode->leftLanes;
+                    // Check whether the maximum amount of lanes changed and
+                    // adjust our lane
+                    // @todo we don't know the direction of the street, so for
+                    // now, choose the bigger value
+                    int maxLanes =
+                        targetNode->rightLanes > targetNode->leftLanes
+                            ? targetNode->rightLanes
+                            : targetNode->leftLanes;
 
                     if (maxLanes < getLane()) {
-                        if(maxLanes <= 0) {
+                        if (maxLanes <= 0) {
                             setLane(1);
-                        }
-                        else {
+                        } else {
                             setLane(maxLanes);
                         }
                     }
@@ -176,8 +186,7 @@ void DefaultAIController::update(float dt) {
                     setNextActivity(std::make_unique<Activities::DriveTo>(
                         targetNode, false));
                 }
-            }
-            else {
+            } else {
                 // We need to pick an initial node
                 auto& graph = getCharacter()->engine->aigraph;
                 AIGraphNode* node = nullptr;
@@ -190,7 +199,8 @@ void DefaultAIController::update(float dt) {
                     }
 
                     // The node must be ahead of the vehicle
-                    if (getCharacter()->getCurrentVehicle()->isInFront(n->position) < 0.f) {
+                    if (getCharacter()->getCurrentVehicle()->isInFront(
+                            n->position) < 0.f) {
                         continue;
                     }
 
@@ -205,7 +215,7 @@ void DefaultAIController::update(float dt) {
                 }
 
                 targetNode = node;
-		
+
                 // Set the next activity
                 if (targetNode) {
                     setNextActivity(std::make_unique<Activities::DriveTo>(

@@ -13,8 +13,8 @@
 
 #include <data/Clump.hpp>
 
-#include "core/Profiler.hpp"
 #include "core/Logger.hpp"
+#include "core/Profiler.hpp"
 
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
@@ -50,7 +50,7 @@ constexpr float kMaxTrafficSpawnRadius = 100.f;
 constexpr float kMaxTrafficCleanupRadius = kMaxTrafficSpawnRadius * 1.25f;
 
 namespace {
-template <typename T>
+template<typename T>
 bool shouldEffectBeRemoved(const T& effect, float gameTime) {
     if (effect->getType() != Particle) {
         return false;
@@ -149,8 +149,8 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
                 "World", "Instance with missing model: " + std::to_string(id));
         }
 
-        auto instance =
-            std::make_unique<InstanceObject>(this, pos, rot, glm::vec3(1.f), oi, dydata);
+        auto instance = std::make_unique<InstanceObject>(
+            this, pos, rot, glm::vec3(1.f), oi, dydata);
 
         auto ptr = instance.get();
 
@@ -223,7 +223,8 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
         }
     }
 
-    auto instance = std::make_unique<CutsceneObject>(this, pos, rot, model, modelinfo);
+    auto instance =
+        std::make_unique<CutsceneObject>(this, pos, rot, model, modelinfo);
     auto ptr = instance.get();
 
     cutscenePool.insert(std::move(instance));
@@ -250,7 +251,8 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
     auto palit = data->vehiclePalettes.find(
         vti->name);  // modelname is conveniently lowercase (usually)
     if (palit != data->vehiclePalettes.end() && !palit->second.empty()) {
-        std::uniform_int_distribution<size_t> uniform(0, palit->second.size() - 1);
+        std::uniform_int_distribution<size_t> uniform(0,
+                                                      palit->second.size() - 1);
         size_t set = uniform(randomEngine);
         prim = data->vehicleColours[palit->second[set].first];
         sec = data->vehicleColours[palit->second[set].second];
@@ -306,8 +308,8 @@ VehicleObject* GameWorld::createVehicle(const uint16_t id, const glm::vec3& pos,
         }
     }
 
-    auto vehicle =
-        std::make_unique<VehicleObject>(this, pos, rot, vti, info->second, prim, sec);
+    auto vehicle = std::make_unique<VehicleObject>(this, pos, rot, vti,
+                                                   info->second, prim, sec);
     auto ptr = vehicle.get();
     vehicle->setGameObjectID(gid);
 
@@ -332,7 +334,8 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
     }
 
     auto controller = new DefaultAIController();
-    auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
+    auto ped =
+        std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
     auto ptr = ped.get();
     ped->setGameObjectID(gid);
     pedestrianPool.insert(std::move(ped));
@@ -360,7 +363,8 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
     }
 
     auto controller = new PlayerController();
-    auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
+    auto ped =
+        std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
     auto ptr = ped.get();
     ped->setGameObjectID(gid);
     ped->setLifetime(GameObject::PlayerLifetime);
@@ -391,28 +395,39 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 
     // If nothing, create a generic pickup instead of an item pickup
     if (it != data->weaponData.end()) {
-        pickup = std::make_unique<ItemPickup>(this, pos, modelInfo, pickuptype, it->get());
+        pickup = std::make_unique<ItemPickup>(this, pos, modelInfo, pickuptype,
+                                              it->get());
     } else if (modelInfo->name == "info" || modelInfo->name == "briefcase" ||
                modelInfo->name == "floatpackge1") {
-        pickup = std::make_unique<DummyPickup>(this, pos, modelInfo, pickuptype);
+        pickup =
+            std::make_unique<DummyPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "killfrenzy") {
-        pickup = std::make_unique<RampagePickup>(this, pos, modelInfo, pickuptype);
+        pickup =
+            std::make_unique<RampagePickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "health") {
-        pickup = std::make_unique<HealthPickup>(this, pos, modelInfo, pickuptype);
+        pickup =
+            std::make_unique<HealthPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "bodyarmour") {
-        pickup = std::make_unique<ArmourPickup>(this, pos, modelInfo, pickuptype);
+        pickup =
+            std::make_unique<ArmourPickup>(this, pos, modelInfo, pickuptype);
     } else if (modelInfo->name == "package1") {
-        pickup = std::make_unique<CollectablePickup>(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<CollectablePickup>(this, pos, modelInfo,
+                                                     pickuptype);
     } else if (modelInfo->name == "adrenaline") {
-        pickup = std::make_unique<AdrenalinePickup>(this, pos, modelInfo, pickuptype);
+        pickup = std::make_unique<AdrenalinePickup>(this, pos, modelInfo,
+                                                    pickuptype);
     } else if (modelInfo->name == "Money") {
-        pickup = std::make_unique<MoneyPickup>(this, pos, modelInfo, pickuptype, 0);
-     } else if (modelInfo->name == "donkeymag") {
-        pickup = std::make_unique<BigNVeinyPickup>(this, pos, modelInfo, pickuptype);
-        pickup->setBehaviourFlags(PickupObject::BehaviourFlags::PickupInVehicle);
+        pickup =
+            std::make_unique<MoneyPickup>(this, pos, modelInfo, pickuptype, 0);
+    } else if (modelInfo->name == "donkeymag") {
+        pickup =
+            std::make_unique<BigNVeinyPickup>(this, pos, modelInfo, pickuptype);
+        pickup->setBehaviourFlags(
+            PickupObject::BehaviourFlags::PickupInVehicle);
     } else {
         RW_UNIMPLEMENTED("Non-weapon pickups");
-        pickup = std::make_unique<PickupObject>(this, pos, modelInfo, pickuptype);
+        pickup =
+            std::make_unique<PickupObject>(this, pos, modelInfo, pickuptype);
     }
 
     auto ptr = pickup.get();
@@ -426,7 +441,8 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 Garage* GameWorld::createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
                                 Garage::Type type) {
     const size_t id = garages.size();
-    garages.emplace_back(std::make_unique<Garage>(this, id, coord0, coord1, type));
+    garages.emplace_back(
+        std::make_unique<Garage>(this, id, coord0, coord1, type));
     return garages.back().get();
 }
 
@@ -441,7 +457,8 @@ void GameWorld::ObjectPool::insert(std::unique_ptr<GameObject> object) {
         // Find the lowest free GameObjectID.
         GameObjectID availID = 1;
         for (auto& [id, objectPtr] : objects) {
-            if (id == availID) availID++;
+            if (id == availID)
+                availID++;
         }
 
         object->setGameObjectID(availID);
@@ -521,7 +538,8 @@ void GameWorld::destroyObject(GameObject* object) {
 
 void GameWorld::destroyObjectQueued(GameObject* object) {
     RW_CHECK(object != nullptr, "destroying a null object?");
-    if (object) deletionQueue.insert(object);
+    if (object)
+        deletionQueue.insert(object);
 }
 
 void GameWorld::destroyQueuedObjects() {
@@ -644,8 +662,10 @@ float GameWorld::getGameTime() const {
 namespace {
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
     bool isVehicle = object->type() == GameObject::Vehicle;
-    if (!isVehicle) return;
-    if (mp.getAppliedImpulse() <= 100.f) return;
+    if (!isVehicle)
+        return;
+    if (mp.getAppliedImpulse() <= 100.f)
+        return;
 
     btVector3 src, dmg;
     if (isA) {
@@ -716,8 +736,10 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
     }
 
     // Handle vehicles
-    if (a) handleVehicleResponse(a, mp, true);
-    if (b) handleVehicleResponse(b, mp, false);
+    if (a)
+        handleVehicleResponse(a, mp, true);
+    if (b)
+        handleVehicleResponse(b, mp, false);
 
     return true;
 }
@@ -727,21 +749,24 @@ void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
     RW_PROFILE_SCOPEC(__func__, MP_CYAN);
     GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
-    RW_PROFILE_COUNTER_SET("physicsTick/vehiclePool", world->vehiclePool.objects.size());
+    RW_PROFILE_COUNTER_SET("physicsTick/vehiclePool",
+                           world->vehiclePool.objects.size());
     for (auto& p : world->vehiclePool.objects) {
         RW_PROFILE_SCOPEC("VehicleObject", MP_THISTLE1);
         auto object = static_cast<VehicleObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
-    RW_PROFILE_COUNTER_SET("physicsTick/pedestrianPool", world->pedestrianPool.objects.size());
+    RW_PROFILE_COUNTER_SET("physicsTick/pedestrianPool",
+                           world->pedestrianPool.objects.size());
     for (auto& p : world->pedestrianPool.objects) {
         RW_PROFILE_SCOPEC("CharacterObject", MP_THISTLE1);
         auto object = static_cast<CharacterObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
-    RW_PROFILE_COUNTER_SET("physicsTick/instancePool", world->instancePool.objects.size());
+    RW_PROFILE_COUNTER_SET("physicsTick/instancePool",
+                           world->instancePool.objects.size());
     for (auto& p : world->instancePool.objects) {
         auto object = static_cast<InstanceObject*>(p.second.get());
         object->tickPhysics(timeStep);

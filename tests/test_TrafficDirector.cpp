@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(test_available_nodes) {
                       {PathNode::EXTERNAL, -1, {-10.f, 10.f, 0.f}, 1.f, 0, 0},
                   }};
 
-    graph.createPathNodes(glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f}, path);
+    graph.createPathNodes(glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, path);
 
     TrafficDirector director(&graph, Global::get().e);
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(test_node_not_blocking) {
                       {PathNode::EXTERNAL, 1, {10.f, 10.f, 0.f}, 1.f, 0, 0},
                   }};
 
-    graph.createPathNodes(glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f}, path);
+    graph.createPathNodes(glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, path);
 
     TrafficDirector director(&graph, Global::get().e);
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_node_blocking) {
                       {PathNode::EXTERNAL, 1, {10.f, 10.f, 0.f}, 1.f, 0, 0},
                   }};
 
-    graph.createPathNodes(glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f}, path);
+    graph.createPathNodes(glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, path);
 
     TrafficDirector director(&graph, Global::get().e);
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(test_node_density) {
                       {PathNode::EXTERNAL, 1, {10.f, 10.f, 0.f}, 1.f, 0, 0},
                   }};
 
-    graph.createPathNodes(glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f}, path);
+    graph.createPathNodes(glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, path);
 
     TrafficDirector director(&graph, Global::get().e);
 
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_create_traffic) {
                       {PathNode::EXTERNAL, 1, {10.f, 10.f, 0.f}, 1.f, 0, 0},
                   }};
 
-    graph.createPathNodes(glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f}, path);
+    graph.createPathNodes(glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, path);
 
     TrafficDirector director(&graph, Global::get().e);
 

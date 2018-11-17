@@ -16,8 +16,8 @@
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
-#include <objects/GameObject.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <objects/GameObject.hpp>
 
 std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
 
@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
 namespace boost {
 namespace test_tools {
 BOOST_NS_MAGIC
-template <>
+template<>
 struct print_log_value<glm::vec3> {
     void operator()(std::ostream& s, glm::vec3 const& v) {
         s << glm::to_string(v);
@@ -48,7 +48,7 @@ BOOST_NS_MAGIC_CLOSING
 namespace boost {
 namespace test_tools {
 BOOST_NS_MAGIC
-template <>
+template<>
 struct print_log_value<std::nullptr_t> {
     void operator()(std::ostream& s, std::nullptr_t) {
         s << "nullptr";
@@ -62,7 +62,7 @@ BOOST_NS_MAGIC_CLOSING
 namespace boost {
 namespace test_tools {
 BOOST_NS_MAGIC
-template <>
+template<>
 struct print_log_value<GameString> {
     void operator()(std::ostream& s, GameString const& v) {
         for (GameString::size_type i = 0u; i < v.size(); ++i) {

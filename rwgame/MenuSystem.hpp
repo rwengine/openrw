@@ -40,7 +40,8 @@ public:
 
     public:
         MenuEntry(const std::string& n, const std::function<void(void)>& cb)
-            : text(GameStringUtil::fromString(n, FONT_PRICEDOWN)), callback(cb) {
+            : text(GameStringUtil::fromString(n, FONT_PRICEDOWN))
+            , callback(cb) {
         }
         MenuEntry(const GameString& n, const std::function<void(void)>& cb)
             : text(n), callback(cb) {
@@ -90,7 +91,8 @@ public:
     }
 
     Menu& lambda(const std::string& n, std::function<void(void)> callback) {
-        entries.emplace_back(GameStringUtil::fromString(n, FONT_PRICEDOWN), callback);
+        entries.emplace_back(GameStringUtil::fromString(n, FONT_PRICEDOWN),
+                             callback);
         return *this;
     }
 
@@ -126,7 +128,7 @@ public:
 
     void click(const float x, const float y) {
         glm::vec2 c(x - offset.x, y - offset.y);
-        for (auto &entry : entries) {
+        for (auto& entry : entries) {
             if (c.y > 0.f && c.y < size) {
                 entry.activate(c.x, c.y);
                 return;

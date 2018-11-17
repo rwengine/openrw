@@ -18,7 +18,7 @@ class GameWorld;
  */
 class InstanceObject final : public GameObject {
     float health = 100.f;
-    bool visible =true;
+    bool visible = true;
     bool floating = false;
     bool static_ = false;
     bool usePhysics = false;

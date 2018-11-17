@@ -61,6 +61,7 @@ public:
     bool shouldWorldUpdate() override;
 
     const ViewCamera& getCamera(float alpha) override;
+
 private:
     GameObject* getCameraTarget() const;
     float getViewDistance() const;

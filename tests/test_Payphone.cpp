@@ -1,5 +1,5 @@
-#include <boost/test/unit_test.hpp>
 #include <ai/PlayerController.hpp>
+#include <boost/test/unit_test.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Payphone.hpp>
 #include <objects/CharacterObject.hpp>
@@ -36,7 +36,8 @@ BOOST_AUTO_TEST_CASE(test_payphone_interaction) {
 
         BOOST_CHECK(!Global::get().e->getPlayer()->isPickingUpPayphone());
 
-        character->setPosition(character->getPosition() + glm::vec3{0.001f, 0.f, 0.f});
+        character->setPosition(character->getPosition() +
+                               glm::vec3{0.001f, 0.f, 0.f});
 
         dt = 0.016f;
         Global::get().e->state->gameTime += dt;

@@ -15,7 +15,7 @@ class DFFLoaderException {
     std::string _message;
 
 public:
-    template <class String>
+    template<class String>
     DFFLoaderException(String&& message) : _message(message) {
     }
 
@@ -52,7 +52,8 @@ private:
 
     void readTexture(Geometry::Material& material, const RWBStream& stream);
 
-    void readGeometryExtension(const GeometryPtr& geom, const RWBStream& stream);
+    void readGeometryExtension(const GeometryPtr& geom,
+                               const RWBStream& stream);
 
     void readBinMeshPLG(const GeometryPtr& geom, const RWBStream& stream);
 

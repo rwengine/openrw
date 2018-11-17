@@ -1,13 +1,13 @@
 #ifndef _RWENGINE_OPENGLRENDERER_HPP_
 #define _RWENGINE_OPENGLRENDERER_HPP_
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-#include <array>
 
 #include <glm/glm.hpp>
 
@@ -30,8 +30,7 @@ struct VertexP2 {
         return {{ATRS_Position, 2, sizeof(VertexP2), 0ul}};
     }
 
-    VertexP2(float _x, float _y)
-        : position({_x, _y}) {
+    VertexP2(float _x, float _y) : position({_x, _y}) {
     }
 
     VertexP2() = default;
@@ -47,8 +46,7 @@ struct VertexP3 {
         };
     }
 
-    VertexP3(float _x, float _y, float _z)
-        : position({_x, _y, _z}) {
+    VertexP3(float _x, float _y, float _z) : position({_x, _y, _z}) {
     }
 
     VertexP3() = default;
@@ -57,11 +55,7 @@ struct VertexP3 {
 /**
  * Enum used to determine which blending mode to use
  */
-enum class BlendMode {
-    BLEND_NONE,
-    BLEND_ALPHA,
-    BLEND_ADDITIVE
-};
+enum class BlendMode { BLEND_NONE, BLEND_ALPHA, BLEND_ADDITIVE };
 
 enum class DepthMode {
     OFF,
@@ -70,7 +64,7 @@ enum class DepthMode {
 
 class Renderer {
 public:
-    typedef std::array<GLuint,2> Textures;
+    typedef std::array<GLuint, 2> Textures;
 
     /**
      * @brief The DrawParameters struct stores drawing state
@@ -149,16 +143,16 @@ public:
 
     class ShaderProgram {
         // This just provides an opaque handle for external users.
-        public:
-            virtual ~ShaderProgram() = 0;
+    public:
+        virtual ~ShaderProgram() = 0;
     };
 
     virtual ~Renderer() = default;
 
     virtual std::string getIDString() const = 0;
 
-    virtual std::unique_ptr<ShaderProgram> createShader(const std::string& vert,
-                                        const std::string& frag) = 0;
+    virtual std::unique_ptr<ShaderProgram> createShader(
+        const std::string& vert, const std::string& frag) = 0;
 
     virtual void useProgram(ShaderProgram* p) = 0;
 
@@ -290,8 +284,8 @@ public:
 
     std::string getIDString() const override;
 
-    std::unique_ptr<ShaderProgram> createShader(const std::string& vert,
-                                const std::string& frag) override;
+    std::unique_ptr<ShaderProgram> createShader(
+        const std::string& vert, const std::string& frag) override;
     void setProgramBlockBinding(ShaderProgram* p, const std::string& name,
                                 GLint point) override;
     void setUniformTexture(ShaderProgram* p, const std::string& name,
@@ -343,8 +337,8 @@ private:
 
     void useTexture(GLuint unit, GLuint tex);
 
-    Buffer UBOObject {};
-    Buffer UBOScene {};
+    Buffer UBOObject{};
+    Buffer UBOScene{};
 
     // State Cache
     DrawBuffer* currentDbuff = nullptr;
@@ -358,10 +352,12 @@ private:
 
     // Set state
     void setBlend(BlendMode mode) {
-        if (mode!=BlendMode::BLEND_NONE && blendMode==BlendMode::BLEND_NONE)//To don't call glEnable again when it already enabled
+        if (mode != BlendMode::BLEND_NONE &&
+            blendMode == BlendMode::BLEND_NONE)  // To don't call glEnable again
+                                                 // when it already enabled
             glEnable(GL_BLEND);
 
-        if (mode!=blendMode) {
+        if (mode != blendMode) {
             switch (mode) {
                 default:
                     assert(false);
@@ -375,7 +371,6 @@ private:
                 case BlendMode::BLEND_ADDITIVE:
                     glBlendFunc(GL_ONE, GL_ONE);
                     break;
-
             }
         }
 
@@ -384,10 +379,15 @@ private:
 
     void setDepthMode(DepthMode mode) {
         if (mode != depthMode) {
-            if (depthMode == DepthMode::OFF) glEnable(GL_DEPTH_TEST);
-            switch(mode) {
-                case DepthMode::OFF: glDisable(GL_DEPTH_TEST); break;
-                case DepthMode::LESS: glDepthFunc(GL_LESS); break;
+            if (depthMode == DepthMode::OFF)
+                glEnable(GL_DEPTH_TEST);
+            switch (mode) {
+                case DepthMode::OFF:
+                    glDisable(GL_DEPTH_TEST);
+                    break;
+                case DepthMode::LESS:
+                    glDepthFunc(GL_LESS);
+                    break;
             }
             depthMode = mode;
         }
@@ -400,7 +400,7 @@ private:
         }
     }
 
-    template <class T>
+    template<class T>
     void uploadUBO(Buffer& buffer, const T& data) {
         uploadUBOEntry(buffer, &data, sizeof(T));
 #ifdef RW_GRAPHICS_STATS
@@ -420,7 +420,7 @@ private:
         }
     }
 
-    void uploadUBOEntry(Buffer& buffer, const void *data, size_t size);
+    void uploadUBOEntry(Buffer& buffer, const void* data, size_t size);
 
     // Debug group profiling timers
     ProfileInfo profileInfo[MAX_DEBUG_DEPTH];

@@ -14,9 +14,11 @@ void SimpleModelInfo::setupBigBuilding(const ModelInfoTable& models) {
 
 void SimpleModelInfo::findRelatedModel(const ModelInfoTable& models) {
     for (const auto& model : models) {
-        if (model.second.get() == this) continue;
+        if (model.second.get() == this)
+            continue;
         const auto& othername = model.second->name;
-        if (othername.size() <= 3 || name.size() <= 3) continue;
+        if (othername.size() <= 3 || name.size() <= 3)
+            continue;
         if (othername.substr(3) == name.substr(3)) {
             related_ = static_cast<SimpleModelInfo*>(model.second.get());
             break;

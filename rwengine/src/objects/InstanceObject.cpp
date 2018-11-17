@@ -23,9 +23,7 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,
                                BaseModelInfo* modelinfo,
                                const std::shared_ptr<DynamicObjectData>& dyn)
-    : GameObject(engine, pos, rot, modelinfo)
-    , scale(scale)
-    , dynamics(dyn) {
+    : GameObject(engine, pos, rot, modelinfo), scale(scale), dynamics(dyn) {
     if (!modelinfo) {
         return;
     }
@@ -69,7 +67,8 @@ void InstanceObject::tick(float dt) {
 }
 
 void InstanceObject::tickPhysics(float dt) {
-    if (animator) animator->tick(dt);
+    if (animator)
+        animator->tick(dt);
 
     if (!body || !dynamics) {
         return;
@@ -90,9 +89,9 @@ void InstanceObject::tickPhysics(float dt) {
     if (floating) {
         const glm::vec3& ws = getPosition();
         auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+                                   (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         auto wY = static_cast<int>((ws.y + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+                                   (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         float vH = ws.z;  // - _collisionHeight/2.f;
         float wH = 0.f;
 

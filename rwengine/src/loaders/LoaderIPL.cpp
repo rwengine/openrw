@@ -11,9 +11,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "LoaderIPL.hpp"
 #include "data/InstanceData.hpp"
 #include "data/ZoneData.hpp"
-#include "LoaderIPL.hpp"
 
 
 #include <rw/casts.hpp>
@@ -22,11 +22,12 @@ enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 
 bool LoaderIPL::load(const std::string& filename) {
     std::ifstream str(filename);
-    if (!str.is_open()) return false;
+    if (!str.is_open())
+        return false;
     return load(str);
 }
 
-bool LoaderIPL::load(std::istream &str) {
+bool LoaderIPL::load(std::istream& str) {
     SectionTypes section = NONE;
     while (!str.eof()) {
         std::string line;
@@ -83,13 +84,15 @@ bool LoaderIPL::load(std::istream &str) {
                 auto instance = std::make_shared<InstanceData>(
                     lexical_cast<int>(id),  // ID
                     model.substr(1, model.size() - 1),
-                    glm::vec3(lexical_cast<float>(posX), lexical_cast<float>(posY),
+                    glm::vec3(lexical_cast<float>(posX),
+                              lexical_cast<float>(posY),
                               lexical_cast<float>(posZ)),
-                    glm::vec3(lexical_cast<float>(scaleX), lexical_cast<float>(scaleY),
+                    glm::vec3(lexical_cast<float>(scaleX),
+                              lexical_cast<float>(scaleY),
                               lexical_cast<float>(scaleZ)),
-                    glm::normalize(
-                        glm::quat(-lexical_cast<float>(rotW), lexical_cast<float>(rotX),
-                                  lexical_cast<float>(rotY), lexical_cast<float>(rotZ))));
+                    glm::normalize(glm::quat(
+                        -lexical_cast<float>(rotW), lexical_cast<float>(rotX),
+                        lexical_cast<float>(rotY), lexical_cast<float>(rotZ))));
 
                 m_instances.push_back(instance);
             } else if (section == ZONE) {
@@ -137,4 +140,3 @@ bool LoaderIPL::load(std::istream &str) {
 
     return true;
 }
-

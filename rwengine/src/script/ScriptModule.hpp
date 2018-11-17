@@ -10,46 +10,46 @@
 #include <string>
 
 namespace script_bind {
-template <class T>
+template<class T>
 struct arg_traits {
     static constexpr size_t arg_size = 1;
 };
 
-template <>
+template<>
 struct arg_traits<ScriptVec2> {
     static constexpr size_t arg_size = 2;
 };
 
-template <>
+template<>
 struct arg_traits<ScriptVec3> {
     static constexpr size_t arg_size = 3;
 };
 
-template <>
+template<>
 struct arg_traits<ScriptRGB> {
     static constexpr size_t arg_size = 3;
 };
 
-template <>
+template<>
 struct arg_traits<ScriptRGBA> {
     static constexpr size_t arg_size = 4;
 };
 
-template <class T, unsigned arg>
+template<class T, unsigned arg>
 struct unpack {
     static T convert(const ScriptArguments& args) {
         return args.getParameter<T>(arg);
     }
 };
 
-template <unsigned arg>
+template<unsigned arg>
 struct unpack<const ScriptArguments&, arg> {
     static const ScriptArguments& convert(const ScriptArguments& args) {
         return args;
     }
 };
 
-template <class T, unsigned arg>
+template<class T, unsigned arg>
 struct unpack<T&, arg> {
     static T& convert(const ScriptArguments& args) {
         return args.getParameterRef<T>(arg);
@@ -57,38 +57,38 @@ struct unpack<T&, arg> {
 };
 
 // unpack ScriptObjectType<T>& as non-ref so object is copied by the caller.
-template <class T, unsigned arg>
+template<class T, unsigned arg>
 struct unpack<ScriptObjectType<T>&, arg> {
     static ScriptObjectType<T> convert(const ScriptArguments& args) {
         return args.getScriptObject<T>(arg);
     }
 };
-template <class T, unsigned arg>
+template<class T, unsigned arg>
 struct unpack<ScriptObjectType<T>, arg> {
     static ScriptObjectType<T> convert(const ScriptArguments& args) {
         return args.getScriptObject<T>(arg);
     }
 };
 
-template <unsigned depth, unsigned script_arg, class Tret, class... Targs>
+template<unsigned depth, unsigned script_arg, class Tret, class... Targs>
 struct call_unpacked {
     // This isn't instanciated, just for reference
-    template <class Tfunc, class... Tprev>
+    template<class Tfunc, class... Tprev>
     Tret call(Tfunc func, const ScriptArguments& args, Tprev&&... prev);
 };
 
-template <unsigned script_arg, class Tret, class... Targs>
+template<unsigned script_arg, class Tret, class... Targs>
 struct call_unpacked<0, script_arg, Tret, Targs...> {
-    template <class Tfunc, class... Tprev>
+    template<class Tfunc, class... Tprev>
     static Tret call(Tfunc func, const ScriptArguments&, Tprev&&... prev) {
         return func(prev...);
     }
 };
 
-template <unsigned depth, unsigned script_arg, class Tret, class Targ,
-          class... Targs>
+template<unsigned depth, unsigned script_arg, class Tret, class Targ,
+         class... Targs>
 struct call_unpacked<depth, script_arg, Tret, Targ, Targs...> {
-    template <class Tfunc, class... Tprev>
+    template<class Tfunc, class... Tprev>
     static Tret call(Tfunc func, const ScriptArguments& args, Tprev&&... prev) {
         constexpr size_t next_arg = script_arg + arg_traits<Targ>::arg_size;
         return call_unpacked<depth - 1, next_arg, Tret, Targs...>::call(
@@ -99,19 +99,19 @@ struct call_unpacked<depth, script_arg, Tret, Targ, Targs...> {
 /**
  * Template to unpack ScriptArguments into real types
  */
-template <class Tret, class... Targs>
+template<class Tret, class... Targs>
 struct binder {
     using func_type = Tret (*const)(Targs...);
 
-    template <class Tfunc>
+    template<class Tfunc>
     static void call(Tfunc func, const ScriptArguments& args) {
         call_unpacked<sizeof...(Targs), 0, Tret, Targs...>::call(func, args);
     }
 };
 
-template <class... Targs>
+template<class... Targs>
 struct binder<bool, Targs...> {
-    template <class Tfunc>
+    template<class Tfunc>
     static void call(Tfunc func, const ScriptArguments& args) {
         args.getThread()->conditionResult =
             call_unpacked<sizeof...(Targs), 0, bool, Targs...>::call(func,
@@ -119,23 +119,23 @@ struct binder<bool, Targs...> {
     }
 };
 
-template <>
+template<>
 struct binder<void, const ScriptArguments&> {
-    template <class Tfunc>
+    template<class Tfunc>
     static void call(Tfunc func, const ScriptArguments& args) {
         func(args);
     }
 };
 
-template <>
+template<>
 struct binder<bool, const ScriptArguments&> {
-    template <class Tfunc>
+    template<class Tfunc>
     static void call(Tfunc func, const ScriptArguments& args) {
         args.getThread()->conditionResult = func(args);
     }
 };
 
-template <class Tret, class... Targs>
+template<class Tret, class... Targs>
 void do_unpacked_call(Tret (*const& func)(Targs...),
                       const ScriptArguments& args) {
     script_bind::binder<Tret, Targs...>::call(func, args);
@@ -153,7 +153,7 @@ void do_unpacked_call(Tret (*const& func)(Targs...),
  */
 class ScriptModule {
 public:
-    template <class String>
+    template<class String>
     ScriptModule(String&& _name) : name(std::forward<String>(_name)) {
     }
 
@@ -161,7 +161,7 @@ public:
         return name;
     }
 
-    template <class Tfunc>
+    template<class Tfunc>
     void bind(ScriptFunctionID id, int argc, Tfunc function) {
         functions.insert({id,
                           {[=](const ScriptArguments& args) {

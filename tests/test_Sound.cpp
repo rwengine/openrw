@@ -20,7 +20,7 @@ BOOST_FIXTURE_TEST_CASE(creates_empty_sound, F) {
 
 // @todo Shfil119 implement
 // This test requires assets
-//BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
+// BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
 //    sound.buffer = std::make_unique<SoundBuffer>();
 //    BOOST_REQUIRE(sound.isPlaying() == false);
 

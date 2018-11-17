@@ -1,9 +1,9 @@
 #ifndef GAMEWINDOW_HPP
 #define GAMEWINDOW_HPP
 
+#include <SDL.h>
 #include <glm/vec2.hpp>
 #include <string>
-#include <SDL.h>
 
 #include <render/GameRenderer.hpp>
 
@@ -11,6 +11,7 @@ class GameWindow {
     SDL_Window* window = nullptr;
     SDL_Surface* icon = nullptr;
     SDL_GLContext glcontext{nullptr};
+
 public:
     GameWindow() = default;
 

@@ -227,9 +227,12 @@ void VehicleObject::setupModel() {
 
     auto compRules = vehicleInfo->componentrules_;
     auto numComponents = [](int rule) {
-        if ((rule & 0xFFF) == 0xFFF) return 0;
-        if ((rule & 0xFF0) == 0xFF0) return 1;
-        if ((rule & 0xF00) == 0xF00) return 2;
+        if ((rule & 0xFFF) == 0xFFF)
+            return 0;
+        if ((rule & 0xFF0) == 0xFF0)
+            return 1;
+        if ((rule & 0xF00) == 0xF00)
+            return 2;
         return 3;
     };
     auto& random = engine->randomEngine;
@@ -276,7 +279,8 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
     if (collision->getBulletBody()) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
         for (auto& part : dynamicParts) {
-            if (part.second.body == nullptr) continue;
+            if (part.second.body == nullptr)
+                continue;
             auto body = part.second.body.get();
             auto rel = body->getWorldTransform().getOrigin() - bodyOrigin;
             body->getWorldTransform().setOrigin(
@@ -336,12 +340,13 @@ void VehicleObject::tick(float dt) {
 void VehicleObject::tickPhysics(float dt) {
     RW_UNUSED(dt);
 
-    static constexpr float steeringWeight = 1.f/0.35f;
+    static constexpr float steeringWeight = 1.f / 0.35f;
 
     if (physVehicle) {
         // todo: a real engine function
         float velFac = info->handling.maxVelocity;
-        float velocity = collision->getBulletBody()->getLinearVelocity().length();
+        float velocity =
+            collision->getBulletBody()->getLinearVelocity().length();
         float velocityForward = physVehicle->getCurrentSpeedKmHour() / 3.6f;
         float velocityMax = velFac / 9.f;
         float steerValue = 0.f;
@@ -349,7 +354,8 @@ void VehicleObject::tickPhysics(float dt) {
         // The engine force is calculated from the acceleration and max velocity
         // of the vehicle, with a specific coefficient to make it adapted to
         // Bullet physics and avoid reaching top speed too fast.
-        float engineForce = info->handling.acceleration * throttle * velFac / 1.2f;
+        float engineForce =
+            info->handling.acceleration * throttle * velFac / 1.2f;
         float brakeF = getBraking();
         // Mass coefficient, that quantifies how heavy a vehicle is and excludes
         // light vehicles.
@@ -384,11 +390,13 @@ void VehicleObject::tickPhysics(float dt) {
         // Reduce the engine force when steering, by a factor of up to 1.25 for
         // the maximum steering angle, linearly back to nominal value when no
         // steering is applied.
-        if (std::abs(steerValue) > steerLimit / 8.f && velocity > velocityMax / 3.f)
+        if (std::abs(steerValue) > steerLimit / 8.f &&
+            velocity > velocityMax / 3.f)
             engineForce /= 1.f + std::abs(steerValue) / (4.f * steerLimit);
 
         if (velocity > velocityMax) {
-            btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
+            btVector3 v =
+                collision->getBulletBody()->getLinearVelocity().normalized();
 
             velocity = velocityMax;
             v *= velocity;
@@ -440,9 +448,10 @@ void VehicleObject::tickPhysics(float dt) {
                 float currentSign = std::copysign(1.0f, currentVal);
                 float newVal;
 
-                if (std::abs(steerAngle) < 0.001f) {   // no steering?
-                    newVal = std::max(0.0f,std::abs(currentVal) -
-                                      steeringWeight * dt) * currentSign;
+                if (std::abs(steerAngle) < 0.001f) {  // no steering?
+                    newVal = std::max(0.0f, std::abs(currentVal) -
+                                                steeringWeight * dt) *
+                             currentSign;
                 } else {
                     newVal = currentVal + steerAngle * dt * steeringWeight;
 
@@ -453,7 +462,7 @@ void VehicleObject::tickPhysics(float dt) {
                     }
                 }
 
-                physVehicle->setSteeringValue(newVal,w);
+                physVehicle->setSteeringValue(newVal, w);
             }
         }
 
@@ -513,9 +522,9 @@ void VehicleObject::tickPhysics(float dt) {
 
         const auto& ws = getPosition();
         auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+                                   (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         auto wY = static_cast<int>((ws.y + WATER_WORLD_SIZE / 2.f) /
-                        (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
+                                   (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
         btVector3 bbmin, bbmax;
         // This is in world space.
         collision->getBulletBody()->getAabb(bbmin, bbmax);
@@ -598,7 +607,8 @@ void VehicleObject::tickPhysics(float dt) {
 
         // Update hinge object rotations
         for (auto& it : dynamicParts) {
-            if (it.second.body == nullptr) continue;
+            if (it.second.body == nullptr)
+                continue;
             if (it.second.moveToAngle) {
                 auto angledelta = it.second.targetAngle -
                                   it.second.constraint->getHingeAngle();
@@ -614,7 +624,8 @@ void VehicleObject::tickPhysics(float dt) {
             // If the part is moving quite fast and near the limit, lock it.
             /// @TODO not all parts rotate in the z axis.
             float zspeed = it.second.body->getAngularVelocity().getZ();
-            if (it.second.openAngle < 0.f) zspeed = -zspeed;
+            if (it.second.openAngle < 0.f)
+                zspeed = -zspeed;
             if (zspeed >= PART_CLOSE_VELOCITY) {
                 auto d = it.second.constraint->getHingeAngle() -
                          it.second.closedAngle;
@@ -662,7 +673,7 @@ void VehicleObject::setSteeringAngle(float a, bool force) {
     if (force && physVehicle) {
         for (int w = 0; w < physVehicle->getNumWheels(); ++w) {
             btWheelInfo& wi = physVehicle->getWheelInfo(w);
-            
+
             if (wi.m_bIsFrontWheel) {
                 physVehicle->setSteeringValue(a, w);
             }
@@ -771,7 +782,8 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
         for (auto& d : dynamicParts) {
             auto p = &d.second;
 
-            if (p->normal == nullptr) continue;
+            if (p->normal == nullptr)
+                continue;
 
             /// @todo correct logic
             float damageradius = 0.1f;
@@ -792,11 +804,15 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 void VehicleObject::setPartState(VehicleObject::Part* part,
                                  VehicleObject::FrameState state) {
     if (state == VehicleObject::OK) {
-        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
-        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
+        if (part->normal)
+            part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
+        if (part->damaged)
+            part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
     } else if (state == VehicleObject::DAM) {
-        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
-        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
+        if (part->normal)
+            part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
+        if (part->damaged)
+            part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
     }
 }
 
@@ -879,8 +895,8 @@ void VehicleObject::registerPart(ModelFrame* mf) {
             damage->setFlag(Atomic::ATOMIC_RENDER, false);
         }
     }
-    Part part{mf, normal, damage, nullptr, nullptr, nullptr, false,
-     0.f, 0.f, 0.f};
+    Part part{mf,      normal, damage, nullptr, nullptr,
+              nullptr, false,  0.f,    0.f,     0.f};
 
     dynamicParts.emplace(mf->getName(), std::move(part));
 }
@@ -941,13 +957,14 @@ void VehicleObject::createObjectHinge(Part* part) {
     btVector3 inertia;
     cs->calculateLocalInertia(10.f, inertia);
 
-    btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, ms.get(), cs.get(), inertia);
+    btRigidBody::btRigidBodyConstructionInfo rginfo(10.f, ms.get(), cs.get(),
+                                                    inertia);
     auto subObject = std::make_unique<btRigidBody>(rginfo);
     subObject->setUserPointer(this);
 
-    auto hinge = std::make_unique<btHingeConstraint>(*collision->getBulletBody(), *subObject,
-                                       tr.getOrigin(), hingePosition, hingeAxis,
-                                       hingeAxis);
+    auto hinge = std::make_unique<btHingeConstraint>(
+        *collision->getBulletBody(), *subObject, tr.getOrigin(), hingePosition,
+        hingeAxis, hingeAxis);
     hinge->setLimit(hingeMin, hingeMax);
     hinge->setBreakingImpulseThreshold(250.f);
 
@@ -1041,7 +1058,7 @@ float VehicleObject::isInFront(const glm::vec3& point) {
 
     v1 = strafe;
     v2 = -strafe;
-	
+
     // Check if the point is behind or in front the car
 
     glm::vec3 normal(v1.y - v2.y, 0, v2.x - v1.x);
@@ -1083,4 +1100,3 @@ float VehicleObject::isOnSide(const glm::vec3& point) {
 
     return distance;
 }
-

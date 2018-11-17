@@ -12,9 +12,8 @@ public:
     glm::quat rotation;
 
     ViewCamera(const glm::vec3& pos = {},
-            const glm::quat& rot = {1.0f,0.0f,0.0f,0.0f})
-        : position(pos)
-        , rotation(rot) {
+               const glm::quat& rot = {1.0f, 0.0f, 0.0f, 0.0f})
+        : position(pos), rotation(rot) {
     }
 
     glm::mat4 getView() {

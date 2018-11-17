@@ -364,12 +364,12 @@ const std::vector<AnimGroup> kBuiltInAnimGroups{
          {"walkst_rocket_right", 0x1040},
      }}};
 
-AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
-                                         const std::string &name) {
+AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet& animations,
+                                         const std::string& name) {
     auto findgroup = [&]() {
         auto it =
             std::find_if(kBuiltInAnimGroups.begin(), kBuiltInAnimGroups.end(),
-                         [&](const AnimGroup &g) { return g.name_ == name; });
+                         [&](const AnimGroup& g) { return g.name_ == name; });
         if (it != kBuiltInAnimGroups.end()) {
             return *it;
         } else {
@@ -382,7 +382,7 @@ AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
     auto group = AnimGroup(findgroup());
 
     uint32_t id = 0;
-    for (auto &a : group.animations_) {
+    for (auto& a : group.animations_) {
         // Copy from the first animgroup if this entry is empty
         /// @todo check if this is realy how we should do this
         if (a.name.empty()) {

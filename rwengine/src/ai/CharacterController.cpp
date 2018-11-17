@@ -60,8 +60,9 @@ void CharacterController::setNextActivity(std::unique_ptr<Activity> activity) {
     }
 }
 
-bool CharacterController::isCurrentActivity(const std::string &activity) const {
-    if (getCurrentActivity() == nullptr) return false;
+bool CharacterController::isCurrentActivity(const std::string& activity) const {
+    if (getCurrentActivity() == nullptr)
+        return false;
     return getCurrentActivity()->name() == activity;
 }
 
@@ -69,7 +70,7 @@ void CharacterController::update(float dt) {
     if (character->getCurrentVehicle()) {
         // Nevermind, the player is in a vehicle.
 
-        auto &d = character->getMovement();
+        auto& d = character->getMovement();
 
         if (character->getCurrentSeat() == 0) {
             character->getCurrentVehicle()->setSteeringAngle(d.y);
@@ -111,15 +112,15 @@ void CharacterController::update(float dt) {
     }
 }
 
-CharacterObject *CharacterController::getCharacter() const {
+CharacterObject* CharacterController::getCharacter() const {
     return character;
 }
 
-void CharacterController::setMoveDirection(const glm::vec3 &movement) {
+void CharacterController::setMoveDirection(const glm::vec3& movement) {
     character->setMovement(movement);
 }
 
-void CharacterController::setLookDirection(const glm::vec2 &look) {
+void CharacterController::setLookDirection(const glm::vec2& look) {
     character->setLook(look);
 }
 
@@ -127,8 +128,8 @@ void CharacterController::setRunning(bool run) {
     character->setRunning(run);
 }
 
-bool Activities::GoTo::update(CharacterObject *character,
-                              CharacterController *controller) {
+bool Activities::GoTo::update(CharacterObject* character,
+                              CharacterController* controller) {
     /* TODO: Use the ai nodes to navigate to the position */
     auto cpos = character->getPosition();
     glm::vec3 targetDirection = target - cpos;
@@ -141,8 +142,8 @@ bool Activities::GoTo::update(CharacterObject *character,
         return true;
     }
 
-    float hdg =
-        std::atan2(targetDirection.y, targetDirection.x) - glm::half_pi<float>();
+    float hdg = std::atan2(targetDirection.y, targetDirection.x) -
+                glm::half_pi<float>();
     character->setHeading(glm::degrees(hdg));
 
     controller->setMoveDirection({1.f, 0.f, 0.f});
@@ -151,9 +152,9 @@ bool Activities::GoTo::update(CharacterObject *character,
     return false;
 }
 
-glm::vec3 CharacterController::calculateRoadTarget(const glm::vec3 &target,
-                                                   const glm::vec3 &start,
-                                                   const glm::vec3 &end) {
+glm::vec3 CharacterController::calculateRoadTarget(const glm::vec3& target,
+                                                   const glm::vec3& start,
+                                                   const glm::vec3& end) {
     // @todo set the real value
     static constexpr float roadWidth = 5.f;
 
@@ -170,7 +171,7 @@ glm::vec3 CharacterController::calculateRoadTarget(const glm::vec3 &target,
     return target + laneOffset;
 }
 
-void CharacterController::steerTo(const glm::vec3 &target) {
+void CharacterController::steerTo(const glm::vec3& target) {
     // We can't drive without a vehicle
     VehicleObject* vehicle = character->getCurrentVehicle();
     if (vehicle == nullptr) {
@@ -181,8 +182,10 @@ void CharacterController::steerTo(const glm::vec3 &target) {
     float steeringAngle = 0.0f;
     float deviation = glm::abs(vehicle->isOnSide(target)) / 5.f;
 
-    // If we are almost at the right angle, decrease the deviation to reduce wiggling
-    if (deviation < 1.f) deviation = deviation / 5.f;
+    // If we are almost at the right angle, decrease the deviation to reduce
+    // wiggling
+    if (deviation < 1.f)
+        deviation = deviation / 5.f;
 
     // Make sure to normalize the value
     deviation = glm::clamp(deviation, 0.f, 1.f);
@@ -190,12 +193,11 @@ void CharacterController::steerTo(const glm::vec3 &target) {
     // Set the right sign
     steeringAngle = std::copysign(deviation, -vehicle->isOnSide(target));
 
-    vehicle->setSteeringAngle(steeringAngle, true);  
+    vehicle->setSteeringAngle(steeringAngle, true);
 }
 
 // @todo replace this by raytest/raycast logic
-bool CharacterController::checkForObstacles()
-{
+bool CharacterController::checkForObstacles() {
     // We can't drive without a vehicle
     VehicleObject* vehicle = character->getCurrentVehicle();
     if (vehicle == nullptr) {
@@ -206,11 +208,11 @@ bool CharacterController::checkForObstacles()
     static constexpr float minColDist = 20.f;
 
     // Try to stop before pedestrians
-    for (const auto &obj : character->engine->pedestrianPool.objects) {
+    for (const auto& obj : character->engine->pedestrianPool.objects) {
         // Verify that the character isn't the driver and is walking
         if (obj.second.get() != character &&
-            static_cast<CharacterObject *>(obj.second.get())->getCurrentVehicle() ==
-                nullptr) {
+            static_cast<CharacterObject*>(obj.second.get())
+                    ->getCurrentVehicle() == nullptr) {
             // Only check characters that are near our vehicle
             if (glm::distance(vehicle->getPosition(),
                               obj.second->getPosition()) <= minColDist) {
@@ -226,7 +228,7 @@ bool CharacterController::checkForObstacles()
     }
 
     // Brake when a car is in front of us and change lanes when possible
-    for (const auto &obj : character->engine->vehiclePool.objects) {
+    for (const auto& obj : character->engine->vehiclePool.objects) {
         // Verify that the vehicle isn't our vehicle
         if (obj.second.get() != vehicle) {
             // Only check vehicles that are near our vehicle
@@ -247,20 +249,20 @@ bool CharacterController::checkForObstacles()
                     if (maxLanes > 1) {
                         // Change the lane, firstly check if there is an
                         // occupant
-                        if (static_cast<VehicleObject *>(obj.second.get())
+                        if (static_cast<VehicleObject*>(obj.second.get())
                                 ->getDriver() != nullptr) {
                             // @todo for now we don't know the lane where the
                             // player is currently driving so just slow down, in
                             // the future calculate the lane
-                            if (static_cast<VehicleObject *>(obj.second.get())
+                            if (static_cast<VehicleObject*>(obj.second.get())
                                     ->getDriver()
                                     ->isPlayer()) {
                                 return true;
                             } else {
-                                int avoidLane =
-                                    static_cast<VehicleObject *>(obj.second.get())
-                                        ->getDriver()
-                                        ->controller->getLane();
+                                int avoidLane = static_cast<VehicleObject*>(
+                                                    obj.second.get())
+                                                    ->getDriver()
+                                                    ->controller->getLane();
 
                                 // @todo for now just two lanes
                                 if (avoidLane == 1)
@@ -280,9 +282,8 @@ bool CharacterController::checkForObstacles()
     return false;
 }
 
-bool Activities::DriveTo::update(CharacterObject *character,
-                              CharacterController *controller) {
-
+bool Activities::DriveTo::update(CharacterObject* character,
+                                 CharacterController* controller) {
     // We can't drive without a vehicle
     VehicleObject* vehicle = character->getCurrentVehicle();
     if (vehicle == nullptr) {
@@ -303,7 +304,7 @@ bool Activities::DriveTo::update(CharacterObject *character,
 
     // Make sure that we have a lastTargetNode
     if (lastTargetNode == nullptr) {
-        for (const auto &node : potentialNodes) {
+        for (const auto& node : potentialNodes) {
             if (vehicle->isInFront(node->position) < 0.f) {
                 lastTargetNode = node;
                 break;
@@ -315,15 +316,16 @@ bool Activities::DriveTo::update(CharacterObject *character,
     }
 
     // Remove unwanted nodes
-    for( auto i = potentialNodes.begin(); i != potentialNodes.end(); ) {
-        // @todo we don't know the direction of the road, so for now, choose the bigger value
-        int maxLanes = (*i)->rightLanes > (*i)->leftLanes ? (*i)->rightLanes : (*i)->leftLanes;
+    for (auto i = potentialNodes.begin(); i != potentialNodes.end();) {
+        // @todo we don't know the direction of the road, so for now, choose the
+        // bigger value
+        int maxLanes = (*i)->rightLanes > (*i)->leftLanes ? (*i)->rightLanes
+                                                          : (*i)->leftLanes;
 
         // We don't want roads with lanes <= 0, also ignore the lastTargetNode
-        if ( (*i) == lastTargetNode || maxLanes <= 0) {
+        if ((*i) == lastTargetNode || maxLanes <= 0) {
             i = potentialNodes.erase(i);
-        }
-        else {
+        } else {
             ++i;
         }
     }
@@ -341,9 +343,10 @@ bool Activities::DriveTo::update(CharacterObject *character,
     // Intersection, choose a direction
     else if (potentialNodes.size() > 1) {
         // Choose the next node randomly
-        if(nextTargetNode == nullptr) {
+        if (nextTargetNode == nullptr) {
             auto& random = character->engine->randomEngine;
-            auto i = std::uniform_int_distribution<std::size_t>(0, potentialNodes.size() - 1)(random);
+            auto i = std::uniform_int_distribution<std::size_t>(
+                0, potentialNodes.size() - 1)(random);
             nextTargetNode = potentialNodes.at(i);
         }
 
@@ -367,7 +370,7 @@ bool Activities::DriveTo::update(CharacterObject *character,
     if (glm::length(targetDistance) <= reachDistance) {
         // Finish the activity
         return true;
-    } 
+    }
 
     // @todo set real values
     static constexpr float maximumSpeed = 10.f;
@@ -376,10 +379,9 @@ bool Activities::DriveTo::update(CharacterObject *character,
     float currentSpeed = 0.f;
 
     // Set the speed depending on where we are driving
-    if ( potentialNodes.size() == 1 ) {
+    if (potentialNodes.size() == 1) {
         currentSpeed = maximumSpeed;
-    }
-    else {
+    } else {
         currentSpeed = intersectionSpeed;
     }
 
@@ -412,10 +414,11 @@ bool Activities::DriveTo::update(CharacterObject *character,
     return false;
 }
 
-bool Activities::Jump::update(CharacterObject *character,
-                              CharacterController *controller) {
+bool Activities::Jump::update(CharacterObject* character,
+                              CharacterController* controller) {
     RW_UNUSED(controller);
-    if (character->physCharacter == nullptr) return true;
+    if (character->physCharacter == nullptr)
+        return true;
 
     if (!jumped) {
         character->jump();
@@ -427,14 +430,14 @@ bool Activities::Jump::update(CharacterObject *character,
     return false;
 }
 
-bool Activities::EnterVehicle::canSkip(CharacterObject *character,
-                                       CharacterController *) const {
+bool Activities::EnterVehicle::canSkip(CharacterObject* character,
+                                       CharacterController*) const {
     // If we're already inside the vehicle, it can't helped.
     return character->getCurrentVehicle() == nullptr;
 }
 
-bool Activities::EnterVehicle::update(CharacterObject *character,
-                                      CharacterController *controller) {
+bool Activities::EnterVehicle::update(CharacterObject* character,
+                                      CharacterController* controller) {
     constexpr float kSprintToEnterDistance = 5.f;
     constexpr float kGiveUpDistance = 100.f;
 
@@ -476,7 +479,7 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     // If there's someone in this seat already, we may have to ask them to
     // leave.
     auto currentOccupant =
-        static_cast<CharacterObject *>(vehicle->getOccupant(seat));
+        static_cast<CharacterObject*>(vehicle->getOccupant(seat));
 
     bool tryToEnter = false;
 
@@ -484,9 +487,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
         if (character->getCurrentCycle() == cycle_open) {
             if (character->animator->isCompleted(AnimIndexAction)) {
                 tryToEnter = true;
-            } else if (entryDoor &&
-                       character->animator->getAnimationTime(AnimIndexAction) >=
-                           0.5f) {
+            } else if (entryDoor && character->animator->getAnimationTime(
+                                        AnimIndexAction) >= 0.5f) {
                 vehicle->setPartTarget(entryDoor, true, entryDoor->openAngle);
             } else {
                 // character->setPosition(vehicle->getSeatEntryPosition(seat));
@@ -560,8 +562,8 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
     return false;
 }
 
-bool Activities::ExitVehicle::update(CharacterObject *character,
-                                     CharacterController *controller) {
+bool Activities::ExitVehicle::update(CharacterObject* character,
+                                     CharacterController* controller) {
     RW_UNUSED(controller);
 
     if (jacked) {
@@ -574,7 +576,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
                 return true;
             }
         } else {
-            if (character->getCurrentVehicle() == nullptr) return true;
+            if (character->getCurrentVehicle() == nullptr)
+                return true;
 
             auto vehicle = character->getCurrentVehicle();
             auto seat = character->getCurrentSeat();
@@ -599,7 +602,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         return false;
     }
 
-    if (character->getCurrentVehicle() == nullptr) return true;
+    if (character->getCurrentVehicle() == nullptr)
+        return true;
 
     auto vehicle = character->getCurrentVehicle();
     auto seat = character->getCurrentSeat();
@@ -653,8 +657,8 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
     return false;
 }
 
-bool Activities::UseItem::update(CharacterObject *character,
-                                 CharacterController *controller) {
+bool Activities::UseItem::update(CharacterObject* character,
+                                 CharacterController* controller) {
     RW_UNUSED(controller);
 
     if (itemslot >= kMaxInventorySlots) {
@@ -663,20 +667,21 @@ bool Activities::UseItem::update(CharacterObject *character,
 
     // Finds the cycle associated with an anim from the AnimGroup
     /// @todo doesn't need to happen every update..
-    auto find_cycle = [&](const std::string &name) {
+    auto find_cycle = [&](const std::string& name) {
         if (name == "null") {
             return AnimCycle::Idle;
         }
-        for (auto &i : character->animations->animations_) {
-            if (i.name == name) return i.id;
+        for (auto& i : character->animations->animations_) {
+            if (i.name == name)
+                return i.id;
         }
         return AnimCycle::Idle;
     };
 
     auto world = character->engine;
-    const auto &weapon = world->data->weaponData.at(itemslot);
-    auto &state = character->getCurrentState().weapons[itemslot];
-    auto &animator = character->animator;
+    const auto& weapon = world->data->weaponData.at(itemslot);
+    auto& state = character->getCurrentState().weapons[itemslot];
+    auto& animator = character->animator;
     auto shootcycle = find_cycle(weapon->animation1);
     auto throwcycle = find_cycle(weapon->animation2);
 

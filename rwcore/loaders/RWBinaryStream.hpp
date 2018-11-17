@@ -1,13 +1,13 @@
 #ifndef _LIBRW_RWBINARYSTREAM_HPP_
 #define _LIBRW_RWBINARYSTREAM_HPP_
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <cstring>
+#include <glm/glm.hpp>
 
 #include <cstddef>
 
-#include "rw/debug.hpp"
 #include "rw/casts.hpp"
+#include "rw/debug.hpp"
 
 /**
  * @brief Class for working with RenderWare binary streams.
@@ -36,7 +36,8 @@ public:
      */
     ChunkID getNextChunk() {
         // Check that there's any data left
-        if ((_dataCur - _data) >= _size) return 0;
+        if ((_dataCur - _data) >= _size)
+            return 0;
 
         // _nextChunk is initally = to _data, making this a non-op
         _dataCur = _nextChunk;
@@ -317,19 +318,19 @@ public:
         }
     }
 
-    template <class T>
+    template<class T>
     T readStructure() {
         return *reinterpret_cast<T*>(data + offset +
                                      sizeof(BSSectionHeader) * 2);
     }
 
-    template <class T>
+    template<class T>
     T& readSubStructure(size_t internalOffset) {
         return *reinterpret_cast<T*>(data + offset + sizeof(BSSectionHeader) +
                                      internalOffset);
     }
 
-    template <class T>
+    template<class T>
     T readRaw(size_t internalOffset) {
         return *reinterpret_cast<T*>(data + offset + internalOffset);
     }

@@ -108,24 +108,24 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
           }},
          {"Unsolid garage doors",
           [=] {
-              static constexpr std::array<char const*, 33> garageDoorModels{{
-                  "8ballsuburbandoor",  "amcogaragedoor",
-                  "bankjobdoor",        "bombdoor",
-                  "crushercrush",       "crushertop",
-                  "door2_garage",       "door3_garage",
-                  "door4_garage",       "door_bombshop",
-                  "door_col_compnd_01", "door_col_compnd_02",
-                  "door_col_compnd_03", "door_col_compnd_04",
-                  "door_col_compnd_05", "door_jmsgrage",
-                  "door_sfehousegrge",  "double_garage_dr",
-                  "impex_door",         "impexpsubgrgdoor",
-                  "ind_plyrwoor",       "ind_slidedoor",
-                  "jamesgrge_kb",       "leveldoor2",
-                  "oddjgaragdoor",      "plysve_gragedoor",
-                  "SalvGarage",         "shedgaragedoor",
-                  "Sub_sprayshopdoor",  "towergaragedoor1",
-                  "towergaragedoor2",   "towergaragedoor3",
-                  "vheistlocdoor"}};
+              static constexpr std::array<char const*, 33> garageDoorModels{
+                  {"8ballsuburbandoor",  "amcogaragedoor",
+                   "bankjobdoor",        "bombdoor",
+                   "crushercrush",       "crushertop",
+                   "door2_garage",       "door3_garage",
+                   "door4_garage",       "door_bombshop",
+                   "door_col_compnd_01", "door_col_compnd_02",
+                   "door_col_compnd_03", "door_col_compnd_04",
+                   "door_col_compnd_05", "door_jmsgrage",
+                   "door_sfehousegrge",  "double_garage_dr",
+                   "impex_door",         "impexpsubgrgdoor",
+                   "ind_plyrwoor",       "ind_slidedoor",
+                   "jamesgrge_kb",       "leveldoor2",
+                   "oddjgaragdoor",      "plysve_gragedoor",
+                   "SalvGarage",         "shedgaragedoor",
+                   "Sub_sprayshopdoor",  "towergaragedoor1",
+                   "towergaragedoor2",   "towergaragedoor3",
+                   "vheistlocdoor"}};
 
               auto gw = game->getWorld();
               for (auto& [id, instancePtr] : gw->instancePool.objects) {
@@ -231,11 +231,14 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
 
-    static constexpr std::array<char const*, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
+    static constexpr std::array<char const*, 4> w{
+        {"Sunny", "Cloudy", "Rainy", "Foggy"}};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
-        menu->lambda(w[i],
-                     [=] { game->getWorld()->state->basic.nextWeather = static_cast<std::uint16_t>(i); });
+        menu->lambda(w[i], [=] {
+            game->getWorld()->state->basic.nextWeather =
+                static_cast<std::uint16_t>(i);
+        });
     }
 
     menu->offset = kDebugMenuOffset;
@@ -468,7 +471,8 @@ void DebugState::handleEvent(const SDL_Event& event) {
                     event.motion.xrel / static_cast<float>(screenSize.x),
                     event.motion.yrel / static_cast<float>(screenSize.y));
 
-                if (!_invertedY) mouseMove.y = -mouseMove.y;
+                if (!_invertedY)
+                    mouseMove.y = -mouseMove.y;
 
                 _debugLook.x -= mouseMove.x;
 
@@ -492,7 +496,8 @@ void DebugState::printCameraDetails() {
 
 void DebugState::spawnVehicle(unsigned int id) {
     auto ch = game->getWorld()->getPlayer()->getCharacter();
-    if (!ch) return;
+    if (!ch)
+        return;
 
     auto playerRot = ch->getRotation();
     auto spawnPos = ch->getPosition();
@@ -504,7 +509,8 @@ void DebugState::spawnVehicle(unsigned int id) {
 
 void DebugState::spawnFollower(unsigned int id) {
     auto ch = game->getWorld()->getPlayer()->getCharacter();
-    if (!ch) return;
+    if (!ch)
+        return;
 
     glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 

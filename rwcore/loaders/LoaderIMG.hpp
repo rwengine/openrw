@@ -25,7 +25,7 @@ public:
     /// Multiple versions of .IMG files
     enum Version {
         GTAIIIVC,  ///< GTA III and GTA VC archives -- only this one is
-                   ///implemented
+                   /// implemented
         GTASA,
         GTAIV
     };

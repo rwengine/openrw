@@ -5,7 +5,7 @@
 
 
 #ifdef RW_DEBUG_OPCODES
-#define RW_UNIMPLEMENTED_OPCODE(opcode) \
+#define RW_UNIMPLEMENTED_OPCODE(opcode)                                        \
     RW_MESSAGE("Unimplemented opcode: " << opcode);
 #else
 #define RW_UNIMPLEMENTED_OPCODE(opcode)

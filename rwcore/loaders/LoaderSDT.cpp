@@ -1,7 +1,7 @@
 #include "loaders/LoaderSDT.hpp"
 
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 #include <string>
 
 #include "rw/debug.hpp"
@@ -19,8 +19,8 @@ bool LoaderSDT::load(const rwfs::path& sdtPath, const rwfs::path& rawPath) {
         size_t expectedCount = fileSize / 20;
         m_assets.resize(expectedCount);
 
-        size_t actualCount = fread(&m_assets[0], sizeof(LoaderSDTFile),
-                expectedCount, fp);
+        size_t actualCount =
+            fread(&m_assets[0], sizeof(LoaderSDTFile), expectedCount, fp);
 
         if (expectedCount != actualCount) {
             m_assets.resize(actualCount);
@@ -60,7 +60,8 @@ std::unique_ptr<char[]> LoaderSDT::loadToMemory(size_t index, bool asWave) {
         std::unique_ptr<char[]> raw_data;
         char* sample_data;
         if (asWave) {
-            raw_data = std::make_unique<char[]>(sizeof(WaveHeader) + assetInfo.size);
+            raw_data =
+                std::make_unique<char[]>(sizeof(WaveHeader) + assetInfo.size);
 
             auto header = reinterpret_cast<WaveHeader*>(raw_data.get());
             memcpy(header->chunkId, "RIFF", 4);
@@ -98,12 +99,14 @@ std::unique_ptr<char[]> LoaderSDT::loadToMemory(size_t index, bool asWave) {
 bool LoaderSDT::saveAsset(size_t index, const std::string& filename,
                           bool asWave) {
     auto raw_sound = loadToMemory(index, asWave);
-    if (!raw_sound) return false;
+    if (!raw_sound)
+        return false;
 
     FILE* dumpFile = fopen(filename.c_str(), "wb");
     if (dumpFile) {
         if (findAssetInfo(index, assetInfo)) {
-            fwrite(raw_sound.get(), 1, assetInfo.size + (asWave ? sizeof(WaveHeader) : 0),
+            fwrite(raw_sound.get(), 1,
+                   assetInfo.size + (asWave ? sizeof(WaveHeader) : 0),
                    dumpFile);
             printf("=> SDT: Saved %zu to disk with filename %s\n", index,
                    filename.c_str());

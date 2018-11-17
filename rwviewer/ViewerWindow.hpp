@@ -8,9 +8,9 @@
 #include <engine/GameWorld.hpp>
 
 #include <QMainWindow>
+#include <QOffscreenSurface>
 #include <QTabWidget>
 #include <QVBoxLayout>
-#include <QOffscreenSurface>
 
 #include <memory>
 

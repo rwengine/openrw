@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
+#include <gl/gl_core_3_3.h>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <gl/gl_core_3_3.h>
 
 #include <render/OpenGLRenderer.hpp>
 

@@ -1,7 +1,7 @@
 #include "PedData.hpp"
 #include <unordered_map>
 
-uint32_t PedRelationship::threatFromName(const std::string &name) {
+uint32_t PedRelationship::threatFromName(const std::string& name) {
     static const std::unordered_map<std::string, uint32_t> kThreatMap{
         {"PLAYER1", THREAT_PLAYER1},        // Player
         {"PLAYER2", THREAT_PLAYER2},        // Unused

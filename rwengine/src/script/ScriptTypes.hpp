@@ -53,7 +53,7 @@ using ScriptString = char[8];
 /**
  * Helper class for transparently handling integer handles for objects
  */
-template <class T>
+template<class T>
 struct ScriptObjectType {
     /**
      * @brief m_id VM Memory containing the object handler
@@ -264,93 +264,93 @@ public:
 
     int getModel(unsigned int arg) const;
 
-    template <class T>
+    template<class T>
     GameObject* getObject(unsigned int arg) const;
 
     GameObject* getPlayerCharacter(unsigned int player) const;
 
-    template <class T>
+    template<class T>
     T getParameter(unsigned int arg) const;
 
-    template <class T>
+    template<class T>
     T& getParameterRef(unsigned int arg) const;
 
     /**
      * Returns a handle for the object of type T at the argument index.
      */
-    template <class T>
+    template<class T>
     ScriptObjectType<T> getScriptObject(unsigned int arg) const;
 };
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<InstanceObject>(unsigned int arg) const;
-template <>
+template<>
 GameObject* ScriptArguments::getObject<CharacterObject>(unsigned int arg) const;
-template <>
+template<>
 GameObject* ScriptArguments::getObject<VehicleObject>(unsigned int arg) const;
-template <>
+template<>
 GameObject* ScriptArguments::getObject<CutsceneObject>(unsigned int arg) const;
-template <>
+template<>
 GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const;
 /** Special player-index returning function */
-template <>
+template<>
 GameObject* ScriptArguments::getObject<PlayerController>(
     unsigned int arg) const;
 
-template <>
+template<>
 ScriptFloat ScriptArguments::getParameter<ScriptFloat>(unsigned int arg) const;
-template <>
+template<>
 ScriptInt ScriptArguments::getParameter<ScriptInt>(unsigned int arg) const;
-template <>
+template<>
 char const* ScriptArguments::getParameter<char const*>(unsigned int arg) const;
-template <>
+template<>
 ScriptVec2 ScriptArguments::getParameter<ScriptVec2>(unsigned int arg) const;
-template <>
+template<>
 ScriptVec3 ScriptArguments::getParameter<ScriptVec3>(unsigned int arg) const;
-template <>
+template<>
 ScriptRGB ScriptArguments::getParameter<ScriptRGB>(unsigned int arg) const;
-template <>
+template<>
 ScriptRGBA ScriptArguments::getParameter<ScriptRGBA>(unsigned int arg) const;
 
-template <>
+template<>
 ScriptFloat& ScriptArguments::getParameterRef<ScriptFloat>(
     unsigned int arg) const;
-template <>
+template<>
 ScriptInt& ScriptArguments::getParameterRef<ScriptInt>(unsigned int arg) const;
 
 ///////////////////////////////////////////////////////////
 // Script Object specialisations
-template <>
+template<>
 ScriptObjectType<VehicleObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<InstanceObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<CharacterObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<CutsceneObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<PickupObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     unsigned int arg) const;
-template <>
+template<>
 ScriptObjectType<Sound> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 

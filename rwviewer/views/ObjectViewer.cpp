@@ -1,6 +1,6 @@
 #include "ObjectViewer.hpp"
-#include <models/ObjectListModel.hpp>
 #include <ViewerWindow.hpp>
+#include <models/ObjectListModel.hpp>
 
 #include <QCheckBox>
 #include <QLineEdit>
@@ -9,8 +9,8 @@
 
 class ObjectSearchModel : public QSortFilterProxyModel {
 public:
-    ObjectSearchModel(QObject* parent)
-        : QSortFilterProxyModel(parent) { }
+    ObjectSearchModel(QObject* parent) : QSortFilterProxyModel(parent) {
+    }
 
     void showCARS(bool cars) {
         _showCars = cars;
@@ -33,8 +33,7 @@ public:
     }
 
     bool filterAcceptsRow(int sourceRow,
-                          const QModelIndex &sourceParent) const override
-    {
+                          const QModelIndex& sourceParent) const override {
         auto index0 = sourceModel()->index(sourceRow, 0, sourceParent);
         const auto& model = _data->modelinfo.at(index0.internalId());
 
@@ -53,7 +52,8 @@ public:
                 break;
         }
 
-        return !(!_name.empty() && model->name.find(_name) == std::string::npos);
+        return !(!_name.empty() &&
+                 model->name.find(_name) == std::string::npos);
     }
 
     void setModel(ObjectListModel* model) {
@@ -62,6 +62,7 @@ public:
     }
 
     GameData* _data = nullptr;
+
 private:
     bool _showPeds = true;
     bool _showMisc = true;
@@ -76,20 +77,24 @@ QLayout* searchControls(ObjectSearchModel* search) {
 
     auto searchBox = new QLineEdit;
     searchBox->setPlaceholderText("Search");
-    QObject::connect(searchBox, &QLineEdit::textChanged, search, &ObjectSearchModel::filterName);
+    QObject::connect(searchBox, &QLineEdit::textChanged, search,
+                     &ObjectSearchModel::filterName);
 
     auto cars = new QCheckBox;
     cars->setText("CARS");
     cars->setChecked(true);
-    QObject::connect(cars, &QCheckBox::clicked, search, &ObjectSearchModel::showCARS );
+    QObject::connect(cars, &QCheckBox::clicked, search,
+                     &ObjectSearchModel::showCARS);
     auto peds = new QCheckBox;
     peds->setText("PEDS");
     peds->setChecked(true);
-    QObject::connect(peds, &QCheckBox::clicked, search, &ObjectSearchModel::showPEDS );
+    QObject::connect(peds, &QCheckBox::clicked, search,
+                     &ObjectSearchModel::showPEDS);
     auto misc = new QCheckBox;
     misc->setText("Misc");
     misc->setChecked(true);
-    QObject::connect(misc, &QCheckBox::clicked, search, &ObjectSearchModel::showOBJS );
+    QObject::connect(misc, &QCheckBox::clicked, search,
+                     &ObjectSearchModel::showOBJS);
 
     bar->addWidget(searchBox, 1);
     bar->addWidget(cars);
@@ -120,7 +125,8 @@ ObjectViewer::ObjectViewer(QWidget* parent, Qt::WindowFlags f)
     objectList->setColumnWidth(1, 150);
     objectList->setColumnWidth(2, 200);
     objectList->setSortingEnabled(true);
-    objectList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+    objectList->setSelectionBehavior(
+        QAbstractItemView::SelectionBehavior::SelectRows);
     connect(objectList->selectionModel(),
             SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
             SLOT(showItem(QModelIndex)));
@@ -143,7 +149,8 @@ ObjectViewer::ObjectViewer(QWidget* parent, Qt::WindowFlags f)
     infoLayout->addWidget(previewClass, 2, 1);
     infoLayout->addWidget(new QLabel("Model"), 3, 0);
     infoLayout->addWidget(previewModel, 3, 1);
-    infoLayout->addWidget(QWidget::createWindowContainer(previewWidget), 0, 0, 1, 2);
+    infoLayout->addWidget(QWidget::createWindowContainer(previewWidget), 0, 0,
+                          1, 2);
     infoLayout->setRowStretch(0, 1);
 
     mainLayout->addLayout(infoLayout, 4);

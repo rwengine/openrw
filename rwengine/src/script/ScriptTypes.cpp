@@ -48,18 +48,19 @@ GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const {
 }
 
 // @todo figure out original cast
-template <>
-ScriptGarageType ScriptArguments::getParameter<ScriptGarageType>(unsigned int arg) const {
+template<>
+ScriptGarageType ScriptArguments::getParameter<ScriptGarageType>(
+    unsigned int arg) const {
     return static_cast<Garage::Type>(getParameters().at(arg).integerValue());
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<PlayerController>(
     unsigned int arg) const {
     return getPlayerCharacter(arg);
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<CharacterObject>(
     unsigned int arg) const {
     auto gameObjectID = parameters->at(arg).integerValue();
@@ -68,7 +69,7 @@ GameObject* ScriptArguments::getObject<CharacterObject>(
     return object;
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<CutsceneObject>(unsigned int arg) const {
     auto gameObjectID = parameters->at(arg).integerValue();
     auto object = getWorld()->cutscenePool.find(gameObjectID);
@@ -76,7 +77,7 @@ GameObject* ScriptArguments::getObject<CutsceneObject>(unsigned int arg) const {
     return object;
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<InstanceObject>(unsigned int arg) const {
     auto gameObjectID = parameters->at(arg).integerValue();
     auto object = getWorld()->instancePool.find(gameObjectID);
@@ -84,7 +85,7 @@ GameObject* ScriptArguments::getObject<InstanceObject>(unsigned int arg) const {
     return object;
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const {
     auto gameObjectID = parameters->at(arg).integerValue();
     auto object = getWorld()->pickupPool.find(gameObjectID);
@@ -92,7 +93,7 @@ GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const {
     return object;
 }
 
-template <>
+template<>
 GameObject* ScriptArguments::getObject<VehicleObject>(unsigned int arg) const {
     auto gameObjectID = parameters->at(arg).integerValue();
     auto object = getWorld()->vehiclePool.find(gameObjectID);
@@ -100,29 +101,29 @@ GameObject* ScriptArguments::getObject<VehicleObject>(unsigned int arg) const {
     return object;
 }
 
-template <>
+template<>
 ScriptFloat ScriptArguments::getParameter<ScriptFloat>(unsigned int arg) const {
     return getParameters().at(arg).realValue();
 }
 
-template <>
+template<>
 ScriptInt ScriptArguments::getParameter<ScriptInt>(unsigned int arg) const {
     return getParameters().at(arg).integerValue();
 }
 
-template <>
+template<>
 const char* ScriptArguments::getParameter<const char*>(unsigned int arg) const {
     return getParameters().at(arg).string;
 }
 
-template <>
+template<>
 ScriptVec2 ScriptArguments::getParameter<ScriptVec2>(unsigned int arg) const {
     RW_CHECK(getParameters().size() > arg + 1,
              "Argument list too short to get vec2");
     return glm::vec2(getParameter<float>(arg), getParameter<float>(arg + 1));
 }
 
-template <>
+template<>
 ScriptVec3 ScriptArguments::getParameter<ScriptVec3>(unsigned int arg) const {
     RW_CHECK(getParameters().size() > arg + 2,
              "Argument list too short to get vec3");
@@ -130,7 +131,7 @@ ScriptVec3 ScriptArguments::getParameter<ScriptVec3>(unsigned int arg) const {
                      getParameter<float>(arg + 2));
 }
 
-template <>
+template<>
 ScriptRGB ScriptArguments::getParameter<ScriptRGB>(unsigned int arg) const {
     RW_CHECK(getParameters().size() > arg + 2,
              "Argument list too short to get u8vec3");
@@ -138,7 +139,7 @@ ScriptRGB ScriptArguments::getParameter<ScriptRGB>(unsigned int arg) const {
                      getParameter<int>(arg + 2));
 }
 
-template <>
+template<>
 ScriptRGBA ScriptArguments::getParameter<ScriptRGBA>(unsigned int arg) const {
     RW_CHECK(getParameters().size() > arg + 3,
              "Argument list too short to get u8vec4");
@@ -146,47 +147,47 @@ ScriptRGBA ScriptArguments::getParameter<ScriptRGBA>(unsigned int arg) const {
                       getParameter<int>(arg + 2), getParameter<int>(arg + 3));
 }
 
-template <>
+template<>
 ScriptFloat& ScriptArguments::getParameterRef<ScriptFloat>(
     unsigned int arg) const {
     return *reinterpret_cast<ScriptFloat*>(
         getParameters().at(arg).handleValue());
 }
 
-template <>
+template<>
 ScriptInt& ScriptArguments::getParameterRef<ScriptInt>(unsigned int arg) const {
     return *reinterpret_cast<ScriptInt*>(getParameters().at(arg).handleValue());
 }
 
-template <>
+template<>
 ScriptObjectType<VehicleObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
     return {param.handleValue(), getObject<VehicleObject>(arg)};
 }
-template <>
+template<>
 ScriptObjectType<InstanceObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
     return {param.handleValue(), getObject<InstanceObject>(arg)};
 }
-template <>
+template<>
 ScriptObjectType<CharacterObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
     return {param.handleValue(), getObject<CharacterObject>(arg)};
 }
-template <>
+template<>
 ScriptObjectType<PickupObject> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
     return {param.handleValue(), getObject<PickupObject>(arg)};
 }
-template <>
+template<>
 ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -201,7 +202,7 @@ ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
     }
     return {param.handleValue(), ctrl};
 }
-template <>
+template<>
 ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -213,7 +214,7 @@ ScriptObjectType<VehicleGenerator> ScriptArguments::getScriptObject(
     }
     return {param.handleValue(), generator};
 }
-template <>
+template<>
 ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -225,7 +226,7 @@ ScriptObjectType<Garage> ScriptArguments::getScriptObject(
     }
     return {param.handleValue(), garage};
 }
-template <>
+template<>
 ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -240,7 +241,7 @@ ScriptObjectType<Payphone> ScriptArguments::getScriptObject(
     return {param.handleValue(), payphone};
 }
 
-template <>
+template<>
 ScriptObjectType<Sound> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -248,7 +249,7 @@ ScriptObjectType<Sound> ScriptArguments::getScriptObject(
     return {param.handleValue(), &getWorld()->sound.getSoundRef(arg)};
 }
 
-template <>
+template<>
 ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
@@ -261,7 +262,7 @@ ScriptObjectType<BlipData> ScriptArguments::getScriptObject(
     }
     return {param.handleValue(), blip};
 }
-template <>
+template<>
 ScriptObjectType<int> ScriptArguments::getScriptObject(unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");

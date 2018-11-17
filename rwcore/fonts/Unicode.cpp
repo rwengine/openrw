@@ -3,19 +3,19 @@
 #include <istream>
 
 size_t unicode_to_utf8(unicode_t unicode, char c[4]) {
-    if (unicode < 0x80) { // 7 bits
+    if (unicode < 0x80) {  // 7 bits
         c[0] = static_cast<char>(unicode);
         return 1;
-    } else if (unicode < 0x800) { // 11 bits
+    } else if (unicode < 0x800) {  // 11 bits
         c[0] = static_cast<char>(0xc0 | (unicode >> 6));
         c[1] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 2;
-    } else if (unicode < 0x10000) { // 16 bits
+    } else if (unicode < 0x10000) {  // 16 bits
         c[0] = static_cast<char>(0xe0 | (unicode >> 12));
         c[1] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
         c[2] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 3;
-    } else if (unicode < 0x110000) { // 21 bits
+    } else if (unicode < 0x110000) {  // 21 bits
         c[0] = static_cast<char>(0xf0 | (unicode >> 18));
         c[1] = static_cast<char>(0x80 | ((unicode >> 12) & 0x3f));
         c[2] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
@@ -26,7 +26,8 @@ size_t unicode_to_utf8(unicode_t unicode, char c[4]) {
     }
 }
 
-Utf8UnicodeIterator::Utf8UnicodeIterator(std::istream &is) : m_is(&is), m_finished(false) {
+Utf8UnicodeIterator::Utf8UnicodeIterator(std::istream& is)
+    : m_is(&is), m_finished(false) {
     next_unicode();
 }
 
@@ -73,7 +74,7 @@ void Utf8UnicodeIterator::next_unicode() {
     m_unicode = unicode;
 }
 
-Utf8UnicodeIterator &Utf8UnicodeIterator::operator ++() {
+Utf8UnicodeIterator& Utf8UnicodeIterator::operator++() {
     next_unicode();
     return *this;
 }
@@ -82,7 +83,7 @@ unicode_t Utf8UnicodeIterator::unicode() const {
     return m_unicode;
 }
 
-unicode_t Utf8UnicodeIterator::operator *() const {
+unicode_t Utf8UnicodeIterator::operator*() const {
     return m_unicode;
 }
 
@@ -90,7 +91,7 @@ bool Utf8UnicodeIterator::good() const {
     return !m_finished;
 }
 
-Utf8UnicodeIteratorWrapper::Utf8UnicodeIteratorWrapper(const std::string &s)
+Utf8UnicodeIteratorWrapper::Utf8UnicodeIteratorWrapper(const std::string& s)
     : iss(s) {
 }
 
@@ -102,6 +103,6 @@ Utf8UnicodeIterator Utf8UnicodeIteratorWrapper::end() {
     return Utf8UnicodeIterator();
 }
 
-bool Utf8UnicodeIterator::operator !=(const Utf8UnicodeIterator &) {
+bool Utf8UnicodeIterator::operator!=(const Utf8UnicodeIterator&) {
     return good();
 }

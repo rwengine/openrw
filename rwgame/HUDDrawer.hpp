@@ -41,7 +41,7 @@ public:
     void applyHUDScale(float scale);
     HUDParameters getHUDParameters();
     void drawHUD(ViewCamera& currentView, PlayerController* player,
-             GameWorld* world, GameRenderer* render);
+                 GameWorld* world, GameRenderer* render);
     void drawOnScreenText(GameWorld* world, GameRenderer* renderer);
 
 private:
@@ -49,9 +49,9 @@ private:
 
     void drawScriptTimer(GameWorld* world, GameRenderer* render);
     void drawMap(ViewCamera& currentView, PlayerController* player,
-             GameWorld* world, GameRenderer* render);
+                 GameWorld* world, GameRenderer* render);
     void drawPlayerInfo(PlayerController* player, GameWorld* world,
-                    GameRenderer* render);
+                        GameRenderer* render);
 };
 
 #endif

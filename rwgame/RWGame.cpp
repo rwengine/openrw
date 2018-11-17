@@ -196,7 +196,8 @@ void RWGame::handleCheatInput(char symbol) {
 #endif
         checkForCheat(health_cheat, [&] {
             player->getCurrentState().health = 100.f;
-            state.showHelpMessage("CHEAT3"); // III / VC: Inputting health cheat.
+            state.showHelpMessage(
+                "CHEAT3");  // III / VC: Inputting health cheat.
         });
 
 #if RW_GAME_VERSION >= 1100  // Changed cheat name in version 1.1
@@ -206,41 +207,45 @@ void RWGame::handleCheatInput(char symbol) {
 #endif
         checkForCheat(armor_cheat, [&] {
             player->getCurrentState().armour = 100.f;
-            state.showHelpMessage("CHEAT4"); // III / VC: Inputting armor cheat.
+            state.showHelpMessage(
+                "CHEAT4");  // III / VC: Inputting armor cheat.
         });
 
         checkForCheat("GUNSGUNSGUNS", [&] {
             static constexpr std::array<int, 11> ammo = {{
-                1,  //baseball bat
-                100,//pistol
-                100,//uzi
-                20, //shotgun
-                5,  //grenade
-                5,  //molotov
-                5,  //rocket launcher
-                20, //flamethrower
-                200,//ak47
-                200,//m16
-                5   //sniper rifle
+                1,    // baseball bat
+                100,  // pistol
+                100,  // uzi
+                20,   // shotgun
+                5,    // grenade
+                5,    // molotov
+                5,    // rocket launcher
+                20,   // flamethrower
+                200,  // ak47
+                200,  // m16
+                5     // sniper rifle
             }};
             for (auto i = 0u; i < ammo.size(); i++)
-                player->addToInventory(static_cast<int>(i+1),ammo[i]);
-            state.showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
+                player->addToInventory(static_cast<int>(i + 1), ammo[i]);
+            state.showHelpMessage(
+                "CHEAT2");  // III / VC: Inputting weapon cheats.
         });
 
         checkForCheat("IFIWEREARICHMAN", [&] {
             state.playerInfo.money += 250000;
-            state.showHelpMessage("CHEAT6"); // III: Inputting money cheat.
+            state.showHelpMessage("CHEAT6");  // III: Inputting money cheat.
         });
 
         checkForCheat("MOREPOLICEPLEASE", [&] {
             // @todo raise to next wanted level
-            state.showHelpMessage("CHEAT5"); // III / VC: Inputting wanted level cheats.
+            state.showHelpMessage(
+                "CHEAT5");  // III / VC: Inputting wanted level cheats.
         });
 
         checkForCheat("NOPOLICEPLEASE", [&] {
             // @todo lower to next lower wanted level
-            state.showHelpMessage("CHEAT5"); // III / VC: Inputting wanted level cheats.
+            state.showHelpMessage(
+                "CHEAT5");  // III / VC: Inputting wanted level cheats.
         });
     }
 
@@ -249,51 +254,59 @@ void RWGame::handleCheatInput(char symbol) {
         checkForCheat("BANGBANGBANG", [&] {
             // @todo Explode nearby vehicles
             // @todo What radius?
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("GIVEUSATANK", [&] {
 // The iPod / Android version of the game (10th year anniversary) spawns random
 // (?) vehicles instead of always rhino
 #if RW_GAME_GTA3_ANNIVERSARY != 0
-         // @todo Which cars are spawned?!
-         uint16_t vehicleModel = 110;
+            // @todo Which cars are spawned?!
+            uint16_t vehicleModel = 110;
 #else
          uint16_t vehicleModel = 122;
 #endif
             // @todo Change spawn place to be more like in original game
             const auto ch = getWorld()->getPlayer()->getCharacter();
             const auto playerRot = ch->getRotation();
-            const auto spawnPos = ch->getPosition() + playerRot * glm::vec3(0.f, 3.f, 0.f);
-            const auto spawnRot = glm::quat(
-                    glm::vec3(0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
+            const auto spawnPos =
+                ch->getPosition() + playerRot * glm::vec3(0.f, 3.f, 0.f);
+            const auto spawnRot = glm::quat(glm::vec3(
+                0.f, 0.f, glm::roll(playerRot) + glm::half_pi<float>()));
             getWorld()->createVehicle(vehicleModel, spawnPos, spawnRot);
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("CORNERSLIKEMAD", [&] {
             // @todo Weird car handling
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ANICESETOFWHEELS", [&] {
             // @todo Hide car bodies
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("CHITTYCHITTYBB", [&] {
             // @todo Cars can fly
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("NASTYLIMBCHEAT", [&] {
             // @todo Makes it possible to shoot limbs off, iirc?
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ILIKEDRESSINGUP", [&] {
             // @todo Which skins will be chosen?
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
     }
 
@@ -303,31 +316,36 @@ void RWGame::handleCheatInput(char symbol) {
             // @todo Give all pedestrians weapons.. this is also saved in the
             // savegame?!
             // @todo Which weapons do they get?
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("NOBODYLIKESME", [&] {
             // @todo Set all pedestrians hostile towards player.. this is also
             // saved in the savegame?!
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("ITSALLGOINGMAAAD", [&] {
             // @todo Set all pedestrians to fighting each other.. this is also
             // saved in the savegame?!
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         // Game speed cheats
 
         checkForCheat("TIMEFLIESWHENYOU", [&] {
             // @todo Set fast gamespeed
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
 
         checkForCheat("BOOOOORING", [&] {
             // @todo Set slow gamespeed
-            state.showHelpMessage("CHEAT1"); // III / VC: Inputting most cheats.
+            state.showHelpMessage(
+                "CHEAT1");  // III / VC: Inputting most cheats.
         });
     }
 
@@ -335,27 +353,32 @@ void RWGame::handleCheatInput(char symbol) {
     {
         checkForCheat("ILIKESCOTLAND", [&] {
             // @todo Set weather to cloudy
-            state.showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
+            state.showHelpMessage(
+                "CHEAT7");  // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("SKINCANCERFORME", [&] {
             // @todo Set sunny / normal weather
-            state.showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
+            state.showHelpMessage(
+                "CHEAT7");  // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("MADWEATHER", [&] {
             // @todo Set bad weather
-            state.showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
+            state.showHelpMessage(
+                "CHEAT7");  // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("ILOVESCOTLAND", [&] {
             // @todo Set weather to rainy
-            state.showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
+            state.showHelpMessage(
+                "CHEAT7");  // III / VC: Inputting weather cheats.
         });
 
         checkForCheat("PEASOUP", [&] {
             // @todo Set weather to foggy
-            state.showHelpMessage("CHEAT7"); // III / VC: Inputting weather cheats.
+            state.showHelpMessage(
+                "CHEAT7");  // III / VC: Inputting weather cheats.
         });
     }
 }
@@ -408,8 +431,7 @@ int RWGame::run() {
 
 float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
     RW_PROFILE_SCOPEC(__func__, MP_GREEN);
-    auto deltaTimeWithTimeScale =
-            deltaTime * world->state->basic.timeScale;
+    auto deltaTimeWithTimeScale = deltaTime * world->state->basic.timeScale;
 
     while (accumulatedTime >= deltaTime) {
         if (!StateManager::currentState()) {
@@ -419,7 +441,7 @@ float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
         {
             RW_PROFILE_SCOPEC("stepSimulation", MP_DARKORANGE1);
             world->dynamicsWorld->stepSimulation(
-                    deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
+                deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
         }
 
         StateManager::get().tick(deltaTimeWithTimeScale);
@@ -508,7 +530,7 @@ void RWGame::tick(float dt) {
             while (scriptTimerAccumulator >= timerClockRate) {
                 // Original game uses milliseconds
                 (*state.scriptTimerVariable) -= timerClockRate * 1000;
-		    
+
                 //                                11 seconds
                 if (*state.scriptTimerVariable <= 11000 &&
                     beepTime - *state.scriptTimerVariable >= 1000) {
@@ -516,7 +538,7 @@ void RWGame::tick(float dt) {
 
                     // @todo beep
                 }
-		    
+
                 if (*state.scriptTimerVariable <= 0) {
                     (*state.scriptTimerVariable) = 0;
                     state.scriptTimerVariable = nullptr;
@@ -560,8 +582,9 @@ void RWGame::tickObjects(float dt) const {
 
     {
         RW_PROFILE_SCOPEC("allObjects", MP_HOTPINK1);
-        RW_PROFILE_COUNTER_SET("tickObjects/allObjects", world->allObjects.size());
-        for (auto &object : world->allObjects) {
+        RW_PROFILE_COUNTER_SET("tickObjects/allObjects",
+                               world->allObjects.size());
+        for (auto& object : world->allObjects) {
             object->_updateLastTransform();
             object->tick(dt);
         }
@@ -569,14 +592,14 @@ void RWGame::tickObjects(float dt) const {
 
     {
         RW_PROFILE_SCOPEC("garages", MP_HOTPINK2);
-        for (auto &g : world->garages) {
+        for (auto& g : world->garages) {
             g->tick(dt);
         }
     }
 
     {
         RW_PROFILE_SCOPEC("payphones", MP_HOTPINK3);
-        for (auto &p : world->payphones) {
+        for (auto& p : world->payphones) {
             p->tick(dt);
         }
     }
@@ -621,7 +644,8 @@ void RWGame::render(float alpha, float time) {
 
     renderDebugView(time, viewCam);
 
-    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused())
+        hudDrawer.drawOnScreenText(world.get(), &renderer);
 
     if (StateManager::currentState()) {
         RW_PROFILE_SCOPE("state");
@@ -629,7 +653,7 @@ void RWGame::render(float alpha, float time) {
     }
 }
 
-void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
+void RWGame::renderDebugView(float time, ViewCamera& viewCam) {
     RW_PROFILE_SCOPE(__func__);
     switch (debugview_) {
         case DebugViewMode::General:
@@ -784,7 +808,7 @@ void RWGame::renderDebugPaths(float time) {
             btVector3 position2(pos2.x, pos2.y, pos2.z);
 
             debug.drawLine(position1, position2, color);
-    }
+        }
     }
 
     debug.flush(&renderer);
@@ -832,7 +856,8 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     };
 
     for (auto& p : world->vehiclePool.objects) {
-        if (!isnearby(p.second.get())) continue;
+        if (!isnearby(p.second.get()))
+            continue;
         auto v = static_cast<VehicleObject*>(p.second.get());
 
         std::stringstream ss;
@@ -844,7 +869,8 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         showdata(v, ss);
     }
     for (auto& p : world->pedestrianPool.objects) {
-        if (!isnearby(p.second.get())) continue;
+        if (!isnearby(p.second.get()))
+            continue;
         auto c = static_cast<CharacterObject*>(p.second.get());
         const auto& state = c->getCurrentState();
         auto act = c->controller->getCurrentActivity();

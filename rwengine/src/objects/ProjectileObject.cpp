@@ -65,7 +65,8 @@ void ProjectileObject::explode() {
         const float damage = static_cast<float>(_info.weapon->damage);
 
         for (auto& o : engine->allObjects) {
-            if (o == this) continue;
+            if (o == this)
+                continue;
             switch (o->type()) {
                 case GameObject::Instance:
                 case GameObject::Vehicle:
@@ -76,7 +77,8 @@ void ProjectileObject::explode() {
             }
 
             float d = glm::distance(getPosition(), o->getPosition());
-            if (d > damageSize) continue;
+            if (d > damageSize)
+                continue;
 
             o->takeDamage({getPosition(), getPosition(),
                            damage / glm::max(d, 1.f), DamageInfo::Explosion,
@@ -109,14 +111,14 @@ void ProjectileObject::cleanup() {
         engine->dynamicsWorld->removeCollisionObject(_ghostBody.get());
         _ghostBody = nullptr;
     }
-    if(_shape) {
+    if (_shape) {
         _shape = nullptr;
     }
 }
 
 ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
                                    const ProjectileObject::ProjectileInfo& info)
-    : GameObject(world, position, glm::quat{1.0f,0.0f,0.0f,0.0f}, nullptr)
+    : GameObject(world, position, glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, nullptr)
     , _info(info) {
     _shape = std::make_unique<btSphereShape>(0.45f);
     btVector3 inertia(0.f, 0.f, 0.f);
@@ -164,7 +166,8 @@ ProjectileObject::~ProjectileObject() {
 }
 
 void ProjectileObject::tick(float dt) {
-    if (_body == nullptr) return;
+    if (_body == nullptr)
+        return;
 
     auto& bttr = _body->getWorldTransform();
     position = {bttr.getOrigin().x(), bttr.getOrigin().y(),

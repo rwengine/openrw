@@ -70,11 +70,11 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     t.setIdentity();
 
     // Boxes
-    for (const auto &box : collision->boxes) {
+    for (const auto& box : collision->boxes) {
         auto size = (box.max - box.min) / 2.f;
         auto mid = (box.min + box.max) / 2.f;
-        auto bshape = std::make_unique<btBoxShape>(
-            btVector3(size.x, size.y, size.z));
+        auto bshape =
+            std::make_unique<btBoxShape>(btVector3(size.x, size.y, size.z));
         t.setOrigin(btVector3(mid.x, mid.y, mid.z));
         cmpShape->addChildShape(t, bshape.get());
 
@@ -85,7 +85,7 @@ bool CollisionInstance::createPhysicsBody(GameObject* object,
     }
 
     // Spheres
-    for (const auto &sphere : collision->spheres) {
+    for (const auto& sphere : collision->spheres) {
         auto sshape = std::make_unique<btSphereShape>(sphere.radius);
         t.setOrigin(
             btVector3(sphere.center.x, sphere.center.y, sphere.center.z));

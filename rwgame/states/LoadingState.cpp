@@ -1,7 +1,8 @@
 #include "LoadingState.hpp"
 #include "RWGame.hpp"
 
-LoadingState::LoadingState(RWGame* game, const std::function<void(void)>& callback)
+LoadingState::LoadingState(RWGame* game,
+                           const std::function<void(void)>& callback)
     : State(game), complete(callback) {
 }
 
@@ -28,7 +29,8 @@ void LoadingState::handleEvent(const SDL_Event& e) {
 }
 
 void LoadingState::draw(GameRenderer* r) {
-    static auto kLoadingString = GameStringUtil::fromString("Loading...", FONT_ARIAL);
+    static auto kLoadingString =
+        GameStringUtil::fromString("Loading...", FONT_ARIAL);
     // Display some manner of loading screen.
     TextRenderer::TextInfo ti;
     ti.text = kLoadingString;

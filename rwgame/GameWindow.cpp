@@ -4,7 +4,8 @@
 void GameWindow::create(const std::string& title, size_t w, size_t h,
                         bool fullscreen) {
     Uint32 style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-    if (fullscreen) style |= SDL_WINDOW_FULLSCREEN;
+    if (fullscreen)
+        style |= SDL_WINDOW_FULLSCREEN;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
@@ -15,7 +16,8 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
     window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED, static_cast<int>(w), static_cast<int>(h), style);
+                              SDL_WINDOWPOS_CENTERED, static_cast<int>(w),
+                              static_cast<int>(h), style);
     if (window == nullptr) {
         // Window creation failure is fatal
         std::string sdlErrorStr = SDL_GetError();

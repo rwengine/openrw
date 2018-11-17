@@ -2,8 +2,8 @@
 #include <ViewerWidget.hpp>
 #include "views/ModelViewer.hpp"
 #include "views/ObjectViewer.hpp"
-#include "views/WorldViewer.hpp"
 #include "views/TextViewer.hpp"
+#include "views/WorldViewer.hpp"
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -12,10 +12,10 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QWindow>
-#include <QMessageBox>
 
 static int MaxRecentGames = 5;
 
@@ -53,8 +53,8 @@ void ViewerWindow::createMenus() {
     recentSep = file->addSeparator();
     auto ex = file->addAction("E&xit");
     ex->setShortcut(QKeySequence::Quit);
-    connect(ex, &QAction::triggered,
-            QApplication::instance(), &QApplication::closeAllWindows);
+    connect(ex, &QAction::triggered, QApplication::instance(),
+            &QApplication::closeAllWindows);
 
     mb->addMenu("&Data");
 
@@ -64,7 +64,7 @@ void ViewerWindow::createMenus() {
 bool ViewerWindow::setupEngine() {
     QSurfaceFormat format = windowHandle()->format();
     format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setVersion(3,3);
+    format.setVersion(3, 3);
     m_context.setup(format);
 
     hiddenSurface = new QOffscreenSurface(windowHandle()->screen());
@@ -86,12 +86,14 @@ void ViewerWindow::createDefaultViews() {
 
     auto objectView = new ObjectViewer(this);
     views->addTab(objectView, "Objects");
-    connect(this, &ViewerWindow::gameLoaded, objectView, &ObjectViewer::showData);
+    connect(this, &ViewerWindow::gameLoaded, objectView,
+            &ObjectViewer::showData);
 
     auto modelView = new ModelViewer(this);
     views->addTab(modelView, "Model");
     connect(this, &ViewerWindow::gameLoaded, modelView, &ModelViewer::showData);
-    connect(objectView, &ObjectViewer::showObjectModel, modelView, &ModelViewer::showObject);
+    connect(objectView, &ObjectViewer::showObjectModel, modelView,
+            &ModelViewer::showObject);
 
     auto worldView = new WorldViewer(this);
     views->addTab(worldView, "World");
@@ -126,7 +128,8 @@ void ViewerWindow::loadGame() {
         this, tr("Open Directory"), QDir::homePath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    if (dir.size() > 0) loadGame(dir);
+    if (dir.size() > 0)
+        loadGame(dir);
 }
 
 void ViewerWindow::loadGame(const QString& path) {
@@ -135,7 +138,8 @@ void ViewerWindow::loadGame(const QString& path) {
         return;
     }
     if (!gameDir.exists()) {
-        QMessageBox::critical(this, "Error", "The requested path doesn't exist");
+        QMessageBox::critical(this, "Error",
+                              "The requested path doesn't exist");
         return;
     }
 
@@ -143,7 +147,8 @@ void ViewerWindow::loadGame(const QString& path) {
         return;
     }
 
-    gameData = std::make_unique<GameData>(&engineLog, gameDir.absolutePath().toStdString());
+    gameData = std::make_unique<GameData>(&engineLog,
+                                          gameDir.absolutePath().toStdString());
     gameData->load();
 
     gameWorld = std::make_unique<GameWorld>(&engineLog, gameData.get());
@@ -160,7 +165,8 @@ void ViewerWindow::loadGame(const QString& path) {
     QStringList recent = settings.value("recentGames").toStringList();
     recent.removeAll(path);
     recent.prepend(path);
-    while (recent.size() > MaxRecentGames) recent.removeLast();
+    while (recent.size() > MaxRecentGames)
+        recent.removeLast();
     settings.setValue("recentGames", recent);
 
     updateRecentGames();
@@ -189,7 +195,6 @@ void ViewerWindow::updateRecentGames() {
 }
 
 ViewerWindow::~ViewerWindow() {
-
 }
 
 bool ViewerWindow::makeCurrent() {
@@ -201,7 +206,7 @@ bool ViewerWindow::makeCurrent() {
     return true;
 }
 
-ViewerWidget *ViewerWindow::createViewer() {
+ViewerWidget* ViewerWindow::createViewer() {
     auto view = new ViewerWidget(&m_context, windowHandle());
     connect(this, &ViewerWindow::gameLoaded, view, &ViewerWidget::gameLoaded);
     return view;

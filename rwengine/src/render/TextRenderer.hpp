@@ -4,7 +4,6 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <array>
 
 #include <glm/glm.hpp>
 
@@ -68,17 +67,16 @@ private:
     public:
         FontMetaData() = default;
         template<size_t N>
-        FontMetaData(const std::string &textureName,
-                     const std::array<std::uint8_t, N> &glyphWidths,
-                     const glm::u32vec2 &textureSize,
-                     const glm::u8vec2 &glyphOffset,
+        FontMetaData(const std::string& textureName,
+                     const std::array<std::uint8_t, N>& glyphWidths,
+                     const glm::u32vec2& textureSize,
+                     const glm::u8vec2& glyphOffset,
                      const std::uint8_t monoWidth)
             : textureName(textureName)
             , glyphWidths(glyphWidths.cbegin(), glyphWidths.cend())
             , textureSize(textureSize)
             , glyphOffset(glyphOffset)
-            , monoWidth(monoWidth)
-        {
+            , monoWidth(monoWidth) {
         }
         std::string textureName;
         std::vector<std::uint8_t> glyphWidths;

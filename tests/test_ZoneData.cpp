@@ -19,15 +19,14 @@ BOOST_AUTO_TEST_CASE(test_contains_point) {
 
 BOOST_AUTO_TEST_CASE(test_hierarchy) {
     ZoneData zone;
-    zone.min = glm::vec3(-10.f,-10.f,-5.f);
-    zone.max = glm::vec3( 10.f, 10.f, 5.f);
+    zone.min = glm::vec3(-10.f, -10.f, -5.f);
+    zone.max = glm::vec3(10.f, 10.f, 5.f);
     ZoneData leaf;
-    leaf.min = glm::vec3(0.f,  0.f,-5.f);
-    leaf.max = glm::vec3(10.f,10.f, 5.f);
+    leaf.min = glm::vec3(0.f, 0.f, -5.f);
+    leaf.max = glm::vec3(10.f, 10.f, 5.f);
     BOOST_CHECK(zone.insertZone(leaf));
 
     BOOST_CHECK_EQUAL(zone.findLeafAtPoint({-5.f, 0.f, 0.f}), &zone);
-    BOOST_CHECK_EQUAL(zone.findLeafAtPoint({ 5.f, 5.f, 0.f}), &leaf);
-
+    BOOST_CHECK_EQUAL(zone.findLeafAtPoint({5.f, 5.f, 0.f}), &leaf);
 }
 BOOST_AUTO_TEST_SUITE_END()

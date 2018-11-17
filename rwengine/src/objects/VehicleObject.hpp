@@ -10,8 +10,8 @@
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
 #endif
-#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btScalar.h>
+#include <btBulletDynamicsCommon.h>
 #ifdef _MSC_VER
 #pragma warning(default : 4305 5033)
 #endif
@@ -137,7 +137,7 @@ public:
 
     void setExtraEnabled(size_t extra, bool enabled);
 
-    void setSteeringAngle(float, bool=false);
+    void setSteeringAngle(float, bool = false);
 
     float getSteeringAngle() const;
 
@@ -238,8 +238,8 @@ public:
 
     /**
      * @brief collectSpecial
-     * @return a positive distance when the point is at the right side of the car
-     * and a negative distance when the point is at the left side of the car
+     * @return a positive distance when the point is at the right side of the
+     * car and a negative distance when the point is at the left side of the car
      */
     float isOnSide(const glm::vec3& point);
 

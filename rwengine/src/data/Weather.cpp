@@ -3,11 +3,10 @@
 
 namespace {
 Weather::Entry interpolateWeather(const Weather::Entry& a,
-                                  const Weather::Entry& b,
-                                  float t) {
-#define MIXPROP(prop) static_cast<decltype(a.prop)>((1.0f - t) * a.prop + (t * b.prop))
-    return {
-            MIXPROP(ambientColor),
+                                  const Weather::Entry& b, float t) {
+#define MIXPROP(prop)                                                          \
+    static_cast<decltype(a.prop)>((1.0f - t) * a.prop + (t * b.prop))
+    return {MIXPROP(ambientColor),
             MIXPROP(directLightColor),
             MIXPROP(skyTopColor),
             MIXPROP(skyBottomColor),
@@ -25,15 +24,13 @@ Weather::Entry interpolateWeather(const Weather::Entry& a,
             MIXPROP(lowCloudColor),
             MIXPROP(topCloudColor),
             MIXPROP(bottomCloudColor),
-            {}
-    };
+            {}};
 #undef MIXPROP
 }
 }
 
 Weather::Entry Weather::interpolate(WeatherCondition prev,
-                                    WeatherCondition next,
-                                    float a, float tod) {
+                                    WeatherCondition next, float a, float tod) {
     const float t = tod - std::floor(tod);
     const auto nI = size_t(next) * 24;
     const auto pI = size_t(prev) * 24;

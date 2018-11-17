@@ -16,20 +16,20 @@ namespace pt = boost::property_tree;
 typedef std::map<std::string, std::map<std::string, std::string>>
     simpleConfig_t;
 
-simpleConfig_t readConfig(const rwfs::path &path) {
+simpleConfig_t readConfig(const rwfs::path& path) {
     simpleConfig_t cfg;
     pt::ptree tree;
     pt::read_ini(path.string(), tree);
 
-    for (const auto &section : tree) {
-        for (const auto &subKey : section.second) {
+    for (const auto& section : tree) {
+        for (const auto& subKey : section.second) {
             cfg[section.first][subKey.first] = subKey.second.data();
         }
     }
     return cfg;
 }
 
-std::string stripWhitespace(const std::string &in) {
+std::string stripWhitespace(const std::string& in) {
     static const std::string whitespace = " \n\r\t";
     auto start = in.find_first_not_of(whitespace);
     auto end = in.find_last_not_of(whitespace) + 1;
@@ -50,11 +50,11 @@ simpleConfig_t getValidConfig() {
     return result;
 }
 
-std::ostream &operator<<(std::ostream &os, const simpleConfig_t &config) {
-    for (auto &section : config) {
+std::ostream& operator<<(std::ostream& os, const simpleConfig_t& config) {
+    for (auto& section : config) {
         os << "[" << section.first << "]"
            << "\n";
-        for (auto &keyValue : section.second) {
+        for (auto& keyValue : section.second) {
             os << keyValue.first << "=" << keyValue.second << "\n";
         }
     }
@@ -69,7 +69,7 @@ public:
     bool exists() const {
         return rwfs::exists(this->m_path);
     }
-    const rwfs::path &path() const {
+    const rwfs::path& path() const {
         return this->m_path;
     }
     std::string filename() const {
@@ -84,14 +84,14 @@ public:
     virtual void touch() const = 0;
 
 protected:
-    Temp(const Temp &) = delete;
+    Temp(const Temp&) = delete;
     Temp() : m_path(getRandomFilePath()) {
     }
-    Temp(const rwfs::path &dirname) : m_path(getRandomFilePath(dirname)) {
+    Temp(const rwfs::path& dirname) : m_path(getRandomFilePath(dirname)) {
     }
 
 private:
-    static rwfs::path getRandomFilePath(const rwfs::path &dirname) {
+    static rwfs::path getRandomFilePath(const rwfs::path& dirname) {
         return rwfs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
     }
     static rwfs::path getRandomFilePath() {
@@ -106,22 +106,25 @@ class TempDir : public Temp {
 public:
     TempDir() : Temp() {
     }
-    TempDir(const TempDir &dirname) : Temp(dirname.path()) {
+    TempDir(const TempDir& dirname) : Temp(dirname.path()) {
     }
     virtual ~TempDir() {
         this->remove();
     }
     virtual void change_perms_normal() const override {
         rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exe |
-            rwfs::perms::group_read | rwfs::perms::group_exe |
-            rwfs::perms::others_read | rwfs::perms::others_exe);
+                          rwfs::perms::owner_read | rwfs::perms::owner_write |
+                              rwfs::perms::owner_exe | rwfs::perms::group_read |
+                              rwfs::perms::group_exe |
+                              rwfs::perms::others_read |
+                              rwfs::perms::others_exe);
     }
     virtual void change_perms_readonly() const override {
         rwfs::permissions(this->path(),
-                        rwfs::perms::owner_read | rwfs::perms::owner_exe |
-                        rwfs::perms::group_read | rwfs::perms::group_exe |
-                        rwfs::perms::others_read | rwfs::perms::others_exe);
+                          rwfs::perms::owner_read | rwfs::perms::owner_exe |
+                              rwfs::perms::group_read | rwfs::perms::group_exe |
+                              rwfs::perms::others_read |
+                              rwfs::perms::others_exe);
     }
     virtual void remove() const override {
         // Remove may fail if this directory contains a read-only entry. Ignore.
@@ -138,21 +141,21 @@ class TempFile : public Temp {
 public:
     TempFile() : Temp() {
     }
-    TempFile(const TempDir &dirname) : Temp(dirname.path()) {
+    TempFile(const TempDir& dirname) : Temp(dirname.path()) {
     }
     virtual ~TempFile() {
         this->remove();
     }
     virtual void change_perms_normal() const override {
-        rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write |
-            rwfs::perms::group_read |
-            rwfs::perms::others_read);
+        rwfs::permissions(this->path(), rwfs::perms::owner_read |
+                                            rwfs::perms::owner_write |
+                                            rwfs::perms::group_read |
+                                            rwfs::perms::others_read);
     }
     virtual void change_perms_readonly() const override {
         rwfs::permissions(this->path(), rwfs::perms::owner_read |
-                                                        rwfs::perms::group_read |
-                                                        rwfs::perms::others_read);
+                                            rwfs::perms::group_read |
+                                            rwfs::perms::others_read);
     }
     virtual void remove() const override {
         rwfs::error_code ec;
@@ -162,7 +165,7 @@ public:
         std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
         ofs.close();
     }
-    template <typename T>
+    template<typename T>
     bool append(T t) const {
         // Append argument at the end of the file.
         // File is open/closes repeatedly. Not optimal.
@@ -171,11 +174,12 @@ public:
         ofs.close();
         return ofs.good();
     }
-    template <typename T>
+    template<typename T>
     bool write(T t) const {
         // Write the argument to the file, discarding all contents.
         // File is open/closes repeatedly. Not optimal.
-        std::ofstream ofs(this->path().string(), std::ios::out | std::ios::trunc);
+        std::ofstream ofs(this->path().string(),
+                          std::ios::out | std::ios::trunc);
         ofs << t;
         ofs.close();
         return ofs.good();
@@ -193,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_stripWhitespace) {
     map["abc "] = "abc";
     map[" abc "] = "abc";
     map["  abc  "] = "abc";
-    for (const auto &keyValue : map) {
+    for (const auto& keyValue : map) {
         BOOST_CHECK_EQUAL(keyValue.second, stripWhitespace(keyValue.first));
     }
 }
@@ -363,7 +367,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid_unknown_keys) {
 
     BOOST_CHECK(config.isValid());
 
-    const auto &unknownData = config.getParseResult().getUnknownData();
+    const auto& unknownData = config.getParseResult().getUnknownData();
 
     BOOST_CHECK_EQUAL(unknownData.size(), 2);
 
@@ -382,7 +386,7 @@ BOOST_AUTO_TEST_CASE(test_config_valid_unknown_keys) {
 
     GameConfig config2;
     config2.loadFile(tempFile.path());
-    const auto &unknownData2 = config2.getParseResult().getUnknownData();
+    const auto& unknownData2 = config2.getParseResult().getUnknownData();
 
     BOOST_CHECK_EQUAL(unknownData2.size(), 2);
 
@@ -444,7 +448,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_emptykey) {
     config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
@@ -461,7 +465,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_duplicate) {
     config.loadFile(tempFile.path());
 
     BOOST_CHECK(!config.isValid());
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
@@ -479,7 +483,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_required_missing) {
 
     BOOST_CHECK(!config.isValid());
 
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
 
@@ -502,7 +506,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_wrong_type) {
 
     BOOST_CHECK(!config.isValid());
 
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
 
@@ -525,7 +529,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
 
     BOOST_CHECK(!config.isValid());
 
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
     BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1);
@@ -544,7 +548,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nodir) {
 
     BOOST_CHECK(!config.isValid());
 
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }
@@ -559,7 +563,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_nonexisting) {
 
     BOOST_CHECK(!config.isValid());
 
-    const auto &parseResult = config.getParseResult();
+    const auto& parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDINPUTFILE);
 }

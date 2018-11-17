@@ -20,7 +20,7 @@ end
 
 template<size_t N>
 void ASSERT_INSTANCE_IS(BaseModelInfo& info, const char* model, const char* txd,
-        const std::array<float, N>& lods, size_t flags) {
+                        const std::array<float, N>& lods, size_t flags) {
     BOOST_ASSERT(info.type() == SimpleModelInfo::kType);
     const auto& t = dynamic_cast<SimpleModelInfo&>(info);
     BOOST_TEST(t.name == model);
@@ -33,8 +33,9 @@ void ASSERT_INSTANCE_IS(BaseModelInfo& info, const char* model, const char* txd,
 }
 
 void ASSERT_VEHICLE_IS(BaseModelInfo& info, const char* model, const char* txd,
-        VehicleModelInfo::VehicleType type, const char* handling, const char* name,
-        VehicleModelInfo::VehicleClass clas_, int frequency, ModelID wheel, float wheelScale) {
+                       VehicleModelInfo::VehicleType type, const char* handling,
+                       const char* name, VehicleModelInfo::VehicleClass clas_,
+                       int frequency, ModelID wheel, float wheelScale) {
     BOOST_ASSERT(info.type() == VehicleModelInfo::kType);
     const auto& t = dynamic_cast<VehicleModelInfo&>(info);
     BOOST_TEST(t.name == model);
@@ -49,8 +50,8 @@ void ASSERT_VEHICLE_IS(BaseModelInfo& info, const char* model, const char* txd,
 }
 
 void ASSERT_PED_IS(BaseModelInfo& info, const char* model, const char* txd,
-                   PedModelInfo::PedType type, int statindex, const char* animgroup,
-                   size_t carmask) {
+                   PedModelInfo::PedType type, int statindex,
+                   const char* animgroup, size_t carmask) {
     BOOST_ASSERT(info.type() == PedModelInfo::kType);
     const auto& t = dynamic_cast<PedModelInfo&>(info);
     BOOST_TEST(t.name == model);
@@ -65,7 +66,7 @@ void ASSERT_PED_IS(BaseModelInfo& info, const char* model, const char* txd,
 struct WithLoaderIDE {
     LoaderIDE loader;
 
-    std::istringstream test_data_stream {kTestDataObjects};
+    std::istringstream test_data_stream{kTestDataObjects};
 };
 
 BOOST_FIXTURE_TEST_SUITE(LoaderIDETests, WithLoaderIDE)
@@ -82,13 +83,15 @@ BOOST_AUTO_TEST_CASE(instance_data_is_correct) {
 
 BOOST_AUTO_TEST_CASE(vehicle_data_is_correct) {
     loader.load(test_data_stream, {});
-    ASSERT_VEHICLE_IS(*loader.objects[90], "vehicle", "texture", VehicleModelInfo::CAR, "HANDLING", "NAME",
-            VehicleModelInfo::RICHFAMILY, 10, 164, 0.8f);
+    ASSERT_VEHICLE_IS(*loader.objects[90], "vehicle", "texture",
+                      VehicleModelInfo::CAR, "HANDLING", "NAME",
+                      VehicleModelInfo::RICHFAMILY, 10, 164, 0.8f);
 }
 
 BOOST_AUTO_TEST_CASE(pedestrian_data_is_correct) {
     loader.load(test_data_stream, {});
-    ASSERT_PED_IS(*loader.objects[1], "mod", "txd", PedModelInfo::COP, -1, "man", 0x7f);
+    ASSERT_PED_IS(*loader.objects[1], "mod", "txd", PedModelInfo::COP, -1,
+                  "man", 0x7f);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

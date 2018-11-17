@@ -35,8 +35,7 @@ public:
     };
 
     Entry interpolate(WeatherCondition lastWeather,
-                      WeatherCondition nextWeather,
-                      float a, float tod);
+                      WeatherCondition nextWeather, float a, float tod);
 
     std::vector<Entry> entries;
 };

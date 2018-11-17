@@ -1,10 +1,10 @@
 #ifndef _RWENGINE_GAMESHADERS_HPP_
 #define _RWENGINE_GAMESHADERS_HPP_
 
-#define SHADER_VF(Name)                    \
-    struct Name {                          \
-        static const char* VertexShader;   \
-        static const char* FragmentShader; \
+#define SHADER_VF(Name)                                                        \
+    struct Name {                                                              \
+        static const char* VertexShader;                                       \
+        static const char* FragmentShader;                                     \
     }
 
 /**

@@ -1,10 +1,10 @@
 #ifndef RWGAME_STATE_HPP
 #define RWGAME_STATE_HPP
+#include <SDL.h>
+#include <SDL_events.h>
 #include <render/ViewCamera.hpp>
 #include "GameWindow.hpp"
 #include "MenuSystem.hpp"
-#include <SDL.h>
-#include <SDL_events.h>
 
 class RWGame;
 class GameWorld;

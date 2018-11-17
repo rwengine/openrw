@@ -1,8 +1,8 @@
 #ifndef _RWENGINE_GAMEDATA_HPP_
 #define _RWENGINE_GAMEDATA_HPP_
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -23,11 +23,11 @@
 #include <data/Weather.hpp>
 #include <data/ZoneData.hpp>
 #include <fonts/GameTexts.hpp>
+#include <gl/TextureData.hpp>
 #include <loaders/LoaderDFF.hpp>
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/LoaderTXD.hpp>
 #include <objects/VehicleInfo.hpp>
-#include <gl/TextureData.hpp>
 
 class Logger;
 struct WeaponData;
@@ -243,7 +243,7 @@ public:
 
     uint16_t findModelObject(const std::string model);
 
-    template <class T>
+    template<class T>
     T* findModelInfo(ModelID id) {
         auto f = modelinfo.find(id);
         if (f != modelinfo.end() && f->second->type() == T::kType) {
@@ -341,7 +341,8 @@ public:
         float xLeft, yBottom;
         float xRight, yTop;
 
-        WaterArea(float _height, float _xLeft, float _yBottom, float _xRight, float _yTop)
+        WaterArea(float _height, float _xLeft, float _yBottom, float _xRight,
+                  float _yTop)
             : height(_height)
             , xLeft(_xLeft)
             , yBottom(_yBottom)

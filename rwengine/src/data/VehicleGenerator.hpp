@@ -30,7 +30,7 @@ struct VehicleGenerator {
     /**
      * Number of vehicles left to spawn 0-100, 101 = never decrement.
      * Intentionally disabled to match behaviour
-    */
+     */
     int remainingSpawns;
 
     VehicleGenerator(size_t id, const glm::vec3& position_, float heading_,

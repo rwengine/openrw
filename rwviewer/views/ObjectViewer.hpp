@@ -8,8 +8,8 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QTableView>
 #include <QSortFilterProxyModel>
+#include <QTableView>
 
 class ViewerWidget;
 class Clump;

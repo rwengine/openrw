@@ -277,8 +277,7 @@ void SoundSource::loadSfx(LoaderSDT& sdt, size_t index, bool asWave) {
     InputData input{};
     input.size = sizeof(WaveHeader) + sdt.assetInfo.size;
     /// Store start ptr of data to be able freed memory later
-    auto inputDataStart = std::make_unique<uint8_t[]>(
-        input.size);
+    auto inputDataStart = std::make_unique<uint8_t[]>(input.size);
     input.ptr = inputDataStart.get();
 
     /// Alocate memory for buffer

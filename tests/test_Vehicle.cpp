@@ -7,8 +7,8 @@ BOOST_AUTO_TEST_SUITE(VehicleTests)
 
 #if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_create_vehicle) {
-    VehicleObject* vehicle =
-        Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
+    VehicleObject* vehicle = Global::get().e->createVehicle(
+        90u, glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle);
 
@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(test_create_vehicle) {
 }
 
 BOOST_AUTO_TEST_CASE(vehicle_parts) {
-    VehicleObject* vehicle =
-        Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
+    VehicleObject* vehicle = Global::get().e->createVehicle(
+        90u, glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle);
     BOOST_REQUIRE(vehicle->getModel());
@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE(vehicle_parts) {
 }
 
 BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
-    VehicleObject* vehicle =
-        Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
+    VehicleObject* vehicle = Global::get().e->createVehicle(
+        90u, glm::vec3(), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle);
     BOOST_REQUIRE(vehicle->getModel());
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
 
 BOOST_AUTO_TEST_CASE(test_door_position) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
-        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
+        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle);
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_door_position) {
 
 BOOST_AUTO_TEST_CASE(test_hinges) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
-        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
+        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle != nullptr);
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(test_hinges) {
 
 BOOST_AUTO_TEST_CASE(test_open_part) {
     VehicleObject* vehicle = Global::get().e->createVehicle(
-        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
+        90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
 
     BOOST_REQUIRE(vehicle);
 

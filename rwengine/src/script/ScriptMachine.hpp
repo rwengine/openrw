@@ -38,7 +38,7 @@ struct IllegalInstruction : SCMException {
     unsigned int offset{0};
     std::string thread;
 
-    template <class String>
+    template<class String>
     IllegalInstruction(SCMOpcode _opcode, unsigned int _offset,
                        String&& _thread)
         : opcode(_opcode)
@@ -61,7 +61,7 @@ struct UnknownType : SCMException {
     unsigned int offset{0};
     std::string thread;
 
-    template <class String>
+    template<class String>
     UnknownType(SCMByte _type, unsigned int _offset, String&& _thread)
         : type(_type), offset(_offset), thread(std::forward<String>(_thread)) {
     }
@@ -164,14 +164,14 @@ public:
         debugFlag = flag;
     }
 
-    template <typename T>
+    template<typename T>
     typename std::enable_if<std::is_integral<T>::value, T>::type
     getRandomNumber(T min, T max) {
         std::uniform_int_distribution<T> dist(min, max);
         return dist(randomNumberGen);
     }
 
-    template <typename T>
+    template<typename T>
     typename std::enable_if<std::is_floating_point<T>::value, T>::type
     getRandomNumber(T min, T max) {
         std::uniform_real_distribution<T> dist(min, max);

@@ -9,8 +9,9 @@
 #include "Unicode.hpp"
 
 /**
- * @brief Class providing mapping from unicode chars to game strings and vice versa.
- * The conversions of an object of this class depend on the actual font used.
+ * @brief Class providing mapping from unicode chars to game strings and vice
+ * versa. The conversions of an object of this class depend on the actual font
+ * used.
  * @param maps
  */
 class FontMap {
@@ -34,10 +35,13 @@ public:
      * @brief FontMap Create a new Fontmapping using the maps provided.
      * @param maps List of mappings used as source for this font mapping.
      */
-    FontMap(std::initializer_list<std::reference_wrapper<const gschar_unicode_map_t>> maps);
+    FontMap(std::initializer_list<
+            std::reference_wrapper<const gschar_unicode_map_t>>
+                maps);
 
     /**
-     * @brief to_GameStringChar Convert a unicode data point to a GameStringChar.
+     * @brief to_GameStringChar Convert a unicode data point to a
+     * GameStringChar.
      * @param u The unicode character.
      * @return  A GameStringChar
      */
@@ -55,14 +59,14 @@ public:
      * @param s The GameString.
      * @return A utf-8 encoded string.
      */
-    std::string to_string(const GameString &s) const;
+    std::string to_string(const GameString& s) const;
 
     /**
      * @brief to_GameString Convert a utf-8 encoded string to a GameString.
      * @param utf8 The utf-8 encoded string.
      * @return  A GameString.
      */
-    GameString to_GameString(const std::string &utf8) const;
+    GameString to_GameString(const std::string& utf8) const;
 
     /**
      * @brief to_unicode_begin Iterate over the GameStringChar to unicode begin.
@@ -75,6 +79,7 @@ public:
      * @return Iterator Iterator to end.
      */
     gschar_unicode_iterator to_unicode_end() const;
+
 private:
     /**
      * Mapping from a unicode point to a GameStringChar.
@@ -87,7 +92,8 @@ private:
     gschar_unicode_map_t m_to_unicode;
 
     /**
-     * GameStringChar used if a unicode point has no corresponding GameStringChar.
+     * GameStringChar used if a unicode point has no corresponding
+     * GameStringChar.
      */
     GameStringChar m_unknown_gschar;
 };

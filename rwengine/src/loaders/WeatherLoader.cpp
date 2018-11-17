@@ -5,17 +5,18 @@
 #include <sstream>
 
 namespace {
-glm::vec3 readRGB(std::stringstream &ss)  {
+glm::vec3 readRGB(std::stringstream& ss) {
     int r, g, b;
     ss >> r >> g >> b;
-    return {r/255.f, g/255.f, b/255.f};
+    return {r / 255.f, g / 255.f, b / 255.f};
 }
 }
 
 bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
     std::ifstream fstream(filename.c_str());
 
-    if (!fstream.is_open()) return false;
+    if (!fstream.is_open())
+        return false;
 
     std::string line;
     while (std::getline(fstream, line)) {
@@ -47,7 +48,7 @@ bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
         weather.bottomCloudColor = readRGB(ss);
 
         int d;
-        for (auto &i : weather.unknown) {
+        for (auto& i : weather.unknown) {
             ss >> d;
             i = d;
         }
@@ -57,4 +58,3 @@ bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
 
     return true;
 }
-

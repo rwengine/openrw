@@ -6,8 +6,8 @@
 
 #include <rw/debug.hpp>
 
-#include <render/VisualFX.hpp>
 #include <objects/GameObject.hpp>
+#include <render/VisualFX.hpp>
 
 
 class btPairCachingGhostObject;

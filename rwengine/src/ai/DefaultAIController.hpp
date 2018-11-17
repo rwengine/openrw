@@ -1,7 +1,7 @@
 #ifndef _RWENGINE_DEFAULTAICONTROLLER_HPP_
 #define _RWENGINE_DEFAULTAICONTROLLER_HPP_
-#include <glm/glm.hpp>
 #include <ai/CharacterController.hpp>
+#include <glm/glm.hpp>
 
 class DefaultAIController final : public CharacterController {
     glm::vec3 gotoPos{};

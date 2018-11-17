@@ -5,8 +5,8 @@
 #include <memory>
 #include <string>
 
-#include <data/PedData.hpp>
 #include <data/ModelData.hpp>
+#include <data/PedData.hpp>
 
 class LoaderIDE {
 public:

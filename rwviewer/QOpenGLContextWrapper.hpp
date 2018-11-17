@@ -9,20 +9,21 @@ class QWidget;
 
 class QOpenGLContextWrapper {
 public:
-    QOpenGLContextWrapper(QWidget *parent);
+    QOpenGLContextWrapper(QWidget* parent);
     void setup(QSurfaceFormat format);
     bool create();
 
-    bool makeCurrent(QSurface *surface);
+    bool makeCurrent(QSurface* surface);
     void doneCurrent();
-    void swapBuffers(QSurface *surface);
+    void swapBuffers(QSurface* surface);
 
-    QOpenGLContext *get() {
+    QOpenGLContext* get() {
         return m_context;
     }
+
 private:
-    QOpenGLContext *m_context;
-    QWidget *m_parent;
+    QOpenGLContext* m_context;
+    QWidget* m_parent;
 };
 
 #endif

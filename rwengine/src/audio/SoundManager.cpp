@@ -91,15 +91,15 @@ void SoundManager::deinitializeOpenAL() {
 
     // De-initialize OpenAL
     if (alContext) {
-         alcMakeContextCurrent(nullptr);
-         alcDestroyContext(alContext);
-     }
-     alContext = nullptr;
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(alContext);
+    }
+    alContext = nullptr;
 
-     if (alDevice) {
-         alcCloseDevice(alDevice);
-     }
-     alDevice = nullptr;
+    if (alDevice) {
+        alcCloseDevice(alDevice);
+    }
+    alDevice = nullptr;
 }
 
 bool SoundManager::loadSound(const std::string& name,
@@ -111,8 +111,8 @@ bool SoundManager::loadSound(const std::string& name,
         sound = &sound_iter->second;
     } else {
         auto [it, emplaced] = sounds.emplace(std::piecewise_construct,
-                                       std::forward_as_tuple(name),
-                                       std::forward_as_tuple());
+                                             std::forward_as_tuple(name),
+                                             std::forward_as_tuple());
         sound = &it->second;
 
         sound->source = std::make_shared<SoundSource>();
@@ -141,7 +141,7 @@ size_t SoundManager::createSfxInstance(size_t index) {
     Sound* sound = nullptr;
     auto soundRef = sfx.find(index);
 
-    if(soundRef == sfx.end()) {
+    if (soundRef == sfx.end()) {
         // Sound source is not loaded yet
         loadSound(index);
         soundRef = sfx.find(index);
@@ -154,16 +154,15 @@ size_t SoundManager::createSfxInstance(size_t index) {
             // Let's use this buffer
             sound.buffer = std::make_unique<SoundBuffer>();
             sound.source = soundRef->second.source;
-            sound.isLoaded =
-                sound.buffer->bufferData(*sound.source);
+            sound.isLoaded = sound.buffer->bufferData(*sound.source);
             return id;
         }
     }
     // There's no available free buffer, so
     // we should create a new one.
     auto [it, emplaced] = buffers.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(bufferNr),
-                                    std::forward_as_tuple());
+                                          std::forward_as_tuple(bufferNr),
+                                          std::forward_as_tuple());
     sound = &it->second;
 
     sound->id = bufferNr;

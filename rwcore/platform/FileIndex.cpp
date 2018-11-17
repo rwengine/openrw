@@ -6,28 +6,30 @@
 #include <iterator>
 #include <sstream>
 
-#include "platform/FileHandle.hpp"
 #include "loaders/LoaderIMG.hpp"
+#include "platform/FileHandle.hpp"
 
 #include "rw/debug.hpp"
 
-std::string FileIndex::normalizeFilePath(const std::string &filePath) {
+std::string FileIndex::normalizeFilePath(const std::string& filePath) {
     std::ostringstream oss;
-    std::transform(filePath.cbegin(), filePath.cend(), std::ostreambuf_iterator<char>(oss), [](char c) {
-        if (c == '\\') {
-            return '/';
-        }
-        return static_cast<char>(std::tolower(c));
-    });
+    std::transform(filePath.cbegin(), filePath.cend(),
+                   std::ostreambuf_iterator<char>(oss), [](char c) {
+                       if (c == '\\') {
+                           return '/';
+                       }
+                       return static_cast<char>(std::tolower(c));
+                   });
     return oss.str();
 }
 
-void FileIndex::indexTree(const rwfs::path &path) {
-    // Remove the trailing "/" or "/." from base_path. Boost 1.66 and c++17 have different lexically_relative behavior.
+void FileIndex::indexTree(const rwfs::path& path) {
+    // Remove the trailing "/" or "/." from base_path. Boost 1.66 and c++17 have
+    // different lexically_relative behavior.
     rwfs::path basePath = (path / ".").lexically_normal();
     basePath = basePath.parent_path();
 
-    for (const rwfs::path &path :
+    for (const rwfs::path& path :
          rwfs::recursive_directory_iterator(basePath)) {
         if (!rwfs::is_regular_file(path)) {
             continue;
@@ -41,17 +43,18 @@ void FileIndex::indexTree(const rwfs::path &path) {
     }
 }
 
-const FileIndex::IndexedData *FileIndex::getIndexedDataAt(const std::string &filePath) const {
+const FileIndex::IndexedData* FileIndex::getIndexedDataAt(
+    const std::string& filePath) const {
     auto normPath = normalizeFilePath(filePath);
     return &indexedData_.at(normPath);
 }
 
-rwfs::path FileIndex::findFilePath(const std::string &filePath) const {
+rwfs::path FileIndex::findFilePath(const std::string& filePath) const {
     return getIndexedDataAt(filePath)->path;
 }
 
-FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
-    const auto *indexData = getIndexedDataAt(filePath);
+FileContentsInfo FileIndex::openFileRaw(const std::string& filePath) const {
+    const auto* indexData = getIndexedDataAt(filePath);
     std::ifstream dfile(indexData->path, std::ios::binary);
     if (!dfile.is_open()) {
         throw std::runtime_error("Unable to open file: " + filePath);
@@ -72,26 +75,29 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
     return {std::move(data), static_cast<size_t>(length)};
 }
 
-void FileIndex::indexArchive(const std::string &archive) {
+void FileIndex::indexArchive(const std::string& archive) {
     rwfs::path path = findFilePath(archive);
 
     LoaderIMG img;
     if (!img.load(path.string())) {
-        throw std::runtime_error("Failed to load IMG archive: " + path.string());
+        throw std::runtime_error("Failed to load IMG archive: " +
+                                 path.string());
     }
 
     for (size_t i = 0; i < img.getAssetCount(); ++i) {
-        auto &asset = img.getAssetInfoByIndex(i);
+        auto& asset = img.getAssetInfoByIndex(i);
 
-        if (asset.size == 0) continue;
+        if (asset.size == 0)
+            continue;
 
         std::string assetName = normalizeFilePath(asset.name);
 
-        indexedData_[assetName] = {IndexedDataType::ARCHIVE, path.string(), asset.name};
+        indexedData_[assetName] = {IndexedDataType::ARCHIVE, path.string(),
+                                   asset.name};
     }
 }
 
-FileContentsInfo FileIndex::openFile(const std::string &filePath) {
+FileContentsInfo FileIndex::openFile(const std::string& filePath) {
     auto cleanFilePath = normalizeFilePath(filePath);
     auto indexedDataPos = indexedData_.find(cleanFilePath);
 
@@ -99,7 +105,7 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
         return {nullptr, 0};
     }
 
-    const auto &indexedData = indexedDataPos->second;
+    const auto& indexedData = indexedDataPos->second;
 
     std::unique_ptr<char[]> data = nullptr;
     size_t length = 0;
@@ -108,7 +114,8 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
         LoaderIMG img;
 
         if (!img.load(indexedData.path)) {
-            throw std::runtime_error("Failed to load IMG archive: " + indexedData.path);
+            throw std::runtime_error("Failed to load IMG archive: " +
+                                     indexedData.path);
         }
 
         LoaderIMGFile file;
@@ -120,7 +127,8 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
     } else {
         std::ifstream dfile(indexedData.path, std::ios::binary);
         if (!dfile.is_open()) {
-            throw std::runtime_error("Unable to open file: " + indexedData.path);
+            throw std::runtime_error("Unable to open file: " +
+                                     indexedData.path);
         }
 
         dfile.seekg(0, std::ios::end);

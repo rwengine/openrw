@@ -6,14 +6,14 @@
 
 #include <glm/glm.hpp>
 
+#include <gl/gl_core_3_3.h>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <gl/gl_core_3_3.h>
 
 #include <rw/forward.hpp>
 
-#include <render/OpenGLRenderer.hpp>
 #include <render/MapRenderer.hpp>
+#include <render/OpenGLRenderer.hpp>
 #include <render/TextRenderer.hpp>
 #include <render/ViewCamera.hpp>
 #include <render/WaterRenderer.hpp>
@@ -142,7 +142,7 @@ public:
 
     enum SpecialModel {
         ZoneCylinderA,
-        ZoneCylinderB,    // same geometry as A, different UVs
+        ZoneCylinderB,  // same geometry as A, different UVs
         Arrow,
         SpecialModelCount
     };
@@ -163,11 +163,12 @@ private:
         return specialmodels_[usage];
     }
 
-    void drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents);
+    void drawRect(const glm::vec4& colour, TextureData* texture,
+                  glm::vec4& extents);
 
-    void renderObjects(const GameWorld *world);
+    void renderObjects(const GameWorld* world);
 
-    RenderList createObjectRenderList(const GameWorld *world);
+    RenderList createObjectRenderList(const GameWorld* world);
 };
 
 #endif

@@ -20,7 +20,8 @@ unsigned charToIndex(std::uint16_t g) {
     return g - 32;
 }
 
-static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
+static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2& textureSize,
+                                 const glm::u8vec2& glyphOffset) {
     constexpr unsigned TEXTURE_COLUMNS = 16;
     const float x = static_cast<float>(index % TEXTURE_COLUMNS);
     const float y = static_cast<float>(index / TEXTURE_COLUMNS);
@@ -71,53 +72,43 @@ constexpr size_t GLYPHS_NB = 193;
 using FontWidthLut = std::array<std::uint8_t, GLYPHS_NB>;
 
 constexpr std::array<std::uint8_t, 193> fontWidthsPager = {{
-     3,  3,  6,  8,  6, 10,  8,  3,  5,  5,  7,  0,  3,  7,  3,  0,
-     6,  4,  6,  6,  7,  6,  6,  6,  6,  6,  3,  0,  0,  0,  0,  6,
-     0,  6,  6,  6,  6,  6,  6,  6,  6,  3,  6,  6,  5,  8,  7,  6,
-     6,  7,  6,  6,  5,  6,  6,  8,  6,  7,  7,  0,  0,  0,  0,  0,
-     0,  6,  6,  6,  6,  6,  5,  6,  6,  3,  4,  6,  3,  9,  6,  6,
-     6,  6,  5,  6,  5,  6,  6,  8,  6,  6,  5,  0,  0,  0,  0,  0,
-     6,  6,  6,  6,  8,  6,  6,  6,  6,  6,  5,  5,  6,  6,  6,  6,
-     6,  6,  6,  6,  6,  6,  7,  6,  6,  6,  6,  9,  6,  6,  6,  6,
-     6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  7,  6,  6,
-     3,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-     8,
+    3, 3, 6, 8, 6, 10, 8, 3, 5, 5, 7, 0, 3, 7, 3, 0, 6, 4, 6, 6, 7, 6, 6, 6, 6,
+    6, 3, 0, 0, 0, 0,  6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 5, 8, 7, 6, 6, 7,
+    6, 6, 5, 6, 6, 8,  6, 7, 7, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 5, 6, 6, 3, 4,
+    6, 3, 9, 6, 6, 6,  6, 5, 6, 5, 6, 6, 8, 6, 6, 5, 0, 0, 0, 0, 0, 6, 6, 6, 6,
+    8, 6, 6, 6, 6, 6,  5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 9, 6,
+    6, 6, 6, 6, 6, 6,  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 3, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+    8, 8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
 }};
 
 constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {{
-    11, 13, 30, 27, 20, 24, 22, 12, 14, 14,  0, 26,  9, 14,  9, 26,
-    20, 19, 20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20,
-    27, 20, 20, 20, 20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20,
-    20, 20, 20, 20, 22, 20, 22, 32, 20, 20, 19, 27, 20, 32, 23, 13,
-    27, 21, 21, 21, 21, 21, 18, 22, 21, 12, 20, 22, 17, 30, 22, 21,
-    21, 21, 21, 22, 21, 21, 21, 29, 19, 23, 21, 28, 25,  0,  0,  0,
-    20, 20, 20, 20, 30, 20, 20, 20, 20, 20, 10, 10, 10, 10, 21, 21,
-    21, 21, 20, 20, 20, 20, 21, 21, 21, 21, 21, 32, 23, 21, 21, 21,
-    21, 12, 12, 12, 12, 21, 21, 21, 21, 21, 21, 21, 21, 20, 20, 20,
-    13, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    16,
+    11, 13, 30, 27, 20, 24, 22, 12, 14, 14, 0,  26, 9,  14, 9,  26, 20, 19,
+    20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20, 27, 20, 20, 20,
+    20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20, 20, 20, 20, 20, 22, 20,
+    22, 32, 20, 20, 19, 27, 20, 32, 23, 13, 27, 21, 21, 21, 21, 21, 18, 22,
+    21, 12, 20, 22, 17, 30, 22, 21, 21, 21, 21, 22, 21, 21, 21, 29, 19, 23,
+    21, 28, 25, 0,  0,  0,  20, 20, 20, 20, 30, 20, 20, 20, 20, 20, 10, 10,
+    10, 10, 21, 21, 21, 21, 20, 20, 20, 20, 21, 21, 21, 21, 21, 32, 23, 21,
+    21, 21, 21, 12, 12, 12, 12, 21, 21, 21, 21, 21, 21, 21, 21, 20, 20, 20,
+    13, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 16,
 }};
 
 constexpr std::array<std::uint8_t, 193> fontWidthsArial = {{
-    27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29,
-    47, 33, 45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39,
-    61, 53, 51, 47, 49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51,
-    47, 51, 49, 49, 45, 51, 49, 59, 59, 47, 51, 31, 27, 31, 29, 27,
-    19, 43, 45, 43, 43, 45, 27, 45, 43, 21, 33, 45, 23, 65, 43, 43,
-    47, 45, 33, 41, 29, 43, 41, 61, 51, 43, 43, 67, 53, 67, 67, 71,
-    53, 53, 53, 53, 65, 49, 45, 45, 45, 45, 23, 23, 23, 23, 51, 51,
-    51, 51, 51, 51, 51, 51, 51, 43, 43, 43, 43, 65, 43, 45, 45, 45,
-    45, 21, 21, 21, 21, 43, 43, 43, 43, 43, 43, 43, 43, 53, 43, 39,
-    25, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
-    19,
+    27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29, 47, 33,
+    45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39, 61, 53, 51, 47,
+    49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51, 47, 51, 49, 49, 45, 51,
+    49, 59, 59, 47, 51, 31, 27, 31, 29, 27, 19, 43, 45, 43, 43, 45, 27, 45,
+    43, 21, 33, 45, 23, 65, 43, 43, 47, 45, 33, 41, 29, 43, 41, 61, 51, 43,
+    43, 67, 53, 67, 67, 71, 53, 53, 53, 53, 65, 49, 45, 45, 45, 45, 23, 23,
+    23, 23, 51, 51, 51, 51, 51, 51, 51, 51, 51, 43, 43, 43, 43, 65, 43, 45,
+    45, 45, 45, 21, 21, 21, 21, 43, 43, 43, 43, 43, 43, 43, 43, 53, 43, 39,
+    25, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19, 19, 19, 19, 19,
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
 }};
-
 }
 
 struct TextVertex {
@@ -126,9 +117,7 @@ struct TextVertex {
     glm::vec3 colour;
 
     TextVertex(glm::vec2 _position, glm::vec2 _texcoord, glm::vec3 _colour)
-        : position(_position)
-        , texcoord(_texcoord)
-        , colour(_colour) {
+        : position(_position), texcoord(_texcoord), colour(_colour) {
     }
 
     TextVertex() = default;
@@ -154,32 +143,27 @@ void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
     if (font != FONT_PAGER) {
         glyphOffset.y += glyphOffset.y / 4;
     }
-    const FontWidthLut *glyphWidths;
+    const FontWidthLut* glyphWidths;
     switch (font) {
-    case FONT_PAGER:
-        glyphWidths = &fontWidthsPager;
-        break;
-    case FONT_PRICEDOWN:
-        glyphWidths = &fontWidthsPriceDown;
-        break;
-    case FONT_ARIAL:
-        glyphWidths = &fontWidthsArial;
-        break;
-    default:
-        throw std::runtime_error("Illegal font");
+        case FONT_PAGER:
+            glyphWidths = &fontWidthsPager;
+            break;
+        case FONT_PRICEDOWN:
+            glyphWidths = &fontWidthsPriceDown;
+            break;
+        case FONT_ARIAL:
+            glyphWidths = &fontWidthsArial;
+            break;
+        default:
+            throw std::runtime_error("Illegal font");
     }
     std::uint8_t monoWidth = 0;
     if (font == FONT_PAGER) {
         monoWidth = 1 + *std::max_element(fontWidthsPager.cbegin(),
                                           fontWidthsPager.cend());
     }
-    fonts[font] = FontMetaData{
-        textureName,
-        *glyphWidths,
-        textureSize,
-        glyphOffset,
-        monoWidth
-    };
+    fonts[font] = FontMetaData{textureName, *glyphWidths, textureSize,
+                               glyphOffset, monoWidth};
 }
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
@@ -206,7 +190,7 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     auto text = ti.text;
 
-    const auto &fontMetaData = fonts[ti.font];
+    const auto& fontMetaData = fonts[ti.font];
 
     for (size_t i = 0; i < text.length(); ++i) {
         char16_t c = text[i];
@@ -216,7 +200,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
             switch (text[i + 1]) {
                 case 'b':  // Blue
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(128, 167, 243)) * (1 / 255.f);
+                    colour =
+                        glm::vec3(glm::u8vec3(128, 167, 243)) * (1 / 255.f);
                     break;
                 case 'g':  // Green
                     text.erase(text.begin() + i, text.begin() + i + 3);
@@ -224,7 +209,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                     break;
                 case 'h':  // White
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(225, 225, 225)) * (1 / 255.f);
+                    colour =
+                        glm::vec3(glm::u8vec3(225, 225, 225)) * (1 / 255.f);
                     break;
                 case 'k': {  // Key
                     text.erase(text.begin() + i, text.begin() + i + 3);
@@ -243,7 +229,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                     break;
                 case 'p':  // Purple
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(168, 110, 252)) * (1 / 255.f);
+                    colour =
+                        glm::vec3(glm::u8vec3(168, 110, 252)) * (1 / 255.f);
                     break;
                 case 'r':  // Red
                     text.erase(text.begin() + i, text.begin() + i + 3);
@@ -251,11 +238,13 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                     break;
                 case 'w':  // Gray
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(175, 175, 175)) * (1 / 255.f);
+                    colour =
+                        glm::vec3(glm::u8vec3(175, 175, 175)) * (1 / 255.f);
                     break;
                 case 'y':  // Yellow
                     text.erase(text.begin() + i, text.begin() + i + 3);
-                    colour = glm::vec3(glm::u8vec3(210, 196, 106)) * (1 / 255.f);
+                    colour =
+                        glm::vec3(glm::u8vec3(210, 196, 106)) * (1 / 255.f);
                     break;
             }
 
@@ -296,13 +285,16 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
             }
         }
 
-        auto tex = indexToTexCoord(glyph, fontMetaData.textureSize, fontMetaData.glyphOffset);
-        ss.x = ti.size * static_cast<float>(fontMetaData.glyphOffset.x) / fontMetaData.glyphOffset.y;
+        auto tex = indexToTexCoord(glyph, fontMetaData.textureSize,
+                                   fontMetaData.glyphOffset);
+        ss.x = ti.size * static_cast<float>(fontMetaData.glyphOffset.x) /
+               fontMetaData.glyphOffset.y;
         lineLength++;
 
         glm::vec2 p = coord;
         float factor = ti.size / static_cast<float>(fontMetaData.glyphOffset.y);
-        float glyphWidth = factor * static_cast<float>(fontMetaData.glyphWidths[glyph]);
+        float glyphWidth =
+            factor * static_cast<float>(fontMetaData.glyphWidths[glyph]);
         if (fontMetaData.monoWidth != 0) {
             float monoWidth = factor * fontMetaData.monoWidth;
             p.x += static_cast<float>(monoWidth - glyphWidth) / 2;
@@ -312,13 +304,17 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
         }
         maxWidth = std::max(coord.x, maxWidth);
 
-        geo.emplace_back(glm::vec2{p.x, p.y + ss.y}, glm::vec2{tex.x, tex.w}, colour);
-        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y}, glm::vec2{tex.z, tex.w}, colour);
+        geo.emplace_back(glm::vec2{p.x, p.y + ss.y}, glm::vec2{tex.x, tex.w},
+                         colour);
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y},
+                         glm::vec2{tex.z, tex.w}, colour);
         geo.emplace_back(glm::vec2{p.x, p.y}, glm::vec2{tex.x, tex.y}, colour);
 
-        geo.emplace_back(glm::vec2{p.x + ss.x, p.y}, glm::vec2{tex.z, tex.y}, colour);
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y}, glm::vec2{tex.z, tex.y},
+                         colour);
         geo.emplace_back(glm::vec2{p.x, p.y}, glm::vec2{tex.x, tex.y}, colour);
-        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y}, glm::vec2{tex.z, tex.w}, colour);
+        geo.emplace_back(glm::vec2{p.x + ss.x, p.y + ss.y},
+                         glm::vec2{tex.z, tex.w}, colour);
     }
 
     if (ti.align == TextInfo::TextAlignment::Right) {
@@ -338,8 +334,10 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     renderer->getRenderer()->setUniform(
         textShader.get(), "proj", renderer->getRenderer()->get2DProjection());
-    renderer->getRenderer()->setUniformTexture(textShader.get(), "fontTexture", 0);
-    renderer->getRenderer()->setUniform(textShader.get(), "alignment", alignment);
+    renderer->getRenderer()->setUniformTexture(textShader.get(), "fontTexture",
+                                               0);
+    renderer->getRenderer()->setUniform(textShader.get(), "alignment",
+                                        alignment);
 
     gb.uploadVertices(geo);
     db.addGeometry(&gb);
@@ -349,7 +347,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.start = 0;
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
-    auto ftexture = renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
+    auto ftexture =
+        renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
     dp.textures = {{ftexture->getName()}};
     dp.depthMode = DepthMode::OFF;
 

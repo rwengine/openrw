@@ -74,7 +74,7 @@ struct ZoneData {
      */
     std::vector<ZoneData*> children_ = {};
 
-    template <class String>
+    template<class String>
     ZoneData(String&& _name, const int& _type, const glm::vec3& _min,
              const glm::vec3& _max, const int& _island,
              const unsigned int& _pedGroupDay,

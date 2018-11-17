@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <numeric>
 
@@ -49,7 +49,7 @@ struct RWBSFrame {
     uint32_t matrixflags;  // Not used
 };
 
-LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
+LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream& stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -57,16 +57,16 @@ LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
         throw DFFLoaderException("Frame List missing struct chunk");
     }
 
-    char *headerPtr = listStream.getCursor();
+    char* headerPtr = listStream.getCursor();
 
-    unsigned int numFrames = *reinterpret_cast<std::uint32_t *>(headerPtr);
+    unsigned int numFrames = *reinterpret_cast<std::uint32_t*>(headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     FrameList framelist;
     framelist.reserve(numFrames);
 
     for (auto f = 0u; f < numFrames; ++f) {
-        auto data = reinterpret_cast<RWBSFrame *>(headerPtr);
+        auto data = reinterpret_cast<RWBSFrame*>(headerPtr);
         headerPtr += sizeof(RWBSFrame);
         auto frame =
             std::make_shared<ModelFrame>(f, data->rotation, data->position);
@@ -115,7 +115,7 @@ LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
     return framelist;
 }
 
-LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
+LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream& stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -123,7 +123,7 @@ LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
         throw DFFLoaderException("Geometry List missing struct chunk");
     }
 
-    char *headerPtr = listStream.getCursor();
+    char* headerPtr = listStream.getCursor();
 
     unsigned int numGeometries = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
@@ -145,7 +145,7 @@ LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
     return geometrylist;
 }
 
-GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
+GeometryPtr LoaderDFF::readGeometry(const RWBStream& stream) {
     auto geomStream = stream.getInnerStream();
 
     auto geomStructID = geomStream.getNextChunk();
@@ -155,7 +155,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     auto geom = std::make_shared<Geometry>();
 
-    char *headerPtr = geomStream.getCursor();
+    char* headerPtr = geomStream.getCursor();
 
     geom->flags = bit_cast<std::uint16_t>(*headerPtr);
     headerPtr += sizeof(std::uint16_t);
@@ -202,7 +202,8 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     // Grab indicies data to generate normals (if applicable).
     auto triangles = std::make_unique<RW::BSGeometryTriangle[]>(numTris);
-    memcpy(triangles.get(), headerPtr, sizeof(RW::BSGeometryTriangle) * numTris);
+    memcpy(triangles.get(), headerPtr,
+           sizeof(RW::BSGeometryTriangle) * numTris);
     headerPtr += sizeof(RW::BSGeometryTriangle) * numTris;
 
     geom->geometryBounds = bit_cast<RW::BSGeometryBounds>(*headerPtr);
@@ -222,10 +223,10 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     } else {
         // Use triangle data to calculate normals for each vert.
         for (size_t t = 0; t < numTris; ++t) {
-            auto &triangle = triangles[t];
-            auto &A = verts[triangle.first];
-            auto &B = verts[triangle.second];
-            auto &C = verts[triangle.third];
+            auto& triangle = triangles[t];
+            auto& A = verts[triangle.first];
+            auto& B = verts[triangle.second];
+            auto& C = verts[triangle.third];
             auto normal = glm::normalize(
                 glm::cross(C.position - A.position, B.position - A.position));
             A.normal = normal;
@@ -260,10 +261,10 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     size_t icount = std::accumulate(
         geom->subgeom.begin(), geom->subgeom.end(), size_t{0u},
-        [](size_t a, const SubGeometry &b) { return a + b.numIndices; });
+        [](size_t a, const SubGeometry& b) { return a + b.numIndices; });
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * icount, nullptr,
                  GL_STATIC_DRAW);
-    for (auto &sg : geom->subgeom) {
+    for (auto& sg : geom->subgeom) {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, sg.start * sizeof(uint32_t),
                         sizeof(uint32_t) * sg.numIndices, sg.indices.data());
     }
@@ -271,7 +272,8 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     return geom;
 }
 
-void LoaderDFF::readMaterialList(const GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readMaterialList(const GeometryPtr& geom,
+                                 const RWBStream& stream) {
     auto listStream = stream.getInnerStream();
 
     auto listStructID = listStream.getNextChunk();
@@ -279,7 +281,8 @@ void LoaderDFF::readMaterialList(const GeometryPtr &geom, const RWBStream &strea
         throw DFFLoaderException("MaterialList missing struct chunk");
     }
 
-    unsigned int numMaterials = bit_cast<std::uint32_t>(*listStream.getCursor());
+    unsigned int numMaterials =
+        bit_cast<std::uint32_t>(*listStream.getCursor());
 
     geom->materials.reserve(numMaterials);
 
@@ -295,7 +298,7 @@ void LoaderDFF::readMaterialList(const GeometryPtr &geom, const RWBStream &strea
     }
 }
 
-void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readMaterial(const GeometryPtr& geom, const RWBStream& stream) {
     auto materialStream = stream.getInnerStream();
 
     auto matStructID = materialStream.getNextChunk();
@@ -303,7 +306,7 @@ void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
         throw DFFLoaderException("Material missing struct chunk");
     }
 
-    char *matData = materialStream.getCursor();
+    char* matData = materialStream.getCursor();
 
     Geometry::Material material;
 
@@ -341,8 +344,8 @@ void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
     geom->materials.push_back(material);
 }
 
-void LoaderDFF::readTexture(Geometry::Material &material,
-                            const RWBStream &stream) {
+void LoaderDFF::readTexture(Geometry::Material& material,
+                            const RWBStream& stream) {
     auto texStream = stream.getInnerStream();
 
     auto texStructID = texStream.getNextChunk();
@@ -365,11 +368,12 @@ void LoaderDFF::readTexture(Geometry::Material &material,
 
     TextureData::Handle textureinst =
         texturelookup ? texturelookup(name, alpha) : nullptr;
-    material.textures.emplace_back(std::move(name), std::move(alpha), textureinst);
+    material.textures.emplace_back(std::move(name), std::move(alpha),
+                                   textureinst);
 }
 
-void LoaderDFF::readGeometryExtension(const GeometryPtr &geom,
-                                      const RWBStream &stream) {
+void LoaderDFF::readGeometryExtension(const GeometryPtr& geom,
+                                      const RWBStream& stream) {
     auto extStream = stream.getInnerStream();
 
     RWBStream::ChunkID chunkID;
@@ -384,10 +388,12 @@ void LoaderDFF::readGeometryExtension(const GeometryPtr &geom,
     }
 }
 
-void LoaderDFF::readBinMeshPLG(const GeometryPtr &geom, const RWBStream &stream) {
+void LoaderDFF::readBinMeshPLG(const GeometryPtr& geom,
+                               const RWBStream& stream) {
     auto data = stream.getCursor();
 
-    geom->facetype = static_cast<Geometry::FaceType>(bit_cast<std::uint32_t>(*data));
+    geom->facetype =
+        static_cast<Geometry::FaceType>(bit_cast<std::uint32_t>(*data));
     data += sizeof(std::uint32_t);
 
     unsigned int numSplits = bit_cast<std::uint32_t>(*data);
@@ -418,9 +424,9 @@ void LoaderDFF::readBinMeshPLG(const GeometryPtr &geom, const RWBStream &stream)
     }
 }
 
-AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
-                                GeometryList &geometrylist,
-                                const RWBStream &stream) {
+AtomicPtr LoaderDFF::readAtomic(FrameList& framelist,
+                                GeometryList& geometrylist,
+                                const RWBStream& stream) {
     auto atomicStream = stream.getInnerStream();
 
     auto atomicStructID = atomicStream.getNextChunk();
@@ -438,8 +444,8 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     std::uint32_t flags = bit_cast<std::uint32_t>(*data);
 
     // Verify the atomic's particulars
-    RW_CHECK(frame < framelist.size(), "atomic frame " << frame
-                                                       << " out of bounds");
+    RW_CHECK(frame < framelist.size(),
+             "atomic frame " << frame << " out of bounds");
     RW_CHECK(geometry < geometrylist.size(),
              "atomic geometry " << geometry << " out of bounds");
 

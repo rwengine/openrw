@@ -2,10 +2,9 @@
 #define _RWLIB_FONTS_GAMETEXTS_HPP_
 
 #include <cstdint>
-#include <string>
-#include <unordered_map>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 /**
  * Each GXT char is just a 16-bit index into the font map.
@@ -36,23 +35,29 @@ static constexpr font_t FONTS_COUNT = 3;
 
 namespace GameStringUtil {
 /**
- * @brief fromString Converts a std::string to a GameString, depending on the font
+ * @brief fromString Converts a std::string to a GameString, depending on the
+ * font
  *
- * Encoding of GameStrings depends on the font. Unknown chars are converted to a "unknown GameStringChar" (such as '?').
+ * Encoding of GameStrings depends on the font. Unknown chars are converted to a
+ * "unknown GameStringChar" (such as '?').
  */
 GameString fromString(const std::string& str, font_t font);
 
 /**
- * @brief fromString Converts a GameString to a std::string, depending on the font
+ * @brief fromString Converts a GameString to a std::string, depending on the
+ * font
  *
- * Encoding of GameStrings depends on the font. Unknown GameStringChar's are converted to a UNICODE_REPLACEMENT_CHARACTER utf-8 sequence.
+ * Encoding of GameStrings depends on the font. Unknown GameStringChar's are
+ * converted to a UNICODE_REPLACEMENT_CHARACTER utf-8 sequence.
  */
 std::string toString(const GameString& str, font_t font);
 
 /**
- * @brief fromString Converts a string to a GameString, independent on the font (only characthers known to all fonts are converted)
+ * @brief fromString Converts a string to a GameString, independent on the font
+ * (only characthers known to all fonts are converted)
  *
- * Encoding of GameStrings does not depend on the font. Unknown chars are converted to a "unknown GameStringChar" (such as '?').
+ * Encoding of GameStrings does not depend on the font. Unknown chars are
+ * converted to a "unknown GameStringChar" (such as '?').
  */
 GameString fromStringCommon(const std::string& str);
 }
@@ -86,7 +91,7 @@ public:
         return GameStringUtil::fromString("MISSING: " + id, FONT_ARIAL);
     }
 
-    const StringTable &getStringTable() const {
+    const StringTable& getStringTable() const {
         return m_strings;
     }
 };

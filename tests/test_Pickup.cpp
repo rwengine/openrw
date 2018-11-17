@@ -25,8 +25,8 @@ BOOST_AUTO_TEST_SUITE(PickupTests)
 BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
     {
         auto objectID = 9999;
-        auto character =
-            Global::get().e->createPlayer({30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
+        auto character = Global::get().e->createPlayer(
+            {30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
         BOOST_REQUIRE(character != nullptr);
         Global::get().e->state->playerObject = objectID;
 
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
 BOOST_AUTO_TEST_CASE(test_item_pickup) {
     {
         auto objectID = 9999;
-        auto character =
-            Global::get().e->createPlayer({30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
+        auto character = Global::get().e->createPlayer(
+            {30.1f, 0.f, 0.f}, {1.f, 0.f, 0.f, 0.f}, objectID);
         BOOST_REQUIRE(character != nullptr);
         Global::get().e->state->playerObject = objectID;
 

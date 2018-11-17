@@ -6,7 +6,7 @@
 #include <string>
 
 namespace WeatherLoader {
-bool load(const std::string &filename, Weather& outWeather);
+bool load(const std::string& filename, Weather& outWeather);
 }
 
 #endif

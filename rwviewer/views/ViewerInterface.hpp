@@ -18,7 +18,8 @@ public:
     }
 
 protected:
-    virtual void worldChanged() {}
+    virtual void worldChanged() {
+    }
 
     ViewerWidget* createViewer();
 

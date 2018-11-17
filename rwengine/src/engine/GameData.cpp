@@ -21,16 +21,16 @@
 #include "core/Profiler.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
+#include "loaders/GenericDATLoader.hpp"
 #include "loaders/LoaderCOL.hpp"
+#include "loaders/LoaderGXT.hpp"
 #include "loaders/LoaderIDE.hpp"
 #include "loaders/LoaderIFP.hpp"
 #include "loaders/LoaderIPL.hpp"
 #include "loaders/WeatherLoader.hpp"
 #include "platform/FileHandle.hpp"
-#include "script/SCMFile.hpp"
-#include "loaders/GenericDATLoader.hpp"
-#include "loaders/LoaderGXT.hpp"
 #include "platform/FileIndex.hpp"
+#include "script/SCMFile.hpp"
 
 GameData::GameData(Logger* log, const rwfs::path& path)
     : datpath(path), logger(log) {
@@ -70,8 +70,13 @@ void GameData::load() {
         AnimGroup::getBuiltInAnimGroup(animations, "player"));
 
     // Clear existing zones
-    gamezones = ZoneDataList{
-        {"CITYZON", 0, {-4000.f, -4000.f, -500.f}, {4000.f, 4000.f, 500.f}, 0, 0, 0}};
+    gamezones = ZoneDataList{{"CITYZON",
+                              0,
+                              {-4000.f, -4000.f, -500.f},
+                              {4000.f, 4000.f, 500.f},
+                              0,
+                              0,
+                              0}};
 
     loadLevelFile("data/default.dat");
     loadLevelFile("data/gta3.dat");
@@ -93,7 +98,8 @@ void GameData::loadLevelFile(const std::string& path) {
     currenttextureslot = "generic";
 
     for (std::string line, cmd; std::getline(datfile, line);) {
-        if (line.empty() || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#')
+            continue;
 #ifndef RW_WINDOWS
         line.erase(line.size() - 1);
 #endif
@@ -152,7 +158,8 @@ uint16_t GameData::findModelObject(const std::string model) {
                               [&](const decltype(modelinfo)::value_type& d) {
                                   return boost::iequals(d.second->name, model);
                               });
-    if (defit != modelinfo.end()) return defit->first;
+    if (defit != modelinfo.end())
+        return defit->first;
     return -1;
 }
 
@@ -253,10 +260,9 @@ void GameData::loadCarcols(const std::string& path) {
 
                 if (std::getline(ss, r, ',') && std::getline(ss, g, ',') &&
                     std::getline(ss, b)) {
-                    vehicleColours.emplace_back(
-                                lexical_cast<int>(r),
-                                lexical_cast<int>(g),
-                                lexical_cast<int>(b));
+                    vehicleColours.emplace_back(lexical_cast<int>(r),
+                                                lexical_cast<int>(g),
+                                                lexical_cast<int>(b));
                 }
             } else if (currentSection == CAR) {
                 std::string vehicle, p, s;
@@ -338,12 +344,9 @@ void GameData::loadWater(const std::string& path) {
         if (std::getline(ss, a, ',') && std::getline(ss, b, ',') &&
             std::getline(ss, c, ',') && std::getline(ss, d, ',') &&
             std::getline(ss, e, ',')) {
-
             waterBlocks.emplace_back(
-                lexical_cast<float>(a),
-                lexical_cast<float>(b),
-                lexical_cast<float>(c),
-                lexical_cast<float>(d),
+                lexical_cast<float>(a), lexical_cast<float>(b),
+                lexical_cast<float>(c), lexical_cast<float>(d),
                 lexical_cast<float>(e));
         }
     }
@@ -411,7 +414,8 @@ ClumpPtr GameData::loadClump(const std::string& name) {
     return m;
 }
 
-ClumpPtr GameData::loadClump(const std::string& name, const std::string& textureSlot) {
+ClumpPtr GameData::loadClump(const std::string& name,
+                             const std::string& textureSlot) {
     std::string currentSlot = currenttextureslot;
     if (!textureSlot.empty())
         currenttextureslot = textureSlot;

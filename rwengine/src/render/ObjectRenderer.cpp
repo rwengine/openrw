@@ -105,7 +105,8 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
             dp.ambient = mat.ambientIntensity;
         }
 
-        dp.blendMode = isTransparent ? BlendMode::BLEND_ALPHA : BlendMode::BLEND_NONE;
+        dp.blendMode =
+            isTransparent ? BlendMode::BLEND_ALPHA : BlendMode::BLEND_NONE;
 
         glm::vec3 position(modelMatrix[3]);
         float distance = glm::length(m_camera.position - position);
@@ -312,7 +313,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 }
 
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
-    if (!pickup->isEnabled()) return;
+    if (!pickup->isEnabled())
+        return;
 
     glm::mat4 modelMatrix =
         glm::translate(glm::mat4(1.0f), pickup->getPosition());
@@ -330,7 +332,8 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
                                           RenderList& outList) {
-    if (!m_world->state->currentCutscene) return;
+    if (!m_world->state->currentCutscene)
+        return;
     const auto& clump = cutscene->getClump();
 
     auto cutsceneOffset = m_world->state->currentCutscene->meta.sceneOffset +

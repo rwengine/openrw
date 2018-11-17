@@ -23,8 +23,10 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) {
     maskProg = renderer->getRenderer()->createShader(
         GameShaders::Mask3D::VertexShader, GameShaders::Mask3D::FragmentShader);
 
-    renderer->getRenderer()->setProgramBlockBinding(waterProg.get(), "SceneData", 1);
-    renderer->getRenderer()->setProgramBlockBinding(maskProg.get(), "SceneData", 1);
+    renderer->getRenderer()->setProgramBlockBinding(waterProg.get(),
+                                                    "SceneData", 1);
+    renderer->getRenderer()->setProgramBlockBinding(maskProg.get(), "SceneData",
+                                                    1);
 
     renderer->getRenderer()->setUniformTexture(waterProg.get(), "data", 1);
 
@@ -49,14 +51,16 @@ WaterRenderer::WaterRenderer(GameRenderer* renderer) {
         }
     }
 
-    gridGeom.uploadVertices(static_cast<GLsizei>(grid.size()), sizeof(glm::vec2) * grid.size(),
-                            grid.data());
+    gridGeom.uploadVertices(static_cast<GLsizei>(grid.size()),
+                            sizeof(glm::vec2) * grid.size(), grid.data());
     gridGeom.getDataAttributes().emplace_back(ATRS_Position, 2, 0, 0, GL_FLOAT);
     gridDraw.addGeometry(&gridGeom);
 }
 
-void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int nHeights,
-                                  const uint8_t* tiles, const unsigned int nTiles) {
+void WaterRenderer::setWaterTable(const float* waterHeights,
+                                  const unsigned int nHeights,
+                                  const uint8_t* tiles,
+                                  const unsigned int nTiles) {
     // Determine the dimensions of the input tiles
     auto edgeNum = static_cast<unsigned int>(sqrt(nTiles));
     float tileSize = WATER_WORLD_SIZE / edgeNum;
@@ -67,10 +71,12 @@ void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int 
     for (auto x = 0u; x < edgeNum; x++) {
         int xi = x * WATER_HQ_DATA_SIZE;
         for (auto y = 0u; y < edgeNum; y++) {
-            if (tiles[xi + y] >= nHeights) continue;
+            if (tiles[xi + y] >= nHeights)
+                continue;
 
             // Tiles with the magic value contain no water.
-            if (tiles[xi + y] >= NO_WATER_INDEX) continue;
+            if (tiles[xi + y] >= NO_WATER_INDEX)
+                continue;
             float h = waterHeights[tiles[xi + y]];
             float hMax = h + WATER_HEIGHT;
             glm::vec2 tMin(wO + glm::vec2(x, y) * tileSize);

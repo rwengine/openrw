@@ -1,9 +1,9 @@
 #include "engine/SaveGame.hpp"
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 #include <iostream>
 
@@ -27,16 +27,16 @@
 #include "script/ScriptTypes.hpp"
 
 namespace {
-    constexpr int kNrOfWeapons = 13;
-    constexpr int kNrOfStoredCars = 18;
-    constexpr int kNrOfPickups = 336;
-    constexpr int kNrOfBlips = 32;
-    constexpr int kNrOfNavZones = 50;
-    constexpr int kNrOfDayNightInfo = 100;
-    constexpr int kNrOfMapZones = 25;
-    constexpr int kNrOfAudioZones = 36;
-    constexpr int kNrOfGangs = 9;
-    constexpr int kNrOfPedTypes = 23;
+constexpr int kNrOfWeapons = 13;
+constexpr int kNrOfStoredCars = 18;
+constexpr int kNrOfPickups = 336;
+constexpr int kNrOfBlips = 32;
+constexpr int kNrOfNavZones = 50;
+constexpr int kNrOfDayNightInfo = 100;
+constexpr int kNrOfMapZones = 25;
+constexpr int kNrOfAudioZones = 36;
+constexpr int kNrOfGangs = 9;
+constexpr int kNrOfPedTypes = 23;
 }
 
 // Original save game file data structures
@@ -503,36 +503,36 @@ void SaveGame::writeGame(GameState& state, const std::string& file) {
     RW_UNIMPLEMENTED("Saving the game is not implemented yet.");
 }
 
-template <class T>
+template<class T>
 bool readBlock(std::FILE* str, T& out) {
     return std::fread(&out, sizeof(out), 1, str) == 1;
 }
 
-#define READ_VALUE(var)                                                   \
-    if (!readBlock(loadFile, var)) {                                      \
-        RW_ERROR(file << ": Failed to load block " #var);                 \
-        return false;                                                     \
+#define READ_VALUE(var)                                                        \
+    if (!readBlock(loadFile, var)) {                                           \
+        RW_ERROR(file << ": Failed to load block " #var);                      \
+        return false;                                                          \
     }
-#define READ_SIZE(var)                                                   \
-    if (!readBlock(loadFile, var)) {                                     \
-        RW_ERROR(file << ": Failed to load size " #var);                 \
-        return false;                                                    \
+#define READ_SIZE(var)                                                         \
+    if (!readBlock(loadFile, var)) {                                           \
+        RW_ERROR(file << ": Failed to load size " #var);                       \
+        return false;                                                          \
     }
-#define CHECK_SIG(expected)                                               \
-    {                                                                     \
-        char signature[4];                                                \
-        if (fread(signature, sizeof(char), 4, loadFile) != 4) {           \
-            RW_ERROR("Failed to read signature");                         \
-            return false;                                                 \
-        }                                                                 \
-        if (strncmp(signature, expected, 3) != 0) {                       \
-            RW_ERROR("Signature " expected " incorrect");                 \
-            return false;                                                 \
-        }                                                                 \
+#define CHECK_SIG(expected)                                                    \
+    {                                                                          \
+        char signature[4];                                                     \
+        if (fread(signature, sizeof(char), 4, loadFile) != 4) {                \
+            RW_ERROR("Failed to read signature");                              \
+            return false;                                                      \
+        }                                                                      \
+        if (strncmp(signature, expected, 3) != 0) {                            \
+            RW_ERROR("Signature " expected " incorrect");                      \
+            return false;                                                      \
+        }                                                                      \
     }
-#define BLOCK_HEADER(sizevar)             \
-    fseek(loadFile, nextBlock, SEEK_SET); \
-    READ_SIZE(sizevar)                    \
+#define BLOCK_HEADER(sizevar)                                                  \
+    fseek(loadFile, nextBlock, SEEK_SET);                                      \
+    READ_SIZE(sizevar)                                                         \
     nextBlock += sizeof(sizevar) + sizevar;
 
 bool SaveGame::loadGame(GameState& state, const std::string& file) {
@@ -608,7 +608,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         std::cout << "Player Health: " << ped.info.health << " ("
                   << ped.info.armour << ")" << std::endl;
         std::cout << "Player model: " << ped.modelName << std::endl;
-        for (const auto &wep : players[p].info.weapons) {
+        for (const auto& wep : players[p].info.weapons) {
             std::cout << "ID " << wep.weaponId << " " << wep.inClip << " "
                       << wep.totalBullets << std::endl;
         }
@@ -648,8 +648,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     std::cout << "Shoreside IE: " << garageData.bfImportExportShoreside
               << std::endl;
     std::cout << "GA21 last shown: " << garageData.GA_21lastTime << std::endl;
-    for (const auto &car : garageData.cars) {
-        if (car.modelId == 0) continue;
+    for (const auto& car : garageData.cars) {
+        if (car.modelId == 0)
+            continue;
         std::cout << " " << car.modelId << " " << uint16_t(car.colorFG) << "/"
                   << uint16_t(car.colorBG) << " " << car.immunities
                   << std::endl;
@@ -807,10 +808,12 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(pickupData);
 
 #ifdef RW_DEBUG
-    for (const auto &pickup : pickupData.pickups) {
-        if (pickup.type == 0) continue;
-        std::cout << " " << uint16_t(pickup.type) << " " << pickup.position.x << " "
-                  << pickup.position.y << " " << pickup.position.z << std::endl;
+    for (const auto& pickup : pickupData.pickups) {
+        if (pickup.type == 0)
+            continue;
+        std::cout << " " << uint16_t(pickup.type) << " " << pickup.position.x
+                  << " " << pickup.position.y << " " << pickup.position.z
+                  << std::endl;
     }
 #endif
 
@@ -830,9 +833,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
 #ifdef RW_DEBUG
     std::cout << "Payphones: " << payphoneData.numPayphones << std::endl;
     for (const auto& payphone : payphones) {
-        std::cout << " " << uint16_t(payphone.state) << " " << payphone.position.x
-                  << " " << payphone.position.y << " " << payphone.position.z
-                  << std::endl;
+        std::cout << " " << uint16_t(payphone.state) << " "
+                  << payphone.position.x << " " << payphone.position.y << " "
+                  << payphone.position.z << std::endl;
     }
 #endif
 
@@ -874,8 +877,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(radarData);
 
 #ifdef RW_DEBUG
-    for (const auto &blip : radarData.blips) {
-        if (blip.type == 0) continue;
+    for (const auto& blip : radarData.blips) {
+        if (blip.type == 0)
+            continue;
         std::cout << " " << blip.position.x << " " << blip.position.y << " "
                   << blip.position.z << std::endl;
     }
@@ -894,7 +898,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(zoneData.currentLevel);
     READ_VALUE(zoneData.findIndex);
     READ_VALUE(zoneData.align);
-    for (auto &zone : zoneData.navZones) {
+    for (auto& zone : zoneData.navZones) {
         READ_VALUE(zone.name);
         READ_VALUE(zone.coordA);
         READ_VALUE(zone.coordB);
@@ -906,7 +910,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(zone.parentZone);
         READ_VALUE(zone.siblingZone);
     }
-    for (auto &info : zoneData.dayNightInfo) {
+    for (auto& info : zoneData.dayNightInfo) {
         READ_VALUE(info.density)
         READ_VALUE(info.unknown1)
         READ_VALUE(info.peddensity)
@@ -916,7 +920,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     }
     READ_VALUE(zoneData.numNavZones);
     READ_VALUE(zoneData.numZoneInfos);
-    for (auto &zone : zoneData.mapZones) {
+    for (auto& zone : zoneData.mapZones) {
         READ_VALUE(zone.name);
         READ_VALUE(zone.coordA);
         READ_VALUE(zone.coordB);
@@ -928,7 +932,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         READ_VALUE(zone.parentZone);
         READ_VALUE(zone.siblingZone);
     }
-    for (auto &audioZone : zoneData.audioZones) {
+    for (auto& audioZone : zoneData.audioZones) {
         READ_VALUE(audioZone);
     }
     READ_VALUE(zoneData.numMapZones);
@@ -982,7 +986,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         Block11ZoneInfo& night = zoneData.dayNightInfo[zone.nightZoneInfo];
         // @toodo restore gang density
         gamezones.emplace_back(zone.name, zone.type, zone.coordA, zone.coordB,
-                            zone.level, day.pedgroup, night.pedgroup);
+                               zone.level, day.pedgroup, night.pedgroup);
     }
     // Re-build zone hierarchy
     for (ZoneData& zone : gamezones) {
@@ -1005,7 +1009,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(gangData);
 
 #ifdef RW_DEBUG
-    for (const auto &gang : gangData.gangs) {
+    for (const auto& gang : gangData.gangs) {
         std::cout << " " << gang.carModelId << " " << gang.weaponPrimary << " "
                   << gang.weaponSecondary << std::endl;
     }
@@ -1199,14 +1203,13 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     READ_VALUE(pedTypeData);
 
 #ifdef RW_DEBUG
-    for (const auto &type : pedTypeData.types) {
+    for (const auto& type : pedTypeData.types) {
         printf("%08x: %f %f %f %f %f threat %08x avoid %08x\n", type.bitstring_,
                static_cast<double>(type.unknown2),
                static_cast<double>(type.unknown3),
                static_cast<double>(type.unknown4),
                static_cast<double>(type.fleedistance),
-               static_cast<double>(type.headingchangerate),
-               type.threatflags_,
+               static_cast<double>(type.headingchangerate), type.threatflags_,
                type.avoidflags_);
     }
 #endif
@@ -1269,8 +1272,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
                                   glm::vec3(garage.x2, garage.y2, garage.z2),
                                   static_cast<Garage::Type>(garage.type));
     }
-    for (auto &c : garageData.cars) {
-        if (c.modelId == 0) continue;
+    for (auto& c : garageData.cars) {
+        if (c.modelId == 0)
+            continue;
         auto& car = c;
         glm::quat rotation(
             glm::mat3(glm::cross(car.rotation, glm::vec3(0.f, 0.f, 1.f)),
@@ -1289,7 +1293,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
             gen.force, gen.alarmChance, gen.lockedChance, gen.minDelay,
             gen.maxDelay, gen.timestamp,
             101  /// @todo determine where the remainingSpawns should be
-            );
+        );
     }
 
     // Load import / export lists
@@ -1327,7 +1331,8 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
 #ifdef RW_WINDOWS
 char* readUserPath() {
     LONG retval;
-    const char* lpSubKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
+    const char* lpSubKey =
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
     const char* lpValueName = "Personal";
     DWORD lpType = REG_SZ;
     HKEY phkResult;
@@ -1335,13 +1340,20 @@ char* readUserPath() {
     DWORD lpcbData = sizeof(lpData);
 
     retval = RegOpenKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, KEY_READ, &phkResult);
-    if (ERROR_SUCCESS != retval) { return nullptr; }
+    if (ERROR_SUCCESS != retval) {
+        return nullptr;
+    }
 
-    retval = RegQueryValueEx(phkResult, lpValueName, NULL, &lpType, (LPBYTE) lpData, &lpcbData);
-    if (ERROR_SUCCESS != retval) { return nullptr; }
+    retval = RegQueryValueEx(phkResult, lpValueName, NULL, &lpType,
+                             (LPBYTE) lpData, &lpcbData);
+    if (ERROR_SUCCESS != retval) {
+        return nullptr;
+    }
 
     retval = RegCloseKey(phkResult);
-    if (ERROR_SUCCESS != retval) { return nullptr; }
+    if (ERROR_SUCCESS != retval) {
+        return nullptr;
+    }
 
     return lpData;
 }
@@ -1349,7 +1361,7 @@ char* readUserPath() {
 
 std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
 #ifdef RW_WINDOWS
-    auto homedir = readUserPath(); // already includes MyDocuments/Documents
+    auto homedir = readUserPath();  // already includes MyDocuments/Documents
 #else
     auto homedir = getenv("HOME");
 #endif
@@ -1362,7 +1374,8 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     rwfs::path gamePath(homedir);
     gamePath /= gameDir;
 
-    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) return {};
+    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath))
+        return {};
 
     std::vector<SaveGameInfo> infos;
     for (const rwfs::path& save_path : rwfs::directory_iterator(gamePath)) {

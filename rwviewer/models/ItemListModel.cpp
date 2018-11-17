@@ -9,22 +9,23 @@ qint16 ItemListModel::getIDOf(unsigned int row) const {
     return -1;
 }
 
-ItemListModel::ItemListModel(GameWorld *world, QObject *parent)
+ItemListModel::ItemListModel(GameWorld* world, QObject* parent)
     : QAbstractTableModel(parent), _world(world) {
 }
 
-int ItemListModel::rowCount(const QModelIndex &) const {
+int ItemListModel::rowCount(const QModelIndex&) const {
     return static_cast<int>(_world->data->modelinfo.size());
 }
 
-int ItemListModel::columnCount(const QModelIndex &) const {
+int ItemListModel::columnCount(const QModelIndex&) const {
     return 2;
 }
 
-QVariant ItemListModel::data(const QModelIndex &index, int role) const {
+QVariant ItemListModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::DisplayRole) {
         qint16 id = getIDOf(index.row());
-        if (id == -1) return QVariant::Invalid;
+        if (id == -1)
+            return QVariant::Invalid;
         if (index.column() == 0) {
             return id;
         } else if (index.column() == 1) {
@@ -48,7 +49,7 @@ QVariant ItemListModel::headerData(int section, Qt::Orientation orientation,
 }
 
 QModelIndex ItemListModel::index(int row, int column,
-                                 const QModelIndex &parent) const {
+                                 const QModelIndex& parent) const {
     return hasIndex(row, column, parent)
                ? createIndex(row, column, getIDOf(row))
                : QModelIndex();

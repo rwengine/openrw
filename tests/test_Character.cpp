@@ -52,15 +52,15 @@ BOOST_AUTO_TEST_CASE(test_activities) {
         }
 
         // Actually GoTo ignores z axis (up)
-        BOOST_CHECK_LT(glm::distance(glm::vec2{character->getPosition()},
-                                        {10.f, 10.f}),
-                                        0.1f);
+        BOOST_CHECK_LT(
+            glm::distance(glm::vec2{character->getPosition()}, {10.f, 10.f}),
+            0.1f);
 
         Global::get().e->destroyObject(character);
     }
     {
         VehicleObject* vehicle = Global::get().e->createVehicle(
-            90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f,0.0f,0.0f,0.0f});
+            90u, glm::vec3(10.f, 0.f, 0.f), glm::quat{1.0f, 0.0f, 0.0f, 0.0f});
         BOOST_REQUIRE(vehicle != nullptr);
         BOOST_REQUIRE(vehicle->getModel() != nullptr);
 

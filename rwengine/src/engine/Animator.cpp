@@ -21,11 +21,12 @@ void Animator::tick(float dt) {
 
     struct BoneTransform {
         glm::vec3 translation{};
-        glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
+        glm::quat rotation{1.0f, 0.0f, 0.0f, 0.0f};
     };
 
     for (AnimationState& state : animations) {
-        if (state.animation == nullptr) continue;
+        if (state.animation == nullptr)
+            continue;
 
         if (state.boneInstances.empty()) {
             for (const auto& [name, bonePtr] : state.animation->bones) {
@@ -47,7 +48,8 @@ void Animator::tick(float dt) {
         }
 
         for (auto& [bonePtr, frame] : state.boneInstances) {
-            if (bonePtr->frames.empty()) continue;
+            if (bonePtr->frames.empty())
+                continue;
             auto kf = bonePtr->getInterpolatedKeyframe(animTime);
 
             BoneTransform xform;
@@ -56,7 +58,7 @@ void Animator::tick(float dt) {
                 xform.translation = kf.position;
             }
             frame->setTranslation(frame->getDefaultTranslation() +
-                                     xform.translation);
+                                  xform.translation);
             frame->setRotation(glm::mat3_cast(xform.rotation));
         }
     }

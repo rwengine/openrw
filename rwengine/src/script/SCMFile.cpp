@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 
-void SCMFile::loadFile(char *data, size_t size) {
+void SCMFile::loadFile(char* data, size_t size) {
     _data = std::make_unique<SCMByte[]>(size);
     std::copy(data, data + size, _data.get());
 
@@ -26,7 +26,7 @@ void SCMFile::loadFile(char *data, size_t size) {
     int i = modelSectionOffset + sizeof(uint32_t);
     for (unsigned int m = 0; m < model_count; ++m) {
         char model_name[24];
-        for (char &c : model_name) {
+        for (char& c : model_name) {
             c = read<char>(i++);
         }
         models.emplace_back(model_name);

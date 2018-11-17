@@ -1,7 +1,7 @@
 #include "render/MapRenderer.hpp"
 
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -57,8 +57,8 @@ MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
     circleVerts.emplace_back(0.f, 0.f);
     for (int v = 0; v < 181; ++v) {
         circleVerts.emplace_back(
-             0.5f * glm::cos(2 * (v / 180.f) * glm::pi<float>()),
-             0.5f * glm::sin(2 * (v / 180.f) * glm::pi<float>()));
+            0.5f * glm::cos(2 * (v / 180.f) * glm::pi<float>()),
+            0.5f * glm::sin(2 * (v / 180.f) * glm::pi<float>()));
     }
     circleGeom.uploadVertices(circleVerts);
     circle.addGeometry(&circleGeom);
@@ -75,7 +75,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     renderer->pushDebugGroup("Map");
     renderer->useProgram(rectProg.get());
 
-    Renderer::DrawParameters dp { };
+    Renderer::DrawParameters dp{};
     dp.start = 0;
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.depthWrite = false;
@@ -91,7 +91,8 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     glm::mat4 view{1.0f}, model{1.0f};
     renderer->setUniform(rectProg.get(), "proj", proj);
     renderer->setUniform(rectProg.get(), "model", glm::mat4(1.0f));
-    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
+    renderer->setUniform(rectProg.get(), "colour",
+                         glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
 
@@ -169,11 +170,13 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         glm::vec2 plyblip(player->getPosition());
         float hdg = glm::roll(player->getRotation());
         drawBlip(plyblip, view, mi, "radar_centre",
-                 glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), defaultBlipSize, mi.rotation - hdg);
+                 glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), defaultBlipSize,
+                 mi.rotation - hdg);
     }
 
     drawBlip(mi.worldCenter + glm::vec2(0.f, mi.worldSize), view, mi,
-             "radar_north", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), radarNorthBlipSize);
+             "radar_north", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
+             radarNorthBlipSize);
 
     for (auto& radarBlip : world->state->radarBlips) {
         const auto& blip = radarBlip.second;
@@ -230,7 +233,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
                              ((rgbaValue >> 16) & 0xFF) / 255.0f,
                              ((rgbaValue >> 8) & 0xFF) / 255.0f,
                              1.0f  // Note: Alpha is not controlled by blip
-                             );
+            );
 
             drawBlip(blippos, view, mi, colour, blip.size * hudScale * 2.0f);
         }
@@ -286,7 +289,8 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view,
                            const MapInfo& mi, glm::vec4 colour, float size) {
     drawBlip(coord, view, mi, "", colour, size);
     // Draw outline
-    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    renderer->setUniform(rectProg.get(), "colour",
+                         glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 

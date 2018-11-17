@@ -9,12 +9,12 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <fonts/GameTexts.hpp>
-#include <objects/GameObject.hpp>
+#include <glm/gtx/norm.hpp>
 #include <objects/CharacterObject.hpp>
+#include <objects/GameObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/ScriptTypes.hpp>
-#include <glm/gtx/norm.hpp>
 
 /**
  * Implementations for common functions likely to be shared
@@ -49,7 +49,7 @@ inline bool isInModel(const ScriptArguments& args, CharacterObject* character,
     return false;
 }
 
-template <class Tvec>
+template<class Tvec>
 inline void drawAreaIndicator(const ScriptArguments& args, const Tvec& coord,
                               const Tvec& radius) {
     auto ground = args.getWorld()->getGroundAtPosition(
@@ -68,7 +68,7 @@ inline bool objectInBounds(GameObject* object, const ScriptVec3& min,
     return (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x <= max.x &&
             p.y <= max.y && p.z <= max.z);
 }
-template <class Tobj, class Tvec>
+template<class Tobj, class Tvec>
 bool objectInArea(const ScriptArguments& args, const Tobj& object,
                   const Tvec& pointA, const Tvec& pointB, bool marker,
                   bool preconditions = true) {
@@ -94,7 +94,7 @@ inline bool objectInSphere(GameObject* object, const ScriptVec3& center,
     p = glm::abs(p - center);
     return p.x <= radius.x && p.y <= radius.y && p.z <= radius.z;
 }
-template <class Tobj, class Tvec>
+template<class Tobj, class Tvec>
 inline bool objectInRadius(const ScriptArguments& args, const Tobj& object,
                            const Tvec& center, const Tvec& radius, bool marker,
                            bool preconditions = true) {
@@ -103,7 +103,7 @@ inline bool objectInRadius(const ScriptArguments& args, const Tobj& object,
     }
     return preconditions && objectInSphere(object, center, radius);
 }
-template <class Tvec>
+template<class Tvec>
 inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object,
                                GameObject* obj_near, const Tvec& radius,
                                bool marker, bool preconditions = true) {
@@ -114,7 +114,7 @@ inline bool objectInRadiusNear(const ScriptArguments& args, GameObject* object,
     return preconditions && objectInSphere(object, center, radius);
 }
 
-template <class Tobj>
+template<class Tobj>
 inline bool objectInZone(const ScriptArguments& args, Tobj object,
                          const ScriptString name) {
     auto zone = args.getWorld()->data->findZone(name);
@@ -141,8 +141,8 @@ inline GameString gxt(const ScriptArguments& args, const ScriptString id) {
     return args.getWorld()->data->texts.text(id);
 }
 
-inline BlipData& createBlip(const ScriptArguments& args, const ScriptVec3& coord,
-                            BlipData::BlipType type) {
+inline BlipData& createBlip(const ScriptArguments& args,
+                            const ScriptVec3& coord, BlipData::BlipType type) {
     BlipData data;
     data.coord = coord;
     data.type = type;
@@ -168,7 +168,8 @@ inline BlipData& createBlip(const ScriptArguments& args, const ScriptVec3& coord
 
 const char* getBlipSprite(ScriptRadarSprite sprite);
 
-inline BlipData& createBlipSprite(const ScriptArguments& args, const ScriptVec3& coord,
+inline BlipData& createBlipSprite(const ScriptArguments& args,
+                                  const ScriptVec3& coord,
                                   BlipData::BlipType type, int sprite) {
     auto& data = script::createBlip(args, coord, type);
     data.texture = getBlipSprite(sprite);
@@ -228,21 +229,23 @@ inline void addObjectToMissionCleanup(const ScriptArguments& args,
 }
 
 inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
-                                      GameObject* object) {
+                                           GameObject* object) {
     if (args.getThread()->isMission) {
         auto& mo = args.getState()->missionObjects;
         mo.erase(std::remove(mo.begin(), mo.end(), object), mo.end());
     }
 }
-        
-inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, AIGraphNode::NodeType type,
-                           ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
+
+inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord,
+                           AIGraphNode::NodeType type, ScriptFloat& xCoord,
+                           ScriptFloat& yCoord, ScriptFloat& zCoord) {
     coord = script::getGround(args, coord);
     float closest = 10000.f;
     std::vector<AIGraphNode*> nodes;
-    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes, type);
+    args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes,
+                                                     type);
 
-    for (const auto &node : nodes) {
+    for (const auto& node : nodes) {
         // This is how the original game calculates distance,
         // weighted manhattan-distance where the vertical distance
         // has to be 3x as close to be considered.
