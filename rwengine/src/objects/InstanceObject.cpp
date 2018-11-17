@@ -26,32 +26,38 @@ InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
     : GameObject(engine, pos, rot, modelinfo)
     , scale(scale)
     , dynamics(dyn) {
-    if (modelinfo) {
-        changeModel(modelinfo);
-        setPosition(pos);
-        setRotation(rot);
+    if (!modelinfo) {
+        return;
+    }
 
-        // Disable the main island LOD
-        if (modelinfo->name.find("IslandLOD") != std::string::npos) {
-            setVisible(false);
-        }
+    changeModel(modelinfo);
+    setPosition(pos);
+    setRotation(rot);
 
-        // Make sure bouys float on water
-        if (modelinfo->name.find("bouy") != std::string::npos) {
-            setFloating(true);
-        }
+    if (body) {
+        body->getBulletBody()->setActivationState(ISLAND_SLEEPING);
+    }
 
-        /// @todo store path information properly
-        if (modelinfo->type() == ModelDataType::SimpleInfo) {
-            auto simpledata = static_cast<SimpleModelInfo*>(modelinfo);
-            for (auto& path : simpledata->paths) {
-                engine->aigraph.createPathNodes(position, rot, path);
-            }
-        }
+    // Disable the main island LOD
+    if (modelinfo->name.find("IslandLOD") != std::string::npos) {
+        setVisible(false);
+    }
 
-        if (SimpleModelInfo::isDoorModel(modelinfo->name)) {
-            setStatic(true);
+    // Make sure bouys float on water
+    if (modelinfo->name.find("bouy") != std::string::npos) {
+        setFloating(true);
+    }
+
+    /// @todo store path information properly
+    if (modelinfo->type() == ModelDataType::SimpleInfo) {
+        auto simpledata = static_cast<SimpleModelInfo*>(modelinfo);
+        for (auto& path : simpledata->paths) {
+            engine->aigraph.createPathNodes(position, rot, path);
         }
+    }
+
+    if (SimpleModelInfo::isDoorModel(modelinfo->name)) {
+        setStatic(true);
     }
 }
 
