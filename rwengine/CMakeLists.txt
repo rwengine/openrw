@@ -49,6 +49,8 @@ set(RWENGINE_SOURCES
 
     src/dynamics/CollisionInstance.cpp
     src/dynamics/CollisionInstance.hpp
+    src/dynamics/HitTest.cpp
+    src/dynamics/HitTest.hpp
     src/dynamics/RaycastCallbacks.hpp
 
     src/engine/Animator.cpp

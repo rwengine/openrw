@@ -11,6 +11,7 @@ set(TESTS
     GameData
     GameWorld
     Garage
+    HitTest
     Input
     Items
     Lifetime
