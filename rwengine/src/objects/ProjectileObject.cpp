@@ -62,10 +62,12 @@ void ProjectileObject::explode() {
 
         const float exp_size = 10.f;
         const float damageSize = 5.f;
-        const float damage = static_cast<float>(_info.weapon->damage);
+        const auto damage = static_cast<float>(_info.weapon->damage);
 
         for (auto& o : engine->allObjects) {
-            if (o == this) continue;
+            if (o == this) {
+                continue;
+            }
             switch (o->type()) {
                 case GameObject::Instance:
                 case GameObject::Vehicle:
@@ -76,7 +78,9 @@ void ProjectileObject::explode() {
             }
 
             float d = glm::distance(getPosition(), o->getPosition());
-            if (d > damageSize) continue;
+            if (d > damageSize) {
+                continue;
+            }
 
             o->takeDamage({getPosition(), getPosition(),
                            damage / glm::max(d, 1.f), DamageInfo::Explosion,
@@ -164,7 +168,9 @@ ProjectileObject::~ProjectileObject() {
 }
 
 void ProjectileObject::tick(float dt) {
-    if (_body == nullptr) return;
+    if (_body == nullptr) {
+        return;
+    }
 
     auto& bttr = _body->getWorldTransform();
     position = {bttr.getOrigin().x(), bttr.getOrigin().y(),

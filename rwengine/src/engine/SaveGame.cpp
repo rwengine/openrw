@@ -1,9 +1,9 @@
 #include "engine/SaveGame.hpp"
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 #include <iostream>
 
@@ -37,12 +37,12 @@ namespace {
     constexpr int kNrOfAudioZones = 36;
     constexpr int kNrOfGangs = 9;
     constexpr int kNrOfPedTypes = 23;
-}
+}  // namespace
 
 // Original save game file data structures
-typedef uint16_t BlockWord;
-typedef uint32_t BlockDword;
-typedef BlockDword BlockSize;
+using BlockWord = uint16_t;
+using BlockDword = uint32_t;
+using BlockSize = BlockDword;
 
 struct Block0ContactInfo {
     BlockDword missionFlag;
@@ -141,7 +141,7 @@ struct StructStoredCar {
     uint8_t bombType;
     uint8_t align0[2];
 
-    // TODO Migrate to more available location (GameConstants?)
+    // TODO(danhedron) Migrate to more available location (GameConstants?)
     enum /*VehicleImmunities*/ {
         Bulletproof = 1 << 0,
         Fireproof = 1 << 1,
@@ -256,7 +256,7 @@ struct Block4Object {
     BlockWord modelId;
     BlockDword reference;
     glm::vec3 position{};
-    int8_t rotation[9];  /// @todo Confirm that this is: right, forward, down
+    int8_t rotation[9];  // TODO(danhedron) Confirm that this is: right, forward, down
     uint8_t unknown1[3];
     float unknown2;
     float unknown3[3];
@@ -1226,13 +1226,13 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         SCMThread& thread = threads.back();
         // no baseAddress in III and VC
         strncpy(thread.name, scripts[s].name, sizeof(SCMThread::name) - 1);
-        thread.conditionResult = scripts[s].ifFlag;
+        thread.conditionResult = (scripts[s].ifFlag != 0u);
         thread.conditionCount = scripts[s].ifNumber;
         thread.stackDepth = scripts[s].stackCounter;
         for (int i = 0; i < SCM_STACK_DEPTH; ++i) {
             thread.calls[i] = scripts[s].stack[i];
         }
-        /* TODO not hardcode +33 ms */
+        // TODO(danhedron) not hardcode +33 ms
         thread.wakeCounter = scripts[s].wakeTimer - state.basic.lastTick + 33;
         for (size_t i = 0; i < sizeof(Block0RunningScript::variables); ++i) {
             thread.locals[i] = scripts[s].variables[i];
@@ -1256,12 +1256,12 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         }
     }
 
-    // @todo restore properly
+    // TODO(danhedron) restore properly
     for (const auto& payphone : payphones) {
         state.world->createPayphone(glm::vec2(payphone.position));
     }
 
-    // TODO restore garage data
+    // TODO(danhedron): restore garage data
     // http://gtaforums.com/topic/758692-gta-iii-save-file-documentation/
     for (size_t g = 0; g < garageData.garageCount; ++g) {
         auto& garage = garages[g];
@@ -1270,7 +1270,9 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
                                   static_cast<Garage::Type>(garage.type));
     }
     for (auto &c : garageData.cars) {
-        if (c.modelId == 0) continue;
+        if (c.modelId == 0) {
+            continue;
+        }
         auto& car = c;
         glm::quat rotation(
             glm::mat3(glm::cross(car.rotation, glm::vec3(0.f, 0.f, 1.f)),
@@ -1288,7 +1290,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
             g, gen.position, gen.angle, gen.modelId, gen.colourFG, gen.colourBG,
             gen.force, gen.alarmChance, gen.lockedChance, gen.minDelay,
             gen.maxDelay, gen.timestamp,
-            101  /// @todo determine where the remainingSpawns should be
+            101  // TODO(danhedron) determine where the remainingSpawns should be
             );
     }
 
@@ -1302,7 +1304,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
     return true;
 }
 
-bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
+bool SaveGame::getSaveInfo(const std::string& file, BasicState* outState) {
     std::FILE* loadFile = std::fopen(file.c_str(), "rb");
 
     SaveGameInfo info;
@@ -1315,7 +1317,7 @@ bool SaveGame::getSaveInfo(const std::string& file, BasicState* basicState) {
     }
 
     // Read block 0 into state
-    if (fread(basicState, sizeof(BasicState), 1, loadFile) == 0) {
+    if (fread(outState, sizeof(BasicState), 1, loadFile) == 0) {
         return false;
     }
 
@@ -1362,7 +1364,9 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     rwfs::path gamePath(homedir);
     gamePath /= gameDir;
 
-    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) return {};
+    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) {
+        return {};
+    }
 
     std::vector<SaveGameInfo> infos;
     for (const rwfs::path& save_path : rwfs::directory_iterator(gamePath)) {

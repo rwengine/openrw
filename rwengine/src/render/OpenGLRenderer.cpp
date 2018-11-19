@@ -13,7 +13,7 @@
 namespace {
 constexpr GLuint kUBOIndexScene = 1;
 constexpr GLuint kUBOIndexDraw = 2;
-}
+}  // namespace
 
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
@@ -190,7 +190,7 @@ std::unique_ptr<Renderer::ShaderProgram> OpenGLRenderer::createShader(const std:
 void OpenGLRenderer::setProgramBlockBinding(Renderer::ShaderProgram* p,
                                             const std::string& name,
                                             GLint point) {
-    OpenGLShaderProgram* glsh = static_cast<OpenGLShaderProgram*>(p);
+    auto glsh = static_cast<OpenGLShaderProgram*>(p);
 
     auto ubi = glGetUniformBlockIndex(glsh->getName(), name.c_str());
     glUniformBlockBinding(glsh->getName(), ubi, point);
@@ -207,15 +207,15 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::mat4& m) {
     useProgram(p);
 
-    glUniformMatrix4fv(currentProgram->getUniformLocation(name.c_str()), 1,
-                       GL_FALSE, glm::value_ptr(m));
+    glUniformMatrix4fv(currentProgram->getUniformLocation(name), 1, GL_FALSE,
+                       glm::value_ptr(m));
 }
 
 void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec4& m) {
     useProgram(p);
 
-    glUniform4fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform4fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -223,7 +223,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec3& m) {
     useProgram(p);
 
-    glUniform3fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform3fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -231,7 +231,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, const glm::vec2& m) {
     useProgram(p);
 
-    glUniform2fv(currentProgram->getUniformLocation(name.c_str()), 1,
+    glUniform2fv(currentProgram->getUniformLocation(name), 1,
                  glm::value_ptr(m));
 }
 
@@ -239,7 +239,7 @@ void OpenGLRenderer::setUniform(Renderer::ShaderProgram* p,
                                 const std::string& name, float f) {
     useProgram(p);
 
-    glUniform1fv(currentProgram->getUniformLocation(name.c_str()), 1, &f);
+    glUniform1fv(currentProgram->getUniformLocation(name), 1, &f);
 }
 
 void OpenGLRenderer::clear(const glm::vec4& colour, bool clearColour,

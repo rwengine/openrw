@@ -50,7 +50,7 @@ public:
         _world->rayTest(from, to, rayCallback);
 
         if (rayCallback.hasHit()) {
-            btRigidBody* body = const_cast<btRigidBody*>(
+            auto body = const_cast<btRigidBody*>(
                 btRigidBody::upcast(rayCallback.m_collisionObject));
 
             if (body && body->hasContactResponse()) {
@@ -96,8 +96,8 @@ private:
 
 VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
                              const glm::quat& rot, BaseModelInfo* modelinfo,
-                             VehicleInfo* info, const glm::u8vec3& prim,
-                             const glm::u8vec3& sec)
+                             VehicleInfo* info,
+                             const glm::u8vec3& prim, const glm::u8vec3& sec)
     : GameObject(engine, pos, rot, modelinfo)
     , info(info)
     , colourPrimary(prim)
@@ -227,9 +227,15 @@ void VehicleObject::setupModel() {
 
     auto compRules = vehicleInfo->componentrules_;
     auto numComponents = [](int rule) {
-        if ((rule & 0xFFF) == 0xFFF) return 0;
-        if ((rule & 0xFF0) == 0xFF0) return 1;
-        if ((rule & 0xF00) == 0xF00) return 2;
+        if ((rule & 0xFFF) == 0xFFF) {
+            return 0;
+        }
+        if ((rule & 0xFF0) == 0xFF0) {
+            return 1;
+        }
+        if ((rule & 0xF00) == 0xF00) {
+            return 2;
+        }
         return 3;
     };
     while (compRules != 0) {
@@ -275,7 +281,9 @@ void VehicleObject::setPosition(const glm::vec3& pos) {
     if (collision->getBulletBody()) {
         auto bodyOrigin = btVector3(position.x, position.y, position.z);
         for (auto& part : dynamicParts) {
-            if (part.second.body == nullptr) continue;
+            if (part.second.body == nullptr) {
+                continue;
+            }
             auto body = part.second.body.get();
             auto rel = body->getWorldTransform().getOrigin() - bodyOrigin;
             body->getWorldTransform().setOrigin(
@@ -375,16 +383,19 @@ void VehicleObject::tickPhysics(float dt) {
         // general sluggishness. The engine force is multiplied by 1.5 before
         // reaching velocityMax / 4 and then reduces down to nominal force as
         // velocity reaches velocityMax / 2.
-        if (velocity < velocityMax / 4.f)
+        if (velocity < velocityMax / 4.f) {
             engineForce *= 1.5f;
-        else if (velocity < velocityMax / 2.f)
+        } else if (velocity < velocityMax / 2.f) {
             engineForce *= 1.f + 0.5f * (2.f - velocity / (velocityMax / 4.f));
+        }
 
         // Reduce the engine force when steering, by a factor of up to 1.25 for
         // the maximum steering angle, linearly back to nominal value when no
         // steering is applied.
-        if (std::abs(steerValue) > steerLimit / 8.f && velocity > velocityMax / 3.f)
+        if (std::abs(steerValue) > steerLimit / 8.f &&
+            velocity > velocityMax / 3.f) {
             engineForce /= 1.f + std::abs(steerValue) / (4.f * steerLimit);
+        }
 
         if (velocity > velocityMax) {
             btVector3 v = collision->getBulletBody()->getLinearVelocity().normalized();
@@ -597,7 +608,9 @@ void VehicleObject::tickPhysics(float dt) {
 
         // Update hinge object rotations
         for (auto& it : dynamicParts) {
-            if (it.second.body == nullptr) continue;
+            if (it.second.body == nullptr) {
+                continue;
+            }
             if (it.second.moveToAngle) {
                 auto angledelta = it.second.targetAngle -
                                   it.second.constraint->getHingeAngle();
@@ -613,7 +626,9 @@ void VehicleObject::tickPhysics(float dt) {
             // If the part is moving quite fast and near the limit, lock it.
             /// @TODO not all parts rotate in the z axis.
             float zspeed = it.second.body->getAngularVelocity().getZ();
-            if (it.second.openAngle < 0.f) zspeed = -zspeed;
+            if (it.second.openAngle < 0.f) {
+                zspeed = -zspeed;
+            }
             if (zspeed >= PART_CLOSE_VELOCITY) {
                 auto d = it.second.constraint->getHingeAngle() -
                          it.second.closedAngle;
@@ -698,8 +713,7 @@ bool VehicleObject::getHandbraking() const {
 }
 
 void VehicleObject::ejectAll() {
-    for (std::map<size_t, GameObject*>::iterator it = seatOccupants.begin();
-         it != seatOccupants.end();) {
+    for (auto it = seatOccupants.begin(); it != seatOccupants.end();) {
         if (it->second->type() == GameObject::Character) {
             CharacterObject* c = static_cast<CharacterObject*>(it->second);
             c->setCurrentVehicle(nullptr, 0);
@@ -756,13 +770,13 @@ VehicleObject::Part* VehicleObject::getSeatEntryDoor(size_t seat) {
     return nearestDoor;
 }
 
-bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
-    RW_CHECK(dmg.hitpoints == 0, "Vehicle Damage not implemented yet");
+bool VehicleObject::takeDamage(const GameObject::DamageInfo& damage) {
+    RW_CHECK(damage.hitpoints == 0, "Vehicle Damage not implemented yet");
 
     const float frameDamageThreshold = 1500.f;
 
-    if (dmg.impulse >= frameDamageThreshold) {
-        auto dpoint = dmg.damageLocation;
+    if (damage.impulse >= frameDamageThreshold) {
+        auto dpoint = damage.damageLocation;
         dpoint -= getPosition();
         dpoint = glm::inverse(getRotation()) * dpoint;
 
@@ -770,7 +784,9 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
         for (auto& d : dynamicParts) {
             auto p = &d.second;
 
-            if (p->normal == nullptr) continue;
+            if (p->normal == nullptr) {
+                continue;
+            }
 
             /// @todo correct logic
             float damageradius = 0.1f;
@@ -783,7 +799,7 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
         }
     }
 
-    health -= dmg.hitpoints;
+    health -= damage.hitpoints;
 
     return true;
 }
@@ -791,11 +807,19 @@ bool VehicleObject::takeDamage(const GameObject::DamageInfo& dmg) {
 void VehicleObject::setPartState(VehicleObject::Part* part,
                                  VehicleObject::FrameState state) {
     if (state == VehicleObject::OK) {
-        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
-        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
+        if (part->normal) {
+            part->normal->setFlag(Atomic::ATOMIC_RENDER, true);
+        }
+        if (part->damaged) {
+            part->damaged->setFlag(Atomic::ATOMIC_RENDER, false);
+        }
     } else if (state == VehicleObject::DAM) {
-        if (part->normal) part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
-        if (part->damaged) part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
+        if (part->normal) {
+            part->normal->setFlag(Atomic::ATOMIC_RENDER, false);
+        }
+        if (part->damaged) {
+            part->damaged->setFlag(Atomic::ATOMIC_RENDER, true);
+        }
     }
 }
 
@@ -893,7 +917,7 @@ void VehicleObject::createObjectHinge(Part* part) {
 
     auto& fn = part->dummy->getName();
 
-    if (fn.find("door") != fn.npos) {
+    if (fn.find("door") != std::string::npos) {
         hingeAxis = {0.f, 0.f, 1.f};
         // hingePosition = {0.f, 0.2f, 0.f};
         boxSize = {0.15f, 0.5f, 0.6f};
@@ -912,7 +936,7 @@ void VehicleObject::createObjectHinge(Part* part) {
             part->openAngle = hingeMin;
             part->closedAngle = hingeMax;
         }
-    } else if (fn.find("bonnet") != fn.npos) {
+    } else if (fn.find("bonnet") != std::string::npos) {
         hingeAxis = {1.f, 0.f, 0.f};
         hingePosition = {0.f, -0.2f, 0.f};
         hingeMax = 0.f;
@@ -920,7 +944,7 @@ void VehicleObject::createObjectHinge(Part* part) {
         boxSize = {0.4f, 0.4f, 0.1f};
         boxOffset = {0.f, 0.2f, 0.f};
     } else {
-        // TODO: boot, bumper
+        // TODO(danhedron): boot, bumper
         return;
     }
 

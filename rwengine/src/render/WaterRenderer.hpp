@@ -53,7 +53,7 @@ private:
     GeometryBuffer gridGeom{};
 
     GLuint fbOutput{};
-    GLuint dataTexture{};
+    GLuint _dataTexture{};
 };
 
 #endif

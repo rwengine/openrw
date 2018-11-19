@@ -69,7 +69,9 @@ void InstanceObject::tick(float dt) {
 }
 
 void InstanceObject::tickPhysics(float dt) {
-    if (animator) animator->tick(dt);
+    if (animator) {
+        animator->tick(dt);
+    }
 
     if (!body || !dynamics) {
         return;
@@ -215,16 +217,16 @@ void InstanceObject::setStatic(bool s) {
     static_ = s;
 }
 
-bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
+bool InstanceObject::takeDamage(const GameObject::DamageInfo& damage) {
     if (!dynamics) {
         return false;
     }
 
     const auto effect = dynamics->collDamageEffect;
 
-    if (dmg.hitpoints > 0.f) {
-        if (effect || dynamics->collResponseFlags) {
-            if (dmg.impulse >= dynamics->uprootForce && !isStatic()) {
+    if (damage.hitpoints > 0.f) {
+        if ((effect != 0u) || (dynamics->collResponseFlags != 0u)) {
+            if (damage.impulse >= dynamics->uprootForce && !isStatic()) {
                 usePhysics = true;
             }
         }

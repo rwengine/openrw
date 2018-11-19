@@ -60,7 +60,7 @@ public:
 
     bool takeDamage(const DamageInfo& damage) override;
 
-    void setSolid(bool s);
+    void setSolid(bool solid);
 
     void setStatic(bool s);
 

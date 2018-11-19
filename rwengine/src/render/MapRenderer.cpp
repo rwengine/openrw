@@ -1,7 +1,7 @@
 #include "render/MapRenderer.hpp"
 
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -46,8 +46,9 @@ void main()
 	outColour = vec4(colour.rgb + c.rgb, colour.a * c.a);
 })";
 
-MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
-    : data(_data), renderer(renderer) {
+MapRenderer::MapRenderer(const std::shared_ptr<Renderer>& renderer,
+                         GameData* data)
+    : _data(data), _renderer(renderer) {
     rectGeom.uploadVertices<VertexP2>(
         {{-.5f, -.5f}, {.5f, -.5f}, {.5f, .5f}, {-.5f, .5f}});
     rect.addGeometry(&rectGeom);
@@ -64,16 +65,16 @@ MapRenderer::MapRenderer(std::shared_ptr<Renderer> renderer, GameData* _data)
     circle.addGeometry(&circleGeom);
     circle.setFaceType(GL_TRIANGLE_FAN);
 
-    rectProg = renderer->createShader(MapVertexShader, MapFragmentShader);
+    rectProg = _renderer->createShader(MapVertexShader, MapFragmentShader);
 
-    renderer->setUniform(rectProg.get(), "colour", glm::vec4(1.f));
+    _renderer->setUniform(rectProg.get(), "colour", glm::vec4(1.f));
 }
 
 #define GAME_MAP_SIZE 4000
 
 void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
-    renderer->pushDebugGroup("Map");
-    renderer->useProgram(rectProg.get());
+    _renderer->pushDebugGroup("Map");
+    _renderer->useProgram(rectProg.get());
 
     Renderer::DrawParameters dp { };
     dp.start = 0;
@@ -87,24 +88,24 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     // Determine the scale to show the right number of world units on the screen
     float worldScale = mi.screenSize / mi.worldSize;
 
-    auto proj = renderer->get2DProjection();
+    auto proj = _renderer->get2DProjection();
     glm::mat4 view{1.0f}, model{1.0f};
-    renderer->setUniform(rectProg.get(), "proj", proj);
-    renderer->setUniform(rectProg.get(), "model", glm::mat4(1.0f));
-    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
+    _renderer->setUniform(rectProg.get(), "proj", proj);
+    _renderer->setUniform(rectProg.get(), "model", glm::mat4(1.0f));
+    _renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     view = glm::translate(view, glm::vec3(mi.screenPosition, 0.f));
 
     if (mi.clipToSize) {
         glm::mat4 circleView = glm::scale(view, glm::vec3(mi.screenSize));
-        renderer->setUniform(rectProg.get(), "view", circleView);
+        _renderer->setUniform(rectProg.get(), "view", circleView);
         dp.count = 182;
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilMask(0xFF);
         glColorMask(0x00, 0x00, 0x00, 0x00);
-        renderer->drawArrays(glm::mat4(1.0f), &circle, dp);
+        _renderer->drawArrays(glm::mat4(1.0f), &circle, dp);
         glColorMask(0xFF, 0xFF, 0xFF, 0xFF);
         glStencilFunc(GL_EQUAL, 1, 0xFF);
     }
@@ -113,7 +114,7 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     view = glm::rotate(view, mi.rotation, glm::vec3(0.f, 0.f, 1.f));
     view = glm::translate(
         view, glm::vec3(glm::vec2(-1.f, 1.f) * mi.worldCenter, 0.f));
-    renderer->setUniform(rectProg.get(), "view", view);
+    _renderer->setUniform(rectProg.get(), "view", view);
 
     // radar00 = -x, +y
     // incrementing in X, then Y
@@ -138,27 +139,27 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
         tilemodel = glm::translate(tilemodel, glm::vec3(tc, 0.f));
         tilemodel = glm::scale(tilemodel, glm::vec3(tileSize, 1.f));
 
-        renderer->setUniform(rectProg.get(), "model", tilemodel);
+        _renderer->setUniform(rectProg.get(), "model", tilemodel);
 
-        renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
+        _renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
     }
 
     // From here on out we will work in screenspace
-    renderer->setUniform(rectProg.get(), "view", glm::mat4(1.0f));
+    _renderer->setUniform(rectProg.get(), "view", glm::mat4(1.0f));
 
     if (mi.clipToSize) {
         glDisable(GL_STENCIL_TEST);
         // We only need the outer ring if we're clipping.
         glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ZERO);
         TextureData::Handle radarDisc =
-            data->findSlotTexture("hud", "radardisc");
+            _data->findSlotTexture("hud", "radardisc");
         dp.textures = {{radarDisc->getName()}};
 
         glm::mat4 model{1.0f};
         model = glm::translate(model, glm::vec3(mi.screenPosition, 0.0f));
         model = glm::scale(model, glm::vec3(mi.screenSize * 1.07f));
-        renderer->setUniform(rectProg.get(), "model", model);
-        renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
+        _renderer->setUniform(rectProg.get(), "model", model);
+        _renderer->drawArrays(glm::mat4(1.0f), &rect, dp);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE,
                             GL_ZERO);
     }
@@ -237,8 +238,8 @@ void MapRenderer::draw(GameWorld* world, const MapInfo& mi) {
     }
 
     /// @TODO migrate to using the renderer
-    renderer->invalidate();
-    renderer->popDebugGroup();
+    _renderer->invalidate();
+    _renderer->popDebugGroup();
 }
 
 void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view,
@@ -260,14 +261,14 @@ void MapRenderer::prepareBlip(const glm::vec2& coord, const glm::mat4& view,
     model = glm::translate(model, viewPos);
     model = glm::scale(model, glm::vec3(size));
     model = glm::rotate(model, heading, glm::vec3(0.f, 0.f, 1.f));
-    renderer->setUniform(rectProg.get(), "model", model);
+    _renderer->setUniform(rectProg.get(), "model", model);
 
     GLuint tex = 0;
     if (!texture.empty()) {
-        auto sprite = data->findSlotTexture("hud", texture);
+        auto sprite = _data->findSlotTexture("hud", texture);
         tex = sprite->getName();
     }
-    renderer->setUniform(rectProg.get(), "colour", colour);
+    _renderer->setUniform(rectProg.get(), "colour", colour);
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -286,7 +287,7 @@ void MapRenderer::drawBlip(const glm::vec2& coord, const glm::mat4& view,
                            const MapInfo& mi, glm::vec4 colour, float size) {
     drawBlip(coord, view, mi, "", colour, size);
     // Draw outline
-    renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    _renderer->setUniform(rectProg.get(), "colour", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 

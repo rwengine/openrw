@@ -60,7 +60,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
     size_t data_offs = 0;
     size_t* dataI = &data_offs;
 
-    ANPK* fileRoot = read<ANPK>(data, dataI);
+    auto fileRoot = read<ANPK>(data, dataI);
     std::string listname = readString(data, dataI);
 
     animations.reserve(fileRoot->info.entries);
@@ -75,15 +75,15 @@ bool LoaderIFP::loadFromMemory(char* data) {
         animation->name = animname;
 
         size_t animstart = data_offs + 8;
-        DGAN* animroot = read<DGAN>(data, dataI);
+        auto animroot = read<DGAN>(data, dataI);
         std::string infoname = readString(data, dataI);
 
         animation->bones.reserve(animroot->info.entries);
 
         for (auto c = 0u; c < animroot->info.entries; ++c) {
             size_t start = data_offs;
-            CPAN* cpan = read<CPAN>(data, dataI);
-            ANIM* frames = read<ANIM>(data, dataI);
+            auto cpan = read<CPAN>(data, dataI);
+            auto frames = read<ANIM>(data, dataI);
 
             AnimationBone boneData{};
             boneData.name = frames->name;
@@ -91,7 +91,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
 
             data_offs += ((8 + frames->base.size) - sizeof(ANIM));
 
-            KFRM* frame = read<KFRM>(data, dataI);
+            auto frame = read<KFRM>(data, dataI);
             std::string type(frame->base.magic, 4);
 
             float time = 0.f;
@@ -150,12 +150,20 @@ bool LoaderIFP::loadFromMemory(char* data) {
 
 std::string LoaderIFP::readString(char* data, size_t* ofs) {
     size_t b = *ofs;
-    for (size_t o = *ofs; (o = *ofs);) {
+    for (size_t o = *ofs; (o = *ofs) != 0u;) {
         *ofs += 4;
-        if (data[o + 0] == 0) break;
-        if (data[o + 1] == 0) break;
-        if (data[o + 2] == 0) break;
-        if (data[o + 3] == 0) break;
+        if (data[o + 0] == 0) {
+            break;
+        }
+        if (data[o + 1] == 0) {
+            break;
+        }
+        if (data[o + 2] == 0) {
+            break;
+        }
+        if (data[o + 3] == 0) {
+            break;
+        }
     }
     return std::string(data + b);
 }

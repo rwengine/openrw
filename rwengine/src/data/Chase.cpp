@@ -1,7 +1,7 @@
 #include "data/Chase.hpp"
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 
 #include <rw/debug.hpp>
@@ -62,7 +62,7 @@ bool ChaseKeyframe::load(const std::string &filePath,
         };
         glm::mat3 rotation(right, up, glm::cross(right, up));
         frames.emplace_back(velocity, rec.steering, rec.driving, rec.braking,
-                            !!rec.handbrake, rec.position,
+                            !(rec.handbrake == 0u), rec.position,
                             glm::quat_cast(rotation));
     }
 

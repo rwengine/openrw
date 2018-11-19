@@ -114,33 +114,34 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
                                btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
     m_colourId = 0;
-    if (modelinfo->name == "colt45")
+    if (modelinfo->name == "colt45") {
         m_colourId = 1;
-    else if (modelinfo->name == "uzi")
+    } else if (modelinfo->name == "uzi") {
         m_colourId = 2;
-    else if (modelinfo->name == "shotgun")
+    } else if (modelinfo->name == "shotgun") {
         m_colourId = 3;
-    else if (modelinfo->name == "ak47")
+    } else if (modelinfo->name == "ak47") {
         m_colourId = 4;
-    else if (modelinfo->name == "m16")
+    } else if (modelinfo->name == "m16") {
         m_colourId = 5;
-    else if (modelinfo->name == "sniper" || modelinfo->name == "donkeymag")
+    } else if (modelinfo->name == "sniper" || modelinfo->name == "donkeymag") {
         m_colourId = 6;
-    else if (modelinfo->name == "rocket")
+    } else if (modelinfo->name == "rocket") {
         m_colourId = 7;
-    else if (modelinfo->name == "flame")
+    } else if (modelinfo->name == "flame") {
         m_colourId = 8;
-    else if (modelinfo->name == "molotov")
+    } else if (modelinfo->name == "molotov") {
         m_colourId = 9;
-    else if (modelinfo->name == "grenade" || modelinfo->name == "package1" ||
-             modelinfo->name == "floatpackge1")
+    } else if (modelinfo->name == "grenade" || modelinfo->name == "package1" ||
+               modelinfo->name == "floatpackge1") {
         m_colourId = 10;
-    else if (modelinfo->name == "bodyarmour" || modelinfo->name == "bribe")
+    } else if (modelinfo->name == "bodyarmour" || modelinfo->name == "bribe") {
         m_colourId = 11;
-    else if (modelinfo->name == "info" || modelinfo->name == "killfrenzy")
+    } else if (modelinfo->name == "info" || modelinfo->name == "killfrenzy") {
         m_colourId = 12;
-    else if (modelinfo->name == "health" || modelinfo->name == "bonus")
+    } else if (modelinfo->name == "health" || modelinfo->name == "bonus") {
         m_colourId = 13;
+    }
 
     m_corona.position = getPosition();
     m_corona.direction = glm::vec3(0.f, 0.f, 1.f);
@@ -198,9 +199,9 @@ void PickupObject::tick(float dt) {
     float time = engine->getGameTime();
     float colourValue = 0.5f * (std::sin(time * 3.0664064f) * 0.3f + 0.3f);
     uint32_t* colour = &colours[m_colourId];
-    float red = static_cast<float>((*colour >> 16) & 0xFF);
-    float green = static_cast<float>((*colour >> 8) & 0xFF);
-    float blue = static_cast<float>(*colour & 0xFF);
+    auto red = static_cast<float>((*colour >> 16) & 0xFF);
+    auto green = static_cast<float>((*colour >> 8) & 0xFF);
+    auto blue = static_cast<float>(*colour & 0xFF);
     m_corona.colour =
         glm::vec4(red / 255.f, green / 255.f, blue / 255.f, 1.f) * colourValue;
 
@@ -220,13 +221,12 @@ void PickupObject::tick(float dt) {
                 pair.m_pProxy0->m_clientObject == m_ghost.get()
                     ? pair.m_pProxy1->m_clientObject
                     : pair.m_pProxy0->m_clientObject);
-            if (otherObject->getUserPointer()) {
-                GameObject* object =
+            if (otherObject->getUserPointer() != nullptr) {
+                auto object =
                     static_cast<GameObject*>(otherObject->getUserPointer());
                 if ((flags & PickupOnFoot) == PickupOnFoot &&
                     object->type() == Character) {
-                    CharacterObject* character =
-                        static_cast<CharacterObject*>(object);
+                    auto character = static_cast<CharacterObject*>(object);
 
                     if (character->isPlayer()) {
                         setCollected(onPlayerTouch());
@@ -239,8 +239,7 @@ void PickupObject::tick(float dt) {
                 }
                 if ((flags & PickupInVehicle) == PickupInVehicle &&
                     object->type() == Vehicle) {
-                    VehicleObject* vehicle =
-                        static_cast<VehicleObject*>(object);
+                    auto vehicle = static_cast<VehicleObject*>(object);
 
                     if (vehicle->getOccupant(0) ==
                         static_cast<GameObject*>(

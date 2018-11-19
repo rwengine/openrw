@@ -38,35 +38,35 @@ class Animator {
     /**
      * @brief model The model being animated.
      */
-    ClumpPtr model;
+    ClumpPtr _model;
 
     /**
      * @brief Currently playing animations
      */
-    std::vector<AnimationState> animations;
+    std::vector<AnimationState> _animations;
 
 public:
-    Animator(const ClumpPtr& _model);
+    Animator(ClumpPtr model);
 
     AnimationPtr getAnimation(unsigned int slot) {
-        if (slot < animations.size()) {
-            return animations[slot].animation;
+        if (slot < _animations.size()) {
+            return _animations[slot].animation;
         }
         return nullptr;
     }
 
     void playAnimation(unsigned int slot, const AnimationPtr& anim, float speed,
                        bool repeat) {
-        if (slot >= animations.size()) {
-            animations.resize(slot + 1);
+        if (slot >= _animations.size()) {
+            _animations.resize(slot + 1);
         }
-        animations[slot] = {anim, 0.f, speed, repeat, {}};
+        _animations[slot] = {anim, 0.f, speed, repeat, {}};
     }
 
     void setAnimationSpeed(unsigned int slot, float speed) {
-        RW_CHECK(slot < animations.size(), "Slot out of range");
-        if (slot < animations.size()) {
-            animations[slot].speed = speed;
+        RW_CHECK(slot < _animations.size(), "Slot out of range");
+        if (slot < _animations.size()) {
+            _animations[slot].speed = speed;
         }
     }
 

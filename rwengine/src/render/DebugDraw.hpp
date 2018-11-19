@@ -45,7 +45,7 @@ public:
     }
 
 protected:
-    int debugMode;
+    int debugMode = 0;
 
     std::vector<GeometryVertex> lines;
     size_t maxlines;
@@ -55,7 +55,7 @@ protected:
     //Ownership is handled by worldProg in renderer
     Renderer::ShaderProgram *shaderProgram = nullptr;
 
-    GLuint texture;
+    GLuint texture = 0;
 };
 
 #endif

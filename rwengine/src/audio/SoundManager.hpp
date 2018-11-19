@@ -111,7 +111,7 @@ private:
     /// Nr of already created buffers
     size_t bufferNr = 0;
 
-    GameWorld* _engine;
+    GameWorld* _engine = nullptr;
     LoaderSDT sdt{};
 
     /// Sound volume

@@ -34,24 +34,24 @@ struct SCMException {
 };
 
 struct IllegalInstruction : SCMException {
-    SCMOpcode opcode{};
-    unsigned int offset{0};
-    std::string thread;
+    SCMOpcode _opcode{};
+    unsigned int _offset{0};
+    std::string _thread;
 
     template <class String>
-    IllegalInstruction(SCMOpcode _opcode, unsigned int _offset,
-                       String&& _thread)
-        : opcode(_opcode)
-        , offset(_offset)
-        , thread(std::forward<String>(_thread)) {
+    IllegalInstruction(SCMOpcode opcode, unsigned int offset,
+                       String&& thread)
+        : _opcode(opcode)
+        , _offset(offset)
+        , _thread(std::forward<String>(thread)) {
     }
 
     std::string what() const override {
         std::stringstream ss;
         ss << "Illegal Instruction " << std::setfill('0') << std::setw(4)
-           << std::hex << opcode << " encountered at offset "
-           << std::setfill('0') << std::setw(4) << std::hex << offset
-           << " on thread " << thread;
+           << std::hex << _opcode << " encountered at offset "
+           << std::setfill('0') << std::setw(4) << std::hex << _offset
+           << " on thread " << _thread;
         return ss.str();
     }
 };
@@ -133,7 +133,7 @@ public:
     ~ScriptMachine() = default;
 
     SCMFile& getFile() const {
-        return file;
+        return _file;
     }
 
     void startThread(SCMThread::pc_t start, bool mission = false);
@@ -144,24 +144,24 @@ public:
 
     SCMByte* getGlobals();
     std::vector<SCMByte>& getGlobalData() {
-        return globalData;
+        return _globalData;
     }
 
     GameState* getState() const {
-        return state;
+        return _state;
     }
 
     uint32_t getGlobalOffset(ScriptInt& global) const {
         return static_cast<uint32_t>(reinterpret_cast<SCMByte*>(&global) -
-                                     globalData.data());
+                                     _globalData.data());
     }
 
     bool getDebugFlag() const {
-        return debugFlag;
+        return _debugFlag;
     }
 
     void setDebugFlag(bool flag) {
-        debugFlag = flag;
+        _debugFlag = flag;
     }
 
     /**
@@ -170,16 +170,16 @@ public:
     void execute(float dt);
 
 private:
-    SCMFile& file;
-    ScriptModule* module = nullptr;
-    GameState* state = nullptr;
-    bool debugFlag;
+    SCMFile& _file;
+    ScriptModule* _module = nullptr;
+    GameState* _state = nullptr;
+    bool _debugFlag;
 
     std::list<SCMThread> _activeThreads;
 
     void executeThread(SCMThread& t, int msPassed);
 
-    std::vector<SCMByte> globalData;
+    std::vector<SCMByte> _globalData;
 };
 
 #endif

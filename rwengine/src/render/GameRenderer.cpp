@@ -1,15 +1,15 @@
 #include "render/GameRenderer.hpp"
 
 #include <algorithm>
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include <glm/gtc/constants.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <gl/TextureData.hpp>
 #include <rw/types.hpp>
@@ -21,8 +21,8 @@
 #include "engine/GameWorld.hpp"
 #include "loaders/WeatherLoader.hpp"
 #include "objects/GameObject.hpp"
-#include "render/ObjectRenderer.hpp"
 #include "render/GameShaders.hpp"
+#include "render/ObjectRenderer.hpp"
 #include "render/VisualFX.hpp"
 
 constexpr size_t skydomeSegments = 8, skydomeRows = 10;
@@ -40,8 +40,8 @@ struct ParticleVert {
     float r, g, b;
 };
 
-GameRenderer::GameRenderer(Logger* log, GameData* _data)
-    : data(_data)
+GameRenderer::GameRenderer(Logger* log, GameData* data)
+    : _data(data)
     , logger(log)
     , map(renderer, _data)
     , water(this)
@@ -348,7 +348,7 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
 
         if (blip.second.target > 0) {
             auto object = world->getBlipTarget(blip.second);
-            if (object) {
+            if (object != nullptr) {
                 model = object->getTimeAdjustedTransform(_renderAlpha);
             }
         } else {
@@ -369,12 +369,16 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
     // Earlier position in the array means earlier object's rendering
     // Transparent objects should be sorted and rendered after opaque
     sort(renderList.begin(), renderList.end(),
-         [](const Renderer::RenderInstruction &a,
-            const Renderer::RenderInstruction &b) {
-             if (a.drawInfo.blendMode == BlendMode::BLEND_NONE && b.drawInfo.blendMode != BlendMode::BLEND_NONE)
+         [](const Renderer::RenderInstruction& a,
+            const Renderer::RenderInstruction& b) {
+             if (a.drawInfo.blendMode == BlendMode::BLEND_NONE &&
+                 b.drawInfo.blendMode != BlendMode::BLEND_NONE) {
                  return true;
-             if (a.drawInfo.blendMode != BlendMode::BLEND_NONE && b.drawInfo.blendMode == BlendMode::BLEND_NONE)
+             }
+             if (a.drawInfo.blendMode != BlendMode::BLEND_NONE &&
+                 b.drawInfo.blendMode == BlendMode::BLEND_NONE) {
                  return false;
+             }
              return (a.sortKey > b.sortKey);
          });
 
@@ -448,7 +452,9 @@ void GameRenderer::renderEffects(GameWorld* world) {
 
     for (auto& fx : effects) {
         // Other effects not implemented yet
-        if (fx->getType() != Particle) continue;
+        if (fx->getType() != Particle) {
+            continue;
+        }
         auto particle = static_cast<ParticleFX*>(fx.get());
 
         auto& p = particle->position;

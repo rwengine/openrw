@@ -27,7 +27,7 @@ class GameObject {
     glm::quat _lastRotation;
     GameObjectID objectID = 0;
 
-    BaseModelInfo* modelinfo_;
+    BaseModelInfo* _modelinfo;
 
     /**
      * Model used for rendering
@@ -36,7 +36,7 @@ class GameObject {
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
-        modelinfo_ = next;
+        _modelinfo = next;
     }
 
 public:
@@ -63,12 +63,12 @@ public:
                BaseModelInfo* modelinfo)
         : _lastPosition(pos)
         , _lastRotation(rot)
-        , modelinfo_(modelinfo)
+        , _modelinfo(modelinfo)
         , position(pos)
         , rotation(rot)
         , engine(engine) {
-        if (modelinfo_) {
-            modelinfo_->addReference();
+        if (_modelinfo) {
+            _modelinfo->addReference();
         }
     }
 
@@ -90,7 +90,7 @@ public:
 
     template <class T>
     T* getModelInfo() const {
-        return static_cast<T*>(modelinfo_);
+        return static_cast<T*>(_modelinfo);
     }
 
     /**

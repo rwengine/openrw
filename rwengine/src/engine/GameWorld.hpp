@@ -106,9 +106,9 @@ public:
     /**
      * @brief cleanupTraffic Cleans up traffic too far away from the given
      * camera
-     * @param viewCamera
+     * @param focus
      */
-    void cleanupTraffic(const ViewCamera& viewCamera);
+    void cleanupTraffic(const ViewCamera& focus);
 
     /**
      * Creates an instance
@@ -236,7 +236,7 @@ public:
     /**
      * Gameplay state
      */
-    GameState* state;
+    GameState* state{};
 
     /**
      * State of playing sounds
@@ -358,7 +358,7 @@ public:
     void eraseCutsceneAnimations();
 
     std::string cutsceneAudio;
-    bool cutsceneAudioLoaded;
+    bool cutsceneAudioLoaded{};
     std::string missionAudio;
 
     /**

@@ -15,11 +15,13 @@
 
 bool LoaderIDE::load(const std::string &filename, const PedStatsList &stats) {
     std::ifstream str(filename);
-    if (!str.is_open()) return false;
+    if (!str.is_open()) {
+        return false;
+    }
     return load(str, stats);
 }
 
-bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
+bool LoaderIDE::load(std::istream& stream, const PedStatsList& stats) {
     auto find_stat_id = [&](const std::string &name) {
         auto it =
             std::find_if(stats.begin(), stats.end(),
@@ -31,15 +33,17 @@ bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
     };
 
     SectionTypes section = NONE;
-    while (!str.eof()) {
+    while (!stream.eof()) {
         std::string line;
-        getline(str, line);
+        getline(stream, line);
         line.erase(std::find_if(line.rbegin(), line.rend(),
                                 [](auto c) { return !std::isspace(c); })
                        .base(),
                    line.end());
 
-        if (!line.empty() && line[0] == '#') continue;
+        if (!line.empty() && line[0] == '#') {
+            continue;
+        }
 
         if (line == "end") {
             section = NONE;
@@ -198,7 +202,7 @@ bool LoaderIDE::load(std::istream& str, const PedStatsList& stats) {
                     for (size_t p = 0; p < 12; ++p) {
                         PathNode node{};
 
-                        getline(str, linebuff);
+                        getline(stream, linebuff);
                         std::stringstream buffstream(linebuff);
 
                         getline(buffstream, buff, ',');

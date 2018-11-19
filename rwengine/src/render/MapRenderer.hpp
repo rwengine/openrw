@@ -36,14 +36,14 @@ public:
         bool clipToSize = true;
     };
 
-    MapRenderer(std::shared_ptr<Renderer> renderer, GameData* data);
+    MapRenderer(const std::shared_ptr<Renderer>& renderer, GameData* data);
 
     void draw(GameWorld* world, const MapInfo& mi);
     void scaleHUD(const float scale);
 
 private:
-    GameData* data;
-    std::shared_ptr<Renderer> renderer;
+    GameData* _data;
+    std::shared_ptr<Renderer> _renderer;
 
     GeometryBuffer rectGeom;
     DrawBuffer rect;

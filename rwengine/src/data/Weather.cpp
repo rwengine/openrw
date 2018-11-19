@@ -29,7 +29,7 @@ Weather::Entry interpolateWeather(const Weather::Entry& a,
     };
 #undef MIXPROP
 }
-}
+}  // namespace
 
 Weather::Entry Weather::interpolate(WeatherCondition prev,
                                     WeatherCondition next,

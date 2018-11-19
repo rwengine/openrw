@@ -11,11 +11,11 @@
 #include <algorithm>
 #include <cmath>
 
-Animator::Animator(const ClumpPtr& _model) : model(_model) {
+Animator::Animator(ClumpPtr model) : _model(std::move(model)) {
 }
 
 void Animator::tick(float dt) {
-    if (model == nullptr || animations.empty()) {
+    if (_model == nullptr || _animations.empty()) {
         return;
     }
 
@@ -24,12 +24,12 @@ void Animator::tick(float dt) {
         glm::quat rotation{1.0f,0.0f,0.0f,0.0f};
     };
 
-    for (AnimationState& state : animations) {
+    for (auto& state : _animations) {
         if (state.animation == nullptr) continue;
 
         if (state.boneInstances.empty()) {
             for (auto& [name, bone] : state.animation->bones) {
-                auto frame = model->findFrame(name);
+                auto frame = _model->findFrame(name);
                 if (!frame) {
                     continue;
                 }
@@ -47,7 +47,9 @@ void Animator::tick(float dt) {
         }
 
         for (auto& [bonePtr, frame] : state.boneInstances) {
-            if (bonePtr->frames.empty()) continue;
+            if (bonePtr->frames.empty()) {
+                continue;
+            }
             auto kf = bonePtr->getInterpolatedKeyframe(animTime);
 
             BoneTransform xform;
@@ -63,24 +65,24 @@ void Animator::tick(float dt) {
 }
 
 bool Animator::isCompleted(unsigned int slot) const {
-    if (slot < animations.size()) {
-        return animations[slot].animation
-                   ? animations[slot].time >=
-                         animations[slot].animation->duration
+    if (slot < _animations.size()) {
+        return _animations[slot].animation
+                   ? _animations[slot].time >=
+                         _animations[slot].animation->duration
                    : true;
     }
     return false;
 }
 
 float Animator::getAnimationTime(unsigned int slot) const {
-    if (slot < animations.size()) {
-        return animations[slot].time;
+    if (slot < _animations.size()) {
+        return _animations[slot].time;
     }
     return 0.f;
 }
 
 void Animator::setAnimationTime(unsigned int slot, float time) {
-    if (slot < animations.size()) {
-        animations[slot].time = time;
+    if (slot < _animations.size()) {
+        _animations[slot].time = time;
     }
 }

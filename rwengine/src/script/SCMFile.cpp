@@ -20,7 +20,7 @@ void SCMFile::loadFile(char *data, size_t size) {
     codeSectionOffset =
         read<uint32_t>(missionSectionOffset - jumpOpSize - 1u + jumpParamSize);
 
-    unsigned int model_count = read<uint32_t>(modelSectionOffset);
+    auto model_count = read<uint32_t>(modelSectionOffset);
     models.reserve(model_count);
 
     int i = modelSectionOffset + sizeof(uint32_t);
@@ -37,7 +37,7 @@ void SCMFile::loadFile(char *data, size_t size) {
     i += sizeof(uint32_t);
     missionLargestSize = read<uint32_t>(i);
     i += sizeof(uint32_t);
-    unsigned int missionCount = read<uint32_t>(i);
+    auto missionCount = read<uint32_t>(i);
     missionOffsets.reserve(missionCount);
     i += sizeof(uint32_t);
 

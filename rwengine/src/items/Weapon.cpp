@@ -16,7 +16,7 @@ void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     const auto& raydirection = owner->getLookDirection();
     const auto rayend = owner->getPosition() + raydirection * weapon->hitRange;
     auto fireOrigin = glm::vec3(handMatrix[3]);
-    float dmg = static_cast<float>(weapon->damage);
+    auto dmg = static_cast<float>(weapon->damage);
 
     owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon});
 }

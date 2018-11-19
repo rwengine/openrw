@@ -57,13 +57,12 @@ Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
             if (!doorObject) {
                 doorObject = inst;
                 continue;
-            } else {
-                secondDoorObject = inst;
             }
+            secondDoorObject = inst;
         }
     }
 
-    if (doorObject) {
+    if (doorObject != nullptr) {
         startPosition = doorObject->getPosition();
 
         // Setup door height based on model's bounding box
@@ -74,7 +73,7 @@ Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
             collision->boundingBox.max.z - collision->boundingBox.min.z - 0.1f;
     }
 
-    if (secondDoorObject) {
+    if (secondDoorObject != nullptr) {
         startPositionSecondDoor = secondDoorObject->getPosition();
     }
 
@@ -112,7 +111,7 @@ Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
         fraction = 1.f;
     }
 
-    if (doorObject) {
+    if (doorObject != nullptr) {
         updateDoor();
     }
 }
@@ -168,28 +167,38 @@ bool Garage::isObjectInsideGarage(GameObject* object) const {
     auto p = object->getPosition();
 
     // Do basic check first
-    if (p.x < min.x) return false;
-    if (p.y < min.y) return false;
-    if (p.z < min.z) return false;
-    if (p.x > max.x) return false;
-    if (p.y > max.y) return false;
-    if (p.z > max.z) return false;
+    if (p.x < min.x || p.y < min.y || p.z < min.z
+            || p.x > max.x || p.y > max.y ||p.z > max.z) {
+        return false;
+    }
 
     // Now check if all collision spheres are inside
     // garage's bounding box
     auto objectModel = object->getModelInfo<BaseModelInfo>();
     auto collision = objectModel->getCollision();
     // Peds don't have collisions currently?
-    if (collision) {
+    if (collision != nullptr) {
         for (auto& sphere : collision->spheres) {
             auto c = p + sphere.center;
             auto r = sphere.radius;
-            if (c.x + r < min.x) return false;
-            if (c.y + r < min.y) return false;
-            if (c.z + r < min.z) return false;
-            if (c.x - r > max.x) return false;
-            if (c.y - r > max.y) return false;
-            if (c.z - r > max.z) return false;
+            if (c.x + r < min.x) {
+                return false;
+            }
+            if (c.y + r < min.y) {
+                return false;
+            }
+            if (c.z + r < min.z) {
+                return false;
+            }
+            if (c.x - r > max.x) {
+                return false;
+            }
+            if (c.y - r > max.y) {
+                return false;
+            }
+            if (c.z - r > max.z) {
+                return false;
+            }
         }
     }
 
@@ -205,13 +214,9 @@ bool Garage::shouldClose() {
 
     switch (type) {
         case Type::Mission: {
-            if (!isObjectInsideGarage(static_cast<GameObject*>(plyChar)) &&
-                isObjectInsideGarage(target) && !playerIsInVehicle &&
-                getDistanceToGarage(playerPosition) >= 2.f) {
-                return true;
-            }
-
-            return false;
+            return !isObjectInsideGarage(static_cast<GameObject*>(plyChar)) &&
+                   isObjectInsideGarage(target) && !playerIsInVehicle &&
+                   getDistanceToGarage(playerPosition) >= 2.f;
         }
 
         case Type::BombShop1:
@@ -234,11 +239,11 @@ bool Garage::shouldClose() {
                         static_cast<GameObject*>(playerVehicle)) &&
                     playerVehicle->isStopped() && !resprayDone) {
                     return true;
-                } else if (!isObjectInsideGarage(
-                               static_cast<GameObject*>(playerVehicle)) &&
-                           getDistanceToGarage(playerVehicle->getPosition()) >=
-                               2.f &&
-                           resprayDone) {
+                }
+                if (!isObjectInsideGarage(
+                        static_cast<GameObject*>(playerVehicle)) &&
+                    getDistanceToGarage(playerVehicle->getPosition()) >= 2.f &&
+                    resprayDone) {
                     resprayDone = false;
                 }
             }
@@ -254,9 +259,8 @@ bool Garage::shouldClose() {
                     if (playerVehicle->getLifetime() !=
                         GameObject::MissionLifetime) {
                         return true;
-                    } else {
-                        // @todo show message "come back when youre not busy"
                     }
+                    // @todo show message "come back when you're not busy"
                 }
             }
 
@@ -282,14 +286,10 @@ bool Garage::shouldClose() {
         case Type::Hideout2:
         case Type::Hideout3: {
             // Not sure about these values
-            if ((!playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) >= 5.f) ||
-                (playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) >= 10.f)) {
-                return true;
-            }
-
-            return false;
+            return (!playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) >= 5.f) ||
+                   (playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) >= 10.f);
         }
 
         case Type::MissionToOpenAndClose: {
@@ -323,24 +323,16 @@ bool Garage::shouldOpen() {
     switch (type) {
         case Type::Mission: {
             // Not sure about these values
-            if (playerIsInVehicle &&
-                getDistanceToGarage(playerPosition) < 8.f &&
-                playerVehicle == target) {
-                return true;
-            }
-
-            return false;
+            return playerIsInVehicle &&
+                   getDistanceToGarage(playerPosition) < 8.f &&
+                   playerVehicle == target;
         }
 
         case Type::BombShop1:
         case Type::BombShop2:
         case Type::BombShop3:
         case Type::Respray: {
-            if (garageTimer < engine->getGameTime()) {
-                return true;
-            }
-
-            return false;
+            return garageTimer < engine->getGameTime();
         }
 
         case Type::CollectCars1:
@@ -368,14 +360,10 @@ bool Garage::shouldOpen() {
         case Type::Hideout2:
         case Type::Hideout3: {
             // Not sure about these values
-            if ((!playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) < 5.f) ||
-                (playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) < 10.f)) {
-                return true;
-            }
-
-            return false;
+            return (!playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) < 5.f) ||
+                   (playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) < 10.f);
         }
 
         case Type::MissionToOpenAndClose: {
@@ -436,14 +424,10 @@ bool Garage::shouldStopClosing() {
         case Type::Hideout2:
         case Type::Hideout3: {
             // Not sure about these values
-            if ((!playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) < 5.f) ||
-                (playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) < 10.f)) {
-                return true;
-            }
-
-            return false;
+            return (!playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) < 5.f) ||
+                   (playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) < 10.f);
         }
 
         case Type::MissionToOpenAndClose: {
@@ -504,14 +488,10 @@ bool Garage::shouldStopOpening() {
         case Type::Hideout2:
         case Type::Hideout3: {
             // Not sure about these values
-            if ((!playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) >= 5.f) ||
-                (playerIsInVehicle &&
-                 getDistanceToGarage(playerPosition) >= 10.f)) {
-                return true;
-            }
-
-            return false;
+            return (!playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) >= 5.f) ||
+                   (playerIsInVehicle &&
+                    getDistanceToGarage(playerPosition) >= 10.f);
         }
 
         case Type::MissionToOpenAndClose: {
@@ -799,7 +779,7 @@ void Garage::doOnStartClosingEvent() {
 }
 
 void Garage::tick(float dt) {
-    if (!doorObject) {
+    if (doorObject == nullptr) {
         return;
     }
     if (!active) {
@@ -876,7 +856,7 @@ void Garage::updateDoor() {
         doorObject->setRotation(glm::angleAxis(fraction * glm::radians(90.f),
                                                glm::vec3(0.f, 1.f, 0.f)));
 
-        if (secondDoorObject) {
+        if (secondDoorObject != nullptr) {
             secondDoorObject->setRotation(glm::angleAxis(
                 fraction * glm::radians(90.f), glm::vec3(0.f, 1.f, 0.f)));
         }
@@ -885,7 +865,7 @@ void Garage::updateDoor() {
     doorObject->setPosition(startPosition +
                             glm::vec3(0.f, 0.f, fraction * doorHeight));
 
-    if (secondDoorObject) {
+    if (secondDoorObject != nullptr) {
         secondDoorObject->setPosition(
             startPositionSecondDoor +
             glm::vec3(0.f, 0.f, fraction * doorHeight));

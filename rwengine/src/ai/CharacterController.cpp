@@ -47,8 +47,9 @@ void CharacterController::skipActivity() {
     // vehicle
     // or jumping.
     if (getCurrentActivity() != nullptr &&
-        getCurrentActivity()->canSkip(character, this))
+        getCurrentActivity()->canSkip(character, this)) {
         setActivity(nullptr);
+    }
 }
 
 void CharacterController::setNextActivity(std::unique_ptr<Activity> activity) {
@@ -61,7 +62,9 @@ void CharacterController::setNextActivity(std::unique_ptr<Activity> activity) {
 }
 
 bool CharacterController::isCurrentActivity(const std::string &activity) const {
-    if (getCurrentActivity() == nullptr) return false;
+    if (getCurrentActivity() == nullptr) {
+        return false;
+    }
     return getCurrentActivity()->name() == activity;
 }
 
@@ -182,7 +185,9 @@ void CharacterController::steerTo(const glm::vec3 &target) {
     float deviation = glm::abs(vehicle->isOnSide(target)) / 5.f;
 
     // If we are almost at the right angle, decrease the deviation to reduce wiggling
-    if (deviation < 1.f) deviation = deviation / 5.f;
+    if (deviation < 1.f) {
+        deviation = deviation / 5.f;
+    }
 
     // Make sure to normalize the value
     deviation = glm::clamp(deviation, 0.f, 1.f);
@@ -209,8 +214,8 @@ bool CharacterController::checkForObstacles()
     for (const auto &obj : character->engine->pedestrianPool.objects) {
         // Verify that the character isn't the driver and is walking
         if (obj.second.get() != character &&
-            static_cast<CharacterObject *>(obj.second.get())->getCurrentVehicle() ==
-                nullptr) {
+            static_cast<CharacterObject *>(obj.second.get())
+                    ->getCurrentVehicle() == nullptr) {
             // Only check characters that are near our vehicle
             if (glm::distance(vehicle->getPosition(),
                               obj.second->getPosition()) <= minColDist) {
@@ -256,17 +261,17 @@ bool CharacterController::checkForObstacles()
                                     ->getDriver()
                                     ->isPlayer()) {
                                 return true;
-                            } else {
-                                int avoidLane =
-                                    static_cast<VehicleObject *>(obj.second.get())
-                                        ->getDriver()
-                                        ->controller->getLane();
+                            }
+                            int avoidLane =
+                                static_cast<VehicleObject *>(obj.second.get())
+                                    ->getDriver()
+                                    ->controller->getLane();
 
-                                // @todo for now just two lanes
-                                if (avoidLane == 1)
-                                    character->controller->setLane(2);
-                                else
-                                    character->controller->setLane(1);
+                            // @todo for now just two lanes
+                            if (avoidLane == 1) {
+                                character->controller->setLane(2);
+                            } else {
+                                character->controller->setLane(1);
                             }
                         }
                     } else {
@@ -384,7 +389,7 @@ bool Activities::DriveTo::update(CharacterObject *character,
     }
 
     // Check whether a pedestrian or vehicle is in our way
-    if (controller->checkForObstacles() == true) {
+    if (controller->checkForObstacles()) {
         currentSpeed = 0.f;
     }
 
@@ -415,7 +420,9 @@ bool Activities::DriveTo::update(CharacterObject *character,
 bool Activities::Jump::update(CharacterObject *character,
                               CharacterController *controller) {
     RW_UNUSED(controller);
-    if (character->physCharacter == nullptr) return true;
+    if (character->physCharacter == nullptr) {
+        return true;
+    }
 
     if (!jumped) {
         character->jump();
@@ -428,7 +435,7 @@ bool Activities::Jump::update(CharacterObject *character,
 }
 
 bool Activities::EnterVehicle::canSkip(CharacterObject *character,
-                                       CharacterController *) const {
+                                       CharacterController * /*unused*/) const {
     // If we're already inside the vehicle, it can't helped.
     return character->getCurrentVehicle() == nullptr;
 }
@@ -574,7 +581,9 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
                 return true;
             }
         } else {
-            if (character->getCurrentVehicle() == nullptr) return true;
+            if (!character->getCurrentVehicle()) {
+                return true;
+            }
 
             auto vehicle = character->getCurrentVehicle();
             auto seat = character->getCurrentSeat();
@@ -599,7 +608,9 @@ bool Activities::ExitVehicle::update(CharacterObject *character,
         return false;
     }
 
-    if (character->getCurrentVehicle() == nullptr) return true;
+    if (character->getCurrentVehicle() == nullptr) {
+        return true;
+    }
 
     auto vehicle = character->getCurrentVehicle();
     auto seat = character->getCurrentSeat();
@@ -668,7 +679,9 @@ bool Activities::UseItem::update(CharacterObject *character,
             return AnimCycle::Idle;
         }
         for (auto &i : character->animations->animations_) {
-            if (i.name == name) return i.id;
+            if (i.name == name) {
+                return i.id;
+            }
         }
         return AnimCycle::Idle;
     };

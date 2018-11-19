@@ -24,7 +24,7 @@ public:
     // Load the IDE data into memory
     bool load(const std::string& filename, const PedStatsList& stats);
 
-    bool load(std::istream& data, const PedStatsList& stats);
+    bool load(std::istream& stream, const PedStatsList& stats);
 
     /**
      * @brief objects loaded during the call to load()

@@ -372,11 +372,11 @@ AnimGroup AnimGroup::getBuiltInAnimGroup(AnimationSet &animations,
                          [&](const AnimGroup &g) { return g.name_ == name; });
         if (it != kBuiltInAnimGroups.end()) {
             return *it;
-        } else {
-            RW_MESSAGE("No such animation group: " + name +
-                       ". Returning first animation group");
-            return kBuiltInAnimGroups[0];
-        }
+        } 
+        RW_MESSAGE("No such animation group: " + name +
+                   ". Returning first animation group");
+        return kBuiltInAnimGroups[0];
+        
     };
 
     auto group = AnimGroup(findgroup());

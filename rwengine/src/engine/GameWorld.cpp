@@ -13,8 +13,8 @@
 
 #include <data/Clump.hpp>
 
-#include "core/Profiler.hpp"
 #include "core/Logger.hpp"
+#include "core/Profiler.hpp"
 
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
@@ -63,7 +63,8 @@ bool shouldEffectBeRemoved(const T& effect, float gameTime) {
 
 class WorldCollisionDispatcher : public btCollisionDispatcher {
 public:
-    WorldCollisionDispatcher(btCollisionConfiguration* collisionConfiguration)
+    explicit WorldCollisionDispatcher(
+        btCollisionConfiguration* collisionConfiguration)
         : btCollisionDispatcher(collisionConfiguration) {
     }
 
@@ -442,7 +443,9 @@ void GameWorld::ObjectPool::insert(std::unique_ptr<GameObject> object) {
         // Find the lowest free GameObjectID.
         GameObjectID availID = 1;
         for (auto& [id, objectPtr] : objects) {
-            if (id == availID) availID++;
+            if (id == availID) {
+                availID++;
+            }
         }
 
         object->setGameObjectID(availID);
@@ -522,7 +525,9 @@ void GameWorld::destroyObject(GameObject* object) {
 
 void GameWorld::destroyObjectQueued(GameObject* object) {
     RW_CHECK(object != nullptr, "destroying a null object?");
-    if (object) deletionQueue.insert(object);
+    if (object) {
+        deletionQueue.insert(object);
+    }
 }
 
 void GameWorld::destroyQueuedObjects() {
@@ -645,8 +650,12 @@ float GameWorld::getGameTime() const {
 namespace {
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
     bool isVehicle = object->type() == GameObject::Vehicle;
-    if (!isVehicle) return;
-    if (mp.getAppliedImpulse() <= 100.f) return;
+    if (!isVehicle) {
+        return;
+    }
+    if (mp.getAppliedImpulse() <= 100.f) {
+        return;
+    }
 
     btVector3 src, dmg;
     if (isA) {
@@ -717,8 +726,12 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
     }
 
     // Handle vehicles
-    if (a) handleVehicleResponse(a, mp, true);
-    if (b) handleVehicleResponse(b, mp, false);
+    if (a) {
+        handleVehicleResponse(a, mp, true);
+    }
+    if (b) {
+        handleVehicleResponse(b, mp, false);
+    }
 
     return true;
 }
@@ -1001,7 +1014,7 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
         // Check if we have any important objects in a vehicle, if we do - don't
         // erase it
         for (auto& seat :
-             static_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
+            static_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
             auto character = static_cast<CharacterObject*>(seat.second);
 
             if (character->getLifetime() == GameObject::PlayerLifetime ||

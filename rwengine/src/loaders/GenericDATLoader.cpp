@@ -21,8 +21,12 @@ void GenericDATLoader::loadDynamicObjects(
         std::string lineBuff;
 
         while (std::getline(dfile, lineBuff)) {
-            if (lineBuff.at(0) == ';') continue;
-            if (lineBuff.at(0) == '*') continue;
+            if (lineBuff.at(0) == ';') {
+                continue;
+            }
+            if (lineBuff.at(0) == '*') {
+                continue;
+            }
             std::stringstream ss(lineBuff);
 
             DynamicObjectData dyndata{};
@@ -34,26 +38,44 @@ void GenericDATLoader::loadDynamicObjects(
                 modelName.erase(cpos);
             }
             ss >> dyndata.mass;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.turnMass;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.airRes;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.elasticity;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.buoyancy;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.uprootForce;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.collDamageMulti;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             int tmp;
             ss >> tmp;
             dyndata.collDamageEffect = tmp;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> tmp;
             dyndata.collResponseFlags = tmp;
-            if (ss.peek() == ',') ss.ignore(1);
+            if (ss.peek() == ',') {
+                ss.ignore(1);
+            }
             ss >> dyndata.cameraAvoid;
 
             RW_CHECK(ss.eof() || ss.good(), "Loading dynamicsObject data file " << name << " failed");
@@ -72,12 +94,16 @@ void GenericDATLoader::loadWeapons(const std::string& name,
         int slotNum = 0;
 
         while (std::getline(dfile, linebuffer)) {
-            if (linebuffer[0] == '#') continue;
+            if (linebuffer[0] == '#') {
+                continue;
+            }
             std::stringstream ss(linebuffer);
 
             WeaponData data{};
             ss >> data.name;
-            if (data.name == "ENDWEAPONDATA") continue;
+            if (data.name == "ENDWEAPONDATA") {
+                continue;
+            }
 
             // Skip lines with blank names (probably an empty line).
             if (std::find_if(data.name.begin(), data.name.end(), ::isalnum) ==

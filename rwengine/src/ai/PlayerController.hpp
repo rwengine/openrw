@@ -49,7 +49,7 @@ public:
 
     void updateCameraDirection(const glm::quat& rot);
 
-    void updateMovementDirection(const glm::vec3& pos,
+    void updateMovementDirection(const glm::vec3& dir,
                                  const glm::vec3& rawdirection);
 
     void exitVehicle();

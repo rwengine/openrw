@@ -5,8 +5,8 @@ class CharacterObject;
 struct WeaponData;
 
 namespace Weapon {
-void fireProjectile(WeaponData* weapon, CharacterObject* character, float force);
-void fireHitscan(WeaponData *weapon, CharacterObject* character);
+void fireProjectile(WeaponData* weapon, CharacterObject* owner, float force);
+void fireHitscan(WeaponData* weapon, CharacterObject* owner);
 }
 
 #endif

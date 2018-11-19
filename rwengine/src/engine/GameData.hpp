@@ -58,7 +58,7 @@ public:
      * ctor
      * @param path Path to the root of the game data.
      */
-    GameData(Logger* log, const rwfs::path& path);
+    GameData(Logger* log, rwfs::path path);
     ~GameData() = default;
 
     GameWorld* engine = nullptr;

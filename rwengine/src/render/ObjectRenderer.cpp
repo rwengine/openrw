@@ -63,7 +63,7 @@ void ObjectRenderer::renderGeometry(Geometry* geom,
         if (object && object->type() == GameObject::Instance) {
             auto modelinfo = object->getModelInfo<SimpleModelInfo>();
             dp.depthWrite =
-                !(modelinfo->flags & SimpleModelInfo::NO_ZBUFFER_WRITE);
+                ((modelinfo->flags & SimpleModelInfo::NO_ZBUFFER_WRITE) == 0);
         }
 
         if (geom->materials.size() > subgeom.material) {
@@ -168,12 +168,14 @@ void ObjectRenderer::renderInstance(InstanceObject* instance,
     const auto currentHour = m_world->getHour();
     if (modelinfo->timeOff < modelinfo->timeOn) {
         if (currentHour >= modelinfo->timeOff &&
-            currentHour < modelinfo->timeOn)
+            currentHour < modelinfo->timeOn) {
             return;
+        }
     } else {
         if (currentHour >= modelinfo->timeOff ||
-            currentHour < modelinfo->timeOn)
+            currentHour < modelinfo->timeOn) {
             return;
+        }
     }
 
     float mindist = glm::length(instance->getPosition() - m_camera.position) /
@@ -312,7 +314,9 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 }
 
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
-    if (!pickup->isEnabled()) return;
+    if (!pickup->isEnabled()) {
+        return;
+    }
 
     glm::mat4 modelMatrix =
         glm::translate(glm::mat4(1.0f), pickup->getPosition());
@@ -330,7 +334,9 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
                                           RenderList& outList) {
-    if (!m_world->state->currentCutscene) return;
+    if (!m_world->state->currentCutscene) {
+        return;
+    }
     const auto& clump = cutscene->getClump();
 
     auto cutsceneOffset = m_world->state->currentCutscene->meta.sceneOffset +

@@ -34,7 +34,7 @@ bool LoaderCOL::load(const std::string& path) {
     file.read(d, length);
 
     while (d < buffer.data() + length) {
-        ColHeader head;
+        ColHeader head{};
         std::memcpy(&head, d, sizeof(head));
         d += sizeof(head);
 

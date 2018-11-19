@@ -31,7 +31,7 @@ class TextureData;
  */
 class GameRenderer {
     /** Game data to use for rendering */
-    GameData* data;
+    GameData* _data;
 
     /** Logger to output messages */
     Logger* logger;
@@ -44,7 +44,7 @@ class GameRenderer {
     GameWorld* _renderWorld = nullptr;
 
     /** Internal non-descript VAOs */
-    GLuint vao;
+    GLuint vao = 0u;
 
     /** Camera values passed to renderWorld() */
     ViewCamera _camera;
@@ -52,11 +52,11 @@ class GameRenderer {
     bool cullOverride = false;
 
     /** Number of culling events */
-    size_t culled;
+    size_t culled = 0u;
 
-    GLuint framebufferName;
-    GLuint fbTextures[2];
-    GLuint fbRenderBuffers[1];
+    GLuint framebufferName = 0u;
+    GLuint fbTextures[2] = {0u, 0u};
+    GLuint fbRenderBuffers[1] = {0u};
     std::unique_ptr<Renderer::ShaderProgram> postProg;
 
     GeometryBuffer particleGeom;
@@ -75,13 +75,13 @@ public:
 
     std::unique_ptr<Renderer::ShaderProgram> ssRectProg;
 
-    GLuint skydomeIBO;
+    GLuint skydomeIBO = 0u;
 
     DrawBuffer skyDbuff;
     GeometryBuffer skyGbuff;
 
     GameData* getData() const {
-        return data;
+        return _data;
     }
 
     size_t getCulledCount() {
@@ -111,7 +111,7 @@ public:
     void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
     /** Render full screen splash / fade */
-    void renderSplash(GameWorld* world, GLuint tex, glm::u16vec3 fc);
+    void renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc);
 
     /** Increases cinematic value */
     void renderLetterbox();

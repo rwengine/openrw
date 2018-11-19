@@ -34,9 +34,8 @@ public:
         uint8_t unknown[4];
     };
 
-    Entry interpolate(WeatherCondition lastWeather,
-                      WeatherCondition nextWeather,
-                      float a, float tod);
+    Entry interpolate(WeatherCondition prev, WeatherCondition next, float a,
+                      float tod);
 
     std::vector<Entry> entries;
 };

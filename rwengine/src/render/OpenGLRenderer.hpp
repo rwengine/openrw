@@ -424,7 +424,7 @@ private:
 
     // Debug group profiling timers
     ProfileInfo profileInfo[MAX_DEBUG_DEPTH];
-    GLuint debugQuery;
+    GLuint debugQuery = 0u;
 #ifdef RW_GRAPHICS_STATS
     int currentDebugDepth = 0;
 #endif

@@ -28,8 +28,8 @@ struct SoundBuffer {
     void setGain(float gain);
     void setMaxDistance(float maxDist);
 
-    ALuint source;
-    ALuint buffer;
+    ALuint source = 0;
+    ALuint buffer = 0;
 };
 
 #endif

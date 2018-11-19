@@ -9,6 +9,7 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
+#include <utility>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -21,19 +22,19 @@
 #include "core/Profiler.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
+#include "loaders/GenericDATLoader.hpp"
 #include "loaders/LoaderCOL.hpp"
+#include "loaders/LoaderGXT.hpp"
 #include "loaders/LoaderIDE.hpp"
 #include "loaders/LoaderIFP.hpp"
 #include "loaders/LoaderIPL.hpp"
 #include "loaders/WeatherLoader.hpp"
 #include "platform/FileHandle.hpp"
-#include "script/SCMFile.hpp"
-#include "loaders/GenericDATLoader.hpp"
-#include "loaders/LoaderGXT.hpp"
 #include "platform/FileIndex.hpp"
+#include "script/SCMFile.hpp"
 
-GameData::GameData(Logger* log, const rwfs::path& path)
-    : datpath(path), logger(log) {
+GameData::GameData(Logger* log, rwfs::path path)
+    : datpath(std::move(path)), logger(log) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
             return findSlotTexture(currenttextureslot, texture);
@@ -93,13 +94,15 @@ void GameData::loadLevelFile(const std::string& path) {
     currenttextureslot = "generic";
 
     for (std::string line, cmd; std::getline(datfile, line);) {
-        if (line.empty() || line[0] == '#') continue;
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
 #ifndef RW_WINDOWS
         line.erase(line.size() - 1);
 #endif
 
         size_t space = line.find_first_of(' ');
-        if (space != line.npos) {
+        if (space != std::string::npos) {
             cmd = line.substr(0, space);
             if (cmd == "IDE") {
                 auto path = line.substr(space + 1);
@@ -152,7 +155,9 @@ uint16_t GameData::findModelObject(const std::string model) {
                               [&](const decltype(modelinfo)::value_type& d) {
                                   return boost::iequals(d.second->name, model);
                               });
-    if (defit != modelinfo.end()) return defit->first;
+    if (defit != modelinfo.end()) {
+        return defit->first;
+    }
     return -1;
 }
 
@@ -238,7 +243,8 @@ void GameData::loadCarcols(const std::string& path) {
     while (std::getline(fstream, line)) {
         if (line.substr(0, 1) == "#") {  // Comment
             continue;
-        } else if (currentSection == Unknown) {
+        }
+        if (currentSection == Unknown) {
             if (line.substr(0, 3) == "col") {
                 currentSection = COL;
             } else if (line.substr(0, 3) == "car") {
@@ -413,8 +419,9 @@ ClumpPtr GameData::loadClump(const std::string& name) {
 
 ClumpPtr GameData::loadClump(const std::string& name, const std::string& textureSlot) {
     std::string currentSlot = currenttextureslot;
-    if (!textureSlot.empty())
+    if (!textureSlot.empty()) {
         currenttextureslot = textureSlot;
+    }
     ClumpPtr result = loadClump(name);
     currenttextureslot = currentSlot;
     return result;
@@ -468,7 +475,7 @@ bool GameData::loadModel(ModelID model) {
             break;
         case ModelDataType::PedInfo: {
             static const std::string specialPrefix("special");
-            if (!name.compare(0, specialPrefix.size(), specialPrefix)) {
+            if (name.compare(0, specialPrefix.size(), specialPrefix) == 0) {
                 auto sid = name.substr(specialPrefix.size());
                 unsigned short specialID = lexical_cast<int>(sid);
                 name = engine->state->specialCharacters[specialID];

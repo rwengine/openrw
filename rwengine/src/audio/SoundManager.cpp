@@ -18,9 +18,9 @@ Sound& SoundManager::getSoundRef(size_t name) {
     auto ref = buffers.find(name);
     if (ref != buffers.end()) {
         return ref->second;
-    } else {
-        createSfxInstance(name);
     }
+    createSfxInstance(name);
+
     return buffers[name];
 }
 
@@ -91,15 +91,15 @@ void SoundManager::deinitializeOpenAL() {
 
     // De-initialize OpenAL
     if (alContext) {
-         alcMakeContextCurrent(nullptr);
-         alcDestroyContext(alContext);
-     }
-     alContext = nullptr;
+        alcMakeContextCurrent(nullptr);
+        alcDestroyContext(alContext);
+    }
+    alContext = nullptr;
 
-     if (alDevice) {
-         alcCloseDevice(alDevice);
-     }
-     alDevice = nullptr;
+    if (alDevice) {
+        alcCloseDevice(alDevice);
+    }
+    alDevice = nullptr;
 }
 
 bool SoundManager::loadSound(const std::string& name,

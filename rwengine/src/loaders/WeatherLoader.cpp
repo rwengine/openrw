@@ -10,17 +10,20 @@ glm::vec3 readRGB(std::stringstream &ss)  {
     ss >> r >> g >> b;
     return {r/255.f, g/255.f, b/255.f};
 }
-}
+}  // namespace
 
 bool WeatherLoader::load(const std::string& filename, Weather& outWeather) {
     std::ifstream fstream(filename.c_str());
 
-    if (!fstream.is_open()) return false;
+    if (!fstream.is_open()) {
+        return false;
+    }
 
     std::string line;
     while (std::getline(fstream, line)) {
-        if (line[0] == '/')  // Comment line
+        if (line[0] == '/') {  // Comment line
             continue;
+        }
 
         Weather::Entry weather;
         std::stringstream ss(line);

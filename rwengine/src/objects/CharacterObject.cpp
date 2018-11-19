@@ -230,8 +230,9 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         animator->setAnimationSpeed(AnimIndexMovement, animationSpeed);
     }
 
-    if (jumped && !isOnGround() && jumpAnimation != nullptr)
+    if (jumped && !isOnGround() && jumpAnimation != nullptr) {
         movementAnimation = jumpAnimation;
+    }
 
     // If we have to, interrogate the movement animation
     const auto& modelroot = getClump()->getFrame();
@@ -473,23 +474,22 @@ bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat) {
         // Check that the seat is free
         if (vehicle->getOccupant(seat)) {
             return false;
-        } else {
-            // Make sure we leave any vehicle we're inside
-            enterVehicle(nullptr, 0);
-            vehicle->setOccupant(seat, this);
-            setCurrentVehicle(vehicle, seat);
-            // enterAction(VehicleSit);
-            return true;
         }
-    } else {
-        if (currentVehicle) {
-            currentVehicle->setOccupant(seat, nullptr);
-            // Disabled due to crashing.
-            // setPosition(currentVehicle->getPosition());
-            setCurrentVehicle(nullptr, 0);
-            return true;
-        }
+        // Make sure we leave any vehicle we're inside
+        enterVehicle(nullptr, 0);
+        vehicle->setOccupant(seat, this);
+        setCurrentVehicle(vehicle, seat);
+        // enterAction(VehicleSit);
+        return true;
     }
+    if (currentVehicle) {
+        currentVehicle->setOccupant(seat, nullptr);
+        // Disabled due to crashing.
+        // setPosition(currentVehicle->getPosition());
+        setCurrentVehicle(nullptr, 0);
+        return true;
+    }
+
     return false;
 }
 
@@ -527,9 +527,9 @@ void CharacterObject::setCurrentVehicle(VehicleObject* value, size_t seat) {
     }
 }
 
-bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
+bool CharacterObject::takeDamage(const GameObject::DamageInfo& damage) {
     // Right now there's no state that determines immunity to any kind of damage
-    float dmgPoints = dmg.hitpoints;
+    float dmgPoints = damage.hitpoints;
 
     if (getCurrentVehicle()) {
         return false;
@@ -538,7 +538,7 @@ bool CharacterObject::takeDamage(const GameObject::DamageInfo& dmg) {
     if (currentState.armour > 0.f) {
         dmgPoints -= currentState.armour;
         currentState.armour =
-            std::max(0.f, currentState.armour - dmg.hitpoints);
+            std::max(0.f, currentState.armour - damage.hitpoints);
     }
     if (dmgPoints > 0.f) {
         currentState.health = std::max(0.f, currentState.health - dmgPoints);
@@ -560,8 +560,9 @@ void CharacterObject::jump() {
         jumpAnimation = animator->getAnimation(AnimIndexMovement);
 
         // There is no kinetic energy left after a jump
-        if (jumpAnimation == animations->animation(AnimCycle::JumpLand))
+        if (jumpAnimation == animations->animation(AnimCycle::JumpLand)) {
             jumpAnimation = nullptr;
+        }
 
         animator->playAnimation(AnimIndexMovement,
                                 animations->animation(AnimCycle::JumpLaunch),
@@ -591,14 +592,18 @@ void CharacterObject::setJumpSpeed(float speed) {
 
 void CharacterObject::resetToAINode() {
     auto& nodes = engine->aigraph.nodes;
-    bool vehicleNode = !!getCurrentVehicle();
+    bool vehicleNode = !(getCurrentVehicle() == nullptr);
     AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
     for (const auto& node : nodes) {
         if (vehicleNode) {
-            if (node->type == AIGraphNode::Pedestrian) continue;
+            if (node->type == AIGraphNode::Pedestrian) {
+                continue;
+            }
         } else {
-            if (node->type == AIGraphNode::Vehicle) continue;
+            if (node->type == AIGraphNode::Vehicle) {
+                continue;
+            }
         }
 
         float dist = glm::length(node->position - getPosition());
@@ -636,7 +641,7 @@ void CharacterObject::playCycle(AnimCycle cycle) {
 
     cycle_ = cycle;
     animator->playAnimation(AnimIndexAction, animation, 1.f,
-                            flags & AnimCycleInfo::Repeat);
+                            (flags & AnimCycleInfo::Repeat) != 0u);
 }
 
 void CharacterObject::playCycleAnimOverride(AnimCycle cycle,
@@ -645,7 +650,7 @@ void CharacterObject::playCycleAnimOverride(AnimCycle cycle,
 
     cycle_ = cycle;
     animator->playAnimation(AnimIndexAction, anim, 1.f,
-                            flags & AnimCycleInfo::Repeat);
+                            (flags & AnimCycleInfo::Repeat) != 0u);
 }
 
 void CharacterObject::addToInventory(int slot, int ammo) {

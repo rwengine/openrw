@@ -12,7 +12,7 @@
 class LoaderCOL {
 public:
     /// Load the COL data into memory
-    bool load(const std::string& file);
+    bool load(const std::string& path);
 
     std::vector<std::unique_ptr<CollisionModel>> collisions;
 };

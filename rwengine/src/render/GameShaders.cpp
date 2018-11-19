@@ -324,4 +324,4 @@ void main()
 	vec4 c = texture(colour, TexCoords);
 	outColour = c;
 })";
-}
+}  // namespace GameShaders

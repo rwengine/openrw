@@ -11,10 +11,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "LoaderIPL.hpp"
 #include "data/InstanceData.hpp"
 #include "data/ZoneData.hpp"
-#include "LoaderIPL.hpp"
-
 
 #include <rw/casts.hpp>
 
@@ -22,15 +21,17 @@ enum SectionTypes { INST, PICK, CULL, ZONE, NONE };
 
 bool LoaderIPL::load(const std::string& filename) {
     std::ifstream str(filename);
-    if (!str.is_open()) return false;
+    if (!str.is_open()) {
+        return false;
+    }
     return load(str);
 }
 
-bool LoaderIPL::load(std::istream &str) {
+bool LoaderIPL::load(std::istream &stream) {
     SectionTypes section = NONE;
-    while (!str.eof()) {
+    while (!stream.eof()) {
         std::string line;
-        getline(str, line);
+        getline(stream, line);
         line.erase(std::find_if(line.rbegin(), line.rend(),
                                 [](auto c) { return !std::isspace(c); })
                        .base(),

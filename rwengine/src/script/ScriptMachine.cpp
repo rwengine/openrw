@@ -13,7 +13,7 @@
 #include "script/ScriptModule.hpp"
 
 void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
-    auto player = state->world->getPlayer();
+    auto player = _state->world->getPlayer();
 
     if (player) {
         if (t.isMission && t.deathOrArrestCheck &&
@@ -33,18 +33,20 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
     if (t.wakeCounter > 0) {
         t.wakeCounter = std::max(t.wakeCounter - msPassed, 0);
     }
-    if (t.wakeCounter > 0) return;
+    if (t.wakeCounter > 0) {
+        return;
+    }
 
     while (t.wakeCounter == 0) {
         auto pc = t.programCounter;
-        auto opcode = file.read<SCMOpcode>(pc);
+        auto opcode = _file.read<SCMOpcode>(pc);
 
         bool isNegatedConditional = ((opcode & SCM_NEGATE_CONDITIONAL_MASK) ==
                                      SCM_NEGATE_CONDITIONAL_MASK);
         opcode = opcode & ~SCM_NEGATE_CONDITIONAL_MASK;
 
         ScriptFunctionMeta* foundcode;
-        if (!module->findOpcode(opcode, &foundcode)) {
+        if (!_module->findOpcode(opcode, &foundcode)) {
             throw IllegalInstruction(opcode, pc, t.name);
         }
         ScriptFunctionMeta& code = *foundcode;
@@ -57,7 +59,7 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
         auto requiredParams = std::abs(code.arguments);
 
         for (int p = 0; p < requiredParams || hasExtraParameters; ++p) {
-            auto type_r = file.read<SCMByte>(pc);
+            auto type_r = _file.read<SCMByte>(pc);
             auto type = static_cast<SCMType>(type_r);
 
             if (type_r > 42) {
@@ -73,47 +75,47 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
                     hasExtraParameters = false;
                     break;
                 case TInt8:
-                    parameters.back().integer = file.read<std::int8_t>(pc);
+                    parameters.back().integer = _file.read<std::int8_t>(pc);
                     pc += sizeof(SCMByte);
                     break;
                 case TInt16:
-                    parameters.back().integer = file.read<std::int16_t>(pc);
+                    parameters.back().integer = _file.read<std::int16_t>(pc);
                     pc += sizeof(SCMByte) * 2;
                     break;
                 case TGlobal: {
-                    auto v = file.read<std::uint16_t>(pc);
+                    auto v = _file.read<std::uint16_t>(pc);
                     parameters.back().globalPtr =
-                        globalData.data() + v;  //* SCM_VARIABLE_SIZE;
-                    if (v >= file.getGlobalsSize()) {
-                        state->world->logger->error(
+                        _globalData.data() + v;  //* SCM_VARIABLE_SIZE;
+                    if (v >= _file.getGlobalsSize()) {
+                        _state->world->logger->error(
                             "SCM", "Global Out of bounds! " +
                                        std::to_string(v) + " " +
-                                       std::to_string(file.getGlobalsSize()));
+                                       std::to_string(_file.getGlobalsSize()));
                     }
                     pc += sizeof(SCMByte) * 2;
                 } break;
                 case TLocal: {
-                    auto v = file.read<std::uint16_t>(pc);
+                    auto v = _file.read<std::uint16_t>(pc);
                     parameters.back().globalPtr =
                         t.locals.data() + v * SCM_VARIABLE_SIZE;
                     if (v >= SCM_THREAD_LOCAL_SIZE) {
-                        state->world->logger->error("SCM",
+                        _state->world->logger->error("SCM",
                                                     "Local Out of bounds!");
                     }
                     pc += sizeof(SCMByte) * 2;
                 } break;
                 case TInt32:
-                    parameters.back().integer = file.read<std::int32_t>(pc);
+                    parameters.back().integer = _file.read<std::int32_t>(pc);
                     pc += sizeof(SCMByte) * 4;
                     break;
                 case TString:
-                    std::copy(file.data() + pc, file.data() + pc + 8,
+                    std::copy(_file.data() + pc, _file.data() + pc + 8,
                               parameters.back().string);
                     pc += sizeof(SCMByte) * 8;
                     break;
                 case TFloat16:
                     parameters.back().real =
-                        file.read<std::int16_t>(pc) / 16.f;
+                        _file.read<std::int16_t>(pc) / 16.f;
                     pc += sizeof(SCMByte) * 2;
                     break;
                 default:
@@ -161,21 +163,21 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
         {
             --t.conditionCount;
             if (t.conditionAND) {
-                if (t.conditionResult == false) {
+                if (!t.conditionResult) {
                     t.conditionMask = 0;
                 } else {
                     // t.conditionMask is already set to 0xFF by the if and
                     // opcode.
                 }
             } else {
-                t.conditionMask = t.conditionMask || t.conditionResult;
+                t.conditionMask = t.conditionMask | (t.conditionResult ? 0xff : 0);
             }
 
             t.conditionResult = (t.conditionMask != 0);
         }
     }
 
-    SCMOpcodeParameter p;
+    SCMOpcodeParameter p{};
     p.globalPtr = (t.locals.data() + 16 * sizeof(SCMByte) * 4);
     *p.globalInteger += msPassed;
     p.globalPtr = (t.locals.data() + 17 * sizeof(SCMByte) * 4);
@@ -186,22 +188,22 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
     }
 }
 
-ScriptMachine::ScriptMachine(GameState* _state, SCMFile& file,
+ScriptMachine::ScriptMachine(GameState* state, SCMFile& file,
                              ScriptModule* ops)
-    : file(file)
-    , module(ops)
-    , state(_state)
-    , debugFlag(false) {
+    : _file(file)
+    , _module(ops)
+    , _state(state)
+    , _debugFlag(false) {
     // Copy globals
     auto size = file.getGlobalsSize();
-    globalData.resize(size);
+    _globalData.resize(size);
     auto offset = file.getGlobalSection();
     std::copy(file.data() + offset, file.data() + offset + size,
-              globalData.begin());
+              _globalData.begin());
 }
 
 void ScriptMachine::startThread(SCMThread::pc_t start, bool mission) {
-    SCMThread t;
+    SCMThread t{};
     for (int i = 0; i < SCM_THREAD_LOCAL_SIZE * SCM_VARIABLE_SIZE; ++i) {
         t.locals[i] = 0;
     }
@@ -222,12 +224,12 @@ void ScriptMachine::startThread(SCMThread::pc_t start, bool mission) {
 }
 
 SCMByte* ScriptMachine::getGlobals() {
-    return globalData.data();
+    return _globalData.data();
 }
 
 void ScriptMachine::execute(float dt) {
     RW_PROFILE_SCOPEC(__func__, MP_ORANGERED);
-    int ms = static_cast<int>(dt * 1000.f);
+    auto ms = static_cast<int>(dt * 1000.f);
     for (auto t = _activeThreads.begin(); t != _activeThreads.end(); ++t) {
         auto& thread = *t;
         executeThread(thread, ms);

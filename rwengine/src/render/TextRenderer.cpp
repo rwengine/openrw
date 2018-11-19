@@ -20,10 +20,11 @@ unsigned charToIndex(std::uint16_t g) {
     return g - 32;
 }
 
-static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
+glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2& textureSize,
+                          const glm::u8vec2& glyphOffset) {
     constexpr unsigned TEXTURE_COLUMNS = 16;
-    const float x = static_cast<float>(index % TEXTURE_COLUMNS);
-    const float y = static_cast<float>(index / TEXTURE_COLUMNS);
+    const auto x = static_cast<float>(index % TEXTURE_COLUMNS);
+    const auto y = static_cast<float>(index / TEXTURE_COLUMNS);
     // Add offset to avoid 'leakage' between adjacent glyphs
     float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
     float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
@@ -118,7 +119,7 @@ constexpr std::array<std::uint8_t, 193> fontWidthsArial = {{
     19,
 }};
 
-}
+}  // namespace
 
 struct TextVertex {
     glm::vec2 position;
@@ -184,8 +185,9 @@ void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
 
 void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
                               bool forceColour) {
-    if (ti.text.empty() || ti.text[0] == '*')
+    if (ti.text.empty() || ti.text[0] == '*') {
         return;
+    }
 
     renderer->getRenderer()->pushDebugGroup("Text");
     renderer->getRenderer()->useProgram(textShader.get());

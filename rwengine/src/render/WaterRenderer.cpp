@@ -67,10 +67,14 @@ void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int 
     for (auto x = 0u; x < edgeNum; x++) {
         int xi = x * WATER_HQ_DATA_SIZE;
         for (auto y = 0u; y < edgeNum; y++) {
-            if (tiles[xi + y] >= nHeights) continue;
+            if (tiles[xi + y] >= nHeights) {
+                continue;
+            }
 
             // Tiles with the magic value contain no water.
-            if (tiles[xi + y] >= NO_WATER_INDEX) continue;
+            if (tiles[xi + y] >= NO_WATER_INDEX) {
+                continue;
+            }
             float h = waterHeights[tiles[xi + y]];
             float hMax = h + WATER_HEIGHT;
             glm::vec2 tMin(wO + glm::vec2(x, y) * tileSize);
@@ -94,9 +98,9 @@ void WaterRenderer::setWaterTable(const float* waterHeights, const unsigned int 
     maskDraw.addGeometry(&maskGeom);
 }
 
-void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex) {
+void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTexture) {
     fbOutput = fbBinding;
-    dataTexture = dataTex;
+    _dataTexture = dataTexture;
 }
 
 void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
@@ -147,7 +151,7 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     r->setUniform(waterProg.get(), "inverseVP", ivp);
 
     wdp.count = gridGeom.getCount();
-    wdp.textures = {{waterTex->getName(), dataTexture}};
+    wdp.textures = {{waterTex->getName(), _dataTexture}};
 
     r->drawArrays(m, &gridDraw, wdp);
 

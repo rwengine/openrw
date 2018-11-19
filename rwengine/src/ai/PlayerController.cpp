@@ -106,21 +106,21 @@ void PlayerController::restart() {
     }
 
     if (isWasted()) {
-        if (!state->playerInfo.singlePayerHealthcare) {
+        if (state->playerInfo.singlePayerHealthcare == 0u) {
             if (state->playerInfo.money >= 1000) {
                 state->playerInfo.money -= 1000;
             } else {
                 state->playerInfo.money = 0;
             }
         } else {
-            state->playerInfo.singlePayerHealthcare = false;
+            state->playerInfo.singlePayerHealthcare = 0u;
         }
 
         state->gameStats.timesHospital++;
     }
 
     if (isBusted()) {
-        if (!state->playerInfo.thaneOfLibertyCity) {
+        if (state->playerInfo.thaneOfLibertyCity == 0u) {
             // @todo implement wanted system
             uint8_t wantedLevel = 0;
             int32_t penalty = 0;
@@ -155,7 +155,7 @@ void PlayerController::restart() {
                 state->playerInfo.money = 0;
             }
         } else {
-            state->playerInfo.thaneOfLibertyCity = false;
+            state->playerInfo.thaneOfLibertyCity = 0u;
         }
 
         state->gameStats.timesBusted++;

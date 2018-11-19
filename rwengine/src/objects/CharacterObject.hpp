@@ -211,7 +211,7 @@ public:
      * controll blending with movement.
      */
     void playActivityAnimation(const AnimationPtr& animation, bool repeat,
-                               bool blocking);
+                               bool blocked);
     /**
      * @brief activityFinished removes activity animation
      */

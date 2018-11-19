@@ -29,7 +29,9 @@ const float followRadius = 5.f;
 void DefaultAIController::update(float dt) {
     switch (currentGoal) {
         case FollowLeader: {
-            if (!leader) break;
+            if (!leader) {
+                break;
+            }
             if (getCharacter()->getCurrentVehicle()) {
                 if (leader->getCurrentVehicle() !=
                     getCharacter()->getCurrentVehicle()) {

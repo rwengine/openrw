@@ -23,7 +23,7 @@
 
 class GameObjectMotionState : public btMotionState {
 public:
-    GameObjectMotionState(GameObject* object) : m_object(object) {
+    explicit GameObjectMotionState(GameObject* object) : m_object(object) {
     }
 
     void getWorldTransform(btTransform& tform) const override {

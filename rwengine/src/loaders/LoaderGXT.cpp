@@ -23,8 +23,7 @@ void LoaderGXT::load(GameTexts &texts, const FileContentsInfo &file) {
         size_t offset = *reinterpret_cast<std::uint32_t *>(data + (t * 12 + 0));
         std::string id(data + (t * 12 + 4));
 
-        GameStringChar *stringSrc =
-            reinterpret_cast<GameStringChar *>(tdata + offset);
+        auto stringSrc = reinterpret_cast<GameStringChar *>(tdata + offset);
         GameString string(stringSrc);
         texts.addText(id, std::move(string));
     }

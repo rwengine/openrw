@@ -5,8 +5,8 @@
 #include "engine/Animator.hpp"
 
 GameObject::~GameObject() {
-    if (modelinfo_) {
-        modelinfo_->removeReference();
+    if (_modelinfo) {
+        _modelinfo->removeReference();
     }
 }
 
