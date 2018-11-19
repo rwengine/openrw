@@ -12,8 +12,8 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -45,16 +45,22 @@ public:
         m_glyph_height = height_width_ratio * m_glyph_width;
 
         int error = FT_Init_FreeType(&m_library);
-        if (error) ft_error(error);
+        if (error != 0) {
+            ft_error(error);
+        }
     }
 
     ~FontTextureBuffer() {
         for (auto face : m_faces) {
             int error = FT_Done_Face(face);
-            if (error) ft_error(error);
+            if (error != 0) {
+                ft_error(error);
+            }
         }
         int error = FT_Done_FreeType(m_library);
-        if (error) ft_error(error);
+        if (error != 0) {
+            ft_error(error);
+        }
     }
 
     void clear() {
@@ -66,11 +72,17 @@ public:
         m_faces.emplace_back();
         FT_Face &face = m_faces.back();
         int error = FT_New_Face(m_library, path, 0, &face);
-        if (error) ft_error(error);
+        if (error != 0) {
+            ft_error(error);
+        }
         error = FT_Select_Charmap(face, FT_ENCODING_UNICODE);
-        if (error) ft_error(error);
+        if (error != 0) {
+            ft_error(error);
+        }
         error = FT_Set_Pixel_Sizes(face, 0, m_fontsize);
-        if (error) ft_error(error);
+        if (error != 0) {
+            ft_error(error);
+        }
     }
 
     void draw_glyph_mono(int index, FT_GlyphSlot glyph) {
@@ -92,7 +104,7 @@ public:
         for (unsigned row = 0; row < glyph->bitmap.rows; ++row) {
             const unsigned char *buffer = glyph->bitmap.buffer + row * glyph->bitmap.pitch;
             for (unsigned i = 0; i < glyph->bitmap.width; ++i) {
-                bool pixel = (buffer[i/8] << (i % 8)) & 0x80;
+                bool pixel = ((buffer[i / 8] << (i % 8)) & 0x80) != 0;
                 QPoint point = baselineleft + QPoint{static_cast<int>(i), static_cast<int>(row - (glyph->metrics.horiBearingY / 64))};
                 QColor color{255, 255, 255, pixel ? 255 : 0};
                 m_texture.setPixelColor(point, color);
@@ -154,9 +166,13 @@ public:
                     continue;
                 }
                 int error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
-                if (error) ft_error(error);
+                if (error != 0) {
+                    ft_error(error);
+                }
                 error = FT_Render_Glyph(face->glyph, render_mode);
-                if (error) ft_error(error);
+                if (error != 0) {
+                    ft_error(error);
+                }
 
                 switch (mode) {
                 case RenderMode::MONO:
@@ -200,7 +216,7 @@ private:
     unsigned m_fontsize;
     unsigned m_glyph_width;
     unsigned m_glyph_height;
-    FT_Library m_library;
+    FT_Library m_library = nullptr;
 
     std::vector<FT_Face> m_faces;
 
@@ -226,7 +242,7 @@ int main(int argc, const char *argv[])
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, desc), vm);
-        if (vm.count("help")) {
+        if (vm.count("help") != 0u) {
             std::cout << desc;
             return EXIT_SUCCESS;
         }
@@ -243,7 +259,7 @@ int main(int argc, const char *argv[])
     const auto fontsize = vm["fontsize"].as<unsigned>();
 
     float aspect;
-    if (vm.count("aspect")) {
+    if (vm.count("aspect") != 0u) {
         aspect = vm["aspect"].as<float>();
     } else {
         if (fontmap_index == 0) {
