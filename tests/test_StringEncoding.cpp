@@ -1,6 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <fonts/FontMapGta3.hpp>
 #include <fonts/Unicode.hpp>
+
+#include <array>
 #include <iostream>
 #include <vector>
 
@@ -73,9 +75,9 @@ BOOST_AUTO_TEST_CASE(utf8_iterator_simple) {
 
     BOOST_CHECK_EQUAL(s.size(), 12);
 
-    for (size_t i=0; i < s.size(); ++i) {
+    for (char i : s) {
         BOOST_CHECK(it.good());
-        BOOST_CHECK_EQUAL(it.unicode(), s[i]);
+        BOOST_CHECK_EQUAL(it.unicode(), i);
         ++it;
     }
     BOOST_CHECK(!it.good());
@@ -116,32 +118,37 @@ typedef struct {
     unicode_t unicode;
 } utf8_unicode_t;
 
-const utf8_unicode_t utf_unicode_data[] = {
+constexpr std::array<utf8_unicode_t, 8> utf_unicode_data = {{
     {
-        "\x2e", 0x2e, /* full stop*/
-    }, {
-        "\x77", 0x77, /* w */
-    }, {
-        "\xc3\x97", 0xd7, /* multiplication sign */
-    }, {
-        "\xd8\x8c", 0x060c, /* Arabic comma */
-    }, {
-        "\xe2\x9b\xb0", 0x26f0, /* mountain */
-    }, {
-        "\xe2\x8a\xa8", 0x22a8, /* true */
-    }, {
-        "\xf0\x9f\xa7\x9b", 0x1f9db, /* vampire */
-    }, {
-        "\xf0\x9f\xa4\x9f", 0x1f91f, /* I love you hand sign */
-    }, {
-        "", 0, /* sentinel */
+        R"(.)", 0x2e, /* full stop*/
+    },
+    {
+        R"(w)", 0x77, /* w */
+    },
+    {
+        R"(×)", 0xd7, /* multiplication sign */
+    },
+    {
+        R"(،)", 0x060c, /* Arabic comma */
+    },
+    {
+        R"(⛰)", 0x26f0, /* mountain */
+    },
+    {
+        R"(⊨)", 0x22a8, /* true */
+    },
+    {
+        R"(🧛)", 0x1f9db, /* vampire */
+    },
+    {
+        R"(🤟)", 0x1f91f, /* I love you hand sign */
     }
-};
+}};
 
 std::string createUtf8String() {
     std::ostringstream oss;
-    for (const utf8_unicode_t *uu = utf_unicode_data; uu->unicode; ++uu) {
-        oss << uu->utf8;
+    for (const utf8_unicode_t &uu : utf_unicode_data) {
+        oss << uu.utf8;
     }
     return oss.str();
 }
@@ -151,12 +158,10 @@ BOOST_AUTO_TEST_CASE(utf8_iterator_mixed) {
     std::istringstream iss(str);
     Utf8UnicodeIterator it(iss);
 
-    size_t nb = 0;
-    for (const utf8_unicode_t *uu = utf_unicode_data; uu->unicode; ++uu) {
+    for (const utf8_unicode_t &uu : utf_unicode_data) {
         BOOST_CHECK(it.good());
-        BOOST_CHECK_EQUAL(it.unicode(), uu->unicode);
+        BOOST_CHECK_EQUAL(it.unicode(), uu.unicode);
         ++it;
-        ++nb;
     }
     BOOST_CHECK(!it.good());
 }
@@ -166,13 +171,11 @@ BOOST_AUTO_TEST_CASE(utf8_iterator_ranged_for_loop) {
     std::istringstream iss(str);
     Utf8UnicodeIterator it(iss);
 
-    size_t nb = 0;
-    const utf8_unicode_t *uu = utf_unicode_data;
+    auto uu_it = utf_unicode_data.begin();
     for (unicode_t u : Utf8UnicodeIteratorWrapper(str)) {
-        BOOST_CHECK_EQUAL(u, uu->unicode);
+        BOOST_CHECK_EQUAL(u, uu_it->unicode);
         ++it;
-        ++nb;
-        ++uu;
+        ++uu_it;
     }
     BOOST_CHECK(!it.good());
 }

@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(test_open_archive) {
 
     BOOST_CHECK(archive.getAssetCount() > 0);
 
-    LoaderIMGFile f, f2;
+    LoaderIMGFile f{}, f2{};
 
     f = archive.getAssetInfoByIndex(0);
 

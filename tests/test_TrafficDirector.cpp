@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_node_blocking) {
     {
         auto open = director.findAvailableNodes(AIGraphNode::Pedestrian,
                                                 glm::vec3(5.f, 5.f, 0.f), 10.f);
-        BOOST_CHECK(open.size() == 0);
+        BOOST_CHECK(open.empty());
     }
 
     Global::get().e->destroyObject(ped);
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_node_density) {
         director.setDensity(AIGraphNode::Pedestrian, 1.f);
         auto open = director.findAvailableNodes(AIGraphNode::Pedestrian,
                                                 glm::vec3(5.f, 5.f, 0.f), 10.f);
-        BOOST_CHECK(open.size() == 0);
+        BOOST_CHECK(open.empty());
     }
 
     {

@@ -64,8 +64,7 @@ std::ostream &operator<<(std::ostream &os, const simpleConfig_t &config) {
 class Temp {
     // An object of type Temp file will be removed on destruction
 public:
-    virtual ~Temp() {
-    }
+    virtual ~Temp() = default;
     bool exists() const {
         return rwfs::exists(this->m_path);
     }
@@ -87,7 +86,8 @@ protected:
     Temp(const Temp &) = delete;
     Temp() : m_path(getRandomFilePath()) {
     }
-    Temp(const rwfs::path &dirname) : m_path(getRandomFilePath(dirname)) {
+    explicit Temp(const rwfs::path &dirname)
+        : m_path(getRandomFilePath(dirname)) {
     }
 
 private:
@@ -104,26 +104,25 @@ class TempFile;
 
 class TempDir : public Temp {
 public:
-    TempDir() : Temp() {
-    }
+    TempDir() = default;
     TempDir(const TempDir &dirname) : Temp(dirname.path()) {
     }
-    virtual ~TempDir() {
+    ~TempDir() override {
         this->remove();
     }
-    virtual void change_perms_normal() const override {
+    void change_perms_normal() const override {
         rwfs::permissions(this->path(),
             rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exe |
             rwfs::perms::group_read | rwfs::perms::group_exe |
             rwfs::perms::others_read | rwfs::perms::others_exe);
     }
-    virtual void change_perms_readonly() const override {
+    void change_perms_readonly() const override {
         rwfs::permissions(this->path(),
                         rwfs::perms::owner_read | rwfs::perms::owner_exe |
                         rwfs::perms::group_read | rwfs::perms::group_exe |
                         rwfs::perms::others_read | rwfs::perms::others_exe);
     }
-    virtual void remove() const override {
+    void remove() const override {
         // Remove may fail if this directory contains a read-only entry. Ignore.
         rwfs::error_code ec;
         rwfs::remove_all(this->path(), ec);
@@ -136,29 +135,28 @@ public:
 
 class TempFile : public Temp {
 public:
-    TempFile() : Temp() {
+    TempFile() = default;
+    explicit TempFile(const TempDir &dirname) : Temp(dirname.path()) {
     }
-    TempFile(const TempDir &dirname) : Temp(dirname.path()) {
-    }
-    virtual ~TempFile() {
+    ~TempFile() override {
         this->remove();
     }
-    virtual void change_perms_normal() const override {
+    void change_perms_normal() const override {
         rwfs::permissions(this->path(),
             rwfs::perms::owner_read | rwfs::perms::owner_write |
             rwfs::perms::group_read |
             rwfs::perms::others_read);
     }
-    virtual void change_perms_readonly() const override {
+    void change_perms_readonly() const override {
         rwfs::permissions(this->path(), rwfs::perms::owner_read |
                                                         rwfs::perms::group_read |
                                                         rwfs::perms::others_read);
     }
-    virtual void remove() const override {
+    void remove() const override {
         rwfs::error_code ec;
         rwfs::remove_all(this->path(), ec);
     }
-    virtual void touch() const override {
+    void touch() const override {
         std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
         ofs.close();
     }

@@ -60,7 +60,7 @@ void ASSERT_PED_IS(BaseModelInfo& info, const char* model, const char* txd,
     BOOST_TEST(t.animgroup_ == animgroup);
     BOOST_TEST(t.carsmask_ == carmask);
 }
-}
+}  // namespace
 
 struct WithLoaderIDE {
     LoaderIDE loader;

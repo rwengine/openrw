@@ -1,15 +1,17 @@
 #include <boost/test/unit_test.hpp>
 #include <core/Logger.hpp>
+#include <utility>
 
 class CallbackReceiver : public Logger::MessageReceiver {
 public:
     std::function<void(const Logger::LogMessage&)> func;
 
-    CallbackReceiver(std::function<void(const Logger::LogMessage&)> func)
-        : func(func) {
+    explicit CallbackReceiver(
+        std::function<void(const Logger::LogMessage&)> func)
+        : func(std::move(std::move(func))) {
     }
 
-    virtual void messageReceived(const Logger::LogMessage& message) {
+    void messageReceived(const Logger::LogMessage& message) override {
         func(message);
     }
 };

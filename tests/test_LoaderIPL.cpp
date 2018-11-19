@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <loaders/LoaderIPL.hpp>
 #include <data/InstanceData.hpp>
+#include <loaders/LoaderIPL.hpp>
 #include "test_Globals.hpp"
 
 namespace {
@@ -16,7 +16,7 @@ inst
 112, ModelB, 11.0, 12.0, 5.0, 1, 1, 1, 0, 0, 0, 1
 end
 )";
-}
+}  // namespace
 
 bool operator==(const ZoneData& lhs, const ZoneData& rhs) {
     return

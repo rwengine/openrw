@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(test_load_dff) {
 
         auto m = loader.loadFromMemory(d);
 
-        BOOST_REQUIRE(m.get() != nullptr);
+        BOOST_REQUIRE(m != nullptr);
 
         BOOST_REQUIRE(m->getFrame());
 

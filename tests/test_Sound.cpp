@@ -53,7 +53,7 @@ BOOST_FIXTURE_TEST_CASE(sound_sets_openal_source_looping, F) {
 
     // Default state should be false
     // openAL should change value of state
-    int state = static_cast<bool>(true);
+    auto state = static_cast<int>(true);
     alGetSourcei(sound.buffer->source, AL_LOOPING, &state);
     BOOST_REQUIRE(static_cast<bool>(state) == false);
 

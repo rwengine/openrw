@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/GenericDATLoader.hpp>
-#include <objects/PickupObject.hpp>
 #include <objects/InstanceObject.hpp>
+#include <objects/PickupObject.hpp>
 #include "test_Globals.hpp"
 
 // Tests against loading various data files

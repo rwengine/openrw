@@ -1,5 +1,5 @@
-#include <boost/test/unit_test.hpp>
 #include <ai/PlayerController.hpp>
+#include <boost/test/unit_test.hpp>
 #include <engine/GameWorld.hpp>
 #include <engine/Payphone.hpp>
 #include <objects/CharacterObject.hpp>

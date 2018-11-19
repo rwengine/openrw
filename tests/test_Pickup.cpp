@@ -14,7 +14,7 @@ public:
                        OnStreet) {
     }
 
-    bool onPlayerTouch() {
+    bool onPlayerTouch() override {
         picked_up = true;
         return true;
     }
