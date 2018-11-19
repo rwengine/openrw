@@ -172,20 +172,20 @@ struct Geometry {
     DrawBuffer dbuff;
     GeometryBuffer gbuff;
 
-    GLuint EBO;
+    GLuint EBO = 0u;
 
     RW::BSGeometryBounds geometryBounds;
 
-    uint32_t clumpNum;
+    uint32_t clumpNum = 0u;
 
     FaceType facetype;
 
-    uint32_t flags;
+    uint32_t flags = 0u;
 
     std::vector<Material> materials;
     std::vector<SubGeometry> subgeom;
 
-    Geometry();
+    Geometry() = default;
     ~Geometry();
 };
 

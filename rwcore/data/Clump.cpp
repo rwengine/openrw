@@ -7,11 +7,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Geometry::Geometry() : EBO(0), flags(0) {
-}
-
 Geometry::~Geometry() {
-    if (EBO) {
+    if (EBO != 0u) {
         glDeleteBuffers(1, &EBO);
     }
 }

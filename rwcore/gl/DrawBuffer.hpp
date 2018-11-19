@@ -8,12 +8,12 @@ class GeometryBuffer;
  * DrawBuffer stores VAO state
  */
 class DrawBuffer {
-    GLuint vao;
+    GLuint vao = 0u;
 
-    GLenum facetype;
+    GLenum facetype{};
 
 public:
-    DrawBuffer();
+    DrawBuffer() = default;
     ~DrawBuffer();
 
     GLuint getVAOName() const {

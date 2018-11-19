@@ -36,7 +36,7 @@ private:
     /**
      * @brief m_unicode Current unicode point.
      */
-    unicode_t m_unicode;
+    unicode_t m_unicode = 0;
 
     /**
      * @brief next_unicode Move to the next unicode point.

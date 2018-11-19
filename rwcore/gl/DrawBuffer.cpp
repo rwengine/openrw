@@ -5,17 +5,14 @@
 #include <gl/gl_core_3_3.h>
 #include <gl/GeometryBuffer.hpp>
 
-DrawBuffer::DrawBuffer() : vao(0) {
-}
-
 DrawBuffer::~DrawBuffer() {
-    if (vao) {
+    if (vao != 0u) {
         glDeleteVertexArrays(1, &vao);
     }
 }
 
 void DrawBuffer::addGeometry(GeometryBuffer* gbuff) {
-    if (vao == 0) {
+    if (vao == 0u) {
         glGenVertexArrays(1, &vao);
     }
 

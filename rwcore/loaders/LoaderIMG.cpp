@@ -5,34 +5,33 @@
 
 #include "rw/debug.hpp"
 
-bool LoaderIMG::load(const rwfs::path& filepath) {
-    auto dirPath = filepath;
+bool LoaderIMG::load(const rwfs::path& filePath) {
+    auto dirPath = filePath;
     dirPath.replace_extension(".dir");
 
     FILE* fp = fopen(dirPath.string().c_str(), "rb");
-    if (fp) {
-        fseek(fp, 0, SEEK_END);
-        unsigned long fileSize = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        std::size_t expectedCount = fileSize / 32;
-        m_assets.resize(expectedCount);
-        std::size_t actualCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
-                expectedCount, fp);
-
-        if (expectedCount != actualCount) {
-            m_assets.resize(actualCount);
-            RW_ERROR("Error reading records in IMG archive");
-        }
-
-        fclose(fp);
-        auto imgPath = filepath;
-        imgPath.replace_extension(".img");
-        m_archive = imgPath;
-        return true;
-    } else {
+    if (!fp) {
         return false;
     }
+    fseek(fp, 0, SEEK_END);
+    unsigned long fileSize = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    std::size_t expectedCount = fileSize / 32;
+    m_assets.resize(expectedCount);
+    std::size_t actualCount = fread(&m_assets[0], sizeof(LoaderIMGFile),
+            expectedCount, fp);
+
+    if (expectedCount != actualCount) {
+        m_assets.resize(actualCount);
+        RW_ERROR("Error reading records in IMG archive");
+    }
+
+    fclose(fp);
+    auto imgPath = filePath;
+    imgPath.replace_extension(".img");
+    m_archive = imgPath;
+    return true;
 }
 
 /// Get the information of a asset in the examining archive
@@ -48,7 +47,7 @@ bool LoaderIMG::findAssetInfo(const std::string& assetname,
 }
 
 std::unique_ptr<char[]> LoaderIMG::loadToMemory(const std::string& assetname) {
-    LoaderIMGFile assetInfo;
+    LoaderIMGFile assetInfo{};
     bool found = findAssetInfo(assetname, assetInfo);
 
     if (!found) {
@@ -59,29 +58,32 @@ std::unique_ptr<char[]> LoaderIMG::loadToMemory(const std::string& assetname) {
     auto imgName = m_archive;
 
     FILE* fp = fopen(imgName.string().c_str(), "rb");
-    if (fp) {
-        auto raw_data = std::make_unique<char[]>(assetInfo.size * 2048);
-
-        fseek(fp, assetInfo.offset * 2048, SEEK_SET);
-        if (fread(raw_data.get(), 2048, assetInfo.size, fp) != assetInfo.size) {
-            RW_ERROR("Error reading asset " << assetInfo.name);
-        }
-
-        fclose(fp);
-        return raw_data;
-    } else
+    if (!fp) {
         return nullptr;
+    }
+
+    auto raw_data = std::make_unique<char[]>(assetInfo.size * 2048);
+
+    fseek(fp, assetInfo.offset * 2048, SEEK_SET);
+    if (fread(raw_data.get(), 2048, assetInfo.size, fp) != assetInfo.size) {
+        RW_ERROR("Error reading asset " << assetInfo.name);
+    }
+
+    fclose(fp);
+    return raw_data;
 }
 
 /// Writes the contents of assetname to filename
 bool LoaderIMG::saveAsset(const std::string& assetname,
                           const std::string& filename) {
     auto raw_data = loadToMemory(assetname);
-    if (!raw_data) return false;
+    if (!raw_data) {
+        return false;
+    }
 
     FILE* dumpFile = fopen(filename.c_str(), "wb");
-    if (dumpFile) {
-        LoaderIMGFile asset;
+    if (dumpFile != nullptr) {
+        LoaderIMGFile asset{};
         if (findAssetInfo(assetname, asset)) {
             fwrite(raw_data.get(), 2048, asset.size, dumpFile);
             printf("=> IMG: Saved %s to disk with filename %s\n",
@@ -90,9 +92,8 @@ bool LoaderIMG::saveAsset(const std::string& assetname,
         fclose(dumpFile);
 
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 /// Get the information of an asset by its index

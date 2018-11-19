@@ -6,24 +6,26 @@ size_t unicode_to_utf8(unicode_t unicode, char c[4]) {
     if (unicode < 0x80) { // 7 bits
         c[0] = static_cast<char>(unicode);
         return 1;
-    } else if (unicode < 0x800) { // 11 bits
+    }
+    if (unicode < 0x800) {  // 11 bits
         c[0] = static_cast<char>(0xc0 | (unicode >> 6));
         c[1] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 2;
-    } else if (unicode < 0x10000) { // 16 bits
+    }
+    if (unicode < 0x10000) { // 16 bits
         c[0] = static_cast<char>(0xe0 | (unicode >> 12));
         c[1] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
         c[2] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 3;
-    } else if (unicode < 0x110000) { // 21 bits
+    }
+    if (unicode < 0x110000) { // 21 bits
         c[0] = static_cast<char>(0xf0 | (unicode >> 18));
         c[1] = static_cast<char>(0x80 | ((unicode >> 12) & 0x3f));
         c[2] = static_cast<char>(0x80 | ((unicode >> 6) & 0x3f));
         c[3] = static_cast<char>(0x80 | (unicode & 0x3f));
         return 4;
-    } else {
-        return unicode_to_utf8(UnicodeValue::UNICODE_REPLACEMENT_CHARACTER, c);
     }
+    return unicode_to_utf8(UnicodeValue::UNICODE_REPLACEMENT_CHARACTER, c);
 }
 
 Utf8UnicodeIterator::Utf8UnicodeIterator(std::istream &is) : m_is(&is), m_finished(false) {
@@ -36,7 +38,7 @@ void Utf8UnicodeIterator::next_unicode() {
         m_finished = true;
         return;
     }
-    char cc = static_cast<char>(c);
+    auto cc = static_cast<char>(c);
     unicode_t unicode;
     unsigned nb_bytes;
     if ((cc & 0x80) == 0x00) {
@@ -102,6 +104,6 @@ Utf8UnicodeIterator Utf8UnicodeIteratorWrapper::end() {
     return Utf8UnicodeIterator();
 }
 
-bool Utf8UnicodeIterator::operator !=(const Utf8UnicodeIterator &) {
+bool Utf8UnicodeIterator::operator!=(const Utf8UnicodeIterator & /*unused*/) {
     return good();
 }

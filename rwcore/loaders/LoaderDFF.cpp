@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <numeric>
 
@@ -38,9 +38,9 @@ enum DFFChunks {
 // These structs are used to interpret raw bytes from the stream.
 /// @todo worry about endianness.
 
-typedef glm::vec3 BSTVector3;
-typedef glm::mat3 BSTMatrix;
-typedef glm::i8vec4 BSTColour;
+using BSTVector3 = glm::vec3;
+using BSTMatrix = glm::mat3;
+using BSTColour = glm::i8vec4;
 
 struct RWBSFrame {
     BSTMatrix rotation;
@@ -125,7 +125,7 @@ LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
 
     char *headerPtr = listStream.getCursor();
 
-    unsigned int numGeometries = bit_cast<std::uint32_t>(*headerPtr);
+    auto numGeometries = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     std::vector<GeometryPtr> geometrylist;
@@ -165,9 +165,9 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     /*unsigned short moreFlags = bit_cast<std::uint8_t>(*headerPtr);*/
     headerPtr += sizeof(std::uint8_t);
 
-    unsigned int numTris = bit_cast<std::uint32_t>(*headerPtr);
+    auto numTris = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
-    unsigned int numVerts = bit_cast<std::uint32_t>(*headerPtr);
+    auto numVerts = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     /*unsigned int numFrames = bit_cast<std::uint32_t>(*headerPtr);*/
@@ -279,12 +279,12 @@ void LoaderDFF::readMaterialList(const GeometryPtr &geom, const RWBStream &strea
         throw DFFLoaderException("MaterialList missing struct chunk");
     }
 
-    unsigned int numMaterials = bit_cast<std::uint32_t>(*listStream.getCursor());
+    auto numMaterials = bit_cast<std::uint32_t>(*listStream.getCursor());
 
     geom->materials.reserve(numMaterials);
 
     RWBStream::ChunkID chunkID;
-    while ((chunkID = listStream.getNextChunk())) {
+    while ((chunkID = listStream.getNextChunk()) != 0u) {
         switch (chunkID) {
             case CHUNK_MATERIAL:
                 readMaterial(geom, listStream);
@@ -328,7 +328,7 @@ void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
     material.flags = 0;
 
     RWBStream::ChunkID chunkID;
-    while ((chunkID = materialStream.getNextChunk())) {
+    while ((chunkID = materialStream.getNextChunk()) != 0u) {
         switch (chunkID) {
             case CHUNK_TEXTURE:
                 readTexture(material, materialStream);
@@ -373,7 +373,7 @@ void LoaderDFF::readGeometryExtension(const GeometryPtr &geom,
     auto extStream = stream.getInnerStream();
 
     RWBStream::ChunkID chunkID;
-    while ((chunkID = extStream.getNextChunk())) {
+    while ((chunkID = extStream.getNextChunk()) != 0u) {
         switch (chunkID) {
             case CHUNK_BINMESHPLG:
                 readBinMeshPLG(geom, extStream);
@@ -390,7 +390,7 @@ void LoaderDFF::readBinMeshPLG(const GeometryPtr &geom, const RWBStream &stream)
     geom->facetype = static_cast<Geometry::FaceType>(bit_cast<std::uint32_t>(*data));
     data += sizeof(std::uint32_t);
 
-    unsigned int numSplits = bit_cast<std::uint32_t>(*data);
+    auto numSplits = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
 
     // Number of triangles.
@@ -429,13 +429,13 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     }
 
     auto data = atomicStream.getCursor();
-    std::uint32_t frame = bit_cast<std::uint32_t>(*data);
+    auto frame = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
 
-    std::uint32_t geometry = bit_cast<std::uint32_t>(*data);
+    auto geometry = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
 
-    std::uint32_t flags = bit_cast<std::uint32_t>(*data);
+    auto flags = bit_cast<std::uint32_t>(*data);
 
     // Verify the atomic's particulars
     RW_CHECK(frame < framelist.size(), "atomic frame " << frame
@@ -473,7 +473,7 @@ ClumpPtr LoaderDFF::loadFromMemory(const FileContentsInfo& file) {
     }
 
     // There is only one value in the struct section.
-    std::uint32_t numAtomics = bit_cast<std::uint32_t>(*rootStream.getCursor());
+    auto numAtomics = bit_cast<std::uint32_t>(*rootStream.getCursor());
     RW_UNUSED(numAtomics);
 
     GeometryList geometrylist;
@@ -481,7 +481,7 @@ ClumpPtr LoaderDFF::loadFromMemory(const FileContentsInfo& file) {
 
     // Process everything inside the clump stream.
     RWBStream::ChunkID chunkID;
-    while ((chunkID = modelStream.getNextChunk())) {
+    while ((chunkID = modelStream.getNextChunk()) != 0u) {
         switch (chunkID) {
             case CHUNK_FRAMELIST:
                 framelist = readFrameList(modelStream);

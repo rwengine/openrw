@@ -38,13 +38,13 @@ const size_t paletteSize = 1024;
 
 static
 void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
-    uint8_t* dataBase = reinterpret_cast<uint8_t*>(
+    auto dataBase = reinterpret_cast<uint8_t*>(
         rootSection.raw() + sizeof(RW::BSSectionHeader) +
         sizeof(RW::BSTextureNative) - 4);
 
     uint8_t* coldata = (dataBase + paletteSize + sizeof(uint32_t));
     uint32_t raster_size = *reinterpret_cast<uint32_t*>(dataBase + paletteSize);
-    uint32_t* palette = reinterpret_cast<uint32_t*>(dataBase);
+    auto palette = reinterpret_cast<uint32_t*>(dataBase);
 
     for (size_t j = 0; j < raster_size; ++j) {
         *(fullColor++) = palette[coldata[j]];
@@ -54,7 +54,7 @@ void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
 static
 TextureData::Handle createTexture(RW::BSTextureNative& texNative,
                                   RW::BinaryStreamSection& rootSection) {
-    // TODO: Exception handling.
+    // TODO(danhedron): Exception handling.
     if (texNative.platform != 8) {
         RW_ERROR("Unsupported texture platform " << std::dec
                   << texNative.platform);
@@ -182,10 +182,11 @@ bool TextureLoader::loadFromMemory(const FileContentsInfo& file,
     while (root.hasMoreData(rootI)) {
         auto rootSection = root.getNextChildSection(rootI);
 
-        if (rootSection.header.id != RW::SID_TextureNative) continue;
+        if (rootSection.header.id != RW::SID_TextureNative) {
+            continue;
+        }
 
-        RW::BSTextureNative texNative =
-            rootSection.readStructure<RW::BSTextureNative>();
+        auto texNative = rootSection.readStructure<RW::BSTextureNative>();
         std::string name = std::string(texNative.diffuseName);
         std::string alpha = std::string(texNative.alphaName);
         std::transform(name.begin(), name.end(), name.begin(), ::tolower);

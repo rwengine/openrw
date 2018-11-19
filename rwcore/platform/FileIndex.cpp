@@ -6,8 +6,8 @@
 #include <iterator>
 #include <sstream>
 
-#include "platform/FileHandle.hpp"
 #include "loaders/LoaderIMG.hpp"
+#include "platform/FileHandle.hpp"
 
 #include "rw/debug.hpp"
 
@@ -72,8 +72,8 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
     return {std::move(data), static_cast<size_t>(length)};
 }
 
-void FileIndex::indexArchive(const std::string &archive) {
-    rwfs::path path = findFilePath(archive);
+void FileIndex::indexArchive(const std::string &filePath) {
+    rwfs::path path = findFilePath(filePath);
 
     LoaderIMG img;
     if (!img.load(path.string())) {
@@ -83,7 +83,9 @@ void FileIndex::indexArchive(const std::string &archive) {
     for (size_t i = 0; i < img.getAssetCount(); ++i) {
         auto &asset = img.getAssetInfoByIndex(i);
 
-        if (asset.size == 0) continue;
+        if (asset.size == 0u) {
+            continue;
+        }
 
         std::string assetName = normalizeFilePath(asset.name);
 
@@ -111,7 +113,7 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
             throw std::runtime_error("Failed to load IMG archive: " + indexedData.path);
         }
 
-        LoaderIMGFile file;
+        LoaderIMGFile file{};
         auto filename = rwfs::path(indexedData.assetData).filename().string();
         if (img.findAssetInfo(filename, file)) {
             length = file.size * 2048;
