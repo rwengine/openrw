@@ -4,8 +4,8 @@
 AnimationListWidget::AnimationListWidget(QWidget* parent, Qt::WindowFlags flags)
     : QDockWidget(parent, flags), filter(nullptr), model(nullptr) {
     setWindowTitle("Animations");
-    QVBoxLayout* layout = new QVBoxLayout();
-    QWidget* intermediate = new QWidget();
+    auto layout = new QVBoxLayout();
+    auto intermediate = new QWidget();
 
     searchbox = new QLineEdit();
     searchbox->setPlaceholderText("Search");
@@ -24,12 +24,10 @@ AnimationListWidget::AnimationListWidget(QWidget* parent, Qt::WindowFlags flags)
     connect(searchbox, SIGNAL(textChanged(QString)), SLOT(setFilter(QString)));
 }
 
-void AnimationListWidget::setAnimations(const AnimationList& archive) {
-    auto m = new AnimationListModel(archive);
+void AnimationListWidget::setAnimations(const AnimationList& animations) {
+    auto m = new AnimationListModel(animations);
     filter->setSourceModel(m);
-    if (model) {
-        delete model;
-    }
+    delete model;
     model = m;
 }
 

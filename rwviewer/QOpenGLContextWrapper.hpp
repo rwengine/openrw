@@ -10,7 +10,7 @@ class QWidget;
 class QOpenGLContextWrapper {
 public:
     QOpenGLContextWrapper(QWidget *parent);
-    void setup(QSurfaceFormat format);
+    void setup(const QSurfaceFormat &format);
     bool create();
 
     bool makeCurrent(QSurface *surface);
@@ -21,7 +21,7 @@ public:
         return m_context;
     }
 private:
-    QOpenGLContext *m_context;
+    QOpenGLContext *m_context = nullptr;
     QWidget *m_parent;
 };
 

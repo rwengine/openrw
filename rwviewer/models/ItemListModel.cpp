@@ -13,21 +13,24 @@ ItemListModel::ItemListModel(GameWorld *world, QObject *parent)
     : QAbstractTableModel(parent), _world(world) {
 }
 
-int ItemListModel::rowCount(const QModelIndex &) const {
+int ItemListModel::rowCount(const QModelIndex & /*parent*/) const {
     return static_cast<int>(_world->data->modelinfo.size());
 }
 
-int ItemListModel::columnCount(const QModelIndex &) const {
+int ItemListModel::columnCount(const QModelIndex & /*parent*/) const {
     return 2;
 }
 
 QVariant ItemListModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole) {
         qint16 id = getIDOf(index.row());
-        if (id == -1) return QVariant::Invalid;
+        if (id == -1) {
+            return QVariant::Invalid;
+        }
         if (index.column() == 0) {
             return id;
-        } else if (index.column() == 1) {
+        }
+        if (index.column() == 1) {
             return QString::fromStdString("TODO");
         }
     }

@@ -2,7 +2,8 @@
 #include <data/Clump.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-void ModelFramesWidget::updateInfoBox(ClumpPtr, ModelFrame* f) {
+void ModelFramesWidget::updateInfoBox(const ClumpPtr /*unused*/&,
+                                      ModelFrame* f) {
     if (f == nullptr) {
         _frameLabel->setText("");
     } else {
@@ -15,7 +16,7 @@ void ModelFramesWidget::updateInfoBox(ClumpPtr, ModelFrame* f) {
 }
 
 void ModelFramesWidget::selectedModelChanged(const QModelIndex& n,
-                                             const QModelIndex&) {
+                                             const QModelIndex& /*unused*/) {
     updateInfoBox(gmodel, static_cast<ModelFrame*>(n.internalPointer()));
     selectedFrameChanged(static_cast<ModelFrame*>(n.internalPointer()));
 }
@@ -33,7 +34,7 @@ ModelFramesWidget::ModelFramesWidget(QWidget* parent, Qt::WindowFlags flags)
     setLayout(_layout);
 }
 
-void ModelFramesWidget::setModel(ClumpPtr model) {
+void ModelFramesWidget::setModel(const ClumpPtr& model) {
     if (framemodel) {
         delete framemodel;
         framemodel = nullptr;

@@ -15,7 +15,7 @@ class WorldViewer : public ViewerInterface {
     Q_OBJECT
 
     QVBoxLayout* mainLayout;
-    ViewerWidget* viewerWidget;
+    ViewerWidget* viewerWidget = nullptr;
 
 public:
     WorldViewer(QWidget* parent = 0, Qt::WindowFlags f = 0);

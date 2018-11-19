@@ -1,17 +1,17 @@
 #include "DFFFramesTreeModel.hpp"
 #include <data/Clump.hpp>
+#include <utility>
 
-DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m,
-                                       QObject* parent)
-    : QAbstractItemModel(parent), model(m) {
+DFFFramesTreeModel::DFFFramesTreeModel(ClumpPtr m, QObject* parent)
+    : QAbstractItemModel(parent), model(std::move(std::move(m))) {
 }
 
-int DFFFramesTreeModel::columnCount(const QModelIndex&) const {
+int DFFFramesTreeModel::columnCount(const QModelIndex& /*parent*/) const {
     return 1;
 }
 
 int DFFFramesTreeModel::rowCount(const QModelIndex& parent) const {
-    ModelFrame* f = static_cast<ModelFrame*>(parent.internalPointer());
+    auto f = static_cast<ModelFrame*>(parent.internalPointer());
     if (f) {
         return static_cast<int>(f->getChildren().size());
     }
@@ -28,16 +28,16 @@ QModelIndex DFFFramesTreeModel::index(int row, int column,
     if (parent.row() == -1 && parent.column() == -1) {
         return createIndex(row, column, model->getFrame().get());
     }
-    ModelFrame* f = static_cast<ModelFrame*>(parent.internalPointer());
+    auto f = static_cast<ModelFrame*>(parent.internalPointer());
     ModelFrame* p = f->getChildren()[row].get();
     return createIndex(row, column, p);
 }
 
 QModelIndex DFFFramesTreeModel::parent(const QModelIndex& child) const {
-    ModelFrame* c = static_cast<ModelFrame*>(child.internalPointer());
+    auto c = static_cast<ModelFrame*>(child.internalPointer());
     if (c->getParent()) {
         auto cp = c->getParent();
-        if (cp->getParent()) {
+        if (cp->getParent() != nullptr) {
             for (size_t i = 0; i < cp->getParent()->getChildren().size(); ++i) {
                 if (cp->getParent()->getChildren()[i].get() == c->getParent()) {
                     return createIndex(static_cast<int>(i), 0, c->getParent());
@@ -51,7 +51,7 @@ QModelIndex DFFFramesTreeModel::parent(const QModelIndex& child) const {
 }
 
 QVariant DFFFramesTreeModel::data(const QModelIndex& index, int role) const {
-    ModelFrame* f = static_cast<ModelFrame*>(index.internalPointer());
+    auto f = static_cast<ModelFrame*>(index.internalPointer());
     if (role == Qt::DisplayRole) {
         if (index.column() == 0) {
             return QString(f->getName().c_str());
@@ -85,7 +85,7 @@ bool DFFFramesTreeModel::setData(const QModelIndex& index,
 
 Qt::ItemFlags DFFFramesTreeModel::flags(const QModelIndex& index) const {
     if (!index.isValid()) {
-        return 0;
+        return nullptr;
     }
 
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -97,7 +97,7 @@ Qt::ItemFlags DFFFramesTreeModel::flags(const QModelIndex& index) const {
     return flags;
 }
 
-QVariant DFFFramesTreeModel::headerData(int,
+QVariant DFFFramesTreeModel::headerData(int /*section*/,
                                         Qt::Orientation orientation,
                                         int role) const {
     if (orientation == Qt::Horizontal) {

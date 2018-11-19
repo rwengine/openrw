@@ -20,7 +20,7 @@ class ModelFramesWidget : public QWidget {
 
 private slots:
 
-    void updateInfoBox(ClumpPtr model, ModelFrame* f);
+    void updateInfoBox(const ClumpPtr& model, ModelFrame* f);
 
     void selectedModelChanged(const QModelIndex&, const QModelIndex&);
 
@@ -29,7 +29,7 @@ public:
 
 public slots:
 
-    void setModel(ClumpPtr model);
+    void setModel(const ClumpPtr& model);
 
 signals:
 

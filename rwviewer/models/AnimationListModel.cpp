@@ -24,10 +24,10 @@ QVariant AnimationListModel::headerData(int section,
     return QVariant::Invalid;
 }
 
-int AnimationListModel::rowCount(const QModelIndex&) const {
+int AnimationListModel::rowCount(const QModelIndex& /*parent*/) const {
     return static_cast<int>(animations.size());
 }
 
-int AnimationListModel::columnCount(const QModelIndex&) const {
+int AnimationListModel::columnCount(const QModelIndex& /*parent*/) const {
     return 1;
 }

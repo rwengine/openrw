@@ -100,7 +100,7 @@ protected:
 
     DrawBuffer* _frameWidgetDraw = nullptr;
     GeometryBuffer* _frameWidgetGeom = nullptr;
-    GLuint whiteTex;
+    GLuint whiteTex = 0u;
 
     void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
     bool initialised = false;

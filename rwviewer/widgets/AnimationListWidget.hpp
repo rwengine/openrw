@@ -17,7 +17,7 @@ class AnimationListWidget : public QDockWidget {
 public:
     AnimationListWidget(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
-    void setAnimations(const AnimationList& anims);
+    void setAnimations(const AnimationList& animations);
 
 signals:
 

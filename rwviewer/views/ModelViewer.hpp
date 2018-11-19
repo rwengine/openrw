@@ -34,7 +34,7 @@ public slots:
     /**
      * Display a raw model
      */
-    void showModel(ClumpPtr model);
+    void showModel(const ClumpPtr& model);
 
     /**
      * Display a game object's model

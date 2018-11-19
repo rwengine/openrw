@@ -1,28 +1,32 @@
 #include "ObjectListModel.hpp"
 
-ObjectListModel::ObjectListModel(GameData *dat, QObject *parent)
-    : QAbstractTableModel(parent), _gameData(dat) {
+ObjectListModel::ObjectListModel(GameData *gameData, QObject *parent)
+    : QAbstractTableModel(parent), _gameData(gameData) {
 }
 
-int ObjectListModel::rowCount(const QModelIndex &) const {
+int ObjectListModel::rowCount(const QModelIndex & /*parent*/) const {
     return static_cast<int>(_gameData->modelinfo.size());
 }
 
-int ObjectListModel::columnCount(const QModelIndex &) const {
+int ObjectListModel::columnCount(const QModelIndex & /*parent*/) const {
     return 3;
 }
 
 QVariant ObjectListModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DisplayRole) {
-        if (!index.isValid()) return QVariant::Invalid;
+        if (!index.isValid()) {
+            return QVariant::Invalid;
+        }
         auto id = index.internalId();
         if (index.column() == 0) {
             return id;
-        } else if (index.column() == 1) {
+        }
+        if (index.column() == 1) {
             auto object = _gameData->modelinfo[id].get();
             return QString::fromStdString(
                 BaseModelInfo::getTypeName(object->type()));
-        } else if (index.column() == 2) {
+        }
+        if (index.column() == 2) {
             auto object = _gameData->modelinfo[id].get();
             return QString::fromStdString(object->name);
         }
@@ -48,7 +52,9 @@ QVariant ObjectListModel::headerData(int section, Qt::Orientation orientation,
 QModelIndex ObjectListModel::index(int row, int column,
                                    const QModelIndex &parent) const {
     auto it = _gameData->modelinfo.begin();
-    for (int i = 0; i < row; i++) it++;
+    for (int i = 0; i < row; i++) {
+        ++it;
+    }
     auto id = it->second->id();
 
     return hasIndex(row, column, parent) ? createIndex(row, column, id)

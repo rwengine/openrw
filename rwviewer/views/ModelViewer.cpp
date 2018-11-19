@@ -25,7 +25,7 @@ ModelViewer::ModelViewer(QWidget* parent, Qt::WindowFlags f)
     setLayout(mainLayout);
 }
 
-void ModelViewer::showModel(ClumpPtr model) {
+void ModelViewer::showModel(const ClumpPtr& model) {
     viewing = model;
     viewerWidget->showModel(model);
     frames->setModel(model);

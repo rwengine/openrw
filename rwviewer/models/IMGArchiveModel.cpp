@@ -29,10 +29,10 @@ QVariant IMGArchiveModel::headerData(int section, Qt::Orientation orientation,
     return QVariant::Invalid;
 }
 
-int IMGArchiveModel::rowCount(const QModelIndex&) const {
+int IMGArchiveModel::rowCount(const QModelIndex& /*parent*/) const {
     return static_cast<int>(archive.getAssetCount());
 }
 
-int IMGArchiveModel::columnCount(const QModelIndex&) const {
+int IMGArchiveModel::columnCount(const QModelIndex& /*parent*/) const {
     return 2;
 }

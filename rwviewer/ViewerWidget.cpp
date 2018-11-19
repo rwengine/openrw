@@ -16,6 +16,8 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 
+#include <utility>
+
 constexpr float kViewFov = glm::radians(90.0f);
 
 namespace {
@@ -34,7 +36,7 @@ ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
     vc.frustum.update(proj * view);
     return vc;
 }
-}
+}  // namespace
 
 ViewerWidget::ViewerWidget(QOpenGLContextWrapper* context, QWindow* parent)
     : QWindow(parent)
@@ -140,7 +142,9 @@ void ViewerWidget::paintGL() {
     glClearColor(0.3f, 0.3f, 0.3f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (world() == nullptr) return;
+    if (world() == nullptr) {
+        return;
+    }
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     auto& r = *_renderer;
@@ -154,10 +158,14 @@ void ViewerWidget::paintGL() {
 
     switch (_viewMode) {
     case Mode::Model:
-        if (_model) drawModel(r, _model);
+        if (_model) {
+            drawModel(r, _model);
+        }
         break;
     case Mode::Object:
-        if (_object) drawObject(r, _object);
+        if (_object != nullptr) {
+            drawObject(r, _object);
+        }
         break;
     case Mode::World:
         drawWorld(r);
@@ -190,7 +198,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
         _renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
     }
 
-    for (auto c : f->getChildren()) {
+    for (const auto& c : f->getChildren()) {
         drawFrameWidget(c.get(), thisM);
     }
 }
@@ -204,11 +212,13 @@ void ViewerWidget::showObject(quint16 item) {
     _viewMode = Mode::Object;
     _objectID = item;
 
-    if (_object) _world->destroyObject(_object);
+    if (_object != nullptr) {
+        _world->destroyObject(_object);
+    }
     _object = nullptr;
 
     auto def = world()->data->modelinfo[item].get();
-    if (!def) {
+    if (def == nullptr) {
         return;
     }
 
@@ -248,7 +258,7 @@ void ViewerWidget::showText(const TextRenderer::TextInfo &ti) {
 
 void ViewerWidget::showModel(ClumpPtr model) {
     _viewMode = Mode::Model;
-    _model = model;
+    _model = std::move(model);
     textInfos.clear();
 }
 
@@ -280,15 +290,25 @@ void ViewerWidget::exportModel() {
 }
 
 void ViewerWidget::keyPressEvent(QKeyEvent* e) {
-    if (e->key() == Qt::Key_Shift) moveFast = true;
+    if (e->key() == Qt::Key_Shift) {
+        moveFast = true;
+    }
 
     glm::vec3 movement{};
-    if (e->key() == Qt::Key_W) movement.y += moveFast ? 10.f : 1.f;
-    if (e->key() == Qt::Key_S) movement.y -= moveFast ? 10.f : 1.f;
-    if (e->key() == Qt::Key_A) movement.x -= moveFast ? 10.f : 1.f;
-    if (e->key() == Qt::Key_D) movement.x += moveFast ? 10.f : 1.f;
+    if (e->key() == Qt::Key_W) {
+        movement.y += moveFast ? 10.f : 1.f;
+    }
+    if (e->key() == Qt::Key_S) {
+        movement.y -= moveFast ? 10.f : 1.f;
+    }
+    if (e->key() == Qt::Key_A) {
+        movement.x -= moveFast ? 10.f : 1.f;
+    }
+    if (e->key() == Qt::Key_D) {
+        movement.x += moveFast ? 10.f : 1.f;
+    }
 
-    if (movement.length() > 0.f) {
+    if (glm::vec3::length() > 0.f) {
         movement = (glm::angleAxis(viewAngles.x, glm::vec3(0.f, 0.f, 1.f)) *
                     glm::angleAxis(viewAngles.y, glm::vec3(-1.f, 0.f, 0.f))) *
                    movement;
@@ -297,7 +317,9 @@ void ViewerWidget::keyPressEvent(QKeyEvent* e) {
 }
 
 void ViewerWidget::keyReleaseEvent(QKeyEvent* e) {
-    if (e->key() == Qt::Key_Shift) moveFast = false;
+    if (e->key() == Qt::Key_Shift) {
+        moveFast = false;
+    }
 }
 
 ClumpPtr ViewerWidget::currentModel() const {
@@ -314,7 +336,7 @@ void ViewerWidget::mousePressEvent(QMouseEvent* e) {
     dastart = viewAngles;
 }
 
-void ViewerWidget::mouseReleaseEvent(QMouseEvent*) {
+void ViewerWidget::mouseReleaseEvent(QMouseEvent* /*unused*/) {
     dragging = false;
 }
 
@@ -361,7 +383,7 @@ bool ViewerWidget::event(QEvent *e) {
     }
 }
 
-void ViewerWidget::exposeEvent(QExposeEvent *) {
+void ViewerWidget::exposeEvent(QExposeEvent* /*unused*/) {
     if (isExposed()) {
         requestUpdate();
     }

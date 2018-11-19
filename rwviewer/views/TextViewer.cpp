@@ -15,10 +15,9 @@
 #include <platform/FileHandle.hpp>
 #include <render/GameRenderer.hpp>
 
-#include <QGroupBox>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QItemSelection>
 #include <QLineEdit>
 #include <QModelIndex>
@@ -30,20 +29,24 @@
 #include <QSplitter>
 #include <QTableView>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
-void TextTableView::selectionChanged(const QItemSelection &selected, const QItemSelection &) {
-    if (!selected.size())
+void TextTableView::selectionChanged(const QItemSelection &selected,
+                                     const QItemSelection & /*deselected*/) {
+    if (selected.empty()) {
         return;
+    }
     auto index = selected.indexes()[0];
-    if (!index.isValid())
+    if (!index.isValid()) {
         return;
+    }
 
     auto *textModel = dynamic_cast<TextModel *>(this->model());
     if (!textModel) {
         return;
     }
     try {
-        auto gameString = textModel->lookupIndex(index);
+        const auto &gameString = textModel->lookupIndex(index);
         emit gameStringChanged(gameString);
     } catch (std::out_of_range &) {
         return;
@@ -141,7 +144,7 @@ void TextViewer::onStringChange() {
 }
 
 void TextViewer::onGameStringChange(const GameString &gameString) {
-    if (!currentGameString.compare(gameString)) {
+    if (currentGameString == gameString) {
         return;
     }
     currentGameString = gameString;
@@ -153,7 +156,7 @@ void TextViewer::onGameStringChange(const GameString &gameString) {
                 << int(c) << " ";
     }
     auto newHexText = QString::fromStdString(oss.str());
-    if (hexLineEdit->text().compare(newHexText)) {
+    if (hexLineEdit->text().compare(newHexText) != 0) {
         hexLineEdit->setText(newHexText);
     }
 
@@ -229,12 +232,12 @@ std::vector<std::string> TextViewer::getFontTextureNames() {
         }
         std::string filename = p.filename().string();
         std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-        if (!filename.compare("text")) {
+        if (filename == "text") {
             textPath = p;
             break;
         }
     }
-    if (!textPath.string().length()) {
+    if (textPath.string().empty()) {
         throw std::runtime_error("text directory not found in gamedata path");
     }
     std::vector<std::string> names;

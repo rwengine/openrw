@@ -11,7 +11,7 @@ class ObjectListModel : public QAbstractTableModel {
     GameData* _gameData;
 
 public:
-    explicit ObjectListModel(GameData* gameDat, QObject* parent = 0);
+    explicit ObjectListModel(GameData* gameData, QObject* parent = 0);
 
     GameData* gameData() const {
         return _gameData;

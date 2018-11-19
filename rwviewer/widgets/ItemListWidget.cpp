@@ -5,8 +5,8 @@
 ItemListWidget::ItemListWidget(QWidget* parent, Qt::WindowFlags flags)
     : QDockWidget(parent, flags), filter(nullptr), model(nullptr) {
     setWindowTitle("Items");
-    QVBoxLayout* layout = new QVBoxLayout();
-    QWidget* intermediate = new QWidget();
+    auto layout = new QVBoxLayout();
+    auto intermediate = new QWidget();
 
     searchbox = new QLineEdit();
     searchbox->setPlaceholderText("Search");
@@ -28,7 +28,7 @@ ItemListWidget::ItemListWidget(QWidget* parent, Qt::WindowFlags flags)
 }
 
 void ItemListWidget::worldLoaded(GameWorld* world) {
-    if (model) delete model;
+    delete model;
     model = new ItemListModel(world, this);
     filter->setSourceModel(model);
 }

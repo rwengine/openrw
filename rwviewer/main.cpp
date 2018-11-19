@@ -7,5 +7,5 @@ int main(int argc, char *argv[]) {
 
     ViewerWindow viewer;
 
-    return app.exec();
+    return QApplication::exec();
 }

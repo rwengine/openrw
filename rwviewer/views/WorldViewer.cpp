@@ -19,7 +19,7 @@ void WorldViewer::loadPlacements(const QString& file) {
 
 void WorldViewer::loadPlacements() {
     QFileDialog dialog(this, "Open Placements", "", "Placement (*.ipl)");
-    if (dialog.exec()) {
+    if (dialog.exec() != 0) {
         loadPlacements(dialog.selectedFiles()[0]);
     }
 }

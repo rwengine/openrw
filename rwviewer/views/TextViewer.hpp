@@ -42,8 +42,8 @@ class TextViewer : public ViewerInterface {
     void worldChanged() override;
 
     GameString currentGameString;
-    font_t currentFont;
-    int currentFontSize;
+    font_t currentFont{};
+    int currentFontSize{};
 
     void updateRender();
 
@@ -58,7 +58,7 @@ private slots:
     void onGameStringChange(const GameString &gameString);
     void onStringChange();
     void onFontChange(size_t font);
-    void onFontSizeChange(int font);
+    void onFontSizeChange(int size);
 };
 
 #endif

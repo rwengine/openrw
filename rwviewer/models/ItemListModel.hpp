@@ -11,7 +11,7 @@ class ItemListModel : public QAbstractTableModel {
     GameWorld* _world;
 
 public:
-    explicit ItemListModel(GameWorld* _world, QObject* parent = 0);
+    explicit ItemListModel(GameWorld* world, QObject* parent = 0);
 
     GameWorld* world() const {
         return _world;

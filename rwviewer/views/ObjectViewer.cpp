@@ -1,6 +1,6 @@
 #include "ObjectViewer.hpp"
-#include <models/ObjectListModel.hpp>
 #include <ViewerWindow.hpp>
+#include <models/ObjectListModel.hpp>
 
 #include <QCheckBox>
 #include <QLineEdit>
@@ -9,8 +9,9 @@
 
 class ObjectSearchModel : public QSortFilterProxyModel {
 public:
-    ObjectSearchModel(QObject* parent)
-        : QSortFilterProxyModel(parent) { }
+    explicit ObjectSearchModel(QObject* parent)
+        : QSortFilterProxyModel(parent) {
+    }
 
     void showCARS(bool cars) {
         _showCars = cars;
@@ -40,16 +41,19 @@ public:
 
         switch (model->type()) {
             case ModelDataType::VehicleInfo:
-                if (!_showCars)
+                if (!_showCars) {
                     return false;
+                }
                 break;
             case ModelDataType::PedInfo:
-                if (!_showPeds)
+                if (!_showPeds) {
                     return false;
+                }
                 break;
             default:
-                if (!_showMisc)
+                if (!_showMisc) {
                     return false;
+                }
                 break;
         }
 
@@ -98,7 +102,7 @@ QLayout* searchControls(ObjectSearchModel* search) {
 
     return bar;
 }
-}
+}  // namespace
 
 ObjectViewer::ObjectViewer(QWidget* parent, Qt::WindowFlags f)
     : ViewerInterface(parent, f) {

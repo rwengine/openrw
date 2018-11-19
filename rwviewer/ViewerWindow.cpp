@@ -2,8 +2,8 @@
 #include <ViewerWidget.hpp>
 #include "views/ModelViewer.hpp"
 #include "views/ObjectViewer.hpp"
-#include "views/WorldViewer.hpp"
 #include "views/TextViewer.hpp"
+#include "views/WorldViewer.hpp"
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
@@ -12,10 +12,10 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QWindow>
-#include <QMessageBox>
 
 static int MaxRecentGames = 5;
 
@@ -104,7 +104,7 @@ void ViewerWindow::createDefaultViews() {
     setCentralWidget(views);
 }
 
-void ViewerWindow::showEvent(QShowEvent*) {
+void ViewerWindow::showEvent(QShowEvent* /*event*/) {
     static bool first = true;
     if (first) {
         QSettings settings("OpenRW", "rwviewer");
@@ -126,7 +126,9 @@ void ViewerWindow::loadGame() {
         this, tr("Open Directory"), QDir::homePath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    if (dir.size() > 0) loadGame(dir);
+    if (dir.size() > 0) {
+        loadGame(dir);
+    }
 }
 
 void ViewerWindow::loadGame(const QString& path) {
@@ -160,13 +162,15 @@ void ViewerWindow::loadGame(const QString& path) {
     QStringList recent = settings.value("recentGames").toStringList();
     recent.removeAll(path);
     recent.prepend(path);
-    while (recent.size() > MaxRecentGames) recent.removeLast();
+    while (recent.size() > MaxRecentGames) {
+        recent.removeLast();
+    }
     settings.setValue("recentGames", recent);
 
     updateRecentGames();
 }
 
-void ViewerWindow::showObjectModel(uint16_t) {
+void ViewerWindow::showObjectModel(uint16_t /*unused*/) {
     RW_MESSAGE("showObjectModel unimplemented");  // FIXME: unimplemented
 }
 
@@ -185,12 +189,10 @@ void ViewerWindow::updateRecentGames() {
         }
     }
 
-    recentSep->setVisible(recent.size() > 0);
+    recentSep->setVisible(!recent.empty());
 }
 
-ViewerWindow::~ViewerWindow() {
-
-}
+ViewerWindow::~ViewerWindow() = default;
 
 bool ViewerWindow::makeCurrent() {
     if (!m_context.makeCurrent(hiddenSurface)) {

@@ -14,11 +14,11 @@ void TextModel::setMapData(const TextMapType &textMap) {
     endResetModel();
 }
 
-int TextModel::rowCount(const QModelIndex &) const {
+int TextModel::rowCount(const QModelIndex & /*parent*/) const {
     return static_cast<int>(m_textMap.keys.size());
 }
 
-int TextModel::columnCount(const QModelIndex &) const {
+int TextModel::columnCount(const QModelIndex & /*parent*/) const {
     return static_cast<int>(m_textMap.languages.size());
 }
 

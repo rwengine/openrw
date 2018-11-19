@@ -8,7 +8,7 @@ QOpenGLContextWrapper::QOpenGLContextWrapper(QWidget *parent)
     : m_parent(parent) {
 }
 
-void QOpenGLContextWrapper::setup(QSurfaceFormat format) {
+void QOpenGLContextWrapper::setup(const QSurfaceFormat &format) {
     m_context = new QOpenGLContext(m_parent);
     m_context->setShareContext(QOpenGLContext::globalShareContext());
     m_context->setFormat(format);

@@ -21,8 +21,8 @@ class GameRenderer;
 class ViewerWindow : public QMainWindow {
     Q_OBJECT
     QOpenGLContextWrapper m_context;
-    QOffscreenSurface* hiddenSurface;
-    QTabWidget* views;
+    QOffscreenSurface* hiddenSurface = nullptr;
+    QTabWidget* views = nullptr;
 
     Logger engineLog;
 
@@ -52,7 +52,7 @@ private slots:
 
 private:
     QList<QAction*> recentGames;
-    QAction* recentSep;
+    QAction* recentSep{};
     void updateRecentGames();
 
     void createMenus();
