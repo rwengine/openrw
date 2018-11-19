@@ -41,8 +41,7 @@ public:
      * @param newgame
      * @param game An empty string, a save game to load, or the string "test".
      */
-    IngameState(RWGame* game, bool newgame = true,
-                const std::string& save = "");
+    IngameState(RWGame* game, bool newgame = true, std::string save = "");
 
     void startTest();
     void startGame();

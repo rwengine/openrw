@@ -1,9 +1,11 @@
 #define SDL_MAIN_HANDLED
-#include <iostream>
-#include "RWGame.hpp"
 #include <SDL.h>
 
+#include "RWGame.hpp"
+
 #include <core/Logger.hpp>
+
+#include <iostream>
 
 int main(int argc, char* argv[]) {
     SDL_SetMainReady();

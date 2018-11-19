@@ -18,7 +18,7 @@ constexpr int kDebugFont = 2;
 const glm::vec2 kDebugMenuOffset = glm::vec2(10.f, 50.f);
 
 static void jumpCharacter(RWGame* game, CharacterObject* player,
-                          const glm::vec3& target, bool ground = true) {
+                          const glm::vec3& target, bool ground) {
     glm::vec3 newPosition = target;
     if (ground) {
         newPosition = game->getWorld()->getGroundAtPosition(newPosition) +
@@ -86,25 +86,25 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
         {{"Back", [=] { enterMenu(createDebugMenu()); }},
          {"Jump to Docks",
           [=] {
-              jumpCharacter(game, player, glm::vec3(1390.f, -837.f, 100.f));
+              jumpCharacter(game, player, glm::vec3(1390.f, -837.f, 100.f), true);
           }},
          {"Jump to Garage",
-          [=] { jumpCharacter(game, player, glm::vec3(270.f, -605.f, 40.f)); }},
+          [=] { jumpCharacter(game, player, glm::vec3(270.f, -605.f, 40.f), true); }},
          {"Jump to Airport",
           [=] {
-              jumpCharacter(game, player, glm::vec3(-950.f, -980.f, 12.f));
+              jumpCharacter(game, player, glm::vec3(-950.f, -980.f, 12.f), true);
           }},
          {"Jump to Hideout",
           [=] {
-              jumpCharacter(game, player, glm::vec3(875.0, -309.0, 100.0));
+              jumpCharacter(game, player, glm::vec3(875.0, -309.0, 100.0), true);
           }},
          {"Jump to Luigi's",
           [=] {
-              jumpCharacter(game, player, glm::vec3(902.75, -425.56, 100.0));
+              jumpCharacter(game, player, glm::vec3(902.75, -425.56, 100.0), true);
           }},
          {"Jump to Hospital",
           [=] {
-              jumpCharacter(game, player, glm::vec3(1123.77, -569.15, 100.0));
+              jumpCharacter(game, player, glm::vec3(1123.77, -569.15, 100.0), true);
           }},
          {"Unsolid garage doors",
           [=] {
@@ -425,10 +425,11 @@ void DebugState::handleEvent(const SDL_Event& event) {
                     break;
                 case SDLK_f:
                     _freeLook = !_freeLook;
-                    if (_freeLook)
+                    if (_freeLook) {
                         getWindow().hideCursor();
-                    else
+                    } else {
                         getWindow().showCursor();
+                    }
                     break;
                 case SDLK_p:
                     printCameraDetails();
@@ -468,11 +469,13 @@ void DebugState::handleEvent(const SDL_Event& event) {
                     event.motion.xrel / static_cast<float>(screenSize.x),
                     event.motion.yrel / static_cast<float>(screenSize.y));
 
-                if (!_invertedY) mouseMove.y = -mouseMove.y;
+                if (!_invertedY) {
+                    mouseMove.y = -mouseMove.y;
+                }
 
                 _debugLook.x -= mouseMove.x;
 
-                float qpi = glm::half_pi<float>();
+                auto qpi = glm::half_pi<float>();
                 _debugLook.y -= glm::clamp(mouseMove.y, -qpi, qpi);
             }
             break;
@@ -492,7 +495,9 @@ void DebugState::printCameraDetails() {
 
 void DebugState::spawnVehicle(unsigned int id) {
     auto ch = game->getWorld()->getPlayer()->getCharacter();
-    if (!ch) return;
+    if (!ch) {
+        return;
+    }
 
     auto playerRot = ch->getRotation();
     auto spawnPos = ch->getPosition();
@@ -504,7 +509,9 @@ void DebugState::spawnVehicle(unsigned int id) {
 
 void DebugState::spawnFollower(unsigned int id) {
     auto ch = game->getWorld()->getPlayer()->getCharacter();
-    if (!ch) return;
+    if (ch == nullptr) {
+        return;
+    }
 
     glm::vec3 fwd = ch->rotation * glm::vec3(0.f, 1.f, 0.f);
 
@@ -513,7 +520,7 @@ void DebugState::spawnFollower(unsigned int id) {
                           normal)) {
         auto spawnPos = hit + normal;
         auto follower = game->getWorld()->createPedestrian(id, spawnPos);
-        jumpCharacter(game, follower, spawnPos);
+        jumpCharacter(game, follower, spawnPos, true);
         follower->controller->setGoal(CharacterController::FollowLeader);
         follower->controller->setTargetCharacter(ch);
     }
@@ -530,6 +537,6 @@ void DebugState::giveItem(int slot) {
     }
 }
 
-const ViewCamera& DebugState::getCamera(float) {
+const ViewCamera& DebugState::getCamera(float /*alpha*/) {
     return _debugCam;
 }

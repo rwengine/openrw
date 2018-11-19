@@ -16,7 +16,7 @@ public:
     virtual void enterMainMenu();
     virtual void enterLoadMenu();
 
-    void handleEvent(const SDL_Event& event) override;
+    void handleEvent(const SDL_Event& e) override;
 };
 
 #endif  // MENUSTATE_HPP

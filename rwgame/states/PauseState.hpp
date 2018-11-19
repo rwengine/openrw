@@ -15,7 +15,7 @@ public:
 
     void draw(GameRenderer* r) override;
 
-    void handleEvent(const SDL_Event& event) override;
+    void handleEvent(const SDL_Event& e) override;
 };
 
 #endif  // PAUSESTATE_HPP

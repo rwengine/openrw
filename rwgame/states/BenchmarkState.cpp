@@ -4,9 +4,10 @@
 
 #include <fstream>
 #include <iostream>
+#include <utility>
 
-BenchmarkState::BenchmarkState(RWGame* game, const std::string& benchfile)
-    : State(game), benchfile(benchfile) {
+BenchmarkState::BenchmarkState(RWGame* game, std::string benchfile)
+    : State(game), benchfile(std::move(benchfile)) {
 }
 
 void BenchmarkState::enter() {
@@ -28,21 +29,37 @@ void BenchmarkState::enter() {
     while (benchstream) {
         TrackPoint point;
         benchstream >> point.time;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.position.x;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.position.y;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.position.z;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.angle.x;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.angle.y;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.angle.z;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         benchstream >> point.angle.w;
-        if (!benchstream) break;
+        if (!benchstream) {
+            break;
+        }
         if (track.empty()) {
             tmpPos = point.position;
         }
@@ -99,6 +116,6 @@ void BenchmarkState::handleEvent(const SDL_Event& e) {
     State::handleEvent(e);
 }
 
-const ViewCamera& BenchmarkState::getCamera(float) {
+const ViewCamera& BenchmarkState::getCamera(float /*alpha*/) {
     return trackCam;
 }

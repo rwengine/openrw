@@ -8,12 +8,15 @@ const ViewCamera defaultView{{-250.f, -550.f, 75.f},
 
 void State::handleEvent(const SDL_Event& e) {
     auto m = getCurrentMenu();
-    if (!m) return;
+    if (!m) {
+        return;
+    }
 
     switch (e.type) {
         case SDL_MOUSEBUTTONUP:
-            if (e.button.button == SDL_BUTTON_LEFT)
+            if (e.button.button == SDL_BUTTON_LEFT) {
                 m->click(e.button.x, e.button.y);
+            }
             break;
 
         case SDL_MOUSEMOTION:
@@ -37,7 +40,7 @@ void State::handleEvent(const SDL_Event& e) {
     }
 }
 
-const ViewCamera& State::getCamera(float) {
+const ViewCamera& State::getCamera(float /*unused*/) {
     return defaultView;
 }
 

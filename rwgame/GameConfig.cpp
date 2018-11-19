@@ -76,8 +76,8 @@ std::string stripComments(const std::string &str) {
 }
 
 struct PathTranslator {
-    typedef std::string internal_type;
-    typedef rwfs::path external_type;
+    using internal_type = std::string;
+    using external_type = rwfs::path;
     boost::optional<external_type> get_value(const internal_type &str) {
         return rwfs::path(str);
     }
@@ -87,8 +87,8 @@ struct PathTranslator {
 };
 
 struct StringTranslator {
-    typedef std::string internal_type;
-    typedef std::string external_type;
+    using internal_type = std::string;
+    using external_type = std::string;
     boost::optional<external_type> get_value(const internal_type &str) {
         return stripComments(str);
     }
@@ -98,8 +98,8 @@ struct StringTranslator {
 };
 
 struct BoolTranslator {
-    typedef std::string internal_type;
-    typedef bool external_type;
+    using internal_type = std::string;
+    using external_type = bool;
     boost::optional<external_type> get_value(const internal_type &str) {
         boost::optional<external_type> res;
         try {
@@ -114,8 +114,8 @@ struct BoolTranslator {
 };
 
 struct IntTranslator {
-    typedef std::string internal_type;
-    typedef int external_type;
+    using internal_type = std::string;
+    using external_type = int;
     boost::optional<external_type> get_value(const internal_type &str) {
         boost::optional<external_type> res;
         try {
@@ -130,8 +130,8 @@ struct IntTranslator {
 };
 
 struct FloatTranslator {
-    typedef std::string internal_type;
-    typedef float external_type;
+    using internal_type = std::string;
+    using external_type = float;
     boost::optional<external_type> get_value(const internal_type &str) {
         boost::optional<external_type> res;
         try {
@@ -189,8 +189,8 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
 
     auto read_config = [&](const std::string &key, auto &target,
                            const auto &defaultValue, auto &translator,
-                           bool optional = true) {
-        typedef typename std::remove_reference<decltype(target)>::type config_t;
+                           bool required) {
+        using config_t = typename std::remove_reference<decltype(target)>::type;
 
         config_t sourceValue;
         knownKeys.push_back(key);
@@ -209,7 +209,7 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
                 } catch (pt::ptree_bad_path &e) {
                     RW_UNUSED(e);
                     // Catches missing key-value pairs: fail when required
-                    if (!optional) {
+                    if (required) {
                         parseResult.failRequiredMissing(key);
                         RW_MESSAGE(e.what());
                         return;
@@ -252,15 +252,15 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
 
     // @todo Don't allow path separators and relative directories
     read_config("game.path", this->m_gamePath, "/opt/games/Grand Theft Auto 3",
-                patht, false);
-    read_config("game.language", this->m_gameLanguage, "american", deft);
-    read_config("game.hud_scale", this->m_HUDscale, 1.f, floatt);
+                patht, true);
+    read_config("game.language", this->m_gameLanguage, "american", deft, false);
+    read_config("game.hud_scale", this->m_HUDscale, 1.f, floatt, false);
 
-    read_config("input.invert_y", this->m_inputInvertY, false, boolt);
+    read_config("input.invert_y", this->m_inputInvertY, false, boolt, false);
 
-    read_config("window.width", this->m_windowWidth, 800, intt);
-    read_config("window.height", this->m_windowHeight, 600, intt);
-    read_config("window.fullscreen", this->m_windowFullscreen, false, boolt);
+    read_config("window.width", this->m_windowWidth, 800, intt, false);
+    read_config("window.height", this->m_windowHeight, 600, intt, false);
+    read_config("window.fullscreen", this->m_windowFullscreen, false, boolt, false);
 
     // Build the unknown key/value map from the correct source
     switch (srcType) {
@@ -299,7 +299,9 @@ GameConfig::ParseResult GameConfig::parseConfig(GameConfig::ParseType srcType,
             break;
     }
 
-    if (!parseResult.isValid()) return parseResult;
+    if (!parseResult.isValid()) {
+        return parseResult;
+    }
 
     try {
         if (destType == ParseType::STRING) {
@@ -343,22 +345,10 @@ GameConfig::ParseResult::ParseResult(GameConfig::ParseType srcType,
     : m_result(ErrorType::GOOD)
     , m_inputfilename(GameConfig::extractFilenameParseTypeData(srcType, source))
     , m_outputfilename(
-          GameConfig::extractFilenameParseTypeData(destType, destination))
-    , m_line(0)
-    , m_message()
-    , m_keys_requiredMissing()
-    , m_keys_invalidData()
-    , m_unknownData() {
+          GameConfig::extractFilenameParseTypeData(destType, destination)) {
 }
 
-GameConfig::ParseResult::ParseResult()
-    : m_result(ErrorType::UNINITIALIZED)
-    , m_inputfilename()
-    , m_outputfilename()
-    , m_line(0)
-    , m_message()
-    , m_keys_requiredMissing()
-    , m_keys_invalidData() {
+GameConfig::ParseResult::ParseResult() : m_result(ErrorType::UNINITIALIZED) {
 }
 
 GameConfig::ParseResult::ErrorType GameConfig::ParseResult::type() const {
@@ -406,8 +396,8 @@ const std::vector<std::string>
     return this->m_keys_requiredMissing;
 }
 
-const std::vector<std::string> &GameConfig::ParseResult::getKeysInvalidData()
-    const {
+const std::vector<std::string>
+    &GameConfig::ParseResult::getKeysInvalidData() const {
     return this->m_keys_invalidData;
 }
 
@@ -421,8 +411,8 @@ std::string GameConfig::ParseResult::what() const {
             oss << "Parsing completed without errors.";
             break;
         case ErrorType::INVALIDARGUMENT:
-            oss << "Invalid argument: destination cannot be the default "
-                   "config.";
+            oss << "Invalid argument: destination cannot be the "
+                   "default config.";
             break;
         case ErrorType::INVALIDINPUTFILE:
             oss << "Error while reading \"" << this->m_inputfilename
@@ -435,7 +425,8 @@ std::string GameConfig::ParseResult::what() const {
                 << this->m_message << ".";
             break;
         case ErrorType::INVALIDCONTENT:
-            oss << "Error while parsing \"" << this->m_inputfilename << "\".";
+            oss << "Error while parsing \"" << this->m_inputfilename
+                << "\".";
             if (!this->m_keys_requiredMissing.empty()) {
                 oss << "\nRequired keys that are missing:";
                 for (auto &key : this->m_keys_requiredMissing) {

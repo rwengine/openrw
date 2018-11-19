@@ -26,7 +26,7 @@
 #include <iostream>
 
 namespace {
-static constexpr std::array<
+constexpr std::array<
     std::tuple<GameRenderer::SpecialModel, char const*, char const*>, 3>
     kSpecialModels{{{GameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
                     {GameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
@@ -44,11 +44,11 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
-    bool newgame = options.count("newgame");
-    bool test = options.count("test");
+    bool newgame = options.count("newgame") != 0u;
+    bool test = options.count("test") != 0u;
     std::string startSave(
-        options.count("load") ? options["load"].as<std::string>() : "");
-    std::string benchFile(options.count("benchmark")
+        options.count("load") != 0u ? options["load"].as<std::string>() : "");
+    std::string benchFile(options.count("benchmark") != 0u
                               ? options["benchmark"].as<std::string>()
                               : "");
 
@@ -223,8 +223,9 @@ void RWGame::handleCheatInput(char symbol) {
                 200,//m16
                 5   //sniper rifle
             }};
-            for (auto i = 0u; i < ammo.size(); i++)
-                player->addToInventory(static_cast<int>(i+1),ammo[i]);
+            for (auto i = 0u; i < ammo.size(); i++) {
+                player->addToInventory(static_cast<int>(i + 1), ammo[i]);
+            }
             state.showHelpMessage("CHEAT2"); // III / VC: Inputting weapon cheats.
         });
 
@@ -434,7 +435,7 @@ float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
 bool RWGame::updateInput() {
     RW_PROFILE_SCOPE(__func__);
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {
+    while (SDL_PollEvent(&event) != 0) {
         switch (event.type) {
             case SDL_QUIT:
                 return false;
@@ -539,7 +540,7 @@ void RWGame::tick(float dt) {
         }
 
         /// @todo this doesn't make sense as the condition
-        if (state.playerObject) {
+        if (state.playerObject != 0u) {
             currentCam.frustum.update(currentCam.frustum.projection() *
                                       currentCam.getView());
             // Use the current camera position to spawn pedestrians.
@@ -582,7 +583,7 @@ void RWGame::tickObjects(float dt) const {
     world->destroyQueuedObjects();
 }
 
-void RWGame::render(float alpha, float time) {
+void RWGame::render(float alpha, float dt) {
     RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
 
     lastDraws = getRenderer().getRenderer()->getDrawCount();
@@ -617,9 +618,11 @@ void RWGame::render(float alpha, float time) {
 
     renderer.getRenderer()->popDebugGroup();
 
-    renderDebugView(time, viewCam);
+    renderDebugView(dt, viewCam);
 
-    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused()) {
+        hudDrawer.drawOnScreenText(world.get(), &renderer);
+    }
 
     if (StateManager::currentState()) {
         RW_PROFILE_SCOPE("state");
@@ -627,21 +630,21 @@ void RWGame::render(float alpha, float time) {
     }
 }
 
-void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
+void RWGame::renderDebugView(float dt, ViewCamera &viewCam) {
     RW_PROFILE_SCOPE(__func__);
     switch (debugview_) {
         case DebugViewMode::General:
-            renderDebugStats(time);
+            renderDebugStats(dt);
             break;
         case DebugViewMode::Physics:
             world->dynamicsWorld->debugDrawWorld();
             debug.flush(&renderer);
             break;
         case DebugViewMode::Navigation:
-            renderDebugPaths(time);
+            renderDebugPaths(dt);
             break;
         case DebugViewMode::Objects:
-            renderDebugObjects(time, viewCam);
+            renderDebugObjects(dt, viewCam);
             break;
         default:
             break;
@@ -660,8 +663,8 @@ void RWGame::renderDebugStats(float time) {
         times_index = 0;
         time_average = 0;
 
-        for (size_t i = 0; i < average_every_frame; ++i) {
-            time_average += times[i];
+        for (float time : times) {
+            time_average += time;
         }
         time_average /= average_every_frame;
     }
@@ -830,7 +833,9 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     };
 
     for (auto& p : world->vehiclePool.objects) {
-        if (!isnearby(p.second.get())) continue;
+        if (!isnearby(p.second.get())) {
+            continue;
+        }
         auto v = static_cast<VehicleObject*>(p.second.get());
 
         std::stringstream ss;
@@ -842,7 +847,9 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         showdata(v, ss);
     }
     for (auto& p : world->pedestrianPool.objects) {
-        if (!isnearby(p.second.get())) continue;
+        if (!isnearby(p.second.get())) {
+            continue;
+        }
         auto c = static_cast<CharacterObject*>(p.second.get());
         const auto& state = c->getCurrentState();
         auto act = c->controller->getCurrentActivity();
@@ -850,7 +857,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         std::stringstream ss;
         ss << "Health: " << state.health << " (" << state.armour << ")\n"
            << (c->isAlive() ? "Alive" : "Dead") << "\n"
-           << "Activity: " << (act ? act->name() : "Idle") << "\n";
+           << "Activity: " << (act != nullptr ? act->name() : "Idle") << "\n";
 
         showdata(c, ss);
     }

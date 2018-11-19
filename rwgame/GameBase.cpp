@@ -58,20 +58,20 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
         std::cout << "Error parsing arguments: " << ex.what() << std::endl;
     }
 
-    if (help || vm.count("help")) {
+    if (help || (vm.count("help") != 0u)) {
         std::cout << desc;
         throw std::invalid_argument("");
     }
-    if (vm.count("width")) {
+    if (vm.count("width") != 0u) {
         w = vm["width"].as<size_t>();
     }
-    if (vm.count("height")) {
+    if (vm.count("height") != 0u) {
         h = vm["height"].as<size_t>();
     }
-    if (vm.count("fullscreen")) {
+    if (vm.count("fullscreen") != 0u) {
         fullscreen = true;
     }
-    if (vm.count("config")) {
+    if (vm.count("config") != 0u) {
         configPath = vm["config"].as<rwfs::path>();
     } else {
         configPath = GameConfig::getDefaultConfigPath() / kDefaultConfigFileName;
@@ -86,18 +86,19 @@ GameBase::GameBase(Logger &inlog, int argc, char *argv[]) :
         throw std::runtime_error(config.getParseResult().what());
     }
 
-    if (!vm.count("width")) {
+    if (vm.count("width") == 0u) {
         w = config.getWindowWidth();
     }
-    if (!vm.count("height")) {
+    if (vm.count("height") == 0u) {
         h = config.getWindowHeight();
     }
-    if (!vm.count("fullscreen")) {
+    if (vm.count("fullscreen") == 0u) {
         fullscreen = config.getWindowFullscreen();
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         throw std::runtime_error("Failed to initialize SDL2!");
+    }
 
     window.create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);
 

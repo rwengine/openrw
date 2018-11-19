@@ -20,6 +20,7 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
 #include <glm/gtx/norm.hpp>
+#include <utility>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
@@ -38,9 +39,9 @@ constexpr float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
 constexpr float kVehicleCameraPitch =
     glm::half_pi<float>() - glm::quarter_pi<float>() * 0.25f;
 
-IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
+IngameState::IngameState(RWGame* game, bool newgame, std::string save)
     : State(game)
-    , save(save)
+    , save(std::move(save))
     , newgame(newgame)
     , m_invertedY(game->getConfig().getInputInvertY()) {
 }
@@ -511,7 +512,7 @@ GameObject* IngameState::getCameraTarget() const {
     auto target =
         getWorld()->pedestrianPool.find(game->getState()->cameraTarget);
 
-    if (target == nullptr && game->getWorld()->getPlayer()) {
+    if (!target && game->getWorld()->getPlayer()) {
         target = game->getWorld()->getPlayer()->getCharacter();
     }
 

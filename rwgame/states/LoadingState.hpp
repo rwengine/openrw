@@ -8,7 +8,7 @@ class LoadingState final : public State {
     std::function<void(void)> complete;
 
 public:
-    LoadingState(RWGame* game, const std::function<void(void)>& callback);
+    LoadingState(RWGame* game, std::function<void(void)> callback);
 
     void enter() override;
 
@@ -20,7 +20,7 @@ public:
 
     bool shouldWorldUpdate() override;
 
-    void handleEvent(const SDL_Event& event) override;
+    void handleEvent(const SDL_Event& e) override;
 };
 
 #endif  // LOADINGSTATE_HPP

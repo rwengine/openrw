@@ -1,8 +1,11 @@
 #include "LoadingState.hpp"
+
 #include "RWGame.hpp"
 
-LoadingState::LoadingState(RWGame* game, const std::function<void(void)>& callback)
-    : State(game), complete(callback) {
+#include <utility>
+
+LoadingState::LoadingState(RWGame* game, std::function<void(void)> callback)
+    : State(game), complete(std::move(callback)) {
 }
 
 void LoadingState::enter() {

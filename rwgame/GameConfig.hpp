@@ -143,14 +143,14 @@ public:
         ErrorType m_result;
 
         /// Filename of the input file
-        std::string m_inputfilename;
+        std::string m_inputfilename{};
 
         /// Filename of the output file
-        std::string m_outputfilename;
+        std::string m_outputfilename{};
 
         /// Line number where the failure occurred (on invalid input or output
         /// file)
-        size_t m_line;
+        size_t m_line{};
 
         /// Description of the failure (on invalid input or output file)
         std::string m_message;

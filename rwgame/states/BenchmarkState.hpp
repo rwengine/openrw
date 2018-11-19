@@ -20,7 +20,7 @@ class BenchmarkState final : public State {
     uint32_t frameCounter{0};
 
 public:
-    BenchmarkState(RWGame* game, const std::string& benchfile);
+    BenchmarkState(RWGame* game, std::string benchfile);
 
     void enter() override;
 
@@ -30,7 +30,7 @@ public:
 
     void draw(GameRenderer* r) override;
 
-    void handleEvent(const SDL_Event& event) override;
+    void handleEvent(const SDL_Event& e) override;
 
     const ViewCamera& getCamera(float) override;
 };

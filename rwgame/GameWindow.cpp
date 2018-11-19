@@ -4,7 +4,9 @@
 void GameWindow::create(const std::string& title, size_t w, size_t h,
                         bool fullscreen) {
     Uint32 style = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN;
-    if (fullscreen) style |= SDL_WINDOW_FULLSCREEN;
+    if (fullscreen) {
+        style |= SDL_WINDOW_FULLSCREEN;
+    }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
