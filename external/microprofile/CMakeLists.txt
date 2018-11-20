@@ -21,4 +21,8 @@ target_link_libraries(microprofile
         openrw::checks
 )
 
+openrw_target_apply_options(
+    TARGET microprofile
+)
+
 add_library(microprofile::microprofile ALIAS microprofile)

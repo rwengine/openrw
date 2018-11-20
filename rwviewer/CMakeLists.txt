@@ -56,6 +56,7 @@ target_link_libraries(rwviewer
 
 openrw_target_apply_options(
     TARGET rwviewer
+    COVERAGE
     INSTALL INSTALL_PDB
     )
 

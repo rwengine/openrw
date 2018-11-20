@@ -2,9 +2,11 @@ FROM base/archlinux
 
 RUN pacman -Syy --noconfirm \
     core/gcc \
+    extra/llvm \
     extra/clang \
     make \
     ninja \
+    curl \
     extra/boost \
     extra/cmake \
     extra/ffmpeg \
@@ -14,5 +16,7 @@ RUN pacman -Syy --noconfirm \
     extra/sdl2 \
     extra/qt5-base \
     extra/freetype2
+
+# FIXME: lcov
 
 CMD ["/bin/bash"]

@@ -40,9 +40,6 @@ else()
     message(FATAL_ERROR "Unknown CMAKE_SYSTEM_NAME detected '${CMAKE_SYSTEM_NAME}'")
 endif()
 
-set(WARNING_MESSAGES)
-set(ERROR_MESSAGES)
-
 if($ENV{USE_CONAN})
     set(USE_CONAN TRUE)
 else()
@@ -51,10 +48,10 @@ endif()
 
 set(SEPARATE_TEST_SUITES TRUE)
 
-if($ENV{RUN_COVERAGE})
-    set(RUN_COVERAGE TRUE)
+if($ENV{TEST_COVERAGE})
+    set(TEST_COVERAGE TRUE)
 else()
-    set(RUN_COVERAGE FALSE)
+    set(TEST_COVERAGE FALSE)
 endif()
 set(RUN_MEMCHECK FALSE) #TODO
 
@@ -68,18 +65,10 @@ endif()
 set(TESTS_NODATA FALSE)
 set(RUN_TESTS TRUE)
 
+set(SUBMIT $ENV{SUBMIT})
+
+set(CODECOV_FLAGS "data")
+
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
 
-if(WARNING_MESSAGES)
-    foreach(WARNING_MESSAGE ${WARNING_MESSAGES})
-        message(WARNING "${WARNING_MESSAGE}")
-    endforeach()
-    message(WARNING "Warning(s) detected")
-endif()
-
-if(ERROR_MESSAGES)
-    foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
-        message(SEND_ERROR "${ERROR_MESSAGE}")
-    endforeach()
-    message(FATAL_ERROR "Error(s) detected")
-endif()
+handle_warnings_errors()

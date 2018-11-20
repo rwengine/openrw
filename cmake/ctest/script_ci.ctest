@@ -41,9 +41,6 @@ else()
     message(FATAL_ERROR "Unknown CMAKE_SYSTEM_NAME detected '${CMAKE_SYSTEM_NAME}'")
 endif()
 
-set(WARNING_MESSAGES)
-set(ERROR_MESSAGES)
-
 if($ENV{USE_CONAN})
     set(USE_CONAN TRUE)
 else()
@@ -51,7 +48,6 @@ else()
 endif()
 
 set(SEPARATE_TEST_SUITES FALSE)
-set(RUN_COVERAGE FALSE)
 set(RUN_MEMCHECK FALSE)
 openrw_should_submit_ci(SUBMIT)
 
@@ -60,6 +56,13 @@ set(BUILDER_NAME "${BUILDER_NAME_BASE}-nodata")
 set(APPEND_RESULTS FALSE)
 set(TESTS_NODATA TRUE)
 set(RUN_TESTS TRUE)
+if($ENV{TEST_COVERAGE})
+    set(TEST_COVERAGE TRUE)
+else()
+    set(TEST_COVERAGE FALSE)
+endif()
+
+set(CODECOV_FLAGS "nodata")
 
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
 
@@ -69,18 +72,8 @@ set(APPEND_RESULTS FALSE)
 set(TESTS_NODATA FALSE)
 set(RUN_TESTS FALSE)
 
+set(CODECOV_FLAGS "data")
+
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
 
-if(WARNING_MESSAGES)
-    foreach(WARNING_MESSAGE ${WARNING_MESSAGES})
-        message(WARNING "${WARNING_MESSAGE}")
-    endforeach()
-    message(WARNING "Warning(s) detected")
-endif()
-
-if(ERROR_MESSAGES)
-    foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
-        message(SEND_ERROR "${ERROR_MESSAGE}")
-    endforeach()
-    message(FATAL_ERROR "Error(s) detected")
-endif()
+handle_warnings_errors()

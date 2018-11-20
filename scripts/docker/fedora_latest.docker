@@ -10,6 +10,9 @@ RUN dnf update -y \
         gcc \
         gcc-c++ \
         clang \
+        llvm \
+        lcov \
+        curl \
         boost-devel \
         cmake \
         make \
@@ -21,6 +24,7 @@ RUN dnf update -y \
         SDL2-devel \
         qt5-devel \
         freetype-devel \
-        libasan
+        libasan \
+    && ln -s /usr/bin/python3 /usr/bin/python
 
 CMD ["/bin/bash"]

@@ -1,3 +1,34 @@
+set(WARNING_MESSAGES)
+set(ERROR_MESSAGES)
+
+function(emit_warning)
+    message("WARNING: ${ARGV}")
+    list(APPEND WARNING_MESSAGES "${ARGV}")
+    set(WARNING_MESSAGES "${WARNING_MESSAGES}" PARENT_SCOPE)
+endfunction()
+
+function(emit_error)
+    message("ERROR: ${ARGV}")
+    list(APPEND ERROR_MESSAGES "${ARGV}")
+    set(ERROR_MESSAGES "${ERROR_MESSAGES}" PARENT_SCOPE)
+endfunction()
+
+function(handle_warnings_errors)
+    if(WARNING_MESSAGES)
+        foreach(WARNING_MESSAGE ${WARNING_MESSAGES})
+            message(WARNING "${WARNING_MESSAGE}")
+        endforeach()
+        message(WARNING "Warning(s) detected")
+    endif()
+
+    if(ERROR_MESSAGES)
+        foreach(ERROR_MESSAGE ${ERROR_MESSAGES})
+            message(SEND_ERROR "${ERROR_MESSAGE}")
+        endforeach()
+        message(FATAL_ERROR "Error(s) detected")
+    endif()
+endfunction()
+
 function(openrw_src_dir RESULT)
     # Returns the OpenRW source directory
     get_filename_component(SRC "${CTEST_SCRIPT_DIRECTORY}/../.." ABSOLUTE)
