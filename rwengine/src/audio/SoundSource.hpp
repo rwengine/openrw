@@ -3,7 +3,25 @@
 
 #include <rw/filesystem.hpp>
 
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
+}
+
 #include <cstdint>
+#include <future>
+
+/// Structure for input data
+struct InputData {
+    uint8_t* ptr = nullptr;
+    size_t size{};  ///< size left in the buffer
+};
+
+class SwrContext;
+class AVFormatContext;
+class AVStream;
+class AVIOContext;
+class LoaderSDT;
 
 class LoaderSDT;
 
@@ -15,11 +33,49 @@ class SoundSource {
     friend struct SoundBuffer;
 
 public:
+    bool allocateAudioFrame();
+
+    bool allocateFormatContext(const rwfs::path& filePath);
+    bool prepareFormatContextSfx(LoaderSDT& sdt, size_t index, bool asWave);
+
+    bool findAudioStream(const rwfs::path& filePath);
+    bool findAudioStreamSfx();
+
+    bool prepareCodecContextWrap();
+    bool prepareCodecContext();
+
+    bool prepareCodecContextSfxWrap();
+    bool prepareCodecContextSfx();
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 5, 0)
+    bool prepareCodecContextLegacy();
+    bool prepareCodecContextSfxLegacy();
+#endif
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
+    void decodeFramesLegacy(size_t framesToDecode);
+#endif
+
+    void decodeFramesWrap(const rwfs::path& filePath);
+    void decodeFramesSfxWrap();
+    void decodeFrames(size_t framesToDecode);
+    void decodeAndResampleFrames(const rwfs::path& filePath, size_t framesToDecode);
+
+    void cleanupAfterSoundLoading();
+    void cleanupAfterSfxLoading();
+
+    void exposeSoundMetadata();
+    void exposeSfxMetadata(LoaderSDT& sdt);
+
+    void decodeRestSoundFramesAndCleanup(const rwfs::path& filePath);
+    void decodeRestSfxFramesAndCleanup();
+
     /// Load sound from mp3/wav file
-    void loadFromFile(const rwfs::path& filePath);
+    void loadFromFile(const rwfs::path& filePath, bool streaming = false);
 
     /// Load sound from sdt file
-    void loadSfx(LoaderSDT& sdt, std::size_t index, bool asWave = true);
+    void loadSfx(LoaderSDT& sdt, std::size_t index, bool asWave = true,
+                 bool streaming = false);
 
 private:
     /// Raw data
@@ -27,6 +83,20 @@ private:
 
     std::uint32_t channels;
     std::uint32_t sampleRate;
+
+    AVFrame* frame = nullptr;
+    AVFormatContext* formatContext = nullptr;
+    AVStream* audioStream = nullptr;
+    AVCodec* codec = nullptr;
+    SwrContext* swr = nullptr;
+    AVCodecContext* codecContext = nullptr;
+    AVPacket readingPacket;
+
+    // For sfx
+    AVIOContext* avioContext;
+    std::unique_ptr<char[]> raw_sound;
+    std::unique_ptr<uint8_t[]> inputDataStart;
+    InputData input{};
 };
 
 #endif
