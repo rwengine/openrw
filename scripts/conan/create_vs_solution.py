@@ -11,7 +11,6 @@ from conans.client import conan_api
 
 openrw_path = Path(__file__).resolve().parents[2]
 cmake_generator_lookup = {
-    2015: 'Visual Studio 14 2015',
     2017: 'Visual Studio 15 2017',
 }
 architectures = ['x64', 'x86']
