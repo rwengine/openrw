@@ -12,7 +12,7 @@ this it will not be possible to play.
 
 Windows | Linux | macOS
 ---| --- | --- 
-[![Build Status](https://ci.appveyor.com/api/projects/status/xyffurxul8m7heq6/branch/master?svg=true)](https://ci.appveyor.com/project/danhedron/openrw/branch/master) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
+[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
 
 
 ## Links
