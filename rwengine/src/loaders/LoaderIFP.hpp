@@ -67,7 +67,7 @@ struct AnimationBone {
  */
 struct Animation {
     std::string name;
-    std::map<std::string, std::unique_ptr<AnimationBone>> bones;
+    std::map<std::string, AnimationBone> bones;
 
     ~Animation() = default;
 

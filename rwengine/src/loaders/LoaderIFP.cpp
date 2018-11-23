@@ -81,9 +81,9 @@ bool LoaderIFP::loadFromMemory(char* data) {
             CPAN* cpan = read<CPAN>(data, dataI);
             ANIM* frames = read<ANIM>(data, dataI);
 
-            auto bonedata = std::make_unique<AnimationBone>();
-            bonedata->name = frames->name;
-            bonedata->frames.reserve(frames->frames);
+            AnimationBone boneData{};
+            boneData.name = frames->name;
+            boneData.frames.reserve(frames->frames);
 
             data_offs += ((8 + frames->base.size) - sizeof(ANIM));
 
@@ -93,37 +93,37 @@ bool LoaderIFP::loadFromMemory(char* data) {
             float time = 0.f;
 
             if (type == "KR00") {
-                bonedata->type = AnimationBone::R00;
+                boneData.type = AnimationBone::R00;
                 for (int d = 0; d < frames->frames; ++d) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     time = *read<float>(data, dataI);
-                    bonedata->frames.emplace_back(q, glm::vec3(0.f, 0.f, 0.f),
+                    boneData.frames.emplace_back(q, glm::vec3(0.f, 0.f, 0.f),
                                                 glm::vec3(1.f, 1.f, 1.f), time,
                                                 d);
                 }
             } else if (type == "KRT0") {
-                bonedata->type = AnimationBone::RT0;
+                boneData.type = AnimationBone::RT0;
                 for (int d = 0; d < frames->frames; ++d) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data, dataI);
-                    bonedata->frames.emplace_back(
+                    boneData.frames.emplace_back(
                         q, p, glm::vec3(1.f, 1.f, 1.f), time, d);
                 }
             } else if (type == "KRTS") {
-                bonedata->type = AnimationBone::RTS;
+                boneData.type = AnimationBone::RTS;
                 for (int d = 0; d < frames->frames; ++d) {
                     glm::quat q = glm::conjugate(*read<glm::quat>(data, dataI));
                     glm::vec3 p = *read<glm::vec3>(data, dataI);
                     glm::vec3 s = *read<glm::vec3>(data, dataI);
                     time = *read<float>(data, dataI);
-                    bonedata->frames.emplace_back(q, p, s, time, d);
+                    boneData.frames.emplace_back(q, p, s, time, d);
                 }
             }
 
-            bonedata->duration = time;
+            boneData.duration = time;
             animation->duration =
-                std::max(bonedata->duration, animation->duration);
+                std::max(boneData.duration, animation->duration);
 
             data_offs = start + sizeof(CPAN) + cpan->base.size;
 
@@ -131,7 +131,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
             std::transform(framename.begin(), framename.end(),
                            framename.begin(), ::tolower);
 
-            animation->bones.emplace(framename, std::move(bonedata));
+            animation->bones.emplace(framename, std::move(boneData));
         }
 
         data_offs = animstart + animroot->base.size;
