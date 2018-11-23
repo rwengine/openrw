@@ -76,6 +76,8 @@ bool LoaderIFP::loadFromMemory(char* data) {
         DGAN* animroot = read<DGAN>(data, dataI);
         std::string infoname = readString(data, dataI);
 
+        animation->bones.reserve(static_cast<unsigned>(animroot->info.entries));
+
         for (int c = 0; c < animroot->info.entries; ++c) {
             size_t start = data_offs;
             CPAN* cpan = read<CPAN>(data, dataI);
@@ -83,7 +85,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
 
             AnimationBone boneData{};
             boneData.name = frames->name;
-            boneData.frames.reserve(frames->frames);
+            boneData.frames.reserve(static_cast<unsigned>(frames->frames));
 
             data_offs += ((8 + frames->base.size) - sizeof(ANIM));
 
