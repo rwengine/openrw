@@ -3,8 +3,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -67,7 +67,7 @@ struct AnimationBone {
  */
 struct Animation {
     std::string name;
-    std::map<std::string, AnimationBone> bones;
+    std::unordered_map<std::string, AnimationBone> bones;
 
     ~Animation() = default;
 
