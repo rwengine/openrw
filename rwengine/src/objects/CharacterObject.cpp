@@ -254,18 +254,18 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
             // keyframes
             if ((animTime + step) > duration) {
                 glm::vec3 a =
-                    rootBone->getInterpolatedKeyframe(animTime).position;
+                    rootBone.getInterpolatedKeyframe(animTime).position;
                 glm::vec3 b =
-                    rootBone->getInterpolatedKeyframe(duration).position;
+                    rootBone.getInterpolatedKeyframe(duration).position;
                 glm::vec3 d = (b - a);
                 animTranslate.y += d.y;
                 step -= (duration - animTime);
                 animTime = 0.f;
             }
 
-            glm::vec3 a = rootBone->getInterpolatedKeyframe(animTime).position;
+            glm::vec3 a = rootBone.getInterpolatedKeyframe(animTime).position;
             glm::vec3 b =
-                rootBone->getInterpolatedKeyframe(animTime + step).position;
+                rootBone.getInterpolatedKeyframe(animTime + step).position;
             glm::vec3 d = (b - a);
             animTranslate.y += d.y;
 

@@ -28,12 +28,12 @@ void Animator::tick(float dt) {
         if (state.animation == nullptr) continue;
 
         if (state.boneInstances.empty()) {
-            for (const auto& [name, bonePtr] : state.animation->bones) {
+            for (auto& [name, bone] : state.animation->bones) {
                 auto frame = model->findFrame(name);
                 if (!frame) {
                     continue;
                 }
-                state.boneInstances.emplace(bonePtr.get(), frame);
+                state.boneInstances.emplace(&bone, frame);
             }
         }
 

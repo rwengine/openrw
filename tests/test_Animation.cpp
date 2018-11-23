@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
 
         animation->duration = 1.f;
         animation->bones.emplace(
-            "player", std::make_unique<AnimationBone>(
+            "player", AnimationBone(
                           "player", 0, 0, 1.0f, AnimationBone::RT0,
                           std::vector<AnimationKeyframe>{
                               {glm::quat{1.0f, 0.0f, 0.0f, 0.0f},
