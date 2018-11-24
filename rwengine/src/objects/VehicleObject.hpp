@@ -246,6 +246,11 @@ public:
 
     void grantOccupantRewards(CharacterObject* character);
 
+    /**
+     * @return The position, and size of the area that must be free for the vehicle to continue.
+     */
+    std::tuple<glm::vec3, glm::vec3> obstacleCheckVolume() const;
+
 private:
     void setupModel();
     void registerPart(ModelFrame* mf);

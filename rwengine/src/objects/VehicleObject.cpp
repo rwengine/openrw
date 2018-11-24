@@ -1083,3 +1083,15 @@ float VehicleObject::isOnSide(const glm::vec3& point) {
     return distance;
 }
 
+std::tuple<glm::vec3, glm::vec3> VehicleObject::obstacleCheckVolume() const {
+    const auto& dim = info->handling.dimensions;
+    const auto kMaxDistance = 20.f;
+    const auto velocity = getVelocity() / info->handling.maxVelocity;
+    const auto lookDistance = glm::clamp(kMaxDistance * velocity, 0.f, kMaxDistance);
+    const glm::vec3 areaSize{dim.x * 0.6f, 1.0f + lookDistance, 1.0f};
+    return {
+            {0.f, dim.y * 0.5f + areaSize.y, 0.f},
+            areaSize,
+    };
+}
+
