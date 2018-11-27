@@ -169,6 +169,7 @@ target_include_directories(rwengine
     )
 
 openrw_target_apply_options(TARGET rwengine
+    CORE
     COVERAGE
     )
 

@@ -1,4 +1,3 @@
-
 add_library(rwcore
     # GL stuff is only here temporarily, hoping to move it back to rwengine
     gl/gl_core_3_3.c
@@ -67,6 +66,7 @@ target_link_libraries(rwcore
     )
 
 openrw_target_apply_options(TARGET rwcore
+    CORE
     COVERAGE
     COVERAGE_EXCEPT gl/gl_core_3_3.c gl/gl_core_3_3.h
     )
