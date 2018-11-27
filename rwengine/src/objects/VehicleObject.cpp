@@ -239,7 +239,7 @@ void VehicleObject::setupModel() {
         return 3;
     };
     while (compRules != 0) {
-        auto rule = (compRules & 0xFFFF);
+        auto rule = compRules & 0xFFFF;
         auto type = static_cast<ComponentRuleType>(rule >> 12);
         compRules >>= 16;
 
@@ -607,34 +607,34 @@ void VehicleObject::tickPhysics(float dt) {
         _lastHeight = vH;
 
         // Update hinge object rotations
-        for (auto& it : dynamicParts) {
-            if (it.second.body == nullptr) {
+        for (auto& [name, part] : dynamicParts) {
+            if (part.body == nullptr) {
                 continue;
             }
-            if (it.second.moveToAngle) {
-                auto angledelta = it.second.targetAngle -
-                                  it.second.constraint->getHingeAngle();
+            if (part.moveToAngle) {
+                auto angledelta = part.targetAngle -
+                                  part.constraint->getHingeAngle();
                 if (glm::abs(angledelta) <= 0.01f) {
-                    it.second.constraint->enableAngularMotor(false, 1.f, 1.f);
-                    it.second.moveToAngle = false;
+                    part.constraint->enableAngularMotor(false, 1.f, 1.f);
+                    part.moveToAngle = false;
                 } else {
-                    it.second.constraint->enableAngularMotor(
+                    part.constraint->enableAngularMotor(
                         true, glm::sign(angledelta) * 5.f, 1.f);
                 }
             }
 
             // If the part is moving quite fast and near the limit, lock it.
             /// @TODO not all parts rotate in the z axis.
-            float zspeed = it.second.body->getAngularVelocity().getZ();
-            if (it.second.openAngle < 0.f) {
+            float zspeed = part.body->getAngularVelocity().getZ();
+            if (part.openAngle < 0.f) {
                 zspeed = -zspeed;
             }
             if (zspeed >= PART_CLOSE_VELOCITY) {
-                auto d = it.second.constraint->getHingeAngle() -
-                         it.second.closedAngle;
+                auto d = part.constraint->getHingeAngle() -
+                         part.closedAngle;
                 if (glm::abs(d) < 0.05f) {
-                    it.second.moveToAngle = false;
-                    setPartLocked(&(it.second), true);
+                    part.moveToAngle = false;
+                    setPartLocked(&part, true);
                 }
             }
         }
