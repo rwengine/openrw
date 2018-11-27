@@ -1349,7 +1349,7 @@ char* readUserPath() {
 }
 #endif
 
-std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
+std::optional<std::vector<SaveGameInfo>> SaveGame::getAllSaveGameInfo() {
 #ifdef RW_WINDOWS
     auto homedir = readUserPath(); // already includes MyDocuments/Documents
 #else
@@ -1357,7 +1357,7 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
 #endif
     if (homedir == nullptr) {
         std::cerr << "Unable to determine home directory" << std::endl;
-        return {};
+        return std::nullopt;
     }
     const char gameDir[] = "GTA3 User Files";
 
@@ -1365,7 +1365,7 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     gamePath /= gameDir;
 
     if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) {
-        return {};
+        return std::nullopt;
     }
 
     std::vector<SaveGameInfo> infos;

@@ -32,23 +32,25 @@ void MenuState::enterLoadMenu() {
     auto menu = Menu::create({{"BACK", [=] { enterMainMenu(); }}});
 
     auto saves = SaveGame::getAllSaveGameInfo();
-    for (SaveGameInfo& save : saves) {
-        if (save.valid) {
-            std::stringstream ss;
-            ss << save.basicState.saveTime.year << " "
-               << save.basicState.saveTime.month << " "
-               << save.basicState.saveTime.day << " "
-               << save.basicState.saveTime.hour << ":"
-               << save.basicState.saveTime.minute << "    ";
-            auto name = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
-            name += save.basicState.saveName;
-            auto loadsave = [=] {
-                StateManager::get().enter<IngameState>(game, false);
-                game->loadGame(save.savePath);
-            };
-            menu->lambda(name, loadsave);
-        } else {
-            menu->lambda("CORRUPT", [=] {});
+    if (saves.has_value()) {
+        for (SaveGameInfo& save : *saves) {
+            if (save.valid) {
+                std::stringstream ss;
+                ss << save.basicState.saveTime.year << " "
+                   << save.basicState.saveTime.month << " "
+                   << save.basicState.saveTime.day << " "
+                   << save.basicState.saveTime.hour << ":"
+                   << save.basicState.saveTime.minute << "    ";
+                auto name = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
+                name += save.basicState.saveName;
+                auto loadsave = [=] {
+                    StateManager::get().enter<IngameState>(game, false);
+                    game->loadGame(save.savePath);
+                };
+                menu->lambda(name, loadsave);
+            } else {
+                menu->lambda("CORRUPT", [=] {});
+            }
         }
     }
     menu->offset = glm::vec2(20.f, 30.f);

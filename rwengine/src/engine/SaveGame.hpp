@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_SAVEGAME_HPP_
 #define _RWENGINE_SAVEGAME_HPP_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ public:
     /**
      * Returns save game information for all found saves
      */
-    static std::vector<SaveGameInfo> getAllSaveGameInfo();
+    static std::optional<std::vector<SaveGameInfo>> getAllSaveGameInfo();
 };
 
 #endif
