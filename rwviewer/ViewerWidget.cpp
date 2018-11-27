@@ -293,19 +293,21 @@ void ViewerWidget::keyPressEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Shift) {
         moveFast = true;
     }
+    constexpr auto SLOW_SPEED = 1.f;
+    constexpr auto FAST_SPEED = 10.f;
 
     glm::vec3 movement{};
     if (e->key() == Qt::Key_W) {
-        movement.y += moveFast ? 10.f : 1.f;
+        movement.y += moveFast ? FAST_SPEED : SLOW_SPEED;
     }
     if (e->key() == Qt::Key_S) {
-        movement.y -= moveFast ? 10.f : 1.f;
+        movement.y -= moveFast ? FAST_SPEED : SLOW_SPEED;
     }
     if (e->key() == Qt::Key_A) {
-        movement.x -= moveFast ? 10.f : 1.f;
+        movement.x -= moveFast ? FAST_SPEED : SLOW_SPEED;
     }
     if (e->key() == Qt::Key_D) {
-        movement.x += moveFast ? 10.f : 1.f;
+        movement.x += moveFast ? FAST_SPEED : SLOW_SPEED;
     }
 
     if (glm::vec3::length() > 0.f) {
