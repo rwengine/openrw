@@ -360,7 +360,7 @@ function(codecoverage_lcov_capture)
     string(REPLACE "/" "\\/" PROJBINDIR_ESCAPED "${PROJECT_BINARY_DIR}/")
     string(REPLACE "/" "\\/" PROJSRCDIR_ESCAPED "${PROJECT_SOURCE_DIR}/")
     add_custom_command(OUTPUT "${TOTALCAPTURE_FILE_UPLOAD}"
-        COMMAND sed -e 's/${PROJBINDIR_ESCAPED}//g' -e 's/${PROJSRCDIR_ESCAPED}//g' "${TOTALCAPTURE_FILE}" > "${TOTALCAPTURE_FILE_UPLOAD}"
+        COMMAND sed -e 's/^SF:${PROJBINDIR_ESCAPED}/SF:/g' -e 's/^SF:${PROJSRCDIR_ESCAPED}/SF:/g' "${TOTALCAPTURE_FILE}" > "${TOTALCAPTURE_FILE_UPLOAD}"
         DEPENDS lcov-geninfo "${TOTALCAPTURE_FILE}"
         COMMENT "Creating ${TOTALCAPTURE_FILE_UPLOAD}"
         )
