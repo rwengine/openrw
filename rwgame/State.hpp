@@ -1,8 +1,12 @@
 #ifndef RWGAME_STATE_HPP
 #define RWGAME_STATE_HPP
+
+#include <optional>
+
 #include <render/ViewCamera.hpp>
 #include "GameWindow.hpp"
 #include "MenuSystem.hpp"
+
 #include <SDL.h>
 #include <SDL_events.h>
 
@@ -12,8 +16,8 @@ class StateManager;
 
 class State {
 public:
-    std::shared_ptr<Menu> menu;
-    std::shared_ptr<Menu> nextMenu;
+    std::optional<Menu> menu;
+    std::optional<Menu> nextMenu;
 
     RWGame* game;
 
@@ -33,16 +37,17 @@ public:
 
     virtual ~State() = default;
 
-    void enterMenu(const std::shared_ptr<Menu>& menu) {
-        nextMenu = menu;
+    template<typename T>
+    void enterMenu(T&& menu) {
+        nextMenu = std::forward<T>(menu);
     }
 
     Menu* getCurrentMenu() {
         if (nextMenu) {
-            menu = nextMenu;
-            nextMenu = nullptr;
+            menu = std::move(nextMenu);
+            nextMenu = std::nullopt;
         }
-        return menu.get();
+        return &*menu;
     }
 
     virtual void handleEvent(const SDL_Event& e);

@@ -33,7 +33,7 @@ static void jumpCharacter(RWGame* game, CharacterObject* player,
     }
 }
 
-std::shared_ptr<Menu> DebugState::createDebugMenu() {
+std::optional<Menu> DebugState::createDebugMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
@@ -76,7 +76,7 @@ std::shared_ptr<Menu> DebugState::createDebugMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createMapMenu() {
+std::optional<Menu> DebugState::createMapMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
@@ -144,7 +144,7 @@ std::shared_ptr<Menu> DebugState::createMapMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createVehicleMenu() {
+std::optional<Menu> DebugState::createVehicleMenu() {
     auto menu = Menu::create({{"Back", [=] { enterMenu(createDebugMenu()); }}},
                              kDebugFont, kDebugEntryHeight);
 
@@ -177,7 +177,7 @@ std::shared_ptr<Menu> DebugState::createVehicleMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createAIMenu() {
+std::optional<Menu> DebugState::createAIMenu() {
     auto menu =
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
@@ -212,7 +212,7 @@ std::shared_ptr<Menu> DebugState::createAIMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createWeaponMenu() {
+std::optional<Menu> DebugState::createWeaponMenu() {
     auto menu =
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
@@ -226,7 +226,7 @@ std::shared_ptr<Menu> DebugState::createWeaponMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createWeatherMenu() {
+std::optional<Menu> DebugState::createWeatherMenu() {
     auto menu =
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeight);
@@ -242,7 +242,7 @@ std::shared_ptr<Menu> DebugState::createWeatherMenu() {
     return menu;
 }
 
-std::shared_ptr<Menu> DebugState::createMissionsMenu() {
+std::optional<Menu> DebugState::createMissionsMenu() {
     auto menu =
         Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
                      kDebugFont, kDebugEntryHeightMissions);
