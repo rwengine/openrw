@@ -37,7 +37,7 @@ class GameRenderer {
     Logger* logger;
 
     /** The low-level drawing interface to use */
-    std::shared_ptr<Renderer> renderer = std::make_shared<OpenGLRenderer>();
+    std::unique_ptr<Renderer> renderer = std::make_unique<OpenGLRenderer>();
 
     // Temporary variables used during rendering
     float _renderAlpha{0.f};
@@ -80,8 +80,8 @@ public:
     DrawBuffer skyDbuff;
     GeometryBuffer skyGbuff;
 
-    GameData* getData() const {
-        return data;
+    const GameData& getData() const {
+        return *data;
     }
 
     size_t getCulledCount() {
@@ -119,8 +119,8 @@ public:
     void setupRender();
     void renderPostProcess();
 
-    std::shared_ptr<Renderer> getRenderer() {
-        return renderer;
+    Renderer& getRenderer() {
+        return *renderer;
     }
 
     void setViewport(int w, int h);

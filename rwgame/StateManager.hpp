@@ -59,7 +59,7 @@ public:
         states.back()->tick(dt);
     }
 
-    void draw(GameRenderer* r) {
+    void draw(GameRenderer& r) {
         states.back()->draw(r);
     }
 

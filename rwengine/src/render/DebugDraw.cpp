@@ -57,12 +57,12 @@ void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
     RW_UNUSED(color);
 }
 
-void DebugDraw::flush(GameRenderer *renderer) {
+void DebugDraw::flush(GameRenderer &renderer) {
     if (lines.empty()) {
         return;
     }
 
-    renderer->getRenderer()->useProgram(shaderProgram);
+    renderer.getRenderer().useProgram(shaderProgram);
 
     lineBuff->uploadVertices(lines);
     dbuff->addGeometry(lineBuff.get());
@@ -75,9 +75,9 @@ void DebugDraw::flush(GameRenderer *renderer) {
     dp.count = lines.size();
     dp.diffuse = 1.f;
 
-    renderer->getRenderer()->drawArrays(glm::mat4(1.f), dbuff.get(), dp);
+    renderer.getRenderer().drawArrays(glm::mat4(1.f), dbuff.get(), dp);
 
-    renderer->getRenderer()->invalidate();
+    renderer.getRenderer().invalidate();
 
     glUseProgram(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

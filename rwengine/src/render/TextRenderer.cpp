@@ -142,13 +142,13 @@ struct TextVertex {
     }
 };
 
-TextRenderer::TextRenderer(GameRenderer* renderer) : renderer(renderer) {
-    textShader = renderer->getRenderer()->createShader(TextVertexShader,
+TextRenderer::TextRenderer(GameRenderer &renderer) : renderer(renderer) {
+    textShader = renderer.getRenderer().createShader(TextVertexShader,
                                                        TextFragmentShader);
 }
 
 void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
-    auto ftexture = renderer->getData()->findSlotTexture("fonts", textureName);
+    auto ftexture = renderer.getData().findSlotTexture("fonts", textureName);
     const glm::u32vec2 textureSize = ftexture->getSize();
     glm::u8vec2 glyphOffset{textureSize.x / 16, textureSize.x / 16};
     if (font != FONT_PAGER) {
@@ -187,8 +187,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     if (ti.text.empty() || ti.text[0] == '*')
         return;
 
-    renderer->getRenderer()->pushDebugGroup("Text");
-    renderer->getRenderer()->useProgram(textShader.get());
+    renderer.getRenderer().pushDebugGroup("Text");
+    renderer.getRenderer().useProgram(textShader.get());
 
     glm::vec2 coord(0.f, 0.f);
     glm::vec2 alignment = ti.screenPosition;
@@ -331,15 +331,15 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
 
     // If we need to, draw the background.
     if (colourBG.a > 0.f) {
-        renderer->drawColour(
+        renderer.drawColour(
             colourBG, glm::vec4(ti.screenPosition - (ss / 3.f),
                                 glm::vec2(maxWidth, maxHeight) + (ss / 2.f)));
     }
 
-    renderer->getRenderer()->setUniform(
-        textShader.get(), "proj", renderer->getRenderer()->get2DProjection());
-    renderer->getRenderer()->setUniformTexture(textShader.get(), "fontTexture", 0);
-    renderer->getRenderer()->setUniform(textShader.get(), "alignment", alignment);
+    renderer.getRenderer().setUniform(
+        textShader.get(), "proj", renderer.getRenderer().get2DProjection());
+    renderer.getRenderer().setUniformTexture(textShader.get(), "fontTexture", 0);
+    renderer.getRenderer().setUniform(textShader.get(), "alignment", alignment);
 
     gb.uploadVertices(geo);
     db.addGeometry(&gb);
@@ -349,11 +349,11 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.start = 0;
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
-    auto ftexture = renderer->getData()->findSlotTexture("fonts", fontMetaData.textureName);
+    auto ftexture = renderer.getData().findSlotTexture("fonts", fontMetaData.textureName);
     dp.textures = {{ftexture->getName()}};
     dp.depthMode = DepthMode::OFF;
 
-    renderer->getRenderer()->drawArrays(glm::mat4(1.0f), &db, dp);
+    renderer.getRenderer().drawArrays(glm::mat4(1.0f), &db, dp);
 
-    renderer->getRenderer()->popDebugGroup();
+    renderer.getRenderer().popDebugGroup();
 }

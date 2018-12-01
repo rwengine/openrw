@@ -29,7 +29,7 @@ public:
 
     void tick(float dt) override;
 
-    void draw(GameRenderer* r) override;
+    void draw(GameRenderer &r) override;
 
     void handleEvent(const SDL_Event& event) override;
 

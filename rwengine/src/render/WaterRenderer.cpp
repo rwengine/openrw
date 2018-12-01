@@ -13,20 +13,20 @@
 #include "render/GameShaders.hpp"
 #include "render/OpenGLRenderer.hpp"
 
-WaterRenderer::WaterRenderer(GameRenderer* renderer) {
+WaterRenderer::WaterRenderer(GameRenderer &renderer) {
     maskDraw.setFaceType(GL_TRIANGLES);
     gridDraw.setFaceType(GL_TRIANGLES);
 
-    waterProg = renderer->getRenderer()->createShader(
+    waterProg = renderer.getRenderer().createShader(
         GameShaders::WaterHQ::VertexShader,
         GameShaders::WaterHQ::FragmentShader);
-    maskProg = renderer->getRenderer()->createShader(
+    maskProg = renderer.getRenderer().createShader(
         GameShaders::Mask3D::VertexShader, GameShaders::Mask3D::FragmentShader);
 
-    renderer->getRenderer()->setProgramBlockBinding(waterProg.get(), "SceneData", 1);
-    renderer->getRenderer()->setProgramBlockBinding(maskProg.get(), "SceneData", 1);
+    renderer.getRenderer().setProgramBlockBinding(waterProg.get(), "SceneData", 1);
+    renderer.getRenderer().setProgramBlockBinding(maskProg.get(), "SceneData", 1);
 
-    renderer->getRenderer()->setUniformTexture(waterProg.get(), "data", 1);
+    renderer.getRenderer().setUniformTexture(waterProg.get(), "data", 1);
 
     // Generate grid mesh
     int gridres = 60;
@@ -99,8 +99,8 @@ void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex) {
     dataTexture = dataTex;
 }
 
-void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
-    auto r = renderer->getRenderer();
+void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
+    auto& r = renderer.getRenderer();
 
     auto waterTex = world->data->findSlotTexture("particle", "water_old");
     RW_CHECK(waterTex != nullptr, "Water texture is null");
@@ -126,30 +126,30 @@ void WaterRenderer::render(GameRenderer* renderer, GameWorld* world) {
     glDrawBuffers(1, buffers);
     glClear(GL_STENCIL_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    r->useProgram(maskProg.get());
+    r.useProgram(maskProg.get());
 
-    r->drawArrays(m, &maskDraw, wdp);
+    r.drawArrays(m, &maskDraw, wdp);
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     glStencilMask(0x00);
     glEnable(GL_DEPTH_TEST);
 
-    r->useProgram(waterProg.get());
+    r.useProgram(waterProg.get());
 
     buffers[0] = GL_COLOR_ATTACHMENT0;
     glDrawBuffers(1, buffers);
 
-    r->setUniform(waterProg.get(), "time", world->getGameTime());
-    r->setUniform(waterProg.get(), "waveParams",
+    r.setUniform(waterProg.get(), "time", world->getGameTime());
+    r.setUniform(waterProg.get(), "waveParams",
                   glm::vec2(WATER_SCALE, WATER_HEIGHT));
     auto ivp =
-        glm::inverse(r->getSceneData().projection * r->getSceneData().view);
-    r->setUniform(waterProg.get(), "inverseVP", ivp);
+        glm::inverse(r.getSceneData().projection * r.getSceneData().view);
+    r.setUniform(waterProg.get(), "inverseVP", ivp);
 
     wdp.count = gridGeom.getCount();
     wdp.textures = {{waterTex->getName(), dataTexture}};
 
-    r->drawArrays(m, &gridDraw, wdp);
+    r.drawArrays(m, &gridDraw, wdp);
 
     glDisable(GL_STENCIL_TEST);
 }

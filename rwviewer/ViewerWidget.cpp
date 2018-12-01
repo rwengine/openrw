@@ -76,8 +76,8 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
                                  viewDistance,
                                  view, proj);
 
-    r.getRenderer()->useProgram(r.worldProg.get());
-    r.getRenderer()->setSceneParameters(
+    r.getRenderer().useProgram(r.worldProg.get());
+    r.getRenderer().setSceneParameters(
             {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
              glm::vec4(0.f), 90.f, vc.frustum.far});
     model->getFrame()->updateHierarchyTransform();
@@ -85,7 +85,7 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
     ObjectRenderer _renderer(world(), vc, 1.f);
     RenderList renders;
     _renderer.renderClump(model.get(), glm::mat4(1.0f), nullptr, renders);
-    r.getRenderer()->drawBatched(renders);
+    r.getRenderer().drawBatched(renders);
 
     drawFrameWidget(model->getFrame().get());
     r.renderPostProcess();
@@ -98,8 +98,8 @@ void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
                                  viewDistance,
                                  view, proj);
 
-    r.getRenderer()->useProgram(r.worldProg.get());
-    r.getRenderer()->setSceneParameters(
+    r.getRenderer().useProgram(r.worldProg.get());
+    r.getRenderer().setSceneParameters(
             {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
              glm::vec4(0.f), 90.f, vc.frustum.far});
 
@@ -111,7 +111,7 @@ void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
                  const Renderer::RenderInstruction& b) {
                   return a.sortKey < b.sortKey;
               });
-    r.getRenderer()->drawBatched(renders);
+    r.getRenderer().drawBatched(renders);
     r.renderPostProcess();
 }
 
@@ -144,12 +144,12 @@ void ViewerWidget::paintGL() {
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     auto& r = *_renderer;
-    r.getRenderer()->invalidate();
+    r.getRenderer().invalidate();
     r.setViewport(width() * devicePixelRatio(), height() * devicePixelRatio());
 
     glEnable(GL_DEPTH_TEST);
 
-    r.getRenderer()->invalidate();
+    r.getRenderer().invalidate();
     r.setupRender();
 
     switch (_viewMode) {
@@ -187,7 +187,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     if(_renderer != nullptr) {
-        _renderer->getRenderer()->drawArrays(thisM, _frameWidgetDraw, dp);
+        _renderer->getRenderer().drawArrays(thisM, _frameWidgetDraw, dp);
     }
 
     for (auto c : f->getChildren()) {
