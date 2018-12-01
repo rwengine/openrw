@@ -9,7 +9,7 @@ const ViewCamera defaultView{{-250.f, -550.f, 75.f},
 State::State(RWGame *game) : game(game) {
 }
 
-void State::draw(GameRenderer *r) {
+void State::draw(GameRenderer& r) {
     auto& menu = getCurrentMenu();
     if (menu) {
         menu->draw(r);

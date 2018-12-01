@@ -390,7 +390,7 @@ void DebugState::tick(float dt) {
     }
 }
 
-void DebugState::draw(GameRenderer* r) {
+void DebugState::draw(GameRenderer& r) {
     // Draw useful information like camera position.
     std::stringstream ss;
     ss << "Camera Position: " << glm::to_string(_debugCam.position) << "\n";
@@ -403,7 +403,7 @@ void DebugState::draw(GameRenderer* r) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    r->text.renderText(ti);
+    r.text.renderText(ti);
 
     State::draw(r);
 }

@@ -56,7 +56,7 @@ public:
         float widthFrac;
     };
 
-    TextRenderer(GameRenderer* renderer);
+    TextRenderer(GameRenderer& renderer);
     ~TextRenderer() = default;
 
     void setFontTexture(font_t font, const std::string& textureName);
@@ -89,7 +89,7 @@ private:
 
     std::array<FontMetaData, FONTS_COUNT> fonts;
 
-    GameRenderer* renderer;
+    GameRenderer& renderer;
     std::unique_ptr<Renderer::ShaderProgram> textShader;
 
     GeometryBuffer gb;

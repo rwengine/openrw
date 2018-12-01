@@ -49,7 +49,7 @@ public:
             : text(n), callback(cb) {
         }
 
-        void draw(font_t font, float size, bool active, GameRenderer* r,
+        void draw(font_t font, float size, bool active, GameRenderer& r,
                   glm::vec2& basis) {
             TextRenderer::TextInfo ti;
             ti.font = font;
@@ -61,7 +61,7 @@ public:
             } else {
                 ti.baseColour = glm::u8vec3(255, 255, 0);
             }
-            r->text.renderText(ti);
+            r.text.renderText(ti);
             basis.y += size;
         }
 
@@ -97,7 +97,7 @@ public:
      */
     int activeEntry;
 
-    void draw(GameRenderer* r) {
+    void draw(GameRenderer& r) {
         glm::vec2 basis(offset);
         for (size_t i = 0; i < entries.size(); ++i) {
             bool active = false;

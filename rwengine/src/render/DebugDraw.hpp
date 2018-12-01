@@ -38,7 +38,7 @@ public:
     void setDebugMode(int debugMode) override;
     int getDebugMode() const override;
 
-    void flush(GameRenderer *renderer);
+    void flush(GameRenderer &renderer);
 
     void setShaderProgram(Renderer::ShaderProgram *shaderProgram) {
         this->shaderProgram = shaderProgram;

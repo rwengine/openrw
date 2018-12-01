@@ -308,8 +308,8 @@ public:
                     float f) override;
     void useProgram(ShaderProgram* p) override;
 
-    void clear(const glm::vec4& colour, bool clearColour,
-               bool clearDepth) override;
+    void clear(const glm::vec4& colour, bool clearColour = true,
+               bool clearDepth = true) override;
 
     void setSceneParameters(const SceneUniformData& data) override;
 

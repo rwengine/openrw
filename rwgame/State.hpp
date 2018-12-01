@@ -25,7 +25,7 @@ public:
 
     virtual void tick(float dt) = 0;
 
-    virtual void draw(GameRenderer* r);
+    virtual void draw(GameRenderer& r);
 
     virtual ~State() = default;
 

@@ -29,10 +29,10 @@ void PauseState::tick(float dt) {
     RW_UNUSED(dt);
 }
 
-void PauseState::draw(GameRenderer* r) {
+void PauseState::draw(GameRenderer& r) {
     MapRenderer::MapInfo map;
 
-    auto& vp = r->getRenderer()->getViewport();
+    auto& vp = r.getRenderer().getViewport();
 
     map.worldSize = 4000.f;
     map.clipToSize = false;

@@ -43,9 +43,9 @@ struct ParticleVert {
 GameRenderer::GameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)
-    , map(renderer, _data)
-    , water(this)
-    , text(this) {
+    , map(*renderer, _data)
+    , water(*this)
+    , text(*this) {
     logger->info("Renderer", renderer->getIDString());
 
     worldProg =
@@ -171,7 +171,7 @@ GameRenderer::~GameRenderer() {
 
 void GameRenderer::setupRender() {
     // Set the viewport
-    const glm::ivec2& vp = getRenderer()->getViewport();
+    const glm::ivec2& vp = getRenderer().getViewport();
     glViewport(0, 0, vp.x, vp.y);
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -239,7 +239,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     renderer->pushDebugGroup("Water");
 
-    water.render(this, world);
+    water.render(*this, world);
 
     profWater = renderer->popDebugGroup();
 

@@ -585,9 +585,9 @@ void RWGame::tickObjects(float dt) const {
 void RWGame::render(float alpha, float time) {
     RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
 
-    lastDraws = getRenderer().getRenderer()->getDrawCount();
+    lastDraws = getRenderer().getRenderer().getDrawCount();
 
-    getRenderer().getRenderer()->swap();
+    getRenderer().getRenderer().swap();
 
     // Update the camera
     if (!StateManager::get().states.empty()) {
@@ -611,19 +611,19 @@ void RWGame::render(float alpha, float time) {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    renderer.getRenderer()->pushDebugGroup("World");
+    renderer.getRenderer().pushDebugGroup("World");
 
     renderer.renderWorld(world.get(), viewCam, alpha);
 
-    renderer.getRenderer()->popDebugGroup();
+    renderer.getRenderer().popDebugGroup();
 
     renderDebugView(time, viewCam);
 
-    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), &renderer);
+    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), renderer);
 
     if (StateManager::currentState()) {
         RW_PROFILE_SCOPE("state");
-        StateManager::get().draw(&renderer);
+        StateManager::get().draw(renderer);
     }
 }
 
@@ -635,7 +635,7 @@ void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
             break;
         case DebugViewMode::Physics:
             world->dynamicsWorld->debugDrawWorld();
-            debug.flush(&renderer);
+            debug.flush(renderer);
             break;
         case DebugViewMode::Navigation:
             renderDebugPaths(time);
@@ -671,8 +671,8 @@ void RWGame::renderDebugStats(float time) {
        << "Frame: " << time_ms << "ms\n"
        << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
        << renderer.getCulledCount() << "/"
-       << renderer.getRenderer()->getTextureCount() << "/"
-       << renderer.getRenderer()->getBufferCount() << "\n"
+       << renderer.getRenderer().getTextureCount() << "/"
+       << renderer.getRenderer().getBufferCount() << "\n"
        << "Timescale: " << world->state->basic.timeScale;
 
     TextRenderer::TextInfo ti;
@@ -785,7 +785,7 @@ void RWGame::renderDebugPaths(float time) {
     }
     }
 
-    debug.flush(&renderer);
+    debug.flush(renderer);
 }
 
 void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
