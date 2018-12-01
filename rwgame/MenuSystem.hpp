@@ -1,8 +1,10 @@
 #ifndef _GAME_MENUSYSTEM_HPP_
 #define _GAME_MENUSYSTEM_HPP_
+
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -76,12 +78,11 @@ public:
 
     /**
      * @brief creates a menu from the given menu items
-     * @return a shared pointer to the menu with the items
+     * @return optional of menu with the items
      */
-    static std::shared_ptr<Menu> create(std::vector<MenuEntry> items,
-                                        int font = MenuDefaults::kFont,
-                                        float size = 30.f) {
-        return std::make_shared<Menu>(std::move(items), font, size);
+    static std::optional<Menu> create(std::vector<MenuEntry> items,
+                       int font = MenuDefaults::kFont, float size = 30.f) {
+        return std::make_optional<Menu>(std::move(items), font, size);
     }
 
     Menu& lambda(const GameString& n, std::function<void()> callback) {

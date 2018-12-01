@@ -11,13 +11,13 @@ class DebugState final : public State {
     bool _sonicMode = false;
     bool _invertedY;
 
-    std::shared_ptr<Menu> createDebugMenu();
-    std::shared_ptr<Menu> createMapMenu();
-    std::shared_ptr<Menu> createVehicleMenu();
-    std::shared_ptr<Menu> createAIMenu();
-    std::shared_ptr<Menu> createWeaponMenu();
-    std::shared_ptr<Menu> createWeatherMenu();
-    std::shared_ptr<Menu> createMissionsMenu();
+    std::optional<Menu> createDebugMenu();
+    std::optional<Menu> createMapMenu();
+    std::optional<Menu> createVehicleMenu();
+    std::optional<Menu> createAIMenu();
+    std::optional<Menu> createWeaponMenu();
+    std::optional<Menu> createWeatherMenu();
+    std::optional<Menu> createMissionsMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
