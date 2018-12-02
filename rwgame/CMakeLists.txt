@@ -63,5 +63,6 @@ target_link_libraries(rwgame
 
 openrw_target_apply_options(
     TARGET rwgame
+    COVERAGE
     INSTALL INSTALL_PDB
     )

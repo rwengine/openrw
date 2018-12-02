@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import re
+import subprocess
+import sys
+
+llvm_cov_bin = "@LLVM_COV_BIN@"
+
+# The wrapper must return the version for the "-v" and "--version" flags.
+# llvm-cov only accepts --version
+if any(h in sys.argv for h in ("-v", "--version",)):
+    p = subprocess.Popen([llvm_cov_bin, "--version"], stdout=subprocess.PIPE)
+    output = p.stdout.read().decode("utf8")
+    p.wait()
+    assert p.returncode == 0
+    versionmatch = re.search("([0-9]+\\.[0-9]+(?:\\.[0-9]+))", output)
+    if not versionmatch:
+        raise RuntimeError("Cannot detect version")
+    print(versionmatch)
+    print("{} version {}".format(sys.argv[0], versionmatch.group(1)))
+    sys.exit(0)
+
+p = subprocess.Popen([llvm_cov_bin, "gcov"] + sys.argv[1:])
+p.wait()
+assert p.returncode == 0

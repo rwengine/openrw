@@ -10,9 +10,9 @@ OpenRW has been ported to Linux, macOS, Windows, and several variants of BSD.
 A legitimate copy of the original PC game is required to run OpenRW. Without
 this it will not be possible to play.
 
-Windows | Linux | macOS
----| --- | --- 
-[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw)
+Windows | Linux | macOS | coverage
+---| --- | ---  | ---
+[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![Build Status](https://travis-ci.org/rwengine/openrw.svg?branch=master)](https://travis-ci.org/rwengine/openrw) | [![codecov](https://codecov.io/gh/rwengine/openrw/branch/master/graph/badge.svg)](https://codecov.io/gh/rwengine/openrw)
 
 
 ## Links

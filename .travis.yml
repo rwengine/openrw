@@ -1,19 +1,16 @@
 language: cpp
 
-git:
-    depth: 3
-
 matrix:
   include:
   - os: linux
     compiler: gcc
-    env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu"
+    env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu" TEST_COVERAGE=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
   - os: linux
     compiler: clang
-    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm"
+    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm" TEST_COVERAGE=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"

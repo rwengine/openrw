@@ -76,7 +76,6 @@ if(BUILD_VIEWER)
 endif()
 if(BUILD_TESTS)
     enable_testing()
-    include(CTest)
     add_subdirectory(tests)
 endif()
 if(BUILD_TOOLS)
@@ -94,3 +93,7 @@ file(COPY COPYING
     )
 
 include(CMakeCPack.cmake)
+
+if(TEST_COVERAGE)
+    coverage_collect()
+endif()

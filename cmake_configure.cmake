@@ -144,23 +144,23 @@ else()
 endif()
 
 if(TEST_COVERAGE)
-    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        message("TEST_COVERAGE enabled. Setting CMAKE_BUILD_TYPE to Debug.")
-        set(CMAKE_BUILD_TYPE "Debug")
+    include(CodeCoverage)
+    codecoverage_enable("${PROJECT_BINARY_DIR}" "${PROJECT_BINARY_DIR}/codecoverage")
+
+    string(REGEX MATCH "[^/]*/[^/]*/([^/]*)" _RE_REFSPEC "${GIT_REFSPEC}")
+    if(_RE_REFSPEC)
+        set(GIT_BRANCH "${CMAKE_MATCH_1}")
+        message(STATUS "Git branch detected from .git directory: ${GIT_BRANCH}")
+    elseif(DEFINED ENV{TRAVIS_BRANCH})
+        set(GIT_BRANCH "$ENV{TRAVIS_BRANCH}")
+        message(STATUS "Git branch detected from TRAVIS_BRANCH environment variable: ${GIT_BRANCH}")
+    else()
+        message("Git branch unknown: uploading coverage might nog work")
     endif()
-    if(NOT BUILD_TESTS)
-        message("TEST_COVERAGE enabled. Enabling BUILD_TESTS.")
-        set(BUILD_TESTS "ON")
-    endif()
-    target_compile_options(rw_checks
-        INTERFACE
-            "-O0"
-            "-fprofile-arcs"
-            "-ftest-coverage"
-        )
-    target_link_libraries(rw_checks
-        INTERFACE
-            gcov
+    add_coverage_upload_target_codecov_io(
+        GITSHA1 "${GIT_SHA1}"
+        GITBRANCH "${GIT_BRANCH}"
+        NAME "${CODECOV_NAME}"
         )
 endif()
 
@@ -188,12 +188,16 @@ endforeach()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
-    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB" "TARGET" "" ${ARGN})
+    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB;COVERAGE" "TARGET" "COVERAGE_EXCEPT" ${ARGN})
     if(CHECK_IWYU)
         iwyu_check(TARGET "${ORW_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
         )
+    endif()
+
+    if(TEST_COVERAGE AND ORW_COVERAGE)
+        coverage_add_target("${ORW_TARGET}" EXCEPT ${ORW_COVERAGE_EXCEPT})
     endif()
 
     if(CHECK_CLANGTIDY)

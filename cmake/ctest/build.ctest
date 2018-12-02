@@ -1,7 +1,8 @@
 # This file does:
 # - check whether all arguments are defined,
 # - configure, build and test,
-# - coverage and memcheck,
+# - coverage,
+# - memcheck (NOT!!),
 # - submit
 
 set(_ARGS_BOOL
@@ -20,7 +21,7 @@ set(_ARGS_BOOL
     ENABLE_SANITIZERS
 
     APPEND_RESULTS
-    RUN_COVERAGE
+    TEST_COVERAGE
     SUBMIT
     )
 
@@ -34,7 +35,8 @@ set(_ARGS_ONEVAL
     CONAN_ARCH
 
     CMAKE_GENERATOR
-    COVERAGE_COMMAND
+
+    CODECOV_FLAGS
     )
 
 set(_ARGS_MULVAL
@@ -44,15 +46,14 @@ set(_ARGS_MULVAL
 
 foreach(_ARG ${_ARGS_BOOL} ${_ARGS_ONEVAL} ${_ARGS_MULVAL})
     set(_VAL "${${_ARG}}")
-    message(STATUS "build parameter: ${_ARG}='${_VAL}'")
+    message(STATUS "build parameter: ${_ARG}=${_VAL}")
     if(NOT DEFINED _VAL)
         message(FATAL_ERROR "Build parameter '${_ARG}' not defined")
     endif()
 endforeach()
 
-# CTEST_CMAKE_GENERATOR and CTEST_COVERAGE_COMMAND needed by CTest
+# CTEST_CMAKE_GENERATOR needed by CTest
 set(CTEST_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
-set(CTEST_COVERAGE_COMMAND "${COVERAGE_COMMAND}")
 
 set(CTEST_SITE "${BUILDER_NAME}")
 set(CTEST_BUILD_NAME "${BUILD_NAME}")
@@ -164,14 +165,21 @@ set(_CONFIGURE_OPTIONS
     "-DBUILD_VIEWER=${BUILD_VIEWER}"
     "-DBUILD_TESTS=TRUE"
     "-DTESTS_NODATA=${TESTS_NODATA}"
-    "-DTEST_COVERAGE=${RUN_COVERAGE}"
+    "-DTEST_COVERAGE=${TEST_COVERAGE}"
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
     "-DCHECK_IWYU=${CHECK_IWYU}"
     "-DCMAKE_BUILD_TYPE=${_CMAKE_BUILD_TYPE}"
     "-DENABLE_SANITIZERS=${ENABLE_SANITIZERS}"
     "-DUSE_CONAN=${USE_CONAN}"
     "-DENABLE_PROFILING=TRUE"
+    "-L"
     )
+
+if(TEST_CONFIGURE)
+    list(APPEND _CONFIGURE_OPTIONS
+        "-DCODECOV_FLAGS=${CODECOV_FLAGS}"
+        )
+endif()
 
 message(STATUS "Configuring...")
 message(STATUS "options='${_CONFIGURE_OPTIONS}'")
@@ -179,10 +187,12 @@ message(STATUS "extra options='${CONFIGURE_EXTRA_OPTIONS}'")
 ctest_configure(
     OPTIONS
         "${_CONFIGURE_OPTIONS};${CONFIGURE_EXTRA_OPTIONS}"
-    RETURN_VALUE
-        _CONFIGURE_RESULT
+    RETURN_VALUE _CONFIGURE_RESULT
     ${_CTEST_CONFIGURE_EXTRA_ARGS}
     )
+if(_CONFIGURE_RESULT)
+    emit_error("Configure error detected!")
+endif()
 
 message(STATUS "Building...")
 ctest_build(
@@ -190,23 +200,84 @@ ctest_build(
     FLAGS ${BUILD_EXTRA_FLAGS}
     NUMBER_ERRORS _NB_BUILD_ERRORS
     )
+if(_NB_BUILD_ERRORS)
+    emit_error("Build failure detected!")
+endif()
 
 if(RUN_TESTS)
     message(STATUS "Running tests...")
     ctest_test(
         RETURN_VALUE _TEST_RESULT
         )
+    if(_TEST_RESULT)
+        emit_error("Test failure detected!")
+    endif()
 else()
     message(STATUS "Skipping tests...")
 endif()
-
-if(RUN_COVERAGE)
-    message(STATUS "Collecting coverage...")
-    ctest_coverage(
-        RETURN_VALUE _COVERAGE_RESULT
+if(SUBMIT)
+    message(STATUS "Submitting to CDash...")
+    ctest_submit(
+        RETRY_COUNT 5
+        RETRY_DELAY 120
+        RETURN_VALUE _SUBMIT_RESULT
         )
+    if(_SUBMIT_RESULT)
+        emit_warning("Test submission failure detected!")
+    endif()
 else()
-    message(STATUS "Coverage skipped.")
+    message(STATUS "Submit skipped.")
+endif()
+
+if(TEST_COVERAGE)
+    message(STATUS "Collecting coverage and submitting to codecov.io...")
+    ctest_build(APPEND
+        CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+        FLAGS "-j1"
+        TARGET "coverage_upload"
+        RETURN_VALUE _COVERAGE_COLLECT_RV
+        )
+    if(_COVERAGE_COLLECT_RV)
+        emit_error("Collecting and uploading coverage failed!")
+    endif()
+    if(SUBMIT)
+        message(STATUS "Submitting to CDash...")
+        ctest_submit(
+            RETRY_COUNT 5
+            RETRY_DELAY 120
+            RETURN_VALUE _SUBMIT_RESULT
+            )
+        if(_SUBMIT_RESULT)
+            emit_warning("Test submission failure detected!")
+        endif()
+    else()
+        message(STATUS "Submit skipped.")
+    endif()
+
+    message(STATUS "Cleaning collected coverage data...")
+    ctest_build(APPEND
+        CONFIGURATION "${_CTEST_BUILD_CONFIGURATION}"
+        TARGET "lcov-geninfo-clean"
+        RETURN_VALUE _COVERAGE_CLEAN_RV
+        )
+    if(_COVERAGE_CLEAN_RV)
+        emit_error("Cleaning collected coverage data failed!")
+    endif()
+    if(SUBMIT)
+        message(STATUS "Submitting to CDash...")
+        ctest_submit(
+            RETRY_COUNT 5
+            RETRY_DELAY 120
+            RETURN_VALUE _SUBMIT_RESULT
+            )
+        if(_SUBMIT_RESULT)
+            emit_warning("Test submission failure detected!")
+        endif()
+    else()
+        message(STATUS "Submit skipped.")
+    endif()
+else()
+    message(STATUS "Collecting and uploading coverage data skipped.")
 endif()
 
 if(RUN_MEMCHECK)
@@ -216,29 +287,3 @@ else()
     message(STATUS "Memcheck skipped.")
 endif()
 
-if(SUBMIT)
-    message(STATUS "Submitting...")
-    ctest_submit(
-        RETRY_COUNT 5
-        RETRY_DELAY 120
-        RETURN_VALUE _SUBMIT_RESULT
-        )
-else()
-    message(STATUS "Submit skipped.")
-endif()
-
-if(_CONFIGURE_RESULT)
-    list(APPEND ERROR_MESSAGES "Configure error detected!")
-endif()
-
-if(_NB_BUILD_ERRORS)
-    list(APPEND ERROR_MESSAGES "Build failure detected!")
-endif()
-
-if(_TEST_RESULT)
-    list(APPEND ERROR_MESSAGES "Test failure detected!")
-endif()
-
-if(_SUBMIT_RESULT)
-    list(APPEND WARNING_MESSAGES "Test submission failure detected!")
-endif()

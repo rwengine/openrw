@@ -15,8 +15,9 @@ set_property(CACHE FAILED_CHECK_ACTION PROPERTY STRINGS "IGNORE" "ABORT" "BREAKP
 set(FILESYSTEM_LIBRARY "BOOST" CACHE STRING "Which filesystem library to use")
 set_property(CACHE FILESYSTEM_LIBRARY PROPERTY STRINGS "CXX17" "CXXTS" "BOOST")
 
+set(CMAKE_CONFIGURATION_TYPES "Release;Debug;RelWithDebInfo;MinSizeRel" CACHE INTERNAL "Build types supported by this project.")
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: ${CMAKE_CONFIGURATION_TYPES}")
 endif()
 
 option(CHECK_IWYU "Enable IncludeWhatYouUse (Analyze #includes in C and C++ source files)")
@@ -25,6 +26,7 @@ option(CHECK_CLANGTIDY_FIX "Apply fixes from clang-tidy (!!!RUN ON CLEAN GIT TRE
 
 set(ENABLE_SANITIZERS "" CACHE STRING "Enable selected sanitizer.")
 
+set(CODECOV_NAME "" CACHE STRING "Name of report in codecov.io ui.")
 option(TEST_COVERAGE "Enable coverage analysis (implies CMAKE_BUILD_TYPE=Debug)")
 option(SEPARATE_TEST_SUITES "Add each test suite as separate test to CTest")
 
