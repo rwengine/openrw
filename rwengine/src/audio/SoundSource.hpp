@@ -77,6 +77,8 @@ public:
     void loadSfx(LoaderSDT& sdt, std::size_t index, bool asWave = true,
                  bool streaming = false);
 
+    unsigned int decodedFrames = 0u;
+
 private:
     /// Raw data
     std::vector<int16_t> data;

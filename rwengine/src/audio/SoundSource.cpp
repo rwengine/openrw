@@ -273,9 +273,7 @@ bool SoundSource::prepareCodecContextSfx() {
 
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
 void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
-    size_t decoded = 0;
-
-    while ((framesToDecode == 0 || decoded < framesToDecode) &&
+    while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
            av_read_frame(formatContext, &readingPacket) == 0) {
         if (readingPacket.stream_index == audioStream->index) {
             AVPacket decodingPacket = readingPacket;
@@ -308,7 +306,7 @@ void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
             }
         }
         av_free_packet(&readingPacket);
-        ++decoded;
+        ++decodedFrames;
     }
 }
 #endif
@@ -322,9 +320,7 @@ void SoundSource::decodeFramesSfxWrap() {
 }
 
 void SoundSource::decodeFrames(size_t framesToDecode) {
-    size_t decoded = 0;
-
-    while ((framesToDecode == 0 || decoded < framesToDecode) &&
+    while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
            av_read_frame(formatContext, &readingPacket) == 0) {
         if (readingPacket.stream_index == audioStream->index) {
             AVPacket decodingPacket = readingPacket;
@@ -353,7 +349,7 @@ void SoundSource::decodeFrames(size_t framesToDecode) {
             }
         }
         av_packet_unref(&readingPacket);
-        ++decoded;
+        ++decodedFrames;
     }
 }
 
@@ -370,9 +366,7 @@ void SoundSource::decodeAndResampleFrames(const rwfs::path& filePath,
     RW_UNUSED(filePath);  // it's used by macro
     AVFrame* resampled = av_frame_alloc();
 
-    size_t decoded = 0;
-
-    while ((framesToDecode == 0 || decoded < framesToDecode) &&
+    while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
            av_read_frame(formatContext, &readingPacket) == 0) {
         if (readingPacket.stream_index == audioStream->index) {
             int sendPacket = avcodec_send_packet(codecContext, &readingPacket);
@@ -435,7 +429,7 @@ void SoundSource::decodeAndResampleFrames(const rwfs::path& filePath,
             }
         }
 
-        ++decoded;
+        ++decodedFrames;
     }
 
     /// Free all data used by the resampled frame.

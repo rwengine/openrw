@@ -84,10 +84,18 @@ find_package_handle_standard_args(FFmpeg
     )
 set(FFMPEG_FOUND "${FFmpeg_FOUND}")
 
-if(FFmpeg_FOUND)
-    add_library(ffmpeg::ffmpeg INTERFACE IMPORTED)
-    set_property(TARGET ffmpeg::ffmpeg
-        PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${FFMPEG_INCLUDE_DIR})
-    set_property(TARGET ffmpeg::ffmpeg
-        PROPERTY INTERFACE_LINK_LIBRARIES ${FFMPEG_LIBRARIES})
+find_package(Threads REQUIRED)
+
+if(FFMPEG_FOUND)
+    add_library(ffmpeg INTERFACE)
+    target_link_libraries(ffmpeg
+        INTERFACE
+            ${FFMPEG_LIBRARIES}
+            Threads::Threads
+        )
+    target_include_directories(ffmpeg SYSTEM
+        INTERFACE
+            "${FFMPEG_INCLUDE_DIR}"
+        )
+    add_library(ffmpeg::ffmpeg ALIAS ffmpeg)
 endif()

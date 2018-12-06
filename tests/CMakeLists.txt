@@ -1,6 +1,7 @@
 set(TESTS
     Animation
     Archive
+    AudioLoading
     Buoyancy
     Character
     Chase

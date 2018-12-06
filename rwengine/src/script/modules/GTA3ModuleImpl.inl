@@ -4305,7 +4305,7 @@ void opcode_018d(const ScriptArguments& args, ScriptVec3 coord, const ScriptSoun
     auto metaData = getSoundInstanceData(sound0);
     auto bufferName = world->sound.createSfxInstance(metaData->sfx);
     world->sound.playSfx(bufferName, coord, true, metaData->range);
-    sound1 = &world->sound.getSoundRef(bufferName);
+    sound1 = &world->sound.getSfxBufferRef(bufferName);
 }
 
 /**

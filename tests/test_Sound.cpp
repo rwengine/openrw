@@ -19,22 +19,6 @@ BOOST_FIXTURE_TEST_CASE(creates_empty_sound, F) {
     BOOST_REQUIRE(sound.source == nullptr);
 }
 
-// @todo Shfil119 implement
-// This test requires assets
-//BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
-//    sound.buffer = std::make_unique<SoundBuffer>();
-//    BOOST_REQUIRE(sound.isPlaying() == false);
-
-//    sound.play();
-//    BOOST_REQUIRE(sound.isPlaying() == true);
-
-//    sound.pause();
-//    BOOST_REQUIRE(sound.isPaused() == true);
-
-//    sound.stop();
-//    BOOST_REQUIRE(sound.isStopped() == true);
-//}
-
 BOOST_FIXTURE_TEST_CASE(sound_sets_openal_source_position, F) {
     sound.buffer = std::make_unique<SoundBuffer>();
 
