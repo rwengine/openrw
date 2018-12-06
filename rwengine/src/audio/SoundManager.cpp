@@ -17,7 +17,7 @@ extern "C" {
 
 #include <rw/types.hpp>
 
-Sound& SoundManager::getSoundRef(size_t name) {
+Sound& SoundManager::getSfxBufferRef(size_t name) {
     auto ref = buffers.find(name);
     if (ref != buffers.end()) {
         return ref->second;
@@ -25,6 +25,10 @@ Sound& SoundManager::getSoundRef(size_t name) {
         createSfxInstance(name);
     }
     return buffers[name];
+}
+
+Sound& SoundManager::getSfxSourceRef(size_t name) {
+    return sfx[name];
 }
 
 Sound& SoundManager::getSoundRef(const std::string& name) {

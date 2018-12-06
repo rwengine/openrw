@@ -34,7 +34,8 @@ public:
     /// Load selected sfx sound
     void loadSound(size_t index);
 
-    Sound& getSoundRef(size_t name);
+    Sound& getSfxBufferRef(size_t name);
+    Sound& getSfxSourceRef(size_t name);
     Sound& getSoundRef(const std::string& name);
 
     size_t createSfxInstance(size_t index);
