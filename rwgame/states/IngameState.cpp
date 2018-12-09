@@ -1,8 +1,10 @@
 #include "IngameState.hpp"
+
 #include "DebugState.hpp"
 #include "HUDDrawer.hpp"
 #include "PauseState.hpp"
 #include "RWGame.hpp"
+#include "StateManager.hpp"
 
 #include <ai/PlayerController.hpp>
 #include <data/Clump.hpp>

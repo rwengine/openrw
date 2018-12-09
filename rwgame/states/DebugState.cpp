@@ -1,16 +1,21 @@
 #include "DebugState.hpp"
+
+#include "MenuSystem.hpp"
+#include "RWGame.hpp"
+
 #include <ai/PlayerController.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameState.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <iostream>
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <script/SCMFile.hpp>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+#include <iostream>
 #include <sstream>
-#include "RWGame.hpp"
 
 constexpr float kDebugEntryHeight = 14.f;
 constexpr float kDebugEntryHeightMissions = 12.f;

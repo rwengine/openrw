@@ -4,6 +4,7 @@
 
 #include "GameInput.hpp"
 #include "State.hpp"
+#include "StateManager.hpp"
 #include "states/BenchmarkState.hpp"
 #include "states/IngameState.hpp"
 #include "states/LoadingState.hpp"
@@ -17,6 +18,7 @@
 #include <script/SCMFile.hpp>
 
 #include <ai/PlayerController.hpp>
+#include <core/Logger.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
@@ -25,6 +27,15 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4305 5033)
+#endif
+// FIXME: should be in rwengine, deeply hidden
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#ifdef _MSC_VER
+#pragma warning(default : 4305 5033)
+#endif
 
 namespace {
 static constexpr std::array<
@@ -135,6 +146,36 @@ void RWGame::newGame() {
         world->data->loadZone(ipl.second);
         world->placeItems(ipl.second);
     }
+}
+
+bool RWGame::hitWorldRay(glm::vec3 &hit, glm::vec3 &normal, GameObject **object) {
+    auto vc = currentCam;
+    glm::vec3 from(vc.position.x, vc.position.y, vc.position.z);
+    glm::vec3 tmp = vc.rotation * glm::vec3(1000.f, 0.f, 0.f);
+
+    return hitWorldRay(from, tmp, hit, normal, object);
+}
+
+bool RWGame::hitWorldRay(const glm::vec3 &start, const glm::vec3 &direction, glm::vec3 &hit, glm::vec3 &normal, GameObject **object) {
+    auto from = btVector3(start.x, start.y, start.z);
+    auto to = btVector3(start.x + direction.x, start.y + direction.y,
+                        start.z + direction.z);
+    btCollisionWorld::ClosestRayResultCallback ray(from, to);
+
+    world->dynamicsWorld->rayTest(from, to, ray);
+    if (ray.hasHit()) {
+        hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
+                        ray.m_hitPointWorld.z());
+        normal =
+                glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
+                          ray.m_hitNormalWorld.z());
+        if (object) {
+            *object = static_cast<GameObject*>(
+                        ray.m_collisionObject->getUserPointer());
+        }
+        return true;
+    }
+    return false;
 }
 
 void RWGame::saveGame(const std::string& savename) {

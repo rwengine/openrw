@@ -3,6 +3,14 @@
 
 #include "State.hpp"
 
+#include <render/ViewCamera.hpp>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
+
+#include <string>
+#include <vector>
+
 class BenchmarkState final : public State {
     struct TrackPoint {
         float time;

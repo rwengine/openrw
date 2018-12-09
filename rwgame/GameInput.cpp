@@ -1,4 +1,7 @@
 #include "GameInput.hpp"
+
+#include "engine/GameState.hpp"
+
 #include <unordered_map>
 
 // Hardcoded Controls SDLK_* -> GameInputState::Control

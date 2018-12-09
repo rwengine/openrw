@@ -1,5 +1,6 @@
-#include <MenuSystem.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include <MenuSystem.hpp>
 
 BOOST_AUTO_TEST_SUITE(MenuTests)
 

@@ -1,5 +1,6 @@
 #ifndef RWGAME_STATEMANAGER_HPP
 #define RWGAME_STATEMANAGER_HPP
+
 #include "State.hpp"
 
 #include <memory>

@@ -3,6 +3,13 @@
 
 #include "State.hpp"
 
+#include <render/ViewCamera.hpp>
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include <memory>
+
 class DebugState final : public State {
     ViewCamera _debugCam;
     glm::vec3 _movement{};

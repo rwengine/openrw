@@ -1,6 +1,7 @@
 #ifndef LOADINGSTATE_HPP
 #define LOADINGSTATE_HPP
-#include "StateManager.hpp"
+
+#include "State.hpp"
 
 #include <functional>
 

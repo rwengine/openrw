@@ -1,18 +1,21 @@
 #ifndef RWGAME_STATE_HPP
 #define RWGAME_STATE_HPP
 
-#include <optional>
-
-#include <render/ViewCamera.hpp>
-#include "GameWindow.hpp"
 #include "MenuSystem.hpp"
 
-#include <SDL.h>
 #include <SDL_events.h>
+
+#include <memory>
+#include <optional>
+#include <utility>
 
 class RWGame;
 class GameWorld;
+class GameRenderer;
+class GameWindow;
+class Menu;
 class StateManager;
+class ViewCamera;
 
 class State {
 public:

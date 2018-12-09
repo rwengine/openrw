@@ -1,4 +1,5 @@
 #include "State.hpp"
+
 #include "RWGame.hpp"
 
 // This serves as the "initial" camera position.
@@ -26,8 +27,8 @@ void State::handleEvent(const SDL_Event& e) {
     if (!m) return;
 
     switch (e.type) {
-        case SDL_MOUSEBUTTONUP:
-            if (e.button.button == SDL_BUTTON_LEFT)
+    case SDL_MOUSEBUTTONUP:
+        if (e.button.button == SDL_BUTTON_LEFT)
                 m->click(e.button.x, e.button.y);
             break;
 

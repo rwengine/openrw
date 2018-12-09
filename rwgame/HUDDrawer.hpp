@@ -1,9 +1,13 @@
 #ifndef _RWGAME_HUDDRAWER_HPP_
 #define _RWGAME_HUDDRAWER_HPP_
-#include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
 
+class GameWorld;
+class GameRenderer;
 class PlayerController;
+class ViewCamera;
+
+#include <glm/gtc/type_precision.hpp>
+#include <glm/vec3.hpp>
 
 class HUDDrawer {
 public:
