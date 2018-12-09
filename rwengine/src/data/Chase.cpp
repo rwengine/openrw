@@ -74,7 +74,7 @@ bool ChaseCoordinator::addChaseVehicle(GameObject *vehicle, int index,
     std::vector<ChaseKeyframe> keyframes;
     bool result = ChaseKeyframe::load(pathFile, keyframes);
     RW_CHECK(result, "Failed to load chase keyframes: " + pathFile);
-    chaseVehicles[index] = {keyframes, vehicle};
+    chaseVehicles[index] = {std::move(keyframes), vehicle};
     return result;
 }
 
@@ -97,20 +97,24 @@ void ChaseCoordinator::start() {
 void ChaseCoordinator::update(float dt) {
     chaseTime += dt;
     auto frameNum = static_cast<size_t>(chaseTime * KEYFRAMES_PER_SECOND);
-    for (auto &it : chaseVehicles) {
-        RW_CHECK(frameNum < it.second.keyframes.size(),
+    for (auto &[index, chase] : chaseVehicles) {
+        RW_CHECK(frameNum < chase.keyframes.size(),
                  "Vehicle out of chase keyframes");
-        if (frameNum >= it.second.keyframes.size()) continue;
+        if (frameNum >= chase.keyframes.size()) continue;
 
-        const ChaseKeyframe &kf = it.second.keyframes[frameNum];
-        it.second.object->setPosition(kf.position);
-        it.second.object->setRotation(kf.rotation);
+        const ChaseKeyframe &kf = chase.keyframes[frameNum];
+        chase.object->setPosition(kf.position);
+        chase.object->setRotation(kf.rotation);
     }
 }
 
+void ChaseCoordinator::reserve(size_t nr) {
+    chaseVehicles.reserve(nr);
+}
+
 void ChaseCoordinator::cleanup() {
-    for (auto &it : chaseVehicles) {
-        it.second.object->engine->destroyObject(it.second.object);
+    for (auto &[index, chase] : chaseVehicles) {
+        chase.object->engine->destroyObject(chase.object);
     }
     chaseVehicles.clear();
 }

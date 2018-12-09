@@ -9399,32 +9399,38 @@ void opcode_0353(const ScriptArguments& args, const ScriptCharacter character) {
 void opcode_0354(const ScriptArguments& args, const ScriptFloat arg1) {
     RW_UNUSED(arg1);
     // Hardcoded list of vehicles, put this somewhere else.
+    auto chaseVehicle = [](auto& args, const auto& data) {
+        args.getWorld()->chase.reserve(data.size());
 
-#define CHASE_VEHICLE(model, x, y, z, hdg, c1, c2, path) \
-    { \
-    	auto vehicle0 = args.getWorld()->createVehicle( \
-    				model, \
-    				glm::vec3(x, y, z), \
-    				glm::angleAxis(glm::radians(hdg), glm::vec3(0.f, 0.f, 1.f))); \
-    	vehicle0->setPrimaryColour(c1);\
-    	vehicle0->setSecondaryColour(c2);\
-    	args.getWorld()->chase.addChaseVehicle(vehicle0, path,\
-    				args.getWorld()->data->getDataPath().string()+"/data/paths/CHASE" #path ".DAT");\
-    }
+        for (auto& [model, x, y, z, hdg, c1, c2, path] : data) {
+            auto vehicle0 = args.getWorld()->createVehicle(
+                model, glm::vec3(x, y, z),
+                glm::angleAxis(glm::radians(hdg), glm::vec3(0.f, 0.f, 1.f)));
+            vehicle0->setPrimaryColour(c1);
+            vehicle0->setSecondaryColour(c2);
+            args.getWorld()->chase.addChaseVehicle(
+                vehicle0, path,
+                args.getWorld()->data->getDataPath().string() +
+                    "/data/paths/CHASE" + std::to_string(path) + ".DAT");
+        }
+    };
 
-    CHASE_VEHICLE(116,   273.5422f,  -1167.1907f,   24.9906f, 64.f,    2, 1,  0);
-    CHASE_VEHICLE(117,   231.1783f,  -1388.832f,    25.9782f, 90.0f,   2, 1,  1);
-    CHASE_VEHICLE(130,  -28.9762f,   -1031.3367f,   25.9781f, 242.0f,  1, 75, 2);
-    CHASE_VEHICLE(96,    114.1564f,  -796.6938f,    24.9782f, 180.0f,  0, 0,  3);
-    CHASE_VEHICLE(110,   184.3156f,  -1473.251f,    25.9782f, 0.0f,    6, 6,  4);
-    CHASE_VEHICLE(105,   173.8868f,  -1377.6514f,   25.9782f, 0.0f,    4, 5,  6);
-    CHASE_VEHICLE(92,    102.5946f,  -943.9363f,    25.9781f, 270.0f,  53,53, 7);
-    CHASE_VEHICLE(105,   177.7157f,  -862.1865f,    25.9782f, 155.0f,  41, 1, 10);
-    CHASE_VEHICLE(92,    170.5698f,  -889.0236f,    25.9782f, 154.0f,  10, 10,11);
-    CHASE_VEHICLE(111,   402.6081f,  -917.4963f,    37.381f,  90.0f,   34, 1, 14);
-    CHASE_VEHICLE(110,  -33.4962f,   -938.4563f,    25.9781f, 266.0f,  6,  6, 16);
-    CHASE_VEHICLE(111,   49.3631f,   -987.605f,     25.9781f, 0.0f,    51, 1, 18);
-    CHASE_VEHICLE(110,   179.0049f,  -1154.6686f,   25.9781f, 0.0f,    6, 76, 19);
+    chaseVehicle(
+        args, std::initializer_list<
+                  std::tuple<int, float, float, float, float, float, int, int>>{
+                  {116, 273.5422f, -1167.1907f, 24.9906f, 64.f, 2, 1, 0},
+                  {117, 231.1783f, -1388.832f, 25.9782f, 90.0f, 2, 1, 1},
+                  {130, -28.9762f, -1031.3367f, 25.9781f, 242.0f, 1, 75, 2},
+                  {96, 114.1564f, -796.6938f, 24.9782f, 180.0f, 0, 0, 3},
+                  {110, 184.3156f, -1473.251f, 25.9782f, 0.0f, 6, 6, 4},
+                  {105, 173.8868f, -1377.6514f, 25.9782f, 0.0f, 4, 5, 6},
+                  {92, 102.5946f, -943.9363f, 25.9781f, 270.0f, 53, 53, 7},
+                  {105, 177.7157f, -862.1865f, 25.9782f, 155.0f, 41, 1, 10},
+                  {92, 170.5698f, -889.0236f, 25.9782f, 154.0f, 10, 10, 11},
+                  {111, 402.6081f, -917.4963f, 37.381f, 90.0f, 34, 1, 14},
+                  {110, -33.4962f, -938.4563f, 25.9781f, 266.0f, 6, 6, 16},
+                  {111, 49.3631f, -987.605f, 25.9781f, 0.0f, 51, 1, 18},
+                  {110, 179.0049f, -1154.6686f, 25.9781f, 0.0f, 6, 76, 19}});
 
     args.getWorld()->chase.start();
 }
