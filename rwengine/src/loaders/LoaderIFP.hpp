@@ -96,7 +96,7 @@ public:
 
     struct INFO {
         BASE base;
-        int32_t entries;
+        std::uint32_t entries;
         // null terminated string
         // entry data
     };
@@ -122,7 +122,7 @@ public:
     struct ANIM {
         BASE base;
         char name[28];
-        int32_t frames;
+        std::uint32_t frames;
         int32_t unk;
         int32_t next;
         int32_t prev;
