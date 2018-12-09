@@ -2,12 +2,11 @@
 #define _RWENGINE_SCRIPTMODULE_HPP_
 
 #include <cstddef>
-#include <map>
+#include <string>
+#include <unordered_map>
 
 #include <script/ScriptTypes.hpp>
 #include "ScriptMachine.hpp"
-
-#include <string>
 
 namespace script_bind {
 template <class T>
@@ -172,9 +171,13 @@ public:
 
     bool findOpcode(ScriptFunctionID id, ScriptFunctionMeta** out);
 
+    void reserveFunctions(size_t nr) {
+        functions.reserve(nr);
+    }
+
 private:
     const std::string name;
-    std::map<ScriptFunctionID, ScriptFunctionMeta> functions;
+    std::unordered_map<ScriptFunctionID, ScriptFunctionMeta> functions;
 };
 
 #endif

@@ -14,6 +14,8 @@
 #include "GTA3ModuleImpl.inl"
 
 GTA3Module::GTA3Module() : ScriptModule("GTA3") {
+    reserveFunctions(903);
+
     bind(0x0000, 0, opcode_0000);
     bind(0x0001, 1, opcode_0001);
     bind(0x0002, 1, opcode_0002);
