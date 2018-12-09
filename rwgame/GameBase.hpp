@@ -1,11 +1,12 @@
 #ifndef RWGAME_GAMEBASE_HPP
 #define RWGAME_GAMEBASE_HPP
+
 #include "GameWindow.hpp"
 #include "RWConfig.hpp"
 
-#include <core/Logger.hpp>
+#include <boost/program_options.hpp>
 
-#include <map>
+class Logger;
 
 /**
  * @brief Handles basic window and setup

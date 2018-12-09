@@ -1,5 +1,9 @@
 #include "GameWindow.hpp"
+
 #include <core/Logger.hpp>
+#include <render/GameRenderer.hpp>
+
+#include <SDL_mouse.h>
 
 void GameWindow::create(const std::string& title, size_t w, size_t h,
                         bool fullscreen) {

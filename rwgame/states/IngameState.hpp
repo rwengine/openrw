@@ -1,7 +1,14 @@
 #ifndef INGAMESTATE_HPP
 #define INGAMESTATE_HPP
 
-#include "StateManager.hpp"
+#include "State.hpp"
+
+#include <render/ViewCamera.hpp>
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
+#include <string>
 
 class GameObject;
 class PlayerController;

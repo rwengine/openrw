@@ -7,18 +7,20 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 
-#include <render/GameRenderer.hpp>
+#include <fonts/GameTexts.hpp>
 #include <rw/debug.hpp>
+
+class GameRenderer;
 
 /**
  * Default values for menus that should match the look and feel of the original
  */
 namespace MenuDefaults {
 constexpr int kFont = 1;
-
 constexpr const char* kStartGameId = "FET_SAN";
 constexpr const char* kResumeGameId = "FEM_RES";
 constexpr const char* kLoadGameId = "FET_LG";
@@ -50,20 +52,7 @@ public:
         }
 
         void draw(font_t font, float size, bool active, GameRenderer& r,
-                  glm::vec2& basis) {
-            TextRenderer::TextInfo ti;
-            ti.font = font;
-            ti.screenPosition = basis;
-            ti.text = text;
-            ti.size = size;
-            if (!active) {
-                ti.baseColour = glm::u8vec3(255);
-            } else {
-                ti.baseColour = glm::u8vec3(255, 255, 0);
-            }
-            r.text.renderText(ti);
-            basis.y += size;
-        }
+                  glm::vec2& basis);
 
         void activate(float clickX, float clickY) {
             RW_UNUSED(clickX);
@@ -97,57 +86,16 @@ public:
      */
     int activeEntry;
 
-    void draw(GameRenderer& r) {
-        glm::vec2 basis(offset);
-        for (size_t i = 0; i < entries.size(); ++i) {
-            bool active = false;
-            if (activeEntry >= 0 && i == static_cast<unsigned>(activeEntry)) {
-                active = true;
-            }
-            entries[i].draw(font, size, active, r, basis);
-        }
-    }
+    void draw(GameRenderer& r);
 
-    void hover(const float x, const float y) {
-        glm::vec2 c(x - offset.x, y - offset.y);
-        for (size_t i = 0; i < entries.size(); ++i) {
-            if (c.y > 0.f && c.y < size) {
-                activeEntry = static_cast<int>(i);
-                return;
-            } else {
-                c.y -= size;
-            }
-        }
-    }
+    void hover(const float x, const float y);
 
-    void click(const float x, const float y) {
-        glm::vec2 c(x - offset.x, y - offset.y);
-        for (auto &entry : entries) {
-            if (c.y > 0.f && c.y < size) {
-                entry.activate(c.x, c.y);
-                return;
-            } else {
-                c.y -= size;
-            }
-        }
-    }
+    void click(const float x, const float y);
 
     // Activates the menu entry at the current active index.
-    void activate() {
-        if (activeEntry >= 0 &&
-            static_cast<unsigned>(activeEntry) < entries.size()) {
-            entries[activeEntry].activate(0.f, 0.f);
-        }
-    }
+    void activate();
 
-    void move(int movement) {
-        activeEntry += movement;
-        if (activeEntry >= static_cast<int>(entries.size())) {
-            activeEntry = 0;
-        } else if (activeEntry < 0) {
-            activeEntry = static_cast<int>(entries.size() - 1);
-        }
-    }
+    void move(int movement);
 
     const std::vector<MenuEntry>& getEntries() const {
         return entries;

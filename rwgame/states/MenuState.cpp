@@ -1,10 +1,13 @@
 #include "MenuState.hpp"
+
 #include "IngameState.hpp"
+#include "RWGame.hpp"
+#include "StateManager.hpp"
+#include "MenuSystem.hpp"
 #include "game.hpp"
 
 #include <engine/SaveGame.hpp>
 #include <rw/debug.hpp>
-#include "RWGame.hpp"
 
 MenuState::MenuState(RWGame* game) : State(game) {
     enterMainMenu();

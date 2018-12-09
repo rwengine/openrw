@@ -1,11 +1,12 @@
 #ifndef GAMEWINDOW_HPP
 #define GAMEWINDOW_HPP
 
-#include <glm/vec2.hpp>
-#include <string>
-#include <SDL.h>
+#include <SDL_surface.h>
+#include <SDL_video.h>
 
-#include <render/GameRenderer.hpp>
+#include <glm/vec2.hpp>
+
+#include <string>
 
 class GameWindow {
     SDL_Window* window = nullptr;

@@ -1,5 +1,8 @@
 #include "PauseState.hpp"
+
 #include "RWGame.hpp"
+#include "MenuSystem.hpp"
+#include "StateManager.hpp"
 
 #include <iostream>
 

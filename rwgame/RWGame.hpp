@@ -1,20 +1,10 @@
 #ifndef RWGAME_RWGAME_HPP
 #define RWGAME_RWGAME_HPP
 
-#include "game.hpp"
 #include "GameBase.hpp"
 #include "HUDDrawer.hpp"
-#include "RWConfig.hpp"
 #include "StateManager.hpp"
-
-#ifdef _MSC_VER
-#pragma warning(disable : 4305)
-#endif
-// FIXME: should be in rwengine, deeply hidden
-#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
-#ifdef _MSC_VER
-#pragma warning(default : 4305)
-#endif
+#include "game.hpp"
 
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
@@ -24,6 +14,8 @@
 #include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/modules/GTA3Module.hpp>
+
+#include <SDL_events.h>
 
 #include <chrono>
 
@@ -100,37 +92,11 @@ public:
     }
 
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
-                     GameObject** object = nullptr) {
-        auto vc = currentCam;
-        glm::vec3 from(vc.position.x, vc.position.y, vc.position.z);
-        glm::vec3 tmp = vc.rotation * glm::vec3(1000.f, 0.f, 0.f);
-
-        return hitWorldRay(from, tmp, hit, normal, object);
-    }
+                     GameObject** object = nullptr);
 
     bool hitWorldRay(const glm::vec3& start, const glm::vec3& direction,
                      glm::vec3& hit, glm::vec3& normal,
-                     GameObject** object = nullptr) {
-        auto from = btVector3(start.x, start.y, start.z);
-        auto to = btVector3(start.x + direction.x, start.y + direction.y,
-                            start.z + direction.z);
-        btCollisionWorld::ClosestRayResultCallback ray(from, to);
-
-        world->dynamicsWorld->rayTest(from, to, ray);
-        if (ray.hasHit()) {
-            hit = glm::vec3(ray.m_hitPointWorld.x(), ray.m_hitPointWorld.y(),
-                            ray.m_hitPointWorld.z());
-            normal =
-                glm::vec3(ray.m_hitNormalWorld.x(), ray.m_hitNormalWorld.y(),
-                          ray.m_hitNormalWorld.z());
-            if (object) {
-                *object = static_cast<GameObject*>(
-                    ray.m_collisionObject->getUserPointer());
-            }
-            return true;
-        }
-        return false;
-    }
+                     GameObject** object = nullptr);
 
     void startScript(const std::string& name);
 
