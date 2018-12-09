@@ -63,6 +63,8 @@ bool LoaderIFP::loadFromMemory(char* data) {
     ANPK* fileRoot = read<ANPK>(data, dataI);
     std::string listname = readString(data, dataI);
 
+    animations.reserve(fileRoot->info.entries);
+
     for (auto a = 0u; a < fileRoot->info.entries; ++a) {
         // something about a name?
         /*NAME* n =*/read<NAME>(data, dataI);
