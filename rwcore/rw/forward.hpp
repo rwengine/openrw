@@ -1,8 +1,8 @@
 #ifndef _LIBRW_RW_FORWARD_HPP_
 #define _LIBRW_RW_FORWARD_HPP_
 
-#include <memory>
 #include <unordered_map>
+#include <memory>
 #include <vector>
 
 // Forward Declarations
