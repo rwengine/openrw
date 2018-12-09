@@ -1,8 +1,8 @@
 #ifndef _LIBRW_RW_FORWARD_HPP_
 #define _LIBRW_RW_FORWARD_HPP_
 
-#include <map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 // Forward Declarations
@@ -23,6 +23,6 @@ using ClumpPtr = std::shared_ptr<Clump>;
 
 // Collections
 using AtomicList = std::vector<AtomicPtr>;
-typedef std::map<std::string, AnimationPtr> AnimationSet;
+typedef std::unordered_map<std::string, AnimationPtr> AnimationSet;
 
 #endif /* FORWARD_HPP */
