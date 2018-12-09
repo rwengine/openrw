@@ -1,5 +1,6 @@
 #ifndef _LIBRW_DRAWBUFFER_HPP_
 #define _LIBRW_DRAWBUFFER_HPP_
+
 #include <gl/gl_core_3_3.h>
 
 class GeometryBuffer;
@@ -9,7 +10,6 @@ class GeometryBuffer;
  */
 class DrawBuffer {
     GLuint vao;
-
     GLenum facetype;
 
 public:

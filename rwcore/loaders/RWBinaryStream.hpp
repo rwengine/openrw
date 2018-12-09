@@ -1,13 +1,16 @@
 #ifndef _LIBRW_RWBINARYSTREAM_HPP_
 #define _LIBRW_RWBINARYSTREAM_HPP_
-#include <cstdint>
-#include <glm/glm.hpp>
-#include <cstring>
 
-#include <cstddef>
+#include <glm/gtc/type_precision.hpp>
+#include <glm/mat3x3.hpp>
+#include <glm/vec3.hpp>
 
 #include "rw/debug.hpp"
 #include "rw/casts.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 /**
  * @brief Class for working with RenderWare binary streams.

@@ -2,7 +2,6 @@
 #define _LIBRW_LOADERDFF_HPP_
 
 #include <data/Clump.hpp>
-#include <gl/TextureData.hpp>
 #include <rw/forward.hpp>
 
 #include <functional>
