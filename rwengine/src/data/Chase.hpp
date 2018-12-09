@@ -3,8 +3,8 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class GameObject;
@@ -50,6 +50,8 @@ public:
     void start();
     void update(float dt);
 
+    void reserve(size_t nr);
+
     void cleanup();
 
 private:
@@ -59,7 +61,7 @@ private:
         GameObject* object;
     };
 
-    std::map<int, ChaseObject> chaseVehicles;
+    std::unordered_map<int, ChaseObject> chaseVehicles;
 };
 
 #endif
