@@ -1,5 +1,6 @@
 #include "Weather.hpp"
 
+#include <cmath>
 
 namespace {
 Weather::Entry interpolateWeather(const Weather::Entry& a,

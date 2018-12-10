@@ -1,8 +1,6 @@
 #ifndef _RWENGINE_PROJECTILEOBJECT_HPP_
 #define _RWENGINE_PROJECTILEOBJECT_HPP_
 
-#include <glm/glm.hpp>
-
 #include <objects/GameObject.hpp>
 #include "render/VisualFX.hpp"
 

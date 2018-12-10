@@ -1267,7 +1267,7 @@ bool SaveGame::loadGame(GameState& state, const std::string& file) {
         auto& garage = garages[g];
         state.world->createGarage(glm::vec3(garage.x1, garage.y1, garage.z1),
                                   glm::vec3(garage.x2, garage.y2, garage.z2),
-                                  static_cast<Garage::Type>(garage.type));
+                                  static_cast<GarageType>(garage.type));
     }
     for (auto &c : garageData.cars) {
         if (c.modelId == 0) continue;

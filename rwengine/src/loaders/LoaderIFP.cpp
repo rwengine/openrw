@@ -1,5 +1,7 @@
 #include "loaders/LoaderIFP.hpp"
 
+#include <glm/glm.hpp>
+
 #include <algorithm>
 #include <cctype>
 #include <memory>

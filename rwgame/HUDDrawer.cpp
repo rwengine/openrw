@@ -9,6 +9,8 @@
 #include <render/GameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <iomanip>
 #include <sstream>
 
@@ -43,7 +45,7 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
     }
 }
 
-void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
+void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
                         GameWorld* world, GameRenderer& render) {
     MapRenderer::MapInfo map;
 
@@ -72,7 +74,7 @@ void HUDDrawer::drawMap(ViewCamera& currentView, PlayerController* player,
     }
 }
 
-void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
+void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
                                GameRenderer& render) {
     float infoTextX = static_cast<float>(render.getRenderer().getViewport().x -
                       (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize + hudParameters.uiInfoMargin));
@@ -248,7 +250,7 @@ void HUDDrawer::drawPlayerInfo(PlayerController* player, GameWorld* world,
     }
 }
 
-void HUDDrawer::drawHUD(ViewCamera& currentView, PlayerController* player,
+void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
                         GameWorld* world, GameRenderer& render) {
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);

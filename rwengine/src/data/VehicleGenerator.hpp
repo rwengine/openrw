@@ -1,6 +1,7 @@
 #ifndef RWENGINE_VEHICLEGENERATOR_HPP
 #define RWENGINE_VEHICLEGENERATOR_HPP
-#include <glm/glm.hpp>
+
+#include <glm/vec3.hpp>
 
 /**
  * Stores information about where the game can generate vehicles.

@@ -41,7 +41,7 @@ int ScriptArguments::getModel(unsigned int arg) const {
 
 GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const {
     auto playerId = parameters->at(player).integerValue();
-    PlayerController* controller = getWorld()->players.at(playerId);
+    auto controller = getWorld()->players.at(playerId);
     RW_CHECK(controller != nullptr, "No controller for player " << player);
     RW_CHECK(controller->getCharacter(), "No character for player " << player);
     return controller->getCharacter();
@@ -50,11 +50,11 @@ GameObject* ScriptArguments::getPlayerCharacter(unsigned int player) const {
 // @todo figure out original cast
 template <>
 ScriptGarageType ScriptArguments::getParameter<ScriptGarageType>(unsigned int arg) const {
-    return static_cast<Garage::Type>(getParameters().at(arg).integerValue());
+    return static_cast<GarageType>(getParameters().at(arg).integerValue());
 }
 
 template <>
-GameObject* ScriptArguments::getObject<PlayerController>(
+GameObject* ScriptArguments::getObject<ai::PlayerController>(
     unsigned int arg) const {
     return getPlayerCharacter(arg);
 }
@@ -187,17 +187,17 @@ ScriptObjectType<PickupObject> ScriptArguments::getScriptObject(
     return {param.handleValue(), getObject<PickupObject>(arg)};
 }
 template <>
-ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
+ScriptObjectType<ai::PlayerController> ScriptArguments::getScriptObject(
     unsigned int arg) const {
     auto& param = (*this)[arg];
     RW_CHECK(param.isLvalue(), "Non lvalue passed as object");
     /// @todo suport more than one player
     auto player = getState()->playerObject;
     auto object = getWorld()->pedestrianPool.find(player);
-    PlayerController* ctrl = nullptr;
+    ai::PlayerController* ctrl = nullptr;
     if (object) {
         auto playerObject = static_cast<CharacterObject*>(object);
-        ctrl = static_cast<PlayerController*>(playerObject->controller);
+        ctrl = static_cast<ai::PlayerController*>(playerObject->controller);
     }
     return {param.handleValue(), ctrl};
 }

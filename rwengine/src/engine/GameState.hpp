@@ -1,14 +1,5 @@
 #ifndef _RWENGINE_GAMESTATE_HPP_
 #define _RWENGINE_GAMESTATE_HPP_
-#include <bitset>
-#include <cstdint>
-#include <map>
-#include <optional>
-#include <string>
-#include <vector>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 #include <fonts/GameTexts.hpp>
 #include "data/CutsceneData.hpp"
@@ -19,6 +10,17 @@
 #include "engine/ScreenText.hpp"
 #include "objects/ObjectTypes.hpp"
 #include "script/ScriptTypes.hpp"
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
+
+#include <bitset>
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <string>
+#include <vector>
 
 class GameWorld;
 class GameObject;

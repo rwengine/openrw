@@ -8,6 +8,9 @@ extern "C" {
 }
 
 #include "audio/alCheck.hpp"
+#include "audio/Sound.hpp"
+#include "audio/SoundBuffer.hpp"
+#include "audio/SoundSource.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"
 #include "render/ViewCamera.hpp"

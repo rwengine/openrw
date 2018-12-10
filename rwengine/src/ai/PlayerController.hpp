@@ -1,9 +1,11 @@
 #ifndef _RWENGINE_PLAYERCONTROLLER_HPP_
 #define _RWENGINE_PLAYERCONTROLLER_HPP_
 
-#include <ai/CharacterController.hpp>
-#include <glm/glm.hpp>
+#include "ai/CharacterController.hpp"
+
 #include <glm/gtc/quaternion.hpp>
+
+namespace ai {
 
 class PlayerController final : public CharacterController {
 private:
@@ -94,7 +96,7 @@ public:
 
     bool isAdrenalineActive() {
         return adrenalineEffect;
-    };
+    }
 
     void activateAdrenalineEffect();
 
@@ -107,5 +109,7 @@ public:
         return 0;
     }
 };
+
+}  // namespace ai
 
 #endif

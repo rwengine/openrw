@@ -3,6 +3,7 @@
 #include <rw/types.hpp>
 
 #include "audio/alCheck.hpp"
+#include "audio/SoundSource.hpp"
 
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));

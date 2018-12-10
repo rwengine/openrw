@@ -1,12 +1,16 @@
 #ifndef _RWENGINE_AIGRAPHNODE_HPP_
 #define _RWENGINE_AIGRAPHNODE_HPP_
+
+#include <glm/vec3.hpp>
+
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <vector>
 
-struct AIGraphNode {
-    enum NodeType { Vehicle, Pedestrian };
+namespace ai {
 
+enum class NodeType { Vehicle, Pedestrian };
+
+struct AIGraphNode {
     enum {
         None = 0,
         CrossesRoad =
@@ -27,5 +31,7 @@ struct AIGraphNode {
 
     std::vector<AIGraphNode*> connections;
 };
+
+}  // namespace ai
 
 #endif

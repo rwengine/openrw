@@ -6,8 +6,6 @@
 #include <string>
 #include <array>
 
-#include <glm/glm.hpp>
-
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 

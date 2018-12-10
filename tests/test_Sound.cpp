@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <audio/Sound.hpp>
+#include <audio/SoundBuffer.hpp>
 #include <audio/SoundManager.hpp>
 
 BOOST_AUTO_TEST_SUITE(SoundTests)

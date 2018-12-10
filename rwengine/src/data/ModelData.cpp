@@ -1,5 +1,16 @@
 #include "data/ModelData.hpp"
 
+#include "data/CollisionModel.hpp"
+#include "data/PathData.hpp"
+
+SimpleModelInfo::SimpleModelInfo() : BaseModelInfo(kType) {
+}
+
+SimpleModelInfo::SimpleModelInfo(ModelDataType type) : BaseModelInfo(type) {
+}
+
+SimpleModelInfo::~SimpleModelInfo() = default;
+
 void SimpleModelInfo::setupBigBuilding(const ModelInfoTable& models) {
     if (loddistances_[0] > 300.f && atomics_[2] == nullptr) {
         isbigbuilding_ = true;
@@ -23,3 +34,12 @@ void SimpleModelInfo::findRelatedModel(const ModelInfoTable& models) {
         }
     }
 }
+
+BaseModelInfo::BaseModelInfo(ModelDataType type) : type_(type) {
+}
+
+void BaseModelInfo::setCollisionModel(std::unique_ptr<CollisionModel> &col) {
+    collision = std::move(col);
+}
+
+BaseModelInfo::~BaseModelInfo() = default;

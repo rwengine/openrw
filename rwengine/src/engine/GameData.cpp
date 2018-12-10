@@ -19,6 +19,7 @@
 
 #include "core/Logger.hpp"
 #include "core/Profiler.hpp"
+#include "data/CollisionModel.hpp"
 #include "engine/GameState.hpp"
 #include "engine/GameWorld.hpp"
 #include "loaders/LoaderCOL.hpp"
@@ -701,6 +702,31 @@ void GameData::loadSplash(const std::string& name) {
     engine->state->currentSplash = lower;
 }
 
+TextureData::Handle GameData::findSlotTexture(const std::string &slot, const std::string &texture) const {
+    auto slotit = textureslots.find(slot);
+    if (slotit == textureslots.end()) {
+        return nullptr;
+    }
+    auto textureit = slotit->second.find(texture);
+    if (textureit == slotit->second.end()) {
+        return nullptr;
+    }
+    return textureit->second;
+}
+
+ZoneData *GameData::findZone(const std::string &name) {
+    auto it =
+            std::find_if(gamezones.begin(), gamezones.end(),
+                         [&](const ZoneData& a) { return a.name == name; });
+    return it != gamezones.end() ? &(*it) : nullptr;
+}
+
+ZoneData *GameData::findZoneAt(const glm::vec3 &pos) {
+    RW_CHECK(!gamezones.empty(), "No game zones loaded");
+    ZoneData* zone = gamezones[0].findLeafAtPoint(pos);
+    return zone;
+}
+
 int GameData::getWaterIndexAt(const glm::vec3& ws) const {
     auto wX = static_cast<int>((ws.x + WATER_WORLD_SIZE / 2.f) /
                                (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
@@ -708,7 +734,7 @@ int GameData::getWaterIndexAt(const glm::vec3& ws) const {
                                (WATER_WORLD_SIZE / WATER_HQ_DATA_SIZE));
 
     if (wX >= 0 && wX < WATER_HQ_DATA_SIZE && wY >= 0 &&
-        wY < WATER_HQ_DATA_SIZE) {
+            wY < WATER_HQ_DATA_SIZE) {
         int i = (wX * WATER_HQ_DATA_SIZE) + wY;
         return engine->data->realWater[i];
     }

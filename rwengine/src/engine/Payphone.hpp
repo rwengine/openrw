@@ -1,10 +1,14 @@
 #ifndef _RWENGINE_PAYPHONE_HPP_
 #define _RWENGINE_PAYPHONE_HPP_
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 #include <string>
 
+namespace ai {
 class PlayerController;
+}  // namespace ai
 
 class GameWorld;
 class GameState;

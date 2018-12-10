@@ -17,20 +17,11 @@
 #pragma warning(default : 4305)
 #endif
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-
 #include <ai/AIGraph.hpp>
-#include <ai/AIGraphNode.hpp>
 #include <audio/SoundManager.hpp>
-
-#include <engine/Garage.hpp>
-#include <engine/Payphone.hpp>
-#include <objects/ObjectTypes.hpp>
-
-#include <render/VisualFX.hpp>
-
 #include <data/Chase.hpp>
+#include <engine/Garage.hpp>
+#include <objects/ObjectTypes.hpp>
 
 class btCollisionDispatcher;
 class btDefaultCollisionConfiguration;
@@ -45,7 +36,10 @@ class GameState;
 class Garage;
 class Payphone;
 
+namespace ai {
 class PlayerController;
+}  // namespace ai
+
 class Logger;
 
 class GameData;
@@ -62,6 +56,11 @@ class ViewCamera;
 struct BlipData;
 struct WeaponScan;
 struct VehicleGenerator;
+
+struct LightFX;
+struct ParticleFX;
+struct TrailFX;
+struct VisualFX;
 
 /**
  * Information about "Goal" locations so they can be rendered
@@ -158,7 +157,7 @@ public:
      * Creates a garage
      */
     Garage* createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
-                         Garage::Type type);
+                         GarageType type);
 
     /**
      * Creates a payphone
@@ -291,7 +290,7 @@ public:
 
     ObjectPool& getTypeObjectPool(GameObject* object);
 
-    std::vector<PlayerController*> players;
+    std::vector<ai::PlayerController*> players;
 
     std::vector<std::unique_ptr<Garage>> garages;
 
@@ -312,7 +311,7 @@ public:
     /**
      * AI Graph
      */
-    AIGraph aigraph;
+    ai::AIGraph aigraph;
 
     /**
      * Visual Effects
@@ -368,9 +367,9 @@ public:
                               const std::string& name);
     void loadSpecialModel(const unsigned short index, const std::string& name);
 
-    void disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
+    void disableAIPaths(ai::NodeType type, const glm::vec3& min,
                         const glm::vec3& max);
-    void enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
+    void enableAIPaths(ai::NodeType type, const glm::vec3& min,
                        const glm::vec3& max);
 
     void drawAreaIndicator(AreaIndicatorInfo::AreaIndicatorType type,
@@ -398,14 +397,14 @@ public:
     void clearObjectsWithinArea(const glm::vec3 center, const float radius,
                                 const bool clearParticles);
 
-    PlayerController* getPlayer();
+    ai::PlayerController* getPlayer();
 
     template <
         typename T1, typename T2 = T1,
         typename std::enable_if<std::is_integral<T1>::value>::type* = nullptr,
         typename std::enable_if<std::is_integral<T2>::value>::type* = nullptr>
     T1 getRandomNumber(T1 min, T2 max) {
-        std::uniform_int_distribution<T1> dist(min, max);
+        std::uniform_int_distribution<T1> dist(min, static_cast<T1>(max));
         return dist(randomNumberGen);
     }
 
@@ -416,7 +415,7 @@ public:
         typename std::enable_if<std::is_floating_point<T2>::value>::type* =
             nullptr>
     T1 getRandomNumber(T1 min, T2 max) {
-        std::uniform_real_distribution<T1> dist(min, max);
+        std::uniform_real_distribution<T1> dist(min, static_cast<T1>(max));
         return dist(randomNumberGen);
     }
 

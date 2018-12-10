@@ -13,6 +13,8 @@
 
 class Animator;
 
+namespace ai {
+
 void PlayerController::setInputEnabled(bool enabled) {
     _enabled = enabled;
 }
@@ -358,3 +360,5 @@ void PlayerController::freeFromCutscene() {
     // @todo: make player no longer invincible
     //                              ignored by police
 }
+
+}  // namespace ai

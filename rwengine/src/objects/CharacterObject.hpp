@@ -7,16 +7,16 @@
 #include <cstdint>
 #include <string>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
-
 #include <rw/forward.hpp>
 
 #include <data/AnimGroup.hpp>
 #include <objects/GameObject.hpp>
 
-class BaseModelInfo;
+namespace ai {
 class CharacterController;
+}
+
+class BaseModelInfo;
 class btCapsuleShapeZ;
 class btKinematicCharacterController;
 class btPairCachingGhostObject;
@@ -85,7 +85,7 @@ public:
     std::unique_ptr<btPairCachingGhostObject> physObject;
     std::unique_ptr<btCapsuleShapeZ> physShape;
 
-    CharacterController* controller;
+    ai::CharacterController* controller;
 
     AnimGroup* animations;
 
@@ -97,7 +97,7 @@ public:
      */
     CharacterObject(GameWorld* engine, const glm::vec3& pos,
                     const glm::quat& rot, BaseModelInfo* modelinfo,
-                    CharacterController* controller);
+                    ai::CharacterController* controller);
 
     ~CharacterObject() override;
 

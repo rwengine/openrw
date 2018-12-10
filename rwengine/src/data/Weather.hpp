@@ -1,12 +1,13 @@
 #ifndef _RWENGINE_WEATHER_HPP_
 #define _RWENGINE_WEATHER_HPP_
 
+#include <glm/vec3.hpp>
+
 #include <rw/types.hpp>
 
 #include <cstdint>
 #include <vector>
 
-#include <glm/glm.hpp>
 
 enum class WeatherCondition { Sunny = 0, Cloudy = 1, Rainy = 2, Foggy = 3 };
 

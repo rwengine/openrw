@@ -1,8 +1,15 @@
 #ifndef _RWENGINE_MODELDATA_HPP_
 #define _RWENGINE_MODELDATA_HPP_
+
+#include <rw/debug.hpp>
+#include <rw/forward.hpp>
+
+#ifdef RW_WINDOWS
+#include <rw_mingw.hpp>
+#endif
+
 #include <array>
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -10,15 +17,8 @@
 #include <utility>
 #include <vector>
 
-#include <data/Clump.hpp>
-#include <rw/debug.hpp>
-#include <rw/forward.hpp>
-
-#include <data/CollisionModel.hpp>
-#include <data/PathData.hpp>
-#ifdef RW_WINDOWS
-#include <rw_mingw.hpp>
-#endif
+struct CollisionModel;
+struct PathData;
 
 /**
  * 16-bit model ID identifier (from .ide)
@@ -47,10 +47,9 @@ public:
     std::string name;
     std::string textureslot;
 
-    BaseModelInfo(ModelDataType type) : type_(type) {
-    }
+    BaseModelInfo(ModelDataType type);
 
-    virtual ~BaseModelInfo() = default;
+    virtual ~BaseModelInfo();
 
     ModelID id() const {
         return modelid_;
@@ -76,9 +75,7 @@ public:
         return refcount_;
     }
 
-    void setCollisionModel(std::unique_ptr<CollisionModel>& col) {
-        collision = std::move(col);
-    }
+    void setCollisionModel(std::unique_ptr<CollisionModel>& col);
 
     CollisionModel* getCollision() const {
         return collision.get();
@@ -146,10 +143,9 @@ public:
     /// @todo remove this from here too :)
     std::vector<PathData> paths;
 
-    SimpleModelInfo() : BaseModelInfo(kType) {
-    }
-    SimpleModelInfo(ModelDataType type) : BaseModelInfo(type) {
-    }
+    SimpleModelInfo();
+    SimpleModelInfo(ModelDataType type);
+    ~SimpleModelInfo() override;
 
     /// @todo change with librw
     void setAtomic(const ClumpPtr& model, int n, const AtomicPtr& atomic) {

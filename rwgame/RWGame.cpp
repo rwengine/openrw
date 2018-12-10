@@ -12,11 +12,13 @@
 
 #include <core/Profiler.hpp>
 
+#include <engine/Payphone.hpp>
 #include <engine/SaveGame.hpp>
 #include <objects/GameObject.hpp>
 
 #include <script/SCMFile.hpp>
 
+#include <ai/AIGraphNode.hpp>
 #include <ai/PlayerController.hpp>
 #include <core/Logger.hpp>
 #include <objects/CharacterObject.hpp>
@@ -767,7 +769,7 @@ void RWGame::renderDebugPaths(float time) {
 
     for (const auto& n : world->aigraph.nodes) {
         btVector3 p(n->position.x, n->position.y, n->position.z);
-        auto& col = n->type == AIGraphNode::Pedestrian ? pedColour : roadColour;
+        auto& col = n->type == ai::NodeType::Pedestrian ? pedColour : roadColour;
         debug.drawLine(p - btVector3(0.f, 0.f, 1.f),
                        p + btVector3(0.f, 0.f, 1.f), col);
         debug.drawLine(p - btVector3(1.f, 0.f, 0.f),

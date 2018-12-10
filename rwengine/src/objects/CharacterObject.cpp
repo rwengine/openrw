@@ -1,10 +1,5 @@
 #include "objects/CharacterObject.hpp"
 
-#include <algorithm>
-#include <cctype>
-#include <cstdlib>
-#include <memory>
-
 #ifdef _MSC_VER
 #pragma warning(disable : 4305)
 #endif
@@ -15,9 +10,14 @@
 #pragma warning(default : 4305)
 #endif
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <rw/debug.hpp>
 
+
 #include "ai/CharacterController.hpp"
+#include "ai/AIGraphNode.hpp"
 #include "ai/PlayerController.hpp"
 #include "engine/Animator.hpp"
 #include "engine/GameData.hpp"
@@ -31,13 +31,17 @@
 #error Unable to find BT_BULLET_VERSION
 #endif
 
+#include <algorithm>
+#include <cctype>
+#include <cstdlib>
+#include <memory>
+
 const float CharacterObject::DefaultJumpSpeed = 2.f;
 
 CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
                                  const glm::quat& rot, BaseModelInfo* modelinfo,
-                                 CharacterController* controller)
-    : GameObject(engine, pos, rot, modelinfo)
-    , controller(controller) {
+                                 ai::CharacterController* controller)
+    : GameObject(engine, pos, rot, modelinfo), controller(controller) {
     auto info = getModelInfo<PedModelInfo>();
     setClump(info->getModel()->clone());
     if (info->getModel()) {
@@ -117,7 +121,7 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
     glm::vec3 animTranslate{};
 
     if (isPlayer()) {
-        auto c = static_cast<PlayerController*>(controller);
+        auto c = static_cast<ai::PlayerController*>(controller);
 
         if (c->isTalkingOnPayphone()) {
             animator->playAnimation(
@@ -218,7 +222,8 @@ glm::vec3 CharacterObject::updateMovementAnimation(float dt) {
         }
     }
 
-    if (isPlayer() && static_cast<PlayerController*>(controller)->isAdrenalineActive() &&
+    if (isPlayer() &&
+        static_cast<ai::PlayerController*>(controller)->isAdrenalineActive() &&
         movementAnimation == animations->animation(AnimCycle::WalkStart)) {
         animationSpeed *= 2;
     }
@@ -599,13 +604,13 @@ void CharacterObject::setJumpSpeed(float speed) {
 void CharacterObject::resetToAINode() {
     auto& nodes = engine->aigraph.nodes;
     bool vehicleNode = !!getCurrentVehicle();
-    AIGraphNode* nearest = nullptr;
+    ai::AIGraphNode* nearest = nullptr;
     float d = std::numeric_limits<float>::max();
     for (const auto& node : nodes) {
         if (vehicleNode) {
-            if (node->type == AIGraphNode::Pedestrian) continue;
+            if (node->type == ai::NodeType::Pedestrian) continue;
         } else {
-            if (node->type == AIGraphNode::Vehicle) continue;
+            if (node->type == ai::NodeType::Vehicle) continue;
         }
 
         float dist = glm::length(node->position - getPosition());
@@ -714,7 +719,7 @@ void CharacterObject::useItem(bool active, bool primary) {
             if (!currentState.primaryActive && active) {
                 // If we've just started, activate
                 controller->setNextActivity(
-                    std::make_unique<Activities::UseItem>(item));
+                    std::make_unique<ai::Activities::UseItem>(item));
             } else if (currentState.primaryActive && !active) {
                 // UseItem will cancel itself upon !primaryActive
             }

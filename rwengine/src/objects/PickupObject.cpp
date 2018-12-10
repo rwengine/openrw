@@ -11,8 +11,6 @@
 #pragma warning(default : 4305)
 #endif
 
-#include <glm/gtc/quaternion.hpp>
-
 #include "ai/PlayerController.hpp"
 #include "data/WeaponData.hpp"
 #include "engine/GameData.hpp"

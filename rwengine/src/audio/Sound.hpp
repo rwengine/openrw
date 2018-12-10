@@ -1,19 +1,12 @@
 #ifndef _RWENGINE_SOUND_HPP_
 #define _RWENGINE_SOUND_HPP_
 
+#include <glm/vec3.hpp>
+
 #include <memory>
-#include <string>
-#include <vector>
 
-#include <al.h>
-#include <alc.h>
-#include <glm/glm.hpp>
-
-#include <rw/filesystem.hpp>
-#include <rw/types.hpp>
-
-#include "audio/SoundBuffer.hpp"
-#include "audio/SoundSource.hpp"
+class SoundSource;
+struct SoundBuffer;
 
 /// Wrapper for SoundBuffer and SoundSource.
 /// Each command connected
@@ -26,52 +19,29 @@ struct Sound {
     std::unique_ptr<SoundBuffer> buffer;
 
     Sound() = default;
+    ~Sound() = default;
 
-    bool isPlaying() const {
-        return buffer->isPlaying();
-    }
+    bool isPlaying() const;
 
-    bool isPaused() const {
-        return buffer->isPaused();
-    }
-    bool isStopped() const {
-        return buffer->isStopped();
-    }
+    bool isPaused() const;
+    bool isStopped() const;
 
-    void play() {
-        buffer->play();
-    }
+    void play();
 
-    void pause() {
-        buffer->pause();
-    }
+    void pause();
 
-    void stop() {
-        buffer->stop();
-    }
+    void stop();
 
-    void setPosition(const glm::vec3& position) {
-        buffer->setPosition(position);
-    }
+    void setPosition(const glm::vec3& position);
 
-    void setLooping(bool looping) {
-        buffer->setLooping(looping);
-    }
+    void setLooping(bool looping);
 
-    void setPitch(float pitch) {
-        buffer->setPitch(pitch);
-    }
+    void setPitch(float pitch);
 
-    void setGain(float gain) {
-        buffer->setGain(gain);
-    }
+    void setGain(float gain);
 
-    void setMaxDistance(float maxDist) {
-        buffer->setMaxDistance(maxDist);
-    }
+    void setMaxDistance(float maxDist);
 
-    size_t getScriptObjectID() const {
-        return id;
-    }
+    size_t getScriptObjectID() const;
 };
 #endif

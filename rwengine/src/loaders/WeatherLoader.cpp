@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <data/Weather.hpp>
+
 namespace {
 glm::vec3 readRGB(std::stringstream &ss)  {
     int r, g, b;

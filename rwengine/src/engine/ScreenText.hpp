@@ -1,14 +1,18 @@
 #ifndef _RWENGINE_SCREENTEXT_HPP_
 #define _RWENGINE_SCREENTEXT_HPP_
+
+#include <glm/gtc/type_precision.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
+#include <fonts/GameTexts.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <string>
 #include <vector>
-
-#include <glm/glm.hpp>
-
-#include <fonts/GameTexts.hpp>
 
 enum class ScreenTextType {
     /// Big text will be rendered according to the proscribed style.

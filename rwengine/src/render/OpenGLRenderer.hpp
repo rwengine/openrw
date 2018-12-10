@@ -9,10 +9,12 @@
 #include <vector>
 #include <array>
 
-#include <glm/glm.hpp>
-
-#include <gl/gl_core_3_3.h>
 #include <gl/GeometryBuffer.hpp>
+
+#include <glm/gtc/type_precision.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 
 class DrawBuffer;
 
@@ -271,17 +273,7 @@ public:
             return program;
         }
 
-        GLint getUniformLocation(const std::string& name) {
-            auto c = uniforms.find(name.c_str());
-            GLint loc = -1;
-            if (c == uniforms.end()) {
-                loc = glGetUniformLocation(program, name.c_str());
-                uniforms[name] = loc;
-            } else {
-                loc = c->second;
-            }
-            return loc;
-        }
+        GLint getUniformLocation(const std::string& name);
     };
 
     OpenGLRenderer();
@@ -357,48 +349,11 @@ private:
     std::map<GLuint, GLuint> currentTextures;
 
     // Set state
-    void setBlend(BlendMode mode) {
-        if (mode!=BlendMode::BLEND_NONE && blendMode==BlendMode::BLEND_NONE)//To don't call glEnable again when it already enabled
-            glEnable(GL_BLEND);
+    void setBlend(BlendMode mode);
 
-        if (mode!=blendMode) {
-            switch (mode) {
-                default:
-                    assert(false);
-                    break;
-                case BlendMode::BLEND_NONE:
-                    glDisable(GL_BLEND);
-                    break;
-                case BlendMode::BLEND_ALPHA:
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    break;
-                case BlendMode::BLEND_ADDITIVE:
-                    glBlendFunc(GL_ONE, GL_ONE);
-                    break;
+    void setDepthMode(DepthMode mode);
 
-            }
-        }
-
-        blendMode = mode;
-    }
-
-    void setDepthMode(DepthMode mode) {
-        if (mode != depthMode) {
-            if (depthMode == DepthMode::OFF) glEnable(GL_DEPTH_TEST);
-            switch(mode) {
-                case DepthMode::OFF: glDisable(GL_DEPTH_TEST); break;
-                case DepthMode::LESS: glDepthFunc(GL_LESS); break;
-            }
-            depthMode = mode;
-        }
-    }
-
-    void setDepthWrite(bool enable) {
-        if (enable != depthWriteEnabled) {
-            glDepthMask(enable ? GL_TRUE : GL_FALSE);
-            depthWriteEnabled = enable;
-        }
-    }
+    void setDepthWrite(bool enable);
 
     template <class T>
     void uploadUBO(Buffer& buffer, const T& data) {
@@ -413,12 +368,7 @@ private:
     // Buffer Helpers
     bool createUBO(Buffer& out, GLsizei size, GLsizei entrySize);
 
-    void attachUBO(GLuint buffer) {
-        if (currentUBO != buffer) {
-            glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-            currentUBO = buffer;
-        }
-    }
+    void attachUBO(GLuint buffer);
 
     void uploadUBOEntry(Buffer& buffer, const void *data, size_t size);
 

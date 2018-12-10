@@ -14,6 +14,7 @@
 
 #include <rw/types.hpp>
 
+#include "data/PathData.hpp"
 #include "dynamics/CollisionInstance.hpp"
 #include "engine/Animator.hpp"
 #include "engine/GameData.hpp"

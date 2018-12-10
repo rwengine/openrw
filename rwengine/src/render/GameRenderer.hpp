@@ -4,11 +4,8 @@
 #include <cstddef>
 #include <memory>
 
-#include <glm/glm.hpp>
-
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <gl/gl_core_3_3.h>
 
 #include <rw/forward.hpp>
 

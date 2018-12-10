@@ -6,6 +6,8 @@
 
 #include <rw/debug.hpp>
 
+#include <glm/gtc/quaternion.hpp>
+
 #include "engine/GameWorld.hpp"
 #include "objects/GameObject.hpp"
 

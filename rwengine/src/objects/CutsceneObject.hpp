@@ -1,6 +1,5 @@
 #ifndef _RWENGINE_CUTSCENEOBJECT_HPP_
 #define _RWENGINE_CUTSCENEOBJECT_HPP_
-#include <glm/glm.hpp>
 
 #include <rw/forward.hpp>
 

@@ -1,7 +1,9 @@
 #ifndef _RWENGINE_PATHDATA_HPP_
 #define _RWENGINE_PATHDATA_HPP_
+
+#include <glm/vec3.hpp>
+
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 

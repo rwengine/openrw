@@ -1,18 +1,23 @@
 #ifndef _RWENGINE_SCRIPTTYPES_HPP_
 #define _RWENGINE_SCRIPTTYPES_HPP_
 
+#include "engine/Garage.hpp"
+
+#include <rw/debug.hpp>
+
+#include <glm/gtc/type_precision.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 #include <cstdint>
 #include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <glm/glm.hpp>
-
-#include <rw/debug.hpp>
-
-#include "audio/Sound.hpp"
-#include "engine/Garage.hpp"
+namespace ai {
+class PlayerController;
+}  // namespace ai
 
 class CharacterObject;
 class CutsceneObject;
@@ -20,7 +25,6 @@ class GameObject;
 class InstanceObject;
 class PickupObject;
 class VehicleObject;
-class PlayerController;
 class ScriptMachine;
 class ScriptModule;
 struct SCMThread;
@@ -28,6 +32,7 @@ class GameState;
 class GameWorld;
 class Payphone;
 class Garage;
+struct Sound;
 
 typedef uint16_t SCMOpcode;
 typedef char SCMByte;
@@ -98,7 +103,7 @@ struct ScriptObjectType {
 };
 
 using ScriptObject = ScriptObjectType<InstanceObject>;
-using ScriptPlayer = ScriptObjectType<PlayerController>;
+using ScriptPlayer = ScriptObjectType<ai::PlayerController>;
 using ScriptVehicle = ScriptObjectType<VehicleObject>;
 using ScriptCharacter = ScriptObjectType<CharacterObject>;
 using ScriptPickup = ScriptObjectType<PickupObject>;
@@ -162,7 +167,7 @@ using ScriptParticle = int;
 using ScriptTempact = int;
 using ScriptSoundType = int;
 using ScriptPickupType = int;
-using ScriptGarageType = Garage::Type;
+using ScriptGarageType = GarageType;
 
 ///////////////////////////////////////////////////////////
 // Script Bytecode Types
@@ -294,7 +299,7 @@ template <>
 GameObject* ScriptArguments::getObject<PickupObject>(unsigned int arg) const;
 /** Special player-index returning function */
 template <>
-GameObject* ScriptArguments::getObject<PlayerController>(
+GameObject* ScriptArguments::getObject<ai::PlayerController>(
     unsigned int arg) const;
 
 template <>
@@ -330,7 +335,7 @@ template <>
 ScriptObjectType<CharacterObject> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
-ScriptObjectType<PlayerController> ScriptArguments::getScriptObject(
+ScriptObjectType<ai::PlayerController> ScriptArguments::getScriptObject(
     unsigned int arg) const;
 template <>
 ScriptObjectType<CutsceneObject> ScriptArguments::getScriptObject(

@@ -11,6 +11,8 @@
 #include "objects/CharacterObject.hpp"
 #include "objects/VehicleObject.hpp"
 
+namespace ai {
+
 glm::vec3 DefaultAIController::getTargetPosition() {
     /*if(targetNode) {
         if(lastNode && character->getCurrentVehicle()) {
@@ -79,7 +81,7 @@ void DefaultAIController::update(float dt) {
                 AIGraphNode* node = nullptr;
                 float mindist = std::numeric_limits<float>::max();
                 for (const auto& n : graph.nodes) {
-                    if (n->type != AIGraphNode::Pedestrian) {
+                    if (n->type != ai::NodeType::Pedestrian) {
                         continue;
 		    }
 
@@ -182,7 +184,7 @@ void DefaultAIController::update(float dt) {
 
                 for (const auto& n : graph.nodes) {
                     // No vehicle node, continue
-                    if (n->type != AIGraphNode::Vehicle) {
+                    if (n->type != ai::NodeType::Vehicle) {
                         continue;
                     }
 
@@ -216,3 +218,5 @@ void DefaultAIController::update(float dt) {
 
     CharacterController::update(dt);
 }
+
+}  // namespace ai

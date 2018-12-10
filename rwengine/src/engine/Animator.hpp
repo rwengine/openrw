@@ -1,10 +1,11 @@
 #ifndef _RWENGINE_ANIMATOR_HPP_
 #define _RWENGINE_ANIMATOR_HPP_
-#include <map>
-#include <vector>
 
 #include <rw/debug.hpp>
 #include <rw/forward.hpp>
+
+#include <map>
+#include <vector>
 
 struct AnimationBone;
 class ModelFrame;

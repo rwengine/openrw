@@ -10,19 +10,17 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include "dynamics/CollisionInstance.hpp"
-
 #include "ai/PlayerController.hpp"
-
+#include "data/CollisionModel.hpp"
+#include "dynamics/CollisionInstance.hpp"
 #include "engine/GameState.hpp"
-
 #include "objects/CharacterObject.hpp"
 #include "objects/GameObject.hpp"
 #include "objects/InstanceObject.hpp"
 #include "objects/VehicleObject.hpp"
 
 Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
-               const glm::vec3& coord1, Type type_)
+               const glm::vec3& coord1, GarageType type_)
     : engine(engine_), id(id_), type(type_) {
     min.x = std::min(coord0.x, coord1.x);
     min.y = std::min(coord0.y, coord1.y);
@@ -81,32 +79,32 @@ Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
     step /= doorHeight;
 
     switch (type) {
-        case Garage::Type::Mission:
-        case Garage::Type::CollectCars1:
-        case Garage::Type::CollectCars2:
-        case Garage::Type::MissionForCarToComeOut:
-        case Garage::Type::MissionKeepCar:
-        case Garage::Type::Hideout1:
-        case Garage::Type::Hideout2:
-        case Garage::Type::Hideout3:
-        case Garage::Type::MissionToOpenAndClose:
-        case Garage::Type::MissionForSpecificCar:
-        case Garage::Type::MissionKeepCarAndRemainClosed: {
-            state = State::Closed;
+        case GarageType::Mission:
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2:
+        case GarageType::MissionForCarToComeOut:
+        case GarageType::MissionKeepCar:
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3:
+        case GarageType::MissionToOpenAndClose:
+        case GarageType::MissionForSpecificCar:
+        case GarageType::MissionKeepCarAndRemainClosed: {
+            state = GarageState::Closed;
             break;
         }
 
-        case Garage::Type::BombShop1:
-        case Garage::Type::BombShop2:
-        case Garage::Type::BombShop3:
-        case Garage::Type::Respray:
-        case Garage::Type::Crusher: {
-            state = State::Opened;
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray:
+        case GarageType::Crusher: {
+            state = GarageState::Opened;
             break;
         }
     }
 
-    if (state == State::Closed) {
+    if (state == GarageState::Closed) {
         fraction = 0.f;
     } else {
         fraction = 1.f;
@@ -129,14 +127,14 @@ void Garage::makeDoorSwing() {
 }
 
 bool Garage::isTargetInsideGarage() const {
-    return state == State::Closed && isObjectInsideGarage(target);
+    return state == GarageState::Closed && isObjectInsideGarage(target);
 }
 
 void Garage::activate() {
     active = true;
 
-    if (type == Type::MissionForCarToComeOut && state == State::Closed) {
-        state = State::Opening;
+    if (type == GarageType::MissionForCarToComeOut && state == GarageState::Closed) {
+        state = GarageState::Opening;
     }
 }
 
@@ -145,14 +143,14 @@ void Garage::deactivate() {
 }
 
 void Garage::open() {
-    if (state == State::Closed || state == State::Closing) {
-        state = State::Opening;
+    if (state == GarageState::Closed || state == GarageState::Closing) {
+        state = GarageState::Opening;
     }
 }
 
 void Garage::close() {
-    if (state == State::Opened || state == State::Opening) {
-        state = State::Closing;
+    if (state == GarageState::Opened || state == GarageState::Opening) {
+        state = GarageState::Closing;
     }
 }
 
@@ -204,7 +202,7 @@ bool Garage::shouldClose() {
     bool playerIsInVehicle = playerVehicle != nullptr;
 
     switch (type) {
-        case Type::Mission: {
+        case GarageType::Mission: {
             if (!isObjectInsideGarage(static_cast<GameObject*>(plyChar)) &&
                 isObjectInsideGarage(target) && !playerIsInVehicle &&
                 getDistanceToGarage(playerPosition) >= 2.f) {
@@ -214,9 +212,9 @@ bool Garage::shouldClose() {
             return false;
         }
 
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3: {
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3: {
             if (playerIsInVehicle) {
                 if (isObjectInsideGarage(
                         static_cast<GameObject*>(playerVehicle)) &&
@@ -228,7 +226,7 @@ bool Garage::shouldClose() {
             return false;
         }
 
-        case Type::Respray: {
+        case GarageType::Respray: {
             if (playerIsInVehicle) {
                 if (isObjectInsideGarage(
                         static_cast<GameObject*>(playerVehicle)) &&
@@ -246,8 +244,8 @@ bool Garage::shouldClose() {
             return false;
         }
 
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             if (playerIsInVehicle) {
                 if (isObjectInsideGarage(
                         static_cast<GameObject*>(playerVehicle))) {
@@ -263,24 +261,24 @@ bool Garage::shouldClose() {
             return false;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             // Not sure about these values
             if ((!playerIsInVehicle &&
                  getDistanceToGarage(playerPosition) >= 5.f) ||
@@ -292,17 +290,17 @@ bool Garage::shouldClose() {
             return false;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             // @todo unimplemented
             return false;
         }
@@ -321,7 +319,7 @@ bool Garage::shouldOpen() {
     bool playerIsInVehicle = playerVehicle != nullptr;
 
     switch (type) {
-        case Type::Mission: {
+        case GarageType::Mission: {
             // Not sure about these values
             if (playerIsInVehicle &&
                 getDistanceToGarage(playerPosition) < 8.f &&
@@ -332,10 +330,10 @@ bool Garage::shouldOpen() {
             return false;
         }
 
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3:
-        case Type::Respray: {
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray: {
             if (garageTimer < engine->getGameTime()) {
                 return true;
             }
@@ -343,30 +341,30 @@ bool Garage::shouldOpen() {
             return false;
         }
 
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             // Not sure about these values
             if ((!playerIsInVehicle &&
                  getDistanceToGarage(playerPosition) < 5.f) ||
@@ -378,17 +376,17 @@ bool Garage::shouldOpen() {
             return false;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             // @todo unimplemented
             return false;
         }
@@ -407,34 +405,34 @@ bool Garage::shouldStopClosing() {
     bool playerIsInVehicle = playerVehicle != nullptr;
 
     switch (type) {
-        case Type::Mission:
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3:
-        case Type::Respray:
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::Mission:
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray:
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             return false;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             // Not sure about these values
             if ((!playerIsInVehicle &&
                  getDistanceToGarage(playerPosition) < 5.f) ||
@@ -446,17 +444,17 @@ bool Garage::shouldStopClosing() {
             return false;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             // @todo unimplemented
             return false;
         }
@@ -475,34 +473,34 @@ bool Garage::shouldStopOpening() {
     bool playerIsInVehicle = playerVehicle != nullptr;
 
     switch (type) {
-        case Type::Mission:
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3:
-        case Type::Respray:
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::Mission:
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray:
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             return false;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             // Not sure about these values
             if ((!playerIsInVehicle &&
                  getDistanceToGarage(playerPosition) >= 5.f) ||
@@ -514,17 +512,17 @@ bool Garage::shouldStopOpening() {
             return false;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             // @todo unimplemented
             return false;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             // @todo unimplemented
             return false;
         }
@@ -545,58 +543,58 @@ void Garage::doOnOpenEvent() {
     RW_UNUSED(playerIsInVehicle);
 
     switch (type) {
-        case Type::Mission: {
+        case GarageType::Mission: {
             break;
         }
 
-        case Type::BombShop1: {
+        case GarageType::BombShop1: {
             break;
         }
 
-        case Type::BombShop2: {
+        case GarageType::BombShop2: {
             break;
         }
 
-        case Type::BombShop3: {
+        case GarageType::BombShop3: {
             break;
         }
 
-        case Type::Respray: {
+        case GarageType::Respray: {
             break;
         }
 
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             break;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             break;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             break;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             break;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             break;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             break;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             break;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             break;
         }
 
@@ -614,21 +612,21 @@ void Garage::doOnCloseEvent() {
     RW_UNUSED(playerIsInVehicle);
 
     switch (type) {
-        case Type::Mission: {
+        case GarageType::Mission: {
             player->setInputEnabled(true);
             break;
         }
 
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3: {
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3: {
             // Find out real value
             garageTimer = engine->getGameTime() + 1.5f;
 
             break;
         }
 
-        case Type::Respray: {
+        case GarageType::Respray: {
             // Find out real value
             garageTimer = engine->getGameTime() + 2.f;
             playerVehicle->setHealth(1000.f);
@@ -636,38 +634,38 @@ void Garage::doOnCloseEvent() {
             break;
         }
 
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             break;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             break;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             break;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             break;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             break;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             break;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             break;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             break;
         }
 
@@ -685,58 +683,58 @@ void Garage::doOnStartOpeningEvent() {
     RW_UNUSED(playerIsInVehicle);
 
     switch (type) {
-        case Type::Mission: {
+        case GarageType::Mission: {
             break;
         }
 
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             player->setInputEnabled(true);
             break;
         }
 
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3: {
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3: {
             player->setInputEnabled(true);
             playerVehicle->setHandbraking(false);
             break;
         }
 
-        case Type::Respray: {
+        case GarageType::Respray: {
             player->setInputEnabled(true);
             playerVehicle->setHandbraking(false);
             resprayDone = true;
             break;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             break;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             break;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             break;
         }
 
-        case Type::Hideout1:
-        case Type::Hideout2:
-        case Type::Hideout3: {
+        case GarageType::Hideout1:
+        case GarageType::Hideout2:
+        case GarageType::Hideout3: {
             break;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             break;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             break;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             break;
         }
 
@@ -754,43 +752,43 @@ void Garage::doOnStartClosingEvent() {
     RW_UNUSED(playerIsInVehicle);
 
     switch (type) {
-        case Type::Mission:
-        case Type::CollectCars1:
-        case Type::CollectCars2: {
+        case GarageType::Mission:
+        case GarageType::CollectCars1:
+        case GarageType::CollectCars2: {
             player->setInputEnabled(false);
             break;
         }
 
-        case Type::BombShop1:
-        case Type::BombShop2:
-        case Type::BombShop3:
-        case Type::Respray: {
+        case GarageType::BombShop1:
+        case GarageType::BombShop2:
+        case GarageType::BombShop3:
+        case GarageType::Respray: {
             player->setInputEnabled(false);
             playerVehicle->setHandbraking(true);
             break;
         }
 
-        case Type::MissionForCarToComeOut: {
+        case GarageType::MissionForCarToComeOut: {
             break;
         }
 
-        case Type::Crusher: {
+        case GarageType::Crusher: {
             break;
         }
 
-        case Type::MissionKeepCar: {
+        case GarageType::MissionKeepCar: {
             break;
         }
 
-        case Type::MissionToOpenAndClose: {
+        case GarageType::MissionToOpenAndClose: {
             break;
         }
 
-        case Type::MissionForSpecificCar: {
+        case GarageType::MissionForSpecificCar: {
             break;
         }
 
-        case Type::MissionKeepCarAndRemainClosed: {
+        case GarageType::MissionKeepCarAndRemainClosed: {
             break;
         }
 
@@ -809,32 +807,32 @@ void Garage::tick(float dt) {
     needsToUpdate = false;
 
     switch (state) {
-        case State::Opened: {
+        case GarageState::Opened: {
             if (shouldClose()) {
-                state = State::Closing;
+                state = GarageState::Closing;
                 doOnStartClosingEvent();
             }
 
             break;
         }
 
-        case State::Closed: {
+        case GarageState::Closed: {
             if (shouldOpen()) {
-                state = State::Opening;
+                state = GarageState::Opening;
                 doOnStartOpeningEvent();
             }
 
             break;
         }
 
-        case State::Opening: {
+        case GarageState::Opening: {
             if (shouldStopOpening()) {
-                state = State::Closing;
+                state = GarageState::Closing;
             } else {
                 fraction += dt * step;
 
                 if (fraction >= 1.0f) {
-                    state = State::Opened;
+                    state = GarageState::Opened;
                     fraction = 1.f;
                     doOnOpenEvent();
                 }
@@ -845,14 +843,14 @@ void Garage::tick(float dt) {
             break;
         }
 
-        case State::Closing: {
+        case GarageState::Closing: {
             if (shouldStopClosing()) {
-                state = State::Opening;
+                state = GarageState::Opening;
             } else {
                 fraction -= dt * step;
 
                 if (fraction <= 0.f) {
-                    state = State::Closed;
+                    state = GarageState::Closed;
                     fraction = 0.f;
                     doOnCloseEvent();
                 }

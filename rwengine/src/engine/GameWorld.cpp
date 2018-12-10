@@ -18,7 +18,9 @@
 
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
+#include "engine/Payphone.hpp"
 
+#include "ai/AIGraphNode.hpp"
 #include "ai/DefaultAIController.hpp"
 #include "ai/PlayerController.hpp"
 #include "ai/TrafficDirector.hpp"
@@ -172,7 +174,7 @@ InstanceObject* GameWorld::createInstance(const uint16_t id,
 }
 
 void GameWorld::createTraffic(const ViewCamera& viewCamera) {
-    TrafficDirector director(&aigraph, this);
+    ai::TrafficDirector director(&aigraph, this);
 
     director.populateNearby(viewCamera, kMaxTrafficSpawnRadius, 5);
 }
@@ -336,7 +338,7 @@ CharacterObject* GameWorld::createPedestrian(const uint16_t id,
         data->loadModel(id);
     }
 
-    auto controller = new DefaultAIController();
+    auto controller = new ai::DefaultAIController();
     auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
     auto ptr = ped.get();
     ped->setGameObjectID(gid);
@@ -364,7 +366,7 @@ CharacterObject* GameWorld::createPlayer(const glm::vec3& pos,
         pt->setModel(model);
     }
 
-    auto controller = new PlayerController();
+    auto controller = new ai::PlayerController();
     auto ped = std::make_unique<CharacterObject>(this, pos, rot, pt, controller);
     auto ptr = ped.get();
     ped->setGameObjectID(gid);
@@ -429,7 +431,7 @@ PickupObject* GameWorld::createPickup(const glm::vec3& pos, int id, int type) {
 }
 
 Garage* GameWorld::createGarage(const glm::vec3 coord0, const glm::vec3 coord1,
-                                Garage::Type type) {
+                                GarageType type) {
     const size_t id = garages.size();
     garages.emplace_back(std::make_unique<Garage>(this, id, coord0, coord1, type));
     return garages.back().get();
@@ -873,7 +875,7 @@ void GameWorld::loadSpecialModel(const unsigned short index,
     state->specialModels[index] = lowerName;
 }
 
-void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
+void GameWorld::disableAIPaths(ai::NodeType type, const glm::vec3& min,
                                const glm::vec3& max) {
     for (auto& n : aigraph.nodes) {
         if (n->type == type) {
@@ -886,7 +888,7 @@ void GameWorld::disableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
     }
 }
 
-void GameWorld::enableAIPaths(AIGraphNode::NodeType type, const glm::vec3& min,
+void GameWorld::enableAIPaths(ai::NodeType type, const glm::vec3& min,
                               const glm::vec3& max) {
     for (auto& n : aigraph.nodes) {
         if (n->type == type) {
@@ -1064,11 +1066,11 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
     // explosions, remove all projectiles
 }
 
-PlayerController* GameWorld::getPlayer() {
+ai::PlayerController* GameWorld::getPlayer() {
     auto object = pedestrianPool.find(state->playerObject);
     if (object) {
         auto controller = static_cast<CharacterObject*>(object)->controller;
-        return static_cast<PlayerController*>(controller);
+        return static_cast<ai::PlayerController*>(controller);
     }
     return nullptr;
 }
