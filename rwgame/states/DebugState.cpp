@@ -527,7 +527,7 @@ void DebugState::spawnFollower(unsigned int id) {
         auto spawnPos = hit + normal;
         auto follower = game->getWorld()->createPedestrian(id, spawnPos);
         jumpCharacter(game, follower, spawnPos);
-        follower->controller->setGoal(CharacterController::FollowLeader);
+        follower->controller->setGoal(ai::CharacterController::FollowLeader);
         follower->controller->setTargetCharacter(ch);
     }
 }

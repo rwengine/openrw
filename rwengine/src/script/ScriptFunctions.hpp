@@ -235,11 +235,11 @@ inline void removeObjectFromMissionCleanup(const ScriptArguments& args,
     }
 }
         
-inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, AIGraphNode::NodeType type,
+inline void getClosestNode(const ScriptArguments& args, ScriptVec3& coord, ai::NodeType type,
                            ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
     coord = script::getGround(args, coord);
     float closest = 10000.f;
-    std::vector<AIGraphNode*> nodes;
+    std::vector<ai::AIGraphNode*> nodes;
     args.getWorld()->aigraph.gatherExternalNodesNear(coord, closest, nodes, type);
 
     for (const auto &node : nodes) {

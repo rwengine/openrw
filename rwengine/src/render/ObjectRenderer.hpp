@@ -3,15 +3,7 @@
 
 #include <cstddef>
 
-#include <gl/gl_core_3_3.h>
-
-//#include <engine/GameWorld.hpp>
-//#include <gl/DrawBuffer.hpp>
-#include <glm/glm.hpp>
-//#include <objects/GameObject.hpp>
-#include <render/OpenGLRenderer.hpp>
-//#include <render/ViewCamera.hpp>
-//#include <rw/types.hpp>
+#include "render/OpenGLRenderer.hpp"
 
 class Atomic;
 class CharacterObject;

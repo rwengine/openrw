@@ -27,6 +27,8 @@
 #pragma warning(disable : 4305)
 #endif
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <btBulletDynamicsCommon.h>
 #ifdef _MSC_VER
 #pragma warning(default : 4305)
 #endif
@@ -251,12 +253,12 @@ void IngameState::tick(float dt) {
             if (player->getCharacter()->getCurrentVehicle()) {
                 player->exitVehicle();
             } else if (!player->isCurrentActivity(
-                           Activities::EnterVehicle::ActivityName)) {
+                           ai::Activities::EnterVehicle::ActivityName)) {
                 player->enterNearestVehicle();
             }
         } else if (glm::length2(movement) > 0.001f) {
             if (player->isCurrentActivity(
-                    Activities::EnterVehicle::ActivityName)) {
+                    ai::Activities::EnterVehicle::ActivityName)) {
                 // Give up entering a vehicle if we're alreadying doing so
                 player->skipActivity();
             }

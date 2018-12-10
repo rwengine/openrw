@@ -1095,3 +1095,21 @@ std::tuple<glm::vec3, glm::vec3> VehicleObject::obstacleCheckVolume() const {
     };
 }
 
+VehicleObject::Part::Part(ModelFrame* p_dummy, Atomic* p_normal,
+                          Atomic* p_damaged,
+                          std::unique_ptr<btCollisionShape> p_cs,
+                          std::unique_ptr<btRigidBody> p_body,
+                          std::unique_ptr<btHingeConstraint> p_constraint,
+                          bool p_moveToAngle, float p_targetAngle,
+                          float p_openAngle, float p_closedAngle)
+    : dummy(p_dummy)
+    , normal(p_normal)
+    , damaged(p_damaged)
+    , cs(std::move(p_cs))
+    , body(std::move(p_body))
+    , constraint(std::move(p_constraint))
+    , moveToAngle(p_moveToAngle)
+    , targetAngle(p_targetAngle)
+    , openAngle(p_openAngle)
+    , closedAngle(p_closedAngle) {
+}

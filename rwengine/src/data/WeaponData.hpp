@@ -1,7 +1,9 @@
 #ifndef _RWENGINE_WEAPONDATA_HPP_
 #define _RWENGINE_WEAPONDATA_HPP_
+
+#include <glm/vec3.hpp>
+
 #include <cinttypes>
-#include <glm/glm.hpp>
 #include <string>
 
 struct WeaponData {

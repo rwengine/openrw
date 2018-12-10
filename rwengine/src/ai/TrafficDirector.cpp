@@ -24,19 +24,21 @@
 #include <rw_mingw.hpp>
 #endif
 
+namespace ai {
+
 TrafficDirector::TrafficDirector(AIGraph* g, GameWorld* w)
     : graph(g)
     , world(w) {
 }
 
-std::vector<AIGraphNode*> TrafficDirector::findAvailableNodes(
-    AIGraphNode::NodeType type, const ViewCamera& camera, float radius) {
-    std::vector<AIGraphNode*> available;
+std::vector<ai::AIGraphNode*> TrafficDirector::findAvailableNodes(
+    ai::NodeType type, const ViewCamera& camera, float radius) {
+    std::vector<ai::AIGraphNode*> available;
     available.reserve(20);
 
     graph->gatherExternalNodesNear(camera.position, radius, available, type);
 
-    float density = type == AIGraphNode::Vehicle ? carDensity : pedDensity;
+    float density = type == ai::NodeType::Vehicle ? carDensity : pedDensity;
     float minDist = (15.f / density) * (15.f / density);
     float halfRadius2 = std::pow(radius / 2.f, 2.f);
 
@@ -80,12 +82,12 @@ std::vector<AIGraphNode*> TrafficDirector::findAvailableNodes(
     return available;
 }
 
-void TrafficDirector::setDensity(AIGraphNode::NodeType type, float density) {
+void TrafficDirector::setDensity(ai::NodeType type, float density) {
     switch (type) {
-        case AIGraphNode::Vehicle:
+        case ai::NodeType::Vehicle:
             carDensity = density;
             break;
-        case AIGraphNode::Pedestrian:
+        case ai::NodeType::Pedestrian:
             pedDensity = density;
             break;
     }
@@ -146,7 +148,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
         111, 112, 116, 119, 128, 129, 130, 134, 135, 136, 138, 139, 144, 146
     }};
 
-    auto availablePedsNodes = findAvailableNodes(AIGraphNode::Pedestrian, camera, radius);
+    auto availablePedsNodes = findAvailableNodes(ai::NodeType::Pedestrian, camera, radius);
 
     // We have not reached the limit of spawned pedestrians
     if (maximumPedestrians > world->pedestrianPool.objects.size()) {
@@ -159,7 +161,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
         }
 
         for (AIGraphNode* spawn : availablePedsNodes) {
-            if (spawn->type != AIGraphNode::Pedestrian) {
+            if (spawn->type != ai::NodeType::Pedestrian) {
                 continue;
             }
             if (counter == 0) {
@@ -178,7 +180,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
         }
     }
 
-    auto availableVehicleNodes = findAvailableNodes(AIGraphNode::Vehicle, camera, radius);
+    auto availableVehicleNodes = findAvailableNodes(ai::NodeType::Vehicle, camera, radius);
 
     // We have not reached the limit of spawned vehicles
     if (maximumCars > world->vehiclePool.objects.size()) {
@@ -191,7 +193,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
         }
 
         for (AIGraphNode* spawn : availableVehicleNodes) {
-            if (spawn->type != AIGraphNode::Vehicle) {
+            if (spawn->type != ai::NodeType::Vehicle) {
                 continue;
             }
             if (counter == 0) {
@@ -265,3 +267,5 @@ void TrafficDirector::setPopulationLimits(int maxPeds, int maxCars) {
     maximumPedestrians = maxPeds;
     maximumCars = maxCars;
 }
+
+}  // namespace ai

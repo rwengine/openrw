@@ -10,14 +10,13 @@
 #ifdef _MSC_VER
 #pragma warning(disable : 4305)
 #endif
-#include <btBulletDynamicsCommon.h>
 #include <LinearMath/btScalar.h>
 #ifdef _MSC_VER
 #pragma warning(default : 4305)
 #endif
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_precision.hpp>
+#include <glm/vec3.hpp>
 
 #include <data/ModelData.hpp>
 #include <objects/GameObject.hpp>
@@ -29,6 +28,12 @@ class CharacterObject;
 class CollisionInstance;
 class GameWorld;
 class ModelFrame;
+class btRaycastVehicle;
+class btCollisionShape;
+class btRigidBody;
+class btHingeConstraint;
+class btMotionState;
+struct btVehicleRaycaster;
 
 /**
  * @class VehicleObject
@@ -67,18 +72,7 @@ public:
              std::unique_ptr<btRigidBody> p_body,
              std::unique_ptr<btHingeConstraint> p_constraint,
              bool p_moveToAngle, float p_targetAngle, float p_openAngle,
-             float p_closedAngle)
-            : dummy(p_dummy)
-            , normal(p_normal)
-            , damaged(p_damaged)
-            , cs(std::move(p_cs))
-            , body(std::move(p_body))
-            , constraint(std::move(p_constraint))
-            , moveToAngle(p_moveToAngle)
-            , targetAngle(p_targetAngle)
-            , openAngle(p_openAngle)
-            , closedAngle(p_closedAngle) {
-        }
+             float p_closedAngle);
 
         Part(Part&& part) = default;
         Part& operator=(Part&& part) = default;

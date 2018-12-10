@@ -13,15 +13,13 @@
 #pragma warning(default : 4305)
 #endif
 
-#include <data/Clump.hpp>
-#include <gl/gl_core_3_3.h>
-
 #include "render/OpenGLRenderer.hpp"
 
 class btVector3;
 class DrawBuffer;
 class GameRenderer;
 class GeometryBuffer;
+struct GeometryVertex;
 
 class DebugDraw final : public btIDebugDraw {
 public:

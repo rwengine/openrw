@@ -21,6 +21,8 @@
 #include <rw/debug.hpp>
 #include <dynamics/HitTest.hpp>
 
+#include "ai/CharacterController.hpp"
+#include "ai/AIGraphNode.hpp"
 #include "data/WeaponData.hpp"
 #include "engine/Animator.hpp"
 #include "engine/GameData.hpp"
@@ -30,6 +32,8 @@
 #include "objects/VehicleObject.hpp"
 
 constexpr float kCloseDoorIdleTime = 2.f;
+
+namespace ai {
 
 bool CharacterController::updateActivity() {
     if (_currentActivity && character->isAlive()) {
@@ -731,3 +735,5 @@ bool Activities::UseItem::update(CharacterObject *character,
 
     return false;
 }
+
+}  // namespace ai

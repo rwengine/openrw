@@ -2,10 +2,9 @@
 #define _RWENGINE_SOUND_BUFFER_HPP_
 
 #include <al.h>
-#include <alc.h>
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
-#include "audio/SoundSource.hpp"
+class SoundSource;
 
 /// OpenAL tool for playing
 /// sound instance.

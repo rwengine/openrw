@@ -2,7 +2,6 @@
 #define _RWENGINE_PICKUPOBJECT_HPP_
 
 #include <cstdint>
-#include <glm/glm.hpp>
 
 #include <rw/debug.hpp>
 

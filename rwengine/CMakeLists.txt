@@ -16,6 +16,7 @@ set(RWENGINE_SOURCES
     src/audio/alCheck.hpp
     src/audio/SfxParameters.cpp
     src/audio/SfxParameters.hpp
+    src/audio/Sound.cpp
     src/audio/Sound.hpp
     src/audio/SoundBuffer.cpp
     src/audio/SoundBuffer.hpp
@@ -34,6 +35,7 @@ set(RWENGINE_SOURCES
     src/data/Chase.cpp
     src/data/Chase.hpp
     src/data/CollisionModel.hpp
+    src/data/CutsceneData.cpp
     src/data/CutsceneData.hpp
     src/data/InstanceData.hpp
     src/data/ModelData.cpp
@@ -45,6 +47,7 @@ set(RWENGINE_SOURCES
     src/data/WeaponData.hpp
     src/data/Weather.cpp
     src/data/Weather.hpp
+    src/data/ZoneData.cpp
     src/data/ZoneData.hpp
 
     src/dynamics/CollisionInstance.cpp
@@ -122,6 +125,7 @@ set(RWENGINE_SOURCES
     src/render/TextRenderer.cpp
     src/render/TextRenderer.hpp
     src/render/ViewCamera.hpp
+    src/render/ViewFrustum.cpp
     src/render/ViewFrustum.hpp
     src/render/VisualFX.cpp
     src/render/VisualFX.hpp

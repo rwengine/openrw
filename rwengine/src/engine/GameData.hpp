@@ -11,8 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
-
 #include <platform/FileIndex.hpp>
 #include <rw/debug.hpp>
 #include <rw/forward.hpp>
@@ -28,7 +26,6 @@
 #include <loaders/LoaderIMG.hpp>
 #include <loaders/LoaderTXD.hpp>
 #include <objects/VehicleInfo.hpp>
-#include <gl/TextureData.hpp>
 
 class Logger;
 struct WeaponData;
@@ -194,17 +191,7 @@ public:
     void loadSplash(const std::string& name);
 
     TextureData::Handle findSlotTexture(const std::string& slot,
-                                        const std::string& texture) const {
-        auto slotit = textureslots.find(slot);
-        if (slotit == textureslots.end()) {
-            return nullptr;
-        }
-        auto textureit = slotit->second.find(texture);
-        if (textureit == slotit->second.end()) {
-            return nullptr;
-        }
-        return textureit->second;
-    }
+                                        const std::string& texture) const;
 
     FileIndex index;
 
@@ -227,18 +214,9 @@ public:
 
     ZoneDataList mapzones;
 
-    ZoneData* findZone(const std::string& name) {
-        auto it =
-            std::find_if(gamezones.begin(), gamezones.end(),
-                         [&](const ZoneData& a) { return a.name == name; });
-        return it != gamezones.end() ? &(*it) : nullptr;
-    }
+    ZoneData* findZone(const std::string& name);
 
-    ZoneData* findZoneAt(const glm::vec3& pos) {
-        RW_CHECK(!gamezones.empty(), "No game zones loaded");
-        ZoneData* zone = gamezones[0].findLeafAtPoint(pos);
-        return zone;
-    }
+    ZoneData* findZoneAt(const glm::vec3& pos);
 
     std::unordered_map<ModelID, std::unique_ptr<BaseModelInfo>> modelinfo;
 

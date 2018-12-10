@@ -1,24 +1,27 @@
 #ifndef _RWENGINE_TRAFFICDIRECTOR_HPP_
 #define _RWENGINE_TRAFFICDIRECTOR_HPP_
 
-#include "AIGraphNode.hpp"
-
 #include <vector>
 
-class AIGraph;
-class GameObject;
 class GameWorld;
+class GameObject;
 class ViewCamera;
+
+namespace ai {
+
+enum class NodeType;
+class AIGraph;
+struct AIGraphNode;
 
 class TrafficDirector {
 public:
     TrafficDirector(AIGraph* graph, GameWorld* world);
 
-    std::vector<AIGraphNode*> findAvailableNodes(AIGraphNode::NodeType type,
+    std::vector<AIGraphNode*> findAvailableNodes(NodeType type,
                                                  const ViewCamera& camera,
                                                  float radius);
 
-    void setDensity(AIGraphNode::NodeType type, float density);
+    void setDensity(NodeType type, float density);
 
     /**
      * Creates new traffic at available locations.
@@ -42,5 +45,7 @@ private:
     size_t maximumPedestrians = 20;
     size_t maximumCars = 10;
 };
+
+}  // namespace ai
 
 #endif

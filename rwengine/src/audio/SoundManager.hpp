@@ -3,20 +3,15 @@
 
 #include "audio/Sound.hpp"
 
-#include <algorithm>
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
-#include <al.h>
 #include <alc.h>
-#include <glm/glm.hpp>
+
+#include <glm/vec3.hpp>
 
 #include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
+
+#include <string>
+#include <unordered_map>
 
 class GameWorld;
 class ViewCamera;

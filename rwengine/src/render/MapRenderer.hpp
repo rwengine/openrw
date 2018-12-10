@@ -4,8 +4,6 @@
 #include <memory>
 #include <string>
 
-#include <glm/glm.hpp>
-
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 

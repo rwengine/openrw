@@ -1,6 +1,8 @@
 #ifndef _RWENGINE_CUTSCENEDATA_HPP_
 #define _RWENGINE_CUTSCENEDATA_HPP_
-#include <glm/glm.hpp>
+
+#include <glm/vec3.hpp>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -39,97 +41,13 @@ struct CutsceneTracks {
 
     float duration{0.f};
 
-    glm::vec3 getPositionAt(float time) const {
-        glm::vec3 p = position.rbegin()->second;
-        for (auto it = position.begin(); it != position.end(); ++it) {
-            if (it->first <= time) {
-                auto a = it->second;
-                auto b = it->second;
-                auto nextIt = it;
-                float t = it->first;
-                if (++nextIt != position.end()) {
-                    b = nextIt->second;
-                    t = nextIt->first;
-                }
-                float tdiff = t - it->first;
-                p = b;
-                if (tdiff > 0.f) {
-                    float fac = (time - it->first) / tdiff;
-                    p = glm::mix(a, b, fac);
-                }
-            }
-        }
-        return p;
-    }
+    glm::vec3 getPositionAt(float time) const;
 
-    glm::vec3 getTargetAt(float time) const {
-        glm::vec3 p = position.rbegin()->second;
-        for (auto it = target.begin(); it != target.end(); ++it) {
-            if (it->first <= time) {
-                auto a = it->second;
-                auto b = it->second;
-                auto nextIt = it;
-                float t = it->first;
-                if (++nextIt != target.end()) {
-                    b = nextIt->second;
-                    t = nextIt->first;
-                }
-                float tdiff = t - it->first;
-                p = b;
-                if (tdiff > 0.f) {
-                    float fac = (time - it->first) / tdiff;
-                    p = glm::mix(a, b, fac);
-                }
-            }
-        }
-        return p;
-    }
+    glm::vec3 getTargetAt(float time) const;
 
-    float getZoomAt(float time) const {
-        float r = zoom.rbegin()->second;
-        for (auto it = zoom.begin(); it != zoom.end(); ++it) {
-            if (it->first <= time) {
-                auto a = it->second;
-                auto b = it->second;
-                auto nextIt = it;
-                float t = it->first;
-                if (++nextIt != zoom.end()) {
-                    b = nextIt->second;
-                    t = nextIt->first;
-                }
-                float tdiff = t - it->first;
-                r = b;
-                if (tdiff > 0.f) {
-                    float fac = (time - it->first) / tdiff;
-                    r = glm::mix(a, b, fac);
-                }
-            }
-        }
-        return r;
-    }
+    float getZoomAt(float time) const;
 
-    float getRotationAt(float time) const {
-        float r = rotation.rbegin()->second;
-        for (auto it = rotation.begin(); it != rotation.end(); ++it) {
-            if (it->first <= time) {
-                auto a = it->second;
-                auto b = it->second;
-                auto nextIt = it;
-                float t = it->first;
-                if (++nextIt != rotation.end()) {
-                    b = nextIt->second;
-                    t = nextIt->first;
-                }
-                float tdiff = t - it->first;
-                r = b;
-                if (tdiff > 0.f) {
-                    float fac = (time - it->first) / tdiff;
-                    r = glm::mix(a, b, fac);
-                }
-            }
-        }
-        return r;
-    }
+    float getRotationAt(float time) const;
 };
 
 struct CutsceneData {

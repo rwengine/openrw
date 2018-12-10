@@ -2,6 +2,8 @@
 
 #include "RWGame.hpp"
 
+#include <glm/gtc/quaternion.hpp>
+
 // This serves as the "initial" camera position.
 const ViewCamera defaultView{{-250.f, -550.f, 75.f},
                        glm::angleAxis(glm::radians(5.f),

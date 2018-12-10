@@ -1,9 +1,11 @@
 #ifndef _RWENGINE_LOADERCOL_HPP_
 #define _RWENGINE_LOADERCOL_HPP_
-#include <data/CollisionModel.hpp>
+
 #include <memory>
 #include <string>
 #include <vector>
+
+struct CollisionModel;
 
 /**
  * @class LoaderCOL
@@ -11,6 +13,7 @@
  */
 class LoaderCOL {
 public:
+
     /// Load the COL data into memory
     bool load(const std::string& file);
 

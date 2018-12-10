@@ -1,17 +1,40 @@
 #ifndef _RWENGINE_GARAGE_HPP_
 #define _RWENGINE_GARAGE_HPP_
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
 #include <rw/debug.hpp>
 
+namespace ai {
 class PlayerController;
+}  // namespace ai
 
 class GameWorld;
 
 class CharacterObject;
 class InstanceObject;
 class GameObject;
+
+// Garage types are from original game
+enum class GarageType {
+    Mission = 1,
+    BombShop1 = 2,
+    BombShop2 = 3,
+    BombShop3 = 4,
+    Respray = 5,
+    CollectCars1 = 8,
+    CollectCars2 = 9,
+    MissionForCarToComeOut = 11,
+    Crusher = 13,
+    MissionKeepCar = 14,
+    Hideout1 = 16,
+    Hideout2 = 17,
+    Hideout3 = 18,
+    MissionToOpenAndClose = 19,
+    MissionForSpecificCar = 20,
+    MissionKeepCarAndRemainClosed = 21,
+};
+
+enum class GarageState { Closed, Closing, Opening, Opened };
 
 class Garage {
 private:
@@ -49,28 +72,6 @@ private:
     void updateDoor();
 
 public:
-    // Garage types are from original game
-    enum class Type {
-        Mission = 1,
-        BombShop1 = 2,
-        BombShop2 = 3,
-        BombShop3 = 4,
-        Respray = 5,
-        CollectCars1 = 8,
-        CollectCars2 = 9,
-        MissionForCarToComeOut = 11,
-        Crusher = 13,
-        MissionKeepCar = 14,
-        Hideout1 = 16,
-        Hideout2 = 17,
-        Hideout3 = 18,
-        MissionToOpenAndClose = 19,
-        MissionForSpecificCar = 20,
-        MissionKeepCarAndRemainClosed = 21,
-    };
-
-    enum class State { Closed, Closing, Opening, Opened };
-
     GameWorld* engine;
     size_t id;
 
@@ -81,18 +82,18 @@ public:
     glm::vec3 min;
     glm::vec3 max;
 
-    Type type;
+    GarageType type;
 
     GameObject* target = nullptr;
     // @todo use model type
     int targetModel = 0;
 
-    State state = State::Closed;
+    GarageState state = GarageState::Closed;
 
     bool resprayDone = false;
 
     Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
-               const glm::vec3& coord1, Type type_);
+               const glm::vec3& coord1, GarageType type_);
     ~Garage() = default;
 
     void makeDoorSwing();

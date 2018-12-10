@@ -1,7 +1,9 @@
 #ifndef _RWENGINE_INSTANCEDATA_HPP_
 #define _RWENGINE_INSTANCEDATA_HPP_
-#include <glm/glm.hpp>
+
 #include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
+
 #include <string>
 
 struct InstanceData {

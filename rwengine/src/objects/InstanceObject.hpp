@@ -1,12 +1,11 @@
 #ifndef _RWENGINE_INSTANCEOBJECT_HPP_
 #define _RWENGINE_INSTANCEOBJECT_HPP_
-#include <memory>
 
-#include <glm/glm.hpp>
+#include "objects/GameObject.hpp"
 
 #include <rw/forward.hpp>
 
-#include <objects/GameObject.hpp>
+#include <memory>
 
 class BaseModelInfo;
 class CollisionInstance;

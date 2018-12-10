@@ -2,7 +2,6 @@
 #define _LIBRW_TYPES_HPP_
 
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <map>
 #include <memory>
 #include <rw/debug.hpp>

@@ -1,4 +1,4 @@
-#include <ai/PlayerController.hpp>
+﻿#include <ai/PlayerController.hpp>
 #include <audio/SfxParameters.hpp>
 #include <core/Logger.hpp>
 #include <data/CutsceneData.hpp>
@@ -6,6 +6,7 @@
 #include <engine/GameData.hpp>
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
+#include <engine/Payphone.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/CutsceneObject.hpp>
 #include <objects/InstanceObject.hpp>
@@ -913,7 +914,7 @@ void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 
     /// @todo fix the API interfaces that are now totally incoherent
     auto character = args.getWorld()->createPlayer(coord);
     character->applyOffset();
-    player = static_cast<PlayerController*>(character->controller);
+    player = static_cast<ai::PlayerController*>(character->controller);
     args.getState()->playerObject = character->getGameObjectID();
 }
 
@@ -2069,7 +2070,7 @@ void opcode_00ae(const ScriptArguments& args, const ScriptVehicle vehicle, const
     if (vehicle->getDriver() != nullptr)
     {
         // @todo set the right driving style and lane
-        vehicle->getDriver()->controller->setGoal(CharacterController::TrafficDriver);
+        vehicle->getDriver()->controller->setGoal(ai::CharacterController::TrafficDriver);
         vehicle->getDriver()->controller->setLane(1);
     }
 }
@@ -5238,7 +5239,7 @@ void opcode_01d3(const ScriptArguments& args, const ScriptCharacter character, c
     RW_UNUSED(args);
     character->controller->skipActivity();
     character->controller->setNextActivity(
-            std::make_unique<Activities::ExitVehicle>());
+            std::make_unique<ai::Activities::ExitVehicle>());
 }
 
 /**
@@ -5252,8 +5253,8 @@ void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, c
     RW_UNUSED(args);
     character->controller->skipActivity();
     character->controller->setNextActivity(
-            std::make_unique<Activities::EnterVehicle>(
-                vehicle,Activities::EnterVehicle::ANY_SEAT));
+        std::make_unique<ai::Activities::EnterVehicle>(
+            vehicle, ai::Activities::EnterVehicle::ANY_SEAT));
 }
 
 /**
@@ -5266,7 +5267,7 @@ void opcode_01d4(const ScriptArguments& args, const ScriptCharacter character, c
 void opcode_01d5(const ScriptArguments& args, const ScriptCharacter character, const ScriptVehicle vehicle) {
     RW_UNUSED(args);
     character->controller->setNextActivity(
-            std::make_unique<Activities::EnterVehicle>(vehicle));
+            std::make_unique<ai::Activities::EnterVehicle>(vehicle));
 }
 
 /**
@@ -5319,7 +5320,7 @@ void opcode_01de(const ScriptArguments& args, const ScriptCharacter character0, 
     @arg player 
 */
 void opcode_01df(const ScriptArguments& args, const ScriptCharacter character, const ScriptPlayer player) {
-    character->controller->setGoal(CharacterController::FollowLeader);
+    character->controller->setGoal(ai::CharacterController::FollowLeader);
     character->controller->setTargetCharacter(player->getCharacter());
     RW_UNUSED(args);
 }
@@ -5432,7 +5433,7 @@ void opcode_01e5(const ScriptArguments& args, const ScriptString gxtEntry, const
     @arg coord1 Coordinates
 */
 void opcode_01e7(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coord1) {
-    args.getWorld()->enableAIPaths(AIGraphNode::Vehicle, coord0, coord1);
+    args.getWorld()->enableAIPaths(ai::NodeType::Vehicle, coord0, coord1);
 }
 
 /**
@@ -5443,7 +5444,7 @@ void opcode_01e7(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     @arg coord1 Coordinates
 */
 void opcode_01e8(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coord1) {
-    args.getWorld()->disableAIPaths(AIGraphNode::Vehicle, coord0, coord1);
+    args.getWorld()->disableAIPaths(ai::NodeType::Vehicle, coord0, coord1);
 }
 
 /**
@@ -6009,11 +6010,11 @@ void opcode_0211(const ScriptArguments& args, const ScriptCharacter character, S
     {
     	// Since we just cleared the Activities, this will become current immediatley.
     	character->controller->setNextActivity(
-                    std::make_unique<Activities::ExitVehicle>());
+                    std::make_unique<ai::Activities::ExitVehicle>());
     }
 
     character->controller->setNextActivity(
-            std::make_unique<Activities::GoTo>(target));
+            std::make_unique<ai::Activities::GoTo>(target));
 }
 
 /**
@@ -6290,7 +6291,7 @@ void opcode_0229(const ScriptArguments& args, const ScriptVehicle vehicle, const
     @arg coord1 Coordinates
 */
 void opcode_022a(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coord1) {
-    args.getWorld()->enableAIPaths(AIGraphNode::Pedestrian, coord0, coord1);
+    args.getWorld()->enableAIPaths(ai::NodeType::Pedestrian, coord0, coord1);
 }
 
 /**
@@ -6301,7 +6302,7 @@ void opcode_022a(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coor
     @arg coord1 Coordinates
 */
 void opcode_022b(const ScriptArguments& args, ScriptVec3 coord0, ScriptVec3 coord1) {
-    args.getWorld()->disableAIPaths(AIGraphNode::Pedestrian, coord0, coord1);
+    args.getWorld()->disableAIPaths(ai::NodeType::Pedestrian, coord0, coord1);
 }
 
 /**
@@ -6438,7 +6439,7 @@ void opcode_0237(const ScriptArguments& args, const ScriptGang gangID, const Scr
 void opcode_0239(const ScriptArguments& args, const ScriptCharacter character, ScriptVec2 coord) {
     auto target = script::getGround(args, glm::vec3(coord, -100.f));
     character->controller->setNextActivity(
-            std::make_unique<Activities::GoTo>(target, true));
+            std::make_unique<ai::Activities::GoTo>(target, true));
 }
 
 /**
@@ -7378,7 +7379,7 @@ bool opcode_02bf(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg zCoord Z Coord
 */
 void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    script::getClosestNode(args, coord, AIGraphNode::NodeType::Pedestrian, xCoord, yCoord, zCoord);
+    script::getClosestNode(args, coord, ai::NodeType::Pedestrian, xCoord, yCoord, zCoord);
 }
 
 /**
@@ -7391,7 +7392,7 @@ void opcode_02c0(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCo
     @arg zCoord Z Coord
 */
 void opcode_02c1(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord) {
-    script::getClosestNode(args, coord, AIGraphNode::NodeType::Vehicle, xCoord, yCoord, zCoord);
+    script::getClosestNode(args, coord, ai::NodeType::Vehicle, xCoord, yCoord, zCoord);
 }
 
 /**
@@ -10702,7 +10703,7 @@ void opcode_03a5(const ScriptArguments& args, const ScriptGarage garage, const S
     RW_UNUSED(args);
     garage->type = garageType;
     garage->targetModel = model;
-    garage->state = Garage::State::Closed;
+    garage->state = GarageState::Closed;
 }
 
 /**
@@ -10826,7 +10827,7 @@ bool opcode_03b0(const ScriptArguments& args, const ScriptGarage garage) {
 */
 bool opcode_03b1(const ScriptArguments& args, const ScriptGarage garage) {
     RW_UNUSED(args);
-    return garage->state == Garage::State::Closed;
+    return garage->state == GarageState::Closed;
 }
 
 /**
@@ -11286,7 +11287,7 @@ bool opcode_03d2(const ScriptArguments& args) {
 */
 void opcode_03d3(const ScriptArguments& args, ScriptVec3 coord, ScriptFloat& xCoord, ScriptFloat& yCoord, ScriptFloat& zCoord, ScriptFloat& angle) {
     RW_UNIMPLEMENTED_OPCODE(0x03d3);
-    script::getClosestNode(args, coord, AIGraphNode::NodeType::Vehicle, xCoord, yCoord, zCoord);
+    script::getClosestNode(args, coord, ai::NodeType::Vehicle, xCoord, yCoord, zCoord);
     // @todo calculate angle based on node connections
     angle = 0.f;
 }
@@ -11304,10 +11305,10 @@ bool opcode_03d4(const ScriptArguments& args, const ScriptGarage garage, const S
     RW_CHECK(entryIndex < 32, "Entry index too high");
 
     // @todo reimplement
-    if (garage->type == Garage::Type::CollectCars1) {
+    if (garage->type == GarageType::CollectCars1) {
         return args.getState()->importExportPortland[entryIndex];
     }
-    if (garage->type == Garage::Type::CollectCars2) {
+    if (garage->type == GarageType::CollectCars2) {
         return args.getState()->importExportShoreside[entryIndex];
     }
 

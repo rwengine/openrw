@@ -149,6 +149,49 @@ void OpenGLRenderer::useTexture(GLuint unit, GLuint tex) {
     }
 }
 
+void OpenGLRenderer::setBlend(BlendMode mode) {
+    if (mode!=BlendMode::BLEND_NONE && blendMode==BlendMode::BLEND_NONE)//To don't call glEnable again when it already enabled
+        glEnable(GL_BLEND);
+
+    if (mode!=blendMode) {
+        switch (mode) {
+        default:
+            assert(false);
+            break;
+        case BlendMode::BLEND_NONE:
+            glDisable(GL_BLEND);
+            break;
+        case BlendMode::BLEND_ALPHA:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case BlendMode::BLEND_ADDITIVE:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+
+        }
+    }
+
+    blendMode = mode;
+}
+
+void OpenGLRenderer::setDepthMode(DepthMode mode) {
+    if (mode != depthMode) {
+        if (depthMode == DepthMode::OFF) glEnable(GL_DEPTH_TEST);
+        switch(mode) {
+        case DepthMode::OFF: glDisable(GL_DEPTH_TEST); break;
+        case DepthMode::LESS: glDepthFunc(GL_LESS); break;
+        }
+        depthMode = mode;
+    }
+}
+
+void OpenGLRenderer::setDepthWrite(bool enable) {
+    if (enable != depthWriteEnabled) {
+        glDepthMask(enable ? GL_TRUE : GL_FALSE);
+        depthWriteEnabled = enable;
+    }
+}
+
 void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p) {
     if (p != currentProgram) {
         currentProgram = static_cast<OpenGLShaderProgram*>(p);
@@ -391,6 +434,13 @@ bool OpenGLRenderer::createUBO(Buffer &out, GLsizei size, GLsizei entrySize)
     return true;
 }
 
+void OpenGLRenderer::attachUBO(GLuint buffer) {
+    if (currentUBO != buffer) {
+        glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+        currentUBO = buffer;
+    }
+}
+
 void OpenGLRenderer::uploadUBOEntry(Buffer &buffer, const void *data, size_t size)
 {
     attachUBO(buffer.name);
@@ -469,3 +519,15 @@ const Renderer::ProfileInfo& OpenGLRenderer::popDebugGroup() {
 }
 
 Renderer::ShaderProgram::~ShaderProgram() = default;
+
+GLint OpenGLRenderer::OpenGLShaderProgram::getUniformLocation(const std::string &name) {
+    auto c = uniforms.find(name.c_str());
+    GLint loc = -1;
+    if (c == uniforms.end()) {
+        loc = glGetUniformLocation(program, name.c_str());
+        uniforms[name] = loc;
+    } else {
+        loc = c->second;
+    }
+    return loc;
+}

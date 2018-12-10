@@ -2,6 +2,8 @@
 #include <engine/GameState.hpp>
 #include "RWGame.hpp"
 
+#include <glm/gtc/quaternion.hpp>
+
 #include <fstream>
 #include <iostream>
 

@@ -1,9 +1,12 @@
 #ifndef _RWGAME_HUDDRAWER_HPP_
 #define _RWGAME_HUDDRAWER_HPP_
 
+namespace ai {
+class PlayerController;
+}  // namespace ai
+
 class GameWorld;
 class GameRenderer;
-class PlayerController;
 class ViewCamera;
 
 #include <glm/gtc/type_precision.hpp>
@@ -44,7 +47,7 @@ public:
 
     void applyHUDScale(float scale);
     HUDParameters getHUDParameters();
-    void drawHUD(ViewCamera& currentView, PlayerController* player,
+    void drawHUD(ViewCamera& currentView, ai::PlayerController* player,
                  GameWorld* world, GameRenderer& render);
     void drawOnScreenText(GameWorld* world, GameRenderer& renderer);
 
@@ -52,9 +55,9 @@ private:
     HUDParameters hudParameters;
 
     void drawScriptTimer(GameWorld* world, GameRenderer& render);
-    void drawMap(ViewCamera& currentView, PlayerController* player,
+    void drawMap(ViewCamera& currentView, ai::PlayerController* player,
                  GameWorld* world, GameRenderer& render);
-    void drawPlayerInfo(PlayerController* player, GameWorld* world,
+    void drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
                         GameRenderer& render);
 };
 

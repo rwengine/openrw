@@ -6,6 +6,8 @@
 
 #include "data/WeaponData.hpp"
 #include "dynamics/HitTest.hpp"
+#include <data/Clump.hpp>
+
 #include "engine/GameWorld.hpp"
 #include "objects/CharacterObject.hpp"
 #include "objects/ProjectileObject.hpp"

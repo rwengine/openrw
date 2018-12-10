@@ -19,8 +19,6 @@
 
 #include <chrono>
 
-class PlayerController;
-
 class RWGame final : public GameBase {
     GameData data;
     GameRenderer renderer;

@@ -6,6 +6,7 @@
 #include <rw/casts.hpp>
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 

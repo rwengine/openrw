@@ -1,16 +1,19 @@
 #ifndef _RWENGINE_AIGRAPH_HPP_
 #define _RWENGINE_AIGRAPH_HPP_
-#include <array>
-#include <vector>
 
-#include <glm/glm.hpp>
-
-#include "ai/AIGraphNode.hpp"
+#include <glm/gtc/quaternion.hpp>
 
 #include <rw/types.hpp>
 
-struct AIGraphNode;
+#include <array>
+#include <vector>
+
 struct PathData;
+
+namespace ai {
+
+enum class NodeType;
+struct AIGraphNode;
 
 class AIGraph {
 public:
@@ -34,7 +37,9 @@ public:
                          PathData& path);
 
     void gatherExternalNodesNear(const glm::vec3& center, const float radius,
-                                 std::vector<AIGraphNode*>& nodes, AIGraphNode::NodeType type);
+                                 std::vector<AIGraphNode*>& nodes, NodeType type);
 };
+
+} // ai
 
 #endif

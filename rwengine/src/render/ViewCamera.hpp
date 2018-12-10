@@ -1,5 +1,7 @@
 #ifndef _RWENGINE_VIEWCAMERA_HPP_
 #define _RWENGINE_VIEWCAMERA_HPP_
+
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 #include "render/ViewFrustum.hpp"

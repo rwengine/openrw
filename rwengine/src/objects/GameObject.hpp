@@ -3,9 +3,8 @@
 
 #include <limits>
 
-#include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
 
 #include <rw/debug.hpp>
 #include <rw/forward.hpp>
@@ -223,12 +222,7 @@ public:
         _lastRotation = getRotation();
     }
 
-    glm::mat4 getTimeAdjustedTransform(float alpha) const {
-        glm::mat4 t{1.0f};
-        t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
-        t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
-        return t;
-    }
+    glm::mat4 getTimeAdjustedTransform(float alpha) const;
 
     enum ObjectLifetime {
         /// lifetime has not been set

@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
 
 #include <rw/forward.hpp>
 

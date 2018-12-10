@@ -1,7 +1,9 @@
 #ifndef _RWENGINE_VISUALFX_HPP_
 #define _RWENGINE_VISUALFX_HPP_
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include <gl/TextureData.hpp>
 
@@ -22,7 +24,7 @@ struct VisualFX {
 
 struct LightFX final : public VisualFX {
     LightFX() = default;
-    ~LightFX() = default;
+    ~LightFX() override = default;
 
     EffectType getType() const override {
         return Light;
@@ -61,7 +63,7 @@ struct ParticleFX final : public VisualFX {
 
     /** Constructs a particle */
     ParticleFX() = default;
-    ~ParticleFX() = default;
+    ~ParticleFX() override = default;
 
     EffectType getType() const override {
         return Particle;

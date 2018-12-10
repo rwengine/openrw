@@ -11,6 +11,8 @@
 #include <rw/debug.hpp>
 #include <rw/types.hpp>
 
+namespace ai {
+
 void AIGraph::createPathNodes(const glm::vec3& position,
                               const glm::quat& rotation, PathData& path) {
     auto startIndex = static_cast<std::uint32_t>(nodes.size());
@@ -38,8 +40,8 @@ void AIGraph::createPathNodes(const glm::vec3& position,
             auto ptr = ainode.get();
 
             ainode->type =
-                (path.type == PathData::PATH_PED ? AIGraphNode::Pedestrian
-                                                 : AIGraphNode::Vehicle);
+                (path.type == PathData::PATH_PED ? NodeType::Pedestrian
+                                                 : NodeType::Vehicle);
             ainode->nextIndex = node.next >= 0 ? startIndex + node.next : -1;
             ainode->flags = AIGraphNode::None;
             ainode->size = node.size;
@@ -95,7 +97,7 @@ glm::ivec2 worldToGrid(const glm::vec2& world) {
 void AIGraph::gatherExternalNodesNear(const glm::vec3& center,
                                       const float radius,
                                       std::vector<AIGraphNode*>& nodes,
-                                      AIGraphNode::NodeType type) {
+                                      NodeType type) {
     // the bounds end up covering more than might fit
     auto planecoords = glm::vec2(center);
     auto minWorld = planecoords - glm::vec2(radius);
@@ -119,3 +121,5 @@ void AIGraph::gatherExternalNodesNear(const glm::vec3& center,
         }
     }
 }
+
+}  // namespace ai

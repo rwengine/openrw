@@ -1,13 +1,18 @@
 #ifndef _RWENGINE_CHARACTERCONTROLLER_HPP_
 #define _RWENGINE_CHARACTERCONTROLLER_HPP_
-#include <glm/glm.hpp>
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include <memory>
 #include <string>
 
-struct AIGraphNode;
 class CharacterObject;
 class VehicleObject;
+
+namespace ai {
+
+struct AIGraphNode;
 
 /**
  * @class CharacterController
@@ -59,11 +64,6 @@ public:
     };
 
 protected:
-    /**
-     * The character being controlled.
-     */
-    CharacterObject* character = nullptr;
-
     std::unique_ptr<Activity> _currentActivity = nullptr;
     std::unique_ptr<Activity> _nextActivity = nullptr;
 
@@ -80,6 +80,10 @@ protected:
     CharacterObject* leader = nullptr;
 
 public:
+    /**
+     * The character being controlled.
+     */
+    CharacterObject* character = nullptr;
 
     AIGraphNode* targetNode;
     AIGraphNode* lastTargetNode;
@@ -293,5 +297,7 @@ struct UseItem : public CharacterController::Activity {
     bool update(CharacterObject* character, CharacterController* controller) override;
 };
 }
+
+} // ai
 
 #endif
