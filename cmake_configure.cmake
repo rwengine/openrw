@@ -29,6 +29,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(rw_interface
         INTERFACE
             "/MP"
+            "/Zc:__cplusplus"
         )
 else()
     message(FATAL_ERROR "Unknown compiler ID: '${CMAKE_CXX_COMPILER_ID}'")
