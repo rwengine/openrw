@@ -42,7 +42,7 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
     : State(game)
     , save(save)
     , newgame(newgame)
-    , m_invertedY(game->getConfig().getInputInvertY()) {
+    , m_invertedY(game->getConfig().invertY()) {
 }
 
 void IngameState::startTest() {

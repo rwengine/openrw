@@ -1,7 +1,10 @@
 #ifndef RWGAME_RWGAME_HPP
 #define RWGAME_RWGAME_HPP
 
-#include <chrono>
+#include "game.hpp"
+#include "GameBase.hpp"
+#include "HUDDrawer.hpp"
+#include "RWConfig.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
@@ -20,10 +23,8 @@
 #include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/modules/GTA3Module.hpp>
-#include "game.hpp"
 
-#include "GameBase.hpp"
-#include "HUDDrawer.hpp"
+#include <chrono>
 
 class PlayerController;
 
@@ -57,7 +58,7 @@ class RWGame final : public GameBase {
     std::string cheatInputWindow = std::string(32, ' ');
 
 public:
-    RWGame(Logger& log, int argc, char* argv[]);
+    RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args);
     ~RWGame() override;
 
     int run();

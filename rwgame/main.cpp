@@ -5,21 +5,30 @@
 
 #include <core/Logger.hpp>
 
-int main(int argc, char* argv[]) {
-    SDL_SetMainReady();
+#include "RWConfig.hpp"
+
+int main(int argc, const char* argv[]) {
     // Initialise Logging before anything else happens
     StdOutReceiver logstdout;
     Logger logger({ &logstdout });
 
+    RWArgumentParser argParser;
+    auto argLayerOpt = argParser.parseArguments(argc, argv);
+    if (!argLayerOpt.has_value()) {
+        argParser.printHelp(std::cerr);
+        return 1;
+    }
+    if (argLayerOpt->help) {
+        argParser.printHelp(std::cout);
+        return 0;
+    }
+
+    SDL_SetMainReady();
+
     try {
-        RWGame game(logger, argc, argv);
+        RWGame game(logger, argLayerOpt);
 
         return game.run();
-    } catch (std::invalid_argument&) {
-        // This exception is thrown when either an invalid command line option
-        // or a --help is found. The RWGame constructor prints a usage message
-        // in this case and then throws this exception.
-        return -2;
     } catch (std::runtime_error& ex) {
         // Catch runtime_error as these are fatal issues the user may want to
         // know about like corrupted files or GL initialisation failure.

@@ -44,7 +44,7 @@ set(TEST_SOURCES
     test_Globals.hpp
 
     # Hack in rwgame sources until there's a per-target test suite
-    "${PROJECT_SOURCE_DIR}/rwgame/GameConfig.cpp"
+    "${PROJECT_SOURCE_DIR}/rwgame/RWConfig.cpp"
     "${PROJECT_SOURCE_DIR}/rwgame/GameWindow.cpp"
     "${PROJECT_SOURCE_DIR}/rwgame/GameInput.cpp"
     )
@@ -71,6 +71,7 @@ target_include_directories(rwtests
 target_link_libraries(rwtests
     PRIVATE
         Boost::unit_test_framework
+        Boost::program_options
         rwengine
         SDL2::SDL2
         Boost::filesystem

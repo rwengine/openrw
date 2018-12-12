@@ -6,12 +6,14 @@ set(RWGAME_SOURCES
 
     main.cpp
 
+    RWConfig.inc
+    RWConfig.hpp
+    RWConfig.cpp
+
     GameBase.hpp
     GameBase.cpp
     RWGame.hpp
     RWGame.cpp
-    GameConfig.hpp
-    GameConfig.cpp
     GameWindow.hpp
     GameWindow.cpp
 
@@ -42,7 +44,6 @@ set(RWGAME_SOURCES
     states/DebugState.cpp
     states/BenchmarkState.hpp
     states/BenchmarkState.cpp
-
     )
 
 add_executable(rwgame
