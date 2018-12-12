@@ -5,11 +5,11 @@
 #include <limits>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4305 5033)
+#pragma warning(disable : 4305)
 #endif
 #include <btBulletDynamicsCommon.h>
 #ifdef _MSC_VER
-#pragma warning(default : 4305 5033)
+#pragma warning(default : 4305)
 #endif
 
 #include <glm/glm.hpp>
