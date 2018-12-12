@@ -161,6 +161,8 @@ if(TEST_COVERAGE)
         GITSHA1 "${GIT_SHA1}"
         GITBRANCH "${GIT_BRANCH}"
         NAME "${CODECOV_NAME}"
+        ROOTPATH "${PROJECT_SOURCE_DIR}"
+        YAMLPATH "${PROJECT_SOURCE_DIR}/.codecov.yml"
         )
 endif()
 
