@@ -577,6 +577,7 @@ void RWGame::tick(float dt) {
 
         tickObjects(dt);
 
+        state.rampage.tick(dt);
         state.text.tick(dt);
 
         if (vm) {

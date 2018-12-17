@@ -37,6 +37,7 @@ public:
         glm::u8vec3 uiArmourColour = glm::u8vec3(123, 136, 93);
         glm::u8vec3 uiScriptTimerColour = glm::u8vec3(186, 101, 50);
         glm::u8vec3 uiShadowColour = glm::u8vec3(0, 0, 0);
+        glm::u8vec3 uiRampageTimerColour = glm::u8vec3(123, 136, 93);
         float uiMapSize = 150.f;
         float uiWorldSizeMin = 200.f;
         float uiWorldSizeMax = 300.f;
@@ -59,6 +60,7 @@ private:
                  GameWorld* world, GameRenderer& render);
     void drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
                         GameRenderer& render);
+    void drawRampage(GameWorld* world, GameRenderer* render);
 };
 
 #endif

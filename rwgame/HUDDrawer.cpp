@@ -1,5 +1,4 @@
 #include "HUDDrawer.hpp"
-
 #include <ai/PlayerController.hpp>
 #include <data/WeaponData.hpp>
 #include <engine/GameData.hpp>
@@ -43,6 +42,37 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
         ti.screenPosition = glm::vec2(scriptTimerTextX, scriptTimerTextY);
         render.text.renderText(ti);
     }
+}
+
+void HUDDrawer::drawRampage(GameWorld* world, GameRenderer* render) {
+    float rampageTimerX = 0 + hudParameters.uiInfoMargin;
+    float rampageTimerY = 0.f + hudParameters.uiOuterMargin;
+
+    TextRenderer::TextInfo ti;
+    ti.font = FONT_PRICEDOWN;
+    ti.size = hudParameters.uiTextSize;
+    ti.align = TextRenderer::TextInfo::TextAlignment::Left;
+
+    {
+        float remainingTime = world->state->rampage.getRemainingTime();
+        int32_t seconds = static_cast<int32_t>(remainingTime);
+
+        std::stringstream ss;
+        ss << std::setw(1) << std::setfill('0')
+           <<  seconds / 60 << std::setw(0)
+           << ":" << std::setw(2)
+           << seconds % 60;
+
+        ti.text = GameStringUtil::fromString(ss.str(), ti.font);
+    }
+
+    ti.baseColour = hudParameters.uiShadowColour;
+    ti.screenPosition = glm::vec2(rampageTimerX + 1.f, rampageTimerY + 1.f);
+    render->text.renderText(ti);
+
+    ti.baseColour = hudParameters.uiRampageTimerColour;
+    ti.screenPosition = glm::vec2(rampageTimerX, rampageTimerY);
+    render->text.renderText(ti);
 }
 
 void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
@@ -256,6 +286,10 @@ void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
         drawScriptTimer(world, render);
+
+        if (world->state->rampage.getStatus() != Rampage::None) {
+            drawRampage(world, render);
+        }
     }
 }
 

@@ -285,14 +285,12 @@ PickupObject::~PickupObject() {
 }
 
 void PickupObject::tick(float dt) {
-    if (isRampage()) {
-        if (engine->state->scriptOnMissionFlag != nullptr) {
-            if (*(engine->state->scriptOnMissionFlag) != 0 && isEnabled()) {
-                setEnabled(false);
-            } else if (*(engine->state->scriptOnMissionFlag) == 0 &&
-                       !isEnabled()) {
-                setEnabled(true);
-            }
+    if (isRampage() && engine->state->scriptOnMissionFlag != nullptr) {
+        if (*engine->state->scriptOnMissionFlag && isEnabled()) {
+            setEnabled(false);
+        } else if (*engine->state->scriptOnMissionFlag == 0 && !isEnabled() &&
+                   !isCollected()) {
+            setEnabled(true);
         }
     }
 
