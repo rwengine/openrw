@@ -5625,31 +5625,28 @@ void opcode_01f7(const ScriptArguments& args, const ScriptPlayer player, const S
 }
 
 /**
-    @brief init_rampage %1g% weapon %2d% time %3d% %4d% targets %5o% %6o% %7o% %8o% flag %9d%
+    @brief init_rampage %1g% weapon %2d% time %3d% %4d% targets %5o% %6o% %7o%
+   %8o% flag %9d%
 
     opcode 01f9
     @arg gxtEntry GXT entry
     @arg weaponID Weapon ID
     @arg time Time (ms)
-    @arg arg4 
+    @arg arg4
     @arg model0 Model ID
     @arg model1 Model ID
     @arg model2 Model ID
     @arg model3 Model ID
     @arg arg9 Boolean true/false
 */
-void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptWeaponType weaponID, const ScriptInt time, const ScriptInt arg4, const ScriptModelID model0, const ScriptModelID model1, const ScriptModelID model2, const ScriptModelID model3, const ScriptBoolean arg9) {
-    RW_UNIMPLEMENTED_OPCODE(0x01f9);
-    RW_UNUSED(gxtEntry);
-    RW_UNUSED(weaponID);
-    RW_UNUSED(time);
-    RW_UNUSED(arg4);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(model2);
-    RW_UNUSED(model3);
-    RW_UNUSED(arg9);
-    RW_UNUSED(args);
+void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry,
+                 const ScriptWeaponType weaponID, const ScriptInt time,
+                 const ScriptInt kills, const ScriptModelID model0,
+                 const ScriptModelID model1, const ScriptModelID model2,
+                 const ScriptModelID model3, const ScriptBoolean unused) {
+    RW_UNUSED(unused);
+    args.getState()->rampage.init(gxtEntry, weaponID, time, kills,
+                                  {model0, model1, model2, model3}, false);
 }
 
 /**
@@ -5658,10 +5655,8 @@ void opcode_01f9(const ScriptArguments& args, const ScriptString gxtEntry, const
     opcode 01fa
     @arg arg1 
 */
-void opcode_01fa(const ScriptArguments& args, ScriptInt& arg1) {
-    RW_UNIMPLEMENTED_OPCODE(0x01fa);
-    RW_UNUSED(arg1);
-    RW_UNUSED(args);
+void opcode_01fa(const ScriptArguments& args, ScriptInt& status) {
+    status = args.getState()->rampage.getStatus();
 }
 
 /**
@@ -6022,12 +6017,15 @@ void opcode_0211(const ScriptArguments& args, const ScriptCharacter character, S
 
     opcode 0213
     @arg model Model ID
-    @arg pickup0 
+    @arg pickup0
     @arg coord Coordinates
     @arg pickup1 Pickup
 */
-void opcode_0213(const ScriptArguments& args, const ScriptModel model, const ScriptPickupType pickup0, ScriptVec3 coord, ScriptPickup& pickup1) {
-    pickup1 = args.getWorld()->createPickup(coord, script::getModel(args, model), pickup0);
+void opcode_0213(const ScriptArguments& args, const ScriptModel model,
+                 const ScriptPickupType pickupType, ScriptVec3 coord,
+                 ScriptPickup& pickup) {
+    pickup = args.getWorld()->createPickup(coord, script::getModel(args, model),
+                                           pickupType);
 }
 
 /**
@@ -6042,8 +6040,10 @@ bool opcode_0214(const ScriptArguments& args, const ScriptPickup pickup) {
     if (!pickup) {
         return false;
     }
-    bool collected = pickup->isCollected();
-    pickup->setCollected(false);
+    const bool collected = pickup->isCollected();
+    if (collected) {
+        pickup->setCollected(false);
+    }
     return collected;
 }
 
@@ -6819,8 +6819,7 @@ void opcode_0296(const ScriptArguments& args, const ScriptInt arg1) {
     opcode 0297
 */
 void opcode_0297(const ScriptArguments& args) {
-    RW_UNIMPLEMENTED_OPCODE(0x0297);
-    RW_UNUSED(args);
+    args.getState()->rampage.clearKills();
 }
 
 /**
@@ -6830,11 +6829,9 @@ void opcode_0297(const ScriptArguments& args) {
     @arg model0 Player
     @arg model1 Model ID
 */
-void opcode_0298(const ScriptArguments& args, const ScriptModelID model0, ScriptInt& model1) {
-    RW_UNIMPLEMENTED_OPCODE(0x0298);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(args);
+void opcode_0298(const ScriptArguments& args, const ScriptModelID model,
+                 ScriptInt& kills) {
+    kills = args.getState()->rampage.getKillsForThisModel(model);
 }
 
 /**
@@ -9681,31 +9678,28 @@ bool opcode_0366(const ScriptArguments& args, const ScriptObject object) {
 }
 
 /**
-    @brief init_headshot_rampage %1g% weapon %2d% time %3d% %4d% targets %5o% %6o% %7o% %8o% flag %9d%
+    @brief init_headshot_rampage %1g% weapon %2d% time %3d% %4d% targets %5o%
+   %6o% %7o% %8o% flag %9d%
 
     opcode 0367
     @arg gxtEntry GXT entry
-    @arg arg2 
-    @arg arg3 
-    @arg arg4 
+    @arg arg2
+    @arg arg3
+    @arg arg4
     @arg model0 Model ID
     @arg model1 Model ID
     @arg model2 Model ID
     @arg model3 Model ID
     @arg arg9 Boolean true/false
 */
-void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry, const ScriptWeaponType arg2, const ScriptInt arg3, const ScriptInt arg4, const ScriptModelID model0, const ScriptModelID model1, const ScriptModelID model2, const ScriptModelID model3, const ScriptBoolean arg9) {
-    RW_UNIMPLEMENTED_OPCODE(0x0367);
-    RW_UNUSED(gxtEntry);
-    RW_UNUSED(arg2);
-    RW_UNUSED(arg3);
-    RW_UNUSED(arg4);
-    RW_UNUSED(model0);
-    RW_UNUSED(model1);
-    RW_UNUSED(model2);
-    RW_UNUSED(model3);
-    RW_UNUSED(arg9);
-    RW_UNUSED(args);
+void opcode_0367(const ScriptArguments& args, const ScriptString gxtEntry,
+                 const ScriptWeaponType weaponID, const ScriptInt time,
+                 const ScriptInt kills, const ScriptModelID model0,
+                 const ScriptModelID model1, const ScriptModelID model2,
+                 const ScriptModelID model3, const ScriptBoolean unused) {
+    RW_UNUSED(unused);
+    args.getState()->rampage.init(gxtEntry, weaponID, time, kills,
+                                  {model0, model1, model2, model3}, true);
 }
 
 /**
