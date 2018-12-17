@@ -229,7 +229,7 @@ function(openrw_target_apply_options)
         endif()
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_TARGET STREQUAL "Xcode")
         set_property(
             TARGET "${ORW_TARGET}"
             APPEND
