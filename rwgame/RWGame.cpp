@@ -96,17 +96,17 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
         data.loadTXD(oss.str());
     }
 
-    StateManager::get().enter<LoadingState>(this, [=]() {
+    stateManager.enter<LoadingState>(this, [=]() {
         if (benchFile.has_value()) {
-            StateManager::get().enter<BenchmarkState>(this, *benchFile);
+            stateManager.enter<BenchmarkState>(this, *benchFile);
         } else if (test) {
-            StateManager::get().enter<IngameState>(this, true, "test");
+            stateManager.enter<IngameState>(this, true, "test");
         } else if (newgame) {
-            StateManager::get().enter<IngameState>(this, true);
+            stateManager.enter<IngameState>(this, true);
         } else if (startSave.has_value()) {
-            StateManager::get().enter<IngameState>(this, true, *startSave);
+            stateManager.enter<IngameState>(this, true, *startSave);
         } else {
-            StateManager::get().enter<MenuState>(this);
+            stateManager.enter<MenuState>(this);
         }
     });
 
@@ -370,7 +370,7 @@ int RWGame::run() {
 
     // Loop until we run out of states.
     bool running = true;
-    while (StateManager::currentState() && running) {
+    while (stateManager.currentState() && running) {
         RW_PROFILE_FRAME_BOUNDARY();
         RW_PROFILE_SCOPE("Main Loop");
 
@@ -397,12 +397,12 @@ int RWGame::run() {
         getWindow().swap();
 
         // Make sure the topmost state is the correct state
-        StateManager::get().updateStack();
+        stateManager.updateStack();
     }
 
     window.close();
 
-    StateManager::get().clear();
+    stateManager.clear();
 
     return 0;
 }
@@ -413,7 +413,7 @@ float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
             deltaTime * world->state->basic.timeScale;
 
     while (accumulatedTime >= deltaTime) {
-        if (!StateManager::currentState()) {
+        if (!stateManager.currentState()) {
             break;
         }
 
@@ -423,7 +423,7 @@ float RWGame::tickWorld(const float deltaTime, float accumulatedTime) {
                     deltaTimeWithTimeScale, kMaxPhysicsSubSteps, deltaTime);
         }
 
-        StateManager::get().tick(deltaTimeWithTimeScale);
+        stateManager.tick(deltaTimeWithTimeScale);
 
         tick(deltaTimeWithTimeScale);
 
@@ -466,9 +466,9 @@ bool RWGame::updateInput() {
 
         GameInput::updateGameInputState(&getState()->input[0], event);
 
-        if (StateManager::currentState()) {
+        if (stateManager.currentState()) {
             RW_PROFILE_SCOPE("State");
-            StateManager::currentState()->handleEvent(event);
+            stateManager.currentState()->handleEvent(event);
         }
     }
     return true;
@@ -476,7 +476,7 @@ bool RWGame::updateInput() {
 
 void RWGame::tick(float dt) {
     RW_PROFILE_SCOPE(__func__);
-    State* currState = StateManager::get().states.back().get();
+    State* currState = stateManager.states.back().get();
 
     static float clockAccumulator = 0.f;
     static float scriptTimerAccumulator = 0.f;
@@ -593,8 +593,8 @@ void RWGame::render(float alpha, float time) {
     getRenderer().getRenderer().swap();
 
     // Update the camera
-    if (!StateManager::get().states.empty()) {
-        currentCam = StateManager::get().states.back()->getCamera(alpha);
+    if (!stateManager.states.empty()) {
+        currentCam = stateManager.states.back()->getCamera(alpha);
     }
 
     glm::ivec2 windowSize = getWindow().getSize();
@@ -624,9 +624,9 @@ void RWGame::render(float alpha, float time) {
 
     if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), renderer);
 
-    if (StateManager::currentState()) {
+    if (stateManager.currentState()) {
         RW_PROFILE_SCOPE("state");
-        StateManager::get().draw(renderer);
+        stateManager.draw(renderer);
     }
 }
 

@@ -15,14 +15,14 @@ void MenuState::enterMainMenu() {
 
     Menu menu{
         {{t.text(MenuDefaults::kStartGameId),
-          [=] { StateManager::get().enter<IngameState>(game); }},
+          [=] { game->getStateManager().enter<IngameState>(game); }},
          {t.text(MenuDefaults::kLoadGameId), [=] { enterLoadMenu(); }},
          {t.text(MenuDefaults::kDebugId),
-          [=] { StateManager::get().enter<IngameState>(game, true, "test"); }},
+          [=] { game->getStateManager().enter<IngameState>(game, true, "test"); }},
          {t.text(MenuDefaults::kOptionsId),
           [] { RW_UNIMPLEMENTED("Options Menu"); }},
          {t.text(MenuDefaults::kQuitGameId),
-          [] { StateManager::get().clear(); }}},
+          [=] { game->getStateManager().clear(); }}},
         glm::vec2(200.f, 200.f)};
 
     setNextMenu(std::move(menu));
@@ -43,7 +43,7 @@ void MenuState::enterLoadMenu() {
             auto name = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
             name += save.basicState.saveName;
             auto loadsave = [=] {
-                StateManager::get().enter<IngameState>(game, false);
+                game->getStateManager().enter<IngameState>(game, false);
                 game->loadGame(save.savePath);
             };
             menu.lambda(name, loadsave);

@@ -297,10 +297,10 @@ void IngameState::handleEvent(const SDL_Event& event) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    StateManager::get().enter<PauseState>(game);
+                    game->getStateManager().enter<PauseState>(game);
                     break;
                 case SDLK_m:
-                    StateManager::get().enter<DebugState>(game, _look.position,
+                    game->getStateManager().enter<DebugState>(game, _look.position,
                                                           _look.rotation);
                     break;
                 case SDLK_SPACE:

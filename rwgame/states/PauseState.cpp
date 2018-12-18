@@ -10,7 +10,7 @@ PauseState::PauseState(RWGame* game) : State(game) {
                {t.text(MenuDefaults::kOptionsId),
                 [] { std::cout << "Options" << std::endl; }},
                {t.text(MenuDefaults::kQuitGameId),
-                [] { StateManager::get().clear(); }}},
+                [=] { game->getStateManager().clear(); }}},
               glm::vec2(200.f, 200.f)};
     setNextMenu(menu);
 }

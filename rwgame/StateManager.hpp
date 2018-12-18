@@ -19,11 +19,6 @@
  */
 class StateManager {
 public:
-    static StateManager& get() {
-        static StateManager m;
-        return m;
-    }
-
     std::deque<std::unique_ptr<State>> states;
 
     void clear() {
@@ -63,11 +58,11 @@ public:
         states.back()->draw(r);
     }
 
-    static State* currentState() {
-        if (StateManager::get().states.empty()) {
+    State* currentState() {
+        if (states.empty()) {
             return nullptr;
         }
-        return StateManager::get().states.back().get();
+        return states.back().get();
     }
 
 private:
