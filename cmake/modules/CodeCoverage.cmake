@@ -4,7 +4,7 @@
 
 get_filename_component(_CODECOVERAGE_MODDIR ${CMAKE_CURRENT_LIST_FILE} PATH)
 
-function(codecoverage_enable _DIR _GLOBALREPORT)
+function(codecoverage_enable)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         find_program(GCOV_BIN gcov)
         if(NOT GCOV_BIN)
@@ -104,6 +104,10 @@ function(_coverage_filter_languages _RETURNVAR)
 
     set(FILTERED_FILES)
     foreach(FILE ${ARGN})
+        if(FILE MATCHES "^\\$<")
+            #ignore generator expressions
+            continue()
+        endif()
         get_filename_component(FILE_EXT "${FILE}" EXT)
         string(TOLOWER "${FILE_EXT}" FILE_EXT)
         string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
@@ -118,6 +122,11 @@ endfunction()
 
 function(coverage_add_target _TARGET)
     cmake_parse_arguments(CAT "" "" "EXCEPT" ${ARGN})
+
+    get_target_property(TARGET_TYPE "${_TARGET}" TYPE)
+    if(TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+        return()
+    endif()
 
     get_property(COMPILE_FLAGS TARGET "${_TARGET}" PROPERTY COMPILE_FLAGS)
 
@@ -278,6 +287,7 @@ function(coverage_lcov_capture_target _TARGET)
                 && "${GENINFO_BIN}" --quiet --base-directory
                     "${PROJECT_SOURCE_DIR}" --gcov-tool "${COV_BIN}"
                     --output-filename "${OUTFILE}" --no-external
+                    --rc lcov_branch_coverage=1
                     "${LCOV_DIR}/${RELSOURCE}.gcda"
                 || cp "${INIT_DIR}/${RELSOURCE}.info.init" "${OUTFILE}"
             DEPENDS "${_TARGET}" "${_TARGET}-capture-init" "${LCOV_DIR}/${RELSOURCE}.gcda"
@@ -309,7 +319,8 @@ function(coverage_lcov_capture_target _TARGET)
         COMMAND "${GENHTML_BIN}" --quiet --sort --prefix "${PROJECT_SOURCE_DIR}"
             --baseline-file "${LCOV_DATA_PATH_INIT}/${_TARGET}.info"
             --output-directory "${LCOV_HTML_PATH}/${_TARGET}"
-            --title "${CMAKE_PROJECT_NAME} - target ${_TARGET}"
+            --highlight --legend --show-details --branch-coverage --function-coverage
+            --title "${PROJECT_NAME}" --target "${_TARGET}"
             --demangle-cpp "${OUTFILE}"
         DEPENDS "${_TARGET}-geninfo" "${_TARGET}-capture-init"
         COMMENT "Generating coverage report for target ${_TARGET}"
@@ -380,6 +391,7 @@ function(codecoverage_lcov_capture)
         COMMAND "${GENHTML_BIN}" --quiet --sort
             --baseline-file "${LCOV_DATA_PATH_INIT}/all_targets.info"
             --output-directory "${LCOV_HTML_PATH}/all_targets"
+            --highlight --legend --show-details --branch-coverage --function-coverage
             --title "${CMAKE_PROJECT_NAME}" --prefix "${PROJECT_SOURCE_DIR}"
             --demangle-cpp "${TOTALCAPTURE_FILE}"
         DEPENDS lcov-geninfo-init lcov-geninfo
@@ -401,8 +413,10 @@ function(coverage_lcov_merge_files)
 
     add_custom_command(OUTPUT "${OUTFILE}"
         COMMAND "${LCOV_BIN}" --quiet -a "${OUTFILE}.raw" --output-file "${OUTFILE}"
+            --rc lcov_branch_coverage=1
             --base-directory "${PROJECT_SOURCE_DIR}" ${CLMF_FLAGS}
         COMMAND "${LCOV_BIN}" --quiet -r "${OUTFILE}" ${CLMF_REMOVE_PATTERNS}
+            --rc lcov_branch_coverage=1
             --output-file "${OUTFILE}" ${CLMF_FLAGS}
         DEPENDS "${OUTFILE}.raw"
         COMMENT "Post-processing ${FILE_REL}"
