@@ -4,7 +4,6 @@ add_library(openrw::interface ALIAS rw_interface)
 add_library(rw_checks INTERFACE)
 add_library(openrw::checks ALIAS rw_checks)
 target_link_libraries(rw_interface INTERFACE rw_checks)
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(rw_interface
         INTERFACE
@@ -16,6 +15,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(MSVC_NO_DEBUG_RUNTIME)
+        foreach(LANG C CXX)
+            foreach(CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES} "")
+                string(TOUPPER "${CONFIGURATION_TYPE}" CONFIGURATION_TYPE)
+                set(FLAGS_VAR "CMAKE_${LANG}_FLAGS")
+                if(CONFIGURATION_TYPE)
+                    set(FLAGS_VAR "${FLAGS_VAR}_${CONFIGURATION_TYPE}")
+                endif()
+                string(REPLACE "/MDd" "/MD" "${FLAGS_VAR}" "${${FLAGS_VAR}}")
+                string(REPLACE "/MTd" "/MT" "${FLAGS_VAR}" "${${FLAGS_VAR}}")
+                set("${FLAGS_VAR}" "${${FLAGS_VAR}}" CACHE STRING "${LANG} flags for ${CONFIGURATION_TYPE} configuration type")
+            endforeach()
+        endforeach()
+    endif()
     target_compile_definitions(rw_checks
         INTERFACE
             "_SCL_SECURE_NO_WARNINGS"

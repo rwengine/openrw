@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake
-from conans.errors import ConanException
 
 
 class OpenrwConan(ConanFile):
@@ -13,19 +12,22 @@ class OpenrwConan(ConanFile):
         'test_data': [True, False],
         'viewer': [True, False],
         'tools': [True, False],
+        'profiling': [True, False],
     }
 
-    default_options = (
-        'test_data=False',
-        'viewer=True',
-        'tools=True',
-        'bullet3:shared=False',
-        'sdl2:sdl2main=False',
-    )
+    default_options = {
+        'test_data': False,
+        'viewer': True,
+        'tools': True,
+        'profiling': True,
+        'bullet3:shared': False,
+        'sdl2:sdl2main': False,
+    }
 
     generators = 'cmake',
-    exports_sources = 'CMakeLists.txt', 'cmake_configure.cmake', 'cmake_options.cmake', 'COPYING', \
-                      'cmake/modules/*', 'benchmarks', 'rwlib/*', 'rwengine/*', 'rwgame/*', 'rwviewer/*', 'tests/*'
+    exports_sources = 'CMakeLists.txt', 'cmake_configure.cmake', 'cmake_options.cmake', 'CMakeCPack.cmake', 'COPYING', \
+                      'cmake/modules/*', 'benchmarks', 'rwcore/*', 'rwengine/*', 'rwgame/*', 'rwviewer/*', \
+                      'rwtools/*', 'tests/*', 'external/*'
 
     _rw_dependencies = {
         'game': (
@@ -67,6 +69,7 @@ class OpenrwConan(ConanFile):
             'BUILD_VIEWER': self.options.viewer,
             'BUILD_TOOLS': self.options.tools,
             'TESTS_NODATA': not self.options.test_data,
+            'ENABLE_PROFILING': self.options.profiling,
             'USE_CONAN': True,
             'BOOST_STATIC': not self.options['boost'].shared,
         }

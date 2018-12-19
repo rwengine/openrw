@@ -23,7 +23,7 @@ if(USE_CONAN)
         message(STATUS "Using conan 'cmake' generator")
         include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
     endif()
-    conan_basic_setup(TARGETS)
+    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
     rwdep_wrap_conan_targets()
 else()
