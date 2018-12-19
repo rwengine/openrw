@@ -24,7 +24,7 @@ endfunction()
 
 function(rwdep_wrap_conan_targets)
     rwdep_wrap_conan_target(OpenAL::OpenAL openal)
-    rwdep_wrap_conan_target(bullet::bullet bullet)
+    rwdep_wrap_conan_target(bullet::bullet bullet3)
     rwdep_wrap_conan_target(glm::glm glm)
     rwdep_wrap_conan_target(ffmpeg::ffmpeg ffmpeg)
     rwdep_wrap_conan_target(SDL2::SDL2 sdl2)

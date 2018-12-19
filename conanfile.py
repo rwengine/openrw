@@ -19,7 +19,7 @@ class OpenrwConan(ConanFile):
         'test_data=False',
         'viewer=True',
         'tools=True',
-        'bullet:shared=False',
+        'bullet3:shared=False',
         'sdl2:sdl2main=False',
     )
 
@@ -29,15 +29,15 @@ class OpenrwConan(ConanFile):
 
     _rw_dependencies = {
         'game': (
-            'openal/1.18.2@bincrafters/stable',
-            'bullet/2.87@bincrafters/stable',
+            'openal/1.19.0@bincrafters/stable',
+            'bullet3/2.87@bincrafters/stable',
             'glm/0.9.9.1@g-truc/stable',
-            'ffmpeg/4.0@bincrafters/stable',
-            'sdl2/2.0.8@bincrafters/stable',
-            'boost/1.67.0@conan/stable',
+            'ffmpeg/4.0.2@bincrafters/stable',
+            'sdl2/2.0.9@bincrafters/stable',
+            'boost/1.68.0@conan/stable',
         ),
         'viewer': (
-            'Qt/5.11.1@bincrafters/stable',
+            'qt/5.12.0@bincrafters/stable',
         ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
@@ -46,7 +46,7 @@ class OpenrwConan(ConanFile):
 
     def configure(self):
         if self.options.viewer:
-            self.options['Qt'].opengl = 'desktop'
+            self.options['qt'].opengl = 'desktop'
 
     def requirements(self):
         for dep in self._rw_dependencies['game']:
