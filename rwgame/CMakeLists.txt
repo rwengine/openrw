@@ -1,10 +1,8 @@
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
-set(RWGAME_SOURCES
+add_library(librwgame STATIC
     GitSHA1.h
     "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp"
-
-    main.cpp
 
     RWConfig.inc
     RWConfig.hpp
@@ -46,20 +44,36 @@ set(RWGAME_SOURCES
     states/BenchmarkState.cpp
     )
 
-add_executable(rwgame
-    ${RWGAME_SOURCES}
+openrw_target_apply_options(
+    TARGET librwgame
+    COVERAGE
     )
 
-target_include_directories(rwgame
+set_target_properties(librwgame
+    PROPERTIES
+        OUTPUT_NAME "rwgame"
+        PREFIX "lib"
+    )
+
+target_include_directories(librwgame
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+target_link_libraries(librwgame
+    PUBLIC
+        openrw::interface
+        rwengine
+        Boost::program_options
+        SDL2::SDL2
+    )
+
+add_executable(rwgame
+    main.cpp
     )
 
 target_link_libraries(rwgame
     PRIVATE
-        rwengine
-        Boost::program_options
-        SDL2::SDL2
+        librwgame
     )
 
 openrw_target_apply_options(
