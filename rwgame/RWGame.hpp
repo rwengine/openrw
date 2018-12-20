@@ -3,6 +3,8 @@
 
 #include "GameBase.hpp"
 #include "HUDDrawer.hpp"
+#include "RWConfig.hpp"
+#include "RWImGui.hpp"
 #include "StateManager.hpp"
 #include "game.hpp"
 
@@ -22,6 +24,7 @@
 class RWGame final : public GameBase {
     GameData data;
     GameRenderer renderer;
+    RWImGui imgui;
     DebugDraw debug;
     GameState state;
     HUDDrawer hudDrawer{};

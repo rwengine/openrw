@@ -2,6 +2,7 @@
 
 #include <glm/gtx/norm.hpp>
 
+#include "RWImGui.hpp"
 #include "GameInput.hpp"
 #include "State.hpp"
 #include "StateManager.hpp"
@@ -28,7 +29,6 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
-#include <algorithm>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
@@ -54,7 +54,8 @@ constexpr float kMaxPhysicsSubSteps = 2;
 RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     : GameBase(log, args)
     , data(&log, config.gamedataPath())
-    , renderer(&log, &data) {
+    , renderer(&log, &data)
+    , imgui(*this) {
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
@@ -75,6 +76,8 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
         throw std::runtime_error("Invalid game directory path: " +
                                  config.gamedataPath());
     }
+
+    imgui.init();
 
     data.load();
 
@@ -480,6 +483,9 @@ bool RWGame::updateInput() {
     RW_PROFILE_SCOPE(__func__);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        if (imgui.process_event(event)) {
+            continue;
+        }
         switch (event.type) {
             case SDL_QUIT:
                 return false;
@@ -669,6 +675,8 @@ void RWGame::render(float alpha, float time) {
         RW_PROFILE_SCOPE("state");
         stateManager.draw(renderer);
     }
+
+    imgui.tick();
 }
 
 void RWGame::renderDebugView(float time, ViewCamera &viewCam) {

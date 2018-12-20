@@ -5,8 +5,9 @@
 #include <SDL_video.h>
 
 #include <glm/vec2.hpp>
-
 #include <string>
+#include <tuple>
+#include <SDL.h>
 
 class GameWindow {
     SDL_Window* window = nullptr;
@@ -29,6 +30,10 @@ public:
 
     bool isOpen() const {
         return !!window;
+    }
+
+    std::tuple<SDL_Window *, SDL_GLContext> getSDLContext() {
+        return std::make_tuple(window, glcontext);
     }
 };
 
