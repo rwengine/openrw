@@ -33,13 +33,13 @@ static void jumpCharacter(RWGame* game, CharacterObject* player,
     }
 }
 
-std::optional<Menu> DebugState::createDebugMenu() {
+Menu DebugState::createDebugMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
     }
 
-    auto menu = Menu::create(
+    Menu menu{
         {{"Jump to Debug Camera",
           [=] {
               jumpCharacter(game, player,
@@ -47,12 +47,12 @@ std::optional<Menu> DebugState::createDebugMenu() {
                                 _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f),
                             false);
           }},
-         {"-Map", [=] { this->enterMenu(createMapMenu()); }},
-         {"-Vehicles", [=] { this->enterMenu(createVehicleMenu()); }},
-         {"-AI", [=] { this->enterMenu(createAIMenu()); }},
-         {"-Weapons", [=] { this->enterMenu(createWeaponMenu()); }},
-         {"-Weather", [=] { this->enterMenu(createWeatherMenu()); }},
-         {"-Missions", [=] { this->enterMenu(createMissionsMenu()); }},
+         {"-Map", [=] { setNextMenu(createMapMenu()); }},
+         {"-Vehicles", [=] { setNextMenu(createVehicleMenu()); }},
+         {"-AI", [=] { setNextMenu(createAIMenu()); }},
+         {"-Weapons", [=] { setNextMenu(createWeaponMenu()); }},
+         {"-Weather", [=] { setNextMenu(createWeatherMenu()); }},
+         {"-Missions", [=] { setNextMenu(createMissionsMenu()); }},
          {"Set Super Jump", [=] { player->setJumpSpeed(20.f); }},
          {"Set Normal Jump",
           [=] { player->setJumpSpeed(CharacterObject::DefaultJumpSpeed); }},
@@ -60,14 +60,14 @@ std::optional<Menu> DebugState::createDebugMenu() {
          {"Full Armour", [=] { player->getCurrentState().armour = 100.f; }},
          {"Cull Here",
           [=] { game->getRenderer().setCullOverride(true, _debugCam); }}},
-        kDebugFont, kDebugEntryHeight);
-
-    menu->offset = kDebugMenuOffset;
+        kDebugMenuOffset,
+        kDebugFont,
+        kDebugEntryHeight};
 
     // Optional block if the player is in a vehicle
     auto cv = player->getCurrentVehicle();
     if (cv) {
-        menu->lambda("Flip vehicle", [=] {
+        menu.lambda("Flip vehicle", [=] {
             cv->setRotation(cv->getRotation() *
                             glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
         });
@@ -76,14 +76,14 @@ std::optional<Menu> DebugState::createDebugMenu() {
     return menu;
 }
 
-std::optional<Menu> DebugState::createMapMenu() {
+Menu DebugState::createMapMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
     }
 
-    auto menu = Menu::create(
-        {{"Back", [=] { enterMenu(createDebugMenu()); }},
+    Menu menu{
+        {{"Back", [=] { setNextMenu(createDebugMenu()); }},
          {"Jump to Docks",
           [=] {
               jumpCharacter(game, player, glm::vec3(1390.f, -837.f, 100.f));
@@ -108,24 +108,24 @@ std::optional<Menu> DebugState::createMapMenu() {
           }},
          {"Unsolid garage doors",
           [=] {
-              static constexpr std::array<char const*, 33> garageDoorModels{{
-                  "8ballsuburbandoor",  "amcogaragedoor",
-                  "bankjobdoor",        "bombdoor",
-                  "crushercrush",       "crushertop",
-                  "door2_garage",       "door3_garage",
-                  "door4_garage",       "door_bombshop",
-                  "door_col_compnd_01", "door_col_compnd_02",
-                  "door_col_compnd_03", "door_col_compnd_04",
-                  "door_col_compnd_05", "door_jmsgrage",
-                  "door_sfehousegrge",  "double_garage_dr",
-                  "impex_door",         "impexpsubgrgdoor",
-                  "ind_plyrwoor",       "ind_slidedoor",
-                  "jamesgrge_kb",       "leveldoor2",
-                  "oddjgaragdoor",      "plysve_gragedoor",
-                  "SalvGarage",         "shedgaragedoor",
-                  "Sub_sprayshopdoor",  "towergaragedoor1",
-                  "towergaragedoor2",   "towergaragedoor3",
-                  "vheistlocdoor"}};
+              static constexpr std::array<char const*, 33> garageDoorModels{
+                  {"8ballsuburbandoor",  "amcogaragedoor",
+                   "bankjobdoor",        "bombdoor",
+                   "crushercrush",       "crushertop",
+                   "door2_garage",       "door3_garage",
+                   "door4_garage",       "door_bombshop",
+                   "door_col_compnd_01", "door_col_compnd_02",
+                   "door_col_compnd_03", "door_col_compnd_04",
+                   "door_col_compnd_05", "door_jmsgrage",
+                   "door_sfehousegrge",  "double_garage_dr",
+                   "impex_door",         "impexpsubgrgdoor",
+                   "ind_plyrwoor",       "ind_slidedoor",
+                   "jamesgrge_kb",       "leveldoor2",
+                   "oddjgaragdoor",      "plysve_gragedoor",
+                   "SalvGarage",         "shedgaragedoor",
+                   "Sub_sprayshopdoor",  "towergaragedoor1",
+                   "towergaragedoor2",   "towergaragedoor3",
+                   "vheistlocdoor"}};
 
               auto gw = game->getWorld();
               for (auto& [id, instancePtr] : gw->instancePool.objects) {
@@ -138,15 +138,20 @@ std::optional<Menu> DebugState::createMapMenu() {
                   }
               }
           }}},
-        kDebugFont, kDebugEntryHeight);
+        kDebugMenuOffset,
+        kDebugFont,
+        kDebugEntryHeight};
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
-std::optional<Menu> DebugState::createVehicleMenu() {
-    auto menu = Menu::create({{"Back", [=] { enterMenu(createDebugMenu()); }}},
-                             kDebugFont, kDebugEntryHeight);
+Menu DebugState::createVehicleMenu() {
+    Menu menu{
+        {{"Back", [=] { setNextMenu(createDebugMenu()); }}},
+        kDebugMenuOffset,
+        kDebugFont,
+        kDebugEntryHeight,
+    };
 
     static constexpr std::array<std::tuple<char const*, unsigned int>, 19>
         kVehicleTypes{{{"Landstalker", 90},
@@ -170,17 +175,17 @@ std::optional<Menu> DebugState::createVehicleMenu() {
                        {"Infernus", 101}}};
 
     for (const auto& [name, id] : kVehicleTypes) {
-        menu->lambda(name, [this, id = id] { spawnVehicle(id); });
+        menu.lambda(name, [this, id = id] { spawnVehicle(id); });
     }
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
-std::optional<Menu> DebugState::createAIMenu() {
-    auto menu =
-        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
-                     kDebugFont, kDebugEntryHeight);
+Menu DebugState::createAIMenu() {
+    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
+              kDebugMenuOffset,
+              kDebugFont,
+              kDebugEntryHeight};
 
     static constexpr std::array<std::tuple<char const*, unsigned int>, 6>
         kPedTypes{{
@@ -193,10 +198,10 @@ std::optional<Menu> DebugState::createAIMenu() {
         }};
 
     for (const auto& [name, id] : kPedTypes) {
-        menu->lambda(name, [this, id = id] { spawnFollower(id); });
+        menu.lambda(name, [this, id = id] { spawnFollower(id); });
     }
 
-    menu->lambda("Kill All Peds", [=] {
+    menu.lambda("Kill All Peds", [=] {
         for (auto& [id, pedestrianPtr] :
              game->getWorld()->pedestrianPool.objects) {
             if (pedestrianPtr->getLifetime() == GameObject::PlayerLifetime) {
@@ -208,44 +213,44 @@ std::optional<Menu> DebugState::createAIMenu() {
         }
     });
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
-std::optional<Menu> DebugState::createWeaponMenu() {
-    auto menu =
-        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
-                     kDebugFont, kDebugEntryHeight);
+Menu DebugState::createWeaponMenu() {
+    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
+              kDebugMenuOffset,
+              kDebugFont,
+              kDebugEntryHeight};
 
     for (int i = 1; i < kMaxInventorySlots; ++i) {
         auto& name = getWorld()->data->weaponData[i].name;
-        menu->lambda(name, [=] { giveItem(i); });
+        menu.lambda(name, [=] { giveItem(i); });
     }
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
-std::optional<Menu> DebugState::createWeatherMenu() {
-    auto menu =
-        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
-                     kDebugFont, kDebugEntryHeight);
+Menu DebugState::createWeatherMenu() {
+    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
+              kDebugMenuOffset,
+              kDebugFont,
+              kDebugEntryHeight};
 
     static constexpr std::array<char const*, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
-        menu->lambda(w[i],
+        menu.lambda(w[i],
                      [=] { game->getWorld()->state->basic.nextWeather = static_cast<std::uint16_t>(i); });
     }
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
-std::optional<Menu> DebugState::createMissionsMenu() {
-    auto menu =
-        Menu::create({{"Back", [=] { this->enterMenu(createDebugMenu()); }}},
-                     kDebugFont, kDebugEntryHeightMissions);
+Menu DebugState::createMissionsMenu() {
+    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
+              kDebugMenuOffset,
+              kDebugFont,
+              kDebugEntryHeightMissions};
 
     static constexpr std::array<char const*, 80> w{{
         "Intro Movie",
@@ -331,7 +336,7 @@ std::optional<Menu> DebugState::createMissionsMenu() {
     }};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
-        menu->lambda(w[i], [=] {
+        menu.lambda(w[i], [=] {
             ScriptMachine* vm = game->getScriptVM();
 
             if (vm) {
@@ -356,13 +361,12 @@ std::optional<Menu> DebugState::createMissionsMenu() {
         });
     }
 
-    menu->offset = kDebugMenuOffset;
     return menu;
 }
 
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
     : State(game), _invertedY(game->getConfig().getInputInvertY()) {
-    this->enterMenu(createDebugMenu());
+    this->setNextMenu(createDebugMenu());
 
     _debugCam.position = vp;
     _debugCam.rotation = vd;
