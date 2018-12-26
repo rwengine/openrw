@@ -16,39 +16,25 @@ class StateManager;
 
 class State {
 public:
-    std::optional<Menu> menu;
-    std::optional<Menu> nextMenu;
-
     RWGame* game;
 
-    State(RWGame* game) : game(game) {
-    }
+    State(RWGame* game);
 
     virtual void enter() = 0;
     virtual void exit() = 0;
 
     virtual void tick(float dt) = 0;
 
-    virtual void draw(GameRenderer* r) {
-        if (getCurrentMenu()) {
-            getCurrentMenu()->draw(r);
-        }
-    }
+    virtual void draw(GameRenderer* r);
 
     virtual ~State() = default;
 
     template<typename T>
-    void enterMenu(T&& menu) {
+    void setNextMenu(T&& menu) {
         nextMenu = std::forward<T>(menu);
     }
 
-    Menu* getCurrentMenu() {
-        if (nextMenu) {
-            menu = std::move(nextMenu);
-            nextMenu = std::nullopt;
-        }
-        return &*menu;
-    }
+    std::optional<Menu>& getCurrentMenu();
 
     virtual void handleEvent(const SDL_Event& e);
 
@@ -63,17 +49,18 @@ public:
     GameWorld* getWorld() const;
     GameWindow& getWindow();
 
-    bool hasExited() const {
-        return hasexited_;
-    }
+    bool hasExited() const;
 
 private:
-    bool hasexited_ = false;
+    bool hasExited_ = false;
+
+    void refreshMenu();
 
 protected:
-    void done() {
-        hasexited_ = true;
-    }
+    std::optional<Menu> menu;
+    std::optional<Menu> nextMenu;
+
+    void done();
 };
 
 #endif

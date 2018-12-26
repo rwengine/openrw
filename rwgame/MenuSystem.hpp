@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <string>
@@ -71,18 +72,14 @@ public:
         }
     };
 
-    Menu(std::vector<MenuEntry> initial, int font = MenuDefaults::kFont,
+    Menu(std::initializer_list<MenuEntry>&& initial,
+         const glm::vec2& offset = glm::vec2(), int font = MenuDefaults::kFont,
          float size = 30.f)
-        : activeEntry(-1), font(font), size(size), entries(std::move(initial)) {
-    }
-
-    /**
-     * @brief creates a menu from the given menu items
-     * @return optional of menu with the items
-     */
-    static std::optional<Menu> create(std::vector<MenuEntry> items,
-                       int font = MenuDefaults::kFont, float size = 30.f) {
-        return std::make_optional<Menu>(std::move(items), font, size);
+        : activeEntry(-1)
+        , offset(offset)
+        , font(font)
+        , size(size)
+        , entries(initial) {
     }
 
     Menu& lambda(const GameString& n, std::function<void()> callback) {
@@ -99,8 +96,6 @@ public:
      * Active Entry index
      */
     int activeEntry;
-
-    glm::vec2 offset{};
 
     void draw(GameRenderer* r) {
         glm::vec2 basis(offset);
@@ -159,6 +154,7 @@ public:
     }
 
 private:
+    glm::vec2 offset{};
     int font;
     float size;
     std::vector<MenuEntry> entries;

@@ -13,7 +13,7 @@ MenuState::MenuState(RWGame* game) : State(game) {
 void MenuState::enterMainMenu() {
     auto& t = game->getGameData().texts;
 
-    auto menu = Menu::create(
+    Menu menu{
         {{t.text(MenuDefaults::kStartGameId),
           [=] { StateManager::get().enter<IngameState>(game); }},
          {t.text(MenuDefaults::kLoadGameId), [=] { enterLoadMenu(); }},
@@ -22,14 +22,14 @@ void MenuState::enterMainMenu() {
          {t.text(MenuDefaults::kOptionsId),
           [] { RW_UNIMPLEMENTED("Options Menu"); }},
          {t.text(MenuDefaults::kQuitGameId),
-          [] { StateManager::get().clear(); }}});
-    menu->offset = glm::vec2(200.f, 200.f);
+          [] { StateManager::get().clear(); }}},
+        glm::vec2(200.f, 200.f)};
 
-    enterMenu(menu);
+    setNextMenu(std::move(menu));
 }
 
 void MenuState::enterLoadMenu() {
-    auto menu = Menu::create({{"BACK", [=] { enterMainMenu(); }}});
+    Menu menu{{{"BACK", [=] { enterMainMenu(); }}}, glm::vec2(20.f, 30.f)};
 
     auto saves = SaveGame::getAllSaveGameInfo();
     for (SaveGameInfo& save : saves) {
@@ -46,14 +46,13 @@ void MenuState::enterLoadMenu() {
                 StateManager::get().enter<IngameState>(game, false);
                 game->loadGame(save.savePath);
             };
-            menu->lambda(name, loadsave);
+            menu.lambda(name, loadsave);
         } else {
-            menu->lambda("CORRUPT", [=] {});
+            menu.lambda("CORRUPT", [=] {});
         }
     }
-    menu->offset = glm::vec2(20.f, 30.f);
 
-    enterMenu(menu);
+    setNextMenu(std::move(menu));
 }
 
 void MenuState::enter() {

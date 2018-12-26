@@ -11,13 +11,13 @@ class DebugState final : public State {
     bool _sonicMode = false;
     bool _invertedY;
 
-    std::optional<Menu> createDebugMenu();
-    std::optional<Menu> createMapMenu();
-    std::optional<Menu> createVehicleMenu();
-    std::optional<Menu> createAIMenu();
-    std::optional<Menu> createWeaponMenu();
-    std::optional<Menu> createWeatherMenu();
-    std::optional<Menu> createMissionsMenu();
+    Menu createDebugMenu();
+    Menu createMapMenu();
+    Menu createVehicleMenu();
+    Menu createAIMenu();
+    Menu createWeaponMenu();
+    Menu createWeatherMenu();
+    Menu createMissionsMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
