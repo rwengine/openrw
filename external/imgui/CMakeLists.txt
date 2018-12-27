@@ -21,6 +21,11 @@ target_compile_definitions(imgui
         IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/rw_imconfig.h"
 )
 
+target_link_libraries(imgui
+    PUBLIC
+        openrw::checks
+)
+
 add_library(imgui::core ALIAS imgui)
 
 openrw_target_apply_options(
