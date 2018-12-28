@@ -15,7 +15,8 @@
 #include "engine/GameWorld.hpp"
 #include "objects/GameObject.hpp"
 
-const char* MapVertexShader = R"(
+namespace {
+constexpr char const* MapVertexShader = R"(
 #version 330
 
 layout(location = 0) in vec2 position;
@@ -25,14 +26,13 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 model;
 
-void main()
-{
-	gl_Position = proj * view * model * vec4(position, 0.0, 1.0);
-	// UI space is top to bottom, so flip Y.
-	TexCoord = position + vec2( 0.5 );
+void main() {
+    gl_Position = proj * view * model * vec4(position, 0.0, 1.0);
+    // UI space is top to bottom, so flip Y.
+    TexCoord = position + vec2( 0.5 );
 })";
 
-const char* MapFragmentShader = R"(
+constexpr char const* MapFragmentShader = R"(
 #version 330
 
 in vec2 TexCoord;
@@ -40,11 +40,11 @@ uniform vec4 colour;
 uniform sampler2D spriteTexture;
 out vec4 outColour;
 
-void main()
-{
-	vec4 c = texture(spriteTexture, TexCoord*0.99);
-	outColour = vec4(colour.rgb + c.rgb, colour.a * c.a);
+void main() {
+    vec4 c = texture(spriteTexture, TexCoord*0.99);
+    outColour = vec4(colour.rgb + c.rgb, colour.a * c.a);
 })";
+}  // namespace
 
 MapRenderer::MapRenderer(Renderer &renderer, GameData* _data)
     : data(_data), renderer(renderer) {
