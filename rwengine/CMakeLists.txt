@@ -110,7 +110,6 @@ set(RWENGINE_SOURCES
     src/render/DebugDraw.hpp
     src/render/GameRenderer.cpp
     src/render/GameRenderer.hpp
-    src/render/GameShaders.cpp
     src/render/GameShaders.hpp
     src/render/MapRenderer.cpp
     src/render/MapRenderer.hpp
