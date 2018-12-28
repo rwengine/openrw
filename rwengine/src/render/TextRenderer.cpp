@@ -20,19 +20,7 @@ unsigned charToIndex(std::uint16_t g) {
     return g - 32;
 }
 
-static glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize, const glm::u8vec2 &glyphOffset) {
-    constexpr unsigned TEXTURE_COLUMNS = 16;
-    const float x = static_cast<float>(index % TEXTURE_COLUMNS);
-    const float y = static_cast<float>(index / TEXTURE_COLUMNS);
-    // Add offset to avoid 'leakage' between adjacent glyphs
-    float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
-    float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
-    float p = ((x + 1) * glyphOffset.x - 1.5f) / textureSize.x;
-    float q = ((y + 1) * glyphOffset.y - 1.5f) / textureSize.y;
-    return glm::vec4(s, t, p, q);
-}
-
-const char* TextVertexShader = R"(
+constexpr char const *TextVertexShader = R"(
 #version 330
 
 layout(location = 0) in vec2 position;
@@ -44,14 +32,13 @@ out vec3 Colour;
 uniform mat4 proj;
 uniform vec2 alignment;
 
-void main()
-{
+void main() {
     gl_Position = proj * vec4(alignment + position, 0.0, 1.0);
     TexCoord = texcoord;
     Colour = colour;
 })";
 
-const char* TextFragmentShader = R"(
+constexpr char const *TextFragmentShader = R"(
 #version 330
 
 in vec2 TexCoord;
@@ -60,64 +47,73 @@ uniform vec4 colour;
 uniform sampler2D fontTexture;
 out vec4 outColour;
 
-void main()
-{
+void main() {
     float a = texture(fontTexture, TexCoord).a;
     outColour = vec4(Colour, a);
 })";
-
 
 constexpr size_t GLYPHS_NB = 193;
 using FontWidthLut = std::array<std::uint8_t, GLYPHS_NB>;
 
 constexpr std::array<std::uint8_t, 193> fontWidthsPager = {{
-     3,  3,  6,  8,  6, 10,  8,  3,  5,  5,  7,  0,  3,  7,  3,  0, //  1
-     6,  4,  6,  6,  7,  6,  6,  6,  6,  6,  3,  0,  0,  0,  0,  6, //  2
-     0,  6,  6,  6,  6,  6,  6,  6,  6,  3,  6,  6,  5,  8,  7,  6, //  3
-     6,  7,  6,  6,  5,  6,  6,  8,  6,  7,  7,  0,  0,  0,  0,  0, //  4
-     0,  6,  6,  6,  6,  6,  5,  6,  6,  3,  4,  6,  3,  9,  6,  6, //  5
-     6,  6,  5,  6,  5,  6,  6,  8,  6,  6,  5,  0,  0,  0,  0,  0, //  6
-     6,  6,  6,  6,  8,  6,  6,  6,  6,  6,  5,  5,  6,  6,  6,  6, //  7
-     6,  6,  6,  6,  6,  6,  7,  6,  6,  6,  6,  9,  6,  6,  6,  6, //  8
-     6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  6,  7,  6,  6, //  9
-     3,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 10
-     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 11
-     8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, // 12
-     8,
+    3, 3, 6, 8, 6, 10, 8, 3, 5, 5, 7, 0, 3, 7, 3, 0,  //  1
+    6, 4, 6, 6, 7, 6,  6, 6, 6, 6, 3, 0, 0, 0, 0, 6,  //  2
+    0, 6, 6, 6, 6, 6,  6, 6, 6, 3, 6, 6, 5, 8, 7, 6,  //  3
+    6, 7, 6, 6, 5, 6,  6, 8, 6, 7, 7, 0, 0, 0, 0, 0,  //  4
+    0, 6, 6, 6, 6, 6,  5, 6, 6, 3, 4, 6, 3, 9, 6, 6,  //  5
+    6, 6, 5, 6, 5, 6,  6, 8, 6, 6, 5, 0, 0, 0, 0, 0,  //  6
+    6, 6, 6, 6, 8, 6,  6, 6, 6, 6, 5, 5, 6, 6, 6, 6,  //  7
+    6, 6, 6, 6, 6, 6,  7, 6, 6, 6, 6, 9, 6, 6, 6, 6,  //  8
+    6, 6, 6, 6, 6, 6,  6, 6, 6, 6, 6, 6, 6, 7, 6, 6,  //  9
+    3, 8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  // 10
+    8, 8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  // 11
+    8, 8, 8, 8, 8, 8,  8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  // 12
+    8,
 }};
 
 constexpr std::array<std::uint8_t, 193> fontWidthsPriceDown = {{
-    11, 13, 30, 27, 20, 24, 22, 12, 14, 14,  0, 26,  9, 14,  9, 26, //  1
-    20, 19, 20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20, //  2
-    27, 20, 20, 20, 20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20, //  3
-    20, 20, 20, 20, 22, 20, 22, 32, 20, 20, 19, 27, 20, 32, 23, 13, //  4
-    27, 21, 21, 21, 21, 21, 18, 22, 21, 12, 20, 22, 17, 30, 22, 21, //  5
-    21, 21, 21, 22, 21, 21, 21, 29, 19, 23, 21, 28, 25,  0,  0,  0, //  6
-    20, 20, 20, 20, 30, 20, 20, 20, 20, 20, 10, 10, 10, 10, 21, 21, //  7
-    21, 21, 20, 20, 20, 20, 21, 21, 21, 21, 21, 32, 23, 21, 21, 21, //  8
-    21, 12, 12, 12, 12, 21, 21, 21, 21, 21, 21, 21, 21, 20, 20, 20, //  9
-    13, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 10
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 11
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
+    11, 13, 30, 27, 20, 24, 22, 12, 14, 14, 0,  26, 9,  14, 9,  26,  //  1
+    20, 19, 20, 20, 22, 20, 20, 19, 20, 20, 13, 29, 24, 29, 24, 20,  //  2
+    27, 20, 20, 20, 20, 20, 17, 20, 20, 10, 20, 20, 15, 30, 20, 20,  //  3
+    20, 20, 20, 20, 22, 20, 22, 32, 20, 20, 19, 27, 20, 32, 23, 13,  //  4
+    27, 21, 21, 21, 21, 21, 18, 22, 21, 12, 20, 22, 17, 30, 22, 21,  //  5
+    21, 21, 21, 22, 21, 21, 21, 29, 19, 23, 21, 28, 25, 0,  0,  0,   //  6
+    20, 20, 20, 20, 30, 20, 20, 20, 20, 20, 10, 10, 10, 10, 21, 21,  //  7
+    21, 21, 20, 20, 20, 20, 21, 21, 21, 21, 21, 32, 23, 21, 21, 21,  //  8
+    21, 12, 12, 12, 12, 21, 21, 21, 21, 21, 21, 21, 21, 20, 20, 20,  //  9
+    13, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,  // 10
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,  // 11
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,  // 12
     16,
 }};
 
 constexpr std::array<std::uint8_t, 193> fontWidthsArial = {{
-    27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29, //  1
-    47, 33, 45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39, //  2
-    61, 53, 51, 47, 49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51, //  3
-    47, 51, 49, 49, 45, 51, 49, 59, 59, 47, 51, 31, 27, 31, 29, 27, //  4
-    19, 43, 45, 43, 43, 45, 27, 45, 43, 21, 33, 45, 23, 65, 43, 43, //  5
-    47, 45, 33, 41, 29, 43, 41, 61, 51, 43, 43, 67, 53, 67, 67, 71, //  6
-    53, 53, 53, 53, 65, 49, 45, 45, 45, 45, 23, 23, 23, 23, 51, 51, //  7
-    51, 51, 51, 51, 51, 51, 51, 43, 43, 43, 43, 65, 43, 45, 45, 45, //  8
-    45, 21, 21, 21, 21, 43, 43, 43, 43, 43, 43, 43, 43, 53, 43, 39, //  9
-    25, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 10
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19, // 11
-    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, // 12
+    27, 25, 55, 43, 47, 65, 53, 19, 29, 31, 21, 45, 23, 35, 27, 29,  //  1
+    47, 33, 45, 43, 49, 47, 47, 41, 47, 45, 25, 23, 53, 43, 53, 39,  //  2
+    61, 53, 51, 47, 49, 45, 43, 49, 53, 23, 41, 53, 45, 59, 53, 51,  //  3
+    47, 51, 49, 49, 45, 51, 49, 59, 59, 47, 51, 31, 27, 31, 29, 27,  //  4
+    19, 43, 45, 43, 43, 45, 27, 45, 43, 21, 33, 45, 23, 65, 43, 43,  //  5
+    47, 45, 33, 41, 29, 43, 41, 61, 51, 43, 43, 67, 53, 67, 67, 71,  //  6
+    53, 53, 53, 53, 65, 49, 45, 45, 45, 45, 23, 23, 23, 23, 51, 51,  //  7
+    51, 51, 51, 51, 51, 51, 51, 43, 43, 43, 43, 65, 43, 45, 45, 45,  //  8
+    45, 21, 21, 21, 21, 43, 43, 43, 43, 43, 43, 43, 43, 53, 43, 39,  //  9
+    25, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,  // 10
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 11, 19, 19,  // 11
+    19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,  // 12
     19,
 }};
 
+glm::vec4 indexToTexCoord(size_t index, const glm::u32vec2 &textureSize,
+                          const glm::u8vec2 &glyphOffset) {
+    constexpr unsigned TEXTURE_COLUMNS = 16;
+    const float x = static_cast<float>(index % TEXTURE_COLUMNS);
+    const float y = static_cast<float>(index / TEXTURE_COLUMNS);
+    // Add offset to avoid 'leakage' between adjacent glyphs
+    float s = (x * glyphOffset.x + 0.5f) / textureSize.x;
+    float t = (y * glyphOffset.y + 0.5f) / textureSize.y;
+    float p = ((x + 1) * glyphOffset.x - 1.5f) / textureSize.x;
+    float q = ((y + 1) * glyphOffset.y - 1.5f) / textureSize.y;
+    return glm::vec4(s, t, p, q);
 }
 
 struct TextVertex {
@@ -126,9 +122,7 @@ struct TextVertex {
     glm::vec3 colour;
 
     TextVertex(glm::vec2 _position, glm::vec2 _texcoord, glm::vec3 _colour)
-        : position(_position)
-        , texcoord(_texcoord)
-        , colour(_colour) {
+        : position(_position), texcoord(_texcoord), colour(_colour) {
     }
 
     TextVertex() = default;
@@ -141,10 +135,11 @@ struct TextVertex {
         };
     }
 };
+}  // namespace
 
 TextRenderer::TextRenderer(GameRenderer &renderer) : renderer(renderer) {
     textShader = renderer.getRenderer().createShader(TextVertexShader,
-                                                       TextFragmentShader);
+                                                     TextFragmentShader);
 }
 
 void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
