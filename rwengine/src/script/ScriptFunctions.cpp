@@ -4,7 +4,8 @@
 #include "script/SCMFile.hpp"
 #include "script/ScriptFunctions.hpp"
 
-static const char* sprite_names[] = {
+namespace {
+constexpr char const* sprite_names[] = {
     "",  // 0
     "radar_asuka",
     "radar_bomb",
@@ -27,6 +28,7 @@ static const char* sprite_names[] = {
     "radar_tony",
     "radar_weapon",
 };
+}  // namespace
 
 const char* script::getBlipSprite(ScriptRadarSprite sprite) {
     return sprite_names[sprite];
