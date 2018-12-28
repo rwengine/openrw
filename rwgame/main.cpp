@@ -35,7 +35,7 @@ int main(int argc, const char* argv[]) {
         // Catching other types (out_of_range, bad_alloc) would just make
         // debugging them more difficult.
 
-        const char* kErrorTitle = "Fatal Error";
+        static constexpr char const* kErrorTitle = "Fatal Error";
 
         logger.error("exception", ex.what());
 
