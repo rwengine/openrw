@@ -1,11 +1,13 @@
 #include "test_Globals.hpp"
 
-#include <GameConfig.hpp>
+#include <RWConfig.hpp>
 
 #if RW_TEST_WITH_DATA
 std::string Global::getGamePath() {
-    GameConfig config;
-    config.loadFile(GameConfig::getDefaultConfigPath() / "openrw.ini");
-    return config.getGameDataPath().string(); //FIXME: use path
+    rwfs::path configPath = RWConfigParser::getDefaultConfigPath() / "openrw.ini";
+    RWConfigParser cfgParser;
+    auto [cfgLayer, parseResult] = cfgParser.loadFile(configPath);
+    BOOST_REQUIRE(parseResult.isValid());
+    return *cfgLayer.gamedataPath;
 }
 #endif

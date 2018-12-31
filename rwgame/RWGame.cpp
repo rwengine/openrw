@@ -37,26 +37,29 @@ constexpr float kMaxPhysicsSubSteps = 2;
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
-RWGame::RWGame(Logger& log, int argc, char* argv[])
-    : GameBase(log, argc, argv)
-    , data(&log, config.getGameDataPath())
+RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
+    : GameBase(log, args)
+    , data(&log, config.gamedataPath())
     , renderer(&log, &data) {
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
-    bool newgame = options.count("newgame");
-    bool test = options.count("test");
-    std::string startSave(
-        options.count("load") ? options["load"].as<std::string>() : "");
-    std::string benchFile(options.count("benchmark")
-                              ? options["benchmark"].as<std::string>()
-                              : "");
+    bool newgame = false;
+    bool test = false;
+    std::optional<std::string> startSave;
+    std::optional<std::string> benchFile;
+    if (args.has_value()) {
+        newgame = args->newGame;
+        test = args->test;
+        startSave = args->loadGamePath;
+        benchFile = args->benchmarkPath;
+    }
 
-    log.info("Game", "Game directory: " + config.getGameDataPath().string());
+    log.info("Game", "Game directory: " + config.gamedataPath());
 
-    if (!GameData::isValidGameDirectory(config.getGameDataPath())) {
+    if (!GameData::isValidGameDirectory(config.gamedataPath())) {
         throw std::runtime_error("Invalid game directory path: " +
-                                 config.getGameDataPath().string());
+                                 config.gamedataPath());
     }
 
     data.load();
@@ -71,18 +74,18 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
     renderer.text.setFontTexture(FONT_ARIAL, "font2");
 
-    hudDrawer.applyHUDScale(config.getHUDScale());
-    renderer.map.scaleHUD(config.getHUDScale());
+    hudDrawer.applyHUDScale(config.hudScale());
+    renderer.map.scaleHUD(config.hudScale());
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
                        btIDebugDraw::DBG_DrawConstraintLimits);
     debug.setShaderProgram(renderer.worldProg.get());
 
-    data.loadDynamicObjects((config.getGameDataPath() / "data/object.dat")
+    data.loadDynamicObjects((rwfs::path{config.gamedataPath()} / "data/object.dat")
                                 .string());  // FIXME: use path
 
-    data.loadGXT("text/" + config.getGameLanguage() + ".gxt");
+    data.loadGXT("text/" + config.gameLanguage() + ".gxt");
 
     getRenderer().water.setWaterTable(data.waterHeights, 48, data.realWater,
                                       128 * 128);
@@ -94,14 +97,14 @@ RWGame::RWGame(Logger& log, int argc, char* argv[])
     }
 
     StateManager::get().enter<LoadingState>(this, [=]() {
-        if (!benchFile.empty()) {
-            StateManager::get().enter<BenchmarkState>(this, benchFile);
+        if (benchFile.has_value()) {
+            StateManager::get().enter<BenchmarkState>(this, *benchFile);
         } else if (test) {
             StateManager::get().enter<IngameState>(this, true, "test");
         } else if (newgame) {
             StateManager::get().enter<IngameState>(this, true);
-        } else if (!startSave.empty()) {
-            StateManager::get().enter<IngameState>(this, true, startSave);
+        } else if (startSave.has_value()) {
+            StateManager::get().enter<IngameState>(this, true, *startSave);
         } else {
             StateManager::get().enter<MenuState>(this);
         }

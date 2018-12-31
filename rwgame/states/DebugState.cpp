@@ -365,7 +365,7 @@ Menu DebugState::createMissionsMenu() {
 }
 
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
-    : State(game), _invertedY(game->getConfig().getInputInvertY()) {
+    : State(game), _invertedY(game->getConfig().invertY()) {
     this->setNextMenu(createDebugMenu());
 
     _debugCam.position = vp;
