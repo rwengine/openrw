@@ -688,9 +688,31 @@ bool Activities::UseItem::update(CharacterObject *character,
             character->playCycle(shootcycle);
         }
     } else if (weapon->fireType == WeaponData::MELEE) {
-        RW_CHECK(weapon->fireType != WeaponData::MELEE,
-                 "Melee attacks not implemented");
-        return true;
+        /// @todo second attack animation for on-ground targets
+        const auto attackAnimation = shootcycle;
+
+        if (character->getCurrentCycle() != attackAnimation) {
+            character->playCycle(attackAnimation);
+        }
+
+        auto fireTime = weapon->animFirePoint / 100.f;
+        auto loopStart = weapon->animLoopStart / 100.f;
+        auto currentTime = animator->getAnimationTime(AnimIndexAction);
+
+        if (currentTime >= fireTime && !fired) {
+            /// @todo weapon hit here
+            fired = true;
+        }
+
+        if (animator->isCompleted(AnimIndexAction)) {
+            if (character->getCurrentState().primaryActive) {
+                animator->setAnimationTime(AnimIndexAction, loopStart);
+                fired = false;
+            }
+            else {
+                return true;
+            }
+        }
     } else {
         RW_ERROR("Unrecognized fireType: " << weapon->fireType);
         return true;
