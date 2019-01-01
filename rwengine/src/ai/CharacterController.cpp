@@ -700,7 +700,7 @@ bool Activities::UseItem::update(CharacterObject *character,
         auto currentTime = animator->getAnimationTime(AnimIndexAction);
 
         if (currentTime >= fireTime && !fired) {
-            /// @todo weapon hit here
+            Weapon::meleeHit(weapon, character);
             fired = true;
         }
 

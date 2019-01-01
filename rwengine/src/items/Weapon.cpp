@@ -22,7 +22,7 @@ void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     auto fireOrigin = glm::vec3(handMatrix[3]);
     float dmg = static_cast<float>(weapon->damage);
 
-    owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon});
+    owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon, owner});
 }
 
 void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
@@ -48,4 +48,15 @@ void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
     auto& pool = owner->engine->getTypeObjectPool(ptr);
     pool.insert(std::move(projectile));
     owner->engine->allObjects.push_back(ptr);
+}
+
+void Weapon::meleeHit(WeaponData* weapon, CharacterObject* character) {
+    const auto center = character->getPosition() + character->getRotation()
+                                                   * weapon->fireOffset;
+    auto e = character->engine;
+    e->doWeaponScan({
+                        static_cast<float>(weapon->damage),
+                        center, weapon->meleeRadius, weapon,
+                        character
+                    });
 }

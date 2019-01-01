@@ -23,6 +23,8 @@
 #include "ai/PlayerController.hpp"
 #include "ai/TrafficDirector.hpp"
 
+#include "dynamics/HitTest.hpp"
+
 #include "data/CutsceneData.hpp"
 #include "data/InstanceData.hpp"
 
@@ -566,12 +568,22 @@ void GameWorld::destroyEffect(VisualFX& effect) {
 }
 
 void GameWorld::doWeaponScan(const WeaponScan& scan) {
-    RW_CHECK(scan.type != WeaponScan::RADIUS,
-             "Radius scans not implemented yet");
-
     if (scan.type == WeaponScan::RADIUS) {
-        // TODO
-        // Requires custom ConvexResultCallback
+        HitTest test {*dynamicsWorld};
+        const auto result = test.sphereTest(scan.center, scan.radius);
+
+        for(const auto& target : result) {
+            if (!scan.doesDamage(target.object)) {
+                continue;
+            }
+
+            GameObject::DamageInfo di;
+            di.damageSource = scan.center;
+            di.type = GameObject::DamageInfo::Melee;
+            di.hitpoints = scan.damage;
+            target.object->takeDamage(di);
+        }
+
     } else if (scan.type == WeaponScan::HITSCAN) {
         btVector3 from(scan.center.x, scan.center.y, scan.center.z),
             to(scan.end.x, scan.end.y, scan.end.z);

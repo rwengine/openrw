@@ -164,7 +164,7 @@ public:
     }
 
     struct DamageInfo {
-        enum DamageType { Explosion, Burning, Bullet, Physics };
+        enum DamageType { Explosion, Burning, Bullet, Physics, Melee };
 
         /**
          * World position of damage
