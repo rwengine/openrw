@@ -9,6 +9,10 @@
 #include "objects/CharacterObject.hpp"
 #include "objects/ProjectileObject.hpp"
 
+bool WeaponScan::doesDamage(GameObject* target) const {
+    return target != source;
+}
+
 void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     auto handFrame = owner->getClump()->findFrame("srhand");
     glm::mat4 handMatrix = handFrame->getWorldTransform();

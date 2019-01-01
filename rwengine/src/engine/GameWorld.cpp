@@ -25,7 +25,8 @@
 
 #include "data/CutsceneData.hpp"
 #include "data/InstanceData.hpp"
-#include "data/WeaponData.hpp"
+
+#include "items/Weapon.hpp"
 
 #include "loaders/LoaderCutsceneDAT.hpp"
 #include "loaders/LoaderIFP.hpp"
