@@ -58,6 +58,7 @@ namespace Weapon {
 void fireProjectile(WeaponData* weapon, CharacterObject* character, float force);
 void fireHitscan(WeaponData *weapon, CharacterObject* character);
 void meleeHit(WeaponData *weapon, CharacterObject* character);
+bool targetOnGround(WeaponData *weapon, CharacterObject* character);
 }
 
 #endif

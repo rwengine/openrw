@@ -26,6 +26,7 @@
 #include "loaders/LoaderIFP.hpp"
 #include "objects/VehicleObject.hpp"
 
+
 #ifndef BT_BULLET_VERSION
 #error Unable to find BT_BULLET_VERSION
 #endif
@@ -466,6 +467,12 @@ void CharacterObject::Die() {
 void CharacterObject::SetDead() {
     currentState.isDying = false;
     currentState.isDead = true;
+}
+
+bool CharacterObject::isKnockedDown() const {
+    /// @todo husho says: State in [knocked down, getting up, dying, dead]
+    auto a = animator->getAnimation(AnimIndexMovement);
+    return a == animations->animation(AnimCycle::KnockOutShotFront0);
 }
 
 bool CharacterObject::enterVehicle(VehicleObject* vehicle, size_t seat) {
