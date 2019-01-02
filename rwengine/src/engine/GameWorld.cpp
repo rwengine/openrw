@@ -92,6 +92,7 @@ GameWorld::GameWorld(Logger* log, GameData* dat)
         _overlappingPairCallback.get());
     gContactProcessedCallback = ContactProcessedCallback;
     dynamicsWorld->setInternalTickCallback(PhysicsTickCallback, this);
+    dynamicsWorld->setForceUpdateAllAabbs(false);
 }
 
 GameWorld::~GameWorld() {
