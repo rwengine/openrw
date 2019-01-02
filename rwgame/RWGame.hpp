@@ -5,6 +5,7 @@
 #include "GameBase.hpp"
 #include "HUDDrawer.hpp"
 #include "RWConfig.hpp"
+#include "StateManager.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
@@ -41,6 +42,8 @@ class RWGame final : public GameBase {
     std::unique_ptr<ScriptMachine> vm;
     SCMFile script;
 
+    StateManager stateManager;
+
     bool inFocus = true;
     ViewCamera currentCam;
 
@@ -67,6 +70,10 @@ public:
      * Initalizes a new game
      */
     void newGame();
+
+    StateManager& getStateManager() {
+        return stateManager;
+    }
 
     GameState* getState() {
         return &state;
