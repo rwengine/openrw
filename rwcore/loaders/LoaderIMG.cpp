@@ -5,7 +5,7 @@
 
 #include "rw/debug.hpp"
 
-bool LoaderIMG::load(const rwfs::path& filepath) {
+bool LoaderIMG::load(const std::filesystem::path& filepath) {
     auto dirPath = filepath;
     dirPath.replace_extension(".dir");
 

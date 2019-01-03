@@ -4,10 +4,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-
+#include <filesystem>
 #include <iostream>
-
-#include <rw/filesystem.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -1359,13 +1357,13 @@ std::vector<SaveGameInfo> SaveGame::getAllSaveGameInfo() {
     }
     const char gameDir[] = "GTA3 User Files";
 
-    rwfs::path gamePath(homedir);
+    std::filesystem::path gamePath(homedir);
     gamePath /= gameDir;
 
-    if (!rwfs::exists(gamePath) || !rwfs::is_directory(gamePath)) return {};
+    if (!std::filesystem::exists(gamePath) || !std::filesystem::is_directory(gamePath)) return {};
 
     std::vector<SaveGameInfo> infos;
-    for (const rwfs::path& save_path : rwfs::directory_iterator(gamePath)) {
+    for (const std::filesystem::path& save_path : std::filesystem::directory_iterator(gamePath)) {
         if (save_path.extension() == ".b") {
             infos.emplace_back(
                 SaveGameInfo{save_path.string(), false, BasicState()});

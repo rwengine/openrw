@@ -1,6 +1,5 @@
 #include <fonts/FontMapGta3.hpp>
 #include <fonts/Unicode.hpp>
-#include <rw/filesystem.hpp>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -12,6 +11,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -182,7 +182,7 @@ public:
         }
     }
 
-    void write(const rwfs::path &bitmap_path, const rwfs::path &advance_path) {
+    void write(const std::filesystem::path &bitmap_path, const std::filesystem::path &advance_path) {
         QImageWriter writer(QString::fromStdString(bitmap_path.string()));
         writer.write(m_texture);
         std::ofstream ofs(advance_path.string(), std::ios_base::out);
@@ -219,8 +219,8 @@ int main(int argc, const char *argv[])
         ("ratio,r",  po::value<float>()->value_name("ASPECTRATIO"), "Aspect ratio")
         ("map,m",  po::value<unsigned>()->value_name("MAP")->required(), "Font map to use")
         ("font,f", po::value<std::vector<std::string>>()->value_name("PATH")->required(), "Path to fonts")
-        ("texture,t", po::value<rwfs::path>()->value_name("PATH")->required(), "Output texture")
-        ("advance,a", po::value<rwfs::path>()->value_name("PATH")->required(), "Output advances")
+        ("texture,t", po::value<std::filesystem::path>()->value_name("PATH")->required(), "Output texture")
+        ("advance,a", po::value<std::filesystem::path>()->value_name("PATH")->required(), "Output advances")
     ;
 
     po::variables_map vm;
@@ -267,6 +267,6 @@ int main(int argc, const char *argv[])
 
     texBuffer.create_font_map(fontmaps_gta3_font[fontmap_index], FontTextureBuffer::RenderMode::NORMAL);
 
-    texBuffer.write(vm["texture"].as<rwfs::path>(), vm["advance"].as<rwfs::path>());
+    texBuffer.write(vm["texture"].as<std::filesystem::path>(), vm["advance"].as<std::filesystem::path>());
     return 0;
 }

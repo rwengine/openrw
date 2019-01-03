@@ -22,14 +22,14 @@ std::string FileIndex::normalizeFilePath(const std::string &filePath) {
     return oss.str();
 }
 
-void FileIndex::indexTree(const rwfs::path &path) {
+void FileIndex::indexTree(const std::filesystem::path &path) {
     // Remove the trailing "/" or "/." from base_path. Boost 1.66 and c++17 have different lexically_relative behavior.
-    rwfs::path basePath = (path / ".").lexically_normal();
+    std::filesystem::path basePath = (path / ".").lexically_normal();
     basePath = basePath.parent_path();
 
-    for (const rwfs::path &path :
-         rwfs::recursive_directory_iterator(basePath)) {
-        if (!rwfs::is_regular_file(path)) {
+    for (const std::filesystem::path &path :
+         std::filesystem::recursive_directory_iterator(basePath)) {
+        if (!std::filesystem::is_regular_file(path)) {
             continue;
         }
         auto relPath = path.lexically_relative(basePath);
@@ -46,7 +46,7 @@ const FileIndex::IndexedData *FileIndex::getIndexedDataAt(const std::string &fil
     return &indexedData_.at(normPath);
 }
 
-rwfs::path FileIndex::findFilePath(const std::string &filePath) const {
+std::filesystem::path FileIndex::findFilePath(const std::string &filePath) const {
     return getIndexedDataAt(filePath)->path;
 }
 
@@ -73,7 +73,7 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
 }
 
 void FileIndex::indexArchive(const std::string &archive) {
-    rwfs::path path = findFilePath(archive);
+    std::filesystem::path path = findFilePath(archive);
 
     LoaderIMG img;
     if (!img.load(path.string())) {
@@ -112,7 +112,7 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
         }
 
         LoaderIMGFile file;
-        auto filename = rwfs::path(indexedData.assetData).filename().string();
+        auto filename = std::filesystem::path(indexedData.assetData).filename().string();
         if (img.findAssetInfo(filename, file)) {
             length = file.size * 2048;
             data = img.loadToMemory(filename);

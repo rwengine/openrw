@@ -99,7 +99,7 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
                        btIDebugDraw::DBG_DrawConstraintLimits);
     debug.setShaderProgram(renderer.worldProg.get());
 
-    data.loadDynamicObjects((rwfs::path{config.gamedataPath()} / "data/object.dat")
+    data.loadDynamicObjects((std::filesystem::path{config.gamedataPath()} / "data/object.dat")
                                 .string());  // FIXME: use path
 
     data.loadGXT("text/" + config.gameLanguage() + ".gxt");

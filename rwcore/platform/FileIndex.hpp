@@ -1,9 +1,9 @@
 #ifndef _LIBRW_FILEINDEX_HPP_
 #define _LIBRW_FILEINDEX_HPP_
 
-#include "rw/filesystem.hpp"
 #include "rw/forward.hpp"
 
+#include <filesystem>
 #include <unordered_map>
 
 class FileIndex {
@@ -22,7 +22,7 @@ public:
      * This is used to build the mapping of lower-case file paths to the
      * true case on the file system for platforms where this is an issue.
      */
-    void indexTree(const rwfs::path &path);
+    void indexTree(const std::filesystem::path &path);
 
     /**
      * @brief findFilePath finds disk path for a game data file
@@ -30,7 +30,7 @@ public:
      * @return The file path as it exists on disk
      * @throws if this FileIndex has not indexed the path
      */
-    rwfs::path findFilePath(const std::string &filePath) const;
+    std::filesystem::path findFilePath(const std::string &filePath) const;
 
     /**
      * @brief openFileRaw Opens a raw file on the disk

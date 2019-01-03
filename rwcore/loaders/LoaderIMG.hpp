@@ -3,10 +3,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <vector>
-
-#include <rw/filesystem.hpp>
 
 /// \brief Points to one file within the archive
 class LoaderIMGFile {
@@ -36,7 +35,7 @@ public:
     /// Load the structure of the archive
     /// Omit the extension in filename so both .dir and .img are loaded when
     /// appropriate
-    bool load(const rwfs::path& filename);
+    bool load(const std::filesystem::path& filename);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file
@@ -60,7 +59,7 @@ public:
 
 private:
     Version m_version = GTAIIIVC;  ///< Version of this IMG archive
-    rwfs::path m_archive;  ///< Path to the archive being used (no extension)
+    std::filesystem::path m_archive;  ///< Path to the archive being used (no extension)
 
     std::vector<LoaderIMGFile> m_assets;  ///< Asset info of the archive
 };

@@ -1,14 +1,13 @@
 #include "TextViewer.hpp"
 
 #include <render/TextRenderer.hpp>
-#include <rw/filesystem.hpp>
 
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 
-#include <boost/filesystem.hpp>
 #include <fonts/GameTexts.hpp>
 #include <loaders/LoaderGXT.hpp>
 #include <models/TextModel.hpp>
@@ -221,10 +220,10 @@ void TextViewer::worldChanged() {
 }
 
 std::vector<std::string> TextViewer::getFontTextureNames() {
-    const auto &gameDataPath = rwfs::path(world()->data->getDataPath());
-    rwfs::path textPath;
-    for (const rwfs::path &p : rwfs::directory_iterator(gameDataPath)) {
-        if (!rwfs::is_directory(p)) {
+    const auto &gameDataPath = std::filesystem::path(world()->data->getDataPath());
+    std::filesystem::path textPath;
+    for (const std::filesystem::path &p : std::filesystem::directory_iterator(gameDataPath)) {
+        if (!std::filesystem::is_directory(p)) {
             continue;
         }
         std::string filename = p.filename().string();
@@ -238,7 +237,7 @@ std::vector<std::string> TextViewer::getFontTextureNames() {
         throw std::runtime_error("text directory not found in gamedata path");
     }
     std::vector<std::string> names;
-    for (const rwfs::path &p : rwfs::directory_iterator(textPath)) {
+    for (const std::filesystem::path &p : std::filesystem::directory_iterator(textPath)) {
 //        auto langName = p.lexically_relative(gameDataPath).string();
         auto langName = p.filename().string();
         std::transform(langName.begin(), langName.end(), langName.begin(), ::tolower);

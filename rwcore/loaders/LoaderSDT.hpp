@@ -1,10 +1,9 @@
 #ifndef _LIBRW_LOADERSDT_HPP_
 #define _LIBRW_LOADERSDT_HPP_
 
-#include <rw/filesystem.hpp>
-
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -62,7 +61,7 @@ public:
     ~LoaderSDT() = default;
 
     /// Load the structure of the archive
-    bool load(const rwfs::path& sdtPath, const rwfs::path& rawPath);
+    bool load(const std::filesystem::path& sdtPath, const std::filesystem::path& rawPath);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file

@@ -33,7 +33,7 @@
 #include "loaders/LoaderGXT.hpp"
 #include "platform/FileIndex.hpp"
 
-GameData::GameData(Logger* log, const rwfs::path& path)
+GameData::GameData(Logger* log, const std::filesystem::path& path)
     : datpath(path), logger(log) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
@@ -759,9 +759,9 @@ float GameData::getWaveHeightAt(const glm::vec3& ws) const {
            WATER_HEIGHT;
 }
 
-bool GameData::isValidGameDirectory(const rwfs::path& path) {
-    rwfs::error_code ec;
-    if (!rwfs::is_directory(path, ec)) {
+bool GameData::isValidGameDirectory(const std::filesystem::path& path) {
+    std::error_code ec;
+    if (!std::filesystem::is_directory(path, ec)) {
         std::cerr << "first test failed\n";
         return false;
     }
