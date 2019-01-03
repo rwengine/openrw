@@ -33,7 +33,7 @@
 #include "loaders/LoaderGXT.hpp"
 #include "platform/FileIndex.hpp"
 
-GameData::GameData(Logger* log, const rwfs::path& path)
+GameData::GameData(Logger* log, const std::filesystem::path& path)
     : datpath(path), logger(log) {
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
@@ -766,8 +766,8 @@ float GameData::getWaveHeightAt(const glm::vec3& ws) const {
 }
 
 bool GameData::isValidGameDirectory() const {
-    rwfs::error_code ec;
-    if (!rwfs::is_directory(datpath, ec)) {
+    std::error_code ec;
+    if (!std::filesystem::is_directory(datpath, ec)) {
         return false;
     }
 

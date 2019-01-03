@@ -37,7 +37,7 @@ RWConfig GameBase::buildConfig(const std::optional<RWArgConfigLayer> &args) {
     auto defaultLayer = buildDefaultConfigLayer();
     config.setLayer(RWConfig::LAYER_DEFAULT, defaultLayer);
 
-    rwfs::path configPath;
+    std::filesystem::path configPath;
     if (args.has_value() && args->configPath.has_value()) {
         configPath = *args->configPath;
     } else {

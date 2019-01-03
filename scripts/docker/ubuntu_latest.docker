@@ -15,8 +15,8 @@ RUN apt-get update \
         curl \
         libavcodec-dev \
         libavformat-dev \
-        libboost-filesystem-dev \
         libboost-program-options-dev \
+        libboost-system-dev \
         libbullet-dev \
         libglm-dev \
         libopenal-dev \

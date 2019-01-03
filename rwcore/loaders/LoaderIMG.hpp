@@ -2,12 +2,11 @@
 #define _LIBRW_LOADERIMG_HPP_
 
 #include <cstddef>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <memory>
 #include <fstream>
-
-#include <rw/filesystem.hpp>
 
 /// \brief Points to one file within the archive
 class LoaderIMGFile {
@@ -40,7 +39,7 @@ public:
     /// Load the structure of the archive
     /// Omit the extension in filename so both .dir and .img are loaded when
     /// appropriate
-    bool load(const rwfs::path& filepath);
+    bool load(const std::filesystem::path& filepath);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file
@@ -72,7 +71,7 @@ public:
 
 private:
     Version m_version = GTAIIIVC;  ///< Version of this IMG archive
-    rwfs::path m_archive;  ///< Path to the archive being used (no extension)
+    std::filesystem::path m_archive;  ///< Path to the archive being used (no extension)
     std::ifstream m_archive_stream; ///< File stream for archive
 
     std::vector<LoaderIMGFile> m_assets; ///< Asset info of the archive

@@ -22,7 +22,7 @@ void to_lowercase_inplace(char* name) {
 
 }
 
-bool LoaderIMG::load(const rwfs::path& filepath) {
+bool LoaderIMG::load(const std::filesystem::path& filepath) {
     assert(m_archive.empty());
     m_archive = filepath;
 

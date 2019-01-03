@@ -7,7 +7,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <rw/filesystem.hpp>
 #include <loaders/LoaderSDT.hpp>
 
 #include <string>

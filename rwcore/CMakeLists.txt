@@ -11,7 +11,6 @@ add_library(rwcore
 
     rw/abort.cpp
     rw/casts.hpp
-    rw/filesystem.hpp
     rw/forward.hpp
     rw/types.hpp
     rw/debug.hpp

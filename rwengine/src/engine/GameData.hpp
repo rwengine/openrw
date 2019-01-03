@@ -43,7 +43,7 @@ class SCMFile;
  */
 class GameData {
 private:
-    rwfs::path datpath;
+    std::filesystem::path datpath;
     std::string splash;
     std::string currenttextureslot;
 
@@ -55,7 +55,7 @@ public:
      * ctor
      * @param path Path to the root of the game data.
      */
-    GameData(Logger* log, const rwfs::path& path);
+    GameData(Logger* log, const std::filesystem::path& path);
     ~GameData() = default;
 
     GameWorld* engine = nullptr;
@@ -70,7 +70,7 @@ public:
     /**
      * Returns the game data path
      */
-    const rwfs::path& getDataPath() const {
+    const std::filesystem::path& getDataPath() const {
         return datpath;
     }
 
