@@ -638,6 +638,20 @@ BOOST_AUTO_TEST_CASE(test_argParser_int) {
     BOOST_CHECK_EQUAL(*optLayer->width, width);
 }
 
+BOOST_AUTO_TEST_CASE(test_argParser_incomplete_optional) {
+    RWArgumentParser argParser;
+    const char *args[] = {"", "--hel"};
+    auto optLayer = argParser.parseArguments(2, args);
+    BOOST_CHECK(!optLayer.has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_argParser_case_sensitive) {
+    RWArgumentParser argParser;
+    const char *args[] = {"", "--HELP"};
+    auto optLayer = argParser.parseArguments(2, args);
+    BOOST_CHECK(!optLayer.has_value());
+}
+
 BOOST_AUTO_TEST_CASE(test_argParser_int_invalid) {
     RWArgumentParser argParser;
 
@@ -646,6 +660,43 @@ BOOST_AUTO_TEST_CASE(test_argParser_int_invalid) {
     auto optLayer = argParser.parseArguments(3, args);
 
     BOOST_CHECK(!optLayer.has_value());
+}
+
+BOOST_AUTO_TEST_CASE(test_argParser_bool_newgame) {
+    RWArgumentParser argParser;
+    {
+        const char *args[] = {""};
+        auto optLayer = argParser.parseArguments(1, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_CHECK(!optLayer->newGame);
+    }
+    {
+        const char *args[] = {"", "-n"};
+        auto optLayer = argParser.parseArguments(2, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_CHECK(optLayer->newGame);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(test_argParser_bool_invert_y) {
+    RWArgumentParser argParser;
+    {
+        const char *args[] = {""};
+        auto optLayer = argParser.parseArguments(1, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_CHECK(!optLayer->invertY.has_value());
+    }
+    {
+        const char *args[] = {"", "--invert_y"};
+        auto optLayer = argParser.parseArguments(2, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_REQUIRE(optLayer->invertY.has_value());
+        BOOST_CHECK(*optLayer->invertY);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_rwconfig_initial) {
