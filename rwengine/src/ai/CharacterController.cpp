@@ -19,6 +19,7 @@
 #include <LinearMath/btScalar.h>
 
 #include <rw/debug.hpp>
+#include <dynamics/HitTest.hpp>
 
 #include "data/WeaponData.hpp"
 #include "engine/Animator.hpp"
@@ -193,91 +194,25 @@ void CharacterController::steerTo(const glm::vec3 &target) {
     vehicle->setSteeringAngle(steeringAngle, true);  
 }
 
-// @todo replace this by raytest/raycast logic
-bool CharacterController::checkForObstacles()
-{
+bool CharacterController::checkForObstacles() {
     // We can't drive without a vehicle
-    VehicleObject* vehicle = character->getCurrentVehicle();
+    VehicleObject *vehicle = character->getCurrentVehicle();
     if (vehicle == nullptr) {
         return false;
     }
 
-    // The minimal distance we test for objects
-    static constexpr float minColDist = 20.f;
+    HitTest test{*vehicle->engine->dynamicsWorld};
 
-    // Try to stop before pedestrians
-    for (const auto &obj : character->engine->pedestrianPool.objects) {
-        // Verify that the character isn't the driver and is walking
-        if (obj.second.get() != character &&
-            static_cast<CharacterObject *>(obj.second.get())->getCurrentVehicle() ==
-                nullptr) {
-            // Only check characters that are near our vehicle
-            if (glm::distance(vehicle->getPosition(),
-                              obj.second->getPosition()) <= minColDist) {
-                // Check if the character is in front of us and in our way
-                if (vehicle->isInFront(obj.second->getPosition()) > -3.f &&
-                    vehicle->isInFront(obj.second->getPosition()) < 10.f &&
-                    glm::abs(vehicle->isOnSide(obj.second->getPosition())) <
-                        3.f) {
-                    return true;
-                }
-            }
-        }
-    }
+    auto[center, halfSize] = vehicle->obstacleCheckVolume();
+    const auto rotation = vehicle->getRotation();
+    center = vehicle->getPosition() + rotation * center;
+    auto results = test.boxTest(center, halfSize, vehicle->getRotation());
 
-    // Brake when a car is in front of us and change lanes when possible
-    for (const auto &obj : character->engine->vehiclePool.objects) {
-        // Verify that the vehicle isn't our vehicle
-        if (obj.second.get() != vehicle) {
-            // Only check vehicles that are near our vehicle
-            if (glm::distance(vehicle->getPosition(),
-                              obj.second->getPosition()) <= minColDist) {
-                // Check if the vehicle is in front of us and in our way
-                if (vehicle->isInFront(obj.second->getPosition()) > 0.f &&
-                    vehicle->isInFront(obj.second->getPosition()) < 10.f &&
-                    glm::abs(vehicle->isOnSide(obj.second->getPosition())) <
-                        2.5f) {
-                    // Check if the road has more than one lane
-                    // @todo we don't know the direction of the road, so for
-                    // now, choose the bigger value
-                    int maxLanes =
-                        targetNode->rightLanes > targetNode->leftLanes
-                            ? targetNode->rightLanes
-                            : targetNode->leftLanes;
-                    if (maxLanes > 1) {
-                        // Change the lane, firstly check if there is an
-                        // occupant
-                        if (static_cast<VehicleObject *>(obj.second.get())
-                                ->getDriver() != nullptr) {
-                            // @todo for now we don't know the lane where the
-                            // player is currently driving so just slow down, in
-                            // the future calculate the lane
-                            if (static_cast<VehicleObject *>(obj.second.get())
-                                    ->getDriver()
-                                    ->isPlayer()) {
-                                return true;
-                            } else {
-                                int avoidLane =
-                                    static_cast<VehicleObject *>(obj.second.get())
-                                        ->getDriver()
-                                        ->controller->getLane();
-
-                                // @todo for now just two lanes
-                                if (avoidLane == 1)
-                                    character->controller->setLane(2);
-                                else
-                                    character->controller->setLane(1);
-                            }
-                        }
-                    } else {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
+    return any_of(results.begin(), results.end(),
+                  [&](const auto &hit) {
+                      return !(hit.object == vehicle ||
+                               hit.body->isStaticObject());
+                  });
 }
 
 bool Activities::DriveTo::update(CharacterObject *character,
@@ -384,12 +319,16 @@ bool Activities::DriveTo::update(CharacterObject *character,
     }
 
     // Check whether a pedestrian or vehicle is in our way
-    if (controller->checkForObstacles() == true) {
+    if (controller->checkForObstacles()) {
         currentSpeed = 0.f;
     }
 
+    if (std::fabs(currentSpeed) < 0.1f) {
+        vehicle->setHandbraking(true);
+        vehicle->setThrottle(0.f);
+    }
     // Is the vehicle slower than it should be
-    if (vehicle->getVelocity() < currentSpeed) {
+    else if (vehicle->getVelocity() < currentSpeed) {
         vehicle->setHandbraking(false);
 
         // The vehicle is driving backwards, accelerate

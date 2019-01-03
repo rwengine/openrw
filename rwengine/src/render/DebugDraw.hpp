@@ -30,6 +30,12 @@ public:
 
     void drawLine(const btVector3 &from, const btVector3 &to,
                   const btVector3 &color) override;
+    void drawLine(const glm::vec3 &from, const glm::vec3 &to,
+                  const glm::vec3 &color) {
+        drawLine(btVector3{from.x, from.y, from.z},
+                 btVector3{to.x, to.y, to.z},
+                 btVector3{color.r, color.g, color.b});
+    }
     void drawContactPoint(const btVector3 &pointOnB, const btVector3 &normalOnB,
                           btScalar distance, int lifeTime,
                           const btVector3 &color) override;

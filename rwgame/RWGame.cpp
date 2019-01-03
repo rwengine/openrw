@@ -24,6 +24,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <algorithm>
 
 namespace {
 static constexpr std::array<
@@ -775,17 +776,49 @@ void RWGame::renderDebugPaths(float time) {
     for (auto& p : world->pedestrianPool.objects) {
         auto v = static_cast<CharacterObject*>(p.second.get());
 
-        static const btVector3 color(1.f, 1.f, 0.f);
+        static const glm::vec3 color(1.f, 1.f, 0.f);
 
-        if (v->controller->targetNode && v->getCurrentVehicle()) {
-            const glm::vec3 pos1 = v->getPosition();
-            const glm::vec3 pos2 = v->controller->targetNode->position;
+        if (auto vehicle = v->getCurrentVehicle(); vehicle)
+        {
+            if (v->controller->targetNode) {
+                debug.drawLine(v->getPosition(), v->controller->targetNode->position, color);
+            }
 
-            btVector3 position1(pos1.x, pos1.y, pos1.z);
-            btVector3 position2(pos2.x, pos2.y, pos2.z);
+            auto [center, halfSize] = vehicle->obstacleCheckVolume();
+            std::array<glm::vec3, 8> corners { {
+                    glm::vec3{- halfSize.x, - halfSize.y, - halfSize.z},
+                    glm::vec3{+ halfSize.x, - halfSize.y, - halfSize.z},
+                    glm::vec3{- halfSize.x, - halfSize.y, + halfSize.z},
+                    glm::vec3{+ halfSize.x, - halfSize.y, + halfSize.z},
+                    glm::vec3{- halfSize.x, + halfSize.y, - halfSize.z},
+                    glm::vec3{+ halfSize.x, + halfSize.y, - halfSize.z},
+                    glm::vec3{- halfSize.x, + halfSize.y, + halfSize.z},
+                    glm::vec3{+ halfSize.x, + halfSize.y, + halfSize.z},
+                }
+            };
+            const auto iRotation = (vehicle->getRotation());
+            const auto rCenter = iRotation * center;
+            std::transform(corners.begin(), corners.end(), corners.begin(),
+                           [&](const auto& p) -> glm::vec3 {
+                               return vehicle->getPosition() + rCenter + iRotation * p;
+                           });
 
-            debug.drawLine(position1, position2, color);
-    }
+            static const glm::vec3 color2(1.f, 0.f, 0.f);
+            debug.drawLine(corners[0], corners[1], color2);
+            debug.drawLine(corners[0], corners[2], color2);
+            debug.drawLine(corners[3], corners[1], color2);
+            debug.drawLine(corners[3], corners[2], color2);
+
+            debug.drawLine(corners[0], corners[4], color2);
+            debug.drawLine(corners[1], corners[5], color2);
+            debug.drawLine(corners[2], corners[6], color2);
+            debug.drawLine(corners[3], corners[7], color2);
+
+            debug.drawLine(corners[4], corners[5], color2);
+            debug.drawLine(corners[4], corners[6], color2);
+            debug.drawLine(corners[7], corners[5], color2);
+            debug.drawLine(corners[7], corners[6], color2);
+        }
     }
 
     debug.flush(renderer);
