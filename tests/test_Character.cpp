@@ -129,9 +129,11 @@ BOOST_AUTO_TEST_CASE(test_death) {
         BOOST_CHECK_EQUAL(character->getCurrentState().health, 100.f);
         BOOST_CHECK(character->isAlive());
 
-        GameObject::DamageInfo dmg;
-        dmg.type = GameObject::DamageInfo::Bullet;
-        dmg.hitpoints = character->getCurrentState().health + 1.f;
+        GameObject::DamageInfo dmg {
+            GameObject::DamageInfo::DamageType::Bullet,
+            {}, {},
+            character->getCurrentState().health + 1.f
+        };
 
         // Do some damage
         BOOST_CHECK(character->takeDamage(dmg));
