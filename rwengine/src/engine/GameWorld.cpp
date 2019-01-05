@@ -568,7 +568,7 @@ void GameWorld::destroyEffect(VisualFX& effect) {
 }
 
 void GameWorld::doWeaponScan(const WeaponScan& scan) {
-    if (scan.type == WeaponScan::RADIUS) {
+    if (scan.type == ScanType::Radius) {
         HitTest test {*dynamicsWorld};
         const auto result = test.sphereTest(scan.center, scan.radius);
 
@@ -584,7 +584,7 @@ void GameWorld::doWeaponScan(const WeaponScan& scan) {
             target.object->takeDamage(di);
         }
 
-    } else if (scan.type == WeaponScan::HITSCAN) {
+    } else if (scan.type == ScanType::HitScan) {
         btVector3 from(scan.center.x, scan.center.y, scan.center.z),
             to(scan.end.x, scan.end.y, scan.end.z);
         glm::vec3 hitEnd = scan.end;

@@ -5,16 +5,20 @@
 #include <objects/ProjectileObject.hpp>
 #include "test_Globals.hpp"
 
+auto& operator<<(std::ostream& s, const ScanType& type) {
+    return s << static_cast<int>(type);
+}
+
 BOOST_AUTO_TEST_SUITE(WeaponTests)
 
 BOOST_AUTO_TEST_CASE(radius_ctor_creates_radius_scan) {
     WeaponScan scan{10.f, {1.f, 1.f, 1.f}, 5.f};
-    BOOST_CHECK_EQUAL(scan.type, WeaponScan::RADIUS);
+    BOOST_CHECK_EQUAL(scan.type, ScanType::Radius);
 }
 
 BOOST_AUTO_TEST_CASE(hitscan_ctor_creates_radius_scan) {
     WeaponScan scan{10.f, {1.f, 1.f, 1.f}, {0.f, 0.f, 0.f}};
-    BOOST_CHECK_EQUAL(scan.type, WeaponScan::HITSCAN);
+    BOOST_CHECK_EQUAL(scan.type, ScanType::HitScan);
 }
 
 struct WeaponScanFixture {

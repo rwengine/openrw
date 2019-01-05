@@ -1,22 +1,22 @@
 #ifndef _RWENGINE_WEAPON_HPP_
 #define _RWENGINE_WEAPON_HPP_
-#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 class CharacterObject;
 class GameObject;
 struct WeaponData;
 
+enum class ScanType {
+    /** Instant-hit ray weapons */
+    HitScan,
+    /** Area of effect attack */
+    Radius,
+};
+
 /**
  * @brief simple object for performing weapon checks against the world
  */
 struct WeaponScan {
-    enum ScanType {
-        /** Instant-hit ray weapons */
-        HITSCAN,
-        /** Area of effect attack */
-        RADIUS,
-    };
-
     const ScanType type;
 
     float damage;
@@ -29,10 +29,10 @@ struct WeaponScan {
     WeaponData* weapon;
     GameObject* source;
 
-    // Constructor for a RADIUS hitscan
+    // Constructor for Radius
     WeaponScan(float damage, const glm::vec3& center, float radius,
                WeaponData* weapon = nullptr, GameObject* source = nullptr)
-            : type(RADIUS)
+            : type(ScanType::Radius)
             , damage(damage)
             , center(center)
             , radius(radius)
@@ -40,10 +40,10 @@ struct WeaponScan {
             , source(source) {
     }
 
-    // Constructor for a ray hitscan
+    // Constructor for HitScan
     WeaponScan(float damage, const glm::vec3& start, const glm::vec3& end,
                WeaponData* weapon = nullptr, GameObject* source = nullptr)
-            : type(HITSCAN)
+            : type(ScanType::HitScan)
             , damage(damage)
             , center(start)
             , end(end)
