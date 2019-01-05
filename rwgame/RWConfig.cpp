@@ -118,8 +118,12 @@ std::optional<RWArgConfigLayer> RWArgumentParser::parseArguments(int argc, const
             po::store(parser.run(), vm);
         }
         po::notify(vm);
-    } catch (po::error &ex) {
+    } catch (po::error& ex) {
         std::cerr << "Error parsing arguments: " << ex.what() << std::endl;
+        return std::nullopt;
+    } catch (boost::exception& ex) {
+        std::cerr << "A boost::exception object was thrown (bug in Boost.Program_options?).\n";
+        std::cerr << "unknown error\n";
         return std::nullopt;
     }
     RWArgConfigLayer layer;
