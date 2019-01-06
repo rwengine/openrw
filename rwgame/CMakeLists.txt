@@ -46,6 +46,7 @@ add_library(librwgame STATIC
 
 openrw_target_apply_options(
     TARGET librwgame
+    CORE
     COVERAGE
     )
 
@@ -78,6 +79,7 @@ target_link_libraries(rwgame
 
 openrw_target_apply_options(
     TARGET rwgame
+    CORE
     COVERAGE
     INSTALL INSTALL_PDB
     )

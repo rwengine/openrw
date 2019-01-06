@@ -72,6 +72,7 @@ target_link_libraries(rwtests
 
 openrw_target_apply_options(
     TARGET rwtests
+    CORE
     COVERAGE
     INSTALL INSTALL_PDB
     )

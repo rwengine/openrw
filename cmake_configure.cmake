@@ -4,12 +4,6 @@ add_library(openrw::interface ALIAS rw_interface)
 add_library(rw_checks INTERFACE)
 add_library(openrw::checks ALIAS rw_checks)
 target_link_libraries(rw_interface INTERFACE rw_checks)
-
-# target_compile_features(rw_interface INTERFACE cxx_std_14) is not supported by CMake 3.2
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(rw_interface
         INTERFACE
@@ -21,6 +15,20 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(MSVC_NO_DEBUG_RUNTIME)
+        foreach(LANG C CXX)
+            foreach(CONFIGURATION_TYPE ${CMAKE_CONFIGURATION_TYPES} "")
+                string(TOUPPER "${CONFIGURATION_TYPE}" CONFIGURATION_TYPE)
+                set(FLAGS_VAR "CMAKE_${LANG}_FLAGS")
+                if(CONFIGURATION_TYPE)
+                    set(FLAGS_VAR "${FLAGS_VAR}_${CONFIGURATION_TYPE}")
+                endif()
+                string(REPLACE "/MDd" "/MD" "${FLAGS_VAR}" "${${FLAGS_VAR}}")
+                string(REPLACE "/MTd" "/MT" "${FLAGS_VAR}" "${${FLAGS_VAR}}")
+                set("${FLAGS_VAR}" "${${FLAGS_VAR}}" CACHE STRING "${LANG} flags for ${CONFIGURATION_TYPE} configuration type")
+            endforeach()
+        endforeach()
+    endif()
     target_compile_definitions(rw_checks
         INTERFACE
             "_SCL_SECURE_NO_WARNINGS"
@@ -29,6 +37,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(rw_interface
         INTERFACE
             "/MP"
+            "/Zc:__cplusplus"
         )
 else()
     message(FATAL_ERROR "Unknown compiler ID: '${CMAKE_CXX_COMPILER_ID}'")
@@ -188,25 +197,36 @@ endforeach()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
-    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB;COVERAGE" "TARGET" "COVERAGE_EXCEPT" ${ARGN})
-    if(CHECK_IWYU)
-        iwyu_check(TARGET "${ORW_TARGET}"
-            EXTRA_OPTS
-                "--mapping_file=${IWYU_MAPPING}"
-        )
-    endif()
+    cmake_parse_arguments("ORW" "CORE;INSTALL;INSTALL_PDB;COVERAGE" "TARGET" "COVERAGE_EXCEPT" ${ARGN})
 
     if(TEST_COVERAGE AND ORW_COVERAGE)
         coverage_add_target("${ORW_TARGET}" EXCEPT ${ORW_COVERAGE_EXCEPT})
     endif()
 
-    if(CHECK_CLANGTIDY)
-        clang_tidy_check_target(
-            TARGET "${ORW_TARGET}"
-            FORMAT_STYLE "file"
-            FIX "${CHECK_CLANGTIDY_FIX}"
-            CHECK_ALL
-        )
+    if(ORW_CORE)
+        if(CHECK_IWYU)
+            iwyu_check(TARGET "${ORW_TARGET}"
+                EXTRA_OPTS
+                    "--mapping_file=${IWYU_MAPPING}"
+            )
+        endif()
+
+        set_target_properties("${ORW_TARGET}"
+            PROPERTIES
+                CXX_EXTENSIONS OFF
+                CXX_STANDARD 17
+                C_EXTENSIONS OFF
+                C_STANDARD 11
+            )
+
+        if(CHECK_CLANGTIDY)
+            clang_tidy_check_target(
+                TARGET "${ORW_TARGET}"
+                FORMAT_STYLE "file"
+                FIX "${CHECK_CLANGTIDY_FIX}"
+                CHECK_ALL
+            )
+        endif()
     endif()
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")

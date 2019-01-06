@@ -5,12 +5,12 @@
 #include <vector>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4305 5033)
+#pragma warning(disable : 4305)
 #endif
 #include <LinearMath/btIDebugDraw.h>
 #include <LinearMath/btScalar.h>
 #ifdef _MSC_VER
-#pragma warning(default : 4305 5033)
+#pragma warning(default : 4305)
 #endif
 
 #include <data/Clump.hpp>

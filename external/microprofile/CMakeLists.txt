@@ -25,4 +25,10 @@ openrw_target_apply_options(
     TARGET microprofile
 )
 
+set_target_properties(microprofile
+    PROPERTIES
+        CXX_EXTENSIONS OFF
+        CXX_STANDARD 11
+    )
+
 add_library(microprofile::microprofile ALIAS microprofile)

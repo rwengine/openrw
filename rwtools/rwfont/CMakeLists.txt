@@ -13,6 +13,7 @@ target_link_libraries(rwfontmap
 
 openrw_target_apply_options(
     TARGET rwfontmap
+    CORE
     COVERAGE
     INSTALL INSTALL_PDB
     )

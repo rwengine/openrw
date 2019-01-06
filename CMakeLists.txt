@@ -23,7 +23,7 @@ if(USE_CONAN)
         message(STATUS "Using conan 'cmake' generator")
         include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
     endif()
-    conan_basic_setup(TARGETS)
+    conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
 
     rwdep_wrap_conan_targets()
 else()
@@ -40,7 +40,7 @@ else()
     endif()
 
     # Do not link to SDL2main library
-    set(SDL2_BUILDING_LIBRARY True)
+    set(SDL2_BUILDING_LIBRARY TRUE)
 
     find_package(OpenAL REQUIRED)
     find_package(Bullet REQUIRED)

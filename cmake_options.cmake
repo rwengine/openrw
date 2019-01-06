@@ -19,6 +19,9 @@ set(CMAKE_CONFIGURATION_TYPES "Release;Debug;RelWithDebInfo;MinSizeRel" CACHE IN
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: ${CMAKE_CONFIGURATION_TYPES}")
 endif()
+if(MSVC)
+    option(MSVC_NO_DEBUG_RUNTIME "Don't use the debug runtime")
+endif()
 
 option(CHECK_IWYU "Enable IncludeWhatYouUse (Analyze #includes in C and C++ source files)")
 option(CHECK_CLANGTIDY "Enable clang-tidy (A clang-based C++ linter tool)")

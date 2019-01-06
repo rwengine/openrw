@@ -5,11 +5,11 @@
 #include <glm/glm.hpp>
 
 #ifdef _MSC_VER
-#pragma warning(disable : 4305 5033)
+#pragma warning(disable : 4305)
 #endif
 #include <LinearMath/btVector3.h>
 #ifdef _MSC_VER
-#pragma warning(default : 4305 5033)
+#pragma warning(default : 4305)
 #endif
 
 #include <data/Clump.hpp>

@@ -11,7 +11,6 @@ from conans.client import conan_api
 
 openrw_path = Path(__file__).resolve().parents[2]
 cmake_generator_lookup = {
-    2015: 'Visual Studio 14 2015',
     2017: 'Visual Studio 15 2017',
 }
 architectures = ['x64', 'x86']
@@ -33,14 +32,13 @@ def create_solution(path, vs_version, arch):
     conan, _, _ = conan_api.ConanAPIV1.factory()
     conan.remote_add('bincrafters', 'https://api.bintray.com/conan/bincrafters/public-conan', force=True)
     conan_arch = conan_arch_map[arch]
-    conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
-                  settings=('build_type=Debug', 'arch={}'.format(conan_arch), ), install_folder=path)
-    conan.install(path=openrw_path, generators=('cmake_multi',), build=['missing', ],
-                  settings=('build_type=Release', 'arch={}'.format(conan_arch), ), install_folder=path)
+    conan.install(path=openrw_path, generators=('cmake',), build=['missing', ],
+                  settings=('build_type=Release', 'arch={}'.format(conan_arch), 'compiler.runtime=MD', ),
+                  install_folder=path)
     cmake_generator = to_cmake_generator(vs_version=vs_version, arch=arch)
     subprocess.run([
-        'cmake', '-DUSE_CONAN=TRUE', '-DBOOST_STATIC=TRUE',
-        '-DBUILD_TESTS=TRUE', '-DBUILD_VIEWER=TRUE', '-DBUILD_TOOLS=TRUE',
+        'cmake', '-DUSE_CONAN=ON', '-DBOOST_STATIC=ON', '-DMSVC_NO_DEBUG_RUNTIME=ON',
+        '-DBUILD_TESTS=ON', '-DBUILD_VIEWER=ON', '-DBUILD_TOOLS=ON',
         '-G{}'.format(cmake_generator), str(openrw_path),
     ], cwd=path, check=True)
 
