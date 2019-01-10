@@ -92,8 +92,7 @@ auto WithBlock(Tserializer& s, const Tfunc& l) {
 template<class Tserializer>
 bool Magic(Tserializer& s, const std::array<char, 4>& magic) {
     auto v = magic;
-    serialize(s, v);
-    return v == magic;
+    return serialize(s, v) && v == magic;
 }
 
 } // namespace SaveGameSerialization

@@ -33,7 +33,7 @@ public:
      */
     static bool loadGame(GameState& state, const std::string& file);
 
-    static bool getSaveInfo(const std::string& file, BasicState* outState);
+    static bool getSaveInfo(const std::string& file, BasicState& outState);
 
     /**
      * Returns save game information for all found saves

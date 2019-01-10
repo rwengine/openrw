@@ -1,5 +1,6 @@
 #ifndef _RWENGINE_SAVEGAMETYPES_HPP_
 #define _RWENGINE_SAVEGAMETYPES_HPP_
+#include <cstdint>
 
 namespace {
 constexpr int kNrOfWeapons = 13;
@@ -471,5 +472,72 @@ struct Block19PedType {
 struct Block19Data {
     std::array<Block19PedType, kNrOfPedTypes> types;
 };
+
+namespace SaveGameSerialization {
+template <class T>
+bool serialize(T& s, Block1PlayerPed& p) {
+    return
+        serialize(s, p.unknown0) &&
+        serialize(s, p.unknown1) &&
+        serialize(s, p.reference) &&
+        serialize(s, p.info) &&
+        serialize(s, p.maxWantedLevel) &&
+        serialize(s, p.maxChaosLevel) &&
+        serialize(s, p.modelName);
+}
+
+template <class T>
+bool serialize(T& s, Block2GarageData& v) {
+    return
+        serialize(s, v.garageCount) &&
+        serialize(s, v.freeBombs) &&
+        serialize(s, v.freeResprays) &&
+        serialize(s, v.unknown0) &&
+        serialize(s, v.unknown1) &&
+        serialize(s, v.unknown2) &&
+        serialize(s, v.bfImportExportPortland) &&
+        serialize(s, v.bfImportExportShoreside) &&
+        serialize(s, v.bfImportExportUnused) &&
+        serialize(s, v.GA_21lastTime) &&
+        serialize(s, v.cars);
+}
+
+template <class T>
+bool serialize(T& s, Block3Vehicle& v) {
+    return
+        serialize(s, v.unknown1) &&
+        serialize(s, v.modelId) &&
+        serialize(s, v.unknown2) &&
+        serialize(s, v.state);
+}
+
+template <class T>
+bool serialize(T& s, Block3Boat& v) {
+    return
+        serialize(s, v.unknown1) &&
+        serialize(s, v.modelId) &&
+        serialize(s, v.unknown2) &&
+        serialize(s, v.state);
+}
+
+template <class T>
+bool serialize(T& s, Block4Object& v) {
+    return
+        serialize(s, v.modelId) &&
+        serialize(s, v.reference) &&
+        serialize(s, v.position) &&
+        serialize(s, v.rotation) &&
+        serialize(s, v.unknown1) &&
+        serialize(s, v.unknown2) &&
+        serialize(s, v.unknown3) &&
+        serialize(s, v.unknown4) &&
+        serialize(s, v.unknown5) &&
+        serialize(s, v.unknown6) &&
+        serialize(s, v.unknown7) &&
+        serialize(s, v.unknown8) &&
+        serialize(s, v.unknown9) &&
+        serialize(s, v.unknown10);
+}
+}
 
 #endif //namespace _RWENGINE_SAVEGAMETYPES_HPP_

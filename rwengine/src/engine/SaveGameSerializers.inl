@@ -5,7 +5,7 @@
 namespace SaveGameSerialization {
 
 template <class Tserializer, class T, typename std::enable_if<
-          std::is_trivial_v<T>,int>::type = 0>
+          std::is_trivially_copyable_v<T>,int>::type = 0>
 bool serialize(Tserializer& serializer, T& value) {
     return serializer.serialize(value);
 }
