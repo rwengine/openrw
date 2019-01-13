@@ -3,6 +3,7 @@
 #include <rw/debug.hpp>
 
 #include <iostream>
+#include <array>
 
 namespace SaveGameSerialization {
 class Reader {
@@ -86,6 +87,13 @@ template<class Tserializer, class Tfunc>
 auto WithBlock(Tserializer& s, const Tfunc& l) {
     auto b = MakeSaveBlock(s);
     return l(b);
+}
+
+template<class Tserializer>
+bool Magic(Tserializer& s, const std::array<char, 4>& magic) {
+    auto v = magic;
+    serialize(s, v);
+    return v == magic;
 }
 
 } // namespace SaveGameSerialization
