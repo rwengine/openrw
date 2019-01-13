@@ -78,8 +78,9 @@ void ProjectileObject::explode() {
             float d = glm::distance(getPosition(), o->getPosition());
             if (d > damageSize) continue;
 
-            o->takeDamage({getPosition(), getPosition(),
-                           damage / glm::max(d, 1.f), DamageInfo::Explosion,
+            o->takeDamage({DamageInfo::DamageType::Explosion,
+                           getPosition(), getPosition(),
+                           damage / glm::max(d, 1.f),
                            0.f});
         }
 

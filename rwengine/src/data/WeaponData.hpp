@@ -34,49 +34,4 @@ struct WeaponData {
     std::uint32_t inventorySlot;
 };
 
-/**
- * @brief simple object for performing weapon checks against the world
- *
- * @todo RADIUS hitscans
- */
-struct WeaponScan {
-    enum ScanType {
-        /** Instant-hit ray weapons */
-        HITSCAN,
-        /** Area of effect attack */
-        RADIUS,
-    };
-
-    const ScanType type;
-
-    float damage;
-
-    glm::vec3 center{};
-    float radius;
-
-    glm::vec3 end{};
-
-    WeaponData* weapon;
-
-    // Constructor for a RADIUS hitscan
-    WeaponScan(float damage, const glm::vec3& center, float radius,
-               WeaponData* weapon = nullptr)
-        : type(RADIUS)
-        , damage(damage)
-        , center(center)
-        , radius(radius)
-        , weapon(weapon) {
-    }
-
-    // Constructor for a ray hitscan
-    WeaponScan(float damage, const glm::vec3& start, const glm::vec3& end,
-               WeaponData* weapon = nullptr)
-        : type(HITSCAN)
-        , damage(damage)
-        , center(start)
-        , end(end)
-        , weapon(weapon) {
-    }
-};
-
 #endif

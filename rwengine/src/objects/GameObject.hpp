@@ -164,7 +164,9 @@ public:
     }
 
     struct DamageInfo {
-        enum DamageType { Explosion, Burning, Bullet, Physics };
+        enum class DamageType {
+            Explosion, Burning, Bullet, Physics, Melee
+        };
 
         /**
          * World position of damage
@@ -190,6 +192,11 @@ public:
          * Physics impulse.
          */
         float impulse;
+
+        DamageInfo(DamageType type, const glm::vec3 &location,
+                   const glm::vec3 &source, float damage, float impulse = 0.f)
+            : damageLocation(location), damageSource(source), hitpoints(damage),
+              type(type), impulse(impulse) {}
     };
 
     virtual bool takeDamage(const DamageInfo& damage) {

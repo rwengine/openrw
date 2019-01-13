@@ -1,13 +1,41 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
+#include <items/Weapon.hpp>
 #include <objects/CharacterObject.hpp>
 #include <objects/ProjectileObject.hpp>
 #include "test_Globals.hpp"
 
+auto& operator<<(std::ostream& s, const ScanType& type) {
+    return s << static_cast<int>(type);
+}
+
 BOOST_AUTO_TEST_SUITE(WeaponTests)
 
+BOOST_AUTO_TEST_CASE(radius_ctor_creates_radius_scan) {
+    WeaponScan scan{10.f, {1.f, 1.f, 1.f}, 5.f};
+    BOOST_CHECK_EQUAL(scan.type, ScanType::Radius);
+}
+
+BOOST_AUTO_TEST_CASE(hitscan_ctor_creates_radius_scan) {
+    WeaponScan scan{10.f, {1.f, 1.f, 1.f}, {0.f, 0.f, 0.f}};
+    BOOST_CHECK_EQUAL(scan.type, ScanType::HitScan);
+}
+
+struct WeaponScanFixture {
+    GameObject* source = reinterpret_cast<GameObject*>(0x0000BEEF);
+    WeaponScan scan{10.f, {1.f, 1.f, 1.f}, {0.f, 0.f, 0.f}, nullptr, source};
+};
+
+BOOST_FIXTURE_TEST_CASE(weapon_scan_doesnt_injur_source, WeaponScanFixture) {
+    BOOST_CHECK(!scan.doesDamage(reinterpret_cast<GameObject*>(0x0000BEEF)));
+}
+
+BOOST_FIXTURE_TEST_CASE(weapon_scan_does_injur_others, WeaponScanFixture) {
+    BOOST_CHECK(scan.doesDamage(reinterpret_cast<GameObject*>(0xDEADBEEF)));
+}
+
 #if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(TestWeaponScan) {
+BOOST_AUTO_TEST_CASE(TestDoWeaponScan) {
     {
         // Test RADIUS scan
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});

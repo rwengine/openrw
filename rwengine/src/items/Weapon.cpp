@@ -5,9 +5,15 @@
 #include <glm/glm.hpp>
 
 #include "data/WeaponData.hpp"
+#include "dynamics/HitTest.hpp"
 #include "engine/GameWorld.hpp"
 #include "objects/CharacterObject.hpp"
 #include "objects/ProjectileObject.hpp"
+
+
+bool WeaponScan::doesDamage(GameObject* target) const {
+    return target != source;
+}
 
 void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     auto handFrame = owner->getClump()->findFrame("srhand");
@@ -18,7 +24,7 @@ void Weapon::fireHitscan(WeaponData* weapon, CharacterObject* owner) {
     auto fireOrigin = glm::vec3(handMatrix[3]);
     float dmg = static_cast<float>(weapon->damage);
 
-    owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon});
+    owner->engine->doWeaponScan({dmg, fireOrigin, rayend, weapon, owner});
 }
 
 void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
@@ -44,4 +50,32 @@ void Weapon::fireProjectile(WeaponData* weapon, CharacterObject* owner,
     auto& pool = owner->engine->getTypeObjectPool(ptr);
     pool.insert(std::move(projectile));
     owner->engine->allObjects.push_back(ptr);
+}
+
+void Weapon::meleeHit(WeaponData* weapon, CharacterObject* character) {
+    const auto center = character->getPosition() + character->getRotation()
+                                                   * weapon->fireOffset;
+    auto e = character->engine;
+    e->doWeaponScan({
+                        static_cast<float>(weapon->damage),
+                        center, weapon->meleeRadius, weapon,
+                        character
+                    });
+}
+
+bool Weapon::targetOnGround(WeaponData *weapon, CharacterObject *character) {
+    const auto center = character->getPosition() + character->getRotation()
+                                                   * weapon->fireOffset;
+    HitTest test {*character->engine->dynamicsWorld};
+    const auto result = test.sphereTest(center, weapon->meleeRadius);
+    bool ground = false;
+    for (const auto& r : result) {
+        if (r.object == character) {
+            continue;
+        }
+        if (r.object->type() == GameObject::Character) {
+            ground |= static_cast<CharacterObject *>(r.object)->isKnockedDown();
+        }
+    }
+    return ground;
 }

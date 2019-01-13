@@ -141,6 +141,8 @@ public:
     void Die();
     void SetDead();
 
+    bool isKnockedDown() const;
+
     bool takeDamage(const DamageInfo& damage) override;
 
     bool enterVehicle(VehicleObject* vehicle, size_t seat);

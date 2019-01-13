@@ -207,9 +207,13 @@ Menu DebugState::createAIMenu() {
             if (pedestrianPtr->getLifetime() == GameObject::PlayerLifetime) {
                 continue;
             }
-            pedestrianPtr->takeDamage({pedestrianPtr->getPosition(),
-                                       pedestrianPtr->getPosition(), 100.f,
-                                       GameObject::DamageInfo::Explosion, 0.f});
+            pedestrianPtr->takeDamage(
+                {
+                    GameObject::DamageInfo::DamageType::Explosion,
+                    pedestrianPtr->getPosition(),
+                    pedestrianPtr->getPosition(), 100.f,
+                    0.f
+                });
         }
     });
 

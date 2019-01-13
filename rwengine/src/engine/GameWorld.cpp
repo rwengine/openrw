@@ -23,9 +23,12 @@
 #include "ai/PlayerController.hpp"
 #include "ai/TrafficDirector.hpp"
 
+#include "dynamics/HitTest.hpp"
+
 #include "data/CutsceneData.hpp"
 #include "data/InstanceData.hpp"
-#include "data/WeaponData.hpp"
+
+#include "items/Weapon.hpp"
 
 #include "loaders/LoaderCutsceneDAT.hpp"
 #include "loaders/LoaderIFP.hpp"
@@ -565,33 +568,41 @@ void GameWorld::destroyEffect(VisualFX& effect) {
 }
 
 void GameWorld::doWeaponScan(const WeaponScan& scan) {
-    RW_CHECK(scan.type != WeaponScan::RADIUS,
-             "Radius scans not implemented yet");
+    if (scan.type == ScanType::Radius) {
+        HitTest test {*dynamicsWorld};
+        const auto& result = test.sphereTest(scan.center, scan.radius);
 
-    if (scan.type == WeaponScan::RADIUS) {
-        // TODO
-        // Requires custom ConvexResultCallback
-    } else if (scan.type == WeaponScan::HITSCAN) {
+        for(const auto& target : result) {
+            if (!scan.doesDamage(target.object)) {
+                continue;
+            }
+
+            target.object->takeDamage(
+                {
+                    GameObject::DamageInfo::DamageType::Melee,
+                    {}, scan.center, scan.damage
+                });
+        }
+
+    } else if (scan.type == ScanType::HitScan) {
         btVector3 from(scan.center.x, scan.center.y, scan.center.z),
             to(scan.end.x, scan.end.y, scan.end.z);
-        glm::vec3 hitEnd = scan.end;
         btCollisionWorld::ClosestRayResultCallback cb(from, to);
         cb.m_collisionFilterGroup = btBroadphaseProxy::AllFilter;
         dynamicsWorld->rayTest(from, to, cb);
-        // TODO: did any weapons penetrate?
-
-        if (cb.hasHit()) {
-            GameObject* go = static_cast<GameObject*>(
-                cb.m_collisionObject->getUserPointer());
-            GameObject::DamageInfo di;
-            hitEnd = di.damageLocation =
-                glm::vec3(cb.m_hitPointWorld.x(), cb.m_hitPointWorld.y(),
-                          cb.m_hitPointWorld.z());
-            di.damageSource = scan.center;
-            di.type = GameObject::DamageInfo::Bullet;
-            di.hitpoints = scan.damage;
-            go->takeDamage(di);
+        if (!cb.hasHit()) {
+            return;
         }
+
+        auto go = static_cast<GameObject *>(
+            cb.m_collisionObject->getUserPointer());
+        go->takeDamage(
+            {
+                GameObject::DamageInfo::DamageType::Bullet,
+                {cb.m_hitPointWorld.x(), cb.m_hitPointWorld.y(),
+                 cb.m_hitPointWorld.z()},
+                scan.center, scan.damage
+            });
     }
 }
 
@@ -658,11 +669,13 @@ void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
         dmg = mp.getPositionWorldOnB();
     }
 
-    object->takeDamage({{dmg.x(), dmg.y(), dmg.z()},
-                        {src.x(), src.y(), src.z()},
-                        0.f,
-                        GameObject::DamageInfo::Physics,
-                        mp.getAppliedImpulse()});
+    object->takeDamage({
+                           GameObject::DamageInfo::DamageType::Physics,
+                           {dmg.x(), dmg.y(), dmg.z()},
+                           {src.x(), src.y(), src.z()},
+                           0.f,
+                           mp.getAppliedImpulse()
+                       });
 }
 
 void handleInstanceResponse(InstanceObject* instance, const btManifoldPoint& mp,
@@ -674,16 +687,20 @@ void handleInstanceResponse(InstanceObject* instance, const btManifoldPoint& mp,
     auto dmg = isA ? mp.m_positionWorldOnA : mp.m_positionWorldOnB;
     auto impulse = mp.getAppliedImpulse();
 
-    if (impulse > 0.0f) {
-        ///@ todo Correctness: object damage calculation
-        constexpr auto kMinimumDamageImpulse = 500.f;
-        const auto hp = std::max(0.f, impulse - kMinimumDamageImpulse);
-        instance->takeDamage({{dmg.x(), dmg.y(), dmg.z()},
-                              {dmg.x(), dmg.y(), dmg.z()},
-                              hp,
-                              GameObject::DamageInfo::Physics,
-                              impulse});
+    if (impulse <= 0.0f) {
+        return;
     }
+
+    ///@ todo Correctness: object damage calculation
+    constexpr auto kMinimumDamageImpulse = 500.f;
+    const auto hp = std::max(0.f, impulse - kMinimumDamageImpulse);
+    instance->takeDamage({
+                             GameObject::DamageInfo::DamageType::Physics,
+                             {dmg.x(), dmg.y(), dmg.z()},
+                             {dmg.x(), dmg.y(), dmg.z()},
+                             hp,
+                             impulse
+                         });
 }
 }  // namespace
 
