@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(instance_data_is_correct) {
     BOOST_REQUIRE(loader.load(test_data_stream));
 
     const auto expectedInstance = InstanceData(112, "ModelB", {10.0f, 12.0f, 5.0f}, {1.f, 1.f, 1.f}, {0.0f, 0.f, 0.f, 1.0f});
-    BOOST_TEST(*loader.m_instances[1] == expectedInstance);
+    BOOST_TEST(loader.m_instances[1] == expectedInstance);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
