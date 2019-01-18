@@ -39,17 +39,9 @@ po::options_description build_options() {
         }                                                                                                               \
     } while (0);
 #define RWCONFIGARG(_RW_TYPE, _RW_NAME, _RW_DEFAULT, _RW_CONFPATH, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)    \
-    do {                                                                                                                \
-        if constexpr (std::is_same_v<bool, _RW_TYPE>) {                                                                 \
-            descriptions[RWArgumentParser::Category::_RW_CATEGORY].add_options()(                                       \
-                _RW_ARGMASK, _RW_HELP);                                                                                 \
-        } else {                                                                                                        \
-            descriptions[RWArgumentParser::Category::_RW_CATEGORY].add_options()(                                       \
-                _RW_ARGMASK, po::value<_RW_TYPE>()->value_name(_RW_ARGMETA), _RW_HELP);                                 \
-        }                                                                                                               \
-    } while (0);
+    RWARG(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)
 #define RWARG_OPT(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)                                 \
-    RWCONFIGARG(_RW_TYPE, _RW_NAME, std::nullopt, nullptr, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)
+    RWARG(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)
 
 #include "RWConfig.inc"
 
@@ -89,39 +81,62 @@ constexpr std::string_view arg_mask_to_key(std::string_view v) {
     return v.substr(maxstart, maxsize);
 }
 
+template <typename T>
+std::optional<T> vm_get_opt_argmask(const po::variables_map& vm, const std::string_view& argmask) {
+    const std::string key{arg_mask_to_key(argmask)};
+    auto it = vm.find(key);
+    if (it != vm.end()) {
+        return it->second.as<T>();
+    }
+    return std::nullopt;
+}
+
+template <>
+std::optional<bool> vm_get_opt_argmask<bool>(const po::variables_map& vm, const std::string_view& argmask) {
+    const std::string key{arg_mask_to_key(argmask)};
+    auto it = vm.find(key);
+    if (it != vm.end()) {
+        return true;
+    }
+    return std::nullopt;
+}
+
+bool vm_get_argmask(const po::variables_map& vm, const std::string_view& argmask) {
+    auto val = vm_get_opt_argmask<bool>(vm, argmask);
+    return val.has_value() && *val;
+}
 }
 
 std::optional<RWArgConfigLayer> RWArgumentParser::parseArguments(int argc, const char* argv[]) const {
     po::variables_map vm;
     try {
         if (argc != 0) {
-            po::store(po::command_line_parser(argc, argv).options(_desc).positional(po::positional_options_description{}).run(), vm);
+            po::command_line_parser parser(argc, argv);
+            parser.options(_desc);
+            parser.positional(po::positional_options_description{});
+            parser.style(po::command_line_style::unix_style & (~po::command_line_style::allow_guessing));
+            po::store(parser.run(), vm);
         }
         po::notify(vm);
-    } catch (po::error &ex) {
+    } catch (po::error& ex) {
         std::cerr << "Error parsing arguments: " << ex.what() << std::endl;
+        return std::nullopt;
+    } catch (boost::exception& ex) {
+        std::cerr << "A boost::exception object was thrown (bug in Boost.Program_options?).\n";
+        std::cerr << "unknown error\n";
         return std::nullopt;
     }
     RWArgConfigLayer layer;
 
 #define RWARG(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)                                     \
     do {                                                                                                                \
-        const std::string key{arg_mask_to_key(_RW_ARGMASK)};                                                            \
-        layer._RW_NAME = vm.count(key) != 0u;                                                                           \
+        layer._RW_NAME = vm_get_argmask(vm, _RW_ARGMASK);                                                               \
     } while (0);
 #define RWCONFIGARG(_RW_TYPE, _RW_NAME, _RW_DEFAULT, _RW_CONFPATH, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)    \
-    do {                                                                                                                \
-        const std::string key{arg_mask_to_key(_RW_ARGMASK)};                                                            \
-        if (vm.count(key)) {                                                                                            \
-            layer._RW_NAME = vm[key].as<_RW_TYPE>();                                                                    \
-        }                                                                                                               \
-    } while (0);
+    RWARG_OPT(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)
 #define RWARG_OPT(_RW_TYPE, _RW_NAME, _RW_CATEGORY, _RW_ARGMASK, _RW_ARGMETA, _RW_HELP)                                 \
     do {                                                                                                                \
-    const std::string key{arg_mask_to_key(_RW_ARGMASK)};                                                                \
-        if (vm.count(key)) {                                                                                            \
-            layer._RW_NAME = vm[key].as<_RW_TYPE>();                                                                    \
-        }                                                                                                               \
+        layer._RW_NAME = vm_get_opt_argmask<_RW_TYPE>(vm, _RW_ARGMASK);                                                 \
     } while (0);
 
 #include "RWConfig.inc"
@@ -131,7 +146,7 @@ std::optional<RWArgConfigLayer> RWArgumentParser::parseArguments(int argc, const
 #undef RWARG
 
     if (layer.noconfig && layer.configPath.has_value()) {
-        std::cerr << "Cannot set config path and ask noconfig at the sametime.\n";
+        std::cerr << "Cannot set config path and noconfig at the same time.\n";
         return std::nullopt;
     }
 
