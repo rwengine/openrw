@@ -4,9 +4,8 @@
 #include <platform/FileHandle.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(CutsceneTests)
+BOOST_AUTO_TEST_SUITE(CutsceneTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_load) {
     {
         auto d = Global::get().e->data->index.openFile("intro.dat");
@@ -29,6 +28,5 @@ BOOST_AUTO_TEST_CASE(test_load) {
         BOOST_CHECK(tracks.duration == 64.8f);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

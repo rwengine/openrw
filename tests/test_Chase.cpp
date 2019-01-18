@@ -2,9 +2,8 @@
 #include <data/Chase.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(ChaseTests)
+BOOST_AUTO_TEST_SUITE(ChaseTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_load_keyframes) {
     std::vector<ChaseKeyframe> keyframes;
     BOOST_REQUIRE(ChaseKeyframe::load(
@@ -12,6 +11,5 @@ BOOST_AUTO_TEST_CASE(test_load_keyframes) {
     BOOST_REQUIRE(keyframes.size() == 5400);
     BOOST_CHECK_CLOSE(keyframes[0].position.x, 273.5422, 0.1);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

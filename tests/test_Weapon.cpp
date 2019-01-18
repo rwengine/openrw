@@ -34,8 +34,7 @@ BOOST_FIXTURE_TEST_CASE(weapon_scan_does_injur_others, WeaponScanFixture) {
     BOOST_CHECK(scan.doesDamage(reinterpret_cast<GameObject*>(0xDEADBEEF)));
 }
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(TestDoWeaponScan) {
+BOOST_AUTO_TEST_CASE(TestDoWeaponScan, DATA_TEST_PREDICATE) {
     {
         // Test RADIUS scan
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
@@ -53,7 +52,7 @@ BOOST_AUTO_TEST_CASE(TestDoWeaponScan) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(TestProjectile) {
+BOOST_AUTO_TEST_CASE(TestProjectile, DATA_TEST_PREDICATE) {
     {
         auto character = Global::get().e->createPedestrian(1, {25.f, 0.f, 0.f});
         BOOST_REQUIRE(character != nullptr);
@@ -141,6 +140,5 @@ BOOST_AUTO_TEST_CASE(TestProjectile) {
         Global::get().e->destroyQueuedObjects();
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

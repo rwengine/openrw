@@ -21,8 +21,7 @@ BOOST_AUTO_TEST_CASE(test_normalizeName) {
     }
 }
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(test_indexTree) {
+BOOST_AUTO_TEST_CASE(test_indexTree, DATA_TEST_PREDICATE) {
     FileIndex index;
     index.indexTree(Global::getGamePath());
 
@@ -46,7 +45,7 @@ BOOST_AUTO_TEST_CASE(test_indexTree) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(test_openFile) {
+BOOST_AUTO_TEST_CASE(test_openFile, DATA_TEST_PREDICATE) {
     FileIndex index;
     index.indexTree(Global::getGamePath() + "/data");
 
@@ -54,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_openFile) {
     BOOST_CHECK(handle.data != nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(test_indexArchive) {
+BOOST_AUTO_TEST_CASE(test_indexArchive, DATA_TEST_PREDICATE) {
     FileIndex index;
     index.indexTree(Global::getGamePath());
 
@@ -70,6 +69,5 @@ BOOST_AUTO_TEST_CASE(test_indexArchive) {
         BOOST_CHECK(handle.data != nullptr);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

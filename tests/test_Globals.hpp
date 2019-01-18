@@ -19,6 +19,11 @@
 #include <objects/GameObject.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <memory>
+
+#define DATA_TEST_PREDICATE * boost::unit_test_framework::label("data-test")\
+                            * boost::unit_test_framework::disabled()
+
 std::ostream& operator<<(std::ostream& stream, glm::vec3 const& v);
 
 // Boost moved the print_log_value struct in version 1.59
@@ -80,12 +85,13 @@ BOOST_NS_MAGIC_CLOSING
 class Global {
 public:
     GameWindow window;
-#if RW_TEST_WITH_DATA
     GameData* d;
     GameWorld* e;
     GameState* s;
+    std::unique_ptr<GameData> d_;
+    std::unique_ptr<GameWorld> e_;
+    std::unique_ptr<GameState> s_;
     Logger log;
-#endif
 
     Global() {
         if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -94,29 +100,25 @@ public:
         window.create("Tests", 800, 600, false);
         window.hideCursor();
 
-#if RW_TEST_WITH_DATA
-        d = new GameData(&log, getGamePath());
+        d_ = std::make_unique<GameData>(&log, getGamePath());
+        d = d_.get();
 
         d->load();
 
-        e = new GameWorld(&log, d);
-        s = new GameState;
+        e_ = std::make_unique<GameWorld>(&log, d);
+        e = e_.get();
+        s_ = std::make_unique<GameState>();
+        s = s_.get();
         e->state = s;
 
         e->dynamicsWorld->setGravity(btVector3(0.f, 0.f, 0.f));
-#endif
     }
 
     ~Global() {
         window.close();
-#if RW_TEST_WITH_DATA
-        delete e;
-#endif
     }
 
-#if RW_TEST_WITH_DATA
     static std::string getGamePath();
-#endif
 
     static Global& get() {
         static Global g;

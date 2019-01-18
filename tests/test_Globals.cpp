@@ -2,7 +2,6 @@
 
 #include <RWConfig.hpp>
 
-#if RW_TEST_WITH_DATA
 std::string Global::getGamePath() {
     rwfs::path configPath = RWConfigParser::getDefaultConfigPath() / "openrw.ini";
     RWConfigParser cfgParser;
@@ -10,4 +9,3 @@ std::string Global::getGamePath() {
     BOOST_REQUIRE(parseResult.isValid());
     return *cfgLayer.gamedataPath;
 }
-#endif

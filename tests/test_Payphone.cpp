@@ -6,9 +6,8 @@
 #include <objects/GameObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include "test_Globals.hpp"
-#if RW_TEST_WITH_DATA
 
-BOOST_AUTO_TEST_SUITE(PayphoneTests)
+BOOST_AUTO_TEST_SUITE(PayphoneTests, DATA_TEST_PREDICATE)
 
 BOOST_AUTO_TEST_CASE(test_payphone_interaction) {
     {
@@ -68,5 +67,3 @@ BOOST_AUTO_TEST_CASE(test_payphone_interaction) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif

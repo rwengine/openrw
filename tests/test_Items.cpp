@@ -2,9 +2,8 @@
 #include <objects/CharacterObject.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(ItemsTests)
+BOOST_AUTO_TEST_SUITE(ItemsTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_character_inventory) {
     {
         auto character = Global::get().e->createPedestrian(1, {0.f, 0.f, 0.f});
@@ -25,6 +24,5 @@ BOOST_AUTO_TEST_CASE(test_character_inventory) {
         Global::get().e->destroyObject(character);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

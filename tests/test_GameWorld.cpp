@@ -4,9 +4,8 @@
 #include <objects/InstanceObject.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(GameWorldTests)
+BOOST_AUTO_TEST_SUITE(GameWorldTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_gameobject_id) {
     auto& gw = *Global::get().e;
 
@@ -67,6 +66,5 @@ BOOST_AUTO_TEST_CASE(test_offsetgametime) {
     BOOST_CHECK_EQUAL(9, gw.getHour());
     BOOST_CHECK_EQUAL(25, gw.getMinute());
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

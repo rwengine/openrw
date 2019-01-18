@@ -15,9 +15,8 @@ std::ostream& operator<<(std::ostream& os, const AIGraphNode* yt) {
     return os;
 }
 
-BOOST_AUTO_TEST_SUITE(TrafficDirectorTests)
+BOOST_AUTO_TEST_SUITE(TrafficDirectorTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_available_nodes) {
     AIGraph graph;
 
@@ -164,6 +163,5 @@ BOOST_AUTO_TEST_CASE(test_create_traffic) {
 
     // Global::get().e->destroyObject(created[0]);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

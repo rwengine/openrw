@@ -5,9 +5,8 @@
 #include <objects/VehicleObject.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(CharacterTests)
+BOOST_AUTO_TEST_SUITE(CharacterTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_create) {
     {
         auto character =
@@ -164,6 +163,5 @@ BOOST_AUTO_TEST_CASE(test_cycle_animating) {
                           static_cast<uint32_t>(AnimCycle::ArrestGun));
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
