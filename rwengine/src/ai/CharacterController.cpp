@@ -619,6 +619,11 @@ bool Activities::UseItem::update(CharacterObject *character,
     auto shootcycle = find_cycle(weapon->animation1);
     auto throwcycle = find_cycle(weapon->animation2);
 
+    // No weapon except for Uzi can be used while in a vehicle
+    if (character->getCurrentVehicle() && weapon->name != "uzi") {
+        return false;
+    }
+
     // Instant hit weapons loop their anim
     // Thrown projectiles have lob / throw.
 
