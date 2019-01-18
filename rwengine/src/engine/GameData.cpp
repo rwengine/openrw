@@ -48,13 +48,12 @@ void GameData::load() {
     /// @todo cuts.img files should be loaded differently to gta3.img
     loadIMG("anim/cuts.img");
 
-    textureslots["particle"] = loadTextureArchive("particle.txd");
-    textureslots["icons"] = loadTextureArchive("icons.txd");
-    textureslots["hud"] = loadTextureArchive("hud.txd");
-    textureslots["fonts"] = loadTextureArchive("fonts.txd");
-    textureslots["generic"] = loadTextureArchive("generic.txd");
-    auto misc = loadTextureArchive("misc.txd");
-    textureslots["generic"].insert(misc.begin(), misc.end());
+    textureSlots["particle"] = loadTextureArchive("particle.txd");
+    textureSlots["icons"] = loadTextureArchive("icons.txd");
+    textureSlots["hud"] = loadTextureArchive("hud.txd");
+    textureSlots["fonts"] = loadTextureArchive("fonts.txd");
+    textureSlots["generic"] = loadTextureArchive("generic.txd");
+    loadToTextureArchive("misc.txd", textureSlots["generic"]);
 
     loadCarcols("data/carcols.dat");
     loadWeather("data/timecyc.dat");
@@ -362,12 +361,12 @@ void GameData::loadTXD(const std::string& name) {
     currenttextureslot = slot;
 
     // Check if this texture slot is loaded already
-    auto slotit = textureslots.find(slot);
-    if (slotit != textureslots.end()) {
+    auto slotit = textureSlots.find(slot);
+    if (slotit != textureSlots.end()) {
         return;
     }
 
-    textureslots[slot] = loadTextureArchive(name);
+    textureSlots[slot] = loadTextureArchive(name);
 }
 
 TextureArchive GameData::loadTextureArchive(const std::string& name) {
@@ -388,6 +387,21 @@ TextureArchive GameData::loadTextureArchive(const std::string& name) {
     }
 
     return textures;
+}
+
+void GameData::loadToTextureArchive(const std::string& name,
+                                  TextureArchive& archive) {
+    RW_PROFILE_COUNTER_ADD("loadTextureArchive", 1);
+    /// @todo refactor loadTXD to use correct file locations
+    auto file = index.openFile(name);
+    if (!file.data) {
+        logger->error("Data", "Failed to open txd: " + name);
+    }
+
+    TextureLoader l;
+    if (!l.loadFromMemory(file, archive)) {
+        logger->error("Data", "Error loading txd: " + name);
+    }
 }
 
 void GameData::getNameAndLod(std::string& name, int& lod) {
@@ -696,22 +710,21 @@ void GameData::loadSplash(const std::string& name) {
     std::string lower(name);
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    auto splashTXD = loadTextureArchive(lower + ".txd");
-    textureslots["generic"].insert(splashTXD.begin(), splashTXD.end());
+    textureSlots["generic"] = loadTextureArchive(lower + ".txd");
 
     engine->state->currentSplash = lower;
 }
 
-TextureData::Handle GameData::findSlotTexture(const std::string &slot, const std::string &texture) const {
-    auto slotit = textureslots.find(slot);
-    if (slotit == textureslots.end()) {
+TextureData* GameData::findSlotTexture(const std::string &slot, const std::string &texture) const {
+    auto slotIt = textureSlots.find(slot);
+    if (slotIt == textureSlots.end()) {
         return nullptr;
     }
-    auto textureit = slotit->second.find(texture);
-    if (textureit == slotit->second.end()) {
+    auto textureIt = slotIt->second.find(texture);
+    if (textureIt == slotIt->second.end()) {
         return nullptr;
     }
-    return textureit->second;
+    return textureIt->second.get();
 }
 
 ZoneData *GameData::findZone(const std::string &name) {

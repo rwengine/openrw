@@ -4,9 +4,9 @@
 #include <gl/gl_core_3_3.h>
 #include <glm/vec2.hpp>
 
-#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 /**
  * Stores a handle and metadata about a loaded texture.
@@ -33,11 +33,9 @@ public:
         return hasAlpha;
     }
 
-    typedef std::shared_ptr<TextureData> Handle;
-
-    static Handle create(GLuint name, const glm::ivec2& size,
+    static auto create(GLuint name, const glm::ivec2& size,
                          bool transparent) {
-        return std::make_shared<TextureData>(name, size, transparent);
+        return std::make_unique<TextureData>(name, size, transparent);
     }
 
 private:
@@ -45,6 +43,6 @@ private:
     glm::ivec2 size;
     bool hasAlpha;
 };
-using TextureArchive = std::map<std::string, TextureData::Handle>;
+using TextureArchive = std::unordered_map<std::string, std::unique_ptr<TextureData>>;
 
 #endif

@@ -44,7 +44,7 @@ void ModelViewer::showObject(uint16_t object) {
     LoaderDFF dffLoader;
     dffLoader.setTextureLookupCallback(
         [&](const std::string& texture, const std::string&) {
-            return textures.at(texture);
+            return textures.at(texture).get();
         });
 
     auto file = world()->data->index.openFile(modelName);

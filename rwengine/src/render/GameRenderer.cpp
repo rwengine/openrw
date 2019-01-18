@@ -270,9 +270,9 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     GLuint splashTexName = 0;
     const auto fc = world->state->fadeColour;
     if ((fc.r + fc.g + fc.b) == 0 && !world->state->currentSplash.empty()) {
-        auto splash = world->data->findSlotTexture("generic", world->state->currentSplash);
-        if (splash) {
-            splashTexName = splash->getName();
+        auto splashTexPtr = world->data->findSlotTexture("generic", world->state->currentSplash);
+        if (splashTexPtr) {
+            splashTexName = splashTexPtr->getName();
         }
     }
 

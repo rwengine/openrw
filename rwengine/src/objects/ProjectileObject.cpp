@@ -86,8 +86,8 @@ void ProjectileObject::explode() {
 
         auto& explosion = engine->createParticleEffect();
 
-        auto tex = engine->data->findSlotTexture("particle", "explo02");
-        explosion.texture = tex;
+        auto texPtr = engine->data->findSlotTexture("particle", "explo02");
+        explosion.texture = texPtr;
         explosion.size = glm::vec2(exp_size);
         explosion.starttime = engine->getGameTime();
         explosion.lifetime = 0.5f;

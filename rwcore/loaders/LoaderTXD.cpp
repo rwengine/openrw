@@ -12,16 +12,18 @@
 #include "platform/FileHandle.hpp"
 #include "rw/debug.hpp"
 
-GLuint gErrorTextureData[] = {0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF};
-GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
-GLuint gTextureRed[] = {0xFF0000FF};
-GLuint gTextureGreen[] = {0xFF00FF00};
-GLuint gTextureBlue[] = {0xFFFF0000};
+namespace {
+constexpr GLuint gErrorTextureData[] = {0xFFFF00FF, 0xFF000000, 0xFF000000, 0xFFFF00FF};
+constexpr GLuint gDebugTextureData[] = {0xFF0000FF, 0xFF00FF00};
+constexpr GLuint gTextureRed[] = {0xFF0000FF};
+constexpr GLuint gTextureGreen[] = {0xFF00FF00};
+constexpr GLuint gTextureBlue[] = {0xFFFF0000};
+}  // namespace
 
 static
-TextureData::Handle getErrorTexture() {
-    static GLuint errTexName = 0;
-    static TextureData::Handle tex;
+std::unique_ptr<TextureData> getErrorTexture() {
+    GLuint errTexName = 0;
+    std::unique_ptr<TextureData> tex = nullptr;
     if (errTexName == 0) {
         glGenTextures(1, &errTexName);
         glBindTexture(GL_TEXTURE_2D, errTexName);
@@ -51,9 +53,8 @@ void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
     }
 }
 
-static
-TextureData::Handle createTexture(RW::BSTextureNative& texNative,
-                                  RW::BinaryStreamSection& rootSection) {
+static std::unique_ptr<TextureData> createTexture(
+    RW::BSTextureNative& texNative, RW::BinaryStreamSection& rootSection) {
     // TODO: Exception handling.
     if (texNative.platform != 8) {
         RW_ERROR("Unsupported texture platform " << std::dec
@@ -191,9 +192,7 @@ bool TextureLoader::loadFromMemory(const FileContentsInfo& file,
         std::transform(name.begin(), name.end(), name.begin(), ::tolower);
         std::transform(alpha.begin(), alpha.end(), alpha.begin(), ::tolower);
 
-        auto texture = createTexture(texNative, rootSection);
-
-        inTextures[name] = texture;
+        inTextures[name] = createTexture(texNative, rootSection);
     }
 
     return true;

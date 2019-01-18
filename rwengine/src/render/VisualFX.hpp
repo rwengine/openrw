@@ -1,4 +1,4 @@
-#ifndef _RWENGINE_VISUALFX_HPP_
+﻿#ifndef _RWENGINE_VISUALFX_HPP_
 #define _RWENGINE_VISUALFX_HPP_
 
 #include <glm/vec2.hpp>
@@ -50,7 +50,7 @@ struct ParticleFX final : public VisualFX {
     float lifetime{-1.f};
 
     /** Texture name */
-    TextureData::Handle texture;
+    TextureData* texture = nullptr;
 
     /** Size of particle */
     glm::vec2 size{1.f, 1.f};
