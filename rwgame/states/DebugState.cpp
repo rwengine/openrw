@@ -500,7 +500,7 @@ void DebugState::printCameraDetails() {
     std::cout << " " << _debugCam.position.x << " " << _debugCam.position.y
               << " " << _debugCam.position.z << " " << _debugCam.rotation.x
               << " " << _debugCam.rotation.y << " " << _debugCam.rotation.z
-              << " " << _debugCam.rotation.w << std::endl;
+              << " " << _debugCam.rotation.w << '\n';
 }
 
 void DebugState::spawnVehicle(unsigned int id) {

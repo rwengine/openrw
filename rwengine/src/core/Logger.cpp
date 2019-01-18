@@ -45,5 +45,5 @@ std::map<Logger::MessageSeverity, char> severityStr{{Logger::Error, 'E'},
 
 void StdOutReceiver::messageReceived(const Logger::LogMessage& message) {
     std::cout << severityStr[message.severity] << " [" << message.component
-              << "] " << message.message << std::endl;
+              << "] " << message.message << '\n';
 }

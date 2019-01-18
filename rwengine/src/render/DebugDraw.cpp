@@ -88,12 +88,12 @@ void DebugDraw::flush(GameRenderer &renderer) {
 }
 
 void DebugDraw::reportErrorWarning(const char *warningString) {
-    std::cerr << warningString << std::endl;
+    std::cerr << warningString << '\n';
 }
 
 void DebugDraw::draw3dText(const btVector3 &location, const char *textString) {
     RW_UNUSED(location);
-    std::cout << textString << std::endl;
+    std::cout << textString << '\n';
 }
 
 void DebugDraw::setDebugMode(int debugMode) {

@@ -56,7 +56,7 @@ void BenchmarkState::enter() {
         track.push_back(point);
     }
 
-    std::cout << "Loaded " << track.size() << " points" << std::endl;
+    std::cout << "Loaded " << track.size() << " points" << '\n';
 }
 
 void BenchmarkState::exit() {
@@ -66,7 +66,7 @@ void BenchmarkState::exit() {
               << "Duration: " << duration << " seconds\n"
               << "Avg frametime: " << std::setprecision(3)
               << (duration / frameCounter) << " (" << (frameCounter / duration)
-              << " fps)" << std::endl;
+              << " fps)" << '\n';
 }
 
 void BenchmarkState::tick(float dt) {

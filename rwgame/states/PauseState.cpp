@@ -11,7 +11,7 @@ PauseState::PauseState(RWGame* game) : State(game) {
 
     Menu menu{{{t.text(MenuDefaults::kResumeGameId), [&] { done(); }},
                {t.text(MenuDefaults::kOptionsId),
-                [] { std::cout << "Options" << std::endl; }},
+                [] { std::cout << "Options" << '\n'; }},
                {t.text(MenuDefaults::kQuitGameId),
                 [=] { game->getStateManager().clear(); }}},
               glm::vec2(200.f, 200.f)};
