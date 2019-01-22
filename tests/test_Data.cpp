@@ -8,9 +8,8 @@
 // Tests against loading various data files
 // These tests are bad but so are the interfaces so it cancels out.
 
-BOOST_AUTO_TEST_SUITE(DataTests)
+BOOST_AUTO_TEST_SUITE(DataTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_weapon_dat) {
     GenericDATLoader l;
     std::vector<WeaponData> weaponData;
@@ -121,6 +120,5 @@ BOOST_AUTO_TEST_CASE(test_model_archive_loaded) {
         e->destroyObject(inst);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

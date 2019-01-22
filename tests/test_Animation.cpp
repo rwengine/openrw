@@ -5,9 +5,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(AnimationTests)
+BOOST_AUTO_TEST_SUITE(AnimationTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_matrix) {
     {
         auto animation = std::make_shared<Animation>();
@@ -44,6 +43,5 @@ BOOST_AUTO_TEST_CASE(test_matrix) {
                     glm::vec3(0.f, 1.f, 0.f));
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

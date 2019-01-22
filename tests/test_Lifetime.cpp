@@ -4,9 +4,8 @@
 #include <render/ViewCamera.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(LifetimeTests)
+BOOST_AUTO_TEST_SUITE(LifetimeTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_cleanup) {
     GameObject* f =
         Global::get().e->createInstance(1337, glm::vec3(0.f, 0.f, 1000.f));
@@ -29,6 +28,5 @@ BOOST_AUTO_TEST_CASE(test_cleanup) {
         BOOST_CHECK(search != objects.end());
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

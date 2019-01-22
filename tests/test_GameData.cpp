@@ -2,9 +2,8 @@
 #include <engine/GameData.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(GameDataTests)
+BOOST_AUTO_TEST_SUITE(GameDataTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_object_data) {
     GameData gd(&Global::get().log, Global::getGamePath());
     gd.load();
@@ -94,6 +93,5 @@ BOOST_AUTO_TEST_CASE(test_ped_groups) {
     BOOST_REQUIRE_GE(red.size(), 8);
     BOOST_CHECK_EQUAL(red[0], 34);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

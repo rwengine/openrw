@@ -3,7 +3,6 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/PickupObject.hpp>
 #include "test_Globals.hpp"
-#if RW_TEST_WITH_DATA
 
 class TestPickup : public PickupObject {
 public:
@@ -20,7 +19,7 @@ public:
     }
 };
 
-BOOST_AUTO_TEST_SUITE(PickupTests)
+BOOST_AUTO_TEST_SUITE(PickupTests, DATA_TEST_PREDICATE)
 
 BOOST_AUTO_TEST_CASE(test_pickup_interaction) {
     {
@@ -97,4 +96,3 @@ BOOST_AUTO_TEST_CASE(test_item_pickup) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-#endif

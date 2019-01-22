@@ -9,8 +9,7 @@
 
 BOOST_AUTO_TEST_SUITE(TextTests)
 
-#if RW_TEST_WITH_DATA
-BOOST_AUTO_TEST_CASE(load_test) {
+BOOST_AUTO_TEST_CASE(load_test, DATA_TEST_PREDICATE) {
     {
         auto d = Global::get().e->data->index.openFileRaw("text/english.gxt");
 
@@ -23,7 +22,6 @@ BOOST_AUTO_TEST_CASE(load_test) {
         BOOST_CHECK_EQUAL(texts.text("1008"), T("BUSTED"));
     }
 }
-#endif
 
 BOOST_AUTO_TEST_CASE(special_chars) {
     {

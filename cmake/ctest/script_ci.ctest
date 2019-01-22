@@ -52,9 +52,8 @@ set(RUN_MEMCHECK FALSE)
 openrw_should_submit_ci(SUBMIT)
 
 # Build with no data and test
-set(BUILDER_NAME "${BUILDER_NAME_BASE}-nodata")
+set(BUILDER_NAME "${BUILDER_NAME_BASE}")
 set(APPEND_RESULTS FALSE)
-set(TESTS_NODATA TRUE)
 set(RUN_TESTS TRUE)
 if($ENV{TEST_COVERAGE})
     set(TEST_COVERAGE TRUE)
@@ -63,16 +62,6 @@ else()
 endif()
 
 set(CODECOV_FLAGS "nodata")
-
-include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
-
-# Build with data and do not test
-set(BUILDER_NAME "${BUILDER_NAME_BASE}-data")
-set(APPEND_RESULTS FALSE)
-set(TESTS_NODATA FALSE)
-set(RUN_TESTS FALSE)
-
-set(CODECOV_FLAGS "data")
 
 include("${CTEST_SCRIPT_DIRECTORY}/build.ctest")
 

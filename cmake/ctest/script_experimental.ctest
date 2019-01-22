@@ -62,7 +62,6 @@ else()
     set(RES FALSE)
 endif()
 
-set(TESTS_NODATA FALSE)
 set(RUN_TESTS TRUE)
 
 set(SUBMIT $ENV{SUBMIT})

@@ -3,9 +3,8 @@
 #include <platform/FileHandle.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(RWBStreamTests)
+BOOST_AUTO_TEST_SUITE(RWBStreamTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(iterate_stream_test) {
     {
         auto d = Global::get().e->data->index.openFile("landstal.dff");
@@ -28,6 +27,5 @@ BOOST_AUTO_TEST_CASE(iterate_stream_test) {
         BOOST_CHECK_EQUAL(*reinterpret_cast<std::uint32_t*>(innerCursor), 0x10);
     }
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

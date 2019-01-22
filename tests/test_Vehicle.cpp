@@ -3,9 +3,8 @@
 #include <objects/VehicleObject.hpp>
 #include "test_Globals.hpp"
 
-BOOST_AUTO_TEST_SUITE(VehicleTests)
+BOOST_AUTO_TEST_SUITE(VehicleTests, DATA_TEST_PREDICATE)
 
-#if RW_TEST_WITH_DATA
 BOOST_AUTO_TEST_CASE(test_create_vehicle) {
     VehicleObject* vehicle =
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
@@ -130,6 +129,5 @@ BOOST_AUTO_TEST_CASE(test_open_part) {
 
     Global::get().e->destroyObject(vehicle);
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()

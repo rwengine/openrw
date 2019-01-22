@@ -53,11 +53,6 @@ add_executable(rwtests
     ${TEST_SOURCES}
     )
 
-target_compile_definitions(rwtests
-    PRIVATE
-        "RW_TEST_WITH_DATA=$<NOT:$<BOOL:${TESTS_NODATA}>>"
-    )
-
 target_include_directories(rwtests
     PRIVATE
         "${PROJECT_SOURCE_DIR}/tests"
@@ -95,5 +90,11 @@ else()
     set_tests_properties(UnitTests
         PROPERTIES
             TIMEOUT 300
+        )
+endif()
+
+if(TEST_DATA)
+    add_test(NAME DataTests
+            COMMAND "$<TARGET_FILE:rwtests>" "--run_test=@data-test"
         )
 endif()
