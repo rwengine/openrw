@@ -17,6 +17,12 @@ constexpr GLuint kUBOIndexDraw = 2;
 
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
+
+    if (shader == 0) {
+        RW_ERROR("[OGL] Failed to create shader object");
+        throw std::runtime_error("Compiling shader failed");
+    }
+
     glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
 
