@@ -311,7 +311,7 @@ void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     static constexpr float kRotationSpeedCoeff = 3.0f;
     glm::mat4 modelMatrix =
         glm::translate(glm::mat4(1.0f), pickup->getPosition());
-    modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime() * rotationSpeedCoeff,
+    modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime() * kRotationSpeedCoeff,
                               glm::vec3(0.f, 0.f, 1.f));
 
     auto odata = pickup->getModelInfo<SimpleModelInfo>();
