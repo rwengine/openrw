@@ -1,9 +1,12 @@
 #include "audio/SoundBuffer.hpp"
 
 #include <rw/types.hpp>
+#include <efx.h>
 
 #include "audio/alCheck.hpp"
 #include "audio/SoundSource.hpp"
+#include "audio/SoundEffect.hpp"
+#include "audio/EffectSlot.hpp"
 
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));
@@ -82,4 +85,12 @@ void SoundBuffer::setGain(float gain) {
 }
 void SoundBuffer::setMaxDistance(float maxDist) {
     alCheck(alSourcef(source, AL_MAX_DISTANCE, maxDist));
+}
+
+void SoundBuffer::attachToEffectSlot(const std::shared_ptr<EffectSlot> slot) {
+    alCheck(alSource3i(source, AL_AUXILIARY_SEND_FILTER, slot->getSlotId(), slot->getSlotNumber(), AL_FILTER_NULL));
+}
+
+void SoundBuffer::detachFromEffectSlot(const std::shared_ptr<EffectSlot> slot) {
+    alCheck(alSource3i (source, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, slot->getSlotNumber(), AL_FILTER_NULL));
 }
