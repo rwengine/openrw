@@ -6,6 +6,7 @@
 #include <memory>
 
 class SoundSource;
+class EffectSlot;
 struct SoundBuffer;
 
 /// Wrapper for SoundBuffer and SoundSource.
@@ -41,6 +42,8 @@ struct Sound {
     void setGain(float gain);
 
     void setMaxDistance(float maxDist);
+
+    void attachToEffectSlot(const std::shared_ptr<EffectSlot> effectSlot);
 
     size_t getScriptObjectID() const;
 };

@@ -5,12 +5,15 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/avutil.h>
+#include <efx.h>
 }
 
 #include "audio/alCheck.hpp"
 #include "audio/Sound.hpp"
 #include "audio/SoundBuffer.hpp"
 #include "audio/SoundSource.hpp"
+#include "audio/OpenAlExtensions.hpp"
+#include "audio/SoundEffect.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"
 #include "render/ViewCamera.hpp"
@@ -43,6 +46,7 @@ SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
 
     initializeOpenAL();
     initializeAVCodec();
+    initializeEFX();
 }
 
 SoundManager::~SoundManager() {
@@ -85,6 +89,18 @@ void SoundManager::initializeAVCodec() {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
     av_register_all();
 #endif
+}
+
+bool SoundManager::initializeEFX() {
+    if (!alcIsExtensionPresent(alDevice, ALC_EXT_EFX_NAME)) {
+        RW_ERROR("EFX extention is not present");
+        return false;
+    }
+
+    initEfxFunctionPointers();
+
+    SoundEffect effect(0);
+    return true;
 }
 
 void SoundManager::deinitializeOpenAL() {
@@ -138,7 +154,7 @@ void SoundManager::loadSound(size_t index) {
 
     sound->source = std::make_shared<SoundSource>();
     sound->source->loadSfx(sdt, index);
-}
+ }
 
 size_t SoundManager::createSfxInstance(size_t index) {
     Sound* sound = nullptr;

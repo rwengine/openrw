@@ -46,6 +46,11 @@ void Sound::setMaxDistance(float maxDist) {
     buffer->setMaxDistance(maxDist);
 }
 
+void Sound::attachToEffectSlot(const std::shared_ptr<EffectSlot> effectSlot)
+{
+    buffer->attachToEffectSlot(effectSlot);
+}
+
 size_t Sound::getScriptObjectID() const {
     return id;
 }

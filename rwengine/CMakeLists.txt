@@ -24,6 +24,14 @@ set(RWENGINE_SOURCES
     src/audio/SoundManager.hpp
     src/audio/SoundSource.cpp
     src/audio/SoundSource.hpp
+    src/audio/EffectSlot.hpp
+    src/audio/EffectSlot.cpp
+    src/audio/SoundEffect.cpp
+    src/audio/SoundEffect.hpp
+    src/audio/ReverbEffect.cpp
+    src/audio/ReverbEffect.hpp
+    src/audio/OpenAlExtensions.hpp
+    src/audio/OpenAlExtensions.cpp
 
     src/core/Logger.cpp
     src/core/Logger.hpp

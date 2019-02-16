@@ -91,6 +91,9 @@ private:
     bool initializeOpenAL();
     void initializeAVCodec();
 
+    /// Initialize EFX OpenAL extention
+    bool initializeEFX();
+
     void deinitializeOpenAL();
 
     ALCcontext* alContext = nullptr;
