@@ -98,8 +98,6 @@ bool SoundManager::initializeEFX() {
     }
 
     initEfxFunctionPointers();
-
-    SoundEffect effect(0);
     return true;
 }
 
