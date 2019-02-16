@@ -27,18 +27,18 @@ void ReverbEffect::setDecayTime(float t) {
     alEffectf(id, AL_REVERB_DECAY_TIME, t);
 }
 
-void	ReverbEffect :: setLateReverbGain  (float g) {
+void ReverbEffect::setLateReverbGain(float g) {
     alEffectf(id, AL_REVERB_LATE_REVERB_GAIN, g);
 }
 
-void	ReverbEffect :: setLateReverbDelay (float t) {
+void ReverbEffect::setLateReverbDelay(float t) {
     alEffectf(id, AL_REVERB_LATE_REVERB_DELAY, t);
 }
 
-void	ReverbEffect :: setAirAbsorptionGainHf (float g) {
+void ReverbEffect::setAirAbsorptionGainHf(float g) {
     alEffectf(id, AL_REVERB_AIR_ABSORPTION_GAINHF, g);
 }
 
-void	ReverbEffect :: setDecayHfLimit (bool flag) {
+void ReverbEffect::setDecayHfLimit(bool flag) {
     alEffecti(id, AL_REVERB_DECAY_HFLIMIT, flag ? AL_TRUE : AL_FALSE);
 }
