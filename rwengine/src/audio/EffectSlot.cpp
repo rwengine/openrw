@@ -5,9 +5,6 @@
 EffectSlot::EffectSlot() {
     alGenAuxiliaryEffectSlots(1, &slotId);
 
-    effect = nullptr;
-    gain = 1.0f;
-    slotNumber = 0;
     created = alGetError() == AL_NO_ERROR;
 }
 

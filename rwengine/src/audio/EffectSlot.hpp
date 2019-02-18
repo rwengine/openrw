@@ -48,12 +48,12 @@ private:
      */
     std::shared_ptr<SoundEffect> effect;
 
-    ALuint slotId;
+    ALuint slotId = 0;
     /**
      * This is flag of successfull slot creation
      */
     bool created;
-    float gain;
+    float gain = 1.0f;
 
     /// OpenAL aux slot
     int slotNumber;
