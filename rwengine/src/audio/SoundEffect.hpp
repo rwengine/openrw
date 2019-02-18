@@ -16,7 +16,7 @@ public:
      * @param type OpenAl specific effect type.
      */
     SoundEffect(ALint type);
-    ~SoundEffect();
+    virtual ~SoundEffect();
 
     ALuint getId() const {
         return id;
