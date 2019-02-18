@@ -32,5 +32,6 @@ bool EffectSlot::detachEffect() {
 }
 
 void EffectSlot::setGain(float gain) {
-    alAuxiliaryEffectSlotf(slotId, AL_EFFECTSLOT_GAIN, this->gain = gain);
+    this->gain = gain;
+    alAuxiliaryEffectSlotf(slotId, AL_EFFECTSLOT_GAIN, gain);
 }
