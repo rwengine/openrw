@@ -2,6 +2,13 @@
 
 #include "audio/SoundBuffer.hpp"
 
+Sound::~Sound()
+{
+    if (effectSlot != nullptr) {
+        buffer->detachFromEffectSlot(effectSlot);
+    }
+}
+
 bool Sound::isPlaying() const {
     return buffer->isPlaying();
 }
@@ -48,6 +55,7 @@ void Sound::setMaxDistance(float maxDist) {
 
 void Sound::attachToEffectSlot(const std::shared_ptr<EffectSlot> effectSlot)
 {
+    this->effectSlot = effectSlot;
     buffer->attachToEffectSlot(effectSlot);
 }
 

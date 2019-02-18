@@ -19,8 +19,10 @@ struct Sound {
     std::shared_ptr<SoundSource> source;
     std::unique_ptr<SoundBuffer> buffer;
 
+    std::shared_ptr<EffectSlot> effectSlot;
+
     Sound() = default;
-    ~Sound() = default;
+    ~Sound();
 
     bool isPlaying() const;
 
