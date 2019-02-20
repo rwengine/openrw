@@ -6,7 +6,7 @@
 
 #include <memory>
 
-class EffectSlot;
+class SoundEffect;
 class SoundSource;
 
 /// OpenAL tool for playing
@@ -30,8 +30,8 @@ struct SoundBuffer {
     void setGain(float gain);
     void setMaxDistance(float maxDist);
 
-    void attachToEffectSlot(const std::shared_ptr<EffectSlot> &effectSlot);
-    void detachFromEffectSlot(const std::shared_ptr<EffectSlot> &effectSlot);
+    void enableEffect(std::shared_ptr<SoundEffect> effect);
+    void disableEffect(std::shared_ptr<SoundEffect> effect);
 
     ALuint source;
     ALuint buffer;

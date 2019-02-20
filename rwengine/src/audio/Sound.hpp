@@ -1,12 +1,14 @@
 #ifndef _RWENGINE_SOUND_HPP_
 #define _RWENGINE_SOUND_HPP_
 
+#include <audio/SoundEffect.hpp>
+
 #include <glm/vec3.hpp>
 
 #include <memory>
+#include <optional>
 
 class SoundSource;
-class EffectSlot;
 struct SoundBuffer;
 
 /// Wrapper for SoundBuffer and SoundSource.
@@ -19,7 +21,7 @@ struct Sound {
     std::shared_ptr<SoundSource> source;
     std::unique_ptr<SoundBuffer> buffer;
 
-    std::shared_ptr<EffectSlot> effectSlot;
+    std::shared_ptr<SoundEffect> effect;
 
     Sound() = default;
     ~Sound();
@@ -45,7 +47,7 @@ struct Sound {
 
     void setMaxDistance(float maxDist);
 
-    void attachToEffectSlot(const std::shared_ptr<EffectSlot> effectSlot);
+    void enableEffect(std::shared_ptr<SoundEffect> effect);
 
     size_t getScriptObjectID() const;
 };

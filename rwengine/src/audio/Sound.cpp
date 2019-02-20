@@ -4,8 +4,8 @@
 
 Sound::~Sound()
 {
-    if (effectSlot != nullptr) {
-        buffer->detachFromEffectSlot(effectSlot);
+    if (effect != nullptr) {
+        buffer->disableEffect(effect);
     }
 }
 
@@ -53,10 +53,10 @@ void Sound::setMaxDistance(float maxDist) {
     buffer->setMaxDistance(maxDist);
 }
 
-void Sound::attachToEffectSlot(const std::shared_ptr<EffectSlot> effectSlot)
+void Sound::enableEffect(std::shared_ptr<SoundEffect> effect)
 {
-    this->effectSlot = std::move(effectSlot);
-    buffer->attachToEffectSlot(this->effectSlot);
+    this->effect = std::move(effect);
+    buffer->enableEffect(this->effect);
 }
 
 size_t Sound::getScriptObjectID() const {

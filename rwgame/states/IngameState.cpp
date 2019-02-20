@@ -18,6 +18,9 @@
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
+#include <audio/SoundEffect.hpp>
+#include <audio/EffectSlot.hpp>
+#include <audio/ReverbEffect.hpp>
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>
@@ -51,6 +54,12 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
 
 void IngameState::startTest() {
     auto playerChar = getWorld()->createPlayer({270.f, -605.f, 40.f});
+
+    // load random sound
+    size_t index = game->getWorld()->sound.createSfxInstance(555);
+    Sound& sound = game->getWorld()->sound.getSoundRef(index);
+
+    game->getWorld()->sound.playSfx(index, playerChar->getPosition(), SoundEffect::Reverb);
 
     getWorld()->state->playerObject = playerChar->getGameObjectID();
 

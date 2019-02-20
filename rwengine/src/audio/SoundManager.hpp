@@ -2,6 +2,7 @@
 #define _RWENGINE_SOUNDMANAGER_HPP_
 
 #include "audio/Sound.hpp"
+#include "audio/SoundEffect.hpp"
 
 #include <alc.h>
 
@@ -62,8 +63,10 @@ public:
     /// allows also for setting position,
     /// looping and max Distance.
     /// -1 means no limit of max distance.
-    void playSfx(size_t name, const glm::vec3& position, bool looping = false,
-                 int maxDist = -1);
+    void playSfx(size_t name, const glm::vec3& position, bool looping = false, int maxDist = -1);
+
+    void playSfx(size_t name, const glm::vec3& position, SoundEffect::Type effect = SoundEffect::Type::Reverb,
+                 bool looping = false, int maxDist = -1);
 
     void pauseAllSounds();
     void resumeAllSounds();
@@ -120,6 +123,9 @@ private:
 
     /// Multiplier for music and cutscenes audio
     float _musicVolume = 1.f;
+
+    /// Available sound effects for sfx
+    std::vector<std::shared_ptr<SoundEffect>> soundEffects;
 };
 
 #endif

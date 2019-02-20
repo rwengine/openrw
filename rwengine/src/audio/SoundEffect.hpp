@@ -10,7 +10,16 @@
  * in order to be able to set different effect-specific parameters.
  */
 class SoundEffect {
+
 public:
+    /**
+     * Known SoundEffect types
+     */
+    enum Type {
+        None,
+        Reverb
+    };
+
     /**
      * Create effect
      * @param type OpenAl specific effect type.
@@ -21,6 +30,16 @@ public:
     ALuint getId() const {
         return id;
     }
+
+    ALuint getSlotId() const {
+        return slotId;
+    }
+
+    int getSlotNumber() const {
+        return slotNumber;
+    }
+
+    void setGain(float gain);
 
 protected:
     /**
@@ -33,6 +52,13 @@ private:
      * Effect created successfully if this is true after construction
      */
     bool created;
+
+    ALuint slotId;
+
+    float gain = 1.0f;
+
+    /// OpenAL aux slot
+    int slotNumber = 0;
 };
 
 #endif // SOUNDEFFECT_H
