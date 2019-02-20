@@ -55,12 +55,6 @@ IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
 void IngameState::startTest() {
     auto playerChar = getWorld()->createPlayer({270.f, -605.f, 40.f});
 
-    // load random sound
-    size_t index = game->getWorld()->sound.createSfxInstance(555);
-    Sound& sound = game->getWorld()->sound.getSoundRef(index);
-
-    game->getWorld()->sound.playSfx(index, playerChar->getPosition(), SoundEffect::Reverb);
-
     getWorld()->state->playerObject = playerChar->getGameObjectID();
 
     glm::vec3 itemspawn(276.5f, -609.f, 36.5f);
