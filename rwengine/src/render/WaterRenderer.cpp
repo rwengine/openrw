@@ -102,9 +102,9 @@ void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex) {
 void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
     auto& r = renderer.getRenderer();
 
-    auto waterTex = world->data->findSlotTexture("particle", "water_old");
-    RW_CHECK(waterTex != nullptr, "Water texture is null");
-    if (waterTex == nullptr) {
+    auto waterTexPtr = world->data->findSlotTexture("particle", "water_old");
+    RW_CHECK(waterTexPtr != nullptr, "Water texture is null");
+    if (waterTexPtr == nullptr) {
         // Can't render water if we don't have a texture.
         return;
     }
@@ -147,7 +147,7 @@ void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
     r.setUniform(waterProg.get(), "inverseVP", ivp);
 
     wdp.count = gridGeom.getCount();
-    wdp.textures = {{waterTex->getName(), dataTexture}};
+    wdp.textures = {{waterTexPtr->getName(), dataTexture}};
 
     r.drawArrays(m, &gridDraw, wdp);
 

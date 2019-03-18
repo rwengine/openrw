@@ -24,6 +24,6 @@ void checkALerror(const std::string& file, unsigned int line) {
                 std::cerr << err;
         }
 
-        std::cerr << std::endl;
+        std::cerr << '\n';
     }
 }

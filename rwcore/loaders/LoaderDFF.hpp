@@ -25,19 +25,19 @@ public:
 
 class LoaderDFF {
 public:
-    using TextureLookupCallback = std::function<TextureData::Handle(
-        const std::string&, const std::string&)>;
+    using TextureLookupCallback =
+        std::function<TextureData*(const std::string&, const std::string&)>;
     using GeometryList = std::vector<GeometryPtr>;
     using FrameList = std::vector<ModelFramePtr>;
 
     ClumpPtr loadFromMemory(const FileContentsInfo& file);
 
     void setTextureLookupCallback(const TextureLookupCallback& tlc) {
-        texturelookup = tlc;
+        textureLookup = tlc;
     }
 
 private:
-    TextureLookupCallback texturelookup;
+    TextureLookupCallback textureLookup;
 
     FrameList readFrameList(const RWBStream& stream);
 

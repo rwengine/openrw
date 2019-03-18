@@ -203,12 +203,12 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
         itemTextureName = "detonator";
     }
 
-    TextureData::Handle itemTexture =
+    auto itemTexturePtr =
         render.getData().findSlotTexture("hud", itemTextureName);
-    RW_CHECK(itemTexture != nullptr, "Item has 0 texture");
-    if (itemTexture != nullptr) {
-        RW_CHECK(itemTexture->getName() != 0, "Item has 0 texture");
-        render.drawTexture(itemTexture.get(),
+    RW_CHECK(itemTexturePtr != nullptr, "Item has 0 texture");
+    if (itemTexturePtr != nullptr) {
+        RW_CHECK(itemTexturePtr->getName() != 0, "Item has 0 texture");
+        render.drawTexture(itemTexturePtr,
                            glm::vec4(iconX, iconY, hudParameters.uiWeaponSize,
                                      hudParameters.uiWeaponSize));
     }

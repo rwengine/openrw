@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <data/ZoneData.hpp>
+#include <data/InstanceData.hpp>
 
 struct InstanceData;
 
@@ -22,7 +23,7 @@ public:
     bool load(std::istream& stream);
 
     /// The list of instances from the IPL file
-    std::vector<std::shared_ptr<InstanceData>> m_instances;
+    std::vector<InstanceData> m_instances;
 
     /// List of Zones
     ZoneDataList zones;

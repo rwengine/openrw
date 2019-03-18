@@ -42,9 +42,9 @@ void WinBreak();
 #if defined(RW_DEBUG) && defined(RW_VERBOSE_DEBUG_MESSAGES)
 #include <iostream>
 #define RW_MESSAGE(msg) \
-    std::cout << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl
+    std::cout << __FILE__ << ":" << __LINE__ << ": " << msg << '\n'
 #define RW_ERROR(msg) \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << msg << std::endl
+    std::cerr << __FILE__ << ":" << __LINE__ << ": " << msg << '\n'
 #else
 #define RW_MESSAGE(msg)
 #define RW_ERROR(msg)

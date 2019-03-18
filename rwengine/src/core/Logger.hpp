@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_LOGGER_HPP_
 #define _RWENGINE_LOGGER_HPP_
 
+#include <array>
 #include <initializer_list>
 #include <string>
 #include <utility>
@@ -13,7 +14,8 @@
  */
 class Logger {
 public:
-    enum MessageSeverity { Verbose, Info, Warning, Error };
+    enum MessageSeverity { Verbose = 0, Info, Warning, Error};
+    static constexpr std::array<char, 4> messageSeverityName{{'V', 'I', 'W', 'E'}};
 
     struct LogMessage {
         /// The component that produced the message

@@ -80,18 +80,18 @@ bool LoaderIPL::load(std::istream &str) {
                 getline(strstream, rotZ, ',');
                 getline(strstream, rotW, ',');
 
-                auto instance = std::make_shared<InstanceData>(
+                m_instances.emplace_back(
                     lexical_cast<int>(id),  // ID
                     model.substr(1, model.size() - 1),
-                    glm::vec3(lexical_cast<float>(posX), lexical_cast<float>(posY),
+                    glm::vec3(lexical_cast<float>(posX),
+                              lexical_cast<float>(posY),
                               lexical_cast<float>(posZ)),
-                    glm::vec3(lexical_cast<float>(scaleX), lexical_cast<float>(scaleY),
+                    glm::vec3(lexical_cast<float>(scaleX),
+                              lexical_cast<float>(scaleY),
                               lexical_cast<float>(scaleZ)),
-                    glm::normalize(
-                        glm::quat(-lexical_cast<float>(rotW), lexical_cast<float>(rotX),
-                                  lexical_cast<float>(rotY), lexical_cast<float>(rotZ))));
-
-                m_instances.push_back(instance);
+                    glm::normalize(glm::quat(
+                        -lexical_cast<float>(rotW), lexical_cast<float>(rotX),
+                        lexical_cast<float>(rotY), lexical_cast<float>(rotZ))));
             } else if (section == ZONE) {
                 ZoneData zone;
 

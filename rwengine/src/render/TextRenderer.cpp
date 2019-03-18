@@ -143,8 +143,8 @@ TextRenderer::TextRenderer(GameRenderer &renderer) : renderer(renderer) {
 }
 
 void TextRenderer::setFontTexture(font_t font, const std::string& textureName) {
-    auto ftexture = renderer.getData().findSlotTexture("fonts", textureName);
-    const glm::u32vec2 textureSize = ftexture->getSize();
+    auto fTexturePtr = renderer.getData().findSlotTexture("fonts", textureName);
+    const glm::u32vec2 textureSize = fTexturePtr->getSize();
     glm::u8vec2 glyphOffset{textureSize.x / 16, textureSize.x / 16};
     if (font != FONT_PAGER) {
         glyphOffset.y += glyphOffset.y / 4;
@@ -344,8 +344,8 @@ void TextRenderer::renderText(const TextRenderer::TextInfo& ti,
     dp.start = 0;
     dp.blendMode = BlendMode::BLEND_ALPHA;
     dp.count = gb.getCount();
-    auto ftexture = renderer.getData().findSlotTexture("fonts", fontMetaData.textureName);
-    dp.textures = {{ftexture->getName()}};
+    auto fTexturePtr = renderer.getData().findSlotTexture("fonts", fontMetaData.textureName);
+    dp.textures = {{fTexturePtr->getName()}};
     dp.depthMode = DepthMode::OFF;
 
     renderer.getRenderer().drawArrays(glm::mat4(1.0f), &db, dp);

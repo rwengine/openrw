@@ -131,6 +131,11 @@ public:
     TextureArchive loadTextureArchive(const std::string& name);
 
     /**
+     * Loads to named a texture archive from the game data
+     */
+    void loadToTextureArchive(const std::string& name, TextureArchive& archive);
+
+    /**
      * Converts combined {name}_l{LOD} into name and lod.
      */
     static void getNameAndLod(std::string& name, int& lod);
@@ -190,7 +195,7 @@ public:
 
     void loadSplash(const std::string& name);
 
-    TextureData::Handle findSlotTexture(const std::string& slot,
+    TextureData* findSlotTexture(const std::string& slot,
                                         const std::string& texture) const;
 
     FileIndex index;
@@ -260,7 +265,7 @@ public:
     /**
      * Texture slots, containing loaded textures.
      */
-    std::map<std::string, TextureArchive> textureslots;
+    std::unordered_map<std::string, TextureArchive> textureSlots;
 
     /**
      * Texture atlases.

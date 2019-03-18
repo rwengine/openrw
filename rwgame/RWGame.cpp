@@ -579,7 +579,7 @@ void RWGame::tick(float dt) {
             try {
                 vm->execute(dt);
             } catch (SCMException& ex) {
-                std::cerr << ex.what() << std::endl;
+                std::cerr << ex.what() << '\n';
                 log.error("Script", ex.what());
                 throw;
             }
