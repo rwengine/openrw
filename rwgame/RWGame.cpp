@@ -41,10 +41,10 @@
 
 namespace {
 static constexpr std::array<
-    std::tuple<GameRenderer::SpecialModel, char const*, char const*>, 3>
-    kSpecialModels{{{GameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
-                    {GameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
-                    {GameRenderer::Arrow, "arrow.dff", ""}}};
+    std::tuple<LegacyGameRenderer::SpecialModel, char const*, char const*>, 3>
+    kSpecialModels{{{LegacyGameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
+                    {LegacyGameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
+                    {LegacyGameRenderer::Arrow, "arrow.dff", ""}}};
 
 constexpr float kMaxPhysicsSubSteps = 2;
 }  // namespace

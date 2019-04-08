@@ -11,7 +11,7 @@
 
 class RWGame;
 class GameWorld;
-class GameRenderer;
+class LegacyGameRenderer;
 class GameWindow;
 class Menu;
 class StateManager;
@@ -28,7 +28,7 @@ public:
 
     virtual void tick(float dt) = 0;
 
-    virtual void draw(GameRenderer& r);
+    virtual void draw(LegacyGameRenderer& r);
 
     virtual ~State() = default;
 

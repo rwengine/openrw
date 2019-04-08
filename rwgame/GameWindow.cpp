@@ -1,7 +1,7 @@
 #include "GameWindow.hpp"
 
 #include <core/Logger.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 #include <SDL_mouse.h>
 

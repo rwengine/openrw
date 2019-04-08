@@ -26,7 +26,7 @@ class TextureData;
  * Rendering of object types is handled by drawWorld, calling the respective
  * render function for each object.
  */
-class GameRenderer {
+class LegacyGameRenderer {
     /** Game data to use for rendering */
     GameData* data;
 
@@ -63,8 +63,8 @@ class GameRenderer {
     DrawBuffer ssRectDraw;
 
 public:
-    GameRenderer(Logger* log, GameData* data);
-    ~GameRenderer();
+    LegacyGameRenderer(Logger* log, GameData* data);
+    ~LegacyGameRenderer();
 
     std::unique_ptr<Renderer::ShaderProgram> worldProg;
     std::unique_ptr<Renderer::ShaderProgram> skyProg;

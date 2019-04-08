@@ -32,7 +32,7 @@ void PauseState::tick(float dt) {
     RW_UNUSED(dt);
 }
 
-void PauseState::draw(GameRenderer& r) {
+void PauseState::draw(LegacyGameRenderer& r) {
     MapRenderer::MapInfo map;
 
     auto& vp = r.getRenderer().getViewport();

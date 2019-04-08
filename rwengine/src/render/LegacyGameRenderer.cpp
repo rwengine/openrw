@@ -1,4 +1,4 @@
-#include "render/GameRenderer.hpp"
+#include "render/LegacyGameRenderer.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -40,7 +40,7 @@ struct ParticleVert {
     float r, g, b;
 };
 
-GameRenderer::GameRenderer(Logger* log, GameData* _data)
+LegacyGameRenderer::LegacyGameRenderer(Logger* log, GameData* _data)
     : data(_data)
     , logger(log)
     , map(*renderer, _data)
@@ -165,11 +165,11 @@ GameRenderer::GameRenderer(Logger* log, GameData* _data)
     renderer->setUniform(ssRectProg.get(), "texture", 0);
 }
 
-GameRenderer::~GameRenderer() {
+LegacyGameRenderer::~LegacyGameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
 }
 
-void GameRenderer::setupRender() {
+void LegacyGameRenderer::setupRender() {
     // Set the viewport
     const glm::ivec2& vp = getRenderer().getViewport();
     glViewport(0, 0, vp.x, vp.y);
@@ -177,7 +177,7 @@ void GameRenderer::setupRender() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
-void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
+void LegacyGameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
                                float alpha) {
     const auto& state = world->state;
 
@@ -293,7 +293,7 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
     renderPostProcess();
 }
 
-void GameRenderer::renderObjects(const GameWorld *world) {
+void LegacyGameRenderer::renderObjects(const GameWorld *world) {
     RW_PROFILE_SCOPE(__func__);
 
     renderer->useProgram(worldProg.get());
@@ -307,7 +307,7 @@ void GameRenderer::renderObjects(const GameWorld *world) {
     profObjects = renderer->popDebugGroup();
 }
 
-RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
+RenderList LegacyGameRenderer::createObjectRenderList(const GameWorld *world) {
     RW_PROFILE_SCOPE(__func__);
     // This is sequential at the moment, it should be easy to make it
     // run in parallel with a good threading system.
@@ -381,7 +381,7 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
     return renderList;
 }
 
-void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
+void LegacyGameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16vec3 fc) {
     float fadeTimer = world->getGameTime() - world->state->fadeStart;
 
     if (splashTexName != 0) {
@@ -414,7 +414,7 @@ void GameRenderer::renderSplash(GameWorld* world, GLuint splashTexName, glm::u16
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
-void GameRenderer::renderPostProcess() {
+void LegacyGameRenderer::renderPostProcess() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glStencilMask(0xFF);
     glClearStencil(0x00);
@@ -431,7 +431,7 @@ void GameRenderer::renderPostProcess() {
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
-void GameRenderer::renderEffects(GameWorld* world) {
+void LegacyGameRenderer::renderEffects(GameWorld* world) {
     renderer->useProgram(particleProg.get());
 
     auto cpos = _camera.position;
@@ -488,15 +488,15 @@ void GameRenderer::renderEffects(GameWorld* world) {
     }
 }
 
-void GameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
+void LegacyGameRenderer::drawTexture(TextureData* texture, glm::vec4 extents) {
     drawRect({0.f, 0.f, 0.f, 1.f}, texture, extents);
 }
 
-void GameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
+void LegacyGameRenderer::drawColour(const glm::vec4& colour, glm::vec4 extents) {
     drawRect(colour, nullptr, extents);
 }
 
-void GameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents) {
+void LegacyGameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::vec4& extents) {
     // Move into NDC
     extents.x /= renderer->getViewport().x;
     extents.y /= renderer->getViewport().y;
@@ -522,7 +522,7 @@ void GameRenderer::drawRect(const glm::vec4& colour, TextureData* texture, glm::
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
-void GameRenderer::renderLetterbox() {
+void LegacyGameRenderer::renderLetterbox() {
     constexpr float cinematicExperienceSize = 0.15f;
     renderer->useProgram(ssRectProg.get());
     renderer->setUniform(ssRectProg.get(), "colour", glm::vec4{0.f, 0.f, 0.f, 1.f});
@@ -539,7 +539,7 @@ void GameRenderer::renderLetterbox() {
     renderer->drawArrays(glm::mat4(1.0f), &ssRectDraw, wdp);
 }
 
-void GameRenderer::setViewport(int w, int h) {
+void LegacyGameRenderer::setViewport(int w, int h) {
     auto& lastViewport = renderer->getViewport();
     if (lastViewport.x != w || lastViewport.y != h) {
         renderer->setViewport({w, h});

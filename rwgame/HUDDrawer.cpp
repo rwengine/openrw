@@ -6,7 +6,7 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <objects/CharacterObject.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <sstream>
 
-void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
+void HUDDrawer::drawScriptTimer(GameWorld* world, LegacyGameRenderer& render) {
     if (world->state->scriptTimerVariable) {
         float scriptTimerTextX = static_cast<float>(
             render.getRenderer().getViewport().x - hudParameters.uiOuterMargin);
@@ -46,7 +46,7 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
 }
 
 void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
-                        GameWorld* world, GameRenderer& render) {
+                        GameWorld* world, LegacyGameRenderer& render) {
     MapRenderer::MapInfo map;
 
     if (world->state->hudFlash != HudFlash::FlashRadar ||
@@ -75,7 +75,7 @@ void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
 }
 
 void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
-                               GameRenderer& render) {
+                               LegacyGameRenderer& render) {
     float infoTextX = static_cast<float>(render.getRenderer().getViewport().x -
                       (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize + hudParameters.uiInfoMargin));
     float infoTextY = 0.f + hudParameters.uiOuterMargin;
@@ -251,7 +251,7 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
 }
 
 void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
-                        GameWorld* world, GameRenderer& render) {
+                        GameWorld* world, LegacyGameRenderer& render) {
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
@@ -259,7 +259,7 @@ void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
     }
 }
 
-void HUDDrawer::drawOnScreenText(GameWorld* world, GameRenderer& renderer) {
+void HUDDrawer::drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer) {
     const auto vp = glm::vec2(renderer.getRenderer().getViewport());
 
     TextRenderer::TextInfo ti;

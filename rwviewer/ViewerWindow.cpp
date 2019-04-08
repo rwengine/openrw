@@ -7,7 +7,7 @@
 
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 #include <QApplication>
 #include <QFileDialog>
@@ -147,7 +147,7 @@ void ViewerWindow::loadGame(const QString& path) {
     gameData->load();
 
     gameWorld = std::make_unique<GameWorld>(&engineLog, gameData.get());
-    renderer = std::make_unique<GameRenderer>(&engineLog, gameData.get());
+    renderer = std::make_unique<LegacyGameRenderer>(&engineLog, gameData.get());
     gameWorld->state = new GameState;
 
     renderer->text.setFontTexture(FONT_PAGER, "pager");

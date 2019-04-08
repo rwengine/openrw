@@ -285,7 +285,7 @@ void IngameState::tick(float dt) {
     }
 }
 
-void IngameState::draw(GameRenderer& r) {
+void IngameState::draw(LegacyGameRenderer& r) {
     if (!getWorld()->state->isCinematic && getWorld()->isCutsceneDone()) {
         game->getHUDDrawer().drawHUD(_look, game->getWorld()->getPlayer(),
                                      getWorld(), r);

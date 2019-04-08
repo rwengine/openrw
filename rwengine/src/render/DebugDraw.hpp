@@ -17,7 +17,7 @@
 
 class btVector3;
 class DrawBuffer;
-class GameRenderer;
+class LegacyGameRenderer;
 class GeometryBuffer;
 struct GeometryVertex;
 
@@ -42,7 +42,7 @@ public:
     void setDebugMode(int debugMode) override;
     int getDebugMode() const override;
 
-    void flush(GameRenderer &renderer);
+    void flush(LegacyGameRenderer &renderer);
 
     void setShaderProgram(Renderer::ShaderProgram *shaderProgram) {
         this->shaderProgram = shaderProgram;

@@ -1,5 +1,5 @@
 #include <boost/test/unit_test.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 BOOST_AUTO_TEST_SUITE(RendererTests)
 

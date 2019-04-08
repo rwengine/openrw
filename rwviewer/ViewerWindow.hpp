@@ -16,7 +16,7 @@
 
 class ViewerWidget;
 class ViewerInterface;
-class GameRenderer;
+class LegacyGameRenderer;
 
 class ViewerWindow : public QMainWindow {
     Q_OBJECT
@@ -28,7 +28,7 @@ class ViewerWindow : public QMainWindow {
 
     std::unique_ptr<GameData> gameData;
     std::unique_ptr<GameWorld> gameWorld;
-    std::unique_ptr<GameRenderer> renderer;
+    std::unique_ptr<LegacyGameRenderer> renderer;
 
 public:
     ViewerWindow(QWidget* parent = 0, Qt::WindowFlags flags = 0);
@@ -45,7 +45,7 @@ public slots:
     void loadGame(const QString& path);
 
 signals:
-    void gameLoaded(GameWorld*, GameRenderer*);
+    void gameLoaded(GameWorld*, LegacyGameRenderer*);
 
 private slots:
     void showObjectModel(uint16_t object);

@@ -6,7 +6,7 @@ class PlayerController;
 }  // namespace ai
 
 class GameWorld;
-class GameRenderer;
+class LegacyGameRenderer;
 class ViewCamera;
 
 #include <glm/gtc/type_precision.hpp>
@@ -48,17 +48,17 @@ public:
     void applyHUDScale(float scale);
     HUDParameters getHUDParameters();
     void drawHUD(ViewCamera& currentView, ai::PlayerController* player,
-                 GameWorld* world, GameRenderer& render);
-    void drawOnScreenText(GameWorld* world, GameRenderer& renderer);
+                 GameWorld* world, LegacyGameRenderer& render);
+    void drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer);
 
 private:
     HUDParameters hudParameters;
 
-    void drawScriptTimer(GameWorld* world, GameRenderer& render);
+    void drawScriptTimer(GameWorld* world, LegacyGameRenderer& render);
     void drawMap(ViewCamera& currentView, ai::PlayerController* player,
-                 GameWorld* world, GameRenderer& render);
+                 GameWorld* world, LegacyGameRenderer& render);
     void drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
-                        GameRenderer& render);
+                        LegacyGameRenderer& render);
 };
 
 #endif

@@ -27,7 +27,7 @@ void LoadingState::handleEvent(const SDL_Event& e) {
     State::handleEvent(e);
 }
 
-void LoadingState::draw(GameRenderer& r) {
+void LoadingState::draw(LegacyGameRenderer& r) {
     static auto kLoadingString =
         GameStringUtil::fromString("Loading...", FONT_ARIAL);
     // Display some manner of loading screen.

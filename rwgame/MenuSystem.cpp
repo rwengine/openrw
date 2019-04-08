@@ -1,9 +1,9 @@
 #include "MenuSystem.hpp"
 
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 void Menu::MenuEntry::draw(font_t font, float size, bool active,
-                           GameRenderer &r, glm::vec2 &basis) {
+                           LegacyGameRenderer &r, glm::vec2 &basis) {
     TextRenderer::TextInfo ti;
     ti.font = font;
     ti.screenPosition = basis;
@@ -18,7 +18,7 @@ void Menu::MenuEntry::draw(font_t font, float size, bool active,
     basis.y += size;
 }
 
-void Menu::draw(GameRenderer &r) {
+void Menu::draw(LegacyGameRenderer &r) {
     glm::vec2 basis(offset);
     for (size_t i = 0; i < entries.size(); ++i) {
         bool active = false;

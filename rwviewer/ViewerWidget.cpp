@@ -9,7 +9,7 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/InstanceObject.hpp>
 #include <objects/VehicleObject.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 #include <render/ObjectRenderer.hpp>
 #include <render/TextRenderer.hpp>
 
@@ -69,7 +69,7 @@ void ViewerWidget::initGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
+void ViewerWidget::drawModel(LegacyGameRenderer& r, ClumpPtr& model) {
     glm::mat4 view{1.0f}, proj{1.0f};
     const auto& vc = OrbitCamera({width(), height()},
                                  viewAngles,
@@ -91,7 +91,7 @@ void ViewerWidget::drawModel(GameRenderer& r, ClumpPtr& model) {
     r.renderPostProcess();
 }
 
-void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
+void ViewerWidget::drawObject(LegacyGameRenderer &r, GameObject *object) {
     glm::mat4 view{1.0f}, proj{1.0f};
     const auto& vc = OrbitCamera({width(), height()},
                                  viewAngles,
@@ -115,7 +115,7 @@ void ViewerWidget::drawObject(GameRenderer &r, GameObject *object) {
     r.renderPostProcess();
 }
 
-void ViewerWidget::drawWorld(GameRenderer& r) {
+void ViewerWidget::drawWorld(LegacyGameRenderer& r) {
     ViewCamera vc;
     vc.frustum.fov = kViewFov;
     vc.frustum.far = 1000.f;
@@ -128,7 +128,7 @@ void ViewerWidget::drawWorld(GameRenderer& r) {
     r.renderWorld(world(), vc, 0.f);
 }
 
-void ViewerWidget::drawText(GameRenderer& r) {
+void ViewerWidget::drawText(LegacyGameRenderer& r) {
     for(auto &textInfo : textInfos) {
         _renderer->text.renderText(textInfo, false);
     }
@@ -329,7 +329,7 @@ void ViewerWidget::wheelEvent(QWheelEvent* e) {
     viewDistance = qMax(viewDistance - e->angleDelta().y() / 240.f, 0.5f);
 }
 
-void ViewerWidget::gameLoaded(GameWorld *world, GameRenderer *renderer) {
+void ViewerWidget::gameLoaded(GameWorld *world, LegacyGameRenderer *renderer) {
     _world = world;
     _renderer = renderer;
 }

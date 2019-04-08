@@ -55,7 +55,7 @@ public:
         states.back()->tick(dt);
     }
 
-    void draw(GameRenderer& r) {
+    void draw(LegacyGameRenderer& r) {
         states.back()->draw(r);
     }
 

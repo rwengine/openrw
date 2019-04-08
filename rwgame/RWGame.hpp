@@ -10,7 +10,7 @@
 #include <engine/GameState.hpp>
 #include <engine/GameWorld.hpp>
 #include <render/DebugDraw.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 #include <script/SCMFile.hpp>
 #include <script/ScriptMachine.hpp>
 #include <script/modules/GTA3Module.hpp>
@@ -21,7 +21,7 @@
 
 class RWGame final : public GameBase {
     GameData data;
-    GameRenderer renderer;
+    LegacyGameRenderer renderer;
     DebugDraw debug;
     GameState state;
     HUDDrawer hudDrawer{};
@@ -77,7 +77,7 @@ public:
         return data;
     }
 
-    GameRenderer& getRenderer() {
+    LegacyGameRenderer& getRenderer() {
         return renderer;
     }
 

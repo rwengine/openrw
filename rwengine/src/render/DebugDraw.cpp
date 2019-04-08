@@ -18,7 +18,7 @@
 #include <gl/gl_core_3_3.h>
 #include <rw/debug.hpp>
 
-#include "render/GameRenderer.hpp"
+#include "render/LegacyGameRenderer.hpp"
 
 DebugDraw::DebugDraw() {
     dbuff->setFaceType(GL_LINES);
@@ -57,7 +57,7 @@ void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
     RW_UNUSED(color);
 }
 
-void DebugDraw::flush(GameRenderer &renderer) {
+void DebugDraw::flush(LegacyGameRenderer &renderer) {
     if (lines.empty()) {
         return;
     }

@@ -60,7 +60,7 @@ public:
 
     void tick(float dt) override;
 
-    void draw(GameRenderer &r) override;
+    void draw(LegacyGameRenderer &r) override;
 
     void handleEvent(const SDL_Event& event) override;
     virtual void handlePlayerInput(const SDL_Event& event);

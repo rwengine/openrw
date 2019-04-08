@@ -17,7 +17,7 @@ public:
 
     void tick(float dt) override;
 
-    void draw(GameRenderer& r) override;
+    void draw(LegacyGameRenderer& r) override;
 
     bool shouldWorldUpdate() override;
 

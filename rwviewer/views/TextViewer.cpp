@@ -13,7 +13,7 @@
 #include <loaders/LoaderGXT.hpp>
 #include <models/TextModel.hpp>
 #include <platform/FileHandle.hpp>
-#include <render/GameRenderer.hpp>
+#include <render/LegacyGameRenderer.hpp>
 
 #include <QGroupBox>
 #include <QFormLayout>

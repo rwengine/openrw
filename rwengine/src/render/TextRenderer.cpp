@@ -10,7 +10,7 @@
 #include <gl/gl_core_3_3.h>
 
 #include "engine/GameData.hpp"
-#include "render/GameRenderer.hpp"
+#include "render/LegacyGameRenderer.hpp"
 
 namespace {
 
@@ -137,7 +137,7 @@ struct TextVertex {
 };
 }  // namespace
 
-TextRenderer::TextRenderer(GameRenderer &renderer) : renderer(renderer) {
+TextRenderer::TextRenderer(LegacyGameRenderer &renderer) : renderer(renderer) {
     textShader = renderer.getRenderer().createShader(TextVertexShader,
                                                      TextFragmentShader);
 }
