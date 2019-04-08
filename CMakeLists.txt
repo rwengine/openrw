@@ -70,6 +70,7 @@ add_subdirectory(external)
 add_subdirectory(rwcore)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
+add_subdirectory(rwlib)
 
 if(BUILD_VIEWER)
     add_subdirectory(rwviewer)
