@@ -76,16 +76,16 @@ void ViewerWidget::drawModel(LegacyGameRenderer& r, ClumpPtr& model) {
                                  viewDistance,
                                  view, proj);
 
-    r.getRenderer().useProgram(r.worldProg.get());
-    r.getRenderer().setSceneParameters(
-            {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
-             glm::vec4(0.f), 90.f, vc.frustum.far});
+    r.useWorldProgram();
+    r.setSceneParameters({proj, view, glm::vec4(0.15f), glm::vec4(0.7f),
+                          glm::vec4(1.f), glm::vec4(0.f), 90.f,
+                          vc.frustum.far});
     model->getFrame()->updateHierarchyTransform();
 
     ObjectRenderer _renderer(world(), vc, 1.f);
     RenderList renders;
     _renderer.renderClump(model.get(), glm::mat4(1.0f), nullptr, renders);
-    r.getRenderer().drawBatched(renders);
+    r.drawBatched(renders);
 
     drawFrameWidget(model->getFrame().get());
     r.renderPostProcess();
@@ -98,10 +98,10 @@ void ViewerWidget::drawObject(LegacyGameRenderer &r, GameObject *object) {
                                  viewDistance,
                                  view, proj);
 
-    r.getRenderer().useProgram(r.worldProg.get());
-    r.getRenderer().setSceneParameters(
-            {proj, view, glm::vec4(0.15f), glm::vec4(0.7f), glm::vec4(1.f),
-             glm::vec4(0.f), 90.f, vc.frustum.far});
+    r.useWorldProgram();
+    r.setSceneParameters({proj, view, glm::vec4(0.15f), glm::vec4(0.7f),
+                          glm::vec4(1.f), glm::vec4(0.f), 90.f,
+                          vc.frustum.far});
 
     ObjectRenderer objectRenderer(world(), vc, 1.f);
     RenderList renders;
@@ -111,7 +111,7 @@ void ViewerWidget::drawObject(LegacyGameRenderer &r, GameObject *object) {
                  const Renderer::RenderInstruction& b) {
                   return a.sortKey < b.sortKey;
               });
-    r.getRenderer().drawBatched(renders);
+    r.drawBatched(renders);
     r.renderPostProcess();
 }
 
@@ -130,7 +130,7 @@ void ViewerWidget::drawWorld(LegacyGameRenderer& r) {
 
 void ViewerWidget::drawText(LegacyGameRenderer& r) {
     for(auto &textInfo : textInfos) {
-        _renderer->text.renderText(textInfo, false);
+        _renderer->renderText(textInfo, false);
     }
     r.renderPostProcess();
 }
@@ -144,12 +144,12 @@ void ViewerWidget::paintGL() {
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     auto& r = *_renderer;
-    r.getRenderer().invalidate();
+    r.invalidate();
     r.setViewport(width() * devicePixelRatio(), height() * devicePixelRatio());
 
     glEnable(GL_DEPTH_TEST);
 
-    r.getRenderer().invalidate();
+    r.invalidate();
     r.setupRender();
 
     switch (_viewMode) {
@@ -187,7 +187,7 @@ void ViewerWidget::drawFrameWidget(ModelFrame* f, const glm::mat4& m) {
 
     RW_CHECK(_renderer != nullptr, "GameRenderer is null");
     if(_renderer != nullptr) {
-        _renderer->getRenderer().drawArrays(thisM, _frameWidgetDraw, dp);
+        _renderer->drawArrays(thisM, _frameWidgetDraw, dp);
     }
 
     for (auto c : f->getChildren()) {

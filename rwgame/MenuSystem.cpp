@@ -14,7 +14,7 @@ void Menu::MenuEntry::draw(font_t font, float size, bool active,
     } else {
         ti.baseColour = glm::u8vec3(255, 255, 0);
     }
-    r.text.renderText(ti);
+    r.renderText(ti);
     basis.y += size;
 }
 

@@ -169,9 +169,13 @@ LegacyGameRenderer::~LegacyGameRenderer() {
     glDeleteFramebuffers(1, &framebufferName);
 }
 
+TextureData *LegacyGameRenderer::findSlotTexture(const std::string &slot, const std::string &texture) const {
+    return data->findSlotTexture(slot, texture);
+}
+
 void LegacyGameRenderer::setupRender() {
     // Set the viewport
-    const glm::ivec2& vp = getRenderer().getViewport();
+    const glm::ivec2& vp = getViewport();
     glViewport(0, 0, vp.x, vp.y);
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -554,4 +558,117 @@ void LegacyGameRenderer::setViewport(int w, int h) {
         glBindRenderbuffer(GL_RENDERBUFFER, fbRenderBuffers[0]);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, w, h);
     }
+}
+
+void LegacyGameRenderer::invalidate() {
+    renderer->invalidate();
+}
+
+void LegacyGameRenderer::useWorldProgram(){
+    renderer->useProgram(worldProg.get());
+}
+
+void LegacyGameRenderer::useProgram(Renderer::ShaderProgram *p) {
+    renderer->useProgram(p);
+}
+
+void LegacyGameRenderer::drawArrays(const glm::mat4& model, DrawBuffer* draw,
+                                    const Renderer::DrawParameters& p) {
+    renderer->drawArrays(model, draw, p);
+}
+
+void LegacyGameRenderer::drawMap(GameWorld *world, const MapRenderer::MapInfo &mi) {
+    map.draw(world, mi);
+}
+
+void LegacyGameRenderer::scaleMapHUD(const float scale) {
+    map.scaleHUD(scale);
+}
+
+void LegacyGameRenderer::setWaterTable(const float *waterHeights, const unsigned int nHeights, const uint8_t *tiles, const unsigned int nTiles) {
+    water.setWaterTable(waterHeights, nHeights, tiles, nTiles);
+}
+
+void LegacyGameRenderer::renderText(const TextRenderer::TextInfo &ti, bool forceColour) {
+    text.renderText(ti, forceColour);
+}
+
+void LegacyGameRenderer::setFontTexture(font_t font, const std::string &textureName) {
+    text.setFontTexture(font, textureName);
+}
+
+const glm::ivec2 &LegacyGameRenderer::getViewport() {
+    return renderer->getViewport();
+}
+
+void LegacyGameRenderer::setSceneParameters(const Renderer::SceneUniformData &data) {
+    renderer->setSceneParameters(data);
+}
+
+void LegacyGameRenderer::drawBatched(const RenderList &list) {
+    renderer->drawBatched(list);
+}
+
+std::unique_ptr<Renderer::ShaderProgram> LegacyGameRenderer::createShader(const std::string &vert, const std::string &frag) {
+    return renderer->createShader(vert, frag);
+}
+
+int LegacyGameRenderer::getBufferCount() {
+    return renderer->getBufferCount();
+}
+
+int LegacyGameRenderer::getTextureCount() {
+    return renderer->getTextureCount();
+}
+
+void LegacyGameRenderer::pushDebugGroup(const std::string &title) {
+    renderer->pushDebugGroup(title);
+}
+
+void LegacyGameRenderer::setUniform(Renderer::ShaderProgram *p, const std::string &name, const glm::mat4 &m) {
+    renderer->setUniform(p, name, m);
+}
+
+void LegacyGameRenderer::setUniform(Renderer::ShaderProgram *p, const std::string &name, const glm::vec4 &v) {
+    renderer->setUniform(p, name, v);
+}
+
+void LegacyGameRenderer::setUniform(Renderer::ShaderProgram *p, const std::string &name, const glm::vec3 &v) {
+    renderer->setUniform(p, name, v);
+}
+
+void LegacyGameRenderer::setUniform(Renderer::ShaderProgram *p, const std::string &name, const glm::vec2 &v) {
+    renderer->setUniform(p, name, v);
+}
+
+void LegacyGameRenderer::setUniform(Renderer::ShaderProgram *p, const std::string &name, float f) {
+    renderer->setUniform(p, name, f);
+}
+
+void LegacyGameRenderer::setUniformTexture(Renderer::ShaderProgram *p, const std::string &name, GLint tex) {
+    renderer->setUniformTexture(p, name, tex);
+}
+
+const glm::mat4 &LegacyGameRenderer::get2DProjection() const {
+    return renderer->get2DProjection();
+}
+
+const Renderer::ProfileInfo &LegacyGameRenderer::popDebugGroup() {
+    return renderer->popDebugGroup();
+}
+
+void LegacyGameRenderer::setProgramBlockBinding(Renderer::ShaderProgram *p, const std::string &name, GLint point) {
+    renderer->setProgramBlockBinding(p, name, point);
+}
+
+int LegacyGameRenderer::getDrawCount() {
+    return renderer->getDrawCount();
+}
+
+void LegacyGameRenderer::swap() {
+    renderer->swap();
+}
+
+const Renderer::SceneUniformData &LegacyGameRenderer::getSceneData() {
+    return renderer->getSceneData();
 }

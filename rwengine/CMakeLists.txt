@@ -112,10 +112,10 @@ set(RWENGINE_SOURCES
     src/objects/VehicleObject.hpp
 
     src/render/DebugDraw.cpp
+    src/render/GameShaders.hpp
     src/render/DebugDraw.hpp
     src/render/LegacyGameRenderer.cpp
     src/render/LegacyGameRenderer.hpp
-    src/render/GameShaders.hpp
     src/render/MapRenderer.cpp
     src/render/MapRenderer.hpp
     src/render/ObjectRenderer.cpp

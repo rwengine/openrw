@@ -84,24 +84,23 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     }
 
     // Set up text renderer
-    renderer.text.setFontTexture(FONT_PAGER, "pager");
-    renderer.text.setFontTexture(FONT_PRICEDOWN, "font1");
-    renderer.text.setFontTexture(FONT_ARIAL, "font2");
+    renderer.setFontTexture(FONT_PAGER, "pager");
+    renderer.setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer.setFontTexture(FONT_ARIAL, "font2");
 
     hudDrawer.applyHUDScale(config.hudScale());
-    renderer.map.scaleHUD(config.hudScale());
+    renderer.scaleMapHUD(config.hudScale());
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
                        btIDebugDraw::DBG_DrawConstraintLimits);
-    debug.setShaderProgram(renderer.worldProg.get());
 
     data.loadDynamicObjects((rwfs::path{config.gamedataPath()} / "data/object.dat")
                                 .string());  // FIXME: use path
 
     data.loadGXT("text/" + config.gameLanguage() + ".gxt");
 
-    getRenderer().water.setWaterTable(data.waterHeights, 48, data.realWater,
+    getRenderer().setWaterTable(data.waterHeights, 48, data.realWater,
                                       128 * 128);
 
     for (int m = 0; m < MAP_BLOCK_SIZE; ++m) {
@@ -632,9 +631,9 @@ void RWGame::tickObjects(float dt) const {
 void RWGame::render(float alpha, float time) {
     RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
 
-    lastDraws = getRenderer().getRenderer().getDrawCount();
+    lastDraws = renderer.getDrawCount();
 
-    getRenderer().getRenderer().swap();
+    renderer.swap();
 
     // Update the camera
     if (!stateManager.states.empty()) {
@@ -658,11 +657,11 @@ void RWGame::render(float alpha, float time) {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    renderer.getRenderer().pushDebugGroup("World");
+    renderer.pushDebugGroup("World");
 
     renderer.renderWorld(world.get(), viewCam, alpha);
 
-    renderer.getRenderer().popDebugGroup();
+    renderer.popDebugGroup();
 
     renderDebugView(time, viewCam);
 
@@ -717,9 +716,8 @@ void RWGame::renderDebugStats(float time) {
     ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
        << "Frame: " << time_ms << "ms\n"
        << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
-       << renderer.getCulledCount() << "/"
-       << renderer.getRenderer().getTextureCount() << "/"
-       << renderer.getRenderer().getBufferCount() << "\n"
+       << renderer.getCulledCount() << "/" << renderer.getTextureCount() << "/"
+       << renderer.getBufferCount() << "\n"
        << "Timescale: " << world->state->basic.timeScale;
 
     TextRenderer::TextInfo ti;
@@ -728,7 +726,7 @@ void RWGame::renderDebugStats(float time) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer.text.renderText(ti);
+    renderer.renderText(ti);
 
     /*while( engine->log.size() > 0 && engine->log.front().time + 10.f <
     engine->gameTime ) {
@@ -756,7 +754,7 @@ void RWGame::renderDebugStats(float time) {
     - it->time) - 5.f)/5.f) * 255 : 255;
         // text.setColor(c);
 
-        engine->renderer.text.renderText(ti);
+        engine->renderer.renderText(ti);
         ti.screenPosition.y -= ti.size;
     }*/
 }
@@ -883,7 +881,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer.text.renderText(ti);
+    renderer.renderText(ti);
 
     // Render worldspace overlay for nearby objects
     constexpr float kNearbyDistance = 25.f;
@@ -905,7 +903,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         screen.y = viewport.w - screen.y;
         ti.screenPosition = glm::vec2(screen);
         ti.size = 10.f;
-        renderer.text.renderText(ti);
+        renderer.renderText(ti);
     };
 
     for (auto& p : world->vehiclePool.objects) {

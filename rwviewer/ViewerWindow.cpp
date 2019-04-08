@@ -150,9 +150,9 @@ void ViewerWindow::loadGame(const QString& path) {
     renderer = std::make_unique<LegacyGameRenderer>(&engineLog, gameData.get());
     gameWorld->state = new GameState;
 
-    renderer->text.setFontTexture(FONT_PAGER, "pager");
-    renderer->text.setFontTexture(FONT_PRICEDOWN, "font1");
-    renderer->text.setFontTexture(FONT_ARIAL, "font2");
+    renderer->setFontTexture(FONT_PAGER, "pager");
+    renderer->setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer->setFontTexture(FONT_ARIAL, "font2");
 
     gameLoaded(gameWorld.get(), renderer.get());
 

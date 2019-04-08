@@ -40,8 +40,8 @@ public:
     void render(LegacyGameRenderer& renderer, GameWorld* world);
 
 private:
-    std::unique_ptr<Renderer::ShaderProgram> waterProg = nullptr;
-    std::unique_ptr<Renderer::ShaderProgram> maskProg = nullptr;
+    std::unique_ptr<Renderer::ShaderProgram> waterProg;
+    std::unique_ptr<Renderer::ShaderProgram> maskProg;
 
     DrawBuffer maskDraw{};
     GeometryBuffer maskGeom{};

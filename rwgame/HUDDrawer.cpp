@@ -17,7 +17,7 @@
 void HUDDrawer::drawScriptTimer(GameWorld* world, LegacyGameRenderer& render) {
     if (world->state->scriptTimerVariable) {
         float scriptTimerTextX = static_cast<float>(
-            render.getRenderer().getViewport().x - hudParameters.uiOuterMargin);
+            render.getViewport().x - hudParameters.uiOuterMargin);
         float scriptTimerTextY = hudParameters.uiScriptTimerHeight;
 
         TextRenderer::TextInfo ti;
@@ -37,11 +37,11 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, LegacyGameRenderer& render) {
         ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition =
             glm::vec2(scriptTimerTextX + 1.f, scriptTimerTextY + 1.f);
-        render.text.renderText(ti);
+        render.renderText(ti);
 
         ti.baseColour = hudParameters.uiScriptTimerColour;
         ti.screenPosition = glm::vec2(scriptTimerTextX, scriptTimerTextY);
-        render.text.renderText(ti);
+        render.renderText(ti);
     }
 }
 
@@ -60,7 +60,7 @@ void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
             map.worldCenter = glm::vec2(player->getCharacter()->getPosition());
         }
 
-        const glm::ivec2& vp = render.getRenderer().getViewport();
+        const glm::ivec2& vp = render.getViewport();
 
         glm::vec2 mapTop =
             glm::vec2(hudParameters.uiOuterMargin, vp.y - (hudParameters.uiOuterMargin + hudParameters.uiMapSize));
@@ -70,19 +70,23 @@ void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
         map.screenPosition = (mapTop + mapBottom) / 2.f;
         map.screenSize = hudParameters.uiMapSize * 0.95f;
 
-        render.map.draw(world, map);
+        render.drawMap(world, map);
     }
 }
 
 void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
                                LegacyGameRenderer& render) {
-    float infoTextX = static_cast<float>(render.getRenderer().getViewport().x -
-                      (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize + hudParameters.uiInfoMargin));
+    float infoTextX = static_cast<float>(render.getViewport().x -
+                                         (hudParameters.uiOuterMargin +
+                                          hudParameters.uiWeaponSize +
+                                          hudParameters.uiInfoMargin));
     float infoTextY = 0.f + hudParameters.uiOuterMargin;
-    float iconX = static_cast<float>(render.getRenderer().getViewport().x -
-                  (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize));
+    float iconX = static_cast<float>(
+        render.getViewport().x -
+        (hudParameters.uiOuterMargin + hudParameters.uiWeaponSize));
     float iconY = hudParameters.uiOuterMargin;
-    float wantedX = static_cast<float>(render.getRenderer().getViewport().x - hudParameters.uiOuterMargin);
+    float wantedX = static_cast<float>(render.getViewport().x -
+                                       hudParameters.uiOuterMargin);
     float wantedY = hudParameters.uiWantedLevelHeight;
 
     TextRenderer::TextInfo ti;
@@ -100,12 +104,12 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
 
     ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
-    render.text.renderText(ti);
+    render.renderText(ti);
 
     ti.baseColour = hudParameters.uiTimeColour;
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
 
-    render.text.renderText(ti);
+    render.renderText(ti);
 
     infoTextY += hudParameters.uiTextHeight;
 
@@ -119,12 +123,12 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
 
     ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
-    render.text.renderText(ti);
+    render.renderText(ti);
 
     ti.baseColour = hudParameters.uiMoneyColour;
 
     ti.screenPosition = glm::vec2(infoTextX, infoTextY);
-    render.text.renderText(ti);
+    render.renderText(ti);
 
     infoTextY += hudParameters.uiTextHeight;
 
@@ -141,11 +145,11 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
         ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition = glm::vec2(infoTextX + 1.f, infoTextY + 1.f);
 
-        render.text.renderText(ti);
+        render.renderText(ti);
 
         ti.baseColour = hudParameters.uiHealthColour;
         ti.screenPosition = glm::vec2(infoTextX, infoTextY);
-        render.text.renderText(ti);
+        render.renderText(ti);
     }
 
     if (player->getCharacter()->getCurrentState().armour > 0) {
@@ -158,11 +162,11 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
         ti.baseColour = hudParameters.uiShadowColour;
         ti.screenPosition =
             glm::vec2(infoTextX + 1.f - hudParameters.uiArmourOffset, infoTextY + 1.f);
-        render.text.renderText(ti);
+        render.renderText(ti);
 
         ti.baseColour = hudParameters.uiArmourColour;
         ti.screenPosition = glm::vec2(infoTextX - hudParameters.uiArmourOffset, infoTextY);
-        render.text.renderText(ti);
+        render.renderText(ti);
     }
 
     GameString s;
@@ -172,7 +176,7 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
     ti.text = s;
     ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(wantedX + 1.f, wantedY + 1.f);
-    render.text.renderText(ti);
+    render.renderText(ti);
 
 #if 0  // Useful for debugging
 	ti.text = "ABCDEFGHIJKLMANOQRTSWXYZ\nM0123456789";
@@ -180,10 +184,10 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
 	ti.align = TextRenderer::TextInfo::Left;
 	ti.baseColour = glm::vec3(0.f, 0.f, 0.f);
 	ti.screenPosition = glm::vec2(101.f, 202.f);
-    render.text.renderText(ti);
+    render.renderText(ti);
 	ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
 	ti.screenPosition = glm::vec2(100.f, 200.f);
-    render.text.renderText(ti);
+    render.renderText(ti);
 #endif
 
     auto item = player->getCharacter()->getActiveItem();
@@ -203,8 +207,7 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
         itemTextureName = "detonator";
     }
 
-    auto itemTexturePtr =
-        render.getData().findSlotTexture("hud", itemTextureName);
+    auto itemTexturePtr = render.findSlotTexture("hud", itemTextureName);
     RW_CHECK(itemTexturePtr != nullptr, "Item has 0 texture");
     if (itemTexturePtr != nullptr) {
         RW_CHECK(itemTexturePtr->getName() != 0, "Item has 0 texture");
@@ -246,7 +249,7 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
         ti.align = TextRenderer::TextInfo::TextAlignment::Center;
         ti.screenPosition = glm::vec2(iconX + hudParameters.uiWeaponSize / 2.f,
                                       iconY + hudParameters.uiWeaponSize - hudParameters.uiAmmoHeight);
-        render.text.renderText(ti);
+        render.renderText(ti);
     }
 }
 
@@ -260,7 +263,7 @@ void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
 }
 
 void HUDDrawer::drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer) {
-    const auto vp = glm::vec2(renderer.getRenderer().getViewport());
+    const auto vp = glm::vec2(renderer.getViewport());
 
     TextRenderer::TextInfo ti;
     ti.font = FONT_ARIAL;
@@ -297,7 +300,7 @@ void HUDDrawer::drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer)
                 ti.screenPosition += shadowPosition;
                 ti.backgroundColour = {0, 0, 0, 0};
 
-                renderer.text.renderText(ti, true);
+                renderer.renderText(ti, true);
 
                 ti.screenPosition -= shadowPosition;
             } else if (t.colourBG.a > 0) {
@@ -305,7 +308,7 @@ void HUDDrawer::drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer)
             }
 
             ti.baseColour = t.colourFG;
-            renderer.text.renderText(ti);
+            renderer.renderText(ti);
         }
     }
 }

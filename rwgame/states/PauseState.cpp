@@ -35,14 +35,14 @@ void PauseState::tick(float dt) {
 void PauseState::draw(LegacyGameRenderer& r) {
     MapRenderer::MapInfo map;
 
-    auto& vp = r.getRenderer().getViewport();
+    auto& vp = r.getViewport();
 
     map.worldSize = 4000.f;
     map.clipToSize = false;
     map.screenPosition = glm::vec2(vp.x / 2, vp.y / 2);
     map.screenSize = std::max(vp.x, vp.y);
 
-    game->getRenderer().map.draw(getWorld(), map);
+    game->getRenderer().drawMap(getWorld(), map);
 
     State::draw(r);
 }

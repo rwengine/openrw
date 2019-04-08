@@ -44,10 +44,6 @@ public:
 
     void flush(LegacyGameRenderer &renderer);
 
-    void setShaderProgram(Renderer::ShaderProgram *shaderProgram) {
-        this->shaderProgram = shaderProgram;
-    }
-
 protected:
     int debugMode;
 
@@ -55,9 +51,6 @@ protected:
     size_t maxlines;
     std::unique_ptr<GeometryBuffer> lineBuff = std::make_unique<GeometryBuffer>();
     std::unique_ptr<DrawBuffer> dbuff = std::make_unique<DrawBuffer>();
-
-    //Ownership is handled by worldProg in renderer
-    Renderer::ShaderProgram *shaderProgram = nullptr;
 
     GLuint texture;
 };

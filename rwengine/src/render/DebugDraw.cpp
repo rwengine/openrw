@@ -62,7 +62,7 @@ void DebugDraw::flush(LegacyGameRenderer &renderer) {
         return;
     }
 
-    renderer.getRenderer().useProgram(shaderProgram);
+    renderer.useWorldProgram();
 
     lineBuff->uploadVertices(lines);
     dbuff->addGeometry(lineBuff.get());
@@ -75,9 +75,9 @@ void DebugDraw::flush(LegacyGameRenderer &renderer) {
     dp.count = lines.size();
     dp.diffuse = 1.f;
 
-    renderer.getRenderer().drawArrays(glm::mat4(1.f), dbuff.get(), dp);
+    renderer.drawArrays(glm::mat4(1.f), dbuff.get(), dp);
 
-    renderer.getRenderer().invalidate();
+    renderer.invalidate();
 
     glUseProgram(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

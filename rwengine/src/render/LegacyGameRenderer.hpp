@@ -66,20 +66,7 @@ public:
     LegacyGameRenderer(Logger* log, GameData* data);
     ~LegacyGameRenderer();
 
-    std::unique_ptr<Renderer::ShaderProgram> worldProg;
-    std::unique_ptr<Renderer::ShaderProgram> skyProg;
-    std::unique_ptr<Renderer::ShaderProgram> particleProg;
-
-    std::unique_ptr<Renderer::ShaderProgram> ssRectProg;
-
-    GLuint skydomeIBO;
-
-    DrawBuffer skyDbuff;
-    GeometryBuffer skyGbuff;
-
-    const GameData& getData() const {
-        return *data;
-    }
+    TextureData* findSlotTexture(const std::string &slot, const std::string &texture) const;
 
     size_t getCulledCount() {
         return culled;
@@ -97,28 +84,13 @@ public:
     void renderWorld(GameWorld* world, const ViewCamera& camera, float alpha);
 
     /**
-     * Renders the effects (Particles, Lighttrails etc)
-     */
-    void renderEffects(GameWorld* world);
-
-    /**
      * @brief Draws a texture on the screen
      */
     void drawTexture(TextureData* texture, glm::vec4 extents);
     void drawColour(const glm::vec4& colour, glm::vec4 extents);
 
-    /** Render full screen splash / fade */
-    void renderSplash(GameWorld* world, GLuint tex, glm::u16vec3 fc);
-
-    /** Increases cinematic value */
-    void renderLetterbox();
-
     void setupRender();
     void renderPostProcess();
-
-    Renderer& getRenderer() {
-        return *renderer;
-    }
 
     void setViewport(int w, int h);
 
@@ -126,16 +98,6 @@ public:
         cullingCamera = cullCamera;
         cullOverride = override;
     }
-
-    MapRenderer map;
-    WaterRenderer water;
-    TextRenderer text;
-
-    // Profiling data
-    Renderer::ProfileInfo profObjects;
-    Renderer::ProfileInfo profSky;
-    Renderer::ProfileInfo profWater;
-    Renderer::ProfileInfo profEffects;
 
     enum SpecialModel {
         ZoneCylinderA,
@@ -153,7 +115,102 @@ public:
         specialmodels_[usage] = model;
     }
 
+    void invalidate();
+
+    void useWorldProgram();
+    void useProgram(Renderer::ShaderProgram* p);
+
+    void drawArrays(const glm::mat4& model, DrawBuffer* draw,
+                    const Renderer::DrawParameters& p);
+
+    void drawMap(GameWorld* world, const MapRenderer::MapInfo& mi);
+
+    void scaleMapHUD(const float scale);
+
+    void setWaterTable(const float* waterHeights, const unsigned int nHeights,
+                       const uint8_t* tiles, const unsigned int nTiles);
+
+    void renderText(const TextRenderer::TextInfo& ti,
+                    bool forceColour = false);
+
+    void setFontTexture(font_t font, const std::string& textureName);
+
+    const glm::ivec2& getViewport();
+
+    void setSceneParameters(const Renderer::SceneUniformData& data);
+
+    void drawBatched(const RenderList& list);
+
+    std::unique_ptr<Renderer::ShaderProgram> createShader(const std::string& vert,
+                                                const std::string& frag);
+
+    int getBufferCount();
+
+    int getTextureCount();
+
+    void pushDebugGroup(const std::string& title);
+
+    void setUniform(Renderer::ShaderProgram* p, const std::string& name,
+                    const glm::mat4& m);
+    void setUniform(Renderer::ShaderProgram* p, const std::string& name,
+                    const glm::vec4& v);
+    void setUniform(Renderer::ShaderProgram* p, const std::string& name,
+                    const glm::vec3& v);
+    void setUniform(Renderer::ShaderProgram* p, const std::string& name,
+                    const glm::vec2& v);
+    void setUniform(Renderer::ShaderProgram* p, const std::string& name,
+                    float f);
+
+    void setUniformTexture(Renderer::ShaderProgram* p, const std::string& name,
+                           GLint tex);
+
+    const glm::mat4& get2DProjection() const;
+
+    const Renderer::ProfileInfo& popDebugGroup();
+
+    void setProgramBlockBinding(Renderer::ShaderProgram* p,
+                                const std::string& name, GLint point);
+
+    int getDrawCount();
+
+    void swap();
+
+    const Renderer::SceneUniformData& getSceneData();
+
 private:
+
+    MapRenderer map;
+    WaterRenderer water;
+    TextRenderer text;
+
+    std::unique_ptr<Renderer::ShaderProgram> worldProg;
+    std::unique_ptr<Renderer::ShaderProgram> skyProg;
+    std::unique_ptr<Renderer::ShaderProgram> particleProg;
+
+    std::unique_ptr<Renderer::ShaderProgram> ssRectProg;
+
+    /** Render full screen splash / fade */
+    void renderSplash(GameWorld* world, GLuint tex, glm::u16vec3 fc);
+
+    /**
+     * Renders the effects (Particles, Lighttrails etc)
+     */
+    void renderEffects(GameWorld* world);
+
+    /** Increases cinematic value */
+    void renderLetterbox();
+
+    GLuint skydomeIBO;
+
+    DrawBuffer skyDbuff;
+    GeometryBuffer skyGbuff;
+
+    // Profiling data
+    Renderer::ProfileInfo profObjects;
+    Renderer::ProfileInfo profSky;
+    Renderer::ProfileInfo profWater;
+    Renderer::ProfileInfo profEffects;
+
     /// Hard-coded models to use for each of the special models
     ClumpPtr specialmodels_[SpecialModel::SpecialModelCount];
     ClumpPtr getSpecialModel(SpecialModel usage) const {

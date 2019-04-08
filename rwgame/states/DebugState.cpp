@@ -412,7 +412,7 @@ void DebugState::draw(LegacyGameRenderer& r) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    r.text.renderText(ti);
+    r.renderText(ti);
 
     State::draw(r);
 }
