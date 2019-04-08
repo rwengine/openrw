@@ -1,3 +1,7 @@
 [submodule "external/microprofile/microprofile"]
 	path = external/microprofile/microprofile
 	url = https://github.com/jonasmr/microprofile.git
+[submodule "rwlib"]
+	path = rwlib
+	url = https://github.com/rwengine/librw
+	branch = cmake
