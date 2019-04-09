@@ -13,7 +13,7 @@
 #include <QWindow>
 
 class Clump;
-class LegacyGameRenderer;
+class GameRenderer;
 class QOpenGLContextWrapper;
 
 class ViewerWidget : public QWindow {
@@ -61,7 +61,7 @@ public slots:
     void selectFrame(ModelFrame* frame);
     void exportModel();
 
-    void gameLoaded(GameWorld* world, LegacyGameRenderer* renderer);
+    void gameLoaded(GameWorld* world, GameRenderer* renderer);
 
 signals:
     void fileOpened(const QString& file);
@@ -80,7 +80,7 @@ protected:
 
     QOpenGLContextWrapper* m_context;
     GameWorld* _world = nullptr;
-    LegacyGameRenderer* _renderer = nullptr;
+    GameRenderer* _renderer = nullptr;
 
     std::vector<TextRenderer::TextInfo> textInfos;
     ClumpPtr _model;
@@ -105,10 +105,10 @@ protected:
     void drawFrameWidget(ModelFrame* f, const glm::mat4& = glm::mat4(1.f));
     bool initialised = false;
 
-    void drawModel(LegacyGameRenderer& r, ClumpPtr& model);
-    void drawObject(LegacyGameRenderer& r, GameObject* object);
-    void drawWorld(LegacyGameRenderer& r);
-    void drawText(LegacyGameRenderer& r);
+    void drawModel(GameRenderer &r, ClumpPtr& model);
+    void drawObject(GameRenderer &r, GameObject* object);
+    void drawWorld(GameRenderer &r);
+    void drawText(GameRenderer& r);
 
 };
 

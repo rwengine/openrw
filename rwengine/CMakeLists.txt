@@ -113,6 +113,7 @@ set(RWENGINE_SOURCES
 
     src/render/DebugDraw.cpp
     src/render/GameShaders.hpp
+    src/render/GameRenderer.hpp
     src/render/DebugDraw.hpp
     src/render/LegacyGameRenderer.cpp
     src/render/LegacyGameRenderer.hpp

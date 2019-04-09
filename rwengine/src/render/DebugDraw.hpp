@@ -17,7 +17,7 @@
 
 class btVector3;
 class DrawBuffer;
-class LegacyGameRenderer;
+class GameRenderer;
 class GeometryBuffer;
 struct GeometryVertex;
 
@@ -42,7 +42,7 @@ public:
     void setDebugMode(int debugMode) override;
     int getDebugMode() const override;
 
-    void flush(LegacyGameRenderer &renderer);
+    void flush(GameRenderer &renderer);
 
 protected:
     int debugMode;

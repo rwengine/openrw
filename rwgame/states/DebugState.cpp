@@ -399,7 +399,7 @@ void DebugState::tick(float dt) {
     }
 }
 
-void DebugState::draw(LegacyGameRenderer& r) {
+void DebugState::draw(GameRenderer &r) {
     // Draw useful information like camera position.
     std::stringstream ss;
     ss << "Camera Position: " << glm::to_string(_debugCam.position) << "\n";

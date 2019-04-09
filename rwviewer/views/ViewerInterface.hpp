@@ -23,10 +23,10 @@ protected:
     ViewerWidget* createViewer();
 
 signals:
-    void gameLoaded(GameWorld*, LegacyGameRenderer*);
+    void gameLoaded(GameWorld*, GameRenderer*);
 
 public slots:
-    void showData(GameWorld* world, LegacyGameRenderer* renderer) {
+    void showData(GameWorld* world, GameRenderer* renderer) {
         m_world = world;
         gameLoaded(world, renderer);
         worldChanged();

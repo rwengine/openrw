@@ -12,7 +12,7 @@
 #include <fonts/GameTexts.hpp>
 #include <render/OpenGLRenderer.hpp>
 
-class LegacyGameRenderer;
+class GameRenderer;
 /**
  * @brief Handles rendering of bitmap font textures.
  *
@@ -54,7 +54,7 @@ public:
         float widthFrac;
     };
 
-    TextRenderer(LegacyGameRenderer& renderer);
+    TextRenderer(GameRenderer &renderer);
     ~TextRenderer() = default;
 
     void setFontTexture(font_t font, const std::string& textureName);
@@ -87,7 +87,7 @@ private:
 
     std::array<FontMetaData, FONTS_COUNT> fonts;
 
-    LegacyGameRenderer& renderer;
+    GameRenderer& renderer;
     std::unique_ptr<Renderer::ShaderProgram> textShader;
 
     GeometryBuffer gb;

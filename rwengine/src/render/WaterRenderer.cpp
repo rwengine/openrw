@@ -13,7 +13,7 @@
 #include "render/GameShaders.hpp"
 #include "render/OpenGLRenderer.hpp"
 
-WaterRenderer::WaterRenderer(LegacyGameRenderer &renderer) {
+WaterRenderer::WaterRenderer(GameRenderer &renderer) {
     maskDraw.setFaceType(GL_TRIANGLES);
     gridDraw.setFaceType(GL_TRIANGLES);
 
@@ -98,7 +98,7 @@ void WaterRenderer::setDataTexture(GLuint fbBinding, GLuint dataTex) {
     dataTexture = dataTex;
 }
 
-void WaterRenderer::render(LegacyGameRenderer &renderer, GameWorld* world) {
+void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
     auto waterTexPtr = world->data->findSlotTexture("particle", "water_old");
     RW_CHECK(waterTexPtr != nullptr, "Water texture is null");
     if (waterTexPtr == nullptr) {

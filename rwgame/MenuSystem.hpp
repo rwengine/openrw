@@ -14,7 +14,7 @@
 #include <fonts/GameTexts.hpp>
 #include <rw/debug.hpp>
 
-class LegacyGameRenderer;
+class GameRenderer;
 
 /**
  * Default values for menus that should match the look and feel of the original
@@ -51,7 +51,7 @@ public:
             : text(n), callback(cb) {
         }
 
-        void draw(font_t font, float size, bool active, LegacyGameRenderer& r,
+        void draw(font_t font, float size, bool active, GameRenderer &r,
                   glm::vec2& basis);
 
         void activate(float clickX, float clickY) {
@@ -86,7 +86,7 @@ public:
      */
     int activeEntry;
 
-    void draw(LegacyGameRenderer& r);
+    void draw(GameRenderer &r);
 
     void hover(const float x, const float y);
 

@@ -92,7 +92,7 @@ void BenchmarkState::tick(float dt) {
     }
 }
 
-void BenchmarkState::draw(LegacyGameRenderer& r) {
+void BenchmarkState::draw(GameRenderer &r) {
     frameCounter++;
     State::draw(r);
 }

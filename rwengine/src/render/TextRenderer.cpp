@@ -137,7 +137,7 @@ struct TextVertex {
 };
 }  // namespace
 
-TextRenderer::TextRenderer(LegacyGameRenderer &renderer) : renderer(renderer) {
+TextRenderer::TextRenderer(GameRenderer &renderer) : renderer(renderer) {
     textShader = renderer.createShader(TextVertexShader,
                                                      TextFragmentShader);
 }

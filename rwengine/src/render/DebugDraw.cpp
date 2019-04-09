@@ -57,7 +57,7 @@ void DebugDraw::drawContactPoint(const btVector3 &pointOnB,
     RW_UNUSED(color);
 }
 
-void DebugDraw::flush(LegacyGameRenderer &renderer) {
+void DebugDraw::flush(GameRenderer &renderer) {
     if (lines.empty()) {
         return;
     }

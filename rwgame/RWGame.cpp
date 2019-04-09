@@ -41,10 +41,10 @@
 
 namespace {
 static constexpr std::array<
-    std::tuple<LegacyGameRenderer::SpecialModel, char const*, char const*>, 3>
-    kSpecialModels{{{LegacyGameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
-                    {LegacyGameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
-                    {LegacyGameRenderer::Arrow, "arrow.dff", ""}}};
+    std::tuple<GameRenderer::SpecialModel, char const*, char const*>, 3>
+    kSpecialModels{{{GameRenderer::ZoneCylinderA, "zonecyla.dff", "particle"},
+                    {GameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
+                    {GameRenderer::Arrow, "arrow.dff", ""}}};
 
 constexpr float kMaxPhysicsSubSteps = 2;
 }  // namespace
@@ -54,7 +54,7 @@ constexpr float kMaxPhysicsSubSteps = 2;
 RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     : GameBase(log, args)
     , data(&log, config.gamedataPath())
-    , renderer(&log, &data) {
+    , renderer(std::make_unique<LegacyGameRenderer>(&log, &data)) {
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
@@ -80,16 +80,16 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
 
     for (const auto& [specialModel, fileName, name] : kSpecialModels) {
         auto model = data.loadClump(fileName, name);
-        renderer.setSpecialModel(specialModel, model);
+        renderer->setSpecialModel(specialModel, model);
     }
 
     // Set up text renderer
-    renderer.setFontTexture(FONT_PAGER, "pager");
-    renderer.setFontTexture(FONT_PRICEDOWN, "font1");
-    renderer.setFontTexture(FONT_ARIAL, "font2");
+    renderer->setFontTexture(FONT_PAGER, "pager");
+    renderer->setFontTexture(FONT_PRICEDOWN, "font1");
+    renderer->setFontTexture(FONT_ARIAL, "font2");
 
     hudDrawer.applyHUDScale(config.hudScale());
-    renderer.scaleMapHUD(config.hudScale());
+    renderer->scaleMapHUD(config.hudScale());
 
     debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
                        btIDebugDraw::DBG_DrawConstraints |
@@ -631,9 +631,9 @@ void RWGame::tickObjects(float dt) const {
 void RWGame::render(float alpha, float time) {
     RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
 
-    lastDraws = renderer.getDrawCount();
+    lastDraws = renderer->getDrawCount();
 
-    renderer.swap();
+    renderer->swap();
 
     // Update the camera
     if (!stateManager.states.empty()) {
@@ -641,7 +641,7 @@ void RWGame::render(float alpha, float time) {
     }
 
     glm::ivec2 windowSize = getWindow().getSize();
-    renderer.setViewport(windowSize.x, windowSize.y);
+    renderer->setViewport(windowSize.x, windowSize.y);
 
     ViewCamera viewCam = currentCam;
 
@@ -657,19 +657,19 @@ void RWGame::render(float alpha, float time) {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    renderer.pushDebugGroup("World");
+    renderer->pushDebugGroup("World");
 
-    renderer.renderWorld(world.get(), viewCam, alpha);
+    renderer->renderWorld(world.get(), viewCam, alpha);
 
-    renderer.popDebugGroup();
+    renderer->popDebugGroup();
 
     renderDebugView(time, viewCam);
 
-    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), renderer);
+    if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), *renderer);
 
     if (stateManager.currentState()) {
         RW_PROFILE_SCOPE("state");
-        stateManager.draw(renderer);
+        stateManager.draw(*renderer);
     }
 }
 
@@ -681,7 +681,7 @@ void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
             break;
         case DebugViewMode::Physics:
             world->dynamicsWorld->debugDrawWorld();
-            debug.flush(renderer);
+            debug.flush(*renderer);
             break;
         case DebugViewMode::Navigation:
             renderDebugPaths(time);
@@ -716,8 +716,8 @@ void RWGame::renderDebugStats(float time) {
     ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
        << "Frame: " << time_ms << "ms\n"
        << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
-       << renderer.getCulledCount() << "/" << renderer.getTextureCount() << "/"
-       << renderer.getBufferCount() << "\n"
+       << renderer->getCulledCount() << "/" << renderer->getTextureCount()
+       << "/" << renderer->getBufferCount() << "\n"
        << "Timescale: " << world->state->basic.timeScale;
 
     TextRenderer::TextInfo ti;
@@ -726,7 +726,7 @@ void RWGame::renderDebugStats(float time) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer.renderText(ti);
+    renderer->renderText(ti);
 
     /*while( engine->log.size() > 0 && engine->log.front().time + 10.f <
     engine->gameTime ) {
@@ -862,7 +862,7 @@ void RWGame::renderDebugPaths(float time) {
         }
     }
 
-    debug.flush(renderer);
+    debug.flush(*renderer);
 }
 
 void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
@@ -881,7 +881,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
     ti.screenPosition = glm::vec2(10.f, 10.f);
     ti.size = 15.f;
     ti.baseColour = glm::u8vec3(255);
-    renderer.renderText(ti);
+    renderer->renderText(ti);
 
     // Render worldspace overlay for nearby objects
     constexpr float kNearbyDistance = 25.f;
@@ -903,7 +903,7 @@ void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
         screen.y = viewport.w - screen.y;
         ti.screenPosition = glm::vec2(screen);
         ti.size = 10.f;
-        renderer.renderText(ti);
+        renderer->renderText(ti);
     };
 
     for (auto& p : world->vehiclePool.objects) {

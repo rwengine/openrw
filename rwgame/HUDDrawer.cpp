@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <sstream>
 
-void HUDDrawer::drawScriptTimer(GameWorld* world, LegacyGameRenderer& render) {
+void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
     if (world->state->scriptTimerVariable) {
         float scriptTimerTextX = static_cast<float>(
             render.getViewport().x - hudParameters.uiOuterMargin);
@@ -46,7 +46,7 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, LegacyGameRenderer& render) {
 }
 
 void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
-                        GameWorld* world, LegacyGameRenderer& render) {
+                        GameWorld* world, GameRenderer& render) {
     MapRenderer::MapInfo map;
 
     if (world->state->hudFlash != HudFlash::FlashRadar ||
@@ -75,7 +75,7 @@ void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,
 }
 
 void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
-                               LegacyGameRenderer& render) {
+                               GameRenderer& render) {
     float infoTextX = static_cast<float>(render.getViewport().x -
                                          (hudParameters.uiOuterMargin +
                                           hudParameters.uiWeaponSize +
@@ -254,7 +254,7 @@ void HUDDrawer::drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
 }
 
 void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
-                        GameWorld* world, LegacyGameRenderer& render) {
+                        GameWorld* world, GameRenderer& render) {
     if (player && player->getCharacter()) {
         drawMap(currentView, player, world, render);
         drawPlayerInfo(player, world, render);
@@ -262,7 +262,7 @@ void HUDDrawer::drawHUD(ViewCamera& currentView, ai::PlayerController* player,
     }
 }
 
-void HUDDrawer::drawOnScreenText(GameWorld* world, LegacyGameRenderer& renderer) {
+void HUDDrawer::drawOnScreenText(GameWorld* world, GameRenderer& renderer) {
     const auto vp = glm::vec2(renderer.getViewport());
 
     TextRenderer::TextInfo ti;

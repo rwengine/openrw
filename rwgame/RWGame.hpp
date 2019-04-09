@@ -21,7 +21,7 @@
 
 class RWGame final : public GameBase {
     GameData data;
-    LegacyGameRenderer renderer;
+    std::unique_ptr<GameRenderer> renderer;
     DebugDraw debug;
     GameState state;
     HUDDrawer hudDrawer{};
@@ -77,8 +77,8 @@ public:
         return data;
     }
 
-    LegacyGameRenderer& getRenderer() {
-        return renderer;
+    GameRenderer& getRenderer() {
+        return *renderer;
     }
 
     ScriptMachine* getScriptVM() const {

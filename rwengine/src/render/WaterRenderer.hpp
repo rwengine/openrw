@@ -10,7 +10,7 @@
 
 #include <render/OpenGLRenderer.hpp>
 
-class LegacyGameRenderer;
+class GameRenderer;
 class GameWorld;
 
 /**
@@ -18,7 +18,7 @@ class GameWorld;
  */
 class WaterRenderer {
 public:
-    WaterRenderer(LegacyGameRenderer& renderer);
+    WaterRenderer(GameRenderer &renderer);
     ~WaterRenderer() = default;
 
     /**
@@ -37,7 +37,7 @@ public:
     /**
      * Render the water using the currently active render state
      */
-    void render(LegacyGameRenderer& renderer, GameWorld* world);
+    void render(GameRenderer &renderer, GameWorld* world);
 
 private:
     std::unique_ptr<Renderer::ShaderProgram> waterProg;
