@@ -10,6 +10,7 @@ extern "C" {
 
 #include <cstdint>
 #include <future>
+#include <mutex>
 
 /// Structure for input data
 struct InputData {
@@ -31,6 +32,7 @@ class LoaderSDT;
 class SoundSource {
     friend class SoundManager;
     friend struct SoundBuffer;
+    friend struct SoundBufferStreamed;
 
 public:
     bool allocateAudioFrame();
@@ -59,7 +61,8 @@ public:
     void decodeFramesWrap(const rwfs::path& filePath);
     void decodeFramesSfxWrap();
     void decodeFrames(size_t framesToDecode);
-    void decodeAndResampleFrames(const rwfs::path& filePath, size_t framesToDecode);
+    void decodeAndResampleFrames(const rwfs::path& filePath,
+                                 size_t framesToDecode);
 
     void cleanupAfterSoundLoading();
     void cleanupAfterSfxLoading();
@@ -99,6 +102,9 @@ private:
     std::unique_ptr<char[]> raw_sound;
     std::unique_ptr<uint8_t[]> inputDataStart;
     InputData input{};
+
+    std::mutex mutex;
+    std::future<void> loadingThread;
 };
 
 #endif

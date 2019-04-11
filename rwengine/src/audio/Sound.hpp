@@ -19,7 +19,7 @@ struct Sound {
     std::unique_ptr<SoundBuffer> buffer;
 
     Sound() = default;
-    ~Sound() = default;
+    ~Sound();
 
     bool isPlaying() const;
 
