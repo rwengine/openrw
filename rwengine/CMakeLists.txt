@@ -20,6 +20,8 @@ set(RWENGINE_SOURCES
     src/audio/Sound.hpp
     src/audio/SoundBuffer.cpp
     src/audio/SoundBuffer.hpp
+    src/audio/SoundBufferStreamed.cpp
+    src/audio/SoundBufferStreamed.hpp
     src/audio/SoundManager.cpp
     src/audio/SoundManager.hpp
     src/audio/SoundSource.cpp

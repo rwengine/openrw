@@ -4,20 +4,22 @@
 #include <al.h>
 #include <glm/vec3.hpp>
 
+#include <vector>
+
 class SoundSource;
 
 /// OpenAL tool for playing
 /// sound instance.
 struct SoundBuffer {
     SoundBuffer();
-    ~SoundBuffer();
-    bool bufferData(SoundSource& soundSource);
+    virtual ~SoundBuffer();
+    virtual bool bufferData(SoundSource& soundSource);
 
     bool isPlaying() const;
     bool isPaused() const;
     bool isStopped() const;
 
-    void play();
+    virtual void play();
     void pause();
     void stop();
 
@@ -28,6 +30,8 @@ struct SoundBuffer {
     void setMaxDistance(float maxDist);
 
     ALuint source;
+    bool running = false;
+private:
     ALuint buffer;
 };
 

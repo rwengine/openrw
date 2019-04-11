@@ -2,6 +2,12 @@
 
 #include "audio/SoundBuffer.hpp"
 
+Sound::~Sound() {
+    if (buffer) {
+        stop();
+    }
+}
+
 bool Sound::isPlaying() const {
     return buffer->isPlaying();
 }

@@ -2,8 +2,13 @@
 
 #include <rw/types.hpp>
 
-#include "audio/alCheck.hpp"
 #include "audio/SoundSource.hpp"
+#include "audio/alCheck.hpp"
+
+namespace {
+constexpr int kNrBuffersStreaming = 4;
+constexpr int kSizeOfChunk = 4;
+}  // namespace
 
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));
@@ -29,7 +34,6 @@ bool SoundBuffer::bufferData(SoundSource& soundSource) {
         static_cast<ALsizei>(soundSource.data.size() * sizeof(int16_t)),
         soundSource.sampleRate));
     alCheck(alSourcei(source, AL_BUFFER, buffer));
-
     return true;
 }
 
@@ -53,12 +57,18 @@ bool SoundBuffer::isStopped() const {
 
 void SoundBuffer::play() {
     alCheck(alSourcePlay(source));
+
+    running = true;
 }
 void SoundBuffer::pause() {
     alCheck(alSourcePause(source));
+
+    running = false;
 }
 void SoundBuffer::stop() {
     alCheck(alSourceStop(source));
+
+    running = false;
 }
 
 void SoundBuffer::setPosition(const glm::vec3& position) {

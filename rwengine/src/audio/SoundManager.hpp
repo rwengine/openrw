@@ -29,7 +29,7 @@ public:
     ~SoundManager();
 
     /// Load sound from file and store it with selected name
-    bool loadSound(const std::string& name, const std::string& fileName);
+    bool loadSound(const std::string& name, const std::string& fileName, bool streamed = true);
 
     /// Load selected sfx sound
     void loadSound(size_t index);

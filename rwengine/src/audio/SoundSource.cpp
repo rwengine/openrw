@@ -60,7 +60,7 @@ int read_packet(void* opaque, uint8_t* buf, int buf_size) {
 }  // namespace
 
 bool SoundSource::prepareFormatContextSfx(LoaderSDT& sdt, size_t index,
-                                           bool asWave) {
+                                          bool asWave) {
     /// Now we need to prepare "custom" format context
     /// We need sdt loader for that purpose
     raw_sound = sdt.loadToMemory(index, asWave);
@@ -288,6 +288,7 @@ void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
                     // Write samples to audio buffer
                     for (size_t i = 0;
                          i < static_cast<size_t>(frame->nb_samples); i++) {
+                        std::lock_guard<std::mutex> lock(mutex);
                         // Interleave left/right channels
                         for (size_t channel = 0; channel < channels;
                              channel++) {
@@ -337,6 +338,7 @@ void SoundSource::decodeFrames(size_t framesToDecode) {
 
                     for (size_t i = 0;
                          i < static_cast<size_t>(frame->nb_samples); i++) {
+                        std::lock_guard<std::mutex> lock(mutex);
                         // Interleave left/right channels
                         for (size_t channel = 0; channel < channels;
                              channel++) {
@@ -417,6 +419,7 @@ void SoundSource::decodeAndResampleFrames(const rwfs::path& filePath,
                         RW_ERROR("Error resampling " << filePath << '\n');
                     }
 
+                    std::lock_guard<std::mutex> lock(mutex);
                     for (size_t i = 0;
                          i <
                          static_cast<size_t>(resampled->nb_samples) * channels;
@@ -512,7 +515,7 @@ void SoundSource::loadFromFile(const rwfs::path& filePath, bool streaming) {
         decodeFramesWrap(filePath);
 
         if (streaming) {
-            auto loadingThread = std::async(
+            loadingThread = std::async(
                 std::launch::async,
                 &SoundSource::decodeRestSoundFramesAndCleanup, this, filePath);
         } else {
@@ -531,7 +534,7 @@ void SoundSource::loadSfx(LoaderSDT& sdt, size_t index, bool asWave,
         decodeFramesSfxWrap();
 
         if (streaming) {
-            auto loadingThread =
+            loadingThread =
                 std::async(std::launch::async,
                            &SoundSource::decodeRestSfxFramesAndCleanup, this);
         } else {
