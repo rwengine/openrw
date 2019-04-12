@@ -710,7 +710,7 @@ void GameData::loadSplash(const std::string& name) {
     std::string lower(name);
     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    textureSlots["generic"] = loadTextureArchive(lower + ".txd");
+    textureSlots[lower + ".txd"] = loadTextureArchive(lower + ".txd");
 
     engine->state->currentSplash = lower;
 }
