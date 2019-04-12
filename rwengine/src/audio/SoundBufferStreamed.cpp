@@ -69,10 +69,12 @@ void SoundBufferStreamed::updateBuffers() {
         alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
 
         std::lock_guard<std::mutex> lock(soundSource->mutex);
+        bool bufferedData = false;
 
         /* Unqueue and handle each processed buffer */
         while (processed > 0 &&
                streamedData * kSizeOfChunk < soundSource->data.size()) {
+            bufferedData = true;
             ALuint bufid{};
             auto sizeOfNextChunk =
                 std::min(static_cast<size_t>(kSizeOfChunk),
@@ -95,7 +97,7 @@ void SoundBufferStreamed::updateBuffers() {
         }
 
         /* Make sure the source hasn't underrun */
-        if (state != AL_PLAYING && state != AL_PAUSED) {
+        if (bufferedData && state != AL_PLAYING && state != AL_PAUSED) {
             ALint queued;
 
             /* If no buffers are queued, playback is finished */
