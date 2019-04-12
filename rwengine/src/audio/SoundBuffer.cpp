@@ -56,19 +56,18 @@ bool SoundBuffer::isStopped() const {
 }
 
 void SoundBuffer::play() {
+    running = true;
     alCheck(alSourcePlay(source));
 
-    running = true;
 }
 void SoundBuffer::pause() {
-    alCheck(alSourcePause(source));
-
     running = false;
+    alCheck(alSourcePause(source));
 }
 void SoundBuffer::stop() {
+    running = false;
     alCheck(alSourceStop(source));
 
-    running = false;
 }
 
 void SoundBuffer::setPosition(const glm::vec3& position) {
