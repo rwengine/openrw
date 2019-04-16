@@ -1,4 +1,4 @@
-#include "audio/SoundBufferStreamed.hpp"
+﻿#include "audio/SoundBufferStreamed.hpp"
 
 #include <rw/types.hpp>
 
@@ -18,13 +18,14 @@ SoundBufferStreamed::SoundBufferStreamed() {
 }
 
 SoundBufferStreamed::~SoundBufferStreamed() {
+    alCheck(alSourceUnqueueBuffers(source, kNrBuffersStreaming, buffers.data()));
     alCheck(alDeleteBuffers(kNrBuffersStreaming, buffers.data()));
 }
 
 bool SoundBufferStreamed::bufferData(SoundSource &soundSource) {
     /* Rewind the source position and clear the buffer queue */
-    alSourceRewind(source);
-    alSourcei(source, AL_BUFFER, 0);
+    alCheck(alSourceRewind(source));
+    alCheck(alSourcei(source, AL_BUFFER, 0));
 
     std::lock_guard<std::mutex> lock(soundSource.mutex);
     /* Fill the buffer queue */
@@ -43,7 +44,7 @@ bool SoundBufferStreamed::bufferData(SoundSource &soundSource) {
         streamedData++;
     }
 
-    alSourceQueueBuffers(source, kNrBuffersStreaming, buffers.data());
+    alCheck(alSourceQueueBuffers(source, kNrBuffersStreaming, buffers.data()));
 
     this->soundSource = &soundSource;
 
@@ -65,8 +66,8 @@ void SoundBufferStreamed::updateBuffers() {
         ALint processed, state;
 
         /* Get relevant source info */
-        alGetSourcei(source, AL_SOURCE_STATE, &state);
-        alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
+        alCheck(alGetSourcei(source, AL_SOURCE_STATE, &state));
+        alCheck(alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed));
 
         std::lock_guard<std::mutex> lock(soundSource->mutex);
         bool bufferedData = false;
@@ -81,18 +82,19 @@ void SoundBufferStreamed::updateBuffers() {
                          soundSource->data.size() -
                              static_cast<size_t>(kSizeOfChunk) * streamedData);
 
-            alSourceUnqueueBuffers(source, 1, &bufid);
+            alCheck(alSourceUnqueueBuffers(source, 1, &bufid));
             processed--;
 
             if (sizeOfNextChunk > 0) {
-                alBufferData(bufid,
-                             soundSource->channels == 1 ? AL_FORMAT_MONO16
-                                                        : AL_FORMAT_STEREO16,
-                             &soundSource->data[streamedData * kSizeOfChunk],
-                             sizeOfNextChunk * sizeof(int16_t),
-                             soundSource->sampleRate);
+                alCheck(alBufferData(
+                    bufid,
+                    soundSource->channels == 1 ? AL_FORMAT_MONO16
+                                               : AL_FORMAT_STEREO16,
+                    &soundSource->data[streamedData * kSizeOfChunk],
+                    sizeOfNextChunk * sizeof(int16_t),
+                    soundSource->sampleRate));
                 streamedData++;
-                alSourceQueueBuffers(source, 1, &bufid);
+                alCheck(alSourceQueueBuffers(source, 1, &bufid));
             }
         }
 
@@ -101,10 +103,10 @@ void SoundBufferStreamed::updateBuffers() {
             ALint queued;
 
             /* If no buffers are queued, playback is finished */
-            alGetSourcei(source, AL_BUFFERS_QUEUED, &queued);
+            alCheck(alGetSourcei(source, AL_BUFFERS_QUEUED, &queued));
             if (queued == 0) return;
 
-            alSourcePlay(source);
+            alCheck(alSourcePlay(source));
         }
     }
 }
