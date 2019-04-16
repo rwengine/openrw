@@ -1,4 +1,4 @@
-#include "audio/SoundSource.hpp"
+﻿#include "audio/SoundSource.hpp"
 
 #include <loaders/LoaderSDT.hpp>
 #include <rw/types.hpp>
@@ -285,10 +285,10 @@ void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
                                                 &decodingPacket);
 
                 if (len >= 0 && gotFrame) {
+                    std::lock_guard<std::mutex> lock(mutex);
                     // Write samples to audio buffer
                     for (size_t i = 0;
                          i < static_cast<size_t>(frame->nb_samples); i++) {
-                        std::lock_guard<std::mutex> lock(mutex);
                         // Interleave left/right channels
                         for (size_t channel = 0; channel < channels;
                              channel++) {
@@ -334,11 +334,10 @@ void SoundSource::decodeFrames(size_t framesToDecode) {
                 // Decode audio packet
 
                 if (receiveFrame == 0 && sendPacket == 0) {
+                    std::lock_guard<std::mutex> lock(mutex);
                     // Write samples to audio buffer
-
                     for (size_t i = 0;
                          i < static_cast<size_t>(frame->nb_samples); i++) {
-                        std::lock_guard<std::mutex> lock(mutex);
                         // Interleave left/right channels
                         for (size_t channel = 0; channel < channels;
                              channel++) {
