@@ -14,7 +14,9 @@ struct SoundBufferStreamed : public SoundBuffer {
     ~SoundBufferStreamed() override;
     bool bufferData(SoundSource& soundSource) final;
 
-    virtual void play() final;
+    void play() final;
+    void pause() final;
+    void stop() final;
 
 private:
     SoundSource* soundSource = nullptr;
