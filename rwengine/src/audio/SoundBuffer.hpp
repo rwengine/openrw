@@ -20,8 +20,8 @@ struct SoundBuffer {
     bool isStopped() const;
 
     virtual void play();
-    void pause();
-    void stop();
+    virtual void pause();
+    virtual void stop();
 
     void setPosition(const glm::vec3& position);
     void setLooping(bool looping);
