@@ -1,4 +1,4 @@
-#include "GameBase.hpp"
+﻿#include "GameBase.hpp"
 
 #include <core/Logger.hpp>
 #include <rw/debug.hpp>
@@ -81,6 +81,8 @@ RWConfig GameBase::buildConfig(const std::optional<RWArgConfigLayer> &args) {
 }
 
 GameBase::~GameBase() {
+    window.close();
+
     SDL_Quit();
 
     log.info("Game", "Done cleaning up");

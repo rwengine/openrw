@@ -1,4 +1,4 @@
-#include "RWGame.hpp"
+﻿#include "RWGame.hpp"
 
 #include <glm/gtx/norm.hpp>
 
@@ -443,8 +443,6 @@ int RWGame::run() {
         // Make sure the topmost state is the correct state
         stateManager.updateStack();
     }
-
-    window.close();
 
     stateManager.clear();
 
