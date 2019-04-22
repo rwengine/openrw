@@ -37,7 +37,7 @@ class OpenrwConan(ConanFile):
             'boost/1.68.0@conan/stable',
         ),
         'viewer': (
-            'qt/5.12.0@bincrafters/stable',
+            'Qt/5.12.0@bincrafters/stable',
         ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
