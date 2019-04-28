@@ -1042,6 +1042,28 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
     // explosions, remove all projectiles
 }
 
+std::vector<GameObject *>
+GameWorld::findOverlappingObjects(const glm::vec3 &center,
+                                  float radius) const {
+    std::vector<GameObject*> overlapping;
+
+    auto checkObjects = [&](const auto& objects) {
+        for (auto& p : objects) {
+            const auto& object = p.second.get();
+            auto objectBounds = object->getModel()->getBoundingRadius();
+            if (glm::distance(center, object->getPosition()) <
+                radius + objectBounds) {
+                overlapping.push_back(object);
+            }
+        }
+    };
+
+    checkObjects(vehiclePool.objects);
+    checkObjects(pedestrianPool.objects);
+
+    return overlapping;
+}
+
 ai::PlayerController* GameWorld::getPlayer() {
     auto object = pedestrianPool.find(state->playerObject);
     if (object) {

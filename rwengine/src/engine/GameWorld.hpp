@@ -397,6 +397,9 @@ public:
     void clearObjectsWithinArea(const glm::vec3 center, const float radius,
                                 const bool clearParticles);
 
+    std::vector<GameObject*> findOverlappingObjects(const glm::vec3& center,
+                                                    float radius) const;
+
     ai::PlayerController* getPlayer();
 
     template <
