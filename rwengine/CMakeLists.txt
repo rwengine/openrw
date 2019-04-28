@@ -1,4 +1,4 @@
-set(RWENGINE_SOURCES
+﻿set(RWENGINE_SOURCES
     src/ai/AIGraph.cpp
     src/ai/AIGraph.hpp
     src/ai/AIGraphNode.cpp
@@ -110,6 +110,8 @@ set(RWENGINE_SOURCES
     src/objects/VehicleInfo.hpp
     src/objects/VehicleObject.cpp
     src/objects/VehicleObject.hpp
+
+    src/objects/Vehicle/AutoPilot.hpp
 
     src/render/DebugDraw.cpp
     src/render/DebugDraw.hpp
