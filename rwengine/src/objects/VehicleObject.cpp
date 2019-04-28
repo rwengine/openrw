@@ -643,6 +643,21 @@ float VehicleObject::getVelocity() const {
     return 0.f;
 }
 
+bool VehicleObject::canBeRemoved() const {
+    if (!GameObject::canBeRemoved()) {
+        return false;
+    }
+
+    for (auto& seat : seatOccupants) {
+        auto character = static_cast<CharacterObject*>(seat.second);
+
+        if (!character->canBeRemoved())
+            return false;
+    }
+
+    return true;
+}
+
 bool VehicleObject::isWrecked() const {
     return health < 250.f;
 }

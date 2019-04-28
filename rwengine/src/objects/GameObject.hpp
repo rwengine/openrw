@@ -238,8 +238,20 @@ public:
     void setLifetime(ObjectLifetime ol) {
         lifetime = ol;
     }
+
     ObjectLifetime getLifetime() const {
         return lifetime;
+    }
+
+    /// Returns true if the object is not referenced by a script or player
+    virtual bool canBeRemoved() const {
+        switch (lifetime) {
+            case MissionLifetime:
+            case PlayerLifetime:
+                return false;
+            default:
+                return true;
+        }
     }
 
     virtual void updateTransform(const glm::vec3& pos, const glm::quat& rot) {

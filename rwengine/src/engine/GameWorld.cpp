@@ -1006,31 +1006,9 @@ bool GameWorld::isRaining() const {
 void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
                                        const float radius,
                                        const bool clearParticles) {
-    bool skipFlag = false;
-
     // Vehicles
     for (auto& obj : vehiclePool.objects) {
-        skipFlag = false;
-
-        // Skip if it's the player or owned by player or owned by mission
-        if (obj.second->getLifetime() == GameObject::PlayerLifetime ||
-            obj.second->getLifetime() == GameObject::MissionLifetime) {
-            continue;
-        }
-
-        // Check if we have any important objects in a vehicle, if we do - don't
-        // erase it
-        for (auto& seat :
-             static_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
-            auto character = static_cast<CharacterObject*>(seat.second);
-
-            if (character->getLifetime() == GameObject::PlayerLifetime ||
-                character->getLifetime() == GameObject::MissionLifetime) {
-                skipFlag = true;
-            }
-        }
-
-        if (skipFlag) {
+        if (!obj.second->canBeRemoved()) {
             continue;
         }
 
@@ -1041,9 +1019,7 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
 
     // Peds
     for (auto& obj : pedestrianPool.objects) {
-        // Skip if it's the player or owned by player or owned by mission
-        if (obj.second->getLifetime() == GameObject::PlayerLifetime ||
-            obj.second->getLifetime() == GameObject::MissionLifetime) {
+        if (!obj.second->canBeRemoved()) {
             continue;
         }
 
