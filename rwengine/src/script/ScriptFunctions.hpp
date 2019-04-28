@@ -217,6 +217,23 @@ inline BlipData createObjectBlipSprite(const ScriptArguments& args,
 
 ScriptModel getModel(const ScriptArguments& args, ScriptModel model);
 
+inline void clearSpaceForObject(const ScriptArguments& args,
+                                GameObject* object) {
+    RW_ASSERT(object->getModel());
+
+    auto radius = object->getModel()->getBoundingRadius();
+
+    const auto& overlapping = args.getWorld()->findOverlappingObjects(
+        object->getPosition(), radius);
+
+    for (const auto& found : overlapping) {
+        if (found->canBeRemoved())
+            args.getWorld()->destroyObjectQueued(found);
+
+        // @todo check collision meshes for real intersection
+    }
+}
+
 inline void addObjectToMissionCleanup(const ScriptArguments& args,
                                       GameObject* object) {
     if (args.getThread()->isMission) {

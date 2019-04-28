@@ -1797,11 +1797,11 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
     character->applyOffset();
     character->setLifetime(GameObject::MissionLifetime);
 
+    script::clearSpaceForObject(args, character);
+
     if (args.getThread()->isMission) {
         script::addObjectToMissionCleanup(args, character);
     }
-
-    /// @todo track object mission status
 }
 
 /**
@@ -1946,6 +1946,8 @@ void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptV
     vehicle = args.getWorld()->createVehicle(model, coord);
     vehicle->applyOffset();
     vehicle->setLifetime(GameObject::MissionLifetime);
+
+    script::clearSpaceForObject(args, vehicle);
 
     if (args.getThread()->isMission) {
         script::addObjectToMissionCleanup(args, vehicle);
@@ -5035,7 +5037,6 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     @arg character Character/ped
 */
 void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, character);
 }
 
@@ -5046,7 +5047,6 @@ void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, vehicle);
 }
 
@@ -5057,7 +5057,6 @@ void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, object);
 }
 
