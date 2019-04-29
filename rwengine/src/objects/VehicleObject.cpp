@@ -644,18 +644,9 @@ float VehicleObject::getVelocity() const {
 }
 
 bool VehicleObject::canBeRemoved() const {
-    if (!GameObject::canBeRemoved()) {
-        return false;
-    }
-
-    for (auto& seat : seatOccupants) {
-        auto character = static_cast<CharacterObject*>(seat.second);
-
-        if (!character->canBeRemoved())
-            return false;
-    }
-
-    return true;
+    return GameObject::canBeRemoved() &&
+           all_of(seatOccupants.begin(), seatOccupants.end(),
+                  [](const auto& p) { return p.second->canBeRemoved(); });
 }
 
 bool VehicleObject::isWrecked() const {
