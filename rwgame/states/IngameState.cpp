@@ -36,10 +36,10 @@
 
 constexpr float kAutoLookTime = 2.f;
 constexpr float kAutolookMinVelocity = 0.2f;
-constexpr float kInGameFOV = glm::half_pi<float>();
-constexpr float kMaxRotationRate = glm::quarter_pi<float>();
-constexpr float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
-constexpr float kVehicleCameraPitch =
+const float kInGameFOV = glm::half_pi<float>();
+const float kMaxRotationRate = glm::quarter_pi<float>();
+const float kCameraPitchLimit = glm::quarter_pi<float>() * 0.5f;
+const float kVehicleCameraPitch =
     glm::half_pi<float>() - glm::quarter_pi<float>() * 0.25f;
 
 IngameState::IngameState(RWGame* game, bool newgame, const std::string& save)
