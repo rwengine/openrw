@@ -16,7 +16,7 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 
-constexpr float kViewFov = glm::radians(90.0f);
+const float kViewFov = glm::radians(90.0f);
 
 namespace {
 ViewCamera OrbitCamera (const glm::vec2& viewPort, const glm::vec2& viewAngles,
