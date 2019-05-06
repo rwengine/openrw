@@ -123,6 +123,8 @@ public:
         return Vehicle;
     }
 
+    bool canBeRemoved() const override;
+
     bool isWrecked() const;
 
     void setHealth(float);

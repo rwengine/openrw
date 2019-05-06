@@ -916,6 +916,7 @@ void opcode_0053(const ScriptArguments& args, const ScriptInt index, ScriptVec3 
     character->applyOffset();
     player = static_cast<ai::PlayerController*>(character->controller);
     args.getState()->playerObject = character->getGameObjectID();
+    script::clearSpaceForObject(args, character);
 }
 
 /**
@@ -940,9 +941,9 @@ void opcode_0054(const ScriptArguments& args, const ScriptPlayer player, ScriptF
     @arg coord Coordinates
 */
 void opcode_0055(const ScriptArguments& args, const ScriptPlayer player, ScriptVec3 coord) {
-    RW_UNUSED(args);
     player->getCharacter()->setPosition(coord);
     player->getCharacter()->applyOffset();
+    script::clearSpaceForObject(args, player->getCharacter());
 }
 
 /**
@@ -1797,11 +1798,11 @@ void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const
     character->applyOffset();
     character->setLifetime(GameObject::MissionLifetime);
 
+    script::clearSpaceForObject(args, character);
+
     if (args.getThread()->isMission) {
         script::addObjectToMissionCleanup(args, character);
     }
-
-    /// @todo track object mission status
 }
 
 /**
@@ -1889,7 +1890,7 @@ void opcode_00a0(const ScriptArguments& args, const ScriptCharacter character, S
 */
 void opcode_00a1(const ScriptArguments& args, const ScriptCharacter character, ScriptVec3 coord) {
     script::setObjectPosition(character, coord);
-    RW_UNUSED(args);
+    script::clearSpaceForObject(args, character);
 }
 
 /**
@@ -1946,6 +1947,8 @@ void opcode_00a5(const ScriptArguments& args, const ScriptModelID model, ScriptV
     vehicle = args.getWorld()->createVehicle(model, coord);
     vehicle->applyOffset();
     vehicle->setLifetime(GameObject::MissionLifetime);
+
+    script::clearSpaceForObject(args, vehicle);
 
     if (args.getThread()->isMission) {
         script::addObjectToMissionCleanup(args, vehicle);
@@ -2022,8 +2025,8 @@ void opcode_00aa(const ScriptArguments& args, const ScriptVehicle vehicle, Scrip
     @arg coord Coordinates
 */
 void opcode_00ab(const ScriptArguments& args, const ScriptVehicle vehicle, ScriptVec3 coord) {
-    RW_UNUSED(args);
     script::setObjectPosition(vehicle, coord);
+    script::clearSpaceForObject(args, vehicle);
 }
 
 /**
@@ -4917,8 +4920,8 @@ void opcode_01bb(const ScriptArguments& args, const ScriptObject object, ScriptF
     @arg coord Coordinates
 */
 void opcode_01bc(const ScriptArguments& args, const ScriptObject object, ScriptVec3 coord) {
-    RW_UNUSED(args);
     script::setObjectPosition(object, coord);
+    script::clearSpaceForObject(args, object);
 }
 
 /**
@@ -5035,7 +5038,6 @@ void opcode_01c4(const ScriptArguments& args, const ScriptObject object) {
     @arg character Character/ped
 */
 void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, character);
 }
 
@@ -5046,7 +5048,6 @@ void opcode_01c5(const ScriptArguments& args, const ScriptCharacter character) {
     @arg vehicle Car/vehicle
 */
 void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, vehicle);
 }
 
@@ -5057,7 +5058,6 @@ void opcode_01c6(const ScriptArguments& args, const ScriptVehicle vehicle) {
     @arg object Object
 */
 void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
-    RW_UNUSED(args);
     script::removeObjectFromMissionCleanup(args, object);
 }
 
@@ -9610,9 +9610,9 @@ void opcode_0361(const ScriptArguments& args, const ScriptGarage garage) {
 */
 void opcode_0362(const ScriptArguments& args, const ScriptCharacter character,
                  ScriptVec3 coord) {
-    RW_UNUSED(args);
     character->setCurrentVehicle(nullptr, 0);
     character->setPosition(coord);
+    script::clearSpaceForObject(args, character);
 }
 
 /**
@@ -9964,6 +9964,7 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
         pedGroup.at(args.getWorld()->getRandomNumber(0u, pedGroup.size() - 1));
     character = world->createPedestrian(model, coord);
     character->applyOffset();
+    script::clearSpaceForObject(args, character);
 }
 
 /**

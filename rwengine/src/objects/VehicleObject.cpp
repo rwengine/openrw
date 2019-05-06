@@ -643,6 +643,12 @@ float VehicleObject::getVelocity() const {
     return 0.f;
 }
 
+bool VehicleObject::canBeRemoved() const {
+    return GameObject::canBeRemoved() &&
+           all_of(seatOccupants.begin(), seatOccupants.end(),
+                  [](const auto& p) { return p.second->canBeRemoved(); });
+}
+
 bool VehicleObject::isWrecked() const {
     return health < 250.f;
 }
