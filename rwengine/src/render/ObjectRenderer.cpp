@@ -365,11 +365,9 @@ void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {
         case GameObject::Character:
             renderCharacter(static_cast<CharacterObject*>(object), outList);
             break;
-            ;
         case GameObject::Vehicle:
             renderVehicle(static_cast<VehicleObject*>(object), outList);
             break;
-            ;
         case GameObject::Pickup:
             renderPickup(static_cast<PickupObject*>(object), outList);
             break;
