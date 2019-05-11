@@ -271,6 +271,11 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
 
     setEnabled(true);
     setCollected(false);
+
+    auto modelData = getModelInfo<SimpleModelInfo>();
+    auto atomic = modelData->getAtomic(0)->clone();
+    atomic->setFrame(std::make_shared<ModelFrame>());
+    setModel(std::move(atomic));
 }
 
 PickupObject::~PickupObject() {

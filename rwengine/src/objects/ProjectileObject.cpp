@@ -158,6 +158,12 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
             _ghostBody.get(), btBroadphaseProxy::SensorTrigger,
             btBroadphaseProxy::AllFilter);
     }
+
+    const auto& modelData = world->data->findModelInfo<SimpleModelInfo>(
+        getProjectileInfo().weapon->modelID);
+    auto atomic = modelData->getAtomic(0)->clone();
+    atomic->setFrame(std::make_shared<ModelFrame>());
+    setModel(std::move(atomic));
 }
 
 ProjectileObject::~ProjectileObject() {
