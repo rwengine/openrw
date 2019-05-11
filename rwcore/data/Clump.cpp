@@ -118,6 +118,7 @@ ClumpPtr Clump::clone() const {
     auto newroot = rootframe_->cloneHierarchy();
     auto clump = std::make_shared<Clump>();
     clump->setFrame(newroot);
+    clump->boundingRadius = boundingRadius;
 
     // This isn't the most optimal implementation, but this code is likely
     // to be replaced soon.

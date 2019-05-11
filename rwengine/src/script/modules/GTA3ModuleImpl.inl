@@ -10900,7 +10900,7 @@ void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloa
 
     for(auto& p : args.getWorld()->instancePool.objects) {
         auto o = p.second.get();
-    	if( !o->getModel() ) continue;
+    	if( !o->getClump() ) continue;
     	if( o->getModelInfo<BaseModelInfo>()->name != oldmodel ) continue;
     	float d = glm::distance(coord, o->getPosition());
     	if( d < radius ) {

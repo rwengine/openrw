@@ -10,12 +10,11 @@ CutsceneObject::CutsceneObject(GameWorld *engine, const glm::vec3 &pos,
                                BaseModelInfo *modelinfo)
     : GameObject(engine, pos, rot, modelinfo) {
     if (model) {
-        setModel(model);
+        setModel(model->clone());
     }
     else {
-        setModel(getModelInfo<ClumpModelInfo>()->getModel());
+        setModel(getModelInfo<ClumpModelInfo>()->getModel()->clone());
     }
-    setClump(getModel()->clone());
     animator = std::make_unique<Animator>(getClump());
 }
 

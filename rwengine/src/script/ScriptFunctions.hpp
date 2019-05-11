@@ -219,9 +219,9 @@ ScriptModel getModel(const ScriptArguments& args, ScriptModel model);
 
 inline void clearSpaceForObject(const ScriptArguments& args,
                                 GameObject* object) {
-    RW_ASSERT(object->getModel());
+    RW_ASSERT(object->getClump());
 
-    auto radius = object->getModel()->getBoundingRadius();
+    auto radius = object->getClump()->getBoundingRadius();
 
     const auto& overlapping = args.getWorld()->findOverlappingObjects(
         object->getPosition(), radius);

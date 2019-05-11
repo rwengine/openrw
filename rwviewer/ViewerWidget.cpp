@@ -230,8 +230,8 @@ void ViewerWidget::showObject(quint16 item) {
 
     RW_CHECK(_object != nullptr, "Dummy Object is null");
 
-    if (_object->getModel()) {
-        auto objectRadius = _object->getModel()->getBoundingRadius();
+    if (_object->getClump()) {
+        auto objectRadius = _object->getClump()->getBoundingRadius();
         viewDistance = objectRadius * 2;
         viewAngles.x = glm::radians(-45.f);
         viewAngles.y = glm::radians(22.5f);

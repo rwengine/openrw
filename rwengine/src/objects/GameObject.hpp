@@ -2,6 +2,7 @@
 #define _RWENGINE_GAMEOBJECT_HPP_
 
 #include <limits>
+#include <variant>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
@@ -28,10 +29,11 @@ class GameObject {
 
     BaseModelInfo* modelinfo_;
 
-    /**
-     * Model used for rendering
-     */
-    ClumpPtr model_ = nullptr;
+    using Model = std::variant<AtomicPtr, ClumpPtr>;
+    Model model_;
+
+    static const AtomicPtr NullAtomic;
+    static const ClumpPtr NullClump;
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
@@ -92,16 +94,30 @@ public:
         return static_cast<T*>(modelinfo_);
     }
 
-    /**
-     * @return The model used in rendering
-     */
-    ClumpPtr getModel() const {
+    const Model& getModel() const {
         return model_;
     }
 
-    /**
-     * Changes the current model, used for re-dressing chars
-     */
+     const AtomicPtr& getAtomic() const {
+        if (auto atomic = std::get_if<AtomicPtr>(&model_))
+        {
+            return *atomic;
+        }
+        return NullAtomic;
+    }
+
+    const ClumpPtr& getClump() const {
+        if (auto clump = std::get_if<ClumpPtr>(&model_))
+        {
+            return *clump;
+        }
+        return NullClump;
+    }
+
+    void setModel(const AtomicPtr& model) {
+        model_ = model;
+    }
+
     void setModel(const ClumpPtr& model) {
         model_ = model;
     }
@@ -263,20 +279,6 @@ public:
 
 private:
     ObjectLifetime lifetime = GameObject::UnknownLifetime;
-};
-
-class ClumpObject {
-    ClumpPtr clump_;
-
-protected:
-    void setClump(const ClumpPtr& ptr) {
-        clump_ = ptr;
-    }
-
-public:
-    const ClumpPtr& getClump() const {
-        return clump_;
-    }
 };
 
 #endif  // __GAMEOBJECTS_HPP__

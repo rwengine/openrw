@@ -448,7 +448,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
 
     if (target->type() == GameObject::Vehicle) {
         auto vehicle = static_cast<VehicleObject*>(target);
-        auto model = vehicle->getModel();
+        auto model = vehicle->getClump();
         auto maxDist = model->getBoundingRadius() * 2.f;
         viewDistance = viewDistance + maxDist;
         lookTargetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);

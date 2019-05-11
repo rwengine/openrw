@@ -173,8 +173,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
         wheelsRotation.push_back(0.f);
     }
 
-    setModel(getVehicle()->getModel());
-    setClump(getModelInfo<VehicleModelInfo>()->getModel()->clone());
+    setModel(getVehicle()->getModel()->clone());
     setupModel();
 }
 

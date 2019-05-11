@@ -6,6 +6,9 @@
 
 #include "engine/Animator.hpp"
 
+const AtomicPtr GameObject::NullAtomic;
+const ClumpPtr GameObject::NullClump;
+
 GameObject::~GameObject() {
     if (modelinfo_) {
         modelinfo_->removeReference();
