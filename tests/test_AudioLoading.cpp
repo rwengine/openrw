@@ -23,6 +23,9 @@ BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
     sound.play();
     BOOST_REQUIRE(sound.isPlaying() == true);
 
+    sound.play();
+    BOOST_REQUIRE(sound.isPlaying() == true);
+
     sound.pause();
     BOOST_REQUIRE(sound.isPaused() == true);
 
