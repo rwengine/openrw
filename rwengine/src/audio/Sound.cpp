@@ -2,6 +2,13 @@
 
 #include "audio/SoundBuffer.hpp"
 
+Sound::~Sound()
+{
+    if (effect != nullptr) {
+        buffer->disableEffect(effect);
+    }
+}
+
 bool Sound::isPlaying() const {
     return buffer->isPlaying();
 }
@@ -44,6 +51,12 @@ void Sound::setGain(float gain) {
 
 void Sound::setMaxDistance(float maxDist) {
     buffer->setMaxDistance(maxDist);
+}
+
+void Sound::enableEffect(std::shared_ptr<SoundEffect> effect)
+{
+    this->effect = std::move(effect);
+    buffer->enableEffect(this->effect);
 }
 
 size_t Sound::getScriptObjectID() const {

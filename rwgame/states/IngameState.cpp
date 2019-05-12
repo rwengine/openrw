@@ -18,6 +18,9 @@
 #include <objects/PickupObject.hpp>
 #include <objects/VehicleObject.hpp>
 #include <script/ScriptMachine.hpp>
+#include <audio/SoundEffect.hpp>
+#include <audio/EffectSlot.hpp>
+#include <audio/ReverbEffect.hpp>
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/matrix_major_storage.hpp>

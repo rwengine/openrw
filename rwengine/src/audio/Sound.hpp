@@ -1,9 +1,12 @@
 #ifndef _RWENGINE_SOUND_HPP_
 #define _RWENGINE_SOUND_HPP_
 
+#include <audio/SoundEffect.hpp>
+
 #include <glm/vec3.hpp>
 
 #include <memory>
+#include <optional>
 
 class SoundSource;
 struct SoundBuffer;
@@ -18,8 +21,10 @@ struct Sound {
     std::shared_ptr<SoundSource> source;
     std::unique_ptr<SoundBuffer> buffer;
 
+    std::shared_ptr<SoundEffect> effect;
+
     Sound() = default;
-    ~Sound() = default;
+    ~Sound();
 
     bool isPlaying() const;
 
@@ -41,6 +46,8 @@ struct Sound {
     void setGain(float gain);
 
     void setMaxDistance(float maxDist);
+
+    void enableEffect(std::shared_ptr<SoundEffect> effect);
 
     size_t getScriptObjectID() const;
 };

@@ -5,12 +5,15 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavutil/avutil.h>
+#include <efx.h>
 }
 
 #include "audio/alCheck.hpp"
 #include "audio/Sound.hpp"
 #include "audio/SoundBuffer.hpp"
 #include "audio/SoundSource.hpp"
+#include "audio/OpenAlExtensions.hpp"
+#include "audio/ReverbEffect.hpp"
 #include "engine/GameData.hpp"
 #include "engine/GameWorld.hpp"
 #include "render/ViewCamera.hpp"
@@ -38,6 +41,7 @@ Sound& SoundManager::getSoundRef(const std::string& name) {
 SoundManager::SoundManager() {
     initializeOpenAL();
     initializeAVCodec();
+    initializeEFX();
 }
 
 SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
@@ -47,6 +51,7 @@ SoundManager::SoundManager(GameWorld* engine) : _engine(engine) {
 
     initializeOpenAL();
     initializeAVCodec();
+    initializeEFX();
 }
 
 SoundManager::~SoundManager() {
@@ -89,6 +94,22 @@ void SoundManager::initializeAVCodec() {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
     av_register_all();
 #endif
+}
+
+bool SoundManager::initializeEFX() {
+    if (!alcIsExtensionPresent(alDevice, ALC_EXT_EFX_NAME)) {
+        RW_ERROR("EFX extention is not present");
+        return false;
+    }
+
+    initEfxFunctionPointers();
+
+    // first effect is placeholder
+    // it allows index to be like in enum
+    soundEffects.push_back(nullptr);
+    soundEffects.push_back(std::make_shared<ReverbEffect>());
+
+    return true;
 }
 
 void SoundManager::deinitializeOpenAL() {
@@ -142,7 +163,7 @@ void SoundManager::loadSound(size_t index) {
 
     sound->source = std::make_shared<SoundSource>();
     sound->source->loadSfx(sdt, index);
-}
+ }
 
 size_t SoundManager::createSfxInstance(size_t index) {
     Sound* sound = nullptr;
@@ -232,8 +253,11 @@ void SoundManager::eraseSound(const std::string& name) {
     }
 }
 
-void SoundManager::playSfx(size_t name, const glm::vec3& position, bool looping,
-                           int maxDist) {
+void SoundManager::playSfx(size_t name, const glm::vec3& position, bool looping, int maxDist) {
+    playSfx(name, position, SoundEffect::Type::Reverb, looping, maxDist);
+}
+
+void SoundManager::playSfx(size_t name, const glm::vec3& position, SoundEffect::Type effectType, bool looping, int maxDist) {
     auto buffer = buffers.find(name);
     if (buffer != buffers.end()) {
         buffer->second.setPosition(position);
@@ -246,6 +270,9 @@ void SoundManager::playSfx(size_t name, const glm::vec3& position, bool looping,
         if (maxDist != -1) {
             buffer->second.setMaxDistance(static_cast<float>(maxDist));
         }
+
+        auto effect = soundEffects.at(static_cast<size_t>(effectType));
+        buffer->second.enableEffect(effect);
         buffer->second.play();
     }
 }

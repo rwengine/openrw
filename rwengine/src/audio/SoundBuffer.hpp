@@ -4,6 +4,9 @@
 #include <al.h>
 #include <glm/vec3.hpp>
 
+#include <memory>
+
+class SoundEffect;
 class SoundSource;
 
 /// OpenAL tool for playing
@@ -26,6 +29,9 @@ struct SoundBuffer {
     void setPitch(float pitch);
     void setGain(float gain);
     void setMaxDistance(float maxDist);
+
+    void enableEffect(std::shared_ptr<SoundEffect> effect);
+    void disableEffect(std::shared_ptr<SoundEffect> effect);
 
     ALuint source;
     ALuint buffer;
