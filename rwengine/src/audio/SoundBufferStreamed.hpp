@@ -9,6 +9,8 @@
 struct SoundBufferStreamed : public SoundBuffer {
     static constexpr unsigned int kNrBuffersStreaming = 4;
     static constexpr unsigned int kSizeOfChunk = 4096;
+    static constexpr std::chrono::milliseconds kTickFreqMs =
+        std::chrono::milliseconds(100);
 
     SoundBufferStreamed();
     ~SoundBufferStreamed() override;

@@ -58,65 +58,74 @@ void SoundBufferStreamed::play() {
         std::lock_guard<std::mutex> lock(soundSource->mutex);
         alSourcePlay(source);
 
-        running = true;
+        // Maybe another thread is running, we should tell him to stop
+        if (running) {
+            running = false;
+        }
     }
+    // Use preloaded data (and give another thread time to stop)
+    std::this_thread::sleep_for(kTickFreqMs);
+
+    // Not we should be able start thread
     loadingThread = std::async(std::launch::async,
                                &SoundBufferStreamed::updateBuffers, this);
 }
 
 void SoundBufferStreamed::updateBuffers() {
+    running = true;
     while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        {
+            std::lock_guard<std::mutex> lock(soundSource->mutex);
+            if (!running) {
+                return;
+            }
 
-        std::lock_guard<std::mutex> lock(soundSource->mutex);
-        if (!running) {
-            return;
-        }
+            ALint processed, state;
 
-        ALint processed, state;
+            /* Get relevant source info */
+            alCheck(alGetSourcei(source, AL_SOURCE_STATE, &state));
+            alCheck(alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed));
 
-        /* Get relevant source info */
-        alCheck(alGetSourcei(source, AL_SOURCE_STATE, &state));
-        alCheck(alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed));
+            bool bufferedData = false;
 
-        bool bufferedData = false;
+            /* Unqueue and handle each processed buffer */
+            while (processed > 0 &&
+                   streamedData * kSizeOfChunk < soundSource->data.size()) {
+                bufferedData = true;
+                ALuint bufid{};
+                auto sizeOfNextChunk = std::min(
+                    static_cast<size_t>(kSizeOfChunk),
+                    soundSource->data.size() -
+                        static_cast<size_t>(kSizeOfChunk) * streamedData);
 
-        /* Unqueue and handle each processed buffer */
-        while (processed > 0 &&
-               streamedData * kSizeOfChunk < soundSource->data.size()) {
-            bufferedData = true;
-            ALuint bufid{};
-            auto sizeOfNextChunk =
-                std::min(static_cast<size_t>(kSizeOfChunk),
-                         soundSource->data.size() -
-                             static_cast<size_t>(kSizeOfChunk) * streamedData);
+                alCheck(alSourceUnqueueBuffers(source, 1, &bufid));
+                processed--;
 
-            alCheck(alSourceUnqueueBuffers(source, 1, &bufid));
-            processed--;
+                if (sizeOfNextChunk > 0) {
+                    alCheck(alBufferData(
+                        bufid,
+                        soundSource->channels == 1 ? AL_FORMAT_MONO16
+                                                   : AL_FORMAT_STEREO16,
+                        &soundSource->data[streamedData * kSizeOfChunk],
+                        sizeOfNextChunk * sizeof(int16_t),
+                        soundSource->sampleRate));
+                    streamedData++;
+                    alCheck(alSourceQueueBuffers(source, 1, &bufid));
+                }
+            }
 
-            if (sizeOfNextChunk > 0) {
-                alCheck(alBufferData(
-                    bufid,
-                    soundSource->channels == 1 ? AL_FORMAT_MONO16
-                                               : AL_FORMAT_STEREO16,
-                    &soundSource->data[streamedData * kSizeOfChunk],
-                    sizeOfNextChunk * sizeof(int16_t),
-                    soundSource->sampleRate));
-                streamedData++;
-                alCheck(alSourceQueueBuffers(source, 1, &bufid));
+            /* Make sure the source hasn't underrun */
+            if (bufferedData && state != AL_PLAYING && state != AL_PAUSED) {
+                ALint queued;
+
+                /* If no buffers are queued, playback is finished */
+                alCheck(alGetSourcei(source, AL_BUFFERS_QUEUED, &queued));
+                if (queued == 0) return;
+
+                alCheck(alSourcePlay(source));
             }
         }
-
-        /* Make sure the source hasn't underrun */
-        if (bufferedData && state != AL_PLAYING && state != AL_PAUSED) {
-            ALint queued;
-
-            /* If no buffers are queued, playback is finished */
-            alCheck(alGetSourcei(source, AL_BUFFERS_QUEUED, &queued));
-            if (queued == 0) return;
-
-            alCheck(alSourcePlay(source));
-        }
+        std::this_thread::sleep_for(kTickFreqMs);
     }
 }
 
