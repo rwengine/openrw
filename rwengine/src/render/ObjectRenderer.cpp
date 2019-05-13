@@ -307,14 +307,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     if (!pickup->isEnabled()) return;
-    
-    static constexpr float kRotationSpeedCoeff = 3.0f;
-    glm::mat4 modelMatrix =
-        glm::translate(glm::mat4(1.0f), pickup->getPosition());
-    modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime() * kRotationSpeedCoeff,
-                              glm::vec3(0.f, 0.f, 1.f));
     const auto& atomic = pickup->getAtomic();
-    renderAtomic(atomic.get(), modelMatrix, nullptr, outList);
+    renderAtomic(atomic.get(), glm::mat4(1.f), nullptr, outList);
 }
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
