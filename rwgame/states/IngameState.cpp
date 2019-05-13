@@ -439,7 +439,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
     bool lookright = held(GameInputState::LookRight);
     btCollisionObject* physTarget = player->getCharacter()->physObject.get();
 
-    auto targetTransform = target->getTimeAdjustedTransform(alpha);
+    auto targetTransform = target->getClump()->getFrame()->getWorldTransform();
 
     glm::vec3 targetPosition(targetTransform[3]);
     glm::vec3 lookTargetPosition(targetPosition);

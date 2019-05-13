@@ -18,7 +18,7 @@ GameObject::~GameObject() {
 }
 
 void GameObject::setPosition(const glm::vec3& pos) {
-    _lastPosition = position = pos;
+    position = pos;
 }
 
 void GameObject::setRotation(const glm::quat& orientation) {
@@ -36,16 +36,7 @@ void GameObject::setHeading(float heading) {
     setRotation(quat);
 }
 
-glm::mat4 GameObject::getTimeAdjustedTransform(float alpha) const {
-    glm::mat4 t{1.0f};
-    t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
-    t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
-    return t;
-}
-
 void GameObject::updateTransform(const glm::vec3& pos, const glm::quat& rot) {
-    _lastPosition = position;
-    _lastRotation = rotation;
     position = pos;
     rotation = rot;
 

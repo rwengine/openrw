@@ -23,8 +23,6 @@ class GameWorld;
  * tracking used to make tunnels work.
  */
 class GameObject {
-    glm::vec3 _lastPosition;
-    glm::quat _lastRotation;
     GameObjectID objectID = 0;
 
     BaseModelInfo* modelinfo_;
@@ -62,12 +60,7 @@ public:
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
                BaseModelInfo* modelinfo)
-        : _lastPosition(pos)
-        , _lastRotation(rot)
-        , modelinfo_(modelinfo)
-        , position(pos)
-        , rotation(rot)
-        , engine(engine) {
+        : modelinfo_(modelinfo), position(pos), rotation(rot), engine(engine) {
         if (modelinfo_) {
             modelinfo_->addReference();
         }
@@ -148,9 +141,6 @@ public:
     const glm::vec3& getPosition() const {
         return position;
     }
-    const glm::vec3& getLastPosition() const {
-        return _lastPosition;
-    }
 
     const glm::quat& getRotation() const {
         return rotation;
@@ -228,17 +218,6 @@ public:
     }
 
     virtual void tick(float dt) = 0;
-
-    /**
-     * @brief Function used to modify the last transform
-     * @param newPos
-     */
-    void _updateLastTransform() {
-        _lastPosition = getPosition();
-        _lastRotation = getRotation();
-    }
-
-    glm::mat4 getTimeAdjustedTransform(float alpha) const;
 
     enum ObjectLifetime {
         /// lifetime has not been set
