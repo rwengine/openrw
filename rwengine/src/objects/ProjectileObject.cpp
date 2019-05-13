@@ -117,8 +117,9 @@ void ProjectileObject::cleanup() {
 
 ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
                                    const ProjectileObject::ProjectileInfo& info)
-    : GameObject(world, position, glm::quat{1.0f,0.0f,0.0f,0.0f}, nullptr)
-    , _info(info) {
+    : GameObject(world, position, glm::quat{1.0f, 0.0f, 0.0f, 0.0f}, nullptr)
+    , _info(info)
+    , _motionState(this) {
     _shape = std::make_unique<btSphereShape>(0.45f);
     btVector3 inertia(0.f, 0.f, 0.f);
     _shape->calculateLocalInertia(1.f, inertia);
@@ -130,6 +131,7 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
     ws.setOrigin(btVector3(position.x, position.y, position.z));
     riginfo.m_startWorldTransform = ws;
     riginfo.m_mass = 1.f;
+    riginfo.m_motionState = &_motionState;
 
     _body = std::make_unique<btRigidBody>(riginfo);
     _body->setUserPointer(this);
@@ -172,12 +174,6 @@ ProjectileObject::~ProjectileObject() {
 
 void ProjectileObject::tick(float dt) {
     if (_body == nullptr) return;
-
-    auto& bttr = _body->getWorldTransform();
-    position = {bttr.getOrigin().x(), bttr.getOrigin().y(),
-                bttr.getOrigin().z()};
-    auto r = bttr.getRotation();
-    rotation = {r.x(), r.y(), r.z(), r.w()};
 
     _info.time -= dt;
 

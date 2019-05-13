@@ -1,5 +1,7 @@
 #include "objects/GameObject.hpp"
 
+#include <data/Clump.hpp>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -39,4 +41,22 @@ glm::mat4 GameObject::getTimeAdjustedTransform(float alpha) const {
     t = glm::translate(t, glm::mix(_lastPosition, getPosition(), alpha));
     t = t * glm::mat4_cast(glm::slerp(_lastRotation, getRotation(), alpha));
     return t;
+}
+
+void GameObject::updateTransform(const glm::vec3& pos, const glm::quat& rot) {
+    _lastPosition = position;
+    _lastRotation = rotation;
+    position = pos;
+    rotation = rot;
+
+    const auto& clump = getClump();
+    const auto& atomic = getAtomic();
+    if (clump) {
+        clump->getFrame()->setRotation(glm::mat3_cast(rot));
+        clump->getFrame()->setTranslation(pos);
+    }
+    if (atomic) {
+        atomic->getFrame()->setRotation(glm::mat3_cast(rot));
+        atomic->getFrame()->setTranslation(pos);
+    }
 }

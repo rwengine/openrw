@@ -339,9 +339,8 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
 
 void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
                                       RenderList& outList) {
-    glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(m_renderAlpha);
     const auto& atomic = projectile->getAtomic();
-    renderAtomic(atomic.get(), modelMatrix, nullptr, outList);
+    renderAtomic(atomic.get(), glm::mat4(1.0f), nullptr, outList);
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {

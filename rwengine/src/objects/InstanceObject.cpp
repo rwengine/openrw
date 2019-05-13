@@ -270,11 +270,3 @@ void InstanceObject::setSolid(bool solid) {
     }
     body->getBulletBody()->setCollisionFlags(flags);
 }
-
-void InstanceObject::updateTransform(const glm::vec3& pos,
-                                     const glm::quat& rot) {
-    position = pos;
-    rotation = rot;
-    getAtomic()->getFrame()->setRotation(glm::mat3_cast(rot));
-    getAtomic()->getFrame()->setTranslation(pos);
-}

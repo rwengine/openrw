@@ -106,8 +106,6 @@ public:
 
     glm::vec3 getCenterOffset() override;
 
-    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
-
     VehicleModelInfo* getVehicle() const {
         return getModelInfo<VehicleModelInfo>();
     }

@@ -270,12 +270,7 @@ public:
         }
     }
 
-    virtual void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
-        _lastPosition = position;
-        _lastRotation = rotation;
-        position = pos;
-        rotation = rot;
-    }
+    void updateTransform(const glm::vec3& pos, const glm::quat& rot);
 
 private:
     ObjectLifetime lifetime = GameObject::UnknownLifetime;

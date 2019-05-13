@@ -86,8 +86,6 @@ public:
     float getHealth() const {
         return health;
     }
-
-    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
 };
 
 #endif

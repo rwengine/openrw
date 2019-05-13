@@ -309,14 +309,6 @@ void VehicleObject::setRotation(const glm::quat& orientation) {
     GameObject::setRotation(orientation);
 }
 
-void VehicleObject::updateTransform(const glm::vec3& pos,
-                                    const glm::quat& rot) {
-    position = pos;
-    rotation = rot;
-    getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
-    getClump()->getFrame()->setTranslation(pos);
-}
-
 void VehicleObject::setExtraEnabled(size_t extra, bool enabled) {
     auto atomic = extras_.at(extra);
     if (!atomic) {
