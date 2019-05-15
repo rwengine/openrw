@@ -163,9 +163,7 @@ ProjectileObject::ProjectileObject(GameWorld* world, const glm::vec3& position,
 
     const auto& modelData = world->data->findModelInfo<SimpleModelInfo>(
         getProjectileInfo().weapon->modelID);
-    auto atomic = modelData->getAtomic(0)->clone();
-    atomic->setFrame(std::make_shared<ModelFrame>());
-    setModel(std::move(atomic));
+    setModel(modelData->getAtomic(0)->clone(std::make_shared<ModelFrame>()));
 }
 
 ProjectileObject::~ProjectileObject() {

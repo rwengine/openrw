@@ -82,10 +82,10 @@ ModelFramePtr ModelFrame::cloneHierarchy() const {
     return self;
 }
 
-AtomicPtr Atomic::clone() const {
+AtomicPtr Atomic::clone(const ModelFramePtr& newFrame) const {
     auto newatomic = std::make_shared<Atomic>();
     newatomic->setGeometry(getGeometry());
-    newatomic->setFrame(getFrame());
+    newatomic->setFrame(newFrame ? newFrame : getFrame());
     newatomic->setFlags(getFlags());
     return newatomic;
 }
