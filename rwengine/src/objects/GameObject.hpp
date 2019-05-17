@@ -2,6 +2,7 @@
 #define _RWENGINE_GAMEOBJECT_HPP_
 
 #include <limits>
+#include <variant>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
@@ -22,16 +23,15 @@ class GameWorld;
  * tracking used to make tunnels work.
  */
 class GameObject {
-    glm::vec3 _lastPosition;
-    glm::quat _lastRotation;
     GameObjectID objectID = 0;
 
     BaseModelInfo* modelinfo_;
 
-    /**
-     * Model used for rendering
-     */
-    ClumpPtr model_ = nullptr;
+    using Model = std::variant<AtomicPtr, ClumpPtr>;
+    Model model_;
+
+    static const AtomicPtr NullAtomic;
+    static const ClumpPtr NullClump;
 
 protected:
     void changeModelInfo(BaseModelInfo* next) {
@@ -60,12 +60,7 @@ public:
 
     GameObject(GameWorld* engine, const glm::vec3& pos, const glm::quat& rot,
                BaseModelInfo* modelinfo)
-        : _lastPosition(pos)
-        , _lastRotation(rot)
-        , modelinfo_(modelinfo)
-        , position(pos)
-        , rotation(rot)
-        , engine(engine) {
+        : modelinfo_(modelinfo), position(pos), rotation(rot), engine(engine) {
         if (modelinfo_) {
             modelinfo_->addReference();
         }
@@ -92,16 +87,30 @@ public:
         return static_cast<T*>(modelinfo_);
     }
 
-    /**
-     * @return The model used in rendering
-     */
-    ClumpPtr getModel() const {
+    const Model& getModel() const {
         return model_;
     }
 
-    /**
-     * Changes the current model, used for re-dressing chars
-     */
+     const AtomicPtr& getAtomic() const {
+        if (auto atomic = std::get_if<AtomicPtr>(&model_))
+        {
+            return *atomic;
+        }
+        return NullAtomic;
+    }
+
+    const ClumpPtr& getClump() const {
+        if (auto clump = std::get_if<ClumpPtr>(&model_))
+        {
+            return *clump;
+        }
+        return NullClump;
+    }
+
+    void setModel(const AtomicPtr& model) {
+        model_ = model;
+    }
+
     void setModel(const ClumpPtr& model) {
         model_ = model;
     }
@@ -131,9 +140,6 @@ public:
 
     const glm::vec3& getPosition() const {
         return position;
-    }
-    const glm::vec3& getLastPosition() const {
-        return _lastPosition;
     }
 
     const glm::quat& getRotation() const {
@@ -213,17 +219,6 @@ public:
 
     virtual void tick(float dt) = 0;
 
-    /**
-     * @brief Function used to modify the last transform
-     * @param newPos
-     */
-    void _updateLastTransform() {
-        _lastPosition = getPosition();
-        _lastRotation = getRotation();
-    }
-
-    glm::mat4 getTimeAdjustedTransform(float alpha) const;
-
     enum ObjectLifetime {
         /// lifetime has not been set
         UnknownLifetime,
@@ -254,29 +249,10 @@ public:
         }
     }
 
-    virtual void updateTransform(const glm::vec3& pos, const glm::quat& rot) {
-        _lastPosition = position;
-        _lastRotation = rotation;
-        position = pos;
-        rotation = rot;
-    }
+    void updateTransform(const glm::vec3& pos, const glm::quat& rot);
 
 private:
     ObjectLifetime lifetime = GameObject::UnknownLifetime;
-};
-
-class ClumpObject {
-    ClumpPtr clump_;
-
-protected:
-    void setClump(const ClumpPtr& ptr) {
-        clump_ = ptr;
-    }
-
-public:
-    const ClumpPtr& getClump() const {
-        return clump_;
-    }
 };
 
 #endif  // __GAMEOBJECTS_HPP__

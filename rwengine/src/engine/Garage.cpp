@@ -38,7 +38,7 @@ Garage::Garage(GameWorld* engine_, size_t id_, const glm::vec3& coord0,
     for (const auto& p : engine->instancePool.objects) {
         const auto inst = static_cast<InstanceObject*>(p.second.get());
 
-        if (!inst->getModel()) {
+        if (!inst->getClump()) {
             continue;
         }
 

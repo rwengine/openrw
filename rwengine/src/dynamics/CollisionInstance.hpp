@@ -4,16 +4,29 @@
 #include <memory>
 #include <vector>
 
+#include <btBulletDynamicsCommon.h>
+
 class btCollisionShape;
 class btCompoundShape;
-class btMotionState;
-class btRigidBody;
 class btTriangleIndexVertexArray;
 struct CollisionModel;
 
 class GameObject;
 struct DynamicObjectData;
 struct VehicleHandlingInfo;
+
+class GameObjectMotionState : public btMotionState {
+public:
+    explicit GameObjectMotionState(GameObject* object) : m_object(object) {
+    }
+
+    void getWorldTransform(btTransform& tform) const override;
+
+    void setWorldTransform(const btTransform& tform) override;
+
+private:
+    GameObject* m_object;
+};
 
 /**
  * @brief CollisionInstance stores bullet body information

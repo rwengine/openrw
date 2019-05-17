@@ -82,10 +82,10 @@ ModelFramePtr ModelFrame::cloneHierarchy() const {
     return self;
 }
 
-AtomicPtr Atomic::clone() const {
+AtomicPtr Atomic::clone(const ModelFramePtr& newFrame) const {
     auto newatomic = std::make_shared<Atomic>();
     newatomic->setGeometry(getGeometry());
-    newatomic->setFrame(getFrame());
+    newatomic->setFrame(newFrame ? newFrame : getFrame());
     newatomic->setFlags(getFlags());
     return newatomic;
 }
@@ -118,6 +118,7 @@ ClumpPtr Clump::clone() const {
     auto newroot = rootframe_->cloneHierarchy();
     auto clump = std::make_shared<Clump>();
     clump->setFrame(newroot);
+    clump->boundingRadius = boundingRadius;
 
     // This isn't the most optimal implementation, but this code is likely
     // to be replaced soon.

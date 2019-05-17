@@ -39,7 +39,7 @@ struct btVehicleRaycaster;
  * @class VehicleObject
  * Implements Vehicle behaviours.
  */
-class VehicleObject final : public GameObject, public ClumpObject {
+class VehicleObject final : public GameObject {
 private:
     float steerAngle{0.f};
     float throttle{0.f};
@@ -105,8 +105,6 @@ public:
     void setRotation(const glm::quat& orientation) override;
 
     glm::vec3 getCenterOffset() override;
-
-    void updateTransform(const glm::vec3& pos, const glm::quat& rot) override;
 
     VehicleModelInfo* getVehicle() const {
         return getModelInfo<VehicleModelInfo>();

@@ -271,6 +271,10 @@ PickupObject::PickupObject(GameWorld* world, const glm::vec3& position,
 
     setEnabled(true);
     setCollected(false);
+
+    auto modelData = getModelInfo<SimpleModelInfo>();
+    setModel(modelData->getAtomic(0)->clone(std::make_shared<ModelFrame>()));
+    updateTransform(getPosition(), getRotation());
 }
 
 PickupObject::~PickupObject() {
@@ -313,6 +317,12 @@ void PickupObject::tick(float dt) {
         glm::vec4(red / 255.f, green / 255.f, blue / 255.f, 1.f) * colourValue;
 
     if (m_enabled) {
+        static constexpr float kRotationSpeedCoeff = 3.0f;
+        updateTransform(
+            getPosition(),
+            glm::angleAxis(engine->getGameTime() * kRotationSpeedCoeff,
+                           glm::vec3(0.f, 0.f, 1.f)));
+
         // Sort out interactions with things that may or may not be players.
         btManifoldArray manifoldArray;
         btBroadphasePairArray& pairArray =

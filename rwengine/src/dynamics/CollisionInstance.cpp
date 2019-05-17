@@ -21,30 +21,21 @@
 #include "objects/GameObject.hpp"
 #include "objects/VehicleInfo.hpp"
 
-class GameObjectMotionState : public btMotionState {
-public:
-    GameObjectMotionState(GameObject* object) : m_object(object) {
-    }
+void GameObjectMotionState::getWorldTransform(btTransform& tform) const {
+    auto& position = m_object->getPosition();
+    auto& rotation = m_object->getRotation();
+    tform.setOrigin(btVector3(position.x, position.y, position.z));
+    tform.setRotation(
+        btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+}
 
-    void getWorldTransform(btTransform& tform) const override {
-        auto& position = m_object->getPosition();
-        auto& rotation = m_object->getRotation();
-        tform.setOrigin(btVector3(position.x, position.y, position.z));
-        tform.setRotation(
-            btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-    }
-
-    void setWorldTransform(const btTransform& tform) override {
-        auto& o = tform.getOrigin();
-        auto r = tform.getRotation();
-        glm::vec3 position(o.x(), o.y(), o.z());
-        glm::quat rotation(r.w(), r.x(), r.y(), r.z());
-        m_object->updateTransform(position, rotation);
-    }
-
-private:
-    GameObject* m_object;
-};
+void GameObjectMotionState::setWorldTransform(const btTransform& tform) {
+    auto& o = tform.getOrigin();
+    auto r = tform.getRotation();
+    glm::vec3 position(o.x(), o.y(), o.z());
+    glm::quat rotation(r.w(), r.x(), r.y(), r.z());
+    m_object->updateTransform(position, rotation);
+}
 
 CollisionInstance::~CollisionInstance() {
     if (m_body) {

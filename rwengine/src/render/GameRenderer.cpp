@@ -349,7 +349,12 @@ RenderList GameRenderer::createObjectRenderList(const GameWorld *world) {
         if (blip.second.target > 0) {
             auto object = world->getBlipTarget(blip.second);
             if (object) {
-                model = object->getTimeAdjustedTransform(_renderAlpha);
+                auto& clump = object->getClump();
+                auto& atomic = object->getAtomic();
+                if (clump)
+                    model = clump->getFrame()->getWorldTransform();
+                else if (atomic)
+                    model = atomic->getFrame()->getWorldTransform();
             }
         } else {
             model = translate(model, blip.second.coord);

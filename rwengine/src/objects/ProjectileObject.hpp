@@ -1,13 +1,12 @@
 #ifndef _RWENGINE_PROJECTILEOBJECT_HPP_
 #define _RWENGINE_PROJECTILEOBJECT_HPP_
 
+#include <dynamics/CollisionInstance.hpp>
 #include <objects/GameObject.hpp>
 #include "render/VisualFX.hpp"
 
-
 class GameWorld;
 class btPairCachingGhostObject;
-class btRigidBody;
 class btSphereShape;
 struct WeaponData;
 
@@ -50,6 +49,8 @@ private:
 
     /** Used for RPGs and Molotov collision detection */
     std::unique_ptr<btPairCachingGhostObject> _ghostBody;
+
+    GameObjectMotionState _motionState;
 
     bool _exploded = false;
 

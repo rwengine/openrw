@@ -43,9 +43,8 @@ CharacterObject::CharacterObject(GameWorld* engine, const glm::vec3& pos,
                                  ai::CharacterController* controller)
     : GameObject(engine, pos, rot, modelinfo), controller(controller) {
     auto info = getModelInfo<PedModelInfo>();
-    setClump(info->getModel()->clone());
     if (info->getModel()) {
-        setModel(info->getModel());
+        setModel(info->getModel()->clone());
         animator = std::make_unique<Animator>(getClump());
 
         createActor();
@@ -70,7 +69,7 @@ void CharacterObject::createActor(const glm::vec2& size) {
     }
 
     // Don't create anything without a valid model.
-    if (getModel()) {
+    if (getClump()) {
         btTransform tf;
         tf.setIdentity();
         tf.setOrigin(btVector3(position.x, position.y, position.z));

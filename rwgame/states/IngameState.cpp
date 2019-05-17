@@ -439,7 +439,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
     bool lookright = held(GameInputState::LookRight);
     btCollisionObject* physTarget = player->getCharacter()->physObject.get();
 
-    auto targetTransform = target->getTimeAdjustedTransform(alpha);
+    auto targetTransform = target->getClump()->getFrame()->getWorldTransform();
 
     glm::vec3 targetPosition(targetTransform[3]);
     glm::vec3 lookTargetPosition(targetPosition);
@@ -448,7 +448,7 @@ const ViewCamera& IngameState::getCamera(float alpha) {
 
     if (target->type() == GameObject::Vehicle) {
         auto vehicle = static_cast<VehicleObject*>(target);
-        auto model = vehicle->getModel();
+        auto model = vehicle->getClump();
         auto maxDist = model->getBoundingRadius() * 2.f;
         viewDistance = viewDistance + maxDist;
         lookTargetPosition.z += (vehicle->info->handling.dimensions.z * 0.5f);

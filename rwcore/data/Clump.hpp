@@ -234,7 +234,7 @@ public:
         }
     }
 
-    AtomicPtr clone() const;
+    AtomicPtr clone(const ModelFramePtr& newFrame = {}) const;
 };
 
 /**

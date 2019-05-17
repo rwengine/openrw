@@ -307,20 +307,8 @@ void ObjectRenderer::renderVehicle(VehicleObject* vehicle,
 
 void ObjectRenderer::renderPickup(PickupObject* pickup, RenderList& outList) {
     if (!pickup->isEnabled()) return;
-    
-    static constexpr float kRotationSpeedCoeff = 3.0f;
-    glm::mat4 modelMatrix =
-        glm::translate(glm::mat4(1.0f), pickup->getPosition());
-    modelMatrix = glm::rotate(modelMatrix, m_world->getGameTime() * kRotationSpeedCoeff,
-                              glm::vec3(0.f, 0.f, 1.f));
-
-    auto odata = pickup->getModelInfo<SimpleModelInfo>();
-
-    RW_CHECK(odata, "Failed to read modelinfo for Pickup");
-
-    auto atomic = odata->getAtomic(0);
-
-    renderAtomic(atomic, modelMatrix, nullptr, outList);
+    const auto& atomic = pickup->getAtomic();
+    renderAtomic(atomic.get(), glm::mat4(1.f), nullptr, outList);
 }
 
 void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
@@ -345,15 +333,8 @@ void ObjectRenderer::renderCutsceneObject(CutsceneObject* cutscene,
 
 void ObjectRenderer::renderProjectile(ProjectileObject* projectile,
                                       RenderList& outList) {
-    glm::mat4 modelMatrix = projectile->getTimeAdjustedTransform(m_renderAlpha);
-
-    auto odata = m_world->data->findModelInfo<SimpleModelInfo>(
-        projectile->getProjectileInfo().weapon->modelID);
-
-    RW_CHECK(odata, "Failed to read modelinfo");
-
-    auto atomic = odata->getAtomic(0);
-    renderAtomic(atomic, modelMatrix, nullptr, outList);
+    const auto& atomic = projectile->getAtomic();
+    renderAtomic(atomic.get(), glm::mat4(1.0f), nullptr, outList);
 }
 
 void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {
@@ -365,11 +346,9 @@ void ObjectRenderer::buildRenderList(GameObject* object, RenderList& outList) {
         case GameObject::Character:
             renderCharacter(static_cast<CharacterObject*>(object), outList);
             break;
-            ;
         case GameObject::Vehicle:
             renderVehicle(static_cast<VehicleObject*>(object), outList);
             break;
-            ;
         case GameObject::Pickup:
             renderPickup(static_cast<PickupObject*>(object), outList);
             break;

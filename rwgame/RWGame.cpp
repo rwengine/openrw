@@ -605,7 +605,6 @@ void RWGame::tickObjects(float dt) const {
         RW_PROFILE_SCOPEC("allObjects", MP_HOTPINK1);
         RW_PROFILE_COUNTER_SET("tickObjects/allObjects", world->allObjects.size());
         for (auto &object : world->allObjects) {
-            object->_updateLastTransform();
             object->tick(dt);
         }
     }

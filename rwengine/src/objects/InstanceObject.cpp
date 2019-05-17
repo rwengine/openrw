@@ -165,13 +165,8 @@ void InstanceObject::changeModel(BaseModelInfo* incoming, int atomicNumber) {
                   atomicNumber);
         auto atomic = getModelInfo<SimpleModelInfo>()->getAtomic(atomicNumber);
         if (atomic) {
-            auto previous = atomic_;
-            atomic_ = atomic->clone();
-            if (previous) {
-                atomic_->setFrame(previous->getFrame());
-            } else {
-                atomic_->setFrame(std::make_shared<ModelFrame>());
-            }
+            const auto frame = atomic_ ? atomic_->getFrame() : std::make_shared<ModelFrame>();
+            atomic_ = atomic->clone(frame);
         }
 
         if (collision) {
@@ -269,12 +264,4 @@ void InstanceObject::setSolid(bool solid) {
         flags |= btCollisionObject::CF_NO_CONTACT_RESPONSE;
     }
     body->getBulletBody()->setCollisionFlags(flags);
-}
-
-void InstanceObject::updateTransform(const glm::vec3& pos,
-                                     const glm::quat& rot) {
-    position = pos;
-    rotation = rot;
-    getAtomic()->getFrame()->setRotation(glm::mat3_cast(rot));
-    getAtomic()->getFrame()->setTranslation(pos);
 }

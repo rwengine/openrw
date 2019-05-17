@@ -173,8 +173,7 @@ VehicleObject::VehicleObject(GameWorld* engine, const glm::vec3& pos,
         wheelsRotation.push_back(0.f);
     }
 
-    setModel(getVehicle()->getModel());
-    setClump(getModelInfo<VehicleModelInfo>()->getModel()->clone());
+    setModel(getVehicle()->getModel()->clone());
     setupModel();
 }
 
@@ -308,14 +307,6 @@ void VehicleObject::setRotation(const glm::quat& orientation) {
         collision->getBulletBody()->setWorldTransform(t);
     }
     GameObject::setRotation(orientation);
-}
-
-void VehicleObject::updateTransform(const glm::vec3& pos,
-                                    const glm::quat& rot) {
-    position = pos;
-    rotation = rot;
-    getClump()->getFrame()->setRotation(glm::mat3_cast(rot));
-    getClump()->getFrame()->setTranslation(pos);
 }
 
 void VehicleObject::setExtraEnabled(size_t extra, bool enabled) {

@@ -227,7 +227,7 @@ CutsceneObject* GameWorld::createCutsceneObject(const uint16_t id,
     if (id == 0) {
         auto playerobj = pedestrianPool.find(state->playerObject);
         if (playerobj) {
-            model = playerobj->getModel();
+            model = playerobj->getClump();
         }
     }
 
@@ -1050,7 +1050,7 @@ GameWorld::findOverlappingObjects(const glm::vec3 &center,
     auto checkObjects = [&](const auto& objects) {
         for (auto& p : objects) {
             const auto& object = p.second.get();
-            auto objectBounds = object->getModel()->getBoundingRadius();
+            auto objectBounds = object->getClump()->getBoundingRadius();
             if (glm::distance(center, object->getPosition()) <
                 radius + objectBounds) {
                 overlapping.push_back(object);

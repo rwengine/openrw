@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(vehicle_parts) {
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
     BOOST_REQUIRE(vehicle);
-    BOOST_REQUIRE(vehicle->getModel());
+    BOOST_REQUIRE(vehicle->getClump());
 
     VehicleObject::Part* part = vehicle->getPart("bonnet_dummy");
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(vehicle_part_vis) {
         Global::get().e->createVehicle(90u, glm::vec3(), glm::quat{1.0f,0.0f,0.0f,0.0f});
 
     BOOST_REQUIRE(vehicle);
-    BOOST_REQUIRE(vehicle->getModel());
+    BOOST_REQUIRE(vehicle->getClump());
 
     VehicleObject::Part* bonnetpart = vehicle->getPart("bonnet_dummy");
 

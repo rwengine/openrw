@@ -16,7 +16,7 @@ Payphone::Payphone(GameWorld* engine_, size_t id_, const glm::vec2& coord)
     // Find payphone object, original game does this differently
     for (const auto& p : engine->instancePool.objects) {
         auto o = p.second.get();
-        if (!o->getModel()) {
+        if (!o->getClump()) {
             continue;
         }
         if (o->getModelInfo<BaseModelInfo>()->name != "phonebooth1") {
