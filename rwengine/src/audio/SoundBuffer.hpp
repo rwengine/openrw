@@ -4,8 +4,6 @@
 #include <al.h>
 #include <glm/vec3.hpp>
 
-#include <vector>
-
 class SoundSource;
 
 /// OpenAL tool for playing
