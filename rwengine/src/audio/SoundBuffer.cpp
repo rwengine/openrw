@@ -5,11 +5,6 @@
 #include "audio/SoundSource.hpp"
 #include "audio/alCheck.hpp"
 
-namespace {
-constexpr int kNrBuffersStreaming = 4;
-constexpr int kSizeOfChunk = 4;
-}  // namespace
-
 SoundBuffer::SoundBuffer() {
     alCheck(alGenSources(1, &source));
     alCheck(alGenBuffers(1, &buffer));
