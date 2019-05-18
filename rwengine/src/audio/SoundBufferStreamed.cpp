@@ -59,8 +59,8 @@ void SoundBufferStreamed::play() {
         alSourcePlay(source);
 
         // Maybe another thread is running, we should tell him to stop
-        if (running) {
-            running = false;
+        if (state == State::Playing) {
+            state = State::Stopped;
         }
     }
     // Use preloaded data (and give another thread time to stop)
@@ -72,11 +72,11 @@ void SoundBufferStreamed::play() {
 }
 
 void SoundBufferStreamed::updateBuffers() {
-    running = true;
+    state = State::Playing;
     while (true) {
         {
             std::lock_guard<std::mutex> lock(soundSource->mutex);
-            if (!running) {
+            if (state == State::Stopped) {
                 return;
             }
 
@@ -131,11 +131,11 @@ void SoundBufferStreamed::updateBuffers() {
 
 void SoundBufferStreamed::pause() {
     std::lock_guard<std::mutex> lock(soundSource->mutex);
-    running = false;
+    state = State::Stopped;
     alCheck(alSourcePause(source));
 }
 void SoundBufferStreamed::stop() {
     std::lock_guard<std::mutex> lock(soundSource->mutex);
-    running = false;
+    state = State::Stopped;
     alCheck(alSourceStop(source));
 }
