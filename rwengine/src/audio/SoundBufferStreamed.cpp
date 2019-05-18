@@ -67,7 +67,7 @@ void SoundBufferStreamed::play() {
     std::this_thread::sleep_for(kTickFreqMs);
 
     // Not we should be able start thread
-    loadingThread = std::async(std::launch::async,
+    bufferingThread = std::async(std::launch::async,
                                &SoundBufferStreamed::updateBuffers, this);
 }
 

@@ -25,7 +25,7 @@ private:
     void updateBuffers();
     unsigned int streamedData = 0;
     std::array<ALuint, kNrBuffersStreaming> buffers;
-    std::future<void> loadingThread;
+    std::future<void> bufferingThread;
 };
 
 #endif
