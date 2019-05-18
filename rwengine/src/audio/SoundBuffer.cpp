@@ -51,16 +51,16 @@ bool SoundBuffer::isStopped() const {
 }
 
 void SoundBuffer::play() {
-    running = true;
+    state = State::Playing;
     alCheck(alSourcePlay(source));
 
 }
 void SoundBuffer::pause() {
-    running = false;
+    state = State::Stopped;
     alCheck(alSourcePause(source));
 }
 void SoundBuffer::stop() {
-    running = false;
+    state = State::Stopped;
     alCheck(alSourceStop(source));
 
 }
