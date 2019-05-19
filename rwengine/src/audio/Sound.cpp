@@ -3,7 +3,7 @@
 #include "audio/SoundBuffer.hpp"
 
 Sound::~Sound() {
-    if (buffer) {
+    if (buffer && buffer->state == SoundBuffer::State::Playing) {
         stop();
     }
 }

@@ -28,12 +28,13 @@ struct SoundBuffer {
     void setMaxDistance(float maxDist);
 
     enum class State {
+        Created = 0,
         Stopped,
         Playing
     };
 
     ALuint source;
-    State state = State::Stopped;
+    State state = State::Created;
 private:
     ALuint buffer;
 };

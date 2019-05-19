@@ -18,8 +18,16 @@ SoundBufferStreamed::SoundBufferStreamed() {
 }
 
 SoundBufferStreamed::~SoundBufferStreamed() {
-    alCheck(
-        alSourceUnqueueBuffers(source, kNrBuffersStreaming, buffers.data()));
+    std::lock_guard<std::mutex> lock(soundSource->mutex);
+
+    if (state == State::Created) {  // We should only clear queue
+        alSourcei(source, AL_BUFFER, 0);
+    } else {
+        auto nrBuffersToUnqueue = std::min(kNrBuffersStreaming, buffersUsed);
+        alCheck(
+            alSourceUnqueueBuffers(source, nrBuffersToUnqueue, buffers.data()));
+    }
+
     alCheck(alDeleteBuffers(kNrBuffersStreaming, buffers.data()));
 }
 
@@ -44,9 +52,10 @@ bool SoundBufferStreamed::bufferData(SoundSource &soundSource) {
             static_cast<ALsizei>(sizeOfNextChunk * sizeof(int16_t)),
             soundSource.sampleRate));
         streamedData++;
+        buffersUsed++;
     }
 
-    alCheck(alSourceQueueBuffers(source, kNrBuffersStreaming, buffers.data()));
+    alCheck(alSourceQueueBuffers(source, buffersUsed, buffers.data()));
 
     this->soundSource = &soundSource;
 
@@ -110,6 +119,7 @@ void SoundBufferStreamed::updateBuffers() {
                         sizeOfNextChunk * sizeof(int16_t),
                         soundSource->sampleRate));
                     streamedData++;
+                    buffersUsed++;
                     alCheck(alSourceQueueBuffers(source, 1, &bufid));
                 }
             }

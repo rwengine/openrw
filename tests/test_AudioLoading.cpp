@@ -7,9 +7,11 @@ BOOST_AUTO_TEST_SUITE(AudioLoadingTests, DATA_TEST_PREDICATE)
 
 // @todo Shfil119 implement
 // This test requires assets
-BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
+struct F {
     SoundManager manager{Global::get().e};
+};
 
+BOOST_FIXTURE_TEST_CASE(testBufferIsPlaying, F) {
     auto audioPath =
         Global::get().e->data->index.findFilePath("audio/A1_a.wav");
 
@@ -33,9 +35,7 @@ BOOST_AUTO_TEST_CASE(testBufferIsPlaying) {
     BOOST_REQUIRE(sound.isStopped() == true);
 }
 
-BOOST_AUTO_TEST_CASE(testDecodingFramesOfMusic) {
-    SoundManager manager{Global::get().e};
-
+BOOST_FIXTURE_TEST_CASE(testDecodingFramesOfMusic, F) {
     auto audioPath =
         Global::get().e->data->index.findFilePath("audio/A1_a.wav");
 
@@ -45,9 +45,7 @@ BOOST_AUTO_TEST_CASE(testDecodingFramesOfMusic) {
     BOOST_REQUIRE(sound.source->decodedFrames > 0);
 }
 
-BOOST_AUTO_TEST_CASE(testDecodingFramesOfSfx) {
-    SoundManager manager{Global::get().e};
-
+BOOST_FIXTURE_TEST_CASE(testDecodingFramesOfSfx, F) {
     manager.createSfxInstance(157);  // Callahan Bridge fire
 
     auto& sound = manager.getSfxSourceRef(157);
