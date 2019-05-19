@@ -24,6 +24,7 @@ private:
     SoundSource* soundSource = nullptr;
     void updateBuffers();
     unsigned int streamedData = 0;
+    unsigned int buffersUsed = 0;
     std::array<ALuint, kNrBuffersStreaming> buffers;
     std::future<void> bufferingThread;
 };
