@@ -483,7 +483,7 @@ bool RWGame::updateInput() {
     RW_PROFILE_SCOPE(__func__);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (imgui.process_event(event)) {
+        if (imgui.processEvent(event)) {
             continue;
         }
         switch (event.type) {
@@ -634,10 +634,12 @@ void RWGame::tickObjects(float dt) const {
 
 void RWGame::render(float alpha, float time) {
     RW_PROFILE_SCOPEC(__func__, MP_CORNFLOWERBLUE);
+    RW_UNUSED(time);
 
     lastDraws = getRenderer().getRenderer().getDrawCount();
 
     getRenderer().getRenderer().swap();
+    imgui.startFrame();
 
     // Update the camera
     if (!stateManager.states.empty()) {
@@ -667,7 +669,7 @@ void RWGame::render(float alpha, float time) {
 
     renderer.getRenderer().popDebugGroup();
 
-    renderDebugView(time, viewCam);
+    renderDebugView();
 
     if (!world->isPaused()) hudDrawer.drawOnScreenText(world.get(), renderer);
 
@@ -676,99 +678,25 @@ void RWGame::render(float alpha, float time) {
         stateManager.draw(renderer);
     }
 
-    imgui.tick();
+    imgui.endFrame(viewCam);
 }
 
-void RWGame::renderDebugView(float time, ViewCamera &viewCam) {
+void RWGame::renderDebugView() {
     RW_PROFILE_SCOPE(__func__);
     switch (debugview_) {
-        case DebugViewMode::General:
-            renderDebugStats(time);
-            break;
         case DebugViewMode::Physics:
             world->dynamicsWorld->debugDrawWorld();
             debug.flush(renderer);
             break;
         case DebugViewMode::Navigation:
-            renderDebugPaths(time);
-            break;
-        case DebugViewMode::Objects:
-            renderDebugObjects(time, viewCam);
+            renderDebugPaths();
             break;
         default:
             break;
     }
 }
 
-void RWGame::renderDebugStats(float time) {
-    // Turn time into milliseconds
-    float time_ms = time * 1000.f;
-    constexpr size_t average_every_frame = 15;
-    static float times[average_every_frame];
-    static size_t times_index = 0;
-    static float time_average = 0;
-    times[times_index++] = time_ms;
-    if (times_index >= average_every_frame) {
-        times_index = 0;
-        time_average = 0;
-
-        for (size_t i = 0; i < average_every_frame; ++i) {
-            time_average += times[i];
-        }
-        time_average /= average_every_frame;
-    }
-
-    std::stringstream ss;
-    ss << "FPS: " << (1000.f / time_average) << " (" << time_average << "ms)\n"
-       << "Frame: " << time_ms << "ms\n"
-       << "Draws/Culls/Textures/Buffers: " << lastDraws << "/"
-       << renderer.getCulledCount() << "/"
-       << renderer.getRenderer().getTextureCount() << "/"
-       << renderer.getRenderer().getBufferCount() << "\n"
-       << "Timescale: " << world->state->basic.timeScale;
-
-    TextRenderer::TextInfo ti;
-    ti.font = FONT_ARIAL;
-    ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
-    ti.screenPosition = glm::vec2(10.f, 10.f);
-    ti.size = 15.f;
-    ti.baseColour = glm::u8vec3(255);
-    renderer.text.renderText(ti);
-
-    /*while( engine->log.size() > 0 && engine->log.front().time + 10.f <
-    engine->gameTime ) {
-        engine->log.pop_front();
-    }
-
-    ti.screenPosition = glm::vec2( 10.f, 500.f );
-    ti.size = 15.f;
-    for(auto it = engine->log.begin(); it != engine->log.end(); ++it) {
-        ti.text = it->message;
-        switch(it->type) {
-        case GameWorld::LogEntry::Error:
-            ti.baseColour = glm::vec3(1.f, 0.f, 0.f);
-            break;
-        case GameWorld::LogEntry::Warning:
-            ti.baseColour = glm::vec3(1.f, 1.f, 0.f);
-            break;
-        default:
-            ti.baseColour = glm::vec3(1.f, 1.f, 1.f);
-            break;
-        }
-
-        // Interpolate the color
-        // c.a = (engine->gameTime - it->time > 5.f) ? 255 - (((engine->gameTime
-    - it->time) - 5.f)/5.f) * 255 : 255;
-        // text.setColor(c);
-
-        engine->renderer.text.renderText(ti);
-        ti.screenPosition.y -= ti.size;
-    }*/
-}
-
-void RWGame::renderDebugPaths(float time) {
-    RW_UNUSED(time);
-
+void RWGame::renderDebugPaths() {
     btVector3 roadColour(1.f, 0.f, 0.f);
     btVector3 pedColour(0.f, 0.f, 1.f);
 
@@ -870,74 +798,6 @@ void RWGame::renderDebugPaths(float time) {
     }
 
     debug.flush(renderer);
-}
-
-void RWGame::renderDebugObjects(float time, ViewCamera& camera) {
-    RW_UNUSED(time);
-
-    std::stringstream ss;
-
-    ss << "Models: " << data.modelinfo.size() << "\n"
-       << "Dynamic Objects:\n"
-       << " Vehicles: " << world->vehiclePool.objects.size() << "\n"
-       << " Peds: " << world->pedestrianPool.objects.size() << "\n";
-
-    TextRenderer::TextInfo ti;
-    ti.font = FONT_ARIAL;
-    ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
-    ti.screenPosition = glm::vec2(10.f, 10.f);
-    ti.size = 15.f;
-    ti.baseColour = glm::u8vec3(255);
-    renderer.text.renderText(ti);
-
-    // Render worldspace overlay for nearby objects
-    constexpr float kNearbyDistance = 25.f;
-    const auto& view = camera.position;
-    const auto& model = camera.getView();
-    const auto& proj = camera.frustum.projection();
-    const auto& size = getWindow().getSize();
-    glm::vec4 viewport(0.f, 0.f, size.x, size.y);
-    auto isnearby = [&](GameObject* o) {
-        return glm::distance2(o->getPosition(), view) <
-               kNearbyDistance * kNearbyDistance;
-    };
-    auto showdata = [&](GameObject* o, std::stringstream& ss) {
-        auto screen = glm::project(o->getPosition(), model, proj, viewport);
-        if (screen.z >= 1.f) {
-            return;
-        }
-        ti.text = GameStringUtil::fromString(ss.str(), FONT_ARIAL);
-        screen.y = viewport.w - screen.y;
-        ti.screenPosition = glm::vec2(screen);
-        ti.size = 10.f;
-        renderer.text.renderText(ti);
-    };
-
-    for (auto& p : world->vehiclePool.objects) {
-        if (!isnearby(p.second.get())) continue;
-        auto v = static_cast<VehicleObject*>(p.second.get());
-
-        std::stringstream ss;
-        ss << v->getVehicle()->vehiclename_ << "\n"
-           << (v->isFlipped() ? "Flipped" : "Upright") << "\n"
-           << (v->isStopped() ? "Stopped" : "Moving") << "\n"
-           << v->getVelocity() << "m/s\n";
-
-        showdata(v, ss);
-    }
-    for (auto& p : world->pedestrianPool.objects) {
-        if (!isnearby(p.second.get())) continue;
-        auto c = static_cast<CharacterObject*>(p.second.get());
-        const auto& state = c->getCurrentState();
-        auto act = c->controller->getCurrentActivity();
-
-        std::stringstream ss;
-        ss << "Health: " << state.health << " (" << state.armour << ")\n"
-           << (c->isAlive() ? "Alive" : "Dead") << "\n"
-           << "Activity: " << (act ? act->name() : "Idle") << "\n";
-
-        showdata(c, ss);
-    }
 }
 
 void RWGame::globalKeyEvent(const SDL_Event& event) {

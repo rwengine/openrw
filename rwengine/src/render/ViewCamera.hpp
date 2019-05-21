@@ -19,7 +19,7 @@ public:
         , rotation(rot) {
     }
 
-    glm::mat4 getView() {
+    glm::mat4 getView() const {
         auto up = rotation * glm::vec3(0.f, 0.f, 1.f);
         return glm::lookAt(position,
                            position + rotation * glm::vec3(1.f, 0.f, 0.f), up);

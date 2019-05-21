@@ -5,6 +5,7 @@
 
 class RWGame;
 struct ImGuiContext;
+class ViewCamera;
 
 class RWImGui {
     RWGame &_game;
@@ -14,8 +15,9 @@ public:
     ~RWImGui();
     void init();
     void destroy();
-    bool process_event(SDL_Event &event);
-    void tick();
+    bool processEvent(SDL_Event &event);
+    void startFrame();
+    void endFrame(const ViewCamera &);
 };
 
 #endif // RWGAME_RWIMGUI_HPP
