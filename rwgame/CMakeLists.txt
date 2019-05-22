@@ -71,17 +71,15 @@ target_link_libraries(librwgame
         SDL2::SDL2
     )
 
-if(ENABLE_IMGUI)
-    target_compile_definitions(librwgame
-        PUBLIC
-            RW_IMGUI
-        )
+target_compile_definitions(librwgame
+    PUBLIC
+        RW_IMGUI
+    )
 
-    target_link_libraries(librwgame
-        PUBLIC
-            imgui::sdl_gl3
-        )
-endif()
+target_link_libraries(librwgame
+    PUBLIC
+        imgui::sdl_gl3
+    )
 
 add_executable(rwgame
     main.cpp

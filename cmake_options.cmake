@@ -6,7 +6,6 @@ option(BUILD_VIEWER "Build GUI data viewer")
 
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
-option(ENABLE_IMGUI "Enable imgui plugin")
 
 option(TEST_DATA "Enable tests that require game data")
 

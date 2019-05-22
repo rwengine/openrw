@@ -4,8 +4,6 @@
 #include <objects/CharacterObject.hpp>
 #include <objects/VehicleObject.hpp>
 
-#ifdef RW_IMGUI
-
 #include "RWGame.hpp"
 
 #include <imgui.h>
@@ -204,24 +202,3 @@ void RWImGui::endFrame(const ViewCamera& camera) {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
-
-#else
-
-RWImGui::RWImGui(RWGame &game)
-    : _game(game) {
-}
-
-RWImGui::~RWImGui() {
-    destroy();
-}
-
-RWImGui::init(SDL_Window *window, SDL_GLContext context) {
-}
-
-RWImGui::destroy() {
-}
-
-RWImGui::process_event(SDL_Event &event) {
-}
-
-#endif
