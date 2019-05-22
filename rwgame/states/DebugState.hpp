@@ -18,13 +18,13 @@ class DebugState final : public State {
     bool _sonicMode = false;
     bool _invertedY;
 
-    Menu createDebugMenu();
-    Menu createMapMenu();
-    Menu createVehicleMenu();
-    Menu createAIMenu();
-    Menu createWeaponMenu();
-    Menu createWeatherMenu();
-    Menu createMissionsMenu();
+    void drawDebugMenu();
+    void drawMapMenu();
+    void drawVehicleMenu();
+    void drawAIMenu();
+    void drawWeaponMenu();
+    void drawWeatherMenu();
+    void drawMissionsMenu();
 
 public:
     DebugState(RWGame* game, const glm::vec3& vp = {},
