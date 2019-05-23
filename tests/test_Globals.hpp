@@ -45,6 +45,12 @@ struct print_log_value<glm::vec3> {
         s << glm::to_string(v);
     }
 };
+template <>
+struct print_log_value<glm::vec4> {
+    void operator()(std::ostream& s, glm::vec4 const& v) {
+        s << glm::to_string(v);
+    }
+};
 BOOST_NS_MAGIC_CLOSING
 }
 }

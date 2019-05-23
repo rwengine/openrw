@@ -34,6 +34,7 @@ set(TESTS
     Text
     TrafficDirector
     Vehicle
+    ViewCamera
     VisualFX
     Weapon
     World
