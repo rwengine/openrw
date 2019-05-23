@@ -1791,10 +1791,32 @@ void opcode_0099(const ScriptArguments& args, ScriptInt& arg1G) {
     @arg character Character/ped
 */
 void opcode_009a(const ScriptArguments& args, const ScriptPedType pedType, const ScriptModelID model, ScriptVec3 coord, ScriptCharacter& character) {
-    RW_UNUSED(pedType);
+    auto actualModel = model;
+    switch (model) {  // hardcoded logic
+        case 1:
+            if (pedType == 6) actualModel = 0;
+            break;
+        case 2:
+            if (pedType == 6) actualModel = 2;
+            break;
+        case 3:
+            if (pedType == 6) actualModel = 1;
+            break;
+        case 4:
+            if (pedType == 6) actualModel = 3;
+            break;
+        case 5:
+            if (pedType == 16) actualModel = 16;
+            break;
+        case 6:
+            if (pedType == 17) actualModel = 17;
+            break;
+        default:
+            break;
+    }
 
     coord = script::getGround(args, coord);
-    character = args.getWorld()->createPedestrian(model, coord);
+    character = args.getWorld()->createPedestrian(actualModel, coord);
     character->applyOffset();
     character->setLifetime(GameObject::MissionLifetime);
 
@@ -3318,12 +3340,32 @@ bool opcode_0126(const ScriptArguments& args, const ScriptCharacter character) {
     @arg character Character/ped
 */
 void opcode_0129(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptPedType pedType, const ScriptModelID model, ScriptCharacter& character) {
-    RW_UNIMPLEMENTED_OPCODE(0x0129);
-    RW_UNUSED(pedType);
-    RW_UNIMPLEMENTED("character type");
+    auto actualModel = model;
+    switch (model) {  // hardcoded logic
+        case 1:
+            if (pedType == 6) actualModel = 0;
+            break;
+        case 2:
+            if (pedType == 6) actualModel = 2;
+            break;
+        case 3:
+            if (pedType == 6) actualModel = 1;
+            break;
+        case 4:
+            if (pedType == 6) actualModel = 3;
+            break;
+        case 5:
+            if (pedType == 16) actualModel = 16;
+            break;
+        case 6:
+            if (pedType == 17) actualModel = 17;
+            break;
+        default:
+            break;
+    }
 
     character =
-        args.getWorld()->createPedestrian(model, vehicle->getPosition());
+        args.getWorld()->createPedestrian(actualModel, vehicle->getPosition());
     character->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
@@ -5072,9 +5114,32 @@ void opcode_01c7(const ScriptArguments& args, const ScriptObject object) {
     @arg character Character/ped
 */
 void opcode_01c8(const ScriptArguments& args, const ScriptVehicle vehicle, const ScriptPedType pedType, const ScriptModelID model, const ScriptInt arg4, ScriptCharacter& character) {
-    RW_UNUSED(pedType);
+    auto actualModel = model;
+    switch (model) {  // hardcoded logic
+        case 1:
+            if (pedType == 6) actualModel = 0;
+            break;
+        case 2:
+            if (pedType == 6) actualModel = 2;
+            break;
+        case 3:
+            if (pedType == 6) actualModel = 1;
+            break;
+        case 4:
+            if (pedType == 6) actualModel = 3;
+            break;
+        case 5:
+            if (pedType == 16) actualModel = 16;
+            break;
+        case 6:
+            if (pedType == 17) actualModel = 17;
+            break;
+        default:
+            break;
+    }
 
-    character = args.getWorld()->createPedestrian(model, vehicle->getPosition());
+    character =
+        args.getWorld()->createPedestrian(actualModel, vehicle->getPosition());
     character->setLifetime(GameObject::MissionLifetime);
 
     if (args.getThread()->isMission) {
