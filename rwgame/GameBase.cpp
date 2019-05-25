@@ -20,7 +20,7 @@ GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
     bool fullscreen = config.fullscreen();
     size_t w = config.width(), h = config.height();
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
         throw std::runtime_error("Failed to initialize SDL2!");
 
     window.create(kWindowTitle + " [" + kBuildStr + "]", w, h, fullscreen);

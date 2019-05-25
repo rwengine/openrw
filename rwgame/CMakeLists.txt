@@ -15,6 +15,9 @@ add_library(librwgame STATIC
     GameWindow.hpp
     GameWindow.cpp
 
+    RWImGui.cpp
+    RWImGui.hpp
+
     HUDDrawer.hpp
     HUDDrawer.cpp
     MenuSystem.hpp
@@ -66,6 +69,16 @@ target_link_libraries(librwgame
         rwengine
         Boost::program_options
         SDL2::SDL2
+    )
+
+target_compile_definitions(librwgame
+    PUBLIC
+        RW_IMGUI
+    )
+
+target_link_libraries(librwgame
+    PUBLIC
+        imgui::sdl_gl3
     )
 
 add_executable(rwgame

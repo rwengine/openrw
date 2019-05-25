@@ -3,6 +3,8 @@
 
 #include "GameBase.hpp"
 #include "HUDDrawer.hpp"
+#include "RWConfig.hpp"
+#include "RWImGui.hpp"
 #include "StateManager.hpp"
 #include "game.hpp"
 
@@ -20,8 +22,19 @@
 #include <chrono>
 
 class RWGame final : public GameBase {
+public:
+    enum class DebugViewMode {
+        Disabled,
+        General,
+        Physics,
+        Navigation,
+        Objects
+    };
+
+private:
     GameData data;
     GameRenderer renderer;
+    RWImGui imgui;
     DebugDraw debug;
     GameState state;
     HUDDrawer hudDrawer{};
@@ -36,14 +49,6 @@ class RWGame final : public GameBase {
 
     bool inFocus = true;
     ViewCamera currentCam;
-
-    enum class DebugViewMode {
-        Disabled,
-        General,
-        Physics,
-        Navigation,
-        Objects
-    };
 
     DebugViewMode debugview_ = DebugViewMode::Disabled;
     int lastDraws{0};  /// Number of draws issued for the last frame.
@@ -89,6 +94,10 @@ public:
         return hudDrawer;
     }
 
+    DebugViewMode getDebugViewMode() const {
+        return debugview_;
+    }
+
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
                      GameObject** object = nullptr);
 
@@ -109,9 +118,7 @@ private:
     void tick(float dt);
     void render(float alpha, float dt);
 
-    void renderDebugStats(float time);
-    void renderDebugPaths(float time);
-    void renderDebugObjects(float time, ViewCamera& camera);
+    void renderDebugPaths();
 
     void handleCheatInput(char symbol);
 
@@ -121,7 +128,7 @@ private:
 
     float tickWorld(const float deltaTime, float accumulatedTime);
 
-    void renderDebugView(float time, ViewCamera &viewCam);
+    void renderDebugView();
 
     void tickObjects(float dt) const;
 };

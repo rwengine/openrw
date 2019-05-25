@@ -27,7 +27,7 @@ public:
         : near(near), far(far), fov(fov), aspectRatio(aspect) {
     }
 
-    glm::mat4 projection();
+    glm::mat4 projection() const;
 
     void update(const glm::mat4& proj);
 

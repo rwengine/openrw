@@ -1,3 +1,6 @@
 [submodule "external/microprofile/microprofile"]
 	path = external/microprofile/microprofile
 	url = https://github.com/jonasmr/microprofile.git
+[submodule "imgui"]
+	path = external/imgui/imgui
+	url = https://github.com/ocornut/imgui.git

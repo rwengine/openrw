@@ -17,10 +17,7 @@
 #include <iostream>
 #include <sstream>
 
-constexpr float kDebugEntryHeight = 14.f;
-constexpr float kDebugEntryHeightMissions = 12.f;
-constexpr int kDebugFont = 2;
-const glm::vec2 kDebugMenuOffset = glm::vec2(10.f, 50.f);
+#include <imgui.h>
 
 static void jumpCharacter(RWGame* game, CharacterObject* player,
                           const glm::vec3& target, bool ground = true) {
@@ -38,126 +35,133 @@ static void jumpCharacter(RWGame* game, CharacterObject* player,
     }
 }
 
-Menu DebugState::createDebugMenu() {
+void DebugState::drawDebugMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
     }
 
-    Menu menu{
-        {{"Jump to Debug Camera",
-          [=] {
-              jumpCharacter(game, player,
-                            _debugCam.position +
-                                _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f),
-                            false);
-          }},
-         {"-Map", [=] { setNextMenu(createMapMenu()); }},
-         {"-Vehicles", [=] { setNextMenu(createVehicleMenu()); }},
-         {"-AI", [=] { setNextMenu(createAIMenu()); }},
-         {"-Weapons", [=] { setNextMenu(createWeaponMenu()); }},
-         {"-Weather", [=] { setNextMenu(createWeatherMenu()); }},
-         {"-Missions", [=] { setNextMenu(createMissionsMenu()); }},
-         {"Set Super Jump", [=] { player->setJumpSpeed(20.f); }},
-         {"Set Normal Jump",
-          [=] { player->setJumpSpeed(CharacterObject::DefaultJumpSpeed); }},
-         {"Full Health", [=] { player->getCurrentState().health = 100.f; }},
-         {"Full Armour", [=] { player->getCurrentState().armour = 100.f; }},
-         {"Cull Here",
-          [=] { game->getRenderer().setCullOverride(true, _debugCam); }}},
-        kDebugMenuOffset,
-        kDebugFont,
-        kDebugEntryHeight};
+    ImGui::Begin("Debug Tools");
 
-    // Optional block if the player is in a vehicle
-    auto cv = player->getCurrentVehicle();
-    if (cv) {
-        menu.lambda("Flip vehicle", [=] {
-            cv->setRotation(cv->getRotation() *
-                            glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
-        });
+    if (player && ImGui::BeginMenu("Game")) {
+        if (ImGui::MenuItem("Set Super Jump")) {
+            player->setJumpSpeed(20.f);
+        }
+        if (ImGui::MenuItem("Set Normal Jump")) {
+            player->setJumpSpeed(CharacterObject::DefaultJumpSpeed);
+        }
+
+        if (ImGui::MenuItem("Full Health")) {
+            player->getCurrentState().health = 100.f;
+        }
+        if (ImGui::MenuItem("Full Armour")) {
+            player->getCurrentState().armour = 100.f;
+        }
+
+        // Optional block if the player is in a vehicle
+        if (auto cv = player->getCurrentVehicle(); cv) {
+            if (ImGui::MenuItem("Flip Vehicle")) {
+                cv->setRotation(
+                    cv->getRotation() *
+                    glm::quat(glm::vec3(0.f, glm::pi<float>(), 0.f)));
+            }
+        }
+
+        if (ImGui::MenuItem("Cull Here")) {
+            game->getRenderer().setCullOverride(true, _debugCam);
+        }
+
+        ImGui::EndMenu();
     }
 
-    return menu;
+    if (ImGui::BeginMenu("Map")) {
+        drawMapMenu();
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Vehicle")) {
+        drawVehicleMenu();
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("AI")) {
+        drawAIMenu();
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Weapons")) {
+        drawWeaponMenu();
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Weather")) {
+        drawWeatherMenu();
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Missions")) {
+        drawMissionsMenu();
+        ImGui::EndMenu();
+    }
+
+    ImGui::End();
 }
 
-Menu DebugState::createMapMenu() {
+void DebugState::drawMapMenu() {
     CharacterObject* player = nullptr;
     if (game->getWorld()->getPlayer()) {
         player = game->getWorld()->getPlayer()->getCharacter();
     }
 
-    Menu menu{
-        {{"Back", [=] { setNextMenu(createDebugMenu()); }},
-         {"Jump to Docks",
-          [=] {
-              jumpCharacter(game, player, glm::vec3(1390.f, -837.f, 100.f));
-          }},
-         {"Jump to Garage",
-          [=] { jumpCharacter(game, player, glm::vec3(270.f, -605.f, 40.f)); }},
-         {"Jump to Airport",
-          [=] {
-              jumpCharacter(game, player, glm::vec3(-950.f, -980.f, 12.f));
-          }},
-         {"Jump to Hideout",
-          [=] {
-              jumpCharacter(game, player, glm::vec3(875.0, -309.0, 100.0));
-          }},
-         {"Jump to Luigi's",
-          [=] {
-              jumpCharacter(game, player, glm::vec3(902.75, -425.56, 100.0));
-          }},
-         {"Jump to Hospital",
-          [=] {
-              jumpCharacter(game, player, glm::vec3(1123.77, -569.15, 100.0));
-          }},
-         {"Unsolid garage doors",
-          [=] {
-              static constexpr std::array<char const*, 33> garageDoorModels{
-                  {"8ballsuburbandoor",  "amcogaragedoor",
-                   "bankjobdoor",        "bombdoor",
-                   "crushercrush",       "crushertop",
-                   "door2_garage",       "door3_garage",
-                   "door4_garage",       "door_bombshop",
-                   "door_col_compnd_01", "door_col_compnd_02",
-                   "door_col_compnd_03", "door_col_compnd_04",
-                   "door_col_compnd_05", "door_jmsgrage",
-                   "door_sfehousegrge",  "double_garage_dr",
-                   "impex_door",         "impexpsubgrgdoor",
-                   "ind_plyrwoor",       "ind_slidedoor",
-                   "jamesgrge_kb",       "leveldoor2",
-                   "oddjgaragdoor",      "plysve_gragedoor",
-                   "SalvGarage",         "shedgaragedoor",
-                   "Sub_sprayshopdoor",  "towergaragedoor1",
-                   "towergaragedoor2",   "towergaragedoor3",
-                   "vheistlocdoor"}};
+    if (ImGui::MenuItem("Jump to Debug Camera")) {
+        jumpCharacter(
+            game, player,
+            _debugCam.position + _debugCam.rotation * glm::vec3(3.f, 0.f, 0.f),
+            false);
+    }
 
-              auto gw = game->getWorld();
-              for (auto& [id, instancePtr] : gw->instancePool.objects) {
-                  auto obj = static_cast<InstanceObject*>(instancePtr.get());
-                  if (std::find(garageDoorModels.begin(),
-                                garageDoorModels.end(),
-                                obj->getModelInfo<BaseModelInfo>()->name) !=
-                      garageDoorModels.end()) {
-                      obj->setSolid(false);
-                  }
-              }
-          }}},
-        kDebugMenuOffset,
-        kDebugFont,
-        kDebugEntryHeight};
-
-    return menu;
-}
-
-Menu DebugState::createVehicleMenu() {
-    Menu menu{
-        {{"Back", [=] { setNextMenu(createDebugMenu()); }}},
-        kDebugMenuOffset,
-        kDebugFont,
-        kDebugEntryHeight,
+    const std::vector<std::tuple<const char*, glm::vec3>> kInterestingPlaces{
+        {"Docks", {1390.f, -837.f, 100.f}},
+        {"Garage", {270.f, -605.f, 40.f}},
+        {"Airport", {-950.f, -980.f, 12.f}},
+        {"Hideout", {875.0, -309.0, 100.0}},
+        {"Luigi's", {902.75, -425.56, 100.0}},
+        {"Hospital", {1123.77, -569.15, 100.0}},
     };
 
+    for (const auto& [name, pos] : kInterestingPlaces) {
+        if (ImGui::MenuItem((std::string("Jump to ") + name).c_str())) {
+            jumpCharacter(game, player, pos);
+        }
+    }
+
+    if (ImGui::MenuItem("Unsolid Garage Doors")) {
+        static constexpr std::array<char const*, 33> garageDoorModels{
+            {"8ballsuburbandoor",  "amcogaragedoor",     "bankjobdoor",
+             "bombdoor",           "crushercrush",       "crushertop",
+             "door2_garage",       "door3_garage",       "door4_garage",
+             "door_bombshop",      "door_col_compnd_01", "door_col_compnd_02",
+             "door_col_compnd_03", "door_col_compnd_04", "door_col_compnd_05",
+             "door_jmsgrage",      "door_sfehousegrge",  "double_garage_dr",
+             "impex_door",         "impexpsubgrgdoor",   "ind_plyrwoor",
+             "ind_slidedoor",      "jamesgrge_kb",       "leveldoor2",
+             "oddjgaragdoor",      "plysve_gragedoor",   "SalvGarage",
+             "shedgaragedoor",     "Sub_sprayshopdoor",  "towergaragedoor1",
+             "towergaragedoor2",   "towergaragedoor3",   "vheistlocdoor"}};
+
+        auto gw = game->getWorld();
+        for (auto& [id, instancePtr] : gw->instancePool.objects) {
+            auto obj = static_cast<InstanceObject*>(instancePtr.get());
+            if (std::find(garageDoorModels.begin(), garageDoorModels.end(),
+                          obj->getModelInfo<BaseModelInfo>()->name) !=
+                garageDoorModels.end()) {
+                obj->setSolid(false);
+            }
+        }
+    }
+}
+
+void DebugState::drawVehicleMenu() {
     static constexpr std::array<std::tuple<char const*, unsigned int>, 19>
         kVehicleTypes{{{"Landstalker", 90},
                        {"Taxi", 110},
@@ -180,18 +184,13 @@ Menu DebugState::createVehicleMenu() {
                        {"Infernus", 101}}};
 
     for (const auto& [name, id] : kVehicleTypes) {
-        menu.lambda(name, [this, id = id] { spawnVehicle(id); });
+        if (ImGui::MenuItem(name)) {
+            spawnVehicle(id);
+        }
     }
-
-    return menu;
 }
 
-Menu DebugState::createAIMenu() {
-    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
-              kDebugMenuOffset,
-              kDebugFont,
-              kDebugEntryHeight};
-
+void DebugState::drawAIMenu() {
     static constexpr std::array<std::tuple<char const*, unsigned int>, 6>
         kPedTypes{{
             {"Triad", 12},
@@ -203,10 +202,12 @@ Menu DebugState::createAIMenu() {
         }};
 
     for (const auto& [name, id] : kPedTypes) {
-        menu.lambda(name, [this, id = id] { spawnFollower(id); });
+        if (ImGui::MenuItem(name)) {
+            spawnFollower(id);
+        }
     }
 
-    menu.lambda("Kill All Peds", [=] {
+    if (ImGui::MenuItem("Kill All Peds")) {
         for (auto& [id, pedestrianPtr] :
              game->getWorld()->pedestrianPool.objects) {
             if (pedestrianPtr->getLifetime() == GameObject::PlayerLifetime) {
@@ -220,47 +221,31 @@ Menu DebugState::createAIMenu() {
                     0.f
                 });
         }
-    });
-
-    return menu;
+    }
 }
 
-Menu DebugState::createWeaponMenu() {
-    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
-              kDebugMenuOffset,
-              kDebugFont,
-              kDebugEntryHeight};
-
+void DebugState::drawWeaponMenu() {
     for (int i = 1; i < kMaxInventorySlots; ++i) {
         auto& name = getWorld()->data->weaponData[i].name;
-        menu.lambda(name, [=] { giveItem(i); });
+        if (ImGui::MenuItem(name.c_str())) {
+            giveItem(i);
+        }
     }
-
-    return menu;
 }
 
-Menu DebugState::createWeatherMenu() {
-    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
-              kDebugMenuOffset,
-              kDebugFont,
-              kDebugEntryHeight};
-
-    static constexpr std::array<char const*, 4> w{{"Sunny", "Cloudy", "Rainy", "Foggy"}};
+void DebugState::drawWeatherMenu() {
+    static constexpr std::array<char const*, 4> w{
+        {"Sunny", "Cloudy", "Rainy", "Foggy"}};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
-        menu.lambda(w[i],
-                     [=] { game->getWorld()->state->basic.nextWeather = static_cast<std::uint16_t>(i); });
+        if (ImGui::MenuItem(w[i])) {
+            game->getWorld()->state->basic.nextWeather =
+                static_cast<std::uint16_t>(i);
+        }
     }
-
-    return menu;
 }
 
-Menu DebugState::createMissionsMenu() {
-    Menu menu{{{"Back", [=] { setNextMenu(createDebugMenu()); }}},
-              kDebugMenuOffset,
-              kDebugFont,
-              kDebugEntryHeightMissions};
-
+void DebugState::drawMissionsMenu() {
     static constexpr std::array<char const*, 80> w{{
         "Intro Movie",
         "Hospital Info Scene",
@@ -345,7 +330,7 @@ Menu DebugState::createMissionsMenu() {
     }};
 
     for (std::size_t i = 0; i < w.size(); ++i) {
-        menu.lambda(w[i], [=] {
+        if (ImGui::MenuItem(w[i])) {
             ScriptMachine* vm = game->getScriptVM();
 
             if (vm) {
@@ -367,16 +352,12 @@ Menu DebugState::createMissionsMenu() {
 
                 vm->startThread(offsets[i], true);
             }
-        });
+        }
     }
-
-    return menu;
 }
 
 DebugState::DebugState(RWGame* game, const glm::vec3& vp, const glm::quat& vd)
     : State(game), _invertedY(game->getConfig().invertY()) {
-    this->setNextMenu(createDebugMenu());
-
     _debugCam.position = vp;
     _debugCam.rotation = vd;
 }
@@ -400,19 +381,18 @@ void DebugState::tick(float dt) {
 }
 
 void DebugState::draw(GameRenderer& r) {
-    // Draw useful information like camera position.
-    std::stringstream ss;
-    ss << "Camera Position: " << glm::to_string(_debugCam.position) << "\n";
-    auto zone = getWorld()->data->findZoneAt(_debugCam.position);
-    ss << (zone ? zone->name : "No Zone") << "\n";
+    ImGui::SetNextWindowPos({20.f, 20.f});
+    ImGui::Begin("Debug Info", nullptr,
+                 ImGuiWindowFlags_NoDecoration |
+                     ImGuiWindowFlags_NoSavedSettings |
+                     ImGuiWindowFlags_NoInputs);
 
-    TextRenderer::TextInfo ti;
-    ti.font = FONT_ARIAL;
-    ti.text = GameStringUtil::fromString(ss.str(), ti.font);
-    ti.screenPosition = glm::vec2(10.f, 10.f);
-    ti.size = 15.f;
-    ti.baseColour = glm::u8vec3(255);
-    r.text.renderText(ti);
+    ImGui::Text("Camera: %s", glm::to_string(_debugCam.position).c_str());
+    auto zone = getWorld()->data->findZoneAt(_debugCam.position);
+    ImGui::Text("Zone: %s", zone ? zone->name.c_str() : "No Zone");
+    ImGui::End();
+
+    drawDebugMenu();
 
     State::draw(r);
 }

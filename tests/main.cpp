@@ -3,6 +3,6 @@
 #include "test_Globals.hpp"
 
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& v) {
-    stream << v.x << " " << v.y << " " << v.z;
+    stream << glm::to_string(v);
     return stream;
 }
