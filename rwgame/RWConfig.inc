@@ -23,3 +23,5 @@ RWARG_OPT(  std::string,    loadGamePath,                                       
 RWCONFIGARG(std::string,    gameLanguage,   "american",             "game.language",        GAME,       "language",     "LANGUAGE", "Language")
 
 RWARG(      bool,           help,                                                           GENERAL,    "help",         nullptr,    "Show this help message")
+
+RWARG(      bool,           viewer,                                                         GENERAL,    "viewer",       nullptr,    "Data Viewer")

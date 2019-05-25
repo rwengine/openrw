@@ -45,6 +45,11 @@ add_library(librwgame STATIC
     states/DebugState.cpp
     states/BenchmarkState.hpp
     states/BenchmarkState.cpp
+
+    viewer/RWViewer.hpp
+    viewer/RWViewer.cpp
+    viewer/RWViewerWindows.hpp
+    viewer/RWViewerWindows.cpp
     )
 
 openrw_target_apply_options(
