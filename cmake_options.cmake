@@ -2,7 +2,6 @@ option(RW_VERBOSE_DEBUG_MESSAGES "Print verbose debugging messages" ON)
 
 option(BUILD_TOOLS "Build tools")
 option(BUILD_TESTS "Build test suite")
-option(BUILD_VIEWER "Build GUI data viewer")
 
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")

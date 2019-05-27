@@ -10,7 +10,6 @@ set(_ARGS_BOOL
     BUILD_TYPE
     CHECK_IWYU
     BUILD_TOOLS
-    BUILD_VIEWER
 
     RUN_TESTS
     SEPARATE_TEST_SUITES
@@ -121,17 +120,11 @@ if(USE_CONAN)
         set(CONAN_CONFIGURATION "Release")
     endif()
 
-    if(BUILD_VIEWER)
-        set(_BUILD_VIEWER True)
-    else()
-        set(_BUILD_VIEWER False)
-    endif()
-
     execute_process(
         COMMAND
             "${CONAN_BIN}" install "${CTEST_SOURCE_DIRECTORY}"
                 -s arch=${CONAN_ARCH} -s build_type=${CONAN_CONFIGURATION}
-                -o viewer=${_BUILD_VIEWER} --build missing
+                --build missing
         WORKING_DIRECTORY "${CTEST_BINARY_DIRECTORY}"
         RESULT_VARIABLE RES
         )
@@ -161,7 +154,6 @@ set(CTEST_CONFIGURATION_TYPE "${BUILD_TYPE}")
 
 set(_CONFIGURE_OPTIONS
     "-DBUILD_TOOLS=${BUILD_TOOLS}"
-    "-DBUILD_VIEWER=${BUILD_VIEWER}"
     "-DBUILD_TESTS=TRUE"
     "-DTEST_COVERAGE=${TEST_COVERAGE}"
     "-DSEPARATE_TEST_SUITES=${SEPARATE_TEST_SUITES}"
