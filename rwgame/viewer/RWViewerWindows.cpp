@@ -1,9 +1,13 @@
 #include <viewer/RWViewerWindows.hpp>
 
+#include <engine/GameWorld.hpp>
 #include <loaders/LoaderGXT.hpp>
+#include <objects/InstanceObject.hpp>
 #include <platform/FileHandle.hpp>
 
 #include <imgui.h>
+
+#include <algorithm>
 
 namespace {
 std::array<int, 3> kFonts{{FONT_PAGER, FONT_PRICEDOWN, FONT_ARIAL}};
@@ -157,4 +161,48 @@ void TextViewer::draw(GameRenderer& r) {
             r.text.renderText(ti, false);
         }
     }
+}
+
+IPLViewer::IPLViewer(Logger& log, GameData& data)
+    : data_(data), world_(std::make_unique<GameWorld>(&log, &data)) {
+    std::transform(begin(data_.iplLocations), end(data_.iplLocations),
+                   std::back_inserter(ipls_), [](const auto& a) -> IPLFileData {
+                       return {false, a.first, a.second, {}, {}};
+                   });
+    world_->state = &state_;
+}
+
+void IPLViewer::draw(GameRenderer& r) {
+    for (auto& ipl : ipls_) {
+        if (ImGui::Checkbox(ipl.name.c_str(), &ipl.enabled)) {
+            if (ipl.enabled)
+                showIPL(ipl);
+            else
+                hideIPL(ipl);
+        }
+    }
+}
+
+void IPLViewer::showIPL(IPLViewer::IPLFileData& ipl) {
+    if (ipl.loader.m_instances.empty()) {
+        ipl.loader.load(ipl.path);
+    }
+
+    for (const auto& inst : ipl.loader.m_instances) {
+        auto instance = world_->createInstance(inst.id, inst.pos, inst.rot);
+        if (!instance) {
+            world_->logger->error("World", "No object data for instance " +
+                                               std::to_string(inst.id) +
+                                               " in " + ipl.name);
+        } else {
+            ipl.objects.push_back(instance);
+        }
+    }
+}
+
+void IPLViewer::hideIPL(IPLViewer::IPLFileData& ipl) {
+    for (auto& object : ipl.objects) {
+        world_->destroyObject(object);
+    }
+    ipl.objects.clear();
 }

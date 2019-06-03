@@ -71,12 +71,22 @@ private:
     bool showTextViewer_ = false;
     std::optional<TextViewer> textViewer_;
     bool showImGuiDemo_ = false;
+    bool showIplViewer_ = false;
+    std::optional<IPLViewer> iplViewer_;
     std::set<ModelID> showModels_;
 
-    GameObject* viewedObject_ = nullptr;
-    glm::vec3 viewParams_{};
-    enum MouseMode { Hovering, Dragging };
+    enum class ViewMode {
+        World,
+        Model,
+    };
+    ViewMode viewMode_ = ViewMode::World;
+    enum class MouseMode { Hovering, Dragging };
     MouseMode mouseMode_ = MouseMode::Hovering;
+
+    GameObject* viewedObject_ = nullptr;
+    glm::vec3 viewAngles_{};
+
+    glm::vec3 viewPosition_{};
 };
 
 #endif

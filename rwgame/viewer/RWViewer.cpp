@@ -26,6 +26,11 @@ static constexpr std::array<
                     {GameRenderer::ZoneCylinderB, "zonecylb.dff", "particle"},
                     {GameRenderer::Arrow, "arrow.dff", ""}}};
 const auto kViewerFov = glm::radians(90.f);
+
+auto viewAnglesToQuat(float yaw, float pitch) {
+    return glm::angleAxis(glm::radians(yaw), glm::vec3(0.f, 0.f, -1.f)) *
+           glm::angleAxis(glm::radians(pitch), glm::vec3(0.f, 1.f, 0.f));
+}
 }  // namespace
 
 RWViewer::RWViewer(Logger& log, const std::optional<RWArgConfigLayer>& args)
@@ -47,6 +52,7 @@ RWViewer::RWViewer(Logger& log, const std::optional<RWArgConfigLayer>& args)
 
     data_.load();
     textViewer_.emplace(data_);
+    iplViewer_.emplace(log, data_);
 
     for (const auto& [specialModel, fileName, name] : kSpecialModels) {
         auto model = data_.loadClump(fileName, name);
@@ -133,15 +139,15 @@ bool RWViewer::updateInput() {
                 break;
 
             case SDL_MOUSEWHEEL:
-                viewParams_.z =
-                    glm::max(1.f, viewParams_.z +
-                                      -(event.wheel.y * viewParams_.z * 0.1f));
+                viewAngles_.z =
+                    glm::max(1.f, viewAngles_.z +
+                                      -(event.wheel.y * viewAngles_.z * 0.1f));
                 break;
 
             case SDL_MOUSEMOTION:
                 if (mouseMode_ == MouseMode::Dragging) {
-                    viewParams_.x += event.motion.xrel * 0.5f;
-                    viewParams_.y += event.motion.yrel * 0.5f;
+                    viewAngles_.x += event.motion.xrel * 0.5f;
+                    viewAngles_.y += event.motion.yrel * 0.5f;
                 }
                 break;
         }
@@ -166,26 +172,28 @@ void RWViewer::render(float alpha, float time) {
 
     ViewCamera viewCam{};
     viewCam.frustum.fov = kViewerFov;
-
-    if (viewedObject_) {
-        auto rotation = glm::angleAxis(glm::radians(viewParams_.x),
-                                       glm::vec3(0.f, 0.f, -1.f)) *
-                        glm::angleAxis(glm::radians(viewParams_.y),
-                                       glm::vec3(0.f, 1.f, 0.f));
-        auto viewDirection = rotation * glm::vec3{-1.f, 0.f, 0.f};
-        viewCam.position = viewDirection * viewParams_.z;
-        viewCam.rotation = rotation;
-    }
-
     viewCam.frustum.aspectRatio =
         windowSize.x / static_cast<float>(windowSize.y);
+
+    viewCam.rotation = viewAnglesToQuat(viewAngles_.x, viewAngles_.y);
 
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     renderer_.getRenderer().pushDebugGroup("World");
 
-    renderer_.renderWorld(world_.get(), viewCam, alpha);
+    switch (viewMode_) {
+        case ViewMode::Model: {
+            auto viewDirection = viewCam.rotation * glm::vec3{-1.f, 0.f, 0.f};
+            viewCam.position = viewDirection * viewAngles_.z;
+            renderer_.renderWorld(world_.get(), viewCam, alpha);
+            break;
+        }
+        case ViewMode::World:
+            viewCam.position = viewPosition_;
+            renderer_.renderWorld(iplViewer_->world(), viewCam, alpha);
+            break;
+    }
 
     renderer_.getRenderer().popDebugGroup();
 
@@ -196,6 +204,7 @@ void RWViewer::render(float alpha, float time) {
 }
 
 void RWViewer::globalKeyEvent(const SDL_Event& event) {
+    auto r = viewAnglesToQuat(viewAngles_.x, viewAngles_.y);
     switch (event.key.keysym.sym) {
         case SDLK_LEFTBRACKET:
             world_->offsetGameTime(-30);
@@ -203,6 +212,24 @@ void RWViewer::globalKeyEvent(const SDL_Event& event) {
         case SDLK_RIGHTBRACKET:
             world_->offsetGameTime(30);
             break;
+
+        case SDLK_w:
+        case SDLK_UP:
+            viewPosition_ += r * glm::vec3{1.f, 0.f, 0.f};
+            break;
+        case SDLK_s:
+        case SDLK_DOWN:
+            viewPosition_ -= r * glm::vec3{1.f, 0.f, 0.f};
+            break;
+        case SDLK_a:
+        case SDLK_LEFT:
+            viewPosition_ += r * glm::vec3{0.f, 1.f, 0.f};
+            break;
+        case SDLK_d:
+        case SDLK_RIGHT:
+            viewPosition_ -= r * glm::vec3{0.f, 1.f, 0.f};
+            break;
+
         default:
             break;
     }
@@ -220,7 +247,10 @@ void RWViewer::drawMenu() {
             }
         });
         menu("View", [&]() {
-            ImGui::MenuItem("Model", "", viewedObject_ != nullptr);
+            if (ImGui::MenuItem("Model", "", viewMode_ == ViewMode::Model))
+                viewMode_ = ViewMode::Model;
+            if (ImGui::MenuItem("World", "", viewMode_ == ViewMode::World))
+                viewMode_ = ViewMode::World;
             if (ImGui::MenuItem("Remove Object", "")) {
                 if (viewedObject_) {
                     world_->destroyObject(viewedObject_);
@@ -231,6 +261,7 @@ void RWViewer::drawMenu() {
         menu("Windows", [&]() {
             ImGui::MenuItem("Models", "", &showModelList_);
             ImGui::MenuItem("Texts", "", &showTextViewer_);
+            ImGui::MenuItem("Map", "", &showIplViewer_);
             ImGui::Separator();
             ImGui::MenuItem("Demo", "", &showImGuiDemo_);
         });
@@ -297,6 +328,9 @@ void RWViewer::drawWindows() {
     window("Texts", showTextViewer_, {920, 320},
            [&]() { textViewer_->draw(renderer_); });
 
+    window("Map", showIplViewer_, {320, 320},
+           [&]() { iplViewer_->draw(renderer_); });
+
     if (showImGuiDemo_) ImGui::ShowDemoWindow(&showImGuiDemo_);
 }
 
@@ -327,6 +361,7 @@ void RWViewer::drawModelWindow(ModelID id) {
 }
 
 void RWViewer::viewModel(ModelID model) {
+    viewMode_ = ViewMode::Model;
     if (viewedObject_) {
         world_->destroyObject(viewedObject_);
         viewedObject_ = nullptr;
@@ -357,5 +392,5 @@ void RWViewer::viewModel(ModelID model) {
         radius = glm::length(geo.center) + geo.radius;
     }
     constexpr auto kViewSlop = 1.f;
-    viewParams_.z = kViewSlop * ((radius * 2) / (glm::tan(kViewerFov / 2.f)));
+    viewAngles_.z = kViewSlop * ((radius * 2) / (glm::tan(kViewerFov / 2.f)));
 }
