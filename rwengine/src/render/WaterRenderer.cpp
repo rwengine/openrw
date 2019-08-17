@@ -132,7 +132,7 @@ void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
 
     glStencilFunc(GL_EQUAL, 1, 0xFF);
     glStencilMask(0x00);
-    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
 
     r.useProgram(waterProg.get());
 
@@ -152,4 +152,5 @@ void WaterRenderer::render(GameRenderer &renderer, GameWorld* world) {
     r.drawArrays(m, &gridDraw, wdp);
 
     glDisable(GL_STENCIL_TEST);
+    glEnable(GL_DEPTH_TEST);
 }
