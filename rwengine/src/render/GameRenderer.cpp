@@ -235,15 +235,15 @@ void GameRenderer::renderWorld(GameWorld* world, const ViewCamera& camera,
 
     culled = 0;
 
-    renderObjects(world);
+	renderer->pushDebugGroup("Water");
 
-    renderer->pushDebugGroup("Water");
-
-    water.render(*this, world);
+	water.render(*this, world);
 
     profWater = renderer->popDebugGroup();
 
-    renderer->pushDebugGroup("Sky");
+    renderObjects(world);
+
+	renderer->pushDebugGroup("Sky");
 
     glBindVertexArray(vao);
 
