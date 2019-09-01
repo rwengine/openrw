@@ -32,6 +32,7 @@ def create(ns: argparse.Namespace):
     env_args = [a for e in ns.env for a in ('-e', e)]
     env_args += ['-e', 'DOCKER=TRUE', ]
     run_args = ['docker', 'run',
+                    '--cap-add', 'SYS_PTRACE',
                     '-v', '{}:/src:rw,z'.format(str(openrw_dir)),
                     '-v', '{}:/build:rw,z'.format(str(build_dir)) ] + \
                env_args + ['--name', ns.name, '-d', ns.tag, 'sleep', 'infinity']
