@@ -259,7 +259,7 @@ void IngameState::tick(float dt) {
         } else if (glm::length2(movement) > 0.001f) {
             if (player->isCurrentActivity(
                     ai::Activities::EnterVehicle::ActivityName)) {
-                // Give up entering a vehicle if we're alreadying doing so
+                // Give up entering a vehicle if we're already doing so
                 player->skipActivity();
             }
         }
@@ -267,6 +267,16 @@ void IngameState::tick(float dt) {
         if (player->getCharacter()->getCurrentVehicle()) {
             auto vehicle = player->getCharacter()->getCurrentVehicle();
             vehicle->setHandbraking(held(GameInputState::Handbrake));
+            if (player->isCurrentActivity(
+                    ai::Activities::ExitVehicle::ActivityName)) {
+                // The player cannot accelerate while exiting.
+                // He can, however, brake in the opposite direction of movement.
+                int velocitySign = vehicle->getVelocity() >= 0 ? 1 : -1;
+	            int movementSign = movement.x >= 0 ? 1 : -1;
+	            if (velocitySign == movementSign) {
+		            movement.x = 0;
+	            }
+            }
             player->setMoveDirection(movement);
         } else {
             if (pressed(GameInputState::Jump)) {
