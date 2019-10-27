@@ -272,10 +272,10 @@ void IngameState::tick(float dt) {
                 // The player cannot accelerate while exiting.
                 // He can, however, brake in the opposite direction of movement.
                 int velocitySign = vehicle->getVelocity() >= 0 ? 1 : -1;
-	            int movementSign = movement.x >= 0 ? 1 : -1;
-	            if (velocitySign == movementSign) {
-		            movement.x = 0;
-	            }
+                int movementSign = movement.x >= 0 ? 1 : -1;
+                if (velocitySign == movementSign) {
+                    movement.x = 0;
+                }
             }
             player->setMoveDirection(movement);
         } else {
