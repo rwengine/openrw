@@ -130,6 +130,9 @@ void Rampage::tick(float dt) {
     if (killsRequired <= 0) {
         if (!special) {
             state->gameStats.rampagesPassed++;
+
+            // First rampage rewards 5,000$, second 10,000$ etc.
+            state->playerInfo.money += state->gameStats.rampagesPassed * 5000;
         }
 
         status = Passed;
@@ -138,7 +141,7 @@ void Rampage::tick(float dt) {
 }
 
 float Rampage::getRemainingTime() const {
-    // TODO: Fix this shitty hack
+    // TODO: Gets called before `state->world` is populated, fix this properly.
     if (!state->world) {
         return 0;
     }

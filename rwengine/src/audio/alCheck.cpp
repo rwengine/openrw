@@ -1,5 +1,6 @@
 #include "audio/alCheck.hpp"
 
+#define OPENAL_DEPRECATED
 #include "al.h"
 #include "alc.h"
 

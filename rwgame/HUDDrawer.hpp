@@ -60,7 +60,7 @@ private:
                  GameWorld* world, GameRenderer& render);
     void drawPlayerInfo(ai::PlayerController* player, GameWorld* world,
                         GameRenderer& render);
-    void drawRampage(GameWorld* world, GameRenderer* render);
+    void drawRampage(GameWorld* world, GameRenderer& render);
 };
 
 #endif

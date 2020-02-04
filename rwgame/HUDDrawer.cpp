@@ -44,7 +44,7 @@ void HUDDrawer::drawScriptTimer(GameWorld* world, GameRenderer& render) {
     }
 }
 
-void HUDDrawer::drawRampage(GameWorld* world, GameRenderer* render) {
+void HUDDrawer::drawRampage(GameWorld* world, GameRenderer& render) {
     float rampageTimerX = 0 + hudParameters.uiInfoMargin;
     float rampageTimerY = 0.f + hudParameters.uiOuterMargin;
 
@@ -68,11 +68,11 @@ void HUDDrawer::drawRampage(GameWorld* world, GameRenderer* render) {
 
     ti.baseColour = hudParameters.uiShadowColour;
     ti.screenPosition = glm::vec2(rampageTimerX + 1.f, rampageTimerY + 1.f);
-    render->text.renderText(ti);
+    render.text.renderText(ti);
 
     ti.baseColour = hudParameters.uiRampageTimerColour;
     ti.screenPosition = glm::vec2(rampageTimerX, rampageTimerY);
-    render->text.renderText(ti);
+    render.text.renderText(ti);
 }
 
 void HUDDrawer::drawMap(ViewCamera& currentView, ai::PlayerController* player,

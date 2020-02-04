@@ -3,6 +3,7 @@
 
 #include "audio/Sound.hpp"
 
+#define OPENAL_DEPRECATED
 #include <alc.h>
 
 #include <glm/vec3.hpp>

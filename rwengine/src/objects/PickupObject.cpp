@@ -452,13 +452,11 @@ RampagePickup::RampagePickup(GameWorld* world, const glm::vec3& position,
 }
 
 bool RampagePickup::onPlayerTouch() {
-    if (engine->state->scriptOnMissionFlag == nullptr) {
+    if (engine->state->scriptOnMissionFlag && *engine->state->scriptOnMissionFlag) {
         return false;
     }
 
-    if (*(engine->state->scriptOnMissionFlag) != 0) {
-        return false;
-    }
+
 
     return true;
 }
