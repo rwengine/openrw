@@ -11,6 +11,7 @@ extern "C" {
 #include <cstdint>
 #include <future>
 #include <mutex>
+#include <vector>
 
 /// Structure for input data
 struct InputData {
