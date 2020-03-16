@@ -68,7 +68,7 @@ endif()
 
 if(FFMPEG_INCLUDE_DIR)
     file(READ "${FFMPEG_INCLUDE_DIR}/libavutil/ffversion.h" __FFVERSION_H)
-    string(REGEX MATCH "#define[ ]+FFMPEG_VERSION[ ]+\"([0-9a-zA-Z\\.\\-]+)\"" _FFMPEG_VERSION "${__FFVERSION_H}")
+    string(REGEX MATCH "#define[ ]+FFMPEG_VERSION[ ]+\"([0-9a-zA-Z\\+\\.\\-]+)\"" _FFMPEG_VERSION "${__FFVERSION_H}")
     if(NOT _FFMPEG_VERSION)
         message(AUTHOR_WARNING "Cannot detect ffmpeg version: regex does not match")
     endif()
