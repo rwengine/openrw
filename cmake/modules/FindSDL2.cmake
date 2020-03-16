@@ -70,12 +70,10 @@ find_path(SDL2_INCLUDE_DIR SDL.h
     HINTS
         $ENV{SDL2DIR}
     PATH_SUFFIXES
-        include/SDL2 include
+        SDL2
     PATHS
         ~/Library/Frameworks
         /Library/Frameworks
-        /usr/local/include/SDL2
-        /usr/include/SDL2
         /sw # Fink
         /opt/local # DarwinPorts
         /opt/csw # Blastwave
