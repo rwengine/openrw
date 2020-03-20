@@ -2,8 +2,9 @@
 
 #include <iostream>
 
-#include "RWGame.hpp"
 #include <SDL.h>
+#include "RWGame.hpp"
+#include "viewer/RWViewer.hpp"
 
 #include <core/Logger.hpp>
 
@@ -28,9 +29,13 @@ int main(int argc, const char* argv[]) {
     SDL_SetMainReady();
 
     try {
-        RWGame game(logger, argLayerOpt);
-
-        return game.run();
+        if (argLayerOpt->viewer) {
+            RWViewer game(logger, argLayerOpt);
+            return game.run();
+        } else {
+            RWGame game(logger, argLayerOpt);
+            return game.run();
+        }
     } catch (std::runtime_error& ex) {
         // Catch runtime_error as these are fatal issues the user may want to
         // know about like corrupted files or GL initialisation failure.

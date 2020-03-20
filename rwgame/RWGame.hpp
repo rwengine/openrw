@@ -22,15 +22,6 @@
 #include <chrono>
 
 class RWGame final : public GameBase {
-public:
-    enum class DebugViewMode {
-        Disabled,
-        General,
-        Physics,
-        Navigation,
-        Objects
-    };
-
 private:
     GameData data;
     GameRenderer renderer;
@@ -49,6 +40,14 @@ private:
 
     bool inFocus = true;
     ViewCamera currentCam;
+
+    enum class DebugViewMode {
+        Disabled,
+        General,
+        Physics,
+        Navigation,
+        Objects
+    };
 
     DebugViewMode debugview_ = DebugViewMode::Disabled;
     int lastDraws{0};  /// Number of draws issued for the last frame.
@@ -94,10 +93,6 @@ public:
         return hudDrawer;
     }
 
-    DebugViewMode getDebugViewMode() const {
-        return debugview_;
-    }
-
     bool hitWorldRay(glm::vec3& hit, glm::vec3& normal,
                      GameObject** object = nullptr);
 
@@ -128,7 +123,7 @@ private:
 
     float tickWorld(const float deltaTime, float accumulatedTime);
 
-    void renderDebugView();
+    void renderDebugView(const ViewCamera&);
 
     void tickObjects(float dt) const;
 };

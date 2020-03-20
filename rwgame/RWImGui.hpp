@@ -3,21 +3,21 @@
 
 #include <SDL.h>
 
-class RWGame;
+class GameBase;
 struct ImGuiContext;
 class ViewCamera;
 
 class RWImGui {
-    RWGame &_game;
+    GameBase &_game;
     ImGuiContext *_context = nullptr;
 public:
-    RWImGui(RWGame &game);
+    RWImGui(GameBase &game);
     ~RWImGui();
     void init();
     void destroy();
     bool processEvent(SDL_Event &event);
     void startFrame();
-    void endFrame(const ViewCamera &);
+    void endFrame();
 };
 
 #endif // RWGAME_RWIMGUI_HPP

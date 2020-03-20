@@ -9,13 +9,11 @@ class OpenrwConan(ConanFile):
     description = "OpenRW 'Open ReWrite' is an un-official open source recreation of the classic Grand Theft Auto III game executable"
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
-        'viewer': [True, False],
         'tools': [True, False],
         'profiling': [True, False],
     }
 
     default_options = {
-        'viewer': True,
         'tools': True,
         'profiling': True,
         'bullet3:shared': False,
@@ -24,7 +22,7 @@ class OpenrwConan(ConanFile):
 
     generators = 'cmake',
     exports_sources = 'CMakeLists.txt', 'cmake_configure.cmake', 'cmake_options.cmake', 'CMakeCPack.cmake', 'COPYING', \
-                      'cmake/modules/*', 'benchmarks', 'rwcore/*', 'rwengine/*', 'rwgame/*', 'rwviewer/*', \
+                      'cmake/modules/*', 'benchmarks', 'rwcore/*', 'rwengine/*', 'rwgame/*', \
                       'rwtools/*', 'tests/*', 'external/*'
 
     _rw_dependencies = {
@@ -37,24 +35,15 @@ class OpenrwConan(ConanFile):
             'boost/1.68.0@conan/stable',
             'bzip2/1.0.8@conan/stable',
         ),
-        'viewer': (
-            'qt/5.12.0@bincrafters/stable',
-        ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
+            'qt/5.12.0@bincrafters/stable',
         ),
     }
-
-    def configure(self):
-        if self.options.viewer:
-            self.options['qt'].opengl = 'desktop'
 
     def requirements(self):
         for dep in self._rw_dependencies['game']:
             self.requires(dep)
-        if self.options.viewer:
-            for dep in self._rw_dependencies['viewer']:
-                self.requires(dep)
         if self.options.tools:
             for dep in self._rw_dependencies['tools']:
                 self.requires(dep)
@@ -65,7 +54,6 @@ class OpenrwConan(ConanFile):
             'BUILD_SHARED_LIBS': False,
             'CMAKE_BUILD_TYPE': self.settings.build_type,
             'BUILD_TESTS': True,
-            'BUILD_VIEWER': self.options.viewer,
             'BUILD_TOOLS': self.options.tools,
             'ENABLE_PROFILING': self.options.profiling,
             'USE_CONAN': True,
@@ -80,9 +68,6 @@ class OpenrwConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if self.options.viewer:
-            # FIXME: https://github.com/osechet/conan-qt/issues/6 and https://github.com/conan-io/conan/issues/2619
-            self.copy('qt.conf', dst='bin', src='rwviewer')
         cmake = self._configure_cmake()
         cmake.install()
 
