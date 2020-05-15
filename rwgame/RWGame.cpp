@@ -26,6 +26,7 @@
 #include <objects/VehicleObject.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <chrono>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -59,6 +60,7 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
+    auto loadTimeStart = std::chrono::steady_clock::now();
     bool newgame = false;
     bool test = false;
     std::optional<std::string> startSave;
@@ -126,6 +128,11 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
             stateManager.enter<MenuState>(this);
         }
     });
+
+    auto loadTimeEnd = std::chrono::steady_clock::now();
+    auto loadTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(loadTimeEnd - loadTimeStart);
+    log.info("Game", "Loading took " + std::to_string(loadTime.count()) + " ms");
 
     log.info("Game", "Started");
     RW_TIMELINE_LEAVE("Startup");
@@ -557,7 +564,7 @@ void RWGame::tick(float dt) {
             while (scriptTimerAccumulator >= timerClockRate) {
                 // Original game uses milliseconds
                 (*state.scriptTimerVariable) -= timerClockRate * 1000;
-		    
+
                 //                                11 seconds
                 if (*state.scriptTimerVariable <= 11000 &&
                     beepTime - *state.scriptTimerVariable >= 1000) {
@@ -565,7 +572,7 @@ void RWGame::tick(float dt) {
 
                     // @todo beep
                 }
-		    
+
                 if (*state.scriptTimerVariable <= 0) {
                     (*state.scriptTimerVariable) = 0;
                     state.scriptTimerVariable = nullptr;
