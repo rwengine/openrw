@@ -72,16 +72,13 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
         benchFile = args->benchmarkPath;
     }
 
-    log.info("Game", "Game directory: " + config.gamedataPath());
+    imgui.init();
 
-    if (!GameData::isValidGameDirectory(config.gamedataPath())) {
+    log.info("Game", "Game directory: " + config.gamedataPath());
+    if (!data.load()) {
         throw std::runtime_error("Invalid game directory path: " +
                                  config.gamedataPath());
     }
-
-    imgui.init();
-
-    data.load();
 
     for (const auto& [specialModel, fileName, name] : kSpecialModels) {
         auto model = data.loadClump(fileName, name);

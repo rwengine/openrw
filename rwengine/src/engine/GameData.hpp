@@ -112,7 +112,7 @@ public:
     void loadWaterpro(const std::string& path);
     void loadWater(const std::string& path);
 
-    void load();
+    bool load();
 
     /**
      * Loads model, placement, models and textures from a level file
@@ -359,10 +359,11 @@ public:
 
     GameTexts texts;
 
+private:
     /**
      * Determines whether the given path is a valid game directory.
      */
-    static bool isValidGameDirectory(const rwfs::path& path);
+    bool isValidGameDirectory() const;
 };
 
 #endif
