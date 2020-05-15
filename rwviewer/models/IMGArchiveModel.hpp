@@ -6,7 +6,7 @@
 class IMGArchiveModel : public QAbstractListModel {
     Q_OBJECT
 
-    LoaderIMG archive;
+    const LoaderIMG& archive;
 
 public:
     IMGArchiveModel(const LoaderIMG& archive, QObject* parent = 0)

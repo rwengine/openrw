@@ -3,12 +3,9 @@
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include <iterator>
 #include <sstream>
 
 #include "platform/FileHandle.hpp"
-#include "loaders/LoaderIMG.hpp"
-
 #include "rw/debug.hpp"
 
 std::string FileIndex::normalizeFilePath(const std::string &filePath) {
@@ -75,7 +72,7 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
 void FileIndex::indexArchive(const std::string &archive) {
     rwfs::path path = findFilePath(archive);
 
-    LoaderIMG img;
+    LoaderIMG& img = loaders_[path.string()];
     if (!img.load(path.string())) {
         throw std::runtime_error("Failed to load IMG archive: " + path.string());
     }
@@ -105,17 +102,17 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
     size_t length = 0;
 
     if (indexedData.type == IndexedDataType::ARCHIVE) {
-        LoaderIMG img;
-
-        if (!img.load(indexedData.path)) {
-            throw std::runtime_error("Failed to load IMG archive: " + indexedData.path);
+        auto loaderPos = loaders_.find(indexedData.path);
+        if (loaderPos == loaders_.end()) {
+            throw std::runtime_error("IMG archive not indexed: " + indexedData.path);
         }
 
+        auto& loader = loaderPos->second;
         LoaderIMGFile file;
         auto filename = rwfs::path(indexedData.assetData).filename().string();
-        if (img.findAssetInfo(filename, file)) {
+        if (loader.findAssetInfo(filename, file)) {
             length = file.size * 2048;
-            data = img.loadToMemory(filename);
+            data = loader.loadToMemory(filename);
         }
     } else {
         std::ifstream dfile(indexedData.path, std::ios::binary);
