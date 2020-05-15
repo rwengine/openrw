@@ -1,10 +1,13 @@
 #ifndef _LIBRW_FILEINDEX_HPP_
 #define _LIBRW_FILEINDEX_HPP_
 
-#include "rw/filesystem.hpp"
-#include "rw/forward.hpp"
-
 #include <unordered_map>
+#include <memory>
+
+#include <loaders/LoaderIMG.hpp>
+#include <rw/filesystem.hpp>
+#include <rw/forward.hpp>
+
 
 class FileIndex {
 public:
@@ -91,6 +94,11 @@ private:
      * @throws If this FileIndex has not indexed filePath
      */
     const IndexedData *getIndexedDataAt(const std::string &filePath) const;
+
+    /**
+     * @brief loaders_ Maps .img filepaths to its respective loader
+     */
+    std::unordered_map<std::string, LoaderIMG> loaders_;
 };
 
 #endif

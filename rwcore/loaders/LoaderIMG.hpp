@@ -2,9 +2,10 @@
 #define _LIBRW_LOADERIMG_HPP_
 
 #include <cstddef>
-#include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
+#include <fstream>
 
 #include <rw/filesystem.hpp>
 
@@ -32,11 +33,13 @@ public:
 
     /// Construct
     LoaderIMG() = default;
+    LoaderIMG(const LoaderIMG&) = delete;
+    LoaderIMG(LoaderIMG&&) noexcept = default;
 
     /// Load the structure of the archive
     /// Omit the extension in filename so both .dir and .img are loaded when
     /// appropriate
-    bool load(const rwfs::path& filename);
+    bool load(const rwfs::path& filepath);
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file
@@ -49,10 +52,14 @@ public:
     bool findAssetInfo(const std::string& assetname, LoaderIMGFile& out);
 
     /// Get the information of an asset by its index
-    const LoaderIMGFile& getAssetInfoByIndex(size_t index) const;
+    const LoaderIMGFile& getAssetInfoByIndex(size_t index) const {
+        return m_assets[index];
+    }
 
     /// Returns the number of asset files in the archive
-    std::size_t getAssetCount() const;
+    std::size_t getAssetCount() const {
+        return m_assets.size();
+    }
 
     Version getVersion() const {
         return m_version;
@@ -61,8 +68,9 @@ public:
 private:
     Version m_version = GTAIIIVC;  ///< Version of this IMG archive
     rwfs::path m_archive;  ///< Path to the archive being used (no extension)
+    std::ifstream m_archive_stream; ///< File stream for archive
 
-    std::vector<LoaderIMGFile> m_assets;  ///< Asset info of the archive
+    std::vector<LoaderIMGFile> m_assets; ///< Asset info of the archive
 };
 
 #endif  // LoaderIMG_h__
