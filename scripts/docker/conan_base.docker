@@ -1,12 +1,13 @@
 FROM ubuntu:rolling
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends --no-upgrade -y \
+    && DEBIAN_FRONTEND=noninteractive \
+       apt-get install --no-install-recommends --no-upgrade -y \
         build-essential \
         cmake \
         ninja-build \
-        gcc-7 \
-        g++-7 \
+        gcc \
+        g++ \
         clang-6.0 \
         llvm \
         lcov \
@@ -65,11 +66,6 @@ RUN apt-get update \
             # conan-sdl2 dependencies https://github.com/bincrafters/conan-sdl2/blob/stable/2.0.8/conanfile.py\
             libxinerama-dev \
             libxkbcommon-dev \
-    && apt-get clean \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 60 \
-    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
-    && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 60
-
-# RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 50 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+    && apt-get clean
 
 CMD [ /bin/bash ]

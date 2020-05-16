@@ -1,7 +1,8 @@
 FROM ubuntu:rolling
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends --no-upgrade -y \
+    && DEBIAN_FRONTEND=noninteractive \
+       apt-get install --no-install-recommends --no-upgrade -y \
         build-essential \
         cmake \
         ninja-build \
