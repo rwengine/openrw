@@ -5,16 +5,53 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <algorithm>
+#include <cstddef>
 #include <fstream>
 #include <map>
+#include <random>
+#include <string>
+#include <string_view>
 
 #include <rw/debug.hpp>
 #include <rw/filesystem.hpp>
+
+#if RW_FS_LIBRARY == RW_FS_BOOST
+//
+// boost misnamed some permissions from filesystem::perms badly.
+// Fix that for now.
+//
+constexpr rwfs::perms kNormalFilePermissions{
+    rwfs::perms::owner_all |
+    rwfs::perms::group_read | rwfs::perms::group_exe |
+    rwfs::perms::others_read | rwfs::perms::others_exe
+};
+
+constexpr rwfs::perms kReadonlyFilePermissions{
+    rwfs::perms::owner_read | rwfs::perms::owner_exe |
+    rwfs::perms::group_read | rwfs::perms::group_exe |
+    rwfs::perms::others_read | rwfs::perms::others_exe
+};
+#else
+constexpr rwfs::perms kNormalFilePermissions{
+    rwfs::perms::owner_all |
+    rwfs::perms::group_read | rwfs::perms::group_exec |
+    rwfs::perms::others_read | rwfs::perms::others_exec
+};
+
+constexpr rwfs::perms kReadonlyFilePermissions{
+    rwfs::perms::owner_read | rwfs::perms::owner_exec |
+    rwfs::perms::group_read | rwfs::perms::group_exec |
+    rwfs::perms::others_read | rwfs::perms::others_exec
+};
+#endif
 
 namespace pt = boost::property_tree;
 
 typedef std::map<std::string, std::map<std::string, std::string>>
     simpleConfig_t;
+
+namespace {
 
 simpleConfig_t readConfig(const rwfs::path &path) {
     simpleConfig_t cfg;
@@ -49,6 +86,28 @@ simpleConfig_t getValidConfig() {
     result["game"]["hud_scale"] = "2.0\t;HUD scale";
     return result;
 }
+
+std::string generateRandomString(std::size_t length)
+{
+    static constexpr std::string_view kCharacters{
+        "0123456789"
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    };
+
+    static std::mt19937 generator{std::random_device{}()};
+    static std::uniform_int_distribution<std::string::size_type> dist(0, kCharacters.size() - 1);
+
+    std::string result(length, '\0');
+    std::generate(
+        result.begin(), result.end(),
+        [&]() { return kCharacters[dist(generator)]; }
+    );
+
+    return result;
+}
+
+} // namespace
 
 std::ostream &operator<<(std::ostream &os, const simpleConfig_t &config) {
     for (auto &section : config) {
@@ -92,7 +151,13 @@ protected:
 
 private:
     static rwfs::path getRandomFilePath(const rwfs::path &dirname) {
-        return rwfs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
+        //
+        // If std::filesystem gains an equivalent to unique_path, use that here
+        // instead of generating our own random name.
+        //
+
+        std::string filename = "openrw_test_" + generateRandomString(16);
+        return dirname / filename;
     }
     static rwfs::path getRandomFilePath() {
         return getRandomFilePath(rwfs::temp_directory_path());
@@ -112,16 +177,10 @@ public:
         this->remove();
     }
     virtual void change_perms_normal() const override {
-        rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exe |
-            rwfs::perms::group_read | rwfs::perms::group_exe |
-            rwfs::perms::others_read | rwfs::perms::others_exe);
+        rwfs::permissions(this->path(), kNormalFilePermissions);
     }
     virtual void change_perms_readonly() const override {
-        rwfs::permissions(this->path(),
-                        rwfs::perms::owner_read | rwfs::perms::owner_exe |
-                        rwfs::perms::group_read | rwfs::perms::group_exe |
-                        rwfs::perms::others_read | rwfs::perms::others_exe);
+        rwfs::permissions(this->path(), kReadonlyFilePermissions);
     }
     virtual void remove() const override {
         // Remove may fail if this directory contains a read-only entry. Ignore.
