@@ -20,6 +20,7 @@ public:
 /**
     \class LoaderIMG
     \brief Parses the structure of GTA .IMG archives and loads the files in it
+           Warning: loadToMemory() is thread-unsafe, refer to its description.
 */
 class LoaderIMG {
 public:
@@ -43,6 +44,10 @@ public:
 
     /// Load a file from the archive to memory and pass a pointer to it
     /// Warning: Returns nullptr if by any reason it can't load the file
+    //
+    /// Warning: CURRENTLY NOT THREADSAFE!
+    //           This method access/modifies m_archive_stream unconditionally,
+    //           be aware of that.
     std::unique_ptr<char[]> loadToMemory(const std::string& assetname);
 
     /// Writes the contents of assetname to filename
