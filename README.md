@@ -1,5 +1,5 @@
 # OpenRW
-[![IRC freenode #openrw](https://raster.shields.io/badge/freenode-%23openrw-blue)](https://webchat.freenode.net/?channels=%23openrw)
+[![IRC libera.chat #openrw](https://raster.shields.io/badge/libera.chat-%23openrw-blue)](https://web.libera.chat/?channels=#openrw)
 
 ## About
 
