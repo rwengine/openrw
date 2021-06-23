@@ -1,4 +1,6 @@
-﻿#include "audio/SoundBufferStreamed.hpp"
+﻿#include <thread> // error: ‘sleep_for’ is not a member of ‘std::this_thread’
+
+#include "audio/SoundBufferStreamed.hpp"
 
 #include <rw/types.hpp>
 

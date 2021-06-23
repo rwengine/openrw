@@ -2,6 +2,7 @@
 #define _RWENGINE_TRAFFICDIRECTOR_HPP_
 
 #include <vector>
+#include <cstddef> // size_t maximumPedestrians
 
 class GameWorld;
 class GameObject;
