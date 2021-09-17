@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_TRAFFICDIRECTOR_HPP_
 #define _RWENGINE_TRAFFICDIRECTOR_HPP_
 
+#include <cstddef>
 #include <vector>
 
 class GameWorld;
