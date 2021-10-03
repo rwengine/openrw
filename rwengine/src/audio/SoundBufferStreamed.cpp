@@ -1,4 +1,6 @@
-﻿#include "audio/SoundBufferStreamed.hpp"
+﻿#include <thread>
+
+#include "audio/SoundBufferStreamed.hpp"
 
 #include <rw/types.hpp>
 
