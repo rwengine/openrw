@@ -1,4 +1,4 @@
-FROM ubuntu:rolling
+FROM ubuntu:latest
 
 RUN apt-get update \
     && apt-get install --no-install-recommends --no-upgrade -y \
