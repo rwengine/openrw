@@ -22,7 +22,7 @@ RUN dnf update -y \
         glm-devel \
         openal-soft-devel \
         SDL2-devel \
-        qt5-devel \
+        qt5-qtbase-devel \
         freetype-devel \
         libasan \
     && ln -s /usr/bin/python3 /usr/bin/python

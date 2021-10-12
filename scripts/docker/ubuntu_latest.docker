@@ -1,13 +1,15 @@
-FROM ubuntu:rolling
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install --no-install-recommends --no-upgrade -y \
         build-essential \
         cmake \
         ninja-build \
-        gcc-7 \
-        g++-7 \
-        clang-6.0 \
+        gcc \
+        g++ \
+        clang \
         llvm \
         lcov \
         curl \
@@ -23,10 +25,6 @@ RUN apt-get update \
         libqt5opengl5-dev \
         libfreetype6-dev \
         iwyu \
-        qt5-default \
-    && apt-get clean \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 60 \
-    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
-    && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 60
+        qt5-default
 
 CMD ["/bin/bash"]
