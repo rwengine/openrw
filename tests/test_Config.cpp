@@ -92,17 +92,20 @@ protected:
     }
 
 private:
+    static std::default_random_engine& getRandomEngine() {
+        static std::default_random_engine defaultRandomEngine = std::default_random_engine(std::random_device{}());
+        return defaultRandomEngine;
+    }
     static std::string gen_random(size_t len) {
         constexpr std::string_view alphanum =
             "0123456789"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz";
-        std::default_random_engine reng(std::random_device{}());
         std::uniform_int_distribution<size_t> dist(0u, alphanum.size());
         std::string res;
         res.reserve(len);
         std::generate_n(std::back_inserter(res), len, [&]() {
-            return alphanum[dist(reng)];
+            return alphanum[dist(getRandomEngine())];
         });
         return res;
     }
