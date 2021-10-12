@@ -14,8 +14,6 @@
     { "include": [ "@<glm/gtx/\\.\\./gtc/quaternion\\.hpp>", "public", "<glm/gtc/quaternion.hpp>", "public"] },
     { "include": [ "@<glm/gtx/\\.\\./gtx/quaternion\\.hpp>", "public", "<glm/gtx/quaternion.hpp>", "public"] },
     { "symbol": [ "glm::value_ptr", "private", "<glm/gtc/type_ptr.hpp>", "public"] },
-# Boost filesystem:
-    { "include": [ "@<boost/filesystem/.*>", "private", "<boost/filesystem.hpp>", "public"] },
 # Boost iterator:
     { "include": [ "@<boost/range/iterator_range_core\\.hpp>", "private", "<boost/range/iterator_range.hpp>", "public"] },
 # Bullet:
