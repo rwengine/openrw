@@ -10,7 +10,7 @@ matrix:
       - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
   - os: linux
     compiler: clang
-    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm" TEST_COVERAGE=1
+    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm"
     services: docker
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"
