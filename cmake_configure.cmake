@@ -126,11 +126,6 @@ elseif(FILESYSTEM_LIBRARY STREQUAL "CXXTS")
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_link_libraries(rw_interface INTERFACE "stdc++fs")
     endif()
-elseif(FILESYSTEM_LIBRARY STREQUAL "BOOST")
-    target_compile_definitions(rw_interface INTERFACE "RW_FS_LIBRARY=2")
-    target_link_libraries(rw_interface INTERFACE
-        Boost::filesystem
-        )
 else()
     message(FATAL_ERROR "Illegal FILESYSTEM_LIBRARY option. (was '${FILESYSTEM_LIBRARY}')")
 endif()
