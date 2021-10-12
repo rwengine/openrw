@@ -6,7 +6,7 @@
 
 #include "rw/debug.hpp"
 
-bool LoaderSDT::load(const rwfs::path& sdtPath, const rwfs::path& rawPath) {
+bool LoaderSDT::load(const std::filesystem::path& sdtPath, const std::filesystem::path& rawPath) {
     const auto sdtName = sdtPath.string();
     const auto rawName = rawPath.string();
 

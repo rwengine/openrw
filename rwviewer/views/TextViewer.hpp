@@ -4,10 +4,10 @@
 #include "ViewerInterface.hpp"
 
 #include <fonts/GameTexts.hpp>
-#include <rw/filesystem.hpp>
 
 #include <QTableView>
 
+#include <filesystem>
 #include <vector>
 
 class TextModel;

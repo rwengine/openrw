@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(test_indexTree, DATA_TEST_PREDICATE) {
         auto truepath = index.findFilePath(upperpath);
         BOOST_ASSERT(!truepath.empty());
         BOOST_CHECK(upperpath != truepath);
-        rwfs::path expected{Global::getGamePath()};
+        std::filesystem::path expected{Global::getGamePath()};
         expected /= "data/CULLZONE.DAT";
         BOOST_CHECK(expected.compare(expected) == 0);
     }
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(test_indexTree, DATA_TEST_PREDICATE) {
         auto truepath = index.findFilePath(upperpath);
         BOOST_ASSERT(!truepath.empty());
         BOOST_CHECK(upperpath != truepath);
-        rwfs::path expected{Global::getGamePath()};
+        std::filesystem::path expected{Global::getGamePath()};
         expected /= "data/maps/comnbtm/comNbtm.ipl";
         BOOST_CHECK(expected.compare(truepath) == 0);
     }

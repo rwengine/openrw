@@ -5,19 +5,19 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <map>
-#include <chrono>
+#include <random>
 
 #include <rw/debug.hpp>
-#include <rw/filesystem.hpp>
 
 namespace pt = boost::property_tree;
 
 typedef std::map<std::string, std::map<std::string, std::string>>
     simpleConfig_t;
 
-simpleConfig_t readConfig(const rwfs::path &path) {
+simpleConfig_t readConfig(const std::filesystem::path &path) {
     simpleConfig_t cfg;
     pt::ptree tree;
     pt::read_ini(path.string(), tree);
@@ -68,9 +68,9 @@ public:
     virtual ~Temp() {
     }
     bool exists() const {
-        return rwfs::exists(this->m_path);
+        return std::filesystem::exists(this->m_path);
     }
-    const rwfs::path &path() const {
+    const std::filesystem::path &path() const {
         return this->m_path;
     }
     std::string filename() const {
@@ -88,18 +88,35 @@ protected:
     Temp(const Temp &) = delete;
     Temp() : m_path(getRandomFilePath()) {
     }
-    Temp(const rwfs::path &dirname) : m_path(getRandomFilePath(dirname)) {
+    Temp(const std::filesystem::path &dirname) : m_path(getRandomFilePath(dirname)) {
     }
 
 private:
-    static rwfs::path getRandomFilePath(const rwfs::path &dirname) {
-        const long current_time = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        return dirname / ("openrw_test_" + std::to_string(current_time));
+    static std::default_random_engine& getRandomEngine() {
+        static std::default_random_engine defaultRandomEngine = std::default_random_engine(std::random_device{}());
+        return defaultRandomEngine;
     }
-    static rwfs::path getRandomFilePath() {
-        return getRandomFilePath(rwfs::temp_directory_path());
+    static std::string gen_random(size_t len) {
+        constexpr std::string_view alphanum =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
+        std::uniform_int_distribution<size_t> dist(0u, alphanum.size());
+        std::string res;
+        res.reserve(len);
+        std::generate_n(std::back_inserter(res), len, [&]() {
+            return alphanum[dist(getRandomEngine())];
+        });
+        return res;
     }
-    rwfs::path m_path;
+    static std::filesystem::path getRandomFilePath(const std::filesystem::path &dirname) {
+        const std::string name = "openrw_test_" + gen_random(16);
+        return dirname / name;
+    }
+    static std::filesystem::path getRandomFilePath() {
+        return getRandomFilePath(std::filesystem::temp_directory_path());
+    }
+    std::filesystem::path m_path;
 };
 
 class TempFile;
@@ -114,24 +131,24 @@ public:
         this->remove();
     }
     virtual void change_perms_normal() const override {
-        rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exec |
-            rwfs::perms::group_read | rwfs::perms::group_exec |
-            rwfs::perms::others_read | rwfs::perms::others_exec);
+        std::filesystem::permissions(this->path(),
+            std::filesystem::perms::owner_read | std::filesystem::perms::owner_write | std::filesystem::perms::owner_exec |
+            std::filesystem::perms::group_read | std::filesystem::perms::group_exec |
+            std::filesystem::perms::others_read | std::filesystem::perms::others_exec);
     }
     virtual void change_perms_readonly() const override {
-        rwfs::permissions(this->path(),
-                        rwfs::perms::owner_read | rwfs::perms::owner_exec |
-                        rwfs::perms::group_read | rwfs::perms::group_exec |
-                        rwfs::perms::others_read | rwfs::perms::others_exec);
+        std::filesystem::permissions(this->path(),
+            std::filesystem::perms::owner_read | std::filesystem::perms::owner_exec |
+            std::filesystem::perms::group_read | std::filesystem::perms::group_exec |
+            std::filesystem::perms::others_read | std::filesystem::perms::others_exec);
     }
     virtual void remove() const override {
         // Remove may fail if this directory contains a read-only entry. Ignore.
-        rwfs::error_code ec;
-        rwfs::remove_all(this->path(), ec);
+        std::error_code ec;
+        std::filesystem::remove_all(this->path(), ec);
     }
     void touch() const override {
-        rwfs::create_directories(this->path());
+        std::filesystem::create_directories(this->path());
     }
     friend class TempFile;
 };
@@ -146,19 +163,20 @@ public:
         this->remove();
     }
     virtual void change_perms_normal() const override {
-        rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write |
-            rwfs::perms::group_read |
-            rwfs::perms::others_read);
+        std::filesystem::permissions(this->path(),
+            std::filesystem::perms::owner_read | std::filesystem::perms::owner_write |
+            std::filesystem::perms::group_read |
+            std::filesystem::perms::others_read);
     }
     virtual void change_perms_readonly() const override {
-        rwfs::permissions(this->path(), rwfs::perms::owner_read |
-                                                        rwfs::perms::group_read |
-                                                        rwfs::perms::others_read);
+        std::filesystem::permissions(this->path(),
+            std::filesystem::perms::owner_read |
+            std::filesystem::perms::group_read |
+            std::filesystem::perms::others_read);
     }
     virtual void remove() const override {
-        rwfs::error_code ec;
-        rwfs::remove_all(this->path(), ec);
+        std::error_code ec;
+        std::filesystem::remove_all(this->path(), ec);
     }
     virtual void touch() const override {
         std::ofstream ofs(this->path().string(), std::ios::out | std::ios::app);
@@ -225,14 +243,14 @@ BOOST_AUTO_TEST_CASE(test_TempDir) {
     tempChildDir.touch();
     BOOST_CHECK(tempChildDir.exists());
 
-    rwfs::path path;
+    std::filesystem::path path;
     {
         TempDir tempLocal;
         tempLocal.touch();
         BOOST_CHECK(tempLocal.exists());
         path = tempLocal.path();
     }
-    BOOST_CHECK(!rwfs::exists(path));
+    BOOST_CHECK(!std::filesystem::exists(path));
 }
 
 BOOST_AUTO_TEST_CASE(test_TempFile) {
@@ -261,14 +279,14 @@ BOOST_AUTO_TEST_CASE(test_TempFile) {
     BOOST_CHECK(!tempFile.write("abc"));
     BOOST_CHECK(!tempFile.append("def"));
 
-    rwfs::path path;
+    std::filesystem::path path;
     {
         TempFile tempLocal;
         tempLocal.touch();
         BOOST_CHECK(tempLocal.exists());
         path = tempLocal.path();
     }
-    BOOST_CHECK(!rwfs::exists(path));
+    BOOST_CHECK(!std::filesystem::exists(path));
 }
 
 BOOST_AUTO_TEST_CASE(test_configParser_initial) {

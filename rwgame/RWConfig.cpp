@@ -174,22 +174,22 @@ RWConfigLayer buildDefaultConfigLayer() {
 
 static constexpr auto kConfigDirectoryName = "OpenRW";
 
-rwfs::path RWConfigParser::getDefaultConfigPath() {
+std::filesystem::path RWConfigParser::getDefaultConfigPath() {
 #if defined(RW_LINUX) || defined(RW_FREEBSD) || defined(RW_NETBSD) || \
     defined(RW_OPENBSD)
     char *config_home = getenv("XDG_CONFIG_HOME");
     if (config_home != nullptr) {
-        return rwfs::path(config_home) / kConfigDirectoryName;
+        return std::filesystem::path(config_home) / kConfigDirectoryName;
     }
     char *home = getenv("HOME");
     if (home != nullptr) {
-        return rwfs::path(home) / ".config/" / kConfigDirectoryName;
+        return std::filesystem::path(home) / ".config/" / kConfigDirectoryName;
     }
 
 #elif defined(RW_OSX)
     char *home = getenv("HOME");
     if (home)
-        return rwfs::path(home) / "Library/Preferences/" / kConfigDirectoryName;
+        return std::filesystem::path(home) / "Library/Preferences/" / kConfigDirectoryName;
 
 #elif defined(RW_WINDOWS)
     wchar_t *widePath;
@@ -197,15 +197,15 @@ rwfs::path RWConfigParser::getDefaultConfigPath() {
                                     nullptr, &widePath);
     if (SUCCEEDED(res)) {
         auto utf8Path = wideStringToACP(widePath);
-        return rwfs::path(utf8Path) / kConfigDirectoryName;
+        return std::filesystem::path(utf8Path) / kConfigDirectoryName;
     }
 #else
-    return rwfs::path();
+    return std::filesystem::path();
 #endif
 
     // Well now we're stuck.
     RW_ERROR("No default config path found.");
-    return rwfs::path();
+    return std::filesystem::path();
 }
 
 namespace {
@@ -406,7 +406,7 @@ TreeParser buildTreeParser() {
 
 }
 
-std::tuple<RWConfigLayer, RWConfigParser::ParseResult> RWConfigParser::loadFile(const rwfs::path &path) const {
+std::tuple<RWConfigLayer, RWConfigParser::ParseResult> RWConfigParser::loadFile(const std::filesystem::path &path) const {
     ParseResult parseResult(path.string(), "<internal>");
 
     auto treeParser = buildTreeParser();
@@ -429,7 +429,8 @@ std::tuple<RWConfigLayer, RWConfigParser::ParseResult> RWConfigParser::loadFile(
     return std::make_tuple(layer, parseResult);
 }
 
-RWConfigParser::ParseResult RWConfigParser::saveFile(const rwfs::path &path, const RWConfigLayer &layer, const std::map<std::string, std::string> &extra) const {
+RWConfigParser::ParseResult RWConfigParser::saveFile(const std::filesystem::path &path,
+        const RWConfigLayer &layer, const std::map<std::string, std::string> &extra) const {
     ParseResult parseResult("<internal>", path.string());
 
     auto treeParser = buildTreeParser();
@@ -454,7 +455,7 @@ RWConfigParser::ParseResult RWConfigParser::saveFile(const rwfs::path &path, con
     return parseResult;
 }
 
-RWConfigParser::ParseResult RWConfigParser::saveFile(const rwfs::path &path, const RWConfigLayer &layer) const {
+RWConfigParser::ParseResult RWConfigParser::saveFile(const std::filesystem::path &path, const RWConfigLayer &layer) const {
     ParseResult parseResult("<internal>", path.string());
 
     auto treeParser = buildTreeParser();

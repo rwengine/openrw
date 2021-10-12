@@ -33,7 +33,6 @@ function(rwdep_wrap_conan_targets)
     endif()
 
     rwdep_wrap_conan_target(Boost::boost boost)
-    rwdep_wrap_conan_target(Boost::filesystem boost)
     rwdep_wrap_conan_target(Boost::program_options boost)
     rwdep_wrap_conan_target(Boost::system boost)
     rwdep_wrap_conan_target(Boost::unit_test_framework boost)

@@ -1,14 +1,13 @@
 #ifndef _RWENGINE_SOUND_SOURCE_HPP_
 #define _RWENGINE_SOUND_SOURCE_HPP_
 
-#include <rw/filesystem.hpp>
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/avutil.h>
 }
 
 #include <cstdint>
+#include <filesystem>
 #include <future>
 #include <mutex>
 #include <vector>
@@ -25,8 +24,6 @@ class AVStream;
 class AVIOContext;
 class LoaderSDT;
 
-class LoaderSDT;
-
 /// Opaque for raw sound,
 /// cooperate with ffmpeg
 /// (loading and decoding sound)
@@ -38,10 +35,10 @@ class SoundSource {
 public:
     bool allocateAudioFrame();
 
-    bool allocateFormatContext(const rwfs::path& filePath);
+    bool allocateFormatContext(const std::filesystem::path& filePath);
     bool prepareFormatContextSfx(LoaderSDT& sdt, size_t index, bool asWave);
 
-    bool findAudioStream(const rwfs::path& filePath);
+    bool findAudioStream(const std::filesystem::path& filePath);
     bool findAudioStreamSfx();
 
     bool prepareCodecContextWrap();
@@ -59,10 +56,10 @@ public:
     void decodeFramesLegacy(size_t framesToDecode);
 #endif
 
-    void decodeFramesWrap(const rwfs::path& filePath);
+    void decodeFramesWrap(const std::filesystem::path& filePath);
     void decodeFramesSfxWrap();
     void decodeFrames(size_t framesToDecode);
-    void decodeAndResampleFrames(const rwfs::path& filePath,
+    void decodeAndResampleFrames(const std::filesystem::path& filePath,
                                  size_t framesToDecode);
 
     void cleanupAfterSoundLoading();
@@ -71,11 +68,11 @@ public:
     void exposeSoundMetadata();
     void exposeSfxMetadata(LoaderSDT& sdt);
 
-    void decodeRestSoundFramesAndCleanup(const rwfs::path& filePath);
+    void decodeRestSoundFramesAndCleanup(const std::filesystem::path& filePath);
     void decodeRestSfxFramesAndCleanup();
 
     /// Load sound from mp3/wav file
-    void loadFromFile(const rwfs::path& filePath, bool streaming = false);
+    void loadFromFile(const std::filesystem::path& filePath, bool streaming = false);
 
     /// Load sound from sdt file
     void loadSfx(LoaderSDT& sdt, std::size_t index, bool asWave = true,

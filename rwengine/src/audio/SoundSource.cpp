@@ -34,7 +34,7 @@ bool SoundSource::allocateAudioFrame() {
     return true;
 }
 
-bool SoundSource::allocateFormatContext(const rwfs::path& filePath) {
+bool SoundSource::allocateFormatContext(const std::filesystem::path& filePath) {
     formatContext = nullptr;
     if (avformat_open_input(&formatContext, filePath.string().c_str(), nullptr,
                             nullptr) != 0) {
@@ -100,7 +100,7 @@ bool SoundSource::prepareFormatContextSfx(LoaderSDT& sdt, size_t index,
     return true;
 }
 
-bool SoundSource::findAudioStream(const rwfs::path& filePath) {
+bool SoundSource::findAudioStream(const std::filesystem::path& filePath) {
     RW_UNUSED(filePath);  // it's used by macro
 
     if (avformat_find_stream_info(formatContext, nullptr) < 0) {
@@ -354,7 +354,7 @@ void SoundSource::decodeFrames(size_t framesToDecode) {
     }
 }
 
-void SoundSource::decodeFramesWrap(const rwfs::path& filePath) {
+void SoundSource::decodeFramesWrap(const std::filesystem::path& filePath) {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     decodeFramesLegacy(kNrFramesToPreload);
 #else
@@ -362,7 +362,7 @@ void SoundSource::decodeFramesWrap(const rwfs::path& filePath) {
 #endif
 }
 
-void SoundSource::decodeAndResampleFrames(const rwfs::path& filePath,
+void SoundSource::decodeAndResampleFrames(const std::filesystem::path& filePath,
                                           size_t framesToDecode) {
     RW_UNUSED(filePath);  // it's used by macro
     AVFrame* resampled = av_frame_alloc();
@@ -485,7 +485,7 @@ void SoundSource::exposeSfxMetadata(LoaderSDT& sdt) {
     sampleRate = sdt.assetInfo.sampleRate;
 }
 
-void SoundSource::decodeRestSoundFramesAndCleanup(const rwfs::path& filePath) {
+void SoundSource::decodeRestSoundFramesAndCleanup(const std::filesystem::path& filePath) {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
     decodeFramesLegacy(0);
 #else
@@ -505,7 +505,7 @@ void SoundSource::decodeRestSfxFramesAndCleanup() {
     cleanupAfterSfxLoading();
 }
 
-void SoundSource::loadFromFile(const rwfs::path& filePath, bool streaming) {
+void SoundSource::loadFromFile(const std::filesystem::path& filePath, bool streaming) {
     if (allocateAudioFrame() && allocateFormatContext(filePath) &&
         findAudioStream(filePath) && prepareCodecContextWrap()) {
         exposeSoundMetadata();

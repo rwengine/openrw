@@ -5,9 +5,9 @@ RUN apt-get update \
         build-essential \
         cmake \
         ninja-build \
-        gcc-7 \
-        g++-7 \
-        clang-6.0 \
+        gcc-8 \
+        g++-8 \
+        clang-7 \
         llvm \
         lcov \
         curl \
@@ -66,9 +66,9 @@ RUN apt-get update \
             libxinerama-dev \
             libxkbcommon-dev \
     && apt-get clean \
-    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 60 \
-    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
-    && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-7 60
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 60 \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 \
+    && update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-8 60
 
 # RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 50 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 

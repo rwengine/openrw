@@ -28,11 +28,10 @@ matrix:
   # - os: osx
   #   compiler: clang
   #   env: NAME="Apple macOS" NAME_SUFFIX="mac"
-  #   osx_image: xcode10.1
+  #   osx_image: xcode11
   #   install:
   #     - brew update
   #     - /usr/bin/yes | pip2 uninstall numpy  # see https://github.com/travis-ci/travis-ci/issues/6688
-  #     - brew upgrade python
   #     - brew upgrade
   #     - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack freetype
   #     - export PATH="/usr/local/opt/qt/bin:$PATH"
