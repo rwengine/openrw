@@ -115,15 +115,15 @@ public:
     }
     virtual void change_perms_normal() const override {
         rwfs::permissions(this->path(),
-            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exe |
-            rwfs::perms::group_read | rwfs::perms::group_exe |
-            rwfs::perms::others_read | rwfs::perms::others_exe);
+            rwfs::perms::owner_read | rwfs::perms::owner_write | rwfs::perms::owner_exec |
+            rwfs::perms::group_read | rwfs::perms::group_exec |
+            rwfs::perms::others_read | rwfs::perms::others_exec);
     }
     virtual void change_perms_readonly() const override {
         rwfs::permissions(this->path(),
-                        rwfs::perms::owner_read | rwfs::perms::owner_exe |
-                        rwfs::perms::group_read | rwfs::perms::group_exe |
-                        rwfs::perms::others_read | rwfs::perms::others_exe);
+                        rwfs::perms::owner_read | rwfs::perms::owner_exec |
+                        rwfs::perms::group_read | rwfs::perms::group_exec |
+                        rwfs::perms::others_read | rwfs::perms::others_exec);
     }
     virtual void remove() const override {
         // Remove may fail if this directory contains a read-only entry. Ignore.
