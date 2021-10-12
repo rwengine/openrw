@@ -20,11 +20,11 @@ matrix:
     services: docker
     script:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
-  - os: linux
-    compiler: gcc
-    env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1
-    script:
-      - scripts/docker/docker_travis.sh "conan_base.docker"
+  # - os: linux
+  #   compiler: gcc
+  #   env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1
+  #   script:
+  #     - scripts/docker/docker_travis.sh "conan_base.docker"
   - os: osx
     compiler: clang
     env: NAME="Apple macOS" NAME_SUFFIX="mac"
