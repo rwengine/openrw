@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <map>
+#include <chrono>
 
 #include <rw/debug.hpp>
 #include <rw/filesystem.hpp>
@@ -92,7 +93,8 @@ protected:
 
 private:
     static rwfs::path getRandomFilePath(const rwfs::path &dirname) {
-        return rwfs::unique_path(dirname / "openrw_test_%%%%%%%%%%%%%%%%");
+        const long current_time = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        return dirname / ("openrw_test_" + std::to_string(current_time));
     }
     static rwfs::path getRandomFilePath() {
         return getRandomFilePath(rwfs::temp_directory_path());
