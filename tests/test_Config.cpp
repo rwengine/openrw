@@ -101,7 +101,7 @@ private:
             "0123456789"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz";
-        std::uniform_int_distribution<size_t> dist(0u, alphanum.size());
+        std::uniform_int_distribution<size_t> dist(0u, alphanum.size() - 1);
         std::string res;
         res.reserve(len);
         std::generate_n(std::back_inserter(res), len, [&]() {
