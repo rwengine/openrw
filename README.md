@@ -12,7 +12,7 @@ this it will not be possible to play.
 
 Windows | Linux | macOS | coverage
 ---| --- | ---  | ---
-[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=master)](https://app.travis-ci.com/rwengine/openrw) | [disabled](https://github.com/rwengine/openrw/commit/f8483d190588a159f65c1c3ffb153e20888347b8) | [![codecov](https://codecov.io/gh/rwengine/openrw/branch/master/graph/badge.svg)](https://codecov.io/gh/rwengine/openrw)
+[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=master)](https://app.travis-ci.com/rwengine/openrw) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=master)](https://app.travis-ci.com/rwengine/openrw) | [![codecov](https://codecov.io/gh/rwengine/openrw/branch/master/graph/badge.svg)](https://codecov.io/gh/rwengine/openrw)
 
 
 ## Links
