@@ -55,7 +55,7 @@ int read_packet(void* opaque, uint8_t* buf, int buf_size) {
     memcpy(buf, input->ptr, buf_size);
     input->ptr += buf_size;
     input->size -= buf_size;
-    return buf_size;
+    return buf_size <= 0 ? AVERROR_EOF : buf_size;
 }
 }  // namespace
 
