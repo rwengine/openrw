@@ -90,7 +90,7 @@ private:
     AVFrame* frame = nullptr;
     AVFormatContext* formatContext = nullptr;
     AVStream* audioStream = nullptr;
-    AVCodec* codec = nullptr;
+    const AVCodec* codec = nullptr;
     SwrContext* swr = nullptr;
     AVCodecContext* codecContext = nullptr;
     AVPacket readingPacket;

@@ -121,7 +121,7 @@ bool SoundSource::findAudioStream(const std::filesystem::path& filePath) {
     }
 
     audioStream = formatContext->streams[streamIndex];
-    auto codec = avcodec_find_decoder(audioStream->codecpar->codec_id);
+    codec = avcodec_find_decoder(audioStream->codecpar->codec_id);
     return true;
 }
 
