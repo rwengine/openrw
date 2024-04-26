@@ -505,6 +505,9 @@ bool Activities::EnterVehicle::update(CharacterObject *character,
 
 bool Activities::ExitVehicle::update(CharacterObject *character,
                                      CharacterController *controller) {
+    /// @todo Acitivty must be cancelled if the player lets go of the
+    /// the enter/exit vehicle key and the exit animation has not yet
+    /// started.
     RW_UNUSED(controller);
 
     if (jacked) {
