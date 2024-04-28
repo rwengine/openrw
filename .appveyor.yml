@@ -34,8 +34,8 @@ init:
   - msbuild /version
   - pip3 install conan==1.64.0
   - conan user
-  - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
-
+  - conan remote add bincrafters https://bincrafters.jfrog.io/artifactory/api/conan/public-conan
+  
 install:
   - cd "%APPVEYOR_BUILD_FOLDER%"
   - for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
