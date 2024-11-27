@@ -39,12 +39,20 @@ void FileIndex::indexTree(const std::filesystem::path &path) {
 }
 
 const FileIndex::IndexedData *FileIndex::getIndexedDataAt(const std::string &filePath) const {
-    auto normPath = normalizeFilePath(filePath);
-    return &indexedData_.at(normPath);
+    std::string normPath = normalizeFilePath(filePath);
+    try {
+        return &indexedData_.at(normPath);
+    } catch (...) {
+        RW_ERROR("Missing file: " << normPath);
+        return nullptr;
+    }
 }
 
 std::filesystem::path FileIndex::findFilePath(const std::string &filePath) const {
-    return getIndexedDataAt(filePath)->path;
+    auto idxData = getIndexedDataAt(filePath);
+    if (!idxData) return filePath;
+
+    return idxData->path;
 }
 
 FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
