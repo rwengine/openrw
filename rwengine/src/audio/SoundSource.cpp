@@ -14,6 +14,8 @@ extern "C" {
 #define avio_context_free av_freep
 #endif
 
+#define HAVE_CH_LAYOUT (LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 28, 100))
+
 constexpr int kNumOutputChannels = 2;
 constexpr AVSampleFormat kOutputFMT = AV_SAMPLE_FMT_S16;
 constexpr size_t kNrFramesToPreload = 50;
@@ -200,7 +202,6 @@ bool SoundSource::prepareCodecContext() {
     // Fill the codecCtx with the parameters of the codec used in the read file.
     if (avcodec_parameters_to_context(codecContext, audioStream->codecpar) !=
         0) {
-        avcodec_close(codecContext);
         avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         RW_ERROR("Couldn't find parametrs for context");
@@ -209,7 +210,6 @@ bool SoundSource::prepareCodecContext() {
 
     // Initialize the decoder.
     if (avcodec_open2(codecContext, codec, nullptr) != 0) {
-        avcodec_close(codecContext);
         avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         RW_ERROR("Couldn't open the audio codec context");
@@ -243,7 +243,6 @@ bool SoundSource::prepareCodecContextSfx() {
         0) {
         av_free(formatContext->pb->buffer);
         avio_context_free(&formatContext->pb);
-        avcodec_close(codecContext);
         avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         RW_ERROR("Couldn't find parametrs for context");
@@ -254,7 +253,6 @@ bool SoundSource::prepareCodecContextSfx() {
     if (avcodec_open2(codecContext, codec, nullptr) != 0) {
         av_free(formatContext->pb->buffer);
         avio_context_free(&formatContext->pb);
-        avcodec_close(codecContext);
         avcodec_free_context(&codecContext);
         avformat_close_input(&formatContext);
         RW_ERROR("Couldn't open the audio codec context");
@@ -267,9 +265,9 @@ bool SoundSource::prepareCodecContextSfx() {
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(57, 37, 100)
 void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
     while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
-           av_read_frame(formatContext, &readingPacket) == 0) {
-        if (readingPacket.stream_index == audioStream->index) {
-            AVPacket decodingPacket = readingPacket;
+           av_read_frame(formatContext, readingPacket) == 0) {
+        if (readingPacket->stream_index == audioStream->index) {
+            AVPacket decodingPacket = *readingPacket;
 
             while (decodingPacket.size > 0) {
                 // Decode audio packet
@@ -299,7 +297,7 @@ void SoundSource::decodeFramesLegacy(size_t framesToDecode) {
                 }
             }
         }
-        av_free_packet(&readingPacket);
+        av_free_packet(readingPacket);
         ++decodedFrames;
     }
 }
@@ -315,9 +313,9 @@ void SoundSource::decodeFramesSfxWrap() {
 
 void SoundSource::decodeFrames(size_t framesToDecode) {
     while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
-           av_read_frame(formatContext, &readingPacket) == 0) {
-        if (readingPacket.stream_index == audioStream->index) {
-            AVPacket decodingPacket = readingPacket;
+           av_read_frame(formatContext, readingPacket) == 0) {
+        if (readingPacket->stream_index == audioStream->index) {
+            AVPacket decodingPacket = *readingPacket;
 
             int sendPacket = avcodec_send_packet(codecContext, &decodingPacket);
             int receiveFrame = 0;
@@ -342,7 +340,7 @@ void SoundSource::decodeFrames(size_t framesToDecode) {
                 }
             }
         }
-        av_packet_unref(&readingPacket);
+        av_packet_unref(readingPacket);
         ++decodedFrames;
     }
 }
@@ -359,21 +357,38 @@ void SoundSource::decodeAndResampleFrames(const std::filesystem::path& filePath,
                                           size_t framesToDecode) {
     RW_UNUSED(filePath);  // it's used by macro
     AVFrame* resampled = av_frame_alloc();
+    int err = 0;
 
     while ((framesToDecode == 0 || decodedFrames < framesToDecode) &&
-           av_read_frame(formatContext, &readingPacket) == 0) {
-        if (readingPacket.stream_index == audioStream->index) {
-            int sendPacket = avcodec_send_packet(codecContext, &readingPacket);
-            av_packet_unref(&readingPacket);
+           av_read_frame(formatContext, readingPacket) == 0) {
+        if (readingPacket->stream_index == audioStream->index) {
+            int sendPacket = avcodec_send_packet(codecContext, readingPacket);
+            av_packet_unref(readingPacket);
             int receiveFrame = 0;
 
             while ((receiveFrame =
                         avcodec_receive_frame(codecContext, frame)) == 0) {
                 if (!swr) {
-                    if (frame->channels == 1 || frame->channel_layout == 0) {
+#if HAVE_CH_LAYOUT
+                    AVChannelLayout out_chlayout = AV_CHANNEL_LAYOUT_STEREO;
+                    err = swr_alloc_set_opts2(
+                        &swr, &out_chlayout, kOutputFMT, frame->sample_rate,
+                        &frame->ch_layout,  // input channel layout
+                        static_cast<AVSampleFormat>(
+                            frame->format),  // input format
+                        frame->sample_rate,  // input sample rate
+                        0, nullptr);
+
+                    if (err < 0) {
+                        RW_ERROR(
+                            "Resampler has not been successfully allocated.");
+                        return;
+                    }
+#else
+                    if (frame->channels == 1 || frame->channel_layout == 0)
                         frame->channel_layout =
                             av_get_default_channel_layout(1);
-                    }
+
                     swr = swr_alloc_set_opts(
                         nullptr,
                         AV_CH_LAYOUT_STEREO,    // output channel layout
@@ -384,6 +399,7 @@ void SoundSource::decodeAndResampleFrames(const std::filesystem::path& filePath,
                             frame->format),  // input format
                         frame->sample_rate,  // input sample rate
                         0, nullptr);
+#endif
                     if (!swr) {
                         RW_ERROR(
                             "Resampler has not been successfully allocated.");
@@ -400,10 +416,14 @@ void SoundSource::decodeAndResampleFrames(const std::filesystem::path& filePath,
                 // Decode audio packet
                 if (receiveFrame == 0 && sendPacket == 0) {
                     // Write samples to audio buffer
+#if HAVE_CH_LAYOUT
+                    resampled->ch_layout = AV_CHANNEL_LAYOUT_STEREO;
+#else
                     resampled->channel_layout = AV_CH_LAYOUT_STEREO;
+                    resampled->channels = kNumOutputChannels;
+#endif
                     resampled->sample_rate = frame->sample_rate;
                     resampled->format = kOutputFMT;
-                    resampled->channels = kNumOutputChannels;
 
                     swr_config_frame(swr, resampled, frame);
 
@@ -438,10 +458,6 @@ void SoundSource::cleanupAfterSoundLoading() {
     /// Free all data used by the frame.
     av_frame_free(&frame);
 
-    /// Close the context and free all data associated to it, but not the
-    /// context itself.
-    avcodec_close(codecContext);
-
     /// Free the context itself.
     avcodec_free_context(&codecContext);
 
@@ -452,10 +468,6 @@ void SoundSource::cleanupAfterSoundLoading() {
 void SoundSource::cleanupAfterSfxLoading() {
     /// Free all data used by the frame.
     av_frame_free(&frame);
-
-    /// Close the context and free all data associated to it, but not the
-    /// context itself.
-    avcodec_close(codecContext);
 
     /// Free the context itself.
     avcodec_free_context(&codecContext);
@@ -474,7 +486,11 @@ void SoundSource::exposeSoundMetadata() {
 }
 
 void SoundSource::exposeSfxMetadata(LoaderSDT& sdt) {
+#if HAVE_CH_LAYOUT
+    channels = static_cast<size_t>(codecContext->ch_layout.nb_channels);
+#else
     channels = static_cast<size_t>(codecContext->channels);
+#endif
     sampleRate = sdt.assetInfo.sampleRate;
 }
 
@@ -502,7 +518,7 @@ void SoundSource::loadFromFile(const std::filesystem::path& filePath, bool strea
     if (allocateAudioFrame() && allocateFormatContext(filePath) &&
         findAudioStream(filePath) && prepareCodecContextWrap()) {
         exposeSoundMetadata();
-        av_init_packet(&readingPacket);
+        readingPacket = av_packet_alloc();
 
         decodeFramesWrap(filePath);
 
@@ -521,7 +537,7 @@ void SoundSource::loadSfx(LoaderSDT& sdt, size_t index, bool asWave,
     if (allocateAudioFrame() && prepareFormatContextSfx(sdt, index, asWave) &&
         findAudioStreamSfx() && prepareCodecContextSfxWrap()) {
         exposeSfxMetadata(sdt);
-        av_init_packet(&readingPacket);
+        readingPacket = av_packet_alloc();
 
         decodeFramesSfxWrap();
 

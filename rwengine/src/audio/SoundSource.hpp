@@ -93,7 +93,7 @@ private:
     const AVCodec* codec = nullptr;
     SwrContext* swr = nullptr;
     AVCodecContext* codecContext = nullptr;
-    AVPacket readingPacket;
+    AVPacket* readingPacket;
 
     // For sfx
     AVIOContext* avioContext;
