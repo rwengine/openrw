@@ -73,6 +73,13 @@ static std::unique_ptr<TextureData> createTexture(
         !((texNative.rasterformat & RW::BSTextureNative::FORMAT_888) ==
           RW::BSTextureNative::FORMAT_888);
 
+    if (texNative.dxttype) {
+        RW_ERROR("FIXME: DXT format "
+                 << static_cast<unsigned>(texNative.dxttype)
+                 << " not yet implemented!");
+        return getErrorTexture();
+    }
+
     if (!(isPal8 || isFulc)) {
         RW_ERROR("Unsupported raster format " << std::dec
                   << texNative.rasterformat);
