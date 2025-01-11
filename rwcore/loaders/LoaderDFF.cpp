@@ -439,6 +439,11 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     // Verify the atomic's particulars
     RW_CHECK(frame < framelist.size(), "atomic frame " << frame
                                                        << " out of bounds");
+    RW_CHECK(atomicStream.getChunkVersion() >= 0x30400,
+	     "Warning: You using old assets (old LOPLYGUY.DFF version 0x" <<
+	     std::hex << atomicStream.getChunkVersion() <<
+             "). Expect atomic geometry warning!\n"
+             "Please, upgrade your game data.\n");
     RW_CHECK(geometry < geometrylist.size(),
              "atomic geometry " << geometry << " out of bounds");
 
