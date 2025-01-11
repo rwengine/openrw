@@ -726,7 +726,7 @@ void VehicleObject::setOccupant(size_t seat, GameObject* occupant) {
 }
 
 bool VehicleObject::canOccupantExit() const {
-    return getVelocity() <= kVehicleMaxExitVelocity;
+    return abs(getVelocity()) <= kVehicleMaxExitVelocity;
 }
 
 bool VehicleObject::isOccupantDriver(size_t seat) const {
