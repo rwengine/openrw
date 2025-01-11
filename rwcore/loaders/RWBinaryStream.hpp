@@ -24,7 +24,7 @@ class RWBStream {
     std::ptrdiff_t _size;
     char* _dataCur;
     char* _nextChunk;
-    std::uint32_t _chunkVersion;
+    std::uint32_t _chunkStamp;
     size_t _currChunkSz;
 
 public:
@@ -50,7 +50,7 @@ public:
         _currChunkSz = bit_cast<std::uint32_t>(*_dataCur);
         _dataCur += sizeof(std::uint32_t);
 
-        _chunkVersion = bit_cast<std::uint32_t>(*_dataCur);
+        _chunkStamp = bit_cast<std::uint32_t>(*_dataCur);
         _dataCur += sizeof(std::uint32_t);
 
         _nextChunk = _dataCur + _currChunkSz;
@@ -67,7 +67,10 @@ public:
     }
 
     std::uint32_t getChunkVersion() const {
-        return _chunkVersion;
+        if (_chunkStamp & 0xFFFF0000)
+	    return ((_chunkStamp >> 14 & 0x3FF00) + 0x30000) |
+		    (_chunkStamp >> 16 & 0x3F);
+	return _chunkStamp << 8;
     }
 
     /**

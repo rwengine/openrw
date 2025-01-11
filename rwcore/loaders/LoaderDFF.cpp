@@ -176,7 +176,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
     std::vector<GeometryVertex> verts;
     verts.resize(numVerts);
 
-    if (geomStream.getChunkVersion() < 0x1003FFFF) {
+    if (geomStream.getChunkVersion() < 0x34003) {
         headerPtr += sizeof(RW::BSGeometryColor);
     }
 
