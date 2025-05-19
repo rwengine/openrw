@@ -1,0 +1,79 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allow to run manually
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  XDG_RUNTIME_DIR: /tmp/openrw-runtimedir
+  ALSOFT_DRIVERS: "null"
+
+jobs:
+  archlinux:
+    name: Arch Linux
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/archlinux/archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syy --noconfirm --disable-sandbox \
+            git core/gcc extra/llvm extra/clang make ninja curl \
+            extra/boost extra/cmake extra/ffmpeg extra/bullet extra/glm \
+            extra/openal extra/sdl2 extra/qt5-base extra/freetype2
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Make runtime directory
+        run: mkdir -p ${XDG_RUNTIME_DIR}
+      - name: Build and test
+        run: mkdir build && cd build && ctest -VV -S ../cmake/ctest/script_ci.ctest
+  fedora:
+    name: Fedora
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/fedora/fedora:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          dnf install -y git-core boost-devel gcc gcc-c++ clang llvm lcov curl \
+            boost-devel cmake make ninja-build bullet-devel ffmpeg-free-devel \
+            glm-devel openal-soft-devel SDL2-devel qt5-qtbase-devel \
+            freetype-devel libasan
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Make runtime directory
+        run: mkdir -p ${XDG_RUNTIME_DIR}
+      - name: Build and test
+        run: mkdir build && cd build && ctest -VV -S ../cmake/ctest/script_ci.ctest
+  ubuntu:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install --no-install-recommends --no-upgrade -y \
+            git-core build-essential cmake ninja-build clang llvm lcov curl \
+            libavcodec-dev libavformat-dev libboost-program-options-dev \
+            libboost-system-dev libbullet-dev libglm-dev libopenal-dev \
+            libsdl2-dev libboost-test-dev libqt5opengl5-dev libfreetype6-dev \
+            iwyu qtbase5-dev qt5-qmake
+        env:
+          DEBIAN_FRONTEND: noninteractive
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Make runtime directory
+        run: mkdir -p ${XDG_RUNTIME_DIR}
+      - name: Build and test
+        run: mkdir build && cd build && ctest -VV -S ../cmake/ctest/script_ci.ctest
