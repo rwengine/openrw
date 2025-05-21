@@ -428,27 +428,39 @@ AtomicPtr LoaderDFF::readAtomic(FrameList &framelist,
     }
 
     auto data = atomicStream.getCursor();
-    std::uint32_t frame = bit_cast<std::uint32_t>(*data);
+    auto frameIndex = bit_cast<std::uint32_t>(*data);
     data += sizeof(std::uint32_t);
-
-    std::uint32_t geometry = bit_cast<std::uint32_t>(*data);
-    data += sizeof(std::uint32_t);
-
-    std::uint32_t flags = bit_cast<std::uint32_t>(*data);
-
-    // Verify the atomic's particulars
-    RW_CHECK(frame < framelist.size(), "atomic frame " << frame
-                                                       << " out of bounds");
-    RW_CHECK(geometry < geometrylist.size(),
-             "atomic geometry " << geometry << " out of bounds");
 
     auto atomic = std::make_shared<Atomic>();
-    if (geometry < geometrylist.size()) {
-        atomic->setGeometry(geometrylist[geometry]);
+    // Verify atomic's frame
+    RW_CHECK(frameIndex < framelist.size(), "atomic frame " << frameIndex
+                                                       << " out of bounds");
+    if (frameIndex < framelist.size()) {
+        atomic->setFrame(framelist[frameIndex]);
     }
-    if (frame < framelist.size()) {
-        atomic->setFrame(framelist[frame]);
+
+    if (atomicStream.getChunkVersion() < 0x30400 && geometrylist.empty()) {
+        RWBStream::ChunkID childChunkID;
+        while ((childChunkID = atomicStream.getNextChunk())) {
+            switch (childChunkID) {
+                case CHUNK_GEOMETRY: {
+                    atomic->setGeometry(readGeometry(atomicStream));
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        RW_CHECK(atomic->getGeometry() != nullptr, "atomic geometry not found");
+    } else {
+        auto geometryIndex = bit_cast<std::uint32_t>(*data);
+        data += sizeof(std::uint32_t);
+        RW_CHECK(geometryIndex < geometrylist.size(),
+                 "atomic geometry " << geometryIndex << " out of bounds");
+        atomic->setGeometry(geometrylist[geometryIndex]);
     }
+
+    auto flags = bit_cast<std::uint32_t>(*data);
     atomic->setFlags(flags);
 
     return atomic;

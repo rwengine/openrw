@@ -65,4 +65,25 @@ BOOST_AUTO_TEST_CASE(test_clump_clone) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(test_load_loplyguy, DATA_TEST_PREDICATE) {
+    {
+        auto d = Global::get().e->data->index.openFile("LOPLYGUY.DFF");
+
+        LoaderDFF loader;
+
+        RW_MESSAGE("LOAD LOPLYGUY.DFF FROM MEMORY");
+        auto m = loader.loadFromMemory(d);
+
+        BOOST_REQUIRE(m.get() != nullptr);
+
+        BOOST_REQUIRE(m->getFrame());
+
+        BOOST_REQUIRE(!m->getAtomics().empty());
+        const auto& atomic = m->getAtomics()[0];
+
+        BOOST_REQUIRE(atomic->getGeometry());
+        BOOST_REQUIRE(atomic->getFrame());
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
