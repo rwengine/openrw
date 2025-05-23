@@ -77,7 +77,6 @@ find_path(SDL2_INCLUDE_DIR SDL.h
         /sw # Fink
         /opt/local # DarwinPorts
         /opt/csw # Blastwave
-        /opt
     )
 
 find_library(SDL2_SHARED_LIBRARY_PATH
@@ -90,7 +89,6 @@ find_library(SDL2_SHARED_LIBRARY_PATH
         /sw
         /opt/local
         /opt/csw
-        /opt
     )
 
 find_library(SDL2_STATIC_LIBRARY_PATH
@@ -103,7 +101,6 @@ find_library(SDL2_STATIC_LIBRARY_PATH
         /sw
         /opt/local
         /opt/csw
-        /opt
     )
 
 if(SDL2_STATIC)
@@ -126,7 +123,6 @@ find_library(SDL2_SDL2MAIN_LIBRARY_PATH
         /sw # Fink
         /opt/local # DarwinPorts
         /opt/csw # Blastwave
-        /opt
     )
 
 if(SDL2_INCLUDE_DIR)
