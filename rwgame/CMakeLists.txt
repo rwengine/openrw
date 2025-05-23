@@ -85,10 +85,42 @@ add_executable(rwgame
     main.cpp
     )
 
-target_link_libraries(rwgame
-    PRIVATE
+
+if(APPLE)
+    find_library(AUDIOTOOLBOX_FRAMEWORK AudioToolbox)
+    find_library(COREAUDIO_FRAMEWORK CoreAudio)
+    find_library(BZ2_LIBRARY bz2 REQUIRED)
+    find_library(COREHAPTICS_FRAMEWORK CoreHaptics)
+    find_library(COREMEDIA_FRAMEWORK CoreMedia)
+    find_library(AVFOUNDATION_FRAMEWORK AVFoundation)
+    find_library(VIDEOTOOLBOX_FRAMEWORK VideoToolbox)
+    find_library(COREVIDEO_FRAMEWORK CoreVideo)
+    find_library(IOKIT_FRAMEWORK IOKit)
+    find_library(SECURITY_FRAMEWORK Security)
+
+    target_link_libraries(rwgame
+        PRIVATE librwgame
+        ${AUDIOTOOLBOX_FRAMEWORK}
+        ${COREAUDIO_FRAMEWORK}
+        ${BZ2_LIBRARY}
+        ${COREHAPTICS_FRAMEWORK}
+        ${COREMEDIA_FRAMEWORK}
+        ${AVFOUNDATION_FRAMEWORK}
+        ${VIDEOTOOLBOX_FRAMEWORK}
+        ${COREVIDEO_FRAMEWORK}
+        ${IOKIT_FRAMEWORK}
+        ${SECURITY_FRAMEWORK}
+        z
+        iconv
+        lzma
+    )
+else()
+    target_link_libraries(rwgame
+        PRIVATE
         librwgame
     )
+
+endif()
 
 openrw_target_apply_options(
     TARGET rwgame
