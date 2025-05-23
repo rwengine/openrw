@@ -1,4 +1,4 @@
-﻿#include "RWGame.hpp"
+#include "RWGame.hpp"
 
 #include <glm/gtx/norm.hpp>
 
@@ -74,6 +74,11 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
 
     imgui.init();
 
+    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
+                       btIDebugDraw::DBG_DrawConstraints |
+                       btIDebugDraw::DBG_DrawConstraintLimits);
+    debug.setShaderProgram(renderer.worldProg.get());
+
     log.info("Game", "Game directory: " + config.gamedataPath());
     if (!data.load()) {
         throw std::runtime_error("Invalid game directory path: " +
@@ -92,11 +97,6 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
 
     hudDrawer.applyHUDScale(config.hudScale());
     renderer.map.scaleHUD(config.hudScale());
-
-    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
-                       btIDebugDraw::DBG_DrawConstraints |
-                       btIDebugDraw::DBG_DrawConstraintLimits);
-    debug.setShaderProgram(renderer.worldProg.get());
 
     data.loadDynamicObjects((std::filesystem::path{config.gamedataPath()} / "data/object.dat")
                                 .string());  // FIXME: use path
