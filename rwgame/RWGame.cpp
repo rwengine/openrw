@@ -52,33 +52,8 @@ constexpr float kMaxPhysicsSubSteps = 2;
 
 #define MOUSE_SENSITIVITY_SCALE 2.5f
 
-RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
-    : GameBase(log, args)
-    , data(&log, config.gamedataPath())
-    , renderer(&log, &data)
-    , imgui(*this) {
-    RW_PROFILE_THREAD("Main");
-    RW_TIMELINE_ENTER("Startup", MP_YELLOW);
-
+void RWGame::loadGameData() {
     auto loadTimeStart = std::chrono::steady_clock::now();
-    bool newgame = false;
-    bool test = false;
-    std::optional<std::string> startSave;
-    std::optional<std::string> benchFile;
-    if (args.has_value()) {
-        newgame = args->newGame;
-        test = args->test;
-        startSave = args->loadGamePath;
-        benchFile = args->benchmarkPath;
-    }
-
-    imgui.init();
-
-    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
-                       btIDebugDraw::DBG_DrawConstraints |
-                       btIDebugDraw::DBG_DrawConstraintLimits);
-    debug.setShaderProgram(renderer.worldProg.get());
-
     log.info("Game", "Game directory: " + config.gamedataPath());
     if (!data.load()) {
         throw std::runtime_error("Invalid game directory path: " +
@@ -112,7 +87,46 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
         data.loadTXD(oss.str());
     }
 
-    stateManager.enter<LoadingState>(this, [=]() {
+    dataLoaded = true;
+    auto loadTimeEnd = std::chrono::steady_clock::now();
+    auto loadTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(loadTimeEnd - loadTimeStart);
+    log.info("Game", "Loading took " + std::to_string(loadTime.count()) + " ms");
+}
+
+bool RWGame::isGameDataLoaded() const {
+    return dataLoaded;
+}
+
+RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
+    : GameBase(log, args)
+    , data(&log, config.gamedataPath())
+    , renderer(&log, &data)
+    , imgui(*this) {
+    RW_PROFILE_THREAD("Main");
+    RW_TIMELINE_ENTER("Startup", MP_YELLOW);
+
+    bool newgame = false;
+    bool test = false;
+    std::optional<std::string> startSave;
+    std::optional<std::string> benchFile;
+    if (args.has_value()) {
+        newgame = args->newGame;
+        test = args->test;
+        startSave = args->loadGamePath;
+        benchFile = args->benchmarkPath;
+    }
+
+    imgui.init();
+
+    debug.setDebugMode(btIDebugDraw::DBG_DrawWireframe |
+                       btIDebugDraw::DBG_DrawConstraints |
+                       btIDebugDraw::DBG_DrawConstraintLimits);
+    debug.setShaderProgram(renderer.worldProg.get());
+
+    loadGameData();
+
+    stateManager.enter<LoadingState>(this, [&]() {
         if (benchFile.has_value()) {
             stateManager.enter<BenchmarkState>(this, *benchFile);
         } else if (test) {
@@ -125,11 +139,6 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
             stateManager.enter<MenuState>(this);
         }
     });
-
-    auto loadTimeEnd = std::chrono::steady_clock::now();
-    auto loadTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(loadTimeEnd - loadTimeStart);
-    log.info("Game", "Loading took " + std::to_string(loadTime.count()) + " ms");
 
     log.info("Game", "Started");
     RW_TIMELINE_LEAVE("Startup");

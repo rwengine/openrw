@@ -55,6 +55,8 @@ private:
 
     std::string cheatInputWindow = std::string(32, ' ');
 
+    bool dataLoaded = false;
+
 public:
     RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args);
     ~RWGame() override;
@@ -113,6 +115,9 @@ public:
 
     void saveGame(const std::string& savename);
     void loadGame(const std::string& savename);
+
+    bool isGameDataLoaded() const;
+    void loadGameData();
 
 private:
     void tick(float dt);

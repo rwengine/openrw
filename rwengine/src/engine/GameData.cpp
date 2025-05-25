@@ -45,6 +45,7 @@ bool GameData::load() {
     if (!isValidGameDirectory()) {
         return false;
     }
+    auto loadTimeStart = std::chrono::steady_clock::now();
 
     index.indexTree(datpath);
 
@@ -82,6 +83,10 @@ bool GameData::load() {
 
     // Load ped groups after IDEs so they can resolve
     loadPedGroups("data/pedgrp.dat");
+    loadTimeEnd = std::chrono::steady_clock::now();
+    loadTime =
+        std::chrono::duration_cast<std::chrono::milliseconds>(loadTimeEnd - loadTimeStart);
+    logger->info("Game", "Loading everything else took " + std::to_string(loadTime.count()) + " ms");
 
     return true;
 }
