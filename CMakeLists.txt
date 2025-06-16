@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.8...3.28)
 
 project(OpenRW)
 
@@ -27,6 +27,9 @@ if(USE_CONAN)
 
     rwdep_wrap_conan_targets()
 else()
+    if(POLICY CMP0167)
+	cmake_policy(SET CMP0167 NEW)
+    endif()
     find_package(Boost REQUIRED)
     find_package(Boost COMPONENTS program_options system REQUIRED)
     if(BUILD_TESTS)
