@@ -4870,8 +4870,7 @@ void opcode_01b6(const ScriptArguments& args, const ScriptWeather weatherID) {
     opcode 01b7
 */
 void opcode_01b7(const ScriptArguments& args) {
-    RW_UNUSED(args);
-    args.getState()->basic.forcedWeather = -1;
+    args.getState()->basic.forcedWeather = UINT16_MAX;
 }
 
 /**
