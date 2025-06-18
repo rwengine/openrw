@@ -12,7 +12,7 @@ this it will not be possible to play.
 
 Windows | Linux | macOS | coverage
 ---| --- | ---  | ---
-[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/master?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/master) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=master)](https://app.travis-ci.com/rwengine/openrw) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=master)](https://app.travis-ci.com/rwengine/openrw) | [![codecov](https://codecov.io/gh/rwengine/openrw/branch/master/graph/badge.svg)](https://codecov.io/gh/rwengine/openrw)
+[![Build status](https://ci.appveyor.com/api/projects/status/k33qf9ssrja6ckx8/branch/main?svg=true)](https://ci.appveyor.com/project/rwengine/openrw/branch/main) | [![Build Status](https://github.com/rwengine/openrw/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/rwengine/openrw/actions/workflows/build-and-test.yml) | [![Build Status](https://app.travis-ci.com/rwengine/openrw.svg?branch=main)](https://app.travis-ci.com/rwengine/openrw) | [![codecov](https://codecov.io/gh/rwengine/openrw/branch/main/graph/badge.svg)](https://codecov.io/gh/rwengine/openrw)
 
 
 ## Links
