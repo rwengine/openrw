@@ -73,7 +73,7 @@ static std::unique_ptr<TextureData> createTexture(
         !((texNative.rasterformat & RW::BSTextureNative::FORMAT_888) ==
           RW::BSTextureNative::FORMAT_888);
 
-    if (!(isPal8 || isFulc)) {
+    if (!(isPal8 || isFulc || texNative.dxttype)) {
         RW_ERROR("Unsupported raster format " << std::dec
                   << texNative.rasterformat);
         return getErrorTexture();
@@ -91,11 +91,52 @@ static std::unique_ptr<TextureData> createTexture(
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texNative.width,
                      texNative.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                      fullColor.data());
+    } else if (texNative.dxttype) {
+        GLenum internalFormat, format;
+        GLsizei imageSize;
+
+        auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative);
+        coldata += sizeof(uint32_t);
+
+        switch (texNative.dxttype) {
+            case 1:
+                if (texNative.alpha) {
+                    internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+                    format = GL_RGBA;
+                } else {
+                    internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+                    format = GL_RGB;
+                }
+                imageSize = (texNative.width * texNative.height) / 2;
+                break;
+            case 3:
+                internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+                format = GL_RGBA;
+                imageSize = texNative.width * texNative.height;
+                break;
+            case 5:
+                internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                imageSize = texNative.width * texNative.height;
+                break;
+            default:
+                RW_ERROR("Unsupported DXT format "
+                         << static_cast<unsigned>(texNative.dxttype)
+                         << " not yet implemented!");
+                return getErrorTexture();
+        }
+
+        glGenTextures(1, &textureName);
+        glBindTexture(GL_TEXTURE_2D, textureName);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, texNative.width,
+                     texNative.height, 0, format, GL_UNSIGNED_BYTE, coldata);
+        glCompressedTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                               texNative.width, texNative.height, 0, imageSize,
+                               coldata);
     } else if (isFulc) {
         auto coldata = rootSection.raw() + sizeof(RW::BSTextureNative);
         coldata += sizeof(uint32_t);
 
-        GLenum type = GL_UNSIGNED_BYTE, format = GL_RGBA;
+        GLenum type, format;
         switch (texNative.rasterformat) {
             case RW::BSTextureNative::FORMAT_1555:
                 format = GL_RGBA;
@@ -112,6 +153,9 @@ static std::unique_ptr<TextureData> createTexture(
                 type = GL_UNSIGNED_BYTE;
                 break;
             default:
+                RW_ERROR("Unsupported format "
+                         << static_cast<unsigned>(texNative.rasterformat));
+                return getErrorTexture();
                 break;
         }
 
