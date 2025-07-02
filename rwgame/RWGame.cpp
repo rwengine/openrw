@@ -533,6 +533,7 @@ void RWGame::tick(float dt) {
     static float clockAccumulator = 0.f;
     static float scriptTimerAccumulator = 0.f;
     static ScriptInt beepTime = std::numeric_limits<ScriptInt>::max();
+    static uint8_t prevGameHour = state.basic.gameHour;
     if (currState->shouldWorldUpdate()) {
         world->chase.update(dt);
 
@@ -553,6 +554,8 @@ void RWGame::tick(float dt) {
             }
             clockAccumulator -= 1.f;
         }
+
+        interpolateWeather(prevGameHour);
 
         constexpr float timerClockRate = 1.f / 30.f;
 
@@ -844,3 +847,23 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
         handleCheatInput(symbol);
     }
 }
+
+void RWGame::interpolateWeather(uint8_t prevGameHour) {
+    if (prevGameHour != state.basic.gameHour) {
+        state.basic.lastWeather = state.basic.nextWeather;
+
+        // TODO: VC and SA has more than 4 weather conditions
+        if (state.basic.forcedWeather > 3) {
+            if (state.basic.weatherType < 63) {
+                ++state.basic.weatherType;
+            } else {
+                state.basic.weatherType = 0;
+            }
+            state.basic.nextWeather =
+                data.weather.WeatherList[state.basic.weatherType];
+        }
+    }
+
+    state.basic.weatherInterpolation = state.basic.gameMinute / 60.f;
+}
+

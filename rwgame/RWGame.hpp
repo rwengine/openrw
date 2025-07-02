@@ -131,6 +131,9 @@ private:
     void renderDebugView();
 
     void tickObjects(float dt) const;
+
+    void interpolateWeather(uint8_t prevGameHour);
 };
 
 #endif
+

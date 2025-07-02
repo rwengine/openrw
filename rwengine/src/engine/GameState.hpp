@@ -64,7 +64,7 @@ struct BasicState {
     uint8_t _align3[2]{0};
     uint16_t nextWeather{0};
     uint8_t _align4[2]{0};
-    uint16_t forcedWeather{0};
+    uint16_t forcedWeather{0xFFFF};
     uint8_t _align5[2]{0};
     float weatherInterpolation{1.f};
     uint8_t dateTime[24]{0};  // Unused
